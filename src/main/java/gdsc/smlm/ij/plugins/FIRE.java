@@ -149,16 +149,19 @@ public class FIRE implements PlugIn
 	String units;
 	double nmPerPixel = 1;
 
+	// Stored in setCorrectionParameters
+	private double correctionQValue, correctionMean, correctionSigma;
+
 	public class FireImages
 	{
 		final ImageProcessor ip1, ip2;
-		final double imageScale;
+		final double nmPerPixel;
 
-		FireImages(ImageProcessor ip1, ImageProcessor ip2, double imageScale)
+		FireImages(ImageProcessor ip1, ImageProcessor ip2, double nmPerPixel)
 		{
 			this.ip1 = ip1;
 			this.ip2 = ip2;
-			this.imageScale = imageScale;
+			this.nmPerPixel = nmPerPixel;
 		}
 	}
 
@@ -166,16 +169,16 @@ public class FIRE implements PlugIn
 	{
 		final double fireNumber;
 		final double correlation;
-		final double imageScale;
+		final double nmPerPixel;
 		final double[][] frcCurve;
 		final double[][] smoothedFrcCurve;
 
-		FireResult(double fireNumber, double correlation, double imageScale, double[][] frcCurve,
+		FireResult(double fireNumber, double correlation, double nmPerPixel, double[][] frcCurve,
 				double[][] smoothedFrcCurve)
 		{
 			this.fireNumber = fireNumber;
 			this.correlation = correlation;
-			this.imageScale = imageScale;
+			this.nmPerPixel = nmPerPixel;
 			this.frcCurve = frcCurve;
 			this.smoothedFrcCurve = smoothedFrcCurve;
 		}
@@ -284,7 +287,7 @@ public class FIRE implements PlugIn
 			if (result != null)
 			{
 				IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name,
-						Utils.rounded(result.fireNumber, 4), units, Utils.rounded(result.imageScale, 3)));
+						Utils.rounded(result.fireNumber, 4), units, Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
 
 				if (showFRCCurve)
 					showFrcCurve(name, result, method);
@@ -302,7 +305,8 @@ public class FIRE implements PlugIn
 				if (result != null)
 				{
 					IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name,
-							Utils.rounded(result.fireNumber, 4), units, Utils.rounded(result.imageScale, 3)));
+							Utils.rounded(result.fireNumber, 4), units,
+							Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
 
 					if (showFRCCurve)
 						showFrcCurve(name, result, method);
@@ -366,7 +370,8 @@ public class FIRE implements PlugIn
 					{
 						// Output each FRC curve using a suffix.
 						IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", w.name,
-								Utils.rounded(result.fireNumber, 4), units, Utils.rounded(result.imageScale, 3)));
+								Utils.rounded(result.fireNumber, 4), units,
+								Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
 						wo.add(Utils.display(w.plot.getTitle(), w.plot));
 					}
 					if (showFRCCurve)
@@ -388,7 +393,7 @@ public class FIRE implements PlugIn
 					double mean = stats.getMean();
 					IJ.log(String.format("%s : FIRE number = %s +/- %s %s (Fourier scale = %s)", name,
 							Utils.rounded(mean, 4), Utils.rounded(stats.getStandardDeviation(), 4), units,
-							Utils.rounded(result.imageScale, 3)));
+							Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
 					if (showFRCCurve)
 					{
 						curve.addResolution(mean);
@@ -400,7 +405,7 @@ public class FIRE implements PlugIn
 
 			// Only do this once
 			if (showFRCTimeEvolution && result != null && !Double.isNaN(result.fireNumber))
-				showFrcTimeEvolution(name, result.fireNumber, method, result.imageScale, imageSize);
+				showFrcTimeEvolution(name, result.fireNumber, method, nmPerPixel / result.nmPerPixel, imageSize);
 		}
 
 		IJ.showStatus(TITLE + " complete : " + Utils.timeToString(System.currentTimeMillis() - start));
@@ -464,12 +469,18 @@ public class FIRE implements PlugIn
 
 		gd.addCheckbox("Use_signal (if present)", useSignal);
 		gd.addNumericField("Max_per_bin", maxPerBin, 0);
+
 		gd.addMessage("For single datsets:");
 		gd.addNumericField("Block_size", blockSize, 0);
 		gd.addCheckbox("Random_split", randomSplit);
 		gd.addNumericField("Repeats", repeats, 0);
 		gd.addCheckbox("Show_FRC_curve_repeats", showFRCCurveRepeats);
 		gd.addCheckbox("Show_FRC_time_evolution", showFRCTimeEvolution);
+		gd.addCheckbox("Spurious correlation correction", spuriousCorrelationCorrection);
+		gd.addNumericField("Q-value", qValue, 3);
+		gd.addNumericField("Precision_Mean", mean, 2);
+		gd.addNumericField("Precision_Sigma", sigma, 2);
+
 		gd.addMessage("Fourier options:");
 		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
 		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
@@ -490,11 +501,17 @@ public class FIRE implements PlugIn
 		inputOption2 = ResultsManager.getInputSource(gd);
 		useSignal = gd.getNextBoolean();
 		maxPerBin = Math.abs((int) gd.getNextNumber());
+
 		blockSize = Math.max(1, (int) gd.getNextNumber());
 		randomSplit = gd.getNextBoolean();
 		repeats = Math.max(1, (int) gd.getNextNumber());
 		showFRCCurveRepeats = gd.getNextBoolean();
 		showFRCTimeEvolution = gd.getNextBoolean();
+		spuriousCorrelationCorrection = gd.getNextBoolean();
+		qValue = Math.abs(gd.getNextNumber());
+		mean = Math.abs(gd.getNextNumber());
+		sigma = Math.abs(gd.getNextNumber());
+
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
 		perimeterSamplingFactor = gd.getNextNumber();
@@ -506,6 +523,14 @@ public class FIRE implements PlugIn
 		try
 		{
 			Parameters.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
+			if (spuriousCorrelationCorrection)
+			{
+				Parameters.isAboveZero("Q-value", qValue);
+				Parameters.isAboveZero("Precision Mean", mean);
+				Parameters.isAboveZero("Precision Sigma", sigma);
+				// Set these for use in FIRE computation 
+				setCorrectionParameters(qValue, mean, sigma);
+			}
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -548,6 +573,14 @@ public class FIRE implements PlugIn
 		return true;
 	}
 
+	/**
+	 * Initialise this instance with results.
+	 *
+	 * @param results
+	 *            the results
+	 * @param results2
+	 *            the second set of results (can be null)
+	 */
 	public void initialise(MemoryPeakResults results, MemoryPeakResults results2)
 	{
 		this.results = verify(results);
@@ -585,6 +618,56 @@ public class FIRE implements PlugIn
 		}
 	}
 
+	/**
+	 * Sets the correction parameters for spurious correlation correction. Only relevant for single images.
+	 *
+	 * @param qValue
+	 *            the q value
+	 * @param mean
+	 *            the mean of the localisation precision
+	 * @param sigma
+	 *            the standard deviation of the localisation precision
+	 */
+	public void setCorrectionParameters(double qValue, double mean, double sigma)
+	{
+		if (qValue > 0 && mean > 0 && sigma > 0)
+		{
+			correctionQValue = qValue;
+			correctionMean = mean;
+			correctionSigma = sigma;
+		}
+		else
+		{
+			correctionQValue = correctionMean = correctionSigma = 0;
+		}
+	}
+
+	/**
+	 * Copy this instance so skipping initialisation.
+	 *
+	 * @return the new FIRE instance
+	 */
+	private FIRE copy()
+	{
+		FIRE f = new FIRE();
+		f.results = results;
+		f.results2 = results2;
+		f.nmPerPixel = nmPerPixel;
+		f.units = units;
+		f.dataBounds = dataBounds;
+		f.correctionQValue = correctionQValue;
+		f.correctionMean = correctionMean;
+		f.correctionSigma = correctionSigma;
+		return f;
+	}
+
+	/**
+	 * Verify.
+	 *
+	 * @param results
+	 *            the results
+	 * @return the memory peak results
+	 */
 	private MemoryPeakResults verify(MemoryPeakResults results)
 	{
 		if (results == null || results.size() < 2)
@@ -725,7 +808,7 @@ public class FIRE implements PlugIn
 			}
 		}
 
-		return new FireImages(ip1, ip2, imageScale);
+		return new FireImages(ip1, ip2, nmPerPixel / imageScale);
 	}
 
 	/**
@@ -748,22 +831,12 @@ public class FIRE implements PlugIn
 
 			if (plot == null)
 			{
-				double nmPerPixel = 1;
-				String units = "px";
-				if (results.getCalibration() != null)
-				{
-					nmPerPixel = results.getNmPerPixel();
-					units = "nm";
-				}
 				String title = name + " FRC Curve";
 				plot = new Plot2(title, String.format("Spatial Frequency (%s^-1)", units), "FRC");
 
 				xValues = new double[frcCurve.length];
-				// Since the Fourier calculation only uses half of the image (from centre to the edge) 
-				// we must double the curve length to get the original maximum image width. In addition
-				// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
-				double frcCurveLength = (frcCurve[(frcCurve.length - 1)][0] + 1) * 2.0;
-				double conversion = result.imageScale / (frcCurveLength * nmPerPixel);
+				final double L = FRC.computeL(frcCurve);
+				final double conversion = 1.0 / (L * result.nmPerPixel);
 				for (int i = 0; i < xValues.length; i++)
 				{
 					final double radius = frcCurve[i][0];
@@ -888,8 +961,7 @@ public class FIRE implements PlugIn
 
 			x.add((double) t);
 
-			FIRE f = new FIRE();
-			f.initialise(newResults, null);
+			FIRE f = this.copy();
 			FireResult result = f.calculateFireNumber(method, fourierImageScale, imageSize);
 			double fire = (result == null) ? 0 : result.fireNumber;
 			y.add(fire);
@@ -1006,8 +1078,9 @@ public class FIRE implements PlugIn
 		frc.progress = progress;
 		frc.perimeterSamplingFactor = perimeterSamplingFactor;
 		frc.useHalfCircle = useHalfCircle;
-		double imageScale = images.imageScale;
 		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
+		if (correctionQValue > 0)
+			FRC.applyQCorrection(frcCurve, images.nmPerPixel, correctionQValue, correctionMean, correctionSigma);
 		double[][] smoothedFrcCurve = frc.getSmoothedCurve(frcCurve);
 
 		// Resolution in pixels
@@ -1023,17 +1096,17 @@ public class FIRE implements PlugIn
 
 		// The FIRE number will be returned in pixels relative to the input images. 
 		// However these were generated using an image scale so adjust for this.
-		fireNumber *= nmPerPixel / imageScale;
+		fireNumber *= images.nmPerPixel;
 
 		if (pixelsTooBig)
 		{
 			// Q. Should this be output somewhere else?
 			Utils.log(
 					"%s Warning: The super-resolution pixel size (%s) should be smaller than 1/4 of R (the resolution %s)",
-					TITLE, Utils.rounded(nmPerPixel / imageScale), Utils.rounded(fireNumber));
+					TITLE, Utils.rounded(images.nmPerPixel), Utils.rounded(fireNumber));
 		}
 
-		return new FireResult(fireNumber, correlation, imageScale, frcCurve, smoothedFrcCurve);
+		return new FireResult(fireNumber, correlation, images.nmPerPixel, frcCurve, smoothedFrcCurve);
 	}
 
 	private void runQEstimation()
@@ -1075,7 +1148,7 @@ public class FIRE implements PlugIn
 		frc.useHalfCircle = useHalfCircle;
 		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 
-		QPlot qplot = new QPlot(images.imageScale, results.size(), frcCurve);
+		QPlot qplot = new QPlot(images.nmPerPixel, results.size(), frcCurve);
 
 		// Build a histogram of the localisation precision.
 		// Get the initial mean and SD and plot as a Gaussian.
@@ -1189,7 +1262,7 @@ public class FIRE implements PlugIn
 		// Store the last computed value
 		double mean, sigma, qValue;
 
-		QPlot(double imageScale, double N, double[][] frcCurve)
+		QPlot(double nmPerPixel, double N, double[][] frcCurve)
 		{
 			this.N = N;
 
@@ -1205,24 +1278,15 @@ public class FIRE implements PlugIn
 				vq[i] = frcCurve[i][3] / d;
 			}
 
-			// Since the Fourier calculation only uses half of the image (from centre to the edge) 
-			// we must double the curve length to get the original maximum image width. In addition
-			// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
-			// Note: frcCurveLength == L == Size of field of view.
-			double frcCurveLength = (frcCurve[(frcCurve.length - 1)][0] + 1) * 2.0;
+			q = FRC.computeQ(frcCurve, nmPerPixel);
 
-			q = new double[frcCurve.length];
-			double conversion = imageScale / (frcCurveLength * nmPerPixel);
-			for (int i = 0; i < q.length; i++)
-			{
-				final double radius = frcCurve[i][0];
-				q[i] = radius * conversion;
-			}
+			final double L = FRC.computeL(frcCurve);
 
 			// Compute sinc factor
 			sinc = new double[frcCurve.length];
 			sinc[0] = 1; // By definition
 			for (int i = 1; i < sinc.length; i++)
+
 			{
 				double d;
 				// This should be sinc(pi*q*L)^2
@@ -1235,10 +1299,10 @@ public class FIRE implements PlugIn
 				// will start at 1 and drop off to zero at L.
 
 				// sinc(pi*q)^2
-				d = Math.PI * i / frcCurveLength;
+				d = Math.PI * i / L;
 
 				// Use q in the correct units - WRONG curve shape
-				//d = Math.PI * q[i] * frcCurveLength;				
+				//d = Math.PI * q[i] * L;				
 
 				sinc[i] = sinc(d);
 				sinc[i] *= sinc[i];
@@ -1255,26 +1319,6 @@ public class FIRE implements PlugIn
 		private double sinc(double x)
 		{
 			return FastMath.sin(x) / x;
-		}
-
-		double[] computeHq(double[] q, double mean, double sigma)
-		{
-			// H(q) is the factor in the correlation averages related to the localization
-			// uncertainties that depends on the mean and width of the
-			// distribution of localization uncertainties
-			double[] hq = new double[q.length];
-			final double four_pi2 = 4 * Math.PI * Math.PI;
-			double eight_pi2_s2 = 2 * four_pi2 * sigma * sigma;
-			hq[0] = 1; // TODO - what should this be at zero?
-			for (int i = 1; i < q.length; i++)
-			{
-				// Q. Should q be in the correct units?
-				double q2 = q[i] * q[i];
-				//double q2 = i * i;
-				double d = 1 + eight_pi2_s2 * q2;
-				hq[i] = FastMath.exp((-four_pi2 * mean * mean * q2) / d) / Math.sqrt(d);
-			}
-			return hq;
 		}
 
 		final double LOG_10 = Math.log(10);
@@ -1309,7 +1353,7 @@ public class FIRE implements PlugIn
 			this.mean = mean;
 			this.sigma = sigma;
 
-			double[] hq = computeHq(q, mean, sigma);
+			double[] hq = FRC.computeHq(q, mean, sigma);
 			double[] l = getLog(hq);
 			// Avoid bad value at zero
 			l[0] = l[1];
@@ -1431,7 +1475,7 @@ public class FIRE implements PlugIn
 				plot.addPoints(x2, y2, Plot.LINE);
 
 				// Always put min = 0 otherwise the plot does not change.
-				plot.setLimits(0, max, 0, 1.05);				
+				plot.setLimits(0, max, 0, 1.05);
 			}
 			return Utils.display(title, plot);
 		}
@@ -1447,8 +1491,9 @@ public class FIRE implements PlugIn
 		boolean logFitParameters = false;
 		String title = results.getName() + " Precision Histogram";
 
-		// Check we can compute the precision for the results. We require that the widths and signal be different
-		if (true ||invalid(results))
+		// Check we can compute the precision for the results. We require that the widths and signal be valid and 
+		// different for at least some of the localisations
+		if (invalid(results))
 		{
 			return new PrecisionHistogram(title);
 		}
@@ -1566,34 +1611,35 @@ public class FIRE implements PlugIn
 	private boolean invalid(MemoryPeakResults results)
 	{
 		// Check all have a width and signal
-		for (PeakResult p : results.getResults())
+		PeakResult[] data = results.toArray();
+		for (int i = 0; i < data.length; i++)
 		{
+			PeakResult p = data[i];
 			if (p.getSD() <= 0 || p.getSignal() <= 0)
 				return true;
 		}
-		
+
 		// Check for variable width that is not 1 and a variable signal
-		boolean found = false;
-		float w1 = 0;
-		float s1 = 0;
-		for (PeakResult p : results.getResults())
+		for (int i = 0; i < data.length; i++)
 		{
-			if (found)
+			PeakResult p = data[i];
+			// Check this is valid
+			if (p.getSD() != 1)
 			{
-				if (p.getSD() != 1 && p.getSD() != w1 && p.getSignal() != s1)
-					return false;
-			}
-			else
-			{
-				if (p.getSD() != 1)
+				// Check the rest for a different value
+				float w1 = p.getSD();
+				float s1 = p.getSignal();
+				for (int j = i + 1; j < data.length; j++)
 				{
-					found = true;
-					w1 = p.getSD();
-					s1 = p.getSignal();
+					PeakResult p2 = data[j];
+					if (p2.getSD() != 1 && p2.getSD() != w1 && p.getSignal() != s1)
+						return false;
 				}
+				// All the results are the same, this is not valid
+				break;
 			}
 		}
-		
+
 		return true;
 	}
 

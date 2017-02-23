@@ -1,5 +1,16 @@
 package gdsc.smlm.ij.frc;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.logging.NullTrackProgress;
+import gdsc.core.logging.TrackProgress;
+import gdsc.core.utils.FloatEquality;
+import gdsc.core.utils.Maths;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -17,17 +28,6 @@ import ij.ImageStack;
 import ij.process.FHT2;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
-import org.apache.commons.math3.util.FastMath;
-
-import gdsc.core.logging.NullTrackProgress;
-import gdsc.core.logging.TrackProgress;
-import gdsc.core.utils.FloatEquality;
-import gdsc.core.utils.Maths;
 
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
@@ -101,12 +101,18 @@ public class FRC
 	 * Calculate the Fourier Ring Correlation curve and numerator for two images.
 	 * 
 	 * @param ip1
+	 *            The first image
 	 * @param ip2
-	 * @return An array of sextuples representing [][radius,correlation,N,sum1,sum2,sum3] where correlation is the FRC
-	 *         at the given radius from the centre of the Fourier transform (i.e. 1/spatial frequency) and N is the
-	 *         number of samples used to compute the correlation. sum1 is the numerator of the correlation (the
-	 *         conjugate multiple of the two FFT images), sum2 and sum3 are the two sums of the absolute FFT transform
-	 *         of each input image. correlation = sum1 / Math.sqrt(sum2*sum3).
+	 *            The second image
+	 * @return An array of septuples representing [][radius,correlation,N,sum1,sum2,sum3,denominator] where:
+	 *         radius is the distance from the centre of the Fourier transform;
+	 *         correlation is the FRC at the given radius from the centre of the Fourier transform (i.e. 1/spatial
+	 *         frequency);
+	 *         N is the number of samples used to compute the correlation;
+	 *         sum1 is the numerator of the correlation (the conjugate multiple of the two FFT images);
+	 *         sum2 and sum3 are the two sums of the absolute FFT transform of each input image;
+	 *         and denominator is Math.sqrt(sum2*sum3).
+	 *         Note that correlation = sum1 / denominator.
 	 */
 	public double[][] calculateFrcCurve(ImageProcessor ip1, ImageProcessor ip2)
 	{
@@ -184,7 +190,7 @@ public class FRC
 
 		// Radius zero is always 1. Set number of pixel to 1 when r==0.
 		// Avoids divide by zero error.
-		frcCurve[0] = new double[] { 0, 1, 1, 0, 0, 0 };
+		frcCurve[0] = new double[] { 0, 1, 1, 0, 0, 0, 0 };
 
 		float[][] images = new float[][] { numerator, absFFT1, absFFT2 };
 
@@ -216,9 +222,10 @@ public class FRC
 				angle += angleStep;
 			}
 
-			double val = sum1 / Math.sqrt(sum2 * sum3);
+			double denominator = Math.sqrt(sum2 * sum3);
+			double correlation = sum1 / denominator;
 
-			frcCurve[radius] = new double[] { radius, val, numSum, sum1, sum2, sum3 };
+			frcCurve[radius] = new double[] { radius, correlation, numSum, sum1, sum2, sum3, denominator };
 
 			radius++;
 		}
@@ -240,8 +247,8 @@ public class FRC
 	}
 
 	// Package level to allow JUnit test
-	static void computeMirrored(int size, float[] numerator, float[] absFFT1, float[] absFFT2, float[] dataA1, float[] dataB1,
-			float[] dataA2, float[] dataB2)
+	static void computeMirrored(int size, float[] numerator, float[] absFFT1, float[] absFFT2, float[] dataA1,
+			float[] dataB1, float[] dataA2, float[] dataB2)
 	{
 		// Note: Since this is symmetric around the centre we could compute half of it.
 		// This is non-trivial since the centre is greater than half of the image, i.e.
@@ -933,5 +940,130 @@ public class FRC
 			return new double[] { fire, intersection[1] };
 		}
 		return null;
+	}
+
+	/**
+	 * Apply spurious correlation correction using the Q-factor. Follows the method described in Niewenhuizen, et al
+	 * (2013), on-line methods. This method computes a value that is subtracted from the numerator of the FRC and added
+	 * to the denominator of the FRC before computing the correlation. The correlation in the FRC curve will be updated.
+	 * The sums of the FRC curve are unchanged.
+	 * <p>
+	 * The correlation can be reset by calling this method with a Q-value of zero.
+	 * <p>
+	 * Note: Spurious correlation correction is only useful when computing the resolution of a single set of
+	 * localisations split into two images. In this case the same emitter can be present in both images leading to
+	 * spurious contribution to the correlation. Correction can be omitted providing the number of emitters is
+	 * sufficiently high and the sample has spectral signal content at the computed resolution for the uncorrected
+	 * curve (see Niewenhuizen, et al (2013), Nature Methods, 10, 557, Supplementary Material p.22).
+	 *
+	 * @param frcCurve
+	 *            the frc curve
+	 * @param nmPerPixel
+	 *            the nm per pixel in the images used to compute the FRC curve
+	 * @param qValue
+	 *            the q value
+	 * @param mean
+	 *            the mean of the localisation precision
+	 * @param sigma
+	 *            the standard deviation of the localisation precision
+	 */
+	public static void applyQCorrection(double[][] frcCurve, double nmPerPixel, double qValue, double mean,
+			double sigma)
+	{
+		if (qValue <= 0)
+		{
+			// Reset the correlation 
+			for (int i = 1; i < frcCurve.length; i++)
+				frcCurve[i][1] = frcCurve[i][3] / frcCurve[i][6];
+			return;
+		}
+
+		double[] q = computeQ(frcCurve, nmPerPixel);
+
+		// H(q) is the factor in the correlation averages related to the localization
+		// uncertainties that depends on the mean and width of the
+		// distribution of localization uncertainties
+		double[] hq = computeHq(q, mean, sigma);
+
+		// Subtract the average residual correlation from the numerator and add to the denominator 
+		for (int i = 1; i < frcCurve.length; i++)
+		{
+			double numerator = frcCurve[i][3];
+			double denominator = frcCurve[i][6];
+			double residual = qValue * hq[i];
+			frcCurve[i][1] = (numerator - residual) / (denominator + residual);
+		}
+	}
+
+	/**
+	 * Compute the size of the field of view for the FRC curve (this is named L)
+	 *
+	 * @param frcCurve
+	 *            the frc curve
+	 * @return L
+	 */
+	public static int computeL(double[][] frcCurve)
+	{
+		// Since the Fourier calculation only uses half of the image (from centre to the edge) 
+		// we must double the curve length to get the original maximum image width. In addition
+		// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
+		// Note: frcCurveLength == L == Size of field of view.
+		return ((int) (frcCurve[(frcCurve.length - 1)][0]) + 1) * 2;
+	}
+
+	/**
+	 * Compute q. This is defined as 1/L, 2/L, ..., for all the spatial frequencies in the FRC curve where L is the size
+	 * of the field of view. This is converted to nm using the pixel size of the input image.
+	 *
+	 * @param frcCurve
+	 *            the frc curve
+	 * @param nmPerPixel
+	 *            the nm per pixel in the images used to compute the FRC curve
+	 * @return the q array
+	 */
+	public static double[] computeQ(double[][] frcCurve, double nmPerPixel)
+	{
+		final double L = computeL(frcCurve);
+
+		double[] q = new double[frcCurve.length];
+		double conversion = 1.0 / (L * nmPerPixel);
+		for (int i = 0; i < q.length; i++)
+		{
+			final double radius = frcCurve[i][0];
+			q[i] = radius * conversion;
+		}
+		return q;
+	}
+
+	/**
+	 * Compute H(q) for all q. This is the integral of the distribution function of the localisation uncertainty. It is
+	 * assumed to Gaussian with the specified mean and width.
+	 *
+	 * @param q
+	 *            the q array
+	 * @param mean
+	 *            the mean of the Gaussian
+	 * @param sigma
+	 *            the width of the Gaussian
+	 * @return the Hq array
+	 */
+	public static double[] computeHq(double[] q, double mean, double sigma)
+	{
+		// H(q) is the factor in the correlation averages related to the localization
+		// uncertainties that depends on the mean and width of the
+		// distribution of localization uncertainties
+		double[] hq = new double[q.length];
+		final double four_pi2 = 4 * Math.PI * Math.PI;
+		double eight_pi2_s2 = 2 * four_pi2 * sigma * sigma;
+		hq[0] = 1; // TODO - what should this be at zero?
+		for (int i = 1; i < q.length; i++)
+		{
+			// Q. Should q be in the correct units?
+			double q2 = q[i] * q[i];
+			//double q2 = i * i;
+			double d = 1 + eight_pi2_s2 * q2;
+			hq[i] = FastMath.exp((-four_pi2 * mean * mean * q2) / d) / Math.sqrt(d);
+		}
+		return hq;
 	}
 }
