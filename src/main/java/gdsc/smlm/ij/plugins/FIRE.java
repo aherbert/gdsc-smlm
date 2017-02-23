@@ -99,6 +99,10 @@ public class FIRE implements PlugIn
 	private static int imageScaleIndex = 0;
 	private static int imageSizeIndex;
 
+	// The Q value and the mean and sigma for spurious correlation correction
+	private static boolean spuriousCorrelationCorrection = false;
+	private static double qValue, mean, sigma;
+
 	static
 	{
 		SCALE_ITEMS = new String[SCALE_VALUES.length];
@@ -240,7 +244,6 @@ public class FIRE implements PlugIn
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
-			IJ.showStatus("");
 			return;
 		}
 		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false);
@@ -249,7 +252,6 @@ public class FIRE implements PlugIn
 		if (results.size() < 2)
 		{
 			IJ.error(TITLE, "No results within the crop region");
-			IJ.showStatus("");
 			return;
 		}
 		if (results2 != null)
@@ -258,7 +260,6 @@ public class FIRE implements PlugIn
 			if (results2.size() < 2)
 			{
 				IJ.error(TITLE, "No results2 within the crop region");
-				IJ.showStatus("");
 				return;
 			}
 		}
@@ -458,6 +459,8 @@ public class FIRE implements PlugIn
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		ResultsManager.addInput(gd, "Input2", inputOption2, InputSource.NONE, InputSource.MEMORY);
+
+		// TODO - Add use of Q to the FIRE plugin.
 
 		gd.addCheckbox("Use_signal (if present)", useSignal);
 		gd.addNumericField("Max_per_bin", maxPerBin, 0);
@@ -1042,7 +1045,11 @@ public class FIRE implements PlugIn
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
-			IJ.showStatus("");
+			return;
+		}
+		if (results.getCalibration() == null)
+		{
+			IJ.error(TITLE, "The results are not calibrated");
 			return;
 		}
 
@@ -1050,7 +1057,6 @@ public class FIRE implements PlugIn
 		if (results.size() < 2)
 		{
 			IJ.error(TITLE, "No results within the crop region");
-			IJ.showStatus("");
 			return;
 		}
 
@@ -1180,6 +1186,9 @@ public class FIRE implements PlugIn
 		double[] vq, sinc, q;
 		String title;
 
+		// Store the last computed value
+		double mean, sigma, qValue;
+
 		QPlot(double imageScale, double N, double[][] frcCurve)
 		{
 			this.N = N;
@@ -1297,6 +1306,9 @@ public class FIRE implements PlugIn
 
 		PlotWindow plot(double mean, double sigma)
 		{
+			this.mean = mean;
+			this.sigma = sigma;
+
 			double[] hq = computeHq(q, mean, sigma);
 			double[] l = getLog(hq);
 			// Avoid bad value at zero
@@ -1307,12 +1319,12 @@ public class FIRE implements PlugIn
 			// where N == Number of localisations
 			double min = Maths.min(sl);
 			// Use Math.pow since we are using log10. 
-			double Q = 4 * Math.pow(10, min) / N;
+			qValue = 4 * Math.pow(10, min) / N;
 
 			Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "Log10 Scaled FRC Numerator");
 			plot.setColor(Color.black);
 			plot.addPoints(q, l, Plot.LINE);
-			plot.addLabel(0, 0, String.format("Q = %.3f (Precision = %.3f +/- %.3f)", Q, mean, sigma));
+			plot.addLabel(0, 0, String.format("Q = %.3f (Precision = %.3f +/- %.3f)", qValue, mean, sigma));
 			plot.setColor(Color.red);
 			plot.addPoints(q, sl, Plot.LINE);
 			plot.setColor(Color.blue);
@@ -1354,6 +1366,16 @@ public class FIRE implements PlugIn
 				x2[i] = (float) (min + i * dx);
 		}
 
+		public PrecisionHistogram(String title)
+		{
+			this.title = title;
+			// Set some defaults
+			this.mean = 20;
+			this.sigma = 2;
+			x = y = x2 = null;
+			standardAmplitude = 0;
+		}
+
 		PlotWindow plot(double mean, double sigma)
 		{
 			this.mean = mean;
@@ -1364,27 +1386,53 @@ public class FIRE implements PlugIn
 		PlotWindow plot()
 		{
 			Plot2 plot = new Plot2(title, "Precision (nm)", "Frequency");
-			plot.setColor(Color.black);
-			plot.addPoints(x, y, Plot.LINE);
-			plot.addLabel(0, 0, String.format("Precision = %.3f +/- %.3f", mean, sigma));
-			// Add the Gaussian line
-			// Compute the intergal of the standard gaussian between the min and max
-			final double denom0 = 1.0 / (Math.sqrt(2.0) * sigma);
-			double integral = 0.5 * Erf.erf((x2[0] - mean) * denom0, (x2[x2.length - 1] - mean) * denom0);
-			// Normalise so the integral has the same volume as the histogram
-			Gaussian g = new Gaussian(this.standardAmplitude / (sigma * integral), mean, sigma);
-			float[] y2 = new float[x2.length];
-			for (int i = 0; i < y2.length; i++)
+			if (x != null)
 			{
-				y2[i] = (float) g.value(x2[i]);
+				plot.setColor(Color.black);
+				plot.addPoints(x, y, Plot.LINE);
+				plot.addLabel(0, 0, String.format("Precision = %.3f +/- %.3f", mean, sigma));
+				// Add the Gaussian line
+				// Compute the intergal of the standard gaussian between the min and max
+				final double denom0 = 1.0 / (Math.sqrt(2.0) * sigma);
+				double integral = 0.5 * Erf.erf((x2[0] - mean) * denom0, (x2[x2.length - 1] - mean) * denom0);
+				// Normalise so the integral has the same volume as the histogram
+				Gaussian g = new Gaussian(this.standardAmplitude / (sigma * integral), mean, sigma);
+				float[] y2 = new float[x2.length];
+				for (int i = 0; i < y2.length; i++)
+				{
+					y2[i] = (float) g.value(x2[i]);
+				}
+				// Normalise
+				plot.setColor(Color.red);
+				plot.addPoints(x2, y2, Plot.LINE);
+				float max = Maths.max(y2);
+				max = Maths.maxDefault(max, y);
+				double rangex = 0; //(x2[x2.length - 1] - x2[0]) * 0.025;
+				plot.setLimits(x2[0] - rangex, x2[x2.length - 1] + rangex, 0, max * 1.05);
 			}
-			// Normalise
-			plot.setColor(Color.red);
-			plot.addPoints(x2, y2, Plot.LINE);
-			float max = Maths.max(y2);
-			max = Maths.maxDefault(max, y);
-			double rangex = 0; //(x2[x2.length - 1] - x2[0]) * 0.025;
-			plot.setLimits(x2[0] - rangex, x2[x2.length - 1] + rangex, 0, max * 1.05);
+			else
+			{
+				// There is no base histogram.
+				// Just plot a Gaussian +/- 4 SD.
+				plot.addLabel(0, 0, String.format("Precision = %.3f +/- %.3f", mean, sigma));
+				double min = Math.max(0, mean - 4 * sigma);
+				double max = mean + 4 * sigma;
+				int n = 100;
+				double dx = (max - min) / n;
+				float[] x2 = new float[n + 1];
+				Gaussian g = new Gaussian(1, mean, sigma);
+				float[] y2 = new float[x2.length];
+				for (int i = 0; i <= n; i++)
+				{
+					x2[i] = (float) (min + i * dx);
+					y2[i] = (float) g.value(x2[i]);
+				}
+				plot.setColor(Color.red);
+				plot.addPoints(x2, y2, Plot.LINE);
+
+				// Always put min = 0 otherwise the plot does not change.
+				plot.setLimits(0, max, 0, 1.05);				
+			}
 			return Utils.display(title, plot);
 		}
 	}
@@ -1392,13 +1440,19 @@ public class FIRE implements PlugIn
 	/**
 	 * Calculate the average precision by fitting a Gaussian to the histogram of the precision distribution.
 	 * 
-	 * @return The average precision
+	 * @return The precision histogram
 	 */
 	public PrecisionHistogram calculatePrecisionHistogram()
 	{
 		boolean logFitParameters = false;
+		String title = results.getName() + " Precision Histogram";
 
-		// Plot histogram of the precision
+		// Check we can compute the precision for the results. We require that the widths and signal be different
+		if (true ||invalid(results))
+		{
+			return new PrecisionHistogram(title);
+		}
+
 		final double nmPerPixel = results.getNmPerPixel();
 		final double gain = results.getGain();
 		final boolean emCCD = results.isEMCCD();
@@ -1456,8 +1510,7 @@ public class FIRE implements PlugIn
 		int histogramBins = Utils.getBins(precision, Utils.BinMethod.SCOTT);
 		float[][] hist = Utils.calcHistogram(precision.getFloatValues(), yMin, yMax, histogramBins);
 
-		PrecisionHistogram histogram = new PrecisionHistogram(hist, precision.getN(),
-				results.getName() + " Precision Histogram");
+		PrecisionHistogram histogram = new PrecisionHistogram(hist, precision.getN(), title);
 
 		// Extract non-zero data
 		float[] x = Arrays.copyOf(hist[0], hist[0].length);
@@ -1508,6 +1561,40 @@ public class FIRE implements PlugIn
 		histogram.sigma = parameters[2];
 
 		return histogram;
+	}
+
+	private boolean invalid(MemoryPeakResults results)
+	{
+		// Check all have a width and signal
+		for (PeakResult p : results.getResults())
+		{
+			if (p.getSD() <= 0 || p.getSignal() <= 0)
+				return true;
+		}
+		
+		// Check for variable width that is not 1 and a variable signal
+		boolean found = false;
+		float w1 = 0;
+		float s1 = 0;
+		for (PeakResult p : results.getResults())
+		{
+			if (found)
+			{
+				if (p.getSD() != 1 && p.getSD() != w1 && p.getSignal() != s1)
+					return false;
+			}
+			else
+			{
+				if (p.getSD() != 1)
+				{
+					found = true;
+					w1 = p.getSD();
+					s1 = p.getSignal();
+				}
+			}
+		}
+		
+		return true;
 	}
 
 	/**
@@ -1596,11 +1683,10 @@ public class FIRE implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
-		// TODO - Store the Q value and the mean and sigma
-		// Allow the FIRE plugin to be run with these settings.
-
-		// Add use of Q to the FIRE plugin.
-		// Add +/- SD lines to the histogram overlay?
+		// Store the Q value and the mean and sigma
+		qValue = qplot.qValue;
+		mean = qplot.mean;
+		sigma = qplot.sigma;
 
 		return true;
 	}
@@ -1617,6 +1703,7 @@ public class FIRE implements PlugIn
 
 	private class Work
 	{
+		long time = 0;
 		double mean, sigma;
 
 		Work(double mean, double sigma)
@@ -1690,6 +1777,32 @@ public class FIRE implements PlugIn
 						debug(" No work, stopping");
 						break;
 					}
+
+					// Delay processing the work. Allows the work to be updated before we process it.
+					if (work.time != 0)
+					{
+						debug(" Checking delay");
+						long time = work.time;
+						while (System.currentTimeMillis() < time)
+						{
+							debug(" Delaying");
+							Thread.sleep(50);
+							// Assume new work can be added to the inbox. Here we are peaking at the inbox
+							// so we do not take ownership with synchronized
+							if (inbox.work != null)
+								time = inbox.work.time;
+						}
+						// If we intend to modify the inbox then we should take ownership
+						synchronized (inbox)
+						{
+							if (!inbox.isEmpty())
+							{
+								work = inbox.getWork();
+								debug(" Found updated work");
+							}
+						}
+					}
+
 					if (!equals(work, lastWork))
 						createResult(work);
 					lastWork = work;
@@ -1731,17 +1844,19 @@ public class FIRE implements PlugIn
 		boolean notActive = true;
 		volatile int ignore = 0;
 		ArrayList<WorkStack> stacks;
-		double mean, sigma;
+		double defaultMean, defaultSigma;
 		String m, s;
 		TextField tf1, tf2;
 		Checkbox cb;
+		final boolean isMacro;
 
 		FIREDialogListener(GenericDialog gd, PrecisionHistogram histogram, ArrayList<WorkStack> stacks)
 		{
 			time = System.currentTimeMillis() + 1000;
 			this.stacks = stacks;
-			this.mean = histogram.mean;
-			this.sigma = histogram.sigma;
+			this.defaultMean = histogram.mean;
+			this.defaultSigma = histogram.sigma;
+			isMacro = Utils.isMacro();
 			// For the reset
 			tf1 = (TextField) gd.getNumericFields().get(0);
 			tf2 = (TextField) gd.getNumericFields().get(1);
@@ -1773,12 +1888,13 @@ public class FIRE implements PlugIn
 			{
 				// This does not trigger the event
 				cb.setState(false);
-				mean = this.mean;
-				sigma = this.sigma;
+				mean = this.defaultMean;
+				sigma = this.defaultSigma;
 			}
 
-			// TODO - implement a delay to allow typing - see OPTICS
 			Work work = new Work(mean, sigma);
+			// Implement a delay to allow typing
+			work.time = (isMacro) ? 0 : System.currentTimeMillis() + 500;
 
 			// Offload this work onto a thread that just picks up the most recent dialog input.
 			for (WorkStack stack : stacks)
