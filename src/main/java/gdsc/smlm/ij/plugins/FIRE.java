@@ -62,6 +62,7 @@ import gdsc.smlm.results.PeakResult;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Macro;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
@@ -87,7 +88,7 @@ import ij.process.LUTHelper.LutColour;
  */
 public class FIRE implements PlugIn
 {
-	private static String TITLE = "Fourier Image REsolution (FIRE)";
+	private String TITLE = "Fourier Image REsolution (FIRE)";
 	private static String inputOption = "";
 	private static String inputOption2 = "";
 
@@ -242,9 +243,12 @@ public class FIRE implements PlugIn
 
 		if ("q".equals(arg))
 		{
+			TITLE += " Q estimation";
 			runQEstimation();
 			return;
 		}
+
+		IJ.showStatus(TITLE + " ...");
 
 		if (!showDialog())
 			return;
@@ -931,8 +935,13 @@ public class FIRE implements PlugIn
 
 	private PlotWindow showFrcCurve(String name, FireResult result, ThresholdMethod method)
 	{
+		return showFrcCurve(name, result, method, 0);
+	}
+
+	private PlotWindow showFrcCurve(String name, FireResult result, ThresholdMethod method, int flags)
+	{
 		Plot2 plot = createFrcCurve(name, result, method);
-		return Utils.display(plot.getTitle(), plot);
+		return Utils.display(plot.getTitle(), plot, flags);
 	}
 
 	private void showFrcTimeEvolution(String name, double fireNumber, ThresholdMethod method, double fourierImageScale,
@@ -1123,6 +1132,8 @@ public class FIRE implements PlugIn
 
 	private void runQEstimation()
 	{
+		IJ.showStatus(TITLE + " ...");
+
 		if (!showQEstimationInputDialog())
 			return;
 
@@ -1153,6 +1164,7 @@ public class FIRE implements PlugIn
 
 		// Create the image and compute the numerator of FRC. 
 		// Do not use the signal so results.size() is the number of localisations.
+		IJ.showStatus("Computing FRC curve ...");
 		FireImages images = createImages(fourierImageScale, imageSize, false);
 		FRC frc = new FRC();
 		frc.progress = progress;
@@ -1160,6 +1172,7 @@ public class FIRE implements PlugIn
 		frc.useHalfCircle = useHalfCircle;
 		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 
+		IJ.showStatus("Running Q-estimation ...");
 		QPlot qplot = new QPlot(images.nmPerPixel, results.size(), frcCurve);
 
 		// Build a histogram of the localisation precision.
@@ -1169,6 +1182,8 @@ public class FIRE implements PlugIn
 		// Interactive dialog to estimate Q (blinking events per flourophore) using 
 		// sliders for the mean and standard deviation of the localisation precision.
 		showQEstimationDialog(histogram, qplot, frcCurve, images.nmPerPixel);
+
+		IJ.showStatus(TITLE + " complete");
 	}
 
 	private boolean showQEstimationInputDialog()
@@ -1386,7 +1401,7 @@ public class FIRE implements PlugIn
 			plot.setColor(Color.blue);
 			plot.drawLine(0, min, q[q.length - 1], min);
 
-			return Utils.display(title, plot);
+			return Utils.display(title, plot, Utils.NO_TO_FRONT);
 		}
 	}
 
@@ -1489,7 +1504,7 @@ public class FIRE implements PlugIn
 				// Always put min = 0 otherwise the plot does not change.
 				plot.setLimits(0, max, 0, 1.05);
 			}
-			return Utils.display(title, plot);
+			return Utils.display(title, plot, Utils.NO_TO_FRONT);
 		}
 	}
 
@@ -1706,7 +1721,9 @@ public class FIRE implements PlugIn
 			if (ignore)
 				return;
 
-			wo.add(plot);
+			// This is not perfect since multiple threads may reset the same new-window flag  
+			if (Utils.isNewWindow())
+				wo.add(plot);
 
 			// Layout the windows if we reached the expected size.
 			if (++size == expected)
@@ -1775,55 +1792,75 @@ public class FIRE implements PlugIn
 					fireNumber *= nmPerPixel;
 
 					pw = showFrcCurve(results.getName(),
-							new FireResult(fireNumber, correlation, nmPerPixel, frcCurve, smoothedFrcCurve), method);
+							new FireResult(fireNumber, correlation, nmPerPixel, frcCurve, smoothedFrcCurve), method,
+							Utils.NO_TO_FRONT);
 				}
 				wo.add(pw);
 				return work;
 			}
 		});
 
-		// Draw the plots with the first set of work
+		ArrayList<Thread> threads = startWorkers(workers);
+
 		wo.expected = workers.size();
-		Work work = new Work(histogram.mean, histogram.sigma);
-		for (WorkStack stack : stacks)
-			stack.addWork(work);
-
-		// Build the dialog
-		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
-		gd.addHelp(About.HELP_URL);
-
-		gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n" +
-				String.format("Precision estimate = %.3f +/- %.3f", histogram.mean, histogram.sigma));
 
 		double mean10 = histogram.mean * 10;
 		double sd10 = histogram.sigma * 10;
-		gd.addSlider("Mean (x10)", Math.max(0, mean10 - sd10 * 2), mean10 + sd10 * 2, mean10);
-		gd.addSlider("SD (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
-		gd.addCheckbox("reset", false);
 
-		gd.addDialogListener(new FIREDialogListener(gd, histogram, stacks));
+		String macroOptions = Macro.getOptions();
+		if (macroOptions != null)
+		{
+			// If inside a macro then just get the options and run the work
+			double mean = Double.parseDouble(Macro.getValue(macroOptions, "mean", Double.toString(mean10))) / 10;
+			double sigma = Double.parseDouble(Macro.getValue(macroOptions, "sd", Double.toString(sd10))) / 10;
+			Work work = new Work(mean, sigma);
+			for (WorkStack stack : stacks)
+				stack.addWork(work);
 
-		gd.showDialog();
+			finishWorkers(workers, threads, false);
+		}
+		else
+		{
+			// Draw the plots with the first set of work
+			Work work = new Work(histogram.mean, histogram.sigma);
+			for (WorkStack stack : stacks)
+				stack.addWork(work);
 
-		// Finish the worker threads
-		for (WorkStack stack : stacks)
-			stack.close();
+			// Build the dialog
+			NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+			gd.addHelp(About.HELP_URL);
 
-		if (gd.wasCanceled())
-			return false;
+			gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n" +
+					String.format("Precision estimate = %.3f +/- %.3f", histogram.mean, histogram.sigma));
+
+			gd.addSlider("Mean (x10)", Math.max(0, mean10 - sd10 * 2), mean10 + sd10 * 2, mean10);
+			gd.addSlider("SD (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
+			gd.addCheckbox("reset", false);
+
+			gd.addDialogListener(new FIREDialogListener(gd, histogram, stacks));
+
+			gd.showDialog();
+
+			// Finish the worker threads
+			boolean cancelled = gd.wasCanceled();
+			finishWorkers(workers, threads, cancelled);
+			if (cancelled)
+				return false;
+		}
 
 		// Store the Q value and the mean and sigma
 		qValue = qplot.qValue;
 		mean = qplot.mean;
 		sigma = qplot.sigma;
 
+		// Record the values for Macros since the NonBlockingDialog doesn't
+		if (Recorder.record)
+		{
+			Recorder.recordOption("mean", Double.toString(mean * 10));
+			Recorder.recordOption("sd", Double.toString(sigma * 10));
+		}
+
 		return true;
-	}
-
-	protected void add(PlotWindow plot)
-	{
-		// TODO Auto-generated method stub
-
 	}
 
 	private void add(ArrayList<WorkStack> stacks, ArrayList<Worker> workers, Worker previous, Worker worker)
@@ -1840,9 +1877,64 @@ public class FIRE implements PlugIn
 			// Join
 			previous.outbox = stack;
 		}
-		Thread t = new Thread(worker);
-		t.setDaemon(true);
-		t.start();
+	}
+
+	private ArrayList<Thread> startWorkers(ArrayList<Worker> workers)
+	{
+		ArrayList<Thread> threads = new ArrayList<Thread>();
+		for (Worker w : workers)
+		{
+			Thread t = new Thread(w);
+			t.setDaemon(true);
+			t.start();
+			threads.add(t);
+		}
+		return threads;
+	}
+
+	private void finishWorkers(ArrayList<Worker> workers, ArrayList<Thread> threads, boolean cancelled)
+	{
+		// Finish work
+		for (int i = 0; i < threads.size(); i++)
+		{
+			Thread t = threads.get(i);
+			Worker w = workers.get(i);
+
+			if (cancelled)
+			{
+				// Stop immediately any running worker
+				try
+				{
+					t.interrupt();
+				}
+				catch (SecurityException e)
+				{
+					// We should have permission to interrupt this thread.
+					e.printStackTrace();
+				}
+			}
+			else
+			{
+				// Stop after the current work in the inbox
+				w.running = false;
+
+				// Notify a workers waiting on the inbox.
+				// Q. How to check if the worker is sleeping?
+				synchronized (w.inbox)
+				{
+					w.inbox.notify();
+				}
+
+				// Leave to finish their current work
+				try
+				{
+					t.join(0);
+				}
+				catch (InterruptedException e)
+				{
+				}
+			}
+		}
 	}
 
 	private class Work implements Cloneable
@@ -1886,6 +1978,7 @@ public class FIRE implements PlugIn
 			this.notify();
 		}
 
+		@SuppressWarnings("unused")
 		synchronized void close()
 		{
 			this.work = null;
@@ -2019,7 +2112,6 @@ public class FIRE implements PlugIn
 		String m, s;
 		TextField tf1, tf2;
 		Checkbox cb;
-		@SuppressWarnings("unused")
 		final boolean isMacro;
 
 		FIREDialogListener(GenericDialog gd, PrecisionHistogram histogram, ArrayList<WorkStack> stacks)
@@ -2039,7 +2131,9 @@ public class FIRE implements PlugIn
 
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
-			if (notActive && System.currentTimeMillis() < time)
+			// Delay reading the dialog when in interactive mode. This is a workaround for a bug
+			// where the dialog has not yet been drawn.
+			if (notActive && !isMacro && System.currentTimeMillis() < time)
 				return true;
 			if (ignore-- > 0)
 			{
