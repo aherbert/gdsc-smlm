@@ -99,6 +99,17 @@ public class FRCTest
 		Assert.assertArrayEquals("numerator", numeratorE, numeratorA, 0);
 		Assert.assertArrayEquals("absFFT1", absFFT1E, absFFT1A, 0);
 		Assert.assertArrayEquals("absFFT2", absFFT2E, absFFT2A, 0);
+
+		FRC.computeMirroredFast(size, numeratorA, absFFT1A, absFFT2A, dataA1, dataB1, dataA2, dataB2);
+		
+		// Check this.
+		for (int y=1; y<size; y++)
+			for (int x=1, i=y*size+1; x<size; x++, i++)
+			{
+				Assert.assertEquals("numerator", numeratorE[i], numeratorA[i], 0);
+				Assert.assertEquals("absFFT1", absFFT1E[i], absFFT1A[i], 0);
+				Assert.assertEquals("absFFT2", absFFT2E[i], absFFT2A[i], 0);
+			}
 	}
 
 	private IJImagePeakResults createImage(Rectangle bounds)
@@ -234,6 +245,14 @@ public class FRCTest
 			public Object run(Object data)
 			{
 				FRC.computeMirrored(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+				return null;
+			}
+		});
+		ts.execute(new MyTimingTask("computeMirroredFast")
+		{
+			public Object run(Object data)
+			{
+				FRC.computeMirroredFast(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
 				return null;
 			}
 		});

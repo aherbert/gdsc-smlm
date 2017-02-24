@@ -178,7 +178,7 @@ public class FRC
 		}
 		else
 		{
-			computeMirrored(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+			computeMirroredFast(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
 		}
 
 		int radius = 1;
@@ -284,6 +284,52 @@ public class FRC
 
 		// Do the centre row. This is mirrored with itself
 		compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i++);
+		for (int x = 1; x <= centre; x++, i++, j--)
+		{
+			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
+			// Mirror
+			numerator[j] = numerator[i];
+			absFFT1[j] = absFFT1[i];
+			absFFT2[j] = absFFT2[i];
+		}
+	}
+
+	// Package level to allow JUnit test
+	static void computeMirroredFast(int size, float[] numerator, float[] absFFT1, float[] absFFT2, float[] dataA1,
+			float[] dataB1, float[] dataA2, float[] dataB2)
+	{
+		// The same as computeMirrored but ignores the pixels that are not a mirror since
+		// these are not used in the FRC calculation. 
+		
+		// Note: Since this is symmetric around the centre we could compute half of it.
+		// This is non-trivial since the centre is greater than half of the image, i.e.
+		// not (size-1)/2;
+		// So we compute up to the centre and copy back to the other half.
+		final int centre = size / 2;
+
+		// Ignore the first row since this is not mirrored
+		int i = size;
+
+		// Compute remaining rows up to the centre. These are mirrored
+		int j = numerator.length - 1;
+		for (int y = 1; y < centre; y++)
+		{
+			// The first entry in each row is not mirrored so just increment i
+			i++;
+			for (int x = 1; x < size; x++, i++, j--)
+			{
+				compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
+				// Mirror
+				numerator[j] = numerator[i];
+				absFFT1[j] = absFFT1[i];
+				absFFT2[j] = absFFT2[i];
+			}
+			// The last entry in each reverse row is not mirrored so just decrement j
+			j--;
+		}
+
+		// Do the centre row. This is mirrored with itself
+		i++;
 		for (int x = 1; x <= centre; x++, i++, j--)
 		{
 			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
