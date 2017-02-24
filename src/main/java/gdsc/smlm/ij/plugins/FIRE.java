@@ -1100,6 +1100,8 @@ public class FIRE implements PlugIn
 		frc.perimeterSamplingFactor = perimeterSamplingFactor;
 		frc.useHalfCircle = useHalfCircle;
 		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
+		if (frcCurve == null)
+			return null;
 		if (correctionQValue > 0)
 			FRC.applyQCorrection(frcCurve, images.nmPerPixel, correctionQValue, correctionMean, correctionSigma);
 		double[][] smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve);
@@ -1171,6 +1173,11 @@ public class FIRE implements PlugIn
 		frc.perimeterSamplingFactor = perimeterSamplingFactor;
 		frc.useHalfCircle = useHalfCircle;
 		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
+		if (frcCurve == null)
+		{
+			IJ.error(TITLE, "Failed to compute FRC curve");
+			return;
+		}
 
 		IJ.showStatus("Running Q-estimation ...");
 		QPlot qplot = new QPlot(images.nmPerPixel, results.size(), frcCurve);

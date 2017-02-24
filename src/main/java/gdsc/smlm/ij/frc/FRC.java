@@ -121,9 +121,15 @@ public class FRC
 		progess.incrementProgress(0);
 		progess.status("Calculating complex FFT images...");
 
-		// Pad images to the same size
+		// Pad images to the same size if different
 		final int maxWidth = FastMath.max(ip1.getWidth(), ip2.getWidth());
 		final int maxHeight = FastMath.max(ip1.getHeight(), ip2.getHeight());
+		if (FastMath.max(maxWidth, maxHeight) > MAX_SIZE)
+		{
+			progess.status("Error calculating FRC curve...");
+			progess.incrementProgress(1);
+			return null;
+		}
 		ip1 = pad(ip1, maxWidth, maxHeight);
 		ip2 = pad(ip2, maxWidth, maxHeight);
 
@@ -300,7 +306,7 @@ public class FRC
 	{
 		// The same as computeMirrored but ignores the pixels that are not a mirror since
 		// these are not used in the FRC calculation. 
-		
+
 		// Note: Since this is symmetric around the centre we could compute half of it.
 		// This is non-trivial since the centre is greater than half of the image, i.e.
 		// not (size-1)/2;
@@ -431,6 +437,16 @@ public class FRC
 		return ret;
 	}
 
+	/** Sizes for Fourier images. Must be a power of 2 */
+	private static final int[] SIZES;
+	private static final int MAX_SIZE;
+	static
+	{
+		// Produce in order to allow binary search
+		SIZES = new int[] { 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
+		MAX_SIZE = SIZES[SIZES.length - 1];
+	}
+
 	/**
 	 * Applies a Tukey window function to the image and then pads it to the next square size power of two.
 	 * 
@@ -446,18 +462,15 @@ public class FRC
 		final int size = FastMath.max(dataImage.getWidth(), dataImage.getHeight());
 
 		// Pad to a power of 2
-		int newSize = 0;
-		for (int i = 4; i < 15; i++)
+		int index = Arrays.binarySearch(SIZES, size);
+		if (index < 0)
 		{
-			newSize = (int) Math.pow(2.0, i);
-			if (size <= newSize)
-			{
-				break;
-			}
+			// Get the insert position
+			index = -(index + 1);
+			if (index == SIZES.length)
+				return null; // Too large so error
 		}
-
-		if (size > newSize)
-			return null; // Error
+		final int newSize = SIZES[index];
 
 		dataImage = dataImage.toFloat(0, null);
 		float[] data = (float[]) dataImage.getPixels();
@@ -932,6 +945,8 @@ public class FRC
 	public double calculateFireNumber(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod method)
 	{
 		double[][] frcCurve = calculateFrcCurve(ip1, ip2);
+		if (frcCurve == null)
+			return Double.NaN;
 		return calculateFireNumber(frcCurve, method);
 	}
 
@@ -961,6 +976,8 @@ public class FRC
 	public double[] calculateFire(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod method)
 	{
 		double[][] frcCurve = calculateFrcCurve(ip1, ip2);
+		if (frcCurve == null)
+			return null;
 		return calculateFire(frcCurve, method);
 	}
 
