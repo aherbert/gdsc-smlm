@@ -521,7 +521,7 @@ public class FIRE implements PlugIn
 			mean = Math.abs(gd.getNextNumber());
 			sigma = Math.abs(gd.getNextNumber());
 		}
-		
+
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
 		perimeterSamplingFactor = gd.getNextNumber();
@@ -897,6 +897,8 @@ public class FIRE implements PlugIn
 			double x = 1 / resolution;
 			plot.setColor(Color.MAGENTA);
 			plot.drawLine(x, 0, x, correlation);
+			plot.setColor(Color.BLACK);
+			plot.addLabel(0, 0, String.format("Resolution = %s %s", Utils.rounded(resolution), units));
 		}
 
 		private void add(Color color, double[] y)
@@ -927,10 +929,10 @@ public class FIRE implements PlugIn
 		return curve.getPlot();
 	}
 
-	private void showFrcCurve(String name, FireResult result, ThresholdMethod method)
+	private PlotWindow showFrcCurve(String name, FireResult result, ThresholdMethod method)
 	{
 		Plot2 plot = createFrcCurve(name, result, method);
-		Utils.display(plot.getTitle(), plot);
+		return Utils.display(plot.getTitle(), plot);
 	}
 
 	private void showFrcTimeEvolution(String name, double fireNumber, ThresholdMethod method, double fourierImageScale,
@@ -1091,10 +1093,10 @@ public class FIRE implements PlugIn
 		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 		if (correctionQValue > 0)
 			FRC.applyQCorrection(frcCurve, images.nmPerPixel, correctionQValue, correctionMean, correctionSigma);
-		double[][] smoothedFrcCurve = frc.getSmoothedCurve(frcCurve);
+		double[][] smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve);
 
 		// Resolution in pixels
-		double[] result = frc.calculateFire(smoothedFrcCurve, method);
+		double[] result = FRC.calculateFire(smoothedFrcCurve, method);
 		if (result == null)
 			return null;
 		double fireNumber = result[0];
@@ -1166,7 +1168,7 @@ public class FIRE implements PlugIn
 
 		// Interactive dialog to estimate Q (blinking events per flourophore) using 
 		// sliders for the mean and standard deviation of the localisation precision.
-		showQEstimationDialog(histogram, qplot);
+		showQEstimationDialog(histogram, qplot, frcCurve, images.nmPerPixel);
 	}
 
 	private boolean showQEstimationInputDialog()
@@ -1642,7 +1644,7 @@ public class FIRE implements PlugIn
 				for (int j = i + 1; j < data.length; j++)
 				{
 					PeakResult p2 = data[j];
-					if (p2.getSD() != 1 && p2.getSD() != w1 && p.getSignal() != s1)
+					if (p2.getSD() != 1 && p2.getSD() != w1 && p2.getSignal() != s1)
 						return false;
 				}
 				// All the results are the same, this is not valid
@@ -1689,13 +1691,104 @@ public class FIRE implements PlugIn
 		}
 	}
 
-	private boolean showQEstimationDialog(final PrecisionHistogram histogram, final QPlot qplot)
+	/**
+	 * Used to tile the windows from the worker threads on the first plot
+	 */
+	private class MyWindowOrganiser
 	{
-		WindowOrganiser wo = new WindowOrganiser();
-		wo.add(histogram.plot());
-		wo.add(qplot.plot(histogram.mean, histogram.sigma));
-		wo.tile();
+		final WindowOrganiser wo = new WindowOrganiser();
+		int expected;
+		int size = 0;
+		boolean ignore = false;
 
+		public void add(PlotWindow plot)
+		{
+			if (ignore)
+				return;
+
+			wo.add(plot);
+
+			// Layout the windows if we reached the expected size.
+			if (++size == expected)
+			{
+				wo.tile();
+				ignore = true; // No further need to track the windows
+			}
+		}
+	}
+
+	private boolean showQEstimationDialog(final PrecisionHistogram histogram, final QPlot qplot,
+			final double[][] frcCurve, final double nmPerPixel)
+	{
+		// This is used for the initial layout of windows
+		final MyWindowOrganiser wo = new MyWindowOrganiser();
+
+		// - create a synchronised set of work queues (to be passed to the dialog listener).
+		// - create a worker threads to take the work from the queue and do the computation.
+		ArrayList<WorkStack> stacks = new ArrayList<WorkStack>();
+		ArrayList<Worker> workers = new ArrayList<Worker>();
+
+		// Create the workers using anonymous inner classes
+		// Plot the histogram
+		add(stacks, workers, null, new Worker()
+		{
+			@Override
+			Work createResult(Work work)
+			{
+				wo.add(histogram.plot(work.mean, work.sigma));
+				return work;
+			}
+		});
+		// Compute Q and then plot the scaled FRC numerator
+		add(stacks, workers, null, new Worker()
+		{
+			@Override
+			Work createResult(Work work)
+			{
+				wo.add(qplot.plot(work.mean, work.sigma));
+				work = work.clone();
+				work.qValue = qplot.qValue;
+				return work;
+			}
+		});
+		// Compute the FIRE number. This uses the q-value from the previous worker
+		add(stacks, workers, workers.get(workers.size() - 1), new Worker()
+		{
+			@Override
+			Work createResult(Work work)
+			{
+				FRC.applyQCorrection(frcCurve, nmPerPixel, work.qValue, work.mean, work.sigma);
+
+				double[][] smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve);
+
+				// Resolution in pixels. Just use the default 1/7 thrshold method
+				ThresholdMethod method = ThresholdMethod.FIXED_1_OVER_7;
+				double[] result = FRC.calculateFire(smoothedFrcCurve, method);
+				PlotWindow pw = null;
+				if (result != null)
+				{
+					double fireNumber = result[0];
+					double correlation = result[1];
+
+					// The FIRE number will be returned in pixels relative to the input images. 
+					// However these were generated using an image scale so adjust for this.
+					fireNumber *= nmPerPixel;
+
+					pw = showFrcCurve(results.getName(),
+							new FireResult(fireNumber, correlation, nmPerPixel, frcCurve, smoothedFrcCurve), method);
+				}
+				wo.add(pw);
+				return work;
+			}
+		});
+
+		// Draw the plots with the first set of work
+		wo.expected = workers.size();
+		Work work = new Work(histogram.mean, histogram.sigma);
+		for (WorkStack stack : stacks)
+			stack.addWork(work);
+
+		// Build the dialog
 		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
@@ -1708,28 +1801,8 @@ public class FIRE implements PlugIn
 		gd.addSlider("SD (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
 		gd.addCheckbox("reset", false);
 
-		// - create a synchronised work queue and pass it to the dialog listener.
-		// - create a worker thread to take the work from the queue and do the computation.
-		ArrayList<WorkStack> stacks = new ArrayList<WorkStack>();
-		ArrayList<Worker> workers = new ArrayList<Worker>();
-		add(stacks, workers, new Worker()
-		{
-			@Override
-			void createResult(Work work)
-			{
-				histogram.plot(work.mean, work.sigma);
-			}
-		});
-		add(stacks, workers, new Worker()
-		{
-			@Override
-			void createResult(Work work)
-			{
-				qplot.plot(work.mean, work.sigma);
-			}
-		});
-
 		gd.addDialogListener(new FIREDialogListener(gd, histogram, stacks));
+
 		gd.showDialog();
 
 		// Finish the worker threads
@@ -1747,25 +1820,53 @@ public class FIRE implements PlugIn
 		return true;
 	}
 
-	private void add(ArrayList<WorkStack> stacks, ArrayList<Worker> workers, Worker worker)
+	protected void add(PlotWindow plot)
 	{
+		// TODO Auto-generated method stub
+
+	}
+
+	private void add(ArrayList<WorkStack> stacks, ArrayList<Worker> workers, Worker previous, Worker worker)
+	{
+		workers.add(worker);
 		WorkStack stack = new WorkStack();
 		worker.inbox = stack;
-		stacks.add(stack);
+		if (previous == null)
+		{
+			stacks.add(stack);
+		}
+		else
+		{
+			// Join
+			previous.outbox = stack;
+		}
 		Thread t = new Thread(worker);
 		t.setDaemon(true);
 		t.start();
 	}
 
-	private class Work
+	private class Work implements Cloneable
 	{
 		long time = 0;
-		double mean, sigma;
+		double mean, sigma, qValue = 0;
 
 		Work(double mean, double sigma)
 		{
 			this.mean = mean;
 			this.sigma = sigma;
+		}
+
+		@Override
+		public Work clone()
+		{
+			try
+			{
+				return (Work) super.clone();
+			}
+			catch (CloneNotSupportedException e)
+			{
+				return null; // Shouldn't happen
+			}
 		}
 	}
 
@@ -1808,7 +1909,8 @@ public class FIRE implements PlugIn
 	{
 		private boolean running = true;
 		private Work lastWork = null;
-		private WorkStack inbox;
+		private Work result;
+		private WorkStack inbox, outbox;
 
 		public void run()
 		{
@@ -1860,8 +1962,13 @@ public class FIRE implements PlugIn
 					}
 
 					if (!equals(work, lastWork))
-						createResult(work);
+						result = createResult(work);
 					lastWork = work;
+					if (outbox != null)
+					{
+						debug(" Posting result");
+						outbox.addWork(result);
+					}
 				}
 				catch (InterruptedException e)
 				{
@@ -1887,11 +1994,13 @@ public class FIRE implements PlugIn
 				return false;
 			if (work.sigma != lastWork.sigma)
 				return false;
+			if (work.qValue != lastWork.qValue)
+				return false;
 
 			return true;
 		}
 
-		abstract void createResult(Work work);
+		abstract Work createResult(Work work);
 	}
 
 	private class FIREDialogListener implements DialogListener
@@ -1899,8 +2008,9 @@ public class FIRE implements PlugIn
 		/**
 		 * Delay (in milliseconds) used when entering new values in the dialog before the preview is processed
 		 */
+		@SuppressWarnings("unused")
 		static final long DELAY = 500;
-		
+
 		long time;
 		boolean notActive = true;
 		volatile int ignore = 0;
@@ -1909,6 +2019,7 @@ public class FIRE implements PlugIn
 		String m, s;
 		TextField tf1, tf2;
 		Checkbox cb;
+		@SuppressWarnings("unused")
 		final boolean isMacro;
 
 		FIREDialogListener(GenericDialog gd, PrecisionHistogram histogram, ArrayList<WorkStack> stacks)
@@ -1942,7 +2053,9 @@ public class FIRE implements PlugIn
 			double sigma = Math.abs(gd.getNextNumber()) / 10;
 			boolean reset = gd.getNextBoolean();
 
-			System.out.printf("Event: %s, %f, %f\n", e, mean, sigma);
+			// Even events from the slider come through as TextEvent from the TextField
+			// since ImageJ captures the slider event as just updates the TextField.
+			//System.out.printf("Event: %s, %f, %f\n", e, mean, sigma);
 
 			// Allow reset to default
 			if (reset)
@@ -1954,10 +2067,11 @@ public class FIRE implements PlugIn
 			}
 
 			Work work = new Work(mean, sigma);
+
 			// Implement a delay to allow typing.
 			// This is also applied to the sliders which we do not want. 
 			// Ideally we would have no delay for sliders (since they are in the correct place already
-			// but a delay for typing the in the text field). Unfortunately the AWTEvent raised by ImageJ
+			// but a delay for typing in the text field). Unfortunately the AWTEvent raised by ImageJ
 			// for the slider is actually from the TextField so we cannot tell the difference.
 			// For now just have no delay.
 			//work.time = (isMacro) ? 0 : System.currentTimeMillis() + DELAY;
