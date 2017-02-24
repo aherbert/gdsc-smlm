@@ -397,8 +397,8 @@ public class FIRE implements PlugIn
 				{
 					wo.cascade();
 					double mean = stats.getMean();
-					IJ.log(String.format("%s : FIRE number = %s +/- %s %s (Fourier scale = %s)", name,
-							Utils.rounded(mean, 4), Utils.rounded(stats.getStandardDeviation(), 4), units,
+					IJ.log(String.format("%s : FIRE number = %s +/- %s %s [95%% C.I.] (Fourier scale = %s)", name,
+							Utils.rounded(mean, 4), Utils.rounded(stats.getConfidenceInterval(0.95), 4), units,
 							Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
 					if (showFRCCurve)
 					{
@@ -1896,6 +1896,11 @@ public class FIRE implements PlugIn
 
 	private class FIREDialogListener implements DialogListener
 	{
+		/**
+		 * Delay (in milliseconds) used when entering new values in the dialog before the preview is processed
+		 */
+		static final long DELAY = 500;
+		
 		long time;
 		boolean notActive = true;
 		volatile int ignore = 0;
@@ -1937,7 +1942,7 @@ public class FIRE implements PlugIn
 			double sigma = Math.abs(gd.getNextNumber()) / 10;
 			boolean reset = gd.getNextBoolean();
 
-			//System.out.printf("Event: %s, %f, %f\n", e, mean, sigma);
+			System.out.printf("Event: %s, %f, %f\n", e, mean, sigma);
 
 			// Allow reset to default
 			if (reset)
@@ -1949,8 +1954,13 @@ public class FIRE implements PlugIn
 			}
 
 			Work work = new Work(mean, sigma);
-			// Implement a delay to allow typing
-			work.time = (isMacro) ? 0 : System.currentTimeMillis() + 500;
+			// Implement a delay to allow typing.
+			// This is also applied to the sliders which we do not want. 
+			// Ideally we would have no delay for sliders (since they are in the correct place already
+			// but a delay for typing the in the text field). Unfortunately the AWTEvent raised by ImageJ
+			// for the slider is actually from the TextField so we cannot tell the difference.
+			// For now just have no delay.
+			//work.time = (isMacro) ? 0 : System.currentTimeMillis() + DELAY;
 
 			// Offload this work onto a thread that just picks up the most recent dialog input.
 			for (WorkStack stack : stacks)
