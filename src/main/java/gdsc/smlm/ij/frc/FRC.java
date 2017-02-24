@@ -620,7 +620,7 @@ public class FRC
 	 * @param robustness
 	 * @return A new FRC curve
 	 */
-	public double[][] getSmoothedCurve(double[][] frcCurve, double bandwidth, int robustness)
+	public static double[][] getSmoothedCurve(double[][] frcCurve, double bandwidth, int robustness)
 	{
 		double[][] sCurve = new double[frcCurve.length][3];
 
@@ -664,7 +664,7 @@ public class FRC
 	 * @param frcCurve
 	 * @return A new FRC curve
 	 */
-	public double[][] getSmoothedCurve(double[][] frcCurve)
+	public static double[][] getSmoothedCurve(double[][] frcCurve)
 	{
 		double bandwidth = 0.0707;
 		int robustness = 0;
@@ -803,11 +803,11 @@ public class FRC
 	 *            The maximum number of intersections to compute
 	 * @return The crossing points
 	 */
-	public double[][] getIntersections(double[][] frcCurve, double[] thresholdCurve, int max)
+	public static double[][] getIntersections(double[][] frcCurve, double[] thresholdCurve, int max)
 	{
 		if (frcCurve.length != thresholdCurve.length)
 		{
-			getTrackProgress().log("Error: Unable to calculate FRC curve intersections due to input length mismatch.");
+			System.err.println("Error: Unable to calculate FRC curve intersections due to input length mismatch.");
 			return null;
 		}
 
@@ -892,7 +892,7 @@ public class FRC
 	 * @param method
 	 * @return The intersection (or null if no crossings)
 	 */
-	public double[] getCorrectIntersection(double[][] intersections, ThresholdMethod method)
+	public static double[] getCorrectIntersection(double[][] intersections, ThresholdMethod method)
 	{
 		if (intersections == null || intersections.length == 0)
 			return null;
@@ -942,7 +942,7 @@ public class FRC
 	 * @param method
 	 * @return The FIRE number (in pixels)
 	 */
-	public double calculateFireNumber(double[][] frcCurve, ThresholdMethod method)
+	public static double calculateFireNumber(double[][] frcCurve, ThresholdMethod method)
 	{
 		double[] result = calculateFire(frcCurve, method);
 		if (result == null)
@@ -971,12 +971,12 @@ public class FRC
 	 * @param method
 	 * @return The FIRE number (in pixels) and the correlation (null if computation failed)
 	 */
-	public double[] calculateFire(double[][] frcCurve, ThresholdMethod method)
+	public static double[] calculateFire(double[][] frcCurve, ThresholdMethod method)
 	{
 		double[] thresholdCurve = calculateThresholdCurve(frcCurve, method);
 		double[][] intersections = getIntersections(frcCurve, thresholdCurve, 2);
 
-		if (intersections == null || intersections.length != 0)
+		if (intersections != null && intersections.length != 0)
 		{
 			double[] intersection = getCorrectIntersection(intersections, method);
 			// Since the Fourier calculation only uses half of the image (from centre to the edge) 
