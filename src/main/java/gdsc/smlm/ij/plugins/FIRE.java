@@ -305,8 +305,7 @@ public class FIRE implements PlugIn
 
 			if (result != null)
 			{
-				IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name,
-						Utils.rounded(result.fireNumber, 4), units, Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
+				logResult(name, result);
 
 				if (showFRCCurve)
 					showFrcCurve(name, result, method);
@@ -323,9 +322,7 @@ public class FIRE implements PlugIn
 
 				if (result != null)
 				{
-					IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name,
-							Utils.rounded(result.fireNumber, 4), units,
-							Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
+					logResult(name, result);
 
 					if (showFRCCurve)
 						showFrcCurve(name, result, method);
@@ -391,9 +388,7 @@ public class FIRE implements PlugIn
 					if (showFRCCurveRepeats)
 					{
 						// Output each FRC curve using a suffix.
-						IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", w.name,
-								Utils.rounded(result.fireNumber, 4), units,
-								Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
+						logResult(w.name, result);
 						wo.add(Utils.display(w.plot.getTitle(), w.plot));
 					}
 					if (showFRCCurve)
@@ -413,9 +408,7 @@ public class FIRE implements PlugIn
 				{
 					wo.cascade();
 					double mean = stats.getMean();
-					IJ.log(String.format("%s : FIRE number = %s +/- %s %s [95%% CI, n=%d] (Fourier scale = %s)", name,
-							Utils.rounded(mean, 4), Utils.rounded(stats.getConfidenceInterval(0.95), 4), units,
-							stats.getN(), Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
+					logResult(name, result, mean, stats);
 					if (showFRCCurve)
 					{
 						curve.addResolution(mean);
@@ -445,6 +438,25 @@ public class FIRE implements PlugIn
 		}
 
 		IJ.showStatus(TITLE + " complete : " + Utils.timeToString(System.currentTimeMillis() - start));
+	}
+
+	private void logResult(String name, FireResult result)
+	{
+		IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name, Utils.rounded(result.fireNumber, 4),
+				units, Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
+		if (Double.isNaN(result.fireNumber))
+		{
+			Utils.log(
+					"%s Warning: NaN result possible if the resolution is below the pixel size of the input Fourier image (%s %s).",
+					TITLE, Utils.rounded(result.nmPerPixel), units);
+		}
+	}
+
+	private void logResult(String name, FireResult result, double mean, Statistics stats)
+	{
+		IJ.log(String.format("%s : FIRE number = %s +/- %s %s [95%% CI, n=%d] (Fourier scale = %s)", name,
+				Utils.rounded(mean, 4), Utils.rounded(stats.getConfidenceInterval(0.95), 4), units, stats.getN(),
+				Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
 	}
 
 	private MemoryPeakResults cropToRoi(MemoryPeakResults results)
@@ -949,7 +961,7 @@ public class FIRE implements PlugIn
 			// so set them as the defaults.
 			double[] limits = plot.getCurrentMinAndMax();
 			// The FRC should not go above 1 so limit Y
-			plot.setLimits(limits[0], limits[1], limits[2], Math.min(1.05, limits[3]));
+			plot.setLimits(limits[0], limits[1], Math.min(0, limits[2]), 1.05);
 			return plot;
 		}
 	}
@@ -1138,7 +1150,7 @@ public class FIRE implements PlugIn
 		// Resolution in pixels
 		double[] result = FRC.calculateFire(smoothedFrcCurve, method);
 		if (result == null)
-			return null;
+			return new FireResult(Double.NaN, Double.NaN, images.nmPerPixel, frcCurve, smoothedFrcCurve);
 		double fireNumber = result[0];
 		double correlation = result[1];
 
@@ -1150,7 +1162,7 @@ public class FIRE implements PlugIn
 		// However these were generated using an image scale so adjust for this.
 		fireNumber *= images.nmPerPixel;
 
-		if (pixelsTooBig)
+		if (pixelsTooBig && fireNumber > 0)
 		{
 			// Q. Should this be output somewhere else?
 			Utils.log(

@@ -1002,7 +1002,24 @@ public class FRC
 			double fire = 2 * (frcCurve.length + 1) / intersection[0];
 			return new double[] { fire, intersection[1] };
 		}
+		else
+		{
+			// Edge case where the entire curve has a correlation of 1.
+			// This happens when the two split images are the same, e.g. comparing a dataset to itself.
+			if (perfect(frcCurve))
+				return new double[] { 0, 1 };
+		}
 		return null;
+	}
+
+	private static boolean perfect(double[][] frcCurve)
+	{
+		for (int i = 0; i < frcCurve.length; i++)
+		{
+			if (frcCurve[i][1] != 1)
+				return false;
+		}
+		return true;
 	}
 
 	/**
