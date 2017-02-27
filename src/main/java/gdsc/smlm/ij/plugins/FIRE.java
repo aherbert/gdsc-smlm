@@ -33,6 +33,7 @@ import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 
 /*----------------------------------------------------------------------------- 
@@ -200,6 +201,7 @@ public class FIRE implements PlugIn
 		String name;
 		FireResult result;
 		Plot2 plot;
+		boolean oom = false;
 
 		public FIREWorker(int id, ThresholdMethod method, double fourierImageScale, int imageSize)
 		{
@@ -212,13 +214,20 @@ public class FIRE implements PlugIn
 
 		public void run()
 		{
-			result = calculateFireNumber(method, fourierImageScale, imageSize);
-			if (showFRCCurve)
+			try
 			{
-				plot = createFrcCurve(name, result, method);
-				if (showFRCCurveRepeats)
-					// Do this on the thread
-					plot.draw();
+				result = calculateFireNumber(method, fourierImageScale, imageSize);
+				if (showFRCCurve)
+				{
+					plot = createFrcCurve(name, result, method);
+					if (showFRCCurveRepeats)
+						// Do this on the thread
+						plot.draw();
+				}
+			}
+			catch (OutOfMemoryError e)
+			{
+				oom = true;
 			}
 		}
 	}
@@ -325,7 +334,7 @@ public class FIRE implements PlugIn
 			else
 			{
 				// Multi-thread this ... 			
-				int nThreads = Maths.min(repeats, Prefs.getThreads());
+				int nThreads = Maths.min(repeats, getThreads());
 				ExecutorService executor = Executors.newFixedThreadPool(nThreads);
 				TurboList<Future<?>> futures = new TurboList<Future<?>>(repeats);
 				TurboList<FIREWorker> workers = new TurboList<FIREWorker>(repeats);
@@ -367,9 +376,12 @@ public class FIRE implements PlugIn
 
 				Statistics stats = new Statistics();
 				WindowOrganiser wo = new WindowOrganiser();
+				boolean oom = false;
 				for (int i = 0; i < repeats; i++)
 				{
 					FIREWorker w = workers.get(i);
+					if (w.oom)
+						oom = true;
 					if (w.result == null)
 						continue;
 					result = w.result;
@@ -401,15 +413,29 @@ public class FIRE implements PlugIn
 				{
 					wo.cascade();
 					double mean = stats.getMean();
-					IJ.log(String.format("%s : FIRE number = %s +/- %s %s [95%% C.I.] (Fourier scale = %s)", name,
+					IJ.log(String.format("%s : FIRE number = %s +/- %s %s [95%% CI, n=%d] (Fourier scale = %s)", name,
 							Utils.rounded(mean, 4), Utils.rounded(stats.getConfidenceInterval(0.95), 4), units,
-							Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
+							stats.getN(), Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
 					if (showFRCCurve)
 					{
 						curve.addResolution(mean);
 						Plot2 plot = curve.getPlot();
 						Utils.display(plot.getTitle(), plot);
 					}
+				}
+
+				if (oom)
+				{
+					//@formatter:off
+					IJ.error(TITLE,
+							"ERROR - Parallel computation out-of-memory.\n \n" + 
+					TextUtils.wrap("The number of results will be reduced. " +
+									"Please reduce the size of the Fourier image " +
+									"or change the number of threads " +
+									"using the extra options (hold down the 'Shift' " +
+									"key when running the plugin).",
+									80));
+					//@formatter:on
 				}
 			}
 
@@ -490,6 +516,7 @@ public class FIRE implements PlugIn
 			gd.addNumericField("Q-value", qValue, 3);
 			gd.addNumericField("Precision_Mean", mean, 2);
 			gd.addNumericField("Precision_Sigma", sigma, 2);
+			gd.addNumericField("Threads", getLastNThreads(), 0);
 		}
 
 		gd.addMessage("Fourier options:");
@@ -524,6 +551,8 @@ public class FIRE implements PlugIn
 			qValue = Math.abs(gd.getNextNumber());
 			mean = Math.abs(gd.getNextNumber());
 			sigma = Math.abs(gd.getNextNumber());
+			setThreads((int) gd.getNextNumber());
+			lastNThreads = this.nThreads;
 		}
 
 		imageScaleIndex = gd.getNextChoiceIndex();
@@ -2192,5 +2221,51 @@ public class FIRE implements PlugIn
 
 			return true;
 		}
+	}
+
+	private static int imagejNThreads = Prefs.getThreads();
+	private static int lastNThreads = imagejNThreads;
+
+	private int nThreads = 0;
+
+	/**
+	 * Gets the last N threads used in the input dialog.
+	 *
+	 * @return the last N threads
+	 */
+	private static int getLastNThreads()
+	{
+		// See if ImageJ preference were updated
+		if (imagejNThreads != Prefs.getThreads())
+		{
+			lastNThreads = imagejNThreads = Prefs.getThreads();
+		}
+		// Otherwise use the last user input
+		return lastNThreads;
+	}
+
+	/**
+	 * Gets the threads to use for multi-threaded computation.
+	 *
+	 * @return the threads
+	 */
+	private int getThreads()
+	{
+		if (nThreads == 0)
+		{
+			nThreads = Prefs.getThreads();
+		}
+		return nThreads;
+	}
+
+	/**
+	 * Sets the threads to use for multi-threaded computation.
+	 *
+	 * @param nThreads
+	 *            the new threads
+	 */
+	public void setThreads(int nThreads)
+	{
+		this.nThreads = Math.max(1, nThreads);
 	}
 }
