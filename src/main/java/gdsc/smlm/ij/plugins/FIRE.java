@@ -51,6 +51,7 @@ import gdsc.core.utils.TurboList;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.frc.FRC;
+import gdsc.smlm.ij.frc.FRC.FIREResult;
 import gdsc.smlm.ij.frc.FRC.FRCCurve;
 import gdsc.smlm.ij.frc.FRC.ThresholdMethod;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -192,9 +193,8 @@ public class FIRE implements PlugIn
 		}
 	}
 
-	public class FIREWorker implements Runnable
+	private class FIREWorker implements Runnable
 	{
-		final int id;
 		final ThresholdMethod method;
 		final double fourierImageScale;
 		final int imageSize;
@@ -206,7 +206,6 @@ public class FIRE implements PlugIn
 
 		public FIREWorker(int id, ThresholdMethod method, double fourierImageScale, int imageSize)
 		{
-			this.id = id;
 			this.method = method;
 			this.fourierImageScale = fourierImageScale;
 			this.imageSize = imageSize;
@@ -1144,11 +1143,10 @@ public class FIRE implements PlugIn
 		FRC.getSmoothedCurve(frcCurve, true);
 
 		// Resolution in pixels
-		double[] result = FRC.calculateFire(frcCurve, method);
+		FIREResult result = FRC.calculateFire(frcCurve, method);
 		if (result == null)
 			return new FireResult(Double.NaN, Double.NaN, images.nmPerPixel, frcCurve, originalCorrelationCurve);
-		double fireNumber = result[0];
-		double correlation = result[1];
+		double fireNumber = result.fireNumber;
 
 		// The FRC paper states that the super-resolution pixel size should be smaller
 		// than 1/4 of R (the resolution).
@@ -1166,7 +1164,7 @@ public class FIRE implements PlugIn
 					TITLE, Utils.rounded(images.nmPerPixel), Utils.rounded(fireNumber));
 		}
 
-		return new FireResult(fireNumber, correlation, images.nmPerPixel, frcCurve, originalCorrelationCurve);
+		return new FireResult(fireNumber, result.correlation, images.nmPerPixel, frcCurve, originalCorrelationCurve);
 	}
 
 	private void runQEstimation()
@@ -1824,18 +1822,16 @@ public class FIRE implements PlugIn
 
 				// Resolution in pixels. Just use the default 1/7 thrshold method
 				ThresholdMethod method = ThresholdMethod.FIXED_1_OVER_7;
-				double[] result = FRC.calculateFire(smoothedFrcCurve, method);
+				FIREResult result = FRC.calculateFire(smoothedFrcCurve, method);
 				PlotWindow pw = null;
 				if (result != null)
 				{
-					double fireNumber = result[0];
-					double correlation = result[1];
-
+					double fireNumber = result.fireNumber;
 					// The FIRE number will be returned in pixels relative to the input images. 
 					// However these were generated using an image scale so adjust for this.
 					fireNumber *= nmPerPixel;
 
-					pw = showFrcCurve(results.getName(), new FireResult(fireNumber, correlation, nmPerPixel,
+					pw = showFrcCurve(results.getName(), new FireResult(fireNumber, result.correlation, nmPerPixel,
 							smoothedFrcCurve, frcCurve.getCorrelationValues()), method, Utils.NO_TO_FRONT);
 				}
 				wo.add(pw);

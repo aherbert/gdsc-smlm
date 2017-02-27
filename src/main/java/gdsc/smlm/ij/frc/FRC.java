@@ -68,7 +68,10 @@ public class FRC
 		abstract public String getName();
 	};
 
-	public class FRCCurveResult implements Cloneable
+	/**
+	 * Contains the result of a single ring from the Fourier Ring Correlation (FRC) between two images.
+	 */
+	public static class FRCCurveResult implements Cloneable
 	{
 		private final int radius;
 		private final int nSamples;
@@ -174,7 +177,10 @@ public class FRC
 		}
 	}
 
-	public class FRCCurve
+	/**
+	 * Contains the result of computing all the rings of the Fourier Ring Correlation (FRC) between two images.
+	 */
+	public static class FRCCurve
 	{
 		/** The size of the field of view in the Fourier image (named L) */
 		final public int fieldOfView;
@@ -246,6 +252,25 @@ public class FRC
 			for (int i = values.length; i-- > 0;)
 				values[i] = get(i).getCorrelation();
 			return values;
+		}
+	}
+
+	/**
+	 * Contains the Fourier Image Resolution (FIRE) result computed from the intersection of the FRC curve and a
+	 * threshold curve
+	 */
+	public static class FIREResult
+	{
+		/** The fire number (in pixels). */
+		final public double fireNumber;
+
+		/** The correlation. */
+		final public double correlation;
+
+		private FIREResult(double fireNumber, double correlation)
+		{
+			this.fireNumber = fireNumber;
+			this.correlation = correlation;
 		}
 	}
 
@@ -1141,21 +1166,24 @@ public class FRC
 	 */
 	public static double calculateFireNumber(FRCCurve frcCurve, ThresholdMethod method)
 	{
-		double[] result = calculateFire(frcCurve, method);
+		FIREResult result = calculateFire(frcCurve, method);
 		if (result == null)
 			return Double.NaN;
-		return result[0];
+		return result.fireNumber;
 	}
 
 	/**
 	 * Utility function that calculates the Fourier Image Resolution (FIRE) number using the provided images.
-	 * 
+	 *
 	 * @param ip1
+	 *            the first image
 	 * @param ip2
+	 *            the second image
 	 * @param method
-	 * @return The FIRE number (in pixels) and the correlation (null if computation failed)
+	 *            the method
+	 * @return The FIRE result (null if computation failed)
 	 */
-	public double[] calculateFire(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod method)
+	public FIREResult calculateFire(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod method)
 	{
 		FRCCurve frcCurve = calculateFrcCurve(ip1, ip2);
 		if (frcCurve == null)
@@ -1167,12 +1195,14 @@ public class FRC
 	/**
 	 * Utility function that calculates the Fourier Image Resolution (FIRE) number using the provided FRC curve
 	 * data.
-	 * 
+	 *
 	 * @param frcCurve
+	 *            the frc curve
 	 * @param method
-	 * @return The FIRE number (in pixels) and the correlation (null if computation failed)
+	 *            the threshold method
+	 * @return The FIRE result (null if computation failed)
 	 */
-	public static double[] calculateFire(FRCCurve frcCurve, ThresholdMethod method)
+	public static FIREResult calculateFire(FRCCurve frcCurve, ThresholdMethod method)
 	{
 		double[] thresholdCurve = calculateThresholdCurve(frcCurve, method);
 		double[][] intersections = getIntersections(frcCurve, thresholdCurve, 2);
@@ -1180,18 +1210,15 @@ public class FRC
 		if (intersections != null && intersections.length != 0)
 		{
 			double[] intersection = getCorrectIntersection(intersections, method);
-			// Since the Fourier calculation only uses half of the image (from centre to the edge) 
-			// we must double the curve length to get the original maximum image width. In addition
-			// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
-			double fire = 2 * (frcCurve.getSize() + 1) / intersection[0];
-			return new double[] { fire, intersection[1] };
+			double fireNumber = frcCurve.fieldOfView / intersection[0];
+			return new FIREResult(fireNumber, intersection[1]);
 		}
 		else
 		{
 			// Edge case where the entire curve has a correlation of 1.
 			// This happens when the two split images are the same, e.g. comparing a dataset to itself.
 			if (perfect(frcCurve))
-				return new double[] { 0, 1 };
+				return new FIREResult(0, 1);
 		}
 		return null;
 	}
@@ -1209,10 +1236,8 @@ public class FRC
 	/**
 	 * Apply spurious correlation correction using the Q-factor. Follows the method described in Niewenhuizen, et al
 	 * (2013), on-line methods. This method computes a value that is subtracted from the numerator of the FRC and
-	 * added
-	 * to the denominator of the FRC before computing the correlation. The correlation in the FRC curve will be
-	 * updated.
-	 * The sums of the FRC curve are unchanged.
+	 * added to the denominator of the FRC before computing the correlation. The correlation in the FRC curve will be
+	 * updated. The sums of the FRC curve are unchanged.
 	 * <p>
 	 * The correlation can be reset by calling this method with a Q-value of zero.
 	 * <p>
