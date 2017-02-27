@@ -51,6 +51,7 @@ import gdsc.core.utils.TurboList;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.frc.FRC;
+import gdsc.smlm.ij.frc.FRC.FRCCurve;
 import gdsc.smlm.ij.frc.FRC.ThresholdMethod;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
@@ -177,17 +178,17 @@ public class FIRE implements PlugIn
 		final double fireNumber;
 		final double correlation;
 		final double nmPerPixel;
-		final double[][] frcCurve;
-		final double[][] smoothedFrcCurve;
+		final FRCCurve frcCurve;
+		final double[] originalCorrelationCurve;
 
-		FireResult(double fireNumber, double correlation, double nmPerPixel, double[][] frcCurve,
-				double[][] smoothedFrcCurve)
+		FireResult(double fireNumber, double correlation, double nmPerPixel, FRCCurve frcCurve,
+				double[] originalCorrelationCurve)
 		{
 			this.fireNumber = fireNumber;
 			this.correlation = correlation;
 			this.nmPerPixel = nmPerPixel;
 			this.frcCurve = frcCurve;
-			this.smoothedFrcCurve = smoothedFrcCurve;
+			this.originalCorrelationCurve = originalCorrelationCurve;
 		}
 	}
 
@@ -878,24 +879,21 @@ public class FIRE implements PlugIn
 		void add(String name, FireResult result, ThresholdMethod method, Color colorValues, Color colorThreshold,
 				Color colorNoSmooth)
 		{
-			double[][] frcCurve = result.smoothedFrcCurve;
-			double[][] frcNoSmooth = result.frcCurve;
+			FRCCurve frcCurve = result.frcCurve;
 
-			double[] yValues = new double[frcCurve.length];
-			double[] yValuesNotSmooth = new double[frcCurve.length];
+			double[] yValues = new double[frcCurve.getSize()];
 
 			if (plot == null)
 			{
 				String title = name + " FRC Curve";
 				plot = new Plot2(title, String.format("Spatial Frequency (%s^-1)", units), "FRC");
 
-				xValues = new double[frcCurve.length];
-				final double L = FRC.computeL(frcCurve);
+				xValues = new double[frcCurve.getSize()];
+				final double L = frcCurve.fieldOfView;
 				final double conversion = 1.0 / (L * result.nmPerPixel);
 				for (int i = 0; i < xValues.length; i++)
 				{
-					final double radius = frcCurve[i][0];
-					xValues[i] = radius * conversion;
+					xValues[i] = frcCurve.get(i).getRadius() * conversion;
 				}
 
 				// The threshold curve is the same
@@ -905,14 +903,11 @@ public class FIRE implements PlugIn
 
 			for (int i = 0; i < xValues.length; i++)
 			{
-				yValues[i] = frcCurve[i][1];
-				if (frcNoSmooth != null)
-					yValuesNotSmooth[i] = frcNoSmooth[i][1];
+				yValues[i] = frcCurve.get(i).getCorrelation();
 			}
 
 			add(colorValues, yValues);
-			if (frcNoSmooth != null)
-				add(colorNoSmooth, yValuesNotSmooth);
+			add(colorNoSmooth, result.originalCorrelationCurve);
 		}
 
 		public void addResolution(double resolution)
@@ -1140,17 +1135,18 @@ public class FIRE implements PlugIn
 		frc.progress = progress;
 		frc.perimeterSamplingFactor = perimeterSamplingFactor;
 		frc.useHalfCircle = useHalfCircle;
-		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
+		FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 		if (frcCurve == null)
 			return null;
 		if (correctionQValue > 0)
 			FRC.applyQCorrection(frcCurve, images.nmPerPixel, correctionQValue, correctionMean, correctionSigma);
-		double[][] smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve);
+		double[] originalCorrelationCurve = frcCurve.getCorrelationValues();
+		FRC.getSmoothedCurve(frcCurve, true);
 
 		// Resolution in pixels
-		double[] result = FRC.calculateFire(smoothedFrcCurve, method);
+		double[] result = FRC.calculateFire(frcCurve, method);
 		if (result == null)
-			return new FireResult(Double.NaN, Double.NaN, images.nmPerPixel, frcCurve, smoothedFrcCurve);
+			return new FireResult(Double.NaN, Double.NaN, images.nmPerPixel, frcCurve, originalCorrelationCurve);
 		double fireNumber = result[0];
 		double correlation = result[1];
 
@@ -1170,7 +1166,7 @@ public class FIRE implements PlugIn
 					TITLE, Utils.rounded(images.nmPerPixel), Utils.rounded(fireNumber));
 		}
 
-		return new FireResult(fireNumber, correlation, images.nmPerPixel, frcCurve, smoothedFrcCurve);
+		return new FireResult(fireNumber, correlation, images.nmPerPixel, frcCurve, originalCorrelationCurve);
 	}
 
 	private void runQEstimation()
@@ -1213,7 +1209,7 @@ public class FIRE implements PlugIn
 		frc.progress = progress;
 		frc.perimeterSamplingFactor = perimeterSamplingFactor;
 		frc.useHalfCircle = useHalfCircle;
-		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
+		FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 		if (frcCurve == null)
 		{
 			IJ.error(TITLE, "Failed to compute FRC curve");
@@ -1337,28 +1333,28 @@ public class FIRE implements PlugIn
 		// Store the last computed value
 		double mean, sigma, qValue;
 
-		QPlot(double nmPerPixel, double N, double[][] frcCurve)
+		QPlot(double nmPerPixel, double N, FRCCurve frcCurve)
 		{
 			this.N = N;
 
 			// Compute v(q) - The numerator of the FRC divided by the number of pixels 
 			// in the Fourier circle (2*pi*q*L)
-			vq = new double[frcCurve.length];
+			vq = new double[frcCurve.getSize()];
 			for (int i = 0; i < vq.length; i++)
 			{
 				// Use the actual number of samples and not 2*pi*q*L so we normalise 
 				// to the correct scale 
-				double d = frcCurve[i][2];
+				double d = frcCurve.get(i).getNumberOfSamples();
 				//double d = 2.0 * Math.PI * i;
-				vq[i] = frcCurve[i][3] / d;
+				vq[i] = frcCurve.get(i).getNumerator() / d;
 			}
 
 			q = FRC.computeQ(frcCurve, nmPerPixel);
 
-			final double L = FRC.computeL(frcCurve);
+			final double L = frcCurve.fieldOfView;
 
 			// Compute sinc factor
-			sinc = new double[frcCurve.length];
+			sinc = new double[frcCurve.getSize()];
 			sinc[0] = 1; // By definition
 			for (int i = 1; i < sinc.length; i++)
 
@@ -1783,7 +1779,7 @@ public class FIRE implements PlugIn
 	}
 
 	private boolean showQEstimationDialog(final PrecisionHistogram histogram, final QPlot qplot,
-			final double[][] frcCurve, final double nmPerPixel)
+			final FRCCurve frcCurve, final double nmPerPixel)
 	{
 		// This is used for the initial layout of windows
 		final MyWindowOrganiser wo = new MyWindowOrganiser();
@@ -1824,7 +1820,7 @@ public class FIRE implements PlugIn
 			{
 				FRC.applyQCorrection(frcCurve, nmPerPixel, work.qValue, work.mean, work.sigma);
 
-				double[][] smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve);
+				FRCCurve smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve, false);
 
 				// Resolution in pixels. Just use the default 1/7 thrshold method
 				ThresholdMethod method = ThresholdMethod.FIXED_1_OVER_7;
@@ -1839,9 +1835,8 @@ public class FIRE implements PlugIn
 					// However these were generated using an image scale so adjust for this.
 					fireNumber *= nmPerPixel;
 
-					pw = showFrcCurve(results.getName(),
-							new FireResult(fireNumber, correlation, nmPerPixel, frcCurve, smoothedFrcCurve), method,
-							Utils.NO_TO_FRONT);
+					pw = showFrcCurve(results.getName(), new FireResult(fireNumber, correlation, nmPerPixel,
+							smoothedFrcCurve, frcCurve.getCorrelationValues()), method, Utils.NO_TO_FRONT);
 				}
 				wo.add(pw);
 				return work;

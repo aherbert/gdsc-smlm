@@ -68,18 +68,202 @@ public class FRC
 		abstract public String getName();
 	};
 
+	public class FRCCurveResult implements Cloneable
+	{
+		private final int radius;
+		private final int nSamples;
+		private double correlation;
+		private final double numerator, sum1, sum2, denominator;
+
+		private FRCCurveResult(int radius, int nSamples, double sum0, double sum1, double sum2)
+		{
+			this.radius = radius;
+			this.nSamples = nSamples;
+			this.setCorrelation(correlation);
+			this.numerator = sum0;
+			this.sum1 = sum1;
+			this.sum2 = sum2;
+			denominator = Math.sqrt(sum1 * sum2);
+			setCorrelation(sum0 / getDenominator());
+		}
+
+		public int getRadius()
+		{
+			return radius;
+		}
+
+		/**
+		 * Gets the number of samples used to compute the correlation.
+		 *
+		 * @return the number of samples
+		 */
+		public int getNumberOfSamples()
+		{
+			return nSamples;
+		}
+
+		/**
+		 * Gets the correlation (the conjugate multiple of the two FFT images). This is the numerator divided by the
+		 * denominator.
+		 *
+		 * @return the correlation
+		 */
+		public double getCorrelation()
+		{
+			return correlation;
+		}
+
+		private void setCorrelation(double correlation)
+		{
+			this.correlation = correlation;
+		}
+
+		/**
+		 * Gets the numerator of the correlation.
+		 *
+		 * @return the numerator
+		 */
+		public double getNumerator()
+		{
+			return numerator;
+		}
+
+		/**
+		 * Gets the denominator of the correlation.
+		 * <p>
+		 * Note: the denominator is Math.sqrt(sum1*sum2)
+		 *
+		 * @return the denominator
+		 */
+		public double getDenominator()
+		{
+			return denominator;
+		}
+
+		/**
+		 * Gets the sum of the absolute FFT transform of input image 1
+		 *
+		 * @return the sum
+		 */
+		public double getSum1()
+		{
+			return sum1;
+		}
+
+		/**
+		 * Gets the sum of the absolute FFT transform of input image 2
+		 *
+		 * @return the sum
+		 */
+		public double getSum2()
+		{
+			return sum2;
+		}
+
+		@Override
+		public FRCCurveResult clone()
+		{
+			try
+			{
+				return (FRCCurveResult) super.clone();
+			}
+			catch (CloneNotSupportedException e)
+			{
+				return null; // This should not happen
+			}
+		}
+	}
+
+	public class FRCCurve
+	{
+		/** The size of the field of view in the Fourier image (named L) */
+		final public int fieldOfView;
+
+		final private FRCCurveResult[] results;
+
+		private FRCCurve(int size, FRCCurveResult[] results)
+		{
+			this.fieldOfView = size;
+			this.results = results;
+		}
+
+		/**
+		 * Gets the FRC curve result.
+		 *
+		 * @param index
+		 *            the index
+		 * @return the FRC curve result
+		 */
+		public FRCCurveResult get(int index)
+		{
+			return results[index];
+		}
+
+		/**
+		 * Gets the number of results.
+		 *
+		 * @return the size
+		 */
+		public int getSize()
+		{
+			return results.length;
+		}
+
+		/**
+		 * Return a deep copy of this curve.
+		 *
+		 * @return the copy
+		 */
+		public FRCCurve copy()
+		{
+			FRCCurveResult[] results = new FRCCurveResult[getSize()];
+			for (int i = results.length; i-- > 0;)
+				results[i] = get(i).clone();
+			return new FRCCurve(getSize(), results);
+		}
+
+		/**
+		 * Gets the radius values.
+		 *
+		 * @return the radius values
+		 */
+		public double[] getRadiusValues()
+		{
+			double[] values = new double[getSize()];
+			for (int i = values.length; i-- > 0;)
+				values[i] = get(i).getRadius();
+			return values;
+		}
+
+		/**
+		 * Gets the correlation values.
+		 *
+		 * @return the correlation values
+		 */
+		public double[] getCorrelationValues()
+		{
+			double[] values = new double[getSize()];
+			for (int i = values.length; i-- > 0;)
+				values[i] = get(i).getCorrelation();
+			return values;
+		}
+	}
+
 	// Properties controlling the algorithm
 
 	/**
-	 * The correlation is computed using intervals around the circle circumference. The number of samples for half the
+	 * The correlation is computed using intervals around the circle circumference. The number of samples for half
+	 * the
 	 * circle is computed as: Pi * radius * sampling factor
 	 */
 	public double perimeterSamplingFactor = 1;
 
 	/**
-	 * The correlation is computed using intervals around the circle circumference of the Fourier transform. The Fourier
+	 * The correlation is computed using intervals around the circle circumference of the Fourier transform. The
+	 * Fourier
 	 * image is 2-fold radially symmetric and so the calculation can use only half the circle for speed. Note: The
-	 * results will differ slightly due to the implementation of the Fourier image not being exactly symmetric and the
+	 * results will differ slightly due to the implementation of the Fourier image not being exactly symmetric and
+	 * the
 	 * sample points used on the perimeter not matching between the two semi-circles.
 	 */
 	public boolean useHalfCircle = true;
@@ -104,17 +288,9 @@ public class FRC
 	 *            The first image
 	 * @param ip2
 	 *            The second image
-	 * @return An array of septuples representing [][radius,correlation,N,sum1,sum2,sum3,denominator] where:
-	 *         radius is the distance from the centre of the Fourier transform;
-	 *         correlation is the FRC at the given radius from the centre of the Fourier transform (i.e. 1/spatial
-	 *         frequency);
-	 *         N is the number of samples used to compute the correlation;
-	 *         sum1 is the numerator of the correlation (the conjugate multiple of the two FFT images);
-	 *         sum2 and sum3 are the two sums of the absolute FFT transform of each input image;
-	 *         and denominator is Math.sqrt(sum2*sum3).
-	 *         Note that correlation = sum1 / denominator.
+	 * @return the FRC curve
 	 */
-	public double[][] calculateFrcCurve(ImageProcessor ip1, ImageProcessor ip2)
+	public FRCCurve calculateFrcCurve(ImageProcessor ip1, ImageProcessor ip2)
 	{
 		// Allow a progress tracker to be input
 		TrackProgress progess = getTrackProgress();
@@ -192,11 +368,11 @@ public class FRC
 
 		progess.status("Calculating FRC curve...");
 
-		double[][] frcCurve = new double[(int) max][];
+		FRCCurveResult[] results = new FRCCurveResult[(int) max];
 
 		// Radius zero is always 1. Set number of pixel to 1 when r==0.
 		// Avoids divide by zero error.
-		frcCurve[0] = new double[] { 0, 1, 1, 0, 0, 0, 0 };
+		results[0] = new FRCCurveResult(0, 1, 1, 1, 1);
 
 		float[][] images = new float[][] { numerator, absFFT1, absFFT2 };
 
@@ -204,9 +380,9 @@ public class FRC
 		while (radius < max)
 		{
 			// Inline the calculation for speed
+			double sum0 = 0;
 			double sum1 = 0;
 			double sum2 = 0;
-			double sum3 = 0;
 
 			final double angleStep = 1 / (perimeterSamplingFactor * radius);
 
@@ -220,26 +396,22 @@ public class FRC
 				//double sinA = FastMath.sin(angle);
 				double y = centre + radius * getSine(angle, cosA);
 				double[] values = getInterpolatedValues(x, y, images, size);
-				sum1 += values[0];
-				sum2 += values[1];
-				sum3 += values[2];
+				sum0 += values[0];
+				sum1 += values[1];
+				sum2 += values[2];
 
 				numSum++;
 				angle += angleStep;
 			}
 
-			double denominator = Math.sqrt(sum2 * sum3);
-			double correlation = sum1 / denominator;
-
-			frcCurve[radius] = new double[] { radius, correlation, numSum, sum1, sum2, sum3, denominator };
-
+			results[radius] = new FRCCurveResult(radius, numSum, sum0, sum1, sum2);
 			radius++;
 		}
 
 		progess.incrementProgress(LAST_THIRD);
 		progess.status("Finished calculating FRC curve...");
 
-		return frcCurve;
+		return new FRCCurve(size, results);
 	}
 
 	// Package level to allow JUnit test
@@ -625,78 +797,86 @@ public class FRC
 	/**
 	 * Perform LOESS smoothing on the FRC curve.
 	 * <p>
-	 * The input curve is copied and then the correlation values are smoothed using a LOESS interpolation with the given
-	 * parameters. If smoothing fails the original curve values are returned.
-	 * 
+	 * The correlation values are smoothed using a LOESS interpolation with the given parameters. If smoothing fails the
+	 * original curve values are returned. If successful then the input curve is optionally copied and updated with the
+	 * smoothed correlation.
+	 *
 	 * @param frcCurve
+	 *            the frc curve
 	 * @param bandwidth
+	 *            the bandwidth
 	 * @param robustness
+	 *            the robustness
+	 * @param inPlace
+	 *            Set to true to modify the correlation in place (do not create a copy)
 	 * @return A new FRC curve
 	 */
-	public static double[][] getSmoothedCurve(double[][] frcCurve, double bandwidth, int robustness)
+	private static FRCCurve getSmoothedCurve(FRCCurve frcCurve, double bandwidth, int robustness, boolean inPlace)
 	{
-		double[][] sCurve = new double[frcCurve.length][3];
+		double[] xVals = new double[frcCurve.getSize()];
+		double[] yVals = new double[frcCurve.getSize()];
 
-		double[] xVals = new double[frcCurve.length];
-		double[] yVals = new double[frcCurve.length];
-
-		for (int i = 0; i < frcCurve.length; i++)
+		for (int i = 0; i < frcCurve.getSize(); i++)
 		{
-			xVals[i] = frcCurve[i][0];
-			yVals[i] = frcCurve[i][1];
-
-			sCurve[i][0] = frcCurve[i][0];
-			sCurve[i][1] = frcCurve[i][1];
-			sCurve[i][2] = frcCurve[i][2];
+			xVals[i] = frcCurve.get(i).getRadius();
+			yVals[i] = frcCurve.get(i).getCorrelation();
 		}
 
-		double[] ySmoothed = new double[frcCurve.length];
+		double[] ySmoothed = new double[frcCurve.getSize()];
 
 		try
 		{
 			LoessInterpolator loess = new LoessInterpolator(bandwidth, robustness);
 			ySmoothed = loess.smooth(xVals, yVals);
 
-			for (int i = 0; i < frcCurve.length; i++)
-				sCurve[i][1] = ySmoothed[i];
+			if (!inPlace)
+				frcCurve = frcCurve.copy();
+
+			for (int i = 0; i < frcCurve.getSize(); i++)
+				frcCurve.get(i).setCorrelation(ySmoothed[i]);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 
-		return sCurve;
+		return frcCurve;
 	}
 
 	/**
 	 * Perform LOESS smoothing on the FRC curve
 	 * <p>
-	 * The input curve is copied and then the correlation values are smoothed using a LOESS interpolation with a
-	 * bandwidth of 0.0707 and robustness of 0. If smoothing fails the original curve values are returned.
-	 * 
+	 * | * The correlation values are smoothed using a LOESS interpolation with bandwidth of 0.0707 and robustness of 0.
+	 * If smoothing fails the original curve values are returned. If successful then the input curve is optionally
+	 * copied and updated with the smoothed correlation.
+	 *
 	 * @param frcCurve
+	 *            the frc curve
+	 * @param inPlace
+	 *            Set to true to modify the correlation in place (do not create a copy)
 	 * @return A new FRC curve
 	 */
-	public static double[][] getSmoothedCurve(double[][] frcCurve)
+	public static FRCCurve getSmoothedCurve(FRCCurve frcCurve, boolean inPlace)
 	{
 		double bandwidth = 0.0707;
 		int robustness = 0;
-		return getSmoothedCurve(frcCurve, bandwidth, robustness);
+		return getSmoothedCurve(frcCurve, bandwidth, robustness, inPlace);
 	}
 
 	private final static double TWO_PI = 2.0 * Math.PI;
 
 	/**
-	 * Calculate the curve representing the minimum correlation required to distinguish two images for each resolution
+	 * Calculate the curve representing the minimum correlation required to distinguish two images for each
+	 * resolution
 	 * in the input FRC curve.
 	 * 
 	 * @param frcCurve
 	 * @param method
 	 * @return The threshold curve representing the threshold for each input spatial frequency
 	 */
-	public static double[] calculateThresholdCurve(double[][] frcCurve, ThresholdMethod method)
+	public static double[] calculateThresholdCurve(FRCCurve frcCurve, ThresholdMethod method)
 	{
-		double[] threshold = new double[frcCurve.length];
+		double[] threshold = new double[frcCurve.getSize()];
 
 		// ADH: 
 		// Half-Bit and 3 Sigma are explained in Supp section 5.4. However this is based on 
@@ -705,7 +885,7 @@ public class FRC
 		// Equation S.84 has an error compared to equation (13) in Heel. In fact equation (17) 
 		// from Heel is what should be implemented for Half-bit.
 
-		// Note: The original code used frcCurve[i][2] which holds the number of samples that 
+		// Note: The original code used frcCurve.get(i)[2] which holds the number of samples that 
 		// were taken from the circle. This makes the curve dependent on the number of samples 
 		// taken (e.g. half-circle/full-circle with different sampling factors).
 		// To make the curve sampling independent I assume 2*pi*r samples were taken. 
@@ -751,8 +931,8 @@ public class FRC
 				sigma++;
 				for (int i = 0; i < threshold.length; i++, nr = TWO_PI * i)
 				{
-					// Note: frcCurve[i][2] holds the number of samples that were taken from the circle.
-					//threshold[i] = (3.0 / Math.sqrt(frcCurve[i][2] / 2.0));
+					// Note: frcCurve.get(i)[2] holds the number of samples that were taken from the circle.
+					//threshold[i] = (3.0 / Math.sqrt(frcCurve.get(i)[2] / 2.0));
 
 					// Heel, Equation (2):
 					// We actually want to know the number of pixels contained in the Fourier shell of radius r.
@@ -807,7 +987,8 @@ public class FRC
 	}
 
 	/**
-	 * Computes the crossing points of the FRC curve and the threshold curve. The intersections can be used to determine
+	 * Computes the crossing points of the FRC curve and the threshold curve. The intersections can be used to
+	 * determine
 	 * the image resolution using {@link #getCorrectIntersection(ArrayList, ThresholdMethod)}
 	 * 
 	 * @param frcCurve
@@ -816,18 +997,18 @@ public class FRC
 	 *            The maximum number of intersections to compute
 	 * @return The crossing points
 	 */
-	public static double[][] getIntersections(double[][] frcCurve, double[] thresholdCurve, int max)
+	public static double[][] getIntersections(FRCCurve frcCurve, double[] thresholdCurve, int max)
 	{
-		if (frcCurve.length != thresholdCurve.length)
+		if (frcCurve.getSize() != thresholdCurve.length)
 		{
 			System.err.println("Error: Unable to calculate FRC curve intersections due to input length mismatch.");
 			return null;
 		}
 
-		double[][] intersections = new double[Math.min(max, frcCurve.length - 1)][];
+		double[][] intersections = new double[Math.min(max, frcCurve.getSize() - 1)][];
 		int count = 0;
 
-		for (int i = 1; i < frcCurve.length; i++)
+		for (int i = 1; i < frcCurve.getSize(); i++)
 		{
 			// http://en.wikipedia.org/wiki/Line-line_intersection
 			//
@@ -841,8 +1022,8 @@ public class FRC
 			//    x3,y3            ** 
 			//                       x2,y2  
 
-			final double y1 = frcCurve[i - 1][1];
-			final double y2 = frcCurve[i][1];
+			final double y1 = frcCurve.get(i - 1).getCorrelation();
+			final double y2 = frcCurve.get(i).getCorrelation();
 			final double y3 = thresholdCurve[i - 1];
 			final double y4 = thresholdCurve[i];
 
@@ -852,8 +1033,8 @@ public class FRC
 				continue;
 			}
 
-			final double x1 = frcCurve[i - 1][0];
-			final double x2 = frcCurve[i][0];
+			final double x1 = frcCurve.get(i - 1).getRadius();
+			final double x2 = frcCurve.get(i).getRadius();
 			final double x3 = x1;
 			final double x4 = x2;
 
@@ -895,11 +1076,11 @@ public class FRC
 	}
 
 	/**
-	 * Get the correction intersection representing the image resolution. The intersection chosen depends on the method
-	 * used to calculate the threshold curve using {@link #calculateThresholdCurve(double[][], ThresholdMethod)}
+	 * Get the correction intersection representing the image resolution. The intersection chosen depends on the
+	 * method used to calculate the threshold curve using {@link #calculateThresholdCurve(double[][], ThresholdMethod)}
 	 * <p>
-	 * The intersection corresponds the lowest spatial frequency at which there is no significant correlation between
-	 * the images.
+	 * The intersection corresponds the lowest spatial frequency at which there is no significant correlation
+	 * between the images.
 	 * 
 	 * @param intersections
 	 * @param method
@@ -944,20 +1125,21 @@ public class FRC
 	 */
 	public double calculateFireNumber(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod method)
 	{
-		double[][] frcCurve = calculateFrcCurve(ip1, ip2);
+		FRCCurve frcCurve = calculateFrcCurve(ip1, ip2);
 		if (frcCurve == null)
 			return Double.NaN;
 		return calculateFireNumber(frcCurve, method);
 	}
 
 	/**
-	 * Utility function that calculates the Fourier Image Resolution (FIRE) number using the provided FRC curve data.
+	 * Utility function that calculates the Fourier Image Resolution (FIRE) number using the provided FRC curve
+	 * data.
 	 * 
 	 * @param frcCurve
 	 * @param method
 	 * @return The FIRE number (in pixels)
 	 */
-	public static double calculateFireNumber(double[][] frcCurve, ThresholdMethod method)
+	public static double calculateFireNumber(FRCCurve frcCurve, ThresholdMethod method)
 	{
 		double[] result = calculateFire(frcCurve, method);
 		if (result == null)
@@ -975,20 +1157,22 @@ public class FRC
 	 */
 	public double[] calculateFire(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod method)
 	{
-		double[][] frcCurve = calculateFrcCurve(ip1, ip2);
+		FRCCurve frcCurve = calculateFrcCurve(ip1, ip2);
 		if (frcCurve == null)
 			return null;
+		frcCurve = getSmoothedCurve(frcCurve, false);
 		return calculateFire(frcCurve, method);
 	}
 
 	/**
-	 * Utility function that calculates the Fourier Image Resolution (FIRE) number using the provided FRC curve data.
+	 * Utility function that calculates the Fourier Image Resolution (FIRE) number using the provided FRC curve
+	 * data.
 	 * 
 	 * @param frcCurve
 	 * @param method
 	 * @return The FIRE number (in pixels) and the correlation (null if computation failed)
 	 */
-	public static double[] calculateFire(double[][] frcCurve, ThresholdMethod method)
+	public static double[] calculateFire(FRCCurve frcCurve, ThresholdMethod method)
 	{
 		double[] thresholdCurve = calculateThresholdCurve(frcCurve, method);
 		double[][] intersections = getIntersections(frcCurve, thresholdCurve, 2);
@@ -999,7 +1183,7 @@ public class FRC
 			// Since the Fourier calculation only uses half of the image (from centre to the edge) 
 			// we must double the curve length to get the original maximum image width. In addition
 			// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
-			double fire = 2 * (frcCurve.length + 1) / intersection[0];
+			double fire = 2 * (frcCurve.getSize() + 1) / intersection[0];
 			return new double[] { fire, intersection[1] };
 		}
 		else
@@ -1012,11 +1196,11 @@ public class FRC
 		return null;
 	}
 
-	private static boolean perfect(double[][] frcCurve)
+	private static boolean perfect(FRCCurve frcCurve)
 	{
-		for (int i = 0; i < frcCurve.length; i++)
+		for (int i = 0; i < frcCurve.getSize(); i++)
 		{
-			if (frcCurve[i][1] != 1)
+			if (frcCurve.get(i).getCorrelation() != 1)
 				return false;
 		}
 		return true;
@@ -1024,8 +1208,10 @@ public class FRC
 
 	/**
 	 * Apply spurious correlation correction using the Q-factor. Follows the method described in Niewenhuizen, et al
-	 * (2013), on-line methods. This method computes a value that is subtracted from the numerator of the FRC and added
-	 * to the denominator of the FRC before computing the correlation. The correlation in the FRC curve will be updated.
+	 * (2013), on-line methods. This method computes a value that is subtracted from the numerator of the FRC and
+	 * added
+	 * to the denominator of the FRC before computing the correlation. The correlation in the FRC curve will be
+	 * updated.
 	 * The sums of the FRC curve are unchanged.
 	 * <p>
 	 * The correlation can be reset by calling this method with a Q-value of zero.
@@ -1047,14 +1233,13 @@ public class FRC
 	 * @param sigma
 	 *            the standard deviation of the localisation precision
 	 */
-	public static void applyQCorrection(double[][] frcCurve, double nmPerPixel, double qValue, double mean,
-			double sigma)
+	public static void applyQCorrection(FRCCurve frcCurve, double nmPerPixel, double qValue, double mean, double sigma)
 	{
 		if (qValue <= 0)
 		{
 			// Reset the correlation 
-			for (int i = 1; i < frcCurve.length; i++)
-				frcCurve[i][1] = frcCurve[i][3] / frcCurve[i][6];
+			for (int i = 1; i < frcCurve.getSize(); i++)
+				frcCurve.get(i).setCorrelation(frcCurve.get(i).getNumerator() / frcCurve.get(i).getDenominator());
 			return;
 		}
 
@@ -1066,33 +1251,18 @@ public class FRC
 		double[] hq = computeHq(q, mean, sigma);
 
 		// Subtract the average residual correlation from the numerator and add to the denominator 
-		for (int i = 1; i < frcCurve.length; i++)
+		for (int i = 1; i < frcCurve.getSize(); i++)
 		{
-			double numerator = frcCurve[i][3];
-			double denominator = frcCurve[i][6];
+			double numerator = frcCurve.get(i).getNumerator();
+			double denominator = frcCurve.get(i).getDenominator();
 			double residual = qValue * hq[i];
-			frcCurve[i][1] = (numerator - residual) / (denominator + residual);
+			frcCurve.get(i).setCorrelation((numerator - residual) / (denominator + residual));
 		}
 	}
 
 	/**
-	 * Compute the size of the field of view for the FRC curve (this is named L)
-	 *
-	 * @param frcCurve
-	 *            the frc curve
-	 * @return L
-	 */
-	public static int computeL(double[][] frcCurve)
-	{
-		// Since the Fourier calculation only uses half of the image (from centre to the edge) 
-		// we must double the curve length to get the original maximum image width. In addition
-		// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
-		// Note: frcCurveLength == L == Size of field of view.
-		return ((int) (frcCurve[(frcCurve.length - 1)][0]) + 1) * 2;
-	}
-
-	/**
-	 * Compute q. This is defined as 1/L, 2/L, ..., for all the spatial frequencies in the FRC curve where L is the size
+	 * Compute q. This is defined as 1/L, 2/L, ..., for all the spatial frequencies in the FRC curve where L is the
+	 * size
 	 * of the field of view. This is converted to nm using the pixel size of the input image.
 	 *
 	 * @param frcCurve
@@ -1101,16 +1271,15 @@ public class FRC
 	 *            the nm per pixel in the images used to compute the FRC curve
 	 * @return the q array
 	 */
-	public static double[] computeQ(double[][] frcCurve, double nmPerPixel)
+	public static double[] computeQ(FRCCurve frcCurve, double nmPerPixel)
 	{
-		final double L = computeL(frcCurve);
+		final double L = frcCurve.fieldOfView;
 
-		double[] q = new double[frcCurve.length];
+		double[] q = new double[frcCurve.getSize()];
 		double conversion = 1.0 / (L * nmPerPixel);
 		for (int i = 0; i < q.length; i++)
 		{
-			final double radius = frcCurve[i][0];
-			q[i] = radius * conversion;
+			q[i] = frcCurve.get(i).radius * conversion;
 		}
 		return q;
 	}
