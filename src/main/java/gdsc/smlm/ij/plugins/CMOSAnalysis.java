@@ -271,18 +271,25 @@ public class CMOSAnalysis implements PlugIn
 	private static String directory = "";
 	private static boolean rollingAlgorithm = false;
 
-	// The simulation can default roughly to the paper values
-	// Approximately Poisson
+	// The simulation can default roughly to the values displayed 
+	// in the Huang sCMOS paper supplementary figure 1:
+	
+	// Offset = Approximately Normal or Poisson. We use Poisson
+	// since that is an integer distribution which would be expected
+	// for an offset & Poisson approaches the Gaussian at high mean.
 	private static double offset = 100;
-	// Approximately Exponential. 
+	
+	// Variance = Exponential (equivalent to chi-squared with k=1, i.e. 
+	// sum of the squares of 1 normal distribution). 
 	// We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b 
 	// cumul = 1 - e^-lx (with l = 1/mean)
 	// => e^-lx = 1 - cumul
 	// => -lx = log(1-0.999)
-	// => l = -log(0.001) / 400
+	// => l = -log(0.001) / 400  (since x==400)
 	// => 1/l = 57.9
 	private static double variance = 57.9; // SD = 7.6
-	// Approximately Normal
+	
+	// Gain = Approximately Normal
 	private static double gain = 2.2;
 	private static double gainSD = 0.2;
 
