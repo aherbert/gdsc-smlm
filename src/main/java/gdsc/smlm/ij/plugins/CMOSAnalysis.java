@@ -703,13 +703,16 @@ public class CMOSAnalysis implements PlugIn
 					e.printStackTrace();
 				}
 			}
-			futures.clear();
 
 			// Create the final aggregate statistics
 			for (ImageWorker w : workers)
 				moment.add(w.moment);
 			data[n][0] = moment.getFirstMoment();
 			data[n][1] = moment.getVariance();
+			
+			// Reset
+			futures.clear();
+			workers.clear();
 
 			Statistics s = new Statistics(data[n][0]);
 
