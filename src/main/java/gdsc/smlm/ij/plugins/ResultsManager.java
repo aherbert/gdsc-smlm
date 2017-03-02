@@ -445,7 +445,8 @@ public class ResultsManager implements PlugIn, MouseListener
 		gd.addNumericField("Image_Window", resultsSettings.imageRollingWindow, 0);
 
 		gd.addMessage("--- File output ---");
-		gd.addStringField("Results_file", resultsSettings.resultsFilename);
+		// Do not add a results file to prevent constant overwrite messages
+		gd.addStringField("Results_file", "");
 		String[] formatNames = SettingsManager.getNames((Object[]) ResultsFileFormat.values());
 		gd.addChoice("Results_format", formatNames, formatNames[resultsSettings.getResultsFileFormat().ordinal()]);
 		gd.addMessage(" ");
@@ -454,8 +455,8 @@ public class ResultsManager implements PlugIn, MouseListener
 		// Dialog to allow double click to select files using a file chooser
 		if (Utils.isShowGenericDialog())
 		{
-			text1 = (TextField) gd.getStringFields().get(0);
-			text2 = (TextField) gd.getStringFields().get(1);
+			text1 = (TextField) gd.getStringFields().get(0); // Input file
+			text2 = (TextField) gd.getStringFields().get(1); // Results file
 			text1.addMouseListener(this);
 			text2.addMouseListener(this);
 			text1.setColumns(30);
@@ -1091,7 +1092,14 @@ public class ResultsManager implements PlugIn, MouseListener
 		if (e.getClickCount() > 1) // Double-click
 		{
 			TextField text = (e.getSource() == text1) ? text1 : text2;
-			String[] path = Utils.decodePath(text.getText());
+			String filename = text.getText();
+			// We initialised the result filename input box to empty.
+			// We can use the last filename if the input box is still empty. 
+			if (Utils.isNullOrEmpty(filename) && text == text2)
+			{
+				filename = resultsSettings.resultsFilename;
+			}
+			String[] path = Utils.decodePath(filename);
 			OpenDialog chooser = new OpenDialog("Coordinate file", path[0], path[1]);
 			if (chooser.getFileName() != null)
 			{
