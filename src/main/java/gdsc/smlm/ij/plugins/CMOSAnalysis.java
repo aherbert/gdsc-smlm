@@ -17,8 +17,10 @@ import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.TestUtils;
+import org.apache.commons.math3.util.MathArrays;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.math.ArrayMoment;
@@ -106,7 +108,7 @@ public class CMOSAnalysis implements PlugIn
 			RandomGenerator rg = new PseudoRandomGenerator(pixelVariance.length, this.rg);
 
 			// Pre-compute a set of Poisson numbers since this is slow
-			int nPoisson = pixelVariance.length + 1;
+			int nPoisson = pixelVariance.length;
 			int[] poisson = null;
 			if (photons != 0)
 			{
@@ -141,7 +143,12 @@ public class CMOSAnalysis implements PlugIn
 						double p = pixelOffset[j] + rg.nextGaussian() * pixelSD[j] +
 								(poisson[--nPoisson] * pixelGain[j]);
 						if (nPoisson == 0) // Rotate Poisson numbers
+						{
 							nPoisson = poisson.length;
+							// Prevent adjacent pixels using a common series.
+							// Shuffling what we have is faster than generating new values.
+							MathArrays.shuffle(poisson, rg);
+						}
 						ip.set(j, clip(p));
 					}
 				}
@@ -890,9 +897,12 @@ public class CMOSAnalysis implements PlugIn
 		result.append(" = ").append(Utils.rounded(s.getMean()));
 		result.append(" +/- ").append(Utils.rounded(s.getStandardDeviation()));
 
-		// Do statistical test
+		// Do statistical tests
 		double[] x = Utils.toDouble(e), y = Utils.toDouble(o);
 
+		PearsonsCorrelation c = new PearsonsCorrelation();
+		result.append(" : R=").append(Utils.rounded(c.correlation(x, y)));
+		
 		// Mann-Whitney U is valid for any distribution, e.g. variance
 		MannWhitneyUTest test = new MannWhitneyUTest();
 		double p = test.mannWhitneyUTest(x, y);
@@ -904,6 +914,9 @@ public class CMOSAnalysis implements PlugIn
 			// T-Test is valid for approximately Normal distributions, e.g. offset and gain
 			p = TestUtils.tTest(x, y);
 			result.append(" : T-Test p=").append(Utils.rounded(p)).append(' ')
+			.append(((p < 0.05) ? "reject" : "accept"));
+			p = TestUtils.pairedTTest(x, y);
+			result.append(" : Paired T-Test p=").append(Utils.rounded(p)).append(' ')
 			.append(((p < 0.05) ? "reject" : "accept"));
 		}
 
