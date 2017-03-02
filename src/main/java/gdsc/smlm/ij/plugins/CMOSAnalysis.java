@@ -707,7 +707,7 @@ public class CMOSAnalysis implements PlugIn
 				moment.add(w.moment);
 			data[n][0] = moment.getFirstMoment();
 			data[n][1] = moment.getVariance();
-			
+
 			// Reset
 			futures.clear();
 			workers.clear();
@@ -735,8 +735,10 @@ public class CMOSAnalysis implements PlugIn
 			{
 				pixelOffset = data[0][0];
 				pixelVariance = data[0][1];
-				Utils.log("%s Mean = %s +/- %s", sd.name, Utils.rounded(s.getMean()),
-						Utils.rounded(s.getStandardDeviation()));
+				Statistics var = new Statistics(pixelVariance);
+				Utils.log("%s Offset = %s +/- %s. Variance = %s +/- %s", sd.name, Utils.rounded(s.getMean()),
+						Utils.rounded(s.getStandardDeviation()), Utils.rounded(var.getMean()),
+						Utils.rounded(var.getStandardDeviation()));
 			}
 
 			IJ.showProgress(1);
@@ -771,6 +773,9 @@ public class CMOSAnalysis implements PlugIn
 			}
 			pixelGain[i] = (float) (biaiT / bibiT);
 		}
+
+		Statistics s = new Statistics(pixelGain);
+		Utils.log("Gain Mean = %s +/- %s", Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
 
 		// Save
 		simulationStack = new ImageStack(size, size);
