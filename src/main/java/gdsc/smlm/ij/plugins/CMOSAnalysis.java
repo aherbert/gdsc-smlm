@@ -13,8 +13,8 @@ import java.util.regex.Pattern;
 
 import javax.swing.JLabel;
 
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
@@ -23,6 +23,7 @@ import gdsc.core.math.ArrayMoment;
 import gdsc.core.math.RollingArrayMoment;
 import gdsc.core.math.SimpleArrayMoment;
 import gdsc.core.utils.PseudoRandomGenerator;
+import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.ij.SeriesImageSource;
@@ -123,18 +124,18 @@ public class CMOSAnalysis implements PlugIn
 					for (int j = 0; j < pixelOffset.length; j++)
 					{
 						double p = pixelOffset[j] + rg.nextGaussian() * pixelSD[j];
-						ip.set(j, (int) Math.round(p));
+						ip.set(j, clip(p));
 					}
 				}
 				else
 				{
 					for (int j = 0; j < pixelOffset.length; j++)
 					{
-						double p = poisson[--nPoisson] * pixelGain[j];
-						if (nPoisson == 0)
+						double p = pixelOffset[j] + rg.nextGaussian() * pixelSD[j] +
+								(poisson[--nPoisson] * pixelGain[j]);
+						if (nPoisson == 0) // Rotate Poisson numbers
 							nPoisson = poisson.length;
-						p += pixelOffset[j] + rg.nextGaussian() * pixelSD[j];
-						ip.set(j, (int) Math.round(p));
+						ip.set(j, clip(p));
 					}
 				}
 
@@ -150,6 +151,23 @@ public class CMOSAnalysis implements PlugIn
 			// This should not happen if we control the to-from range correctly
 			if (stack.getSize() != 0)
 				save(stack, start);
+		}
+
+		/**
+		 * Clip to the range for a 16-bit image.
+		 *
+		 * @param value
+		 *            the value
+		 * @return the clipped value
+		 */
+		private int clip(double value)
+		{
+			int i = (int) Math.round(value);
+			if (i < 0)
+				return 0;
+			if (i > 65335)
+				return 65335;
+			return i;
 		}
 
 		private void save(ImageStack stack, int start)
@@ -253,10 +271,17 @@ public class CMOSAnalysis implements PlugIn
 	private static boolean rollingAlgorithm = false;
 
 	// The simulation can default roughly to the paper values
-	// Approximately Poisson
+	// Approximately Normal
 	private static double offset = 100;
-	// Approximately Exponential
-	private static double variance = 500;
+	private static double offsetSD = 3;
+	// Approximately Exponential. 
+	// We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b 
+	// cumul = 1 - e^-lx (with l = 1/mean)
+	// => e^-lx = 1 - cumul
+	// => -lx = log(1-0.999)
+	// => l = -log(0.001) / 400
+	// => 1/l = 57.9
+	private static double variance = 57.9; // SD = 7.6
 	// Approximately Normal
 	private static double gain = 2.2;
 	private static double gainSD = 0.2;
@@ -392,12 +417,15 @@ public class CMOSAnalysis implements PlugIn
 		IJ.showStatus("Creating random per-pixel readout");
 		long start = System.currentTimeMillis();
 
-		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c());
+		RandomGenerator rg = new Well19937c();
+		ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
+				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 		for (int i = 0; i < n; i++)
 		{
-			pixelOffset[i] = (float) rdg.nextPoisson(offset);
-			pixelVariance[i] = (float) rdg.nextExponential(variance);
-			pixelGain[i] = (float) rdg.nextGaussian(gain, gainSD);
+			// Q. Should these be clipped to a sensible range?
+			pixelOffset[i] = (float) (offset + rg.nextGaussian() * offsetSD);
+			pixelVariance[i] = (float) ed.sample();
+			pixelGain[i] = (float) (gain + rg.nextGaussian() * gainSD);
 		}
 
 		// Avoid all the file saves from updating the progress bar and status line
@@ -483,8 +511,9 @@ public class CMOSAnalysis implements PlugIn
 		gd.addMessage("Simulate per-pixel offset, variance and gain of sCMOS images.");
 
 		gd.addNumericField("nThreads", getLastNThreads(), 0);
-		gd.addNumericField("Offset (Poisson)", offset, 3);
-		gd.addNumericField("Variance (Expeonential)", variance, 3);
+		gd.addNumericField("Offset (Gaussian)", offset, 3);
+		gd.addNumericField("Offset_SD", offsetSD, 3);
+		gd.addNumericField("Variance (Exponential)", variance, 3);
 		gd.addNumericField("Gain (Gaussian)", gain, 3);
 		gd.addNumericField("Gain_SD", gainSD, 3);
 		gd.addNumericField("Size", size, 0);
@@ -495,6 +524,7 @@ public class CMOSAnalysis implements PlugIn
 
 		setThreads((int) gd.getNextNumber());
 		offset = Math.abs(gd.getNextNumber());
+		offsetSD = Math.abs(gd.getNextNumber());
 		variance = Math.abs(gd.getNextNumber());
 		gain = Math.abs(gd.getNextNumber());
 		gainSD = Math.abs(gd.getNextNumber());
@@ -505,6 +535,7 @@ public class CMOSAnalysis implements PlugIn
 		try
 		{
 			Parameters.isAboveZero("Offset", offset);
+			Parameters.isAboveZero("Offset SD", offsetSD);
 			Parameters.isAboveZero("Variance", variance);
 			Parameters.isAboveZero("Gain", gain);
 			Parameters.isAboveZero("Gain SD", gainSD);
@@ -613,9 +644,11 @@ public class CMOSAnalysis implements PlugIn
 		TurboList<ImageWorker> workers = new TurboList<ImageWorker>(nThreads);
 
 		double[][][] data = new double[subDirs.size()][2][];
+		double[] pixelOffset = null, pixelVariance = null;
 
 		// For each sub-directory compute the mean and variance
 		final int nSubDirs = subDirs.size();
+		boolean error = false;
 		for (int n = 0; n < nSubDirs; n++)
 		{
 			SubDir sd = subDirs.getf(n);
@@ -623,6 +656,13 @@ public class CMOSAnalysis implements PlugIn
 
 			// Open the series
 			SeriesImageSource source = new SeriesImageSource(sd.name, sd.path.getPath());
+			//source.setLogProgress(true);
+			if (!source.open())
+			{
+				error = true;
+				IJ.error(TITLE, "Failed to open image series: " + sd.path.getPath());
+				break;
+			}
 
 			totalProgress = source.getFrames();
 			stepProgress = Utils.getProgressInterval(totalProgress);
@@ -671,13 +711,31 @@ public class CMOSAnalysis implements PlugIn
 			data[n][0] = moment.getFirstMoment();
 			data[n][1] = moment.getVariance();
 
-			// TODO - optionally save
+			Statistics s = new Statistics(data[n][0]);
+
 			if (n != 0)
 			{
+				// Compute mean ADU
+				Statistics signal = new Statistics();
+				double[] mean = data[n][0];
+				for (int i = 0; i < pixelOffset.length; i++)
+					signal.add(mean[i] - pixelOffset[i]);
+				Utils.log("%s Mean = %s +/- %s. Signal = %s +/- %s ADU", sd.name, Utils.rounded(s.getMean()),
+						Utils.rounded(s.getStandardDeviation()), Utils.rounded(signal.getMean()),
+						Utils.rounded(signal.getStandardDeviation()));
+
+				// TODO - optionally save
 				ImageStack stack = new ImageStack(source.getWidth(), source.getHeight());
 				stack.addSlice("Mean", Utils.toFloat(data[n][0]));
 				stack.addSlice("Variance", Utils.toFloat(data[n][1]));
 				IJ.save(new ImagePlus("PerPixel", stack), new File(directory, "perPixel" + sd.name + ".tif").getPath());
+			}
+			else
+			{
+				pixelOffset = data[0][0];
+				pixelVariance = data[0][1];
+				Utils.log("%s Mean = %s +/- %s", sd.name, Utils.rounded(s.getMean()),
+						Utils.rounded(s.getStandardDeviation()));
 			}
 
 			IJ.showProgress(1);
@@ -689,11 +747,12 @@ public class CMOSAnalysis implements PlugIn
 		executor.shutdown();
 		Utils.setShowStatus(true);
 
+		if (error)
+			return;
+
 		// Compute the gain
 		statusLine.setText("Computing gain");
 
-		double[] pixelOffset = data[0][0];
-		double[] pixelVariance = data[0][1];
 		float[] pixelGain = new float[pixelOffset.length];
 
 		// Ignore first as this is the 0 exposure image
