@@ -104,18 +104,16 @@ public class CMOSAnalysis implements PlugIn
 
 			int size = (int) Math.sqrt(pixelVariance.length);
 
-			// For speed we can precompute a set of random numbers to reuse
-			RandomGenerator rg = new PseudoRandomGenerator(pixelVariance.length, this.rg);
-
 			// Pre-compute a set of Poisson numbers since this is slow
-			int nPoisson = pixelVariance.length;
 			int[] poisson = null;
 			if (photons != 0)
 			{
+				// For speed we can precompute a set of random numbers to reuse
+				RandomGenerator rg = new PseudoRandomGenerator(pixelVariance.length, this.rg);
 				final PoissonDistribution pd = new PoissonDistribution(rg, photons, PoissonDistribution.DEFAULT_EPSILON,
 						PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-				poisson = new int[nPoisson];
-				for (int i = 0; i < nPoisson; i++)
+				poisson = new int[pixelVariance.length];
+				for (int i = poisson.length; i-- > 0;)
 					poisson[i] = pd.sample();
 			}
 
@@ -132,6 +130,7 @@ public class CMOSAnalysis implements PlugIn
 				{
 					for (int j = 0; j < pixelOffset.length; j++)
 					{
+						// Fixed offset per pixel plus a variance
 						double p = pixelOffset[j] + rg.nextGaussian() * pixelSD[j];
 						ip.set(j, clip(p));
 					}
@@ -140,17 +139,17 @@ public class CMOSAnalysis implements PlugIn
 				{
 					for (int j = 0; j < pixelOffset.length; j++)
 					{
-						double p = pixelOffset[j] + rg.nextGaussian() * pixelSD[j] +
-								(poisson[--nPoisson] * pixelGain[j]);
-						if (nPoisson == 0) // Rotate Poisson numbers
-						{
-							nPoisson = poisson.length;
-							// Prevent adjacent pixels using a common series.
-							// Shuffling what we have is faster than generating new values.
-							MathArrays.shuffle(poisson, rg);
-						}
+						// Fixed offset per pixel plus a variance plus a 
+						// fixed gain multiplied by a Poisson sample of the photons
+						double p = pixelOffset[j] + rg.nextGaussian() * pixelSD[j] + (poisson[j] * pixelGain[j]);
 						ip.set(j, clip(p));
 					}
+					
+					// Rotate Poisson numbers.
+					// Prevent adjacent pixels using a common series.
+					// Shuffling what we have is faster than generating new values
+					// and we should have enough.
+					MathArrays.shuffle(poisson, rg);
 				}
 
 				// Save image
@@ -902,7 +901,7 @@ public class CMOSAnalysis implements PlugIn
 
 		PearsonsCorrelation c = new PearsonsCorrelation();
 		result.append(" : R=").append(Utils.rounded(c.correlation(x, y)));
-		
+
 		// Mann-Whitney U is valid for any distribution, e.g. variance
 		MannWhitneyUTest test = new MannWhitneyUTest();
 		double p = test.mannWhitneyUTest(x, y);
@@ -914,10 +913,10 @@ public class CMOSAnalysis implements PlugIn
 			// T-Test is valid for approximately Normal distributions, e.g. offset and gain
 			p = TestUtils.tTest(x, y);
 			result.append(" : T-Test p=").append(Utils.rounded(p)).append(' ')
-			.append(((p < 0.05) ? "reject" : "accept"));
+					.append(((p < 0.05) ? "reject" : "accept"));
 			p = TestUtils.pairedTTest(x, y);
 			result.append(" : Paired T-Test p=").append(Utils.rounded(p)).append(' ')
-			.append(((p < 0.05) ? "reject" : "accept"));
+					.append(((p < 0.05) ? "reject" : "accept"));
 		}
 
 		Utils.log(result.toString());
