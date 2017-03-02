@@ -17,13 +17,17 @@ import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
+import org.apache.commons.math3.stat.inference.TestUtils;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.math.ArrayMoment;
 import gdsc.core.math.RollingArrayMoment;
 import gdsc.core.math.SimpleArrayMoment;
+import gdsc.core.utils.DoubleData;
 import gdsc.core.utils.PseudoRandomGenerator;
 import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredData;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.ij.SeriesImageSource;
@@ -33,9 +37,11 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.ProgressBar;
 import ij.io.FileSaver;
 import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
 import ij.process.ShortProcessor;
 
 /*----------------------------------------------------------------------------- 
@@ -273,12 +279,12 @@ public class CMOSAnalysis implements PlugIn
 
 	// The simulation can default roughly to the values displayed 
 	// in the Huang sCMOS paper supplementary figure 1:
-	
+
 	// Offset = Approximately Normal or Poisson. We use Poisson
 	// since that is an integer distribution which would be expected
 	// for an offset & Poisson approaches the Gaussian at high mean.
 	private static double offset = 100;
-	
+
 	// Variance = Exponential (equivalent to chi-squared with k=1, i.e. 
 	// sum of the squares of 1 normal distribution). 
 	// We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b 
@@ -288,7 +294,7 @@ public class CMOSAnalysis implements PlugIn
 	// => l = -log(0.001) / 400  (since x==400)
 	// => 1/l = 57.9
 	private static double variance = 57.9; // SD = 7.6
-	
+
 	// Gain = Approximately Normal
 	private static double gain = 2.2;
 	private static double gainSD = 0.2;
@@ -303,7 +309,9 @@ public class CMOSAnalysis implements PlugIn
 
 	private int nThreads = 0;
 	// The simulated offset, variance and gain
-	private ImageStack simulationStack;
+	private ImagePlus simulationImp;
+	// The measured offset, variance and gain
+	private ImageStack measuredStack;
 	// The sub-directories containing the sCMOS images
 	private TurboList<SubDir> subDirs;
 
@@ -390,7 +398,16 @@ public class CMOSAnalysis implements PlugIn
 
 		run();
 
-		if (simulationStack != null)
+		if (simulationImp == null)
+		{
+			// Just in case an old simulation is in the directory
+			ImagePlus imp = IJ.openImage(new File(directory, "perPixelSimulation.tif").getPath());
+			if (imp != null && imp.getStackSize() == 3 && imp.getWidth() == measuredStack.getWidth() &&
+					imp.getHeight() == measuredStack.getHeight())
+				simulationImp = imp;
+		}
+
+		if (simulationImp != null)
 			computeError();
 	}
 
@@ -451,11 +468,15 @@ public class CMOSAnalysis implements PlugIn
 		progressBar = Utils.getProgressBar();
 
 		// Save to the directory as a stack
-		simulationStack = new ImageStack(size, size);
+		ImageStack simulationStack = new ImageStack(size, size);
 		simulationStack.addSlice("Offset", pixelOffset);
 		simulationStack.addSlice("Variance", pixelVariance);
 		simulationStack.addSlice("Gain", pixelGain);
-		IJ.save(new ImagePlus("PerPixel", simulationStack), new File(directory, "perPixelSimulation.tif").getPath());
+		simulationImp = new ImagePlus("PerPixel", simulationStack);
+		// Only the info property is saved to the TIFF file
+		simulationImp.setProperty("Info", String.format("Offset=%s; Variance=%s; Gain=%s +/- %s", Utils.rounded(offset),
+				Utils.rounded(variance), Utils.rounded(gain), Utils.rounded(gainSD)));
+		IJ.save(simulationImp, new File(directory, "perPixelSimulation.tif").getPath());
 
 		// Create thread pool and workers
 		ExecutorService executor = Executors.newFixedThreadPool(getThreads());
@@ -657,6 +678,7 @@ public class CMOSAnalysis implements PlugIn
 
 		double[][][] data = new double[subDirs.size()][2][];
 		double[] pixelOffset = null, pixelVariance = null;
+		Statistics statsOffset = null, statsVariance = null;
 
 		// For each sub-directory compute the mean and variance
 		final int nSubDirs = subDirs.size();
@@ -750,10 +772,11 @@ public class CMOSAnalysis implements PlugIn
 			{
 				pixelOffset = data[0][0];
 				pixelVariance = data[0][1];
-				Statistics var = new Statistics(pixelVariance);
+				statsOffset = s;
+				statsVariance = new Statistics(pixelVariance);
 				Utils.log("%s Offset = %s +/- %s. Variance = %s +/- %s", sd.name, Utils.rounded(s.getMean()),
-						Utils.rounded(s.getStandardDeviation()), Utils.rounded(var.getMean()),
-						Utils.rounded(var.getStandardDeviation()));
+						Utils.rounded(s.getStandardDeviation()), Utils.rounded(statsVariance.getMean()),
+						Utils.rounded(statsVariance.getStandardDeviation()));
 			}
 		}
 
@@ -787,20 +810,46 @@ public class CMOSAnalysis implements PlugIn
 			pixelGain[i] = biaiT / bibiT;
 		}
 
-		Statistics s = new Statistics(pixelGain);
-		Utils.log("Gain Mean = %s +/- %s", Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+		Statistics statsGain = new Statistics(pixelGain);
+		Utils.log("Gain Mean = %s +/- %s", Utils.rounded(statsGain.getMean()),
+				Utils.rounded(statsGain.getStandardDeviation()));
 
-		// TODO - Histogram of offset, variance and gain
+		// Histogram of offset, variance and gain
+		int bins = Utils.getBinsSturges(pixelGain.length);
+		WindowOrganiser wo = new WindowOrganiser();
+		showHistogram("Offset", pixelOffset, bins, statsOffset, wo);
+		showHistogram("Variance", pixelVariance, bins, statsVariance, wo);
+		showHistogram("Gain", pixelGain, bins, statsGain, wo);
+		wo.tile();
 
 		// Save
-		simulationStack = new ImageStack(size, size);
-		simulationStack.addSlice("Offset", Utils.toFloat(pixelOffset));
-		simulationStack.addSlice("Variance", Utils.toFloat(pixelVariance));
-		simulationStack.addSlice("Gain", Utils.toFloat(pixelGain));
-		IJ.save(new ImagePlus("PerPixel", simulationStack), new File(directory, "perPixel.tif").getPath());
+		measuredStack = new ImageStack(size, size);
+		measuredStack.addSlice("Offset", Utils.toFloat(pixelOffset));
+		measuredStack.addSlice("Variance", Utils.toFloat(pixelVariance));
+		measuredStack.addSlice("Gain", Utils.toFloat(pixelGain));
+		IJ.save(new ImagePlus("PerPixel", measuredStack), new File(directory, "perPixel.tif").getPath());
 		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
 
 		Utils.log("Analysis time = " + Utils.timeToString(System.currentTimeMillis() - start));
+	}
+
+	private void showHistogram(String name, double[] values, int bins, Statistics stats, WindowOrganiser wo)
+	{
+		DoubleData data = new StoredData(values, false);
+		double minWidth = 0;
+		int removeOutliers = 0;
+		int shape = Plot.CIRCLE; // Plot2.BAR; // A bar chart confuses the log plot since it plots lines to zero.
+		String label = String.format("Mean = %s +/- %s", Utils.rounded(stats.getMean()),
+				Utils.rounded(stats.getStandardDeviation()));
+		int id = Utils.showHistogram(TITLE, data, name, minWidth, removeOutliers, bins, shape, label);
+		if (Utils.isNewWindow())
+			wo.add(id);
+		// Redraw using a log scale. This requires a non-zero y-min
+		Plot plot = Utils.plot;
+		double[] limits = plot.getLimits();
+		plot.setLimits(limits[0], limits[1], 1, limits[3]);
+		plot.setAxisYLog(true);
+		Utils.plot.updateImage();
 	}
 
 	private <T> void put(BlockingQueue<T> jobs, T job)
@@ -817,7 +866,47 @@ public class CMOSAnalysis implements PlugIn
 
 	private void computeError()
 	{
-		// TODO Auto-generated method stub
+		// Assume the simulation stack and measured stack are not null.
+		Utils.log("Comparison to simulation: %s", simulationImp.getInfoProperty());
+		ImageStack simulationStack = simulationImp.getImageStack();
+		for (int slice = 1; slice <= 3; slice++)
+		{
+			computeError(slice, simulationStack);
+		}
+	}
 
+	private void computeError(int slice, ImageStack simulationStack)
+	{
+		String label = simulationStack.getSliceLabel(slice);
+		float[] e = (float[]) simulationStack.getPixels(slice);
+		float[] o = (float[]) measuredStack.getPixels(slice);
+
+		// Get the mean error
+		Statistics s = new Statistics();
+		for (int i = e.length; i-- > 0;)
+			s.add(o[i] - e[i]);
+
+		StringBuilder result = new StringBuilder("Error ").append(label);
+		result.append(" = ").append(Utils.rounded(s.getMean()));
+		result.append(" +/- ").append(Utils.rounded(s.getStandardDeviation()));
+
+		// Do statistical test
+		double[] x = Utils.toDouble(e), y = Utils.toDouble(o);
+
+		// Mann-Whitney U is valid for any distribution, e.g. variance
+		MannWhitneyUTest test = new MannWhitneyUTest();
+		double p = test.mannWhitneyUTest(x, y);
+		result.append(" : Mann-Whitney U p=").append(Utils.rounded(p)).append(' ')
+				.append(((p < 0.05) ? "reject" : "accept"));
+
+		if (slice != 2)
+		{
+			// T-Test is valid for approximately Normal distributions, e.g. offset and gain
+			p = TestUtils.tTest(x, y);
+			result.append(" : T-Test p=").append(Utils.rounded(p)).append(' ')
+			.append(((p < 0.05) ? "reject" : "accept"));
+		}
+
+		Utils.log(result.toString());
 	}
 }
