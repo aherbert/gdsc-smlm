@@ -2,6 +2,7 @@ package gdsc.smlm.ij;
 
 import java.awt.Rectangle;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -299,7 +300,7 @@ public class SeriesImageSource extends ImageSource
 		{
 			for (String imageName : series.getImageList())
 			{
-				images.add(series.getPath() + imageName);
+				images.add(new File(series.getPath(), imageName).getPath());
 			}
 		}
 		isTiffSeries = isTiffSeries();
