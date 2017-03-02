@@ -33,6 +33,7 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.ProgressBar;
 import ij.io.FileSaver;
 import ij.plugin.PlugIn;
 import ij.process.ShortProcessor;
@@ -388,6 +389,7 @@ public class CMOSAnalysis implements PlugIn
 
 	/** The total progress. */
 	int progress, stepProgress, totalProgress;
+	ProgressBar progressBar;
 
 	/**
 	 * Show progress.
@@ -398,9 +400,10 @@ public class CMOSAnalysis implements PlugIn
 		{
 			//IJ.showProgress(progress, totalProgress);
 
-			// Use the actual progress bar so we can show progress in batch mode
+			// Use the actual progress bar so we can show progress 
+			// when all other IJ commands cannot
 			double p = ((double) progress + 1.0) / totalProgress;
-			IJ.getInstance().getProgressBar().show(p, true);
+			progressBar.show(p, true);
 		}
 		progress++;
 	}
@@ -421,18 +424,24 @@ public class CMOSAnalysis implements PlugIn
 				PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 		ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
 				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+		totalProgress = n;
+		stepProgress = Utils.getProgressInterval(totalProgress);
 		for (int i = 0; i < n; i++)
 		{
+			if (i % n == 0)
+				IJ.showProgress(i, n);
 			// Q. Should these be clipped to a sensible range?
 			pixelOffset[i] = (float) pd.sample();
 			pixelVariance[i] = (float) ed.sample();
 			pixelGain[i] = (float) (gain + rg.nextGaussian() * gainSD);
 		}
+		IJ.showProgress(1);
 
 		// Avoid all the file saves from updating the progress bar and status line
-		IJ.getInstance().getProgressBar().setBatchMode(true);
 		Utils.setShowStatus(false);
+		Utils.setShowProgress(false);
 		JLabel statusLine = Utils.getStatusLine();
+		progressBar = Utils.getProgressBar();
 
 		// Save to the directory as a stack
 		simulationStack = new ImageStack(size, size);
@@ -440,9 +449,6 @@ public class CMOSAnalysis implements PlugIn
 		simulationStack.addSlice("Variance", pixelVariance);
 		simulationStack.addSlice("Gain", pixelGain);
 		IJ.save(new ImagePlus("PerPixel", simulationStack), new File(directory, "perPixelSimulation.tif").getPath());
-
-		// Do this now since the save above will have written progress
-		IJ.showProgress(0);
 
 		// Create thread pool and workers
 		ExecutorService executor = Executors.newFixedThreadPool(getThreads());
@@ -455,6 +461,7 @@ public class CMOSAnalysis implements PlugIn
 		totalProgress = photons.length * frames;
 		stepProgress = Utils.getProgressInterval(totalProgress);
 		progress = 0;
+		progressBar.show(0);
 
 		int blockSize = 10; // For saving stacks
 		int nPerThread = (int) Math.ceil((double) frames / nThreads);
@@ -495,11 +502,11 @@ public class CMOSAnalysis implements PlugIn
 			futures.clear();
 		}
 
-		IJ.getInstance().getProgressBar().setBatchMode(false);
+		Utils.setShowStatus(true);
+		Utils.setShowProgress(true);
 		IJ.showProgress(1);
 
 		executor.shutdown();
-		Utils.setShowStatus(true);
 
 		Utils.log("Simulation time = " + Utils.timeToString(System.currentTimeMillis() - start));
 	}
@@ -631,10 +638,10 @@ public class CMOSAnalysis implements PlugIn
 		long start = System.currentTimeMillis();
 
 		// Avoid all the file saves from updating the progress bar and status line
-		IJ.getInstance().getProgressBar().setBatchMode(true);
+		Utils.setShowProgress(false);
 		Utils.setShowStatus(false);
 		JLabel statusLine = Utils.getStatusLine();
-		IJ.showProgress(0);
+		progressBar = Utils.getProgressBar();
 
 		// Create thread pool and workers
 		ExecutorService executor = Executors.newFixedThreadPool(getThreads());
@@ -662,9 +669,10 @@ public class CMOSAnalysis implements PlugIn
 				break;
 			}
 
-			totalProgress = source.getFrames();
+			totalProgress = source.getFrames() + 1; // So the bar remains at 99% when workers have finished
 			stepProgress = Utils.getProgressInterval(totalProgress);
 			progress = 0;
+			progressBar.show(0);
 
 			ArrayMoment moment = (rollingAlgorithm) ? new RollingArrayMoment() : new SimpleArrayMoment();
 
@@ -740,15 +748,13 @@ public class CMOSAnalysis implements PlugIn
 						Utils.rounded(s.getStandardDeviation()), Utils.rounded(var.getMean()),
 						Utils.rounded(var.getStandardDeviation()));
 			}
-
-			IJ.showProgress(1);
 		}
 
-		IJ.getInstance().getProgressBar().setBatchMode(false);
+		Utils.setShowStatus(true);
+		Utils.setShowProgress(true);
 		IJ.showProgress(1);
 
 		executor.shutdown();
-		Utils.setShowStatus(true);
 
 		if (error)
 			return;
@@ -756,7 +762,7 @@ public class CMOSAnalysis implements PlugIn
 		// Compute the gain
 		statusLine.setText("Computing gain");
 
-		float[] pixelGain = new float[pixelOffset.length];
+		double[] pixelGain = new double[pixelOffset.length];
 
 		// Ignore first as this is the 0 exposure image
 		for (int i = 0; i < pixelGain.length; i++)
@@ -771,18 +777,21 @@ public class CMOSAnalysis implements PlugIn
 				bibiT += bi * bi;
 				biaiT += bi * ai;
 			}
-			pixelGain[i] = (float) (biaiT / bibiT);
+			pixelGain[i] = biaiT / bibiT;
 		}
 
 		Statistics s = new Statistics(pixelGain);
 		Utils.log("Gain Mean = %s +/- %s", Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
 
+		// TODO - Histogram of offset, variance and gain
+
 		// Save
 		simulationStack = new ImageStack(size, size);
 		simulationStack.addSlice("Offset", Utils.toFloat(pixelOffset));
 		simulationStack.addSlice("Variance", Utils.toFloat(pixelVariance));
-		simulationStack.addSlice("Gain", pixelGain);
+		simulationStack.addSlice("Gain", Utils.toFloat(pixelGain));
 		IJ.save(new ImagePlus("PerPixel", simulationStack), new File(directory, "perPixel.tif").getPath());
+		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
 
 		Utils.log("Analysis time = " + Utils.timeToString(System.currentTimeMillis() - start));
 	}
