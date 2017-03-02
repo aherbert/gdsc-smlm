@@ -5189,7 +5189,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		String[] images = Utils.getImageList(Utils.GREY_SCALE);
 		gd.addChoice("Image", images, benchmarkImage);
 		gd.addStringField("Results_file", benchmarkFile);
-		gd.addCheckbox("Auto", benchmarkAuto);
+		gd.addCheckbox("Preprocessed_results", benchmarkAuto);
 
 		if (Utils.isShowGenericDialog())
 		{
