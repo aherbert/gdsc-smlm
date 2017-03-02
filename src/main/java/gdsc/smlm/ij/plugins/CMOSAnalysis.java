@@ -271,9 +271,8 @@ public class CMOSAnalysis implements PlugIn
 	private static boolean rollingAlgorithm = false;
 
 	// The simulation can default roughly to the paper values
-	// Approximately Normal
+	// Approximately Poisson
 	private static double offset = 100;
-	private static double offsetSD = 3;
 	// Approximately Exponential. 
 	// We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b 
 	// cumul = 1 - e^-lx (with l = 1/mean)
@@ -418,12 +417,14 @@ public class CMOSAnalysis implements PlugIn
 		long start = System.currentTimeMillis();
 
 		RandomGenerator rg = new Well19937c();
+		PoissonDistribution pd = new PoissonDistribution(rg, offset, PoissonDistribution.DEFAULT_EPSILON,
+				PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 		ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
 				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 		for (int i = 0; i < n; i++)
 		{
 			// Q. Should these be clipped to a sensible range?
-			pixelOffset[i] = (float) (offset + rg.nextGaussian() * offsetSD);
+			pixelOffset[i] = (float) pd.sample();
 			pixelVariance[i] = (float) ed.sample();
 			pixelGain[i] = (float) (gain + rg.nextGaussian() * gainSD);
 		}
@@ -511,8 +512,7 @@ public class CMOSAnalysis implements PlugIn
 		gd.addMessage("Simulate per-pixel offset, variance and gain of sCMOS images.");
 
 		gd.addNumericField("nThreads", getLastNThreads(), 0);
-		gd.addNumericField("Offset (Gaussian)", offset, 3);
-		gd.addNumericField("Offset_SD", offsetSD, 3);
+		gd.addNumericField("Offset (Poisson)", offset, 3);
 		gd.addNumericField("Variance (Exponential)", variance, 3);
 		gd.addNumericField("Gain (Gaussian)", gain, 3);
 		gd.addNumericField("Gain_SD", gainSD, 3);
@@ -524,7 +524,6 @@ public class CMOSAnalysis implements PlugIn
 
 		setThreads((int) gd.getNextNumber());
 		offset = Math.abs(gd.getNextNumber());
-		offsetSD = Math.abs(gd.getNextNumber());
 		variance = Math.abs(gd.getNextNumber());
 		gain = Math.abs(gd.getNextNumber());
 		gainSD = Math.abs(gd.getNextNumber());
@@ -535,7 +534,6 @@ public class CMOSAnalysis implements PlugIn
 		try
 		{
 			Parameters.isAboveZero("Offset", offset);
-			Parameters.isAboveZero("Offset SD", offsetSD);
 			Parameters.isAboveZero("Variance", variance);
 			Parameters.isAboveZero("Gain", gain);
 			Parameters.isAboveZero("Gain SD", gainSD);
