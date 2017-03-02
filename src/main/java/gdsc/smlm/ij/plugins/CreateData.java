@@ -2659,6 +2659,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 			{
 				// We can do N random samples thus ensuring the background average is constant.
 				// Note: The number of samples must be Poisson distributed.
+				// currently: pixels2[0] = uniform background level
+				// => (pixels2[0] * pixels2.length) = amount of photons that fall on the image. 
 				final int samples = (int) random.nextPoisson(pixels2[0] * pixels2.length);
 
 				// Only do sampling if the number of samples is valid
