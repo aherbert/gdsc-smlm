@@ -5253,16 +5253,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			if (!Utils.isMacro())
 			{
 				// Interactively show the sample image data
-				ImagePlus outImp = Utils.display(title, out[0]);
-				boolean close = false;
-				if (Utils.isNewWindow())
+				final boolean[] close = new boolean[1];
+				final ImagePlus[] outImp = new ImagePlus[1];
+				if (out[0] != null)
 				{
-					close = true;
-					// Zoom a bit
-					ImageWindow iw = outImp.getWindow();
-					for (int i = 7; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < 512;)
+					outImp[0] = Utils.display(title, out[0]);
+					if (Utils.isNewWindow())
 					{
-						iw.getCanvas().zoomIn(0, 0);
+						close[0] = true;
+						// Zoom a bit
+						ImageWindow iw = outImp[0].getWindow();
+						for (int i = 7; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < 512;)
+						{
+							iw.getCanvas().zoomIn(0, 0);
+						}
 					}
 				}
 
@@ -5293,7 +5297,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						nLow = (int) gd.getNextNumber();
 						nHigh = (int) gd.getNextNumber();
 						out[0] = createExample(stack, no, low, high, present, list, r);
-						Utils.display(title, out[0]);
+						if (out[0] != null)
+						{
+							outImp[0] = Utils.display(title, out[0]);
+							if (Utils.isNewWindow())
+							{
+								close[0] = true;
+								// Zoom a bit
+								ImageWindow iw = outImp[0].getWindow();
+								for (int i = 7; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < 512;)
+								{
+									iw.getCanvas().zoomIn(0, 0);
+								}
+							}
+						}
 						return true;
 					}
 				});
@@ -5304,11 +5321,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					nNo = nLow = nHigh = 0; // For the recorder
 				}
 
-				if (close)
+				if (close[0])
 				{
 					// Because closing the image sets the stack pixels array to null
 					out[0] = out[0].duplicate();
-					outImp.close();
+					outImp[0].close();
 				}
 
 				if (record)
