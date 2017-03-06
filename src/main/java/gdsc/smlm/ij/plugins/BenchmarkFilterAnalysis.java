@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.AWTEvent;
 import java.awt.Checkbox;
 
 /*----------------------------------------------------------------------------- 
@@ -129,6 +130,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Macro;
 import ij.Prefs;
+import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.NonBlockingGenericDialog;
@@ -258,7 +260,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double iterationMinRangeReduction = 0.2;
 	private static int iterationMinRangeReductionIteration = 5;
 	private static boolean iterationConvergeBeforeRefit = false;
-	
+
 	// For the template example
 	private static int nNo = 2, nLow = 2, nHigh = 2;
 
@@ -5190,12 +5192,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				return;
 
 			// Get the number of frames
-			ImageStack stack = imp.getImageStack();
+			final ImageStack stack = imp.getImageStack();
 			int totalFrames = stack.getSize();
-			String title = "Template Example";
+			final String title = "Template Example";
 
 			// Count the number of localisations per frame
-			int[] present = new int[totalFrames];
+			final int[] present = new int[totalFrames];
 			for (PeakResult p : results)
 			{
 				// Check the range just in case
@@ -5219,19 +5221,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					break;
 				}
 			int lowEnd = zeroEnd + (frames.length - zeroEnd) / 2;
-			int[] no = Arrays.copyOf(frames, zeroEnd);
-			int[] low = Arrays.copyOfRange(frames, zeroEnd, lowEnd);
-			int[] high = Arrays.copyOfRange(frames, lowEnd, frames.length);
+			final int[] no = Arrays.copyOf(frames, zeroEnd);
+			final int[] low = Arrays.copyOfRange(frames, zeroEnd, lowEnd);
+			final int[] high = Arrays.copyOfRange(frames, lowEnd, frames.length);
 
 			// Iteratively show the example until the user is happy.
 			// Yes = OK, No = Repeat, Cancel = Do not save
-			Random r = new Random();
-			TIntArrayList list = new TIntArrayList(nNo + nLow + nHigh);
-			ImageStack out = null;
-			ImagePlus outImp = null;
-			boolean close = false;
-			String msg = null;
-			boolean record = Recorder.record;
+			final Random r = new Random();
+			final TIntArrayList list = new TIntArrayList(nNo + nLow + nHigh);
+			final ImageStack[] out = new ImageStack[1];
 
 			String keyNo = "nNo";
 			String keyLow = "nLower";
@@ -5241,67 +5239,25 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// Collect the options if running in a macro
 				String options = Macro.getOptions();
 				nNo = Integer.parseInt(Macro.getValue(options, keyNo, Integer.toString(nNo)));
-				nLow = Integer.parseInt(Macro.getValue(options, keyNo, Integer.toString(nLow)));
-				nHigh = Integer.parseInt(Macro.getValue(options, keyNo, Integer.toString(nHigh)));
+				nLow = Integer.parseInt(Macro.getValue(options, keyLow, Integer.toString(nLow)));
+				nHigh = Integer.parseInt(Macro.getValue(options, keyHigh, Integer.toString(nHigh)));
 			}
 			else
 			{
-				// Interactively show the sample image data
-				
-				// For the dialog
-				msg = String.format(
-						"Showing image data for the template example.\n \nSample Frames:\nEmpty = %d\nLower density = %d\nHigher density = %d\n",
-						no.length, low.length, high.length);
-				
-				// Prevent recording anything else since we use a non blocking dialog 
-				// other commands can be run. Also prevents duplicate keys within the loop
-				Recorder.record = false;
-				
-				
-				
+				if (nLow + nHigh == 0)
+					nLow = nHigh = 1;
 			}
-			
-			
 
-			// We could change this to work in a dialog listener so the sample is dynamically updated.
+			out[0] = createExample(stack, no, low, high, present, list, r);
 
-			while (true)
+			if (!Utils.isMacro())
 			{
-				out = null;
-				list.resetQuick();
-
-				if (no.length != 0)
-					list.add(r.sample(nNo, no));
-				list.add(r.sample(nLow, low));
-				list.add(r.sample(nHigh, high));
-
-				if (list.isEmpty())
-					// Nothing to do
-					break;
-
-				// Sort descending by number in the frame
-				int[] sample = list.toArray();
-				Sort.sort(sample, present);
-
-				out = new ImageStack(stack.getWidth(), stack.getHeight());
-				out.trim();
-				for (int t : sample)
-				{
-					// IJ slice are 1-based index
-					int slice = t + 1;
-					out.addSlice(String.format("%s frame=%d (n=%d)", imp.getTitle(), slice, present[t]),
-							stack.getPixels(slice));
-				}
-
-				if (Utils.isMacro())
-					// We have made the sample so just save it
-					break;
-
-				// Interactively show the example
-				outImp = Utils.display(title, out);
+				// Interactively show the sample image data
+				ImagePlus outImp = Utils.display(title, out[0]);
+				boolean close = false;
 				if (Utils.isNewWindow())
 				{
-					close |= true;
+					close = true;
 					// Zoom a bit
 					ImageWindow iw = outImp.getWindow();
 					for (int i = 7; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < 512;)
@@ -5310,46 +5266,97 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					}
 				}
 
+				// For the dialog
+				String msg = String.format(
+						"Showing image data for the template example.\n \nSample Frames:\nEmpty = %d\nLower density = %d\nHigher density = %d\n",
+						no.length, low.length, high.length);
+
+				// Turn off the recorder when the dialog is showing
+				boolean record = Recorder.record;
+				Recorder.record = false;
 				NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 				gd.addMessage(msg);
-				gd.enableYesNoCancel(" Save ", " Resample ");
+				//gd.enableYesNoCancel(" Save ", " Resample ");
 				gd.addSlider(keyNo, 0, 10, nNo);
 				gd.addSlider(keyLow, 0, 10, nLow);
 				gd.addSlider(keyHigh, 0, 10, nHigh);
+				gd.addDialogListener(new DialogListener()
+				{
+					public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+					{
+						// If the event is null then this is the final call when the 
+						// dialog has been closed. We ignore this to prevent generating a
+						// image the user has not seen.
+						if (e == null)
+							return true;
+						nNo = (int) gd.getNextNumber();
+						nLow = (int) gd.getNextNumber();
+						nHigh = (int) gd.getNextNumber();
+						out[0] = createExample(stack, no, low, high, present, list, r);
+						Utils.display(title, out[0]);
+						return true;
+					}
+				});
 				gd.showDialog();
 				if (gd.wasCanceled())
 				{
-					out = null;
+					out[0] = null;
 					nNo = nLow = nHigh = 0; // For the recorder
-					break;
 				}
-				nNo = (int) gd.getNextNumber();
-				nLow = (int) gd.getNextNumber();
-				nHigh = (int) gd.getNextNumber();
-				if (!gd.wasOKed())
-					continue;
-				break;
+
+				if (close)
+				{
+					// Because closing the image sets the stack pixels array to null
+					out[0] = out[0].duplicate();
+					outImp.close();
+				}
+
+				if (record)
+				{
+					Recorder.record = true;
+					Recorder.recordOption(keyNo, Integer.toString(nNo));
+					Recorder.recordOption(keyLow, Integer.toString(nLow));
+					Recorder.recordOption(keyHigh, Integer.toString(nHigh));
+				}
 			}
 
-			// Reset this
-			Recorder.record = record;
-			if (record)
-			{
-				Recorder.recordOption(keyNo, Integer.toString(nNo));
-				Recorder.recordOption(keyLow, Integer.toString(nLow));
-				Recorder.recordOption(keyHigh, Integer.toString(nHigh));
-			}
-			
-			if (close)
-				outImp.close();
-			
-			if (out == null)
+			if (out[0] == null)
 				return;
 
-			ImagePlus example = new ImagePlus(title, out);
+			ImagePlus example = new ImagePlus(title, out[0]);
 			filename = Utils.replaceExtension(filename, ".tif");
 			IJ.save(example, filename);
 		}
+	}
+
+	private ImageStack createExample(ImageStack stack, int[] no, int[] low, int[] high, int[] present,
+			TIntArrayList list, Random r)
+	{
+		if (list == null)
+			list = new TIntArrayList();
+		list.resetQuick();
+
+		if (no.length != 0)
+			list.add(r.sample(nNo, no));
+		list.add(r.sample(nLow, low));
+		list.add(r.sample(nHigh, high));
+
+		if (list.isEmpty())
+			return null;
+
+		// Sort descending by number in the frame
+		int[] sample = list.toArray();
+		Sort.sort(sample, present);
+
+		ImageStack out = new ImageStack(stack.getWidth(), stack.getHeight());
+		for (int t : sample)
+		{
+			// IJ slice are 1-based index
+			int slice = t + 1;
+			out.addSlice(String.format("Frame=%d (n=%d)", slice, present[t]), stack.getPixels(slice));
+		}
+
+		return out;
 	}
 
 	private String getNotes(String topFilterSummary)
