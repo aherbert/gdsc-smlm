@@ -65,7 +65,9 @@ import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.MatchResult;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.Random;
 import gdsc.core.utils.Settings;
+import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.UnicodeReader;
@@ -118,18 +120,24 @@ import gdsc.smlm.search.SearchDimension;
 import gdsc.smlm.search.SearchResult;
 import gdsc.smlm.search.SearchSpace;
 import gdsc.smlm.utils.XmlUtils;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Macro;
 import ij.Prefs;
 import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
+import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
+import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
 
 /**
@@ -250,6 +258,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double iterationMinRangeReduction = 0.2;
 	private static int iterationMinRangeReductionIteration = 5;
 	private static boolean iterationConvergeBeforeRefit = false;
+	
+	// For the template example
+	private static int nNo = 2, nLow = 2, nHigh = 2;
 
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2, limitFailCount;
@@ -5168,7 +5179,176 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			settings.setNotes(getNotes(topFilterSummary));
 			settings.setFitEngineConfiguration(config);
 			if (!SettingsManager.saveSettings(settings, filename, true))
+			{
 				IJ.log("Unable to save the template configuration");
+				return;
+			}
+
+			// Save some random frames from the test image data
+			ImagePlus imp = CreateData.getImage();
+			if (imp == null)
+				return;
+
+			// Get the number of frames
+			ImageStack stack = imp.getImageStack();
+			int totalFrames = stack.getSize();
+			String title = "Template Example";
+
+			// Count the number of localisations per frame
+			int[] present = new int[totalFrames];
+			for (PeakResult p : results)
+			{
+				// Check the range just in case
+				int t = p.peak;
+				if (t < 1 || t > totalFrames)
+					continue;
+				// Note: Frames start at zero not 1 as is IJ convention so we can use the sort utility
+				present[t - 1]++;
+			}
+
+			int[] frames = Utils.newArray(totalFrames, 0, 1);
+			Sort.sort(frames, present);
+			Sort.reverse(frames);
+
+			// Split the image into frames with zero localisations, low density, high density
+			int zeroEnd = 0;
+			for (int i = 0; i < frames.length; i++)
+				if (present[frames[i]] != 0)
+				{
+					zeroEnd = i;
+					break;
+				}
+			int lowEnd = zeroEnd + (frames.length - zeroEnd) / 2;
+			int[] no = Arrays.copyOf(frames, zeroEnd);
+			int[] low = Arrays.copyOfRange(frames, zeroEnd, lowEnd);
+			int[] high = Arrays.copyOfRange(frames, lowEnd, frames.length);
+
+			// Iteratively show the example until the user is happy.
+			// Yes = OK, No = Repeat, Cancel = Do not save
+			Random r = new Random();
+			TIntArrayList list = new TIntArrayList(nNo + nLow + nHigh);
+			ImageStack out = null;
+			ImagePlus outImp = null;
+			boolean close = false;
+			String msg = null;
+			boolean record = Recorder.record;
+
+			String keyNo = "nNo";
+			String keyLow = "nLower";
+			String keyHigh = "nHigher";
+			if (Utils.isMacro())
+			{
+				// Collect the options if running in a macro
+				String options = Macro.getOptions();
+				nNo = Integer.parseInt(Macro.getValue(options, keyNo, Integer.toString(nNo)));
+				nLow = Integer.parseInt(Macro.getValue(options, keyNo, Integer.toString(nLow)));
+				nHigh = Integer.parseInt(Macro.getValue(options, keyNo, Integer.toString(nHigh)));
+			}
+			else
+			{
+				// Interactively show the sample image data
+				
+				// For the dialog
+				msg = String.format(
+						"Showing image data for the template example.\n \nSample Frames:\nEmpty = %d\nLower density = %d\nHigher density = %d\n",
+						no.length, low.length, high.length);
+				
+				// Prevent recording anything else since we use a non blocking dialog 
+				// other commands can be run. Also prevents duplicate keys within the loop
+				Recorder.record = false;
+				
+				
+				
+			}
+			
+			
+
+			// We could change this to work in a dialog listener so the sample is dynamically updated.
+
+			while (true)
+			{
+				out = null;
+				list.resetQuick();
+
+				if (no.length != 0)
+					list.add(r.sample(nNo, no));
+				list.add(r.sample(nLow, low));
+				list.add(r.sample(nHigh, high));
+
+				if (list.isEmpty())
+					// Nothing to do
+					break;
+
+				// Sort descending by number in the frame
+				int[] sample = list.toArray();
+				Sort.sort(sample, present);
+
+				out = new ImageStack(stack.getWidth(), stack.getHeight());
+				out.trim();
+				for (int t : sample)
+				{
+					// IJ slice are 1-based index
+					int slice = t + 1;
+					out.addSlice(String.format("%s frame=%d (n=%d)", imp.getTitle(), slice, present[t]),
+							stack.getPixels(slice));
+				}
+
+				if (Utils.isMacro())
+					// We have made the sample so just save it
+					break;
+
+				// Interactively show the example
+				outImp = Utils.display(title, out);
+				if (Utils.isNewWindow())
+				{
+					close |= true;
+					// Zoom a bit
+					ImageWindow iw = outImp.getWindow();
+					for (int i = 7; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < 512;)
+					{
+						iw.getCanvas().zoomIn(0, 0);
+					}
+				}
+
+				NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+				gd.addMessage(msg);
+				gd.enableYesNoCancel(" Save ", " Resample ");
+				gd.addSlider(keyNo, 0, 10, nNo);
+				gd.addSlider(keyLow, 0, 10, nLow);
+				gd.addSlider(keyHigh, 0, 10, nHigh);
+				gd.showDialog();
+				if (gd.wasCanceled())
+				{
+					out = null;
+					nNo = nLow = nHigh = 0; // For the recorder
+					break;
+				}
+				nNo = (int) gd.getNextNumber();
+				nLow = (int) gd.getNextNumber();
+				nHigh = (int) gd.getNextNumber();
+				if (!gd.wasOKed())
+					continue;
+				break;
+			}
+
+			// Reset this
+			Recorder.record = record;
+			if (record)
+			{
+				Recorder.recordOption(keyNo, Integer.toString(nNo));
+				Recorder.recordOption(keyLow, Integer.toString(nLow));
+				Recorder.recordOption(keyHigh, Integer.toString(nHigh));
+			}
+			
+			if (close)
+				outImp.close();
+			
+			if (out == null)
+				return;
+
+			ImagePlus example = new ImagePlus(title, out);
+			filename = Utils.replaceExtension(filename, ".tif");
+			IJ.save(example, filename);
 		}
 	}
 
