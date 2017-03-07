@@ -66,9 +66,7 @@ import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.MatchResult;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
-import gdsc.core.utils.Random;
 import gdsc.core.utils.Settings;
-import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.UnicodeReader;
@@ -88,6 +86,7 @@ import gdsc.smlm.ga.SimpleRecombiner;
 import gdsc.smlm.ga.SimpleSelectionStrategy;
 import gdsc.smlm.ga.ToleranceChecker;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFit.FilterCandidates;
+import gdsc.smlm.ij.results.ResultsImageSampler;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -121,7 +120,6 @@ import gdsc.smlm.search.SearchDimension;
 import gdsc.smlm.search.SearchResult;
 import gdsc.smlm.search.SearchSpace;
 import gdsc.smlm.utils.XmlUtils;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.set.hash.TIntHashSet;
@@ -5155,6 +5153,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		resumeFilterTimer();
 	}
 
+	private static ResultsImageSampler sampler;
+
 	/**
 	 * Save PeakFit configuration template using the current benchmark settings.
 	 * 
@@ -5193,44 +5193,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			// Get the number of frames
 			final ImageStack stack = imp.getImageStack();
-			int totalFrames = stack.getSize();
-			final String title = "Template Example";
 
-			// Count the number of localisations per frame
-			final int[] present = new int[totalFrames];
-			for (PeakResult p : results)
+			if (sampler == null || sampler.getResults() != results)
 			{
-				// Check the range just in case
-				int t = p.peak;
-				if (t < 1 || t > totalFrames)
-					continue;
-				// Note: Frames start at zero not 1 as is IJ convention so we can use the sort utility
-				present[t - 1]++;
+				sampler = new ResultsImageSampler(results, stack, 64);
+				sampler.analyse();
 			}
+			if (!sampler.isValid())
+				return;
 
-			int[] frames = Utils.newArray(totalFrames, 0, 1);
-			Sort.sort(frames, present);
-			Sort.reverse(frames);
-
-			// Split the image into frames with zero localisations, low density, high density
-			int zeroEnd = 0;
-			for (int i = 0; i < frames.length; i++)
-				if (present[frames[i]] != 0)
-				{
-					zeroEnd = i;
-					break;
-				}
-			int lowEnd = zeroEnd + (frames.length - zeroEnd) / 2;
-			final int[] no = Arrays.copyOf(frames, zeroEnd);
-			final int[] low = Arrays.copyOfRange(frames, zeroEnd, lowEnd);
-			final int[] high = Arrays.copyOfRange(frames, lowEnd, frames.length);
+			final String title = "Template Example";
 
 			// Iteratively show the example until the user is happy.
 			// Yes = OK, No = Repeat, Cancel = Do not save
-			final Random r = new Random();
-			final TIntArrayList list = new TIntArrayList(nNo + nLow + nHigh);
-			final ImageStack[] out = new ImageStack[1];
-
 			String keyNo = "nNo";
 			String keyLow = "nLower";
 			String keyHigh = "nHigher";
@@ -5248,7 +5223,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					nLow = nHigh = 1;
 			}
 
-			out[0] = createExample(stack, no, low, high, present, list, r);
+			final ImageStack[] out = new ImageStack[1];
+			out[0] = sampler.getSample(nNo, nLow, nHigh);
 
 			if (!Utils.isMacro())
 			{
@@ -5273,7 +5249,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// For the dialog
 				String msg = String.format(
 						"Showing image data for the template example.\n \nSample Frames:\nEmpty = %d\nLower density = %d\nHigher density = %d\n",
-						no.length, low.length, high.length);
+						sampler.getNumberOfLowDensitySamples(), sampler.getNumberOfLowDensitySamples(), sampler.getNumberOfHighDensitySamples());
 
 				// Turn off the recorder when the dialog is showing
 				boolean record = Recorder.record;
@@ -5296,7 +5272,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						nNo = (int) gd.getNextNumber();
 						nLow = (int) gd.getNextNumber();
 						nHigh = (int) gd.getNextNumber();
-						out[0] = createExample(stack, no, low, high, present, list, r);
+						out[0] = sampler.getSample(nNo, nLow, nHigh);
 						if (out[0] != null)
 						{
 							outImp[0] = Utils.display(title, out[0]);
@@ -5344,36 +5320,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			filename = Utils.replaceExtension(filename, ".tif");
 			IJ.save(example, filename);
 		}
-	}
-
-	private ImageStack createExample(ImageStack stack, int[] no, int[] low, int[] high, int[] present,
-			TIntArrayList list, Random r)
-	{
-		if (list == null)
-			list = new TIntArrayList();
-		list.resetQuick();
-
-		if (no.length != 0)
-			list.add(r.sample(nNo, no));
-		list.add(r.sample(nLow, low));
-		list.add(r.sample(nHigh, high));
-
-		if (list.isEmpty())
-			return null;
-
-		// Sort descending by number in the frame
-		int[] sample = list.toArray();
-		Sort.sort(sample, present);
-
-		ImageStack out = new ImageStack(stack.getWidth(), stack.getHeight());
-		for (int t : sample)
-		{
-			// IJ slice are 1-based index
-			int slice = t + 1;
-			out.addSlice(String.format("Frame=%d (n=%d)", slice, present[t]), stack.getPixels(slice));
-		}
-
-		return out;
 	}
 
 	private String getNotes(String topFilterSummary)
