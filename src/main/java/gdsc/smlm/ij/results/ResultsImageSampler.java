@@ -125,7 +125,7 @@ public class ResultsImageSampler
 		Arrays.sort(data, lc);
 
 		// For the low and high sample we just split in half. 
-		lower = (data.length + 1) / 2;
+		lower = data.length / 2;
 		upper = data.length - lower;
 
 		// Do the empty blocks
