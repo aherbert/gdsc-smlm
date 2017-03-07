@@ -257,17 +257,18 @@ public class ResultsImageSampler
 	 * Gets the sample.
 	 *
 	 * @param nNo
-	 *            the number of sample with no localisations
+	 *            the number of samples with no localisations
 	 * @param nLow
 	 *            the number of samples with low localisations
 	 * @param nHigh
 	 *            the number of samples with high localisations
-	 * @return the sample (or null)
+	 * @return the sample (could be empty if no samples were made)
 	 */
 	public ImageStack getSample(int nNo, int nLow, int nHigh)
 	{
+		ImageStack out = new ImageStack(size, size);
 		if (!isValid())
-			return null;
+			return out;
 
 		list.clearf();
 
@@ -282,14 +283,13 @@ public class ResultsImageSampler
 			list.add(data[i + lower]);
 
 		if (list.isEmpty())
-			return null;
+			return out;
 
 		// Sort descending by number in the frame
 		long[][] sample = list.toArray(new long[list.size()][]);
 		Arrays.sort(sample, lc);
 
 		int[] xyz = new int[3];
-		ImageStack out = new ImageStack(size, size);
 		Rectangle stackBounds = new Rectangle(stack.getWidth(), stack.getHeight());
 		for (long[] s : sample)
 		{
