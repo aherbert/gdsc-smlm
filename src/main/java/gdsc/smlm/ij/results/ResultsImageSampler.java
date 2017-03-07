@@ -318,4 +318,16 @@ public class ResultsImageSampler
 
 		return out;
 	}
+
+	/**
+	 * Set the random for use during sampling
+	 * 
+	 * @param r
+	 *            the random to set (ignored if null)
+	 */
+	public void setRandom(Random r)
+	{
+		if (r != null)
+			this.r = r;
+	}
 }
