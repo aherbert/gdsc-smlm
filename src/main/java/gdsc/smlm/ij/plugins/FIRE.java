@@ -1324,8 +1324,8 @@ public class FIRE implements PlugIn
 
 	public class QPlot
 	{
-		final double N;
-		double[] vq, sinc, q;
+		final double N, qNorm;		
+		double[] vq, sinc, q, qScaled;
 		String title;
 
 		// Store the last computed value
@@ -1335,6 +1335,9 @@ public class FIRE implements PlugIn
 		{
 			this.N = N;
 
+			// For normalisation
+			qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
+			
 			// Compute v(q) - The numerator of the FRC divided by the number of pixels 
 			// in the Fourier circle (2*pi*q*L)
 			vq = new double[frcCurve.getSize()];
@@ -1344,12 +1347,12 @@ public class FIRE implements PlugIn
 				// to the correct scale 
 				double d = frcCurve.get(i).getNumberOfSamples();
 				//double d = 2.0 * Math.PI * i;
-				vq[i] = frcCurve.get(i).getNumerator() / d;
+				vq[i] = qNorm * frcCurve.get(i).getNumerator() / d;
 			}
 
-			q = FRC.computeQ(frcCurve, nmPerPixel);
-
-			final double L = frcCurve.fieldOfView;
+			q = FRC.computeQ(frcCurve);
+			// For the plot
+			qScaled = FRC.computeQ(frcCurve, nmPerPixel);
 
 			// Compute sinc factor
 			sinc = new double[frcCurve.getSize()];
@@ -1357,28 +1360,14 @@ public class FIRE implements PlugIn
 			for (int i = 1; i < sinc.length; i++)
 
 			{
-				double d;
-				// This should be sinc(pi*q*L)^2
-				// where pi*q*L is half the number of samples in the Fourier circle.
-				//d = Math.PI * i;
-
-				// This does not seem correct. We are essentially computing Sine at intervals of pi
-				// which all compute to 0. Try removing the L factor => sinc(pi*q)^2 with 
-				// q == 1/L, 2/L, ... (i.e. no unit conversion to nm). This means that the function 
-				// will start at 1 and drop off to zero at L.
+				// Note the original equation given in the paper: sinc(pi*q*L)^2 is a typo.
+				// Matlab code provided by Bernd Rieger removes L to compute: sinc(pi*q)^2
+				// with q == 1/L, 2/L, ... (i.e. no unit conversion to nm). This means that 
+				// the function will start at 1 and drop off to zero at q=L.
 
 				// sinc(pi*q)^2
-				d = Math.PI * i / L;
-
-				// Use q in the correct units - WRONG curve shape
-				//d = Math.PI * q[i] * L;				
-
-				sinc[i] = sinc(d);
+				sinc[i] = sinc(Math.PI * q[i]);
 				sinc[i] *= sinc[i];
-
-				// TODO - figure out what this should be...
-				// Ignore this term for now
-				//sinc[i] = 1;
 			}
 
 			// For the plot
@@ -1436,12 +1425,12 @@ public class FIRE implements PlugIn
 
 			Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "Log10 Scaled FRC Numerator");
 			plot.setColor(Color.black);
-			plot.addPoints(q, l, Plot.LINE);
+			plot.addPoints(qScaled, l, Plot.LINE);
 			plot.addLabel(0, 0, String.format("Q = %.3f (Precision = %.3f +/- %.3f)", qValue, mean, sigma));
 			plot.setColor(Color.red);
-			plot.addPoints(q, sl, Plot.LINE);
+			plot.addPoints(qScaled, sl, Plot.LINE);
 			plot.setColor(Color.blue);
-			plot.drawLine(0, min, q[q.length - 1], min);
+			plot.drawLine(0, min, qScaled[qScaled.length - 1], min);
 
 			return Utils.display(title, plot, Utils.NO_TO_FRONT);
 		}

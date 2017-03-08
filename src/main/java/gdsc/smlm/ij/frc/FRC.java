@@ -75,14 +75,13 @@ public class FRC
 	{
 		private final int radius;
 		private final int nSamples;
-		private double correlation;
 		private final double numerator, sum1, sum2, denominator;
+		private double correlation;
 
 		private FRCCurveResult(int radius, int nSamples, double sum0, double sum1, double sum2)
 		{
 			this.radius = radius;
 			this.nSamples = nSamples;
-			this.setCorrelation(correlation);
 			this.numerator = sum0;
 			this.sum1 = sum1;
 			this.sum2 = sum2;
@@ -180,16 +179,23 @@ public class FRC
 	/**
 	 * Contains the result of computing all the rings of the Fourier Ring Correlation (FRC) between two images.
 	 */
-	public static class FRCCurve
+	public static class FRCCurve implements Cloneable
 	{
 		/** The size of the field of view in the Fourier image (named L) */
 		final public int fieldOfView;
 
+		/** The mean of the first input image after application of the Tukey window taper. */
+		final public double mean1;
+		/** The mean of the second input image after application of the Tukey window taper. */
+		final public double mean2;
+
 		final private FRCCurveResult[] results;
 
-		private FRCCurve(int size, FRCCurveResult[] results)
+		private FRCCurve(int size, double mean1, double mean2, FRCCurveResult[] results)
 		{
 			this.fieldOfView = size;
+			this.mean1 = mean1;
+			this.mean2 = mean2;
 			this.results = results;
 		}
 
@@ -222,10 +228,31 @@ public class FRC
 		 */
 		public FRCCurve copy()
 		{
-			FRCCurveResult[] results = new FRCCurveResult[getSize()];
+			// Let the Java framework copy the primatives
+			FRCCurve curve = this.clone();
+			// Clone the curve entries
+			FRCCurveResult[] results = curve.results;
 			for (int i = results.length; i-- > 0;)
-				results[i] = get(i).clone();
-			return new FRCCurve(getSize(), results);
+				results[i] = results[i].clone();
+			return curve;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#clone()
+		 */
+		@Override
+		protected FRCCurve clone()
+		{
+			try
+			{
+				return (FRCCurve) super.clone();
+			}
+			catch (CloneNotSupportedException e)
+			{
+				return null; // This should not happen
+			}
 		}
 
 		/**
@@ -336,12 +363,17 @@ public class FRC
 
 		FloatProcessor[] fft1, fft2;
 
+		// The mean of each image after applying the taper
+		double mean1, mean2;
+
 		boolean basic = false;
 		if (basic)
 		{
 			fft1 = getComplexFFT(ip1);
+			mean1 = taperedImageMean;
 			progess.incrementProgress(THIRD);
 			fft2 = getComplexFFT(ip2);
+			mean2 = taperedImageMean;
 			progess.incrementProgress(THIRD);
 		}
 		else
@@ -351,6 +383,7 @@ public class FRC
 			fht.setShowProgress(false);
 
 			ip1 = getSquareTaperedImage(ip1);
+			mean1 = taperedImageMean;
 			float[] f1 = (float[]) ip1.getPixels();
 			fht.rc2DFHT(f1, false, ip1.getWidth());
 			FHT2 fht1 = new FHT2(ip1, true);
@@ -358,6 +391,7 @@ public class FRC
 			progess.incrementProgress(THIRD);
 
 			ip2 = getSquareTaperedImage(ip2);
+			mean2 = taperedImageMean;
 			float[] f2 = (float[]) ip2.getPixels();
 			fht.rc2DFHT(f2, false, ip2.getWidth());
 			FHT2 fht2 = new FHT2(ip2, true);
@@ -388,12 +422,11 @@ public class FRC
 			computeMirroredFast(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
 		}
 
-		int radius = 1;
 		final int max = centre - 1;
 
 		progess.status("Calculating FRC curve...");
 
-		FRCCurveResult[] results = new FRCCurveResult[(int) max];
+		FRCCurveResult[] results = new FRCCurveResult[max];
 
 		// Radius zero is always 1. Set number of pixel to 1 when r==0.
 		// Avoids divide by zero error.
@@ -402,7 +435,7 @@ public class FRC
 		float[][] images = new float[][] { numerator, absFFT1, absFFT2 };
 
 		final double limit = (useHalfCircle) ? Math.PI : 2 * Math.PI;
-		while (radius < max)
+		for (int radius = 1; radius < max; radius++)
 		{
 			// Inline the calculation for speed
 			double sum0 = 0;
@@ -430,13 +463,12 @@ public class FRC
 			}
 
 			results[radius] = new FRCCurveResult(radius, numSum, sum0, sum1, sum2);
-			radius++;
 		}
 
 		progess.incrementProgress(LAST_THIRD);
 		progess.status("Finished calculating FRC curve...");
 
-		return new FRCCurve(size, results);
+		return new FRCCurve(size, mean1, mean2, results);
 	}
 
 	// Package level to allow JUnit test
@@ -644,6 +676,8 @@ public class FRC
 		MAX_SIZE = SIZES[SIZES.length - 1];
 	}
 
+	private double taperedImageMean;
+
 	/**
 	 * Applies a Tukey window function to the image and then pads it to the next square size power of two.
 	 * 
@@ -652,6 +686,8 @@ public class FRC
 	 */
 	public FloatProcessor getSquareTaperedImage(ImageProcessor dataImage)
 	{
+		taperedImageMean = 0;
+
 		// Use a Tukey window function
 		float[] taperX = getWindowFunctionX(dataImage.getWidth());
 		float[] taperY = getWindowFunctionY(dataImage.getHeight());
@@ -681,9 +717,13 @@ public class FRC
 			final float yTmp = taperY[y];
 			for (int x = 1, i = y * oldWidth + 1, ii = y * newSize + 1; x < maxx_1; x++, i++, ii++)
 			{
-				pixels[ii] = data[i] * taperX[x] * yTmp;
+				float v = data[i] * taperX[x] * yTmp;
+				taperedImageMean += v;
+				pixels[ii] = v;
 			}
 		}
+		// Take the mean over the padded image size
+		taperedImageMean /= pixels.length;
 
 		return new FloatProcessor(newSize, newSize, pixels, null);
 	}
@@ -1268,27 +1308,43 @@ public class FRC
 			return;
 		}
 
-		double[] q = computeQ(frcCurve, nmPerPixel);
+		double[] q = computeQ(frcCurve);
 
 		// H(q) is the factor in the correlation averages related to the localization
 		// uncertainties that depends on the mean and width of the
 		// distribution of localization uncertainties
 		double[] hq = computeHq(q, mean, sigma);
 
-		// Subtract the average residual correlation from the numerator and add to the denominator 
+		// Precompute Q normalisation
+		double qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
+		qValue /= qNorm;
+		
+		// Subtract the average residual correlation from the numerator and add to the denominator
 		for (int i = 1; i < frcCurve.getSize(); i++)
 		{
-			double numerator = frcCurve.get(i).getNumerator();
-			double denominator = frcCurve.get(i).getDenominator();
-			double residual = qValue * hq[i];
+			// The numerator and denominator are computed using the radial sum. 
+			// Convert this to the radial mean by dividing by the number of samples.
+			int n = frcCurve.get(i).getNumberOfSamples();
+			double numerator = frcCurve.get(i).getNumerator() / n;
+			double denominator = frcCurve.get(i).getDenominator() / n;
+			// Matlab code provided by Bernd Reiger computes the residual as:
+			// Q/Qnorm*sinc(q).^2.*exp(-4*pi^2*sigma_mean^2*q.^2./(1+8*pi^2*sigma_std^2*q.^2))./sqrt(1+8*pi^2*sigma_std^2*q.^2);
+			// Qnorm = (1/mean1+1/mean2);
+			// Matlab sinc is sin(pi*x) / pi*x
+			double sinc_q = sinc(Math.PI * q[i]);
+			double residual = qValue * sinc_q * sinc_q * hq[i];
 			frcCurve.get(i).setCorrelation((numerator - residual) / (denominator + residual));
 		}
 	}
 
+	private static double sinc(double x)
+	{
+		return FastMath.sin(x) / x;
+	}
+
 	/**
 	 * Compute q. This is defined as 1/L, 2/L, ..., for all the spatial frequencies in the FRC curve where L is the
-	 * size
-	 * of the field of view. This is converted to nm using the pixel size of the input image.
+	 * size of the field of view. This is converted to nm using the pixel size of the input image.
 	 *
 	 * @param frcCurve
 	 *            the frc curve
@@ -1302,6 +1358,27 @@ public class FRC
 
 		double[] q = new double[frcCurve.getSize()];
 		double conversion = 1.0 / (L * nmPerPixel);
+		for (int i = 0; i < q.length; i++)
+		{
+			q[i] = frcCurve.get(i).radius * conversion;
+		}
+		return q;
+	}
+
+	/**
+	 * Compute q. This is defined as 1/L, 2/L, ..., for all the spatial frequencies in the FRC curve where L is the
+	 * size of the field of view.
+	 *
+	 * @param frcCurve
+	 *            the frc curve
+	 * @return the q array
+	 */
+	public static double[] computeQ(FRCCurve frcCurve)
+	{
+		final double L = frcCurve.fieldOfView;
+
+		double[] q = new double[frcCurve.getSize()];
+		double conversion = 1.0 / L;
 		for (int i = 0; i < q.length; i++)
 		{
 			q[i] = frcCurve.get(i).radius * conversion;
@@ -1332,9 +1409,7 @@ public class FRC
 		hq[0] = 1; // TODO - what should this be at zero?
 		for (int i = 1; i < q.length; i++)
 		{
-			// Q. Should q be in the correct units?
 			double q2 = q[i] * q[i];
-			//double q2 = i * i;
 			double d = 1 + eight_pi2_s2 * q2;
 			hq[i] = FastMath.exp((-four_pi2 * mean * mean * q2) / d) / Math.sqrt(d);
 		}
