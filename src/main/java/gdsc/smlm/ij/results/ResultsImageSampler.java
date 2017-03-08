@@ -32,22 +32,48 @@ import ij.process.ImageProcessor;
  */
 public class ResultsImageSampler
 {
-	private static class LongComparator implements Comparator<long[]>
+	private static class IndexComparator implements Comparator<long[]>
 	{
 		public int compare(long[] o1, long[] o2)
 		{
-			return Long.compare(o1[1], o2[1]);
+			return Long.compare(o1[0], o2[0]);
 		}
 	}
 
-	private static LongComparator lc = new LongComparator();
+	private static class CountComparator implements Comparator<long[]>
+	{
+		public int compare(long[] o1, long[] o2)
+		{
+			int result = Long.compare(o1[1], o2[1]);
+			if (result == 0)
+				// Use index if the same count
+				return Long.compare(o1[0], o2[0]);
+			return result;
+		}
+	}
+
+	private static class ReverseCountComparator implements Comparator<long[]>
+	{
+		public int compare(long[] o1, long[] o2)
+		{
+			int result = Long.compare(o2[1], o1[1]);
+			if (result == 0)
+				// Use index if the same count
+				return Long.compare(o1[0], o2[0]);
+			return result;
+		}
+	}
+
+	private static IndexComparator ic = new IndexComparator();
+	private static CountComparator cc = new CountComparator();
+	private static ReverseCountComparator rcc = new ReverseCountComparator();
 
 	private final MemoryPeakResults results;
 	private final ImageStack stack;
 
-	private final int minx, miny;
-	private final int maxx, maxy;
-	private final int maxx_maxy;
+	private final int lx, ly;
+	private final int xblocks, yblocks;
+	private final int xy_blocks;
 
 	/** The size for samples */
 	public final int size;
@@ -76,13 +102,13 @@ public class ResultsImageSampler
 
 		Rectangle bounds = results.getBounds(true);
 		// Round the image dimensions to the nearest block interval
-		minx = size * (bounds.x / size);
-		miny = size * (bounds.y / size);
+		lx = size * (bounds.x / size);
+		ly = size * (bounds.y / size);
 		int ux = size * (int) Math.ceil((double) (bounds.x + bounds.width) / size);
 		int uy = size * (int) Math.ceil((double) (bounds.y + bounds.height) / size);
-		maxx = ux - minx;
-		maxy = uy - miny;
-		maxx_maxy = maxx * maxy;
+		xblocks = (ux - lx) / size;
+		yblocks = (uy - ly) / size;
+		xy_blocks = xblocks * yblocks;
 	}
 
 	/**
@@ -122,12 +148,8 @@ public class ResultsImageSampler
 
 		// Split the image into frames with zero localisations, low density, high density
 
-		// Sort
-		Arrays.sort(data, lc);
-
-		// For the low and high sample we just split in half. 
-		lower = data.length / 2;
-		upper = data.length - lower;
+		// Sort by index
+		Arrays.sort(data, ic);
 
 		// Do the empty blocks
 		long max = 1 + data[data.length - 1][0];
@@ -140,20 +162,63 @@ public class ResultsImageSampler
 		else
 		{
 			// Randomly sample indices that are not used.
-			// Do this by picking blocks after those with localisations.
 			TLongArrayList list = new TLongArrayList(data.length);
-			long emptyCandidate = 1;
-			for (int i = 0; i < data.length; i++)
+			if (empty < data.length)
 			{
-				long current = data[i][0];
-				// If the current index is bigger than the candidate then it must be empty
-				if (current > emptyCandidate)
-					list.add(emptyCandidate);
-				// Set the next candidate
-				emptyCandidate = current + 1;
+				// We can pick all the indices that are missing 
+				long emptyCandidate = 0;
+				for (int i = 0; i < data.length; i++)
+				{
+					long current = data[i][0];
+					// If the current index is bigger than the candidate then it must be empty
+					while (current > emptyCandidate)
+					{
+						// Add all those that are empty
+						list.add(emptyCandidate++);
+					}
+					// Set the next candidate
+					emptyCandidate = current + 1;
+				}
+			}
+			else
+			{
+				// There are many empty blocks so just sample blocks 
+				// after those with localisations.
+				long emptyCandidate = 1;
+				for (int i = 0; i < data.length; i++)
+				{
+					long current = data[i][0];
+					// If the current index is bigger than the candidate then it must be empty
+					if (current > emptyCandidate)
+					{
+						// Note: we only sample the next empty index after an index with data
+						// This means the number of frames could be lower
+						list.add(emptyCandidate);
+					}
+					// Set the next candidate
+					emptyCandidate = current + 1;
+				}
 			}
 			no = list.toArray();
 		}
+
+		// For the low and high sample we just split in half.
+		// The data must be sorted by count.
+		Arrays.sort(data, cc);
+		lower = data.length / 2;
+		upper = data.length - lower;
+
+		//// Debug indexing
+		//int[] xyz = new int[3];
+		//for (long l = 0; l < max; l++)
+		//{
+		//	getXYZ(l, xyz);
+		//	if (xyz[0] < 0 || xyz[0] > stack.getWidth() || xyz[1] < 0 || xyz[1] > stack.getHeight() || xyz[2] < 1 ||
+		//			xyz[2] > stack.getSize())
+		//	{
+		//		System.out.printf("Bad %d = %s\n", l, Arrays.toString(xyz));
+		//	}
+		//}
 
 		return true;
 	}
@@ -172,17 +237,17 @@ public class ResultsImageSampler
 	private long getIndex(float x, float y, int t)
 	{
 		// Make frames start at zero for the index
-		return (long) ((maxx_maxy) * (t - 1)) + maxx * getY(y) + getX(x);
+		return (long) ((xy_blocks) * (t - 1)) + xblocks * getY(y) + getX(x);
 	}
 
 	private int getX(float f)
 	{
-		return (int) ((f - minx) / size);
+		return (int) ((f - lx) / size);
 	}
 
 	private int getY(float f)
 	{
-		return (int) ((f - miny) / size);
+		return (int) ((f - ly) / size);
 	}
 
 	/**
@@ -194,14 +259,16 @@ public class ResultsImageSampler
 	 */
 	private int[] getXYZ(long index, int[] xyz)
 	{
-		// Frames start at 1
-		xyz[2] = (int) (index / (maxx_maxy)) + 1;
-		int mod = (int) (index % (maxx_maxy));
-		xyz[1] = mod / maxx;
-		xyz[0] = mod % maxx;
+		xyz[2] = (int) (index / (xy_blocks));
+		int mod = (int) (index % (xy_blocks));
+		xyz[1] = mod / xblocks;
+		xyz[0] = mod % xblocks;
+
 		// Convert back to real coords
-		xyz[1] = (xyz[1] * size) + miny;
-		xyz[0] = (xyz[0] * size) + minx;
+		xyz[2]++; // Frames start at 1
+		xyz[1] = (xyz[1] * size) + ly;
+		xyz[0] = (xyz[0] * size) + lx;
+
 		return xyz;
 	}
 
@@ -289,7 +356,7 @@ public class ResultsImageSampler
 
 		// Sort descending by number in the frame
 		long[][] sample = list.toArray(new long[list.size()][]);
-		Arrays.sort(sample, lc);
+		Arrays.sort(sample, rcc);
 
 		int[] xyz = new int[3];
 		Rectangle stackBounds = new Rectangle(stack.getWidth(), stack.getHeight());

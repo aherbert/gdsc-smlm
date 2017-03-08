@@ -260,7 +260,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static boolean iterationConvergeBeforeRefit = false;
 
 	// For the template example
-	private static int nNo = 2, nLow = 2, nHigh = 2;
+	private static int nNo = 2, nLow = 4, nHigh = 4;
 
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2, limitFailCount;
@@ -5196,7 +5196,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			if (sampler == null || sampler.getResults() != results)
 			{
-				sampler = new ResultsImageSampler(results, stack, 64);
+				sampler = new ResultsImageSampler(results, stack, 32);
 				sampler.analyse();
 			}
 			if (!sampler.isValid())
@@ -5249,7 +5249,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// For the dialog
 				String msg = String.format(
 						"Showing image data for the template example.\n \nSample Frames:\nEmpty = %d\nLower density = %d\nHigher density = %d\n",
-						sampler.getNumberOfLowDensitySamples(), sampler.getNumberOfLowDensitySamples(), sampler.getNumberOfHighDensitySamples());
+						sampler.getNumberOfEmptySamples(), sampler.getNumberOfLowDensitySamples(), sampler.getNumberOfHighDensitySamples());
 
 				// Turn off the recorder when the dialog is showing
 				boolean record = Recorder.record;
