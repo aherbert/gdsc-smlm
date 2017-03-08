@@ -310,7 +310,7 @@ public class ResultsImageSampler
 			// Cut out the desired pixels (some may be blank if the block overruns the source image)
 			float[] pixels = new float[size * size];
 			for (int y = 0; y < target.height; y++)
-				for (int x = 0, i = y * size, index = target.y * ip.getWidth() +
+				for (int x = 0, i = y * size, index = (y + target.y) * ip.getWidth() +
 						target.x; x < target.width; x++, i++, index++)
 				{
 					pixels[i] = ip.getf(index);
