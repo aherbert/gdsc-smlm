@@ -100,9 +100,10 @@ public class ResultsImageSampler
 		TLongIntHashMap map = new TLongIntHashMap(results.size());
 		for (PeakResult p : results)
 		{
-			if (p.peak < 1)
+			// Avoid invalid slices
+			if (p.peak < 1 || p.peak > stack.getSize())
 				continue;
-			long index = getIndex(p.getXPosition(), p.getYPosition(), p.peak - 1);
+			long index = getIndex(p.getXPosition(), p.getYPosition(), p.peak);
 			map.adjustOrPutValue(index, 1, 1);
 		}
 
@@ -170,7 +171,8 @@ public class ResultsImageSampler
 	 */
 	private long getIndex(float x, float y, int t)
 	{
-		return (long) ((maxx_maxy) * t) + maxx * getY(y) + getX(x);
+		// Make frames start at zero for the index
+		return (long) ((maxx_maxy) * (t - 1)) + maxx * getY(y) + getX(x);
 	}
 
 	private int getX(float f)
