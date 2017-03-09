@@ -174,7 +174,7 @@ public class ResultsImageSampler
 				// Just enumerate the first N. Since they are empty it should not matter
 				// unless the noise characteristics change over the image duration.
 				long emptyCandidate = 0;
-				long[] list = new long[maxNumberOfEmptySamples];
+				long[] list = new long[(int) Math.min(empty, maxNumberOfEmptySamples)];
 				int c = 0;
 				OUTER: for (int i = 0; i < data.length; i++)
 				{
@@ -184,7 +184,7 @@ public class ResultsImageSampler
 					{
 						// Add all those that are empty
 						list[c++] = emptyCandidate++;
-						if (c == maxNumberOfEmptySamples)
+						if (c == list.length)
 							break OUTER;
 					}
 					// Set the next candidate
