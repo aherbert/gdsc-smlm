@@ -8,6 +8,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.logging.NullTrackProgress;
 import gdsc.core.logging.TrackProgress;
+import gdsc.core.math.RadialStatistics;
 import gdsc.core.utils.FloatEquality;
 import gdsc.core.utils.Maths;
 
@@ -67,6 +68,39 @@ public class FRC
 		 */
 		abstract public String getName();
 	};
+
+	public enum SamplingMethod
+	{
+		//@formatter:off
+		RADIAL_SUM{ public String getName() { return "Radial Sum"; }
+			@Override public boolean isInterpolated() { return false; }}, 
+		INTERPOLATED_SEMI_CIRCLE{ public String getName() { return "Interpolated semi-circle"; }}, 
+		INTERPOLATED_CIRCLE{ public String getName() { return "Interpolated circle"; }}; 
+		//@formatter:on
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+
+		/**
+		 * Checks if the method used interpolated pixels from the exact Fourier circle perimeter.
+		 *
+		 * @return true, if is interpolated
+		 */
+		public boolean isInterpolated()
+		{
+			return true;
+		};
+	}
 
 	/**
 	 * Contains the result of a single ring from the Fourier Ring Correlation (FRC) between two images.
@@ -304,21 +338,79 @@ public class FRC
 	// Properties controlling the algorithm
 
 	/**
-	 * The correlation is computed using intervals around the circle circumference. The number of samples for half
-	 * the
-	 * circle is computed as: Pi * radius * sampling factor
+	 * Depending on the sampling method, the correlation is computed using interpolated values from intervals around the
+	 * circle circumference. The number of samples for half the circle is computed as: Pi * radius * sampling factor.
 	 */
-	public double perimeterSamplingFactor = 1;
+	private double perimeterSamplingFactor = 1;
 
 	/**
-	 * The correlation is computed using intervals around the circle circumference of the Fourier transform. The
-	 * Fourier
-	 * image is 2-fold radially symmetric and so the calculation can use only half the circle for speed. Note: The
-	 * results will differ slightly due to the implementation of the Fourier image not being exactly symmetric and
-	 * the
-	 * sample points used on the perimeter not matching between the two semi-circles.
+	 * Gets the perimeter sampling factor.
+	 *
+	 * @return the perimeter sampling factor
 	 */
-	public boolean useHalfCircle = true;
+	public double getPerimeterSamplingFactor()
+	{
+		return perimeterSamplingFactor;
+	}
+
+	/**
+	 * Sets the perimeter sampling factor.
+	 * <p>
+	 * Depending on the sampling method, the correlation is computed using interpolated values from intervals around the
+	 * circle circumference. The number of samples for half the circle is computed as: Pi * radius * sampling factor.
+	 *
+	 * @param perimeterSamplingFactor
+	 *            the new perimeter sampling factor
+	 */
+	public void setPerimeterSamplingFactor(double perimeterSamplingFactor)
+	{
+		if (perimeterSamplingFactor <= 0)
+			perimeterSamplingFactor = 1;
+		this.perimeterSamplingFactor = perimeterSamplingFactor;
+	}
+
+	/**
+	 * Control the method for generating the Fourier circle.
+	 * <p>
+	 * The correlation is computed using intervals around the circle circumference of the Fourier transform.
+	 * <p>
+	 * Note in the case of using interpolated pixels on the perimeter the Fourier image is 2-fold radially symmetric and
+	 * so the calculation can use only half the circle for speed. Note: The results will differ slightly due to the
+	 * implementation of the Fourier image not being exactly symmetric and the sample points used on the perimeter not
+	 * matching between the two semi-circles.
+	 */
+	private SamplingMethod samplingMethod = SamplingMethod.RADIAL_SUM;
+
+	/**
+	 * Gets the sampling method.
+	 *
+	 * @return the sampling method
+	 */
+	public SamplingMethod getSamplingMethod()
+	{
+		return samplingMethod;
+	}
+
+	/**
+	 * Control the method for generating the Fourier circle.
+	 * <p>
+	 * The correlation is computed using intervals around the circle circumference of the Fourier transform.
+	 * <p>
+	 * Note in the case of using interpolated pixels on the perimeter the Fourier image is 2-fold radially symmetric and
+	 * so the calculation can use only half the circle for speed. Note: The results will differ slightly due to the
+	 * implementation of the Fourier image not being exactly symmetric and the sample points used on the perimeter not
+	 * matching between the two semi-circles.
+	 * 
+	 * @param
+	 * 		   samplingMethod
+	 *            the new sampling method
+	 */
+	public void setSamplingMethod(SamplingMethod samplingMethod)
+	{
+		if (samplingMethod == null)
+			samplingMethod = SamplingMethod.RADIAL_SUM;
+		this.samplingMethod = samplingMethod;
+	}
 
 	/** Used to track the progess within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}. */
 	public TrackProgress progress = null;
@@ -422,47 +514,58 @@ public class FRC
 			computeMirroredFast(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
 		}
 
-		final int max = centre - 1;
-
 		progess.status("Calculating FRC curve...");
 
+		final int max = centre - 1;
 		FRCCurveResult[] results = new FRCCurveResult[max];
 
-		// Radius zero is always 1. Set number of pixel to 1 when r==0.
-		// Avoids divide by zero error.
-		results[0] = new FRCCurveResult(0, 1, 1, 1, 1);
-
-		float[][] images = new float[][] { numerator, absFFT1, absFFT2 };
-
-		final double limit = (useHalfCircle) ? Math.PI : 2 * Math.PI;
-		for (int radius = 1; radius < max; radius++)
+		if (samplingMethod.isInterpolated())
 		{
-			// Inline the calculation for speed
-			double sum0 = 0;
-			double sum1 = 0;
-			double sum2 = 0;
+			// Set the results for the centre pixel
+			int cx = size * centre + centre;
+			results[0] = new FRCCurveResult(0, 1, numerator[cx], absFFT1[cx], absFFT2[cx]);
 
-			final double angleStep = 1 / (perimeterSamplingFactor * radius);
-
-			double angle = 0D;
-			int numSum = 0;
-
-			while (angle < limit)
+			float[][] images = new float[][] { numerator, absFFT1, absFFT2 };
+			final double limit = (samplingMethod == SamplingMethod.INTERPOLATED_SEMI_CIRCLE) ? Math.PI : 2 * Math.PI;
+			for (int radius = 1; radius < max; radius++)
 			{
-				double cosA = FastMath.cos(angle);
-				double x = centre + radius * cosA;
-				//double sinA = FastMath.sin(angle);
-				double y = centre + radius * getSine(angle, cosA);
-				double[] values = getInterpolatedValues(x, y, images, size);
-				sum0 += values[0];
-				sum1 += values[1];
-				sum2 += values[2];
+				// Inline the calculation for speed
+				double sum0 = 0;
+				double sum1 = 0;
+				double sum2 = 0;
 
-				numSum++;
-				angle += angleStep;
+				final double angleStep = 1 / (perimeterSamplingFactor * radius);
+
+				double angle = 0D;
+				int numSum = 0;
+
+				while (angle < limit)
+				{
+					double cosA = FastMath.cos(angle);
+					double x = centre + radius * cosA;
+					//double sinA = FastMath.sin(angle);
+					double y = centre + radius * getSine(angle, cosA);
+					double[] values = getInterpolatedValues(x, y, images, size);
+					sum0 += values[0];
+					sum1 += values[1];
+					sum2 += values[2];
+
+					numSum++;
+					angle += angleStep;
+				}
+
+				results[radius] = new FRCCurveResult(radius, numSum, sum0, sum1, sum2);
 			}
-
-			results[radius] = new FRCCurveResult(radius, numSum, sum0, sum1, sum2);
+		}
+		else
+		{
+			// Use a radial sum object to compute the radial sum as per the DIP image Matlab toolbox
+			double[][] sum = RadialStatistics.radialSumAndCount(size, numerator, absFFT1, absFFT2);
+			for (int radius = 0; radius < max; radius++)
+			{
+				results[radius] = new FRCCurveResult(radius, (int) sum[3][radius], sum[0][radius], sum[1][radius],
+						sum[2][radius]);
+			}
 		}
 
 		progess.incrementProgress(LAST_THIRD);
@@ -936,10 +1039,10 @@ public class FRC
 	 * in the input FRC curve.
 	 * 
 	 * @param frcCurve
-	 * @param method
+	 * @param thresholdMethod
 	 * @return The threshold curve representing the threshold for each input spatial frequency
 	 */
-	public static double[] calculateThresholdCurve(FRCCurve frcCurve, ThresholdMethod method)
+	public static double[] calculateThresholdCurve(FRCCurve frcCurve, ThresholdMethod thresholdMethod)
 	{
 		double[] threshold = new double[frcCurve.getSize()];
 
@@ -963,7 +1066,7 @@ public class FRC
 
 		int sigma = 0; // For the N-sigma methods
 
-		switch (method)
+		switch (thresholdMethod)
 		{
 			case FIXED_1_OVER_7:
 				Arrays.fill(threshold, 1.0 / 7.0);
@@ -1148,16 +1251,16 @@ public class FRC
 	 * between the images.
 	 * 
 	 * @param intersections
-	 * @param method
+	 * @param thresholdMethod
 	 * @return The intersection (or null if no crossings)
 	 */
-	public static double[] getCorrectIntersection(double[][] intersections, ThresholdMethod method)
+	public static double[] getCorrectIntersection(double[][] intersections, ThresholdMethod thresholdMethod)
 	{
 		if (intersections == null || intersections.length == 0)
 			return null;
 
 		int pos = 0;
-		switch (method)
+		switch (thresholdMethod)
 		{
 			case FIXED_1_OVER_7:
 				// always use the first intersection
@@ -1182,31 +1285,36 @@ public class FRC
 
 	/**
 	 * Utility function that calculates the Fourier Image Resolution (FIRE) number using the provided images.
-	 * 
+	 *
 	 * @param ip1
+	 *            the first image
 	 * @param ip2
-	 * @param method
+	 *            the second image
+	 * @param thresholdMethod
+	 *            the threshold method
 	 * @return The FIRE number (in pixels) and the correlation
 	 */
-	public double calculateFireNumber(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod method)
+	public double calculateFireNumber(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod thresholdMethod)
 	{
 		FRCCurve frcCurve = calculateFrcCurve(ip1, ip2);
 		if (frcCurve == null)
 			return Double.NaN;
-		return calculateFireNumber(frcCurve, method);
+		return calculateFireNumber(frcCurve, thresholdMethod);
 	}
 
 	/**
 	 * Utility function that calculates the Fourier Image Resolution (FIRE) number using the provided FRC curve
 	 * data.
-	 * 
+	 *
 	 * @param frcCurve
-	 * @param method
+	 *            the frc curve
+	 * @param thresholdMethod
+	 *            the threshold method
 	 * @return The FIRE number (in pixels)
 	 */
-	public static double calculateFireNumber(FRCCurve frcCurve, ThresholdMethod method)
+	public static double calculateFireNumber(FRCCurve frcCurve, ThresholdMethod thresholdMethod)
 	{
-		FIREResult result = calculateFire(frcCurve, method);
+		FIREResult result = calculateFire(frcCurve, thresholdMethod);
 		if (result == null)
 			return Double.NaN;
 		return result.fireNumber;
@@ -1219,17 +1327,17 @@ public class FRC
 	 *            the first image
 	 * @param ip2
 	 *            the second image
-	 * @param method
+	 * @param thresholdMethod
 	 *            the method
 	 * @return The FIRE result (null if computation failed)
 	 */
-	public FIREResult calculateFire(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod method)
+	public FIREResult calculateFire(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod thresholdMethod)
 	{
 		FRCCurve frcCurve = calculateFrcCurve(ip1, ip2);
 		if (frcCurve == null)
 			return null;
 		frcCurve = getSmoothedCurve(frcCurve, false);
-		return calculateFire(frcCurve, method);
+		return calculateFire(frcCurve, thresholdMethod);
 	}
 
 	/**
@@ -1238,18 +1346,18 @@ public class FRC
 	 *
 	 * @param frcCurve
 	 *            the frc curve
-	 * @param method
+	 * @param thresholdMethod
 	 *            the threshold method
 	 * @return The FIRE result (null if computation failed)
 	 */
-	public static FIREResult calculateFire(FRCCurve frcCurve, ThresholdMethod method)
+	public static FIREResult calculateFire(FRCCurve frcCurve, ThresholdMethod thresholdMethod)
 	{
-		double[] thresholdCurve = calculateThresholdCurve(frcCurve, method);
+		double[] thresholdCurve = calculateThresholdCurve(frcCurve, thresholdMethod);
 		double[][] intersections = getIntersections(frcCurve, thresholdCurve, 2);
 
 		if (intersections != null && intersections.length != 0)
 		{
-			double[] intersection = getCorrectIntersection(intersections, method);
+			double[] intersection = getCorrectIntersection(intersections, thresholdMethod);
 			double fireNumber = frcCurve.fieldOfView / intersection[0];
 			return new FIREResult(fireNumber, intersection[1]);
 		}
@@ -1318,7 +1426,7 @@ public class FRC
 		// Precompute Q normalisation
 		double qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
 		qValue /= qNorm;
-		
+
 		// Subtract the average residual correlation from the numerator and add to the denominator
 		for (int i = 1; i < frcCurve.getSize(); i++)
 		{

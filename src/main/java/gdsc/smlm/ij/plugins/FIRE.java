@@ -53,6 +53,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.frc.FRC;
 import gdsc.smlm.ij.frc.FRC.FIREResult;
 import gdsc.smlm.ij.frc.FRC.FRCCurve;
+import gdsc.smlm.ij.frc.FRC.SamplingMethod;
 import gdsc.smlm.ij.frc.FRC.ThresholdMethod;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
@@ -139,8 +140,10 @@ public class FIRE implements PlugIn
 	}
 
 	private static double perimeterSamplingFactor = 1;
-	private static boolean useHalfCircle = true;
+	private static int samplingMethodIndex = 0;
+	private SamplingMethod samplingMethod;
 	private static int thresholdMethodIndex = 0;
+	private ThresholdMethod thresholdMethod;
 	private static boolean showFRCCurve = true;
 	private static boolean showFRCCurveRepeats = false;
 	private static boolean showFRCTimeEvolution = false;
@@ -195,7 +198,6 @@ public class FIRE implements PlugIn
 
 	private class FIREWorker implements Runnable
 	{
-		final ThresholdMethod method;
 		final double fourierImageScale;
 		final int imageSize;
 
@@ -204,9 +206,8 @@ public class FIRE implements PlugIn
 		Plot2 plot;
 		boolean oom = false;
 
-		public FIREWorker(int id, ThresholdMethod method, double fourierImageScale, int imageSize)
+		public FIREWorker(int id, double fourierImageScale, int imageSize)
 		{
-			this.method = method;
 			this.fourierImageScale = fourierImageScale;
 			this.imageSize = imageSize;
 			name = results.getName() + " [" + id + "]";
@@ -216,10 +217,10 @@ public class FIRE implements PlugIn
 		{
 			try
 			{
-				result = calculateFireNumber(method, fourierImageScale, imageSize);
+				result = calculateFireNumber(samplingMethod, thresholdMethod, fourierImageScale, imageSize);
 				if (showFRCCurve)
 				{
-					plot = createFrcCurve(name, result, method);
+					plot = createFrcCurve(name, result, thresholdMethod);
 					if (showFRCCurveRepeats)
 						// Do this on the thread
 						plot.draw();
@@ -288,8 +289,6 @@ public class FIRE implements PlugIn
 
 		long start = System.currentTimeMillis();
 
-		ThresholdMethod method = FRC.ThresholdMethod.values()[thresholdMethodIndex];
-
 		// Compute FIRE
 		initialise(results, results2);
 
@@ -301,14 +300,14 @@ public class FIRE implements PlugIn
 		{
 			name += " vs " + results2.getName();
 
-			FireResult result = calculateFireNumber(method, fourierImageScale, imageSize);
+			FireResult result = calculateFireNumber(samplingMethod, thresholdMethod, fourierImageScale, imageSize);
 
 			if (result != null)
 			{
 				logResult(name, result);
 
 				if (showFRCCurve)
-					showFrcCurve(name, result, method);
+					showFrcCurve(name, result, thresholdMethod);
 			}
 		}
 		else
@@ -318,14 +317,14 @@ public class FIRE implements PlugIn
 			int repeats = (randomSplit) ? Math.max(1, FIRE.repeats) : 1;
 			if (repeats == 1)
 			{
-				result = calculateFireNumber(method, fourierImageScale, imageSize);
+				result = calculateFireNumber(samplingMethod, thresholdMethod, fourierImageScale, imageSize);
 
 				if (result != null)
 				{
 					logResult(name, result);
 
 					if (showFRCCurve)
-						showFrcCurve(name, result, method);
+						showFrcCurve(name, result, thresholdMethod);
 				}
 			}
 			else
@@ -340,7 +339,7 @@ public class FIRE implements PlugIn
 				IJ.showStatus(TITLE + " computing ...");
 				for (int i = 1; i <= repeats; i++)
 				{
-					FIREWorker w = new FIREWorker(i, method, fourierImageScale, imageSize);
+					FIREWorker w = new FIREWorker(i, fourierImageScale, imageSize);
 					workers.add(w);
 					futures.add(executor.submit(w));
 				}
@@ -395,7 +394,7 @@ public class FIRE implements PlugIn
 					{
 						int index = mapper.map(i + 1);
 						//@formatter:off
-						curve.add(name, result, method, 
+						curve.add(name, result, thresholdMethod, 
 								LUTHelper.getColour(valuesLUT, index),
 								Color.blue, 
 								null //LUTHelper.getColour(noSmoothLUT, index)
@@ -434,7 +433,8 @@ public class FIRE implements PlugIn
 
 			// Only do this once
 			if (showFRCTimeEvolution && result != null && !Double.isNaN(result.fireNumber))
-				showFrcTimeEvolution(name, result.fireNumber, method, nmPerPixel / result.nmPerPixel, imageSize);
+				showFrcTimeEvolution(name, result.fireNumber, thresholdMethod, nmPerPixel / result.nmPerPixel,
+						imageSize);
 		}
 
 		IJ.showStatus(TITLE + " complete : " + Utils.timeToString(System.currentTimeMillis() - start));
@@ -534,10 +534,11 @@ public class FIRE implements PlugIn
 		gd.addMessage("Fourier options:");
 		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
 		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
+		String[] samplingMethodNames = SettingsManager.getNames((Object[]) FRC.SamplingMethod.values());
+		gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
-		gd.addCheckbox("Half_circle", useHalfCircle);
-		String[] methodNames = SettingsManager.getNames((Object[]) FRC.ThresholdMethod.values());
-		gd.addChoice("Threshold_method", methodNames, methodNames[thresholdMethodIndex]);
+		String[] thresholdMethodNames = SettingsManager.getNames((Object[]) FRC.ThresholdMethod.values());
+		gd.addChoice("Threshold_method", thresholdMethodNames, thresholdMethodNames[thresholdMethodIndex]);
 		gd.addCheckbox("Show_FRC_curve", showFRCCurve);
 		if (!titles.isEmpty())
 			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
@@ -569,9 +570,11 @@ public class FIRE implements PlugIn
 
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
+		samplingMethodIndex = gd.getNextChoiceIndex();
+		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
 		perimeterSamplingFactor = gd.getNextNumber();
-		useHalfCircle = gd.getNextBoolean();
 		thresholdMethodIndex = gd.getNextChoiceIndex();
+		thresholdMethod = FRC.ThresholdMethod.values()[thresholdMethodIndex];
 		showFRCCurve = gd.getNextBoolean();
 
 		// Check arguments
@@ -875,8 +878,8 @@ public class FIRE implements PlugIn
 		double[] threshold = null;
 		Plot2 plot = null;
 
-		void add(String name, FireResult result, ThresholdMethod method, Color colorValues, Color colorThreshold,
-				Color colorNoSmooth)
+		void add(String name, FireResult result, ThresholdMethod thresholdMethod, Color colorValues,
+				Color colorThreshold, Color colorNoSmooth)
 		{
 			FRCCurve frcCurve = result.frcCurve;
 
@@ -896,7 +899,7 @@ public class FIRE implements PlugIn
 				}
 
 				// The threshold curve is the same
-				threshold = FRC.calculateThresholdCurve(frcCurve, method);
+				threshold = FRC.calculateThresholdCurve(frcCurve, thresholdMethod);
 				add(colorThreshold, threshold);
 			}
 
@@ -960,27 +963,27 @@ public class FIRE implements PlugIn
 		}
 	}
 
-	private Plot2 createFrcCurve(String name, FireResult result, ThresholdMethod method)
+	private Plot2 createFrcCurve(String name, FireResult result, ThresholdMethod thresholdMethod)
 	{
 		FrcCurve curve = new FrcCurve();
-		curve.add(name, result, method, Color.red, Color.blue, Color.black);
+		curve.add(name, result, thresholdMethod, Color.red, Color.blue, Color.black);
 		curve.addResolution(result.fireNumber, result.correlation);
 		return curve.getPlot();
 	}
 
-	private PlotWindow showFrcCurve(String name, FireResult result, ThresholdMethod method)
+	private PlotWindow showFrcCurve(String name, FireResult result, ThresholdMethod thresholdMethod)
 	{
-		return showFrcCurve(name, result, method, 0);
+		return showFrcCurve(name, result, thresholdMethod, 0);
 	}
 
-	private PlotWindow showFrcCurve(String name, FireResult result, ThresholdMethod method, int flags)
+	private PlotWindow showFrcCurve(String name, FireResult result, ThresholdMethod thresholdMethod, int flags)
 	{
-		Plot2 plot = createFrcCurve(name, result, method);
+		Plot2 plot = createFrcCurve(name, result, thresholdMethod);
 		return Utils.display(plot.getTitle(), plot, flags);
 	}
 
-	private void showFrcTimeEvolution(String name, double fireNumber, ThresholdMethod method, double fourierImageScale,
-			int imageSize)
+	private void showFrcTimeEvolution(String name, double fireNumber, ThresholdMethod thresholdMethod,
+			double fourierImageScale, int imageSize)
 	{
 		IJ.showStatus("Calculating FRC time evolution curve...");
 
@@ -1018,7 +1021,7 @@ public class FIRE implements PlugIn
 			x.add((double) t);
 
 			FIRE f = this.copy();
-			FireResult result = f.calculateFireNumber(method, fourierImageScale, imageSize);
+			FireResult result = f.calculateFireNumber(samplingMethod, thresholdMethod, fourierImageScale, imageSize);
 			double fire = (result == null) ? 0 : result.fireNumber;
 			y.add(fire);
 
@@ -1053,9 +1056,11 @@ public class FIRE implements PlugIn
 	/**
 	 * Calculate the Fourier Image REsolution (FIRE) number using the chosen threshold method. Should be called after
 	 * {@link #initialise(MemoryPeakResults)}
-	 * 
-	 * @param method
-	 * @param method
+	 *
+	 * @param samplingMethod
+	 *            the sampling method
+	 * @param thresholdMethod
+	 *            the threshold method
 	 * @param fourierImageScale
 	 *            The scale to use when reconstructing the super-resolution images (0 for auto)
 	 * @param imageSize
@@ -1063,10 +1068,11 @@ public class FIRE implements PlugIn
 	 *            optimum memory usage)
 	 * @return The FIRE number
 	 */
-	public FireResult calculateFireNumber(ThresholdMethod method, double fourierImageScale, int imageSize)
+	public FireResult calculateFireNumber(SamplingMethod samplingMethod, ThresholdMethod thresholdMethod,
+			double fourierImageScale, int imageSize)
 	{
 		FireImages images = createImages(fourierImageScale, imageSize);
-		return calculateFireNumber(method, images);
+		return calculateFireNumber(samplingMethod, thresholdMethod, images);
 	}
 
 	private TrackProgress progress = new IJTrackProgress();
@@ -1114,15 +1120,16 @@ public class FIRE implements PlugIn
 	 * Calculate the Fourier Image REsolution (FIRE) number using the chosen threshold method. Should be called after
 	 * {@link #initialise(MemoryPeakResults)}
 	 *
-	 * @param method
-	 *            the method
-	 * @param ip1
-	 *            the ip 1
-	 * @param ip2
-	 *            the ip 2
+	 * @param samplingMethod
+	 *            the sampling method
+	 * @param thresholdMethod
+	 *            the threshold method
+	 * @param images
+	 *            the images
 	 * @return The FIRE number
 	 */
-	public FireResult calculateFireNumber(ThresholdMethod method, FireImages images)
+	public FireResult calculateFireNumber(SamplingMethod samplingMethod, ThresholdMethod thresholdMethod,
+			FireImages images)
 	{
 		if (images == null)
 			return null;
@@ -1132,8 +1139,8 @@ public class FIRE implements PlugIn
 		// This should be setup for the total number of repeats. 
 		// If parallelised then do not output the text status messages as they conflict. 
 		frc.progress = progress;
-		frc.perimeterSamplingFactor = perimeterSamplingFactor;
-		frc.useHalfCircle = useHalfCircle;
+		frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
+		frc.setSamplingMethod(samplingMethod);
 		FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 		if (frcCurve == null)
 			return null;
@@ -1143,7 +1150,7 @@ public class FIRE implements PlugIn
 		FRC.getSmoothedCurve(frcCurve, true);
 
 		// Resolution in pixels
-		FIREResult result = FRC.calculateFire(frcCurve, method);
+		FIREResult result = FRC.calculateFire(frcCurve, thresholdMethod);
 		if (result == null)
 			return new FireResult(Double.NaN, Double.NaN, images.nmPerPixel, frcCurve, originalCorrelationCurve);
 		double fireNumber = result.fireNumber;
@@ -1203,10 +1210,16 @@ public class FIRE implements PlugIn
 		// Do not use the signal so results.size() is the number of localisations.
 		IJ.showStatus("Computing FRC curve ...");
 		FireImages images = createImages(fourierImageScale, imageSize, false);
+
+		// TODO - Save the two images to disk. Load the images into the Matlab code that calculates
+		// the Q-estimation and make this plugin match the functionality.
+		IJ.save(new ImagePlus("i1", images.ip1), "/tmp/i1.tif");
+		IJ.save(new ImagePlus("i2", images.ip2), "/tmp/i2.tif");
+
 		FRC frc = new FRC();
 		frc.progress = progress;
-		frc.perimeterSamplingFactor = perimeterSamplingFactor;
-		frc.useHalfCircle = useHalfCircle;
+		frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
+		frc.setSamplingMethod(samplingMethod);
 		FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 		if (frcCurve == null)
 		{
@@ -1215,6 +1228,18 @@ public class FIRE implements PlugIn
 		}
 
 		IJ.showStatus("Running Q-estimation ...");
+
+		// Note:
+		// The method implemented here is based on Matlab code provided by Bernd Rieger.
+		// The idea is to compute the spurious correlation component of the FRC Numerator
+		// using an initial estimate of distribution of the localisation precision (assumed 
+		// to be Gaussian). The Scaled FRC Numerator is plotted and Q can be determined by
+		// adjusting Q and the precision mean and SD to maximise the plateau region of the
+		// plot. This can be done interactively by the user with the effect of the FRC curve
+		// dynamically updated.
+
+		// The sigma mean and std are in the units of super-resolution pixels.
+
 		QPlot qplot = new QPlot(images.nmPerPixel, results.size(), frcCurve);
 
 		// Build a histogram of the localisation precision.
@@ -1256,8 +1281,9 @@ public class FIRE implements PlugIn
 		gd.addMessage("Fourier options:");
 		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
 		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
+		String[] samplingMethodNames = SettingsManager.getNames((Object[]) FRC.SamplingMethod.values());
+		gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
-		gd.addCheckbox("Half_circle", useHalfCircle);
 		if (!titles.isEmpty())
 			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
 
@@ -1273,8 +1299,9 @@ public class FIRE implements PlugIn
 		randomSplit = gd.getNextBoolean();
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
+		samplingMethodIndex = gd.getNextChoiceIndex();
+		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
 		perimeterSamplingFactor = gd.getNextNumber();
-		useHalfCircle = gd.getNextBoolean();
 
 		// Check arguments
 		try
@@ -1324,7 +1351,7 @@ public class FIRE implements PlugIn
 
 	public class QPlot
 	{
-		final double N, qNorm;		
+		final double N, qNorm;
 		double[] vq, sinc, q, qScaled;
 		String title;
 
@@ -1337,7 +1364,7 @@ public class FIRE implements PlugIn
 
 			// For normalisation
 			qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
-			
+
 			// Compute v(q) - The numerator of the FRC divided by the number of pixels 
 			// in the Fourier circle (2*pi*q*L)
 			vq = new double[frcCurve.getSize()];
@@ -1810,8 +1837,8 @@ public class FIRE implements PlugIn
 				FRCCurve smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve, false);
 
 				// Resolution in pixels. Just use the default 1/7 thrshold method
-				ThresholdMethod method = ThresholdMethod.FIXED_1_OVER_7;
-				FIREResult result = FRC.calculateFire(smoothedFrcCurve, method);
+				ThresholdMethod thresholdMethod = ThresholdMethod.FIXED_1_OVER_7;
+				FIREResult result = FRC.calculateFire(smoothedFrcCurve, thresholdMethod);
 				PlotWindow pw = null;
 				if (result != null)
 				{
@@ -1820,8 +1847,10 @@ public class FIRE implements PlugIn
 					// However these were generated using an image scale so adjust for this.
 					fireNumber *= nmPerPixel;
 
-					pw = showFrcCurve(results.getName(), new FireResult(fireNumber, result.correlation, nmPerPixel,
-							smoothedFrcCurve, frcCurve.getCorrelationValues()), method, Utils.NO_TO_FRONT);
+					pw = showFrcCurve(
+							results.getName(), new FireResult(fireNumber, result.correlation, nmPerPixel,
+									smoothedFrcCurve, frcCurve.getCorrelationValues()),
+							thresholdMethod, Utils.NO_TO_FRONT);
 				}
 				wo.add(pw);
 				return work;
