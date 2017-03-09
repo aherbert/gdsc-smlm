@@ -559,7 +559,7 @@ public class FRC
 		}
 		else
 		{
-			// Use a radial sum object to compute the radial sum as per the DIP image Matlab toolbox
+			// Compute the radial sum as per the DIP image Matlab toolbox
 			double[][] sum = RadialStatistics.radialSumAndCount(size, numerator, absFFT1, absFFT2);
 			for (int radius = 0; radius < max; radius++)
 			{
