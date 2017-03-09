@@ -1211,10 +1211,10 @@ public class FIRE implements PlugIn
 		IJ.showStatus("Computing FRC curve ...");
 		FireImages images = createImages(fourierImageScale, imageSize, false);
 
-		// TODO - Save the two images to disk. Load the images into the Matlab code that calculates
-		// the Q-estimation and make this plugin match the functionality.
-		IJ.save(new ImagePlus("i1", images.ip1), "/tmp/i1.tif");
-		IJ.save(new ImagePlus("i2", images.ip2), "/tmp/i2.tif");
+		// DEBUGGING - Save the two images to disk. Load the images into the Matlab 
+		// code that calculates the Q-estimation and make this plugin match the functionality.
+		//IJ.save(new ImagePlus("i1", images.ip1), "/tmp/i1.tif");
+		//IJ.save(new ImagePlus("i2", images.ip2), "/tmp/i2.tif");
 
 		FRC frc = new FRC();
 		frc.progress = progress;
