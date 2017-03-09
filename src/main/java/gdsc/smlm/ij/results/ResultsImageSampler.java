@@ -78,6 +78,13 @@ public class ResultsImageSampler
 	/** The size for samples */
 	public final int size;
 
+	/**
+	 * The max number of empty samples. Since they are empty it should not matter
+	 * unless the noise characteristics change over the image duration. Set to 0 to sample throughout the lifetime of
+	 * the localisation occurrences.
+	 */
+	public int maxNumberOfEmptySamples = 500;
+
 	private long[] no;
 	private long[][] data;
 	private int lower, upper;
@@ -152,8 +159,8 @@ public class ResultsImageSampler
 		Arrays.sort(data, ic);
 
 		// Do the empty blocks
-		long max = 1 + data[data.length - 1][0];
-		long empty = max - map.size();
+		long total = stack.getSize() * xy_blocks;
+		long empty = total - map.size();
 		if (empty == 0)
 		{
 			// All indices are used 
@@ -162,44 +169,71 @@ public class ResultsImageSampler
 		else
 		{
 			// Randomly sample indices that are not used.
-			TLongArrayList list = new TLongArrayList(data.length);
-			if (empty < data.length)
+			if (maxNumberOfEmptySamples > 0)
 			{
-				// We can pick all the indices that are missing 
+				// Just enumerate the first N. Since they are empty it should not matter
+				// unless the noise characteristics change over the image duration.
 				long emptyCandidate = 0;
-				for (int i = 0; i < data.length; i++)
+				long[] list = new long[maxNumberOfEmptySamples];
+				int c = 0;
+				OUTER: for (int i = 0; i < data.length; i++)
 				{
 					long current = data[i][0];
 					// If the current index is bigger than the candidate then it must be empty
 					while (current > emptyCandidate)
 					{
 						// Add all those that are empty
-						list.add(emptyCandidate++);
+						list[c++] = emptyCandidate++;
+						if (c == maxNumberOfEmptySamples)
+							break OUTER;
 					}
 					// Set the next candidate
 					emptyCandidate = current + 1;
 				}
+				no = Arrays.copyOf(list, c);
 			}
 			else
 			{
-				// There are many empty blocks so just sample blocks 
-				// after those with localisations.
-				long emptyCandidate = 1;
-				for (int i = 0; i < data.length; i++)
+				// Sample throughout the localisation time course
+				TLongArrayList list = new TLongArrayList(data.length);
+				if (empty < data.length)
 				{
-					long current = data[i][0];
-					// If the current index is bigger than the candidate then it must be empty
-					if (current > emptyCandidate)
+					// We can pick all the indices that are missing 
+					long emptyCandidate = 0;
+					for (int i = 0; i < data.length; i++)
 					{
-						// Note: we only sample the next empty index after an index with data
-						// This means the number of frames could be lower
-						list.add(emptyCandidate);
+						long current = data[i][0];
+						// If the current index is bigger than the candidate then it must be empty
+						while (current > emptyCandidate)
+						{
+							// Add all those that are empty
+							list.add(emptyCandidate++);
+						}
+						// Set the next candidate
+						emptyCandidate = current + 1;
 					}
-					// Set the next candidate
-					emptyCandidate = current + 1;
 				}
+				else
+				{
+					// There are many empty blocks so just sample blocks 
+					// after those with localisations.
+					long emptyCandidate = 1;
+					for (int i = 0; i < data.length; i++)
+					{
+						long current = data[i][0];
+						// If the current index is bigger than the candidate then it must be empty
+						if (current > emptyCandidate)
+						{
+							// Note: we only sample the next empty index after an index with data
+							// This means the number of frames could be lower
+							list.add(emptyCandidate);
+						}
+						// Set the next candidate
+						emptyCandidate = current + 1;
+					}
+				}
+				no = list.toArray();
 			}
-			no = list.toArray();
 		}
 
 		// For the low and high sample we just split in half.
@@ -221,6 +255,7 @@ public class ResultsImageSampler
 		//}
 
 		return true;
+
 	}
 
 	/**
