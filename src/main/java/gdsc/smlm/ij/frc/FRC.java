@@ -120,7 +120,7 @@ public class FRC
 			this.sum1 = sum1;
 			this.sum2 = sum2;
 			denominator = Math.sqrt(sum1 * sum2);
-			setCorrelation(sum0 / getDenominator());
+			setCorrelation(numerator / denominator);
 		}
 
 		public int getRadius()
@@ -151,7 +151,7 @@ public class FRC
 
 		private void setCorrelation(double correlation)
 		{
-			this.correlation = correlation;
+			this.correlation = Maths.clip(-1, 1, correlation);
 		}
 
 		/**
@@ -223,11 +223,11 @@ public class FRC
 		/** The mean of the second input image after application of the Tukey window taper. */
 		final public double mean2;
 
-		final private FRCCurveResult[] results;
+		private FRCCurveResult[] results;
 
-		private FRCCurve(int size, double mean1, double mean2, FRCCurveResult[] results)
+		private FRCCurve(int fieldOfView, double mean1, double mean2, FRCCurveResult[] results)
 		{
-			this.fieldOfView = size;
+			this.fieldOfView = fieldOfView;
 			this.mean1 = mean1;
 			this.mean2 = mean2;
 			this.results = results;
@@ -265,9 +265,9 @@ public class FRC
 			// Let the Java framework copy the primatives
 			FRCCurve curve = this.clone();
 			// Clone the curve entries
-			FRCCurveResult[] results = curve.results;
+			curve.results = new FRCCurveResult[results.length]; 
 			for (int i = results.length; i-- > 0;)
-				results[i] = results[i].clone();
+				curve.results[i] = results[i].clone();
 			return curve;
 		}
 
@@ -426,7 +426,7 @@ public class FRC
 	private static final double LAST_THIRD = 1.0 - 2 * THIRD;
 
 	/**
-	 * Calculate the Fourier Ring Correlation curve and numerator for two images.
+	 * Calculate the Fourier Ring Correlation curve for two images.
 	 * 
 	 * @param ip1
 	 *            The first image
@@ -450,6 +450,7 @@ public class FRC
 			progess.incrementProgress(1);
 			return null;
 		}
+		final int fieldOfView = FastMath.max(maxWidth, maxHeight);
 		ip1 = pad(ip1, maxWidth, maxHeight);
 		ip2 = pad(ip2, maxWidth, maxHeight);
 
@@ -497,21 +498,31 @@ public class FRC
 		final int centre = size / 2;
 
 		// In-line for speed 
-		float[] dataA1 = (float[]) fft1[0].getPixels();
-		float[] dataB1 = (float[]) fft1[1].getPixels();
-		float[] dataA2 = (float[]) fft2[0].getPixels();
-		float[] dataB2 = (float[]) fft2[1].getPixels();
-		float[] numerator = new float[dataA1.length];
-		float[] absFFT1 = new float[dataA1.length];
-		float[] absFFT2 = new float[dataA1.length];
+		float[] re1 = (float[]) fft1[0].getPixels();
+		float[] im1 = (float[]) fft1[1].getPixels();
+		float[] re2 = (float[]) fft2[0].getPixels();
+		float[] im2 = (float[]) fft2[1].getPixels();
+		float[] conjMult = new float[re1.length];
+		float[] absFFT1 = new float[re1.length];
+		float[] absFFT2 = new float[re1.length];
+
+		// Normalise the FFT to the field of view, i.e. normalise by 1/sqrt(N) for each dimension
+		final double norm = 1.0 / fieldOfView;
+		for (int i = 0; i < re1.length; i++)
+		{
+			re1[i] *= norm;
+			im1[i] *= norm;
+			re2[i] *= norm;
+			im2[i] *= norm;
+		}
 
 		if (basic)
 		{
-			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2);
 		}
 		else
 		{
-			computeMirroredFast(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+			computeMirroredFast(size, conjMult, absFFT1, absFFT2, re1, im1, re2, im2);
 		}
 
 		progess.status("Calculating FRC curve...");
@@ -523,9 +534,9 @@ public class FRC
 		{
 			// Set the results for the centre pixel
 			int cx = size * centre + centre;
-			results[0] = new FRCCurveResult(0, 1, numerator[cx], absFFT1[cx], absFFT2[cx]);
+			results[0] = new FRCCurveResult(0, 1, conjMult[cx], absFFT1[cx], absFFT2[cx]);
 
-			float[][] images = new float[][] { numerator, absFFT1, absFFT2 };
+			float[][] images = new float[][] { conjMult, absFFT1, absFFT2 };
 			final double limit = (samplingMethod == SamplingMethod.INTERPOLATED_SEMI_CIRCLE) ? Math.PI : 2 * Math.PI;
 			for (int radius = 1; radius < max; radius++)
 			{
@@ -560,7 +571,7 @@ public class FRC
 		else
 		{
 			// Compute the radial sum as per the DIP image Matlab toolbox
-			double[][] sum = RadialStatistics.radialSumAndCount(size, numerator, absFFT1, absFFT2);
+			double[][] sum = RadialStatistics.radialSumAndCount(size, conjMult, absFFT1, absFFT2);
 			for (int radius = 0; radius < max; radius++)
 			{
 				results[radius] = new FRCCurveResult(radius, (int) sum[3][radius], sum[0][radius], sum[1][radius],
@@ -571,22 +582,22 @@ public class FRC
 		progess.incrementProgress(LAST_THIRD);
 		progess.status("Finished calculating FRC curve...");
 
-		return new FRCCurve(size, mean1, mean2, results);
+		return new FRCCurve(fieldOfView, mean1, mean2, results);
 	}
 
 	// Package level to allow JUnit test
-	static void compute(float[] numerator, float[] absFFT1, float[] absFFT2, float[] dataA1, float[] dataB1,
-			float[] dataA2, float[] dataB2)
+	static void compute(float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1, float[] im1, float[] re2,
+			float[] im2)
 	{
-		for (int i = dataA1.length; i-- > 0;)
+		for (int i = re1.length; i-- > 0;)
 		{
-			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
+			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, i);
 		}
 	}
 
 	// Package level to allow JUnit test
-	static void computeMirrored(int size, float[] numerator, float[] absFFT1, float[] absFFT2, float[] dataA1,
-			float[] dataB1, float[] dataA2, float[] dataB2)
+	static void computeMirrored(int size, float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1, float[] im1,
+			float[] re2, float[] im2)
 	{
 		// Note: Since this is symmetric around the centre we could compute half of it.
 		// This is non-trivial since the centre is greater than half of the image, i.e.
@@ -599,42 +610,42 @@ public class FRC
 		int i = 0;
 		while (i < size)
 		{
-			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i++);
+			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, i++);
 		}
 
 		// Compute remaining rows up to the centre. These are mirrored
-		int j = numerator.length - 1;
+		int j = conjMult.length - 1;
 		for (int y = 1; y < centre; y++)
 		{
 			// The first entry in each row is not mirrored so compute and increment i
-			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i++);
+			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, i++);
 			for (int x = 1; x < size; x++, i++, j--)
 			{
-				compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
+				compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, i);
 				// Mirror
-				numerator[j] = numerator[i];
+				conjMult[j] = conjMult[i];
 				absFFT1[j] = absFFT1[i];
 				absFFT2[j] = absFFT2[i];
 			}
 			// The last entry in each reverse row is not mirrored so compute and decrement j
-			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, j--);
+			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, j--);
 		}
 
 		// Do the centre row. This is mirrored with itself
-		compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i++);
+		compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, i++);
 		for (int x = 1; x <= centre; x++, i++, j--)
 		{
-			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
+			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, i);
 			// Mirror
-			numerator[j] = numerator[i];
+			conjMult[j] = conjMult[i];
 			absFFT1[j] = absFFT1[i];
 			absFFT2[j] = absFFT2[i];
 		}
 	}
 
 	// Package level to allow JUnit test
-	static void computeMirroredFast(int size, float[] numerator, float[] absFFT1, float[] absFFT2, float[] dataA1,
-			float[] dataB1, float[] dataA2, float[] dataB2)
+	static void computeMirroredFast(int size, float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1,
+			float[] im1, float[] re2, float[] im2)
 	{
 		// The same as computeMirrored but ignores the pixels that are not a mirror since
 		// these are not used in the FRC calculation. 
@@ -649,16 +660,16 @@ public class FRC
 		int i = size;
 
 		// Compute remaining rows up to the centre. These are mirrored
-		int j = numerator.length - 1;
+		int j = conjMult.length - 1;
 		for (int y = 1; y < centre; y++)
 		{
 			// The first entry in each row is not mirrored so just increment i
 			i++;
 			for (int x = 1; x < size; x++, i++, j--)
 			{
-				compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
+				compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, i);
 				// Mirror
-				numerator[j] = numerator[i];
+				conjMult[j] = conjMult[i];
 				absFFT1[j] = absFFT1[i];
 				absFFT2[j] = absFFT2[i];
 			}
@@ -670,24 +681,24 @@ public class FRC
 		i++;
 		for (int x = 1; x <= centre; x++, i++, j--)
 		{
-			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
+			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2, i);
 			// Mirror
-			numerator[j] = numerator[i];
+			conjMult[j] = conjMult[i];
 			absFFT1[j] = absFFT1[i];
 			absFFT2[j] = absFFT2[i];
 		}
 	}
 
-	private static void compute(float[] numerator, float[] absFFT1, float[] absFFT2, float[] dataA1, float[] dataB1,
-			float[] dataA2, float[] dataB2, int i)
+	private static void compute(float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1, float[] im1,
+			float[] re2, float[] im2, int i)
 	{
-		final float a1i = dataA1[i];
-		final float a2i = dataA2[i];
-		final float b1i = dataB1[i];
-		final float b2i = dataB2[i];
-		numerator[i] = a1i * a2i + b1i * b2i;
-		absFFT1[i] = a1i * a1i + b1i * b1i;
-		absFFT2[i] = a2i * a2i + b2i * b2i;
+		final float re1i = re1[i];
+		final float im1i = im1[i];
+		final float re2i = re2[i];
+		final float im2i = im2[i];
+		conjMult[i] = re1i * re2i + im1i * im2i;
+		absFFT1[i] = re1i * re1i + im1i * im1i;
+		absFFT2[i] = re2i * re2i + im2i * im2i;
 	}
 
 	static boolean checkSymmetry(float[] data, int size)
@@ -1397,16 +1408,14 @@ public class FRC
 	 *
 	 * @param frcCurve
 	 *            the frc curve
-	 * @param nmPerPixel
-	 *            the nm per pixel in the images used to compute the FRC curve
 	 * @param qValue
 	 *            the q value
 	 * @param mean
-	 *            the mean of the localisation precision
+	 *            the mean of the Gaussian localisation precision (in units of super-resolution pixels)
 	 * @param sigma
-	 *            the standard deviation of the localisation precision
+	 *            the width of the Gaussian localisation precision (in units of super-resolution pixels)
 	 */
-	public static void applyQCorrection(FRCCurve frcCurve, double nmPerPixel, double qValue, double mean, double sigma)
+	public static void applyQCorrection(FRCCurve frcCurve, double qValue, double mean, double sigma)
 	{
 		if (qValue <= 0)
 		{
@@ -1458,7 +1467,7 @@ public class FRC
 	 *            the frc curve
 	 * @param nmPerPixel
 	 *            the nm per pixel in the images used to compute the FRC curve
-	 * @return the q array
+	 * @return the q array (in nm^-1)
 	 */
 	public static double[] computeQ(FRCCurve frcCurve, double nmPerPixel)
 	{
@@ -1501,9 +1510,9 @@ public class FRC
 	 * @param q
 	 *            the q array
 	 * @param mean
-	 *            the mean of the Gaussian
+	 *            the mean of the Gaussian (in units of super-resolution pixels)
 	 * @param sigma
-	 *            the width of the Gaussian
+	 *            the width of the Gaussian (in units of super-resolution pixels)
 	 * @return the Hq array
 	 */
 	public static double[] computeHq(double[] q, double mean, double sigma)
@@ -1514,7 +1523,7 @@ public class FRC
 		double[] hq = new double[q.length];
 		final double four_pi2 = 4 * Math.PI * Math.PI;
 		double eight_pi2_s2 = 2 * four_pi2 * sigma * sigma;
-		hq[0] = 1; // TODO - what should this be at zero?
+		hq[0] = 1;
 		for (int i = 1; i < q.length; i++)
 		{
 			double q2 = q[i] * q[i];
