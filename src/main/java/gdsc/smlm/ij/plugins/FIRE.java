@@ -49,6 +49,7 @@ import gdsc.core.logging.NullTrackProgress;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.MedianWindow;
+import gdsc.core.utils.Random;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
@@ -171,6 +172,7 @@ public class FIRE implements PlugIn
 	private static boolean showFRCCurve = true;
 	private static boolean showFRCCurveRepeats = false;
 	private static boolean showFRCTimeEvolution = false;
+	private static boolean fitPrecision = false;
 	private static double minQ = 0;
 	private static double maxQ = 0.45;
 
@@ -1273,10 +1275,6 @@ public class FIRE implements PlugIn
 		// plot. This can be done interactively by the user with the effect on the FRC curve
 		// dynamically updated and displayed.
 
-		// Build a histogram of the localisation precision.
-		// Get the initial mean and SD and plot as a Gaussian.
-		PrecisionHistogram histogram = calculatePrecisionHistogram();
-
 		// TODO - Copy the logic in Qcorrection_ims_manual.m to estimate the parameters 
 		// and optimise the plateau region. Then show the plots and allow the user to adjust
 		// the estimates.
@@ -1314,12 +1312,56 @@ public class FIRE implements PlugIn
 			return;
 		}
 
-		// Obtain initial estimate of Q plateau height and decay
+		// Obtain initial estimate of Q plateau height and decay.
+		// This can be done by fitting the precision histogram and then fixing the mean and sigma.
+		// Or it can be done by allowing the precision to be sampled and the mean and sigma
+		// become parameters for fitting.
 
-		// Note: The sigma mean and std are in the units of super-resolution 
-		// pixels so convert from nm to SR pixels.
-		double[] exp_decay = computeExpDecay(histogram.mean / images.nmPerPixel, histogram.sigma / images.nmPerPixel,
-				q);
+		// Build a histogram of the localisation precision.
+		// Get the initial mean and SD and plot as a Gaussian.
+		PrecisionHistogram histogram = calculatePrecisionHistogram();
+		StoredDataStatistics precision = histogram.precision;
+
+		boolean fitPrecision = precision != null && FIRE.fitPrecision;
+
+		double[] exp_decay;
+		if (fitPrecision)
+		{
+			int[] sample = new Random().sample(10000, precision.getN());
+
+			final double four_pi2 = 4 * Math.PI * Math.PI;
+			double[] pre = new double[q.length];
+			for (int i = 1; i < q.length; i++)
+				pre[i] = -four_pi2 * q[i] * q[i];
+
+			// Sample
+			final int n = sample.length;
+			double[] hq = new double[n];
+			for (int j = 0; j < n; j++)
+			{
+				// Scale to SR pixels
+				double s2 = precision.getValue(sample[j]) / images.nmPerPixel;
+				s2 *= s2;
+				for (int i = 1; i < q.length; i++)
+					hq[i] += FastMath.exp(pre[i] * s2);
+			}
+			for (int i = 1; i < q.length; i++)
+				hq[i] /= n;
+
+			exp_decay = new double[q.length];
+			exp_decay[0] = 1;
+			for (int i = 1; i < q.length; i++)
+			{
+				double sinc_q = sinc(Math.PI * q[i]);
+				exp_decay[i] = sinc_q * sinc_q * hq[i];
+			}
+		}
+		else
+		{
+			// Note: The sigma mean and std are in the units of super-resolution 
+			// pixels so convert from nm to SR pixels.
+			exp_decay = computeExpDecay(histogram.mean / images.nmPerPixel, histogram.sigma / images.nmPerPixel, q);
+		}
 
 		double[] norm = new double[exp_decay.length];
 		for (int i = 0; i < norm.length; i++)
@@ -1342,30 +1384,61 @@ public class FIRE implements PlugIn
 		double[] estimate = fit.fit(points.toList());
 		double qValue = FastMath.exp(estimate[0]);
 
-		// Estimate spurious component by promoting plateauness.
-		// The Matlab code used random initial points for a Simplex optimiser.
+		if (fitPrecision)
+		{
+			histogram.sigma = precision.getStandardDeviation();
+			// Normalise sum-of-squares to the SR pixel size
+			double meanSumOfSquares = (precision.getSumOfSquares() / (images.nmPerPixel * images.nmPerPixel)) /
+					precision.getN();
+			histogram.mean = images.nmPerPixel * Math.sqrt(meanSumOfSquares - estimate[1] / (4 * Math.PI * Math.PI));
 
-		// A Brent line search should be pretty deterministic so do simple repeats.
-		// However it will proceed downhill so if the initial point is wrong then 
-		// it will find a sub-optimal result.
-		UnivariateOptimizer o = new BrentOptimizer(1e-3, 1e-6);
-		Plateauness f = new Plateauness(frcnum, exp_decay, low, high);
-		UnivariatePointValuePair p = null;
-		p = findMin(p, o, f, qValue, 0.1);
-		p = findMin(p, o, f, qValue, 0.2);
-		p = findMin(p, o, f, qValue, 0.333);
-		p = findMin(p, o, f, qValue, 0.5);
+			// Do a multivariate fit ...
+			SimplexOptimizer opt = new SimplexOptimizer(1e-6, 1e-10);
+			PointValuePair p = null;
+			MultiPlateauness f = new MultiPlateauness(frcnum, q, low, high);
+			double[] initial = new double[] { histogram.mean / images.nmPerPixel, histogram.sigma / images.nmPerPixel,
+					qValue };
+			p = findMin(p, opt, f, scale(initial, 0.1));
+			p = findMin(p, opt, f, scale(initial, 0.5));
+			p = findMin(p, opt, f, initial);
+			p = findMin(p, opt, f, scale(initial, 2));
+			p = findMin(p, opt, f, scale(initial, 10));
 
-		// Do some Simplex repeats as well
-		SimplexOptimizer opt = new SimplexOptimizer(1e-6, 1e-10);
-		p = findMin(p, opt, f, qValue * 0.1);
-		p = findMin(p, opt, f, qValue * 0.5);
-		p = findMin(p, opt, f, qValue);
-		p = findMin(p, opt, f, qValue * 2);
-		p = findMin(p, opt, f, qValue * 10);
+			if (p != null)
+			{
+				double[] point = p.getPointRef();
+				histogram.mean = point[0] * images.nmPerPixel;
+				histogram.sigma = point[1] * images.nmPerPixel;
+				qValue = point[2];
+			}
+		}
+		else
+		{
+			// Estimate spurious component by promoting plateauness.
+			// The Matlab code used random initial points for a Simplex optimiser.
 
-		if (p != null)
-			qValue = p.getPoint();
+			// A Brent line search should be pretty deterministic so do simple repeats.
+			// However it will proceed downhill so if the initial point is wrong then 
+			// it will find a sub-optimal result.
+			UnivariateOptimizer o = new BrentOptimizer(1e-3, 1e-6);
+			Plateauness f = new Plateauness(frcnum, exp_decay, low, high);
+			UnivariatePointValuePair p = null;
+			p = findMin(p, o, f, qValue, 0.1);
+			p = findMin(p, o, f, qValue, 0.2);
+			p = findMin(p, o, f, qValue, 0.333);
+			p = findMin(p, o, f, qValue, 0.5);
+
+			// Do some Simplex repeats as well
+			SimplexOptimizer opt = new SimplexOptimizer(1e-6, 1e-10);
+			p = findMin(p, opt, f, qValue * 0.1);
+			p = findMin(p, opt, f, qValue * 0.5);
+			p = findMin(p, opt, f, qValue);
+			p = findMin(p, opt, f, qValue * 2);
+			p = findMin(p, opt, f, qValue * 10);
+
+			if (p != null)
+				qValue = p.getPoint();
+		}
 
 		QPlot qplot = new QPlot(images.nmPerPixel, frcCurve, qValue, low, high);
 
@@ -1374,6 +1447,14 @@ public class FIRE implements PlugIn
 		showQEstimationDialog(histogram, qplot, frcCurve, images.nmPerPixel);
 
 		IJ.showStatus(TITLE + " complete");
+	}
+
+	private double[] scale(double[] a, double f)
+	{
+		a = a.clone();
+		for (int i = 0; i < a.length; i++)
+			a[i] *= f;
+		return a;
 	}
 
 	private double[] computeExpDecay(double mean, double sigma, double[] q)
@@ -1426,7 +1507,7 @@ public class FIRE implements PlugIn
 					new UnivariateObjectiveFunction(f));
 			if (next == null)
 				return current;
-			System.out.printf("[%.1f]  %f = %f\n", factor, next.getPoint(), next.getValue());
+			//System.out.printf("LineMin [%.1f]  %f = %f\n", factor, next.getPoint(), next.getValue());
 			if (current != null)
 				return (next.getValue() < current.getValue()) ? next : current;
 			return next;
@@ -1450,7 +1531,29 @@ public class FIRE implements PlugIn
 					: new UnivariatePointValuePair(solution.getPointRef()[0], solution.getValue());
 			if (next == null)
 				return current;
-			System.out.printf("Simplex [%f]  %f = %f\n", qValue, next.getPoint(), next.getValue());
+			//System.out.printf("Simplex [%f]  %f = %f\n", qValue, next.getPoint(), next.getValue());
+			if (current != null)
+				return (next.getValue() < current.getValue()) ? next : current;
+			return next;
+		}
+		catch (Exception e)
+		{
+			return current;
+		}
+	}
+
+	private PointValuePair findMin(PointValuePair current, SimplexOptimizer o, MultivariateFunction f,
+			double[] initialSolution)
+	{
+		try
+		{
+			NelderMeadSimplex simplex = new NelderMeadSimplex(initialSolution.length);
+			PointValuePair next = o.optimize(new MaxEval(1000), new InitialGuess(initialSolution), simplex,
+					new ObjectiveFunction(f), GoalType.MINIMIZE);
+			if (next == null)
+				return current;
+			//System.out.printf("MultiSimplex [%s]  %s = %f\n", Arrays.toString(initialSolution),
+			//		Arrays.toString(next.getPointRef()), next.getValue());
 			if (current != null)
 				return (next.getValue() < current.getValue()) ? next : current;
 			return next;
@@ -1519,6 +1622,84 @@ public class FIRE implements PlugIn
 		}
 	}
 
+	private class MultiPlateauness implements MultivariateFunction
+	{
+		final double frcnum_noisevar = 0.1;
+		final double[] pre, q2;
+		final double n2;
+		final double four_pi2 = 4 * Math.PI * Math.PI;
+
+		@SuppressWarnings("unused")
+		final double[] q;
+		@SuppressWarnings("unused")
+		final int low;
+		
+		/**
+		 * Instantiates a new plateauness.
+		 *
+		 * @param frcnum
+		 *            the scaled FRC numerator
+		 * @param exp_decay
+		 *            the precomputed exponential decay (hq)
+		 * @param low
+		 *            the lower bound of the array for optimisation
+		 * @param high
+		 *            the higher bound of the array for optimisation
+		 */
+		MultiPlateauness(double[] frcnum, double[] q, int low, int high)
+		{
+			this.q = q;
+			this.low = low;
+
+			q2 = new double[q.length];
+
+			// Precompute
+			pre = new double[high - low];
+			for (int i = 0; i < pre.length; i++)
+			{
+				int index = i + low;
+				double sinc_q = (index == 0) ? 1 : sinc(Math.PI * q[index]);
+				pre[i] = frcnum[index] / (sinc_q * sinc_q);
+				q2[i] = q[index] * q[index];
+			}
+			n2 = frcnum_noisevar * frcnum_noisevar;
+		}
+
+		public double value(double[] point) throws IllegalArgumentException
+		{
+			double mean = point[0];
+			double sigma = point[1];
+			double qValue = point[2];
+
+			if (qValue < 1e-16)
+				qValue = 1e-16;
+
+			// Fast computation of a subset of hq
+			double eight_pi2_s2 = 2 * four_pi2 * sigma * sigma;
+			double factor = -four_pi2 * mean * mean;
+
+			// Check 
+			//double[] hq2 = FRC.computeHq(q, mean, sigma);
+
+			double v = 0;
+			for (int i = 0; i < pre.length; i++)
+			{
+				double d = 1 + eight_pi2_s2 * q2[i];
+				double hq = FastMath.exp((factor * q2[i]) / d) / Math.sqrt(d);
+
+				// Check
+				//if (hq != hq2[i + low])
+				//	System.out.printf("hq error: %f != %f\n", hq, hq2[i + low]);
+
+				// Original cost function. Note that each observation has a 
+				// contribution of 0 to 1.
+				double diff = pre[i] / (qValue * hq) - 1;
+				v += 1 - FastMath.exp(-diff * diff / n2);
+			}
+			return v;
+		}
+	}
+
 	private boolean showQEstimationInputDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
@@ -1552,6 +1733,7 @@ public class FIRE implements PlugIn
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
 		if (!titles.isEmpty())
 			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
+		gd.addCheckbox("Fit_precision", fitPrecision);
 		gd.addSlider("MinQ", 0, 0.4, minQ);
 		gd.addSlider("MaxQ", 0.1, 0.5, maxQ);
 
@@ -1570,6 +1752,7 @@ public class FIRE implements PlugIn
 		samplingMethodIndex = gd.getNextChoiceIndex();
 		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
 		perimeterSamplingFactor = gd.getNextNumber();
+		fitPrecision = gd.getNextBoolean();
 		minQ = Maths.clip(0, 0.5, gd.getNextNumber());
 		maxQ = Maths.clip(0, 0.5, gd.getNextNumber());
 
@@ -1776,10 +1959,15 @@ public class FIRE implements PlugIn
 				FrcCurve curve = new FrcCurve();
 				FireResult fireResult = new FireResult(fireNumber, result.correlation, nmPerPixel, smoothedFrcCurve,
 						frcCurve.getCorrelationValues());
-				curve.add(results.getName(), originalFireResult, thresholdMethod, Color.orange, Color.blue,
-						Color.lightGray);
+				double orig = Double.NaN;
+				if (qValue > 0)
+				{
+					curve.add(results.getName(), originalFireResult, thresholdMethod, Color.orange, Color.blue,
+							Color.lightGray);
+					orig = originalFireNumber;
+				}
 				curve.add(results.getName(), fireResult, thresholdMethod, Color.red, Color.blue, Color.black);
-				curve.addResolution(fireNumber, originalFireNumber, result.correlation);
+				curve.addResolution(fireNumber, orig, result.correlation);
 				plot = curve.getPlot();
 
 				pw2 = Utils.display(plot.getTitle(), plot, Utils.NO_TO_FRONT);
@@ -1815,21 +2003,23 @@ public class FIRE implements PlugIn
 		final String title;
 		final double standardAmplitude;
 		final float[] x2;
+		final StoredDataStatistics precision;
 
 		double mean;
 		double sigma;
 
-		PrecisionHistogram(float[][] hist, int nPoints, String title)
+		PrecisionHistogram(float[][] hist, StoredDataStatistics precision, String title)
 		{
 			this.title = title;
 			x = Utils.createHistogramAxis(hist[0]);
 			y = Utils.createHistogramValues(hist[1]);
+			this.precision = precision;
 
 			// Sum the area under the histogram to use for normalisation.
 			// Amplitude = volume / (sigma * sqrt(2*pi)) 
 			// Precompute the correct amplitude for a standard width Gaussian
 			double dx = (hist[0][1] - hist[0][0]);
-			standardAmplitude = nPoints * dx / Math.sqrt(2 * Math.PI);
+			standardAmplitude = precision.getN() * dx / Math.sqrt(2 * Math.PI);
 
 			// Set up for drawing the Gaussian curve
 			double min = x[0];
@@ -1848,6 +2038,7 @@ public class FIRE implements PlugIn
 			this.mean = 20;
 			this.sigma = 2;
 			x = y = x2 = null;
+			precision = null;
 			standardAmplitude = 0;
 		}
 
@@ -1986,7 +2177,7 @@ public class FIRE implements PlugIn
 		int histogramBins = Utils.getBins(precision, Utils.BinMethod.SCOTT);
 		float[][] hist = Utils.calcHistogram(precision.getFloatValues(), yMin, yMax, histogramBins);
 
-		PrecisionHistogram histogram = new PrecisionHistogram(hist, precision.getN(), title);
+		PrecisionHistogram histogram = new PrecisionHistogram(hist, precision, title);
 
 		// Extract non-zero data
 		float[] x = Arrays.copyOf(hist[0], hist[0].length);
