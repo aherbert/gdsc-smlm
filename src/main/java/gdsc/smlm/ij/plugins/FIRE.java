@@ -15,12 +15,29 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.analysis.ParametricUnivariateFunction;
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.function.Gaussian;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.GaussianCurveFitter;
+import org.apache.commons.math3.fitting.SimpleCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
+import org.apache.commons.math3.optim.univariate.BracketFinder;
+import org.apache.commons.math3.optim.univariate.BrentOptimizer;
+import org.apache.commons.math3.optim.univariate.SearchInterval;
+import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
+import org.apache.commons.math3.optim.univariate.UnivariateOptimizer;
+import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
@@ -31,6 +48,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.logging.NullTrackProgress;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.MedianWindow;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
@@ -39,7 +57,7 @@ import gdsc.core.utils.TurboList;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2017 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -53,6 +71,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.frc.FRC;
 import gdsc.smlm.ij.frc.FRC.FIREResult;
 import gdsc.smlm.ij.frc.FRC.FRCCurve;
+import gdsc.smlm.ij.frc.FRC.FRCCurveResult;
 import gdsc.smlm.ij.frc.FRC.SamplingMethod;
 import gdsc.smlm.ij.frc.FRC.ThresholdMethod;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -89,6 +108,11 @@ import ij.process.LUTHelper.LutColour;
  * Implements the FIRE (Fourier Image REsolution) method described in:<br>
  * Niewenhuizen, et al (2013). Measuring image resolution in optical nanoscopy. Nature Methods, 10, 557<br>
  * http://www.nature.com/nmeth/journal/v10/n6/full/nmeth.2448.html
+ * <p>
+ * A second plugin allows estimation of the spurious correlation component contributed by the same molecule being
+ * present in both super-resolution images due to splitting of repeat localisations. The correction Q factor is the
+ * number of times a molecule is repeat localised (i.e. average blinks per molecule). This code was developed using the
+ * Matlab examples provided by Bernd Reiger.
  */
 public class FIRE implements PlugIn
 {
@@ -147,6 +171,8 @@ public class FIRE implements PlugIn
 	private static boolean showFRCCurve = true;
 	private static boolean showFRCCurveRepeats = false;
 	private static boolean showFRCTimeEvolution = false;
+	private static double minQ = 0;
+	private static double maxQ = 0.45;
 
 	private static boolean chooseRoi = false;
 	private static String roiImage = "";
@@ -935,12 +961,21 @@ public class FIRE implements PlugIn
 
 		public void addResolution(double resolution, double correlation)
 		{
+			addResolution(resolution, Double.NaN, correlation);
+		}
+
+		public void addResolution(double resolution, double originalResolution, double correlation)
+		{
 			// Convert back to nm^-1
 			double x = 1 / resolution;
 			plot.setColor(Color.MAGENTA);
 			plot.drawLine(x, 0, x, correlation);
 			plot.setColor(Color.BLACK);
-			plot.addLabel(0, 0, String.format("Resolution = %s %s", Utils.rounded(resolution), units));
+			if (Double.isNaN(originalResolution))
+				plot.addLabel(0, 0, String.format("Resolution = %s %s", Utils.rounded(resolution), units));
+			else
+				plot.addLabel(0, 0, String.format("Resolution = %s %s (Original = %s %s)", Utils.rounded(resolution),
+						units, Utils.rounded(originalResolution), units));
 		}
 
 		private void add(Color color, double[] y)
@@ -1145,7 +1180,7 @@ public class FIRE implements PlugIn
 		if (frcCurve == null)
 			return null;
 		if (correctionQValue > 0)
-			FRC.applyQCorrection(frcCurve, images.nmPerPixel, correctionQValue, correctionMean, correctionSigma);
+			FRC.applyQCorrection(frcCurve, correctionQValue, correctionMean, correctionSigma);
 		double[] originalCorrelationCurve = frcCurve.getCorrelationValues();
 		FRC.getSmoothedCurve(frcCurve, true);
 
@@ -1235,22 +1270,253 @@ public class FIRE implements PlugIn
 		// using an initial estimate of distribution of the localisation precision (assumed 
 		// to be Gaussian). The Scaled FRC Numerator is plotted and Q can be determined by
 		// adjusting Q and the precision mean and SD to maximise the plateau region of the
-		// plot. This can be done interactively by the user with the effect of the FRC curve
-		// dynamically updated.
-
-		// The sigma mean and std are in the units of super-resolution pixels.
-
-		QPlot qplot = new QPlot(images.nmPerPixel, results.size(), frcCurve);
+		// plot. This can be done interactively by the user with the effect on the FRC curve
+		// dynamically updated and displayed.
 
 		// Build a histogram of the localisation precision.
 		// Get the initial mean and SD and plot as a Gaussian.
 		PrecisionHistogram histogram = calculatePrecisionHistogram();
+
+		// TODO - Copy the logic in Qcorrection_ims_manual.m to estimate the parameters 
+		// and optimise the plateau region. Then show the plots and allow the user to adjust
+		// the estimates.
+
+		// Compute the scaled FRC numerator
+		double qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
+		double[] frcnum = new double[frcCurve.getSize()];
+		for (int i = 0; i < frcnum.length; i++)
+		{
+			FRCCurveResult r = frcCurve.get(i);
+			frcnum[i] = qNorm * r.getNumerator() / r.getNumberOfSamples();
+		}
+
+		// Compute the spatial frequency and the region for curve fitting
+		double[] q = FRC.computeQ(frcCurve);
+		int low = 0, high = q.length;
+		for (int i = 0; i < q.length; i++)
+		{
+			if (q[i] <= maxQ)
+				continue;
+			high = i;
+			break;
+		}
+		for (int i = q.length; i-- > 0;)
+		{
+			if (q[i] >= minQ)
+				continue;
+			low = i + 1;
+			break;
+		}
+		// Require we fit at least 10% of the curve
+		if (high - low < q.length * 0.1)
+		{
+			IJ.error(TITLE, "Not enough points for Q estimation");
+			return;
+		}
+
+		// Obtain initial estimate of Q plateau height and decay
+
+		// Note: The sigma mean and std are in the units of super-resolution 
+		// pixels so convert from nm to SR pixels.
+		double[] exp_decay = computeExpDecay(histogram.mean / images.nmPerPixel, histogram.sigma / images.nmPerPixel,
+				q);
+
+		double[] norm = new double[exp_decay.length];
+		for (int i = 0; i < norm.length; i++)
+		{
+			norm[i] = frcnum[i] / exp_decay[i];
+		}
+		// Window of 5 == radius of 2
+		MedianWindow mw = new MedianWindow(norm, 2);
+		double[] smooth = new double[exp_decay.length];
+		for (int i = 0; i < norm.length; i++)
+		{
+			smooth[i] = Math.log(Math.abs(mw.getMedian()));
+			mw.increment();
+		}
+		// Fit with quadratic to find the initial guess.
+		SimpleCurveFitter fit = SimpleCurveFitter.create(new Quadratic(), new double[2]);
+		WeightedObservedPoints points = new WeightedObservedPoints();
+		for (int i = low; i < high; i++)
+			points.add(q[i], smooth[i]);
+		double[] estimate = fit.fit(points.toList());
+		double qValue = FastMath.exp(estimate[0]);
+
+		// Estimate spurious component by promoting plateauness.
+		// The Matlab code used random initial points for a Simplex optimiser.
+
+		// A Brent line search should be pretty deterministic so do simple repeats.
+		// However it will proceed downhill so if the initial point is wrong then 
+		// it will find a sub-optimal result.
+		UnivariateOptimizer o = new BrentOptimizer(1e-3, 1e-6);
+		Plateauness f = new Plateauness(frcnum, exp_decay, low, high);
+		UnivariatePointValuePair p = null;
+		p = findMin(p, o, f, qValue, 0.1);
+		p = findMin(p, o, f, qValue, 0.2);
+		p = findMin(p, o, f, qValue, 0.333);
+		p = findMin(p, o, f, qValue, 0.5);
+
+		// Do some Simplex repeats as well
+		SimplexOptimizer opt = new SimplexOptimizer(1e-6, 1e-10);
+		p = findMin(p, opt, f, qValue * 0.1);
+		p = findMin(p, opt, f, qValue * 0.5);
+		p = findMin(p, opt, f, qValue);
+		p = findMin(p, opt, f, qValue * 2);
+		p = findMin(p, opt, f, qValue * 10);
+
+		if (p != null)
+			qValue = p.getPoint();
+
+		QPlot qplot = new QPlot(images.nmPerPixel, frcCurve, qValue, low, high);
 
 		// Interactive dialog to estimate Q (blinking events per flourophore) using 
 		// sliders for the mean and standard deviation of the localisation precision.
 		showQEstimationDialog(histogram, qplot, frcCurve, images.nmPerPixel);
 
 		IJ.showStatus(TITLE + " complete");
+	}
+
+	private double[] computeExpDecay(double mean, double sigma, double[] q)
+	{
+		double[] hq = FRC.computeHq(q, mean, sigma);
+		double[] exp_decay = new double[q.length];
+		exp_decay[0] = 1;
+		for (int i = 1; i < q.length; i++)
+		{
+			double sinc_q = sinc(Math.PI * q[i]);
+			exp_decay[i] = sinc_q * sinc_q * hq[i];
+		}
+		return exp_decay;
+	}
+
+	/**
+	 * Compute the Sinc function.
+	 *
+	 * @param d
+	 *            the d
+	 * @return the sinc value
+	 */
+	private static double sinc(double d)
+	{
+		return Math.sin(d) / d;
+	}
+
+	private class Quadratic implements ParametricUnivariateFunction
+	{
+		public double value(double x, double... parameters)
+		{
+			return parameters[0] + parameters[1] * x * x;
+		}
+
+		public double[] gradient(double x, double... parameters)
+		{
+			return new double[] { 1, x * x };
+		}
+	}
+
+	private UnivariatePointValuePair findMin(UnivariatePointValuePair current, UnivariateOptimizer o,
+			UnivariateFunction f, double qValue, double factor)
+	{
+		try
+		{
+			BracketFinder bracket = new BracketFinder();
+			bracket.search(f, GoalType.MINIMIZE, qValue * factor, qValue / factor);
+			UnivariatePointValuePair next = o.optimize(GoalType.MINIMIZE, new MaxEval(3000),
+					new SearchInterval(bracket.getLo(), bracket.getHi(), bracket.getMid()),
+					new UnivariateObjectiveFunction(f));
+			if (next == null)
+				return current;
+			System.out.printf("[%.1f]  %f = %f\n", factor, next.getPoint(), next.getValue());
+			if (current != null)
+				return (next.getValue() < current.getValue()) ? next : current;
+			return next;
+		}
+		catch (Exception e)
+		{
+			return current;
+		}
+	}
+
+	private UnivariatePointValuePair findMin(UnivariatePointValuePair current, SimplexOptimizer o,
+			MultivariateFunction f, double qValue)
+	{
+		try
+		{
+			NelderMeadSimplex simplex = new NelderMeadSimplex(1);
+			double[] initialSolution = { qValue };
+			PointValuePair solution = o.optimize(new MaxEval(1000), new InitialGuess(initialSolution), simplex,
+					new ObjectiveFunction(f), GoalType.MINIMIZE);
+			UnivariatePointValuePair next = (solution == null) ? null
+					: new UnivariatePointValuePair(solution.getPointRef()[0], solution.getValue());
+			if (next == null)
+				return current;
+			System.out.printf("Simplex [%f]  %f = %f\n", qValue, next.getPoint(), next.getValue());
+			if (current != null)
+				return (next.getValue() < current.getValue()) ? next : current;
+			return next;
+		}
+		catch (Exception e)
+		{
+			return current;
+		}
+	}
+
+	private class Plateauness implements UnivariateFunction, MultivariateFunction
+	{
+		final double frcnum_noisevar = 0.1;
+		final double[] pre;
+		final double n2;
+
+		/**
+		 * Instantiates a new plateauness.
+		 *
+		 * @param frcnum
+		 *            the scaled FRC numerator
+		 * @param exp_decay
+		 *            the precomputed exponential decay (hq)
+		 * @param low
+		 *            the lower bound of the array for optimisation
+		 * @param high
+		 *            the higher bound of the array for optimisation
+		 */
+		Plateauness(double[] frcnum, double[] exp_decay, int low, int high)
+		{
+			// Precompute
+			pre = new double[high - low];
+			for (int i = 0; i < pre.length; i++)
+			{
+				int index = i + low;
+				pre[i] = frcnum[index] / exp_decay[index];
+			}
+			n2 = frcnum_noisevar * frcnum_noisevar;
+		}
+
+		public double value(double qValue)
+		{
+			if (qValue < 1e-16)
+				qValue = 1e-16;
+			double v = 0;
+			for (int i = 0; i < pre.length; i++)
+			{
+				// Original cost function. Note that each observation has a 
+				// contribution of 0 to 1.
+				double diff = pre[i] / qValue - 1;
+				v += 1 - FastMath.exp(-diff * diff / n2);
+
+				// Modified cost function so that the magnitude of difference over or 
+				// under 1 is penalised the same. This has a problem if FRC numerator 
+				// is negative. Also the range is unchecked so observation can have 
+				// unequal contributions.
+				//double diff = Math.abs(pre[i]) / qValue;
+				//v += Math.abs(Math.log(diff));
+			}
+			return v;
+		}
+
+		public double value(double[] point) throws IllegalArgumentException
+		{
+			return value(point[0]);
+		}
 	}
 
 	private boolean showQEstimationInputDialog()
@@ -1286,6 +1552,8 @@ public class FIRE implements PlugIn
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
 		if (!titles.isEmpty())
 			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
+		gd.addSlider("MinQ", 0, 0.4, minQ);
+		gd.addSlider("MaxQ", 0.1, 0.5, maxQ);
 
 		gd.showDialog();
 
@@ -1302,11 +1570,14 @@ public class FIRE implements PlugIn
 		samplingMethodIndex = gd.getNextChoiceIndex();
 		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
 		perimeterSamplingFactor = gd.getNextNumber();
+		minQ = Maths.clip(0, 0.5, gd.getNextNumber());
+		maxQ = Maths.clip(0, 0.5, gd.getNextNumber());
 
 		// Check arguments
 		try
 		{
 			Parameters.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
+			Parameters.isAbove("MaxQ", maxQ, minQ);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -1351,16 +1622,24 @@ public class FIRE implements PlugIn
 
 	public class QPlot
 	{
-		final double N, qNorm;
-		double[] vq, sinc, q, qScaled;
-		String title;
+		final FRCCurve frcCurve;
+		final double nmPerPixel, qNorm;
+		final double[] vq, sinc2, q, qScaled;
+		final int low, high;
+		String title, title2;
+		FireResult originalFireResult;
+		double originalFireNumber = Double.NaN;
 
-		// Store the last computed value
+		// Store the last plotted value
 		double mean, sigma, qValue;
 
-		QPlot(double nmPerPixel, double N, FRCCurve frcCurve)
+		QPlot(double nmPerPixel, FRCCurve frcCurve, double qValue, int low, int high)
 		{
-			this.N = N;
+			this.nmPerPixel = nmPerPixel;
+			this.frcCurve = frcCurve;
+			this.qValue = qValue;
+			this.low = low;
+			this.high = high;
 
 			// For normalisation
 			qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
@@ -1370,11 +1649,7 @@ public class FIRE implements PlugIn
 			vq = new double[frcCurve.getSize()];
 			for (int i = 0; i < vq.length; i++)
 			{
-				// Use the actual number of samples and not 2*pi*q*L so we normalise 
-				// to the correct scale 
-				double d = frcCurve.get(i).getNumberOfSamples();
-				//double d = 2.0 * Math.PI * i;
-				vq[i] = qNorm * frcCurve.get(i).getNumerator() / d;
+				vq[i] = qNorm * frcCurve.get(i).getNumerator() / frcCurve.get(i).getNumberOfSamples();
 			}
 
 			q = FRC.computeQ(frcCurve);
@@ -1382,10 +1657,9 @@ public class FIRE implements PlugIn
 			qScaled = FRC.computeQ(frcCurve, nmPerPixel);
 
 			// Compute sinc factor
-			sinc = new double[frcCurve.getSize()];
-			sinc[0] = 1; // By definition
-			for (int i = 1; i < sinc.length; i++)
-
+			sinc2 = new double[frcCurve.getSize()];
+			sinc2[0] = 1; // By definition
+			for (int i = 1; i < sinc2.length; i++)
 			{
 				// Note the original equation given in the paper: sinc(pi*q*L)^2 is a typo.
 				// Matlab code provided by Bernd Rieger removes L to compute: sinc(pi*q)^2
@@ -1393,28 +1667,29 @@ public class FIRE implements PlugIn
 				// the function will start at 1 and drop off to zero at q=L.
 
 				// sinc(pi*q)^2
-				sinc[i] = sinc(Math.PI * q[i]);
-				sinc[i] *= sinc[i];
+				sinc2[i] = sinc(Math.PI * q[i]);
+				sinc2[i] *= sinc2[i];
 			}
 
 			// For the plot
 			title = results.getName() + " FRC Numerator Curve";
+			title2 = results.getName() + " FRC Numerator/Correction Ratio";
+
+			// Reset
+			FRC.applyQCorrection(frcCurve, 0, 0, 0);
+			FRCCurve smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve, false);
+			originalFireResult = new FireResult(0, 0, nmPerPixel, smoothedFrcCurve, frcCurve.getCorrelationValues());
+			ThresholdMethod thresholdMethod = ThresholdMethod.FIXED_1_OVER_7;
+			FIREResult result = FRC.calculateFire(smoothedFrcCurve, thresholdMethod);
+			if (result != null)
+			{
+				originalFireNumber = result.fireNumber * nmPerPixel;
+			}
 		}
 
 		private double sinc(double x)
 		{
 			return FastMath.sin(x) / x;
-		}
-
-		final double LOG_10 = Math.log(10);
-
-		double[] getLog(double[] hq)
-		{
-			double[] l = new double[hq.length];
-			for (int q = 0; q < hq.length; q++)
-				// Do this using log10
-				l[q] = Math.log(Math.abs(vq[q] / hq[q] / sinc[q])) / LOG_10;
-			return l;
 		}
 
 		double[] smooth(double[] l)
@@ -1433,33 +1708,104 @@ public class FIRE implements PlugIn
 			return l;
 		}
 
-		PlotWindow plot(double mean, double sigma)
+		PlotWindow[] plot(double mean, double sigma, double qValue)
 		{
 			this.mean = mean;
 			this.sigma = sigma;
+			this.qValue = qValue;
 
-			double[] hq = FRC.computeHq(q, mean, sigma);
-			double[] l = getLog(hq);
-			// Avoid bad value at zero
-			l[0] = l[1];
-			double[] sl = smooth(l);
+			double mu = mean / nmPerPixel;
+			double sd = sigma / nmPerPixel;
 
-			// log(NQ/4) = min of the curve => Q = 4*exp(min) / N
-			// where N == Number of localisations
-			double min = Maths.min(sl);
-			// Use Math.pow since we are using log10. 
-			qValue = 4 * Math.pow(10, min) / N;
+			double[] hq = FRC.computeHq(q, mu, sd);
+			double[] correction = new double[hq.length];
+			double[] difference = new double[vq.length];
+			double[] ratio = new double[vq.length];
 
-			Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "Log10 Scaled FRC Numerator");
-			plot.setColor(Color.black);
-			plot.addPoints(qScaled, l, Plot.LINE);
-			plot.addLabel(0, 0, String.format("Q = %.3f (Precision = %.3f +/- %.3f)", qValue, mean, sigma));
+			for (int i = 0; i < hq.length; i++)
+			{
+				// Note: vq already has the qNorm factor applied so we do not 
+				// divide qValue by qNorm.
+				correction[i] = qValue * sinc2[i] * hq[i];
+				// This is not actually the corrected numerator since it is made absolute
+				difference[i] = Math.abs(vq[i] - correction[i]);
+				ratio[i] = vq[i] / correction[i];
+			}
+
+			// Add this to aid is manual adjustment
+			double[] exp_decay = computeExpDecay(mu, sd, q);
+			Plateauness p = new Plateauness(vq, exp_decay, low, high);
+			double plateauness = p.value(qValue);
+
+			Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "FRC Numerator");
+
+			String label = String.format("Q = %.3f (Precision = %.3f +/- %.3f)", qValue, mean, sigma);
 			plot.setColor(Color.red);
-			plot.addPoints(qScaled, sl, Plot.LINE);
-			plot.setColor(Color.blue);
-			plot.drawLine(0, min, qScaled[qScaled.length - 1], min);
+			plot.addPoints(qScaled, makeStrictlyPositive(vq), Plot.LINE);
+			if (qValue > 0)
+			{
+				label += String.format(". Plateauness = %.3f", plateauness);
+				plot.setColor(Color.blue);
+				plot.addPoints(qScaled, makeStrictlyPositive(difference), Plot.LINE);
+				plot.setColor(Color.darkGray);
+				plot.addPoints(qScaled, correction, Plot.DOT);
+			}
+			plot.setColor(Color.black);
+			plot.addLabel(0, 0, label);
 
-			return Utils.display(title, plot, Utils.NO_TO_FRONT);
+			plot.setAxisYLog(true);
+			PlotWindow pw1 = Utils.display(title, plot, Utils.NO_TO_FRONT);
+			plot.setLimitsToFit(true); // For the log scale this seems to only work after drawing
+
+			// Show how the resolution changes
+
+			FRC.applyQCorrection(frcCurve, qValue, mu, sd);
+			FRCCurve smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve, false);
+
+			// Resolution in pixels. Just use the default 1/7 thrshold method
+			ThresholdMethod thresholdMethod = ThresholdMethod.FIXED_1_OVER_7;
+			FIREResult result = FRC.calculateFire(smoothedFrcCurve, thresholdMethod);
+			PlotWindow pw2 = null;
+			if (result != null)
+			{
+				double fireNumber = result.fireNumber;
+				// The FIRE number will be returned in pixels relative to the input images. 
+				// However these were generated using an image scale so adjust for this.
+				fireNumber *= nmPerPixel;
+
+				FrcCurve curve = new FrcCurve();
+				FireResult fireResult = new FireResult(fireNumber, result.correlation, nmPerPixel, smoothedFrcCurve,
+						frcCurve.getCorrelationValues());
+				curve.add(results.getName(), originalFireResult, thresholdMethod, Color.orange, Color.blue,
+						Color.lightGray);
+				curve.add(results.getName(), fireResult, thresholdMethod, Color.red, Color.blue, Color.black);
+				curve.addResolution(fireNumber, originalFireNumber, result.correlation);
+				plot = curve.getPlot();
+
+				pw2 = Utils.display(plot.getTitle(), plot, Utils.NO_TO_FRONT);
+			}
+
+			// Produce a ratio plot. Plateauness is designed to achieve a value of 1 for this ratio. 
+			plot = new Plot2(title2, "Spatial Frequency (nm^-1)", "FRC Numerator / Spurious component");
+			plot.setColor(Color.blue);
+			plot.addPoints(qScaled, ratio, Plot.LINE);
+			plot.setLimits(0, qScaled[qScaled.length - 1], 0, 2);
+			PlotWindow pw3 = Utils.display(title2, plot, Utils.NO_TO_FRONT);
+
+			return new PlotWindow[] { pw1, pw2, pw3 };
+		}
+
+		private double[] makeStrictlyPositive(double[] data)
+		{
+			double min = Double.POSITIVE_INFINITY;
+			data = data.clone();
+			for (int i = 0; i < data.length; i++)
+				if (data[i] > 0 && data[i] < min)
+					min = data[i];
+			for (int i = 0; i < data.length; i++)
+				if (data[i] <= 0)
+					data[i] = min;
+			return data;
 		}
 	}
 
@@ -1820,49 +2166,20 @@ public class FIRE implements PlugIn
 			@Override
 			Work createResult(Work work)
 			{
-				wo.add(qplot.plot(work.mean, work.sigma));
-				work = work.clone();
-				work.qValue = qplot.qValue;
-				return work;
-			}
-		});
-		// Compute the FIRE number. This uses the q-value from the previous worker
-		add(stacks, workers, workers.get(workers.size() - 1), new Worker()
-		{
-			@Override
-			Work createResult(Work work)
-			{
-				FRC.applyQCorrection(frcCurve, nmPerPixel, work.qValue, work.mean, work.sigma);
-
-				FRCCurve smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve, false);
-
-				// Resolution in pixels. Just use the default 1/7 thrshold method
-				ThresholdMethod thresholdMethod = ThresholdMethod.FIXED_1_OVER_7;
-				FIREResult result = FRC.calculateFire(smoothedFrcCurve, thresholdMethod);
-				PlotWindow pw = null;
-				if (result != null)
-				{
-					double fireNumber = result.fireNumber;
-					// The FIRE number will be returned in pixels relative to the input images. 
-					// However these were generated using an image scale so adjust for this.
-					fireNumber *= nmPerPixel;
-
-					pw = showFrcCurve(
-							results.getName(), new FireResult(fireNumber, result.correlation, nmPerPixel,
-									smoothedFrcCurve, frcCurve.getCorrelationValues()),
-							thresholdMethod, Utils.NO_TO_FRONT);
-				}
-				wo.add(pw);
+				for (PlotWindow pw : qplot.plot(work.mean, work.sigma, work.qValue))
+					wo.add(pw);
 				return work;
 			}
 		});
 
 		ArrayList<Thread> threads = startWorkers(workers);
 
-		wo.expected = workers.size();
+		// The number of plots
+		wo.expected = 4;
 
 		double mean10 = histogram.mean * 10;
 		double sd10 = histogram.sigma * 10;
+		double q10 = qplot.qValue * 10;
 
 		String macroOptions = Macro.getOptions();
 		if (macroOptions != null)
@@ -1870,7 +2187,8 @@ public class FIRE implements PlugIn
 			// If inside a macro then just get the options and run the work
 			double mean = Double.parseDouble(Macro.getValue(macroOptions, "mean", Double.toString(mean10))) / 10;
 			double sigma = Double.parseDouble(Macro.getValue(macroOptions, "sd", Double.toString(sd10))) / 10;
-			Work work = new Work(mean, sigma);
+			double qValue = Double.parseDouble(Macro.getValue(macroOptions, "qValue", Double.toString(q10))) / 10;
+			Work work = new Work(mean, sigma, qValue);
 			for (WorkStack stack : stacks)
 				stack.addWork(work);
 
@@ -1879,7 +2197,7 @@ public class FIRE implements PlugIn
 		else
 		{
 			// Draw the plots with the first set of work
-			Work work = new Work(histogram.mean, histogram.sigma);
+			Work work = new Work(histogram.mean, histogram.sigma, qplot.qValue);
 			for (WorkStack stack : stacks)
 				stack.addWork(work);
 
@@ -1888,13 +2206,15 @@ public class FIRE implements PlugIn
 			gd.addHelp(About.HELP_URL);
 
 			gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n" +
-					String.format("Precision estimate = %.3f +/- %.3f", histogram.mean, histogram.sigma));
+					String.format("Precision estimate = %.3f +/- %.3f\n", histogram.mean, histogram.sigma) +
+					String.format("Q estimate = %s", Utils.rounded(qplot.qValue)));
 
 			gd.addSlider("Mean (x10)", Math.max(0, mean10 - sd10 * 2), mean10 + sd10 * 2, mean10);
 			gd.addSlider("SD (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
+			gd.addSlider("Q (x10)", 0, Math.max(50, q10 * 2), q10);
 			gd.addCheckbox("reset", false);
 
-			gd.addDialogListener(new FIREDialogListener(gd, histogram, stacks));
+			gd.addDialogListener(new FIREDialogListener(gd, histogram, qplot, stacks));
 
 			gd.showDialog();
 
@@ -1915,6 +2235,7 @@ public class FIRE implements PlugIn
 		{
 			Recorder.recordOption("mean", Double.toString(mean * 10));
 			Recorder.recordOption("sd", Double.toString(sigma * 10));
+			Recorder.recordOption("q", Double.toString(qValue * 10));
 		}
 
 		return true;
@@ -1999,10 +2320,11 @@ public class FIRE implements PlugIn
 		long time = 0;
 		double mean, sigma, qValue = 0;
 
-		Work(double mean, double sigma)
+		Work(double mean, double sigma, double qValue)
 		{
 			this.mean = mean;
 			this.sigma = sigma;
+			this.qValue = qValue;
 		}
 
 		@Override
@@ -2165,25 +2487,28 @@ public class FIRE implements PlugIn
 		boolean notActive = true;
 		volatile int ignore = 0;
 		ArrayList<WorkStack> stacks;
-		double defaultMean, defaultSigma;
-		String m, s;
-		TextField tf1, tf2;
+		double defaultMean, defaultSigma, defaultQValue;
+		String m, s, q;
+		TextField tf1, tf2, tf3;
 		Checkbox cb;
 		final boolean isMacro;
 
-		FIREDialogListener(GenericDialog gd, PrecisionHistogram histogram, ArrayList<WorkStack> stacks)
+		FIREDialogListener(GenericDialog gd, PrecisionHistogram histogram, QPlot qplot, ArrayList<WorkStack> stacks)
 		{
 			time = System.currentTimeMillis() + 1000;
 			this.stacks = stacks;
 			this.defaultMean = histogram.mean;
 			this.defaultSigma = histogram.sigma;
+			this.defaultQValue = qplot.qValue;
 			isMacro = Utils.isMacro();
 			// For the reset
 			tf1 = (TextField) gd.getNumericFields().get(0);
 			tf2 = (TextField) gd.getNumericFields().get(1);
+			tf3 = (TextField) gd.getNumericFields().get(2);
 			cb = (Checkbox) (gd.getCheckboxes().get(0));
 			m = tf1.getText();
 			s = tf2.getText();
+			q = tf3.getText();
 		}
 
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
@@ -2202,6 +2527,7 @@ public class FIRE implements PlugIn
 
 			double mean = Math.abs(gd.getNextNumber()) / 10;
 			double sigma = Math.abs(gd.getNextNumber()) / 10;
+			double qValue = Math.abs(gd.getNextNumber()) / 10;
 			boolean reset = gd.getNextBoolean();
 
 			// Even events from the slider come through as TextEvent from the TextField
@@ -2215,9 +2541,10 @@ public class FIRE implements PlugIn
 				cb.setState(false);
 				mean = this.defaultMean;
 				sigma = this.defaultSigma;
+				qValue = this.defaultQValue;
 			}
 
-			Work work = new Work(mean, sigma);
+			Work work = new Work(mean, sigma, qValue);
 
 			// Implement a delay to allow typing.
 			// This is also applied to the sliders which we do not want. 
@@ -2235,9 +2562,10 @@ public class FIRE implements PlugIn
 			{
 				// These trigger dialogItemChanged(...) so do them after we added 
 				// work to the queue and ignore the events
-				ignore = 2;
+				ignore = 3;
 				tf1.setText(m);
 				tf2.setText(s);
+				tf3.setText(q);
 			}
 
 			return true;
