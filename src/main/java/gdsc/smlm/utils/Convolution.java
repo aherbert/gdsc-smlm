@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
 
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
+import org.jtransforms.fft.DoubleFFT_1D;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

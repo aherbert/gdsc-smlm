@@ -26,13 +26,13 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.apache.commons.math3.util.FastMath;
+import org.jtransforms.fft.DoubleFFT_2D;
+import org.jtransforms.fft.FloatFFT_2D;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_2D;
-import edu.emory.mathcs.jtransforms.fft.FloatFFT_2D;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.Maths;
@@ -1159,8 +1159,9 @@ public class PCPALMAnalysis implements PlugInFilter
 			for (int j = correlation.length; j < data.length; j++)
 				data[j] = 0;
 
-			DoubleFFT_2D fftCorr = new DoubleFFT_2D(size, size);
-			fftCorr.realInverseFull(data, true);
+			// Re-use the pre-computed object
+			//fft = new DoubleFFT_2D(size, size);
+			fft.realInverseFull(data, true);
 
 			// Get the real part of the data
 			for (int i = 0, j = 0; i < data.length; i += 2, j++)
@@ -1184,8 +1185,9 @@ public class PCPALMAnalysis implements PlugInFilter
 			for (int j = correlation.length; j < data.length; j++)
 				data[j] = 0;
 
-			FloatFFT_2D fftCorr = new FloatFFT_2D(size, size);
-			fftCorr.realInverseFull(data, true);
+			// Re-use the pre-computed object
+			//fft = new FloatFFT_2D(size, size);
+			fft.realInverseFull(data, true);
 
 			// Get the real part of the data
 			for (int i = 0, j = 0; i < data.length; i += 2, j++)
