@@ -242,6 +242,9 @@ public class FRC
 	 */
 	public static class FRCCurve implements Cloneable
 	{
+		/** The nm per pixel for the super-resolution images */
+		final public double nmPerPixel;
+
 		/** The size of the field of view in the Fourier image (named L) */
 		final public int fieldOfView;
 
@@ -252,8 +255,9 @@ public class FRC
 
 		private FRCCurveResult[] results;
 
-		private FRCCurve(int fieldOfView, double mean1, double mean2, FRCCurveResult[] results)
+		private FRCCurve(double nmPerPixel, int fieldOfView, double mean1, double mean2, FRCCurveResult[] results)
 		{
+			this.nmPerPixel = nmPerPixel;
 			this.fieldOfView = fieldOfView;
 			this.mean1 = mean1;
 			this.mean2 = mean2;
@@ -349,7 +353,7 @@ public class FRC
 	 */
 	public static class FIREResult
 	{
-		/** The fire number (in pixels). */
+		/** The fire number (in nm). */
 		final public double fireNumber;
 
 		/** The correlation. */
@@ -475,14 +479,16 @@ public class FRC
 
 	/**
 	 * Calculate the Fourier Ring Correlation curve for two images.
-	 * 
+	 *
 	 * @param ip1
 	 *            The first image
 	 * @param ip2
 	 *            The second image
+	 * @param nmPerPixel
+	 *            the nm per pixel for the super-resolution images
 	 * @return the FRC curve
 	 */
-	public FRCCurve calculateFrcCurve(ImageProcessor ip1, ImageProcessor ip2)
+	public FRCCurve calculateFrcCurve(ImageProcessor ip1, ImageProcessor ip2, double nmPerPixel)
 	{
 		// Allow a progress tracker to be input
 		TrackProgress progess = getTrackProgress();
@@ -595,7 +601,7 @@ public class FRC
 			im2 = (float[]) fft[1].getPixels();
 			progess.incrementProgress(THIRD);
 		}
-		
+
 		progess.status("Preparing FRC curve calculation...");
 
 		final int centre = size / 2;
@@ -686,7 +692,7 @@ public class FRC
 		progess.incrementProgress(LAST_THIRD);
 		progess.status("Finished calculating FRC curve...");
 
-		return new FRCCurve(fieldOfView, mean1, mean2, results);
+		return new FRCCurve(nmPerPixel, fieldOfView, mean1, mean2, results);
 	}
 
 	// Package level to allow JUnit test
@@ -1418,13 +1424,16 @@ public class FRC
 	 *            the first image
 	 * @param ip2
 	 *            the second image
+	 * @param nmPerPixel
+	 *            the nm per pixel
 	 * @param thresholdMethod
 	 *            the threshold method
 	 * @return The FIRE number (in pixels) and the correlation
 	 */
-	public double calculateFireNumber(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod thresholdMethod)
+	public double calculateFireNumber(ImageProcessor ip1, ImageProcessor ip2, double nmPerPixel,
+			ThresholdMethod thresholdMethod)
 	{
-		FRCCurve frcCurve = calculateFrcCurve(ip1, ip2);
+		FRCCurve frcCurve = calculateFrcCurve(ip1, ip2, nmPerPixel);
 		if (frcCurve == null)
 			return Double.NaN;
 		return calculateFireNumber(frcCurve, thresholdMethod);
@@ -1455,13 +1464,16 @@ public class FRC
 	 *            the first image
 	 * @param ip2
 	 *            the second image
+	 * @param nmPerPixel
+	 *            the nm per pixel
 	 * @param thresholdMethod
 	 *            the method
 	 * @return The FIRE result (null if computation failed)
 	 */
-	public FIREResult calculateFire(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod thresholdMethod)
+	public FIREResult calculateFire(ImageProcessor ip1, ImageProcessor ip2, double nmPerPixel,
+			ThresholdMethod thresholdMethod)
 	{
-		FRCCurve frcCurve = calculateFrcCurve(ip1, ip2);
+		FRCCurve frcCurve = calculateFrcCurve(ip1, ip2, nmPerPixel);
 		if (frcCurve == null)
 			return null;
 		frcCurve = getSmoothedCurve(frcCurve, false);
@@ -1487,7 +1499,7 @@ public class FRC
 		{
 			double[] intersection = getCorrectIntersection(intersections, thresholdMethod);
 			double fireNumber = frcCurve.fieldOfView / intersection[0];
-			return new FIREResult(fireNumber, intersection[1]);
+			return new FIREResult(frcCurve.nmPerPixel * fireNumber, intersection[1]);
 		}
 		else
 		{
@@ -1542,7 +1554,8 @@ public class FRC
 			return;
 		}
 
-		double[] q = computeQ(frcCurve);
+		// q must be in pixel units
+		double[] q = computeQ(frcCurve, false);
 
 		// H(q) is the factor in the correlation averages related to the localization
 		// uncertainties that depends on the mean and width of the
@@ -1586,7 +1599,7 @@ public class FRC
 	 *            the nm per pixel in the images used to compute the FRC curve
 	 * @return the q array (in nm^-1)
 	 */
-	public static double[] computeQ(FRCCurve frcCurve, double nmPerPixel)
+	private static double[] computeQ(FRCCurve frcCurve, double nmPerPixel)
 	{
 		final double L = frcCurve.fieldOfView;
 
@@ -1601,23 +1614,17 @@ public class FRC
 
 	/**
 	 * Compute q. This is defined as 1/L, 2/L, ..., for all the spatial frequencies in the FRC curve where L is the
-	 * size of the field of view.
+	 * size of the field of view. This is optionally converted to nm using the pixel size units in the FRC curve.
 	 *
 	 * @param frcCurve
 	 *            the frc curve
+	 * @param useUnits
+	 *            Set to true to convert the pixel units to nm
 	 * @return the q array
 	 */
-	public static double[] computeQ(FRCCurve frcCurve)
+	public static double[] computeQ(FRCCurve frcCurve, boolean useUnits)
 	{
-		final double L = frcCurve.fieldOfView;
-
-		double[] q = new double[frcCurve.getSize()];
-		double conversion = 1.0 / L;
-		for (int i = 0; i < q.length; i++)
-		{
-			q[i] = frcCurve.get(i).radius * conversion;
-		}
-		return q;
+		return computeQ(frcCurve, (useUnits) ? frcCurve.nmPerPixel : 1);
 	}
 
 	/**

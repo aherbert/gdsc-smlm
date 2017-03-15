@@ -213,18 +213,20 @@ public class FIRE implements PlugIn
 	{
 		final double fireNumber;
 		final double correlation;
-		final double nmPerPixel;
 		final FRCCurve frcCurve;
 		final double[] originalCorrelationCurve;
 
-		FireResult(double fireNumber, double correlation, double nmPerPixel, FRCCurve frcCurve,
-				double[] originalCorrelationCurve)
+		FireResult(double fireNumber, double correlation, FRCCurve frcCurve, double[] originalCorrelationCurve)
 		{
 			this.fireNumber = fireNumber;
 			this.correlation = correlation;
-			this.nmPerPixel = nmPerPixel;
 			this.frcCurve = frcCurve;
 			this.originalCorrelationCurve = originalCorrelationCurve;
+		}
+
+		double getNmPerPixel()
+		{
+			return frcCurve.nmPerPixel;
 		}
 	}
 
@@ -468,7 +470,7 @@ public class FIRE implements PlugIn
 
 			// Only do this once
 			if (showFRCTimeEvolution && result != null && !Double.isNaN(result.fireNumber))
-				showFrcTimeEvolution(name, result.fireNumber, thresholdMethod, nmPerPixel / result.nmPerPixel,
+				showFrcTimeEvolution(name, result.fireNumber, thresholdMethod, nmPerPixel / result.getNmPerPixel(),
 						imageSize);
 		}
 
@@ -478,12 +480,12 @@ public class FIRE implements PlugIn
 	private void logResult(String name, FireResult result)
 	{
 		IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name, Utils.rounded(result.fireNumber, 4),
-				units, Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
+				units, Utils.rounded(nmPerPixel / result.getNmPerPixel(), 3)));
 		if (Double.isNaN(result.fireNumber))
 		{
 			Utils.log(
 					"%s Warning: NaN result possible if the resolution is below the pixel size of the input Fourier image (%s %s).",
-					TITLE, Utils.rounded(result.nmPerPixel), units);
+					TITLE, Utils.rounded(result.getNmPerPixel()), units);
 		}
 	}
 
@@ -491,7 +493,7 @@ public class FIRE implements PlugIn
 	{
 		IJ.log(String.format("%s : FIRE number = %s +/- %s %s [95%% CI, n=%d] (Fourier scale = %s)", name,
 				Utils.rounded(mean, 4), Utils.rounded(stats.getConfidenceInterval(0.95), 4), units, stats.getN(),
-				Utils.rounded(nmPerPixel / result.nmPerPixel, 3)));
+				Utils.rounded(nmPerPixel / result.getNmPerPixel(), 3)));
 	}
 
 	private MemoryPeakResults cropToRoi(MemoryPeakResults results)
@@ -931,7 +933,7 @@ public class FIRE implements PlugIn
 
 				xValues = new double[frcCurve.getSize()];
 				final double L = frcCurve.fieldOfView;
-				final double conversion = 1.0 / (L * result.nmPerPixel);
+				final double conversion = 1.0 / (L * result.getNmPerPixel());
 				for (int i = 0; i < xValues.length; i++)
 				{
 					xValues[i] = frcCurve.get(i).getRadius() * conversion;
@@ -1195,7 +1197,7 @@ public class FIRE implements PlugIn
 		frc.setFourierMethod(fourierMethod);
 		frc.setSamplingMethod(samplingMethod);
 		frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
-		FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
+		FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2, images.nmPerPixel);
 		if (frcCurve == null)
 			return null;
 		if (correctionQValue > 0)
@@ -1206,18 +1208,12 @@ public class FIRE implements PlugIn
 		// Resolution in pixels
 		FIREResult result = FRC.calculateFire(frcCurve, thresholdMethod);
 		if (result == null)
-			return new FireResult(Double.NaN, Double.NaN, images.nmPerPixel, frcCurve, originalCorrelationCurve);
+			return new FireResult(Double.NaN, Double.NaN, frcCurve, originalCorrelationCurve);
 		double fireNumber = result.fireNumber;
 
 		// The FRC paper states that the super-resolution pixel size should be smaller
 		// than 1/4 of R (the resolution).
-		boolean pixelsTooBig = (4 > fireNumber);
-
-		// The FIRE number will be returned in pixels relative to the input images. 
-		// However these were generated using an image scale so adjust for this.
-		fireNumber *= images.nmPerPixel;
-
-		if (pixelsTooBig && fireNumber > 0)
+		if (fireNumber > 0 && (images.nmPerPixel > fireNumber / 4))
 		{
 			// Q. Should this be output somewhere else?
 			Utils.log(
@@ -1225,7 +1221,7 @@ public class FIRE implements PlugIn
 					TITLE, Utils.rounded(images.nmPerPixel), Utils.rounded(fireNumber));
 		}
 
-		return new FireResult(fireNumber, result.correlation, images.nmPerPixel, frcCurve, originalCorrelationCurve);
+		return new FireResult(fireNumber, result.correlation, frcCurve, originalCorrelationCurve);
 	}
 
 	private void runQEstimation()
@@ -1275,7 +1271,7 @@ public class FIRE implements PlugIn
 		frc.setFourierMethod(fourierMethod);
 		frc.setSamplingMethod(samplingMethod);
 		frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
-		FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
+		FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2, images.nmPerPixel);
 		if (frcCurve == null)
 		{
 			IJ.error(TITLE, "Failed to compute FRC curve");
@@ -1311,7 +1307,7 @@ public class FIRE implements PlugIn
 		}
 
 		// Compute the spatial frequency and the region for curve fitting
-		double[] q = FRC.computeQ(frcCurve);
+		double[] q = FRC.computeQ(frcCurve, false);
 		int low = 0, high = q.length;
 		for (int i = 0; i < q.length; i++)
 		{
@@ -1463,7 +1459,7 @@ public class FIRE implements PlugIn
 				qValue = p.getPoint();
 		}
 
-		QPlot qplot = new QPlot(images.nmPerPixel, frcCurve, qValue, low, high);
+		QPlot qplot = new QPlot(frcCurve, qValue, low, high);
 
 		// Interactive dialog to estimate Q (blinking events per flourophore) using 
 		// sliders for the mean and standard deviation of the localisation precision.
@@ -1843,9 +1839,9 @@ public class FIRE implements PlugIn
 		// Store the last plotted value
 		double mean, sigma, qValue;
 
-		QPlot(double nmPerPixel, FRCCurve frcCurve, double qValue, int low, int high)
+		QPlot(FRCCurve frcCurve, double qValue, int low, int high)
 		{
-			this.nmPerPixel = nmPerPixel;
+			this.nmPerPixel = frcCurve.nmPerPixel;
 			this.frcCurve = frcCurve;
 			this.qValue = qValue;
 			this.low = low;
@@ -1862,9 +1858,9 @@ public class FIRE implements PlugIn
 				vq[i] = qNorm * frcCurve.get(i).getNumerator() / frcCurve.get(i).getNumberOfSamples();
 			}
 
-			q = FRC.computeQ(frcCurve);
+			q = FRC.computeQ(frcCurve, false);
 			// For the plot
-			qScaled = FRC.computeQ(frcCurve, nmPerPixel);
+			qScaled = FRC.computeQ(frcCurve, true);
 
 			// Compute sinc factor
 			sinc2 = new double[frcCurve.getSize()];
@@ -1888,12 +1884,12 @@ public class FIRE implements PlugIn
 			// Reset
 			FRC.applyQCorrection(frcCurve, 0, 0, 0);
 			FRCCurve smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve, false);
-			originalFireResult = new FireResult(0, 0, nmPerPixel, smoothedFrcCurve, frcCurve.getCorrelationValues());
+			originalFireResult = new FireResult(0, 0, smoothedFrcCurve, frcCurve.getCorrelationValues());
 			ThresholdMethod thresholdMethod = ThresholdMethod.FIXED_1_OVER_7;
 			FIREResult result = FRC.calculateFire(smoothedFrcCurve, thresholdMethod);
 			if (result != null)
 			{
-				originalFireNumber = result.fireNumber * nmPerPixel;
+				originalFireNumber = result.fireNumber;
 			}
 		}
 
@@ -1985,12 +1981,9 @@ public class FIRE implements PlugIn
 			if (result != null)
 			{
 				double fireNumber = result.fireNumber;
-				// The FIRE number will be returned in pixels relative to the input images. 
-				// However these were generated using an image scale so adjust for this.
-				fireNumber *= nmPerPixel;
 
 				FrcCurve curve = new FrcCurve();
-				FireResult fireResult = new FireResult(fireNumber, result.correlation, nmPerPixel, smoothedFrcCurve,
+				FireResult fireResult = new FireResult(fireNumber, result.correlation, smoothedFrcCurve,
 						frcCurve.getCorrelationValues());
 				double orig = Double.NaN;
 				if (qValue > 0)
