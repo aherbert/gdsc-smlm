@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.util.FastMath;
+import org.jtransforms.fft.FloatFFT_2D;
 
 import gdsc.core.logging.NullTrackProgress;
 import gdsc.core.logging.TrackProgress;
@@ -42,6 +43,23 @@ import ij.process.ImageProcessor;
  */
 public class FRC
 {
+	private static boolean JTRANSFORMS;
+	static
+	{
+		try
+		{
+			int size = 8;
+			FloatFFT_2D fft = new FloatFFT_2D(size, size);
+			float[] data = new float[size * size * 2];
+			fft.realForwardFull(data);
+			JTRANSFORMS = true;
+		}
+		catch (Throwable t)
+		{
+			JTRANSFORMS = false;
+		}
+	}
+
 	public enum ThresholdMethod
 	{
 		//@formatter:off
@@ -74,6 +92,27 @@ public class FRC
 		//@formatter:off
 		RADIAL_SUM{ public String getName() { return "Radial Sum"; }},
 		INTERPOLATED_CIRCLE{ public String getName() { return "Interpolated circle"; }}; 
+		//@formatter:on
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+	}
+
+	public enum FourierMethod
+	{
+		//@formatter:off
+		JTRANSFORMS{ public String getName() { return "JTransforms"; }},
+		FHT{ public String getName() { return "FHT"; }}; 
 		//@formatter:on
 
 		@Override
@@ -253,7 +292,7 @@ public class FRC
 			// Let the Java framework copy the primatives
 			FRCCurve curve = this.clone();
 			// Clone the curve entries
-			curve.results = new FRCCurveResult[results.length]; 
+			curve.results = new FRCCurveResult[results.length];
 			for (int i = results.length; i-- > 0;)
 				curve.results[i] = results[i].clone();
 			return curve;
@@ -363,9 +402,7 @@ public class FRC
 	 * The correlation is computed using intervals around the circle circumference of the Fourier transform.
 	 * <p>
 	 * Note in the case of using interpolated pixels on the perimeter the Fourier image is 2-fold radially symmetric and
-	 * so the calculation can use only half the circle for speed. Note: The results will differ slightly due to the
-	 * implementation of the Fourier image not being exactly symmetric and the sample points used on the perimeter not
-	 * matching between the two semi-circles.
+	 * so the calculation can use only half the circle for speed.
 	 */
 	private SamplingMethod samplingMethod = SamplingMethod.RADIAL_SUM;
 
@@ -382,12 +419,12 @@ public class FRC
 	/**
 	 * Control the method for generating the Fourier circle.
 	 * <p>
-	 * The correlation is computed using intervals around the circle circumference of the Fourier transform.
+	 * The correlation is computed using intervals around the circle circumference of the Fourier transform. The radial
+	 * sum does not use interpolation but instead assigns all pixels at radius r to the interval n<=r<n+1 for all n
+	 * from 0 to the max radius.
 	 * <p>
 	 * Note in the case of using interpolated pixels on the perimeter the Fourier image is 2-fold radially symmetric and
-	 * so the calculation can use only half the circle for speed. Note: The results will differ slightly due to the
-	 * implementation of the Fourier image not being exactly symmetric and the sample points used on the perimeter not
-	 * matching between the two semi-circles.
+	 * so the calculation can use only half the circle for speed.
 	 * 
 	 * @param
 	 * 		   samplingMethod
@@ -398,6 +435,29 @@ public class FRC
 		if (samplingMethod == null)
 			samplingMethod = SamplingMethod.RADIAL_SUM;
 		this.samplingMethod = samplingMethod;
+	}
+
+	private FourierMethod fourierMethod = FourierMethod.JTRANSFORMS;
+
+	/**
+	 * Gets the fourier method.
+	 *
+	 * @return the fourier method
+	 */
+	public FourierMethod getFourierMethod()
+	{
+		return fourierMethod;
+	}
+
+	/**
+	 * Sets the fourier method.
+	 *
+	 * @param fourierMethod
+	 *            the new fourier method
+	 */
+	public void setFourierMethod(FourierMethod fourierMethod)
+	{
+		this.fourierMethod = fourierMethod;
 	}
 
 	/** Used to track the progess within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}. */
@@ -442,54 +502,120 @@ public class FRC
 		ip1 = pad(ip1, maxWidth, maxHeight);
 		ip2 = pad(ip2, maxWidth, maxHeight);
 
-		FloatProcessor[] fft1, fft2;
-
 		// The mean of each image after applying the taper
 		double mean1, mean2;
 
-		boolean basic = false;
-		if (basic)
-		{
-			fft1 = getComplexFFT(ip1);
-			mean1 = taperedImageMean;
-			progess.incrementProgress(THIRD);
-			fft2 = getComplexFFT(ip2);
-			mean2 = taperedImageMean;
-			progess.incrementProgress(THIRD);
-		}
-		else
-		{
-			// Speed up by reusing the FHT object which performs pre-computation
-			FHT2 fht = new FHT2();
-			fht.setShowProgress(false);
+		// Real and imaginary components
+		float[] re1 = null, im1, re2, im2;
 
-			ip1 = getSquareTaperedImage(ip1);
-			mean1 = taperedImageMean;
-			float[] f1 = (float[]) ip1.getPixels();
-			fht.rc2DFHT(f1, false, ip1.getWidth());
-			FHT2 fht1 = new FHT2(ip1, true);
-			fft1 = getProcessors(fht1.getComplexTransform2());
+		// Do the first image
+		ip1 = getSquareTaperedImage(ip1);
+		mean1 = taperedImageMean;
+		final int size = ip1.getWidth();
+
+//		// Check JTransforms matches FHT
+//		ImageProcessor ip1a = ip1.duplicate();
+//		ImageProcessor ip2a = ip2.duplicate();
+//		float[] re1b = null, im1b=null, re2b=null, im2b=null;
+
+		if (JTRANSFORMS && fourierMethod == FourierMethod.JTRANSFORMS)
+		{
+			// Speed up by reusing the FFT object which performs pre-computation
+			float[] data = new float[size * size * 2];
+			FloatFFT_2D fft = new FloatFFT_2D(size, size);
+			FHT2 fht = new FHT2(); // For quadrant swap
+
+			float[] pixels = (float[]) ip1.getPixels();
+			System.arraycopy(pixels, 0, data, 0, pixels.length);
+			fft.realForwardFull(data);
+
+			// Get the data
+			re1 = pixels;
+			im1 = new float[pixels.length];
+			for (int i = 0, j = 0; i < data.length; j++)
+			{
+				re1[j] = data[i++];
+				im1[j] = data[i++];
+			}
+			fht.swapQuadrants(new FloatProcessor(size, size, re1));
+			fht.swapQuadrants(new FloatProcessor(size, size, im1));
 			progess.incrementProgress(THIRD);
 
 			ip2 = getSquareTaperedImage(ip2);
 			mean2 = taperedImageMean;
+
+			pixels = (float[]) ip2.getPixels();
+			System.arraycopy(pixels, 0, data, 0, pixels.length);
+			for (int i = pixels.length; i < data.length; i++)
+				data[i] = 0;
+			fft.realForwardFull(data);
+
+			// Get the data
+			re2 = pixels;
+			im2 = new float[pixels.length];
+			for (int i = 0, j = 0; i < data.length; j++)
+			{
+				re2[j] = data[i++];
+				im2[j] = data[i++];
+			}
+			fht.swapQuadrants(new FloatProcessor(size, size, re2));
+			fht.swapQuadrants(new FloatProcessor(size, size, im2));
+			progess.incrementProgress(THIRD);
+
+//			re1b = re1;
+//			im1b = im1;
+//			re2b = re2;
+//			im2b = im2;
+		}
+		else
+		{
+//			ip1 = ip1a;
+//			ip2 = ip2a;
+			
+			// Simple implementation. This is left for testing.
+			//FloatProcessor[] fft = getComplexFFT(ip1);
+			//mean1 = taperedImageMean;
+			//re1 = (float[]) fft[0].getPixels();
+			//im1 = (float[]) fft[1].getPixels();
+			//progess.incrementProgress(THIRD);
+			//
+			//fft = getComplexFFT(ip2);
+			//mean2 = taperedImageMean;
+			//re2 = (float[]) fft[0].getPixels();
+			//im2 = (float[]) fft[1].getPixels();
+			//progess.incrementProgress(THIRD);
+
+			// Speed up by reusing the FHT object which performs pre-computation
+			FHT2 fht = new FHT2();
+			fht.setShowProgress(false);
+
+			float[] f1 = (float[]) ip1.getPixels();
+			fht.rc2DFHT(f1, false, size);
+			FHT2 fht1 = new FHT2(ip1, true);
+			FloatProcessor[] fft = getProcessors(fht1.getComplexTransform2());
+			re1 = (float[]) fft[0].getPixels();
+			im1 = (float[]) fft[1].getPixels();
+			progess.incrementProgress(THIRD);
+
+			ip2 = getSquareTaperedImage(ip2);
+			mean2 = taperedImageMean;
+
 			float[] f2 = (float[]) ip2.getPixels();
-			fht.rc2DFHT(f2, false, ip2.getWidth());
+			fht.rc2DFHT(f2, false, size);
 			FHT2 fht2 = new FHT2(ip2, true);
-			fft2 = getProcessors(fht2.getComplexTransform2());
+			fft = getProcessors(fht2.getComplexTransform2());
+			re2 = (float[]) fft[0].getPixels();
+			im2 = (float[]) fft[1].getPixels();
 			progess.incrementProgress(THIRD);
 		}
+		
+		// Compare 
 
 		progess.status("Preparing FRC curve calculation...");
 
-		final int size = fft1[0].getWidth();
 		final int centre = size / 2;
 
 		// In-line for speed 
-		float[] re1 = (float[]) fft1[0].getPixels();
-		float[] im1 = (float[]) fft1[1].getPixels();
-		float[] re2 = (float[]) fft2[0].getPixels();
-		float[] im2 = (float[]) fft2[1].getPixels();
 		float[] conjMult = new float[re1.length];
 		float[] absFFT1 = new float[re1.length];
 		float[] absFFT2 = new float[re1.length];
@@ -504,6 +630,7 @@ public class FRC
 			im2[i] *= norm;
 		}
 
+		boolean basic = false;
 		if (basic)
 		{
 			compute(conjMult, absFFT1, absFFT2, re1, im1, re2, im2);
@@ -536,7 +663,7 @@ public class FRC
 				// angles from 0-pi. To sample the perimeter at pixel intervals we need
 				// pi*r samples. So the angle step is max_angle / samples == pi / (pi*r) == 1 / r.
 				// The number of samples is increased using the sampling factor.
-				
+
 				final double angleStep = 1 / (perimeterSamplingFactor * radius);
 
 				double angle = 0;
@@ -772,14 +899,33 @@ public class FRC
 		return ret;
 	}
 
-	/** Sizes for Fourier images. Must be a power of 2 */
-	private static final int[] SIZES;
-	private static final int MAX_SIZE;
-	static
+	/** Max size for Fourier images. Must be a power of 2 that is smalled that Math.sqrt(Integer.MAX_VALUE) */
+	private static final int MAX_SIZE = 32768;
+
+	/**
+	 * Returns the closest power-of-two number greater than or equal to x.
+	 * <p>
+	 * Copied from the JTransforms library class edu.emory.mathcs.utils.ConcurrencyUtils.
+	 * 
+	 * 
+	 * @param x
+	 * @return the closest power-of-two number greater than or equal to x
+	 */
+	public static int nextPow2(int x)
 	{
-		// Produce in order to allow binary search
-		SIZES = new int[] { 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
-		MAX_SIZE = SIZES[SIZES.length - 1];
+		if (x < 1)
+			throw new IllegalArgumentException("x must be greater or equal 1");
+		if ((x & (x - 1)) == 0)
+		{
+			return x; // x is already a power-of-two number 
+		}
+		x |= (x >>> 1);
+		x |= (x >>> 2);
+		x |= (x >>> 4);
+		x |= (x >>> 8);
+		x |= (x >>> 16);
+		x |= (x >>> 32);
+		return x + 1;
 	}
 
 	private double taperedImageMean;
@@ -794,22 +940,16 @@ public class FRC
 	{
 		taperedImageMean = 0;
 
+		final int size = FastMath.max(dataImage.getWidth(), dataImage.getHeight());
+		if (size > MAX_SIZE)
+			return null; // Too large so error
+
 		// Use a Tukey window function
 		float[] taperX = getWindowFunctionX(dataImage.getWidth());
 		float[] taperY = getWindowFunctionY(dataImage.getHeight());
 
-		final int size = FastMath.max(dataImage.getWidth(), dataImage.getHeight());
-
 		// Pad to a power of 2
-		int index = Arrays.binarySearch(SIZES, size);
-		if (index < 0)
-		{
-			// Get the insert position
-			index = -(index + 1);
-			if (index == SIZES.length)
-				return null; // Too large so error
-		}
-		final int newSize = SIZES[index];
+		final int newSize = nextPow2(size);
 
 		dataImage = dataImage.toFloat(0, null);
 		float[] data = (float[]) dataImage.getPixels();
