@@ -38,6 +38,7 @@ import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariateOptimizer;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
+import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
@@ -176,7 +177,7 @@ public class FIRE implements PlugIn
 	private static boolean showFRCCurveRepeats = false;
 	private static boolean showFRCTimeEvolution = false;
 	private static boolean fitPrecision = false;
-	private static double minQ = 0;
+	private static double minQ = 0.2;
 	private static double maxQ = 0.45;
 
 	private static boolean chooseRoi = false;
@@ -1266,8 +1267,8 @@ public class FIRE implements PlugIn
 
 		// DEBUGGING - Save the two images to disk. Load the images into the Matlab 
 		// code that calculates the Q-estimation and make this plugin match the functionality.
-		//IJ.save(new ImagePlus("i1", images.ip1), "/tmp/i1.tif");
-		//IJ.save(new ImagePlus("i2", images.ip2), "/tmp/i2.tif");
+		//IJ.save(new ImagePlus("i1", images.ip1), "/scratch/i1.tif");
+		//IJ.save(new ImagePlus("i2", images.ip2), "/scratch/i2.tif");
 
 		FRC frc = new FRC();
 		frc.progress = progress;
@@ -1287,14 +1288,18 @@ public class FIRE implements PlugIn
 		// The method implemented here is based on Matlab code provided by Bernd Rieger.
 		// The idea is to compute the spurious correlation component of the FRC Numerator
 		// using an initial estimate of distribution of the localisation precision (assumed 
-		// to be Gaussian). The Scaled FRC Numerator is plotted and Q can be determined by
+		// to be Gaussian). This component is the contribution of repeat localisations of 
+		// the same molecule to the numerator and is modelled as an exponential decay
+		// (exp_decay). The component is scaled by the Q-value which
+		// is the average number of times a molecule is seen in addition to the first time.
+		// At large spatial frequencies the scaled component should match the numerator,
+		// i.e. at high resolution (low FIRE number) the numerator is made up of repeat 
+		// localisations of the same molecule and not actual structure in the image.
+		// The best fit is where the numerator equals the scaled component, i.e. num / (q*exp_decay) == 1.
+		// The FRC Numerator is plotted and Q can be determined by
 		// adjusting Q and the precision mean and SD to maximise the plateau region of the
 		// plot. This can be done interactively by the user with the effect on the FRC curve
 		// dynamically updated and displayed.
-
-		// TODO - Copy the logic in Qcorrection_ims_manual.m to estimate the parameters 
-		// and optimise the plateau region. Then show the plots and allow the user to adjust
-		// the estimates.
 
 		// Compute the scaled FRC numerator
 		double qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
@@ -1339,12 +1344,13 @@ public class FIRE implements PlugIn
 		PrecisionHistogram histogram = calculatePrecisionHistogram();
 		StoredDataStatistics precision = histogram.precision;
 
+		// Check if we can fit precision values
 		boolean fitPrecision = precision != null && FIRE.fitPrecision;
 
 		double[] exp_decay;
 		if (fitPrecision)
 		{
-			int[] sample = new Random().sample(10000, precision.getN());
+			int[] sample = Random.sample(10000, precision.getN(), new Well19937c());
 
 			final double four_pi2 = 4 * Math.PI * Math.PI;
 			double[] pre = new double[q.length];
@@ -1620,7 +1626,7 @@ public class FIRE implements PlugIn
 			{
 				// Original cost function. Note that each observation has a 
 				// contribution of 0 to 1.
-				double diff = pre[i] / qValue - 1;
+				double diff = (pre[i] / qValue) - 1;
 				v += 1 - FastMath.exp(-diff * diff / n2);
 
 				// Modified cost function so that the magnitude of difference over or 
@@ -1710,7 +1716,7 @@ public class FIRE implements PlugIn
 
 				// Original cost function. Note that each observation has a 
 				// contribution of 0 to 1.
-				double diff = pre[i] / (qValue * hq) - 1;
+				double diff = (pre[i] / (qValue * hq)) - 1;
 				v += 1 - FastMath.exp(-diff * diff / n2);
 			}
 			return v;
@@ -1923,7 +1929,7 @@ public class FIRE implements PlugIn
 
 			double[] hq = FRC.computeHq(q, mu, sd);
 			double[] correction = new double[hq.length];
-			double[] difference = new double[vq.length];
+			double[] vq_corr = new double[vq.length];
 			double[] ratio = new double[vq.length];
 
 			for (int i = 0; i < hq.length; i++)
@@ -1932,28 +1938,34 @@ public class FIRE implements PlugIn
 				// divide qValue by qNorm.
 				correction[i] = qValue * sinc2[i] * hq[i];
 				// This is not actually the corrected numerator since it is made absolute
-				difference[i] = Math.abs(vq[i] - correction[i]);
+				//vq_corr[i] = Math.abs(vq[i] - correction[i]);
+				vq_corr[i] = vq[i] - correction[i];
 				ratio[i] = vq[i] / correction[i];
 			}
 
 			// Add this to aid is manual adjustment
-			double[] exp_decay = computeExpDecay(mu, sd, q);
-			Plateauness p = new Plateauness(vq, exp_decay, low, high);
-			double plateauness = p.value(qValue);
+			double plateauness = computePlateauness(qValue, mu, sd);
 
 			Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "FRC Numerator");
 
 			String label = String.format("Q = %.3f (Precision = %.3f +/- %.3f)", qValue, mean, sigma);
 			plot.setColor(Color.red);
-			plot.addPoints(qScaled, makeStrictlyPositive(vq), Plot.LINE);
+			double[] vq = makeStrictlyPositive(this.vq, Double.POSITIVE_INFINITY);
+			plot.addPoints(qScaled, vq, Plot.LINE);
+			double min = Maths.min(vq);
 			if (qValue > 0)
 			{
 				label += String.format(". Plateauness = %.3f", plateauness);
-				plot.setColor(Color.blue);
-				plot.addPoints(qScaled, makeStrictlyPositive(difference), Plot.LINE);
 				plot.setColor(Color.darkGray);
 				plot.addPoints(qScaled, correction, Plot.DOT);
+				plot.setColor(Color.blue);
+				plot.addPoints(qScaled, makeStrictlyPositive(vq_corr, min), Plot.LINE);
+				plot.setColor(Color.black);
+				plot.addLegend("Numerator\nCorrection\nCorrected Numerator", "top-right");
 			}
+			plot.setColor(Color.magenta);
+			plot.drawLine(qScaled[low], min, qScaled[low], vq[0]);
+			plot.drawLine(qScaled[high], min, qScaled[high], vq[0]);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, label);
 
@@ -1998,21 +2010,38 @@ public class FIRE implements PlugIn
 			plot = new Plot2(title2, "Spatial Frequency (nm^-1)", "FRC Numerator / Spurious component");
 			plot.setColor(Color.blue);
 			plot.addPoints(qScaled, ratio, Plot.LINE);
-			plot.setLimits(0, qScaled[qScaled.length - 1], 0, 2);
+			plot.setColor(Color.black);
+			double xMax = qScaled[qScaled.length - 1];
+			plot.drawLine(0, 1, xMax, 1);
+			plot.setColor(Color.magenta);
+			plot.drawLine(qScaled[low], 0, qScaled[low], 2);
+			plot.drawLine(qScaled[high], 0, qScaled[high], 2);
+			plot.setLimits(0, xMax, 0, 2);
 			PlotWindow pw3 = Utils.display(title2, plot, Utils.NO_TO_FRONT);
 
 			return new PlotWindow[] { pw1, pw2, pw3 };
 		}
 
-		private double[] makeStrictlyPositive(double[] data)
+		private double computePlateauness(double qValue, double mu, double sd)
 		{
-			double min = Double.POSITIVE_INFINITY;
+			double[] exp_decay = computeExpDecay(mu, sd, q);
+			Plateauness p = new Plateauness(vq, exp_decay, low, high);
+			double plateauness = p.value(qValue);
+			return plateauness;
+		}
+
+		private double[] makeStrictlyPositive(double[] data, double min)
+		{
 			data = data.clone();
+			if (min == Double.POSITIVE_INFINITY)
+			{
+				// Find min positive value
+				for (int i = 0; i < data.length; i++)
+					if (data[i] > 0 && data[i] < min)
+						min = data[i];
+			}
 			for (int i = 0; i < data.length; i++)
-				if (data[i] > 0 && data[i] < min)
-					min = data[i];
-			for (int i = 0; i < data.length; i++)
-				if (data[i] <= 0)
+				if (data[i] < min)
 					data[i] = min;
 			return data;
 		}
@@ -2417,9 +2446,13 @@ public class FIRE implements PlugIn
 			NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
+			double mu = histogram.mean / nmPerPixel;
+			double sd = histogram.sigma / nmPerPixel;
+			double plateauness = qplot.computePlateauness(qplot.qValue, mu, sd);
+
 			gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n" +
-					String.format("Precision estimate = %.3f +/- %.3f\n", histogram.mean, histogram.sigma) +
-					String.format("Q estimate = %s", Utils.rounded(qplot.qValue)));
+					String.format("Initial estimate:\nPrecision = %.3f +/- %.3f\n", histogram.mean, histogram.sigma) +
+					String.format("Q = %s\nPlateauness = %.3f", Utils.rounded(qplot.qValue), plateauness));
 
 			gd.addSlider("Mean (x10)", Math.max(0, mean10 - sd10 * 2), mean10 + sd10 * 2, mean10);
 			gd.addSlider("SD (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
