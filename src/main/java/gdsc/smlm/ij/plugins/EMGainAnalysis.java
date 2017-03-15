@@ -672,11 +672,7 @@ public class EMGainAnalysis implements PlugInFilter
 			for (int j = 0; j < kernel.length; j++)
 				kernel[j] /= sum;
 
-			// Use Fourier Transform when the convolution is large
-			if (g.length * kernel.length > 100000)
-				gg = Convolution.convolveFFT(g, kernel);
-			else
-				gg = Convolution.convolve(g, kernel);
+			gg = Convolution.convolveFast(g, kernel);
 			// The convolution will have created a larger array so we must adjust the offset for this
 			c0 -= radius;
 		}

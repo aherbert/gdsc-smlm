@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.util.FastMath;
 
 import org.jtransforms.fft.DoubleFFT_1D;
+import org.jtransforms.utils.CommonUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -106,39 +107,81 @@ public class Convolution
 		final int totalLength = xLen + hLen - 1;
 
 		// Get length to a power of 2
-		int newL = 2;
-		while (newL < totalLength) //xLen)
-			newL *= 2;
+		int newL = CommonUtils.nextPow2(totalLength);
 
 		// Double the new length for complex values in DoubleFFT_1D
 		x = Arrays.copyOf(x, 2 * newL);
 		h = Arrays.copyOf(h, x.length);
-		double[] tmp = new double[x.length];
+		//double[] tmp = new double[x.length];
 
 		DoubleFFT_1D fft = new DoubleFFT_1D(newL);
 
 		// FFT
 		fft.realForwardFull(x);
 		fft.realForwardFull(h);
-
-		// Complex multiply
-		for (int i = 0; i < newL; i++)
+		
+		// Complex multiply. Reuse data array
+		for (int i = 0; i < x.length; i += 2)
 		{
-			final int ii = 2 * i;
-			tmp[ii] = x[ii] * h[ii] - x[ii + 1] * h[ii + 1];
-			tmp[ii + 1] = x[ii] * h[ii + 1] + x[ii + 1] * h[ii];
+			int j = i + 1;
+			double xi = x[i];
+			double xj = x[j];
+			x[i] = xi * h[i] - xj * h[j];
+			x[j] = xi * h[j] + xj * h[i];
 		}
 
 		// Inverse FFT
-		fft.complexInverse(tmp, true);
+		fft.complexInverse(x, true);
 
 		// Fill result with real part
 		final double[] y = new double[totalLength];
 		for (int i = 0; i < totalLength; i++)
 		{
-			y[i] = tmp[2 * i];
+			y[i] = x[2 * i];
 		}
 		return y;
+	}
+
+	/**
+	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
+	 * convolution</a> between two sequences.
+	 * <p>
+	 * The solution is obtained using either the spatial or frequency domain depending on the size. The switch is made
+	 * when the min array length is above 127 and the product of the lengths is above 40000. Speed tests have
+	 * been performed for single threaded FFT computation. The FFT library begins multi-threaded computation when the
+	 * size of the array is above length 8192.
+	 *
+	 * @param x
+	 *            First sequence.
+	 *            Typically, this sequence will represent an input signal to a system.
+	 * @param h
+	 *            Second sequence.
+	 *            Typically, this sequence will represent the impulse response of the system.
+	 * @return the convolution of {@code x} and {@code h}.
+	 *         This array's length will be {@code x.length + h.length - 1}.
+	 * @throws IllegalArgumentException
+	 *             if either {@code x} or {@code h} is {@code null} or either {@code x} or {@code h} is empty.
+	 */
+	public static double[] convolveFast(double[] x, double[] h) throws IllegalArgumentException
+	{
+		checkInput(x, h);
+		// See Junit class ConvolveTest to determine when to switch to the FFT method.
+		// This is not perfect for all length combinations but the switch will happen 
+		// when the two methods are roughly the same speed.
+		int min, max;
+		if (x.length < h.length)
+		{
+			min = x.length;
+			max = h.length;
+		}
+		else
+		{
+			min = h.length;
+			max = x.length;
+		}
+		if (min >= 128 && (long) min * (long) max > 40000L)
+			return convolveFFT(x, h);
+		return convolve(x, h);
 	}
 
 	private static void checkInput(double[] x, double[] h)

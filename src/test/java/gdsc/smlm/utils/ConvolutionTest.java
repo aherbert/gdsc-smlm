@@ -6,13 +6,14 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
-import edu.emory.mathcs.utils.ConcurrencyUtils;
+import pl.edu.icm.jlargearrays.ConcurrencyUtils;
+
 
 public class ConvolutionTest
 {
 	private static RandomGenerator random = new Well19937c();
 
-	int sizeLoops = 8;
+	int sizeLoops = 10;
 	int sLoops = 8;
 
 	static
