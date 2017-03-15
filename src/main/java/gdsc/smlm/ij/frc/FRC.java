@@ -72,9 +72,7 @@ public class FRC
 	public enum SamplingMethod
 	{
 		//@formatter:off
-		RADIAL_SUM{ public String getName() { return "Radial Sum"; }
-			@Override public boolean isInterpolated() { return false; }}, 
-		INTERPOLATED_SEMI_CIRCLE{ public String getName() { return "Interpolated semi-circle"; }}, 
+		RADIAL_SUM{ public String getName() { return "Radial Sum"; }},
 		INTERPOLATED_CIRCLE{ public String getName() { return "Interpolated circle"; }}; 
 		//@formatter:on
 
@@ -90,16 +88,6 @@ public class FRC
 		 * @return the name
 		 */
 		abstract public String getName();
-
-		/**
-		 * Checks if the method used interpolated pixels from the exact Fourier circle perimeter.
-		 *
-		 * @return true, if is interpolated
-		 */
-		public boolean isInterpolated()
-		{
-			return true;
-		};
 	}
 
 	/**
@@ -530,14 +518,13 @@ public class FRC
 		final int max = centre - 1;
 		FRCCurveResult[] results = new FRCCurveResult[max];
 
-		if (samplingMethod.isInterpolated())
+		if (samplingMethod == SamplingMethod.INTERPOLATED_CIRCLE)
 		{
 			// Set the results for the centre pixel
 			int cx = size * centre + centre;
 			results[0] = new FRCCurveResult(0, 1, conjMult[cx], absFFT1[cx], absFFT2[cx]);
 
 			float[][] images = new float[][] { conjMult, absFFT1, absFFT2 };
-			final double limit = (samplingMethod == SamplingMethod.INTERPOLATED_SEMI_CIRCLE) ? Math.PI : 2 * Math.PI;
 			for (int radius = 1; radius < max; radius++)
 			{
 				// Inline the calculation for speed
@@ -545,12 +532,17 @@ public class FRC
 				double sum1 = 0;
 				double sum2 = 0;
 
+				// Note: The image has 2-fold radial symmetry. So we only need to sample
+				// angles from 0-pi. To sample the perimeter at pixel intervals we need
+				// pi*r samples. So the angle step is max_angle / samples == pi / (pi*r) == 1 / r.
+				// The number of samples is increased using the sampling factor.
+				
 				final double angleStep = 1 / (perimeterSamplingFactor * radius);
 
-				double angle = 0D;
+				double angle = 0;
 				int numSum = 0;
 
-				while (angle < limit)
+				while (angle < Math.PI)
 				{
 					double cosA = FastMath.cos(angle);
 					double x = centre + radius * cosA;
