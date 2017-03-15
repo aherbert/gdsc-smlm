@@ -73,6 +73,7 @@ import gdsc.smlm.ij.frc.FRC;
 import gdsc.smlm.ij.frc.FRC.FIREResult;
 import gdsc.smlm.ij.frc.FRC.FRCCurve;
 import gdsc.smlm.ij.frc.FRC.FRCCurveResult;
+import gdsc.smlm.ij.frc.FRC.FourierMethod;
 import gdsc.smlm.ij.frc.FRC.SamplingMethod;
 import gdsc.smlm.ij.frc.FRC.ThresholdMethod;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -165,6 +166,8 @@ public class FIRE implements PlugIn
 	}
 
 	private static double perimeterSamplingFactor = 1;
+	private static int fourierMethodIndex = 0;
+	private FourierMethod fourierMethod;
 	private static int samplingMethodIndex = 0;
 	private SamplingMethod samplingMethod;
 	private static int thresholdMethodIndex = 0;
@@ -245,7 +248,8 @@ public class FIRE implements PlugIn
 		{
 			try
 			{
-				result = calculateFireNumber(samplingMethod, thresholdMethod, fourierImageScale, imageSize);
+				result = calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod, fourierImageScale,
+						imageSize);
 				if (showFRCCurve)
 				{
 					plot = createFrcCurve(name, result, thresholdMethod);
@@ -328,7 +332,8 @@ public class FIRE implements PlugIn
 		{
 			name += " vs " + results2.getName();
 
-			FireResult result = calculateFireNumber(samplingMethod, thresholdMethod, fourierImageScale, imageSize);
+			FireResult result = calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod, fourierImageScale,
+					imageSize);
 
 			if (result != null)
 			{
@@ -345,7 +350,8 @@ public class FIRE implements PlugIn
 			int repeats = (randomSplit) ? Math.max(1, FIRE.repeats) : 1;
 			if (repeats == 1)
 			{
-				result = calculateFireNumber(samplingMethod, thresholdMethod, fourierImageScale, imageSize);
+				result = calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod, fourierImageScale,
+						imageSize);
 
 				if (result != null)
 				{
@@ -562,6 +568,8 @@ public class FIRE implements PlugIn
 		gd.addMessage("Fourier options:");
 		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
 		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
+		String[] fourierMethodNames = SettingsManager.getNames((Object[]) FRC.FourierMethod.values());
+		gd.addChoice("Fourier_method", fourierMethodNames, fourierMethodNames[fourierMethodIndex]);
 		String[] samplingMethodNames = SettingsManager.getNames((Object[]) FRC.SamplingMethod.values());
 		gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
@@ -598,6 +606,8 @@ public class FIRE implements PlugIn
 
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
+		fourierMethodIndex = gd.getNextChoiceIndex();
+		fourierMethod = FourierMethod.values()[fourierMethodIndex];
 		samplingMethodIndex = gd.getNextChoiceIndex();
 		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
 		perimeterSamplingFactor = gd.getNextNumber();
@@ -1058,7 +1068,8 @@ public class FIRE implements PlugIn
 			x.add((double) t);
 
 			FIRE f = this.copy();
-			FireResult result = f.calculateFireNumber(samplingMethod, thresholdMethod, fourierImageScale, imageSize);
+			FireResult result = f.calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod, fourierImageScale,
+					imageSize);
 			double fire = (result == null) ? 0 : result.fireNumber;
 			y.add(fire);
 
@@ -1094,6 +1105,8 @@ public class FIRE implements PlugIn
 	 * Calculate the Fourier Image REsolution (FIRE) number using the chosen threshold method. Should be called after
 	 * {@link #initialise(MemoryPeakResults)}
 	 *
+	 * @param fourierMethod
+	 *            the fourier method
 	 * @param samplingMethod
 	 *            the sampling method
 	 * @param thresholdMethod
@@ -1105,11 +1118,11 @@ public class FIRE implements PlugIn
 	 *            optimum memory usage)
 	 * @return The FIRE number
 	 */
-	public FireResult calculateFireNumber(SamplingMethod samplingMethod, ThresholdMethod thresholdMethod,
-			double fourierImageScale, int imageSize)
+	public FireResult calculateFireNumber(FourierMethod fourierMethod, SamplingMethod samplingMethod,
+			ThresholdMethod thresholdMethod, double fourierImageScale, int imageSize)
 	{
 		FireImages images = createImages(fourierImageScale, imageSize);
-		return calculateFireNumber(samplingMethod, thresholdMethod, images);
+		return calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod, images);
 	}
 
 	private TrackProgress progress = new IJTrackProgress();
@@ -1157,6 +1170,8 @@ public class FIRE implements PlugIn
 	 * Calculate the Fourier Image REsolution (FIRE) number using the chosen threshold method. Should be called after
 	 * {@link #initialise(MemoryPeakResults)}
 	 *
+	 * @param fourierMethod
+	 *            the fourier method
 	 * @param samplingMethod
 	 *            the sampling method
 	 * @param thresholdMethod
@@ -1165,8 +1180,8 @@ public class FIRE implements PlugIn
 	 *            the images
 	 * @return The FIRE number
 	 */
-	public FireResult calculateFireNumber(SamplingMethod samplingMethod, ThresholdMethod thresholdMethod,
-			FireImages images)
+	public FireResult calculateFireNumber(FourierMethod fourierMethod, SamplingMethod samplingMethod,
+			ThresholdMethod thresholdMethod, FireImages images)
 	{
 		if (images == null)
 			return null;
@@ -1176,8 +1191,9 @@ public class FIRE implements PlugIn
 		// This should be setup for the total number of repeats. 
 		// If parallelised then do not output the text status messages as they conflict. 
 		frc.progress = progress;
-		frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
+		frc.setFourierMethod(fourierMethod);
 		frc.setSamplingMethod(samplingMethod);
+		frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
 		FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 		if (frcCurve == null)
 			return null;
@@ -1255,8 +1271,9 @@ public class FIRE implements PlugIn
 
 		FRC frc = new FRC();
 		frc.progress = progress;
-		frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
+		frc.setFourierMethod(fourierMethod);
 		frc.setSamplingMethod(samplingMethod);
+		frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
 		FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 		if (frcCurve == null)
 		{
@@ -1633,7 +1650,7 @@ public class FIRE implements PlugIn
 		final double[] q;
 		@SuppressWarnings("unused")
 		final int low;
-		
+
 		/**
 		 * Instantiates a new plateauness.
 		 *
@@ -1728,6 +1745,8 @@ public class FIRE implements PlugIn
 		gd.addMessage("Fourier options:");
 		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
 		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
+		String[] fourierMethodNames = SettingsManager.getNames((Object[]) FRC.FourierMethod.values());
+		gd.addChoice("Fourier_method", fourierMethodNames, fourierMethodNames[fourierMethodIndex]);
 		String[] samplingMethodNames = SettingsManager.getNames((Object[]) FRC.SamplingMethod.values());
 		gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
@@ -1749,6 +1768,8 @@ public class FIRE implements PlugIn
 		randomSplit = gd.getNextBoolean();
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
+		fourierMethodIndex = gd.getNextChoiceIndex();
+		fourierMethod = FourierMethod.values()[fourierMethodIndex];
 		samplingMethodIndex = gd.getNextChoiceIndex();
 		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
 		perimeterSamplingFactor = gd.getNextNumber();

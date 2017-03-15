@@ -513,11 +513,6 @@ public class FRC
 		mean1 = taperedImageMean;
 		final int size = ip1.getWidth();
 
-//		// Check JTransforms matches FHT
-//		ImageProcessor ip1a = ip1.duplicate();
-//		ImageProcessor ip2a = ip2.duplicate();
-//		float[] re1b = null, im1b=null, re2b=null, im2b=null;
-
 		if (JTRANSFORMS && fourierMethod == FourierMethod.JTRANSFORMS)
 		{
 			// Speed up by reusing the FFT object which performs pre-computation
@@ -561,17 +556,9 @@ public class FRC
 			fht.swapQuadrants(new FloatProcessor(size, size, re2));
 			fht.swapQuadrants(new FloatProcessor(size, size, im2));
 			progess.incrementProgress(THIRD);
-
-//			re1b = re1;
-//			im1b = im1;
-//			re2b = re2;
-//			im2b = im2;
 		}
 		else
 		{
-//			ip1 = ip1a;
-//			ip2 = ip2a;
-			
 			// Simple implementation. This is left for testing.
 			//FloatProcessor[] fft = getComplexFFT(ip1);
 			//mean1 = taperedImageMean;
@@ -609,8 +596,6 @@ public class FRC
 			progess.incrementProgress(THIRD);
 		}
 		
-		// Compare 
-
 		progess.status("Preparing FRC curve calculation...");
 
 		final int centre = size / 2;
