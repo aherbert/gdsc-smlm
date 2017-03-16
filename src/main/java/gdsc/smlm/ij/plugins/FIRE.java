@@ -782,12 +782,34 @@ public class FIRE implements PlugIn
 		return createImages(fourierImageScale, imageSize, useSignal);
 	}
 
+	private interface SignalProvider
+	{
+		float getSignal(PeakResult p);
+	}
+
+	private static class FixedSignalProvider implements SignalProvider
+	{
+		public float getSignal(PeakResult p)
+		{
+			return 1f;
+		}
+	}
+
+	private static class PeakSignalProvider implements SignalProvider
+	{
+		public float getSignal(PeakResult p)
+		{
+			return p.getSignal();
+		}
+	}
+
 	public FireImages createImages(double fourierImageScale, int imageSize, boolean useSignal)
 	{
 		if (results == null)
 			return null;
 
-		final boolean hasSignal = useSignal && (results.getHead().getSignal() > 0);
+		final SignalProvider signalProvider = (useSignal && (results.getHead().getSignal() > 0))
+				? new PeakSignalProvider() : new FixedSignalProvider();
 
 		// Draw images using the existing IJ routines.
 		Rectangle bounds = new Rectangle(0, 0, (int) Math.ceil(dataBounds.getWidth()),
@@ -826,15 +848,13 @@ public class FIRE implements PlugIn
 			{
 				float x = p.getXPosition() - minx;
 				float y = p.getYPosition() - miny;
-				float v = (hasSignal) ? p.getSignal() : 1f;
-				image1.add(x, y, v);
+				image1.add(x, y, signalProvider.getSignal(p));
 			}
 			for (PeakResult p : results2)
 			{
 				float x = p.getXPosition() - minx;
 				float y = p.getYPosition() - miny;
-				float v = (hasSignal) ? p.getSignal() : 1f;
-				image2.add(x, y, v);
+				image2.add(x, y, signalProvider.getSignal(p));
 			}
 		}
 		else
@@ -883,8 +903,7 @@ public class FIRE implements PlugIn
 				{
 					float x = p.getXPosition() - minx;
 					float y = p.getYPosition() - miny;
-					float v = (hasSignal) ? p.getSignal() : 1f;
-					image.add(x, y, v);
+					image.add(x, y, signalProvider.getSignal(p));
 				}
 			}
 		}
@@ -895,7 +914,7 @@ public class FIRE implements PlugIn
 		image2.end();
 		ImageProcessor ip2 = image2.getImagePlus().getProcessor();
 
-		if (!hasSignal && maxPerBin > 0)
+		if (maxPerBin > 0 && signalProvider instanceof FixedSignalProvider)
 		{
 			// We can eliminate over-sampled pixels
 			for (int i = ip1.getPixelCount(); i-- > 0;)
