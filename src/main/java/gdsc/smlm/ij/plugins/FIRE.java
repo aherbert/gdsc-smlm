@@ -1461,7 +1461,7 @@ public class FIRE implements PlugIn
 		double[] estimate = fit.fit(points.toList());
 		double qValue = FastMath.exp(estimate[0]);
 
-		System.out.printf("Initial q-estimate = %s => %.3f\n", Arrays.toString(estimate), qValue);
+		//System.out.printf("Initial q-estimate = %s => %.3f\n", Arrays.toString(estimate), qValue);
 
 		if (fitPrecision)
 		{
