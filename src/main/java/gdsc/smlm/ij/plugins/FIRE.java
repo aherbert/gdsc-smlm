@@ -176,6 +176,7 @@ public class FIRE implements PlugIn
 	private static boolean showFRCCurve = true;
 	private static boolean showFRCCurveRepeats = false;
 	private static boolean showFRCTimeEvolution = false;
+	private static boolean loessSmoothing = false;
 	private static boolean fitPrecision = false;
 	private static double minQ = 0.2;
 	private static double maxQ = 0.45;
@@ -1401,26 +1402,66 @@ public class FIRE implements PlugIn
 			exp_decay = computeExpDecay(histogram.mean / images.nmPerPixel, histogram.sigma / images.nmPerPixel, q);
 		}
 
-		double[] norm = new double[exp_decay.length];
-		for (int i = 0; i < norm.length; i++)
+		// Smoothing
+		double[] smooth;
+		if (loessSmoothing)
 		{
-			norm[i] = frcnum[i] / exp_decay[i];
+			// Note: This compute the log then smooths it 
+			double bandwidth = 0.1;
+			int robustness = 0;
+			double[] l = new double[exp_decay.length];
+			for (int i = 0; i < l.length; i++)
+			{
+				// Original Matlab code compute the log for each array.
+				// This is equivalent to a single log on the fraction of the two.
+				// Perhaps the two log method is more numerically stable.
+				//l[i] = Math.log(Math.abs(frcnum[i])) - Math.log(exp_decay[i]);
+				l[i] = Math.log(Math.abs(frcnum[i] / exp_decay[i]));
+			}
+			try
+			{
+				LoessInterpolator loess = new LoessInterpolator(bandwidth, robustness);
+				smooth = loess.smooth(q, l);
+			}
+			catch (Exception e)
+			{
+				IJ.error(TITLE, "LOESS smoothing failed");
+				return;
+			}
 		}
-		// Window of 5 == radius of 2
-		MedianWindow mw = new MedianWindow(norm, 2);
-		double[] smooth = new double[exp_decay.length];
-		for (int i = 0; i < norm.length; i++)
+		else
 		{
-			smooth[i] = Math.log(Math.abs(mw.getMedian()));
-			mw.increment();
+			// Note: This smooths the curve before computing the log 
+
+			// Median window of 5 == radius of 2
+			double[] norm = new double[exp_decay.length];
+			for (int i = 0; i < norm.length; i++)
+			{
+				norm[i] = frcnum[i] / exp_decay[i];
+			}
+			MedianWindow mw = new MedianWindow(norm, 2);
+			smooth = new double[exp_decay.length];
+			for (int i = 0; i < norm.length; i++)
+			{
+				smooth[i] = Math.log(Math.abs(mw.getMedian()));
+				mw.increment();
+			}
 		}
+
 		// Fit with quadratic to find the initial guess.
+		// Note: example Matlab code frc_Qcorrection7.m identifies regions of the 
+		// smoothed log curve with low derivative and only fits those. The fit is 
+		// used for the final estimate. Fitting a subset with low derivative is not 
+		// implemented here since the initial estimate is subsequently optimised 
+		// to maximise the plateau. 
 		SimpleCurveFitter fit = SimpleCurveFitter.create(new Quadratic(), new double[2]);
 		WeightedObservedPoints points = new WeightedObservedPoints();
 		for (int i = low; i < high; i++)
 			points.add(q[i], smooth[i]);
 		double[] estimate = fit.fit(points.toList());
 		double qValue = FastMath.exp(estimate[0]);
+
+		System.out.printf("Initial q-estimate = %s => %.3f\n", Arrays.toString(estimate), qValue);
 
 		if (fitPrecision)
 		{
@@ -1773,6 +1814,7 @@ public class FIRE implements PlugIn
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
 		if (!titles.isEmpty())
 			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
+		gd.addCheckbox("LOESS_smoothing", loessSmoothing);
 		gd.addCheckbox("Fit_precision", fitPrecision);
 		gd.addSlider("MinQ", 0, 0.4, minQ);
 		gd.addSlider("MaxQ", 0.1, 0.5, maxQ);
@@ -1794,6 +1836,7 @@ public class FIRE implements PlugIn
 		samplingMethodIndex = gd.getNextChoiceIndex();
 		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
 		perimeterSamplingFactor = gd.getNextNumber();
+		loessSmoothing = gd.getNextBoolean();
 		fitPrecision = gd.getNextBoolean();
 		minQ = Maths.clip(0, 0.5, gd.getNextNumber());
 		maxQ = Maths.clip(0, 0.5, gd.getNextNumber());
@@ -1915,22 +1958,6 @@ public class FIRE implements PlugIn
 		private double sinc(double x)
 		{
 			return FastMath.sin(x) / x;
-		}
-
-		double[] smooth(double[] l)
-		{
-			double bandwidth = 0.1;
-			int robustness = 0;
-			try
-			{
-				LoessInterpolator loess = new LoessInterpolator(bandwidth, robustness);
-				return loess.smooth(q, l);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			return l;
 		}
 
 		PlotWindow[] plot(double mean, double sigma, double qValue)
