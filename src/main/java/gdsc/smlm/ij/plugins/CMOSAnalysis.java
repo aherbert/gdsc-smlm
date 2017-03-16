@@ -44,7 +44,6 @@ import ij.gui.ProgressBar;
 import ij.io.FileSaver;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
-import ij.process.ShortProcessor;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -98,7 +97,7 @@ public class CMOSAnalysis implements PlugIn
 			WindowManager.setTempCurrentImage(null);
 
 			// Convert variance to SD
-			float[] pixelSD = pixelVariance.clone();
+			float[] pixelSD = new float[pixelVariance.length];
 			for (int i = 0; i < pixelVariance.length; i++)
 				pixelSD[i] = (float) Math.sqrt(pixelVariance[i]);
 
@@ -125,14 +124,14 @@ public class CMOSAnalysis implements PlugIn
 				showProgress();
 
 				// Create image
-				ShortProcessor ip = new ShortProcessor(size, size);
+				final short[] pixels = new short[pixelOffset.length];
 				if (photons == 0)
 				{
 					for (int j = 0; j < pixelOffset.length; j++)
 					{
 						// Fixed offset per pixel plus a variance
 						double p = pixelOffset[j] + rg.nextGaussian() * pixelSD[j];
-						ip.set(j, clip(p));
+						pixels[j] = clip16bit(p);
 					}
 				}
 				else
@@ -142,18 +141,17 @@ public class CMOSAnalysis implements PlugIn
 						// Fixed offset per pixel plus a variance plus a 
 						// fixed gain multiplied by a Poisson sample of the photons
 						double p = pixelOffset[j] + rg.nextGaussian() * pixelSD[j] + (poisson[j] * pixelGain[j]);
-						ip.set(j, clip(p));
+						pixels[j] = clip16bit(p);
 					}
-					
+
 					// Rotate Poisson numbers.
-					// Prevent adjacent pixels using a common series.
 					// Shuffling what we have is faster than generating new values
 					// and we should have enough.
 					MathArrays.shuffle(poisson, rg);
 				}
 
 				// Save image
-				stack.addSlice(null, ip.getPixels());
+				stack.addSlice(null, pixels);
 				if (stack.getSize() == blockSize)
 				{
 					save(stack, start);
@@ -166,6 +164,10 @@ public class CMOSAnalysis implements PlugIn
 				save(stack, start);
 		}
 
+		final static short MIN_SHORT = 0;
+		// Require cast since this is out-of-range for a signed short
+		final static short MAX_SHORT = (short) 65335;
+
 		/**
 		 * Clip to the range for a 16-bit image.
 		 *
@@ -173,14 +175,14 @@ public class CMOSAnalysis implements PlugIn
 		 *            the value
 		 * @return the clipped value
 		 */
-		private int clip(double value)
+		private short clip16bit(double value)
 		{
 			int i = (int) Math.round(value);
 			if (i < 0)
-				return 0;
+				return MIN_SHORT;
 			if (i > 65335)
-				return 65335;
-			return i;
+				return MAX_SHORT;
+			return (short) i;
 		}
 
 		private void save(ImageStack stack, int start)
