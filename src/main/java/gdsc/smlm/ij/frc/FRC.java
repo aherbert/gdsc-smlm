@@ -1527,6 +1527,9 @@ public class FRC
 	 * added to the denominator of the FRC before computing the correlation. The correlation in the FRC curve will be
 	 * updated. The sums of the FRC curve are unchanged.
 	 * <p>
+	 * The localisation precision is input in units of nm. This is converted using the nmPerPixel stored in the FRC
+	 * curve object into units of super-resolution pixels.
+	 * <p>
 	 * The correlation can be reset by calling this method with a Q-value of zero.
 	 * <p>
 	 * Note: Spurious correlation correction is only useful when computing the resolution of a single set of
@@ -1540,9 +1543,9 @@ public class FRC
 	 * @param qValue
 	 *            the q value
 	 * @param mean
-	 *            the mean of the Gaussian localisation precision (in units of super-resolution pixels)
+	 *            the mean of the Gaussian localisation precision (in units of nm)
 	 * @param sigma
-	 *            the width of the Gaussian localisation precision (in units of super-resolution pixels)
+	 *            the width of the Gaussian localisation precision (in units of nm)
 	 */
 	public static void applyQCorrection(FRCCurve frcCurve, double qValue, double mean, double sigma)
 	{
@@ -1560,7 +1563,7 @@ public class FRC
 		// H(q) is the factor in the correlation averages related to the localization
 		// uncertainties that depends on the mean and width of the
 		// distribution of localization uncertainties
-		double[] hq = computeHq(q, mean, sigma);
+		double[] hq = computeHq(q, mean / frcCurve.nmPerPixel, sigma / frcCurve.nmPerPixel);
 
 		// Precompute Q normalisation
 		double qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
@@ -1586,7 +1589,7 @@ public class FRC
 
 	private static double sinc(double x)
 	{
-		return FastMath.sin(x) / x;
+		return Math.sin(x) / x;
 	}
 
 	/**

@@ -564,8 +564,8 @@ public class FIRE implements PlugIn
 		{
 			gd.addCheckbox("Spurious correlation correction", spuriousCorrelationCorrection);
 			gd.addNumericField("Q-value", qValue, 3);
-			gd.addNumericField("Precision_Mean", mean, 2);
-			gd.addNumericField("Precision_Sigma", sigma, 2);
+			gd.addNumericField("Precision_Mean", mean, 2, 6, "nm");
+			gd.addNumericField("Precision_Sigma", sigma, 2, 6, "nm");
 			gd.addNumericField("Threads", getLastNThreads(), 0);
 		}
 
@@ -1957,7 +1957,7 @@ public class FIRE implements PlugIn
 
 		private double sinc(double x)
 		{
-			return FastMath.sin(x) / x;
+			return Math.sin(x) / x;
 		}
 
 		PlotWindow[] plot(double mean, double sigma, double qValue)
@@ -2017,7 +2017,7 @@ public class FIRE implements PlugIn
 
 			// Show how the resolution changes
 
-			FRC.applyQCorrection(frcCurve, qValue, mu, sd);
+			FRC.applyQCorrection(frcCurve, qValue, mean, sigma);
 			FRCCurve smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve, false);
 
 			// Resolution in pixels. Just use the default 1/7 thrshold method
@@ -2047,10 +2047,14 @@ public class FIRE implements PlugIn
 
 			// Produce a ratio plot. Plateauness is designed to achieve a value of 1 for this ratio. 
 			plot = new Plot2(title2, "Spatial Frequency (nm^-1)", "FRC Numerator / Spurious component");
-			plot.setColor(Color.blue);
-			plot.addPoints(qScaled, ratio, Plot.LINE);
-			plot.setColor(Color.black);
 			double xMax = qScaled[qScaled.length - 1];
+			if (qValue > 0)
+			{
+				plot.addLabel(0, 0, String.format("Plateauness = %.3f", plateauness));
+				plot.setColor(Color.blue);
+				plot.addPoints(qScaled, ratio, Plot.LINE);
+			}
+			plot.setColor(Color.black);
 			plot.drawLine(0, 1, xMax, 1);
 			plot.setColor(Color.magenta);
 			plot.drawLine(qScaled[low], 0, qScaled[low], 2);
