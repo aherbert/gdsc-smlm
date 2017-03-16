@@ -797,6 +797,28 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
+	 * Gets the frame.
+	 *
+	 * @return The time frame that this result corresponds to
+	 */
+	public int getFrame()
+	{
+		return peak;
+	}
+
+	/**
+	 * Checks for end frame. Derived classes can override this.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasEndFrame()
+	{
+		return false;
+	}
+
+	/**
+	 * Gets the end frame. Default = {@link #getFrame()}. Derived classes can override this.
+	 *
 	 * @return The last time frame that this result corresponds to
 	 */
 	public int getEndFrame()
@@ -805,11 +827,45 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
+	 * Checks for id. Derived classes can override this.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasId()
+	{
+		return false;
+	}
+
+	/**
+	 * Gets the id. Default = 0. Derived classes can override this.
+	 *
 	 * @return The results identifier
 	 */
 	public int getId()
 	{
 		return 0;
+	}
+
+	/**
+	 * Checks for precision. Derived classes can override this.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasPrecision()
+	{
+		return false;
+	}
+
+	/**
+	 * Gets the localisation precision. Default = Double.NaN. Derived classes can override this.
+	 * <p>
+	 * This is provided so that results can be loaded from external sources.
+	 *
+	 * @return the precision (in nm)
+	 */
+	public double getPrecision()
+	{
+		return Double.NaN;
 	}
 
 	/**
@@ -879,10 +935,12 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Return the squared distance to the other coordinate
-	 * 
-	 * @param r
-	 *            The result
+	 * Return the squared distance to the other coordinate.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
 	 * @return The squared distance
 	 */
 	public double distance2(final double x, final double y)
@@ -909,8 +967,6 @@ public class PeakResult implements Comparable<PeakResult>
 	/**
 	 * This methods return the x-position. To allow filters to use the actual shift requires either off-setting the
 	 * position with the initial fit position, or extending this class so the shift can be stored.
-	 * 
-	 * @see gdsc.smlm.results.ClassifiedPeakResult#getXShift()
 	 */
 	public float getXShift()
 	{
@@ -920,18 +976,16 @@ public class PeakResult implements Comparable<PeakResult>
 	/**
 	 * This methods return the y-position. To allow filters to use the actual shift requires either off-setting the
 	 * position with the initial fit position, or extending this class so the shift can be stored.
-	 * 
-	 * @see gdsc.smlm.results.ClassifiedPeakResult#getYShift()
 	 */
 	public float getYShift()
 	{
 		return getYPosition();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.ClassifiedPeakResult#getNoise()
+	/**
+	 * Gets the noise.
+	 *
+	 * @return the noise
 	 */
 	public float getNoise()
 	{

@@ -45,6 +45,18 @@ public class ExtendedPeakResult extends IdPeakResult
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.PeakResult#hasEndFrame()
+	 */
+	@Override
+	public boolean hasEndFrame()
+	{
+		// TODO Auto-generated method stub
+		return super.hasEndFrame();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.PeakResult#getEndFrame()
 	 */
 	@Override

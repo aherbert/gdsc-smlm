@@ -23,15 +23,24 @@ public class IdPeakResult extends PeakResult
 	/**
 	 * Instantiates a new id peak result.
 	 *
-	 * @param startFrame the start frame
-	 * @param origX the orig X
-	 * @param origY the orig Y
-	 * @param origValue the orig value
-	 * @param error the error
-	 * @param noise the noise
-	 * @param params the params
-	 * @param paramsStdDev the params std dev
-	 * @param id the id
+	 * @param startFrame
+	 *            the start frame
+	 * @param origX
+	 *            the orig X
+	 * @param origY
+	 *            the orig Y
+	 * @param origValue
+	 *            the orig value
+	 * @param error
+	 *            the error
+	 * @param noise
+	 *            the noise
+	 * @param params
+	 *            the params
+	 * @param paramsStdDev
+	 *            the params std dev
+	 * @param id
+	 *            the id
 	 */
 	public IdPeakResult(int startFrame, int origX, int origY, float origValue, double error, float noise,
 			float[] params, float[] paramsStdDev, int id)
@@ -43,16 +52,32 @@ public class IdPeakResult extends PeakResult
 	/**
 	 * Instantiates a new id peak result.
 	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param sd the sd
-	 * @param signal the signal
-	 * @param id the id
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param sd
+	 *            the sd
+	 * @param signal
+	 *            the signal
+	 * @param id
+	 *            the id
 	 */
 	public IdPeakResult(float x, float y, float sd, float signal, int id)
 	{
 		super(x, y, sd, signal);
 		this.id = id;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResult#hasId()
+	 */
+	@Override
+	public boolean hasId()
+	{
+		return true;
 	}
 
 	/*
