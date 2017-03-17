@@ -207,7 +207,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setMolecule(id.incrementAndGet());
 		builder.setChannel(1);
 		builder.setFluorophoreType(1);
-		builder.setFrame(result.peak);
+		builder.setFrame(result.getFrame());
 		builder.setXPosition(result.origX);
 		builder.setYPosition(result.origY);
 		setBackground(builder, params[Gaussian2DFunction.BACKGROUND]);
@@ -332,7 +332,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			builder.setMolecule(id.incrementAndGet());
 			builder.setChannel(1);
 			builder.setFluorophoreType(1);
-			builder.setFrame(result.peak);
+			builder.setFrame(result.getFrame());
 			builder.setXPosition(result.origX);
 			builder.setYPosition(result.origY);
 			setBackground(builder, params[Gaussian2DFunction.BACKGROUND]);

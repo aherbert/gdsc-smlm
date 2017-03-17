@@ -376,7 +376,6 @@ public class TSFPeakResultsReader
 				int id = 0;
 				int endFrame = frame;
 
-				PeakResult peakResult;
 				if (isGDSC)
 				{
 					error = spot.getError();
@@ -397,19 +396,28 @@ public class TSFPeakResultsReader
 					id = spot.getCluster();
 				}
 
-				if (endFrame != frame)
+				// Allow storing any of the optional attributes
+				AttributePeakResult peakResult = new AttributePeakResult(frame, origX, origY, origValue, error, noise,
+						params, paramsStdDev);
+
+				peakResult.setEndFrame(endFrame);
+				peakResult.setId(id);
+				if (spot.hasXPrecision() || spot.hasYPrecision())
 				{
-					peakResult = new ExtendedPeakResult(frame, origX, origY, origValue, error, noise, params,
-							paramsStdDev, endFrame, id);
-				}
-				else if (id != 0)
-				{
-					peakResult = new IdPeakResult(frame, origX, origY, origValue, error, noise, params, paramsStdDev,
-							id);
-				}
-				else
-				{
-					peakResult = new PeakResult(frame, origX, origY, origValue, error, noise, params, paramsStdDev);
+					// Use the average. Note this is not the Euclidean distance since we divide by n!
+					double p = 0;
+					int n = 0;
+					if (spot.hasXPrecision())
+					{
+						p = spot.getXPrecision() * spot.getXPrecision();
+						n++;
+					}
+					if (spot.hasYPrecision())
+					{
+						p += spot.getYPrecision() * spot.getYPrecision();
+						n++;
+					}
+					peakResult.setPrecision(Math.sqrt(p / n));
 				}
 				results.add(peakResult);
 			}
