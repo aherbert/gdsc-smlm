@@ -1534,6 +1534,27 @@ public class FIRE implements PlugIn
 		}
 		else
 		{
+			// Reset to theoretical curve. This is what will be used to compute the final correction.
+			// TODO - check if the Matlab code uses a sampled curve to compute the correction. 
+			// If so then this should be optional.
+			if (sampleDecay)
+			{
+				// If a sample of the precision was used to construct the data for the initial fit 
+				// then update the estimate using the fit result since it will be a better start point. 
+
+				if (precisionMethod != PrecisionMethod.FIXED)
+				{
+					histogram.sigma = precision.getStandardDeviation();
+					// Normalise sum-of-squares to the SR pixel size
+					double meanSumOfSquares = (precision.getSumOfSquares() / (images.nmPerPixel * images.nmPerPixel)) /
+							precision.getN();
+					histogram.mean = images.nmPerPixel *
+							Math.sqrt(meanSumOfSquares - estimate[1] / (4 * Math.PI * Math.PI));
+				}
+
+				exp_decay = computeExpDecay(histogram.mean / images.nmPerPixel, histogram.sigma / images.nmPerPixel, q);
+			}
+
 			// Estimate spurious component by promoting plateauness.
 			// The Matlab code used random initial points for a Simplex optimiser.
 
