@@ -361,11 +361,15 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 			if (result.hasId())
 				builder.setCluster(result.getId());
+			else
+				builder.clearCluster();
 
 			builder.setError(result.error);
 			builder.setNoise(result.noise);
 			if (result.hasEndFrame())
 				builder.setEndFrame(result.getEndFrame());
+			else
+				builder.clearEndFrame();
 			builder.setOriginalValue(result.origValue);
 			addParamsStdDev(builder, result.paramsStdDev);
 
