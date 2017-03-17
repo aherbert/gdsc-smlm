@@ -199,7 +199,7 @@ public class FIRE implements PlugIn
 	private static boolean showFRCCurve = true;
 	private static boolean showFRCCurveRepeats = false;
 	private static boolean showFRCTimeEvolution = false;
-	private static int precisionMethodIndex = PrecisionMethod.CALCULATE.ordinal(); 
+	private static int precisionMethodIndex = PrecisionMethod.CALCULATE.ordinal();
 	private PrecisionMethod precisionMethod;
 	private static boolean loessSmoothing = false;
 	private static boolean fitPrecision = false;
@@ -1303,7 +1303,8 @@ public class FIRE implements PlugIn
 		PrecisionHistogram histogram = calculatePrecisionHistogram();
 		if (histogram == null)
 		{
-			IJ.error(TITLE, "No localisation precision available");
+			IJ.error(TITLE, "No localisation precision available.\n \nPlease choose " + PrecisionMethod.FIXED +
+					" and enter a precision mean and SD.");
 			return;
 		}
 		StoredDataStatistics precision = histogram.precision;
@@ -2374,7 +2375,7 @@ public class FIRE implements PlugIn
 		}
 
 		// Fitting of the histogram to produce the initial estimate
-		
+
 		// Extract non-zero data
 		float[] x = Arrays.copyOf(hist[0], hist[0].length);
 		float[] y = hist[1];
