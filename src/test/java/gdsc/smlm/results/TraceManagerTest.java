@@ -185,7 +185,7 @@ public class TraceManagerTest
 			{
 				PeakResult p1 = e.get(j);
 				PeakResult p2 = a.get(j);
-				Assert.assertEquals("Frames different", p1.peak, p2.peak);
+				Assert.assertEquals("Frames different", p1.getFrame(), p2.getFrame());
 				Assert.assertEquals("X different", p1.getXPosition(), p2.getXPosition(), 1e-3f);
 				Assert.assertEquals("Y different", p1.getYPosition(), p2.getYPosition(), 1e-3f);
 			}
@@ -200,7 +200,7 @@ public class TraceManagerTest
 			{
 				PeakResult p1 = o1.getHead();
 				PeakResult p2 = o2.getHead();
-				int result = p1.peak - p2.peak;
+				int result = p1.getFrame() - p2.getFrame();
 				if (result != 0)
 					return result;
 				if (p1.getXPosition() < p2.getXPosition())

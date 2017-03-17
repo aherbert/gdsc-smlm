@@ -28,7 +28,7 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
  */
 public class PeakResult implements Comparable<PeakResult>
 {
-	public int peak;
+	private int frame;
 	public int origX;
 	public int origY;
 	public float origValue;
@@ -37,10 +37,10 @@ public class PeakResult implements Comparable<PeakResult>
 	public float[] params;
 	public float[] paramsStdDev;
 
-	public PeakResult(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
+	public PeakResult(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
 	{
-		this.peak = peak;
+		this.frame = frame;
 		this.origX = origX;
 		this.origY = origY;
 		this.origValue = origValue;
@@ -674,7 +674,7 @@ public class PeakResult implements Comparable<PeakResult>
 	public int compareTo(PeakResult o)
 	{
 		// Sort by peak number: Ascending
-		if (peak == o.peak)
+		if (frame == o.frame)
 		{
 			// Sort by peak height: Descending
 			if (params[Gaussian2DFunction.SIGNAL] > o.params[Gaussian2DFunction.SIGNAL])
@@ -683,7 +683,7 @@ public class PeakResult implements Comparable<PeakResult>
 				return 1;
 			return 0;
 		}
-		return peak - o.peak;
+		return frame - o.frame;
 	}
 
 	/**
@@ -803,9 +803,19 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public int getFrame()
 	{
-		return peak;
+		return frame;
 	}
 
+	/**
+	 * Sets the frame.
+	 *
+	 * @param frame The time frame that this result corresponds to
+	 */
+	public void setFrame(int frame)
+	{
+		this.frame = frame;
+	}
+	
 	/**
 	 * Checks for end frame. Derived classes can override this.
 	 *
@@ -823,7 +833,7 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public int getEndFrame()
 	{
-		return peak;
+		return frame;
 	}
 
 	/**

@@ -172,7 +172,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		{
 			rank.rank = n++;
 			PeakResult r = rank.peakResult;
-			table.add(r.peak, r.origX, r.origY, r.origValue, r.error, r.noise, r.params, r.paramsStdDev);
+			table.add(r.getFrame(), r.origX, r.origY, r.origValue, r.error, r.noise, r.params, r.paramsStdDev);
 		}
 		table.end();
 
@@ -231,9 +231,9 @@ public class SpotInspector implements PlugIn, MouseListener
 		{
 			public int compare(PeakResultRank o1, PeakResultRank o2)
 			{
-				if (o1.peakResult.peak < o2.peakResult.peak)
+				if (o1.peakResult.getFrame() < o2.peakResult.getFrame())
 					return -1;
-				if (o1.peakResult.peak > o2.peakResult.peak)
+				if (o1.peakResult.getFrame() > o2.peakResult.getFrame())
 					return 1;
 				return 0;
 			}
@@ -269,7 +269,7 @@ public class SpotInspector implements PlugIn, MouseListener
 			int sizeX = maxX - minX;
 			int sizeY = maxY - minY;
 
-			float[] data = source.get(r.peak, new Rectangle(minX, minY, sizeX, sizeY));
+			float[] data = source.get(r.getFrame(), new Rectangle(minX, minY, sizeX, sizeY));
 			// Prevent errors with missing data
 			if (data == null)
 				data = new float[sizeX * sizeY];

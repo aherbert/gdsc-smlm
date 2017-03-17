@@ -141,7 +141,7 @@ public class MALKFilePeakResults extends FilePeakResults
 		for (PeakResult result : results)
 		{
 			// Add the standard data
-			addStandardData(sb, result.getXPosition(), result.getYPosition(), result.peak, result.getSignal());
+			addStandardData(sb, result.getXPosition(), result.getYPosition(), result.getFrame(), result.getSignal());
 
 			// Flush the output to allow for very large input lists
 			if (++count >= 20)

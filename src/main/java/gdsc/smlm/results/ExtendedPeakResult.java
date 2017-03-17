@@ -20,22 +20,50 @@ public class ExtendedPeakResult extends IdPeakResult
 {
 	private int endFrame;
 
+	/**
+	 * Instantiates a new extended peak result.
+	 *
+	 * @param startFrame
+	 *            the start frame
+	 * @param origX
+	 *            the orig X
+	 * @param origY
+	 *            the orig Y
+	 * @param origValue
+	 *            the orig value
+	 * @param error
+	 *            the error
+	 * @param noise
+	 *            the noise
+	 * @param params
+	 *            the params
+	 * @param paramsStdDev
+	 *            the params std dev
+	 * @param endFrame
+	 *            the end frame
+	 * @param id
+	 *            the id
+	 */
 	public ExtendedPeakResult(int startFrame, int origX, int origY, float origValue, double error, float noise,
 			float[] params, float[] paramsStdDev, int endFrame, int id)
 	{
 		super(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev, id);
-		// Ensure that the end frame is valid
-		this.endFrame = (endFrame < startFrame) ? startFrame : endFrame;
+		setEndFrame(endFrame);
 	}
 
 	/**
-	 * Simple constructor to create a result with location, width, strength, and id
-	 * 
+	 * Simple constructor to create a result with location, width, strength, and id.
+	 *
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param sd
+	 *            the sd
 	 * @param signal
+	 *            the signal
 	 * @param id
+	 *            the id
 	 */
 	public ExtendedPeakResult(float x, float y, float sd, float signal, int id)
 	{
@@ -50,8 +78,7 @@ public class ExtendedPeakResult extends IdPeakResult
 	@Override
 	public boolean hasEndFrame()
 	{
-		// TODO Auto-generated method stub
-		return super.hasEndFrame();
+		return endFrame > getFrame();
 	}
 
 	/*
@@ -65,6 +92,21 @@ public class ExtendedPeakResult extends IdPeakResult
 		return endFrame;
 	}
 
+	public void setEndFrame(int endFrame)
+	{
+		// Ensure that the end frame is valid
+		this.endFrame = Math.max(endFrame, super.getFrame());
+	}
+
+	@Override
+	public void setFrame(int frame)
+	{
+		// Set the new start frame
+		super.setFrame(frame);
+		// Validate the current end frame
+		setEndFrame(endFrame);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -73,7 +115,7 @@ public class ExtendedPeakResult extends IdPeakResult
 	public int compareTo(PeakResult o)
 	{
 		// Sort by peak number: Ascending
-		if (peak == o.peak)
+		if (getFrame() == o.getFrame())
 		{
 			// Sort by peak end number: Descending
 			if (endFrame == o.getEndFrame())
@@ -88,6 +130,6 @@ public class ExtendedPeakResult extends IdPeakResult
 			}
 			return endFrame - o.getEndFrame();
 		}
-		return peak - o.peak;
+		return getFrame() - o.getFrame();
 	}
 }

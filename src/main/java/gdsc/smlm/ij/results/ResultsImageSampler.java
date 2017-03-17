@@ -134,9 +134,9 @@ public class ResultsImageSampler
 		for (PeakResult p : results)
 		{
 			// Avoid invalid slices
-			if (p.peak < 1 || p.peak > stack.getSize())
+			if (p.getFrame() < 1 || p.getFrame() > stack.getSize())
 				continue;
-			long index = getIndex(p.getXPosition(), p.getYPosition(), p.peak);
+			long index = getIndex(p.getXPosition(), p.getYPosition(), p.getFrame());
 			map.adjustOrPutValue(index, 1, 1);
 		}
 

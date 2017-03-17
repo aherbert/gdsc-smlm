@@ -130,7 +130,7 @@ public class ResequenceResults implements PlugIn
 		results.sort();
 
 		// Assume the results start from frame 1 (or above)
-		if (results.getHead().peak < 1)
+		if (results.getHead().getFrame() < 1)
 		{
 			return false;
 		}
@@ -142,10 +142,10 @@ public class ResequenceResults implements PlugIn
 		boolean print = true;
 		for (PeakResult r : results.getResults())
 		{
-			if (t != r.peak)
+			if (t != r.getFrame())
 			{
 				// Update the mapped position
-				while (t < r.peak)
+				while (t < r.getFrame())
 				{
 					// Move to the next position
 					mapped++;
@@ -161,11 +161,11 @@ public class ResequenceResults implements PlugIn
 					t++;
 				}
 
-				t = r.peak;
+				t = r.getFrame();
 				print = true;
 			}
 
-			r.peak = mapped;
+			r.setFrame(mapped);
 
 			if (print)
 			{

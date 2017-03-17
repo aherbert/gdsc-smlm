@@ -23,8 +23,8 @@ public class IdPeakResult extends PeakResult
 	/**
 	 * Instantiates a new id peak result.
 	 *
-	 * @param startFrame
-	 *            the start frame
+	 * @param frame
+	 *            the frame
 	 * @param origX
 	 *            the orig X
 	 * @param origY
@@ -42,10 +42,10 @@ public class IdPeakResult extends PeakResult
 	 * @param id
 	 *            the id
 	 */
-	public IdPeakResult(int startFrame, int origX, int origY, float origValue, double error, float noise,
+	public IdPeakResult(int frame, int origX, int origY, float origValue, double error, float noise,
 			float[] params, float[] paramsStdDev, int id)
 	{
-		super(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev);
+		super(frame, origX, origY, origValue, error, noise, params, paramsStdDev);
 		this.id = id;
 	}
 
@@ -99,10 +99,10 @@ public class IdPeakResult extends PeakResult
 	public int compareTo(PeakResult o)
 	{
 		// Sort by peak number: Ascending
-		if (peak == o.peak)
+		if (getFrame() == o.getFrame())
 		{
 			return getId() - o.getId();
 		}
-		return peak - o.peak;
+		return getFrame() - o.getFrame();
 	}
 }

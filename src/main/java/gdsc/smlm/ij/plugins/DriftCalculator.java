@@ -574,8 +574,8 @@ public class DriftCalculator implements PlugIn
 			Utils.log("Applying drift correction to the results set: " + results.getName());
 			for (PeakResult r : results)
 			{
-				r.params[Gaussian2DFunction.X_POSITION] += dx[r.peak];
-				r.params[Gaussian2DFunction.Y_POSITION] += dy[r.peak];
+				r.params[Gaussian2DFunction.X_POSITION] += dx[r.getFrame()];
+				r.params[Gaussian2DFunction.Y_POSITION] += dy[r.getFrame()];
 			}
 		}
 		else
@@ -591,13 +591,13 @@ public class DriftCalculator implements PlugIn
 			{
 				if (truncate)
 				{
-					if (r.peak < interpolationStart || r.peak > interpolationEnd)
+					if (r.getFrame() < interpolationStart || r.getFrame() > interpolationEnd)
 						continue;
 				}
 				float[] params = Arrays.copyOf(r.params, r.params.length);
-				params[Gaussian2DFunction.X_POSITION] += dx[r.peak];
-				params[Gaussian2DFunction.Y_POSITION] += dy[r.peak];
-				newResults.addf(r.peak, r.origX, r.origY, r.origValue, r.error, r.noise, params, r.paramsStdDev);
+				params[Gaussian2DFunction.X_POSITION] += dx[r.getFrame()];
+				params[Gaussian2DFunction.Y_POSITION] += dy[r.getFrame()];
+				newResults.addf(r.getFrame(), r.origX, r.origY, r.origValue, r.error, r.noise, params, r.paramsStdDev);
 			}
 		}
 	}
@@ -833,10 +833,10 @@ public class DriftCalculator implements PlugIn
 		int max = 0;
 		for (PeakResult r : results)
 		{
-			if (min > r.peak)
-				min = r.peak;
-			if (max < r.peak)
-				max = r.peak;
+			if (min > r.getFrame())
+				min = r.getFrame();
+			if (max < r.getFrame())
+				max = r.getFrame();
 		}
 		return new int[] { min, max };
 	}
@@ -877,7 +877,7 @@ public class DriftCalculator implements PlugIn
 			{
 				final float y = r.params[Gaussian2DFunction.Y_POSITION];
 				if (y > miny && y < maxy)
-					list.add(new Spot(r.peak, x, y, r.getSignal()));
+					list.add(new Spot(r.getFrame(), x, y, r.getSignal()));
 			}
 		}
 
@@ -1316,16 +1316,16 @@ public class DriftCalculator implements PlugIn
 		ArrayList<Localisation> nextBlock = null;
 		for (PeakResult r : results.getResults())
 		{
-			if (r.peak > t)
+			if (r.getFrame() > t)
 			{
-				while (r.peak > t)
+				while (r.getFrame() > t)
 					t += frames;
 				// To avoid blocks without many results only create a new block if the min size has been met
 				if (nextBlock == null || nextBlock.size() >= minimimLocalisations)
 					nextBlock = new ArrayList<Localisation>();
 				blocks.add(nextBlock);
 			}
-			nextBlock.add(new Localisation(r.peak, r.getXPosition(), r.getYPosition(), r.getSignal()));
+			nextBlock.add(new Localisation(r.getFrame(), r.getXPosition(), r.getYPosition(), r.getSignal()));
 		}
 
 		if (blocks.size() < 2)

@@ -98,9 +98,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		int failCount = 0;
 		for (PeakResult peak : results.getResults())
 		{
-			if (frame != peak.peak)
+			if (frame != peak.getFrame())
 			{
-				frame = peak.peak;
+				frame = peak.getFrame();
 				failCount = 0;
 			}
 
@@ -154,9 +154,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		int failCount = 0;
 		for (PeakResult peak : results.getResults())
 		{
-			if (frame != peak.peak)
+			if (frame != peak.getFrame())
 			{
-				frame = peak.peak;
+				frame = peak.getFrame();
 				failCount = 0;
 			}
 
@@ -218,9 +218,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		int p = 0;
 		for (PeakResult peak : results.getResults())
 		{
-			if (frame != peak.peak)
+			if (frame != peak.getFrame())
 			{
-				frame = peak.peak;
+				frame = peak.getFrame();
 				failCount = 0;
 			}
 
@@ -299,9 +299,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		int p = 0;
 		for (PeakResult peak : results.getResults())
 		{
-			if (frame != peak.peak)
+			if (frame != peak.getFrame())
 			{
-				frame = peak.peak;
+				frame = peak.getFrame();
 				failCount = 0;
 			}
 
@@ -379,9 +379,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		double tp = 0, tn = 0;
 		for (PeakResult peak : results.getResults())
 		{
-			if (frame != peak.peak)
+			if (frame != peak.getFrame())
 			{
-				frame = peak.peak;
+				frame = peak.getFrame();
 				failCount = 0;
 			}
 
@@ -469,9 +469,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		double tp = 0, tn = 0;
 		for (PeakResult peak : results.getResults())
 		{
-			if (frame != peak.peak)
+			if (frame != peak.getFrame())
 			{
-				frame = peak.peak;
+				frame = peak.getFrame();
 				failCount = 0;
 			}
 
@@ -642,9 +642,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				final boolean isTrue = peak.origValue != 0;
 
 				// Reset fail count for new frames
-				if (frame != peak.peak)
+				if (frame != peak.getFrame())
 				{
-					frame = peak.peak;
+					frame = peak.getFrame();
 					failCount = 0;
 				}
 
@@ -727,9 +727,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				final boolean isTrue = peak.origValue != 0;
 
 				// Reset fail count for new frames
-				if (frame != peak.peak)
+				if (frame != peak.getFrame())
 				{
-					frame = peak.peak;
+					frame = peak.getFrame();
 					failCount = 0;
 				}
 
@@ -808,9 +808,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			for (PeakResult peak : peakResults.getResults())
 			{
 				// Reset fail count for new frames
-				if (frame != peak.peak)
+				if (frame != peak.getFrame())
 				{
-					frame = peak.peak;
+					frame = peak.getFrame();
 					failCount = 0;
 				}
 
@@ -890,9 +890,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			for (PeakResult peak : peakResults.getResults())
 			{
 				// Reset fail count for new frames
-				if (frame != peak.peak)
+				if (frame != peak.getFrame())
 				{
-					frame = peak.peak;
+					frame = peak.getFrame();
 					failCount = 0;
 				}
 
@@ -982,9 +982,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			for (PeakResult peak : peakResults.getResults())
 			{
 				// Reset fail count for new frames
-				if (frame != peak.peak)
+				if (frame != peak.getFrame())
 				{
-					frame = peak.peak;
+					frame = peak.getFrame();
 					failCount = 0;
 				}
 

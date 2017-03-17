@@ -290,7 +290,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	private boolean canShowEndFrame(MemoryPeakResults results)
 	{
 		for (PeakResult r : results.getResults())
-			if (r.peak != r.getEndFrame())
+			if (r.getFrame() != r.getEndFrame())
 				return true;
 		return false;
 	}
@@ -727,7 +727,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	public static boolean isMultiFrame(MemoryPeakResults memoryResults)
 	{
 		for (PeakResult r : memoryResults.getResults())
-			if (r.peak < r.getEndFrame())
+			if (r.getFrame() < r.getEndFrame())
 				return true;
 		return false;
 	}

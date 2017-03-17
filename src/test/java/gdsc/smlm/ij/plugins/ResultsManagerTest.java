@@ -272,7 +272,7 @@ public class ResultsManagerTest
 			PeakResult p1 = expected.get(i);
 			PeakResult p2 = actual.get(i);
 
-			Assert.assertEquals("Peak mismatch @ " + i, p1.peak, p2.peak);
+			Assert.assertEquals("Peak mismatch @ " + i, p1.getFrame(), p2.getFrame());
 
 			Assert.assertEquals("Orig X mismatch @ " + i, p1.origX, p2.origX);
 			Assert.assertEquals("Orig Y mismatch @ " + i, p1.origY, p2.origY);

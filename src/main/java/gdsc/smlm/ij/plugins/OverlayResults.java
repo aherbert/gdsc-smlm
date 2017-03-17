@@ -181,7 +181,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			int points = 0;
 			for (PeakResult r : results.getResults())
 			{
-				if (r.peak != currentSlice)
+				if (r.getFrame() != currentSlice)
 					continue;
 				if (points == ox.length)
 				{

@@ -383,7 +383,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		int n = 0;
 		for (PeakResult result : results)
 		{
-			addPeak(result.peak, result.getEndFrame(), result.origX, result.origY, result.origValue, result.error,
+			addPeak(result.getFrame(), result.getEndFrame(), result.origX, result.origY, result.origValue, result.error,
 					result.noise, result.params, result.paramsStdDev);
 			if (n++ > 31)
 			{

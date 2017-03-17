@@ -279,10 +279,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			}
 
 			// Check for single frame
-			singleFrame = results.getHead().peak;
+			singleFrame = results.getHead().getFrame();
 			for (PeakResult result : results.getResults())
 			{
-				if (singleFrame != result.peak)
+				if (singleFrame != result.getFrame())
 				{
 					singleFrame = 0;
 					break;
@@ -2511,13 +2511,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		runTime = System.nanoTime();
 		boolean shutdown = false;
-		int slice = candidateMaxima.get(0).peak;
+		int slice = candidateMaxima.get(0).getFrame();
 		ArrayList<PeakResult> sliceCandidates = new ArrayList<PeakResult>();
 		Iterator<PeakResult> iter = candidateMaxima.iterator();
 		while (iter.hasNext())
 		{
 			PeakResult r = iter.next();
-			if (slice != r.peak)
+			if (slice != r.getFrame())
 			{
 				if (escapePressed())
 				{
@@ -2536,7 +2536,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 				sliceCandidates.clear();
 			}
-			slice = r.peak;
+			slice = r.getFrame();
 			sliceCandidates.add(r);
 		}
 
@@ -2562,7 +2562,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		for (PeakResult result : sliceCandidates)
 		{
 			// Add ExtendedPeakResults to the results if they span multiple frames (they are the result of previous fitting).
-			if (result instanceof ExtendedPeakResult && result.peak != result.getEndFrame())
+			if (result instanceof ExtendedPeakResult && result.getFrame() != result.getEndFrame())
 			{
 				processedResults.add(result);
 			}

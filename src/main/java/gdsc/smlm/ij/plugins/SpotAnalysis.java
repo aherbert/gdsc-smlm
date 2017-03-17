@@ -809,7 +809,7 @@ public class SpotAnalysis extends PlugInFrame
 					if (p.getXPosition() >= minx && p.getXPosition() <= maxx && p.getYPosition() >= miny &&
 							p.getYPosition() <= maxy)
 					{
-						candidateFrames.add(p.peak);
+						candidateFrames.add(p.getFrame());
 					}
 				}
 			}
@@ -1153,7 +1153,7 @@ public class SpotAnalysis extends PlugInFrame
 
 				int[] on = traceResult.trace.getOnTimes();
 				int[] off = traceResult.trace.getOffTimes();
-				int t = traceResult.trace.getHead().peak;
+				int t = traceResult.trace.getHead().getFrame();
 				for (int i = 0; i < on.length; i++)
 				{
 					writeLine(files[1], Double.toString(msPerFrame * on[i]));
@@ -1170,7 +1170,7 @@ public class SpotAnalysis extends PlugInFrame
 				writeLine(files[4], String.format("# Id=%d, Blinks=%d, Signal=%f", traceResult.spot.frame, nBlinks,
 						traceResult.spot.signal));
 				for (PeakResult r : traceResult.trace.getPoints())
-					writeLine(files[4], String.format("%d %f", r.peak, r.getSignal()));
+					writeLine(files[4], String.format("%d %f", r.getFrame(), r.getSignal()));
 			}
 		}
 		catch (Exception e)

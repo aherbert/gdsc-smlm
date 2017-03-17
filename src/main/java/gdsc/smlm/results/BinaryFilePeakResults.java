@@ -233,7 +233,7 @@ public class BinaryFilePeakResults extends FilePeakResults
 		{
 			try
 			{
-				addResult(buffer, result.getId(), result.peak, result.getEndFrame(), result.origX, result.origY,
+				addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.origX, result.origY,
 						result.origValue, result.error, result.noise, result.params, result.paramsStdDev);
 			}
 			catch (IOException e)

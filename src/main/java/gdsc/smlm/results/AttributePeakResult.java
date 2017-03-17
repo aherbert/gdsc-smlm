@@ -109,13 +109,14 @@ public class AttributePeakResult extends PeakResult
 
 	public void setId(int id)
 	{
-		if (id != super.getId())
-		{
-			setHasId();
-			this.id = id;
-		}
-		else
-			clearHasId();
+		// Allow ID to be anything, including zero
+		//if (id != super.getId())
+		//{
+		setHasId();
+		this.id = id;
+		//}
+		//else
+		//	clearHasId();
 	}
 
 	/*
@@ -133,7 +134,8 @@ public class AttributePeakResult extends PeakResult
 
 	public void setEndFrame(int endFrame)
 	{
-		if (endFrame != super.getFrame())
+		// End frame must be after the start frame.
+		if (endFrame > super.getFrame())
 		{
 			setHasEndFrame();
 			this.endFrame = endFrame;
@@ -142,6 +144,15 @@ public class AttributePeakResult extends PeakResult
 			clearHasEndFrame();
 	}
 
+	@Override
+	public void setFrame(int frame)
+	{
+		// Set the new start frame
+		super.setFrame(frame);
+		// Validate the current end frame
+		setEndFrame(endFrame);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

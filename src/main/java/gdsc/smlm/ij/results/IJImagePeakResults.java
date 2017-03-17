@@ -1021,15 +1021,15 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
 				continue;
 
-			if (shouldUpdate(result.peak))
+			if (shouldUpdate(result.getFrame()))
 			{
 				addData(nPoints, nValues, allIndices, allValues);
 				nPoints = 0;
 				nValues = 0;
-				updateToFrame(result.peak);
+				updateToFrame(result.getFrame());
 			}
 
-			getValue(result.peak, result.params, result.error, x, y, indices, values);
+			getValue(result.getFrame(), result.params, result.error, x, y, indices, values);
 
 			for (int i = indices[4]; i-- > 0;)
 			{

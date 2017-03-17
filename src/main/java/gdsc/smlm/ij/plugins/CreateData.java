@@ -468,9 +468,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 			double sum = 0, sum2 = 0;
 			for (PeakResult result : results)
 			{
-				int i = result.peak - 1;
+				int i = result.getFrame() - 1;
 				if (p[i] != 0)
-					throw new RuntimeException("Multiple peaks on the same frame: " + result.peak);
+					throw new RuntimeException("Multiple peaks on the same frame: " + result.getFrame());
 				p[i] = result.getSignal();
 				background[i] = result.getBackground() - bias;
 				sum += p[i];
@@ -3015,24 +3015,24 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 				ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
 				List<Future<?>> futures = new LinkedList<Future<?>>();
 				final ArrayList<float[]> coords = new ArrayList<float[]>();
-				int t = results.getHead().peak;
+				int t = results.getHead().getFrame();
 				final Statistics densityStats = stats[DENSITY];
 				final float radius = (float) (settings.densityRadius * getHWHM());
 				final Rectangle bounds = results.getBounds();
 				currentIndex = 0;
-				finalIndex = results.getTail().peak;
+				finalIndex = results.getTail().getFrame();
 				// Store the density for each result.
 				int[] allDensity = new int[results.size()];
 				int allIndex = 0;
 				for (PeakResult r : results.getResults())
 				{
-					if (t != r.peak)
+					if (t != r.getFrame())
 					{
 						allIndex += runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds,
 								allDensity, allIndex);
 					}
 					coords.add(new float[] { r.getXPosition(), r.getYPosition() });
-					t = r.peak;
+					t = r.getFrame();
 				}
 				runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds, allDensity, allIndex);
 				Utils.waitForCompletion(futures);
@@ -4973,8 +4973,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 
 		for (PeakResult p : results.getResults())
 		{
-			if (p.peak < noise.length)
-				p.noise = noise[p.peak];
+			if (p.getFrame() < noise.length)
+				p.noise = noise[p.getFrame()];
 		}
 	}
 

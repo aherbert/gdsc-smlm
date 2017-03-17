@@ -315,7 +315,7 @@ public class TraceMolecules implements PlugIn
 		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(peakResults.size());
 		int id = 0;
 		for (PeakResult p : peakResults)
-			points.add(ClusterPoint.newTimeClusterPoint(id++, p.getXPosition(), p.getYPosition(), p.getSignal(), p.peak,
+			points.add(ClusterPoint.newTimeClusterPoint(id++, p.getXPosition(), p.getYPosition(), p.getSignal(), p.getFrame(),
 					p.getEndFrame()));
 		return points;
 	}
@@ -363,7 +363,7 @@ public class TraceMolecules implements PlugIn
 		{
 			public int compare(Trace o1, Trace o2)
 			{
-				return o1.getHead().peak - o2.getHead().peak;
+				return o1.getHead().getFrame() - o2.getHead().getFrame();
 			}
 		});
 	}
@@ -1811,8 +1811,8 @@ public class TraceMolecules implements PlugIn
 
 			// This is not needed since the bounds are passed using the FitJob
 			//params.setOffset(new float[] { bounds.x, bounds.y });
-			int startT = trace.getHead().peak;
-			params.endT = trace.getTail().peak;
+			int startT = trace.getHead().getFrame();
+			params.endT = trace.getTail().getFrame();
 
 			ParameterisedFitJob job = new ParameterisedFitJob(n, params, startT, data, bounds);
 			jobItems.add(new JobItem(job, trace, centre));
@@ -2025,7 +2025,7 @@ public class TraceMolecules implements PlugIn
 		{
 			noise += result.noise * result.noise;
 
-			float[] sourceData = source.get(result.peak, bounds);
+			float[] sourceData = source.get(result.getFrame(), bounds);
 			final float background = result.getBackground();
 			sumBackground += background;
 			for (int i = 0; i < data.length; i++)

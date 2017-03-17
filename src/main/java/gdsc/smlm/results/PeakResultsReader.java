@@ -1492,7 +1492,7 @@ public class PeakResultsReader
 		Statistics pixelPitch = new Statistics();
 		for (PeakResult p : results.getResults())
 		{
-			if (p.peak == p.getEndFrame())
+			if (p.getFrame() == p.getEndFrame())
 			{
 				float width = p.params[Gaussian2DFunction.X_SD];
 				float height = p.params[Gaussian2DFunction.SIGNAL];

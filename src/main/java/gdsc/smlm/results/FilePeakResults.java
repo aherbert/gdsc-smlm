@@ -329,7 +329,7 @@ public class FilePeakResults extends AbstractPeakResults
 		for (PeakResult result : results)
 		{
 			// Add the standard data
-			addStandardData(sb, result.getId(), result.peak, result.getEndFrame(), result.origX, result.origY,
+			addStandardData(sb, result.getId(), result.getFrame(), result.getEndFrame(), result.origX, result.origY,
 					result.origValue, result.error, result.noise);
 
 			// Add the parameters		
@@ -409,7 +409,7 @@ public class FilePeakResults extends AbstractPeakResults
 					results2.add(result);
 				else
 				{
-					results2.add(new ExtendedPeakResult(result.peak, result.origX, result.origY, result.origValue,
+					results2.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue,
 							result.error, result.noise, result.params, result.paramsStdDev, result.getEndFrame(), id));
 				}
 			}

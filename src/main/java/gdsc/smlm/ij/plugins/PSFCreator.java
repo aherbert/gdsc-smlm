@@ -317,7 +317,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			int i = 0;
 			for (PeakResult peak : results.getResults())
 			{
-				z[i] = peak.peak;
+				z[i] = peak.getFrame();
 				xCoord[i] = peak.getXPosition() - x;
 				yCoord[i] = peak.getYPosition() - y;
 				sd[i] = FastMath.max(peak.getXSD(), peak.getYSD());
@@ -1560,9 +1560,9 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			if (peak.getSignal() > maxSignal || w > maxWidth)
 				continue;
 
-			z[i] = peak.peak;
-			fitCom[0][peak.peak - 1] = xCoord[i] = peak.getXPosition() - x;
-			fitCom[1][peak.peak - 1] = yCoord[i] = peak.getYPosition() - y;
+			z[i] = peak.getFrame();
+			fitCom[0][peak.getFrame() - 1] = xCoord[i] = peak.getXPosition() - x;
+			fitCom[1][peak.getFrame() - 1] = yCoord[i] = peak.getYPosition() - y;
 			sd[i] = w;
 			a[i] = peak.getAmplitude();
 			i++;

@@ -1743,11 +1743,11 @@ public class PCPALMMolecules implements PlugIn
 			seconds = 0;
 			return;
 		}
-		start = end = peakResults.get(0).peak;
+		start = end = peakResults.get(0).getFrame();
 		for (PeakResult r : peakResults)
 		{
-			if (start > r.peak)
-				start = r.peak;
+			if (start > r.getFrame())
+				start = r.getFrame();
 			if (end < r.getEndFrame())
 				end = r.getEndFrame();
 		}

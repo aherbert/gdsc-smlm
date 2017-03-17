@@ -222,12 +222,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				for (PointPair pair : matches)
 				{
 					PeakResult p = ((PeakResultPoint) pair.getPoint2()).peakResult;
-					fileResults.add(p.peak, p.origX, p.origY, 1, p.error, p.noise, p.params, null);
+					fileResults.add(p.getFrame(), p.origX, p.origY, 1, p.error, p.noise, p.params, null);
 				}
 				for (Coordinate c : FP)
 				{
 					PeakResult p = ((PeakResultPoint) c).peakResult;
-					fileResults.add(p.peak, p.origX, p.origY, 0, p.error, p.noise, p.params, null);
+					fileResults.add(p.getFrame(), p.origX, p.origY, 0, p.error, p.noise, p.params, null);
 				}
 			}
 		}
@@ -468,7 +468,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			// will be many calls to getEntry(). Instead sort the results and use 
 			// a new list for each time point
 			Collections.sort(results);
-			int minT = results.get(0).peak;
+			int minT = results.get(0).getFrame();
 			int maxT = results.get(results.size() - 1).getEndFrame();
 
 			// Create lists
@@ -492,7 +492,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 					x = p.getXPosition();
 					y = p.getYPosition();
 				}
-				for (int t = p.peak - minT, i = p.getEndFrame() - p.peak + 1; i-- > 0; t++)
+				for (int t = p.getFrame() - minT, i = p.getEndFrame() - p.getFrame() + 1; i-- > 0; t++)
 					tmpCoords.get(t).add(instance.new PeakResultPoint(t + minT, x, y, p));
 			}
 
@@ -567,9 +567,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		TIntHashSet set = new TIntHashSet();
 		for (PeakResult r : actualPoints)
-			set.add(r.peak);
+			set.add(r.getFrame());
 		for (PeakResult r : predictedPoints)
-			set.add(r.peak);
+			set.add(r.getFrame());
 		int[] t = set.toArray();
 		Arrays.sort(t);
 		return t;

@@ -64,11 +64,11 @@ public class Trace extends Cluster
 			TIntLinkedList off = new TIntLinkedList();
 
 			nBlinks = 1;
-			int t1 = results.get(0).peak;
+			int t1 = results.get(0).getFrame();
 			int onStart = t1;
 			for (int i = 0; i < results.size() - 1; i++)
 			{
-				int t2 = results.get(i + 1).peak;
+				int t2 = results.get(i + 1).getFrame();
 				int diff = t2 - t1;
 				if (diff > 1)
 				{

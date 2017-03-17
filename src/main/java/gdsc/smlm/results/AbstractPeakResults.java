@@ -57,7 +57,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public void add(PeakResult result)
 	{
-		add(result.peak, result.origX, result.origY, result.origValue, result.error, result.noise, result.params,
+		add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise, result.params,
 				result.paramsStdDev);
 	}
 

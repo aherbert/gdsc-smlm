@@ -523,7 +523,7 @@ public class PeakResultsReaderTest
 			{
 				public int compare(PeakResult o1, PeakResult o2)
 				{
-					return o1.peak - o2.peak;
+					return o1.getFrame() - o2.getFrame();
 				}
 			});
 		}
@@ -536,7 +536,7 @@ public class PeakResultsReaderTest
 			PeakResult p1 = expected.get(i);
 			PeakResult p2 = actual.get(i);
 
-			Assert.assertEquals("Peak mismatch @ " + i, p1.peak, p2.peak);
+			Assert.assertEquals("Peak mismatch @ " + i, p1.getFrame(), p2.getFrame());
 
 			if (fileFormat == ResultsFileFormat.MALK)
 			{
@@ -704,7 +704,7 @@ public class PeakResultsReaderTest
 		{
 			for (PeakResult peak : results)
 			{
-				out.add(peak.peak, peak.origX, peak.origY, peak.origValue, peak.error, peak.noise, peak.params,
+				out.add(peak.getFrame(), peak.origX, peak.origY, peak.origValue, peak.error, peak.noise, peak.params,
 						peak.paramsStdDev);
 			}
 		}

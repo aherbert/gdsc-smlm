@@ -108,8 +108,8 @@ public class DrawClusters implements PlugIn
 			{
 				traces[count++] = traces[i];
 				traces[i].sort();
-				if (maxFrame < traces[i].getTail().peak)
-					maxFrame = traces[i].getTail().peak;
+				if (maxFrame < traces[i].getTail().getFrame())
+					maxFrame = traces[i].getTail().getFrame();
 			}
 		}
 
@@ -198,7 +198,7 @@ public class DrawClusters implements PlugIn
 				xPoints[j] = (result.getXPosition() - bounds.x) * xScale;
 				yPoints[j] = (result.getYPosition() - bounds.y) * yScale;
 				if (isUseStackPosition)
-					frames[i][j] = result.peak;
+					frames[i][j] = result.getFrame();
 				j++;
 			}
 			Roi roi;
@@ -224,7 +224,7 @@ public class DrawClusters implements PlugIn
 					values[i] = traces[i].getId();
 					break;
 				case 2: // Sort by time
-					values[i] = traces[i].getHead().peak;
+					values[i] = traces[i].getHead().getFrame();
 					break;
 				case 3: // Sort by size descending
 					values[i] = -traces[i].size();

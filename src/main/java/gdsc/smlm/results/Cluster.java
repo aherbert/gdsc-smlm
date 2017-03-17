@@ -299,7 +299,7 @@ public class Cluster implements Comparable<Cluster>
 		ArrayList<PeakResult> remove = null;
 		for (PeakResult result : results)
 		{
-			if (result.peak != result.getEndFrame())
+			if (result.getFrame() != result.getEndFrame())
 			{
 				if (extra == null)
 				{
@@ -307,7 +307,7 @@ public class Cluster implements Comparable<Cluster>
 					remove = new ArrayList<PeakResult>();
 				}
 				remove.add(result);
-				for (int peak = result.peak; peak <= result.getEndFrame(); peak++)
+				for (int peak = result.getFrame(); peak <= result.getEndFrame(); peak++)
 					extra.add(new ExtendedPeakResult(peak, result.origX, result.origY, result.origValue, result.error,
 							result.noise, result.params, result.paramsStdDev, peak, result.getId()));
 			}

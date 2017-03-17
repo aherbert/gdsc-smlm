@@ -343,7 +343,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		public IdPeakResult(int id, int uniqueId, PeakResult result)
 		{
-			super(result.peak, result.origX, result.origY, result.origValue, result.error, result.noise, result.params,
+			super(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise, result.params,
 					null);
 			this.id = id;
 			this.uniqueId = uniqueId;
@@ -1760,7 +1760,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Add the results to the lists
 			for (PeakResult p : list)
 			{
-				if (last != p.peak)
+				if (last != p.getFrame())
 				{
 					if (!tmp.isEmpty())
 					{
@@ -1769,7 +1769,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					id = 0;
 					tmp.clear();
 				}
-				last = p.peak;
+				last = p.getFrame();
 				tmp.add(new IdPeakResult(id++, uniqueId++, p));
 			}
 

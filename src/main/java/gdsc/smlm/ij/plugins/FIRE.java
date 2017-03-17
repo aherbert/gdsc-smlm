@@ -1085,7 +1085,7 @@ public class FIRE implements PlugIn
 		List<PeakResult> list = results.getResults();
 
 		int nSteps = 10;
-		int maxT = list.get(list.size() - 1).peak;
+		int maxT = list.get(list.size() - 1).getFrame();
 		if (maxT == 0)
 			maxT = list.size();
 		int step = maxT / nSteps;
@@ -1104,7 +1104,7 @@ public class FIRE implements PlugIn
 		{
 			while (i < list.size())
 			{
-				if (list.get(i).peak <= t)
+				if (list.get(i).getFrame() <= t)
 				{
 					newResults.add(list.get(i));
 					i++;
