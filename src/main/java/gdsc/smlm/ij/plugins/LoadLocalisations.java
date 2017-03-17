@@ -27,8 +27,8 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.AttributePeakResult;
 import gdsc.smlm.results.Calibration;
-import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
@@ -44,7 +44,7 @@ public class LoadLocalisations implements PlugIn
 	public static class Localisation
 	{
 		int t, id;
-		float x, y, z, intensity, sx = -1, sy = -1;
+		float x, y, z, intensity, sx = -1, sy = -1, precision = -1;
 	}
 
 	public enum DistanceUnit
@@ -92,29 +92,33 @@ public class LoadLocalisations implements PlugIn
 
 			// Convert to ADU count and pixels
 			final double convertI = (intensityUnit == IntensityUnit.PHOTON) ? gain : 1;
-			final double convertD = (distanceUnit == DistanceUnit.NM) ? 1 / pixelPitch : 1;
+			final double convertDtoPx = (distanceUnit == DistanceUnit.NM) ? 1 / pixelPitch : 1;
+			final double convertDtoNm = (distanceUnit == DistanceUnit.NM) ? 1 : pixelPitch;			
 
 			for (int i = 0; i < size(); i++)
 			{
 				final Localisation l = get(i);
 				final float[] params = new float[7];
 				params[Gaussian2DFunction.SIGNAL] = (float) (l.intensity * convertI);
-				params[Gaussian2DFunction.X_POSITION] = (float) (l.x * convertD);
-				params[Gaussian2DFunction.Y_POSITION] = (float) (l.y * convertD);
+				params[Gaussian2DFunction.X_POSITION] = (float) (l.x * convertDtoPx);
+				params[Gaussian2DFunction.Y_POSITION] = (float) (l.y * convertDtoPx);
 				// We may not have read in the widths
 				if (l.sx == -1)
 					params[Gaussian2DFunction.X_SD] = 1;
 				else
-					params[Gaussian2DFunction.X_SD] = (float) (l.sx * convertD);
+					params[Gaussian2DFunction.X_SD] = (float) (l.sx * convertDtoPx);
 				if (l.sy == -1)
 					params[Gaussian2DFunction.Y_SD] = 1;
 				else
-					params[Gaussian2DFunction.Y_SD] = (float) (l.sy * convertD);
-				results.add(new IdPeakResult(l.t, (int) params[Gaussian2DFunction.X_POSITION],
-						(int) params[Gaussian2DFunction.Y_POSITION], 0, l.z * convertD, 0, params, null, l.id));
+					params[Gaussian2DFunction.Y_SD] = (float) (l.sy * convertDtoPx);
+				AttributePeakResult peakResult = new AttributePeakResult(l.t,
+						(int) params[Gaussian2DFunction.X_POSITION], (int) params[Gaussian2DFunction.Y_POSITION], 0,
+						l.z * convertDtoPx, 0, params, null);
+				peakResult.setId(l.id);
+				peakResult.setPrecision(l.precision * convertDtoNm);
+				results.add(peakResult);
 			}
 			return results;
-
 		}
 	}
 
@@ -131,6 +135,7 @@ public class LoadLocalisations implements PlugIn
 	private static int ii = 5;
 	private static int isx = -1;
 	private static int isy = -1;
+	private static int ip = -1;
 	private static int header = 1;
 	private static String comment = "#";
 	private static String delimiter = "\\t";
@@ -297,6 +302,8 @@ public class LoadLocalisations implements PlugIn
 						l.sy = l.sx = Integer.parseInt(fields[isx]);
 					if (isy >= 0)
 						l.sy = Integer.parseInt(fields[isy]);
+					if (ip >= 0)
+						l.precision = Float.parseFloat(fields[ip]);
 
 					localisations.add(l);
 				}
@@ -346,6 +353,7 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Intensity", ii, 0);
 		gd.addNumericField("Sx", isx, 0);
 		gd.addNumericField("Sy", isy, 0);
+		gd.addNumericField("Precision", ip, 0);
 
 		String[] dUnits = SettingsManager.getNames((Object[]) DistanceUnit.values());
 		gd.addChoice("Distance_unit", dUnits, dUnits[distanceUnit]);
@@ -397,6 +405,7 @@ public class LoadLocalisations implements PlugIn
 		ii = columns[i++];
 		isx = columns[i++];
 		isy = columns[i++];
+		ip = columns[i++];
 
 		distanceUnit = gd.getNextChoiceIndex();
 		intensityUnit = gd.getNextChoiceIndex();
