@@ -198,6 +198,58 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		writeResult(1, spot);
 	}
 
+	@Override
+	public void add(PeakResult result)
+	{
+		final float[] params = result.params;
+
+		Spot.Builder builder = Spot.newBuilder();
+		builder.setMolecule(id.incrementAndGet());
+		builder.setChannel(1);
+		builder.setFluorophoreType(1);
+		builder.setFrame(result.peak);
+		builder.setXPosition(result.origX);
+		builder.setYPosition(result.origY);
+		setBackground(builder, params[Gaussian2DFunction.BACKGROUND]);
+		builder.setIntensity(params[Gaussian2DFunction.SIGNAL]);
+		builder.setX(params[Gaussian2DFunction.X_POSITION]);
+		builder.setY(params[Gaussian2DFunction.Y_POSITION]);
+
+		setWidth(params, builder);
+
+		if (result.hasPrecision())
+		{
+			// Use the actual precision
+			float precision = (float) result.getPrecision();
+			builder.setXPrecision(precision);
+			builder.setYPrecision(precision);
+		}
+		else if (canComputePrecision)
+		{
+			// Compute precision
+			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
+			float precision = (float) PeakResult.getPrecision(nmPerPixel, s, params[Gaussian2DFunction.SIGNAL] / gain,
+					result.noise / gain, isEmCCD);
+			builder.setXPrecision(precision);
+			builder.setYPrecision(precision);
+		}
+
+		if (result.hasId())
+			builder.setCluster(result.getId());
+
+		builder.setError(result.error);
+		builder.setNoise(result.noise);
+		if (result.hasEndFrame())
+			builder.setEndFrame(result.getEndFrame());
+		builder.setOriginalValue(result.origValue);
+		if (result.paramsStdDev != null)
+			addNewParamsStdDev(builder, result.paramsStdDev);
+
+		Spot spot = builder.build();
+
+		writeResult(1, spot);
+	}
+
 	/**
 	 * Sets the background.
 	 *
@@ -307,11 +359,13 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				builder.setYPrecision(precision);
 			}
 
-			builder.setCluster(result.getId());
+			if (result.hasId())
+				builder.setCluster(result.getId());
 
 			builder.setError(result.error);
 			builder.setNoise(result.noise);
-			builder.setEndFrame(result.getEndFrame());
+			if (result.hasEndFrame())
+				builder.setEndFrame(result.getEndFrame());
 			builder.setOriginalValue(result.origValue);
 			addParamsStdDev(builder, result.paramsStdDev);
 
