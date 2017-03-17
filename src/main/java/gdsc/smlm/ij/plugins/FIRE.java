@@ -83,6 +83,7 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -166,16 +167,40 @@ public class FIRE implements PlugIn
 		IMAGE_SIZE_ITEMS = Arrays.copyOf(IMAGE_SIZE_ITEMS, count);
 	}
 
+	private enum PrecisionMethod
+	{
+		//@formatter:off
+		FIXED{ public String getName() { return "Fixed"; }},
+		STORED{ public String getName() { return "Stored"; }},
+		CALCULATE{ public String getName() { return "Calculate"; }};
+		//@formatter:on
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+	}
+
 	private static double perimeterSamplingFactor = 1;
-	private static int fourierMethodIndex = 0;
+	private static int fourierMethodIndex = FourierMethod.JTRANSFORMS.ordinal();
 	private FourierMethod fourierMethod;
-	private static int samplingMethodIndex = 0;
+	private static int samplingMethodIndex = SamplingMethod.RADIAL_SUM.ordinal();
 	private SamplingMethod samplingMethod;
-	private static int thresholdMethodIndex = 0;
+	private static int thresholdMethodIndex = ThresholdMethod.FIXED_1_OVER_7.ordinal();
 	private ThresholdMethod thresholdMethod;
 	private static boolean showFRCCurve = true;
 	private static boolean showFRCCurveRepeats = false;
 	private static boolean showFRCTimeEvolution = false;
+	private static int precisionMethodIndex = PrecisionMethod.CALCULATE.ordinal(); 
+	private PrecisionMethod precisionMethod;
 	private static boolean loessSmoothing = false;
 	private static boolean fitPrecision = false;
 	private static double minQ = 0.2;
@@ -1272,6 +1297,17 @@ public class FIRE implements PlugIn
 
 		initialise(results, null);
 
+		// We need localisation precision.
+		// Build a histogram of the localisation precision.
+		// Get the initial mean and SD and plot as a Gaussian.
+		PrecisionHistogram histogram = calculatePrecisionHistogram();
+		if (histogram == null)
+		{
+			IJ.error(TITLE, "No localisation precision available");
+			return;
+		}
+		StoredDataStatistics precision = histogram.precision;
+
 		//String name = results.getName();
 		double fourierImageScale = SCALE_VALUES[imageScaleIndex];
 		int imageSize = IMAGE_SIZE_VALUES[imageSizeIndex];
@@ -1354,11 +1390,6 @@ public class FIRE implements PlugIn
 		// This can be done by fitting the precision histogram and then fixing the mean and sigma.
 		// Or it can be done by allowing the precision to be sampled and the mean and sigma
 		// become parameters for fitting.
-
-		// Build a histogram of the localisation precision.
-		// Get the initial mean and SD and plot as a Gaussian.
-		PrecisionHistogram histogram = calculatePrecisionHistogram();
-		StoredDataStatistics precision = histogram.precision;
 
 		// Check if we can fit precision values
 		boolean fitPrecision = precision != null && FIRE.fitPrecision;
@@ -1814,6 +1845,10 @@ public class FIRE implements PlugIn
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
 		if (!titles.isEmpty())
 			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
+		String[] precisionMethodNames = SettingsManager.getNames((Object[]) PrecisionMethod.values());
+		gd.addChoice("Precision_method", precisionMethodNames, precisionMethodNames[precisionMethodIndex]);
+		gd.addNumericField("Precision_Mean", mean, 2, 6, "nm");
+		gd.addNumericField("Precision_Sigma", sigma, 2, 6, "nm");
 		gd.addCheckbox("LOESS_smoothing", loessSmoothing);
 		gd.addCheckbox("Fit_precision", fitPrecision);
 		gd.addSlider("MinQ", 0, 0.4, minQ);
@@ -1836,6 +1871,10 @@ public class FIRE implements PlugIn
 		samplingMethodIndex = gd.getNextChoiceIndex();
 		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
 		perimeterSamplingFactor = gd.getNextNumber();
+		precisionMethodIndex = gd.getNextChoiceIndex();
+		precisionMethod = PrecisionMethod.values()[precisionMethodIndex];
+		mean = Math.abs(gd.getNextNumber());
+		sigma = Math.abs(gd.getNextNumber());
 		loessSmoothing = gd.getNextBoolean();
 		fitPrecision = gd.getNextBoolean();
 		minQ = Maths.clip(0, 0.5, gd.getNextNumber());
@@ -1845,6 +1884,11 @@ public class FIRE implements PlugIn
 		try
 		{
 			Parameters.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
+			if (precisionMethod == PrecisionMethod.FIXED)
+			{
+				Parameters.isAboveZero("Precision Mean", mean);
+				Parameters.isAboveZero("Precision Sigma", sigma);
+			}
 			Parameters.isAbove("MaxQ", maxQ, minQ);
 		}
 		catch (IllegalArgumentException e)
@@ -2197,8 +2241,12 @@ public class FIRE implements PlugIn
 	}
 
 	/**
-	 * Calculate the average precision by fitting a Gaussian to the histogram of the precision distribution.
-	 * 
+	 * Calculate a histogram of the precision. The precision can be either stored in the results or calculated using the
+	 * Mortensen formula. If the precision method for Q estimation is not fixed then the histogram is fitted with a
+	 * Gaussian to create an initial estimate.
+	 *
+	 * @param precisionMethod
+	 *            the precision method
 	 * @return The precision histogram
 	 */
 	public PrecisionHistogram calculatePrecisionHistogram()
@@ -2206,20 +2254,67 @@ public class FIRE implements PlugIn
 		boolean logFitParameters = false;
 		String title = results.getName() + " Precision Histogram";
 
-		// Check we can compute the precision for the results. We require that the widths and signal be valid and 
-		// different for at least some of the localisations
-		if (invalid(results))
+		// Check if the results has the precision already or if it can be computed.
+		boolean canUseStored = canUseStoredPrecision(results);
+		boolean canCalculatePrecision = canCalculatePrecision(results);
+
+		// Set the method to compute a histogram. Default to the user selected option.
+		PrecisionMethod m = null;
+		if (canUseStored && precisionMethod == PrecisionMethod.STORED)
+			m = precisionMethod;
+		else if (canCalculatePrecision && precisionMethod == PrecisionMethod.CALCULATE)
+			m = precisionMethod;
+
+		if (m == null)
 		{
-			return new PrecisionHistogram(title);
+			// We get here if the choice of the user is not available.
+			// We only have two choices so if one is available then select it.
+			if (canUseStored)
+				m = PrecisionMethod.STORED;
+			else if (canCalculatePrecision)
+				m = PrecisionMethod.CALCULATE;
+			// If the user selected a method not available then log a warning
+			if (m != null && precisionMethod != PrecisionMethod.FIXED)
+			{
+				IJ.log(String.format("%s : Selected precision method '%s' not available, switching to '%s'", TITLE,
+						precisionMethod, m.getName()));
+			}
+
+			if (m == null)
+			{
+				// We cannot compute a precision histogram. 
+				// This does not matter if the user has provide a fixed input.
+				if (precisionMethod == PrecisionMethod.FIXED)
+				{
+					PrecisionHistogram histogram = new PrecisionHistogram(title);
+					histogram.mean = mean;
+					histogram.sigma = sigma;
+					return histogram;
+				}
+				// No precision
+				return null;
+			}
 		}
 
-		final double nmPerPixel = results.getNmPerPixel();
-		final double gain = results.getGain();
-		final boolean emCCD = results.isEMCCD();
+		// We get here if we can compute precision.
+		// Build the histogram 
 		StoredDataStatistics precision = new StoredDataStatistics(results.size());
-		for (PeakResult r : results.getResults())
+		if (m == PrecisionMethod.STORED)
 		{
-			precision.add(r.getPrecision(nmPerPixel, gain, emCCD));
+			for (PeakResult r : results.getResults())
+			{
+				precision.add(r.getPrecision());
+			}
+		}
+		else
+		{
+			final double nmPerPixel = results.getNmPerPixel();
+			final double gain = results.getGain();
+			final boolean emCCD = results.isEMCCD();
+			for (PeakResult r : results.getResults())
+			{
+				precision.add(r.getPrecision(nmPerPixel, gain, emCCD));
+			}
 		}
 		//System.out.printf("Raw p = %f\n", precision.getMean());
 
@@ -2269,9 +2364,17 @@ public class FIRE implements PlugIn
 
 		int histogramBins = Utils.getBins(precision, Utils.BinMethod.SCOTT);
 		float[][] hist = Utils.calcHistogram(precision.getFloatValues(), yMin, yMax, histogramBins);
-
 		PrecisionHistogram histogram = new PrecisionHistogram(hist, precision, title);
 
+		if (precisionMethod == PrecisionMethod.FIXED)
+		{
+			histogram.mean = mean;
+			histogram.sigma = sigma;
+			return histogram;
+		}
+
+		// Fitting of the histogram to produce the initial estimate
+		
 		// Extract non-zero data
 		float[] x = Arrays.copyOf(hist[0], hist[0].length);
 		float[] y = hist[1];
@@ -2323,8 +2426,15 @@ public class FIRE implements PlugIn
 		return histogram;
 	}
 
-	private boolean invalid(MemoryPeakResults results)
+	private boolean canCalculatePrecision(MemoryPeakResults results)
 	{
+		// Calibration is required to compute the precision
+		Calibration cal = results.getCalibration();
+		if (cal == null)
+			return false;
+		if (!cal.hasNmPerPixel() || !cal.hasGain() || !cal.hasEMCCD())
+			return false;
+
 		// Check all have a width and signal
 		PeakResult[] data = results.toArray();
 		for (int i = 0; i < data.length; i++)
@@ -2348,13 +2458,21 @@ public class FIRE implements PlugIn
 				{
 					PeakResult p2 = data[j];
 					if (p2.getSD() != 1 && p2.getSD() != w1 && p2.getSignal() != s1)
-						return false;
+						return true;
 				}
 				// All the results are the same, this is not valid
 				break;
 			}
 		}
 
+		return false;
+	}
+
+	private boolean canUseStoredPrecision(MemoryPeakResults results)
+	{
+		for (PeakResult p : results)
+			if (!p.hasPrecision())
+				return false;
 		return true;
 	}
 
