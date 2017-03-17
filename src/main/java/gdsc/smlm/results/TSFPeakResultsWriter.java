@@ -62,7 +62,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 	private FitMode fitMode = FitMode.ONEAXIS;
 
-	private float bias = 0;
+	private boolean canComputePrecision, isEmCCD;
+	private double nmPerPixel, gain;
+	private float bias;
 
 	private int boxSize = 0;
 
@@ -80,7 +82,20 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	{
 		out = null;
 		size = 0;
-		bias = (calibration != null) ? (float) calibration.getBias() : 0;
+		bias = 0;
+		canComputePrecision = false;
+		if (calibration != null)
+		{
+			if (calibration.hasBias())
+				bias = (float) calibration.getBias();
+			if (calibration.hasNmPerPixel() && calibration.hasGain() && calibration.hasEMCCD())
+			{
+				canComputePrecision = true;
+				nmPerPixel = calibration.getNmPerPixel();
+				gain = calibration.getGain();
+				isEmCCD = calibration.isEmCCD();
+			}
+		}
 		id = new AtomicInteger();
 		try
 		{
@@ -152,7 +167,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		Spot.Builder builder = Spot.newBuilder();
 		builder.setMolecule(id.incrementAndGet());
 		builder.setChannel(1);
-		builder.setFluorophoreType(1); 
+		builder.setFluorophoreType(1);
 		builder.setFrame(peak);
 		builder.setXPosition(origX);
 		builder.setYPosition(origY);
@@ -163,13 +178,11 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 		setWidth(params, builder);
 
-		if (this.calibration != null)
+		if (canComputePrecision)
 		{
-			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
-					calibration.getNmPerPixel();
-			float precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
-					params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), noise / calibration.getGain(),
-					calibration.isEmCCD());
+			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
+			float precision = (float) PeakResult.getPrecision(nmPerPixel, s, params[Gaussian2DFunction.SIGNAL] / gain,
+					noise / gain, isEmCCD);
 			builder.setXPrecision(precision);
 			builder.setYPrecision(precision);
 		}
@@ -266,7 +279,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 			builder.setMolecule(id.incrementAndGet());
 			builder.setChannel(1);
-			builder.setFluorophoreType(1); 
+			builder.setFluorophoreType(1);
 			builder.setFrame(result.peak);
 			builder.setXPosition(result.origX);
 			builder.setYPosition(result.origY);
@@ -277,13 +290,19 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 			setWidth(params, builder);
 
-			if (this.calibration != null)
+			if (result.hasPrecision())
 			{
-				double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
-						calibration.getNmPerPixel();
-				float precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
-						params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), result.noise / calibration.getGain(),
-						calibration.isEmCCD());
+				// Use the actual precision
+				float precision = (float) result.getPrecision();
+				builder.setXPrecision(precision);
+				builder.setYPrecision(precision);
+			}
+			else if (canComputePrecision)
+			{
+				// Compute precision
+				double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
+				float precision = (float) PeakResult.getPrecision(nmPerPixel, s,
+						params[Gaussian2DFunction.SIGNAL] / gain, result.noise / gain, isEmCCD);
 				builder.setXPrecision(precision);
 				builder.setYPrecision(precision);
 			}
@@ -427,17 +446,24 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		}
 		if (calibration != null)
 		{
-			builder.setPixelSize((float) calibration.getNmPerPixel());
+			if (calibration.hasNmPerPixel())
+				builder.setPixelSize((float) calibration.getNmPerPixel());
 
-			builder.setGain(calibration.getGain());
-			builder.setExposureTime(calibration.getExposureTime());
-			builder.setReadNoise(calibration.getReadNoise());
-			builder.setBias(calibration.getBias());
-			builder.setEmCCD(calibration.isEmCCD());
-			builder.setAmplification(calibration.getAmplification());
+			if (calibration.hasExposureTime())
+				builder.setExposureTime(calibration.getExposureTime());
+			if (calibration.hasReadNoise())
+				builder.setReadNoise(calibration.getReadNoise());
+			if (calibration.hasBias())
+				builder.setBias(calibration.getBias());
+			if (calibration.hasEMCCD())
+				builder.setEmCCD(calibration.isEmCCD());
+			if (calibration.hasAmplification())
+				builder.setAmplification(calibration.getAmplification());
 
 			if (calibration.hasGain())
 			{
+				builder.setGain(calibration.getGain());
+
 				// Use amplification if present (as this is the correct electrons/count value), otherwise use gain
 				if (calibration.hasAmplification())
 				{
@@ -466,7 +492,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setIntensityUnits(IntensityUnits.COUNTS);
 		builder.setThetaUnits(ThetaUnits.DEGREES);
 		builder.setFitMode(fitMode);
-		
+
 		FluorophoreType.Builder typeBuilder = FluorophoreType.newBuilder();
 		typeBuilder.setId(1);
 		typeBuilder.setDescription("Default fluorophore");
