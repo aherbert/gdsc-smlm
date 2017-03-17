@@ -93,7 +93,7 @@ public class LoadLocalisations implements PlugIn
 			// Convert to ADU count and pixels
 			final double convertI = (intensityUnit == IntensityUnit.PHOTON) ? gain : 1;
 			final double convertDtoPx = (distanceUnit == DistanceUnit.NM) ? 1 / pixelPitch : 1;
-			final double convertDtoNm = (distanceUnit == DistanceUnit.NM) ? 1 : pixelPitch;			
+			final double convertDtoNm = (distanceUnit == DistanceUnit.NM) ? 1 : pixelPitch;
 
 			for (int i = 0; i < size(); i++)
 			{
@@ -124,6 +124,7 @@ public class LoadLocalisations implements PlugIn
 
 	private static final String TITLE = "Load Localisations";
 	private static boolean limitZ = false;
+	private boolean myLimitZ = false;
 	private static double minz = -5;
 	private static double maxz = 5;
 
@@ -179,7 +180,7 @@ public class LoadLocalisations implements PlugIn
 		// Ask the user what depth to use to create the in-memory results
 		if (!getZDepth(results))
 			return;
-		if (limitZ)
+		if (myLimitZ)
 		{
 			MemoryPeakResults results2 = new MemoryPeakResults(results.size());
 			results.setName(name);
@@ -201,7 +202,7 @@ public class LoadLocalisations implements PlugIn
 		}
 
 		IJ.showStatus(String.format("Loaded %d localisations", results.size()));
-		if (limitZ)
+		if (myLimitZ)
 			Utils.log("Loaded %d localisations, z between %.2f - %.2f", results.size(), minz, maxz);
 		else
 			Utils.log("Loaded %d localisations", results.size());
@@ -209,16 +210,20 @@ public class LoadLocalisations implements PlugIn
 
 	private boolean getZDepth(MemoryPeakResults results)
 	{
-		// The z-depth is stored in pixels
+		// The z-depth is stored in pixels in the error field
 		double min = results.getHead().error;
 		double max = min;
 		for (PeakResult peak : results.getResults())
 		{
 			if (min > peak.error)
 				min = peak.error;
-			if (max < peak.error)
+			else if (max < peak.error)
 				max = peak.error;
 		}
+
+		// No z-depth
+		if (min == max && min == 0)
+			return true;
 
 		maxz = FastMath.min(maxz, max);
 		minz = FastMath.max(minz, min);
@@ -243,7 +248,7 @@ public class LoadLocalisations implements PlugIn
 		{
 			return false;
 		}
-		limitZ = gd.getNextBoolean();
+		myLimitZ = limitZ = gd.getNextBoolean();
 		minz = gd.getNextNumber() / pp;
 		maxz = gd.getNextNumber() / pp;
 		return true;
@@ -373,7 +378,7 @@ public class LoadLocalisations implements PlugIn
 		{
 			return false;
 		}
-		int[] columns = new int[8];
+		int[] columns = new int[9];
 		for (int i = 0; i < columns.length; i++)
 			columns[i] = (int) gd.getNextNumber();
 		if (gd.invalidNumber())
