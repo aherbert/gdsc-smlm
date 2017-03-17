@@ -201,6 +201,7 @@ public class FIRE implements PlugIn
 	private static boolean showFRCTimeEvolution = false;
 	private static int precisionMethodIndex = PrecisionMethod.CALCULATE.ordinal();
 	private PrecisionMethod precisionMethod;
+	private static boolean sampleDecay = false;
 	private static boolean loessSmoothing = false;
 	private static boolean fitPrecision = false;
 	private static double minQ = 0.2;
@@ -1392,11 +1393,11 @@ public class FIRE implements PlugIn
 		// Or it can be done by allowing the precision to be sampled and the mean and sigma
 		// become parameters for fitting.
 
-		// Check if we can fit precision values
-		boolean fitPrecision = precision != null && FIRE.fitPrecision;
+		// Check if we can sample precision values
+		boolean sampleDecay = precision != null && FIRE.sampleDecay;
 
 		double[] exp_decay;
-		if (fitPrecision)
+		if (sampleDecay)
 		{
 			int[] sample = Random.sample(10000, precision.getN(), new Well19937c());
 
@@ -1497,11 +1498,19 @@ public class FIRE implements PlugIn
 
 		if (fitPrecision)
 		{
-			histogram.sigma = precision.getStandardDeviation();
-			// Normalise sum-of-squares to the SR pixel size
-			double meanSumOfSquares = (precision.getSumOfSquares() / (images.nmPerPixel * images.nmPerPixel)) /
-					precision.getN();
-			histogram.mean = images.nmPerPixel * Math.sqrt(meanSumOfSquares - estimate[1] / (4 * Math.PI * Math.PI));
+			// Q - Should this be optional?
+			if (sampleDecay)
+			{
+				// If a sample of the precision was used to construct the data for the initial fit 
+				// then update the estimate using the fit result since it will be a better start point. 
+
+				histogram.sigma = precision.getStandardDeviation();
+				// Normalise sum-of-squares to the SR pixel size
+				double meanSumOfSquares = (precision.getSumOfSquares() / (images.nmPerPixel * images.nmPerPixel)) /
+						precision.getN();
+				histogram.mean = images.nmPerPixel *
+						Math.sqrt(meanSumOfSquares - estimate[1] / (4 * Math.PI * Math.PI));
+			}
 
 			// Do a multivariate fit ...
 			SimplexOptimizer opt = new SimplexOptimizer(1e-6, 1e-10);
@@ -1850,6 +1859,7 @@ public class FIRE implements PlugIn
 		gd.addChoice("Precision_method", precisionMethodNames, precisionMethodNames[precisionMethodIndex]);
 		gd.addNumericField("Precision_Mean", mean, 2, 6, "nm");
 		gd.addNumericField("Precision_Sigma", sigma, 2, 6, "nm");
+		gd.addCheckbox("Sample_decay", sampleDecay);
 		gd.addCheckbox("LOESS_smoothing", loessSmoothing);
 		gd.addCheckbox("Fit_precision", fitPrecision);
 		gd.addSlider("MinQ", 0, 0.4, minQ);
@@ -1876,6 +1886,7 @@ public class FIRE implements PlugIn
 		precisionMethod = PrecisionMethod.values()[precisionMethodIndex];
 		mean = Math.abs(gd.getNextNumber());
 		sigma = Math.abs(gd.getNextNumber());
+		sampleDecay = gd.getNextBoolean();
 		loessSmoothing = gd.getNextBoolean();
 		fitPrecision = gd.getNextBoolean();
 		minQ = Maths.clip(0, 0.5, gd.getNextNumber());
