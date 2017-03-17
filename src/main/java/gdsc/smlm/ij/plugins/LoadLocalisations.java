@@ -139,7 +139,7 @@ public class LoadLocalisations implements PlugIn
 	private static int ip = -1;
 	private static int header = 1;
 	private static String comment = "#";
-	private static String delimiter = "\\t";
+	private static String delimiter = "\\s+";
 	private static String name = "Localisations";
 	private static int distanceUnit = 0;
 	private static int intensityUnit = 0;
