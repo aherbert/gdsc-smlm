@@ -167,11 +167,28 @@ public class FIRE implements PlugIn
 		IMAGE_SIZE_ITEMS = Arrays.copyOf(IMAGE_SIZE_ITEMS, count);
 	}
 
+	/**
+	 * Specify the method to use to determine the parameters for the distribution of the localisation precision (assumed
+	 * to be Gaussian)
+	 */
 	private enum PrecisionMethod
 	{
 		//@formatter:off
+		/**
+		 * Use a fixed value for the precision distribution mean and standard deviation
+		 */
 		FIXED{ public String getName() { return "Fixed"; }},
+		/**
+		 * Use the precision value that is stored in the results, e.g. from loaded data. 
+		 * The values can then be used to fit the entire distribution using a Gaussian or 
+		 * sampled to construct a decay curve from which the parameters are estimated. 
+		 */
 		STORED{ public String getName() { return "Stored"; }},
+		/**
+		 * Calculate the precision of each localisation using the formula of Mortensen. 
+		 * The values can then be used to fit the entire distribution using a Gaussian or 
+		 * sampled to construct a decay curve from which the parameters are estimated.
+		 */
 		CALCULATE{ public String getName() { return "Calculate"; }};
 		//@formatter:on
 
@@ -225,7 +242,11 @@ public class FIRE implements PlugIn
 
 	public class FireImages
 	{
-		final ImageProcessor ip1, ip2;
+		/** The first super-resolution image. */
+		final ImageProcessor ip1;
+		/** The second super-resolution image. */
+		final ImageProcessor ip2;
+		/** The nm per pixel in the super-resolution images */
 		final double nmPerPixel;
 
 		FireImages(ImageProcessor ip1, ImageProcessor ip2, double nmPerPixel)
@@ -236,11 +257,21 @@ public class FIRE implements PlugIn
 		}
 	}
 
+	/**
+	 * Contains the Fourier Image REsolution (FIRE) result.
+	 */
 	public class FireResult
 	{
+		/** The fire number (in nm). */
 		final double fireNumber;
+
+		/** The correlation at the given resolution. */
 		final double correlation;
+
+		/** The FRC curve used to compute the resolution. */
 		final FRCCurve frcCurve;
+
+		/** The original correlation curve, i.e. the raw curve before smoothing. */
 		final double[] originalCorrelationCurve;
 
 		FireResult(double fireNumber, double correlation, FRCCurve frcCurve, double[] originalCorrelationCurve)
@@ -251,6 +282,11 @@ public class FIRE implements PlugIn
 			this.originalCorrelationCurve = originalCorrelationCurve;
 		}
 
+		/**
+		 * Gets the nm per pixel for the super-resolution images used to construct the FRC curve.
+		 *
+		 * @return the nm per pixel
+		 */
 		double getNmPerPixel()
 		{
 			return frcCurve.nmPerPixel;
@@ -265,6 +301,10 @@ public class FIRE implements PlugIn
 		String name;
 		FireResult result;
 		Plot2 plot;
+		/**
+		 * Flag to denote that an out-of-memory error occurred. This is probably due to using too many threads to
+		 * compute large Fourier transforms.
+		 */
 		boolean oom = false;
 
 		public FIREWorker(int id, double fourierImageScale, int imageSize)
@@ -700,7 +740,7 @@ public class FIRE implements PlugIn
 	}
 
 	/**
-	 * Initialise this instance with results.
+	 * Initialise this instance with localisation results for the FIRE computation.
 	 *
 	 * @param results
 	 *            the results
@@ -769,7 +809,8 @@ public class FIRE implements PlugIn
 	}
 
 	/**
-	 * Copy this instance so skipping initialisation.
+	 * Shallow copy this instance so skipping initialisation. Only variables required for the FIRE calculation are
+	 * copied.
 	 *
 	 * @return the new FIRE instance
 	 */
@@ -788,7 +829,7 @@ public class FIRE implements PlugIn
 	}
 
 	/**
-	 * Verify.
+	 * Verify the results can be used for FIRE. Results are sorted in time order if the block size is above 1.
 	 *
 	 * @param results
 	 *            the results
@@ -804,6 +845,16 @@ public class FIRE implements PlugIn
 		return results;
 	}
 
+	/**
+	 * Creates the images to use for the FIRE calculation. This must be called after
+	 * {@link #initialise(MemoryPeakResults, MemoryPeakResults)}.
+	 *
+	 * @param fourierImageScale
+	 *            the fourier image scale (set to zero to auto compute)
+	 * @param imageSize
+	 *            the image size
+	 * @return the fire images
+	 */
 	public FireImages createImages(double fourierImageScale, int imageSize)
 	{
 		return createImages(fourierImageScale, imageSize, useSignal);
@@ -830,6 +881,18 @@ public class FIRE implements PlugIn
 		}
 	}
 
+	/**
+	 * Creates the images to use for the FIRE calculation. This must be called after
+	 * {@link #initialise(MemoryPeakResults, MemoryPeakResults)}.
+	 *
+	 * @param fourierImageScale
+	 *            the fourier image scale (set to zero to auto compute)
+	 * @param imageSize
+	 *            the image size
+	 * @param useSignal
+	 *            the use signal
+	 * @return the fire images
+	 */
 	public FireImages createImages(double fourierImageScale, int imageSize, boolean useSignal)
 	{
 		if (results == null)
@@ -845,7 +908,7 @@ public class FIRE implements PlugIn
 		boolean weighted = true;
 		boolean equalised = false;
 		double imageScale;
-		if (fourierImageScale == 0)
+		if (fourierImageScale <= 0)
 		{
 			double size = FastMath.max(bounds.width, bounds.height);
 			if (size <= 0)
@@ -1367,20 +1430,10 @@ public class FIRE implements PlugIn
 		// Compute the spatial frequency and the region for curve fitting
 		double[] q = FRC.computeQ(frcCurve, false);
 		int low = 0, high = q.length;
-		for (int i = 0; i < q.length; i++)
-		{
-			if (q[i] <= maxQ)
-				continue;
-			high = i;
-			break;
-		}
-		for (int i = q.length; i-- > 0;)
-		{
-			if (q[i] >= minQ)
-				continue;
-			low = i + 1;
-			break;
-		}
+		while (high > 0 && q[high - 1] > maxQ)
+			high--;
+		while (low < q.length && q[low] < minQ)
+			low++;
 		// Require we fit at least 10% of the curve
 		if (high - low < q.length * 0.1)
 		{
@@ -1399,6 +1452,8 @@ public class FIRE implements PlugIn
 		double[] exp_decay;
 		if (sampleDecay)
 		{
+			// Random sample of precision values from the distribution is used to 
+			// construct the decay curve
 			int[] sample = Random.sample(10000, precision.getN(), new Well19937c());
 
 			final double four_pi2 = 4 * Math.PI * Math.PI;
@@ -1430,8 +1485,8 @@ public class FIRE implements PlugIn
 		}
 		else
 		{
-			// Note: The sigma mean and std are in the units of super-resolution 
-			// pixels so convert from nm to SR pixels.
+			// Note: The sigma mean and std should be in the units of super-resolution 
+			// pixels so scale to SR pixels
 			exp_decay = computeExpDecay(histogram.mean / images.nmPerPixel, histogram.sigma / images.nmPerPixel, q);
 		}
 
@@ -1439,13 +1494,13 @@ public class FIRE implements PlugIn
 		double[] smooth;
 		if (loessSmoothing)
 		{
-			// Note: This compute the log then smooths it 
+			// Note: This computes the log then smooths it 
 			double bandwidth = 0.1;
 			int robustness = 0;
 			double[] l = new double[exp_decay.length];
 			for (int i = 0; i < l.length; i++)
 			{
-				// Original Matlab code compute the log for each array.
+				// Original Matlab code computes the log for each array.
 				// This is equivalent to a single log on the fraction of the two.
 				// Perhaps the two log method is more numerically stable.
 				//l[i] = Math.log(Math.abs(frcnum[i])) - Math.log(exp_decay[i]);
@@ -1466,12 +1521,12 @@ public class FIRE implements PlugIn
 		{
 			// Note: This smooths the curve before computing the log 
 
-			// Median window of 5 == radius of 2
 			double[] norm = new double[exp_decay.length];
 			for (int i = 0; i < norm.length; i++)
 			{
 				norm[i] = frcnum[i] / exp_decay[i];
 			}
+			// Median window of 5 == radius of 2
 			MedianWindow mw = new MedianWindow(norm, 2);
 			smooth = new double[exp_decay.length];
 			for (int i = 0; i < norm.length; i++)
@@ -2175,7 +2230,16 @@ public class FIRE implements PlugIn
 		final float[] x2;
 		final StoredDataStatistics precision;
 
+		/**
+		 * The mean of the localisation precision distribution (in nm). This value can be updated by the
+		 * {@link #plot(double, double)} method.
+		 */
 		double mean;
+
+		/**
+		 * The standard deviation of the localisation precision distribution (in nm). This value can be updated by the
+		 * {@link #plot(double, double)} method.
+		 */
 		double sigma;
 
 		PrecisionHistogram(float[][] hist, StoredDataStatistics precision, String title)
@@ -2282,7 +2346,7 @@ public class FIRE implements PlugIn
 	 *            the precision method
 	 * @return The precision histogram
 	 */
-	public PrecisionHistogram calculatePrecisionHistogram()
+	private PrecisionHistogram calculatePrecisionHistogram()
 	{
 		boolean logFitParameters = false;
 		String title = results.getName() + " Precision Histogram";
