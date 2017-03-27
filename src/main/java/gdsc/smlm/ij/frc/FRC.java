@@ -60,6 +60,10 @@ public class FRC
 		}
 	}
 
+	/**
+	 * Specify the method to create the FRC threshold curve. The intersection between the observed curve and the
+	 * threshold curve determines the resolution.
+	 */
 	public enum ThresholdMethod
 	{
 		//@formatter:off
@@ -87,10 +91,22 @@ public class FRC
 		abstract public String getName();
 	};
 
+	/**
+	 * Specify the sampling method to compute the Fourier Ring Correlation.
+	 */
 	public enum SamplingMethod
 	{
 		//@formatter:off
+		/**
+		 * Compute using all pixels from radius n (inclusive) to n+1 (exclusive) assigned to ring n. 
+		 * This does not require interpolation. 
+		 */
 		RADIAL_SUM{ public String getName() { return "Radial Sum"; }},
+		/**
+		 * Compute using sampled points on a circle circumference of radius n for each ring. 
+		 * Values are computed using interpolation of the surrounding pixels. The number of points
+		 * on the circumference can be controlled using the perimeter sampling factor.
+		 */
 		INTERPOLATED_CIRCLE{ public String getName() { return "Interpolated circle"; }}; 
 		//@formatter:on
 
@@ -108,10 +124,19 @@ public class FRC
 		abstract public String getName();
 	}
 
+	/**
+	 * Specify the method used to compute the Fourier transform
+	 */
 	public enum FourierMethod
 	{
 		//@formatter:off
+		/**
+		 * Use the JTransforms Java library
+		 */
 		JTRANSFORMS{ public String getName() { return "JTransforms"; }},
+		/**
+		 * Use ImageJ's Fast Hartley Transform
+		 */
 		FHT{ public String getName() { return "FHT"; }}; 
 		//@formatter:on
 
@@ -134,9 +159,15 @@ public class FRC
 	 */
 	public static class FRCCurveResult implements Cloneable
 	{
+		/** The radius of the ring. */
 		private final int radius;
+
+		/** The number of samples on the ring. */
 		private final int nSamples;
+
 		private final double numerator, sum1, sum2, denominator;
+
+		/** The correlation. */
 		private double correlation;
 
 		private FRCCurveResult(int radius, int nSamples, double sum0, double sum1, double sum2)
@@ -150,13 +181,18 @@ public class FRC
 			setCorrelation(numerator / denominator);
 		}
 
+		/**
+		 * Gets the radius of the ring.
+		 *
+		 * @return the radius
+		 */
 		public int getRadius()
 		{
 			return radius;
 		}
 
 		/**
-		 * Gets the number of samples used to compute the correlation.
+		 * Gets the number of samples taken from the ring used to compute the correlation.
 		 *
 		 * @return the number of samples
 		 */
@@ -166,8 +202,8 @@ public class FRC
 		}
 
 		/**
-		 * Gets the correlation (the conjugate multiple of the two FFT images). This is the numerator divided by the
-		 * denominator.
+		 * Gets the correlation (the normalised conjugate multiple of the two FFT images). This is the numerator divided
+		 * by the denominator.
 		 *
 		 * @return the correlation
 		 */
@@ -182,7 +218,8 @@ public class FRC
 		}
 
 		/**
-		 * Gets the numerator of the correlation.
+		 * Gets the numerator of the correlation. This is the sum of the conjugate multiple of the FFT of input image 1
+		 * and 2.
 		 *
 		 * @return the numerator
 		 */
@@ -204,7 +241,7 @@ public class FRC
 		}
 
 		/**
-		 * Gets the sum of the absolute FFT transform of input image 1
+		 * Gets the sum of the absolute FFT of input image 1.
 		 *
 		 * @return the sum
 		 */
@@ -214,7 +251,7 @@ public class FRC
 		}
 
 		/**
-		 * Gets the sum of the absolute FFT transform of input image 2
+		 * Gets the sum of the absolute FFT of input image 2.
 		 *
 		 * @return the sum
 		 */
@@ -321,7 +358,7 @@ public class FRC
 		}
 
 		/**
-		 * Gets the radius values.
+		 * Gets the radius values for each ring.
 		 *
 		 * @return the radius values
 		 */
@@ -334,7 +371,7 @@ public class FRC
 		}
 
 		/**
-		 * Gets the correlation values.
+		 * Gets the correlation values for each ring.
 		 *
 		 * @return the correlation values
 		 */
@@ -665,7 +702,8 @@ public class FRC
 					double cosA = FastMath.cos(angle);
 					double x = centre + radius * cosA;
 					//double sinA = FastMath.sin(angle);
-					double y = centre + radius * getSine(angle, cosA);
+					double sinA = getSine(angle, cosA);
+					double y = centre + radius * sinA;
 					double[] values = getInterpolatedValues(x, y, images, size);
 					sum0 += values[0];
 					sum1 += values[1];
@@ -859,7 +897,7 @@ public class FRC
 		{
 			ImageProcessor ip2 = ip.createProcessor(width, height);
 			ip2.insert(ip, 0, 0);
-			ip = ip2;
+			return ip2;
 		}
 		return ip;
 	}
@@ -868,6 +906,7 @@ public class FRC
 	 * Convert an image into a Fourier image with real and imaginary parts
 	 * 
 	 * @param ip
+	 *            The image
 	 * @return the real and imaginary parts
 	 */
 	public FloatProcessor[] getComplexFFT(ImageProcessor ip)
@@ -959,8 +998,8 @@ public class FRC
 				pixels[ii] = v;
 			}
 		}
-		// Take the mean over the padded image size
-		taperedImageMean /= pixels.length;
+		// Take the mean over the non-padded image size
+		taperedImageMean /= (dataImage.getPixelCount());
 
 		return new FloatProcessor(newSize, newSize, pixels, null);
 	}
