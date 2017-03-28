@@ -3,6 +3,10 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Checkbox;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Label;
 import java.awt.Rectangle;
 import java.awt.TextField;
 import java.awt.geom.Rectangle2D;
@@ -126,6 +130,7 @@ public class FIRE implements PlugIn
 
 	private static int repeats = 1;
 	private static boolean useSignal = false;
+	private boolean myUseSignal = false;
 	private static int maxPerBin = 0; // 5 in the Niewenhuizen paper
 	private static boolean randomSplit = true;
 	private static int blockSize = 50;
@@ -573,7 +578,8 @@ public class FIRE implements PlugIn
 			return results;
 
 		// Adjust bounds relative to input results image
-		Rectangle2D.Float bounds = results.getDataBounds();
+		//Rectangle2D.Float bounds = results.getDataBounds();
+		Rectangle bounds = results.getBounds(true);
 		double xscale = roiImageWidth / bounds.width;
 		double yscale = roiImageHeight / bounds.height;
 
@@ -674,8 +680,21 @@ public class FIRE implements PlugIn
 
 		boolean single = results2 == null;
 
-		gd.addCheckbox("Use_signal (if present)", useSignal);
+		gd.addMessage("Image construction options:");
+		if (extraOptions)
+			gd.addCheckbox("Use_signal (if present)", useSignal);
 		gd.addNumericField("Max_per_bin", maxPerBin, 0);
+		gd.addChoice("Image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
+		gd.addChoice("Auto_image_size", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
+
+		gd.addMessage("Fourier options:");
+		String[] fourierMethodNames = SettingsManager.getNames((Object[]) FRC.FourierMethod.values());
+		gd.addChoice("Fourier_method", fourierMethodNames, fourierMethodNames[fourierMethodIndex]);
+		String[] samplingMethodNames = SettingsManager.getNames((Object[]) FRC.SamplingMethod.values());
+		gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
+		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
+
+		gd.addMessage("FIRE options:");
 		String[] thresholdMethodNames = SettingsManager.getNames((Object[]) FRC.ThresholdMethod.values());
 		gd.addChoice("Threshold_method", thresholdMethodNames, thresholdMethodNames[thresholdMethodIndex]);
 		gd.addCheckbox("Show_FRC_curve", showFRCCurve);
@@ -683,6 +702,7 @@ public class FIRE implements PlugIn
 		if (single)
 		{
 			gd.addMessage("For single datasets:");
+			Label l = (Label) gd.getMessage();
 			gd.addNumericField("Block_size", blockSize, 0);
 			gd.addCheckbox("Random_split", randomSplit);
 			gd.addNumericField("Repeats", repeats, 0);
@@ -694,24 +714,57 @@ public class FIRE implements PlugIn
 			gd.addNumericField("Precision_Sigma", sigma, 2, 6, "nm");
 			if (extraOptions)
 				gd.addNumericField("Threads", getLastNThreads(), 0);
-		}
 
-		gd.addMessage("Fourier options:");
-		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
-		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
-		String[] fourierMethodNames = SettingsManager.getNames((Object[]) FRC.FourierMethod.values());
-		gd.addChoice("Fourier_method", fourierMethodNames, fourierMethodNames[fourierMethodIndex]);
-		String[] samplingMethodNames = SettingsManager.getNames((Object[]) FRC.SamplingMethod.values());
-		gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
-		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
+			// Rearrange the dialog
+			if (gd.getLayout() != null)
+			{
+				GridBagLayout grid = (GridBagLayout) gd.getLayout();
+
+				int xOffset = 0, yOffset = 0;
+				int lastY = -1, rowCount = 0;
+				for (Component comp : gd.getComponents())
+				{
+					// Check if this should be the second major column
+					if (comp == l)
+					{
+						xOffset += 2;
+						yOffset = yOffset - rowCount + 1; // Skip title row
+					}
+					// Reposition the field
+					GridBagConstraints c = grid.getConstraints(comp);
+					if (lastY != c.gridy)
+						rowCount++;
+					lastY = c.gridy;
+					c.gridx = c.gridx + xOffset;
+					c.gridy = c.gridy + yOffset;
+					c.insets.left = c.insets.left + 10 * xOffset;
+					c.insets.top = 0;
+					c.insets.bottom = 0;
+					grid.setConstraints(comp, c);
+				}
+
+				if (IJ.isLinux())
+					gd.setBackground(new Color(238, 238, 238));
+			}
+		}
 
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return false;
 
-		useSignal = gd.getNextBoolean();
+		if (extraOptions)
+			myUseSignal = useSignal = gd.getNextBoolean();
 		maxPerBin = Math.abs((int) gd.getNextNumber());
+		imageScaleIndex = gd.getNextChoiceIndex();
+		imageSizeIndex = gd.getNextChoiceIndex();
+
+		fourierMethodIndex = gd.getNextChoiceIndex();
+		fourierMethod = FourierMethod.values()[fourierMethodIndex];
+		samplingMethodIndex = gd.getNextChoiceIndex();
+		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
+		perimeterSamplingFactor = gd.getNextNumber();
+
 		thresholdMethodIndex = gd.getNextChoiceIndex();
 		thresholdMethod = FRC.ThresholdMethod.values()[thresholdMethodIndex];
 		showFRCCurve = gd.getNextBoolean();
@@ -733,14 +786,6 @@ public class FIRE implements PlugIn
 				lastNThreads = this.nThreads;
 			}
 		}
-
-		imageScaleIndex = gd.getNextChoiceIndex();
-		imageSizeIndex = gd.getNextChoiceIndex();
-		fourierMethodIndex = gd.getNextChoiceIndex();
-		fourierMethod = FourierMethod.values()[fourierMethodIndex];
-		samplingMethodIndex = gd.getNextChoiceIndex();
-		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
-		perimeterSamplingFactor = gd.getNextNumber();
 
 		// Check arguments
 		try
@@ -882,7 +927,7 @@ public class FIRE implements PlugIn
 	 */
 	public FireImages createImages(double fourierImageScale, int imageSize)
 	{
-		return createImages(fourierImageScale, imageSize, useSignal);
+		return createImages(fourierImageScale, imageSize, myUseSignal);
 	}
 
 	private interface SignalProvider
@@ -915,7 +960,7 @@ public class FIRE implements PlugIn
 	 * @param imageSize
 	 *            the image size
 	 * @param useSignal
-	 *            the use signal
+	 *            Use the localisation signal to weight the intensity. The default uses a value of 1 per localisation.
 	 * @return the fire images
 	 */
 	public FireImages createImages(double fourierImageScale, int imageSize, boolean useSignal)

@@ -107,7 +107,7 @@ public class FRC
 		 * Values are computed using interpolation of the surrounding pixels. The number of points
 		 * on the circumference can be controlled using the perimeter sampling factor.
 		 */
-		INTERPOLATED_CIRCLE{ public String getName() { return "Interpolated circle"; }}; 
+		INTERPOLATED_CIRCLE{ public String getName() { return "Interpolated Circle"; }}; 
 		//@formatter:on
 
 		@Override
