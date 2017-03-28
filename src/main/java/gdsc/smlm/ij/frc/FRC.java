@@ -1241,6 +1241,7 @@ public class FRC
 
 		switch (thresholdMethod)
 		{
+			// This is first as it is the most commonly used
 			case FIXED_1_OVER_7:
 				Arrays.fill(threshold, 1.0 / 7.0);
 				break;

@@ -362,7 +362,7 @@ public class FIRE implements PlugIn
 
 		IJ.showStatus(TITLE + " ...");
 
-		if (!showDialog())
+		if (!showInputDialog())
 			return;
 
 		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
@@ -389,10 +389,14 @@ public class FIRE implements PlugIn
 			}
 		}
 
+		initialise(results, results2);
+
+		if (!showDialog())
+			return;
+
 		long start = System.currentTimeMillis();
 
 		// Compute FIRE
-		initialise(results, results2);
 
 		String name = results.getName();
 		double fourierImageScale = SCALE_VALUES[imageScaleIndex];
@@ -595,9 +599,10 @@ public class FIRE implements PlugIn
 		return newResults;
 	}
 
-	private boolean showDialog()
+	private boolean showInputDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage("Compute the resolution using Fourier Ring Correlation");
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
@@ -612,40 +617,9 @@ public class FIRE implements PlugIn
 			}
 		}
 
-		gd.addMessage("Compute the resolution using Fourier Ring Correlation");
-
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		ResultsManager.addInput(gd, "Input2", inputOption2, InputSource.NONE, InputSource.MEMORY);
 
-		gd.addCheckbox("Use_signal (if present)", useSignal);
-		gd.addNumericField("Max_per_bin", maxPerBin, 0);
-
-		gd.addMessage("For single datsets:");
-		gd.addNumericField("Block_size", blockSize, 0);
-		gd.addCheckbox("Random_split", randomSplit);
-		gd.addNumericField("Repeats", repeats, 0);
-		gd.addCheckbox("Show_FRC_curve_repeats", showFRCCurveRepeats);
-		gd.addCheckbox("Show_FRC_time_evolution", showFRCTimeEvolution);
-		if (extraOptions)
-		{
-			gd.addCheckbox("Spurious correlation correction", spuriousCorrelationCorrection);
-			gd.addNumericField("Q-value", qValue, 3);
-			gd.addNumericField("Precision_Mean", mean, 2, 6, "nm");
-			gd.addNumericField("Precision_Sigma", sigma, 2, 6, "nm");
-			gd.addNumericField("Threads", getLastNThreads(), 0);
-		}
-
-		gd.addMessage("Fourier options:");
-		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
-		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
-		String[] fourierMethodNames = SettingsManager.getNames((Object[]) FRC.FourierMethod.values());
-		gd.addChoice("Fourier_method", fourierMethodNames, fourierMethodNames[fourierMethodIndex]);
-		String[] samplingMethodNames = SettingsManager.getNames((Object[]) FRC.SamplingMethod.values());
-		gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
-		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
-		String[] thresholdMethodNames = SettingsManager.getNames((Object[]) FRC.ThresholdMethod.values());
-		gd.addChoice("Threshold_method", thresholdMethodNames, thresholdMethodNames[thresholdMethodIndex]);
-		gd.addCheckbox("Show_FRC_curve", showFRCCurve);
 		if (!titles.isEmpty())
 			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
 
@@ -656,53 +630,6 @@ public class FIRE implements PlugIn
 
 		inputOption = ResultsManager.getInputSource(gd);
 		inputOption2 = ResultsManager.getInputSource(gd);
-		useSignal = gd.getNextBoolean();
-		maxPerBin = Math.abs((int) gd.getNextNumber());
-
-		blockSize = Math.max(1, (int) gd.getNextNumber());
-		randomSplit = gd.getNextBoolean();
-		repeats = Math.max(1, (int) gd.getNextNumber());
-		showFRCCurveRepeats = gd.getNextBoolean();
-		showFRCTimeEvolution = gd.getNextBoolean();
-		if (extraOptions)
-		{
-			spuriousCorrelationCorrection = gd.getNextBoolean();
-			qValue = Math.abs(gd.getNextNumber());
-			mean = Math.abs(gd.getNextNumber());
-			sigma = Math.abs(gd.getNextNumber());
-			setThreads((int) gd.getNextNumber());
-			lastNThreads = this.nThreads;
-		}
-
-		imageScaleIndex = gd.getNextChoiceIndex();
-		imageSizeIndex = gd.getNextChoiceIndex();
-		fourierMethodIndex = gd.getNextChoiceIndex();
-		fourierMethod = FourierMethod.values()[fourierMethodIndex];
-		samplingMethodIndex = gd.getNextChoiceIndex();
-		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
-		perimeterSamplingFactor = gd.getNextNumber();
-		thresholdMethodIndex = gd.getNextChoiceIndex();
-		thresholdMethod = FRC.ThresholdMethod.values()[thresholdMethodIndex];
-		showFRCCurve = gd.getNextBoolean();
-
-		// Check arguments
-		try
-		{
-			Parameters.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
-			if (extraOptions && spuriousCorrelationCorrection)
-			{
-				Parameters.isAboveZero("Q-value", qValue);
-				Parameters.isAboveZero("Precision Mean", mean);
-				Parameters.isAboveZero("Precision Sigma", sigma);
-				// Set these for use in FIRE computation 
-				setCorrectionParameters(qValue, mean, sigma);
-			}
-		}
-		catch (IllegalArgumentException e)
-		{
-			IJ.error(TITLE, e.getMessage());
-			return false;
-		}
 
 		if (!titles.isEmpty())
 			chooseRoi = gd.getNextBoolean();
@@ -734,6 +661,104 @@ public class FIRE implements PlugIn
 		else
 		{
 			roiBounds = null;
+		}
+
+		return true;
+	}
+
+	private boolean showDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage("Compute the resolution using Fourier Ring Correlation");
+		gd.addHelp(About.HELP_URL);
+
+		boolean single = results2 == null;
+
+		gd.addCheckbox("Use_signal (if present)", useSignal);
+		gd.addNumericField("Max_per_bin", maxPerBin, 0);
+		String[] thresholdMethodNames = SettingsManager.getNames((Object[]) FRC.ThresholdMethod.values());
+		gd.addChoice("Threshold_method", thresholdMethodNames, thresholdMethodNames[thresholdMethodIndex]);
+		gd.addCheckbox("Show_FRC_curve", showFRCCurve);
+
+		if (single)
+		{
+			gd.addMessage("For single datasets:");
+			gd.addNumericField("Block_size", blockSize, 0);
+			gd.addCheckbox("Random_split", randomSplit);
+			gd.addNumericField("Repeats", repeats, 0);
+			gd.addCheckbox("Show_FRC_curve_repeats", showFRCCurveRepeats);
+			gd.addCheckbox("Show_FRC_time_evolution", showFRCTimeEvolution);
+			gd.addCheckbox("Spurious correlation correction", spuriousCorrelationCorrection);
+			gd.addNumericField("Q-value", qValue, 3);
+			gd.addNumericField("Precision_Mean", mean, 2, 6, "nm");
+			gd.addNumericField("Precision_Sigma", sigma, 2, 6, "nm");
+			if (extraOptions)
+				gd.addNumericField("Threads", getLastNThreads(), 0);
+		}
+
+		gd.addMessage("Fourier options:");
+		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
+		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
+		String[] fourierMethodNames = SettingsManager.getNames((Object[]) FRC.FourierMethod.values());
+		gd.addChoice("Fourier_method", fourierMethodNames, fourierMethodNames[fourierMethodIndex]);
+		String[] samplingMethodNames = SettingsManager.getNames((Object[]) FRC.SamplingMethod.values());
+		gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
+		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		useSignal = gd.getNextBoolean();
+		maxPerBin = Math.abs((int) gd.getNextNumber());
+		thresholdMethodIndex = gd.getNextChoiceIndex();
+		thresholdMethod = FRC.ThresholdMethod.values()[thresholdMethodIndex];
+		showFRCCurve = gd.getNextBoolean();
+
+		if (single)
+		{
+			blockSize = Math.max(1, (int) gd.getNextNumber());
+			randomSplit = gd.getNextBoolean();
+			repeats = Math.max(1, (int) gd.getNextNumber());
+			showFRCCurveRepeats = gd.getNextBoolean();
+			showFRCTimeEvolution = gd.getNextBoolean();
+			spuriousCorrelationCorrection = gd.getNextBoolean();
+			qValue = Math.abs(gd.getNextNumber());
+			mean = Math.abs(gd.getNextNumber());
+			sigma = Math.abs(gd.getNextNumber());
+			if (extraOptions)
+			{
+				setThreads((int) gd.getNextNumber());
+				lastNThreads = this.nThreads;
+			}
+		}
+
+		imageScaleIndex = gd.getNextChoiceIndex();
+		imageSizeIndex = gd.getNextChoiceIndex();
+		fourierMethodIndex = gd.getNextChoiceIndex();
+		fourierMethod = FourierMethod.values()[fourierMethodIndex];
+		samplingMethodIndex = gd.getNextChoiceIndex();
+		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
+		perimeterSamplingFactor = gd.getNextNumber();
+
+		// Check arguments
+		try
+		{
+			Parameters.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
+			if (single && spuriousCorrelationCorrection)
+			{
+				Parameters.isAboveZero("Q-value", qValue);
+				Parameters.isAboveZero("Precision Mean", mean);
+				Parameters.isAboveZero("Precision Sigma", sigma);
+				// Set these for use in FIRE computation 
+				setCorrectionParameters(qValue, mean, sigma);
+			}
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
 		}
 
 		return true;
