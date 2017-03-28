@@ -681,11 +681,11 @@ public class FIRE implements PlugIn
 		boolean single = results2 == null;
 
 		gd.addMessage("Image construction options:");
+		gd.addChoice("Image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
+		gd.addChoice("Auto_image_size", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
 		if (extraOptions)
 			gd.addCheckbox("Use_signal (if present)", useSignal);
 		gd.addNumericField("Max_per_bin", maxPerBin, 0);
-		gd.addChoice("Image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
-		gd.addChoice("Auto_image_size", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
 
 		gd.addMessage("Fourier options:");
 		String[] fourierMethodNames = SettingsManager.getNames((Object[]) FRC.FourierMethod.values());
@@ -753,11 +753,11 @@ public class FIRE implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
+		imageScaleIndex = gd.getNextChoiceIndex();
+		imageSizeIndex = gd.getNextChoiceIndex();
 		if (extraOptions)
 			myUseSignal = useSignal = gd.getNextBoolean();
 		maxPerBin = Math.abs((int) gd.getNextNumber());
-		imageScaleIndex = gd.getNextChoiceIndex();
-		imageSizeIndex = gd.getNextChoiceIndex();
 
 		fourierMethodIndex = gd.getNextChoiceIndex();
 		fourierMethod = FourierMethod.values()[fourierMethodIndex];
@@ -1612,7 +1612,8 @@ public class FIRE implements PlugIn
 		// used for the final estimate. Fitting a subset with low derivative is not 
 		// implemented here since the initial estimate is subsequently optimised 
 		// to maximise the plateau. 
-		SimpleCurveFitter fit = SimpleCurveFitter.create(new Quadratic(), new double[2]);
+		Quadratic curve = new Quadratic();
+		SimpleCurveFitter fit = SimpleCurveFitter.create(curve, new double[2]);
 		WeightedObservedPoints points = new WeightedObservedPoints();
 		for (int i = low; i < high; i++)
 			points.add(q[i], smooth[i]);
@@ -1620,6 +1621,26 @@ public class FIRE implements PlugIn
 		double qValue = FastMath.exp(estimate[0]);
 
 		//System.out.printf("Initial q-estimate = %s => %.3f\n", Arrays.toString(estimate), qValue);
+		
+		// This could be made an option. Just use for debugging
+		boolean debug = false;
+		if (debug)
+		{
+			// Plot the initial fit and the fit curve
+			double[] qScaled = FRC.computeQ(frcCurve, true);
+			double[] line = new double[q.length];
+			for (int i = 0; i < q.length; i++)
+				line[i] = curve.value(q[i], estimate);
+			String title = TITLE + " Initial fit";
+			Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "FRC Numerator");
+			String label = String.format("Q = %.3f", qValue);
+			plot.addPoints(qScaled, smooth, Plot.LINE);
+			plot.setColor(Color.red);
+			plot.addPoints(qScaled, line, Plot.LINE);
+			plot.setColor(Color.black);
+			plot.addLabel(0, 0, label);
+			Utils.display(title, plot, Utils.NO_TO_FRONT);
+		}
 
 		if (fitPrecision)
 		{
@@ -1986,21 +2007,25 @@ public class FIRE implements PlugIn
 		gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation");
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+		if (!titles.isEmpty())
+			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
 
+		gd.addMessage("Image construction options:");
 		//gd.addCheckbox("Use_signal (if present)", useSignal);
-		gd.addNumericField("Max_per_bin", maxPerBin, 0);
+		gd.addChoice("Image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
+		gd.addChoice("Auto_image_size", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
 		gd.addNumericField("Block_size", blockSize, 0);
 		gd.addCheckbox("Random_split", randomSplit);
+		gd.addNumericField("Max_per_bin", maxPerBin, 0);
+
 		gd.addMessage("Fourier options:");
-		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
-		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
 		String[] fourierMethodNames = SettingsManager.getNames((Object[]) FRC.FourierMethod.values());
 		gd.addChoice("Fourier_method", fourierMethodNames, fourierMethodNames[fourierMethodIndex]);
 		String[] samplingMethodNames = SettingsManager.getNames((Object[]) FRC.SamplingMethod.values());
 		gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
-		if (!titles.isEmpty())
-			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
+
+		gd.addMessage("Estimation options:");
 		String[] precisionMethodNames = SettingsManager.getNames((Object[]) PrecisionMethod.values());
 		gd.addChoice("Precision_method", precisionMethodNames, precisionMethodNames[precisionMethodIndex]);
 		gd.addNumericField("Precision_Mean", mean, 2, 6, "nm");
@@ -2017,17 +2042,22 @@ public class FIRE implements PlugIn
 			return false;
 
 		inputOption = ResultsManager.getInputSource(gd);
+		if (!titles.isEmpty())
+			chooseRoi = gd.getNextBoolean();
+
 		//useSignal = gd.getNextBoolean();
-		maxPerBin = Math.abs((int) gd.getNextNumber());
-		blockSize = Math.max(1, (int) gd.getNextNumber());
-		randomSplit = gd.getNextBoolean();
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
+		blockSize = Math.max(1, (int) gd.getNextNumber());
+		randomSplit = gd.getNextBoolean();
+		maxPerBin = Math.abs((int) gd.getNextNumber());
+
 		fourierMethodIndex = gd.getNextChoiceIndex();
 		fourierMethod = FourierMethod.values()[fourierMethodIndex];
 		samplingMethodIndex = gd.getNextChoiceIndex();
 		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
 		perimeterSamplingFactor = gd.getNextNumber();
+
 		precisionMethodIndex = gd.getNextChoiceIndex();
 		precisionMethod = PrecisionMethod.values()[precisionMethodIndex];
 		mean = Math.abs(gd.getNextNumber());
@@ -2054,9 +2084,6 @@ public class FIRE implements PlugIn
 			IJ.error(TITLE, e.getMessage());
 			return false;
 		}
-
-		if (!titles.isEmpty())
-			chooseRoi = gd.getNextBoolean();
 
 		if (!titles.isEmpty() && chooseRoi)
 		{
