@@ -1484,8 +1484,8 @@ public class FIRE implements PlugIn
 		// localisations of the same molecule and not actual structure in the image.
 		// The best fit is where the numerator equals the scaled component, i.e. num / (q*exp_decay) == 1.
 		// The FRC Numerator is plotted and Q can be determined by
-		// adjusting Q and the precision mean and SD to maximise the plateau region of the
-		// plot. This can be done interactively by the user with the effect on the FRC curve
+		// adjusting Q and the precision mean and SD to maximise the cost function.
+		// This can be done interactively by the user with the effect on the FRC curve
 		// dynamically updated and displayed.
 
 		// Compute the scaled FRC numerator
@@ -1611,7 +1611,7 @@ public class FIRE implements PlugIn
 		// smoothed log curve with low derivative and only fits those. The fit is 
 		// used for the final estimate. Fitting a subset with low derivative is not 
 		// implemented here since the initial estimate is subsequently optimised 
-		// to maximise the plateau. 
+		// to maximise a cost function. 
 		Quadratic curve = new Quadratic();
 		SimpleCurveFitter fit = SimpleCurveFitter.create(curve, new double[2]);
 		WeightedObservedPoints points = new WeightedObservedPoints();
@@ -1621,7 +1621,7 @@ public class FIRE implements PlugIn
 		double qValue = FastMath.exp(estimate[0]);
 
 		//System.out.printf("Initial q-estimate = %s => %.3f\n", Arrays.toString(estimate), qValue);
-		
+
 		// This could be made an option. Just use for debugging
 		boolean debug = false;
 		if (debug)
@@ -2226,7 +2226,7 @@ public class FIRE implements PlugIn
 			double min = Maths.min(vq);
 			if (qValue > 0)
 			{
-				label += String.format(". Plateauness = %.3f", plateauness);
+				label += String.format(". Cost = %.3f", plateauness);
 				plot.setColor(Color.darkGray);
 				plot.addPoints(qScaled, correction, Plot.DOT);
 				plot.setColor(Color.blue);
@@ -2279,7 +2279,7 @@ public class FIRE implements PlugIn
 			double xMax = qScaled[qScaled.length - 1];
 			if (qValue > 0)
 			{
-				plot.addLabel(0, 0, String.format("Plateauness = %.3f", plateauness));
+				plot.addLabel(0, 0, String.format("Cost = %.3f", plateauness));
 				plot.setColor(Color.blue);
 				plot.addPoints(qScaled, ratio, Plot.LINE);
 			}
@@ -2807,7 +2807,7 @@ public class FIRE implements PlugIn
 
 			gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n" +
 					String.format("Initial estimate:\nPrecision = %.3f +/- %.3f\n", histogram.mean, histogram.sigma) +
-					String.format("Q = %s\nPlateauness = %.3f", Utils.rounded(qplot.qValue), plateauness));
+					String.format("Q = %s\nCost = %.3f", Utils.rounded(qplot.qValue), plateauness));
 
 			gd.addSlider("Mean (x10)", Math.max(0, mean10 - sd10 * 2), mean10 + sd10 * 2, mean10);
 			gd.addSlider("SD (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
@@ -2816,8 +2816,22 @@ public class FIRE implements PlugIn
 
 			gd.addDialogListener(new FIREDialogListener(gd, histogram, qplot, stacks));
 
+			// Show this when the workers have finished drawing the plots so it is on top
+			for (Worker w : workers)
+				if (w.isBusy())
+				{
+					try
+					{
+						Thread.sleep(50);
+					}
+					catch (InterruptedException e)
+					{
+						break;
+					}
+				}
+			
 			gd.showDialog();
-
+			
 			// Finish the worker threads
 			boolean cancelled = gd.wasCanceled();
 			finishWorkers(workers, threads, cancelled);
@@ -2980,6 +2994,7 @@ public class FIRE implements PlugIn
 	private abstract class Worker implements Runnable
 	{
 		private boolean running = true;
+		private volatile boolean working = false;
 		private Work lastWork = null;
 		private Work result;
 		private WorkStack inbox, outbox;
@@ -2998,6 +3013,8 @@ public class FIRE implements PlugIn
 							debug("Inbox empty, waiting ...");
 							inbox.wait();
 						}
+						// Set the working flag before we empty the inbox
+						working = true;
 						work = inbox.getWork();
 						if (work != null)
 							debug(" Found work");
@@ -3041,6 +3058,9 @@ public class FIRE implements PlugIn
 						debug(" Posting result");
 						outbox.addWork(result);
 					}
+
+					// Unset the working flag
+					working = false;
 				}
 				catch (InterruptedException e)
 				{
@@ -3048,6 +3068,7 @@ public class FIRE implements PlugIn
 					break;
 				}
 			}
+			working = false;
 		}
 
 		private void debug(String msg)
@@ -3073,6 +3094,16 @@ public class FIRE implements PlugIn
 		}
 
 		abstract Work createResult(Work work);
+
+		/**
+		 * Checks if is currently doing work or there is more work in the inbox.
+		 *
+		 * @return true, if is busy
+		 */
+		boolean isBusy()
+		{
+			return working || !inbox.isEmpty();
+		}
 	}
 
 	private class FIREDialogListener implements DialogListener
