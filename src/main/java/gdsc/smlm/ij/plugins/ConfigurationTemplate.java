@@ -307,6 +307,12 @@ public class ConfigurationTemplate implements PlugIn
 
 		return template.settings;
 	}
+	
+	static void clearTemplates()
+	{
+		names.clear();
+		map.clear();
+	}
 
 	/**
 	 * Save template configuration. If an existing template exists with the same name it will be over-written. If an
