@@ -343,8 +343,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		public IdPeakResult(int id, int uniqueId, PeakResult result)
 		{
-			super(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise, result.params,
-					null);
+			super(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
+					result.params, null);
 			this.id = id;
 			this.uniqueId = uniqueId;
 		}
@@ -5249,7 +5249,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// For the dialog
 				String msg = String.format(
 						"Showing image data for the template example.\n \nSample Frames:\nEmpty = %d\nLower density = %d\nHigher density = %d\n",
-						sampler.getNumberOfEmptySamples(), sampler.getNumberOfLowDensitySamples(), sampler.getNumberOfHighDensitySamples());
+						sampler.getNumberOfEmptySamples(), sampler.getNumberOfLowDensitySamples(),
+						sampler.getNumberOfHighDensitySamples());
 
 				// Turn off the recorder when the dialog is showing
 				boolean record = Recorder.record;
@@ -5273,7 +5274,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						nLow = (int) gd.getNextNumber();
 						nHigh = (int) gd.getNextNumber();
 						out[0] = sampler.getSample(nNo, nLow, nHigh);
-						if (out[0] != null)
+						if (out[0] != null && out[0].getSize() != 0)
 						{
 							outImp[0] = Utils.display(title, out[0]);
 							if (Utils.isNewWindow())
@@ -5296,11 +5297,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					out[0] = null;
 					nNo = nLow = nHigh = 0; // For the recorder
 				}
-
 				if (close[0])
 				{
 					// Because closing the image sets the stack pixels array to null
-					out[0] = out[0].duplicate();
+					if (out[0] != null)
+						out[0] = out[0].duplicate();
 					outImp[0].close();
 				}
 
@@ -5313,7 +5314,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 
-			if (out[0] == null)
+			if (out[0] == null || out[0].getSize() == 0)
 				return;
 
 			ImagePlus example = new ImagePlus(title, out[0]);
