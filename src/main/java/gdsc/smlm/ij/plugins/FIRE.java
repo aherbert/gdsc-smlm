@@ -8,7 +8,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Label;
 import java.awt.Rectangle;
+import java.awt.Scrollbar;
 import java.awt.TextField;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2026,6 +2029,8 @@ public class FIRE implements PlugIn
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
 
 		gd.addMessage("Estimation options:");
+		String[] thresholdMethodNames = SettingsManager.getNames((Object[]) FRC.ThresholdMethod.values());
+		gd.addChoice("Threshold_method", thresholdMethodNames, thresholdMethodNames[thresholdMethodIndex]);
 		String[] precisionMethodNames = SettingsManager.getNames((Object[]) PrecisionMethod.values());
 		gd.addChoice("Precision_method", precisionMethodNames, precisionMethodNames[precisionMethodIndex]);
 		gd.addNumericField("Precision_Mean", mean, 2, 6, "nm");
@@ -2058,6 +2063,8 @@ public class FIRE implements PlugIn
 		samplingMethod = SamplingMethod.values()[samplingMethodIndex];
 		perimeterSamplingFactor = gd.getNextNumber();
 
+		thresholdMethodIndex = gd.getNextChoiceIndex();
+		thresholdMethod = FRC.ThresholdMethod.values()[thresholdMethodIndex];
 		precisionMethodIndex = gd.getNextChoiceIndex();
 		precisionMethod = PrecisionMethod.values()[precisionMethodIndex];
 		mean = Math.abs(gd.getNextNumber());
@@ -2176,7 +2183,6 @@ public class FIRE implements PlugIn
 			FRC.applyQCorrection(frcCurve, 0, 0, 0);
 			FRCCurve smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve, false);
 			originalFireResult = new FireResult(0, 0, smoothedFrcCurve, frcCurve.getCorrelationValues());
-			ThresholdMethod thresholdMethod = ThresholdMethod.FIXED_1_OVER_7;
 			FIREResult result = FRC.calculateFire(smoothedFrcCurve, thresholdMethod);
 			if (result != null)
 			{
@@ -2249,8 +2255,7 @@ public class FIRE implements PlugIn
 			FRC.applyQCorrection(frcCurve, qValue, mean, sigma);
 			FRCCurve smoothedFrcCurve = FRC.getSmoothedCurve(frcCurve, false);
 
-			// Resolution in pixels. Just use the default 1/7 thrshold method
-			ThresholdMethod thresholdMethod = ThresholdMethod.FIXED_1_OVER_7;
+			// Resolution in pixels
 			FIREResult result = FRC.calculateFire(smoothedFrcCurve, thresholdMethod);
 			PlotWindow pw2 = null;
 			if (result != null)
@@ -2817,23 +2822,26 @@ public class FIRE implements PlugIn
 			gd.addSlider("Mean (x10)", Math.max(0, mean10 - sd10 * 2), mean10 + sd10 * 2, mean10);
 			gd.addSlider("Sigma (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
 			gd.addSlider("Q (x10)", 0, Math.max(50, q10 * 2), q10);
-			gd.addCheckbox("Reset", false);
+			gd.addCheckbox("Reset_all", false);
+			gd.addMessage("Double-click a slider to reset");
 
 			gd.addDialogListener(new FIREDialogListener(gd, histogram, qplot, stacks));
 
 			// Show this when the workers have finished drawing the plots so it is on top
-			for (Worker w : workers)
-				if (w.isBusy())
+			try
+			{
+				long timeout = System.currentTimeMillis() + 5000;
+				while (wo.size < wo.expected)
 				{
-					try
-					{
-						Thread.sleep(50);
-					}
-					catch (InterruptedException e)
-					{
+					Thread.sleep(50);
+					if (System.currentTimeMillis() > timeout)
 						break;
-					}
 				}
+			}
+			catch (InterruptedException e)
+			{
+				// Ignore
+			}			
 
 			gd.showDialog();
 
@@ -2999,7 +3007,6 @@ public class FIRE implements PlugIn
 	private abstract class Worker implements Runnable
 	{
 		private boolean running = true;
-		private volatile boolean working = false;
 		private Work lastWork = null;
 		private Work result;
 		private WorkStack inbox, outbox;
@@ -3018,8 +3025,6 @@ public class FIRE implements PlugIn
 							debug("Inbox empty, waiting ...");
 							inbox.wait();
 						}
-						// Set the working flag before we empty the inbox
-						working = true;
 						work = inbox.getWork();
 						if (work != null)
 							debug(" Found work");
@@ -3063,9 +3068,6 @@ public class FIRE implements PlugIn
 						debug(" Posting result");
 						outbox.addWork(result);
 					}
-
-					// Unset the working flag
-					working = false;
 				}
 				catch (InterruptedException e)
 				{
@@ -3073,7 +3075,6 @@ public class FIRE implements PlugIn
 					break;
 				}
 			}
-			working = false;
 		}
 
 		private void debug(String msg)
@@ -3099,19 +3100,9 @@ public class FIRE implements PlugIn
 		}
 
 		abstract Work createResult(Work work);
-
-		/**
-		 * Checks if is currently doing work or there is more work in the inbox.
-		 *
-		 * @return true, if is busy
-		 */
-		boolean isBusy()
-		{
-			return working || !inbox.isEmpty();
-		}
 	}
 
-	private class FIREDialogListener implements DialogListener
+	private class FIREDialogListener implements DialogListener, MouseListener
 	{
 		/**
 		 * Delay (in milliseconds) used when entering new values in the dialog before the preview is processed
@@ -3126,6 +3117,7 @@ public class FIRE implements PlugIn
 		double defaultMean, defaultSigma, defaultQValue;
 		String m, s, q;
 		TextField tf1, tf2, tf3;
+		Scrollbar sl1, sl2, sl3;
 		Checkbox cb;
 		final boolean isMacro;
 
@@ -3142,6 +3134,13 @@ public class FIRE implements PlugIn
 			tf2 = (TextField) gd.getNumericFields().get(1);
 			tf3 = (TextField) gd.getNumericFields().get(2);
 			cb = (Checkbox) (gd.getCheckboxes().get(0));
+			// Sliders
+			sl1 = (Scrollbar) gd.getSliders().get(0);
+			sl2 = (Scrollbar) gd.getSliders().get(1);
+			sl3 = (Scrollbar) gd.getSliders().get(2);
+			sl1.addMouseListener(this);
+			sl2.addMouseListener(this);
+			sl3.addMouseListener(this);
 			m = tf1.getText();
 			s = tf2.getText();
 			q = tf3.getText();
@@ -3205,6 +3204,42 @@ public class FIRE implements PlugIn
 			}
 
 			return true;
+		}
+
+		public void mouseClicked(MouseEvent e)
+		{
+			// Reset the slider on double-click
+			if (e.getClickCount() < 2)
+				return;
+			if (e.getSource() == null || !(e.getSource() instanceof Scrollbar))
+				return;
+			Scrollbar sl = (Scrollbar) e.getSource();
+			if (sl == sl1)
+				tf1.setText(m);
+			if (sl == sl2)
+				tf2.setText(s);
+			if (sl == sl3)
+				tf3.setText(q);
+		}
+
+		public void mousePressed(MouseEvent e)
+		{
+			// Ignore			
+		}
+
+		public void mouseReleased(MouseEvent e)
+		{
+			// Ignore			
+		}
+
+		public void mouseEntered(MouseEvent e)
+		{
+			// Ignore			
+		}
+
+		public void mouseExited(MouseEvent e)
+		{
+			// Ignore			
 		}
 	}
 
