@@ -2773,17 +2773,18 @@ public class FIRE implements PlugIn
 		// The number of plots
 		wo.expected = 4;
 
-		double mean10 = histogram.mean * 10;
-		double sd10 = histogram.sigma * 10;
-		double q10 = qplot.qValue * 10;
+		String KEY_MEAN = "mean_estimate";
+		String KEY_SIGMA = "sigma_estimate";
+		String KEY_Q = "q_estimate";
 
 		String macroOptions = Macro.getOptions();
 		if (macroOptions != null)
 		{
 			// If inside a macro then just get the options and run the work
-			double mean = Double.parseDouble(Macro.getValue(macroOptions, "mean", Double.toString(mean10))) / 10;
-			double sigma = Double.parseDouble(Macro.getValue(macroOptions, "sd", Double.toString(sd10))) / 10;
-			double qValue = Double.parseDouble(Macro.getValue(macroOptions, "qValue", Double.toString(q10))) / 10;
+			double mean = Double.parseDouble(Macro.getValue(macroOptions, KEY_MEAN, Double.toString(histogram.mean)));
+			double sigma = Double
+					.parseDouble(Macro.getValue(macroOptions, KEY_SIGMA, Double.toString(histogram.sigma)));
+			double qValue = Double.parseDouble(Macro.getValue(macroOptions, KEY_Q, Double.toString(qplot.qValue)));
 			Work work = new Work(mean, sigma, qValue);
 			for (WorkStack stack : stacks)
 				stack.addWork(work);
@@ -2809,10 +2810,14 @@ public class FIRE implements PlugIn
 					String.format("Initial estimate:\nPrecision = %.3f +/- %.3f\n", histogram.mean, histogram.sigma) +
 					String.format("Q = %s\nCost = %.3f", Utils.rounded(qplot.qValue), plateauness));
 
+			double mean10 = histogram.mean * 10;
+			double sd10 = histogram.sigma * 10;
+			double q10 = qplot.qValue * 10;
+
 			gd.addSlider("Mean (x10)", Math.max(0, mean10 - sd10 * 2), mean10 + sd10 * 2, mean10);
-			gd.addSlider("SD (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
+			gd.addSlider("Sigma (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
 			gd.addSlider("Q (x10)", 0, Math.max(50, q10 * 2), q10);
-			gd.addCheckbox("reset", false);
+			gd.addCheckbox("Reset", false);
 
 			gd.addDialogListener(new FIREDialogListener(gd, histogram, qplot, stacks));
 
@@ -2829,9 +2834,9 @@ public class FIRE implements PlugIn
 						break;
 					}
 				}
-			
+
 			gd.showDialog();
-			
+
 			// Finish the worker threads
 			boolean cancelled = gd.wasCanceled();
 			finishWorkers(workers, threads, cancelled);
@@ -2847,9 +2852,9 @@ public class FIRE implements PlugIn
 		// Record the values for Macros since the NonBlockingDialog doesn't
 		if (Recorder.record)
 		{
-			Recorder.recordOption("mean", Double.toString(mean * 10));
-			Recorder.recordOption("sd", Double.toString(sigma * 10));
-			Recorder.recordOption("q", Double.toString(qValue * 10));
+			Recorder.recordOption(KEY_MEAN, Double.toString(mean));
+			Recorder.recordOption(KEY_SIGMA, Double.toString(sigma));
+			Recorder.recordOption(KEY_Q, Double.toString(qValue));
 		}
 
 		return true;
