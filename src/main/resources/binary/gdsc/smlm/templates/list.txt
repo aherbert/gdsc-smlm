@@ -1,0 +1,5 @@
+# Mandatory
+MT0.N1.HD.xml*
+# Optional
+MT0.N1.HDb.xml
+template.xml

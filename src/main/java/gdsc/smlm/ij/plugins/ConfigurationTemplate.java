@@ -21,7 +21,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import gdsc.core.ij.Utils;
@@ -34,7 +35,9 @@ import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
+import ij.ImagePlus;
 import ij.gui.GenericDialog;
+import ij.io.Opener;
 import ij.plugin.PlugIn;
 import ij.util.StringSorter;
 
@@ -43,17 +46,31 @@ import ij.util.StringSorter;
  */
 public class ConfigurationTemplate implements PlugIn
 {
+	/**
+	 * Describes the details of a template that can be loaded from the JAR resources folder
+	 */
 	static class TemplateResource
 	{
 		final String path;
+		final String tifPath;
 		final String name;
 		final boolean optional;
 
-		TemplateResource(String path, String name, boolean optional)
+		TemplateResource(String path, String name, boolean optional, String tifPath)
 		{
 			this.path = path;
 			this.name = name;
 			this.optional = optional;
+			this.tifPath = tifPath;
+		}
+
+		@Override
+		public String toString()
+		{
+			String text = String.format("path=%s, name=%s, optional=%b", path, name, optional);
+			if (tifPath != null)
+				text += ", tifPath=" + tifPath;
+			return text;
 		}
 	}
 
@@ -63,13 +80,28 @@ public class ConfigurationTemplate implements PlugIn
 		final boolean custom;
 		final File file;
 		long timestamp;
+		// An example image from the data used to build the template
+		String tifPath;
 
-		public Template(GlobalSettings settings, boolean custom, File file)
+		public Template(GlobalSettings settings, boolean custom, File file, String tifPath)
 		{
 			this.settings = settings;
 			this.custom = custom;
 			this.file = file;
 			timestamp = (file != null) ? file.lastModified() : 0;
+
+			// Resource templates may have a tif image as a resource
+			if (tifPath != null)
+			{
+				this.tifPath = tifPath;
+			}
+			// Templates with a file may have a corresponding tif image
+			else if (file != null)
+			{
+				tifPath = Utils.replaceExtension(file.getPath(), ".tif");
+				if (new File(tifPath).exists())
+					this.tifPath = tifPath;
+			}
 		}
 
 		public void update()
@@ -105,10 +137,41 @@ public class ConfigurationTemplate implements PlugIn
 			}
 			return result;
 		}
+
+		public boolean hasImage()
+		{
+			return tifPath != null;
+		}
+
+		public ImagePlus loadImage()
+		{
+			if (!hasImage())
+				return null;
+
+			Opener opener = new Opener();
+			opener.setSilentMode(true);
+
+			// The tifPath may be a system resource or it may be a file 
+			File file = new File(tifPath);
+			if (file.exists())
+			{
+				// Load directly from a file path
+				return opener.openImage(tifPath);
+			}
+
+			// IJ has support for loading TIFs from an InputStream
+			Class<ConfigurationTemplate> resourceClass = ConfigurationTemplate.class;
+			InputStream inputStream = resourceClass.getResourceAsStream(tifPath);
+			if (inputStream != null)
+			{
+				return opener.openTiff(inputStream, Utils.removeExtension(file.getName()));
+			}
+
+			return null;
+		}
 	}
 
-	private static HashMap<String, Template> map;
-	private static ArrayList<String> names;
+	private static LinkedHashMap<String, Template> map;
 	private static boolean selectStandardTemplates = false;
 	private static boolean chooseDirectory = true;
 	private static String configurationDirectory;
@@ -117,8 +180,8 @@ public class ConfigurationTemplate implements PlugIn
 
 	static
 	{
-		map = new HashMap<String, ConfigurationTemplate.Template>();
-		names = new ArrayList<String>();
+		// Maintain the names in the order they are added
+		map = new LinkedHashMap<String, ConfigurationTemplate.Template>();
 
 		String currentUsersHomeDir = System.getProperty("user.home");
 		configurationDirectory = currentUsersHomeDir + File.separator + "gdsc.smlm";
@@ -140,12 +203,12 @@ public class ConfigurationTemplate implements PlugIn
 		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(45);
-		addTemplate("PALM LSE", config, false);
+		addTemplate("PALM LSE", config);
 
 		// Add settings for STORM ...
 		config.setResidualsThreshold(0.4);
 		config.setFailuresLimit(3);
-		addTemplate("STORM LSE", config, false);
+		addTemplate("STORM LSE", config);
 		config.setResidualsThreshold(1);
 		config.setFailuresLimit(1);
 
@@ -158,12 +221,12 @@ public class ConfigurationTemplate implements PlugIn
 		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(47);
-		addTemplate("PALM MLE", config, false);
+		addTemplate("PALM MLE", config);
 
 		// Add settings for STORM ...
 		config.setResidualsThreshold(0.4);
 		config.setFailuresLimit(3);
-		addTemplate("STORM MLE", config, false);
+		addTemplate("STORM MLE", config);
 		config.setResidualsThreshold(1);
 		config.setFailuresLimit(1);
 
@@ -174,21 +237,30 @@ public class ConfigurationTemplate implements PlugIn
 		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(50);
-		addTemplate("PALM MLE Camera", config, false);
+		addTemplate("PALM MLE Camera", config);
 
 		// Add settings for STORM ...
 		config.setResidualsThreshold(0.4);
 		config.setFailuresLimit(3);
-		addTemplate("STORM MLE Camera", config, false);
+		addTemplate("STORM MLE Camera", config);
 
 		loadStandardTemplates();
 	}
 
-	private static void addTemplate(String name, FitEngineConfiguration config, boolean custom)
+	/**
+	 * Adds the template using the configuration. This should be used to add templates that have not been produced using
+	 * benchmarking on a specific image. Those can be added to the /gdsc/smlm/templates/ resources directory.
+	 *
+	 * @param name
+	 *            the name
+	 * @param config
+	 *            the config
+	 */
+	private static void addTemplate(String name, FitEngineConfiguration config)
 	{
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config.clone());
-		addTemplate(name, settings, custom, null);
+		addTemplate(name, settings, false, null, null);
 	}
 
 	/**
@@ -225,8 +297,13 @@ public class ConfigurationTemplate implements PlugIn
 		{
 			while ((line = input.readLine()) != null)
 			{
+				// Skip comment character
+				if (line.length() == 0 || line.charAt(0) == '#')
+					continue;
+
 				String template = line;
 				boolean optional = true;
+				// Mandatory templates have a '*' suffix 
 				int index = template.indexOf('*');
 				if (index >= 0)
 				{
@@ -243,8 +320,22 @@ public class ConfigurationTemplate implements PlugIn
 					if (!loadMandatory)
 						continue;
 				}
+				// Check the resource exists
+				String path = templateDir + template;
+				InputStream templateStream = resourceClass.getResourceAsStream(path);
+				if (templateStream == null)
+					continue;
+
+				// Create a simple name
 				String name = Utils.removeExtension(template);
-				list.add(new TemplateResource(templateDir + template, name, optional));
+
+				// Check if an example TIF file exists for the template
+				String tifPath = templateDir + name + ".tif";
+				InputStream tifStream = resourceClass.getResourceAsStream(tifPath);
+				if (tifStream == null)
+					tifPath = null;
+
+				list.add(new TemplateResource(path, name, optional, tifPath));
 			}
 		}
 		catch (IOException e)
@@ -270,26 +361,23 @@ public class ConfigurationTemplate implements PlugIn
 			// Skip those already done
 			if (map.containsKey(template.name))
 				continue;
-			
+
 			InputStream templateStream = resourceClass.getResourceAsStream(template.path);
 			if (templateStream == null)
 				continue;
 			GlobalSettings settings = SettingsManager.unsafeLoadSettings(templateStream, true);
 			if (settings != null)
 			{
-				addTemplate(template.name, settings, false, null);
+				addTemplate(template.name, settings, false, null, template.tifPath);
 			}
 		}
 	}
 
-	private static void addTemplate(String name, GlobalSettings settings, boolean custom, File file)
+	private static void addTemplate(String name, GlobalSettings settings, boolean custom, File file, String tifPath)
 	{
-		// Maintain the names in the order they are added
-		if (!map.containsKey(name))
-			names.add(name);
-		map.put(name, new Template(settings, custom, file));
+		map.put(name, new Template(settings, custom, file, tifPath));
 	}
-	
+
 	/**
 	 * Get the template configuration
 	 * 
@@ -307,10 +395,17 @@ public class ConfigurationTemplate implements PlugIn
 
 		return template.settings;
 	}
-	
+
+	public static ImagePlus getTemplateImage(String name)
+	{
+		Template template = map.get(name);
+		if (template == null)
+			return null;
+		return template.loadImage();
+	}
+
 	static void clearTemplates()
 	{
-		names.clear();
 		map.clear();
 	}
 
@@ -331,7 +426,7 @@ public class ConfigurationTemplate implements PlugIn
 		Template template = map.get(name);
 		if (template == null)
 		{
-			addTemplate(name, settings, true, file);
+			addTemplate(name, settings, true, file, null);
 			return true;
 		}
 		template.settings = settings;
@@ -356,6 +451,16 @@ public class ConfigurationTemplate implements PlugIn
 	}
 
 	/**
+	 * Get the names of the available templates.
+	 *
+	 * @return The template names
+	 */
+	public static String[] getTemplateNames()
+	{
+		return getTemplateNames(false);
+	}
+
+	/**
 	 * Get the names of the available templates
 	 * 
 	 * @param includeNone
@@ -364,14 +469,28 @@ public class ConfigurationTemplate implements PlugIn
 	 */
 	public static String[] getTemplateNames(boolean includeNone)
 	{
-		int length = (includeNone) ? names.size() + 1 : names.size();
+		int length = (includeNone) ? map.size() + 1 : map.size();
 		String[] templateNames = new String[length];
 		int i = 0;
 		if (includeNone)
 			templateNames[i++] = "[None]";
-		for (String name : names)
+		for (String name : map.keySet())
 			templateNames[i++] = name;
 		return templateNames;
+	}
+
+	/**
+	 * Get the names of the available templates that have an example image.
+	 *
+	 * @return The template names
+	 */
+	public static String[] getTemplateNamesWithImage()
+	{
+		TurboList<String> templateNames = new TurboList<String>(map.size());
+		for (Map.Entry<String, Template> entry : map.entrySet())
+			if (entry.getValue().hasImage())
+				templateNames.add(entry.getKey());
+		return templateNames.toArray(new String[templateNames.size()]);
 	}
 
 	/*
@@ -426,7 +545,7 @@ public class ConfigurationTemplate implements PlugIn
 		selected = md.getSelectedResults();
 		if (selected.isEmpty())
 			return;
-		
+
 		// Use list filtering to get the selected templates
 		TurboList<TemplateResource> list = new TurboList<TemplateResource>(Arrays.asList(templates));
 		list.removeIf(new SimplePredicate<TemplateResource>()
@@ -481,7 +600,7 @@ public class ConfigurationTemplate implements PlugIn
 				count++;
 				File file = new File(path);
 				String name = Utils.removeExtension(file.getName());
-				addTemplate(name, settings, true, file);
+				addTemplate(name, settings, true, file, null);
 			}
 		}
 		IJ.showMessage("Loaded " + Utils.pleural(count, "result"));
