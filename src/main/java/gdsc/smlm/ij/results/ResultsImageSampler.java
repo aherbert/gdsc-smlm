@@ -410,14 +410,15 @@ public class ResultsImageSampler
 			ImageProcessor ip = stack.getProcessor(slice);
 
 			// Cut out the desired pixels (some may be blank if the block overruns the source image)
-			float[] pixels = new float[size * size];
+			ImageProcessor ip2 = ip.createProcessor(size, size);
 			for (int y = 0; y < target.height; y++)
 				for (int x = 0, i = y * size, index = (y + target.y) * ip.getWidth() +
 						target.x; x < target.width; x++, i++, index++)
 				{
-					pixels[i] = ip.getf(index);
+					ip2.setf(i, ip.getf(index));
 				}
-			out.addSlice(String.format("Frame=%d (x=%d,y=%d) (n=%d)", slice, xyz[0], xyz[1], s[1]), pixels);
+
+			out.addSlice(String.format("Frame=%d (x=%d,y=%d) (n=%d)", slice, xyz[0], xyz[1], s[1]), ip2.getPixels());
 		}
 
 		return out;
