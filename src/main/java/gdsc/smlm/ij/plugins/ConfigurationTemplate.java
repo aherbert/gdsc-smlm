@@ -669,8 +669,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		{
 			if (imp != null)
 				imp.close();
-			if (resultsWindow != null)
-				resultsWindow.close();
+			closeResults();
 		}
 	}
 
@@ -704,7 +703,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 * @param title
 	 *            the title
 	 * @param templateImp
-	 *            the template imp
+	 *            the template image
 	 * @return the image plus
 	 */
 	public static ImagePlus displayTemplate(String title, ImagePlus templateImp)
@@ -742,12 +741,21 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		}
 	}
 
-	private void createResults(ImagePlus imp)
+	/**
+	 * Creates a results window showing the localisation results from a template image.
+	 *
+	 * @param templateImp
+	 *            the template image
+	 * @return the text window
+	 */
+	public TextWindow createResults(ImagePlus templateImp)
 	{
+		if (TITLE == null)
+			TITLE = templateImp.getTitle();
 		currentSlice = 0;
 		headings = "";
 		text = new TIntObjectHashMap<String>();
-		Object info = imp.getProperty("Info");
+		Object info = templateImp.getProperty("Info");
 		if (info != null)
 		{
 			// First line is the headings
@@ -777,21 +785,35 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			}
 			text.put(last, sb.toString());
 		}
-		updateResults(imp.getSlice());
+		return updateResults(templateImp.getSlice());
 	}
 
-	private void updateResults(int slice)
+	/**
+	 * Update the results window using the current selected slice from the template image.
+	 *
+	 * @param slice
+	 *            the slice
+	 * @return the text window
+	 */
+	public TextWindow updateResults(int slice)
 	{
-		if (slice == currentSlice)
-			return;
+		if (slice == currentSlice || text == null)
+			return resultsWindow;
 		currentSlice = slice;
 
 		if (resultsWindow == null || !resultsWindow.isVisible())
-			resultsWindow = new TextWindow(TITLE, headings, "", 450, 250);
+			resultsWindow = new TextWindow(TITLE + " Results", headings, "", 450, 250);
 
 		resultsWindow.getTextPanel().clear();
 		String data = text.get(slice);
 		if (!Utils.isNullOrEmpty(data))
 			resultsWindow.append(data);
+		return resultsWindow;
+	}
+
+	public void closeResults()
+	{
+		if (resultsWindow != null)
+			resultsWindow.close();
 	}
 }

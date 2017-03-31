@@ -124,6 +124,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
+import ij.ImageListener;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Macro;
@@ -5226,12 +5227,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			if (!Utils.isMacro())
 			{
+				// Show the template results
+				final ConfigurationTemplate configTemplate = new ConfigurationTemplate();
+				
 				// Interactively show the sample image data
 				final boolean[] close = new boolean[1];
 				final ImagePlus[] outImp = new ImagePlus[1];
 				if (out[0] != null)
 				{
 					outImp[0] = display(out[0]);
+					configTemplate.createResults(outImp[0]);
 					if (Utils.isNewWindow())
 					{
 						close[0] = true;
@@ -5243,6 +5248,28 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						}
 					}
 				}
+
+				// TODO - fix this when a second sample is made as the results are not updated.
+				
+				ImageListener listener = new ImageListener()
+				{
+					public void imageOpened(ImagePlus imp)
+					{
+					}
+
+					public void imageClosed(ImagePlus imp)
+					{
+					}
+
+					public void imageUpdated(ImagePlus imp)
+					{
+						if (imp != null && imp == outImp[0])
+						{
+							configTemplate.updateResults(imp.getSlice());
+						}
+					}
+				};
+				ImagePlus.addImageListener(listener);
 
 				// For the dialog
 				String msg = String.format(
@@ -5275,6 +5302,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						if (out[0] != null)
 						{
 							outImp[0] = display(out[0]);
+							configTemplate.createResults(outImp[0]);
 							if (Utils.isNewWindow())
 							{
 								close[0] = true;
@@ -5302,6 +5330,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						out[0] = out[0].duplicate();
 					outImp[0].close();
 				}
+				configTemplate.closeResults();
+				ImagePlus.removeImageListener(listener);
 
 				if (record)
 				{
