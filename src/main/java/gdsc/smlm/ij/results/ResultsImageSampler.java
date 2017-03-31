@@ -155,9 +155,6 @@ public class ResultsImageSampler
 
 		// Split the image into frames with zero localisations, low density, high density
 
-		// Sort by index
-		Arrays.sort(data, ic);
-
 		// Do the empty blocks
 		long total = stack.getSize() * xy_blocks;
 		long empty = total - map.size();
@@ -168,6 +165,9 @@ public class ResultsImageSampler
 		}
 		else
 		{
+			// Sort by index
+			Arrays.sort(data, ic);
+			
 			// Randomly sample indices that are not used.
 			if (maxNumberOfEmptySamples > 0)
 			{
