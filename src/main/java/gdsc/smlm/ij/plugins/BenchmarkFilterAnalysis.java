@@ -5202,8 +5202,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			if (!sampler.isValid())
 				return;
 
-			final String title = "Template Example";
-
 			// Iteratively show the example until the user is happy.
 			// Yes = OK, No = Repeat, Cancel = Do not save
 			String keyNo = "nNo";
@@ -5223,7 +5221,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					nLow = nHigh = 1;
 			}
 
-			final ImageStack[] out = new ImageStack[1];
+			final ImagePlus[] out = new ImagePlus[1];
 			out[0] = sampler.getSample(nNo, nLow, nHigh);
 
 			if (!Utils.isMacro())
@@ -5233,7 +5231,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				final ImagePlus[] outImp = new ImagePlus[1];
 				if (out[0] != null)
 				{
-					outImp[0] = Utils.display(title, out[0]);
+					outImp[0] = display(out[0]);
 					if (Utils.isNewWindow())
 					{
 						close[0] = true;
@@ -5274,9 +5272,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						nLow = (int) gd.getNextNumber();
 						nHigh = (int) gd.getNextNumber();
 						out[0] = sampler.getSample(nNo, nLow, nHigh);
-						if (out[0] != null && out[0].getSize() != 0)
+						if (out[0] != null)
 						{
-							outImp[0] = Utils.display(title, out[0]);
+							outImp[0] = display(out[0]);
 							if (Utils.isNewWindow())
 							{
 								close[0] = true;
@@ -5314,15 +5312,27 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 
-			if (out[0] == null || out[0].getSize() == 0)
+			if (out[0] == null)
 				return;
 
-			ImagePlus example = new ImagePlus(title, out[0]);
+			ImagePlus example = out[0];
 			filename = Utils.replaceExtension(filename, ".tif");
 			IJ.save(example, filename);
 		}
 	}
 
+	private ImagePlus display(ImagePlus example)
+	{
+		final String title = "Template Example";
+		// Update the example image
+		example.setTitle(title);
+		
+		// Display as a new image. This is so we can close it later.
+		ImagePlus imp = Utils.display(title, example.getImageStack());
+		imp.setOverlay(example.getOverlay());
+		return imp;
+	}
+	
 	private String getNotes(String topFilterSummary)
 	{
 		StringBuilder sb = new StringBuilder();

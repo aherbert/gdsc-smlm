@@ -4,14 +4,21 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
+
 import gdsc.core.utils.Random;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.map.hash.TLongIntHashMap;
-import gnu.trove.procedure.TLongIntProcedure;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.procedure.TLongObjectProcedure;
+import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.Overlay;
+import ij.gui.PointRoi;
 import ij.process.ImageProcessor;
 
 /*----------------------------------------------------------------------------- 
@@ -32,34 +39,57 @@ import ij.process.ImageProcessor;
  */
 public class ResultsImageSampler
 {
-	private static class IndexComparator implements Comparator<long[]>
+	private static class ResultsSample
 	{
-		public int compare(long[] o1, long[] o2)
+		final long index;
+		final float[] data;
+
+		ResultsSample(long index)
 		{
-			return Long.compare(o1[0], o2[0]);
+			this.index = index;
+			this.data = new float[0]; // makes things simple
+		}
+
+		ResultsSample(long index, float[] data)
+		{
+			this.index = index;
+			this.data = data;
+		}
+
+		public int size()
+		{
+			return data.length / 2;
 		}
 	}
 
-	private static class CountComparator implements Comparator<long[]>
+	private static class IndexComparator implements Comparator<ResultsSample>
 	{
-		public int compare(long[] o1, long[] o2)
+		public int compare(ResultsSample o1, ResultsSample o2)
 		{
-			int result = Long.compare(o1[1], o2[1]);
+			return Long.compare(o1.index, o2.index);
+		}
+	}
+
+	private static class CountComparator implements Comparator<ResultsSample>
+	{
+		public int compare(ResultsSample o1, ResultsSample o2)
+		{
+			int result = Integer.compare(o1.data.length, o2.data.length);
 			if (result == 0)
 				// Use index if the same count
-				return Long.compare(o1[0], o2[0]);
+				return Long.compare(o1.index, o2.index);
 			return result;
 		}
 	}
 
-	private static class ReverseCountComparator implements Comparator<long[]>
+	private static class ReverseCountComparator implements Comparator<ResultsSample>
 	{
-		public int compare(long[] o1, long[] o2)
+		public int compare(ResultsSample o1, ResultsSample o2)
 		{
-			int result = Long.compare(o2[1], o1[1]);
+			int result = Integer.compare(o2.data.length, o1.data.length);
 			if (result == 0)
 				// Use index if the same count
-				return Long.compare(o1[0], o2[0]);
+				return Long.compare(o1.index, o2.index);
 			return result;
 		}
 	}
@@ -86,10 +116,10 @@ public class ResultsImageSampler
 	public int maxNumberOfEmptySamples = 500;
 
 	private long[] no;
-	private long[][] data;
+	private ResultsSample[] data;
 	private int lower, upper;
-	private TurboList<long[]> list = new TurboList<long[]>();
-	private Random r = new Random();
+	private TurboList<ResultsSample> list = new TurboList<ResultsSample>();
+	private RandomGenerator r = new Well19937c();
 
 	/**
 	 * Instantiates a new results image sampler.
@@ -125,39 +155,46 @@ public class ResultsImageSampler
 	 */
 	public boolean analyse()
 	{
+		// Clear old samples
+		data = null;
 		no = null;
+
 		if (results.isEmpty())
 			return false;
 
-		// Count the number of localisations in each region
-		TLongIntHashMap map = new TLongIntHashMap(results.size());
-		for (PeakResult p : results)
-		{
-			// Avoid invalid slices
-			if (p.getFrame() < 1 || p.getFrame() > stack.getSize())
-				continue;
-			long index = getIndex(p.getXPosition(), p.getYPosition(), p.getFrame());
-			map.adjustOrPutValue(index, 1, 1);
-		}
-
-		final long[][] data = new long[map.size()][];
-		map.forEachEntry(new TLongIntProcedure()
-		{
-			int i = 0;
-
-			public boolean execute(long a, int b)
-			{
-				data[i++] = new long[] { a, b };
-				return true;
-			}
-		});
-		this.data = data;
+		createResultSamples();
 
 		// Split the image into frames with zero localisations, low density, high density
 
-		// Do the empty blocks
+		createEmptySampleIndices();
+
+		// For the low and high sample we just split in half.
+		// The data must be sorted by count.
+		Arrays.sort(data, cc);
+		lower = data.length / 2;
+		upper = data.length - lower;
+
+		//// Debug indexing
+		//int[] xyz = new int[3];
+		//for (long l = 0; l < max; l++)
+		//{
+		//	getXYZ(l, xyz);
+		//	if (xyz[0] < 0 || xyz[0] > stack.getWidth() || xyz[1] < 0 || xyz[1] > stack.getHeight() || xyz[2] < 1 ||
+		//			xyz[2] > stack.getSize())
+		//	{
+		//		System.out.printf("Bad %d = %s\n", l, Arrays.toString(xyz));
+		//	}
+		//}
+
+		return true;
+
+	}
+
+	private void createEmptySampleIndices()
+	{
+		// Create the empty blocks
 		long total = stack.getSize() * xy_blocks;
-		long empty = total - map.size();
+		long empty = total - data.length;
 		if (empty == 0)
 		{
 			// All indices are used 
@@ -167,7 +204,7 @@ public class ResultsImageSampler
 		{
 			// Sort by index
 			Arrays.sort(data, ic);
-			
+
 			// Randomly sample indices that are not used.
 			if (maxNumberOfEmptySamples > 0)
 			{
@@ -178,7 +215,7 @@ public class ResultsImageSampler
 				int c = 0;
 				OUTER: for (int i = 0; i < data.length; i++)
 				{
-					long current = data[i][0];
+					long current = data[i].index;
 					// If the current index is bigger than the candidate then it must be empty
 					while (current > emptyCandidate)
 					{
@@ -202,7 +239,7 @@ public class ResultsImageSampler
 					long emptyCandidate = 0;
 					for (int i = 0; i < data.length; i++)
 					{
-						long current = data[i][0];
+						long current = data[i].index;
 						// If the current index is bigger than the candidate then it must be empty
 						while (current > emptyCandidate)
 						{
@@ -220,7 +257,7 @@ public class ResultsImageSampler
 					long emptyCandidate = 1;
 					for (int i = 0; i < data.length; i++)
 					{
-						long current = data[i][0];
+						long current = data[i].index;
 						// If the current index is bigger than the candidate then it must be empty
 						if (current > emptyCandidate)
 						{
@@ -235,27 +272,49 @@ public class ResultsImageSampler
 				no = list.toArray();
 			}
 		}
+	}
 
-		// For the low and high sample we just split in half.
-		// The data must be sorted by count.
-		Arrays.sort(data, cc);
-		lower = data.length / 2;
-		upper = data.length - lower;
+	/**
+	 * Creates the result samples.
+	 * Do this by storing the coordinates at the region index.
+	 */
+	private void createResultSamples()
+	{
+		TLongObjectHashMap<TFloatArrayList> map = new TLongObjectHashMap<TFloatArrayList>(results.size());
+		TFloatArrayList next = new TFloatArrayList(2);
+		for (PeakResult p : results)
+		{
+			// Avoid invalid slices
+			if (p.getFrame() < 1 || p.getFrame() > stack.getSize())
+				continue;
+			long index = getIndex(p.getXPosition(), p.getYPosition(), p.getFrame());
 
-		//// Debug indexing
-		//int[] xyz = new int[3];
-		//for (long l = 0; l < max; l++)
-		//{
-		//	getXYZ(l, xyz);
-		//	if (xyz[0] < 0 || xyz[0] > stack.getWidth() || xyz[1] < 0 || xyz[1] > stack.getHeight() || xyz[2] < 1 ||
-		//			xyz[2] > stack.getSize())
-		//	{
-		//		System.out.printf("Bad %d = %s\n", l, Arrays.toString(xyz));
-		//	}
-		//}
+			TFloatArrayList current = map.putIfAbsent(index, next);
+			if (current == null)
+			{
+				// If the return value is null then this is a new insertion.
+				// Set the current value as the one we just added and create the next insertion object.
+				current = next;
+				next = new TFloatArrayList(2);
+			}
+			current.add(p.getXPosition());
+			current.add(p.getYPosition());
+		}
 
-		return true;
+		// Create an array of all the sample entries.
+		// This is used to sample regions by density.
+		data = new ResultsSample[map.size()];
+		map.forEachEntry(new TLongObjectProcedure<TFloatArrayList>()
+		{
+			int i = 0;
 
+			public boolean execute(long a, TFloatArrayList b)
+			{
+				data[i++] = new ResultsSample(a, b.toArray());
+				b.clear(0); // Clear memory
+				return true;
+			}
+		});
 	}
 
 	/**
@@ -358,7 +417,7 @@ public class ResultsImageSampler
 	}
 
 	/**
-	 * Gets the sample.
+	 * Gets the sample image. The image is a stack of the samples with an overlay of the localisation positions.
 	 *
 	 * @param nNo
 	 *            the number of samples with no localisations
@@ -366,38 +425,40 @@ public class ResultsImageSampler
 	 *            the number of samples with low localisations
 	 * @param nHigh
 	 *            the number of samples with high localisations
-	 * @return the sample (could be empty if no samples were made)
+	 * @return the sample image (could be null if no samples were made)
 	 */
-	public ImageStack getSample(int nNo, int nLow, int nHigh)
+	public ImagePlus getSample(int nNo, int nLow, int nHigh)
 	{
 		ImageStack out = new ImageStack(size, size);
 		if (!isValid())
-			return out;
+			return null;
 
 		list.clearf();
 
 		// empty
-		for (int i : r.sample(nNo, no.length))
-			list.add(new long[] { no[i], 0 });
+		for (int i : Random.sample(nNo, no.length, r))
+			list.add(new ResultsSample(no[i]));
 		// low
-		for (int i : r.sample(nLow, lower))
+		for (int i : Random.sample(nLow, lower, r))
 			list.add(data[i]);
 		// high
-		for (int i : r.sample(nHigh, upper))
+		for (int i : Random.sample(nHigh, upper, r))
 			list.add(data[i + lower]);
 
 		if (list.isEmpty())
-			return out;
+			return null;
 
 		// Sort descending by number in the frame
-		long[][] sample = list.toArray(new long[list.size()][]);
+		ResultsSample[] sample = list.toArray(new ResultsSample[list.size()]);
 		Arrays.sort(sample, rcc);
 
 		int[] xyz = new int[3];
 		Rectangle stackBounds = new Rectangle(stack.getWidth(), stack.getHeight());
-		for (long[] s : sample)
+		Overlay overlay = new Overlay();
+		float[] ox = new float[10], oy = new float[10];
+		for (ResultsSample s : sample)
 		{
-			getXYZ(s[0], xyz);
+			getXYZ(s.index, xyz);
 
 			// Construct the region to extract
 			Rectangle target = new Rectangle(xyz[0], xyz[1], size, size);
@@ -418,10 +479,29 @@ public class ResultsImageSampler
 					ip2.setf(i, ip.getf(index));
 				}
 
-			out.addSlice(String.format("Frame=%d (x=%d,y=%d) (n=%d)", slice, xyz[0], xyz[1], s[1]), ip2.getPixels());
+			int size = s.size();
+			if (size > 0)
+			{
+				// Create an ROI with the localisations
+				for (int i = 0, j = 0; i < size; i++)
+				{
+					ox[i] = s.data[j++] - xyz[0];
+					oy[i] = s.data[j++] - xyz[1];
+				}
+				PointRoi roi = new PointRoi(ox, oy, size);
+				roi.setPosition(out.getSize() + 1);
+				overlay.add(roi);
+			}
+
+			out.addSlice(String.format("Frame=%d (x=%d,y=%d) (n=%d)", slice, xyz[0], xyz[1], size), ip2.getPixels());
 		}
 
-		return out;
+		if (out.getSize() == 0)
+			return null;
+
+		ImagePlus imp = new ImagePlus("Sample", out);
+		imp.setOverlay(overlay);
+		return imp;
 	}
 
 	/**
