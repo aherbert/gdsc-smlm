@@ -1,5 +1,8 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.AWTEvent;
+import java.awt.Choice;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -36,7 +39,10 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
+import ij.gui.NonBlockingGenericDialog;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
 import ij.util.StringSorter;
@@ -44,8 +50,13 @@ import ij.util.StringSorter;
 /**
  * This plugin loads configuration templates for the localisation fitting settings
  */
-public class ConfigurationTemplate implements PlugIn
+public class ConfigurationTemplate implements PlugIn, DialogListener
 {
+	private String TITLE;
+	private static String template = "";
+	private static boolean close = true;
+	private ImagePlus imp;
+
 	/**
 	 * Describes the details of a template that can be loaded from the JAR resources folder
 	 */
@@ -173,7 +184,7 @@ public class ConfigurationTemplate implements PlugIn
 
 	private static LinkedHashMap<String, Template> map;
 	private static boolean selectStandardTemplates = false;
-	private static boolean chooseDirectory = true;
+	private static boolean selectCustomDirectory = true;
 	private static String configurationDirectory;
 	// Used for the multiMode option 
 	private static ArrayList<String> selected;
@@ -351,10 +362,11 @@ public class ConfigurationTemplate implements PlugIn
 	 * @param templates
 	 *            the templates
 	 */
-	static void loadTemplates(TemplateResource[] templates)
+	static int loadTemplates(TemplateResource[] templates)
 	{
 		if (templates == null || templates.length == 0)
-			return;
+			return 0;
+		int count = 0;
 		Class<ConfigurationTemplate> resourceClass = ConfigurationTemplate.class;
 		for (TemplateResource template : templates)
 		{
@@ -368,9 +380,11 @@ public class ConfigurationTemplate implements PlugIn
 			GlobalSettings settings = SettingsManager.unsafeLoadSettings(templateStream, true);
 			if (settings != null)
 			{
+				count++;
 				addTemplate(template.name, settings, false, null, template.tifPath);
 			}
 		}
+		return count;
 	}
 
 	private static void addTemplate(String name, GlobalSettings settings, boolean custom, File file, String tifPath)
@@ -502,18 +516,25 @@ public class ConfigurationTemplate implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		GenericDialog gd = new GenericDialog("Template Configuration");
-		gd.addCheckbox("Select_templates", selectStandardTemplates);
-		gd.addCheckbox("Choose_directory", chooseDirectory);
+		if ("images".equals(arg))
+		{
+			showTemplateImages();
+			return;
+		}
+
+		TITLE = "Template Configuration";
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addCheckbox("Select_standard_templates", selectStandardTemplates);
+		gd.addCheckbox("Select_custom_directory", selectCustomDirectory);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
 		selectStandardTemplates = gd.getNextBoolean();
-		chooseDirectory = gd.getNextBoolean();
+		selectCustomDirectory = gd.getNextBoolean();
 
 		if (selectStandardTemplates)
 			loadSelectedStandardTemplates();
-		if (chooseDirectory)
+		if (selectCustomDirectory)
 			loadTemplatesFromDirectory();
 	}
 
@@ -555,7 +576,8 @@ public class ConfigurationTemplate implements PlugIn
 				return !(selected.contains(t.name));
 			}
 		});
-		loadTemplates(list.toArray(new TemplateResource[list.size()]));
+		int count = loadTemplates(list.toArray(new TemplateResource[list.size()]));
+		IJ.showMessage("Loaded " + Utils.pleural(count, "standard template"));
 	}
 
 	private void loadTemplatesFromDirectory()
@@ -603,6 +625,70 @@ public class ConfigurationTemplate implements PlugIn
 				addTemplate(name, settings, true, file, null);
 			}
 		}
-		IJ.showMessage("Loaded " + Utils.pleural(count, "result"));
+		IJ.showMessage("Loaded " + Utils.pleural(count, "custom template"));
+	}
+
+	private void showTemplateImages()
+	{
+		TITLE = "Template Example Images";
+
+		String[] names = getTemplateNamesWithImage();
+		if (names.length == 0)
+		{
+			IJ.error(TITLE, "No templates with example images");
+			return;
+		}
+
+		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+		gd.addMessage("View the example source image");
+		gd.addChoice("Template", names, template);
+		gd.addCheckbox("Close_image_on_exit", close);
+		gd.hideCancelButton();
+		gd.addDialogListener(this);
+
+		// Show the first template
+		showTemplateImage(((Choice) (gd.getChoices().get(0))).getSelectedItem());
+
+		gd.showDialog();
+		template = gd.getNextChoice();
+		close = gd.getNextBoolean();
+
+		if (close)
+			closeImage();
+	}
+
+	private void showTemplateImage(String name)
+	{
+		ImagePlus imp = getTemplateImage(name);
+		if (imp == null)
+		{
+			IJ.error(TITLE, "Failed to load example image for template: " + name);
+		} else {
+			this.imp = Utils.display(TITLE, imp.getStack());
+			if (Utils.isNewWindow())
+			{
+				// Zoom a bit
+				ImageWindow iw = this.imp.getWindow();
+				for (int i = 7; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < 512;)
+				{
+					iw.getCanvas().zoomIn(0, 0);
+				}
+			}
+		}
+	}
+
+	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+	{
+		if (e != null && e.getSource() instanceof Choice)
+		{
+			showTemplateImage(((Choice) (e.getSource())).getSelectedItem());
+		}
+		return true;
+	}
+
+	private void closeImage()
+	{
+		if (imp != null)
+			imp.close();
 	}
 }
