@@ -11,9 +11,11 @@ Contains routines for:
 - Spot localisation using PSF fitting
 - Drift correction using labelled regions
 - Clustering using distance and time thresholds
+- OPTICS/DBSCAN clustering
 - Super-resolution image reconstruction
+- Fourier Image Resolution
  
-Copyright (C) 2015 Alex Herbert
+Copyright (C) 2011-2017 Alex Herbert
 MRC Genome Damage and Stability Centre
 University of Sussex, UK
  
