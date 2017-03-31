@@ -37,7 +37,9 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
+import ij.ImageListener;
 import ij.ImagePlus;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
@@ -45,18 +47,14 @@ import ij.gui.ImageWindow;
 import ij.gui.NonBlockingGenericDialog;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
+import ij.text.TextWindow;
 import ij.util.StringSorter;
 
 /**
  * This plugin loads configuration templates for the localisation fitting settings
  */
-public class ConfigurationTemplate implements PlugIn, DialogListener
+public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListener
 {
-	private String TITLE;
-	private static String template = "";
-	private static boolean close = true;
-	private ImagePlus imp;
-
 	/**
 	 * Describes the details of a template that can be loaded from the JAR resources folder
 	 */
@@ -183,11 +181,20 @@ public class ConfigurationTemplate implements PlugIn, DialogListener
 	}
 
 	private static LinkedHashMap<String, Template> map;
-	private static boolean selectStandardTemplates = false;
-	private static boolean selectCustomDirectory = true;
+	private static boolean selectStandardTemplates = true;
+	private static boolean selectCustomDirectory = false;
 	private static String configurationDirectory;
 	// Used for the multiMode option 
 	private static ArrayList<String> selected;
+
+	private String TITLE;
+	private static String template = "";
+	private static boolean close = true;
+	private ImagePlus imp;
+	private int currentSlice = 0;
+	private TextWindow resultsWindow;
+	private String headings;
+	private TIntObjectHashMap<String> text;
 
 	static
 	{
@@ -639,10 +646,13 @@ public class ConfigurationTemplate implements PlugIn, DialogListener
 			return;
 		}
 
+		// Follow when the image slice is changed
+		ImagePlus.addImageListener(this);
+
 		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 		gd.addMessage("View the example source image");
 		gd.addChoice("Template", names, template);
-		gd.addCheckbox("Close_image_on_exit", close);
+		gd.addCheckbox("Close_on_exit", close);
 		gd.hideCancelButton();
 		gd.addDialogListener(this);
 
@@ -653,8 +663,15 @@ public class ConfigurationTemplate implements PlugIn, DialogListener
 		template = gd.getNextChoice();
 		close = gd.getNextBoolean();
 
+		ImagePlus.removeImageListener(this);
+
 		if (close)
-			closeImage();
+		{
+			if (imp != null)
+				imp.close();
+			if (resultsWindow != null)
+				resultsWindow.close();
+		}
 	}
 
 	private void showTemplateImage(String name)
@@ -667,6 +684,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener
 		else
 		{
 			this.imp = displayTemplate(TITLE, imp);
+			createResults(imp);
 			if (Utils.isNewWindow())
 			{
 				// Zoom a bit
@@ -707,9 +725,73 @@ public class ConfigurationTemplate implements PlugIn, DialogListener
 		return true;
 	}
 
-	private void closeImage()
+	public void imageOpened(ImagePlus imp)
 	{
-		if (imp != null)
-			imp.close();
+
+	}
+
+	public void imageClosed(ImagePlus imp)
+	{
+	}
+
+	public void imageUpdated(ImagePlus imp)
+	{
+		if (imp != null && imp == this.imp)
+		{
+			updateResults(imp.getSlice());
+		}
+	}
+
+	private void createResults(ImagePlus imp)
+	{
+		currentSlice = 0;
+		headings = "";
+		text = new TIntObjectHashMap<String>();
+		Object info = imp.getProperty("Info");
+		if (info != null)
+		{
+			// First line is the headings
+			String[] lines = info.toString().split("\n");
+			headings = lines[0].replace(" ", "\t");
+
+			// The remaining lines are the data for each stack position
+			StringBuilder sb = new StringBuilder();
+			int last = 0;
+			for (int i = 1; i < lines.length; i++)
+			{
+				// Get the position
+				String[] data = lines[i].split(" ");
+				int slice = Integer.parseInt(data[0]);
+				if (last != slice)
+				{
+					text.put(last, sb.toString());
+					last = slice;
+					sb.setLength(0);
+				}
+				sb.append(slice);
+				for (int j = 1; j < data.length; j++)
+				{
+					sb.append('\t').append(data[j]);
+				}
+				sb.append('\n');
+			}
+			text.put(last, sb.toString());
+		}
+		updateResults(imp.getSlice());
+	}
+
+	private void updateResults(int slice)
+	{
+		if (slice == currentSlice)
+			return;
+		currentSlice = slice;
+
+		if (resultsWindow == null || !resultsWindow.isVisible())
+			resultsWindow = new TextWindow(TITLE, headings, "", 450, 250);
+
+		resultsWindow.getTextPanel().clear();
+		String data = text.get(slice);
+		if (!Utils.isNullOrEmpty(data))
+			resultsWindow.append(data);
 	}
 }
