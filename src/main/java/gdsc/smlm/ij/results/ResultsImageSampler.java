@@ -7,14 +7,14 @@ import java.util.Comparator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.procedure.TLongObjectProcedure;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Overlay;
@@ -39,26 +39,67 @@ import ij.process.ImageProcessor;
  */
 public class ResultsImageSampler
 {
-	private static class ResultsSample
+	private static class PeakResultList
 	{
-		final long index;
-		final float[] data;
+		int size = 0;
+		PeakResult[] data;
 
-		ResultsSample(long index)
+		PeakResultList()
 		{
-			this.index = index;
-			this.data = new float[0]; // makes things simple
+			this(new PeakResult[1]);
 		}
 
-		ResultsSample(long index, float[] data)
+		PeakResultList(PeakResult[] data)
+		{
+			this.data = data;
+		}
+
+		void add(PeakResult p)
+		{
+			data[size++] = p;
+			if (size == data.length)
+			{
+				PeakResult[] data2 = new PeakResult[size * 2];
+				System.arraycopy(data, 0, data2, 0, size);
+				data = data2;
+			}
+		}
+
+		PeakResult get(int i)
+		{
+			return data[i];
+		}
+	}
+
+	private static class ResultsSample
+	{
+		long index;
+		final PeakResultList list;
+
+		static ResultsSample createEmpty(long index)
+		{
+			return new ResultsSample(index, new PeakResultList(null));
+		}
+
+		static ResultsSample create(long index)
+		{
+			return new ResultsSample(index, new PeakResultList());
+		}
+
+		ResultsSample(long index, PeakResultList data)
 		{
 			this.index = index;
-			this.data = data;
+			this.list = data;
 		}
 
 		public int size()
 		{
-			return data.length / 2;
+			return list.size;
+		}
+
+		public void add(PeakResult p)
+		{
+			list.add(p);
 		}
 	}
 
@@ -74,7 +115,7 @@ public class ResultsImageSampler
 	{
 		public int compare(ResultsSample o1, ResultsSample o2)
 		{
-			int result = Integer.compare(o1.data.length, o2.data.length);
+			int result = Integer.compare(o1.size(), o2.size());
 			if (result == 0)
 				// Use index if the same count
 				return Long.compare(o1.index, o2.index);
@@ -86,7 +127,7 @@ public class ResultsImageSampler
 	{
 		public int compare(ResultsSample o1, ResultsSample o2)
 		{
-			int result = Integer.compare(o2.data.length, o1.data.length);
+			int result = Integer.compare(o2.size(), o1.size());
 			if (result == 0)
 				// Use index if the same count
 				return Long.compare(o1.index, o2.index);
@@ -280,8 +321,8 @@ public class ResultsImageSampler
 	 */
 	private void createResultSamples()
 	{
-		TLongObjectHashMap<TFloatArrayList> map = new TLongObjectHashMap<TFloatArrayList>(results.size());
-		TFloatArrayList next = new TFloatArrayList(2);
+		TLongObjectHashMap<ResultsSample> map = new TLongObjectHashMap<ResultsSample>(results.size());
+		ResultsSample next = ResultsSample.create(-1);
 		for (PeakResult p : results)
 		{
 			// Avoid invalid slices
@@ -289,32 +330,22 @@ public class ResultsImageSampler
 				continue;
 			long index = getIndex(p.getXPosition(), p.getYPosition(), p.getFrame());
 
-			TFloatArrayList current = map.putIfAbsent(index, next);
+			ResultsSample current = map.putIfAbsent(index, next);
 			if (current == null)
 			{
 				// If the return value is null then this is a new insertion.
 				// Set the current value as the one we just added and create the next insertion object.
 				current = next;
-				next = new TFloatArrayList(2);
+				current.index = index;
+				next = ResultsSample.create(-1);
 			}
-			current.add(p.getXPosition());
-			current.add(p.getYPosition());
+			current.add(p);
 		}
 
 		// Create an array of all the sample entries.
 		// This is used to sample regions by density.
 		data = new ResultsSample[map.size()];
-		map.forEachEntry(new TLongObjectProcedure<TFloatArrayList>()
-		{
-			int i = 0;
-
-			public boolean execute(long a, TFloatArrayList b)
-			{
-				data[i++] = new ResultsSample(a, b.toArray());
-				b.clear(0); // Clear memory
-				return true;
-			}
-		});
+		map.values(data);
 	}
 
 	/**
@@ -417,7 +448,8 @@ public class ResultsImageSampler
 	}
 
 	/**
-	 * Gets the sample image. The image is a stack of the samples with an overlay of the localisation positions.
+	 * Gets the sample image. The image is a stack of the samples with an overlay of the localisation positions. The
+	 * info property is set with details of the localisations and the image is calibrated.
 	 *
 	 * @param nNo
 	 *            the number of samples with no localisations
@@ -437,7 +469,7 @@ public class ResultsImageSampler
 
 		// empty
 		for (int i : Random.sample(nNo, no.length, r))
-			list.add(new ResultsSample(no[i]));
+			list.add(ResultsSample.createEmpty(no[i]));
 		// low
 		for (int i : Random.sample(nLow, lower, r))
 			list.add(data[i]);
@@ -448,6 +480,16 @@ public class ResultsImageSampler
 		if (list.isEmpty())
 			return null;
 
+		double nmPerPixel = 1;
+		if (results.getCalibration() != null)
+		{
+			Calibration calibration = results.getCalibration();
+			if (calibration.hasNmPerPixel())
+			{
+				nmPerPixel = calibration.getNmPerPixel();
+			}
+		}
+		
 		// Sort descending by number in the frame
 		ResultsSample[] sample = list.toArray(new ResultsSample[list.size()]);
 		Arrays.sort(sample, rcc);
@@ -456,6 +498,12 @@ public class ResultsImageSampler
 		Rectangle stackBounds = new Rectangle(stack.getWidth(), stack.getHeight());
 		Overlay overlay = new Overlay();
 		float[] ox = new float[10], oy = new float[10];
+		StringBuilder sb = new StringBuilder();
+		if (nmPerPixel == 1)
+			sb.append("Sample X Y Z Signal\n");
+		else
+			sb.append("Sample X(nm) Y(nm) Z(nm) Signal\n");
+
 		for (ResultsSample s : sample)
 		{
 			getXYZ(s.index, xyz);
@@ -482,18 +530,26 @@ public class ResultsImageSampler
 			int size = s.size();
 			if (size > 0)
 			{
+				int position = out.getSize() + 1;
 				// Create an ROI with the localisations
-				for (int i = 0, j = 0; i < size; i++)
+				for (int i = 0; i < size; i++)
 				{
-					ox[i] = s.data[j++] - xyz[0];
-					oy[i] = s.data[j++] - xyz[1];
+					PeakResult p = s.list.get(i);
+					ox[i] = p.getXPosition() - xyz[0];
+					oy[i] = p.getYPosition() - xyz[1];
+					sb.append(position).append(' ');
+					sb.append(Utils.rounded(ox[i] * nmPerPixel)).append(' ');
+					sb.append(Utils.rounded(oy[i] * nmPerPixel)).append(' ');
+					// Z can be stored in the error field
+					sb.append(Utils.rounded(p.error * nmPerPixel)).append(' ');
+					sb.append(Utils.rounded(p.getSignal())).append('\n');
 				}
 				PointRoi roi = new PointRoi(ox, oy, size);
-				roi.setPosition(out.getSize() + 1);
+				roi.setPosition(position);
 				overlay.add(roi);
 			}
 
-			out.addSlice(String.format("Frame=%d (x=%d,y=%d) (n=%d)", slice, xyz[0], xyz[1], size), ip2.getPixels());
+			out.addSlice(String.format("Frame=%d @ %d,%d px (n=%d)", slice, xyz[0], xyz[1], size), ip2.getPixels());
 		}
 
 		if (out.getSize() == 0)
@@ -501,6 +557,16 @@ public class ResultsImageSampler
 
 		ImagePlus imp = new ImagePlus("Sample", out);
 		imp.setOverlay(overlay);
+		// Note: Only the info property can be saved to a TIFF file
+		imp.setProperty("Info", sb.toString());
+		if (nmPerPixel != 1)
+		{
+			ij.measure.Calibration cal = new ij.measure.Calibration();
+			cal.setUnit("nm");
+			cal.pixelHeight = cal.pixelWidth = nmPerPixel;
+			imp.setCalibration(cal);
+		}
+
 		return imp;
 	}
 

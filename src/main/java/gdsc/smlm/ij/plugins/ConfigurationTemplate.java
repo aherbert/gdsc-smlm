@@ -663,8 +663,10 @@ public class ConfigurationTemplate implements PlugIn, DialogListener
 		if (imp == null)
 		{
 			IJ.error(TITLE, "Failed to load example image for template: " + name);
-		} else {
-			this.imp = Utils.display(TITLE, imp.getStack());
+		}
+		else
+		{
+			this.imp = displayTemplate(TITLE, imp);
 			if (Utils.isNewWindow())
 			{
 				// Zoom a bit
@@ -675,6 +677,25 @@ public class ConfigurationTemplate implements PlugIn, DialogListener
 				}
 			}
 		}
+	}
+
+	/**
+	 * Display the template image in an image window with the specified title. If the window exists it will be reused
+	 * and the appropriate properties updated.
+	 *
+	 * @param title
+	 *            the title
+	 * @param templateImp
+	 *            the template imp
+	 * @return the image plus
+	 */
+	public static ImagePlus displayTemplate(String title, ImagePlus templateImp)
+	{
+		ImagePlus imp = Utils.display(title, templateImp.getStack());
+		imp.setOverlay(templateImp.getOverlay());
+		imp.setProperty("Info", templateImp.getProperty("Info"));
+		imp.setCalibration(templateImp.getCalibration());
+		return imp;
 	}
 
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)

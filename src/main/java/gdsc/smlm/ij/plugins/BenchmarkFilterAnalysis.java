@@ -5326,13 +5326,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final String title = "Template Example";
 		// Update the example image
 		example.setTitle(title);
-		
+
 		// Display as a new image. This is so we can close it later.
-		ImagePlus imp = Utils.display(title, example.getImageStack());
-		imp.setOverlay(example.getOverlay());
-		return imp;
+		return ConfigurationTemplate.displayTemplate(title, example);
 	}
-	
+
 	private String getNotes(String topFilterSummary)
 	{
 		StringBuilder sb = new StringBuilder();
