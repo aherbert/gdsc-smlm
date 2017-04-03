@@ -169,7 +169,7 @@ public class LoadLocalisations implements PlugIn
 
 		LocalisationList localisations = loadLocalisations(settings.localisationsFilename);
 
-		if (localisations.isEmpty())
+		if (localisations == null || localisations.isEmpty())
 		{
 			IJ.error(TITLE, "No localisations could be loaded");
 			return;
