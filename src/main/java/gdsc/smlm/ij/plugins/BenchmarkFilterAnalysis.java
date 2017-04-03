@@ -5265,7 +5265,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					{
 						if (imp != null && imp == outImp[0])
 						{
-							configTemplate.updateResults(imp.getSlice());
+							configTemplate.updateResults(imp.getCurrentSlice());
 						}
 					}
 				};

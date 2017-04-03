@@ -737,7 +737,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	{
 		if (imp != null && imp == this.imp)
 		{
-			updateResults(imp.getSlice());
+			updateResults(imp.getCurrentSlice());
 		}
 	}
 
