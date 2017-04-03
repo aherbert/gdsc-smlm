@@ -5236,7 +5236,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				if (out[0] != null)
 				{
 					outImp[0] = display(out[0]);
-					configTemplate.createResults(outImp[0]);
 					if (Utils.isNewWindow())
 					{
 						close[0] = true;
@@ -5247,6 +5246,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 							iw.getCanvas().zoomIn(0, 0);
 						}
 					}
+					configTemplate.createResults(outImp[0]);
 				}
 
 				// TODO - fix this when a second sample is made as the results are not updated.
@@ -5302,7 +5302,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						if (out[0] != null)
 						{
 							outImp[0] = display(out[0]);
-							configTemplate.createResults(outImp[0]);
 							if (Utils.isNewWindow())
 							{
 								close[0] = true;
@@ -5313,6 +5312,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 									iw.getCanvas().zoomIn(0, 0);
 								}
 							}
+							configTemplate.createResults(outImp[0]);
 						}
 						return true;
 					}

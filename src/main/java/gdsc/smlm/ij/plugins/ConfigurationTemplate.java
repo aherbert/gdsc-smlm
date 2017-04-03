@@ -2,6 +2,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
 import java.awt.Choice;
+import java.awt.Point;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -41,6 +42,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
+import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
@@ -192,7 +194,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	private static boolean close = true;
 	private ImagePlus imp;
 	private int currentSlice = 0;
-	private TextWindow resultsWindow;
+	private TextWindow resultsWindow, infoWindow;
+	private int templateId;
 	private String headings;
 	private TIntObjectHashMap<String> text;
 
@@ -657,7 +660,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		gd.addDialogListener(this);
 
 		// Show the first template
-		showTemplateImage(((Choice) (gd.getChoices().get(0))).getSelectedItem());
+		template = ((Choice) (gd.getChoices().get(0))).getSelectedItem();
+		showTemplateImage(template);
 
 		gd.showDialog();
 		template = gd.getNextChoice();
@@ -670,6 +674,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			if (imp != null)
 				imp.close();
 			closeResults();
+			closeInfo();
 		}
 	}
 
@@ -683,7 +688,6 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		else
 		{
 			this.imp = displayTemplate(TITLE, imp);
-			createResults(imp);
 			if (Utils.isNewWindow())
 			{
 				// Zoom a bit
@@ -693,6 +697,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 					iw.getCanvas().zoomIn(0, 0);
 				}
 			}
+			createResults(this.imp);
+
+			showTemplateInfo(name);
 		}
 	}
 
@@ -719,7 +726,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	{
 		if (e != null && e.getSource() instanceof Choice)
 		{
-			showTemplateImage(((Choice) (e.getSource())).getSelectedItem());
+			template = ((Choice) (e.getSource())).getSelectedItem();
+			showTemplateImage(template);
 		}
 		return true;
 	}
@@ -742,7 +750,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	}
 
 	/**
-	 * Creates a results window showing the localisation results from a template image.
+	 * Creates a results window showing the localisation results from a template image. This will be positioned next to
+	 * the input template image plus if it is currently displayed.
 	 *
 	 * @param templateImp
 	 *            the template image
@@ -752,6 +761,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	{
 		if (TITLE == null)
 			TITLE = templateImp.getTitle();
+		templateId = templateImp.getID();
 		currentSlice = 0;
 		headings = "";
 		text = new TIntObjectHashMap<String>();
@@ -760,7 +770,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		{
 			// First line is the headings
 			String[] lines = info.toString().split("\n");
-			headings = lines[0].replace(" ", "\t");
+			headings = lines[0].replace(' ', '\t');
 
 			// The remaining lines are the data for each stack position
 			StringBuilder sb = new StringBuilder();
@@ -785,7 +795,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			}
 			text.put(last, sb.toString());
 		}
-		return updateResults(templateImp.getSlice());
+		return updateResults(templateImp.getCurrentSlice());
 	}
 
 	/**
@@ -802,7 +812,18 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		currentSlice = slice;
 
 		if (resultsWindow == null || !resultsWindow.isVisible())
+		{
 			resultsWindow = new TextWindow(TITLE + " Results", headings, "", 450, 250);
+			// Put next to the image
+			ImagePlus imp = WindowManager.getImage(templateId);
+			if (imp != null && imp.getWindow() != null)
+			{
+				ImageWindow iw = imp.getWindow();
+				Point p = iw.getLocation();
+				p.x += iw.getWidth();
+				resultsWindow.setLocation(p);
+			}
+		}
 
 		resultsWindow.getTextPanel().clear();
 		String data = text.get(slice);
@@ -815,5 +836,40 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	{
 		if (resultsWindow != null)
 			resultsWindow.close();
+	}
+
+	/**
+	 * Show the info from the template.
+	 *
+	 * @param name
+	 *            the name
+	 */
+	private void showTemplateInfo(String name)
+	{
+		GlobalSettings settings = getTemplate(name);
+		if (settings == null || Utils.isNullOrEmpty(settings.getNotes()))
+			return;
+		if (infoWindow == null || !infoWindow.isVisible())
+		{
+			infoWindow = new TextWindow(TITLE + " Info", "", "", 450, 250);
+
+			// Put underneath the results window
+			if (resultsWindow != null)
+			{
+				Point p = resultsWindow.getLocation();
+				p.y += resultsWindow.getHeight();
+				infoWindow.setLocation(p);
+			}
+		}
+
+		infoWindow.getTextPanel().clear();
+		// Text window cannot show tabs
+		infoWindow.append(settings.getNotes().replace('\t', ','));
+	}
+
+	private void closeInfo()
+	{
+		if (infoWindow != null)
+			infoWindow.close();
 	}
 }
