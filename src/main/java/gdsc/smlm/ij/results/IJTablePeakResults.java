@@ -43,6 +43,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private boolean showEndFrame = false;
 	private boolean clearAtStart = false;
 	private boolean showCalibratedValues = false;
+	private boolean hideSourceText = false;
 	private String peakIdColumnName = "Peak";
 	private String source = null;
 	private String sourceText = null;
@@ -109,7 +110,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		size = 0;
 		// Let some results appear before drawing.
 		// ImageJ will auto-layout columns if it has less than 10 rows
-		nextRepaintSize = 9; 
+		nextRepaintSize = 9;
 		tableActive = true;
 	}
 
@@ -136,6 +137,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 				}
 
 				roiPainter = map.get(resultsWindow.getTextPanel());
+				break;
 			}
 		}
 
@@ -221,6 +223,11 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private void createSourceText()
 	{
+		if (hideSourceText)
+		{
+			sourceText = null;
+			return;
+		}
 		StringBuilder sb = new StringBuilder();
 		if (source != null)
 			sb.append(source);
@@ -267,8 +274,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		{
 			final double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
 					calibration.getNmPerPixel();
-			precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s, params[Gaussian2DFunction.SIGNAL] /
-					calibration.getGain(), noise / calibration.getGain(), calibration.isEmCCD());
+			precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
+					params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), noise / calibration.getGain(),
+					calibration.isEmCCD());
 		}
 		final float snr = (noise > 0) ? params[Gaussian2DFunction.SIGNAL] / noise : 0;
 		if (showCalibratedValues)
@@ -280,7 +288,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			noise /= gain;
 			params = Arrays.copyOf(params, params.length);
 			params[Gaussian2DFunction.SIGNAL] /= gain;
-			params[Gaussian2DFunction.BACKGROUND] = (float) ((params[Gaussian2DFunction.BACKGROUND] - calibration.getBias()) / gain);
+			params[Gaussian2DFunction.BACKGROUND] = (float) ((params[Gaussian2DFunction.BACKGROUND] -
+					calibration.getBias()) / gain);
 			params[Gaussian2DFunction.X_POSITION] *= nmPerPixel;
 			params[Gaussian2DFunction.X_SD] *= nmPerPixel;
 			params[Gaussian2DFunction.Y_POSITION] *= nmPerPixel;
@@ -529,6 +538,27 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void setAddCounter(boolean addCounter)
 	{
 		this.addCounter = addCounter;
+	}
+
+	/**
+	 * Checks if the source text will be added to each entry.
+	 *
+	 * @return true, if hiding the source text
+	 */
+	public boolean isHideSourceText()
+	{
+		return hideSourceText;
+	}
+
+	/**
+	 * Sets the hide source text flag.
+	 *
+	 * @param hideSourceText
+	 *            the new hide source text flag
+	 */
+	public void setHideSourceText(boolean hideSourceText)
+	{
+		this.hideSourceText = hideSourceText;
 	}
 
 	/**

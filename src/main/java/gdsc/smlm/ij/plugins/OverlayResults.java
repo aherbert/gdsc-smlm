@@ -16,19 +16,24 @@ import gdsc.core.ij.Utils;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.IJImageSource;
+import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
 import ij.WindowManager;
+import ij.gui.ImageWindow;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
+import ij.text.TextWindow;
 
+import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Label;
+import java.awt.Point;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Arrays;
@@ -40,9 +45,12 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 {
 	private static final String TITLE = "Overlay Results";
 	private static String name = "";
+	private static boolean showTable = false;
+
 	private String[] names;
 	private int[] ids;
 	private Choice choice;
+	private Checkbox checkbox;
 	private Label label;
 
 	private int currentIndex = 0;
@@ -93,6 +101,8 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 	{
 		private boolean running = true;
 		private boolean[] error = new boolean[ids.length];
+		// The results text window (so we can close it)
+		private TextWindow tw = null;
 
 		public void run()
 		{
@@ -129,6 +139,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				}
 			}
 			clearOldOverlay();
+			closeTextWindow();
 		}
 
 		private void clearOldOverlay()
@@ -141,6 +152,15 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			}
 			currentSlice = -1;
 			currentIndex = 0;
+		}
+
+		private void closeTextWindow()
+		{
+			if (tw != null)
+			{
+				tw.close();
+				tw = null;
+			}
 		}
 
 		/**
@@ -163,8 +183,12 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			// Check slice
 			int newSlice = imp.getCurrentSlice();
 			if (currentSlice == newSlice)
-				// No change from last time
-				return;
+			{
+				boolean isShowing = tw != null;
+				if (showTable == isShowing)
+					// No change from last time
+					return;
+			}
 			currentSlice = newSlice;
 
 			MemoryPeakResults results = MemoryPeakResults.getResults(name);
@@ -175,6 +199,29 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				return;
 			}
 			clearError();
+
+			IJTablePeakResults table = null;
+			if (showTable)
+			{
+				table = new IJTablePeakResults(false);
+				table.setPeakIdColumnName("Frame");
+				table.setTableTitle(TITLE);
+				table.copySettings(results);
+				table.setClearAtStart(true);
+				table.setAddCounter(true);
+				table.setHideSourceText(true);
+				table.begin();
+				// Position under thew window
+				tw = table.getResultsWindow();
+				ImageWindow win = imp.getWindow();
+				Point p = win.getLocation();
+				p.y += win.getHeight();
+				tw.setLocation(p);
+			}
+			else
+			{
+				closeTextWindow();
+			}
 
 			float[] ox = new float[100];
 			float[] oy = new float[100];
@@ -191,11 +238,20 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				ox[points] = r.getXPosition();
 				oy[points] = r.getYPosition();
 				points++;
+				if (table != null)
+					table.add(r);
 			}
 			PointRoi roi = new PointRoi(ox, oy, points);
 			roi.setPointType(3);
 			imp.getWindow().toFront();
 			imp.setOverlay(new Overlay(roi));
+
+			if (table != null)
+			{
+				table.end();
+				TextWindow tw = table.getResultsWindow();
+				tw.getTextPanel().scrollToTop();
+			}
 		}
 
 		private void logError(String msg, String name)
@@ -248,18 +304,19 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				}
 			}
 		}
-		if (c == 0)
+		if (c == 1)
 		{
 			IJ.error(TITLE, "There are no result images available");
 			return;
 		}
-		Arrays.copyOf(names, c);
+		names = Arrays.copyOf(names, c);
 
 		Thread t = null;
 		Worker w = null;
 		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 		gd.addMessage("Overlay results on current image frame");
-		gd.addChoice("Results", names, name);
+		gd.addChoice("Results", names, (name == null) ? "" : name);
+		gd.addCheckbox("Show_table", showTable);
 		gd.addMessage("");
 		gd.addHelp(About.HELP_URL);
 		gd.hideCancelButton();
@@ -268,6 +325,8 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		{
 			choice = (Choice) gd.getChoices().get(0);
 			choice.addItemListener(this);
+			checkbox = (Checkbox) gd.getCheckboxes().get(0);
+			checkbox.addItemListener(this);
 			label = (Label) gd.getMessage();
 
 			// Listen for changes to an image
@@ -285,6 +344,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		if (!gd.wasCanceled())
 		{
 			name = gd.getNextChoice();
+			showTable = gd.getNextBoolean();
 		}
 		if (t != null)
 		{
@@ -326,6 +386,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 
 	private void show()
 	{
+		showTable = checkbox.getState();
 		inbox.add(choice.getSelectedIndex());
 	}
 }
