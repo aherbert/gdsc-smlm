@@ -52,7 +52,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private static int afterPulseStart = 1;
 	private static int afterPulseEnd = 1;
 	private static int darkFramesForNewActivation = 1;
-	private static double pulseActivationRatio = 0.5;
+	private static double pulseActivationFraction = 0.5;
 
 	private GlobalSettings settings;
 	private ResultsSettings resultsSettings;
@@ -66,7 +66,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		int activations;
 		@SuppressWarnings("unused")
 		int pulseActivation;
-		double ratio;
+		double fraction;
 
 		PulseActivationResult(Trace trace)
 		{
@@ -77,7 +77,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		{
 			this.activations = activations;
 			this.pulseActivation = pulseActivation;
-			ratio = (double) pulseActivation / activations;
+			fraction = (double) pulseActivation / activations;
 		}
 	}
 
@@ -162,7 +162,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		gd.addNumericField("After_pulse_start", afterPulseStart, 0);
 		gd.addNumericField("After_pulse_end", afterPulseEnd, 0);
 		gd.addNumericField("Dark_frames_for_new_activation", darkFramesForNewActivation, 0);
-		gd.addSlider("Pulse_activation_ratio", 0.05, 1, pulseActivationRatio);
+		gd.addSlider("Pulse_activation_fraction", 0.05, 1, pulseActivationFraction);
 
 		settings = SettingsManager.loadSettings();
 		resultsSettings = settings.getResultsSettings();
@@ -205,7 +205,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		afterPulseStart = (int) gd.getNextNumber();
 		afterPulseEnd = (int) gd.getNextNumber();
 		darkFramesForNewActivation = Math.max(1, (int) gd.getNextNumber());
-		pulseActivationRatio = gd.getNextNumber();
+		pulseActivationFraction = gd.getNextNumber();
 
 		// Check arguments
 		try
@@ -214,8 +214,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			Parameters.isEqualOrBelow("After pulse start", afterPulseStart, pulseInterval);
 			Parameters.isEqualOrAbove("After pulse end", afterPulseEnd, afterPulseStart);
 			Parameters.isEqualOrBelow("After pulse end", afterPulseEnd, pulseInterval);
-			Parameters.isEqualOrAbove("Pulse activation ratio", pulseActivationRatio, 0);
-			Parameters.isEqualOrBelow("Pulse activation ratio", pulseActivationRatio, 1);
+			Parameters.isEqualOrAbove("Pulse activation ratio", pulseActivationFraction, 0);
+			Parameters.isEqualOrBelow("Pulse activation ratio", pulseActivationFraction, 1);
 		}
 		catch (IllegalArgumentException ex)
 		{
@@ -269,7 +269,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		for (int i = activations.size(); i-- > 0;)
 		{
 			PulseActivationResult result = activations.getf(i);
-			if (result.ratio >= pulseActivationRatio)
+			if (result.fraction >= pulseActivationFraction)
 			{
 				count++;
 				output.addAll(activations.get(i).trace.getPoints());
