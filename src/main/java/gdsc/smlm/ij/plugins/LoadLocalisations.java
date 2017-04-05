@@ -1,5 +1,10 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Label;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -99,7 +104,10 @@ public class LoadLocalisations implements PlugIn
 			{
 				final Localisation l = get(i);
 				final float[] params = new float[7];
-				params[Gaussian2DFunction.SIGNAL] = (float) (l.intensity * convertI);
+				if (l.intensity <= 0)
+					params[Gaussian2DFunction.SIGNAL] = 1;
+				else
+					params[Gaussian2DFunction.SIGNAL] = (float) (l.intensity * convertI);
 				params[Gaussian2DFunction.X_POSITION] = (float) (l.x * convertDtoPx);
 				params[Gaussian2DFunction.Y_POSITION] = (float) (l.y * convertDtoPx);
 				// We may not have read in the widths
@@ -129,11 +137,11 @@ public class LoadLocalisations implements PlugIn
 	private static double maxz = 5;
 
 	private static int it = 0;
-	private static int iid = 1;
-	private static int ix = 2;
-	private static int iy = 3;
-	private static int iz = 4;
-	private static int ii = 5;
+	private static int iid = -1;
+	private static int ix = 1;
+	private static int iy = 2;
+	private static int iz = -1;
+	private static int ii = 3;
 	private static int isx = -1;
 	private static int isy = -1;
 	private static int ip = -1;
@@ -172,7 +180,7 @@ public class LoadLocalisations implements PlugIn
 		if (localisations == null)
 			// Cancelled
 			return;
-		
+
 		if (localisations.isEmpty())
 		{
 			IJ.error(TITLE, "No localisations could be loaded");
@@ -269,7 +277,7 @@ public class LoadLocalisations implements PlugIn
 		final boolean hasComment = !Utils.isNullOrEmpty(comment);
 		int errors = 0;
 		int count = 0;
-		int h = Math.abs(header);
+		int h = Math.max(0, header);
 
 		BufferedReader input = null;
 		try
@@ -353,7 +361,26 @@ public class LoadLocalisations implements PlugIn
 	private static boolean getFields()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Define the fields");
+
+		gd.addMessage("Load delimited localisations");
+		gd.addStringField("Dataset_name", name, 30);
+		
+		gd.addMessage("Calibration:");
+		gd.addNumericField("Pixel_size", pixelPitch, 3, 8, "nm");
+		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
+		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "ms");
+		
+		gd.addMessage("Records:");
+		gd.addNumericField("Header_lines", header, 0);
+		gd.addStringField("Comment", comment);
+		gd.addStringField("Delimiter", delimiter);
+		String[] dUnits = SettingsManager.getNames((Object[]) DistanceUnit.values());
+		gd.addChoice("Distance_unit", dUnits, dUnits[distanceUnit]);
+		String[] iUnits = SettingsManager.getNames((Object[]) IntensityUnit.values());
+		gd.addChoice("Intensity_unit", iUnits, iUnits[intensityUnit]);
+		
+		gd.addMessage("Define the fields:");
+		Label l = (Label) gd.getMessage();
 		gd.addNumericField("T", it, 0);
 		gd.addNumericField("ID", iid, 0);
 		gd.addNumericField("X", ix, 0);
@@ -364,19 +391,39 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Sy", isy, 0);
 		gd.addNumericField("Precision", ip, 0);
 
-		String[] dUnits = SettingsManager.getNames((Object[]) DistanceUnit.values());
-		gd.addChoice("Distance_unit", dUnits, dUnits[distanceUnit]);
-		String[] iUnits = SettingsManager.getNames((Object[]) IntensityUnit.values());
-		gd.addChoice("Intensity_unit", iUnits, iUnits[intensityUnit]);
-		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
-		gd.addNumericField("Pixel_size", pixelPitch, 3, 8, "nm");
-		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "ms");
+		// Rearrange
+		if (gd.getLayout() != null)
+		{
+			GridBagLayout grid = (GridBagLayout) gd.getLayout();
 
-		gd.addNumericField("Header_lines", header, 0);
-		gd.addStringField("Comment", comment);
-		gd.addStringField("Delimiter", delimiter);
-		gd.addStringField("Name", name);
+			int xOffset = 0, yOffset = 0;
+			int lastY = -1, rowCount = 0;
+			for (Component comp : gd.getComponents())
+			{
+				// Check if this should be the second major column
+				if (comp == l)
+				{
+					xOffset += 2;
+					yOffset = yOffset - rowCount + 1; // Skip title row
+				}
+				// Reposition the field
+				GridBagConstraints c = grid.getConstraints(comp);
+				if (lastY != c.gridy)
+					rowCount++;
+				lastY = c.gridy;
+				c.gridx = c.gridx + xOffset;
+				c.gridy = c.gridy + yOffset;
+				c.insets.left = c.insets.left + 10 * xOffset;
+				c.insets.top = 0;
+				c.insets.bottom = 0;
+				grid.setConstraints(comp, c);
+			}
 
+			if (IJ.isLinux())
+				gd.setBackground(new Color(238, 238, 238));
+		}
+		
+		
 		gd.showDialog();
 		if (gd.wasCanceled())
 		{
@@ -405,6 +452,19 @@ public class LoadLocalisations implements PlugIn
 				}
 			}
 		}
+
+		name = getNextString(gd, name);
+		pixelPitch = gd.getNextNumber();
+		gain = gd.getNextNumber();
+		exposureTime = gd.getNextNumber();
+
+		header = (int) gd.getNextNumber();
+		comment = gd.getNextString();
+		delimiter = getNextString(gd, delimiter);
+
+		distanceUnit = gd.getNextChoiceIndex();
+		intensityUnit = gd.getNextChoiceIndex();
+		
 		int i = 0;
 		it = columns[i++];
 		iid = columns[i++];
@@ -415,18 +475,7 @@ public class LoadLocalisations implements PlugIn
 		isx = columns[i++];
 		isy = columns[i++];
 		ip = columns[i++];
-
-		distanceUnit = gd.getNextChoiceIndex();
-		intensityUnit = gd.getNextChoiceIndex();
-		gain = gd.getNextNumber();
-		pixelPitch = gd.getNextNumber();
-		exposureTime = gd.getNextNumber();
-
-		header = (int) gd.getNextNumber();
-		comment = gd.getNextString();
-		delimiter = getNextString(gd, delimiter);
-		name = getNextString(gd, name);
-
+		
 		if (gd.invalidNumber())
 		{
 			IJ.error(TITLE, "Invalid number in input fields");
