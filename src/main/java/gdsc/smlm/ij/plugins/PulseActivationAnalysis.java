@@ -52,7 +52,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private static int afterPulseStart = 1;
 	private static int afterPulseEnd = 1;
 	private static int darkFramesForNewActivation = 1;
-	private static double pulseActivationFraction = 0.5;
+	private static double pulseActivationPercentage = 50;
 
 	private GlobalSettings settings;
 	private ResultsSettings resultsSettings;
@@ -66,7 +66,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		int activations;
 		@SuppressWarnings("unused")
 		int pulseActivation;
-		double fraction;
+		double percentage;
 
 		PulseActivationResult(Trace trace)
 		{
@@ -77,7 +77,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		{
 			this.activations = activations;
 			this.pulseActivation = pulseActivation;
-			fraction = (double) pulseActivation / activations;
+			percentage = (100.0 * pulseActivation) / activations;
 		}
 	}
 
@@ -158,11 +158,11 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		GenericDialog gd = new GenericDialog(TITLE);
 
 		gd.addMessage("Count & plot molecules activated after a pulse.\nDataset = " + inputOption +
-				"\nPulse Interval = " + pulseInterval);
+				"\nPulse interval = " + pulseInterval);
 		gd.addNumericField("After_pulse_start", afterPulseStart, 0);
 		gd.addNumericField("After_pulse_end", afterPulseEnd, 0);
 		gd.addNumericField("Dark_frames_for_new_activation", darkFramesForNewActivation, 0);
-		gd.addSlider("Pulse_activation_fraction", 0.05, 1, pulseActivationFraction);
+		gd.addSlider("Pulse_activation_percentage", 0, 100, pulseActivationPercentage);
 
 		settings = SettingsManager.loadSettings();
 		resultsSettings = settings.getResultsSettings();
@@ -205,7 +205,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		afterPulseStart = (int) gd.getNextNumber();
 		afterPulseEnd = (int) gd.getNextNumber();
 		darkFramesForNewActivation = Math.max(1, (int) gd.getNextNumber());
-		pulseActivationFraction = gd.getNextNumber();
+		pulseActivationPercentage = gd.getNextNumber();
 
 		// Check arguments
 		try
@@ -214,8 +214,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			Parameters.isEqualOrBelow("After pulse start", afterPulseStart, pulseInterval);
 			Parameters.isEqualOrAbove("After pulse end", afterPulseEnd, afterPulseStart);
 			Parameters.isEqualOrBelow("After pulse end", afterPulseEnd, pulseInterval);
-			Parameters.isEqualOrAbove("Pulse activation ratio", pulseActivationFraction, 0);
-			Parameters.isEqualOrBelow("Pulse activation ratio", pulseActivationFraction, 1);
+			Parameters.isEqualOrAbove("Pulse activation percentage", pulseActivationPercentage, 0);
+			Parameters.isEqualOrBelow("Pulse activation percentage", pulseActivationPercentage, 100);
 		}
 		catch (IllegalArgumentException ex)
 		{
@@ -269,7 +269,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		for (int i = activations.size(); i-- > 0;)
 		{
 			PulseActivationResult result = activations.getf(i);
-			if (result.fraction >= pulseActivationFraction)
+			if (result.percentage >= pulseActivationPercentage)
 			{
 				count++;
 				output.addAll(activations.get(i).trace.getPoints());
