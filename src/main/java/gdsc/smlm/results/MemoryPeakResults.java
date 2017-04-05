@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -12,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -30,7 +30,7 @@ import java.util.Set;
  * Stores peak results in memory. The PeakResults interface add methods are thread safe as they are synchronized. There
  * are equivalent non-.synchronized methods.
  */
-public class MemoryPeakResults extends AbstractPeakResults implements Iterable<PeakResult>
+public class MemoryPeakResults extends AbstractPeakResults implements Cloneable, Iterable<PeakResult>
 {
 	private static LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<String, MemoryPeakResults>();
 	private static final Runtime s_runtime = Runtime.getRuntime();
@@ -564,16 +564,33 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	}
 
 	/**
+	 * Shallow copy this set of results. To create new object references use {@link #copy()}.
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public MemoryPeakResults clone()
+	{
+		try
+		{
+			return (MemoryPeakResults) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			// This should not happen so ignore
+		}
+		return null;
+	}
+
+	/**
 	 * Copy the results. Create new objects for the properties (avoiding a shallow copy) but does not
 	 * deep copy all of the peak results. Allows results to be resorted but not modified.
 	 */
 	public MemoryPeakResults copy()
 	{
-		MemoryPeakResults copy;
-		try
+		MemoryPeakResults copy = clone();
+		if (copy != null)
 		{
-			copy = (MemoryPeakResults) super.clone();
-
 			// Deep copy the objects
 			if (bounds != null)
 				copy.bounds = new Rectangle(bounds);
@@ -581,14 +598,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 				copy.calibration = calibration.clone();
 			if (results != null)
 				copy.results = new ArrayList<PeakResult>(results);
-
-			return copy;
 		}
-		catch (CloneNotSupportedException e)
-		{
-			// This should not happen so ignore
-		}
-		return null;
+		return copy;
 	}
 
 	/**
@@ -645,5 +656,50 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 		if (isEmpty())
 			return null;
 		return results.get(size() - 1);
+	}
+
+	/**
+	 * Checks if all results have a stored precision value.
+	 *
+	 * @return true, if all results have a stored precision value
+	 */
+	public boolean hasStoredPrecision()
+	{
+		for (int i = 0; i < results.size(); i++)
+		{
+			if (!results.get(i).hasPrecision())
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Checks for null results in the store.
+	 *
+	 * @return true, if null PeakResult object(s) exist
+	 */
+	public boolean hasNullResults()
+	{
+		for (int i = 0; i < results.size(); i++)
+		{
+			if (results.get(i) == null)
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Removes the null results from the store.
+	 */
+	public void removeNullResults()
+	{
+		ArrayList<PeakResult> list = new ArrayList<PeakResult>(size());
+		// Use an iterator to take advantage of the fail-fast thread safety
+		for (PeakResult e : results)
+		{
+			if (e != null)
+				list.add(e);
+		}
+		this.results = list;		
 	}
 }

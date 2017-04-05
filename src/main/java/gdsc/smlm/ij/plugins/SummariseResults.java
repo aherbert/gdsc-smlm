@@ -19,6 +19,7 @@ import gdsc.core.ij.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
+import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
@@ -41,7 +42,7 @@ public class SummariseResults implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
@@ -95,31 +96,67 @@ public class SummariseResults implements PlugIn
 		clearSummaryTable();
 	}
 
+	private static int NO = -1, UNKNOWN = 0, YES = 1;
+	private int removeNullResults = UNKNOWN;
+	
 	private void addSummary(StringBuilder sb, MemoryPeakResults result)
 	{
 		DescriptiveStatistics[] stats = new DescriptiveStatistics[2];
+		char[] suffix = new char[2];
 		for (int i = 0; i < stats.length; i++)
 		{
 			stats[i] = new DescriptiveStatistics();
+			suffix[i] = 0;
 		}
 
-		// Only process the statistics if we have a noise component
-		final int size = result.size();
-		if (size > 0 && result.getHead().noise > 0)
+		if (result.hasNullResults())
 		{
-			int ii = 0;
-			final double nmPerPixel = result.getNmPerPixel();
-			final double gain = result.getGain();
-			final boolean emCCD = result.isEMCCD();
-			for (PeakResult peakResult : result.getResults())
+			IJ.log("Null results in dataset: " + result.getName());
+			if (removeNullResults == UNKNOWN)
 			{
-				if (peakResult == null)
+				GenericDialog gd = new GenericDialog(TITLE);
+				gd.addMessage("There are invalid results in memory.\n \nClean these results?");
+				gd.enableYesNoCancel();
+				gd.hideCancelButton();
+				gd.showDialog();
+				removeNullResults = (gd.wasOKed()) ? YES : NO;
+			}
+			if (removeNullResults == NO)
+				result = result.copy();
+			result.removeNullResults();
+		}
+
+		final int size = result.size();
+		if (size > 0)
+		{
+			// Precision
+			// Check if we can use the stored precision
+			if (result.hasStoredPrecision())
+			{
+				suffix[0] = '*';
+				for (PeakResult peakResult : result.getResults())
 				{
-					System.out.printf("Null result in summary @ %d\n", ++ii);
-					continue;
+					stats[0].addValue(peakResult.getPrecision());
 				}
-				stats[0].addValue(peakResult.getPrecision(nmPerPixel, gain, emCCD));
-				stats[1].addValue(peakResult.getSignal() / peakResult.noise);
+			}
+			else if (result.isCalibratedForPrecision())
+			{
+				final double nmPerPixel = result.getNmPerPixel();
+				final double gain = result.getGain();
+				final boolean emCCD = result.isEMCCD();
+				for (PeakResult peakResult : result.getResults())
+				{
+					stats[0].addValue(peakResult.getPrecision(nmPerPixel, gain, emCCD));
+				}
+			}
+
+			// SNR requires noise
+			if (result.getHead().noise > 0)
+			{
+				for (PeakResult peakResult : result.getResults())
+				{
+					stats[1].addValue(peakResult.getSignal() / peakResult.noise);
+				}
 			}
 		}
 
@@ -141,8 +178,8 @@ public class SummariseResults implements PlugIn
 			sb.append("\t-");
 		}
 		Rectangle bounds = result.getBounds(true);
-		sb.append(String.format("\t%d,%d,%d,%d\t%s\t%s\t%s", bounds.x, bounds.y, bounds.x + bounds.width, bounds.y +
-				bounds.height, Utils.rounded(result.getNmPerPixel(), 4), Utils.rounded(result.getGain(), 4),
+		sb.append(String.format("\t%d,%d,%d,%d\t%s\t%s\t%s", bounds.x, bounds.y, bounds.x + bounds.width,
+				bounds.y + bounds.height, Utils.rounded(result.getNmPerPixel(), 4), Utils.rounded(result.getGain(), 4),
 				Utils.rounded(exposureTime, 4)));
 		for (int i = 0; i < stats.length; i++)
 		{
@@ -153,6 +190,8 @@ public class SummariseResults implements PlugIn
 			else
 			{
 				sb.append("\t").append(IJ.d2s(stats[i].getMean(), 3));
+				if (suffix[i] != 0)
+					sb.append(suffix[i]);					
 				sb.append("\t").append(IJ.d2s(stats[i].getPercentile(50), 3));
 				sb.append("\t").append(IJ.d2s(stats[i].getMin(), 3));
 				sb.append("\t").append(IJ.d2s(stats[i].getMax(), 3));

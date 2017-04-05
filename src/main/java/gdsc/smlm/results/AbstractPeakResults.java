@@ -24,7 +24,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	public static final double DEFAULT_NM_PER_PIXEL = 100;
 	public static final double DEFAULT_GAIN = 1;
 	public static final boolean DEFAULT_EMCCD = true;
-	
+
 	protected ImageSource source = null;
 	protected Rectangle bounds = null;
 	protected Calibration calibration = null;
@@ -200,7 +200,6 @@ public abstract class AbstractPeakResults implements PeakResults
 			this.name = name;
 	}
 
-	
 	/**
 	 * Get the nm-per-pixel from the calibration, or if not available, return the {@link #DEFAULT_NM_PER_PIXEL}
 	 * 
@@ -208,7 +207,8 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public double getNmPerPixel()
 	{
-		return (calibration != null && calibration.hasNmPerPixel()) ? calibration.getNmPerPixel() : DEFAULT_NM_PER_PIXEL;
+		return (calibration != null && calibration.hasNmPerPixel()) ? calibration.getNmPerPixel()
+				: DEFAULT_NM_PER_PIXEL;
 	}
 
 	/**
@@ -230,7 +230,22 @@ public abstract class AbstractPeakResults implements PeakResults
 	{
 		return (calibration != null && calibration.hasEMCCD()) ? calibration.isEmCCD() : DEFAULT_EMCCD;
 	}
-	
+
+	/**
+	 * Checks if the results have a valid calibration to compute the localisation precision. This requires the pixel
+	 * size and camera details (gain and CCD type).
+	 *
+	 * @return true, if is calibrated for precision
+	 */
+	public boolean isCalibratedForPrecision()
+	{
+		if (calibration != null)
+		{
+			return calibration.hasNmPerPixel() && calibration.hasGain() && calibration.hasEMCCD();
+		}
+		return false;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
