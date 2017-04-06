@@ -29,7 +29,7 @@ public class PulseActivationAnalysisTest
 			for (int loop = 0; loop < 10; loop++)
 			{
 				// A rough mix of each channel
-				double[] d = create(2, r, 100, 100);
+				double[] d = create(2, r, 1, 100);
 
 				// Crosstalk should be below 50%
 				double[] c = create(2, r, 0, 0.5);
