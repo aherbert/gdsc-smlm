@@ -730,7 +730,7 @@ public class EJMLLinearSolver
 		// a quality of 1 when it has successfully setA(). The quality is the product of the 
 		// diagonal and the LDLT method must make this equal to 1 on all elements.
 		// The other linear solver is a LU decomposition. The quality is the product of the diagonal
-		// with each element divided by the maxmimum matrix element value. This can return a quality 
+		// with each element divided by the maximum matrix element value. This can return a quality 
 		// down in the 1e-20 range but the solution is still valid for A x = b.
 		//
 		// Thus we will check the solution to our equation instead for a maximum relative error.
@@ -754,10 +754,10 @@ public class EJMLLinearSolver
 
 			choleskyLDLTSolver = new LinearSolverCholLDL();
 
-			// This is a Cholesky solver that only works on positive definite matrices
+			// This is a Cholesky solver that only works on symmetric positive definite matrices
 			choleskySolver = LinearSolverFactory.symmPosDef(solverSize);
 
-			// This should work on any symmetric matrix
+			// This should work on any matrix
 			linearSolver = LinearSolverFactory.linear(solverSize);
 
 			X = new DenseMatrix64F(solverSize, 1);
@@ -777,7 +777,8 @@ public class EJMLLinearSolver
 				a2[index++] = a[i][j];
 			}
 		}
-		return new DenseMatrix64F[] { DenseMatrix64F.wrap(b.length, b.length, a2), DenseMatrix64F.wrap(b.length, 1, b2) };
+		return new DenseMatrix64F[] { DenseMatrix64F.wrap(b.length, b.length, a2),
+				DenseMatrix64F.wrap(b.length, 1, b2) };
 	}
 
 	private DenseMatrix64F[] wrapDataWithZeros(float[][] a, float[] b)
