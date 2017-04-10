@@ -3,7 +3,6 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -49,14 +48,18 @@ import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
+import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
+import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 
 /**
@@ -120,7 +123,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		 */
 		abstract public String getName();
 	}
-	
+
 	private static String inputOption = "";
 	private static int channels = 1;
 	private static final int MAX_CHANNELS = 3;
@@ -458,33 +461,33 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		if (channels == 2)
 		{
 			if (targetChannel == 1)
-				index1 = setCrosstalk(C21, crosstalk[2]);
+				index1 = setCrosstalk(C21, crosstalk[1]);
 			else
-				index1 = setCrosstalk(C12, crosstalk[1]);
+				index1 = setCrosstalk(C12, crosstalk[0]);
 		}
 		else
 		{
 			// 3-channel
 			if (targetChannel == 1)
 			{
-				index1 = setCrosstalk(C21, crosstalk[2]);
-				index2 = setCrosstalk(C31, crosstalk[3]);
+				index1 = setCrosstalk(C21, crosstalk[1]);
+				index2 = setCrosstalk(C31, crosstalk[2]);
 			}
 			else if (targetChannel == 2)
 			{
-				index1 = setCrosstalk(C12, crosstalk[1]);
-				index2 = setCrosstalk(C32, crosstalk[3]);
+				index1 = setCrosstalk(C12, crosstalk[0]);
+				index2 = setCrosstalk(C32, crosstalk[2]);
 			}
 			else
 			{
-				index1 = setCrosstalk(C13, crosstalk[1]);
-				index2 = setCrosstalk(C23, crosstalk[2]);
+				index1 = setCrosstalk(C13, crosstalk[0]);
+				index2 = setCrosstalk(C23, crosstalk[1]);
 			}
 		}
 
 		// Plot a histogram
 		double[] x = Utils.newArray(channels, 0.5, 1);
-		double[] y = Arrays.copyOfRange(crosstalk, 1, crosstalk.length);
+		double[] y = crosstalk;
 		Plot2 plot = new Plot2(TITLE, "Channel", "Fraction activations");
 		plot.setLimits(0, channels + 1, 0, Maths.max(y) * 1.05);
 		plot.setXMinorTicks(false);
@@ -633,9 +636,12 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 	private boolean runPulseAnalysis()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 
 		gd.addMessage("Plot molecules activated after a pulse");
+		String[] correctionNames = null;
+		String[] assigmentNames = null;
+
 		if (channels > 1)
 		{
 			if (channels == 2)
@@ -645,20 +651,16 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			}
 			else
 			{
-				gd.addNumericField("Crosstalk_21", ct[C21], 3);
-				gd.addNumericField("Crosstalk_31", ct[C31], 3);
-				gd.addNumericField("Crosstalk_12", ct[C12], 3);
-				gd.addNumericField("Crosstalk_32", ct[C32], 3);
-				gd.addNumericField("Crosstalk_13", ct[C13], 3);
-				gd.addNumericField("Crosstalk_23", ct[C23], 3);
+				for (int i = 0; i < ctNames.length; i++)
+					gd.addNumericField("Crosstalk_" + ctNames[i], ct[i], 3);
 			}
 
 			gd.addNumericField("Local_density_radius", densityRadius, 0, 6, "nm");
-			String[] correctionNames = SettingsManager.getNames((Object[]) CrosstalkCorrection.values());
+			correctionNames = SettingsManager.getNames((Object[]) CrosstalkCorrection.values());
 			gd.addChoice("Crosstalk_correction", correctionNames, correctionNames[crosstalkCorrectionIndex]);
 			for (int c = 1; c <= channels; c++)
 				gd.addSlider("Subtraction_cutoff_C" + c + "(%)", 0, 100, subtractionCutoff[c - 1]);
-			String[] assigmentNames = SettingsManager.getNames((Object[]) NonSpecificAssignment.values());
+			assigmentNames = SettingsManager.getNames((Object[]) NonSpecificAssignment.values());
 			gd.addChoice("Nonspecific_assigment", assigmentNames, assigmentNames[nonSpecificAssignmentIndex]);
 			gd.addSlider("Nonspecific_assignment_cutoff (%)", 0, 100, nonSpecificAssignmentCutoff);
 		}
@@ -679,19 +681,58 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		gd.showDialog();
 
+		if (gd.wasCanceled())
+		{
+			if (executor != null)
+				executor.shutdown();
+			return false;
+		}
+
+		run();
+
 		if (executor != null)
 			executor.shutdown();
 
-		if (gd.wasCanceled())
-			return false;
+		// Record options for a macro since the NonBlockingDialog does not
+		if (Recorder.record)
+		{
+			if (channels > 1)
+			{
+				if (channels == 2)
+				{
+					Recorder.recordOption("Crosstalk_21", Double.toString(ct[C21]));
+					Recorder.recordOption("Crosstalk_12", Double.toString(ct[C12]));
+				}
+				else
+				{
+					for (int i = 0; i < ctNames.length; i++)
+						Recorder.recordOption("Crosstalk_" + ctNames[i], Double.toString(ct[i]));
+				}
+
+				Recorder.recordOption("Local_density_radius", Double.toString(densityRadius));
+
+				Recorder.recordOption("Crosstalk_correction", correctionNames[crosstalkCorrectionIndex]);
+				for (int c = 1; c <= channels; c++)
+					Recorder.recordOption("Subtraction_cutoff_C" + c, Double.toString(subtractionCutoff[c - 1]));
+
+				Recorder.recordOption("Nonspecific_assigment", assigmentNames[nonSpecificAssignmentIndex]);
+				Recorder.recordOption("Nonspecific_assignment_cutoff (%)",
+						Double.toString(nonSpecificAssignmentCutoff));
+			}
+
+			Recorder.recordOption("Image", imageNames[resultsSettings.getResultsImage().ordinal()]);
+			if (resultsSettings.weightedImage)
+				Recorder.recordOption("Weighted");
+			if (resultsSettings.equalisedImage)
+				Recorder.recordOption("Equalised");
+			Recorder.recordOption("Image_Precision", Double.toString(resultsSettings.precision));
+			Recorder.recordOption("Image_Scale", Double.toString(resultsSettings.imageScale));
+		}
 
 		SettingsManager.saveSettings(settings);
 
 		return true;
 	}
-
-	/** The changed flag indicating that work has yet to be done. */
-	private boolean changed = true;
 
 	/*
 	 * (non-Javadoc)
@@ -700,9 +741,13 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	 */
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
-		// The event is not null when the GenericDialog's components are updated
-		if (e != null)
-			changed = true;
+		// The event is null when the NonBlockingGenericDialog is first shown
+		if (e == null)
+		{
+			// Do not ignore this if a macro
+			if (Utils.isMacro())
+				return true;
+		}
 
 		// Check arguments
 		try
@@ -756,12 +801,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		if (gd.invalidNumber())
 			return false;
 
-		// Only run if there are changes.
-		// The event is null when the GenericDialog is OK'd. 
-		// In that case we run to process the changes. 
-		if (changed && (preview || e == null))
+		runSettings = new RunSettings();
+		if (preview)
 		{
-			run(new RunSettings());
+			run();
 		}
 
 		return true;
@@ -795,6 +838,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		NonSpecificAssignment nonSpecificAssignment = NonSpecificAssignment.NONE;
 		double nonSpecificAssignmentCutoff;
 
+		@SuppressWarnings("unused")
 		ResultsSettings resultsSettings;
 
 		RunSettings()
@@ -811,11 +855,12 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 					// Convert from percentage to a probability
 					this.subtractionCutoff[i] = PulseActivationAnalysis.subtractionCutoff[i] / 100.0;
 				int nonSpecificAssignmentIndex = PulseActivationAnalysis.nonSpecificAssignmentIndex;
-				if (nonSpecificAssignmentIndex >= 0 && nonSpecificAssignmentIndex < NonSpecificAssignment.values().length)
+				if (nonSpecificAssignmentIndex >= 0 &&
+						nonSpecificAssignmentIndex < NonSpecificAssignment.values().length)
 					nonSpecificAssignment = NonSpecificAssignment.values()[nonSpecificAssignmentIndex];
 				this.nonSpecificAssignmentCutoff = PulseActivationAnalysis.nonSpecificAssignmentCutoff / 100.0;
 			}
-			this.resultsSettings = resultsSettings.clone();
+			this.resultsSettings = PulseActivationAnalysis.this.resultsSettings.clone();
 		}
 
 		public boolean newUnmixSettings(RunSettings lastRunSettings)
@@ -857,14 +902,18 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private int nThreads;
 	private ExecutorService executor = null;
 	private TurboList<Future<?>> futures = null;
-	private RunSettings lastRunSettings = null;
+	private RunSettings lastRunSettings = null, runSettings = null;
 
-	private synchronized void run(RunSettings runSettings)
+	private synchronized void run()
 	{
 		// This is synchronized since it updates the class results. 
 		// Note: We check against the last settings and only repeat what is necessary ...
 
-		changed = false;
+		if (runSettings == null)
+		{
+			lastRunSettings = null;
+			return;
+		}
 
 		// Assign all activations to a channel.
 		// This is only necessary when we have more than 1 channel. If we have 1 channel then 
@@ -984,14 +1033,29 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				ImageProcessor ip = getImage(output[c - 1]);
 				if (stack == null)
 					stack = new ImageStack(ip.getWidth(), ip.getHeight());
+				ip.setColorModel(null);
 				stack.addSlice("C" + c, ip);
 			}
+
+			// Create a composite
 			String name = results.getName() + " " + TITLE;
-			ImagePlus imp = Utils.display(name, stack);
+			ImagePlus imp = new ImagePlus(name, stack);
 			imp.setDimensions(channels, 1, 1);
+			CompositeImage ci = new CompositeImage(imp, IJ.COMPOSITE);
+
+			imp = WindowManager.getImage(name);
+			if (imp != null && imp.isComposite())
+			{
+				imp.setImage(ci);
+			}
+			else
+			{
+				ci.show();
+			}
 		}
 
 		lastRunSettings = runSettings;
+		runSettings = null;
 
 		IJ.showStatus(String.format("%d/%s, %d/%s", count, Utils.pleural(traces.length, "Trace"), output[0].size(),
 				Utils.pleural(results.size(), "Result")));
@@ -1153,8 +1217,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			// TODO - We could do other non-specific assignments.
 			// e.g. Compute probability for each channel and assign
 			// using a weighted random selection
-			
-			
+
 			int[] c = new int[channels];
 			for (int i = from; i < to; i++)
 			{
