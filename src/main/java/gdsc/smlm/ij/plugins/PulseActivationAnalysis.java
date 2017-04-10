@@ -1046,6 +1046,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			imp = WindowManager.getImage(name);
 			if (imp != null && imp.isComposite())
 			{
+				ci.setMode(imp.getCompositeMode());
 				imp.setImage(ci);
 			}
 			else
