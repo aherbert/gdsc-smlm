@@ -7,7 +7,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.distribution.BinomialDistribution;
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.UnitSphereRandomVectorGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
@@ -17,6 +20,8 @@ import gdsc.core.clustering.DensityCounter;
 import gdsc.core.clustering.DensityCounter.Molecule;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.NotImplementedException;
+import gdsc.core.utils.Random;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 
@@ -41,7 +46,9 @@ import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.Cluster.CentroidMethod;
+import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
@@ -71,12 +78,8 @@ import ij.process.ImageProcessor;
  */
 public class PulseActivationAnalysis implements PlugIn, DialogListener
 {
-	private String TITLE = " Activation Analysis";
+	private String TITLE = "Activation Analysis";
 
-	/**
-	 * Specify the method to use to determine the parameters for the distribution of the localisation precision (assumed
-	 * to be Gaussian)
-	 */
 	private enum CrosstalkCorrection
 	{
 		//@formatter:off
@@ -99,10 +102,6 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		abstract public String getName();
 	}
 
-	/**
-	 * Specify the method to use to determine the parameters for the distribution of the localisation precision (assumed
-	 * to be Gaussian)
-	 */
 	private enum NonSpecificAssignment
 	{
 		//@formatter:off
@@ -122,6 +121,133 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		 * @return the name
 		 */
 		abstract public String getName();
+	}
+
+	private enum SimulationDistribution
+	{
+		//@formatter:off
+		POINT{ public String getName() { return "Point"; }},
+		LINE{ public String getName() { return "Line"; }},
+		CIRCLE{ public String getName() { return "Circle"; }};
+		//@formatter:on
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+	}
+
+	private abstract class Shape
+	{
+		float x, y;
+
+		Shape(float x, float y)
+		{
+			this.x = x;
+			this.y = y;
+		}
+
+		boolean canSample()
+		{
+			return true;
+		}
+
+		float[] getPosition()
+		{
+			return new float[] { x, y };
+		}
+
+		abstract float[] sample(RandomGenerator rand);
+	}
+
+	private class Point extends Shape
+	{
+		float[] xy;
+
+		Point(float x, float y)
+		{
+			super(x, y);
+			xy = super.getPosition();
+		}
+
+		@Override
+		boolean canSample()
+		{
+			return false;
+		}
+
+		@Override
+		float[] getPosition()
+		{
+			return xy;
+		}
+
+		@Override
+		float[] sample(RandomGenerator rand)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+	private class Line extends Shape
+	{
+		double radius, length;
+		float sina, cosa;
+
+		/**
+		 * Instantiates a new line.
+		 *
+		 * @param x
+		 *            the x
+		 * @param y
+		 *            the y
+		 * @param angle
+		 *            the angle (in radians)
+		 * @param radius
+		 *            the radius
+		 */
+		Line(float x, float y, double angle, double radius)
+		{
+			super(x, y);
+			this.radius = radius;
+			length = 2*radius;
+			sina = (float) Math.sin(angle);
+			cosa = (float) Math.cos(angle);
+		}
+
+		@Override
+		float[] sample(RandomGenerator rand)
+		{
+			float p = (float) (-radius + rand.nextDouble() * length);
+			return new float[] { sina * p + x, cosa * p + y };
+		}
+	}
+
+	private class Circle extends Shape
+	{
+		double radius;
+
+		Circle(float x, float y, double radius)
+		{
+			super(x, y);
+			this.radius = radius;
+		}
+
+		@Override
+		float[] sample(RandomGenerator rand)
+		{
+			double[] v = new UnitSphereRandomVectorGenerator(2, rand).nextVector();
+			return new float[] { (float) (v[0] * radius + x), (float) (v[1] * radius + y) };
+		}
+
 	}
 
 	private static String inputOption = "";
@@ -226,6 +352,20 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
+		switch (isSimulation())
+		{
+			case 0:
+				// Most common to not run the simulation
+				break;
+			case -1:
+				// Cancelled
+				return;
+			case 1:
+				//OK'd
+				runSimulation();
+				return;
+		}
+
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "No localisations in memory");
@@ -266,7 +406,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 	private boolean showDialog(boolean crosstalkMode)
 	{
-		TITLE = ((crosstalkMode) ? "Crosstalk" : "Pulse") + TITLE;
+		TITLE = ((crosstalkMode) ? "Crosstalk " : "Pulse ") + TITLE;
 
 		GenericDialog gd = new GenericDialog(TITLE);
 
@@ -1317,5 +1457,307 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		PeakResults[] list = peakResultsList.toArray();
 		IJImagePeakResults image = (IJImagePeakResults) list[1];
 		return image.getImagePlus().getProcessor();
+	}
+
+	private int isSimulation()
+	{
+		if (Utils.isExtraOptions())
+		{
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.addMessage("Perform a crosstalk simulation?");
+			gd.enableYesNoCancel();
+			gd.showDialog();
+			if (gd.wasOKed())
+				return 1;
+			if (gd.wasCanceled())
+				return -1;
+		}
+		return 0;
+	}
+
+	private void runSimulation()
+	{
+		if (!showSimulationDialog())
+			return;
+
+		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c());
+
+		// Draw the molecule positions
+		float[][][] molecules = new float[3][][];
+		MemoryPeakResults[] results = new MemoryPeakResults[3];
+		for (int c = 0; c < 3; c++)
+		{
+			molecules[c] = simulateMolecules(rdg, c);
+
+			// Create a dataset to store the activations
+			MemoryPeakResults r = new MemoryPeakResults();
+			r.setCalibration(new Calibration(sim_nmPerPixel, 1, 100));
+			r.setBounds(new Rectangle(0, 0, sim_size, sim_size));
+			r.setName(TITLE + " C" + (c + 1));
+			MemoryPeakResults.addResults(r);
+			results[c] = r;
+		}
+
+		// Simulate activations
+		for (int c = 0; c < 3; c++)
+			simulateActivations(rdg, molecules, c, results);
+
+		// Combine
+		MemoryPeakResults r = new MemoryPeakResults();
+		r.setCalibration(new Calibration(sim_nmPerPixel, 1, 100));
+		r.setBounds(new Rectangle(0, 0, sim_size, sim_size));
+		r.setName(TITLE);
+		MemoryPeakResults.addResults(r);
+
+		for (int c = 0; c < 3; c++)
+			r.addAllf(results[c].getResults());
+	}
+
+	private float[][] simulateMolecules(RandomDataGenerator rdg, int c)
+	{
+		int n = sim_nMolecules[c];
+		float[][] molecules = new float[n][];
+		if (n == 0)
+			return molecules;
+
+		// Draw the shapes
+		Shape[] shapes = createShapes(rdg, c);
+
+		// Sample positions from within the shapes
+		boolean canSample = shapes[0].canSample();
+		RandomGenerator rand = rdg.getRandomGenerator();
+		while (n-- > 0)
+		{
+			float[] coords;
+			if (canSample)
+			{
+				int next = rand.nextInt(shapes.length);
+				coords = shapes[next].sample(rand);
+			}
+			else
+			{
+				coords = shapes[n % shapes.length].getPosition();
+			}
+
+			// Avoid out-of-bounds positions
+			if (outOfBounds(coords[0]) || outOfBounds(coords[1]))
+				n++;
+			else
+				molecules[n] = coords;
+		}
+		return molecules;
+	}
+
+	private Shape[] createShapes(RandomDataGenerator rdg, int c)
+	{
+		RandomGenerator rand = rdg.getRandomGenerator();
+		Shape[] shapes;
+		double min = sim_size / 20;
+		double max = sim_size / 10;
+		double range = max - min;
+		switch (sim_distribution[c])
+		{
+			case CIRCLE:
+				shapes = new Shape[10];
+				for (int i = 0; i < shapes.length; i++)
+				{
+					float x = nextCoordinate(rand);
+					float y = nextCoordinate(rand);
+					double radius = rand.nextDouble() * range + min;
+					shapes[i] = new Circle(x, y, radius);
+				}
+				break;
+
+			case LINE:
+				shapes = new Shape[10];
+				for (int i = 0; i < shapes.length; i++)
+				{
+					float x = nextCoordinate(rand);
+					float y = nextCoordinate(rand);
+					double angle = rand.nextDouble() * Math.PI;
+					double radius = rand.nextDouble() * range + min;
+					shapes[i] = new Line(x, y, angle, radius);
+				}
+
+				break;
+
+			case POINT:
+			default:
+				shapes = new Shape[sim_nMolecules[c]];
+				for (int i = 0; i < shapes.length; i++)
+				{
+					float x = nextCoordinate(rand);
+					float y = nextCoordinate(rand);
+					shapes[i] = new Point(x, y);
+				}
+		}
+		return shapes;
+	}
+
+	private float nextCoordinate(RandomGenerator rand)
+	{
+		return (float) rand.nextDouble() * sim_size;
+	}
+
+	private boolean outOfBounds(float f)
+	{
+		return f < 0 || f > sim_size;
+	}
+
+	private void simulateActivations(RandomDataGenerator rdg, float[][][] molecules, int c, MemoryPeakResults[] results)
+	{
+		int n = molecules[c].length;
+		if (n == 0)
+			return;
+
+		// Compute desired number per frame
+		double umPerPixel = sim_nmPerPixel / 1000;
+		double um2PerPixel = umPerPixel * umPerPixel;
+		double area = sim_size * sim_size * um2PerPixel;
+		double nPerFrame = area * sim_activationDensity;
+
+		// Compute the activation probability (but set an upper limit so not all are on in every frame)
+		double p = Math.min(0.5, nPerFrame / n);
+
+		// Determine the other channels activation probability using crosstalk
+		double p0, p1, p2, norm;
+		switch (c)
+		{
+			case 0:
+				norm = 1 - ct[C12] - ct[C13];
+				p0 = p;
+				p1 = p * ct[C12] / norm;
+				p2 = p * ct[C13] / norm;
+				break;
+			case 1:
+				norm = 1 - ct[C21] - ct[C23];
+				p0 = p * ct[C21] / norm;
+				p1 = p;
+				p2 = p * ct[C23] / norm;
+				break;
+			case 2:
+			default:
+				norm = 1 - ct[C31] - ct[C32];
+				p0 = p * ct[C31] / norm;
+				p1 = p * ct[C32] / norm;
+				p2 = p;
+				break;
+		}
+
+		// Assume 10 frames after each channel pulse => 30 frames per cycle
+		double precision = sim_precision[c];
+		int id = c + 1;
+
+		RandomGenerator rand = rdg.getRandomGenerator();
+		BinomialDistribution[] bd = new BinomialDistribution[4];
+		bd[0] = createBinomialDistribution(rand, n, p0);
+		bd[1] = createBinomialDistribution(rand, n, p1);
+		bd[2] = createBinomialDistribution(rand, n, p2);
+
+		int[] frames = new int[27];
+		for (int i = 1, j = 0; i <= 30; i++)
+		{
+			if (i % 10 == 1)
+				// Skip specific activation frames 
+				continue;
+			frames[j++] = i;
+		}
+		bd[3] = createBinomialDistribution(rand, n, p * sim_nonSpecificFrequency);
+
+		for (int i = 0, t = 1; i < sim_cycles; i++, t += 30)
+		{
+			simulateActivations(rdg, bd[0], molecules[c], results[0], t, precision, id);
+			simulateActivations(rdg, bd[1], molecules[c], results[1], t + 10, precision, id);
+			simulateActivations(rdg, bd[2], molecules[c], results[2], t + 20, precision, id);
+			// Add non-specific activations
+			if (bd[3] != null)
+			{
+				for (int t2 : frames)
+					simulateActivations(rdg, bd[3], molecules[c], results[2], t2, precision, id);
+			}
+		}
+	}
+
+	private BinomialDistribution createBinomialDistribution(RandomGenerator rand, int n, double p)
+	{
+		if (p == 0)
+			return null;
+		return new BinomialDistribution(rand, n, p);
+	}
+
+	private void simulateActivations(RandomDataGenerator rdg, BinomialDistribution bd, float[][] molecules,
+			MemoryPeakResults results, int t, double precision, int id)
+	{
+		if (bd == null)
+			return;
+		int n = molecules.length;
+		int k = bd.sample();
+		// Sample
+		RandomGenerator rand = rdg.getRandomGenerator();
+		int[] sample = Random.sample(k, n, rand);
+		while (k-- > 0)
+		{
+			float[] xy = molecules[sample[k]];
+			float x = (float) (xy[0] + rand.nextGaussian() * precision);
+			float y = (float) (xy[1] + rand.nextGaussian() * precision);
+			results.add(new IdPeakResult(t, x, y, 1, 1, id));
+		}
+		return;
+	}
+
+	private static int[] sim_nMolecules = { 1000, 1000, 1000 };
+	private static SimulationDistribution[] sim_distribution = { SimulationDistribution.CIRCLE,
+			SimulationDistribution.LINE, SimulationDistribution.POINT };
+	private static double sim_precision[] = { 15, 15, 15 }; // nm
+	// These could be collected in the simulation dialog
+	private static int sim_cycles = 1000;
+	private static int sim_size = 256;
+	private static double sim_nmPerPixel = 100;
+	private static double sim_activationDensity = 0.1; // molecules/micrometer
+	private static double sim_nonSpecificFrequency = 0.01;
+
+	private boolean showSimulationDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+
+		SimulationDistribution[] distributionValues = SimulationDistribution.values();
+		String[] distribution = SettingsManager.getNames((Object[]) distributionValues);
+
+		// Three channel
+		for (int c = 0; c < 3; c++)
+		{
+			String ch = "_C" + (c + 1);
+			gd.addNumericField("Molcules" + ch, sim_nMolecules[c], 0);
+			gd.addChoice("Distribution" + ch, distribution, distribution[sim_distribution[c].ordinal()]);
+			gd.addNumericField("Precision_" + ch, sim_precision[c], 3);
+			gd.addNumericField("Crosstalk_" + ctNames[2 * c], ct[2 * c], 3);
+			gd.addNumericField("Crosstalk_" + ctNames[2 * c + 1], ct[2 * c + 1], 3);
+		}
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		int count = 0;
+		for (int c = 0; c < 3; c++)
+		{
+			sim_nMolecules[c] = (int) Math.abs(gd.getNextNumber());
+			if (sim_nMolecules[c] > 0)
+				count++;
+			sim_distribution[c] = distributionValues[gd.getNextChoiceIndex()];
+			sim_precision[c] = Math.abs(gd.getNextNumber());
+			ct[2 * c] = Math.abs(gd.getNextNumber());
+			ct[2 * c + 1] = Math.abs(gd.getNextNumber());
+		}
+
+		if (gd.invalidNumber())
+			return false;
+		if (count < 2)
+		{
+			IJ.error(TITLE, "Simulation requires at least 2 channels");
+			return false;
+		}
+
+		return true;
 	}
 }
