@@ -518,7 +518,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		for (Trace trace : traces)
 		{
-			trace.sort(); // Time-order			
+			trace.sort(); // Time-order
 
 			ArrayList<PeakResult> points = trace.getPoints();
 
@@ -534,7 +534,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				{
 					if (current != null)
 						// Store the last
-						activations.add(new Activation(trace, channel));
+						activations.add(new Activation(current, channel));
 
 					// Create a new activation
 					current = new Trace(p);
@@ -549,7 +549,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			}
 
 			if (current != null)
-				activations.add(new Activation(trace, channel));
+				activations.add(new Activation(current, channel));
 		}
 
 		save(activations);
@@ -795,6 +795,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		return b;
 	}
 
+	private WorkStack<RunSettings> inputStack;
+
 	private boolean runPulseAnalysis()
 	{
 		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
@@ -840,19 +842,41 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		gd.addCheckbox("Preview", false);
 		gd.addDialogListener(this);
 
+		// TODO - Make the Work, WorkStack, Worker chain generic and move
+		// into separate classes. 
+		// This idea is used in a few plugins.		
+
+		inputStack = new WorkStack<RunSettings>();
+		Worker<RunSettings> w = new Worker<RunSettings>()
+		{
+			@Override
+			Work<RunSettings> createResult(Work<RunSettings> work)
+			{
+				PulseActivationAnalysis.this.run(work.work);
+				return work;
+			}
+		};
+		w.inbox = inputStack;
+		ArrayList<Worker<?>> workers = new ArrayList<Worker<?>>();
+		workers.add(w);
+
+		ArrayList<Thread> threads = startWorkers(workers);
+
 		gd.showDialog();
 
-		if (gd.wasCanceled())
+		if (!isPreview)
 		{
-			if (executor != null)
-				executor.shutdown();
-			return false;
+			// The dialog was OK'd so run if work was stashed in the input stack.
+			inputStack.addWork(inputStack.work);
 		}
 
-		run();
-
+		boolean cancelled = gd.wasCanceled();
+		finishWorkers(workers, threads, cancelled);
 		if (executor != null)
 			executor.shutdown();
+
+		if (cancelled)
+			return false;
 
 		// Record options for a macro since the NonBlockingDialog does not
 		if (Recorder.record)
@@ -894,6 +918,70 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		return true;
 	}
+
+	private static ArrayList<Thread> startWorkers(ArrayList<Worker<?>> workers)
+	{
+		ArrayList<Thread> threads = new ArrayList<Thread>();
+		for (Worker<?> w : workers)
+		{
+			Thread t = new Thread(w);
+			t.setDaemon(true);
+			t.start();
+			threads.add(t);
+		}
+		return threads;
+	}
+
+	private static void finishWorkers(ArrayList<Worker<?>> workers, ArrayList<Thread> threads, boolean cancelled)
+	{
+		// Finish work
+		for (int i = 0; i < threads.size(); i++)
+		{
+			Thread t = threads.get(i);
+			Worker<?> w = workers.get(i);
+
+			if (cancelled)
+			{
+				// Stop immediately any running worker
+				try
+				{
+					t.interrupt();
+				}
+				catch (SecurityException e)
+				{
+					// We should have permission to interrupt this thread.
+					e.printStackTrace();
+				}
+			}
+			else
+			{
+				// Stop after the current work in the inbox
+				w.running = false;
+
+				// Notify a workers waiting on the inbox.
+				// Q. How to check if the worker is sleeping?
+				synchronized (w.inbox)
+				{
+					w.inbox.notify();
+				}
+
+				// Leave to finish their current work
+				try
+				{
+					t.join(0);
+				}
+				catch (InterruptedException e)
+				{
+				}
+			}
+		}
+	}
+
+	/**
+	 * Delay (in milliseconds) used when entering new values in the dialog before the preview is processed
+	 */
+	private long DELAY = 500;
+	private boolean isPreview = false;
 
 	/*
 	 * (non-Javadoc)
@@ -962,10 +1050,23 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		if (gd.invalidNumber())
 			return false;
 
-		runSettings = new RunSettings();
+		Work<RunSettings> work = new Work<RunSettings>(new RunSettings());
 		if (preview)
 		{
-			run();
+			// Queue the settings
+			if (isPreview)
+				// Use a delay next time. This prevents delay when the preview is first switched on. 
+				work.time = System.currentTimeMillis() + DELAY;
+			else
+				isPreview = true;
+			inputStack.addWork(work);
+		}
+		else
+		{
+			// Preview is off
+			isPreview = false;
+			// Stash the work (this does not notify the input worker)
+			inputStack.setWork(work);
 		}
 
 		return true;
@@ -1058,14 +1159,193 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		}
 	}
 
+	private class Work<T> implements Cloneable
+	{
+		long time = 0;
+		T work;
+
+		Work(long time, T work)
+		{
+			if (work == null)
+				throw new NullPointerException("Work cannot be null");
+			this.time = time;
+			this.work = work;
+		}
+
+		Work(T work)
+		{
+			this(0, work);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Work<T> clone()
+		{
+			try
+			{
+				return (Work<T>) super.clone();
+			}
+			catch (CloneNotSupportedException e)
+			{
+				return null; // Shouldn't happen
+			}
+		}
+
+		@Override
+		public boolean equals(Object that)
+		{
+			if (this == that)
+				return true;
+
+			if (!(that instanceof Work<?>))
+				return false;
+
+			@SuppressWarnings("rawtypes")
+			Work thatWork = (Work) that;
+
+			// Work cannot be null
+			return this.work.equals(thatWork.work);
+		}
+	}
+
+	/**
+	 * Allow work to be added to a FIFO stack in a synchronised manner
+	 * 
+	 * @author Alex Herbert
+	 */
+	private class WorkStack<T>
+	{
+		// We only support a stack size of 1
+		private Work<T> work = null;
+
+		synchronized void setWork(Work<T> work)
+		{
+			this.work = work;
+		}
+
+		synchronized void addWork(Work<T> work)
+		{
+			this.work = work;
+			this.notify();
+		}
+
+		synchronized void addWork(T work)
+		{
+			this.work = new Work<T>(work);
+			this.notify();
+		}
+
+		@SuppressWarnings("unused")
+		synchronized void close()
+		{
+			this.work = null;
+			this.notify();
+		}
+
+		synchronized Work<T> getWork()
+		{
+			Work<T> work = this.work;
+			this.work = null;
+			return work;
+		}
+
+		boolean isEmpty()
+		{
+			return work == null;
+		}
+	}
+
+	private abstract class Worker<T> implements Runnable
+	{
+		private boolean running = true;
+		private Work<T> lastWork = null;
+		private Work<T> result;
+		private WorkStack<T> inbox, outbox;
+
+		public void run()
+		{
+			while (running)
+			{
+				try
+				{
+					Work<T> work = null;
+					synchronized (inbox)
+					{
+						if (inbox.isEmpty())
+						{
+							debug("Inbox empty, waiting ...");
+							inbox.wait();
+						}
+						work = inbox.getWork();
+						if (work != null)
+							debug(" Found work");
+					}
+					if (work == null)
+					{
+						debug(" No work, stopping");
+						break;
+					}
+
+					// Delay processing the work. Allows the work to be updated before we process it.
+					if (work.time != 0)
+					{
+						debug(" Checking delay");
+						long time = work.time;
+						while (System.currentTimeMillis() < time)
+						{
+							debug(" Delaying");
+							Thread.sleep(50);
+							// Assume new work can be added to the inbox. Here we are peaking at the inbox
+							// so we do not take ownership with synchronized
+							if (inbox.work != null)
+								time = inbox.work.time;
+						}
+						// If we intend to modify the inbox then we should take ownership
+						synchronized (inbox)
+						{
+							if (!inbox.isEmpty())
+							{
+								work = inbox.getWork();
+								debug(" Found updated work");
+							}
+						}
+					}
+
+					if (!work.equals(lastWork))
+						result = createResult(work);
+					lastWork = work;
+					if (outbox != null)
+					{
+						debug(" Posting result");
+						outbox.addWork(result);
+					}
+				}
+				catch (InterruptedException e)
+				{
+					debug(" Interrupted, stopping");
+					break;
+				}
+			}
+		}
+
+		private void debug(String msg)
+		{
+			boolean debug = false;
+			if (debug)
+				System.out.println(this.getClass().getSimpleName() + msg);
+		}
+
+		abstract Work<T> createResult(Work<T> work);
+	}
+
 	private DensityCounter dc = null;
 	private int[][] density = null;
 	private int nThreads;
 	private ExecutorService executor = null;
 	private TurboList<Future<?>> futures = null;
-	private RunSettings lastRunSettings = null, runSettings = null;
+	private RunSettings lastRunSettings = null;
 
-	private synchronized void run()
+	private synchronized void run(RunSettings runSettings)
 	{
 		// This is synchronized since it updates the class results. 
 		// Note: We check against the last settings and only repeat what is necessary ...
@@ -1076,11 +1356,16 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			return;
 		}
 
+		IJ.showStatus("Analysing ...");
+
 		// Assign all activations to a channel.
 		// This is only necessary when we have more than 1 channel. If we have 1 channel then 
 		// no correction method is specified.
+		boolean changed = false;
 		if (runSettings.newUnmixSettings(lastRunSettings))
 		{
+			changed = true;
+
 			// Reset
 			for (int i = specificActivations.length; i-- > 0;)
 			{
@@ -1101,7 +1386,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				if (density == null)
 				{
 					IJ.showStatus("Computing observed density");
-					density = dc.countAll(channels);
+					density = dc.countAll(channels - 1);
 				}
 
 				long seed = System.currentTimeMillis();
@@ -1134,7 +1419,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		// -=-=-=--=-=-
 		// Assign non-specific activations
 		// -=-=-=--=-=-
-		if (runSettings.newNonSpecificAssignmentSettings(lastRunSettings))
+		if (changed || runSettings.newNonSpecificAssignmentSettings(lastRunSettings))
 		{
 			// Reset
 			for (int i = nonSpecificActivations.length; i-- > 0;)
@@ -1180,7 +1465,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		// Create a results set with only those molecules assigned to a channel
 		int count = write(output, specificActivations, 0);
-		count = write(output, specificActivations, count);
+		count = write(output, nonSpecificActivations, count);
 
 		for (int c = 0; c < channels; c++)
 			output[c].end();
@@ -1222,7 +1507,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		ContrastEnhancer ce = new ContrastEnhancer();
 		double saturated = 0.35;
 		ce.stretchHistogram(ci, saturated);
-		
+
 		imp = WindowManager.getImage(name);
 		if (imp != null && imp.isComposite())
 		{
@@ -1550,9 +1835,14 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		MemoryPeakResults.addResults(r);
 
 		ImageProcessor[] images = new ImageProcessor[3];
+		int id = 0;
 		for (int c = 0; c < 3; c++)
 		{
-			r.addAllf(results[c].getResults());
+			// We add them as if tracing is perfect. So each peak result has a new ID.
+			// This allows the output of the simulation to be used directly by the pulse analysis code.
+			ArrayList<PeakResult> list = (ArrayList<PeakResult>) results[c].getResults();
+			for (PeakResult p : list)
+				r.add(createResult(p.getFrame(), p.getXPosition(), p.getYPosition(), ++id));
 
 			// Draw
 			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.LOCALISATIONS, true,
@@ -1560,7 +1850,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			image.setLiveImage(false);
 			image.setDisplayImage(false);
 			image.begin();
-			image.addAll(results[c].getResults());
+			image.addAll(list);
 			image.end();
 			images[c] = image.getImagePlus().getProcessor();
 		}
@@ -1764,11 +2054,16 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				y = (float) (xy[1] + rand.nextGaussian() * precision);
 			} while (outOfBounds(y));
 
-			IdPeakResult r = new IdPeakResult(t, x, y, 1, 1, id);
-			r.noise = 1; // So it appears calibrated
-			results.add(r);
+			results.add(createResult(t, x, y, id));
 		}
 		return;
+	}
+
+	private IdPeakResult createResult(int t, float x, float y, int id)
+	{
+		IdPeakResult r = new IdPeakResult(t, x, y, 1, 1, id);
+		r.noise = 1; // So it appears calibrated
+		return r;
 	}
 
 	private boolean showSimulationDialog()
