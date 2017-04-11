@@ -1844,7 +1844,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			for (PeakResult p : list)
 				r.add(createResult(p.getFrame(), p.getXPosition(), p.getYPosition(), ++id));
 
-			// Draw
+			// Draw the unmixed activations
 			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.LOCALISATIONS, true,
 					true, TITLE, bounds, sim_nmPerPixel, 1, 1024.0 / sim_size, 0, ResultsMode.ADD);
 			image.setLiveImage(false);
@@ -1855,6 +1855,11 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			images[c] = image.getImagePlus().getProcessor();
 		}
 		displayComposite(images, TITLE);
+		
+		// TODO:
+		// Show an image of what it looks like with no unmixing, i.e. colours allocated 
+		// from the frame
+		
 
 		Utils.showStatus("Simulation complete: " + Utils.timeToString(System.currentTimeMillis() - start));
 	}
@@ -2012,14 +2017,14 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		for (int i = 0, t = 1; i < sim_cycles; i++, t += 30)
 		{
-			simulateActivations(rdg, bd[0], molecules[c], results[0], t, precision, id);
-			simulateActivations(rdg, bd[1], molecules[c], results[1], t + 10, precision, id);
-			simulateActivations(rdg, bd[2], molecules[c], results[2], t + 20, precision, id);
+			simulateActivations(rdg, bd[0], molecules[c], results[c], t, precision, id);
+			simulateActivations(rdg, bd[1], molecules[c], results[c], t + 10, precision, id);
+			simulateActivations(rdg, bd[2], molecules[c], results[c], t + 20, precision, id);
 			// Add non-specific activations
 			if (bd[3] != null)
 			{
 				for (int t2 : frames)
-					simulateActivations(rdg, bd[3], molecules[c], results[2], t2, precision, id);
+					simulateActivations(rdg, bd[3], molecules[c], results[c], t2, precision, id);
 			}
 		}
 	}
