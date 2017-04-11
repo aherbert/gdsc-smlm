@@ -405,6 +405,12 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			IJ.error(TITLE, "No results could be loaded");
 			return;
 		}
+		
+		if (!results.isCalibrated())
+		{
+			IJ.error(TITLE, "Results must have basic calibration (pixel pitch and gain)");
+			return;
+		}
 
 		// Get the traces
 		traces = TraceManager.convert(results);
@@ -1108,7 +1114,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			// Copy the current settings required
 			if (channels > 1)
 			{
-				this.densityRadius = PulseActivationAnalysis.densityRadius;
+				this.densityRadius = PulseActivationAnalysis.densityRadius / results.getNmPerPixel();
 				int crosstalkCorrectionIndex = PulseActivationAnalysis.crosstalkCorrectionIndex;
 				if (crosstalkCorrectionIndex >= 0 && crosstalkCorrectionIndex < CrosstalkCorrection.values().length)
 					crosstalkCorrection = CrosstalkCorrection.values()[crosstalkCorrectionIndex];

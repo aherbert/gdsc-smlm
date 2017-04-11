@@ -246,6 +246,21 @@ public abstract class AbstractPeakResults implements PeakResults
 		return false;
 	}
 
+	/**
+	 * Checks if the results have a basic calibration. This requires the pixel
+	 * size and camera gain.
+	 *
+	 * @return true, if is calibrated
+	 */
+	public boolean isCalibrated()
+	{
+		if (calibration != null)
+		{
+			return calibration.hasNmPerPixel() && calibration.hasGain();
+		}
+		return false;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
