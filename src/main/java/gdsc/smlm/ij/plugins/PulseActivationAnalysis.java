@@ -65,6 +65,7 @@ import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Plot2;
+import ij.plugin.ContrastEnhancer;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
@@ -218,7 +219,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		{
 			super(x, y);
 			this.radius = radius;
-			length = 2*radius;
+			length = 2 * radius;
 			sina = (float) Math.sin(angle);
 			cosa = (float) Math.cos(angle);
 		}
@@ -274,6 +275,26 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private static double[] subtractionCutoff = { 50, 50, 50 };
 	private static int nonSpecificAssignmentIndex = NonSpecificAssignment.NONE.ordinal();
 	private static double nonSpecificAssignmentCutoff = 50;
+
+	// Simulation settings
+	private RandomDataGenerator rdg = null;
+
+	private RandomDataGenerator getRandomDataGenerator()
+	{
+		if (rdg == null)
+			rdg = new RandomDataGenerator(new Well19937c());
+		return rdg;
+	}
+
+	private static int[] sim_nMolecules = { 1000, 1000, 1000 };
+	private static SimulationDistribution[] sim_distribution = { SimulationDistribution.CIRCLE,
+			SimulationDistribution.LINE, SimulationDistribution.POINT };
+	private static double sim_precision[] = { 15, 15, 15 }; // nm
+	private static int sim_cycles = 1000;
+	private static int sim_size = 256;
+	private static double sim_nmPerPixel = 100;
+	private static double sim_activationDensity = 0.1; // molecules/micrometer
+	private static double sim_nonSpecificFrequency = 0.01;
 
 	private GlobalSettings settings;
 	private ResultsSettings resultsSettings;
@@ -1167,32 +1188,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		// Collate image into a stack
 		if (channels > 1 && resultsSettings.getResultsImage() != ResultsImage.NONE)
 		{
-			ImageStack stack = null; // We do not yet know the size
-			for (int c = 1; c <= channels; c++)
-			{
-				ImageProcessor ip = getImage(output[c - 1]);
-				if (stack == null)
-					stack = new ImageStack(ip.getWidth(), ip.getHeight());
-				ip.setColorModel(null);
-				stack.addSlice("C" + c, ip);
-			}
-
-			// Create a composite
-			String name = results.getName() + " " + TITLE;
-			ImagePlus imp = new ImagePlus(name, stack);
-			imp.setDimensions(channels, 1, 1);
-			CompositeImage ci = new CompositeImage(imp, IJ.COMPOSITE);
-
-			imp = WindowManager.getImage(name);
-			if (imp != null && imp.isComposite())
-			{
-				ci.setMode(imp.getCompositeMode());
-				imp.setImage(ci);
-			}
-			else
-			{
-				ci.show();
-			}
+			ImageProcessor[] images = new ImageProcessor[channels];
+			for (int c = 0; c < channels; c++)
+				images[c] = getImage(output[c]);
+			displayComposite(images, results.getName() + " " + TITLE);
 		}
 
 		lastRunSettings = runSettings;
@@ -1200,6 +1199,40 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		IJ.showStatus(String.format("%d/%s, %d/%s", count, Utils.pleural(traces.length, "Trace"), output[0].size(),
 				Utils.pleural(results.size(), "Result")));
+	}
+
+	private void displayComposite(ImageProcessor[] images, String name)
+	{
+		ImageStack stack = null; // We do not yet know the size
+		for (int i = 0; i < images.length; i++)
+		{
+			ImageProcessor ip = images[i];
+			if (stack == null)
+				stack = new ImageStack(ip.getWidth(), ip.getHeight());
+			ip.setColorModel(null);
+			stack.addSlice("C" + (i + 1), ip);
+		}
+
+		// Create a composite
+		ImagePlus imp = new ImagePlus(name, stack);
+		imp.setDimensions(images.length, 1, 1);
+		CompositeImage ci = new CompositeImage(imp, IJ.COMPOSITE);
+
+		// Make it easier to see
+		ContrastEnhancer ce = new ContrastEnhancer();
+		double saturated = 0.35;
+		ce.stretchHistogram(ci, saturated);
+		
+		imp = WindowManager.getImage(name);
+		if (imp != null && imp.isComposite())
+		{
+			ci.setMode(imp.getCompositeMode());
+			imp.setImage(ci);
+		}
+		else
+		{
+			ci.show();
+		}
 	}
 
 	private void createThreadPool()
@@ -1477,14 +1510,19 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 	private void runSimulation()
 	{
+		TITLE += " Simulation";
+
 		if (!showSimulationDialog())
 			return;
 
-		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c());
+		long start = System.currentTimeMillis();
+		RandomDataGenerator rdg = getRandomDataGenerator();
 
 		// Draw the molecule positions
+		Utils.showStatus("Simulating molecules ...");
 		float[][][] molecules = new float[3][][];
 		MemoryPeakResults[] results = new MemoryPeakResults[3];
+		Rectangle bounds = new Rectangle(0, 0, sim_size, sim_size);
 		for (int c = 0; c < 3; c++)
 		{
 			molecules[c] = simulateMolecules(rdg, c);
@@ -1492,25 +1530,43 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			// Create a dataset to store the activations
 			MemoryPeakResults r = new MemoryPeakResults();
 			r.setCalibration(new Calibration(sim_nmPerPixel, 1, 100));
-			r.setBounds(new Rectangle(0, 0, sim_size, sim_size));
+			r.setBounds(bounds);
 			r.setName(TITLE + " C" + (c + 1));
 			MemoryPeakResults.addResults(r);
 			results[c] = r;
 		}
 
-		// Simulate activations
+		// Simulate activation
+		Utils.showStatus("Simulating activations ...");
 		for (int c = 0; c < 3; c++)
 			simulateActivations(rdg, molecules, c, results);
 
 		// Combine
+		Utils.showStatus("Producing simulation output ...");
 		MemoryPeakResults r = new MemoryPeakResults();
 		r.setCalibration(new Calibration(sim_nmPerPixel, 1, 100));
 		r.setBounds(new Rectangle(0, 0, sim_size, sim_size));
 		r.setName(TITLE);
 		MemoryPeakResults.addResults(r);
 
+		ImageProcessor[] images = new ImageProcessor[3];
 		for (int c = 0; c < 3; c++)
+		{
 			r.addAllf(results[c].getResults());
+
+			// Draw
+			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.LOCALISATIONS, true,
+					true, TITLE, bounds, sim_nmPerPixel, 1, 1024.0 / sim_size, 0, ResultsMode.ADD);
+			image.setLiveImage(false);
+			image.setDisplayImage(false);
+			image.begin();
+			image.addAll(results[c].getResults());
+			image.end();
+			images[c] = image.getImagePlus().getProcessor();
+		}
+		displayComposite(images, TITLE);
+
+		Utils.showStatus("Simulation complete: " + Utils.timeToString(System.currentTimeMillis() - start));
 	}
 
 	private float[][] simulateMolecules(RandomDataGenerator rdg, int c)
@@ -1645,7 +1701,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		}
 
 		// Assume 10 frames after each channel pulse => 30 frames per cycle
-		double precision = sim_precision[c];
+		double precision = sim_precision[c] / sim_nmPerPixel;
 		int id = c + 1;
 
 		RandomGenerator rand = rdg.getRandomGenerator();
@@ -1698,23 +1754,22 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		while (k-- > 0)
 		{
 			float[] xy = molecules[sample[k]];
-			float x = (float) (xy[0] + rand.nextGaussian() * precision);
-			float y = (float) (xy[1] + rand.nextGaussian() * precision);
-			results.add(new IdPeakResult(t, x, y, 1, 1, id));
+			float x, y;
+			do
+			{
+				x = (float) (xy[0] + rand.nextGaussian() * precision);
+			} while (outOfBounds(x));
+			do
+			{
+				y = (float) (xy[1] + rand.nextGaussian() * precision);
+			} while (outOfBounds(y));
+
+			IdPeakResult r = new IdPeakResult(t, x, y, 1, 1, id);
+			r.noise = 1; // So it appears calibrated
+			results.add(r);
 		}
 		return;
 	}
-
-	private static int[] sim_nMolecules = { 1000, 1000, 1000 };
-	private static SimulationDistribution[] sim_distribution = { SimulationDistribution.CIRCLE,
-			SimulationDistribution.LINE, SimulationDistribution.POINT };
-	private static double sim_precision[] = { 15, 15, 15 }; // nm
-	// These could be collected in the simulation dialog
-	private static int sim_cycles = 1000;
-	private static int sim_size = 256;
-	private static double sim_nmPerPixel = 100;
-	private static double sim_activationDensity = 0.1; // molecules/micrometer
-	private static double sim_nonSpecificFrequency = 0.01;
 
 	private boolean showSimulationDialog()
 	{
@@ -1722,6 +1777,14 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		SimulationDistribution[] distributionValues = SimulationDistribution.values();
 		String[] distribution = SettingsManager.getNames((Object[]) distributionValues);
+
+		// Random crosstalk if not set
+		if (Maths.max(ct) == 0)
+		{
+			RandomDataGenerator rdg = getRandomDataGenerator();
+			for (int i = 0; i < ct.length; i++)
+				ct[i] = rdg.nextUniform(0, 0.2);
+		}
 
 		// Three channel
 		for (int c = 0; c < 3; c++)
@@ -1748,6 +1811,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			sim_precision[c] = Math.abs(gd.getNextNumber());
 			ct[2 * c] = Math.abs(gd.getNextNumber());
 			ct[2 * c + 1] = Math.abs(gd.getNextNumber());
+			for (int i = 0; i < ct.length; i += 2)
+				validateCrosstalk(i, i + 1);
 		}
 
 		if (gd.invalidNumber())
@@ -1755,6 +1820,20 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		if (count < 2)
 		{
 			IJ.error(TITLE, "Simulation requires at least 2 channels");
+			return false;
+		}
+
+		try
+		{
+			for (int i = 0; i < ct.length; i += 2)
+			{
+				if (sim_nMolecules[i / 2] > 0)
+					validateCrosstalk(i, i + 1);
+			}
+		}
+		catch (IllegalArgumentException ex)
+		{
+			IJ.error(TITLE, ex.getMessage());
 			return false;
 		}
 
