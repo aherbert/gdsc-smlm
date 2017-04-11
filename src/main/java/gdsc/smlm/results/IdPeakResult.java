@@ -42,10 +42,32 @@ public class IdPeakResult extends PeakResult
 	 * @param id
 	 *            the id
 	 */
-	public IdPeakResult(int frame, int origX, int origY, float origValue, double error, float noise,
-			float[] params, float[] paramsStdDev, int id)
+	public IdPeakResult(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
+			float[] paramsStdDev, int id)
 	{
 		super(frame, origX, origY, origValue, error, noise, params, paramsStdDev);
+		this.id = id;
+	}
+
+	/**
+	 * Instantiates a new id peak result.
+	 *
+	 * @param frame
+	 *            the frame
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param sd
+	 *            the sd
+	 * @param signal
+	 *            the signal
+	 * @param id
+	 *            the id
+	 */
+	public IdPeakResult(int frame, float x, float y, float sd, float signal, int id)
+	{
+		super(frame, x, y, sd, signal);
 		this.id = id;
 	}
 

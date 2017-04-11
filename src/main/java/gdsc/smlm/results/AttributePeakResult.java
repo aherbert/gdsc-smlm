@@ -152,7 +152,7 @@ public class AttributePeakResult extends PeakResult
 		// Validate the current end frame
 		setEndFrame(endFrame);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -204,7 +204,26 @@ public class AttributePeakResult extends PeakResult
 	}
 
 	/**
-	 * Instantiates a new id peak result.
+	 * Instantiates a new attribute peak result.
+	 *
+	 * @param frame
+	 *            the frame
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param sd
+	 *            the sd
+	 * @param signal
+	 *            the signal
+	 */
+	public AttributePeakResult(int frame, float x, float y, float sd, float signal)
+	{
+		super(frame, x, y, sd, signal);
+	}
+
+	/**
+	 * Instantiates a new attribute peak result.
 	 *
 	 * @param x
 	 *            the x

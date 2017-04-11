@@ -52,6 +52,27 @@ public class ExtendedPeakResult extends IdPeakResult
 	}
 
 	/**
+	 * Simple constructor to create a result with frame, location, width, strength, and id.
+	 *
+	 * @param frame
+	 *            the frame
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param sd
+	 *            the sd
+	 * @param signal
+	 *            the signal
+	 * @param id
+	 *            the id
+	 */
+	public ExtendedPeakResult(int frame, float x, float y, float sd, float signal, int id)
+	{
+		super(frame, x, y, sd, signal, id);
+	}
+
+	/**
 	 * Simple constructor to create a result with location, width, strength, and id.
 	 *
 	 * @param x

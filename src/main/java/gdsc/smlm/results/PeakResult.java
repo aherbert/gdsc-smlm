@@ -51,22 +51,46 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Simple constructor to create a result with location, width and strength
-	 * 
+	 * Simple constructor to create a result with frame, location, width and strength.
+	 *
+	 * @param frame
+	 *            the frame
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param sd
+	 *            the sd
 	 * @param signal
+	 *            the signal
 	 */
-	public PeakResult(float x, float y, float sd, float signal)
+	public PeakResult(int frame, float x, float y, float sd, float signal)
 	{
-		origX = (int) Math.round(x);
-		origY = (int) Math.round(y);
+		setFrame(frame);
+		origX = (int) x;
+		origY = (int) y;
 		params = new float[7];
 		params[Gaussian2DFunction.X_POSITION] = x;
 		params[Gaussian2DFunction.Y_POSITION] = y;
 		params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = sd;
 		params[Gaussian2DFunction.SIGNAL] = signal;
+	}
+
+	/**
+	 * Simple constructor to create a result with location, width and strength.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param sd
+	 *            the sd
+	 * @param signal
+	 *            the signal
+	 */
+	public PeakResult(float x, float y, float sd, float signal)
+	{
+		this(0, x, y, sd, signal);
 	}
 
 	/**
@@ -809,13 +833,14 @@ public class PeakResult implements Comparable<PeakResult>
 	/**
 	 * Sets the frame.
 	 *
-	 * @param frame The time frame that this result corresponds to
+	 * @param frame
+	 *            The time frame that this result corresponds to
 	 */
 	public void setFrame(int frame)
 	{
 		this.frame = frame;
 	}
-	
+
 	/**
 	 * Checks for end frame. Derived classes can override this.
 	 *
