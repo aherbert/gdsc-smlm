@@ -3,6 +3,7 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -81,12 +82,13 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 {
 	private String TITLE = "Activation Analysis";
 
-	private enum CrosstalkCorrection
+	private enum Correction
 	{
 		//@formatter:off
 		NONE{ public String getName() { return "None"; }},
 		SUBTRACTION{ public String getName() { return "Subtraction"; }},
-		SWITCH{ public String getName() { return "Switch"; }};
+		MOST_LIKELY{ public String getName() { return "Most likely"; }},
+		WEIGHTED_RANDOM{ public String getName() { return "Weighted random"; }};
 		//@formatter:on
 
 		@Override
@@ -103,25 +105,13 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		abstract public String getName();
 	}
 
-	private enum NonSpecificAssignment
+	private static Correction[] specificCorrection, nonSpecificCorrection;
+	static
 	{
-		//@formatter:off
-		NONE{ public String getName() { return "None"; }},
-		MOST_LIKELY{ public String getName() { return "Most likely"; }};
-		//@formatter:on
-
-		@Override
-		public String toString()
-		{
-			return getName();
-		}
-
-		/**
-		 * Gets the name.
-		 *
-		 * @return the name
-		 */
-		abstract public String getName();
+		EnumSet<Correction> correction = EnumSet.allOf(Correction.class);
+		specificCorrection = correction.toArray(new Correction[correction.size()]);
+		correction.remove(Correction.SUBTRACTION);
+		nonSpecificCorrection = correction.toArray(new Correction[correction.size()]);
 	}
 
 	private enum SimulationDistribution
@@ -252,7 +242,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	}
 
 	private static String inputOption = "";
-	private static int channels = 1;
+	// Note: Set defaults to work with the 3-channel simulation
+	private static int channels = 3;
 	private static final int MAX_CHANNELS = 3;
 
 	private static int repeatInterval = 30;
@@ -271,10 +262,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private static int targetChannel = 1;
 
 	private static double densityRadius = 35;
-	private static int crosstalkCorrectionIndex = CrosstalkCorrection.SUBTRACTION.ordinal();
-	private static double[] subtractionCutoff = { 50, 50, 50 };
-	private static int nonSpecificAssignmentIndex = NonSpecificAssignment.NONE.ordinal();
-	private static double nonSpecificAssignmentCutoff = 50;
+	private static int specificCorrectionIndex = Correction.SUBTRACTION.ordinal();
+	private static double[] specificCorrectionCutoff = { 50, 50, 50 };
+	private static int nonSpecificCorrectionIndex = 0;
+	private static double nonSpecificCorrectionCutoff = 50;
 
 	// Simulation settings
 	private RandomDataGenerator rdg = null;
@@ -305,7 +296,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	{
 		final Trace trace;
 		float x, y;
-		final int channelx;
+		final int channel;
 		int currentChannel;
 
 		Activation(Trace trace, int channel)
@@ -314,29 +305,28 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			float[] centroid = trace.getCentroid(CentroidMethod.SIGNAL_WEIGHTED);
 			x = centroid[0];
 			y = centroid[1];
-			// zero index
-			this.channelx = channel - 1;
+			this.channel = channel;
 			currentChannel = channel;
 		}
 
-		boolean hasSpecificChannel()
+		boolean hasChannel()
 		{
-			return channelx != -1;
+			return channel != 0;
 		}
 
 		int getChannel()
 		{
-			return channelx;
+			return channel - 1;
 		}
 
 		boolean hasCurrentChannel()
 		{
-			return currentChannel != -1;
+			return currentChannel != 0;
 		}
 
 		int getCurrentChannel()
 		{
-			return currentChannel;
+			return currentChannel - 1;
 		}
 
 		/*
@@ -367,6 +357,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		public int getID()
 		{
 			// Allow the ID to be updated from the original channel by using a current channel field
+			// Note: the ID must be zero or above
 			return currentChannel;
 		}
 	}
@@ -579,7 +570,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		for (int i = list.size(); i-- > 0;)
 		{
 			Activation result = list.getf(i);
-			if (result.hasSpecificChannel())
+			if (result.hasChannel())
 				count[result.getChannel()]++;
 		}
 
@@ -590,7 +581,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		for (int i = list.size(), c1 = 0, c2 = 0; i-- > 0;)
 		{
 			Activation result = list.getf(i);
-			if (result.hasSpecificChannel())
+			if (result.hasChannel())
 				specificActivations[c1++] = result;
 			else
 				nonSpecificActivations[c2++] = result;
@@ -861,13 +852,13 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			}
 
 			gd.addNumericField("Local_density_radius", densityRadius, 0, 6, "nm");
-			correctionNames = SettingsManager.getNames((Object[]) CrosstalkCorrection.values());
-			gd.addChoice("Crosstalk_correction", correctionNames, correctionNames[crosstalkCorrectionIndex]);
+			correctionNames = SettingsManager.getNames((Object[]) specificCorrection);
+			gd.addChoice("Crosstalk_correction", correctionNames, correctionNames[specificCorrectionIndex]);
 			for (int c = 1; c <= channels; c++)
-				gd.addSlider("Subtraction_cutoff_C" + c + "(%)", 0, 100, subtractionCutoff[c - 1]);
-			assigmentNames = SettingsManager.getNames((Object[]) NonSpecificAssignment.values());
-			gd.addChoice("Nonspecific_assigment", assigmentNames, assigmentNames[nonSpecificAssignmentIndex]);
-			gd.addSlider("Nonspecific_assignment_cutoff (%)", 0, 100, nonSpecificAssignmentCutoff);
+				gd.addSlider("Crosstalk_correction_cutoff_C" + c + "(%)", 0, 100, specificCorrectionCutoff[c - 1]);
+			assigmentNames = SettingsManager.getNames((Object[]) nonSpecificCorrection);
+			gd.addChoice("Nonspecific_assigment", assigmentNames, assigmentNames[nonSpecificCorrectionIndex]);
+			gd.addSlider("Nonspecific_assignment_cutoff (%)", 0, 100, nonSpecificCorrectionCutoff);
 		}
 
 		settings = SettingsManager.loadSettings();
@@ -938,13 +929,14 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 				Recorder.recordOption("Local_density_radius", Double.toString(densityRadius));
 
-				Recorder.recordOption("Crosstalk_correction", correctionNames[crosstalkCorrectionIndex]);
+				Recorder.recordOption("Crosstalk_correction", correctionNames[specificCorrectionIndex]);
 				for (int c = 1; c <= channels; c++)
-					Recorder.recordOption("Subtraction_cutoff_C" + c, Double.toString(subtractionCutoff[c - 1]));
+					Recorder.recordOption("Crosstalk_correction_cutoff_C" + c,
+							Double.toString(specificCorrectionCutoff[c - 1]));
 
-				Recorder.recordOption("Nonspecific_assigment", assigmentNames[nonSpecificAssignmentIndex]);
+				Recorder.recordOption("Nonspecific_assigment", assigmentNames[nonSpecificCorrectionIndex]);
 				Recorder.recordOption("Nonspecific_assignment_cutoff (%)",
-						Double.toString(nonSpecificAssignmentCutoff));
+						Double.toString(nonSpecificCorrectionCutoff));
 			}
 
 			Recorder.recordOption("Image", imageNames[resultsSettings.getResultsImage().ordinal()]);
@@ -1065,15 +1057,15 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				}
 
 				densityRadius = Math.abs(gd.getNextNumber());
-				crosstalkCorrectionIndex = gd.getNextChoiceIndex();
+				specificCorrectionIndex = gd.getNextChoiceIndex();
 				for (int c = 1; c <= channels; c++)
 				{
-					subtractionCutoff[c - 1] = (int) gd.getNextNumber();
-					validatePercentage("Subtraction_cutoff_C" + c, subtractionCutoff[c - 1]);
+					specificCorrectionCutoff[c - 1] = (int) gd.getNextNumber();
+					validatePercentage("Crosstalk_correction_cutoff_C" + c, specificCorrectionCutoff[c - 1]);
 				}
-				nonSpecificAssignmentIndex = gd.getNextChoiceIndex();
-				nonSpecificAssignmentCutoff = gd.getNextNumber();
-				validatePercentage("Nonspecific_assignment_cutoff", nonSpecificAssignmentCutoff);
+				nonSpecificCorrectionIndex = gd.getNextChoiceIndex();
+				nonSpecificCorrectionCutoff = gd.getNextNumber();
+				validatePercentage("Nonspecific_assignment_cutoff", nonSpecificCorrectionCutoff);
 			}
 		}
 		catch (IllegalArgumentException ex)
@@ -1137,10 +1129,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private class RunSettings
 	{
 		double densityRadius;
-		CrosstalkCorrection crosstalkCorrection = CrosstalkCorrection.NONE;
-		double[] subtractionCutoff;
-		NonSpecificAssignment nonSpecificAssignment = NonSpecificAssignment.NONE;
-		double nonSpecificAssignmentCutoff;
+		Correction specificCorrection = Correction.NONE;
+		double[] specificCorrectionCutoff;
+		Correction nonSpecificCorrection = Correction.NONE;
+		double nonSpecificCorrectionCutoff;
 
 		@SuppressWarnings("unused")
 		ResultsSettings resultsSettings;
@@ -1151,20 +1143,26 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			if (channels > 1)
 			{
 				this.densityRadius = PulseActivationAnalysis.densityRadius / results.getNmPerPixel();
-				int crosstalkCorrectionIndex = PulseActivationAnalysis.crosstalkCorrectionIndex;
-				if (crosstalkCorrectionIndex >= 0 && crosstalkCorrectionIndex < CrosstalkCorrection.values().length)
-					crosstalkCorrection = CrosstalkCorrection.values()[crosstalkCorrectionIndex];
-				this.subtractionCutoff = new double[channels];
+				
+				specificCorrection = getCorrection(PulseActivationAnalysis.specificCorrection,
+						PulseActivationAnalysis.specificCorrectionIndex);
+				this.specificCorrectionCutoff = new double[channels];
 				for (int i = channels; i-- > 0;)
 					// Convert from percentage to a probability
-					this.subtractionCutoff[i] = PulseActivationAnalysis.subtractionCutoff[i] / 100.0;
-				int nonSpecificAssignmentIndex = PulseActivationAnalysis.nonSpecificAssignmentIndex;
-				if (nonSpecificAssignmentIndex >= 0 &&
-						nonSpecificAssignmentIndex < NonSpecificAssignment.values().length)
-					nonSpecificAssignment = NonSpecificAssignment.values()[nonSpecificAssignmentIndex];
-				this.nonSpecificAssignmentCutoff = PulseActivationAnalysis.nonSpecificAssignmentCutoff / 100.0;
+					this.specificCorrectionCutoff[i] = PulseActivationAnalysis.specificCorrectionCutoff[i] / 100.0;
+				
+				nonSpecificCorrection = getCorrection(PulseActivationAnalysis.nonSpecificCorrection,
+						PulseActivationAnalysis.nonSpecificCorrectionIndex);
+				this.nonSpecificCorrectionCutoff = PulseActivationAnalysis.nonSpecificCorrectionCutoff / 100.0;
 			}
 			this.resultsSettings = PulseActivationAnalysis.this.resultsSettings.clone();
+		}
+
+		Correction getCorrection(Correction[] correction, int index)
+		{
+			if (index >= 0 && index < correction.length)
+				return correction[index];
+			return Correction.NONE;
 		}
 
 		public boolean newUnmixSettings(RunSettings lastRunSettings)
@@ -1173,28 +1171,28 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				return true;
 			if (lastRunSettings.densityRadius != densityRadius)
 				return true;
-			if (lastRunSettings.crosstalkCorrection != crosstalkCorrection)
+			if (lastRunSettings.specificCorrection != specificCorrection)
 				return true;
-			if (crosstalkCorrection == CrosstalkCorrection.SUBTRACTION)
+			if (specificCorrection != Correction.NONE)
 			{
 				for (int i = channels; i-- > 0;)
-					if (lastRunSettings.subtractionCutoff[i] != subtractionCutoff[i])
+					if (lastRunSettings.specificCorrectionCutoff[i] != specificCorrectionCutoff[i])
 						return true;
 			}
 			return false;
 		}
 
-		public boolean newNonSpecificAssignmentSettings(RunSettings lastRunSettings)
+		public boolean newNonSpecificCorrectionSettings(RunSettings lastRunSettings)
 		{
 			if (lastRunSettings == null)
 				return true;
 			if (lastRunSettings.densityRadius != densityRadius)
 				return true;
-			if (lastRunSettings.nonSpecificAssignment != nonSpecificAssignment)
+			if (lastRunSettings.nonSpecificCorrection != nonSpecificCorrection)
 				return true;
-			if (nonSpecificAssignment == NonSpecificAssignment.MOST_LIKELY)
+			if (nonSpecificCorrection != Correction.NONE)
 			{
-				if (lastRunSettings.nonSpecificAssignmentCutoff != nonSpecificAssignmentCutoff)
+				if (lastRunSettings.nonSpecificCorrectionCutoff != nonSpecificCorrectionCutoff)
 					return true;
 			}
 			return false;
@@ -1412,10 +1410,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			for (int i = specificActivations.length; i-- > 0;)
 			{
 				Activation result = specificActivations[i];
-				result.currentChannel = result.channelx;
+				result.currentChannel = result.channel;
 			}
 
-			if (runSettings.crosstalkCorrection != CrosstalkCorrection.NONE)
+			if (runSettings.specificCorrection != Correction.NONE)
 			{
 				// Use a density counter that can put all the activations on a grid.
 				// It has a method to count the number of activations within a radius that 
@@ -1428,7 +1426,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				if (density == null)
 				{
 					IJ.showStatus("Computing observed density");
-					density = dc.countAll(channels - 1);
+					density = dc.countAll(channels);
 				}
 
 				long seed = System.currentTimeMillis();
@@ -1445,7 +1443,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				for (int from = 0; from < specificActivations.length;)
 				{
 					int to = Math.min(from + nPerThread, specificActivations.length);
-					futures.add(executor.submit(new UnmixWorker(runSettings, density, newChannel, from, to, seed++)));
+					futures.add(executor
+							.submit(new SpecificUnmixWorker(runSettings, density, newChannel, from, to, seed++)));
 					from = to;
 				}
 				waitToFinish();
@@ -1461,16 +1460,16 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		// -=-=-=--=-=-
 		// Assign non-specific activations
 		// -=-=-=--=-=-
-		if (changed || runSettings.newNonSpecificAssignmentSettings(lastRunSettings))
+		if (changed || runSettings.newNonSpecificCorrectionSettings(lastRunSettings))
 		{
 			// Reset
 			for (int i = nonSpecificActivations.length; i-- > 0;)
 			{
 				Activation result = nonSpecificActivations[i];
-				result.currentChannel = result.channelx;
+				result.currentChannel = result.channel;
 			}
 
-			if (runSettings.nonSpecificAssignment != NonSpecificAssignment.NONE)
+			if (runSettings.nonSpecificCorrection != Correction.NONE)
 			{
 				createDensityCounter((float) runSettings.densityRadius);
 
@@ -1601,27 +1600,90 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		futures.clear();
 	}
 
-	/**
-	 * For processing the unmixing of specific channel activations
-	 */
-	private class UnmixWorker implements Runnable
+	private abstract class UnmixWorker
 	{
-		final RunSettings runSettings;
-		final int[][] density;
 		final int[] newChannel;
 		final int from;
 		final int to;
 		RandomGenerator random;
+		int[] assignedChannel = new int[channels];
+		double[] p = new double[channels];
 
-		public UnmixWorker(RunSettings runSettings, int[][] density, int[] newChannel, int from, int to, long seed)
+		public UnmixWorker(int[] newChannel, int from, int to, long seed)
 		{
-			this.runSettings = runSettings;
-			this.density = density;
 			this.newChannel = newChannel;
 			this.from = from;
 			this.to = to;
-			if (runSettings.crosstalkCorrection != CrosstalkCorrection.SUBTRACTION)
-				random = new Well19937c(seed);
+			random = new Well19937c(seed);
+		}
+
+		int weightedRandomSelection(double cutoff)
+		{
+			double sum = 0;
+			for (int j = channels; j-- > 0;)
+			{
+				if (p[j] > cutoff)
+					sum += p[j];
+				else
+					p[j] = 0;
+			}
+			if (sum == 0)
+				return 0;
+
+			final double sum2 = sum * random.nextDouble();
+			sum = 0;
+			for (int j = channels; j-- > 0;)
+			{
+				sum += p[j];
+				if (sum >= sum2)
+				{
+					return j + 1;
+				}
+			}
+			// This should not happen
+			return 0;
+		}
+
+		int mostLikelySelection(double cutoff)
+		{
+			double max = cutoff;
+			int size = 0;
+			for (int j = channels; j-- > 0;)
+			{
+				if (p[j] > max)
+				{
+					size = 1;
+					max = p[j];
+					assignedChannel[0] = j;
+				}
+				else if (p[j] == max)
+				{
+					// Equal so store all for a random pick
+					assignedChannel[size++] = j;
+				}
+			}
+
+			if (size == 0)
+				return 0;
+
+			return (size > 1) ? assignedChannel[random.nextInt(size)] + 1 : assignedChannel[0] + 1;
+		}
+	}
+
+	/**
+	 * For processing the unmixing of specific channel activations
+	 */
+	private class SpecificUnmixWorker extends UnmixWorker implements Runnable
+	{
+		final RunSettings runSettings;
+		final int[][] density;
+
+		public SpecificUnmixWorker(RunSettings runSettings, int[][] density, int[] newChannel, int from, int to,
+				long seed)
+		{
+			super(newChannel, from, to, seed);
+			this.runSettings = runSettings;
+			this.density = density;
 		}
 
 		/*
@@ -1631,11 +1693,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		 */
 		public void run()
 		{
-			double[] p = new double[channels];
 			for (int i = from; i < to; i++)
 			{
-				// Current channel
-				int c = specificActivations[i].channelx;
+				// Current channel (1-indexed)
+				int c = specificActivations[i].channel;
 
 				// Observed density
 				int[] D = density[i];
@@ -1644,40 +1705,44 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				double[] d;
 				if (channels == 2)
 				{
-					d = unmix(D[0], D[1], ct[C12], ct[C12]);
+					d = unmix(D[1], D[2], ct[C12], ct[C12]);
 				}
 				else
 				{
-					d = unmix(D[0], D[1], D[2], ct[C21], ct[C31], ct[C12], ct[C32], ct[C13], ct[C23]);
+					d = unmix(D[1], D[2], D[3], ct[C21], ct[C31], ct[C12], ct[C32], ct[C13], ct[C23]);
 				}
 
 				// Apply crosstalk correction
-				if (runSettings.crosstalkCorrection == CrosstalkCorrection.SUBTRACTION)
+				if (runSettings.specificCorrection == Correction.SUBTRACTION)
 				{
 					// Compute the probability it is correct:
-					double pc = d[c] / D[c];
+					// This is a measure of how much crosstalk effected the observed density.
+					// (This is taken from Bates et al, 2007)
+					double pc = d[c - 1] / D[c];
 
 					// Remove it if below the subtraction threshold
-					if (pc < runSettings.subtractionCutoff[c])
-						c = -1;
+					if (pc < runSettings.specificCorrectionCutoff[c - 1])
+						c = 0;
 				}
 				else
 				{
-					// Switch.
-					// Compute the probability of each channel and perform a weighted random selection
+					// Compute the probability of each channel as:
+					// p(i) = di / (d1 + d2 + ... + dn)
+					// Note this is different from computing the probability of the channel being correct.
+					// That probability is an indication of how much crosstalk has effected the observed density.
+					// This value is a simple probability using the local density in each channel. 
 					double sum = 0;
 					for (int j = channels; j-- > 0;)
-					{
-						sum += (p[j] = d[j] / D[j]);
-					}
-					final double sum2 = sum * random.nextDouble();
-					sum = 0;
-					for (c = channels; c-- > 0;)
-					{
-						sum += p[c];
-						if (sum >= sum2)
-							break;
-					}
+						sum += d[j];
+					// Note that since this is a specific activation we can assume the molecule will be 
+					// self-counted within the radius and that d will never be zero in every channel
+					for (int j = channels; j-- > 0;)
+						p[j] = d[j] / sum;
+
+					if (runSettings.specificCorrection == Correction.WEIGHTED_RANDOM)
+						c = weightedRandomSelection(runSettings.specificCorrectionCutoff[c - 1]);
+					else //if (runSettings.specificCorrection == CrosstalkCorrection.MOST_LIKELY)
+						c = mostLikelySelection(runSettings.specificCorrectionCutoff[c - 1]);
 				}
 
 				newChannel[i] = c;
@@ -1688,24 +1753,17 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	/**
 	 * For processing the unmixing of specific channel activations
 	 */
-	private class NonSpecificUnmixWorker implements Runnable
+	private class NonSpecificUnmixWorker extends UnmixWorker implements Runnable
 	{
 		final RunSettings runSettings;
 		final DensityCounter dc;
-		final int[] newChannel;
-		final int from;
-		final int to;
-		RandomGenerator random;
 
 		public NonSpecificUnmixWorker(RunSettings runSettings, DensityCounter dc, int[] newChannel, int from, int to,
 				long seed)
 		{
+			super(newChannel, from, to, seed);
 			this.runSettings = runSettings;
 			this.dc = dc;
-			this.newChannel = newChannel;
-			this.from = from;
-			this.to = to;
-			random = new Well19937c(seed);
 		}
 
 		/*
@@ -1719,11 +1777,9 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			// e.g. Compute probability for each channel and assign
 			// using a weighted random selection
 
-			int[] c = new int[channels];
 			for (int i = from; i < to; i++)
 			{
-				// Assigned channel
-				c[0] = -1;
+				int c = 0;
 
 				// Assume the observed density is the true local density 
 				// (i.e. cross talk correction of specific activations is perfect)
@@ -1732,31 +1788,23 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				// Compute the probability of each channel as:
 				// p(i) = di / (d1 + d2 + ... + dn)
 				double sum = 0;
-				for (int j = channels; j-- > 0;)
+				for (int j = 1; j <= channels; j++)
 				{
 					sum += d[j];
 				}
 
-				// Assign to most probable channel above the cut-off
-				double max = runSettings.nonSpecificAssignmentCutoff;
-				int size = 0;
-				for (int j = channels; j-- > 0;)
+				if (sum != 0)
 				{
-					double p = d[j] / sum;
-					if (p > max)
-					{
-						size = 1;
-						max = p;
-						c[0] = j;
-					}
-					else if (p == max)
-					{
-						// Equal so store all for a random pick
-						c[size++] = j;
-					}
+					for (int j = channels; j-- > 0;)
+						p[j] = d[j + 1] / sum;
+
+					if (runSettings.nonSpecificCorrection == Correction.WEIGHTED_RANDOM)
+						c = weightedRandomSelection(runSettings.nonSpecificCorrectionCutoff);
+					else //if (runSettings.nonSpecificCorrection == NonSpecificCorrection.MOST_LIKELY)
+						c = mostLikelySelection(runSettings.nonSpecificCorrectionCutoff);
 				}
 
-				newChannel[i] = (size > 1) ? c[random.nextInt(size)] : c[0];
+				newChannel[i] = c;
 			}
 		}
 	}
@@ -1874,11 +1922,6 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		r.setBounds(new Rectangle(0, 0, sim_size, sim_size));
 		r.setName(TITLE);
 
-		// Add to memory. Set the composite dataset first.
-		MemoryPeakResults.addResults(r);
-		for (int c = 0; c < 3; c++)
-			MemoryPeakResults.addResults(r);
-
 		ImageProcessor[] images = new ImageProcessor[3];
 		for (int c = 0; c < 3; c++)
 		{
@@ -1896,6 +1939,11 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			images[c] = image.getImagePlus().getProcessor();
 		}
 		displayComposite(images, TITLE);
+
+		// Add to memory. Set the composite dataset first.
+		MemoryPeakResults.addResults(r);
+		for (int c = 0; c < 3; c++)
+			MemoryPeakResults.addResults(results[c]);
 
 		// TODO:
 		// Show an image of what it looks like with no unmixing, i.e. colours allocated 
@@ -2137,7 +2185,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		{
 			RandomDataGenerator rdg = getRandomDataGenerator();
 			for (int i = 0; i < ct.length; i++)
-				ct[i] = rdg.nextUniform(0, 0.2);
+				ct[i] = rdg.nextUniform(0.05, 0.15); // Have some crosstalk
 		}
 
 		// Three channel
