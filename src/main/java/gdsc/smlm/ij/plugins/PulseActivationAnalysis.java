@@ -1567,6 +1567,9 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		{
 			ci.show();
 		}
+		
+		if (WindowManager.getWindow("Channels") == null)
+			IJ.run("Channels Tool...");
 	}
 
 	/**
