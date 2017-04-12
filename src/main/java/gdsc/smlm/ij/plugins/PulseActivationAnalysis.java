@@ -405,7 +405,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			IJ.error(TITLE, "No results could be loaded");
 			return;
 		}
-		
+
 		if (!results.isCalibrated())
 		{
 			IJ.error(TITLE, "Results must have basic calibration (pixel pitch and gain)");
@@ -618,45 +618,51 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		if (!showCrossTalkAnalysisDialog())
 			return;
 
-		double[] crosstalk = new double[count.length];
-		long sum = Maths.sum(count);
-		for (int c = 0; c < channels; c++)
-			crosstalk[c] = (double) count[c] / sum;
+		double[] crosstalk = computeCrosstalk(count, targetChannel - 1);
 
-		// Store the cross talk
+		// Store the cross talk.
+		// Crosstalk from M into N is defined as the number of times the molecule that should be 
+		// activated by a pulse from channel M is activated by a pulse from channel N.
+		// targetChannel = M
+		// activationChannel = N
 		int index1, index2 = -1;
 		if (channels == 2)
 		{
 			if (targetChannel == 1)
-				index1 = setCrosstalk(C21, crosstalk[1]);
+				index1 = setCrosstalk(C12, crosstalk[1]);
 			else
-				index1 = setCrosstalk(C12, crosstalk[0]);
+				index1 = setCrosstalk(C21, crosstalk[0]);
 		}
 		else
 		{
 			// 3-channel
 			if (targetChannel == 1)
 			{
-				index1 = setCrosstalk(C21, crosstalk[1]);
-				index2 = setCrosstalk(C31, crosstalk[2]);
+				index1 = setCrosstalk(C12, crosstalk[1]);
+				index2 = setCrosstalk(C13, crosstalk[2]);
 			}
 			else if (targetChannel == 2)
 			{
-				index1 = setCrosstalk(C12, crosstalk[0]);
-				index2 = setCrosstalk(C32, crosstalk[2]);
+				index1 = setCrosstalk(C21, crosstalk[0]);
+				index2 = setCrosstalk(C23, crosstalk[2]);
 			}
 			else
 			{
-				index1 = setCrosstalk(C13, crosstalk[0]);
-				index2 = setCrosstalk(C23, crosstalk[1]);
+				index1 = setCrosstalk(C31, crosstalk[0]);
+				index2 = setCrosstalk(C32, crosstalk[1]);
 			}
 		}
+
+		// Show fraction activations histogram. So we have to set the sum to 1
+		double sum = Maths.sum(crosstalk);
+		for (int i = 0; i < crosstalk.length; i++)
+			crosstalk[i] /= sum;
 
 		// Plot a histogram
 		double[] x = Utils.newArray(channels, 0.5, 1);
 		double[] y = crosstalk;
 		Plot2 plot = new Plot2(TITLE, "Channel", "Fraction activations");
-		plot.setLimits(0, channels + 1, 0, Maths.max(y) * 1.05);
+		plot.setLimits(0, channels + 1, 0, 1);
 		plot.setXMinorTicks(false);
 		plot.addPoints(x, y, Plot2.BAR);
 		String label = String.format("Crosstalk %s = %s", ctNames[index1], Maths.round(ct[index1]));
@@ -664,6 +670,26 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			label += String.format(", %s = %s", ctNames[index2], Maths.round(ct[index2]));
 		plot.addLabel(0, 0, label);
 		Utils.display(TITLE, plot);
+	}
+
+	/**
+	 * Compute crosstalk.
+	 * <p>
+	 * "The crosstalk ratios can be calculated from the ratios of
+	 * incorrectly to correctly colored localizations."
+	 *
+	 * @param count
+	 *            the count
+	 * @param target
+	 *            the target
+	 * @return the double[]
+	 */
+	private static double[] computeCrosstalk(int[] count, int target)
+	{
+		double[] crosstalk = new double[count.length];
+		for (int c = 0; c < count.length; c++)
+			crosstalk[c] = (double) count[c] / count[target];
+		return crosstalk;
 	}
 
 	private int setCrosstalk(int index, double value)
@@ -677,7 +703,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		GenericDialog gd = new GenericDialog(TITLE);
 
 		gd.addMessage(TextUtils.wrap(
-				"Crosstalk analysis requires a sample singly labelled with only one photo-switable probe and imaged with the full pulse lifecycle.",
+				"Crosstalk analysis requires a sample singly labelled with only one photo-switchable probe and imaged with the full pulse lifecycle. The probe should be activated by the pulse in the target channel. Activations from the pulse in other channels is crosstalk.",
 				80));
 
 		String[] ch = new String[channels];
@@ -700,8 +726,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	 * Unmix the observed local densities into the actual densities for 2-channels.
 	 * <p>
 	 * Crosstalk from M into N is defined as the number of times the molecule that should be activated by a pulse from
-	 * channel N is activated by a pulse from channel M. A value less than 0.5 is expected (otherwise the fluorophore is
-	 * not being specifically activated by channel N).
+	 * channel M is activated by a pulse from channel N. A value less than 1 is expected (otherwise the fluorophore is
+	 * not being specifically activated by channel M).
 	 *
 	 * @param D1
 	 *            the observed density in channel 1
@@ -722,7 +748,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		double d1 = (D1 - C21 * D2) / (1 - C12 * C21);
 		double d2 = D2 - C12 * d1;
 		// Assuming D1 and D2 are positive and C12 and C21 are 
-		// between 0 and 0.5 then we do not need to check the bounds.
+		// between 0 and 1 then we do not need to check the bounds.
 		//d1 = Maths.clip(0, D1, d1);
 		//d2 = Maths.clip(0, D2, d2);
 		return new double[] { d1, d2 };
@@ -732,8 +758,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	 * Unmix the observed local densities into the actual densities for 3-channels.
 	 * <p>
 	 * Crosstalk from M into N is defined as the number of times the molecule that should be activated by a pulse from
-	 * channel N is activated by a pulse from channel M. A total value for crosstalk into N is expected to be less than
-	 * 2/3 (otherwise the fluorophore is not being non-specifically activated by channel N).
+	 * channel M is activated by a pulse from channel N. A value less than 1 is expected (otherwise the fluorophore is
+	 * not being specifically activated by channel M).
 	 *
 	 * @param D1
 	 *            the observed density in channel 1
@@ -1841,14 +1867,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		MemoryPeakResults.addResults(r);
 
 		ImageProcessor[] images = new ImageProcessor[3];
-		int id = 0;
 		for (int c = 0; c < 3; c++)
 		{
-			// We add them as if tracing is perfect. So each peak result has a new ID.
-			// This allows the output of the simulation to be used directly by the pulse analysis code.
 			ArrayList<PeakResult> list = (ArrayList<PeakResult>) results[c].getResults();
-			for (PeakResult p : list)
-				r.add(createResult(p.getFrame(), p.getXPosition(), p.getYPosition(), ++id));
+			r.addAllf(list);
 
 			// Draw the unmixed activations
 			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.LOCALISATIONS, true,
@@ -1861,11 +1883,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			images[c] = image.getImagePlus().getProcessor();
 		}
 		displayComposite(images, TITLE);
-		
+
 		// TODO:
 		// Show an image of what it looks like with no unmixing, i.e. colours allocated 
 		// from the frame
-		
 
 		Utils.showStatus("Simulation complete: " + Utils.timeToString(System.currentTimeMillis() - start));
 	}
@@ -1977,29 +1998,32 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		double p = Math.min(0.5, nPerFrame / n);
 
 		// Determine the other channels activation probability using crosstalk
-		double p0, p1, p2, norm;
+		double[] p0 = { p, p, p };
+		int index1, index2, c1, c2;
 		switch (c)
 		{
 			case 0:
-				norm = 1 - ct[C12] - ct[C13];
-				p0 = p;
-				p1 = p * ct[C12] / norm;
-				p2 = p * ct[C13] / norm;
+				index1 = C12;
+				index2 = C13;
+				c1 = 1;
+				c2 = 2;
 				break;
 			case 1:
-				norm = 1 - ct[C21] - ct[C23];
-				p0 = p * ct[C21] / norm;
-				p1 = p;
-				p2 = p * ct[C23] / norm;
+				index1 = C21;
+				index2 = C23;
+				c1 = 0;
+				c2 = 2;
 				break;
 			case 2:
 			default:
-				norm = 1 - ct[C31] - ct[C32];
-				p0 = p * ct[C31] / norm;
-				p1 = p * ct[C32] / norm;
-				p2 = p;
+				index1 = C31;
+				index2 = C32;
+				c1 = 0;
+				c2 = 1;
 				break;
 		}
+		p0[c1] *= ct[index1];
+		p0[c2] *= ct[index2];
 
 		// Assume 10 frames after each channel pulse => 30 frames per cycle
 		double precision = sim_precision[c] / sim_nmPerPixel;
@@ -2007,9 +2031,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		RandomGenerator rand = rdg.getRandomGenerator();
 		BinomialDistribution[] bd = new BinomialDistribution[4];
-		bd[0] = createBinomialDistribution(rand, n, p0);
-		bd[1] = createBinomialDistribution(rand, n, p1);
-		bd[2] = createBinomialDistribution(rand, n, p2);
+		for (int i = 0; i < 3; i++)
+			bd[i] = createBinomialDistribution(rand, n, p0[i]);
 
 		int[] frames = new int[27];
 		for (int i = 1, j = 0; i <= 30; i++)
@@ -2021,11 +2044,14 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		}
 		bd[3] = createBinomialDistribution(rand, n, p * sim_nonSpecificFrequency);
 
+		// Count the actual cross talk
+		int[] count = new int[3];
+
 		for (int i = 0, t = 1; i < sim_cycles; i++, t += 30)
 		{
-			simulateActivations(rdg, bd[0], molecules[c], results[c], t, precision, id);
-			simulateActivations(rdg, bd[1], molecules[c], results[c], t + 10, precision, id);
-			simulateActivations(rdg, bd[2], molecules[c], results[c], t + 20, precision, id);
+			count[0] += simulateActivations(rdg, bd[0], molecules[c], results[c], t, precision, id);
+			count[1] += simulateActivations(rdg, bd[1], molecules[c], results[c], t + 10, precision, id);
+			count[2] += simulateActivations(rdg, bd[2], molecules[c], results[c], t + 20, precision, id);
 			// Add non-specific activations
 			if (bd[3] != null)
 			{
@@ -2033,6 +2059,11 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 					simulateActivations(rdg, bd[3], molecules[c], results[c], t2, precision, id);
 			}
 		}
+
+		// Report simulated cross talk
+		double[] crosstalk = computeCrosstalk(count, c);
+		Utils.log("Crosstalk C%s  %s=>%s, C%s  %s=>%s", ctNames[index1], Utils.rounded(ct[index1]),
+				Utils.rounded(crosstalk[c1]), ctNames[index2], Utils.rounded(ct[index2]), Utils.rounded(crosstalk[c2]));
 	}
 
 	private BinomialDistribution createBinomialDistribution(RandomGenerator rand, int n, double p)
@@ -2042,11 +2073,11 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		return new BinomialDistribution(rand, n, p);
 	}
 
-	private void simulateActivations(RandomDataGenerator rdg, BinomialDistribution bd, float[][] molecules,
+	private int simulateActivations(RandomDataGenerator rdg, BinomialDistribution bd, float[][] molecules,
 			MemoryPeakResults results, int t, double precision, int id)
 	{
 		if (bd == null)
-			return;
+			return 0;
 		int n = molecules.length;
 		int k = bd.sample();
 		// Sample
@@ -2065,14 +2096,18 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				y = (float) (xy[1] + rand.nextGaussian() * precision);
 			} while (outOfBounds(y));
 
-			results.add(createResult(t, x, y, id));
+			results.add(createResult(t, x, y));
 		}
-		return;
+		return sample.length;
 	}
 
-	private IdPeakResult createResult(int t, float x, float y, int id)
+	private int id = 0;
+
+	private IdPeakResult createResult(int t, float x, float y)
 	{
-		IdPeakResult r = new IdPeakResult(t, x, y, 1, 1, id);
+		// We add them as if tracing is perfect. So each peak result has a new ID.
+		// This allows the output of the simulation to be used directly by the pulse analysis code.
+		IdPeakResult r = new IdPeakResult(t, x, y, 1, 1, ++id);
 		r.noise = 1; // So it appears calibrated
 		return r;
 	}
