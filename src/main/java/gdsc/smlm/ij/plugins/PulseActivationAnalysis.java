@@ -329,6 +329,16 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			return channelx;
 		}
 
+		boolean hasCurrentChannel()
+		{
+			return currentChannel != -1;
+		}
+
+		int getCurrentChannel()
+		{
+			return currentChannel;
+		}
+
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -1793,10 +1803,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		for (int i = activations.length; i-- > 0;)
 		{
 			Activation result = activations[i];
-			if (result.hasSpecificChannel())
+			if (result.hasCurrentChannel())
 			{
 				count++;
-				output[result.getChannel()].addAll(result.trace.getPoints());
+				output[result.getCurrentChannel()].addAll(result.trace.getPoints());
 			}
 		}
 		return count;
@@ -1849,7 +1859,6 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			r.setCalibration(new Calibration(sim_nmPerPixel, 1, 100));
 			r.setBounds(bounds);
 			r.setName(TITLE + " C" + (c + 1));
-			MemoryPeakResults.addResults(r);
 			results[c] = r;
 		}
 
@@ -1864,7 +1873,11 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		r.setCalibration(new Calibration(sim_nmPerPixel, 1, 100));
 		r.setBounds(new Rectangle(0, 0, sim_size, sim_size));
 		r.setName(TITLE);
+
+		// Add to memory. Set the composite dataset first.
 		MemoryPeakResults.addResults(r);
+		for (int c = 0; c < 3; c++)
+			MemoryPeakResults.addResults(r);
 
 		ImageProcessor[] images = new ImageProcessor[3];
 		for (int c = 0; c < 3; c++)
