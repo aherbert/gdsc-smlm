@@ -66,10 +66,10 @@ import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Plot2;
-import ij.plugin.ContrastEnhancer;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
 
 /**
  * Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed light activation.
@@ -1143,14 +1143,14 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			if (channels > 1)
 			{
 				this.densityRadius = PulseActivationAnalysis.densityRadius / results.getNmPerPixel();
-				
+
 				specificCorrection = getCorrection(PulseActivationAnalysis.specificCorrection,
 						PulseActivationAnalysis.specificCorrectionIndex);
 				this.specificCorrectionCutoff = new double[channels];
 				for (int i = channels; i-- > 0;)
 					// Convert from percentage to a probability
 					this.specificCorrectionCutoff[i] = PulseActivationAnalysis.specificCorrectionCutoff[i] / 100.0;
-				
+
 				nonSpecificCorrection = getCorrection(PulseActivationAnalysis.nonSpecificCorrection,
 						PulseActivationAnalysis.nonSpecificCorrectionIndex);
 				this.nonSpecificCorrectionCutoff = PulseActivationAnalysis.nonSpecificCorrectionCutoff / 100.0;
@@ -1269,6 +1269,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			this.notify();
 		}
 
+		@SuppressWarnings("unused")
 		synchronized void addWork(T work)
 		{
 			this.work = new Work<T>(work);
@@ -1508,8 +1509,12 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		int count = write(output, specificActivations, 0);
 		count = write(output, nonSpecificActivations, count);
 
+		int size = 0;
 		for (int c = 0; c < channels; c++)
+		{
 			output[c].end();
+			size += output[c].size();
+		}
 
 		// Collate image into a stack
 		if (channels > 1 && resultsSettings.getResultsImage() != ResultsImage.NONE)
@@ -1523,7 +1528,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		lastRunSettings = runSettings;
 		runSettings = null;
 
-		IJ.showStatus(String.format("%d/%s, %d/%s", count, Utils.pleural(traces.length, "Trace"), output[0].size(),
+		IJ.showStatus(String.format("%d/%s, %d/%s", count, Utils.pleural(traces.length, "Trace"), size,
 				Utils.pleural(results.size(), "Result")));
 	}
 
@@ -1545,20 +1550,106 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		CompositeImage ci = new CompositeImage(imp, IJ.COMPOSITE);
 
 		// Make it easier to see
-		ContrastEnhancer ce = new ContrastEnhancer();
-		double saturated = 0.35;
-		ce.stretchHistogram(ci, saturated);
+		//ij.plugin.ContrastEnhancerce = new ij.plugin.ContrastEnhancer();
+		//double saturated = 0.35;
+		//ce.stretchHistogram(ci, saturated);
+		
+		autoAdjust(ci, ci.getProcessor());
 
 		imp = WindowManager.getImage(name);
 		if (imp != null && imp.isComposite())
 		{
 			ci.setMode(imp.getCompositeMode());
 			imp.setImage(ci);
+			imp.getWindow().toFront();
 		}
 		else
 		{
 			ci.show();
 		}
+	}
+
+	/**
+	 * Auto adjust. Copied from ij.plgin.frame.ContrastAdjuster
+	 * <p>
+	 * Although the ContrastAdjuster records its actions as 'run("Enhance Contrast", "saturated=0.35");' it actually
+	 * does something else which makes the image easier to see than the afore mentioned command.
+	 *
+	 * @param imp
+	 *            the imp
+	 * @param ip
+	 *            the ip
+	 */
+	private void autoAdjust(ImagePlus imp, ImageProcessor ip)
+	{
+		ij.measure.Calibration cal = imp.getCalibration();
+		imp.setCalibration(null);
+		ImageStatistics stats = imp.getStatistics(); // get uncalibrated stats
+		imp.setCalibration(cal);
+		int limit = stats.pixelCount / 10;
+		int[] histogram = stats.histogram;
+		int autoThreshold = 0;
+		if (autoThreshold < 10)
+			autoThreshold = 5000;
+		else
+			autoThreshold /= 2;
+		int threshold = stats.pixelCount / autoThreshold;
+		int i = -1;
+		boolean found = false;
+		int count;
+		do
+		{
+			i++;
+			count = histogram[i];
+			if (count > limit)
+				count = 0;
+			found = count > threshold;
+		} while (!found && i < 255);
+		int hmin = i;
+		i = 256;
+		do
+		{
+			i--;
+			count = histogram[i];
+			if (count > limit)
+				count = 0;
+			found = count > threshold;
+		} while (!found && i > 0);
+		int hmax = i;
+		if (hmax >= hmin)
+		{
+			double min = stats.histMin + hmin * stats.binSize;
+			double max = stats.histMin + hmax * stats.binSize;
+			if (min == max)
+			{
+				min = stats.min;
+				max = stats.max;
+			}
+			imp.setDisplayRange(min, max);
+		}
+		else
+		{
+			reset(imp, ip);
+			return;
+		}
+	}
+
+	void reset(ImagePlus imp, ImageProcessor ip)
+	{
+		int bitDepth = imp.getBitDepth();
+		double defaultMin, defaultMax;
+		if (bitDepth == 16 || bitDepth == 32)
+		{
+			imp.resetDisplayRange();
+			defaultMin = imp.getDisplayRangeMin();
+			defaultMax = imp.getDisplayRangeMax();
+		}
+		else
+		{
+			defaultMin = 0;
+			defaultMax = 255;
+		}
+		imp.setDisplayRange(defaultMin, defaultMax);
 	}
 
 	private void createThreadPool()
@@ -2123,7 +2214,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		// Report simulated cross talk
 		double[] crosstalk = computeCrosstalk(count, c);
-		Utils.log("Crosstalk C%s  %s=>%s, C%s  %s=>%s", ctNames[index1], Utils.rounded(ct[index1]),
+		Utils.log("Simulated crosstalk C%s  %s=>%s, C%s  %s=>%s", ctNames[index1], Utils.rounded(ct[index1]),
 				Utils.rounded(crosstalk[c1]), ctNames[index2], Utils.rounded(ct[index2]), Utils.rounded(crosstalk[c2]));
 	}
 
