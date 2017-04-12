@@ -2,6 +2,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
@@ -1553,7 +1554,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		//ij.plugin.ContrastEnhancerce = new ij.plugin.ContrastEnhancer();
 		//double saturated = 0.35;
 		//ce.stretchHistogram(ci, saturated);
-		
+
 		autoAdjust(ci, ci.getProcessor());
 
 		imp = WindowManager.getImage(name);
@@ -1566,10 +1567,22 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		else
 		{
 			ci.show();
+			imp = ci;
 		}
-		
+
 		if (WindowManager.getWindow("Channels") == null)
+		{
 			IJ.run("Channels Tool...");
+			Window w = WindowManager.getWindow("Channels");
+			if (w == null)
+				return;
+			Window w2 = imp.getWindow();
+			if (w2 == null)
+				return;
+			java.awt.Point p = w2.getLocation();
+			p.x += w2.getWidth();
+			w.setLocation(p);
+		}
 	}
 
 	/**
