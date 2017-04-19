@@ -71,6 +71,7 @@ import ij.gui.Plot2;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
 import ij.process.LUT;
 import ij.process.LUTHelper;
 import ij.process.LUTHelper.LUTMapper;
@@ -1713,14 +1714,14 @@ public class OPTICS implements PlugIn
 		else
 		{
 			String[] opticsModes = SettingsManager.getNames((Object[]) OPTICSMode.values());
-			gd.addChoice("OPTICS_mode", opticsModes, opticsModes[inputSettings.getOPTICSModeOridinal()]);
+			gd.addChoice("OPTICS_mode", opticsModes, inputSettings.getOPTICSMode().toString());
 			gd.addNumericField("Number_of_splits", inputSettings.numberOfSplitSets, 0);
 			if (extraOptions)
 			{
 				gd.addCheckbox("Random_vectors", inputSettings.useRandomVectors);
 				gd.addCheckbox("Approx_sets", inputSettings.saveApproximateSets);
 				String[] sampleModes = SettingsManager.getNames((Object[]) SampleMode.values());
-				gd.addChoice("Sample_mode", sampleModes, sampleModes[inputSettings.getSampleModeOridinal()]);
+				gd.addChoice("Sample_mode", sampleModes, inputSettings.getSampleMode().toString());
 			}
 			gd.addNumericField("Generating_distance", inputSettings.generatingDistance, 2, 6, "nm");
 		}
@@ -1733,7 +1734,7 @@ public class OPTICS implements PlugIn
 		{
 			String[] clusteringModes = SettingsManager.getNames((Object[]) ClusteringMode.values());
 			gd.addChoice("Clustering_mode", clusteringModes,
-					clusteringModes[inputSettings.getClusteringModeOridinal()]);
+					inputSettings.getClusteringMode().toString());
 			gd.addMessage(ClusteringMode.XI.toString() + " options:\n" + ClusteringMode.XI.toString() +
 					" controls the change in reachability (profile steepness) to define a cluster");
 			gd.addNumericField("Xi", inputSettings.xi, 4);
@@ -1745,7 +1746,7 @@ public class OPTICS implements PlugIn
 			gd.addCheckbox("Core_points", inputSettings.core);
 		}
 		gd.addMessage("--- Image ---");
-		gd.addSlider("Image_Scale", 0, 15, inputSettings.imageScale);
+		gd.addSlider("Image_scale", 0, 15, inputSettings.imageScale);
 		TreeSet<ImageMode> imageModeSet = new TreeSet<ImageMode>();
 		imageModeSet.addAll(Arrays.asList(ImageMode.values()));
 		if (isDBSCAN)
@@ -1805,7 +1806,72 @@ public class OPTICS implements PlugIn
 		if (workflow.isStaged())
 			workflow.runStaged();
 
-		// TODO - Record the options for macros since the NonBlocking dialog does not
+		// Record the options for macros since the NonBlocking dialog does not
+		if (Recorder.record)
+		{
+			Recorder.recordOption("Min_points", Integer.toString(inputSettings.minPoints));
+			if (isDBSCAN)
+			{
+				// Add fields to auto-compute the clustering distance from the K-nearest neighbour distance profile
+				Recorder.recordOption("Noise", Double.toString(inputSettings.fractionNoise * 100));
+				Recorder.recordOption("Samples", Double.toString(inputSettings.samples));
+				Recorder.recordOption("Sample_fraction", Double.toString(inputSettings.sampleFraction * 100));
+				Recorder.recordOption("Clustering_distance", Double.toString(inputSettings.clusteringDistance));
+			}
+			else
+			{
+				Recorder.recordOption("OPTICS_mode", inputSettings.getOPTICSMode().toString());
+				Recorder.recordOption("Number_of_splits", Integer.toString(inputSettings.numberOfSplitSets));
+				if (extraOptions)
+				{
+					if (inputSettings.useRandomVectors)
+						Recorder.recordOption("Random_vectors");
+					if (inputSettings.saveApproximateSets)
+						Recorder.recordOption("Approx_sets");
+					Recorder.recordOption("Sample_mode", inputSettings.getSampleMode().toString());
+				}
+				Recorder.recordOption("Generating_distance", Double.toString(inputSettings.generatingDistance));
+			}
+			if (isDBSCAN)
+			{
+				if (inputSettings.core)
+					Recorder.recordOption("Core_points");
+			}
+			else
+			{
+				Recorder.recordOption("Clustering_mode", inputSettings.getClusteringMode().toString());
+				Recorder.recordOption("Xi", Double.toString(inputSettings.xi));
+				if (inputSettings.topLevel)
+					Recorder.recordOption("Top_clusters");
+				Recorder.recordOption("Upper_limit", Double.toString(inputSettings.upperLimit));
+				Recorder.recordOption("Lower_limit", Double.toString(inputSettings.lowerLimit));
+				Recorder.recordOption("Clustering_distance", Double.toString(inputSettings.clusteringDistance));
+				if (inputSettings.core)
+					Recorder.recordOption("Core_points");
+			}
+			gd.addMessage("--- Image ---");
+			Recorder.recordOption("Image_scale", Double.toString(inputSettings.imageScale));
+			Recorder.recordOption("Image_mode", inputSettings.getImageMode().toString());
+
+			if (inputSettings.weighted)
+				Recorder.recordOption("Weighted");
+			if (inputSettings.equalised)
+				Recorder.recordOption("Equalised");
+			if (extraOptions)
+			{
+				Recorder.recordOption("LoOP_lambda", Double.toString(inputSettings.lambda));
+			}
+			Recorder.recordOption("Outline", inputSettings.getOutlineMode().toString());
+
+			if (!isDBSCAN)
+			{
+				Recorder.recordOption("Spanning_tree", inputSettings.getSpanningTreeMode().toString());
+				Recorder.recordOption("Plot_mode", inputSettings.getPlotMode().toString());
+			}
+
+			if (debug)
+				Recorder.recordOption("Debug");
+		}
 
 		return true;
 	}
