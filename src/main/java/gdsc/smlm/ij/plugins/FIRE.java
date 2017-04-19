@@ -13,7 +13,6 @@ import java.awt.TextField;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -2739,41 +2738,126 @@ public class FIRE implements PlugIn
 		}
 	}
 
+	private class WorkSettings implements Cloneable
+	{
+		double mean, sigma, qValue = 0;
+
+		WorkSettings(double mean, double sigma, double qValue)
+		{
+			this.mean = mean;
+			this.sigma = sigma;
+			this.qValue = qValue;
+		}
+
+		@Override
+		public WorkSettings clone()
+		{
+			try
+			{
+				return (WorkSettings) super.clone();
+			}
+			catch (CloneNotSupportedException e)
+			{
+				return null; // Shouldn't happen
+			}
+		}
+	}
+
+	private class BaseWorker extends WorkflowWorker<WorkSettings, Object>
+	{
+		final MyWindowOrganiser wo;
+
+		BaseWorker(MyWindowOrganiser wo)
+		{
+			this.wo = wo;
+		}
+
+		@Override
+		public boolean equalSettings(WorkSettings current, WorkSettings previous)
+		{
+			if (current.mean != previous.mean)
+				return false;
+			if (current.sigma != previous.sigma)
+				return false;
+			return true;
+		}
+
+		@Override
+		public boolean equalResults(Object current, Object previous)
+		{
+			// We never create any results so ignore this
+			return true;
+		}
+
+		@Override
+		public Object createResults(WorkSettings settings, Object results)
+		{
+			return null;
+		}
+	}
+
+	private class HistogramWorker extends BaseWorker
+	{
+		final PrecisionHistogram histogram;
+
+		HistogramWorker(MyWindowOrganiser wo, PrecisionHistogram histogram)
+		{
+			super(wo);
+			this.histogram = histogram;
+		}
+
+		@Override
+		public Object createResults(WorkSettings settings, Object results)
+		{
+			// Plot the histogram
+			wo.add(histogram.plot(settings.mean, settings.sigma));
+			return null;
+		}
+	}
+
+	private class QPlotWorker extends BaseWorker
+	{
+		final QPlot qplot;
+
+		QPlotWorker(MyWindowOrganiser wo, QPlot qplot)
+		{
+			super(wo);
+			this.qplot = qplot;
+		}
+
+		@Override
+		public boolean equalSettings(WorkSettings current, WorkSettings previous)
+		{
+			if (current.qValue != previous.qValue)
+				return false;
+			return super.equalSettings(current, previous);
+		}
+
+		@Override
+		public Object createResults(WorkSettings settings, Object results)
+		{
+			// Compute Q and then plot the scaled FRC numerator
+			for (PlotWindow pw : qplot.plot(settings.mean, settings.sigma, settings.qValue))
+				wo.add(pw);
+			return null;
+		}
+	}
+
 	private boolean showQEstimationDialog(final PrecisionHistogram histogram, final QPlot qplot,
 			final FRCCurve frcCurve, final double nmPerPixel)
 	{
 		// This is used for the initial layout of windows
 		final MyWindowOrganiser wo = new MyWindowOrganiser();
 
-		// - create a synchronised set of work queues (to be passed to the dialog listener).
-		// - create a worker threads to take the work from the queue and do the computation.
-		ArrayList<WorkStack> stacks = new ArrayList<WorkStack>();
-		ArrayList<Worker> workers = new ArrayList<Worker>();
+		// Use a simple workflow
+		Workflow<WorkSettings, Object> workflow = new Workflow<WorkSettings, Object>();
 
-		// Create the workers using anonymous inner classes
-		// Plot the histogram
-		add(stacks, workers, null, new Worker()
-		{
-			@Override
-			Work createResult(Work work)
-			{
-				wo.add(histogram.plot(work.mean, work.sigma));
-				return work;
-			}
-		});
-		// Compute Q and then plot the scaled FRC numerator
-		add(stacks, workers, null, new Worker()
-		{
-			@Override
-			Work createResult(Work work)
-			{
-				for (PlotWindow pw : qplot.plot(work.mean, work.sigma, work.qValue))
-					wo.add(pw);
-				return work;
-			}
-		});
+		// Split the work to two children with a dummy initial worker
+		int previous = workflow.add(new BaseWorker(wo));
+		workflow.add(new HistogramWorker(wo, histogram), previous);
+		workflow.add(new QPlotWorker(wo, qplot), previous);
 
-		ArrayList<Thread> threads = startWorkers(workers);
+		workflow.start();
 
 		// The number of plots
 		wo.expected = 4;
@@ -2790,18 +2874,21 @@ public class FIRE implements PlugIn
 			double sigma = Double
 					.parseDouble(Macro.getValue(macroOptions, KEY_SIGMA, Double.toString(histogram.sigma)));
 			double qValue = Double.parseDouble(Macro.getValue(macroOptions, KEY_Q, Double.toString(qplot.qValue)));
-			Work work = new Work(mean, sigma, qValue);
-			for (WorkStack stack : stacks)
-				stack.addWork(work);
-
-			finishWorkers(workers, threads, false);
+			workflow.run(new WorkSettings(mean, sigma, qValue));
+			try
+			{
+				// Because an immediate shutdown call sometimes is not processed.
+				Thread.sleep(100);
+			}
+			catch (InterruptedException e)
+			{
+			}
+			workflow.shutdown(false);
 		}
 		else
 		{
 			// Draw the plots with the first set of work
-			Work work = new Work(histogram.mean, histogram.sigma, qplot.qValue);
-			for (WorkStack stack : stacks)
-				stack.addWork(work);
+			workflow.run(new WorkSettings(histogram.mean, histogram.sigma, qplot.qValue));
 
 			// Build the dialog
 			NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
@@ -2825,7 +2912,7 @@ public class FIRE implements PlugIn
 			gd.addCheckbox("Reset_all", false);
 			gd.addMessage("Double-click a slider to reset");
 
-			gd.addDialogListener(new FIREDialogListener(gd, histogram, qplot, stacks));
+			gd.addDialogListener(new FIREDialogListener(gd, histogram, qplot, workflow));
 
 			// Show this when the workers have finished drawing the plots so it is on top
 			try
@@ -2841,13 +2928,13 @@ public class FIRE implements PlugIn
 			catch (InterruptedException e)
 			{
 				// Ignore
-			}			
+			}
 
 			gd.showDialog();
 
 			// Finish the worker threads
 			boolean cancelled = gd.wasCanceled();
-			finishWorkers(workers, threads, cancelled);
+			workflow.shutdown(cancelled);
 			if (cancelled)
 				return false;
 		}
@@ -2868,240 +2955,6 @@ public class FIRE implements PlugIn
 		return true;
 	}
 
-	private void add(ArrayList<WorkStack> stacks, ArrayList<Worker> workers, Worker previous, Worker worker)
-	{
-		workers.add(worker);
-		WorkStack stack = new WorkStack();
-		worker.inbox = stack;
-		if (previous == null)
-		{
-			stacks.add(stack);
-		}
-		else
-		{
-			// Join
-			previous.outbox = stack;
-		}
-	}
-
-	private ArrayList<Thread> startWorkers(ArrayList<Worker> workers)
-	{
-		ArrayList<Thread> threads = new ArrayList<Thread>();
-		for (Worker w : workers)
-		{
-			Thread t = new Thread(w);
-			t.setDaemon(true);
-			t.start();
-			threads.add(t);
-		}
-		return threads;
-	}
-
-	private void finishWorkers(ArrayList<Worker> workers, ArrayList<Thread> threads, boolean cancelled)
-	{
-		// Finish work
-		for (int i = 0; i < threads.size(); i++)
-		{
-			Thread t = threads.get(i);
-			Worker w = workers.get(i);
-
-			if (cancelled)
-			{
-				// Stop immediately any running worker
-				try
-				{
-					t.interrupt();
-				}
-				catch (SecurityException e)
-				{
-					// We should have permission to interrupt this thread.
-					e.printStackTrace();
-				}
-			}
-			else
-			{
-				// Stop after the current work in the inbox
-				w.running = false;
-
-				// Notify a workers waiting on the inbox.
-				// Q. How to check if the worker is sleeping?
-				synchronized (w.inbox)
-				{
-					w.inbox.notify();
-				}
-
-				// Leave to finish their current work
-				try
-				{
-					t.join(0);
-				}
-				catch (InterruptedException e)
-				{
-				}
-			}
-		}
-	}
-
-	private class Work implements Cloneable
-	{
-		long time = 0;
-		double mean, sigma, qValue = 0;
-
-		Work(double mean, double sigma, double qValue)
-		{
-			this.mean = mean;
-			this.sigma = sigma;
-			this.qValue = qValue;
-		}
-
-		@Override
-		public Work clone()
-		{
-			try
-			{
-				return (Work) super.clone();
-			}
-			catch (CloneNotSupportedException e)
-			{
-				return null; // Shouldn't happen
-			}
-		}
-	}
-
-	/**
-	 * Allow work to be added to a FIFO stack in a synchronised manner
-	 * 
-	 * @author Alex Herbert
-	 */
-	private class WorkStack
-	{
-		// We only support a stack size of 1
-		private Work work = null;
-
-		synchronized void addWork(Work work)
-		{
-			this.work = work;
-			this.notify();
-		}
-
-		@SuppressWarnings("unused")
-		synchronized void close()
-		{
-			this.work = null;
-			this.notify();
-		}
-
-		synchronized Work getWork()
-		{
-			Work work = this.work;
-			this.work = null;
-			return work;
-		}
-
-		boolean isEmpty()
-		{
-			return work == null;
-		}
-	}
-
-	private abstract class Worker implements Runnable
-	{
-		private boolean running = true;
-		private Work lastWork = null;
-		private Work result;
-		private WorkStack inbox, outbox;
-
-		public void run()
-		{
-			while (running)
-			{
-				try
-				{
-					Work work = null;
-					synchronized (inbox)
-					{
-						if (inbox.isEmpty())
-						{
-							debug("Inbox empty, waiting ...");
-							inbox.wait();
-						}
-						work = inbox.getWork();
-						if (work != null)
-							debug(" Found work");
-					}
-					if (work == null)
-					{
-						debug(" No work, stopping");
-						break;
-					}
-
-					// Delay processing the work. Allows the work to be updated before we process it.
-					if (work.time != 0)
-					{
-						debug(" Checking delay");
-						long time = work.time;
-						while (System.currentTimeMillis() < time)
-						{
-							debug(" Delaying");
-							Thread.sleep(50);
-							// Assume new work can be added to the inbox. Here we are peaking at the inbox
-							// so we do not take ownership with synchronized
-							if (inbox.work != null)
-								time = inbox.work.time;
-						}
-						// If we intend to modify the inbox then we should take ownership
-						synchronized (inbox)
-						{
-							if (!inbox.isEmpty())
-							{
-								work = inbox.getWork();
-								debug(" Found updated work");
-							}
-						}
-					}
-
-					if (!equals(work, lastWork))
-						result = createResult(work);
-					lastWork = work;
-					if (outbox != null)
-					{
-						debug(" Posting result");
-						outbox.addWork(result);
-					}
-				}
-				catch (InterruptedException e)
-				{
-					debug(" Interrupted, stopping");
-					break;
-				}
-			}
-		}
-
-		private void debug(String msg)
-		{
-			boolean debug = false;
-			if (debug)
-				System.out.println(this.getClass().getSimpleName() + msg);
-		}
-
-		boolean equals(Work work, Work lastWork)
-		{
-			if (lastWork == null)
-				return false;
-
-			if (work.mean != lastWork.mean)
-				return false;
-			if (work.sigma != lastWork.sigma)
-				return false;
-			if (work.qValue != lastWork.qValue)
-				return false;
-
-			return true;
-		}
-
-		abstract Work createResult(Work work);
-	}
-
 	private class FIREDialogListener implements DialogListener, MouseListener
 	{
 		/**
@@ -3113,7 +2966,7 @@ public class FIRE implements PlugIn
 		long time;
 		boolean notActive = true;
 		volatile int ignore = 0;
-		ArrayList<WorkStack> stacks;
+		Workflow<WorkSettings, Object> workflow;
 		double defaultMean, defaultSigma, defaultQValue;
 		String m, s, q;
 		TextField tf1, tf2, tf3;
@@ -3121,10 +2974,11 @@ public class FIRE implements PlugIn
 		Checkbox cb;
 		final boolean isMacro;
 
-		FIREDialogListener(GenericDialog gd, PrecisionHistogram histogram, QPlot qplot, ArrayList<WorkStack> stacks)
+		FIREDialogListener(GenericDialog gd, PrecisionHistogram histogram, QPlot qplot,
+				Workflow<WorkSettings, Object> workflow)
 		{
 			time = System.currentTimeMillis() + 1000;
-			this.stacks = stacks;
+			this.workflow = workflow;
 			this.defaultMean = histogram.mean;
 			this.defaultSigma = histogram.sigma;
 			this.defaultQValue = qplot.qValue;
@@ -3144,6 +2998,15 @@ public class FIRE implements PlugIn
 			m = tf1.getText();
 			s = tf2.getText();
 			q = tf3.getText();
+			
+			// Implement a delay to allow typing.
+			// This is also applied to the sliders which we do not want. 
+			// Ideally we would have no delay for sliders (since they are in the correct place already
+			// but a delay for typing in the text field). Unfortunately the AWTEvent raised by ImageJ
+			// for the slider is actually from the TextField so we cannot tell the difference.
+			// For now just have no delay.
+			//if (!isMacro)
+			//	workflow.startPreview();
 		}
 
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
@@ -3179,19 +3042,10 @@ public class FIRE implements PlugIn
 				qValue = this.defaultQValue;
 			}
 
-			Work work = new Work(mean, sigma, qValue);
-
-			// Implement a delay to allow typing.
-			// This is also applied to the sliders which we do not want. 
-			// Ideally we would have no delay for sliders (since they are in the correct place already
-			// but a delay for typing in the text field). Unfortunately the AWTEvent raised by ImageJ
-			// for the slider is actually from the TextField so we cannot tell the difference.
-			// For now just have no delay.
-			//work.time = (isMacro) ? 0 : System.currentTimeMillis() + DELAY;
+			WorkSettings work = new WorkSettings(mean, sigma, qValue);
 
 			// Offload this work onto a thread that just picks up the most recent dialog input.
-			for (WorkStack stack : stacks)
-				stack.addWork(work);
+			workflow.run(work);
 
 			if (reset)
 			{

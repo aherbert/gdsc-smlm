@@ -110,231 +110,40 @@ public class OPTICS implements PlugIn
 	}
 
 	private String TITLE;
-	/**
-	 * Delay (in milliseconds) used when entering new values in the dialog before the preview is processed
-	 */
-	private long DELAY = 500;
-	private boolean isPreview = false;
 
 	private GlobalSettings globalSettings;
 	private OPTICSSettings inputSettings;
 
-	private boolean extraOptions, debug;
-
-	private static class Work
-	{
-		long time = 0;
-		OPTICSSettings inputSettings;
-		Settings settings;
-
-		public Work(OPTICSSettings inputSettings, Settings settings)
-		{
-			this.inputSettings = inputSettings;
-			this.settings = settings;
-		}
-
-		public Work(OPTICSSettings inputSettings, Object... settings)
-		{
-			this.inputSettings = inputSettings;
-			this.settings = new Settings(settings);
-		}
-	}
-
-	/**
-	 * Allow work to be added to a FIFO stack in a synchronised manner
-	 * 
-	 * @author Alex Herbert
-	 */
-	private class WorkStack
-	{
-		// We only support a stack size of 1
-		private Work work = null;
-
-		synchronized void setWork(Work work)
-		{
-			this.work = work;
-		}
-
-		synchronized void addWork(Work work)
-		{
-			this.work = work;
-			this.notify();
-		}
-
-		@SuppressWarnings("unused")
-		synchronized void close()
-		{
-			this.work = null;
-			this.notify();
-		}
-
-		synchronized Work getWork()
-		{
-			Work work = this.work;
-			this.work = null;
-			return work;
-		}
-
-		boolean isEmpty()
-		{
-			return work == null;
-		}
-	}
+	private boolean extraOptions, preview, debug;
 
 	// Stack to which the work is first added
-	private WorkStack inputStack = new WorkStack();
+	private Workflow<OPTICSSettings, Settings> workflow = new Workflow<OPTICSSettings, Settings>();
 
-	private abstract class Worker implements Runnable
+	private abstract class BaseWorker extends WorkflowWorker<OPTICSSettings, Settings>
 	{
-		private boolean running = true;
-		private Work lastWork = null;
-		private Work result = null;
-		private WorkStack inbox;
-		private WorkStack[] outbox;
-
-		public void run()
+		@Override
+		public boolean equalResults(Settings current, Settings previous)
 		{
-			while (running)
-			{
-				try
-				{
-					Work work = null;
-					synchronized (inbox)
-					{
-						if (inbox.isEmpty())
-						{
-							debug("Inbox empty, waiting ...");
-							inbox.wait();
-						}
-						work = inbox.getWork();
-						if (work != null)
-							debug(" Found work");
-					}
-					if (work == null)
-					{
-						debug(" No work, stopping");
-						break;
-					}
-
-					// Commented out. To stop the worker from doing any more work just close the inbox
-					// (so passing in null work).
-					//if (!running)
-					//{
-					//	debug(" Not running, stopping");
-					//	break;
-					//}
-
-					// Delay processing the work. Allows the work to be updated before we process it.
-					if (work.time != 0)
-					{
-						long time = work.time;
-						while (System.currentTimeMillis() < time)
-						{
-							debug(" Delaying");
-							Thread.sleep(50);
-							// Assume new work can be added to the inbox. Here we are peaking at the inbox
-							// so we do not take ownership with synchronized
-							if (inbox.work != null)
-								time = inbox.work.time;
-						}
-						// If we intend to modify the inbox then we should take ownership
-						synchronized (inbox)
-						{
-							if (!inbox.isEmpty())
-							{
-								work = inbox.getWork();
-								debug(" Found updated work");
-							}
-						}
-						// No further delay checking
-						work.time = 0;
-					}
-
-					if (!equals(work, lastWork))
-					{
-						// Create a new result
-						debug(" Creating new result");
-						result = createResult(work);
-					}
-					else
-					{
-						// Pass through the new settings with the existing results
-						debug(" Updating existing result");
-						result = new Work(work.inputSettings, result.settings);
-					}
-					lastWork = work;
-					// Add the result to the output
-					if (outbox != null)
-					{
-						debug(" Posting result");
-						for (int i = outbox.length; i-- > 0;)
-							outbox[i].addWork(result);
-					}
-				}
-				catch (InterruptedException e)
-				{
-					debug(" Interrupted, stopping");
-					break;
-				}
-			}
-		}
-
-		private void debug(String msg)
-		{
-			if (debug)
-				System.out.println(this.getClass().getSimpleName() + msg);
-		}
-
-		boolean equals(Work work, Work lastWork)
-		{
-			if (lastWork == null)
-				return false;
-
-			// We must selectively compare this as not all settings changes matter.
-			if (!equals(work.inputSettings, lastWork.inputSettings))
-				return false;
-
-			// We can compare these here using object references. 
-			// Any new results passed in will trigger equals to fail.
-			boolean result = work.settings.equals(lastWork.settings);
-			if (!result)
-				newResults();
-			return result;
-		}
-
-		/**
-		 * Compare the settings and return false if any settings that the work depends on have changed
-		 * 
-		 * @param current
-		 * @param previous
-		 * @return
-		 */
-		abstract boolean equals(OPTICSSettings current, OPTICSSettings previous);
-
-		abstract Work createResult(Work work);
-
-		/**
-		 * Called when there are new results in the current work.
-		 */
-		void newResults()
-		{
+			if (current == null)
+				return previous == null;
+			return current.equals(previous);
 		}
 	}
 
-	private class InputWorker extends Worker
+	private class InputWorker extends BaseWorker
 	{
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			// Nothing in the settings effects if we have to create a new OPTICS manager
 			return true;
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
 			// The first item should be the memory peak results 
-			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
+			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			// Convert results to coordinates
 			float[] x, y;
 			int size = results.size();
@@ -351,14 +160,14 @@ public class OPTICS implements PlugIn
 			OPTICSManager opticsManager = new OPTICSManager(x, y, bounds);
 			opticsManager.setTracker(new IJTrackProgress());
 			opticsManager.setOptions(Option.CACHE);
-			return new Work(work.inputSettings, results, opticsManager);
+			return new Settings(results, opticsManager);
 		}
 	}
 
-	private class OpticsWorker extends Worker
+	private class OpticsWorker extends BaseWorker
 	{
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			if (current.minPoints != previous.minPoints)
 				return false;
@@ -387,28 +196,28 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
 			// The first item should be the memory peak results 
-			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
+			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			// The second item should be the OPTICS manager
-			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
+			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
 
-			int minPts = work.inputSettings.minPoints;
+			int minPts = settings.minPoints;
 
 			OPTICSResult opticsResult;
-			if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
+			if (settings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 			{
-				int n = work.inputSettings.numberOfSplitSets;
+				int n = settings.numberOfSplitSets;
 				// Q. Should these be options
 				boolean useRandomVectors = false;
 				boolean saveApproximateSets = false;
 				SampleMode sampleMode = SampleMode.RANDOM;
 				if (extraOptions)
 				{
-					useRandomVectors = work.inputSettings.useRandomVectors;
-					saveApproximateSets = work.inputSettings.saveApproximateSets;
-					sampleMode = work.inputSettings.getSampleMode();
+					useRandomVectors = settings.useRandomVectors;
+					saveApproximateSets = settings.saveApproximateSets;
+					sampleMode = settings.getSampleMode();
 				}
 				synchronized (opticsManager)
 				{
@@ -419,7 +228,7 @@ public class OPTICS implements PlugIn
 			}
 			else
 			{
-				double distance = work.inputSettings.generatingDistance;
+				double distance = settings.generatingDistance;
 				if (distance > 0)
 				{
 					// Convert generating distance to pixels
@@ -448,16 +257,16 @@ public class OPTICS implements PlugIn
 				}
 			}
 			// It may be null if cancelled. However return null Work will close down the next thread
-			return new Work(work.inputSettings, results, opticsManager, opticsResult);
+			return new Settings(results, opticsManager, opticsResult);
 		}
 	}
 
-	private class OpticsClusterWorker extends Worker
+	private class OpticsClusterWorker extends BaseWorker
 	{
 		int clusterCount = 0;
 
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			if (current.getClusteringMode() != previous.getClusteringMode())
 				return false;
@@ -483,11 +292,11 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
-			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
-			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
-			OPTICSResult opticsResult = (OPTICSResult) work.settings.get(2);
+			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
+			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
+			OPTICSResult opticsResult = (OPTICSResult) resultList.get(2);
 			// It may be null if cancelled.
 			if (opticsResult != null)
 			{
@@ -496,26 +305,25 @@ public class OPTICS implements PlugIn
 				{
 					double nmPerPixel = getNmPerPixel(results);
 
-					if (work.inputSettings.getClusteringMode() == ClusteringMode.XI)
+					if (settings.getClusteringMode() == ClusteringMode.XI)
 					{
-						int options = (work.inputSettings.topLevel) ? OPTICSResult.XI_OPTION_TOP_LEVEL : 0;
+						int options = (settings.topLevel) ? OPTICSResult.XI_OPTION_TOP_LEVEL : 0;
 						// Always include these as they are ignored if invalid
 						options |= OPTICSResult.XI_OPTION_UPPER_LIMIT | OPTICSResult.XI_OPTION_LOWER_LIMIT;
-						opticsResult.setUpperLimit(work.inputSettings.upperLimit / nmPerPixel);
-						opticsResult.setLowerLimit(work.inputSettings.lowerLimit / nmPerPixel);
-						opticsResult.extractClusters(work.inputSettings.xi, options);
+						opticsResult.setUpperLimit(settings.upperLimit / nmPerPixel);
+						opticsResult.setLowerLimit(settings.lowerLimit / nmPerPixel);
+						opticsResult.extractClusters(settings.xi, options);
 					}
 					else
 					{
 						double distance;
-						if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
+						if (settings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 						{
-							if (work.inputSettings.clusteringDistance > 0)
-								distance = work.inputSettings.clusteringDistance;
+							if (settings.clusteringDistance > 0)
+								distance = settings.clusteringDistance;
 							else
 							{
-								distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) *
-										nmPerPixel;
+								distance = opticsManager.computeGeneratingDistance(settings.minPoints) * nmPerPixel;
 								if (nmPerPixel != 1)
 								{
 									Utils.log(TITLE + ": Default clustering distance %s nm", Utils.rounded(distance));
@@ -526,8 +334,8 @@ public class OPTICS implements PlugIn
 						{
 							// Ensure that the distance is valid
 							distance = opticsResult.generatingDistance * nmPerPixel;
-							if (work.inputSettings.clusteringDistance > 0)
-								distance = Math.min(work.inputSettings.clusteringDistance, distance);
+							if (settings.clusteringDistance > 0)
+								distance = Math.min(settings.clusteringDistance, distance);
 						}
 
 						if (nmPerPixel != 1)
@@ -538,7 +346,7 @@ public class OPTICS implements PlugIn
 							distance = newDistance;
 						}
 
-						opticsResult.extractDBSCANClustering((float) distance, work.inputSettings.core);
+						opticsResult.extractDBSCANClustering((float) distance, settings.core);
 					}
 					nClusters = opticsResult.getNumberOfClusters();
 					// We must scramble after extracting the clusters since the cluster Ids have been rewritten
@@ -546,17 +354,17 @@ public class OPTICS implements PlugIn
 				}
 				// We created a new clustering
 				clusterCount++;
-				Utils.log("Clustering mode: %s = %s", work.inputSettings.getClusteringMode(),
+				Utils.log("Clustering mode: %s = %s", settings.getClusteringMode(),
 						Utils.pleural(nClusters, "Cluster"));
 			}
-			return new Work(work.inputSettings, results, opticsManager, opticsResult, clusterCount);
+			return new Settings(results, opticsManager, opticsResult, clusterCount);
 		}
 	}
 
-	private class ResultsWorker extends Worker
+	private class ResultsWorker extends BaseWorker
 	{
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			// Only depends on if the clustering results are new. This is triggered 
 			// in the default comparison of the Settings object.
@@ -564,16 +372,16 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
 			// The result is in position 2.
 			// It may be null if cancelled.
-			if (work.settings.get(2) == null)
+			if (resultList.get(2) == null)
 			{
 				// Only log here so it happens once
 				IJ.log(TITLE + ": No results to display");
 			}
-			return work;
+			return resultList;
 		}
 	}
 
@@ -601,12 +409,12 @@ public class OPTICS implements PlugIn
 		}
 	}
 
-	private class RandIndexWorker extends Worker
+	private class RandIndexWorker extends BaseWorker
 	{
 		Queue<ClusterResult> queue = new LinkedList<ClusterResult>();
 
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			if (!current.inputOption.equals(previous.inputOption))
 			{
@@ -619,11 +427,11 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
-			ClusteringResult clusteringResult = (ClusteringResult) work.settings.get(2);
+			ClusteringResult clusteringResult = (ClusteringResult) resultList.get(2);
 			if (clusteringResult == null)
-				return work;
+				return resultList;
 
 			int[] clusters, topClusters = null;
 			synchronized (clusteringResult)
@@ -664,7 +472,7 @@ public class OPTICS implements PlugIn
 			if (queue.size() > 2)
 				queue.poll();
 
-			return work;
+			return resultList;
 		}
 
 		private void compare(StringBuilder sb, String title, int[] set1, int n1, int[] set2, int n2)
@@ -683,10 +491,10 @@ public class OPTICS implements PlugIn
 		}
 	}
 
-	private class MemoryResultsWorker extends Worker
+	private class MemoryResultsWorker extends BaseWorker
 	{
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			// Only depends on if the clustering results are new. This is triggered 
 			// in the default comparison of the Settings object.
@@ -694,11 +502,11 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
-			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
-			//OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
-			ClusteringResult clusteringResult = (ClusteringResult) work.settings.get(2);
+			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
+			//OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
+			ClusteringResult clusteringResult = (ClusteringResult) resultList.get(2);
 			// It may be null if cancelled.
 			if (clusteringResult != null)
 			{
@@ -726,14 +534,14 @@ public class OPTICS implements PlugIn
 			}
 
 			// We have not created anything new so return the current object
-			return work;
+			return resultList;
 		}
 	}
 
-	private class ReachabilityResultsWorker extends Worker
+	private class ReachabilityResultsWorker extends BaseWorker
 	{
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			if (current.getPlotMode() != previous.getPlotMode())
 				return false;
@@ -741,20 +549,20 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
-			OPTICSResult opticsResult = (OPTICSResult) work.settings.get(2);
+			OPTICSResult opticsResult = (OPTICSResult) resultList.get(2);
 			// It may be null if cancelled.
 			if (opticsResult == null)
 			{
-				return work;
+				return resultList;
 			}
 
-			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
+			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			double nmPerPixel = getNmPerPixel(results);
 
 			// Draw the reachability profile
-			PlotMode mode = work.inputSettings.getPlotMode();
+			PlotMode mode = settings.getPlotMode();
 			if (mode != PlotMode.OFF)
 			{
 				double[] profile;
@@ -798,7 +606,7 @@ public class OPTICS implements PlugIn
 					}
 				}
 
-				if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
+				if (settings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 				{
 					// The profile may be very high. Compute the outliers and remove.
 					Percentile p = new Percentile();
@@ -966,23 +774,22 @@ public class OPTICS implements PlugIn
 				double distance = -1, distance2 = -1;
 				if (inputSettings.getClusteringMode() == ClusteringMode.DBSCAN)
 				{
-					if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
+					if (settings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 					{
-						if (work.inputSettings.clusteringDistance > 0)
-							distance = work.inputSettings.clusteringDistance;
+						if (settings.clusteringDistance > 0)
+							distance = settings.clusteringDistance;
 						else
 						{
-							OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
-							distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) *
-									nmPerPixel;
+							OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
+							distance = opticsManager.computeGeneratingDistance(settings.minPoints) * nmPerPixel;
 						}
 					}
 					else
 					{
 						// Ensure that the distance is valid
 						distance = opticsResult.generatingDistance * nmPerPixel;
-						if (work.inputSettings.clusteringDistance > 0)
-							distance = Math.min(work.inputSettings.clusteringDistance, distance);
+						if (settings.clusteringDistance > 0)
+							distance = Math.min(settings.clusteringDistance, distance);
 					}
 
 					if (distance > limits[1])
@@ -990,10 +797,10 @@ public class OPTICS implements PlugIn
 				}
 				else // Assume Optics Xi
 				{
-					if (work.inputSettings.upperLimit > 0)
-						distance = work.inputSettings.upperLimit;
-					if (work.inputSettings.lowerLimit > 0)
-						distance2 = work.inputSettings.lowerLimit;
+					if (settings.upperLimit > 0)
+						distance = settings.upperLimit;
+					if (settings.lowerLimit > 0)
+						distance2 = settings.lowerLimit;
 				}
 
 				if (distance > -1)
@@ -1017,7 +824,7 @@ public class OPTICS implements PlugIn
 			}
 
 			// We have not created anything new so return the current object
-			return work;
+			return resultList;
 		}
 	}
 
@@ -1063,7 +870,7 @@ public class OPTICS implements PlugIn
 		}
 	}
 
-	private class ImageResultsWorker extends Worker
+	private class ImageResultsWorker extends BaseWorker
 	{
 		IJImagePeakResults image = null;
 		OutlineMode lastOutlineMode = null;
@@ -1075,7 +882,7 @@ public class OPTICS implements PlugIn
 		float[] loop = null;
 
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			if (current.imageScale != previous.imageScale)
 			{
@@ -1127,7 +934,7 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		void newResults()
+		protected void newResults()
 		{
 			// We can keep the image but should clear the overlays
 			clearCache(false);
@@ -1145,25 +952,25 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
-			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
-			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
-			ClusteringResult clusteringResult = (ClusteringResult) work.settings.get(2);
-			int clusterCount = (Integer) work.settings.get(3);
+			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
+			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
+			ClusteringResult clusteringResult = (ClusteringResult) resultList.get(2);
+			int clusterCount = (Integer) resultList.get(3);
 			// It may be null if cancelled.
 			if (clusteringResult == null)
 			{
 				clearCache(true);
-				return new Work(work.inputSettings, results, opticsManager, clusteringResult, clusterCount, image);
+				return new Settings(results, opticsManager, clusteringResult, clusterCount, image);
 			}
 
 			int[] clusters = null, order = null;
 			int max = 0; // max cluster value
 			float[] x = null, y = null;
-			ImageMode mode = work.inputSettings.getImageMode();
+			ImageMode mode = settings.getImageMode();
 
-			if (work.inputSettings.imageScale > 0)
+			if (settings.imageScale > 0)
 			{
 				// Check if the image should be redrawn based on the clusters
 				if (mode.isRequiresClusters())
@@ -1175,10 +982,10 @@ public class OPTICS implements PlugIn
 
 					Rectangle bounds = results.getBounds();
 					image = new IJImagePeakResults(results.getName() + " " + TITLE, bounds,
-							(float) work.inputSettings.imageScale);
+							(float) settings.imageScale);
 					// Options to control rendering
 					image.copySettings(results);
-					image.setDisplayFlags(getDisplayFlags(work.inputSettings));
+					image.setDisplayFlags(getDisplayFlags(settings));
 					image.setLiveImage(false);
 					image.begin();
 					ImagePlus imp = image.getImagePlus();
@@ -1207,12 +1014,12 @@ public class OPTICS implements PlugIn
 								}
 							}
 						}
-						if (requiresLoop(work.inputSettings) && loop == null)
+						if (requiresLoop(settings) && loop == null)
 						{
 							synchronized (opticsManager)
 							{
-								lastLambda = (extraOptions) ? work.inputSettings.lambda : 3;
-								lastMinPoints = work.inputSettings.minPoints;
+								lastLambda = (extraOptions) ? settings.lambda : 3;
+								lastMinPoints = settings.minPoints;
 								loop = opticsManager.loop(lastMinPoints, lastLambda, true);
 							}
 							float[] limits = Maths.limits(loop);
@@ -1286,11 +1093,11 @@ public class OPTICS implements PlugIn
 				int[] map = null; // Used to map clusters to a display value
 				int max2 = 0; // max mapped cluster value
 
-				if (work.inputSettings.getOutlineMode().isOutline())
+				if (settings.getOutlineMode().isOutline())
 				{
 					if (outline == null)
 					{
-						lastOutlineMode = work.inputSettings.getOutlineMode();
+						lastOutlineMode = settings.getOutlineMode();
 						if (clusters == null)
 						{
 							synchronized (clusteringResult)
@@ -1307,7 +1114,7 @@ public class OPTICS implements PlugIn
 
 						if (clusteringResult instanceof OPTICSResult)
 						{
-							if (work.inputSettings.getOutlineMode().isColourByDepth())
+							if (settings.getOutlineMode().isColourByDepth())
 							{
 								lut = clusterDepthLut;
 								synchronized (clusteringResult)
@@ -1365,13 +1172,12 @@ public class OPTICS implements PlugIn
 					overlay = outline;
 				}
 
-				if (work.inputSettings.getSpanningTreeMode().isSpanningTree() &&
-						clusteringResult instanceof OPTICSResult)
+				if (settings.getSpanningTreeMode().isSpanningTree() && clusteringResult instanceof OPTICSResult)
 				{
 					if (spanningTree == null)
 					{
 						OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
-						lastSpanningTreeMode = work.inputSettings.getSpanningTreeMode();
+						lastSpanningTreeMode = settings.getSpanningTreeMode();
 
 						int[] predecessor, topLevelClusters;
 						synchronized (opticsResult)
@@ -1514,7 +1320,7 @@ public class OPTICS implements PlugIn
 				imp.setOverlay(overlay);
 			}
 
-			return new Work(work.inputSettings, results, opticsManager, clusteringResult, clusterCount, image);
+			return new Settings(results, opticsManager, clusteringResult, clusterCount, image);
 		}
 
 		private int getDisplayFlags(OPTICSSettings inputSettings)
@@ -1545,12 +1351,12 @@ public class OPTICS implements PlugIn
 		}
 	}
 
-	private class KNNWorker extends Worker
+	private class KNNWorker extends BaseWorker
 	{
 		double[] profile = null;
 
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			if (current.minPoints != previous.minPoints)
 			{
@@ -1571,23 +1377,23 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		void newResults()
+		protected void newResults()
 		{
 			// Clear cache
 			profile = null;
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
 			// The first item should be the memory peak results 
-			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
+			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			// The second item should be the OPTICS manager
-			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
+			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
 
-			int minPts = work.inputSettings.minPoints;
+			int minPts = settings.minPoints;
 			int k = minPts - 1; // Since min points includes the actual point
-			double fractionNoise = work.inputSettings.fractionNoise;
+			double fractionNoise = settings.fractionNoise;
 
 			double nmPerPixel = getNmPerPixel(results);
 
@@ -1600,12 +1406,12 @@ public class OPTICS implements PlugIn
 				preserve = 0;
 				synchronized (opticsManager)
 				{
-					int samples = work.inputSettings.samples;
-					if (samples > 1 || work.inputSettings.sampleFraction > 0)
+					int samples = settings.samples;
+					if (samples > 1 || settings.sampleFraction > 0)
 					{
 						// Ensure we take a reasonable amount of samples (min=100)
 						samples = Maths.max(100, samples,
-								(int) Math.ceil(opticsManager.getSize() * work.inputSettings.sampleFraction));
+								(int) Math.ceil(opticsManager.getSize() * settings.sampleFraction));
 					}
 					float[] d = opticsManager.nearestNeighbourDistance(k, samples, true);
 					profile = new double[d.length];
@@ -1634,7 +1440,7 @@ public class OPTICS implements PlugIn
 			plot.addPoints(order, profile, Plot.LINE);
 
 			// Add the DBSCAN clustering distance
-			double distance = work.inputSettings.clusteringDistance;
+			double distance = settings.clusteringDistance;
 			if (distance > 0)
 			{
 				plot.setColor(Color.red);
@@ -1648,15 +1454,15 @@ public class OPTICS implements PlugIn
 
 			Utils.display(title, plot, preserve);
 
-			if (work.inputSettings.clusteringDistance == 0)
+			if (settings.clusteringDistance == 0)
 			{
 				// Set this distance into the settings if there is no clustering distance
 				// Use a negative value to show it is an auto-distance
-				work.inputSettings.clusteringDistance = -distance;
+				settings.clusteringDistance = -distance;
 			}
 
 			// We have not created anything new so return the current object
-			return work;
+			return resultList;
 		}
 	}
 
@@ -1694,10 +1500,10 @@ public class OPTICS implements PlugIn
 		return profile[n];
 	}
 
-	private class DBSCANWorker extends Worker
+	private class DBSCANWorker extends BaseWorker
 	{
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			if (current.minPoints != previous.minPoints)
 				return false;
@@ -1707,15 +1513,15 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
 			// The first item should be the memory peak results 
-			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
+			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			// The second item should be the OPTICS manager
-			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
+			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
 
-			double clusteringDistance = Math.abs(work.inputSettings.clusteringDistance);
-			int minPts = work.inputSettings.minPoints;
+			double clusteringDistance = Math.abs(settings.clusteringDistance);
+			int minPts = settings.minPoints;
 			if (clusteringDistance > 0)
 			{
 				// Convert clustering distance to pixels
@@ -1748,16 +1554,16 @@ public class OPTICS implements PlugIn
 				scrambleClusters(dbscanResult);
 			}
 			// It may be null if cancelled. However return null Work will close down the next thread
-			return new Work(work.inputSettings, results, opticsManager, dbscanResult);
+			return new Settings(results, opticsManager, dbscanResult);
 		}
 	}
 
-	private class DBSCANClusterWorker extends Worker
+	private class DBSCANClusterWorker extends BaseWorker
 	{
 		int clusterCount = 0;
 
 		@Override
-		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		public boolean equalSettings(OPTICSSettings current, OPTICSSettings previous)
 		{
 			if (current.core != previous.core)
 				return false;
@@ -1765,22 +1571,22 @@ public class OPTICS implements PlugIn
 		}
 
 		@Override
-		Work createResult(Work work)
+		public Settings createResults(OPTICSSettings settings, Settings resultList)
 		{
-			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
-			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
-			DBSCANResult dbscanResult = (DBSCANResult) work.settings.get(2);
+			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
+			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
+			DBSCANResult dbscanResult = (DBSCANResult) resultList.get(2);
 			// It may be null if cancelled.
 			if (dbscanResult != null)
 			{
 				synchronized (dbscanResult)
 				{
-					dbscanResult.extractClusters(work.inputSettings.core);
+					dbscanResult.extractClusters(settings.core);
 				}
 				// We created a new clustering
 				clusterCount++;
 			}
-			return new Work(work.inputSettings, results, opticsManager, dbscanResult, clusterCount);
+			return new Settings(results, opticsManager, dbscanResult, clusterCount);
 		}
 	}
 
@@ -1821,90 +1627,48 @@ public class OPTICS implements PlugIn
 		SettingsManager.saveSettings(globalSettings);
 	}
 
+	private void runDBSCAN()
+	{
+		TITLE = TITLE_DBSCAN;
+
+		// Create the workflow
+		workflow.add(new InputWorker());
+		workflow.add(new KNNWorker());
+		workflow.add(new DBSCANWorker());
+		int previous = workflow.add(new DBSCANClusterWorker());
+		// The following can operate in parallel
+		workflow.add(new ResultsWorker(), previous);
+		workflow.add(new RandIndexWorker(), previous);
+		workflow.add(new MemoryResultsWorker(), previous);
+		workflow.add(new ImageResultsWorker(), previous);
+
+		workflow.start();
+
+		boolean cancelled = !showDialog(true);
+
+		workflow.shutdown(cancelled);
+	}
+
 	private void runOPTICS()
 	{
 		TITLE = TITLE_OPTICS;
 
-		// Create the working threads, connected in a chain
-		ArrayList<Worker> workers = new ArrayList<Worker>();
-		add(workers, new InputWorker());
-		add(workers, new OpticsWorker());
-		add(workers, new OpticsClusterWorker());
-		// The following could operate in parallel
-		//		add(workers, new ResultsWorker());
-		//		add(workers, new MemoryResultsWorker());
-		//		add(workers, new ReachabilityResultsWorker());
-		//		add(workers, new ImageResultsWorker());
-		Worker previous = workers.get(workers.size() - 1);
-		add(workers, new ResultsWorker(), previous);
-		add(workers, new RandIndexWorker(), previous);
-		add(workers, new MemoryResultsWorker(), previous);
-		add(workers, new ReachabilityResultsWorker(), previous);
-		add(workers, new ImageResultsWorker(), previous);
+		// Create the workflow
+		workflow.add(new InputWorker());
+		workflow.add(new OpticsWorker());
+		int previous = workflow.add(new OpticsClusterWorker());
+		// The following can operate in parallel
+		workflow.add(new ResultsWorker(), previous);
+		workflow.add(new RandIndexWorker(), previous);
+		workflow.add(new MemoryResultsWorker(), previous);
+		workflow.add(new ReachabilityResultsWorker(), previous);
+		workflow.add(new ImageResultsWorker(), previous);
 
-		ArrayList<Thread> threads = startWorkers(workers);
+		workflow.start();
 
 		boolean cancelled = !showDialog(false);
 
-		finishWorkers(workers, threads, cancelled);
-	}
-
-	private ArrayList<Thread> startWorkers(ArrayList<Worker> workers)
-	{
-		ArrayList<Thread> threads = new ArrayList<Thread>();
-		for (Worker w : workers)
-		{
-			Thread t = new Thread(w);
-			t.setDaemon(true);
-			t.start();
-			threads.add(t);
-		}
-		return threads;
-	}
-
-	private void finishWorkers(ArrayList<Worker> workers, ArrayList<Thread> threads, boolean cancelled)
-	{
-		// Finish work
-		for (int i = 0; i < threads.size(); i++)
-		{
-			Thread t = threads.get(i);
-			Worker w = workers.get(i);
-
-			if (cancelled)
-			{
-				// Stop immediately any running worker
-				try
-				{
-					t.interrupt();
-				}
-				catch (SecurityException e)
-				{
-					// We should have permission to interrupt this thread.
-					e.printStackTrace();
-				}
-			}
-			else
-			{
-				// Stop after the current work in the inbox
-				w.running = false;
-
-				// Notify a workers waiting on the inbox.
-				// Q. How to check if the worker is sleeping?
-				synchronized (w.inbox)
-				{
-					w.inbox.notify();
-				}
-
-				// Leave to finish their current work
-				try
-				{
-					t.join(0);
-				}
-				catch (InterruptedException e)
-				{
-				}
-			}
-		}
+		workflow.shutdown(cancelled);
 	}
 
 	/**
@@ -1919,59 +1683,6 @@ public class OPTICS implements PlugIn
 		if (results.getCalibration() != null && results.getCalibration().getNmPerPixel() > 0)
 			return results.getCalibration().getNmPerPixel();
 		return 1;
-	}
-
-	/**
-	 * Adds the worker. Connect the inbox to the previous worker outbox, or the primary input.
-	 *
-	 * @param workers
-	 *            the workers
-	 * @param worker
-	 *            the worker
-	 */
-	private void add(ArrayList<Worker> workers, Worker worker)
-	{
-		if (workers.isEmpty())
-		{
-			add(workers, worker, null);
-		}
-		else
-		{
-			// Chain together
-			Worker previous = workers.get(workers.size() - 1);
-			add(workers, worker, previous);
-		}
-	}
-
-	/**
-	 * Adds the worker. Connect the inbox to the previous worker outbox, or the primary input.
-	 *
-	 * @param workers
-	 *            the workers
-	 * @param worker
-	 *            the worker
-	 * @param previous
-	 *            the previous worker from which to take work
-	 */
-	private void add(ArrayList<Worker> workers, Worker worker, Worker previous)
-	{
-		if (previous == null)
-		{
-			// Take the primary input
-			worker.inbox = inputStack;
-		}
-		else
-		{
-			// Chain together
-			int size = (previous.outbox == null) ? 0 : previous.outbox.length;
-			if (size == 0)
-				previous.outbox = new WorkStack[1];
-			else
-				previous.outbox = Arrays.copyOf(previous.outbox, size + 1);
-			previous.outbox[size] = new WorkStack();
-			worker.inbox = previous.outbox[size];
-		}
-		workers.add(worker);
 	}
 
 	private Object[] imageModeArray;
@@ -2090,11 +1801,11 @@ public class OPTICS implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
-		if (!isPreview)
-		{
-			// The dialog was OK'd so run if work was stashed in the input stack.
-			inputStack.addWork(inputStack.work);
-		}
+		// The dialog was OK'd so run if work was staged in the workflow.
+		if (workflow.isStaged())
+			workflow.runStaged();
+
+		// TODO - Record the options for macros since the NonBlocking dialog does not
 
 		return true;
 	}
@@ -2140,7 +1851,7 @@ public class OPTICS implements PlugIn
 			IJ.log(sb.toString());
 	}
 
-	private class OPTICSDialogListener implements DialogListener
+	private abstract class BaseDialogListener implements DialogListener
 	{
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
@@ -2175,6 +1886,37 @@ public class OPTICS implements PlugIn
 				return false;
 			}
 
+			if (!readSettings(gd))
+				return false;
+
+			// Clone so that the workflow has it's own unique reference
+			OPTICSSettings settings = inputSettings.clone();
+			Settings baseResults = new Settings(results);
+			if (preview)
+			{
+				// Run the settings
+				if (debug)
+					System.out.println("Adding work");
+				workflow.run(settings, baseResults);
+				workflow.startPreview();
+			}
+			else
+			{
+				workflow.stopPreview();
+				// Stage the work but do not run
+				workflow.stage(settings, baseResults);
+			}
+
+			return true;
+		}
+
+		abstract boolean readSettings(GenericDialog gd);
+	}
+
+	private class OPTICSDialogListener extends BaseDialogListener
+	{
+		boolean readSettings(GenericDialog gd)
+		{
 			inputSettings.minPoints = (int) Math.abs(gd.getNextNumber());
 			inputSettings.setOPTICSMode(gd.getNextChoiceIndex());
 			inputSettings.numberOfSplitSets = (int) Math.abs(gd.getNextNumber());
@@ -2203,7 +1945,7 @@ public class OPTICS implements PlugIn
 			inputSettings.setOutlineMode((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]);
 			inputSettings.setSpanningTreeMode(gd.getNextChoiceIndex());
 			inputSettings.setPlotMode(gd.getNextChoiceIndex());
-			boolean preview = gd.getNextBoolean();
+			preview = gd.getNextBoolean();
 			if (extraOptions)
 				debug = gd.getNextBoolean();
 
@@ -2224,67 +1966,14 @@ public class OPTICS implements PlugIn
 				return false;
 			}
 
-			// Clone so that the work queue has it's own unique reference
-			Work work = new Work(inputSettings.clone(), results);
-			if (preview)
-			{
-				// Queue the settings
-				if (debug)
-					System.out.println("Adding work");
-				if (isPreview)
-					// Use a delay next time. This prevents delay when the preview is first switched on. 
-					work.time = System.currentTimeMillis() + DELAY;
-				else
-					isPreview = true;
-				inputStack.addWork(work);
-			}
-			else
-			{
-				// Preview is off
-				isPreview = false;
-				// Stash the work (this does not notify the input worker)
-				inputStack.setWork(work);
-			}
-
 			return true;
 		}
 	}
 
-	private class DBSCANDialogListener implements DialogListener
+	private class DBSCANDialogListener extends BaseDialogListener
 	{
-		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		boolean readSettings(GenericDialog gd)
 		{
-			//		if (e == null)
-			//		{
-			//			// This happens when the dialog is first shown and can be ignored.
-			//			// It also happens when called from within a macro. In this case we should run.
-			//			if (!Utils.isMacro())
-			//				return true;
-			//		}
-
-			if (debug)
-				System.out.println("dialogItemChanged: " + e);
-
-			// A previous run may have been cancelled so we have to handle this.
-			if (Utils.isInterrupted())
-			{
-				if (Utils.isMacro())
-					return true;
-
-				// Q. Should we ask if the user wants to restart?
-				IJ.resetEscape();
-			}
-
-			inputSettings.inputOption = ResultsManager.getInputSource(gd);
-
-			// Load the results
-			MemoryPeakResults results = ResultsManager.loadInputResults(inputSettings.inputOption, true);
-			if (results == null || results.size() == 0)
-			{
-				IJ.error(TITLE, "No results could be loaded");
-				return false;
-			}
-
 			inputSettings.minPoints = (int) Math.abs(gd.getNextNumber());
 			inputSettings.fractionNoise = Math.abs(gd.getNextNumber() / 100);
 			inputSettings.samples = (int) Math.abs(gd.getNextNumber());
@@ -2300,60 +1989,14 @@ public class OPTICS implements PlugIn
 				inputSettings.lambda = Math.abs(gd.getNextNumber());
 			}
 			inputSettings.setOutlineMode((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]);
-			boolean preview = gd.getNextBoolean();
+			preview = gd.getNextBoolean();
 			if (extraOptions)
 				debug = gd.getNextBoolean();
 
 			if (gd.invalidNumber())
 				return false;
 
-			// Clone so that the work queue has it's own unique reference
-			Work work = new Work(inputSettings.clone(), results);
-			if (preview)
-			{
-				// Queue the settings
-				if (debug)
-					System.out.println("Adding work");
-				if (isPreview)
-					// Use a delay next time. This prevents delay when the preview is first switched on. 
-					work.time = System.currentTimeMillis() + DELAY;
-				else
-					isPreview = true;
-				inputStack.addWork(work);
-			}
-			else
-			{
-				// Preview is off
-				isPreview = false;
-				// Stash the work (this does not notify the input worker)
-				inputStack.setWork(work);
-			}
-
 			return true;
 		}
-	}
-
-	private void runDBSCAN()
-	{
-		TITLE = TITLE_DBSCAN;
-
-		// Create the working threads, connected in a chain
-		ArrayList<Worker> workers = new ArrayList<Worker>();
-		add(workers, new InputWorker());
-		add(workers, new KNNWorker());
-		add(workers, new DBSCANWorker());
-		add(workers, new DBSCANClusterWorker());
-		// The following could operate in parallel
-		Worker previous = workers.get(workers.size() - 1);
-		add(workers, new ResultsWorker(), previous);
-		add(workers, new RandIndexWorker(), previous);
-		add(workers, new MemoryResultsWorker(), previous);
-		add(workers, new ImageResultsWorker(), previous);
-
-		ArrayList<Thread> threads = startWorkers(workers);
-
-		boolean cancelled = !showDialog(true);
-
-		finishWorkers(workers, threads, cancelled);
 	}
 }
