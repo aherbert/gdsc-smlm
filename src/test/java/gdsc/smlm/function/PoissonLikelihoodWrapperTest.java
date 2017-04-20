@@ -28,7 +28,7 @@ public class PoissonLikelihoodWrapperTest
 
 	// Compute as per Numerical Recipes 5.7.
 	// Approximate error accuracy in single precision: Ef
-	// Step size for deerivatives:
+	// Step size for derivatives:
 	// h ~ (Ef)^(1/3) * xc
 	// xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x is close to zero)
 	final double h_ = 0.01; //(double) (Math.pow(1e-3f, 1.0 / 3));
