@@ -107,7 +107,8 @@ public class Workflow<S, R>
 		@SuppressWarnings("unchecked")
 		public void run()
 		{
-			while (running)
+			// Note: We check the condition for loop termination within the loop
+			while (true)
 			{
 				try
 				{
@@ -181,13 +182,19 @@ public class Workflow<S, R>
 					debug(" Interrupted, stopping");
 					break;
 				}
+				
+				if (!running)
+				{
+					debug(" Shutdown");
+					break;
+				}
 			}
 		}
 
 		private void debug(String msg)
 		{
 			if (debug)
-				System.out.println(this.getClass().getSimpleName() + msg);
+				System.out.println(worker.getClass().getSimpleName() + msg);
 		}
 
 		private boolean equals(Work work, Work lastWork)

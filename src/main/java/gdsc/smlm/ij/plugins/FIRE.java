@@ -2875,14 +2875,6 @@ public class FIRE implements PlugIn
 					.parseDouble(Macro.getValue(macroOptions, KEY_SIGMA, Double.toString(histogram.sigma)));
 			double qValue = Double.parseDouble(Macro.getValue(macroOptions, KEY_Q, Double.toString(qplot.qValue)));
 			workflow.run(new WorkSettings(mean, sigma, qValue));
-			try
-			{
-				// Because an immediate shutdown call sometimes is not processed.
-				Thread.sleep(100);
-			}
-			catch (InterruptedException e)
-			{
-			}
 			workflow.shutdown(false);
 		}
 		else
