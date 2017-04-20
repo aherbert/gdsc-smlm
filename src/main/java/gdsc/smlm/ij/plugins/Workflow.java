@@ -370,11 +370,6 @@ public class Workflow<S, R>
 			}
 			else
 			{
-				// TODO - Fix this. Sometimes a call to shutdown straight after work is added
-				// results in the work not getting processed. We could give an id to each work
-				// object and only allow the worker to be shutdown after it has received 
-				// that work id from its inbox.
-				
 				// Stop after the current work in the inbox
 				w.running = false;
 
