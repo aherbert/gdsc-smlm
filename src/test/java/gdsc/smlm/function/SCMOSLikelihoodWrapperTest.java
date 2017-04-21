@@ -21,9 +21,7 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 public class SCMOSLikelihoodWrapperTest
 {
-	double[] photons = { 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
-	// Set this at the range output from cumulativeProbabilityIsOneWithIntegerData
-	int[] maxRange = { 6, 7, 10, 13, 17, 29, 149, 1141 };
+	private double[] photons = { 1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10, 100, 1000 };
 
 	DoubleEquality eqPerDatum = new DoubleEquality(2, 0.01);
 	DoubleEquality eq = new DoubleEquality(3, 0.001);
@@ -41,34 +39,31 @@ public class SCMOSLikelihoodWrapperTest
 	// Step size for derivatives:
 	// h ~ (Ef)^(1/3) * xc
 	// xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x is close to zero)
-	final double h_ = 0.01; //(double) (Math.pow(1e-3f, 1.0 / 3));
+	private final double h_ = 0.01; //(double) (Math.pow(1e-3f, 1.0 / 3));
 
-	int[] testx = new int[] { 4, 5, 6 };
-	int[] testy = new int[] { 4, 5, 6 };
+	private int[] testx = new int[] { 4, 5, 6 };
+	private int[] testy = new int[] { 4, 5, 6 };
 	// Do not test zero background since this is an edge case for the likelihood function
-	double[] testbackground_ = new double[] { 10, 400 };
+	private double[] testbackground_ = new double[] { 0.1, 1, 10 };
 
-	double[] testamplitude1_ = new double[] { 15, 55, 105 };
-	double[] testangle1_ = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
-	double[] testcx1_ = new double[] { 4.9, 5.3 };
-	double[] testcy1_ = new double[] { 4.8, 5.2 };
-	double[][] testw1_ = new double[][] { { 1.1, 1.4 }, { 1.1, 1.7 }, { 1.5, 1.2 }, { 1.3, 1.7 }, };
+	private double[] testsignal1_ = new double[] { 15, 55, 105 };
+	private double[] testangle1_ = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
+	private double[] testcx1_ = new double[] { 4.9, 5.3 };
+	private double[] testcy1_ = new double[] { 4.8, 5.2 };
+	private double[][] testw1_ = new double[][] { { 1.1, 1.4 }, { 1.1, 1.7 }, { 1.5, 1.2 }, { 1.3, 1.7 }, };
 
-	double[] testbackground, testamplitude1, testangle1, testcx1, testcy1;
-	double[][] testw1;
+	private 	double[] testbackground, testsignal1, testangle1, testcx1, testcy1;
+	private double[][] testw1;
 
-	int maxx = 10;
-	double background = 50;
-	double angle = 0;
-	double width = 5;
+	private int maxx = 10;
 
 	// Simulate per pixel noise
-	float VAR = 57.9f;
-	float G = 2.2f;
-	float G_SD = 0.2f;
-	float O = 100f;
+	private float VAR = 57.9f;
+	private float G = 2.2f;
+	private float G_SD = 0.2f;
+	private float O = 100f;
 
-	float[] var, g, o, sd;
+	private float[] var, g, o, sd;
 
 	public SCMOSLikelihoodWrapperTest()
 	{
@@ -144,7 +139,7 @@ public class SCMOSLikelihoodWrapperTest
 		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, flags);
 		// Setup
 		testbackground = testbackground_;
-		testamplitude1 = testamplitude1_;
+		testsignal1 = testsignal1_;
 		testangle1 = testangle1_;
 		testcx1 = testcx1_;
 		testcy1 = testcy1_;
@@ -155,7 +150,7 @@ public class SCMOSLikelihoodWrapperTest
 		}
 		if (!f1.evaluatesSignal())
 		{
-			testamplitude1 = new double[] { testamplitude1[0] };
+			testsignal1 = new double[] { testsignal1[0] };
 		}
 		if (!f1.evaluatesAngle())
 		{
@@ -214,13 +209,13 @@ public class SCMOSLikelihoodWrapperTest
 		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
 
 		for (double background : testbackground)
-			for (double amplitude1 : testamplitude1)
+			for (double signal1 : testsignal1)
 				for (double angle1 : testangle1)
 					for (double cx1 : testcx1)
 						for (double cy1 : testcy1)
 							for (double[] w1 : testw1)
 							{
-								a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+								a = createParameters(background, signal1, angle1, cx1, cy1, w1[0], w1[1]);
 
 								// Create y as a function we would want to move towards
 								double[] a2 = a.clone();
@@ -341,7 +336,7 @@ public class SCMOSLikelihoodWrapperTest
 		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, flags);
 		// Setup
 		testbackground = testbackground_;
-		testamplitude1 = testamplitude1_;
+		testsignal1 = testsignal1_;
 		testangle1 = testangle1_;
 		testcx1 = testcx1_;
 		testcy1 = testcy1_;
@@ -352,7 +347,7 @@ public class SCMOSLikelihoodWrapperTest
 		}
 		if (!f1.evaluatesSignal())
 		{
-			testamplitude1 = new double[] { testamplitude1[0] };
+			testsignal1 = new double[] { testsignal1[0] };
 		}
 		if (!f1.evaluatesAngle())
 		{
@@ -412,13 +407,13 @@ public class SCMOSLikelihoodWrapperTest
 		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
 
 		for (double background : testbackground)
-			for (double amplitude1 : testamplitude1)
+			for (double signal1 : testsignal1)
 				for (double angle1 : testangle1)
 					for (double cx1 : testcx1)
 						for (double cy1 : testcy1)
 							for (double[] w1 : testw1)
 							{
-								a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+								a = createParameters(background, signal1, angle1, cx1, cy1, w1[0], w1[1]);
 
 								// Create y as a function we would want to move towards
 								double[] a2 = a.clone();
@@ -515,8 +510,6 @@ public class SCMOSLikelihoodWrapperTest
 	@Test
 	public void cumulativeProbabilityIsOneWithRealDataForCountAbove8()
 	{
-		double[] photons = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100, 1000 };
-
 		for (double mu : photons)
 		{
 			// Determine upper limit for a Poisson
@@ -566,8 +559,6 @@ public class SCMOSLikelihoodWrapperTest
 	@Test
 	public void instanceLikelihoodMatches()
 	{
-		double[] photons = { 1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10, 100, 1000 };
-
 		for (double mu : photons)
 			instanceLikelihoodMatches(mu, mu > 8);
 	}
