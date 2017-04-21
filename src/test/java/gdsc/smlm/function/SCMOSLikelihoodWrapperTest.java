@@ -1,6 +1,12 @@
 package gdsc.smlm.function;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Arrays;
+import java.security.*;
+import java.math.*;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -52,7 +58,7 @@ public class SCMOSLikelihoodWrapperTest
 	private double[] testcy1_ = new double[] { 4.8, 5.2 };
 	private double[][] testw1_ = new double[][] { { 1.1, 1.4 }, { 1.1, 1.7 }, { 1.5, 1.2 }, { 1.3, 1.7 }, };
 
-	private 	double[] testbackground, testsignal1, testangle1, testcx1, testcy1;
+	private double[] testbackground, testsignal1, testangle1, testcx1, testcy1;
 	private double[][] testw1;
 
 	private int maxx = 10;
@@ -72,7 +78,7 @@ public class SCMOSLikelihoodWrapperTest
 		g = new float[n];
 		o = new float[n];
 		sd = new float[n];
-		RandomGenerator rg = new Well19937c();
+		RandomGenerator rg = new Well19937c(30051977);
 		PoissonDistribution pd = new PoissonDistribution(rg, O, PoissonDistribution.DEFAULT_EPSILON,
 				PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 		ExponentialDistribution ed = new ExponentialDistribution(rg, VAR,
@@ -205,7 +211,7 @@ public class SCMOSLikelihoodWrapperTest
 
 		int n = maxx * maxx;
 		int count = 0, total = 0;
-		
+
 		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
 
 		for (double background : testbackground)
@@ -403,7 +409,7 @@ public class SCMOSLikelihoodWrapperTest
 
 		int n = maxx * maxx;
 		int count = 0, total = 0;
-		
+
 		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
 
 		for (double background : testbackground)
@@ -655,17 +661,25 @@ public class SCMOSLikelihoodWrapperTest
 		double mode2 = Math.ceil(lambda) - 1;
 		double kmax = ((mode1 + mode2) * 0.5) * G + O; // Scale to observed values
 		//System.out.printf("mu=%f, p=%f, maxp=%f @ %f  (expected=%f  %f)\n", mu, p, maxp, k[maxi], kmax, kmax - k[maxi]);
-		Assert.assertEquals("k-max", kmax, k[maxi], kmax*1e-3);
-		
+		Assert.assertEquals("k-max", kmax, k[maxi], kmax * 1e-3);
+
 		if (test)
 		{
 			Assert.assertEquals(String.format("mu=%f", mu), P_LIMIT, p, 0.02);
 		}
 
 		// Check the function can compute the same total
-		double sum = f.computeLikelihood();
-		double sum2 = f.computeLikelihood(gradient);
 		double delta = total * 1e-10;
+		double sum, sum2;
+		sum = f.computeLikelihood();
+		sum2 = f.computeLikelihood(gradient);
+		Assert.assertEquals("computeLikelihood", total, sum, delta);
+		Assert.assertEquals("computeLikelihood with gradient", total, sum2, delta);
+
+		// Check the function can compute the same total after duplication
+		f = f.build(nlf, a);
+		sum = f.computeLikelihood();
+		sum2 = f.computeLikelihood(gradient);
 		Assert.assertEquals("computeLikelihood", total, sum, delta);
 		Assert.assertEquals("computeLikelihood with gradient", total, sum2, delta);
 	}
@@ -675,5 +689,138 @@ public class SCMOSLikelihoodWrapperTest
 		float[] a = new float[n];
 		Arrays.fill(a, val);
 		return a;
+	}
+
+	private abstract class BaseNonLinearFunction implements NonLinearFunction
+	{
+		double[] a;
+		String name;
+
+		BaseNonLinearFunction(String name)
+		{
+			this.name = name;
+		}
+
+		public void initialise(double[] a)
+		{
+			this.a = a;
+		}
+
+		public int[] gradientIndices()
+		{
+			return new int[1];
+		}
+
+		public double eval(int x, double[] dyda, double[] w)
+		{
+			return 0;
+		}
+
+		public double eval(int x, double[] dyda)
+		{
+			return 0;
+		}
+
+		public boolean canComputeWeights()
+		{
+			return false;
+		}
+
+		public double evalw(int x, double[] w)
+		{
+			return 0;
+		}
+	}
+
+	@Test
+	public void canComputePValue()
+	{
+		final double n2 = maxx * maxx * 0.5;
+		//@formatter:off
+		canComputePValue(new BaseNonLinearFunction("Linear")
+		{
+			public double eval(int x) {	return a[0] * (x-n2); }
+		});		
+		canComputePValue(new BaseNonLinearFunction("Quadratic")
+		{
+			public double eval(int x) {	return a[0] * (x-n2) * (x-n2); }
+		});		
+		canComputePValue(new BaseNonLinearFunction("Linear+C")
+		{
+			public double eval(int x) {	return 10 * a[0] + (x-n2); }
+		});		
+		canComputePValue(new BaseNonLinearFunction("Gaussian")
+		{
+			public double eval(int x) {	return 100 * FastMath.exp(-0.5 * Math.pow(x - n2, 2) / (a[0] * a[0])); }
+		});		
+		//@formatter:on
+	}
+
+	private void canComputePValue(BaseNonLinearFunction nlf)
+	{
+		System.out.println(nlf.name);
+
+		int n = maxx * maxx;
+
+		double[] a = new double[] { 1 };
+
+		// Simulate sCMOS camera
+		nlf.initialise(a);
+		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		double[] k = Utils.newArray(n, 0, 1.0);
+		for (int i = 0; i < n; i++)
+		{
+			double u = nlf.eval(i);
+			if (u > 0)
+				u = rdg.nextPoisson(u);
+			k[i] = u * g[i] + rdg.nextGaussian(o[i], sd[i]);
+		}
+
+		SCMOSLikelihoodWrapper f = new SCMOSLikelihoodWrapper(nlf, a, k, n, var, g, o);
+
+		double oll = f.computeObservedLikelihood();
+		double oll2 = 0;
+		double[] op = new double[n];
+		for (int j = 0; j < n; j++)
+		{
+			op[j] = SCMOSLikelihoodWrapper.likelihood((k[j] - o[j]) / g[j], var[j], g[j], o[j], k[j]);
+			oll2 -= Math.log(op[j]);
+		}
+		System.out.printf("oll=%f, oll2=%f\n", oll, oll2);
+		Assert.assertEquals("Observed Log-likelihood", oll2, oll, oll2 * 1e-10);
+
+		double min = Double.POSITIVE_INFINITY;
+		double mina = 0;
+		for (int i = 5; i <= 15; i++)
+		{
+			a[0] = (double) i / 10;
+			double ll = f.likelihood(a);
+			double llr = f.computeLogLikelihoodRatio(ll);
+			BigDecimal product = new BigDecimal(1);
+			double ll2 = 0;
+			for (int j = 0; j < n; j++)
+			{
+				double p1 = SCMOSLikelihoodWrapper.likelihood(nlf.eval(j), var[j], g[j], o[j], k[j]);
+				ll2 -= Math.log(p1);
+				double ratio = p1 / op[j];
+				product = product.multiply(new BigDecimal(ratio));
+			}
+			double llr2 = -2 * Math.log(product.doubleValue());
+			double p = 1 - f.computePValue(ll);
+			System.out.printf("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
+					product.round(new MathContext(4)).toString(), p);
+			if (min > ll)
+			{
+				min = ll;
+				mina = a[0];
+			}
+
+			// Only value if the product could be computed. Low ratios cause it to becomes 
+			// too small to store in a double.
+			if (product.doubleValue() > 0)
+				Assert.assertEquals("Log-likelihood", llr, llr2, llr * 1e-10);
+		}
+
+		Assert.assertEquals("min", 1, mina, 0);
 	}
 }
