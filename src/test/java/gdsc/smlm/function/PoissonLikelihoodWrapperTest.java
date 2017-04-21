@@ -24,7 +24,13 @@ public class PoissonLikelihoodWrapperTest
 	DoubleEquality eqPerDatum = new DoubleEquality(2, 0.01);
 	DoubleEquality eq = new DoubleEquality(3, 0.001);
 
-	String[] NAME = { "BACKGROUND", "SIGNAL", "ANGLE", "X_POSITION", "Y_POSITION", "X_SD", "Y_SD" };
+	static String[] NAME;
+	static
+	{
+		NAME = new String[7];
+		for (int i = 0; i < 7; i++)
+			NAME[i] = Gaussian2DFunction.getName(i);
+	}
 
 	// Compute as per Numerical Recipes 5.7.
 	// Approximate error accuracy in single precision: Ef
