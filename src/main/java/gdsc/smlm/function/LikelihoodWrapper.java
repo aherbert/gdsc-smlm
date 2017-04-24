@@ -3,6 +3,7 @@ package gdsc.smlm.function;
 import java.util.Arrays;
 
 import gdsc.core.utils.NotImplementedException;
+import gdsc.smlm.fitting.FisherInformationMatrix;
 
 /**
  * This is a wrapper for any function to compute the negative log-likelihood
@@ -46,7 +47,7 @@ public abstract class LikelihoodWrapper
 	 * 
 	 * @param variables
 	 */
-	private void initialiseFunction(double[] variables)
+	protected void initialiseFunction(double[] variables)
 	{
 		final int[] gradientIndices = f.gradientIndices();
 		for (int i = 0; i < gradientIndices.length; i++)
@@ -211,4 +212,79 @@ public abstract class LikelihoodWrapper
 	 * @return True if the likelihood function can compute gradients
 	 */
 	public abstract boolean canComputeGradient();
+	
+	/**
+	 * Compute the Fisher's Information Matrix (I) for fitted variables:
+	 * 
+	 * <pre>
+	 * Iab = sum(k) 1/(uk) * (duk da) * (duk db)
+	 * </pre>
+	 * 
+	 * @param variables
+	 *            The variables of the function
+	 * @return Fisher's Information Matrix (I)
+	 */
+	public double[][] fisherInformation(final double[] variables)
+	{
+		initialiseFunction(variables);
+
+		double[] du_da = new double[nVariables];
+
+		final double[][] I = new double[nVariables][nVariables];
+
+		for (int k = 0; k < n; k++)
+		{
+			final double uk = f.eval(k, du_da);
+			final double yk = 1 / uk;
+			for (int i = 0; i < nVariables; i++)
+			{
+				double du_dai = yk * du_da[i];
+				for (int j = 0; j <= i; j++)
+				{
+					I[i][j] += du_dai * du_da[j];
+				}
+			}
+		}
+
+		// Generate symmetric matrix
+		for (int i = 0; i < nVariables - 1; i++)
+			for (int j = i + 1; j < nVariables; j++)
+				I[i][j] = I[j][i];
+
+		return I;
+	}
+
+	/**
+	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
+	 * Fisher's Information Matrix (I).
+	 * 
+	 * The information matrix is inverted and the central diagonal returned.
+	 * 
+	 * @param variables
+	 *            The variables of the function
+	 * @return CRLB-sCMOS (or null if inversion failed)
+	 */
+	public double[] crlb(final double[] variables)
+	{
+		return crlb(variables, false);
+	}
+
+	/**
+	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
+	 * Fisher's Information Matrix (I).
+	 * 
+	 * The information matrix is inverted and the central diagonal returned. If the inversion fails then the routine
+	 * optionally returns the reciprocal of the diagonal element to find a (possibly loose) lower bound.
+	 *
+	 * @param variables
+	 *            The variables of the function
+	 * @param allowReciprocal
+	 *            the allow reciprocal flag
+	 * @return CRLB (or null if inversion failed)
+	 */
+	public double[] crlb(final double[] variables, boolean allowReciprocal)
+	{
+		double[][] I = fisherInformation(variables);
+		return new FisherInformationMatrix(I).crlb(allowReciprocal);
+	}
 }

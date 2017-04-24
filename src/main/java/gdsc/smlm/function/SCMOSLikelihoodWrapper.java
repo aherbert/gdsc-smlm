@@ -288,7 +288,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 				// So we need (k-o)/g as the expected value. We did not store this so
 				// compute it by subtracting var_g2 from x.
 				// Then perform the same likelihood computation.
-				
+
 				//double u = x[i] - var_g2[i];
 				//
 				//if (u < 0)
@@ -536,11 +536,45 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 		return true;
 	}
 
-	// TODO
-	// Function for LLR
+	/**
+	 * Compute the Fisher's Information Matrix (I) for fitted variables:
+	 * 
+	 * <pre>
+	 * Iab = sum(k) 1/(uk+vark/gk^2)  (duk da) * (duk db)
+	 * </pre>
+	 * 
+	 * @param variables
+	 *            The variables of the function
+	 * @return Fisher's Information Matrix (I)
+	 */
+	@Override
+	public double[][] fisherInformation(final double[] variables)
+	{
+		initialiseFunction(variables);
 
-	// Function for CRLB-sCMOS
+		double[] du_da = new double[nVariables];
 
-	// Function for CRLB-sCMOS only for X/Y positions (i.e. specific indices)
+		final double[][] I = new double[nVariables][nVariables];
 
+		for (int k = 0; k < n; k++)
+		{
+			final double uk = f.eval(k, du_da);
+			final double yk = 1 / (uk + var_g2[k]);
+			for (int i = 0; i < nVariables; i++)
+			{
+				double du_dai = yk * du_da[i];
+				for (int j = 0; j <= i; j++)
+				{
+					I[i][j] += du_dai * du_da[j];
+				}
+			}
+		}
+
+		// Generate symmetric matrix
+		for (int i = 0; i < nVariables - 1; i++)
+			for (int j = i + 1; j < nVariables; j++)
+				I[i][j] = I[j][i];
+
+		return I;
+	}
 }

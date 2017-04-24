@@ -1,8 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
-import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.function.LikelihoodWrapper;
 import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
@@ -684,13 +683,13 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			if (a_dev != null)
 			{
 				// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
-				// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix. 
+				// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix.
+				FisherInformationMatrix m = new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
+				double[] crlb = m.crlb(true);
+				Arrays.fill(a_dev, 0);
 				final int[] gradientIndices = f.gradientIndices();
-				final int nparams = gradientIndices.length;
-				GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams);
-				final double[] I = calculator.fisherInformationDiagonal(n, a, f);
-				for (int i = nparams; i-- > 0;)
-					a_dev[gradientIndices[i]] = 1.0 / Math.sqrt(I[i]);
+				for (int i = gradientIndices.length; i-- > 0;)
+					a_dev[gradientIndices[i]] = crlb[i];
 			}
 
 			error[0] = NonLinearFit.getError(residualSumOfSquares, noise, n, f.gradientIndices().length);
@@ -1021,11 +1020,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	public boolean computeValue(int n, double[] y, double[] y_fit, double[] a)
 	{
 		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper(n, y, a);
-		
+
 		final double l = maximumLikelihoodFunction.likelihood(a);
 		if (l == Double.POSITIVE_INFINITY)
 			return false;
-		
+
 		// Compute residuals for the FunctionSolver interface
 		if (y_fit == null || y_fit.length < n)
 			y_fit = new double[n];
@@ -1040,7 +1039,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 		// Reverse negative log likelihood for maximum likelihood score
 		value = -l;
-		
+
 		return false;
 	}
 }

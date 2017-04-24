@@ -2,6 +2,7 @@ package gdsc.smlm.fitting.linear;
 
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
+import org.ejml.ops.CommonOps;
 
 import gdsc.core.utils.DoubleEquality;
 
@@ -635,6 +636,46 @@ public class EJMLLinearSolver
 		}
 	}
 
+	private void checkForZerosAndCreateZeroArrays(double[][] a)
+	{
+		// Resize array if necessary
+		if (zeros.length < a.length)
+		{
+			zeros = new boolean[a.length];
+			zerosMap = new int[a.length];
+		}
+		for (int i = 0, j = 0; i < a.length; i++)
+		{
+			// Check diagonal element first
+			if (isZero(a[i][i]))
+			{
+				// Check row and column entries
+				if (isZero(a, i))
+				{
+					zeros[i] = true;
+					continue;
+				}
+			}
+
+			zeros[i] = false;
+			// Map new data index back to original index
+			zerosMap[j++] = i;
+		}
+	}
+
+	private boolean isZero(double[][] a, int i)
+	{
+		final int length = a.length;
+		for (int k = length; k-- > 0;)
+		{
+			if (!isZero(a[i][k]))
+				return false;
+			if (!isZero(a[k][i]))
+				return false;
+		}
+		return true;
+	}
+
 	/**
 	 * Computes the inverse of the 'A' matrix passed into the last successful solve method.
 	 * <p>
@@ -655,7 +696,12 @@ public class EJMLLinearSolver
 			for (int i = 0, index = 0; i < size; i++)
 			{
 				if (zeros[i])
+				{
+					// Set all zero columns to zero
+					for (int j = 0; j < size; j++)
+						a[i][j] = a[j][i] = 0;
 					continue;
+				}
 				for (int j = 0; j < size; j++)
 				{
 					if (zeros[j])
@@ -696,7 +742,12 @@ public class EJMLLinearSolver
 			for (int i = 0, index = 0; i < size; i++)
 			{
 				if (zeros[i])
+				{
+					// Set all zero columns to zero
+					for (int j = 0; j < size; j++)
+						a[i][j] = a[j][i] = 0;
 					continue;
+				}
 				for (int j = 0; j < size; j++)
 				{
 					if (zeros[j])
@@ -829,6 +880,31 @@ public class EJMLLinearSolver
 		return new DenseMatrix64F[] { DenseMatrix64F.wrap(size, size, a2), DenseMatrix64F.wrap(size, 1, b2) };
 	}
 
+	private DenseMatrix64F wrapDataWithZeros(double[][] a)
+	{
+		checkForZerosAndCreateZeroArrays(a);
+
+		if (zeroCount == 0)
+			return new DenseMatrix64F(a);
+
+		final int length = a.length;
+
+		int size = length - zeroCount;
+		double[] a2 = new double[size * size];
+		for (int i = 0, index = 0; i < length; i++)
+		{
+			if (zeros[i])
+				continue;
+			for (int j = 0; j < length; j++)
+			{
+				if (zeros[j])
+					continue;
+				a2[index++] = a[i][j];
+			}
+		}
+		return DenseMatrix64F.wrap(size, size, a2);
+	}
+
 	/**
 	 * @param equal
 	 *            the equality class to compare that the solution x in A x = b is within tolerance
@@ -845,5 +921,85 @@ public class EJMLLinearSolver
 	public DoubleEquality getEqual()
 	{
 		return equal;
+	}
+
+	/**
+	 * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the inverse of a.
+	 * <p>
+	 * Note: Rows and columns for element i that are entirely zero are removed before inversion.
+	 *
+	 * @param a
+	 *            the matrix a
+	 * @return False if there is no solution
+	 */
+	public boolean invertSymmPosDef(double[][] a)
+	{
+		DenseMatrix64F A = wrapDataWithZeros(a);
+		DenseMatrix64F A2 = (errorChecking) ? A.copy() : null;
+		createSolver(A.numCols);
+		if (!initialiseSolver(choleskySolver, A))
+		{
+			if (choleskySolver.modifiesA())
+				A = wrapDataWithZeros(a);
+			if (!initialiseSolver(linearSolver, A))
+				return false;
+		}
+
+		invert(a);
+
+		if (errorChecking)
+			return validateInversion(A2);
+
+		return true;
+	}
+
+	private boolean validateInversion(DenseMatrix64F A)
+	{
+		// Compute A A_inv = I
+		final int n = A.numCols;
+		DenseMatrix64F I = new DenseMatrix64F(n, n);
+		CommonOps.mult(A, A_inv, I);
+
+		for (int i = n, index = I.data.length; i-- > 0;)
+		{
+			for (int j = n; j-- > 0;)
+			{
+				double target = (j == i) ? 1 : 0;
+				if (!equal.almostEqualComplement(I.data[--index], target))
+				{
+					System.out.printf("Bad solution: %g != %g (%g = %d)\n", I.data[index], target,
+							DoubleEquality.relativeError(I.data[index], target),
+							DoubleEquality.complement(I.data[index], target));
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Computes the inverse of the matrix. This should work on any square matrix. On output a is replaced by the
+	 * inverse of a.
+	 * <p>
+	 * Note: Rows and columns for element i that are entirely zero are removed before inversion.
+	 * 
+	 * @param a
+	 *            the matrix a
+	 * @return False if there is no solution
+	 */
+	public boolean invertLinear(double[][] a)
+	{
+		DenseMatrix64F A = wrapDataWithZeros(a);
+		DenseMatrix64F A2 = (errorChecking) ? A.copy() : null;
+		createSolver(A.numCols);
+		if (!initialiseSolver(linearSolver, A))
+			return false;
+
+		invert(a);
+
+		if (errorChecking)
+			return validateInversion(A2);
+
+		return true;
 	}
 }

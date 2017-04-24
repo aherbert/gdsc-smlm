@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import java.util.Arrays;
+
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.function.NonLinearFunction;
@@ -139,6 +141,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	public void setDeviations(double[] deviations, double[][] covar)
 	{
+		Arrays.fill(deviations, 0);
 		final int[] indices = f.gradientIndices();
 		for (int i = 0; i < indices.length; i++)
 			deviations[indices[i]] = Math.sqrt(covar[i][i]);

@@ -1,6 +1,9 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import java.util.Arrays;
+
 import gdsc.core.utils.DoubleEquality;
+import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
@@ -323,12 +326,13 @@ public class NonLinearFit extends BaseFunctionSolver
 		{
 			if (!computeDeviations(a_dev))
 			{
-				// Matrix inversion failed. In order to return a solution assume 
-				// the fit achieves the Cramer Roa lower bounds and so the covariance can 
-				// be obtained from the Fisher Information Matrix. 
+				// Matrix inversion failed. In order to return a solution 
+				// return the reciprocal of the diagonal of the Fisher information 
+				// for a loose bound on the limit 
 				final double[] I = calculator.fisherInformationDiagonal(n, a, f);
+				Arrays.fill(a_dev, 0);
 				for (int i = gradientIndices.length; i-- > 0;)
-					a_dev[gradientIndices[i]] = 1.0 / Math.sqrt(I[i]);
+					a_dev[gradientIndices[i]] = FisherInformationMatrix.reciprocalSqrt(I[i]);
 			}
 		}
 

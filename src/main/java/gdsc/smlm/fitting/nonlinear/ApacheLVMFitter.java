@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
@@ -11,6 +13,7 @@ import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.SingularMatrixException;
 import org.apache.commons.math3.util.Precision;
 
+import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
@@ -109,15 +112,16 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 				}
 				catch (SingularMatrixException e)
 				{
-					// Matrix inversion failed. In order to return a solution assume 
-					// the fit achieves the Cramer Roa lower bounds and so the covariance can 
-					// be obtained from the Fisher Information Matrix. 
+					// Matrix inversion failed. In order to return a solution 
+					// return the reciprocal of the diagonal of the Fisher information 
+					// for a loose bound on the limit 
 					final int[] gradientIndices = f.gradientIndices();
 					final int nparams = gradientIndices.length;
 					GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams);
 					final double[] I = calculator.fisherInformationDiagonal(n, a, f);
+					Arrays.fill(a_dev, 0);
 					for (int i = nparams; i-- > 0;)
-						a_dev[gradientIndices[i]] = 1.0 / Math.sqrt(I[i]);
+						a_dev[gradientIndices[i]] = FisherInformationMatrix.reciprocalSqrt(I[i]);
 				}
 			}
 			// Compute sum-of-squares
