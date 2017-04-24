@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 
 /*----------------------------------------------------------------------------- 
@@ -29,7 +30,14 @@ public class FisherInformationMatrix
 	private final int n;
 	private double[][] m_inv = null;
 	private byte inverted = UNKNOWN;
+	private DoubleEquality equal = null;
 
+	/**
+	 * Instantiates a new fisher information matrix.
+	 *
+	 * @param m
+	 *            the fisher information matrix
+	 */
 	public FisherInformationMatrix(double[][] m)
 	{
 		this.m = m;
@@ -38,12 +46,24 @@ public class FisherInformationMatrix
 
 	private void invert()
 	{
-		if (inverted == 0)
+		if (inverted != UNKNOWN)
+			return;
+
+		inverted = NO;
+
+		m_inv = new double[n][];
+		for (int i = n; i-- > 0;)
+			m_inv[i] = m[i].clone();
+		EJMLLinearSolver solver = new EJMLLinearSolver();
+		solver.setEqual(equal);
+		if (solver.invertSymmPosDef(m_inv))
 		{
-			m_inv = new double[n][];
+			// Check all values are zero or above
 			for (int i = n; i-- > 0;)
-				m_inv[i] = m[i].clone();
-			inverted = (byte) ((new EJMLLinearSolver().invertSymmPosDef(m_inv)) ? YES : NO);
+				if (m_inv[i][i] < 0)
+					return;
+
+			inverted = YES;
 		}
 	}
 
@@ -99,14 +119,30 @@ public class FisherInformationMatrix
 	 * The information matrix is NOT inverted. The square root of the reciprocal of the central diagonal returned for a
 	 * (possibly loose) lower bound.
 	 *
-	 * @param variables
-	 *            The variables of the function
-	 * @param allowReciprocal
-	 *            the allow reciprocal flag
 	 * @return CRLB (or null if inversion failed)
 	 */
 	public double[] crlbReciprocal()
 	{
+		final double[] crlb = new double[n];
+		for (int i = 0; i < n; i++)
+			crlb[i] = reciprocalSqrt(m[i][i]);
+		return crlb;
+	}
+
+	/**
+	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the central diagonal of
+	 * the Fisher information matrix.
+	 * 
+	 * The information matrix is NOT inverted. The square root of the reciprocal of the central diagonal returned for a
+	 * (possibly loose) lower bound.
+	 *
+	 * @param m
+	 *            the fisher information matrix
+	 * @return CRLB
+	 */
+	public static double[] crlbReciprocal(double[][] m)
+	{
+		int n = m.length;
 		final double[] crlb = new double[n];
 		for (int i = 0; i < n; i++)
 			crlb[i] = reciprocalSqrt(m[i][i]);
@@ -126,5 +162,22 @@ public class FisherInformationMatrix
 	public static double reciprocalSqrt(double d)
 	{
 		return (d > 0) ? 1.0 / Math.sqrt(d) : Double.POSITIVE_INFINITY;
+	}
+
+	/**
+	 * @param equal
+	 *            the equality class to compare that the solution inversion is correct (A*A_inv = I)
+	 */
+	public void setEqual(DoubleEquality equal)
+	{
+		this.equal = equal;
+	}
+
+	/**
+	 * @return the equality class to compare that the solution inversion is correct (A*A_inv = I)
+	 */
+	public DoubleEquality getEqual()
+	{
+		return equal;
 	}
 }

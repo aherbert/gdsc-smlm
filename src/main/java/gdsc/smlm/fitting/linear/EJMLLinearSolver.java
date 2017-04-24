@@ -5,6 +5,7 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.Maths;
 
 import org.ejml.alg.dense.linsol.chol.LinearSolverCholLDL;
 import org.ejml.data.DenseMatrix64F;
@@ -638,6 +639,7 @@ public class EJMLLinearSolver
 
 	private void checkForZerosAndCreateZeroArrays(double[][] a)
 	{
+		zeroCount = 0;
 		// Resize array if necessary
 		if (zeros.length < a.length)
 		{
@@ -653,6 +655,7 @@ public class EJMLLinearSolver
 				if (isZero(a, i))
 				{
 					zeros[i] = true;
+					zeroCount++;
 					continue;
 				}
 			}
@@ -681,7 +684,7 @@ public class EJMLLinearSolver
 	 * <p>
 	 * On output a[n][n] replaced by the inverse of the solved matrix a.
 	 * 
-	 * @return False if the last solve attempt failed
+	 * @return False if the last solve attempt failed, or inversion produces non finite values
 	 */
 	public boolean invert(double[][] a)
 	{
@@ -689,6 +692,11 @@ public class EJMLLinearSolver
 			return false;
 
 		lastSuccessfulSolver.invert(A_inv);
+
+		// Check for NaN or Infinity
+		for (int i = A_inv.data.length; i-- > 0;)
+			if (!Maths.isFinite(A_inv.data[i]))
+				return false;
 
 		if (zeroCount > 0)
 		{
@@ -727,7 +735,7 @@ public class EJMLLinearSolver
 	 * <p>
 	 * On output a[n][n] replaced by the inverse of the solved matrix a.
 	 * 
-	 * @return False if the last solve attempt failed
+	 * @return False if the last solve attempt failed, or inversion produces non finite values
 	 */
 	public boolean invert(float[][] a)
 	{
@@ -735,6 +743,11 @@ public class EJMLLinearSolver
 			return false;
 
 		lastSuccessfulSolver.invert(A_inv);
+
+		// Check for NaN or Infinity
+		for (int i = A_inv.data.length; i-- > 0;)
+			if (!Maths.isFinite(A_inv.data[i]))
+				return false;
 
 		if (zeroCount > 0)
 		{
@@ -945,7 +958,8 @@ public class EJMLLinearSolver
 				return false;
 		}
 
-		invert(a);
+		if (!invert(a))
+			return false;
 
 		if (errorChecking)
 			return validateInversion(A2);
@@ -967,9 +981,9 @@ public class EJMLLinearSolver
 				double target = (j == i) ? 1 : 0;
 				if (!equal.almostEqualComplement(I.data[--index], target))
 				{
-					System.out.printf("Bad solution: %g != %g (%g = %d)\n", I.data[index], target,
-							DoubleEquality.relativeError(I.data[index], target),
-							DoubleEquality.complement(I.data[index], target));
+					//System.out.printf("Bad solution: %g != %g (%g = %d)\n", I.data[index], target,
+					//		DoubleEquality.relativeError(I.data[index], target),
+					//		DoubleEquality.complement(I.data[index], target));
 					return false;
 				}
 			}
@@ -995,7 +1009,8 @@ public class EJMLLinearSolver
 		if (!initialiseSolver(linearSolver, A))
 			return false;
 
-		invert(a);
+		if (!invert(a))
+			return false;
 
 		if (errorChecking)
 			return validateInversion(A2);
