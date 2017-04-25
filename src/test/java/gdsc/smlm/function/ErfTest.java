@@ -144,9 +144,11 @@ public class ErfTest
 			}
 		}
 
-		//System.out.printf("sum1=%f, sum2=%f, sum3=%f\n", sum1, sum2, sum3);
+		Assert.assertTrue("Gaussian 2D integral is not 1", sum1 > 0.999);
+		Assert.assertTrue("Erf approx integral is incorrect", DoubleEquality.relativeError(sum1, sum2) < 1e-3);
+		Assert.assertTrue("Gaussian approx integral is incorrect", DoubleEquality.relativeError(sum1, sum3) < 1e-3);
 
-		System.out.printf("Erf pixel unit max error = %f\n", max);
-		System.out.printf("Gaussian pixel unit max error = %f\n", max2);
+		System.out.printf("Erf approx pixel unit max error = %f\n", max);
+		System.out.printf("Gaussian approx pixel unit max error = %f\n", max2);
 	}
 }
