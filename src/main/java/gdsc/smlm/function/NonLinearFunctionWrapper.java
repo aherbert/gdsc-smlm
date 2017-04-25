@@ -1,5 +1,7 @@
 package gdsc.smlm.function;
 
+import org.apache.commons.math3.util.Pair;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -16,7 +18,7 @@ package gdsc.smlm.function;
 /**
  * Wrap the NonLinearFunction to remove the parameters that are fixed from the evaluation methods
  */
-public class NonLinearFunctionWrapper implements NonLinearFunction
+public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 {
 	private final NonLinearFunction fun;
 	private final double[] a;
@@ -119,13 +121,12 @@ public class NonLinearFunctionWrapper implements NonLinearFunction
 		return fun.canComputeWeights();
 	}
 
-	/**
-	 * Helper method to return the value of all the data points
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param variables
-	 * @return
+	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
 	 */
-	public double[] computeValue(double[] variables)
+	public double[] computeValues(double[] variables)
 	{
 		initialise(variables);
 		final double[] values = new double[n];
@@ -137,30 +138,58 @@ public class NonLinearFunctionWrapper implements NonLinearFunction
 		return values;
 	}
 
-	/**
-	 * Helper method to return the jacobian of the gradients of all the data points
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param variables
-	 * @return
+	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeJacobian(double[])
 	 */
 	public double[][] computeJacobian(double[] variables)
 	{
 		initialise(variables);
 
-		final double[][] jacobian = new double[n][variables.length];
-		final double[] dyda = new double[variables.length];
+		final double[][] jacobian = new double[n][];
 
-		for (int i = 0; i < jacobian.length; ++i)
+		for (int i = 0; i < n; ++i)
 		{
-			//float y = gf.eval(x.get(i).intValue());
 			// Assume linear X from 0..N
+			final double[] dyda = new double[variables.length];
 			fun.eval(i, dyda);
-
-			// Differentiate with respect to each parameter:
-			for (int j = 0; j < dyda.length; j++)
-				jacobian[i][j] = dyda[j];
+			jacobian[i] = dyda;
 		}
 
 		return jacobian;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#canComputeValuesAndJacobian()
+	 */
+	public boolean canComputeValuesAndJacobian()
+	{
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValuesAndJacobian(double[])
+	 */
+	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
+	{
+		initialise(variables);
+
+		final double[][] jacobian = new double[n][];
+		final double[] values = new double[n];
+
+		for (int i = 0; i < n; ++i)
+		{
+			// Assume linear X from 0..N
+			final double[] dyda = new double[variables.length];
+			values[i] = fun.eval(i, dyda);
+			jacobian[i] = dyda;
+		}
+
+		return new Pair<double[], double[][]>(values, jacobian);
 	}
 }

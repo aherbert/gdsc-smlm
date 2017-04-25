@@ -9,14 +9,21 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.fitting.leastsquares.ValueAndJacobianFunction;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.linear.SingularMatrixException;
+import org.apache.commons.math3.util.Pair;
 import org.apache.commons.math3.util.Precision;
 
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import gdsc.smlm.function.ExtendedNonLinearFunction;
 import gdsc.smlm.function.MultivariateMatrixFunctionWrapper;
 import gdsc.smlm.function.MultivariateVectorFunctionWrapper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -85,17 +92,48 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 					costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
 
 			//@formatter:off
-			LeastSquaresProblem problem = new LeastSquaresBuilder()
+			LeastSquaresBuilder builder = new LeastSquaresBuilder()
 					.maxEvaluations(Integer.MAX_VALUE)
 					.maxIterations(getMaxEvaluations())
 					.start(initialSolution)
 					.target(yd)
-					.weight(new DiagonalMatrix(w))
-					.model(
-						new MultivariateVectorFunctionWrapper(f, a, n), 
-						new MultivariateMatrixFunctionWrapper(f, a, n))
-					.build();
+					.weight(new DiagonalMatrix(w));
 			//@formatter:on
+
+			if (f instanceof ExtendedNonLinearFunction && ((ExtendedNonLinearFunction) f).canComputeValuesAndJacobian())
+			{
+				// Compute together, or each individually
+				builder.model(new ValueAndJacobianFunction()
+				{
+					final ExtendedNonLinearFunction fun = (ExtendedNonLinearFunction) f;
+
+					public Pair<RealVector, RealMatrix> value(RealVector point)
+					{
+						final double[] p = point.toArray();
+						final Pair<double[], double[][]> result = fun.computeValuesAndJacobian(p);
+						return new Pair<RealVector, RealMatrix>(new ArrayRealVector(result.getFirst(), false),
+								new Array2DRowRealMatrix(result.getSecond(), false));
+					}
+
+					public RealVector computeValue(double[] params)
+					{
+						return new ArrayRealVector(fun.computeValues(params), false);
+					}
+
+					public RealMatrix computeJacobian(double[] params)
+					{
+						return new Array2DRowRealMatrix(fun.computeJacobian(params), false);
+					}
+				});
+			}
+			else
+			{
+				// Compute separately
+				builder.model(new MultivariateVectorFunctionWrapper(f, a, n),
+						new MultivariateMatrixFunctionWrapper(f, a, n));
+			}
+
+			LeastSquaresProblem problem = builder.build();
 
 			Optimum optimum = optimizer.optimize(problem);
 

@@ -32,6 +32,6 @@ public class MultivariateVectorFunctionWrapper extends NonLinearFunctionWrapper 
 	 */
 	public double[] value(double[] point)
 	{
-		return computeValue(point);
+		return computeValues(point);
 	}
 }
