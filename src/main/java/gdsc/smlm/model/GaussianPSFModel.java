@@ -306,6 +306,8 @@ public class GaussianPSFModel extends PSFModel
 		return insert(data, x0min, x1min, x0max, x1max, width, gauss, poissonNoise);
 	}
 
+	private final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2); 
+	
 	/**
 	 * Construct a Gaussian 2D function based at the origin using the specified range in each dimension.
 	 * <p>
@@ -341,23 +343,27 @@ public class GaussianPSFModel extends PSFModel
 		double[] erf0 = new double[x0range + 1];
 		double[] erf1 = new double[x1range + 1];
 
-		final double denom0 = 1.0 / (Math.sqrt(2.0) * s0);
-		final double denom1 = 1.0 / (Math.sqrt(2.0) * s1);
-		//final double denom0 = 1.0 / (s0);
-		//final double denom1 = 1.0 / (s1);
+		final double denom0 = ONE_OVER_ROOT2 / s0;
+		final double denom1 = ONE_OVER_ROOT2 / s1;
+		
+		// Note: The 0.5 factors are moved to reduce computations 
 		for (int x = 0; x <= x0range; x++)
 		{
-			erf0[x] = 0.5 * Erf.erf((x - x0) * denom0);
+			//erf0[x] = 0.5 * Erf.erf((x - x0) * denom0);
+			erf0[x] = Erf.erf((x - x0) * denom0);
 		}
 		for (int y = 0; y <= x1range; y++)
 		{
-			erf1[y] = 0.5 * Erf.erf((y - x1) * denom1);
+			//erf1[y] = 0.5 * Erf.erf((y - x1) * denom1);
+			erf1[y] = Erf.erf((y - x1) * denom1);
 		}
+		sum *= 0.5; // Incorporate the 0.5 factor for Y into the sum
 
 		// Pre-compute deltaE0
 		double[] deltaE0 = new double[x0range];
 		for (int x = 0; x < x0range; x++)
-			deltaE0[x] = erf0[x + 1] - erf0[x];
+			// Incorporate the 0.5 factor for X into the delta
+			deltaE0[x] = 0.5 * (erf0[x + 1] - erf0[x]);
 
 		// Compute Gaussian using the difference of the Gaussian error function
 		double[] data = new double[x0range * x1range];
