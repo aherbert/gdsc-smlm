@@ -59,7 +59,7 @@ public class ErfTest
 						double o = Erf.erf(x, x2);
 						double e = org.apache.commons.math3.special.Erf.erf(x, x2);
 						double absError = Math.abs(o - e);
-						if (absError < 1e-10)
+						if (absError < 1e-5)
 							continue;
 						double error = DoubleEquality.relativeError(o, e);
 						if (max < error)
@@ -87,7 +87,7 @@ public class ErfTest
 			double o = Erf.erf(x, x2);
 			double e = org.apache.commons.math3.special.Erf.erf(x, x2);
 			double absError = Math.abs(o - e);
-			if (absError < 1e-10)
+			if (absError < 1e-5)
 				continue;
 			double error = DoubleEquality.relativeError(o, e);
 			if (max < error)
@@ -106,20 +106,21 @@ public class ErfTest
 		double max = 0, max2 = 0;
 
 		// Standard deviation
-		double s = 1;
+		double s = 1.3;
 		final double twos2 = 2 * s * s;
 		double norm = 1 / (Math.PI * twos2);
+		final double denom = 1.0 / (Math.sqrt(2.0) * s);
 
 		double sum1 = 0, sum2 = 0, sum3 = 0;
 
 		for (int x = -range; x <= range; x++)
 		{
-			double o1 = 0.5 * Erf.erf((x - 0.5) / twos2, (x + 0.5) / twos2);
-			double e1 = 0.5 * org.apache.commons.math3.special.Erf.erf((x - 0.5) / twos2, (x + 0.5) / twos2);
+			double o1 = 0.5 * Erf.erf((x - 0.5) * denom, (x + 0.5) * denom);
+			double e1 = 0.5 * org.apache.commons.math3.special.Erf.erf((x - 0.5) * denom, (x + 0.5) * denom);
 			for (int y = -range; y <= range; y++)
 			{
-				double o2 = 0.5 * Erf.erf((y - 0.5) / twos2, (y + 0.5) / twos2);
-				double e2 = 0.5 * org.apache.commons.math3.special.Erf.erf((y - 0.5) / twos2, (y + 0.5) / twos2);
+				double o2 = 0.5 * Erf.erf((y - 0.5) * denom, (y + 0.5) * denom);
+				double e2 = 0.5 * org.apache.commons.math3.special.Erf.erf((y - 0.5) * denom, (y + 0.5) * denom);
 
 				double o = o1 * o2;
 				double e = e1 * e2;
@@ -130,7 +131,7 @@ public class ErfTest
 				sum3 += oo;
 
 				double absError = Math.abs(o - e);
-				if (absError < 1e-10)
+				if (e < 1e-4 || absError < 1e-10)
 					continue;
 				double error = DoubleEquality.relativeError(o, e);
 				double error2 = DoubleEquality.relativeError(oo, e);
@@ -138,13 +139,12 @@ public class ErfTest
 					max = error;
 				if (max2 < error2)
 					max2 = error2;
-				System.out.printf("x=%d, y=%d, e=%f, o=%f, o2=%f, error=%f, error2=%f\n", x, y, e, o, oo, error,
-						error2);
-				//Assert.assertTrue(error < error2);
+				//System.out.printf("x=%d, y=%d, e=%g, o=%g, o2=%g, error=%f, error2=%f\n", x, y, e, o, oo, error, error2);
+				Assert.assertTrue(error < error2);
 			}
 		}
 
-		System.out.printf("sum1=%f, sum2=%f, sum3=%f\n", sum1, sum2, sum3);
+		//System.out.printf("sum1=%f, sum2=%f, sum3=%f\n", sum1, sum2, sum3);
 
 		System.out.printf("Erf pixel unit max error = %f\n", max);
 		System.out.printf("Gaussian pixel unit max error = %f\n", max2);
