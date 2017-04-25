@@ -9,55 +9,123 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
+import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 public class FisherInformationMatrixTest
 {
+	// TODO test for computation with inversion and with reciprocal
+
+	// TODO test if the two are similar, reciprocal should be loose (so above the inversion solution)
+
+	// TODO Make the fitters use the correct CRLB computation (probably inversion for stability)
+
 	@Test
 	public void canComputeCRLB()
 	{
 		for (int n = 1; n < 10; n++)
 		{
-			canComputeCRLB(n, 0);
+			canComputeCRLB(n, 0, true);
 		}
 	}
 
 	@Test
 	public void canComputeCRLBWithZeros()
 	{
-		canComputeCRLB(4, 1);
-
 		for (int n = 2; n < 10; n++)
 		{
-			canComputeCRLB(n, 1);
-			canComputeCRLB(n, n / 2);
+			canComputeCRLB(n, 1, true);
+			canComputeCRLB(n, n / 2, true);
 		}
 	}
 
-	private void canComputeCRLB(int n, int k)
+	@Test
+	public void canComputeCRLBWithReciprocal()
 	{
-		RandomGenerator randomGenerator = new Well19937c(30051977);
-
-		// TODO - Use a real Gaussian function here to compute the Fisher information.
-		// The matrix may be sensitive to the type of equation used.
-		
-		double[] dx = new double[n];
-		for (int i = 0; i < n; i++)
-			dx[i] = randomGenerator.nextDouble() * 100;
-		double[][] I = new double[n][n];
-		for (int i = 0; i < n; i++)
+		for (int n = 1; n < 10; n++)
 		{
-			for (int j = 0; j <= i; j++)
-			{
-				I[i][j] = dx[i] * dx[j];
-			}
+			canComputeCRLB(n, 0, false);
 		}
+	}
 
-		// Symmetric
-		for (int i = 0; i < n - 1; i++)
-			for (int j = i + 1; j < n; j++)
-				I[i][j] = I[j][i];
+	@Test
+	public void canComputeCRLBWithReciprocalWithZeros()
+	{
+		for (int n = 2; n < 10; n++)
+		{
+			canComputeCRLB(n, 1, false);
+			canComputeCRLB(n, n / 2, false);
+		}
+	}
 
-		// Zero
+	@Test
+	public void inversionMatchesReciprocal()
+	{
+		for (int n = 1; n < 10; n++)
+		{
+			FisherInformationMatrix m = createFisherInformationMatrix(n, 0);
+			double[] crlb = m.crlb();
+			double[] crlb2 = m.crlbReciprocal();
+			// These increasingly do not match with increaseing number of parameters. 
+			// Q. Is full inversion of the Fisher information matrix the best way to get 
+			// the CRLB? Should we stick to using the inverse of the diagonal?
+			System.out.printf("%s =? %s\n", Arrays.toString(crlb), Arrays.toString(crlb2));
+		}
+	}
+	
+	private double[] canComputeCRLB(int n, int k, boolean invert)
+	{
+		FisherInformationMatrix m = createFisherInformationMatrix(n, k);
+
+		// Invert for CRLB
+		double[] crlb = (invert) ? m.crlb() : m.crlbReciprocal();
+		System.out.printf("n=%d, k=%d : %s\n", n, k, Arrays.toString(crlb));
+		Assert.assertNotNull("CRLB failed", crlb);
+		return crlb;
+	}
+	
+	private FisherInformationMatrix createFisherInformationMatrix(int n, int k)
+	{
+		int maxx = 10;
+		int size = maxx * maxx;
+		RandomGenerator randomGenerator = new Well19937c(30051977);
+		RandomDataGenerator rdg = new RandomDataGenerator(randomGenerator);
+
+		// Use a real Gaussian function here to compute the Fisher information.
+		// The matrix may be sensitive to the type of equation used.
+		int npeaks = 1;
+		while (1 + npeaks * 6 < n)
+			npeaks++;
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
+
+		double[] a = new double[1 + npeaks * 6];
+		a[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(1, 5);
+		for (int i = 0, j = 0; i < npeaks; i++, j += 6)
+		{
+			a[j + Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
+			a[j + Gaussian2DFunction.ANGLE] = rdg.nextUniform(-Math.PI, Math.PI);
+			a[j + Gaussian2DFunction.X_POSITION] = rdg.nextUniform(4, 6);
+			a[j + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(4, 6);
+			a[j + Gaussian2DFunction.X_SD] = rdg.nextUniform(1.5, 2);
+			a[j + Gaussian2DFunction.Y_SD] = rdg.nextUniform(1.5, 2);
+		}
+		f.initialise(a);
+
+		GradientCalculator c = GradientCalculatorFactory.newCalculator(a.length);
+		double[][] I = c.fisherInformationMatrix(size, a, f);
+
+		//System.out.printf("n=%d, k=%d, I=\n", n, k);
+		//for (int i = 0; i < I.length; i++)
+		//	System.out.println(Arrays.toString(I[i]));
+
+		// Reduce to the desired size
+		I = Arrays.copyOf(I, n);
+		for (int i = 0; i < n; i++)
+			I[i] = Arrays.copyOf(I[i], n);
+
+		// Zero selected columns
 		if (k > 0)
 		{
 			int[] zero = new RandomDataGenerator(randomGenerator).nextPermutation(n, k);
@@ -70,13 +138,16 @@ public class FisherInformationMatrixTest
 			}
 		}
 
+		//System.out.printf("n=%d, k=%d\n", n, k);
+		//for (int i = 0; i < n; i++)
+		//	System.out.println(Arrays.toString(I[i]));
+
+		// Create matrix
 		FisherInformationMatrix m = new FisherInformationMatrix(I);
 		DoubleEquality eq = new DoubleEquality(3, 1e-6);
 		m.setEqual(eq);
-
-		double[] crlb = m.crlb(true);
-		System.out.printf("n=%d, k=%d : %s\n", n, k, Arrays.toString(crlb));
-		Assert.assertNotNull("CRLB failed", crlb);
+		
+		return m;
 	}
 
 	void log(String format, Object... args)

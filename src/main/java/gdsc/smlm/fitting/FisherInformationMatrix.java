@@ -58,7 +58,7 @@ public class FisherInformationMatrix
 		solver.setEqual(equal);
 		if (solver.invertSymmPosDef(m_inv))
 		{
-			// Check all values are zero or above
+			// Check all diagonal values are zero or above
 			for (int i = n; i-- > 0;)
 				if (m_inv[i][i] < 0)
 					return;
@@ -150,8 +150,11 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Return the reciprocal of the square root of the input. If the number is not strictly positive then infinity is
-	 * returned.
+	 * Return the reciprocal of the square root of the input. If the number is not strictly positive then zero is
+	 * returned. Note that zero can only be returned if there was no Fisher information. This is done to match the
+	 * return value from matrix inversion when there is no Fisher information for a parameter i within the matrix. In
+	 * that case the zero column and row is removed from the matrix before inversion and the inverted matrix contains
+	 * zeros.
 	 * <p>
 	 * The reciprocal of the diagonal element of the Fisher information matrix is a (possibly loose) lower bound.
 	 *
@@ -161,7 +164,7 @@ public class FisherInformationMatrix
 	 */
 	public static double reciprocalSqrt(double d)
 	{
-		return (d > 0) ? 1.0 / Math.sqrt(d) : Double.POSITIVE_INFINITY;
+		return (d > 0) ? 1.0 / Math.sqrt(d) : 0;
 	}
 
 	/**

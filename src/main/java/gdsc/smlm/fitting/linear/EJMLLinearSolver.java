@@ -682,7 +682,8 @@ public class EJMLLinearSolver
 	/**
 	 * Computes the inverse of the 'A' matrix passed into the last successful solve method.
 	 * <p>
-	 * On output a[n][n] replaced by the inverse of the solved matrix a.
+	 * On output a[n][n] replaced by the inverse of the solved matrix a. If any column/row index was removed (as it was
+	 * set to zero in the input matrix) then the resulting column/row index will be set to zero.
 	 * 
 	 * @return False if the last solve attempt failed, or inversion produces non finite values
 	 */
@@ -705,7 +706,7 @@ public class EJMLLinearSolver
 			{
 				if (zeros[i])
 				{
-					// Set all zero columns to zero
+					// Set all zero columns to zero.
 					for (int j = 0; j < size; j++)
 						a[i][j] = a[j][i] = 0;
 					continue;
@@ -733,7 +734,8 @@ public class EJMLLinearSolver
 	/**
 	 * Computes the inverse of the 'A' matrix passed into the last successful solve method.
 	 * <p>
-	 * On output a[n][n] replaced by the inverse of the solved matrix a.
+	 * On output a[n][n] replaced by the inverse of the solved matrix a. If any column/row index was removed (as it was
+	 * set to zero in the input matrix) then the resulting column/row index will be set to zero.
 	 * 
 	 * @return False if the last solve attempt failed, or inversion produces non finite values
 	 */
@@ -756,7 +758,7 @@ public class EJMLLinearSolver
 			{
 				if (zeros[i])
 				{
-					// Set all zero columns to zero
+					// Set all zero columns to zer0
 					for (int j = 0; j < size; j++)
 						a[i][j] = a[j][i] = 0;
 					continue;
@@ -939,7 +941,8 @@ public class EJMLLinearSolver
 	/**
 	 * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the inverse of a.
 	 * <p>
-	 * Note: Rows and columns for element i that are entirely zero are removed before inversion.
+	 * Note: Rows and columns for element i that are entirely zero are removed before inversion and the result will have
+	 * zero in the result.
 	 *
 	 * @param a
 	 *            the matrix a
@@ -981,9 +984,9 @@ public class EJMLLinearSolver
 				double target = (j == i) ? 1 : 0;
 				if (!equal.almostEqualComplement(I.data[--index], target))
 				{
-					//System.out.printf("Bad solution: %g != %g (%g = %d)\n", I.data[index], target,
-					//		DoubleEquality.relativeError(I.data[index], target),
-					//		DoubleEquality.complement(I.data[index], target));
+					System.out.printf("Bad solution: %g != %g (%g = %d)\n", I.data[index], target,
+							DoubleEquality.relativeError(I.data[index], target),
+							DoubleEquality.complement(I.data[index], target));
 					return false;
 				}
 			}
@@ -995,7 +998,8 @@ public class EJMLLinearSolver
 	 * Computes the inverse of the matrix. This should work on any square matrix. On output a is replaced by the
 	 * inverse of a.
 	 * <p>
-	 * Note: Rows and columns for element i that are entirely zero are removed before inversion.
+	 * Note: Rows and columns for element i that are entirely zero are removed before inversion and the result will have
+	 * zero in the result.
 	 * 
 	 * @param a
 	 *            the matrix a
