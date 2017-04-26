@@ -429,7 +429,7 @@ public class ErfTest
 	}
 
 	@Test
-	public void canComputeErfGradient()
+	public void analyticErfGradientCorrectForErfApproximation()
 	{
 		BaseErf erf = new Erf();
 		int range = 7;
