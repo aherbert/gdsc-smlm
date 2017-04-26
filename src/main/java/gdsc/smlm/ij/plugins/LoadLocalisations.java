@@ -338,7 +338,7 @@ public class LoadLocalisations implements PlugIn
 		}
 		catch (IOException e)
 		{
-			// ignore
+			Utils.log("%s IO error: %s", TITLE, e.getMessage());
 		}
 		finally
 		{
@@ -364,12 +364,12 @@ public class LoadLocalisations implements PlugIn
 
 		gd.addMessage("Load delimited localisations");
 		gd.addStringField("Dataset_name", name, 30);
-		
+
 		gd.addMessage("Calibration:");
 		gd.addNumericField("Pixel_size", pixelPitch, 3, 8, "nm");
 		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
 		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "ms");
-		
+
 		gd.addMessage("Records:");
 		gd.addNumericField("Header_lines", header, 0);
 		gd.addStringField("Comment", comment);
@@ -378,7 +378,7 @@ public class LoadLocalisations implements PlugIn
 		gd.addChoice("Distance_unit", dUnits, dUnits[distanceUnit]);
 		String[] iUnits = SettingsManager.getNames((Object[]) IntensityUnit.values());
 		gd.addChoice("Intensity_unit", iUnits, iUnits[intensityUnit]);
-		
+
 		gd.addMessage("Define the fields:");
 		Label l = (Label) gd.getMessage();
 		gd.addNumericField("T", it, 0);
@@ -422,16 +422,44 @@ public class LoadLocalisations implements PlugIn
 			if (IJ.isLinux())
 				gd.setBackground(new Color(238, 238, 238));
 		}
-		
-		
+
 		gd.showDialog();
 		if (gd.wasCanceled())
 		{
 			return false;
 		}
+
+		name = getNextString(gd, name);
+		pixelPitch = gd.getNextNumber();
+		gain = gd.getNextNumber();
+		exposureTime = gd.getNextNumber();
+
+		header = (int) gd.getNextNumber();
+		comment = gd.getNextString();
+		delimiter = getNextString(gd, delimiter);
+
+		distanceUnit = gd.getNextChoiceIndex();
+		intensityUnit = gd.getNextChoiceIndex();
+
 		int[] columns = new int[9];
 		for (int i = 0; i < columns.length; i++)
 			columns[i] = (int) gd.getNextNumber();
+
+		{
+			int i = 0;
+			it = columns[i++];
+			iid = columns[i++];
+			ix = columns[i++];
+			iy = columns[i++];
+			iz = columns[i++];
+			ii = columns[i++];
+			isx = columns[i++];
+			isy = columns[i++];
+			ip = columns[i++];
+		}
+
+		// Validate after reading the dialog (so the static fields store the last entered values)
+
 		if (gd.invalidNumber())
 		{
 			IJ.error(TITLE, "Invalid number in input fields");
@@ -452,41 +480,12 @@ public class LoadLocalisations implements PlugIn
 				}
 			}
 		}
-
-		name = getNextString(gd, name);
-		pixelPitch = gd.getNextNumber();
-		gain = gd.getNextNumber();
-		exposureTime = gd.getNextNumber();
-
-		header = (int) gd.getNextNumber();
-		comment = gd.getNextString();
-		delimiter = getNextString(gd, delimiter);
-
-		distanceUnit = gd.getNextChoiceIndex();
-		intensityUnit = gd.getNextChoiceIndex();
-		
-		int i = 0;
-		it = columns[i++];
-		iid = columns[i++];
-		ix = columns[i++];
-		iy = columns[i++];
-		iz = columns[i++];
-		ii = columns[i++];
-		isx = columns[i++];
-		isy = columns[i++];
-		ip = columns[i++];
-		
-		if (gd.invalidNumber())
-		{
-			IJ.error(TITLE, "Invalid number in input fields");
-			return false;
-		}
 		if (gain <= 0 || pixelPitch <= 0)
 		{
 			IJ.error(TITLE, "Require positive gain and pixel pitch");
 			return false;
 		}
-		if (ix < 0 || iy < 0 || ix == iy)
+		if (ix < 0 || iy < 0)
 		{
 			IJ.error(TITLE, "Require valid X and Y indices");
 			return false;
