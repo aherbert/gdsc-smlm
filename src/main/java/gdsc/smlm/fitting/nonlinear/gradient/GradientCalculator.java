@@ -670,14 +670,25 @@ public class GradientCalculator
 	}
 
 	/**
-	 * Compute Fisher's Information Matrix (I).
+	 * Compute the Fisher's Information Matrix (I) assuming a Poisson process.
 	 * 
 	 * <pre>
-	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
+	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
+	 * p = parameters
+	 * x = obsereved values
+	 * L(x|p) = likelihood of X given p
+	 * E = expected value
 	 * </pre>
 	 * 
-	 * Note that this is only a true Fisher information matrix if the function returns the log of the likelihood (i.e.
-	 * Yi = log(f(X;a)) with f(X;a) the probability density function for X conditional on a).
+	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
+	 * Poisson process. In this case the equation reduces to:
+	 * 
+	 * <pre>
+	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
+	 * </pre>
+	 * 
+	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
 	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
@@ -695,14 +706,25 @@ public class GradientCalculator
 	}
 
 	/**
-	 * Compute Fisher's Information Matrix (I).
+	 * Compute the Fisher's Information Matrix (I) assuming a Poisson process.
 	 * 
 	 * <pre>
-	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
+	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
+	 * p = parameters
+	 * x = obsereved values
+	 * L(x|p) = likelihood of X given p
+	 * E = expected value
 	 * </pre>
 	 * 
-	 * Note that this is only a true Fisher information matrix if the function returns the log of the likelihood (i.e.
-	 * Yi = log(f(X;a)) with f(X;a) the probability density function for X conditional on a).
+	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
+	 * Poisson process. In this case the equation reduces to:
+	 * 
+	 * <pre>
+	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
+	 * </pre>
+	 * 
+	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
 	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
@@ -745,14 +767,25 @@ public class GradientCalculator
 	}
 
 	/**
-	 * Compute the central diagonal of Fisher's Information Matrix (I).
+	 * Compute the central diagonal of Fisher's Information Matrix (I) assuming a Poisson process.
+	 * 
+	 * <pre>
+	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
+	 * p = parameters
+	 * x = obsereved values
+	 * L(x|p) = likelihood of X given p
+	 * E = expected value
+	 * </pre>
+	 * 
+	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
+	 * Poisson process. In this case the equation reduces to:
 	 * 
 	 * <pre>
 	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
 	 * </pre>
 	 * 
-	 * Note that this is only a true Fisher information diagonal if the function returns the log of the likelihood (i.e.
-	 * Yi = log(f(X;a)) with f(X;a) the probability density function for X conditional on a).
+	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
 	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
@@ -770,14 +803,25 @@ public class GradientCalculator
 	}
 
 	/**
-	 * Compute the central diagonal of Fisher's Information Matrix (I).
+	 * Compute the central diagonal of Fisher's Information Matrix (I) assuming a Poisson process.
+	 * 
+	 * <pre>
+	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
+	 * p = parameters
+	 * x = obsereved values
+	 * L(x|p) = likelihood of X given p
+	 * E = expected value
+	 * </pre>
+	 * 
+	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
+	 * Poisson process. In this case the equation reduces to:
 	 * 
 	 * <pre>
 	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
 	 * </pre>
 	 * 
-	 * Note that this is only a true Fisher information diagonal if the function returns the log of the likelihood (i.e.
-	 * Yi = log(f(X;a)) with f(X;a) the probability density function for X conditional on a).
+	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
 	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
