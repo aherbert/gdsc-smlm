@@ -6,12 +6,65 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.test.BaseTimingTask;
+import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
 
 public class ErfTest
 {
+	//@formatter:off
+	private abstract class BaseErf
+	{
+		String name;
+		BaseErf(String name) { this.name = name; }
+		abstract double erf(double x);
+		abstract double erf(double x1, double x2);
+	}
+	private class ApacheErf extends BaseErf
+	{
+		ApacheErf() {	super("apache erf"); }
+		double erf(double x) { return org.apache.commons.math3.special.Erf.erf(x); }
+		double erf(double x1, double x2) { return org.apache.commons.math3.special.Erf.erf(x1, x2); }
+	}
+	private class Erf extends BaseErf
+	{
+		Erf() {	super("erf"); }
+		double erf(double x) { return gdsc.smlm.function.Erf.erf(x); }
+		double erf(double x1, double x2) { return gdsc.smlm.function.Erf.erf(x1, x2); }
+	}
+	private class Erf0 extends BaseErf
+	{
+		Erf0() { super("erf0"); }
+		double erf(double x) { return gdsc.smlm.function.Erf.erf0(x); }
+		double erf(double x1, double x2) { return gdsc.smlm.function.Erf.erf0(x1, x2); }
+	}
+	private class Erf2 extends BaseErf
+	{
+		Erf2() { super("erf2"); }
+		double erf(double x) { return gdsc.smlm.function.Erf.erf2(x); }
+		double erf(double x1, double x2) { return gdsc.smlm.function.Erf.erf2(x1, x2); }
+	}
+	//@formatter:on
+
+	@Test
+	public void erf0xHasLowError()
+	{
+		erfxHasLowError(new Erf0(), 5e-4);
+	}
+
 	@Test
 	public void erfxHasLowError()
+	{
+		erfxHasLowError(new Erf(), 3e-7);
+	}
+
+	@Test
+	public void erf2xHasLowError()
+	{
+		erfxHasLowError(new Erf2(), 1.3e-4);
+	}
+
+	private void erfxHasLowError(BaseErf erf, double expected)
 	{
 		RandomGenerator rg = new Well19937c(30051977);
 		int range = 8;
@@ -22,23 +75,37 @@ public class ErfTest
 			for (int i = 0; i < 5; i++)
 			{
 				double x = xi + rg.nextDouble();
-				double o = Erf.erf(x);
+				double o = erf.erf(x);
 				double e = org.apache.commons.math3.special.Erf.erf(x);
-				double absError = Math.abs(o - e);
-				if (absError < 1e-10)
-					continue;
-				double error = DoubleEquality.relativeError(o, e);
+				double error = Math.abs(o - e);
 				if (max < error)
 					max = error;
 				//System.out.printf("x=%f, e=%f, o=%f, error=%f\n", x, e, o, error);
-				Assert.assertTrue(error < 1.3e-4);
+				Assert.assertTrue(error < expected);
 			}
 		}
-		System.out.printf("erfx max error = %f\n", max);
+		System.out.printf("erfx %s max error = %g\n", erf.name, max);
+	}
+
+	@Test
+	public void erf0xxHasLowError()
+	{
+		erfxxHasLowError(new Erf0(), 4e-2);
 	}
 
 	@Test
 	public void erfxxHasLowError()
+	{
+		erfxxHasLowError(new Erf(), 7e-4);
+	}
+
+	@Test
+	public void erf2xxHasLowError()
+	{
+		erfxxHasLowError(new Erf2(), 1.1e-2);
+	}
+
+	private void erfxxHasLowError(BaseErf erf, double expected )
 	{
 		RandomGenerator rg = new Well19937c(30051977);
 
@@ -56,26 +123,40 @@ public class ErfTest
 					{
 						double x2 = xi2 + rg.nextDouble();
 
-						double o = Erf.erf(x, x2);
+						double o = erf.erf(x, x2);
 						double e = org.apache.commons.math3.special.Erf.erf(x, x2);
-						double absError = Math.abs(o - e);
-						if (absError < 1e-5)
-							continue;
-						double error = DoubleEquality.relativeError(o, e);
+						double error = Math.abs(o - e);
 						if (max < error)
 							max = error;
 						//System.out.printf("x=%f, x2=%f, e=%f, o=%f, error=%f\n", x, x2, e, o, error);
-						Assert.assertTrue(error < 0.04);
+						Assert.assertTrue(error < expected);
 					}
 				}
 			}
 		}
 
-		System.out.printf("erfxx max error = %f\n", max);
+		System.out.printf("erfxx %s max error = %g\n", erf.name, max);
+	}
+
+	@Test
+	public void erf0xxHasLowErrorForUnitBlocks()
+	{
+		erfxxHasLowErrorForUnitBlocks(new Erf0(), 5e-4);
 	}
 
 	@Test
 	public void erfxxHasLowErrorForUnitBlocks()
+	{
+		erfxxHasLowErrorForUnitBlocks(new Erf(), 5e-7);
+	}
+
+	@Test
+	public void erf2xxHasLowErrorForUnitBlocks()
+	{
+		erfxxHasLowErrorForUnitBlocks(new Erf2(), 1e-4);
+	}
+
+	private void erfxxHasLowErrorForUnitBlocks(BaseErf erf, double expected)
 	{
 		int range = 8;
 		double max = 0;
@@ -84,23 +165,37 @@ public class ErfTest
 		{
 			double x = xi;
 			double x2 = xi + 1;
-			double o = Erf.erf(x, x2);
+			double o = erf.erf(x, x2);
 			double e = org.apache.commons.math3.special.Erf.erf(x, x2);
-			double absError = Math.abs(o - e);
-			if (absError < 1e-5)
-				continue;
-			double error = DoubleEquality.relativeError(o, e);
+			double error = Math.abs(o - e);
 			if (max < error)
 				max = error;
 			//System.out.printf("x=%f, x2=%f, e=%f, o=%f, error=%f\n", x, x2, e, o, error);
-			Assert.assertTrue(error < 0.04);
+			Assert.assertTrue(error < expected);
 		}
 
-		System.out.printf("erfxx unit max error = %f\n", max);
+		System.out.printf("erfxx %s unit max error = %g\n", erf.name, max);
+	}
+
+	@Test
+	public void erf0xxHasLowerErrorThanGaussianApproximationForUnitBlocks()
+	{
+		erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf0());
 	}
 
 	@Test
 	public void erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks()
+	{
+		erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf());
+	}
+
+	@Test
+	public void erf2xxHasLowerErrorThanGaussianApproximationForUnitBlocks()
+	{
+		erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf2());
+	}
+
+	private void erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(BaseErf erf)
 	{
 		int range = 5;
 		double max = 0, max2 = 0;
@@ -115,11 +210,11 @@ public class ErfTest
 
 		for (int x = -range; x <= range; x++)
 		{
-			double o1 = 0.5 * Erf.erf((x - 0.5) * denom, (x + 0.5) * denom);
+			double o1 = 0.5 * erf.erf((x - 0.5) * denom, (x + 0.5) * denom);
 			double e1 = 0.5 * org.apache.commons.math3.special.Erf.erf((x - 0.5) * denom, (x + 0.5) * denom);
 			for (int y = -range; y <= range; y++)
 			{
-				double o2 = 0.5 * Erf.erf((y - 0.5) * denom, (y + 0.5) * denom);
+				double o2 = 0.5 * erf.erf((y - 0.5) * denom, (y + 0.5) * denom);
 				double e2 = 0.5 * org.apache.commons.math3.special.Erf.erf((y - 0.5) * denom, (y + 0.5) * denom);
 
 				double o = o1 * o2;
@@ -144,11 +239,145 @@ public class ErfTest
 			}
 		}
 
-		Assert.assertTrue("Gaussian 2D integral is not 1", sum1 > 0.999);
-		Assert.assertTrue("Erf approx integral is incorrect", DoubleEquality.relativeError(sum1, sum2) < 1e-3);
-		Assert.assertTrue("Gaussian approx integral is incorrect", DoubleEquality.relativeError(sum1, sum3) < 1e-3);
+		Assert.assertTrue(erf.name + " Gaussian 2D integral is not 1", sum1 > 0.999);
+		Assert.assertTrue(erf.name + " Erf approx integral is incorrect",
+				DoubleEquality.relativeError(sum1, sum2) < 1e-3);
+		Assert.assertTrue(erf.name + " Gaussian approx integral is incorrect",
+				DoubleEquality.relativeError(sum1, sum3) < 1e-3);
 
-		System.out.printf("Erf approx pixel unit max error = %f\n", max);
-		System.out.printf("Gaussian approx pixel unit max error = %f\n", max2);
+		System.out.printf(erf.name + " Erf approx pixel unit max error = %f\n", max);
+		System.out.printf(erf.name + " Gaussian approx pixel unit max error = %f\n", max2);
+	}
+
+	private class MyTimingTask extends BaseTimingTask
+	{
+		BaseErf erf;
+		double[] x;
+
+		public MyTimingTask(BaseErf erf, double[] x)
+		{
+			super(erf.name);
+			this.erf = erf;
+			this.x = x;
+		}
+
+		public int getSize()
+		{
+			return 1;
+		}
+
+		public Object getData(int i)
+		{
+			return null;
+		}
+
+		public Object run(Object data)
+		{
+			for (int i = 0; i < x.length; i++)
+				erf.erf(x[i]);
+			return null;
+		}
+	}
+
+	@Test
+	public void erfApproxIsFaster()
+	{
+		int range = 5;
+		int steps = 10000;
+		final double[] x = new double[steps];
+		double total = 2 * range;
+		double step = total / steps;
+		for (int i = 0; i < steps; i++)
+			x[i] = -range + i * step;
+
+		TimingService ts = new TimingService(5);
+		ts.execute(new MyTimingTask(new ApacheErf(), x));
+		ts.execute(new MyTimingTask(new Erf(), x));
+		ts.execute(new MyTimingTask(new Erf0(), x));
+		ts.execute(new MyTimingTask(new Erf2(), x));
+
+		int size = ts.getSize();
+		ts.repeat(size);
+		ts.report();
+	}
+
+	@Test
+	public void gaussianIntegralApproximatesErf()
+	{
+		double x = 1.3, y = 2.2, s = 1.14;
+		int minx = (int) x;
+		int miny = (int) y;
+		int maxx = minx + 1;
+		int maxy = miny + 1;
+
+		// Full integration using the Erf
+		// Note: The PSF of a 2D Gaussian is described in Smith et all using a denominator
+		// of (2.0 * s * s) for both x and Y directions. This is wrong. We need the 
+		// integral of the single Guassian in each dimension so the denomiator is (sqrt(2.0) * s). 
+		// See: Smith et al, (2010). Fast, single-molecule localisation that achieves 
+		// theoretically minimum uncertainty. Nature Methods 7, 373-375
+		// (supplementary note).
+		//final double denom = 1.0 / (2.0 * s * s); // As per Smith, etal (2010),
+
+		final double denom = 1.0 / (Math.sqrt(2.0) * s);
+		double e1 = 0.5 * org.apache.commons.math3.special.Erf.erf(minx * denom, maxx * denom);
+		double e2 = 0.5 * org.apache.commons.math3.special.Erf.erf(miny * denom, maxy * denom);
+		double e = e1 * e2;
+
+		double o = 0;
+		// Numeric integration
+		final double twos2 = 2 * s * s;
+		double norm = 1 / (Math.PI * twos2);
+		for (int i = 0, steps = 1; i < 4; i++, steps = (int) Math.pow(10, i))
+		{
+			// Gaussian is: FastMath.exp(-(x * x + y * y) / twos2) over all x and y
+			// But we can do this by separating x and y:
+			// FastMath.exp(-(x * x) / twos2) * FastMath.exp(-(y * y) / twos2)
+
+			// pre-compute
+			double[] ex = new double[steps];
+			double sumey = 0;
+			if (steps == 1)
+			{
+				// Use the actual values for x and y
+				ex[0] = FastMath.exp(-(x * x) / twos2);
+				sumey = FastMath.exp(-(y * y) / twos2);
+			}
+			else
+			{
+				for (int j = 0; j < steps; j++)
+				{
+					double xx = minx + (double) j / steps;
+					double yy = miny + (double) j / steps;
+					ex[j] = FastMath.exp(-(xx * xx) / twos2);
+					sumey += FastMath.exp(-(yy * yy) / twos2);
+				}
+			}
+
+			double sum = 0;
+			for (int j = 0; j < steps; j++)
+			{
+				sum += ex[j] * sumey;
+			}
+
+			//// Check
+			//double sum2 = 0;
+			//for (int j = 0; j <= steps; j++)
+			//{
+			//	double xx = minx + (double) j / steps;
+			//	for (int k = 0; k <= steps; k++)
+			//	{
+			//		double yy = miny + (double) k / steps;
+			//		sum2 += FastMath.exp(-(xx * xx + yy * yy) / twos2);
+			//	}
+			//}
+			//System.out.printf("sum=%f, sum2=%f\n", sum, sum2);
+
+			int n = steps * steps;
+			o = norm * sum / n;
+			System.out.printf("n=%d, e=%f, o=%f, error=%f\n", n, e, o, DoubleEquality.relativeError(e, o));
+		}
+
+		Assert.assertEquals(e, o, e * 1e-2);
 	}
 }
