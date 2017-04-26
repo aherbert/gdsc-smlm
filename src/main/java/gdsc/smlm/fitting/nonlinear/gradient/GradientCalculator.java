@@ -22,7 +22,7 @@ import gdsc.smlm.function.NonLinearFunction;
  * set of data points (x, y).
  * <p>
  * Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving
- * the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models. 
+ * the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
  */
 public class GradientCalculator
 {
@@ -676,6 +676,9 @@ public class GradientCalculator
 	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
 	 * </pre>
 	 * 
+	 * Note that this is only a true Fisher information matrix if the function returns the log of the likelihood (i.e.
+	 * Yi = log(f(X;a)) with f(X;a) the probability density function for X conditional on a).
+	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
 	 * @param x
@@ -697,6 +700,9 @@ public class GradientCalculator
 	 * <pre>
 	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
 	 * </pre>
+	 * 
+	 * Note that this is only a true Fisher information matrix if the function returns the log of the likelihood (i.e.
+	 * Yi = log(f(X;a)) with f(X;a) the probability density function for X conditional on a).
 	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
@@ -745,6 +751,9 @@ public class GradientCalculator
 	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
 	 * </pre>
 	 * 
+	 * Note that this is only a true Fisher information diagonal if the function returns the log of the likelihood (i.e.
+	 * Yi = log(f(X;a)) with f(X;a) the probability density function for X conditional on a).
+	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
 	 * @param x
@@ -766,6 +775,9 @@ public class GradientCalculator
 	 * <pre>
 	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
 	 * </pre>
+	 * 
+	 * Note that this is only a true Fisher information diagonal if the function returns the log of the likelihood (i.e.
+	 * Yi = log(f(X;a)) with f(X;a) the probability density function for X conditional on a).
 	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
