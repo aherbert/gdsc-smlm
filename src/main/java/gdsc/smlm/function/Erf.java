@@ -54,7 +54,8 @@ public class Erf
 		final boolean negative = (x < 0);
 		if (negative)
 			x = -x;
-		if (x > 40)
+		// Set this to 40 when computing the limit in the JUnit test
+		if (x > 19.581294086464855)
 			return negative ? -1 : 1;
 
 		final double x2 = x * x;
@@ -110,7 +111,8 @@ public class Erf
 		final boolean negative = (x < 0);
 		if (negative)
 			x = -x;
-		if (x > 40)
+		// Set this to 40 when computing the limit in the JUnit test
+		if (x > 6.183574750897915)
 			return negative ? -1 : 1;
 
 		final double x2 = x * x;
@@ -173,7 +175,8 @@ public class Erf
 		final boolean negative = (x < 0);
 		if (negative)
 			x = -x;
-		if (x > 40)
+		// Set this to 40 when computing the limit in the JUnit test
+		if (x > 5.9889490707148445)
 			return negative ? -1 : 1;
 
 		final double x2 = x * x;

@@ -88,6 +88,52 @@ public class ErfTest
 	}
 
 	@Test
+	public void erfApachexIndistinguishableFrom1()
+	{
+		erfxIndistinguishableFrom1(new ApacheErf());
+	}
+
+	@Test
+	public void erf0xIndistinguishableFrom1()
+	{
+		erfxIndistinguishableFrom1(new Erf0());
+	}
+
+	@Test
+	public void erfxIndistinguishableFrom1()
+	{
+		erfxIndistinguishableFrom1(new Erf());
+	}
+
+	@Test
+	public void erf2xIndistinguishableFrom1()
+	{
+		erfxIndistinguishableFrom1(new Erf2());
+	}
+
+	private void erfxIndistinguishableFrom1(BaseErf erf)
+	{
+		// Find switch using a binary search
+		double lower = 1;
+		double upper = 40;
+		while (DoubleEquality.complement(lower, upper) > 1)
+		{
+			double mid = (upper + lower) * 0.5;
+			double o = erf.erf(mid);
+			if (o == 1)
+			{
+				upper = mid;
+			}
+			else
+			{
+				lower = mid;
+			}
+		}
+
+		System.out.printf("erfx %s indistinguishable from 1: x > %s, x >= %s\n", erf.name, Double.toString(lower), Double.toString(upper));
+	}
+
+	@Test
 	public void erf0xxHasLowError()
 	{
 		erfxxHasLowError(new Erf0(), 4e-2);
@@ -105,7 +151,7 @@ public class ErfTest
 		erfxxHasLowError(new Erf2(), 1.1e-2);
 	}
 
-	private void erfxxHasLowError(BaseErf erf, double expected )
+	private void erfxxHasLowError(BaseErf erf, double expected)
 	{
 		RandomGenerator rg = new Well19937c(30051977);
 
