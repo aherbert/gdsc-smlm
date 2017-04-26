@@ -199,4 +199,20 @@ public class Erf
 	{
 		return erf2(x2) - erf2(x1);
 	}
+
+	private static double D_FACTOR = 2 / Math.sqrt(Math.PI);
+
+	/**
+	 * Compute the first derivative of the Error function = (2 / sqrt(pi)) * exp(-x*x)
+	 * 
+	 * @see http://mathworld.wolfram.com/Erf.html
+	 *
+	 * @param x
+	 *            the x
+	 * @return the first derivative
+	 */
+	public static double dErf_dx(double x)
+	{
+		return D_FACTOR * FastMath.exp(-x * x);
+	}
 }
