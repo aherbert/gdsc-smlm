@@ -484,48 +484,35 @@ public abstract class Gaussian2DFunctionTest
 		int maxx = 30;
 
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
-		//f.setMaxX(maxx);
 		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
 
-		try
-		{
-			for (double amplitude1 : testamplitude1)
-				for (double angle1 : testangle1)
-					for (double cx1 : new double[] { maxx / 2 + 0.373f })
-						for (double cy1 : new double[] { maxx / 2 + 0.876f })
-							for (double[] w1 : testw1)
+		for (double amplitude1 : testamplitude1)
+			for (double angle1 : testangle1)
+				for (double cx1 : new double[] { maxx / 2 + 0.373f })
+					for (double cy1 : new double[] { maxx / 2 + 0.876f })
+						for (double[] w1 : testw1)
+						{
+							double[] a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+
+							f.initialise(a);
+							f2.initialise(a);
+							double sum = 0;
+							for (int index = maxx * maxx; index-- > 0;)
 							{
-								double[] a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
-
-								f.initialise(a);
-								f2.initialise(a);
-								double sum = 0;
-								for (int index = maxx * maxx; index-- > 0;)
-								{
-									double r1 = f.eval(index);
-									double r2 = f2.eval(index);
-									//System.out.printf("%d,%d r1=%f\n", index%maxx, index/maxx, r1);
-									sum += r1;
-									final boolean ok = eq2.almostEqualComplement(r1, r2);
-									if (!ok)
-										Assert.assertTrue(
-												String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx),
-												ok);
-								}
-
-								Assert.assertTrue(sum + " != " + amplitude1,
-										eq.almostEqualComplement((double) sum, amplitude1));
+								double r1 = f.eval(index);
+								double r2 = f2.eval(index);
+								//System.out.printf("%d,%d r1=%f\n", index%maxx, index/maxx, r1);
+								sum += r1;
+								final boolean ok = eq2.almostEqualComplement(r1, r2);
+								if (!ok)
+									Assert.assertTrue(
+											String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx),
+											ok);
 							}
-		}
-		catch (AssertionError e)
-		{
-			throw e;
-		}
-		finally
-		{
-			// Reset the function width
-			//f.setMaxX(this.maxx);
-		}
+
+							Assert.assertTrue(sum + " != " + amplitude1,
+									eq.almostEqualComplement((double) sum, amplitude1));
+						}
 	}
 
 	double[] createParameters(double... args)
