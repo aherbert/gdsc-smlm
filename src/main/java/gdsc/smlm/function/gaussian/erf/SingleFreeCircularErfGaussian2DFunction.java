@@ -1,6 +1,7 @@
 package gdsc.smlm.function.gaussian.erf;
 
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.Pair;
 
 import gdsc.smlm.function.Erf;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -19,7 +20,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  *---------------------------------------------------------------------------*/
 
 /**
- * Evaluates an 2-dimensional Gaussian function for a single peak.
+ * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
 public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFunction
 {
@@ -29,24 +30,34 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	private static final int[] gradientIndices;
 	static
 	{
-		gradientIndices = createGradientIndices(1, new SingleFreeCircularErfGaussian2DFunction(1, 1));
+		gradientIndices = createGradientIndices(1, new SingleFreeCircularErfGaussian2DFunction(1, 1, true));
 	}
 
-	protected double[] deltaEx, deltaEy, expx, expy;
+	// Required for the PSF
+	protected final double[] deltaEx, deltaEy;
 	protected double bg, I0, x0, y0, sx0, sy0;
+
+	// Required for the gradients
+	protected double[] expx, expy;
 	protected double oneOverSxRoot2pi, oneOverSyRoot2pi;
 
 	/**
-	 * Constructor
-	 * 
+	 * Constructor.
+	 *
 	 * @param maxx
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param noGradients
+	 *            Set to true if the gradients are not required
 	 */
-	public SingleFreeCircularErfGaussian2DFunction(int maxx, int maxy)
+	public SingleFreeCircularErfGaussian2DFunction(int maxx, int maxy, boolean noGradients)
 	{
-		super(maxx, maxy);
+		super(maxx, maxy, noGradients);
 		deltaEx = new double[this.maxx];
 		deltaEy = new double[this.maxy];
+		if (noGradients)
+			return;
 		expx = new double[this.maxx + 1];
 		expy = new double[this.maxy + 1];
 	}
@@ -65,10 +76,66 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 		y0 = a[Gaussian2DFunction.Y_POSITION] + 0.5;
 		sx0 = a[Gaussian2DFunction.X_SD];
 		sy0 = a[Gaussian2DFunction.Y_SD];
-		createTables(deltaEx, expx, x0, sx0);
-		createTables(deltaEy, expy, y0, sy0);
-		oneOverSxRoot2pi = ONE_OVER_ROOT2PI / sx0;
-		oneOverSyRoot2pi = ONE_OVER_ROOT2PI / sy0;
+		
+		// TODO - initialise for 0,1,2 derivatives
+		
+		// We can store the derivatives for position and sd in arrays 
+		// since the Gaussian is XY separable
+		
+		if (noGradients)
+		{
+			// Only create the tables for the PSF
+			createDeltaETable(deltaEx, x0, sx0);
+			createDeltaETable(deltaEy, y0, sy0);
+		}
+		else
+		{
+			// Create the tables for the PSF and the gradients
+			createTables(deltaEx, expx, x0, sx0);
+			createTables(deltaEy, expy, y0, sy0);
+			oneOverSxRoot2pi = ONE_OVER_ROOT2PI / sx0;
+			oneOverSyRoot2pi = ONE_OVER_ROOT2PI / sy0;
+		}
+	}
+
+	/**
+	 * Creates the delta E array. This is the sum of the Gaussian function using the error function for each of the
+	 * pixels from 0 to n. Also compute the value of the Gaussian function at the pixel boundaries.
+	 *
+	 * @param deltaE
+	 *            the delta E (difference between the error function at the start and end of each pixel)
+	 * @param exp
+	 *            the Gaussian exponential function at each pixel boundary
+	 * @param u
+	 *            the mean of the Gaussian
+	 * @param s
+	 *            the standard deviation of the Gaussian
+	 * @return the double[]
+	 */
+	private void createDeltaETable(double[] deltaE, double u, double s)
+	{
+		// Used for the denominator: sqrt(2) * s
+		final double f = ONE_OVER_ROOT2 / s;
+
+		// Note: The paper by Smith, et al computes the integral for the kth pixel centred at (x,y)
+		// If x=u then the Erf will be evaluated at x-u+0.5 - x-u-0.5 => integral from -0.5 to 0.5.
+		// This code sets the first pixel at (0,0).
+
+		// All computations for pixel k (=(x,y)) that require the exponential can use x,y indices for the 
+		// lower boundary value and x+1,y+1 indices for the upper value.
+
+		// The first position:
+		// Offset x by the position and get the pixel lower bound.
+		// (x - u - 0.5) with x=0 and u offset by +0.5
+		double x = -u;
+		double erf = 0.5 * Erf.erf(x * f);
+		for (int i = 0, n = deltaE.length; i < n; i++)
+		{
+			x += 1.0;
+			final double erf2 = 0.5 * Erf.erf(x * f);
+			deltaE[i] = erf2 - erf;
+			erf = erf2;
+		}
 	}
 
 	/**
@@ -120,6 +187,24 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	 * 
 	 * @param i
 	 *            Input predictor
+	 * @return The Gaussian value
+	 * 
+	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
+	 */
+	public double eval(final int i)
+	{
+		// Unpack the predictor into the dimensions
+		final int y = i / maxx;
+		final int x = i % maxx;
+
+		return bg + I0 * deltaEx[x] * deltaEy[y];
+	}
+
+	/**
+	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	 * 
+	 * @param i
+	 *            Input predictor
 	 * @param duda
 	 *            Partial gradient of function with respect to each coefficient
 	 * @return The predicted value
@@ -132,6 +217,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 		final int y = i / maxx;
 		final int x = i % maxx;
 
+		// Use pre-computed gradients
+		
 		duda[Gaussian2DFunction.X_POSITION] = I0 * oneOverSxRoot2pi * (expx[x + 1] - expx[x]) * deltaEy[y];
 		duda[Gaussian2DFunction.Y_POSITION] = I0 * oneOverSyRoot2pi * (expy[y + 1] - expy[y]) * deltaEx[x];
 		duda[Gaussian2DFunction.SIGNAL] = deltaEx[x] * deltaEy[y];
@@ -144,7 +231,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	}
 
 	/**
-	 * Compute the first derivative with respect to the standard deviation. This does not include the intensity of the Gaussian.
+	 * Compute the first derivative with respect to the standard deviation. This does not include the intensity of the
+	 * Gaussian.
 	 *
 	 * @param deltaE
 	 *            the delta E array
@@ -169,7 +257,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	}
 
 	/**
-	 * Compute the second derivative with respect to the standard deviation. This does not include the intensity of the Gaussian.
+	 * Compute the second derivative with respect to the standard deviation. This does not include the intensity of the
+	 * Gaussian.
 	 *
 	 * @param deltaE
 	 *            the delta E array
@@ -199,18 +288,25 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 		return deltaE[x] * (G53 - 2 * G31);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
-	 */
-	public double eval(final int i)
+	// Support for ExtendedNonLinear Function. This can take advantage of x/y iteration.
+	@Override
+	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
 	{
-		// Unpack the predictor into the dimensions
-		final int y = i / maxx;
-		final int x = i % maxx;
+		initialise(variables);
 
-		return bg + I0 * deltaEx[x] * deltaEy[y];
+		final int n = maxx * maxy;
+		final double[][] jacobian = new double[n][];
+		final double[] values = new double[n];
+
+		for (int i = 0; i < n; ++i)
+		{
+			// Assume linear X from 0..N
+			final double[] dyda = new double[variables.length];
+			values[i] = eval(i, dyda);
+			jacobian[i] = dyda;
+		}
+
+		return new Pair<double[], double[][]>(values, jacobian);
 	}
 
 	@Override

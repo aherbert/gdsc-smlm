@@ -27,16 +27,37 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 {
 	public static final int Z_POSITION = 2;
-	
-	public ErfGaussian2DFunction(int maxx, int maxy)
+
+	protected final boolean noGradients;
+
+	/**
+	 * Instantiates a new erf gaussian 2D function.
+	 *
+	 * @param maxx
+	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param noGradients
+	 *            Set to true if the gradients are not required
+	 */
+	public ErfGaussian2DFunction(int maxx, int maxy, boolean noGradients)
 	{
 		super(maxx, maxy);
+		this.noGradients = noGradients;
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#getShapeName()
+	 */
 	@Override
 	protected String getShapeName()
 	{
 		// The shape parameter is used for the z-position
 		return "Z";
 	}
+
+	// TODO - Add function support for computing the second derivatives directly in a Newton-Raphson method
+
 }
