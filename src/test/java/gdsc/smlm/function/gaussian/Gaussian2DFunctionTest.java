@@ -483,8 +483,8 @@ public abstract class Gaussian2DFunctionTest
 		double background = 0;
 		int maxx = 30;
 
-		Gaussian2DFunction f = f1;
-		f.setMaxX(maxx);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
+		//f.setMaxX(maxx);
 		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
 
 		try
@@ -524,7 +524,7 @@ public abstract class Gaussian2DFunctionTest
 		finally
 		{
 			// Reset the function width
-			f.setMaxX(this.maxx);
+			//f.setMaxX(this.maxx);
 		}
 	}
 
