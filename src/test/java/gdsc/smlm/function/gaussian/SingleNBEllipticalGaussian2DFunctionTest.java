@@ -8,6 +8,6 @@ public class SingleNBEllipticalGaussian2DFunctionTest extends Gaussian2DFunction
 	protected void init()
 	{
 		flags = GaussianFunctionFactory.FIT_NB_ELLIPTICAL; 
-		f1 = new SingleNBEllipticalGaussian2DFunction(maxx);
+		f1 = new SingleNBEllipticalGaussian2DFunction(maxx, maxx);
 	}
 }

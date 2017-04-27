@@ -18,7 +18,8 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Evaluates an 2-dimensional Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into
+ * 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -28,7 +29,7 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
 	private static final int[] gradientIndices;
 	static
 	{
-		gradientIndices = createGradientIndices(1, new SingleNBFixedGaussian2DFunction(1));
+		gradientIndices = createGradientIndices(1, new SingleNBFixedGaussian2DFunction(1, 1));
 	}
 
 	/**
@@ -36,10 +37,12 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
 	 * 
 	 * @param maxx
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 */
-	public SingleNBFixedGaussian2DFunction(int maxx)
+	public SingleNBFixedGaussian2DFunction(int maxx, int maxy)
 	{
-		super(maxx);
+		super(maxx, maxy);
 	}
 
 	/*

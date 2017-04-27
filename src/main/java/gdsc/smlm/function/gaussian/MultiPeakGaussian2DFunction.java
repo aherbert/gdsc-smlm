@@ -22,22 +22,31 @@ package gdsc.smlm.function.gaussian;
  * <p>
  * The class provides the number of peaks and the gradient indices.
  */
-public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction 
+public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction
 {
 	protected final int npeaks;
 	protected final int[] gradientIndices;
-	
+
 	/**
-	 * @param npeaks The number of peaks
+	 * Instantiates a new multi peak gaussian 2D function.
+	 *
+	 * @param npeaks
+	 *            The number of peaks
+	 * @param maxx
+	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 */
-	public MultiPeakGaussian2DFunction(int npeaks, int maxx)
+	public MultiPeakGaussian2DFunction(int npeaks, int maxx, int maxy)
 	{
-		super(maxx);
+		super(maxx, maxy);
 		this.npeaks = npeaks;
 		this.gradientIndices = createGradientIndices(npeaks);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.fitting.function.GaussianFunction#getNPeaks()
 	 */
 	@Override
@@ -45,8 +54,10 @@ public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction
 	{
 		return npeaks;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#gradientIndices()
 	 */
 	public int[] gradientIndices()

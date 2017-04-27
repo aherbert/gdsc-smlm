@@ -291,10 +291,10 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 					(float) Math.sqrt(Math.abs(params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD])));
 			builder.setA(params[Gaussian2DFunction.X_SD] / params[Gaussian2DFunction.Y_SD]);
 
-			if (params[Gaussian2DFunction.ANGLE] != 0)
+			if (params[Gaussian2DFunction.SHAPE] != 0)
 			{
 				newFitMode = FitMode.TWOAXISANDTHETA;
-				builder.setTheta(params[Gaussian2DFunction.ANGLE]);
+				builder.setTheta(params[Gaussian2DFunction.SHAPE]);
 			}
 
 			if (fitMode.getNumber() < newFitMode.getNumber())

@@ -139,4 +139,13 @@ public interface FunctionSolver
 	 * @return True if evaluation was performed
 	 */
 	public boolean evaluate(final int n, final double[] y, final double[] y_fit, final double[] a);
+
+	/**
+	 * Gets the name of the parameter i.
+	 *
+	 * @param i
+	 *            the parameter i
+	 * @return the name
+	 */
+	public String getName(int i);
 }

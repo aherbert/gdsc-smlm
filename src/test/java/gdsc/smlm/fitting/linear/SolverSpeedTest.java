@@ -58,14 +58,18 @@ public class SolverSpeedTest
 			boolean r1 = solver.solve(a, b);
 			boolean r2 = solver2.solveLinearWithInversion(a2, b2);
 			Assert.assertSame("Different solve result @ " + i, r1, r2);
-			Assert.assertArrayEquals("Different b result @ " + i, b, b2, 0.01f);
 			for (int j = 0; j < b.length; j++)
-				Assert.assertArrayEquals("Different a[" + j + "] result @ " + i, a[j], a2[j], 0.01f);
+			{
+				Assert.assertEquals("Different b result @ " + i, b[j] / b2[j], 1.0, 1e-2);
+				String msg2 = "Different a[" + j + "] result @ " + i;
+				for (int k = 0; k < b.length; k++)
+					Assert.assertEquals(msg2, a[j][k] / a2[j][k], 1, 0.2);
+			}
 		}
 	}
 
 	@Test
-	public void solveAndGaussJordanReturnSameSolutionResult()
+	public void solveLinearAndGaussJordanReturnSameSolutionResult()
 	{
 		int ITER = 100;
 		ArrayList<float[][]> A = copyAfloat(this.Adata, ITER);
@@ -110,18 +114,14 @@ public class SolverSpeedTest
 			boolean r1 = solver.solve(a, b);
 			boolean r2 = solver.solve(a2, b2);
 			Assert.assertSame("Different solve result @ " + i, r1, r2);
-			assertArrayEquals("Different b result @ " + i, b, b2, 0.01);
 			for (int j = 0; j < b.length; j++)
-				assertArrayEquals("Different a[" + j + "] result @ " + i, a[j], a2[j], 0.01);
+			{
+				Assert.assertEquals("Different b result @ " + i, b[j] / b2[j], 1.0, 1e-2);
+				String msg2 = "Different a[" + j + "] result @ " + i;
+				for (int k = 0; k < b.length; k++)
+					Assert.assertEquals(msg2, a[j][k] / a2[j][k], 1, 0.2);
+			}
 		}
-	}
-
-	private void assertArrayEquals(String string, float[] fs, double[] ds, double d)
-	{
-		double[] fs2 = new double[fs.length];
-		for (int i = 0; i < fs.length; i++)
-			fs2[i] = fs[i];
-		Assert.assertArrayEquals(string, fs2, ds, d);
 	}
 
 	@Test
@@ -279,7 +279,8 @@ public class SolverSpeedTest
 		solveCholesky(A2, B2, ITER, solver2);
 		start2 = System.nanoTime() - start2;
 
-		log("GaussJordanDouble = %d : LinearSolver.solveCholesky = %d : %fx\n", start1, start2, (1.0 * start1) / start2);
+		log("GaussJordanDouble = %d : LinearSolver.solveCholesky = %d : %fx\n", start1, start2,
+				(1.0 * start1) / start2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(start2 < start1);
 	}
@@ -309,8 +310,8 @@ public class SolverSpeedTest
 		solveCholeskyLDLT(A2, B2, ITER, solver2);
 		start2 = System.nanoTime() - start2;
 
-		log("GaussJordanDouble = %d : LinearSolver.solveCholeskyLDLT = %d : %fx\n", start1, start2, (1.0 * start1) /
-				start2);
+		log("GaussJordanDouble = %d : LinearSolver.solveCholeskyLDLT = %d : %fx\n", start1, start2,
+				(1.0 * start1) / start2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(start2 < start1);
 	}
@@ -348,7 +349,7 @@ public class SolverSpeedTest
 	private boolean createData(float[][] alpha, float[] beta, boolean positiveDifinite)
 	{
 		// Generate a 2D Gaussian
-		SingleFreeCircularGaussian2DFunction func = new SingleFreeCircularGaussian2DFunction(10);
+		SingleFreeCircularGaussian2DFunction func = new SingleFreeCircularGaussian2DFunction(10, 10);
 		double[] a = new double[] {
 				// Background, Amplitude, Angle, Xpos, Ypos, Xwidth, yWidth
 				20 + rand.nextDouble() * 5, 10 + rand.nextDouble() * 5, 0, 5 + rand.nextDouble() * 2,

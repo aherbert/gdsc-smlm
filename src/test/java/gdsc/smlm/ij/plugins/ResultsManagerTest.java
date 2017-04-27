@@ -223,7 +223,8 @@ public class ResultsManagerTest
 						sb.append(" channel=").append(channel);
 						sb.append(" slice=").append(slice);
 						sb.append(" position=").append(position);
-						sb.append(" fluorophore_type=[").append(type).append(":Type ").append(type).append(']');
+						sb.append(" fluorophore_type=[").append(type).append(":Type ").append(type).append(":fiducial=")
+								.append(builder.getFluorophoreTypes(type - 1).getIsFiducial()).append(']');
 						// This is needed to trick the Macro class into returning the options 
 						// for the thread to the GenericDialog used in the ResultsManager
 						Thread.currentThread().setName("Run$_");

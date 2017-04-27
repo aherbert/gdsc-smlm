@@ -1,12 +1,8 @@
 package gdsc.smlm.function;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.Arrays;
-import java.security.*;
-import java.math.*;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -35,9 +31,10 @@ public class SCMOSLikelihoodWrapperTest
 	static String[] NAME;
 	static
 	{
+		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, 1, 1, GaussianFunctionFactory.FIT_FIXED);
 		NAME = new String[7];
 		for (int i = 0; i < 7; i++)
-			NAME[i] = Gaussian2DFunction.getName(i);
+			NAME[i] = f1.getName(i);
 	}
 
 	// Compute as per Numerical Recipes 5.7.
@@ -142,7 +139,7 @@ public class SCMOSLikelihoodWrapperTest
 
 	private void functionComputesGradientPerDatum(int flags)
 	{
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, flags);
+		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
 		// Setup
 		testbackground = testbackground_;
 		testsignal1 = testsignal1_;
@@ -158,7 +155,7 @@ public class SCMOSLikelihoodWrapperTest
 		{
 			testsignal1 = new double[] { testsignal1[0] };
 		}
-		if (!f1.evaluatesAngle())
+		if (!f1.evaluatesShape())
 		{
 			testangle1 = new double[] { 0 };
 		}
@@ -190,8 +187,8 @@ public class SCMOSLikelihoodWrapperTest
 			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.BACKGROUND);
 		if (f1.evaluatesSignal())
 			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.SIGNAL);
-		if (f1.evaluatesAngle())
-			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.ANGLE);
+		if (f1.evaluatesShape())
+			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.SHAPE);
 		functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.X_POSITION);
 		functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.Y_POSITION);
 		if (f1.evaluatesSD0())
@@ -339,7 +336,7 @@ public class SCMOSLikelihoodWrapperTest
 
 	private void functionComputesGradient(int flags)
 	{
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, flags);
+		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
 		// Setup
 		testbackground = testbackground_;
 		testsignal1 = testsignal1_;
@@ -355,7 +352,7 @@ public class SCMOSLikelihoodWrapperTest
 		{
 			testsignal1 = new double[] { testsignal1[0] };
 		}
-		if (!f1.evaluatesAngle())
+		if (!f1.evaluatesShape())
 		{
 			testangle1 = new double[] { 0 };
 		}
@@ -388,8 +385,8 @@ public class SCMOSLikelihoodWrapperTest
 			functionComputesTargetGradient(f1, Gaussian2DFunction.BACKGROUND, fraction);
 		if (f1.evaluatesSignal())
 			functionComputesTargetGradient(f1, Gaussian2DFunction.SIGNAL, fraction);
-		if (f1.evaluatesAngle())
-			functionComputesTargetGradient(f1, Gaussian2DFunction.ANGLE, fraction);
+		if (f1.evaluatesShape())
+			functionComputesTargetGradient(f1, Gaussian2DFunction.SHAPE, fraction);
 		functionComputesTargetGradient(f1, Gaussian2DFunction.X_POSITION, fraction);
 		functionComputesTargetGradient(f1, Gaussian2DFunction.Y_POSITION, fraction);
 		if (f1.evaluatesSD0())

@@ -278,7 +278,7 @@ public class BenchmarkFit implements PlugIn
 				final double[] params = initialParams.clone();
 				params[Gaussian2DFunction.X_POSITION] = centre[0];
 				params[Gaussian2DFunction.Y_POSITION] = centre[1];
-				fitConfig.initialise(1, size, params);
+				fitConfig.initialise(1, size, size, params);
 				FunctionSolver solver = fitConfig.getFunctionSolver();
 				if (solver.isBounded())
 					bounds = setBounds(solver, initialParams, bounds);
@@ -395,8 +395,8 @@ public class BenchmarkFit implements PlugIn
 				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
 				ub[Gaussian2DFunction.X_POSITION] = 2 * regionSize + 1;
 				ub[Gaussian2DFunction.Y_POSITION] = 2 * regionSize + 1;
-				lb[Gaussian2DFunction.ANGLE] = -Math.PI;
-				ub[Gaussian2DFunction.ANGLE] = Math.PI;
+				lb[Gaussian2DFunction.SHAPE] = -Math.PI;
+				ub[Gaussian2DFunction.SHAPE] = Math.PI;
 				double wf = 1.5;
 				double s = benchmarkParameters.s / benchmarkParameters.a;
 				lb[Gaussian2DFunction.X_SD] = s / wf;
@@ -1097,7 +1097,7 @@ public class BenchmarkFit implements PlugIn
 		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / benchmarkParameters.gain : 0;
 		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() &&
 				fitConfig.getFitFunction() == FitFunction.FIXED) ? 0 : 1 / benchmarkParameters.gain;
-		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
+		convert[Gaussian2DFunction.SHAPE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
 		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.X_SD] = (fitConfig.isWidth0Fitting()) ? benchmarkParameters.a : 0;

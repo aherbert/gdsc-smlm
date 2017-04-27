@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.function.gaussian.GaussianFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -126,7 +126,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 				settings.wavelength, settings.numericalAperture, settings.proportionalityFactor,
 				settings.adjustForSquarePixels);
 		gd.addNumericField("StdDev (pixels)", sd, 3);
-		gd.addNumericField("HWHM (pixels)", sd * GaussianFunction.SD_TO_HWHM_FACTOR, 3);
+		gd.addNumericField("HWHM (pixels)", sd * Gaussian2DFunction.SD_TO_HWHM_FACTOR, 3);
 
 		if (!simpleMode)
 		{
@@ -392,7 +392,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 					double sd = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength,
 							numericalAperture, proportionalityFactor, adjustForSquarePixels);
 					sdPixelsText.setText(IJ.d2s(sd, 3));
-					fwhmPixelsText.setText(IJ.d2s(sd * GaussianFunction.SD_TO_HWHM_FACTOR, 3));
+					fwhmPixelsText.setText(IJ.d2s(sd * Gaussian2DFunction.SD_TO_HWHM_FACTOR, 3));
 
 					double s = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength,
 							numericalAperture, 1, false);

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.function.NonLinearFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -358,5 +359,19 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		{
 			residualSumOfSquares += residuals[i] * residuals[i];
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.FunctionSolver#getName(int)
+	 */
+	public String getName(int i)
+	{
+		if (f instanceof Gaussian2DFunction)
+		{
+			((Gaussian2DFunction) f).getName(i);
+		}
+		return "Unknown";
 	}
 }

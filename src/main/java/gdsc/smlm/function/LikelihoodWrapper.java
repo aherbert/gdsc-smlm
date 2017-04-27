@@ -214,11 +214,17 @@ public abstract class LikelihoodWrapper
 	public abstract boolean canComputeGradient();
 	
 	/**
-	 * Compute the Fisher's Information Matrix (I) for fitted variables:
+	 * Compute the Fisher's Information Matrix (I) for fitted variables.
+	 * 
+	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
+	 * Poisson process. In this case the equation reduces to:
 	 * 
 	 * <pre>
-	 * Iab = sum(k) 1/(uk) * (duk da) * (duk db)
+	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
 	 * </pre>
+	 * 
+	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
 	 * 
 	 * @param variables
 	 *            The variables of the function

@@ -569,7 +569,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				if (showFit && validPeaks != 0)
 				{
 					double[] pixels = new double[data.length];
-					EllipticalGaussian2DFunction f = new EllipticalGaussian2DFunction(validPeaks, width);
+					EllipticalGaussian2DFunction f = new EllipticalGaussian2DFunction(validPeaks, width, height);
 					invertParameters(validParams);
 					f.initialise(validParams);
 					for (int x = 0; x < pixels.length; x++)

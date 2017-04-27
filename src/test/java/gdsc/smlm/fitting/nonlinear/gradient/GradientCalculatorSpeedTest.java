@@ -60,127 +60,141 @@ public class GradientCalculatorSpeedTest
 	@Test
 	public void mleGradientCalculator7ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleEllipticalGaussian2DFunction(blockWidth), 7,
-				true);
+		gradientCalculatorNComputesSameAsGradientCalculator(
+				new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth), 7, true);
 	}
 
 	@Test
 	public void mleGradientCalculator7IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleEllipticalGaussian2DFunction(blockWidth), 7, true);
+		gradientCalculatorNIsFasterThanGradientCalculator(
+				new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth), 7, true);
 	}
 
 	@Test
 	public void mleGradientCalculator6ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFreeCircularGaussian2DFunction(blockWidth), 6,
-				true);
+		gradientCalculatorNComputesSameAsGradientCalculator(
+				new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth), 6, true);
 	}
 
 	@Test
 	public void mleGradientCalculator6IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFreeCircularGaussian2DFunction(blockWidth), 6,
-				true);
+		gradientCalculatorNIsFasterThanGradientCalculator(
+				new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth), 6, true);
 	}
 
 	@Test
 	public void mleGradientCalculator5ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth), 5, true);
+		gradientCalculatorNComputesSameAsGradientCalculator(
+				new SingleCircularGaussian2DFunction(blockWidth, blockWidth), 5, true);
 	}
 
 	@Test
 	public void mleGradientCalculator5IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth), 5, true);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth, blockWidth),
+				5, true);
 	}
 
 	@Test
 	public void mleGradientCalculator4ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth), 4, true);
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth, blockWidth),
+				4, true);
 	}
 
 	@Test
 	public void mleGradientCalculator4IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth), 4, true);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth, blockWidth), 4,
+				true);
 	}
 
 	@Test
 	public void mleGradientCalculator3ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth), 3, true);
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth),
+				3, true);
 	}
 
 	@Test
 	public void mleGradientCalculator3IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth), 3, true);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth),
+				3, true);
 	}
 
 	@Test
 	public void gradientCalculator7ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleEllipticalGaussian2DFunction(blockWidth), 7,
-				false);
+		gradientCalculatorNComputesSameAsGradientCalculator(
+				new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth), 7, false);
 	}
 
 	@Test
 	public void gradientCalculator7IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleEllipticalGaussian2DFunction(blockWidth), 7, false);
+		gradientCalculatorNIsFasterThanGradientCalculator(
+				new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth), 7, false);
 	}
 
 	@Test
 	public void gradientCalculator6ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFreeCircularGaussian2DFunction(blockWidth), 6,
-				false);
+		gradientCalculatorNComputesSameAsGradientCalculator(
+				new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth), 6, false);
 	}
 
 	@Test
 	public void gradientCalculator6IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFreeCircularGaussian2DFunction(blockWidth), 6,
-				false);
+		gradientCalculatorNIsFasterThanGradientCalculator(
+				new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth), 6, false);
 	}
 
 	@Test
 	public void gradientCalculator5ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth), 5, false);
+		gradientCalculatorNComputesSameAsGradientCalculator(
+				new SingleCircularGaussian2DFunction(blockWidth, blockWidth), 5, false);
 	}
 
 	@Test
 	public void gradientCalculator5IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth), 5, false);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth, blockWidth),
+				5, false);
 	}
 
 	@Test
 	public void gradientCalculator4ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth), 4, false);
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth, blockWidth),
+				4, false);
 	}
 
 	@Test
 	public void gradientCalculator4IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth), 4, false);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth, blockWidth), 4,
+				false);
 	}
 
 	@Test
 	public void gradientCalculator3ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth), 3, false);
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth),
+				3, false);
 	}
 
 	@Test
 	public void gradientCalculator3IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth), 3, false);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth),
+				3, false);
 	}
 
 	private void gradientCalculatorNComputesSameAsGradientCalculator(Gaussian2DFunction func, int nparams, boolean mle)
@@ -341,7 +355,7 @@ public class GradientCalculatorSpeedTest
 
 		GradientCalculator calc = new GradientCalculator6();
 		GradientCalculator calc2 = new GradientCalculator6();
-		SingleFreeCircularGaussian2DFunction func = new SingleFreeCircularGaussian2DFunction(blockWidth);
+		SingleFreeCircularGaussian2DFunction func = new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth);
 		int n = x.length;
 
 		for (int i = 0; i < paramsList.size(); i++)
@@ -381,7 +395,7 @@ public class GradientCalculatorSpeedTest
 	private void gradientCalculatorComputesGradient(GradientCalculator calc)
 	{
 		int nparams = calc.nparams;
-		Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth);
+		Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
 		// Check the function is the correct size
 		Assert.assertEquals(nparams, func.gradientIndices().length);
 
@@ -441,7 +455,7 @@ public class GradientCalculatorSpeedTest
 		int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
-		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth);
+		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
 		params[0] = random(Background);
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 		{

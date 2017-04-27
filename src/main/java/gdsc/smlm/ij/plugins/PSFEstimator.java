@@ -21,7 +21,7 @@ import gdsc.smlm.engine.FitJob;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
-import gdsc.smlm.function.gaussian.GaussianFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.ResultsTable;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -442,15 +442,15 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		PeakFit fitter = createFitter();
 
 		// Use the fit configuration to generate a Gaussian function to test what is being evaluated
-		GaussianFunction gf = config.getFitConfiguration().createGaussianFunction(1, 1,
+		Gaussian2DFunction gf = config.getFitConfiguration().createGaussianFunction(1, 1, 1,
 				new double[] { 0, 10, initialPeakAngle, 0, 0, initialPeakStdDev0, initialPeakStdDev1 });
 		createResultsWindow();
 		int iteration = 0;
-		ignore[ANGLE] = !gf.evaluatesAngle();
+		ignore[ANGLE] = !gf.evaluatesShape();
 		ignore[X] = !gf.evaluatesSD0();
 		ignore[Y] = !gf.evaluatesSD1();
 
-		double[] params = new double[] { gf.evaluatesAngle() ? initialPeakAngle : 0,
+		double[] params = new double[] { gf.evaluatesShape() ? initialPeakAngle : 0,
 				gf.evaluatesSD0() ? initialPeakStdDev0 : 0, gf.evaluatesSD1() ? initialPeakStdDev1 : 0, 0, 0 };
 		double[] params_dev = new double[3];
 		boolean[] identical = new boolean[4];

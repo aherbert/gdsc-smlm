@@ -324,7 +324,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		final double[] p = new double[7];
 		p[Gaussian2DFunction.BACKGROUND] = b;
 		p[Gaussian2DFunction.SIGNAL] = signal;
-		p[Gaussian2DFunction.ANGLE] = angle;
+		p[Gaussian2DFunction.SHAPE] = angle;
 		p[Gaussian2DFunction.X_POSITION] = x;
 		p[Gaussian2DFunction.Y_POSITION] = y;
 		p[Gaussian2DFunction.X_SD] = xsd;

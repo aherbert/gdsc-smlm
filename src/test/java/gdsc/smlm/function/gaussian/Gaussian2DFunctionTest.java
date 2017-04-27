@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 import org.junit.Assert;
@@ -60,7 +59,7 @@ public abstract class Gaussian2DFunctionTest
 			testamplitude1 = new double[] { testamplitude1[0] };
 			testamplitude2 = new double[] { testamplitude2[0] };
 		}
-		if (!f1.evaluatesAngle())
+		if (!f1.evaluatesShape())
 		{
 			testangle1 = new double[] { 0 };
 			testangle2 = new double[] { 0 };
@@ -105,7 +104,7 @@ public abstract class Gaussian2DFunctionTest
 		checkGradientIndices(2, f2);
 	}
 
-	private void checkGradientIndices(int npeaks, GaussianFunction gf)
+	private void checkGradientIndices(int npeaks, Gaussian2DFunction gf)
 	{
 		if (gf == null)
 			return;
@@ -122,7 +121,7 @@ public abstract class Gaussian2DFunctionTest
 		{
 			if (gf.evaluatesSignal())
 				Assert.assertEquals("Amplitude", i, gradientIndices[p++]);
-			if (gf.evaluatesAngle())
+			if (gf.evaluatesShape())
 				Assert.assertEquals("Angle", i + 1, gradientIndices[p++]);
 			if (gf.evaluatesPosition())
 			{
@@ -139,16 +138,16 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void factoryCreatesCorrectFunction()
 	{
-		GaussianFunction f;
+		Gaussian2DFunction f;
 
 		if (f2 != null)
 		{
-			f = GaussianFunctionFactory.create2D(2, maxx, flags);
+			f = GaussianFunctionFactory.create2D(2, maxx, maxx, flags);
 			Assert.assertTrue("Incorrect function2", f.getClass() == f2.getClass());
 		}
 		else
 		{
-			f = GaussianFunctionFactory.create2D(1, maxx, flags);
+			f = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
 			Assert.assertTrue("Incorrect function1", f.getClass() == f1.getClass());
 		}
 	}
@@ -196,8 +195,8 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void functionComputesAngleGradient()
 	{
-		if (f1.evaluatesAngle())
-			functionComputesTargetGradient(Gaussian2DFunction.ANGLE);
+		if (f1.evaluatesShape())
+			functionComputesTargetGradient(Gaussian2DFunction.SHAPE);
 	}
 
 	@Test
@@ -233,8 +232,8 @@ public abstract class Gaussian2DFunctionTest
 		double[] dyda2 = new double[dyda.length];
 		double[] a;
 
-		Gaussian2DFunction f1a = GaussianFunctionFactory.create2D(1, maxx, flags);
-		Gaussian2DFunction f1b = GaussianFunctionFactory.create2D(1, maxx, flags);
+		Gaussian2DFunction f1a = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
+		Gaussian2DFunction f1b = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
 
 		for (double background : testbackground)
 			// Peak 1
@@ -354,10 +353,10 @@ public abstract class Gaussian2DFunctionTest
 	{
 		if (f2 != null)
 		{
-			if (f2.evaluatesAngle())
+			if (f2.evaluatesShape())
 			{
-				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE);
-				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE + 6);
+				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SHAPE);
+				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SHAPE + 6);
 			}
 		}
 	}
@@ -415,8 +414,8 @@ public abstract class Gaussian2DFunctionTest
 		double[] dyda2 = new double[dyda.length];
 		double[] a;
 
-		Gaussian2DFunction f2a = GaussianFunctionFactory.create2D(2, maxx, flags);
-		Gaussian2DFunction f2b = GaussianFunctionFactory.create2D(2, maxx, flags);
+		Gaussian2DFunction f2a = GaussianFunctionFactory.create2D(2, maxx, maxx, flags);
+		Gaussian2DFunction f2b = GaussianFunctionFactory.create2D(2, maxx, maxx, flags);
 
 		for (double background : testbackground)
 			// Peak 1
@@ -486,7 +485,7 @@ public abstract class Gaussian2DFunctionTest
 
 		Gaussian2DFunction f = f1;
 		f.setMaxX(maxx);
-		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
 
 		try
 		{

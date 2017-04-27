@@ -8,6 +8,6 @@ public class SingleNBCircularGaussian2DFunctionTest extends Gaussian2DFunctionTe
 	protected void init()
 	{
 		flags = GaussianFunctionFactory.FIT_NB_CIRCLE; 
-		f1 = new SingleNBCircularGaussian2DFunction(maxx);
+		f1 = new SingleNBCircularGaussian2DFunction(maxx, maxx);
 	}
 }

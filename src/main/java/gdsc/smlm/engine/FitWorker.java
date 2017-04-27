@@ -39,7 +39,6 @@ import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.ExtendedPeakResult;
@@ -522,7 +521,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Note: We go deeper into the candidate list than max candidate
 			// for any candidate where we have a good fit result as an estimate.
 			// Q. Should this only be for benchmarking?
-			
+
 			//if (benchmarking)
 			//	System.out.printf("Slice %d: %d + %d\n", slice, dynamicMultiPathFitResult.extra, candidates.getSize());
 
@@ -1201,7 +1200,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						j += parametersPerPeak;
 					}
 
-					final GaussianFunction func = fitConfig.createGaussianFunction(subtractFittedPeaks, width,
+					final Gaussian2DFunction func = fitConfig.createGaussianFunction(subtractFittedPeaks, width, height,
 							funcParams);
 					func.initialise(funcParams);
 
@@ -1612,7 +1611,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						regionBounds.x;
 				params[j + Gaussian2DFunction.Y_POSITION] = estimatedParams[Gaussian2DFunction.Y_POSITION] -
 						regionBounds.y;
-				params[j + Gaussian2DFunction.ANGLE] = estimatedParams[Gaussian2DFunction.ANGLE];
+				params[j + Gaussian2DFunction.SHAPE] = estimatedParams[Gaussian2DFunction.SHAPE];
 				params[j + Gaussian2DFunction.X_SD] = estimatedParams[Gaussian2DFunction.X_SD];
 				params[j + Gaussian2DFunction.Y_SD] = estimatedParams[Gaussian2DFunction.Y_SD];
 				return false;
@@ -1780,7 +1779,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Add the single fitted peak to the residuals. This is the data to fit as a doublet.
 			final double[] region = residuals.clone();
-			GaussianFunction func = fitConfig.createGaussianFunction(1, width, fittedParams);
+			Gaussian2DFunction func = fitConfig.createGaussianFunction(1, width, height, fittedParams);
 			func.initialise(fittedParams);
 			for (int i = 0; i < region.length; i++)
 			{
@@ -1982,7 +1981,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					}
 				}
 
-				GaussianFunction func = fitConfig.createGaussianFunction(fittedNeighbourCount, width, funcParams);
+				Gaussian2DFunction func = fitConfig.createGaussianFunction(fittedNeighbourCount, width, height,
+						funcParams);
 				func.initialise(funcParams);
 
 				for (int i = 0; i < region.length; i++)
@@ -3692,7 +3692,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					peakParams[i * 6 + Gaussian2DFunction.X_POSITION] += cc.fromFitRegionToGlobalX();
 					peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += cc.fromFitRegionToGlobalY();
-					peakParams[i * 6 + Gaussian2DFunction.ANGLE] *= 180.0 / Math.PI;
+					peakParams[i * 6 + Gaussian2DFunction.SHAPE] *= 180.0 / Math.PI;
 				}
 			}
 			final int x = candidates.get(candidateId).x;

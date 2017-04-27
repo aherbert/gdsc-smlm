@@ -13,12 +13,11 @@ import org.junit.Test;
 
 public class TraceManagerTest
 {
-	private gdsc.core.utils.Random rand = new Random();
-
 	@Test
 	public void canTraceSinglePulseWithFixedCoords()
 	{
-		float[] params = createParams();
+		Random rand = new Random(30051977);
+		float[] params = createParams(rand);
 		Trace trace = new Trace();
 		for (int i = 0; i < 5; i++)
 		{
@@ -31,13 +30,14 @@ public class TraceManagerTest
 	@Test
 	public void canTraceSinglePulseWithMovingCoords()
 	{
+		Random rand = new Random(30051977);
 		float distance = 0.5f;
 
-		float[] params = createParams();
+		float[] params = createParams(rand);
 		Trace trace = new Trace();
 		for (int i = 0; i < 5; i++)
 		{
-			move(params, distance);
+			move(rand, params, distance);
 			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, params, null));
 		}
 
@@ -47,9 +47,10 @@ public class TraceManagerTest
 	@Test
 	public void canTraceMultiplePulseWithFixedCoords()
 	{
+		Random rand = new Random(30051977);
 		int maxOffTime = 5;
 
-		float[] params = createParams();
+		float[] params = createParams(rand);
 		Trace trace = new Trace();
 		for (int i = 0; i < 5; i++)
 		{
@@ -66,19 +67,20 @@ public class TraceManagerTest
 	@Test
 	public void canTraceMultiplePulseWithMovingCoords()
 	{
+		Random rand = new Random(30051977);
 		float distance = 0.5f;
 		int maxOffTime = 5;
 
-		float[] params = createParams();
+		float[] params = createParams(rand);
 		Trace trace = new Trace();
 		for (int i = 0; i < 5; i++)
 		{
-			move(params, distance);
+			move(rand, params, distance);
 			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, params, null));
 		}
 		for (int i = 0; i < 5; i++)
 		{
-			move(params, distance);
+			move(rand, params, distance);
 			trace.add(new PeakResult(i + maxOffTime, 0, 0, 0, 0, 0, params, null));
 		}
 
@@ -99,47 +101,49 @@ public class TraceManagerTest
 	@Test
 	public void canTraceMultipleFluorophoresWithFixedCoords()
 	{
-		simulate(1000, 1, 5, 2, 0);
+		simulate(new Random(), 1000, 1, 5, 2, 0);
 	}
 
 	@Test
 	public void canTraceMultiplePulsingFluorophoresWithFixedCoords()
 	{
-		simulate(1000, 5, 5, 10, 0);
+		simulate(new Random(), 1000, 5, 5, 10, 0);
 	}
 
 	@Test
 	public void canTraceMultipleFluorophoresWithMovingCoords()
 	{
 		// This test can fail if the moving fluorophores paths intersect
-		simulate(1000, 1, 5, 2, 0.5f);
+		// so we used a known seed that is ok
+		simulate(new Random(3), 1000, 1, 5, 2, 0.5f);
 	}
 
 	@Test
 	public void canTraceMultiplePulsingFluorophoresWithMovingCoords()
 	{
 		// This test can fail if the moving fluorophores paths intersect
-		simulate(100, 5, 5, 10, 0.5f);
+		// so we used a known seed that is ok
+		simulate(new Random(3005), 100, 5, 5, 10, 0.5f);
 	}
 
-	private void simulate(int molecules, int maxPulses, int maxOnTime, int maxOffTime, float distance)
+	private void simulate(Random rand, int molecules, int maxPulses, int maxOnTime, int maxOffTime, float distance)
 	{
 		Trace[] expected = new Trace[molecules];
 		for (int j = 0; j < expected.length; j++)
 		{
-			float[] params = createParams();
-			int t = nextInt(200);
+			float[] params = createParams(rand);
+			int t = rand.nextInt(1, 200);
 			Trace trace = new Trace();
-			int pulses = nextInt(maxPulses);
+			int pulses = rand.nextInt(1, maxPulses);
 			for (int p = 0; p < pulses; p++)
 			{
-				int length = nextInt(maxOnTime);
+				int length = rand.nextInt(1, maxOnTime);
 				for (int i = 0; i < length; i++)
 				{
-					move(params, distance);
+					move(rand, params, distance);
 					trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, params, null));
 				}
-				t += nextInt(maxOffTime);
+				t += rand.nextInt(1, maxOffTime);
 			}
 			expected[j] = trace;
 		}
@@ -148,7 +152,7 @@ public class TraceManagerTest
 		runTracing(d, maxOffTime + 1, expected);
 	}
 
-	private float[] createParams()
+	private static float[] createParams(Random rand)
 	{
 		float[] params = new float[7];
 		params[Gaussian2DFunction.X_POSITION] = rand.next() * 256f;
@@ -216,23 +220,12 @@ public class TraceManagerTest
 		});
 	}
 
-	private void move(float[] params, float distance)
+	private static void move(Random rand, float[] params, float distance)
 	{
 		if (distance > 0)
 		{
 			params[Gaussian2DFunction.X_POSITION] += -distance + rand.next() * 2 * distance;
 			params[Gaussian2DFunction.Y_POSITION] += -distance + rand.next() * 2 * distance;
 		}
-	}
-
-	/**
-	 * Return an integer in the range 1 - max
-	 * 
-	 * @param max
-	 * @return
-	 */
-	private int nextInt(int max)
-	{
-		return 1 + (int) (rand.next() * max);
 	}
 }

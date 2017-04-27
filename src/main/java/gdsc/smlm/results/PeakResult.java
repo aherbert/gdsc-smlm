@@ -785,7 +785,7 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public float getAngle()
 	{
-		return params[Gaussian2DFunction.ANGLE];
+		return params[Gaussian2DFunction.SHAPE];
 	}
 
 	/**

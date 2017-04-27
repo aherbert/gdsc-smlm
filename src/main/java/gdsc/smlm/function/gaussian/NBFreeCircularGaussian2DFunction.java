@@ -30,10 +30,12 @@ public class NBFreeCircularGaussian2DFunction extends FreeCircularGaussian2DFunc
 	 *            The number of peaks
 	 * @param maxx
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 */
-	public NBFreeCircularGaussian2DFunction(int npeaks, int maxx)
+	public NBFreeCircularGaussian2DFunction(int npeaks, int maxx, int maxy)
 	{
-		super(npeaks, maxx);
+		super(npeaks, maxx, maxy);
 	}
 
 	/*

@@ -28,7 +28,7 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
 	private static final int[] gradientIndices;
 	static
 	{
-		gradientIndices = createGradientIndices(1, new SingleNBCircularGaussian2DFunction(1));
+		gradientIndices = createGradientIndices(1, new SingleNBCircularGaussian2DFunction(1, 1));
 	}
 
 	/**
@@ -36,10 +36,12 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
 	 * 
 	 * @param maxx
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 */
-	public SingleNBCircularGaussian2DFunction(int maxx)
+	public SingleNBCircularGaussian2DFunction(int maxx, int maxy)
 	{
-		super(maxx);
+		super(maxx, maxy);
 	}
 
 	/*

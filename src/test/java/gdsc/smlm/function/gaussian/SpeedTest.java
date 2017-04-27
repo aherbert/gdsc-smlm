@@ -4,7 +4,6 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 import java.util.ArrayList;
@@ -205,11 +204,11 @@ public class SpeedTest
 	{
 		DoubleEquality eq = new DoubleEquality(2, 1e-10);
 		int iter = 2000;
-		ArrayList<double[]> paramsList2 = (npeaks == 1) ? copyList(paramsListSinglePeak, iter) : copyList(
-				paramsListDoublePeak, iter);
+		ArrayList<double[]> paramsList2 = (npeaks == 1) ? copyList(paramsListSinglePeak, iter)
+				: copyList(paramsListDoublePeak, iter);
 
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, flags1);
-		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, blockWidth, flags2);
+		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags1);
+		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags2);
 
 		double[] dyda1 = new double[1 + npeaks * 6];
 		double[] dyda2 = new double[1 + npeaks * 6];
@@ -257,8 +256,8 @@ public class SpeedTest
 		ArrayList<double[]> paramsList2 = (npeaks == 1) ? paramsListSinglePeak : paramsListDoublePeak;
 
 		// Use the full list of parameters to build the functions
-		GaussianFunction f1 = GaussianFunctionFactory.create2D(npeaks, blockWidth, flags1);
-		GaussianFunction f2 = GaussianFunctionFactory.create2D(npeaks, blockWidth, flags2);
+		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags1);
+		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags2);
 
 		double[] dyda = new double[1 + npeaks * 6];
 
@@ -314,7 +313,7 @@ public class SpeedTest
 		int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
-		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth);
+		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
 		params[0] = Background + rand.nextFloat() * 5f;
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 		{

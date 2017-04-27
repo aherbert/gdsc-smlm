@@ -169,7 +169,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 			}
 			else
 			{
-				t = params[Gaussian2DFunction.ANGLE];
+				t = params[Gaussian2DFunction.SHAPE];
 				sx = params[Gaussian2DFunction.X_SD];
 				sy = params[Gaussian2DFunction.Y_SD];
 			}

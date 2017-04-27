@@ -8,7 +8,7 @@ public class CircularGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	protected void init()
 	{
 		flags = GaussianFunctionFactory.FIT_CIRCLE; 
-		f1 = new CircularGaussian2DFunction(1, maxx);
-		f2 = new CircularGaussian2DFunction(2, maxx);
+		f1 = new CircularGaussian2DFunction(1, maxx, maxx);
+		f2 = new CircularGaussian2DFunction(2, maxx, maxx);
 	}
 }

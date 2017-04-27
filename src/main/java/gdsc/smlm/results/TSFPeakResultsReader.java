@@ -359,7 +359,7 @@ public class TSFPeakResultsReader
 
 					if (fitMode == FitMode.TWOAXISANDTHETA && spot.hasTheta())
 					{
-						params[Gaussian2DFunction.ANGLE] = spot.getTheta() * thetaConversion;
+						params[Gaussian2DFunction.SHAPE] = spot.getTheta() * thetaConversion;
 					}
 				}
 

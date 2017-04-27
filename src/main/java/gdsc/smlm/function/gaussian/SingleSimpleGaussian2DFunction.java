@@ -43,10 +43,12 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 	 * 
 	 * @param maxx
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 */
-	public SingleSimpleGaussian2DFunction(int maxx)
+	public SingleSimpleGaussian2DFunction(int maxx, int maxy)
 	{
-		super(maxx);
+		super(maxx, maxy);
 	}
 
 	/*
@@ -136,7 +138,7 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesAngle()
+	public boolean evaluatesShape()
 	{
 		return false;
 	}

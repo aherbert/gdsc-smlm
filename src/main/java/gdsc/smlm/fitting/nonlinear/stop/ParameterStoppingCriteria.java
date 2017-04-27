@@ -2,7 +2,6 @@ package gdsc.smlm.fitting.nonlinear.stop;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -35,7 +34,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 	 * @param func
 	 *            The Gaussian function
 	 */
-	public ParameterStoppingCriteria(GaussianFunction func)
+	public ParameterStoppingCriteria(Gaussian2DFunction func)
 	{
 		super(func);
 		eq = new DoubleEquality(significantDigits, 1e-16);
@@ -70,16 +69,16 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 							Gaussian2DFunction.SIGNAL]));
 					sb.append(",");
 
-					if (func.evaluatesAngle())
+					if (func.evaluatesShape())
 					{
-						double x = bestA[i * 6 + Gaussian2DFunction.ANGLE];
-						double y = a[i * 6 + Gaussian2DFunction.ANGLE];
+						double x = bestA[i * 6 + Gaussian2DFunction.SHAPE];
+						double y = a[i * 6 + Gaussian2DFunction.SHAPE];
 						sb.append(relativeAngle(x, y));
 					}
 					else
 						sb.append(0);
 
-					for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2 * dimensions; j++, k++)
+					for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2 * 2; j++, k++)
 					{
 						sb.append(",");
 						sb.append(DoubleEquality.relativeError(bestA[k], a[k]));
@@ -117,15 +116,15 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 
 			// Calculate the smallest angle between the two angles. This should be in the range 0 - 90 degrees.
 			// Use this to compare if the angle has changed significantly relative to the maximum it could change.
-			if (func.evaluatesAngle())
+			if (func.evaluatesShape())
 			{
-				double x = bestA[i * 6 + Gaussian2DFunction.ANGLE];
-				double y = a[i * 6 + Gaussian2DFunction.ANGLE];
+				double x = bestA[i * 6 + Gaussian2DFunction.SHAPE];
+				double y = a[i * 6 + Gaussian2DFunction.SHAPE];
 				if (relativeAngle(x, y) > angleLimit)
 					return false;
 			}
 
-			for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2 * dimensions; j++, k++)
+			for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
 			{
 				if (!eq.almostEqualComplement(bestA[k], a[k]))
 					return false;

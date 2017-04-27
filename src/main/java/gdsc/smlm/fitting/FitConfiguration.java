@@ -30,7 +30,6 @@ import gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria;
 import gdsc.smlm.fitting.nonlinear.stop.ParameterStoppingCriteria;
 import gdsc.smlm.function.NoiseModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
@@ -108,7 +107,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
 		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
 		defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
-		defaultClampValues[Gaussian2DFunction.ANGLE] = Math.PI;
+		defaultClampValues[Gaussian2DFunction.SHAPE] = Math.PI;
 		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
 		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
 		defaultClampValues[Gaussian2DFunction.X_SD] = 3;
@@ -116,7 +115,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	private StoppingCriteria stoppingCriteria = null;
-	private GaussianFunction gaussianFunction = null;
+	private Gaussian2DFunction gaussianFunction = null;
 	private NoiseModel noiseModel = null;
 	private FunctionSolver functionSolver = null;
 
@@ -149,14 +148,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 *            The number of peaks to fit
 	 * @param maxx
 	 *            The width of the XY data
+	 * @param maxx
+	 *            The height of the XY data
 	 * @param params
 	 *            The Gaussian parameters
 	 */
-	public void initialise(int npeaks, int maxx, double[] params)
+	public void initialise(int npeaks, int maxx, int maxy, double[] params)
 	{
 		// Check if the Gaussian function is invalid
-		if (gaussianFunction != null &&
-				(gaussianFunction.getNPeaks() != npeaks || gaussianFunction.getDimensions()[0] != maxx))
+		if (gaussianFunction != null && (gaussianFunction.getNPeaks() != npeaks || gaussianFunction.getMaxX() != maxx ||
+				gaussianFunction.getMaxY() != maxy))
 		{
 			// The gaussian function cannot be reused. 
 			// Do not call invalidate as it also invalidates the solver and we can re-use that.
@@ -168,7 +169,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			// TODO : See if this works ...
 			// We can update the function solver with the new function so do not invalidate the solver
 			//invalidateFunctionSolver();
-			gaussianFunction = createGaussianFunction(npeaks, maxx, params);
+			gaussianFunction = createGaussianFunction(npeaks, maxx, maxy, params);
 		}
 		if (stoppingCriteria == null)
 		{
@@ -187,7 +188,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 *            The Gaussian parameters
 	 * @return The stopping criteria
 	 */
-	public StoppingCriteria createStoppingCriteria(GaussianFunction func, double[] params)
+	public StoppingCriteria createStoppingCriteria(Gaussian2DFunction func, double[] params)
 	{
 		StoppingCriteria stoppingCriteria;
 		if (fitCriteria == FitCriteria.PARAMETERS)
@@ -224,7 +225,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 * @param func
 	 * @param sc
 	 */
-	protected void addPeakRestrictions(GaussianFunction func, GaussianStoppingCriteria sc, double[] params)
+	protected void addPeakRestrictions(Gaussian2DFunction func, GaussianStoppingCriteria sc, double[] params)
 	{
 		// TODO - Check if it is worth using this to stop fitting early or simply do it at the end.
 		sc.setMinimumSignal(0);
@@ -238,15 +239,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 *            The number of peaks to fit
 	 * @param maxx
 	 *            The width of the XY data
+	 * @param maxx
+	 *            The height of the XY data
 	 * @param params
 	 *            The Gaussian parameters
 	 * @return The function
 	 */
-	public GaussianFunction createGaussianFunction(int npeaks, int maxx, double[] params)
+	public Gaussian2DFunction createGaussianFunction(int npeaks, int maxx, int maxy, double[] params)
 	{
 		final int flags = getFunctionFlags();
 
-		GaussianFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, flags);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxy, flags);
 		//f.initialise(params);
 		return f;
 	}
@@ -930,7 +933,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	/**
 	 * @return the gaussianFunction
 	 */
-	public GaussianFunction getGaussianFunction()
+	public Gaussian2DFunction getGaussianFunction()
 	{
 		return gaussianFunction;
 	}
@@ -1369,7 +1372,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public float getAngle()
 		{
-			return (float) params[Gaussian2DFunction.ANGLE + offset];
+			return (float) params[Gaussian2DFunction.SHAPE + offset];
 		}
 
 		public float getX()
@@ -1620,7 +1623,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL];
 		final double photons = (parameters[offset + Gaussian2DFunction.SIGNAL] / getGain());
 		final double b = (localBackground > 0) ? localBackground : parameters[Gaussian2DFunction.BACKGROUND];
-		final double angle = parameters[offset + Gaussian2DFunction.ANGLE];
+		final double angle = parameters[offset + Gaussian2DFunction.SHAPE];
 		final double x = parameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
 		final double y = parameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
 		final double x0 = initialParameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
@@ -2088,7 +2091,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		{
 			// Other code may want to call getFunctionSolver() to see if exceptions are thrown
 			// so create a dummy function so we can return a function solver.
-			gaussianFunction = createGaussianFunction(1, 10, null);
+			gaussianFunction = createGaussianFunction(1, 1, 1, null);
 		}
 
 		// Remove noise model
@@ -2579,7 +2582,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public double getClampAngle()
 	{
-		return getClampValues()[Gaussian2DFunction.ANGLE];
+		return getClampValues()[Gaussian2DFunction.SHAPE];
 	}
 
 	/**
@@ -2590,7 +2593,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setClampAngle(double value)
 	{
-		updateClampValue(Gaussian2DFunction.ANGLE, value);
+		updateClampValue(Gaussian2DFunction.SHAPE, value);
 	}
 
 	/**

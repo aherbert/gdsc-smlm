@@ -37,10 +37,12 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 *            The number of peaks
 	 * @param maxx
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 */
-	public EllipticalGaussian2DFunction(int npeaks, int maxx)
+	public EllipticalGaussian2DFunction(int npeaks, int maxx, int maxy)
 	{
-		super(npeaks, maxx);
+		super(npeaks, maxx, maxy);
 		peakFactors = new double[npeaks][16];
 	}
 
@@ -72,7 +74,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 		// Precalculate multiplication factors
 		for (int j = 0; j < npeaks; j++)
 		{
-			final double theta = a[j * 6 + ANGLE];
+			final double theta = a[j * 6 + SHAPE];
 			final double sx = a[j * 6 + X_SD];
 			final double sy = a[j * 6 + Y_SD];
 			final double sx2 = sx * sx;
@@ -254,7 +256,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesAngle()
+	public boolean evaluatesShape()
 	{
 		return true;
 	}

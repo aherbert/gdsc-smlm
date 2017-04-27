@@ -37,10 +37,12 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 *            The number of peaks
 	 * @param maxx
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 */
-	public FixedGaussian2DFunction(int npeaks, int maxx)
+	public FixedGaussian2DFunction(int npeaks, int maxx, int maxy)
 	{
-		super(npeaks, maxx);
+		super(npeaks, maxx, maxy);
 		peakFactors = new double[npeaks][4];
 	}
 
@@ -188,7 +190,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesAngle()
+	public boolean evaluatesShape()
 	{
 		return false;
 	}

@@ -28,7 +28,7 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
 	private static final int[] gradientIndices;
 	static
 	{
-		gradientIndices = createGradientIndices(1, new SingleNSNBFixedGaussian2DFunction(1));
+		gradientIndices = createGradientIndices(1, new SingleNSNBFixedGaussian2DFunction(1, 1));
 	}
 
 	protected double width;
@@ -47,10 +47,12 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
 	 * 
 	 * @param maxx
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 */
-	public SingleNSNBFixedGaussian2DFunction(int maxx)
+	public SingleNSNBFixedGaussian2DFunction(int maxx, int maxy)
 	{
-		super(maxx);
+		super(maxx, maxy);
 	}
 
 	/*
@@ -162,7 +164,7 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesAngle()
+	public boolean evaluatesShape()
 	{
 		return false;
 	}

@@ -8,6 +8,6 @@ public class SingleFixedGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	protected void init()
 	{
 		flags = GaussianFunctionFactory.FIT_FIXED; 
-		f1 = new SingleFixedGaussian2DFunction(maxx);
+		f1 = new SingleFixedGaussian2DFunction(maxx, maxx);
 	}
 }

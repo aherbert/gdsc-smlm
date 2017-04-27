@@ -45,73 +45,75 @@ public class GaussianFunctionFactory
 	 *            The number of peaks (N)
 	 * @param maxx
 	 *            The maximum X-dimension
+	 * @param maxy
+	 *            The maximum Y-dimension
 	 * @param flags
 	 *            Enable all the parameters that should evaluate gradient
 	 * @return The function
 	 */
-	public static Gaussian2DFunction create2D(int nPeaks, int maxx, int flags)
+	public static Gaussian2DFunction create2D(int nPeaks, int maxx, int maxy, int flags)
 	{
 		if (nPeaks == 1)
 		{
 			if ((flags & FIT_BACKGROUND) == FIT_BACKGROUND)
 			{
 				if ((flags & FIT_ANGLE) == FIT_ANGLE)
-					return new SingleEllipticalGaussian2DFunction(maxx);
+					return new SingleEllipticalGaussian2DFunction(maxx, maxy);
 				if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
-					return new SingleFreeCircularGaussian2DFunction(maxx);
+					return new SingleFreeCircularGaussian2DFunction(maxx, maxy);
 				if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
-					return new SingleCircularGaussian2DFunction(maxx);
+					return new SingleCircularGaussian2DFunction(maxx, maxy);
 				
 				// Fixed function
 				if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
-					return new SingleFixedGaussian2DFunction(maxx);
+					return new SingleFixedGaussian2DFunction(maxx, maxy);
 
-				return new SingleNSFixedGaussian2DFunction(maxx);
+				return new SingleNSFixedGaussian2DFunction(maxx, maxy);
 			}
 
 			if ((flags & FIT_ANGLE) == FIT_ANGLE)
-				return new SingleNBEllipticalGaussian2DFunction(maxx);
+				return new SingleNBEllipticalGaussian2DFunction(maxx, maxy);
 			if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
-				return new SingleNBFreeCircularGaussian2DFunction(maxx);
+				return new SingleNBFreeCircularGaussian2DFunction(maxx, maxy);
 			if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
-				return new SingleNBCircularGaussian2DFunction(maxx);
+				return new SingleNBCircularGaussian2DFunction(maxx, maxy);
 
 			// Fixed function
 			if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
-				return new SingleNBFixedGaussian2DFunction(maxx);
+				return new SingleNBFixedGaussian2DFunction(maxx, maxy);
 
-			return new SingleNSNBFixedGaussian2DFunction(maxx);
+			return new SingleNSNBFixedGaussian2DFunction(maxx, maxy);
 		}
 		else
 		{
 			if ((flags & FIT_BACKGROUND) == FIT_BACKGROUND)
 			{
 				if ((flags & FIT_ANGLE) == FIT_ANGLE)
-					return new EllipticalGaussian2DFunction(nPeaks, maxx);
+					return new EllipticalGaussian2DFunction(nPeaks, maxx, maxy);
 				if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
-					return new FreeCircularGaussian2DFunction(nPeaks, maxx);
+					return new FreeCircularGaussian2DFunction(nPeaks, maxx, maxy);
 				if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
-					return new CircularGaussian2DFunction(nPeaks, maxx);
+					return new CircularGaussian2DFunction(nPeaks, maxx, maxy);
 
 				// Fixed function
 				if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
-					return new FixedGaussian2DFunction(nPeaks, maxx);
+					return new FixedGaussian2DFunction(nPeaks, maxx, maxy);
 
-				return new NSFixedGaussian2DFunction(nPeaks, maxx);
+				return new NSFixedGaussian2DFunction(nPeaks, maxx, maxy);
 			}
 
 			if ((flags & FIT_ANGLE) == FIT_ANGLE)
-				return new NBEllipticalGaussian2DFunction(nPeaks, maxx);
+				return new NBEllipticalGaussian2DFunction(nPeaks, maxx, maxy);
 			if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
-				return new NBFreeCircularGaussian2DFunction(nPeaks, maxx);
+				return new NBFreeCircularGaussian2DFunction(nPeaks, maxx, maxy);
 			if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
-				return new NBCircularGaussian2DFunction(nPeaks, maxx);
+				return new NBCircularGaussian2DFunction(nPeaks, maxx, maxy);
 
 			// Fixed function
 			if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
-				return new NBFixedGaussian2DFunction(nPeaks, maxx);
+				return new NBFixedGaussian2DFunction(nPeaks, maxx, maxy);
 
-			return new NSNBFixedGaussian2DFunction(nPeaks, maxx);
+			return new NSNBFixedGaussian2DFunction(nPeaks, maxx, maxy);
 		}
 	}
 }

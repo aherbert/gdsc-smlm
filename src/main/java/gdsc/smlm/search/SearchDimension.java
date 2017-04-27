@@ -120,8 +120,8 @@ public class SearchDimension implements Cloneable, Dimension
 		this.nIncrement = nIncrement;
 
 		// Rounding changes the range so bring the upper and lower back within
-		lower = Math.min(this.max, Math.max(lower, this.min));
-		upper = Math.min(this.max, Math.max(upper, this.min));
+		lower = Maths.clip(this.min, this.max, lower);
+		upper = Maths.clip(this.min, this.max, upper);
 
 		setCentre((upper + lower) / 2);
 		setIncrement((upper - lower) / (2 * nIncrement));

@@ -2,7 +2,6 @@ package gdsc.smlm.fitting.nonlinear.stop;
 
 import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunction;
 
 import java.util.Arrays;
 
@@ -32,8 +31,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	private double delta = 0.01;
 
 	protected int peaks;
-	protected int dimensions;
-	protected GaussianFunction func;
+	protected Gaussian2DFunction func;
 
 	private double minimumSignal = Float.NEGATIVE_INFINITY;
 	private double[] minimumPosition = null;
@@ -45,11 +43,10 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	 * @param func
 	 *            The Gaussian function
 	 */
-	public GaussianStoppingCriteria(GaussianFunction func)
+	public GaussianStoppingCriteria(Gaussian2DFunction func)
 	{
 		this.func = func;
 		this.peaks = func.getNPeaks();
-		this.dimensions = func.getNDimensions();
 	}
 
 	/*
@@ -127,7 +124,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 				for (int i = 0; i < peaks; i++)
 				{
 					sb.append(", Peak").append(i + 1).append("=[");
-					for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < dimensions; j++, k++)
+					for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
 					{
 						if (j > 0)
 							sb.append(",");
@@ -145,7 +142,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	{
 		for (int i = 0; i < peaks; i++)
 		{
-			for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < dimensions; j++, k++)
+			for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
 			{
 				// Check if the coordinates have moved less than the delta limit
 				if (Math.abs(bestA[k] - a[k]) > delta)
@@ -198,7 +195,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	{
 		if (threshold != null)
 		{
-			for (int j = 0; j < dimensions; j++, paramIndex++)
+			for (int j = 0; j < 2; j++, paramIndex++)
 			{
 				if (params[paramIndex] < threshold[j])
 					return true;
@@ -219,7 +216,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	{
 		if (threshold != null)
 		{
-			for (int j = 0; j < dimensions; j++, paramIndex++)
+			for (int j = 0; j < 2; j++, paramIndex++)
 			{
 				if (params[paramIndex] > threshold[j])
 					return true;
@@ -339,6 +336,6 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 
 	private double[] checkArray(double[] array)
 	{
-		return (array == null || array.length != func.getNDimensions()) ? null : array;
+		return (array == null || array.length != 2) ? null : array;
 	}
 }

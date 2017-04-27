@@ -21,7 +21,7 @@ public class PrecisionTest
 
 	int maxx = 10;
 	// Use realistic values for a camera with a bias of 500
-	static double[] params2 = new double[] { 500.23, 50.12, 0, 5.12, 5.23, 1.11, 1.11 };
+	static double[] params2 = new double[] { 500.23, 300.12, 0, 5.12, 5.23, 1.11, 1.11 };
 	static float[] params1 = toFloat(params2);
 
 	// Stripped down Gaussian functions copied from the gdsc.smlm.fitting.function.gaussian package
@@ -476,8 +476,8 @@ public class PrecisionTest
 		singlePrecisionIsFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false);
 	}
 
-	@Test
-	public void fixedSinglePrecisionIsFasterWithGradientsNoSum()
+	@Test(expected = java.lang.AssertionError.class)
+	public void fixedSinglePrecisionIsNotMuchFasterWithGradientsNoSum()
 	{
 		singlePrecisionIsFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true);
 	}

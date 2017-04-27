@@ -56,13 +56,14 @@ public class SearchSpaceTest
 	{
 		SearchDimension d1 = new SearchDimension(0, 10, 0, 1, 2.5, 7.5);
 		double[] v1 = d1.values();
-		Assert.assertFalse(d1.isAtBounds(0));
+		Assert.assertTrue(d1.isAtBounds(0));
 		Assert.assertTrue(d1.isAtBounds(v1[0]));
 		Assert.assertTrue(d1.isAtBounds(v1[v1.length - 1]));
+		Assert.assertFalse(d1.isAtBounds(5));
 		
 		d1.setCentre(0);
 		Assert.assertTrue(d1.isAtBounds(0));
-		Assert.assertFalse(d1.isAtBounds(7.5));
+		Assert.assertTrue(d1.isAtBounds(5));
 		
 		double[] v2 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v1));
@@ -91,7 +92,7 @@ public class SearchSpaceTest
 		d1.setPad(false);
 		
 		double[] v1 = d1.values();
-		Assert.assertFalse(d1.isAtBounds(0));
+		Assert.assertTrue(d1.isAtBounds(0));
 		
 		d1.setCentre(0);
 		Assert.assertTrue(d1.isAtBounds(0));

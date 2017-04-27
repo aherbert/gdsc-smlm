@@ -465,7 +465,7 @@ public class Gaussian2DFitter
 		{
 			// Get the parameters
 			double signal = params[j + Gaussian2DFunction.SIGNAL];
-			double angle = params[j + Gaussian2DFunction.ANGLE];
+			double angle = params[j + Gaussian2DFunction.SHAPE];
 			double xpos = params[j + Gaussian2DFunction.X_POSITION];
 			double ypos = params[j + Gaussian2DFunction.Y_POSITION];
 			double sx = params[j + Gaussian2DFunction.X_SD];
@@ -627,7 +627,7 @@ public class Gaussian2DFitter
 		// Use alternative fitters
 		// -----------------------
 
-		fitConfiguration.initialise(npeaks, maxx, initialParams);
+		fitConfiguration.initialise(npeaks, maxx, maxy, initialParams);
 		solver = fitConfiguration.getFunctionSolver();
 		if (fitConfiguration.isComputeDeviations())
 			params_dev = new double[params.length];
@@ -680,7 +680,7 @@ public class Gaussian2DFitter
 			if (fitConfiguration.isAngleFitting())
 			{
 				// Ensure the angle is within the correct bounds
-				for (int i = Gaussian2DFunction.ANGLE; i < params.length; i += 6)
+				for (int i = Gaussian2DFunction.SHAPE; i < params.length; i += 6)
 				{
 					correctAngle(i, params, params_dev);
 				}
@@ -926,9 +926,11 @@ public class Gaussian2DFitter
 
 			if (fitConfiguration.isAngleFitting())
 			{
-				lower[j + Gaussian2DFunction.ANGLE] = -Math.PI;
-				upper[j + Gaussian2DFunction.ANGLE] = Math.PI;
+				lower[j + Gaussian2DFunction.SHAPE] = -Math.PI;
+				upper[j + Gaussian2DFunction.SHAPE] = Math.PI;
 			}
+			// TODO - Add support for z-depth fitting in the shape parameter			
+			
 			lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * min_wf;
 			upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * max_wf;
 			lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * min_wf;
@@ -958,13 +960,13 @@ public class Gaussian2DFitter
 		{
 			if (params[i] < lower[i])
 			{
-				System.out.printf("Param %d (%s) too low %f < %f\n", i, Gaussian2DFunction.getName(i), params[i],
+				System.out.printf("Param %d (%s) too low %f < %f\n", i, solver.getName(i), params[i],
 						lower[i]);
 				lower[i] = params[i] - (lower[i] - params[i]);
 			}
 			if (params[i] > upper[i])
 			{
-				System.out.printf("Param %d (%s) too high %f > %f\n", i, Gaussian2DFunction.getName(i), params[i],
+				System.out.printf("Param %d (%s) too high %f > %f\n", i, solver.getName(i), params[i],
 						upper[i]);
 				upper[i] = params[i] + (params[i] - upper[i]);
 			}
@@ -1084,8 +1086,8 @@ public class Gaussian2DFitter
 		//		}
 
 		// Commented out as this interferes with the PSF Estimator
-		double xWidth = params[i + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE];
-		double yWidth = params[i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE];
+		double xWidth = params[i + Gaussian2DFunction.X_SD - Gaussian2DFunction.SHAPE];
+		double yWidth = params[i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.SHAPE];
 		// The fit will compute the angle from the major axis. 
 		// Standardise so it is always from the X-axis
 		if (yWidth > xWidth)
@@ -1343,7 +1345,7 @@ public class Gaussian2DFitter
 		// Use alternative fitters
 		// -----------------------
 
-		fitConfiguration.initialise(npeaks, maxx, params);
+		fitConfiguration.initialise(npeaks, maxx, maxy, params);
 		solver = fitConfiguration.getFunctionSolver();
 
 		// Do not apply bounds and constraints as it is assumed the input parameters are good

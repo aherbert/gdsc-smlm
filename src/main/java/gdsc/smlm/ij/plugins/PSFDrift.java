@@ -22,7 +22,6 @@ import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFOffset;
 import gdsc.smlm.ij.settings.PSFSettings;
@@ -261,7 +260,7 @@ public class PSFDrift implements PlugIn
 				final double[] params = initialParams.clone();
 				params[Gaussian2DFunction.X_POSITION] = cx + centre[0];
 				params[Gaussian2DFunction.Y_POSITION] = cy + centre[1];
-				fitConfig.initialise(1, w, params);
+				fitConfig.initialise(1, w, w, params);
 				FunctionSolver solver = fitConfig.getFunctionSolver();
 				if (solver.isBounded())
 					setBounds(solver);
@@ -311,8 +310,8 @@ public class PSFDrift implements PlugIn
 				ub[Gaussian2DFunction.SIGNAL] = photons * 2;
 				ub[Gaussian2DFunction.X_POSITION] = w;
 				ub[Gaussian2DFunction.Y_POSITION] = w;
-				lb[Gaussian2DFunction.ANGLE] = -Math.PI;
-				ub[Gaussian2DFunction.ANGLE] = Math.PI;
+				lb[Gaussian2DFunction.SHAPE] = -Math.PI;
+				ub[Gaussian2DFunction.SHAPE] = Math.PI;
 				double wf = 1.5;
 				lb[Gaussian2DFunction.X_SD] = s / wf;
 				ub[Gaussian2DFunction.X_SD] = s * 5;
@@ -518,7 +517,7 @@ public class PSFDrift implements PlugIn
 		// Create robust PSF fitting settings
 		final double a = psfSettings.nmPerPixel * scale;
 		final double sa = PSFCalculator.squarePixelAdjustment(
-				psfSettings.nmPerPixel * (psfSettings.fwhm / GaussianFunction.SD_TO_FWHM_FACTOR), a);
+				psfSettings.nmPerPixel * (psfSettings.fwhm / Gaussian2DFunction.SD_TO_FWHM_FACTOR), a);
 		fitConfig.setInitialPeakStdDev(sa / a);
 		fitConfig.setBackgroundFitting(backgroundFitting);
 		fitConfig.setNotSignalFitting(false);

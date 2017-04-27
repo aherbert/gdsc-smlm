@@ -39,7 +39,7 @@ public class GaussianOverlapAnalysis
 	private final double[] params0;
 	private final double range;
 
-	private final int maxx, size;
+	private final int maxx, maxy, size;
 	private final double centrex, centrey;
 
 	private double[] data = null, overlap = null;
@@ -62,7 +62,7 @@ public class GaussianOverlapAnalysis
 		this.range = range;
 
 		maxx = 2 * ((int) Math.ceil(params[Gaussian2DFunction.X_SD] * range)) + 1;
-		final int maxy = 2 * ((int) Math.ceil(params[Gaussian2DFunction.Y_SD] * range)) + 1;
+		maxy = 2 * ((int) Math.ceil(params[Gaussian2DFunction.Y_SD] * range)) + 1;
 		size = maxx * maxy;
 		// We will sample the Gaussian at integer intervals, i.e. on a pixel grid.
 		// Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss 
@@ -111,7 +111,7 @@ public class GaussianOverlapAnalysis
 			// Initialise the input function
 			data = new double[size];
 			overlap = new double[size];
-			Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, this.flags);
+			Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxy, this.flags);
 
 			// Note that the position should be in the centre of the sample region
 			final double cx = params0[Gaussian2DFunction.X_POSITION];
@@ -160,7 +160,7 @@ public class GaussianOverlapAnalysis
 
 		// Add the function to the overlap
 		final int nPeaks = params.length / 6;
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(nPeaks, maxx, flags);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(nPeaks, maxx, maxy, flags);
 		params = params.clone();
 		for (int n = 0; n < nPeaks; n++)
 		{
