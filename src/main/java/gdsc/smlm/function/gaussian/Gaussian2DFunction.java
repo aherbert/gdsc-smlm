@@ -36,7 +36,7 @@ public abstract class Gaussian2DFunction implements NonLinearFunction
 	 * The factor for converting a Gaussian standard deviation to Half Width at Half Maxima (FWHM)
 	 */
 	public static final double SD_TO_HWHM_FACTOR = (Math.sqrt(2.0 * Math.log(2.0)));
-	
+
 	private NoiseModel noiseModel = null;
 
 	public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI;
@@ -84,7 +84,7 @@ public abstract class Gaussian2DFunction implements NonLinearFunction
 		return "Angle";
 	}
 
-	protected int maxx, maxy;
+	protected final int maxx, maxy;
 
 	/**
 	 * Instantiates a new gaussian 2 D function.
@@ -96,8 +96,8 @@ public abstract class Gaussian2DFunction implements NonLinearFunction
 	 */
 	public Gaussian2DFunction(int maxx, int maxy)
 	{
-		setMaxX(maxx);
-		setMaxY(maxy);
+		this.maxx = (maxx < 1) ? 1 : maxx;
+		this.maxy = (maxy < 1) ? 1 : maxy;
 	}
 
 	/**
@@ -109,31 +109,11 @@ public abstract class Gaussian2DFunction implements NonLinearFunction
 	}
 
 	/**
-	 * @maxx the maximum size in the first dimension. Default to 1 if not positive.
-	 */
-	public void setMaxX(int maxx)
-	{
-		if (maxx < 1)
-			maxx = 1;
-		this.maxx = maxx;
-	}
-
-	/**
 	 * @return the maximum size in the first dimension
 	 */
 	public int getMaxX()
 	{
 		return maxx;
-	}
-
-	/**
-	 * @maxy the maximum size in the second dimension. Default to 1 if not positive.
-	 */
-	public void setMaxY(int maxy)
-	{
-		if (maxy < 1)
-			maxy = 1;
-		this.maxy = maxy;
 	}
 
 	/**
@@ -215,7 +195,7 @@ public abstract class Gaussian2DFunction implements NonLinearFunction
 		w[0] = noiseModel.variance(value);
 		return value;
 	}
-	
+
 	/**
 	 * @return the noise model
 	 */
@@ -244,7 +224,7 @@ public abstract class Gaussian2DFunction implements NonLinearFunction
 	{
 		return (noiseModel != null);
 	}
-	
+
 	/**
 	 * Build the index array that maps the gradient index back to the original parameter index so that:<br/>
 	 * a[indices[i]] += dy_da[i]
