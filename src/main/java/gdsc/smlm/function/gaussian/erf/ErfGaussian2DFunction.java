@@ -28,8 +28,21 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 {
 	public static final int Z_POSITION = 2;
 
+	protected final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
+	protected final static double ONE_OVER_ROOT2PI = 1.0 / Math.sqrt(2 * Math.PI);
+	
 	protected final byte derivativeOrder;
 
+	// Required for the PSF
+	protected final double[] deltaEx, deltaEy;
+	protected double bg, I0, x0, y0, sx0, sy0;
+	
+	// Required for the first gradients
+	protected double[] dudx, dudy, dudsx, dudsy;
+
+	// Required for the second gradients
+	protected double[] d2udx2, d2udy2, d2udsx2, d2udsy2;
+	
 	/**
 	 * Instantiates a new erf gaussian 2D function.
 	 *
@@ -44,7 +57,12 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	{
 		super(maxx, maxy);
 		this.derivativeOrder = (byte) derivativeOrder;
+		deltaEx = new double[this.maxx];
+		deltaEy = new double[this.maxy];
+		createArrays();
 	}
+
+	protected abstract void createArrays();
 
 	@Override
 	public int getDerivativeOrder()

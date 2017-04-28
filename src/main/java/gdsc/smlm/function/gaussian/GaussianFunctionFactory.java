@@ -1,5 +1,6 @@
 package gdsc.smlm.function.gaussian;
 
+import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -48,6 +49,8 @@ public class GaussianFunctionFactory
 	// Flags for ERF Gaussian functions
 	public static final int FIT_ERF = 0x00000100;
 	public static final int FIT_ERF_FREE_CIRCLE = FIT_FREE_CIRCLE | FIT_ERF;
+	public static final int FIT_ERF_CIRCLE = FIT_CIRCLE | FIT_ERF;
+	public static final int FIT_ERF_FIXED = FIT_FIXED | FIT_ERF;
 
 	/**
 	 * Create the correct 2D Gaussian function for the specified parameters
@@ -79,6 +82,8 @@ public class GaussianFunctionFactory
 					// Independent X/Y width
 					if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
 						return new SingleFreeCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+					if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
+						return new SingleCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
 
 					// TODO
 

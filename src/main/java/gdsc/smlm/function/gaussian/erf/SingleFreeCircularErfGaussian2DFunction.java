@@ -1,5 +1,6 @@
 package gdsc.smlm.function.gaussian.erf;
 
+//import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Pair;
 
@@ -24,24 +25,11 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFunction
 {
-	protected final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
-	protected final static double ONE_OVER_ROOT2PI = 1.0 / Math.sqrt(2 * Math.PI);
-
 	private static final int[] gradientIndices;
 	static
 	{
 		gradientIndices = createGradientIndices(1, new SingleFreeCircularErfGaussian2DFunction(1, 1, 0));
 	}
-
-	// Required for the PSF
-	protected final double[] deltaEx, deltaEy;
-	protected double bg, I0, x0, y0, sx0, sy0;
-
-	// Required for the first gradients
-	protected double[] dudx, dudy, dudsx, dudsy;
-
-	// Required for the second gradients
-	protected double[] d2udx2, d2udy2, d2udsx2, d2udsy2;
 
 	/**
 	 * Constructor.
@@ -56,8 +44,11 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	public SingleFreeCircularErfGaussian2DFunction(int maxx, int maxy, int derivativeOrder)
 	{
 		super(maxx, maxy, derivativeOrder);
-		deltaEx = new double[this.maxx];
-		deltaEy = new double[this.maxy];
+	}
+
+	@Override
+	protected void createArrays()
+	{
 		if (derivativeOrder <= 0)
 			return;
 		dudx = new double[this.maxx];
@@ -126,7 +117,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	 * @param s0
 	 *            the standard deviation of the Gaussian for dimension 0
 	 */
-	private void createDeltaETable(double[] deltaE0, double u0, double s0)
+	protected void createDeltaETable(double[] deltaE0, double u0, double s0)
 	{
 		final double one_oversSqrt2 = ONE_OVER_ROOT2 / s0;
 
@@ -165,7 +156,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	 * @param s0
 	 *            the standard deviation of the Gaussian for dimension 0
 	 */
-	private void createFirstOrderTables(double[] deltaE0, double[] dudx0, double[] duds0, double u0, double s0)
+	protected void createFirstOrderTables(double[] deltaE0, double[] dudx0, double[] duds0, double u0, double s0)
 	{
 		final double one_oversSqrt2 = ONE_OVER_ROOT2 / s0;
 		final double one_2ss = 0.5 / (s0 * s0);
@@ -219,7 +210,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	 * @param s0
 	 *            the standard deviation of the Gaussian for dimension 0
 	 */
-	private void createSecondOrderTables(double[] deltaE0, double[] dudx0, double[] duds0, double[] d2udx02,
+	protected void createSecondOrderTables(double[] deltaE0, double[] dudx0, double[] duds0, double[] d2udx02,
 			double[] d2uds02, double u0, double s0)
 	{
 		final double ss = s0 * s0;
@@ -255,13 +246,14 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 			final double pre = I0_sSqrt2pi; // * deltaE1[i];
 			dudx0[i] = pre * (exp - exp2);
 			// Compute: I0 * G21(xk)
-			duds0[i] = (pre / s0) * (lx * exp - x * exp2);
+			final double pre2 = (lx * exp - x * exp2);
+			duds0[i] = (pre / s0) * pre2;
 
 			// Second derivatives
-			d2udx02[i] = (pre / ss) * (lx * exp - x * exp2);
+			d2udx02[i] = (pre / ss) * pre2;
 
 			// Compute G31(xk)
-			final double G31 = one_sssSqrt2pi * (lx * exp - x * exp2);
+			final double G31 = one_sssSqrt2pi * pre2;
 
 			// Compute G53(xk)
 			lx = lx * lx * lx;
@@ -357,6 +349,36 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 
 	// Support for ExtendedNonLinear Function. This can take advantage of x/y iteration.
 	@Override
+	public double[][] computeJacobian(double[] variables)
+	{
+		initialise(variables);
+
+		final int n = maxx * maxy;
+		final double[][] jacobian = new double[n][];
+
+		for (int y = 0, i = 0; y < maxy; y++)
+		{
+			final double dudy = this.dudy[y];
+			final double deltaEy = this.deltaEy[y];
+			final double dudsy = this.dudsy[y];
+			for (int x = 0; x < maxx; x++, i++)
+			{
+				final double[] duda = new double[variables.length];
+				duda[0] = 1.0;
+				duda[1] = deltaEx[x] * deltaEy;
+				duda[2] = dudx[x] * deltaEy;
+				duda[3] = dudy * deltaEx[x];
+				duda[4] = dudsx[x] * deltaEy;
+				duda[5] = dudsy * deltaEx[x];
+				jacobian[i] = duda;
+			}
+		}
+
+		return jacobian;
+	}
+	
+	// Support for ExtendedNonLinear Function. This can take advantage of x/y iteration.
+	@Override
 	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
 	{
 		initialise(variables);
@@ -365,12 +387,23 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 		final double[][] jacobian = new double[n][];
 		final double[] values = new double[n];
 
-		for (int i = 0; i < n; ++i)
+		for (int y = 0, i = 0; y < maxy; y++)
 		{
-			// Assume linear X from 0..N
-			final double[] dyda = new double[variables.length];
-			values[i] = eval(i, dyda);
-			jacobian[i] = dyda;
+			final double dudy = this.dudy[y];
+			final double deltaEy = this.deltaEy[y];
+			final double dudsy = this.dudsy[y];
+			for (int x = 0; x < maxx; x++, i++)
+			{
+				final double[] duda = new double[variables.length];
+				duda[0] = 1.0;
+				duda[1] = deltaEx[x] * deltaEy;
+				duda[2] = dudx[x] * deltaEy;
+				duda[3] = dudy * deltaEx[x];
+				duda[4] = dudsx[x] * deltaEy;
+				duda[5] = dudsy * deltaEx[x];
+				values[i] = bg + I0 * duda[1];
+				jacobian[i] = duda;
+			}
 		}
 
 		return new Pair<double[], double[][]>(values, jacobian);
