@@ -284,24 +284,6 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	 * 
 	 * @param i
 	 *            Input predictor
-	 * @return The Gaussian value
-	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
-	 */
-	public double eval(final int i)
-	{
-		// Unpack the predictor into the dimensions
-		final int y = i / maxx;
-		final int x = i % maxx;
-
-		return tB + tI * deltaEx[x] * deltaEy[y];
-	}
-
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 * 
-	 * @param i
-	 *            Input predictor
 	 * @param duda
 	 *            Partial gradient of function with respect to each coefficient
 	 * @return The predicted value

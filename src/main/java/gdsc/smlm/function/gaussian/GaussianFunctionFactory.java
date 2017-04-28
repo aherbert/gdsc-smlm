@@ -1,6 +1,7 @@
 package gdsc.smlm.function.gaussian;
 
 import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -82,19 +83,16 @@ public class GaussianFunctionFactory
 					// Independent X/Y width
 					if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
 						return new SingleFreeCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+					// Combined X/Y width
 					if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
 						return new SingleCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
-
-					// TODO
-
-					// Combined X/Y width
-
 					// Fixed width
-
-					return new SingleNSFixedGaussian2DFunction(maxx, maxy);
+					if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+						return new SingleFixedErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+					
+					// TODO
+					// z-depth function
 				}
-
-				return new SingleNSNBFixedGaussian2DFunction(maxx, maxy);
 			}
 			else
 			{

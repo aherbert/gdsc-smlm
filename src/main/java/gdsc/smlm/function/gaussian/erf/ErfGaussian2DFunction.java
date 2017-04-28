@@ -92,6 +92,24 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 		return "Z";
 	}
 
+	/**
+	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	 * 
+	 * @param i
+	 *            Input predictor
+	 * @return The Gaussian value
+	 * 
+	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
+	 */
+	public double eval(final int i)
+	{
+		// Unpack the predictor into the dimensions
+		final int y = i / maxx;
+		final int x = i % maxx;
+
+		return tB + tI * deltaEx[x] * deltaEy[y];
+	}
+	
 	// TODO - Add function support for computing the second derivatives directly in a Newton-Raphson method
 
 }
