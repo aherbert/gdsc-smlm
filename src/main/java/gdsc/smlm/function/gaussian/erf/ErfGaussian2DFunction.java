@@ -28,7 +28,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 {
 	public static final int Z_POSITION = 2;
 
-	protected final boolean noGradients;
+	protected final byte derivativeOrder;
 
 	/**
 	 * Instantiates a new erf gaussian 2D function.
@@ -37,14 +37,30 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 * @param maxy
 	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param noGradients
-	 *            Set to true if the gradients are not required
+	 * @param derivativeOrder
+	 *            Set to the order of partial derivatives required
 	 */
-	public ErfGaussian2DFunction(int maxx, int maxy, boolean noGradients)
+	public ErfGaussian2DFunction(int maxx, int maxy, int derivativeOrder)
 	{
 		super(maxx, maxy);
-		this.noGradients = noGradients;
+		this.derivativeOrder = (byte) derivativeOrder;
 	}
+
+	@Override
+	public int getDerivativeOrder()
+	{
+		return derivativeOrder;
+	}
+
+	@Override
+	public boolean isOverhead(int derivativeOrder)
+	{
+		return derivativeOrder < this.derivativeOrder;
+	}
+	
+	// Force implementation by making abstract
+	@Override
+	abstract public Gaussian2DFunction create(int derivativeOrder);
 
 	/*
 	 * (non-Javadoc)

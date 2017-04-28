@@ -52,9 +52,8 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction
 	public static final int Y_SD = 6;
 
 	/**
-	 * Gets the name of the parameter assuming a 2D Gaussian function packed as: background + n * [signal, angle,
-	 * position0,
-	 * position1, sd0, sd1].
+	 * Gets the name of the parameter assuming a 2D Gaussian function packed as: background + n * [signal, shape,
+	 * position0, position1, sd0, sd1].
 	 *
 	 * @param index
 	 *            the index (zero or above)
@@ -124,6 +123,46 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction
 	public int getMaxY()
 	{
 		return maxy;
+	}
+
+	/**
+	 * Gets the order of partial derivatives that can be computed.
+	 *
+	 * @return the derivative order
+	 */
+	public int getDerivativeOrder()
+	{
+		return 1;
+	}
+
+	/**
+	 * Checks if there is an overhead to computing derivatives of the given order. The input order is expected to be
+	 * less than the value returned from {@link #getDerivativeOrder()}.
+	 *
+	 * @param derivativeOrder
+	 *            the derivative order
+	 * @return true, if is overhead
+	 */
+	public boolean isOverhead(int derivativeOrder)
+	{
+		return false;
+	}
+
+	/**
+	 * Creates a new function with the ability to compute derivatives of the chosen order. Note that computation of
+	 * higher order derivatives may incur an overhead and so a function can be created with only the derivatives
+	 * required.
+	 * <p>
+	 * If the derivative order matches the current derivative order for this function then the same object may be
+	 * returned.
+	 *
+	 * @param derivativeOrder
+	 *            the derivative order
+	 * @return the gaussian 2D function
+	 */
+	public Gaussian2DFunction create(int derivativeOrder)
+	{
+		return this;
 	}
 
 	/**

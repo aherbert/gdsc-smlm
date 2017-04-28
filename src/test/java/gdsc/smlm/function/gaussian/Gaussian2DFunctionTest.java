@@ -11,39 +11,39 @@ import org.junit.Test;
 
 public abstract class Gaussian2DFunctionTest
 {
-	DoubleEquality eq = new DoubleEquality(2, 1e-3);
-	DoubleEquality eq2 = new DoubleEquality(5, 1e-8);
+	protected DoubleEquality eq = new DoubleEquality(2, 1e-3);
+	protected DoubleEquality eq2 = new DoubleEquality(5, 1e-8);
 
 	// Compute as per Numerical Recipes 5.7.
 	// Approximate error accuracy in single precision: Ef
 	// Step size for derivatives:
 	// h ~ (Ef)^(1/3) * xc
 	// xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x is close to zero)
-	final double h_ = 0.01; //(double) (Math.pow(1e-3f, 1.0 / 3));
+	protected final double h_ = 0.01; //(double) (Math.pow(1e-3f, 1.0 / 3));
 
-	int[] testx = new int[] { 4, 5, 6 };
-	int[] testy = new int[] { 4, 5, 6 };
-	double[] testbackground = new double[] { 0, 400 };
+	protected int[] testx = new int[] { 4, 5, 6 };
+	protected int[] testy = new int[] { 4, 5, 6 };
+	protected double[] testbackground = new double[] { 0, 400 };
 
-	double[] testamplitude1 = new double[] { 15, 55, 105 };
-	double[] testangle1 = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
-	double[] testcx1 = new double[] { 4.9, 5.3 };
-	double[] testcy1 = new double[] { 4.8, 5.2 };
-	double[][] testw1 = new double[][] { { 1.1, 1.2 }, { 1.5, 1.2 }, { 1.1, 1.7 }, { 1.5, 1.7 }, };
+	protected double[] testamplitude1 = new double[] { 15, 55, 105 };
+	protected double[] testshape1 = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
+	protected double[] testcx1 = new double[] { 4.9, 5.3 };
+	protected double[] testcy1 = new double[] { 4.8, 5.2 };
+	protected double[][] testw1 = new double[][] { { 1.1, 1.2 }, { 1.5, 1.2 }, { 1.1, 1.7 }, { 1.5, 1.7 }, };
 
-	double[] testamplitude2 = new double[] { 20, 50 };
-	double[] testangle2 = new double[] { (double) (Math.PI / 7), (double) (Math.PI / 11) };
-	double[] testcx2 = new double[] { 4.8, 5.3 };
-	double[] testcy2 = new double[] { 5.1, 4.9 };
-	double[][] testw2 = new double[][] { { 1.2, 1.4 }, { 1.3, 1.4 }, { 1.2, 1.5 }, { 1.3, 1.5 }, };
+	protected double[] testamplitude2 = new double[] { 20, 50 };
+	protected double[] testshape2 = new double[] { (double) (Math.PI / 7), (double) (Math.PI / 11) };
+	protected double[] testcx2 = new double[] { 4.8, 5.3 };
+	protected double[] testcy2 = new double[] { 5.1, 4.9 };
+	protected double[][] testw2 = new double[][] { { 1.2, 1.4 }, { 1.3, 1.4 }, { 1.2, 1.5 }, { 1.3, 1.5 }, };
 
-	int maxx = 10;
-	double background = 50;
-	double angle = 0;
-	double width = 5;
-	Gaussian2DFunction f1;
-	Gaussian2DFunction f2 = null;
-	int flags;
+	protected int maxx = 10;
+	protected double background = 50;
+	protected double shape = 0;
+	protected double width = 5;
+	protected Gaussian2DFunction f1;
+	protected Gaussian2DFunction f2 = null;
+	protected int flags;
 
 	public Gaussian2DFunctionTest()
 	{
@@ -61,8 +61,8 @@ public abstract class Gaussian2DFunctionTest
 		}
 		if (!f1.evaluatesShape())
 		{
-			testangle1 = new double[] { 0 };
-			testangle2 = new double[] { 0 };
+			testshape1 = new double[] { 0 };
+			testshape2 = new double[] { 0 };
 		}
 		// Position is always evaluated
 
@@ -120,18 +120,18 @@ public abstract class Gaussian2DFunctionTest
 		for (int peak = 1, i = 1; peak <= npeaks; peak++, i += 6)
 		{
 			if (gf.evaluatesSignal())
-				Assert.assertEquals("Amplitude", i, gradientIndices[p++]);
+				Assert.assertEquals(gf.getName(i), i, gradientIndices[p++]);
 			if (gf.evaluatesShape())
-				Assert.assertEquals("Angle", i + 1, gradientIndices[p++]);
+				Assert.assertEquals(gf.getName(i + 1), i + 1, gradientIndices[p++]);
 			if (gf.evaluatesPosition())
 			{
-				Assert.assertEquals("Position0", i + 2, gradientIndices[p++]);
-				Assert.assertEquals("Position1", i + 3, gradientIndices[p++]);
+				Assert.assertEquals(gf.getName(i + 2), i + 2, gradientIndices[p++]);
+				Assert.assertEquals(gf.getName(i + 3), i + 3, gradientIndices[p++]);
 			}
 			if (gf.evaluatesSD0())
-				Assert.assertEquals("Width0", i + 4, gradientIndices[p++]);
+				Assert.assertEquals(gf.getName(i + 4), i + 4, gradientIndices[p++]);
 			if (gf.evaluatesSD1())
-				Assert.assertEquals("Width1", i + 5, gradientIndices[p++]);
+				Assert.assertEquals(gf.getName(i + 5), i + 5, gradientIndices[p++]);
 		}
 	}
 
@@ -163,12 +163,12 @@ public abstract class Gaussian2DFunctionTest
 				for (double background : testbackground)
 					// Peak 1
 					for (double amplitude1 : testamplitude1)
-						for (double angle1 : testangle1)
+						for (double shape1 : testshape1)
 							for (double cx1 : testcx1)
 								for (double cy1 : testcy1)
 									for (double[] w1 : testw1)
 									{
-										a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+										a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
 
 										f1.initialise(a);
 										double y1 = f1.eval(y * maxx + x, dyda);
@@ -193,7 +193,7 @@ public abstract class Gaussian2DFunctionTest
 	}
 
 	@Test
-	public void functionComputesAngleGradient()
+	public void functionComputesShapeGradient()
 	{
 		if (f1.evaluatesShape())
 			functionComputesTargetGradient(Gaussian2DFunction.SHAPE);
@@ -238,12 +238,12 @@ public abstract class Gaussian2DFunctionTest
 		for (double background : testbackground)
 			// Peak 1
 			for (double amplitude1 : testamplitude1)
-				for (double angle1 : testangle1)
+				for (double shape1 : testshape1)
 					for (double cx1 : testcx1)
 						for (double cy1 : testcy1)
 							for (double[] w1 : testw1)
 							{
-								a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
 								f1.initialise(a);
 
 								// Numerically solve gradient. 
@@ -257,30 +257,31 @@ public abstract class Gaussian2DFunctionTest
 								h = temp - xx;
 
 								// Evaluate at (x+h) and (x-h)
-								a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
 								a[targetParameter] = xx + h;
 								f1a.initialise(a);
 
-								a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
 								a[targetParameter] = xx - h;
 								f1b.initialise(a);
 
 								for (int x : testx)
 									for (int y : testy)
 									{
-										f1.eval(y * maxx + x, dyda);
-										double value2 = f1a.eval(y * maxx + x, dyda2);
-										double value3 = f1b.eval(y * maxx + x, dyda2);
+										int i = y * maxx + x;
+										f1.eval(i, dyda);
+										double value2 = f1a.eval(i, dyda2);
+										double value3 = f1b.eval(i, dyda2);
 
 										double gradient = (value2 - value3) / (2 * h);
-										//System.out.printf("%f == [%d] %f?\n", gradient, gradientIndex, dyda[gradientIndex]);
+										//System.out.printf("[%d,%d] %f == [%d] %f?\n", x, y, gradient, gradientIndex, dyda[gradientIndex]);
 										Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
 												eq.almostEqualComplement(gradient, dyda[gradientIndex]));
 									}
 							}
 	}
 
-	private int findGradientIndex(Gaussian2DFunction f, int targetParameter)
+	protected int findGradientIndex(Gaussian2DFunction f, int targetParameter)
 	{
 		int i = f.findGradientIndex(targetParameter);
 		Assert.assertTrue("Cannot find gradient index", i >= 0);
@@ -301,19 +302,19 @@ public abstract class Gaussian2DFunctionTest
 				for (double background : testbackground)
 					// Peak 1
 					for (double amplitude1 : testamplitude1)
-						for (double angle1 : testangle1)
+						for (double shape1 : testshape1)
 							for (double cx1 : testcx1)
 								for (double cy1 : testcy1)
 									for (double[] w1 : testw1)
 										// Peak 2
 										for (double amplitude2 : testamplitude2)
-											for (double angle2 : testangle2)
+											for (double shape2 : testshape2)
 												for (double cx2 : testcx2)
 													for (double cy2 : testcy2)
 														for (double[] w2 : testw2)
 														{
-															a = createParameters(background, amplitude1, angle1, cx1,
-																	cy1, w1[0], w1[1], amplitude2, angle2, cx2, cy2,
+															a = createParameters(background, amplitude1, shape1, cx1,
+																	cy1, w1[0], w1[1], amplitude2, shape2, cx2, cy2,
 																	w2[0], w2[1]);
 
 															f2.initialise(a);
@@ -349,7 +350,7 @@ public abstract class Gaussian2DFunctionTest
 	}
 
 	@Test
-	public void functionComputesAngleGradientWith2Peaks()
+	public void functionComputesShapeGradientWith2Peaks()
 	{
 		if (f2 != null)
 		{
@@ -420,19 +421,19 @@ public abstract class Gaussian2DFunctionTest
 		for (double background : testbackground)
 			// Peak 1
 			for (double amplitude1 : testamplitude1)
-				for (double angle1 : testangle1)
+				for (double shape1 : testshape1)
 					for (double cx1 : testcx1)
 						for (double cy1 : testcy1)
 							for (double[] w1 : testw1)
 								// Peak 2
 								for (double amplitude2 : testamplitude2)
-									for (double angle2 : testangle2)
+									for (double shape2 : testshape2)
 										for (double cx2 : testcx2)
 											for (double cy2 : testcy2)
 												for (double[] w2 : testw2)
 												{
-													a = createParameters(background, amplitude1, angle1, cx1, cy1,
-															w1[0], w1[1], amplitude2, angle2, cx2, cy2, w2[0], w2[1]);
+													a = createParameters(background, amplitude1, shape1, cx1, cy1,
+															w1[0], w1[1], amplitude2, shape2, cx2, cy2, w2[0], w2[1]);
 
 													f2.initialise(a);
 
@@ -447,22 +448,23 @@ public abstract class Gaussian2DFunctionTest
 													h = temp - xx;
 
 													// Evaluate at (x+h) and (x-h)
-													a = createParameters(background, amplitude1, angle1, cx1, cy1,
-															w1[0], w1[1], amplitude2, angle2, cx2, cy2, w2[0], w2[1]);
+													a = createParameters(background, amplitude1, shape1, cx1, cy1,
+															w1[0], w1[1], amplitude2, shape2, cx2, cy2, w2[0], w2[1]);
 													a[targetParameter] = xx + h;
 													f2a.initialise(a);
 
-													a = createParameters(background, amplitude1, angle1, cx1, cy1,
-															w1[0], w1[1], amplitude2, angle2, cx2, cy2, w2[0], w2[1]);
+													a = createParameters(background, amplitude1, shape1, cx1, cy1,
+															w1[0], w1[1], amplitude2, shape2, cx2, cy2, w2[0], w2[1]);
 													a[targetParameter] = xx - h;
 													f2b.initialise(a);
 
 													for (int x : testx)
 														for (int y : testy)
 														{
-															f2.eval(y * maxx + x, dyda);
-															double value2 = f2a.eval(y * maxx + x, dyda2);
-															double value3 = f2b.eval(y * maxx + x, dyda2);
+															int i= y * maxx + x;
+															f2.eval(i, dyda);
+															double value2 = f2a.eval(i, dyda2);
+															double value3 = f2b.eval(i, dyda2);
 
 															double gradient = (value2 - value3) / (2 * h);
 															Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
@@ -472,7 +474,7 @@ public abstract class Gaussian2DFunctionTest
 												}
 	}
 
-	private void doNothing(double f)
+	protected void doNothing(double f)
 	{
 
 	}
@@ -484,15 +486,19 @@ public abstract class Gaussian2DFunctionTest
 		int maxx = 30;
 
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
-		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		Gaussian2DFunction f2;
+		if ((flags & GaussianFunctionFactory.FIT_ERF) == 0)
+			f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		else
+			f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
 
 		for (double amplitude1 : testamplitude1)
-			for (double angle1 : testangle1)
+			for (double shape1 : testshape1)
 				for (double cx1 : new double[] { maxx / 2 + 0.373f })
 					for (double cy1 : new double[] { maxx / 2 + 0.876f })
 						for (double[] w1 : testw1)
 						{
-							double[] a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+							double[] a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
 
 							f.initialise(a);
 							f2.initialise(a);
@@ -515,17 +521,17 @@ public abstract class Gaussian2DFunctionTest
 						}
 	}
 
-	double[] createParameters(double... args)
+	protected double[] createParameters(double... args)
 	{
 		return args;
 	}
 
-	void log(String message)
+	protected void log(String message)
 	{
 		System.out.println(message);
 	}
 
-	void logf(String format, Object... args)
+	protected void logf(String format, Object... args)
 	{
 		System.out.printf(format, args);
 	}
