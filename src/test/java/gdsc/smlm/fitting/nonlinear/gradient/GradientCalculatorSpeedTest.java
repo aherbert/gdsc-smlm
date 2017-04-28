@@ -2,14 +2,17 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.ArrayList;
 
+import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.CameraNoiseModel;
+import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleCircularGaussian2DFunction;
@@ -387,7 +390,7 @@ public class GradientCalculatorSpeedTest
 	}
 
 	@Test
-	public void mleGradientCalcutlatorComputesGradient()
+	public void mleGradientCalculatorComputesGradient()
 	{
 		gradientCalculatorComputesGradient(new MLEGradientCalculator(7));
 	}
@@ -434,6 +437,49 @@ public class GradientCalculatorSpeedTest
 				//System.out.printf("[%d,%d] %f  (%f+/-%f)  %f  ?=  %f\n", i, j, s, a[j], d, beta[j], gradient);
 				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualComplement(beta[j], gradient));
 			}
+		}
+	}
+
+	@Test
+	public void mleGradientCalculatorComputesLikelihood()
+	{
+		//@formatter:off
+		NonLinearFunction func = new NonLinearFunction(){
+			double u;
+			public void initialise(double[] a) { u = a[0]; }
+			public int[] gradientIndices() { return null; }
+			public double eval(int x, double[] dyda)  { return 0; }
+			public double eval(int x) {
+				return u;
+			}
+			public double eval(int x, double[] dyda, double[] w) { return 0; }
+			public double evalw(int x, double[] w) { return 0; }
+			public boolean canComputeWeights() { return false; }};
+		//@formatter:on
+
+		int[] xx = Utils.newArray(100, 0, 1);
+		double[] xxx = Utils.newArray(100, 0, 1.0);
+		for (double u : new double[] { 0.79, 2.5, 5.32 })
+		{
+			double ll = 0;
+			PoissonDistribution pd = new PoissonDistribution(u);
+			for (int x : xx)
+			{
+				double o = MLEGradientCalculator.likelihood(u, x);
+				double e = pd.probability(x);
+				Assert.assertEquals("likelihood", e, o, e * 1e-10);
+
+				o = MLEGradientCalculator.logLikelihood(u, x);
+				e = pd.logProbability(x);
+				Assert.assertEquals("log likelihood", e, o, Math.abs(e) * 1e-10);
+
+				ll += e;
+			}
+
+			MLEGradientCalculator gc = new MLEGradientCalculator(1);
+			double o = gc.logLikelihood(xxx, new double[] { u }, func);
+			
+			Assert.assertEquals("sum log likelihood", ll, o, Math.abs(ll) * 1e-10);
 		}
 	}
 

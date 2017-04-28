@@ -1,5 +1,8 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
+import org.apache.commons.math3.special.Gamma;
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.smlm.function.NonLinearFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -720,5 +723,73 @@ public class MLEGradientCalculator extends GradientCalculator
 		for (int j = 0; j < nparams; j++)
 			df_da[j] *= 2;
 		return chisq * 2;
+	}
+
+	/**
+	 * Get the Poisson likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
+	 *
+	 * @param u
+	 *            the mean
+	 * @param x
+	 *            the x
+	 * @return the likelihood
+	 */
+	public static double likelihood(double u, double x)
+	{
+		if (x == 0)
+			return FastMath.exp(-u);
+		return Math.pow(u, x) * FastMath.exp(-u) / factorial(x);
+	}
+
+	private static double factorial(double k)
+	{
+		if (k <= 1)
+			return 1;
+		return Gamma.gamma(k + 1);
+	}
+
+	/**
+	 * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
+	 *
+	 * @param u
+	 *            the mean
+	 * @param x
+	 *            the x
+	 * @return the log likelihood
+	 */
+	public static double logLikelihood(double u, double x)
+	{
+		if (x == 0)
+			return -u;
+		return x * Math.log(u) - u - logFactorial(x);
+	}
+
+	private static double logFactorial(double k)
+	{
+		if (k <= 1)
+			return 0;
+		return Gamma.logGamma(k + 1);
+	}
+
+	/**
+	 * Compute the Poisson log likelihood for the data.
+	 *
+	 * @param x
+	 *            the data
+	 * @param a
+	 *            the parameters for the function
+	 * @param func
+	 *            the function (must evaluate to strictly positive for all the data points)
+	 * @return the Poisson log likelihood
+	 */
+	public double logLikelihood(final double[] x, final double[] a, final NonLinearFunction func)
+	{
+		double ll = 0;
+		func.initialise(a);
+		for (int i = 0; i < x.length; i++)
+		{
+			ll += logLikelihood(func.eval(i), x[i]);
+		}
+		return ll;
 	}
 }
