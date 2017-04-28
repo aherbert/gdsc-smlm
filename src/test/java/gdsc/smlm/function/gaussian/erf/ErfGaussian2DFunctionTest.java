@@ -231,6 +231,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		n--;
 		Assert.assertTrue("1 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
 	}
+	
+	// TODO - Test that the value and jacobian is correct since this is reimplemented 
 
 	// TODO - Computation of widths given z. This requires support for astigmatism.
 
