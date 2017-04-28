@@ -64,7 +64,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double xi = y[i];
 
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-			// effectively ignores the any function value below zero. This could lead to a 
+			// effectively ignores any function value below zero. This could lead to a 
 			// situation where the best chisq value can be achieved by setting the output
 			// function to produce 0 for all evaluations. To cope with this we heavily 
 			// penalise the chisq value. 
@@ -138,7 +138,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double xi = y[i];
 
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-			// effectively ignores the any function value below zero. This could lead to a 
+			// effectively ignores the function value below zero. This could lead to a 
 			// situation where the best chisq value can be achieved by setting the output
 			// function to produce 0 for all evaluations. To cope with this we heavily 
 			// penalise the chisq value. 
@@ -196,7 +196,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				final double xi = y[i];
 
 				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-				// effectively ignores the any function value below zero. This could lead to a 
+				// effectively ignores the function value below zero. This could lead to a 
 				// situation where the best chisq value can be achieved by setting the output
 				// function to produce 0 for all evaluations. To cope with this we heavily 
 				// penalise the chisq value. 
@@ -228,7 +228,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				final double xi = y[i];
 
 				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-				// effectively ignores the any function value below zero. This could lead to a 
+				// effectively ignores the function value below zero. This could lead to a 
 				// situation where the best chisq value can be achieved by setting the output
 				// function to produce 0 for all evaluations. To cope with this we heavily 
 				// penalise the chisq value. 
@@ -282,7 +282,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double xi = y[i];
 
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-			// effectively ignores the any function value below zero. This could lead to a 
+			// effectively ignores the function value below zero. This could lead to a 
 			// situation where the best chisq value can be achieved by setting the output
 			// function to produce 0 for all evaluations. To cope with this we heavily 
 			// penalise the chisq value. 
@@ -362,7 +362,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double xi = y[i];
 
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-			// effectively ignores the any function value below zero. This could lead to a 
+			// effectively ignores the function value below zero. This could lead to a 
 			// situation where the best chisq value can be achieved by setting the output
 			// function to produce 0 for all evaluations. To cope with this we heavily 
 			// penalise the chisq value. 
@@ -438,7 +438,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				final double xi = y[i];
 
 				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-				// effectively ignores the any function value below zero. This could lead to a 
+				// effectively ignores the function value below zero. This could lead to a 
 				// situation where the best chisq value can be achieved by setting the output
 				// function to produce 0 for all evaluations. To cope with this we heavily 
 				// penalise the chisq value. 
@@ -470,7 +470,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				final double xi = y[i];
 
 				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-				// effectively ignores the any function value below zero. This could lead to a 
+				// effectively ignores the function value below zero. This could lead to a 
 				// situation where the best chisq value can be achieved by setting the output
 				// function to produce 0 for all evaluations. To cope with this we heavily 
 				// penalise the chisq value. 
@@ -672,7 +672,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double xi = y[i];
 
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-			// effectively ignores the any function value below zero. This could lead to a 
+			// effectively ignores the function value below zero. This could lead to a 
 			// situation where the best chisq value can be achieved by setting the output
 			// function to produce 0 for all evaluations. To cope with this we heavily 
 			// penalise the chisq value. 
