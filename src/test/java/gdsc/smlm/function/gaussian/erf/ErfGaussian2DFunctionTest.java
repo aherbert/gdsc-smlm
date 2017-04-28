@@ -6,7 +6,6 @@ import org.junit.Test;
 import gdsc.core.ij.Utils;
 import gdsc.core.test.BaseTimingTask;
 import gdsc.core.test.TimingService;
-import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
@@ -81,7 +80,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		double[] a;
 
 		// Test fitting of second derivatives 
-		int flags = BitFlags.set(this.flags, GaussianFunctionFactory.FIT_2_DERIVATIVES);
+		int flags = this.flags| GaussianFunctionFactory.FIT_2_DERIVATIVES;
 		ErfGaussian2DFunction f1a = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
 		ErfGaussian2DFunction f1b = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
 		Statistics s = new Statistics();
@@ -128,6 +127,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 										double gradient = (value2 - value3) / (2 * h);
 										double error = DoubleEquality.relativeError(gradient, dyda2[gradientIndex]);
+										Assert.assertTrue(gradient + " sign != " + dyda2[gradientIndex],
+												(gradient * dyda2[gradientIndex]) >= 0);
 										s.add(error);
 										//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
 										//		gradientIndex, dyda2[gradientIndex], error);
@@ -199,7 +200,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		final ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) this.f1.create(2);
 		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1.create(1);
 		final ErfGaussian2DFunction f0 = (ErfGaussian2DFunction) this.f1.create(0);
-		int flags = BitFlags.unset(this.flags, GaussianFunctionFactory.FIT_ERF);
+		int flags = this.flags & ~GaussianFunctionFactory.FIT_ERF;
 		final Gaussian2DFunction gf = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
 
 		final TurboList<double[]> params = new TurboList<double[]>();

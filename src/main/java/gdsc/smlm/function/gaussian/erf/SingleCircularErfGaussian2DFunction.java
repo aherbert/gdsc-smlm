@@ -58,30 +58,30 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 	 */
 	public void initialise(double[] a)
 	{
-		I0 = a[Gaussian2DFunction.SIGNAL];
-		bg = a[Gaussian2DFunction.BACKGROUND];
+		tI = a[Gaussian2DFunction.SIGNAL];
+		tB = a[Gaussian2DFunction.BACKGROUND];
 		// Pre-compute the offset by 0.5
-		x0 = a[Gaussian2DFunction.X_POSITION] + 0.5;
-		y0 = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		sx0 = sy0 = a[Gaussian2DFunction.X_SD];
+		tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		tsx = tsy = a[Gaussian2DFunction.X_SD];
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
 
 		if (derivativeOrder == (byte) 2)
 		{
-			createSecondOrderTables(deltaEx, dudx, dudsx, d2udx2, d2udsx2, x0, sx0);
-			createSecondOrderTables(deltaEy, dudy, dudsy, d2udy2, d2udsy2, y0, sy0);
+			createSecondOrderTables(deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx, tsx);
+			createSecondOrderTables(deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, tsy);
 		}
 		else if (derivativeOrder == (byte) 1)
 		{
-			createFirstOrderTables(deltaEx, dudx, dudsx, x0, sx0);
-			createFirstOrderTables(deltaEy, dudy, dudsy, y0, sy0);
+			createFirstOrderTables(deltaEx, du_dtx, du_dtsx, tx, tsx);
+			createFirstOrderTables(deltaEy, du_dty, du_dtsy, ty, tsy);
 		}
 		else
 		{
-			createDeltaETable(deltaEx, x0, sx0);
-			createDeltaETable(deltaEy, y0, sy0);
+			createDeltaETable(deltaEx, tx, tsx);
+			createDeltaETable(deltaEy, ty, tsy);
 		}
 	}
 
@@ -100,7 +100,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		final int y = i / maxx;
 		final int x = i % maxx;
 
-		return bg + I0 * deltaEx[x] * deltaEy[y];
+		return tB + tI * deltaEx[x] * deltaEy[y];
 	}
 
 	/**
@@ -124,11 +124,11 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		// Use pre-computed gradients
 		duda[0] = 1.0;
 		duda[1] = deltaEx[x] * deltaEy[y];
-		duda[2] = dudx[x] * deltaEy[y];
-		duda[3] = dudy[y] * deltaEx[x];
-		duda[4] = dudsx[x] * deltaEy[y] + dudsy[y] * deltaEx[x];
+		duda[2] = du_dtx[x] * deltaEy[y];
+		duda[3] = du_dty[y] * deltaEx[x];
+		duda[4] = du_dtsx[x] * deltaEy[y] + du_dtsy[y] * deltaEx[x];
 
-		return bg + I0 * duda[1];
+		return tB + tI * duda[1];
 	}
 
 	/**
@@ -152,16 +152,18 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		// Use pre-computed gradients
 		duda[0] = 1.0;
 		duda[1] = deltaEx[x] * deltaEy[y];
-		duda[2] = dudx[x] * deltaEy[y];
-		duda[3] = dudy[y] * deltaEx[x];
-		duda[4] = dudsx[x] * deltaEy[y] + dudsy[y] * deltaEx[x];
+		duda[2] = du_dtx[x] * deltaEy[y];
+		duda[3] = du_dty[y] * deltaEx[x];
+		duda[4] = du_dtsx[x] * deltaEy[y] + du_dtsy[y] * deltaEx[x];
 		d2uda2[0] = 0;
 		d2uda2[1] = 0;
-		d2uda2[2] = d2udx2[x] * deltaEy[y];
-		d2uda2[3] = d2udy2[y] * deltaEx[x];
-		d2uda2[4] = d2udsx2[x] * deltaEy[y] + d2udsy2[y] * deltaEx[x];
+		d2uda2[2] = d2u_dtx2[x] * deltaEy[y];
+		d2uda2[3] = d2u_dty2[y] * deltaEx[x];
+		// Working  example of this in GraspJ source code:
+		// https://github.com/isman7/graspj/blob/master/graspj/src/main/java/eu/brede/graspj/opencl/src/functions/psfmodel_derivatives_sigma.cl
+		d2uda2[4] = (d2u_dtsx2[x] * deltaEy[y] + d2u_dtsy2[y] * deltaEx[x] + 2 * du_dtsx[x] * du_dtsy[y] / tI);
 
-		return bg + I0 * duda[1];
+		return tB + tI * duda[1];
 	}
 
 	// Support for ExtendedNonLinear Function. This can take advantage of x/y iteration.
@@ -175,17 +177,17 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 		for (int y = 0, i = 0; y < maxy; y++)
 		{
-			final double dudy = this.dudy[y];
+			final double dudy = this.du_dty[y];
 			final double deltaEy = this.deltaEy[y];
-			final double dudsy = this.dudsy[y];
+			final double dudsy = this.du_dtsy[y];
 			for (int x = 0; x < maxx; x++, i++)
 			{
 				final double[] duda = new double[variables.length];
 				duda[0] = 1.0;
 				duda[1] = deltaEx[x] * deltaEy;
-				duda[2] = dudx[x] * deltaEy;
+				duda[2] = du_dtx[x] * deltaEy;
 				duda[3] = dudy * deltaEx[x];
-				duda[4] = dudsx[x] * deltaEy + dudsy * deltaEx[x];
+				duda[4] = du_dtsx[x] * deltaEy + dudsy * deltaEx[x];
 				jacobian[i] = duda;
 			}
 		}
@@ -205,18 +207,18 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 		for (int y = 0, i = 0; y < maxy; y++)
 		{
-			final double dudy = this.dudy[y];
+			final double dudy = this.du_dty[y];
 			final double deltaEy = this.deltaEy[y];
-			final double dudsy = this.dudsy[y];
+			final double dudsy = this.du_dtsy[y];
 			for (int x = 0; x < maxx; x++, i++)
 			{
 				final double[] duda = new double[variables.length];
 				duda[0] = 1.0;
 				duda[1] = deltaEx[x] * deltaEy;
-				duda[2] = dudx[x] * deltaEy;
+				duda[2] = du_dtx[x] * deltaEy;
 				duda[3] = dudy * deltaEx[x];
-				duda[4] = dudsx[x] * deltaEy + dudsy * deltaEx[x];
-				values[i] = bg + I0 * duda[1];
+				duda[4] = du_dtsx[x] * deltaEy + dudsy * deltaEx[x];
+				values[i] = tB + tI * duda[1];
 				jacobian[i] = duda;
 			}
 		}

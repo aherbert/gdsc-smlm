@@ -21,7 +21,7 @@ public abstract class Gaussian2DFunctionTest
 	// Step size for derivatives:
 	// h ~ (Ef)^(1/3) * xc
 	// xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x is close to zero)
-	protected double h_ = 0.01; //(double) (Math.pow(1e-3f, 1.0 / 3));
+	protected double h_ = 0.0001; //(double) (Math.pow(1e-3f, 1.0 / 3));
 
 	protected int[] testx = new int[] { 4, 5, 6 };
 	protected int[] testy = new int[] { 4, 5, 6 };
@@ -279,6 +279,8 @@ public abstract class Gaussian2DFunctionTest
 										double gradient = (value2 - value3) / (2 * h);
 										double error = DoubleEquality.relativeError(gradient, dyda2[gradientIndex]);
 										s.add(error);
+										Assert.assertTrue(gradient + " sign != " + dyda2[gradientIndex],
+												(gradient * dyda2[gradientIndex]) >= 0);
 										//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
 										//		gradientIndex, dyda2[gradientIndex], error);
 										//System.out.printf("[%d,%d] %f == [%d] %f?\n", x, y, gradient, gradientIndex, dyda[gradientIndex]);
@@ -477,6 +479,8 @@ public abstract class Gaussian2DFunctionTest
 															double value3 = f2b.eval(i, dyda2);
 
 															double gradient = (value2 - value3) / (2 * h);
+															Assert.assertTrue(gradient + " sign != " + dyda2[gradientIndex],
+																	(gradient * dyda2[gradientIndex]) >= 0);
 															Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
 																	eq.almostEqualComplement(gradient,
 																			dyda[gradientIndex]));
