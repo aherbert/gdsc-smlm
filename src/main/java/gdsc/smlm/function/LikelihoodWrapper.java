@@ -212,7 +212,7 @@ public abstract class LikelihoodWrapper
 	 * @return True if the likelihood function can compute gradients
 	 */
 	public abstract boolean canComputeGradient();
-	
+
 	/**
 	 * Compute the Fisher's Information Matrix (I) for fitted variables.
 	 * 
@@ -261,8 +261,8 @@ public abstract class LikelihoodWrapper
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
-	 * Fisher's Information Matrix (I).
+	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
+	 * inverted Fisher's Information Matrix (I).
 	 * 
 	 * The information matrix is inverted and the central diagonal returned.
 	 * 
@@ -276,8 +276,8 @@ public abstract class LikelihoodWrapper
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
-	 * Fisher's Information Matrix (I).
+	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
+	 * inverted Fisher's Information Matrix (I).
 	 * 
 	 * The information matrix is inverted and the central diagonal returned. If the inversion fails then the routine
 	 * optionally returns the reciprocal of the diagonal element to find a (possibly loose) lower bound.

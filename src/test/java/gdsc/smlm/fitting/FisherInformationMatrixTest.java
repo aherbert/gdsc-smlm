@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -9,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -68,7 +70,58 @@ public class FisherInformationMatrixTest
 			System.out.printf("%s =? %s\n", Arrays.toString(crlb), Arrays.toString(crlb2));
 		}
 	}
-	
+
+	@Test
+	public void directInversionIsFaster()
+	{
+		directInversionIsFaster(4);
+		directInversionIsFaster(3);
+		directInversionIsFaster(2);
+	}
+
+	private void directInversionIsFaster(int size)
+	{
+		FisherInformationMatrix m = createFisherInformationMatrix(size, 0);
+
+		int n = 20000;
+		ArrayList<double[][]> data = new ArrayList<double[][]>(n);
+		for (int i = 0; i < n; i++)
+			data.add(m.getMatrix());
+		double[][] m2 = m.getMatrix();
+
+		final EJMLLinearSolver solver = new EJMLLinearSolver();
+		long t1 = System.nanoTime();
+		for (int i = 0; i < n; i++)
+			solver.invertSymmPosDef(data.get(i));
+		t1 = System.nanoTime() - t1;
+
+		// Warm-up
+		for (int i = 0; i < n; i++)
+		{
+			if (size == 3)
+				FisherInformationMatrix.computeCRLB3(m2);
+			else if (size == 4)
+				FisherInformationMatrix.computeCRLB4(m2);
+			else if (size == 2)
+				FisherInformationMatrix.computeCRLB2(m2);
+		}
+		
+		long t2 = System.nanoTime();
+		for (int i = 0; i < n; i++)
+		{
+			if (size == 3)
+				FisherInformationMatrix.computeCRLB3(m2);
+			else if (size == 4)
+				FisherInformationMatrix.computeCRLB4(m2);
+			else if (size == 2)
+				FisherInformationMatrix.computeCRLB2(m2);
+		}
+		t2 = System.nanoTime() - t2;
+
+		System.out.printf("Direct inversion [%d]  %fx\n", size, (double) t1 / t2);
+		Assert.assertTrue("Direct inversion " + size, t2 < t1);
+	}
+
 	private double[] canComputeCRLB(int n, int k, boolean invert)
 	{
 		FisherInformationMatrix m = createFisherInformationMatrix(n, k);
@@ -79,7 +132,7 @@ public class FisherInformationMatrixTest
 		Assert.assertNotNull("CRLB failed", crlb);
 		return crlb;
 	}
-	
+
 	private FisherInformationMatrix createFisherInformationMatrix(int n, int k)
 	{
 		int maxx = 10;
@@ -92,7 +145,8 @@ public class FisherInformationMatrixTest
 		int npeaks = 1;
 		while (1 + npeaks * 6 < n)
 			npeaks++;
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxx,
+				GaussianFunctionFactory.FIT_ELLIPTICAL);
 
 		double[] a = new double[1 + npeaks * 6];
 		a[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(1, 5);
@@ -100,8 +154,9 @@ public class FisherInformationMatrixTest
 		{
 			a[j + Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
 			a[j + Gaussian2DFunction.SHAPE] = rdg.nextUniform(-Math.PI, Math.PI);
-			a[j + Gaussian2DFunction.X_POSITION] = rdg.nextUniform(4, 6);
-			a[j + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(4, 6);
+			// Non-overlapping peaks otherwise the CRLB are poor
+			a[j + Gaussian2DFunction.X_POSITION] = rdg.nextUniform(2 + i * 2, 4 + i * 2);
+			a[j + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(2 + i * 2, 4 + i * 2);
 			a[j + Gaussian2DFunction.X_SD] = rdg.nextUniform(1.5, 2);
 			a[j + Gaussian2DFunction.Y_SD] = rdg.nextUniform(1.5, 2);
 		}
@@ -140,7 +195,7 @@ public class FisherInformationMatrixTest
 		FisherInformationMatrix m = new FisherInformationMatrix(I);
 		DoubleEquality eq = new DoubleEquality(3, 1e-6);
 		m.setEqual(eq);
-		
+
 		return m;
 	}
 

@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.Maths;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 
 /*----------------------------------------------------------------------------- 
@@ -28,7 +29,7 @@ public class FisherInformationMatrix
 
 	private final double[][] m;
 	private final int n;
-	private double[][] m_inv = null;
+	private double[] crlb = null;
 	private byte inverted = UNKNOWN;
 	private DoubleEquality equal = null;
 
@@ -49,27 +50,204 @@ public class FisherInformationMatrix
 		if (inverted != UNKNOWN)
 			return;
 
+		if (n == 0)
+		{
+			// Nothing to do
+			crlb = new double[0];
+			inverted = YES;
+			return;
+		}
+
 		inverted = NO;
 
-		m_inv = new double[n][];
-		for (int i = n; i-- > 0;)
-			m_inv[i] = m[i].clone();
+		if (n < 5)
+		{
+			// We could solve this without linear algebra...
+			// Look for zero columns since the EJMLLinearSolver will handle those 
+			boolean ok = true;
+			OUTER: for (int i = 0; i < n; i++)
+			{
+				if (m[i][i] == 0)
+				{
+					// Check row and column
+					for (int j = 0; j < n; j++)
+					{
+						if (m[i][j] != 0 || m[j][i] != 0)
+							continue OUTER;
+					}
+					ok = false;
+					break;
+				}
+			}
+			if (ok)
+			{
+				// Most likely to be used with larger matrices
+				if (n == 4)
+				{
+					crlb = computeCRLB4(m);
+					if (crlb != null)
+						inverted = YES;
+					return;
+				}
+				if (n == 3)
+				{
+					crlb = computeCRLB3(m);
+					if (crlb != null)
+						inverted = YES;
+					return;
+				}
+				if (n == 2)
+				{
+					crlb = computeCRLB2(m);
+					if (crlb != null)
+						inverted = YES;
+					return;
+				}
+				if (n == 1)
+				{
+					if (m[0][0] != 0)
+					{
+						crlb = new double[] { 1.0 / m[0][0] };
+						inverted = YES;
+					}
+					return;
+				}
+			}
+		}
+
+		// Matrix inversion
+		double[][] m_inv = getMatrix();
+
 		EJMLLinearSolver solver = new EJMLLinearSolver();
 		solver.setEqual(equal);
 		if (solver.invertSymmPosDef(m_inv))
 		{
 			// Check all diagonal values are zero or above
+			double[] crlb = new double[n];
 			for (int i = n; i-- > 0;)
+			{
 				if (m_inv[i][i] < 0)
 					return;
+				crlb[i] = Math.sqrt(m_inv[i][i]);
+			}
 
 			inverted = YES;
+			this.crlb = crlb;
 		}
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
-	 * Fisher information matrix.
+	 * Compute CRLB of the Fisher Information matrix by direct matrix inversion of a 2x2 matrix.
+	 *
+	 * @param m
+	 *            the matrix
+	 * @return the CRLB (or null if the determinant is zero)
+	 */
+	public static double[] computeCRLB2(double[][] m)
+	{
+		// https://en.wikipedia.org/wiki/Determinant		
+		double a = m[0][0];
+		double b = m[0][1];
+		double c = m[1][0];
+		double d = m[1][1];
+
+		double det = a * d - b * c;
+
+		double det_recip = 1.0 / det;
+
+		if (!Maths.isFinite(det_recip))
+			return null;
+		//@formatter:off
+		return new double[] {
+			det_recip * d,
+			det_recip * a
+		};
+		//@formatter:on
+	}
+
+	/**
+	 * Compute CRLB of the Fisher Information matrix by direct matrix inversion of a 3x3 matrix.
+	 *
+	 * @param m
+	 *            the matrix
+	 * @return the CRLB (or null if the determinant is zero)
+	 */
+	public static double[] computeCRLB3(double[][] m)
+	{
+		// https://en.wikipedia.org/wiki/Determinant		
+		double a = m[0][0];
+		double b = m[0][1];
+		double c = m[0][2];
+		double d = m[1][0];
+		double e = m[1][1];
+		double f = m[1][2];
+		double g = m[2][0];
+		double h = m[2][1];
+		double i = m[2][2];
+
+		double A = (e * i - f * h);
+		double B = -(d * i - f * g);
+		double C = (d * h - e * g);
+
+		double det = a * A + b * B + c * C;
+
+		double det_recip = 1.0 / det;
+
+		if (!Maths.isFinite(det_recip))
+			return null;
+		//@formatter:off
+		return new double[] {
+			det_recip * A,
+			det_recip * (a * i - c * g),
+			det_recip * (a * e - b * d)
+		};
+		//@formatter:on
+	}
+
+	/**
+	 * Compute CRLB of the Fisher Information matrix by direct matrix inversion of a 4x4 matrix.
+	 *
+	 * @param m
+	 *            the matrix
+	 * @return the CRLB (or null if the determinant is zero)
+	 */
+	public static double[] computeCRLB4(double[][] m)
+	{
+		// Adapted from GraspJ:
+		// https://github.com/isman7/graspj/blob/master/graspj/src/main/java/eu/brede/graspj/opencl/src/functions/CRLB_from_fisher_matrix_4x4.cl
+
+		double a0 = m[0][0] * m[1][1] - m[0][1] * m[1][0];
+		double a1 = m[0][0] * m[1][2] - m[0][2] * m[1][0];
+		double a2 = m[0][0] * m[1][3] - m[0][3] * m[1][0];
+		double a3 = m[0][1] * m[1][2] - m[0][2] * m[1][1];
+		double a4 = m[0][1] * m[1][3] - m[0][3] * m[1][1];
+		double a5 = m[0][2] * m[1][3] - m[0][3] * m[1][2];
+		double b0 = m[2][0] * m[3][1] - m[2][1] * m[3][0];
+		double b1 = m[2][0] * m[3][2] - m[2][2] * m[3][0];
+		double b2 = m[2][0] * m[3][3] - m[2][3] * m[3][0];
+		double b3 = m[2][1] * m[3][2] - m[2][2] * m[3][1];
+		double b4 = m[2][1] * m[3][3] - m[2][3] * m[3][1];
+		double b5 = m[2][2] * m[3][3] - m[2][3] * m[3][2];
+
+		double det = a0 * b5 - a1 * b4 + a2 * b3 + a3 * b2 - a4 * b1 + a5 * b0;
+
+		double det_recip = 1.0 / det;
+
+		if (!Maths.isFinite(det_recip))
+			return null;
+		//@formatter:off
+		return new double[] {
+			det_recip * (m[1][1] * b5 - m[1][2] * b4 + m[1][3] * b3),
+			det_recip * (m[0][0] * b5 - m[0][2] * b2 + m[0][3] * b1),
+			det_recip * (m[3][0] * a4 - m[3][1] * a2 + m[3][3] * a0),
+			det_recip * (m[2][0] * a3 - m[2][1] * a1 + m[2][2] * a0)
+		};
+		//@formatter:on
+	}
+
+	/**
+	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
+	 * inverted Fisher information matrix.
 	 * <p>
 	 * The information matrix is inverted and the square root of the central diagonal returned.
 	 * 
@@ -81,8 +259,8 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
-	 * Fisher information matrix.
+	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
+	 * inverted Fisher information matrix.
 	 * <p>
 	 * The information matrix is inverted and the square root of the central diagonal returned. If the inversion fails
 	 * then the routine optionally returns the square root of the reciprocal of the diagonal element to find a (possibly
@@ -98,9 +276,6 @@ public class FisherInformationMatrix
 
 		if (inverted == YES)
 		{
-			final double[] crlb = new double[n];
-			for (int i = n; i-- > 0;)
-				crlb[i] = Math.sqrt(m_inv[i][i]);
 			return crlb;
 		}
 
@@ -113,8 +288,8 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the central diagonal of
-	 * the Fisher information matrix.
+	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of the central
+	 * diagonal of the Fisher information matrix.
 	 * 
 	 * The information matrix is NOT inverted. The square root of the reciprocal of the central diagonal returned for a
 	 * (possibly loose) lower bound.
@@ -125,16 +300,79 @@ public class FisherInformationMatrix
 	{
 		final double[] crlb = new double[n];
 		for (int i = 0; i < n; i++)
-			crlb[i] = reciprocalSqrt(m[i][i]);
+			crlb[i] = reciprocal(m[i][i]);
 		return crlb;
+	}
+
+	/**
+	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
+	 * Fisher information matrix.
+	 * <p>
+	 * The information matrix is inverted and the square root of the central diagonal returned.
+	 * 
+	 * @return CRLB (or null if inversion failed)
+	 */
+	public double[] crlbSqrt()
+	{
+		return crlbSqrt(false);
+	}
+
+	/**
+	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
+	 * Fisher information matrix.
+	 * <p>
+	 * The information matrix is inverted and the square root of the central diagonal returned. If the inversion fails
+	 * then the routine optionally returns the square root of the reciprocal of the diagonal element to find a (possibly
+	 * loose) lower bound.
+	 *
+	 * @param allowReciprocal
+	 *            the allow reciprocal flag
+	 * @return CRLB (or null if inversion failed and the reciprocal is not used)
+	 */
+	public double[] crlbSqrt(boolean allowReciprocal)
+	{
+		invert();
+
+		if (inverted == YES)
+		{
+			final double[] crlb = new double[n];
+			for (int i = 0; i < n; i++)
+				crlb[i] = Math.sqrt(this.crlb[i]);
+			return crlb;
+		}
+
+		if (allowReciprocal)
+		{
+			return crlbReciprocalSqrt();
+		}
+
+		return null;
 	}
 
 	/**
 	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the central diagonal of
 	 * the Fisher information matrix.
 	 * 
-	 * The information matrix is NOT inverted. The square root of the reciprocal of the central diagonal returned for a
+	 * The information matrix is NOT inverted. Uses the square root of the reciprocal of the central diagonal returned
+	 * for a
 	 * (possibly loose) lower bound.
+	 *
+	 * @return CRLB (or null if inversion failed)
+	 */
+	public double[] crlbReciprocalSqrt()
+	{
+		final double[] crlb = new double[n];
+		for (int i = 0; i < n; i++)
+			crlb[i] = reciprocalSqrt(m[i][i]);
+		return crlb;
+	}
+
+	/**
+	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of the central
+	 * diagonal of the Fisher information matrix.
+	 * 
+	 * The information matrix is NOT inverted. Uses the reciprocal of the central diagonal returned for a (possibly
+	 * loose) lower bound.
 	 *
 	 * @param m
 	 *            the fisher information matrix
@@ -145,8 +383,46 @@ public class FisherInformationMatrix
 		int n = m.length;
 		final double[] crlb = new double[n];
 		for (int i = 0; i < n; i++)
+			crlb[i] = reciprocal(m[i][i]);
+		return crlb;
+	}
+
+	/**
+	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the central
+	 * diagonal of the Fisher information matrix.
+	 * 
+	 * The information matrix is NOT inverted. Uses the square root of the reciprocal of the central diagonal returned
+	 * for a (possibly loose) lower bound.
+	 *
+	 * @param m
+	 *            the fisher information matrix
+	 * @return CRLB
+	 */
+	public static double[] crlbReciprocalSqrt(double[][] m)
+	{
+		int n = m.length;
+		final double[] crlb = new double[n];
+		for (int i = 0; i < n; i++)
 			crlb[i] = reciprocalSqrt(m[i][i]);
 		return crlb;
+	}
+
+	/**
+	 * Return the reciprocal of the input. If the number is not strictly positive then zero is
+	 * returned. Note that zero can only be returned if there was no Fisher information. This is done to match the
+	 * return value from matrix inversion when there is no Fisher information for a parameter i within the matrix. In
+	 * that case the zero column and row is removed from the matrix before inversion and the inverted matrix contains
+	 * zeros.
+	 * <p>
+	 * The reciprocal of the diagonal element of the Fisher information matrix is a (possibly loose) lower bound.
+	 *
+	 * @param d
+	 *            the input value
+	 * @return the reciprocal of the square root of the input value
+	 */
+	public static double reciprocal(double d)
+	{
+		return (d > 0) ? 1.0 / d : 0;
 	}
 
 	/**
@@ -156,7 +432,8 @@ public class FisherInformationMatrix
 	 * that case the zero column and row is removed from the matrix before inversion and the inverted matrix contains
 	 * zeros.
 	 * <p>
-	 * The reciprocal of the diagonal element of the Fisher information matrix is a (possibly loose) lower bound.
+	 * The square root of the reciprocal of the diagonal element of the Fisher information matrix is a (possibly loose)
+	 * lower bound.
 	 *
 	 * @param d
 	 *            the input value
@@ -182,5 +459,18 @@ public class FisherInformationMatrix
 	public DoubleEquality getEqual()
 	{
 		return equal;
+	}
+
+	/**
+	 * Gets a copy of the matrix.
+	 *
+	 * @return the matrix
+	 */
+	public double[][] getMatrix()
+	{
+		double[][] m2 = new double[n][];
+		for (int i = n; i-- > 0;)
+			m2[i] = m[i].clone();
+		return m2;
 	}
 }
