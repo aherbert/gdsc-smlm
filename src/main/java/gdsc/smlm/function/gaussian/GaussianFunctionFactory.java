@@ -3,6 +3,7 @@ package gdsc.smlm.function.gaussian;
 import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.SingleZCircularErfGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -27,6 +28,7 @@ public class GaussianFunctionFactory
 	public static final int FIT_X_WIDTH = 0x00000004;
 	public static final int FIT_Y_WIDTH = 0x00000008;
 	public static final int FIT_SIGNAL = 0x00000010;
+	public static final int FIT_Z = 0x00000020;
 
 	public static final int FIT_ELLIPTICAL = FIT_BACKGROUND | FIT_ANGLE | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
 	public static final int FIT_FREE_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
@@ -44,18 +46,19 @@ public class GaussianFunctionFactory
 
 	// Flags to specify which derivatives to compute. 
 	// If absent the function will be able to compute the 1st derivatives.
-	public static final int FIT_0_DERIVATIVES = 0x00000020;
-	public static final int FIT_2_DERIVATIVES = 0x00000040;
+	public static final int FIT_0_DERIVATIVES = 0x00000040;
+	public static final int FIT_2_DERIVATIVES = 0x00000080;
 
 	// Flags for ERF Gaussian functions
 	public static final int FIT_ERF = 0x00000100;
 	public static final int FIT_ERF_FREE_CIRCLE = FIT_FREE_CIRCLE | FIT_ERF;
 	public static final int FIT_ERF_CIRCLE = FIT_CIRCLE | FIT_ERF;
 	public static final int FIT_ERF_FIXED = FIT_FIXED | FIT_ERF;
+	public static final int FIT_ERF_Z_CIRCLE = FIT_BACKGROUND | FIT_Z | FIT_SIGNAL | FIT_ERF;
 
 	/**
-	 * Create the correct 2D Gaussian function for the specified parameters
-	 * 
+	 * Create the correct 2D Gaussian function for the specified parameters.
+	 *
 	 * @param nPeaks
 	 *            The number of peaks (N)
 	 * @param maxx
@@ -64,9 +67,11 @@ public class GaussianFunctionFactory
 	 *            The maximum Y-dimension
 	 * @param flags
 	 *            Enable all the parameters that should evaluate gradient
+	 * @param zModel
+	 *            the z model
 	 * @return The function
 	 */
-	public static Gaussian2DFunction create2D(int nPeaks, int maxx, int maxy, int flags)
+	public static Gaussian2DFunction create2D(int nPeaks, int maxx, int maxy, int flags, AstimatismZModel zModel)
 	{
 		if ((flags & FIT_ERF) == FIT_ERF)
 		{
@@ -86,12 +91,12 @@ public class GaussianFunctionFactory
 					// Combined X/Y width
 					if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
 						return new SingleCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+					// Z-depth function
+					if ((flags & FIT_Z) == FIT_Z)
+						return new SingleZCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
 					// Fixed width
 					if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
 						return new SingleFixedErfGaussian2DFunction(maxx, maxy, derivativeOrder);
-					
-					// TODO
-					// z-depth function
 				}
 			}
 			else

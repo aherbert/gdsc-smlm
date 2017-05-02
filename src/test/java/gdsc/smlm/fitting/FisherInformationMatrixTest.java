@@ -146,7 +146,7 @@ public class FisherInformationMatrixTest
 		while (1 + npeaks * 6 < n)
 			npeaks++;
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxx,
-				GaussianFunctionFactory.FIT_ELLIPTICAL);
+				GaussianFunctionFactory.FIT_ELLIPTICAL, null);
 
 		double[] a = new double[1 + npeaks * 6];
 		a[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(1, 5);

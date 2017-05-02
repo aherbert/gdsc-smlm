@@ -20,7 +20,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		super();
 		// Test fitting of second derivatives 
 		//flags |= GaussianFunctionFactory.FIT_2_DERIVATIVES;
-		
+
 		// The derivative check can be tighter with the ERF since it is a true integration
 		h_ = 0.0001;
 	}
@@ -39,12 +39,12 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			functionComputesSecondTargetGradient(Gaussian2DFunction.SIGNAL);
 	}
 
-	//@Test
-	//public void functionComputesSecondShapeGradient()
-	//{
-	//	if (f1.evaluatesShape())
-	//		functionComputesSecondTargetGradient(Gaussian2DFunction.SHAPE);
-	//}
+	@Test
+	public void functionComputesSecondShapeGradient()
+	{
+		if (f1.evaluatesShape())
+			functionComputesSecondTargetGradient(Gaussian2DFunction.SHAPE);
+	}
 
 	@Test
 	public void functionComputesSecondXGradient()
@@ -80,9 +80,11 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		double[] a;
 
 		// Test fitting of second derivatives 
-		int flags = this.flags| GaussianFunctionFactory.FIT_2_DERIVATIVES;
-		ErfGaussian2DFunction f1a = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
-		ErfGaussian2DFunction f1b = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
+		int flags = this.flags | GaussianFunctionFactory.FIT_2_DERIVATIVES;
+		ErfGaussian2DFunction f1a = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, maxx, maxx, flags,
+				zModel);
+		ErfGaussian2DFunction f1b = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, maxx, maxx, flags,
+				zModel);
 		Statistics s = new Statistics();
 
 		for (double background : testbackground)
@@ -127,13 +129,13 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 										double gradient = (value2 - value3) / (2 * h);
 										double error = DoubleEquality.relativeError(gradient, dyda2[gradientIndex]);
+										s.add(error);
 										Assert.assertTrue(gradient + " sign != " + dyda2[gradientIndex],
 												(gradient * dyda2[gradientIndex]) >= 0);
-										s.add(error);
 										//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
 										//		gradientIndex, dyda2[gradientIndex], error);
-										//Assert.assertTrue(gradient + " != " + dyda2[gradientIndex],
-										//		eq.almostEqualComplement(gradient, dyda2[gradientIndex]));
+										Assert.assertTrue(gradient + " != " + dyda2[gradientIndex],
+												eq.almostEqualComplement(gradient, dyda2[gradientIndex]));
 									}
 							}
 		System.out.printf("functionComputesSecondTargetGradient %s %s (error %s +/- %s)\n",
@@ -201,7 +203,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1.create(1);
 		final ErfGaussian2DFunction f0 = (ErfGaussian2DFunction) this.f1.create(0);
 		int flags = this.flags & ~GaussianFunctionFactory.FIT_ERF;
-		final Gaussian2DFunction gf = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
+		final Gaussian2DFunction gf = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, zModel);
 
 		final TurboList<double[]> params = new TurboList<double[]>();
 		for (double background : testbackground)
@@ -231,7 +233,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		n--;
 		Assert.assertTrue("1 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
 	}
-	
+
 	// TODO - Test that the value and jacobian is correct since this is reimplemented 
 
 	// TODO - Computation of widths given z. This requires support for astigmatism.

@@ -46,6 +46,7 @@ public abstract class Gaussian2DFunctionTest
 	protected Gaussian2DFunction f1;
 	protected Gaussian2DFunction f2 = null;
 	protected int flags;
+	protected AstimatismZModel zModel = null;
 
 	public Gaussian2DFunctionTest()
 	{
@@ -92,12 +93,16 @@ public abstract class Gaussian2DFunctionTest
 				testw2[i][1] = testw2[i][0];
 			}
 		}
+		
+		postInit();
 	}
 
 	/**
 	 * Create the Gaussian2DFunction for 1 and 2 peaks. Creates the flags for the factory
 	 */
 	protected abstract void init();
+	
+	protected void postInit(){}
 
 	@Test
 	public void functionCreatesCorrectGradientIndices()
@@ -144,12 +149,12 @@ public abstract class Gaussian2DFunctionTest
 
 		if (f2 != null)
 		{
-			f = GaussianFunctionFactory.create2D(2, maxx, maxx, flags);
+			f = GaussianFunctionFactory.create2D(2, maxx, maxx, flags, zModel);
 			Assert.assertTrue("Incorrect function2", f.getClass() == f2.getClass());
 		}
 		else
 		{
-			f = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
+			f = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, zModel);
 			Assert.assertTrue("Incorrect function1", f.getClass() == f1.getClass());
 		}
 	}
@@ -234,8 +239,8 @@ public abstract class Gaussian2DFunctionTest
 		double[] dyda2 = new double[dyda.length];
 		double[] a;
 
-		Gaussian2DFunction f1a = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
-		Gaussian2DFunction f1b = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
+		Gaussian2DFunction f1a = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, zModel);
+		Gaussian2DFunction f1b = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, zModel);
 		Statistics s = new Statistics();
 
 		for (double background : testbackground)
@@ -288,9 +293,8 @@ public abstract class Gaussian2DFunctionTest
 												eq.almostEqualComplement(gradient, dyda[gradientIndex]));
 									}
 							}
-		System.out.printf("functionComputesTargetGradient %s %s (error %s +/- %s)\n",
-				f1.getClass().getSimpleName(), f1.getName(targetParameter), Utils.rounded(s.getMean()),
-				Utils.rounded(s.getStandardDeviation()));
+		System.out.printf("functionComputesTargetGradient %s %s (error %s +/- %s)\n", f1.getClass().getSimpleName(),
+				f1.getName(targetParameter), Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
 	}
 
 	protected int findGradientIndex(Gaussian2DFunction f, int targetParameter)
@@ -427,8 +431,8 @@ public abstract class Gaussian2DFunctionTest
 		double[] dyda2 = new double[dyda.length];
 		double[] a;
 
-		Gaussian2DFunction f2a = GaussianFunctionFactory.create2D(2, maxx, maxx, flags);
-		Gaussian2DFunction f2b = GaussianFunctionFactory.create2D(2, maxx, maxx, flags);
+		Gaussian2DFunction f2a = GaussianFunctionFactory.create2D(2, maxx, maxx, flags, zModel);
+		Gaussian2DFunction f2b = GaussianFunctionFactory.create2D(2, maxx, maxx, flags, zModel);
 
 		for (double background : testbackground)
 			// Peak 1
@@ -473,13 +477,14 @@ public abstract class Gaussian2DFunctionTest
 													for (int x : testx)
 														for (int y : testy)
 														{
-															int i= y * maxx + x;
+															int i = y * maxx + x;
 															f2.eval(i, dyda);
 															double value2 = f2a.eval(i, dyda2);
 															double value3 = f2b.eval(i, dyda2);
 
 															double gradient = (value2 - value3) / (2 * h);
-															Assert.assertTrue(gradient + " sign != " + dyda2[gradientIndex],
+															Assert.assertTrue(
+																	gradient + " sign != " + dyda2[gradientIndex],
 																	(gradient * dyda2[gradientIndex]) >= 0);
 															Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
 																	eq.almostEqualComplement(gradient,
@@ -499,12 +504,14 @@ public abstract class Gaussian2DFunctionTest
 		double background = 0;
 		int maxx = 30;
 
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, zModel);
 		Gaussian2DFunction f2;
 		if ((flags & GaussianFunctionFactory.FIT_ERF) == 0)
-			f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
+			f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL, zModel);
 		else
-			f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
+			f2 = GaussianFunctionFactory.create2D(1, maxx, maxx, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, zModel);
+
+		boolean zDepth = (flags & GaussianFunctionFactory.FIT_Z) != 0;
 
 		for (double amplitude1 : testamplitude1)
 			for (double shape1 : testshape1)
@@ -515,6 +522,13 @@ public abstract class Gaussian2DFunctionTest
 							double[] a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
 
 							f.initialise(a);
+							if (zDepth)
+							{
+								// Change to a standard free circular function
+								a[Gaussian2DFunction.X_SD] *= zModel.getSx(a[Gaussian2DFunction.SHAPE]);
+								a[Gaussian2DFunction.Y_SD] *= zModel.getSy(a[Gaussian2DFunction.SHAPE]);
+								a[Gaussian2DFunction.SHAPE] = 0;
+							}
 							f2.initialise(a);
 							double sum = 0;
 							for (int index = maxx * maxx; index-- > 0;)

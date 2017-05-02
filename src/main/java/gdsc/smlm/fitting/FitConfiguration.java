@@ -249,7 +249,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	{
 		final int flags = getFunctionFlags();
 
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxy, flags);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxy, flags, null);
 		//f.initialise(params);
 		return f;
 	}

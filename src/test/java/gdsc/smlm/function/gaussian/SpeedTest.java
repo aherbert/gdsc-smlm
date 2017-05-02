@@ -207,8 +207,8 @@ public class SpeedTest
 		ArrayList<double[]> paramsList2 = (npeaks == 1) ? copyList(paramsListSinglePeak, iter)
 				: copyList(paramsListDoublePeak, iter);
 
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags1);
-		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags2);
+		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags1, null);
+		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags2, null);
 
 		double[] dyda1 = new double[1 + npeaks * 6];
 		double[] dyda2 = new double[1 + npeaks * 6];
@@ -256,8 +256,8 @@ public class SpeedTest
 		ArrayList<double[]> paramsList2 = (npeaks == 1) ? paramsListSinglePeak : paramsListDoublePeak;
 
 		// Use the full list of parameters to build the functions
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags1);
-		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags2);
+		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags1, null);
+		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags2, null);
 
 		double[] dyda = new double[1 + npeaks * 6];
 

@@ -36,6 +36,7 @@ public class GaussianOverlapAnalysis
 	}
 
 	private final int flags;
+	private final AstimatismZModel zModel;
 	private final double[] params0;
 	private final double range;
 
@@ -55,14 +56,19 @@ public class GaussianOverlapAnalysis
 	 * @param range
 	 *            The range over which to compute the function (factor of the standard deviation)
 	 */
-	public GaussianOverlapAnalysis(int flags, double[] params, double range)
+	public GaussianOverlapAnalysis(int flags, AstimatismZModel zModel, double[] params, double range)
 	{
 		this.flags = flags;
+		this.zModel = zModel;
 		this.params0 = params.clone();
 		this.range = range;
 
-		maxx = 2 * ((int) Math.ceil(params[Gaussian2DFunction.X_SD] * range)) + 1;
-		maxy = 2 * ((int) Math.ceil(params[Gaussian2DFunction.Y_SD] * range)) + 1;
+		double sx = (params[Gaussian2DFunction.X_SD] == 0) ? 1 : params[Gaussian2DFunction.X_SD];
+		double sy = (params[Gaussian2DFunction.Y_SD] == 0) ? sx : params[Gaussian2DFunction.Y_SD];
+
+		// Note that this does not use the z-model to expand the widths
+		maxx = 2 * ((int) Math.ceil(sx * range)) + 1;
+		maxy = 2 * ((int) Math.ceil(sy * range)) + 1;
 		size = maxx * maxy;
 		// We will sample the Gaussian at integer intervals, i.e. on a pixel grid.
 		// Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss 
@@ -74,15 +80,13 @@ public class GaussianOverlapAnalysis
 	/**
 	 * Add the Gaussian function data to the overlap region. This is the region that contains the input function within
 	 * the range defined in the constructor.
-	 * 
-	 * @param flags
-	 *            The flags describing the Gaussian2DFunction function (see GaussianFunctionFactory)
+	 *
 	 * @param params
 	 *            The parameters for the Gaussian (can be multiple peaks)
 	 */
-	public void add(int flags, double[] params)
+	public void add(double[] params)
 	{
-		add(flags, params, false);
+		add(params, false);
 	}
 
 	/**
@@ -92,15 +96,13 @@ public class GaussianOverlapAnalysis
 	 * The square region is masked using the expected sum of the function within the range. The overlap of other
 	 * functions within this masked region can be computed, or within the square region.
 	 *
-	 * @param flags
-	 *            The flags describing the Gaussian2DFunction function (see GaussianFunctionFactory)
 	 * @param params
 	 *            The parameters for the Gaussian (can be multiple peaks)
 	 * @param withinMask
 	 *            Set to true to only compute the overlap within the mask. This effects the computation of the weighted
 	 *            background (see {@link #getWeightedbackground()}.
 	 */
-	public void add(int flags, double[] params, boolean withinMask)
+	public void add(double[] params, boolean withinMask)
 	{
 		// Note: When computing the overlap no adjustment is made for sampling on a pixel grid.
 		// This is OK since the method will be used to evaluate the overlap between Gaussians that have
@@ -111,7 +113,7 @@ public class GaussianOverlapAnalysis
 			// Initialise the input function
 			data = new double[size];
 			overlap = new double[size];
-			Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxy, this.flags);
+			Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, maxy, this.flags, zModel);
 
 			// Note that the position should be in the centre of the sample region
 			final double cx = params0[Gaussian2DFunction.X_POSITION];
@@ -160,7 +162,7 @@ public class GaussianOverlapAnalysis
 
 		// Add the function to the overlap
 		final int nPeaks = params.length / 6;
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(nPeaks, maxx, maxy, flags);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(nPeaks, maxx, maxy, flags, zModel);
 		params = params.clone();
 		for (int n = 0; n < nPeaks; n++)
 		{
@@ -244,7 +246,7 @@ public class GaussianOverlapAnalysis
 	 * estimate of the background contributed to the region by overlapping functions.
 	 * <p>
 	 * The result of this function is effected by how the overlap was computed, either within the mask or within the
-	 * entire square region (see {@link #add(int, double[], boolean)})
+	 * entire square region (see {@link #add(double[], boolean)})
 	 * 
 	 * @return The weighted background
 	 */

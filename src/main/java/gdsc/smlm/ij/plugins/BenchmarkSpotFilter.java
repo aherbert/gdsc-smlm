@@ -518,7 +518,7 @@ public class BenchmarkSpotFilter implements PlugIn
 							params[Gaussian2DFunction.X_POSITION] = cx;
 							params[Gaussian2DFunction.Y_POSITION] = cy;
 							params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = sa[i];
-							overlapAnalysis = new GaussianOverlapAnalysis(flags, params, 2);
+							overlapAnalysis = new GaussianOverlapAnalysis(flags, null, params, 2);
 						}
 
 						// Accumulate the function for j
@@ -534,7 +534,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				if (offset != 0)
 				{
 					final double[] overlapParams = Arrays.copyOf(allParams, 1 + offset);
-					overlapAnalysis.add(flags, overlapParams, false);
+					overlapAnalysis.add(overlapParams, false);
 					actual[i].backgroundOffset = (float) overlapAnalysis.getWeightedbackground();
 
 					// This is not currently used.

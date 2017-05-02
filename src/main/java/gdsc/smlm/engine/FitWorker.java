@@ -1594,8 +1594,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		private double getLocalBackground(int n, int npeaks, double[] params, final int flags)
 		{
-			GaussianOverlapAnalysis overlap = new GaussianOverlapAnalysis(flags, extractSpotParams(params, n), 2);
-			overlap.add(flags, extractOtherParams(params, n, npeaks), true);
+			GaussianOverlapAnalysis overlap = new GaussianOverlapAnalysis(flags, null, extractSpotParams(params, n), 2);
+			overlap.add(extractOtherParams(params, n, npeaks), true);
 			double[] overlapData = overlap.getOverlapData();
 			return overlapData[1] + params[0];
 		}

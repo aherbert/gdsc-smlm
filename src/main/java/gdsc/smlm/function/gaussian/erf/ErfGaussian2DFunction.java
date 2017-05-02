@@ -35,7 +35,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 
 	// Required for the PSF
 	protected final double[] deltaEx, deltaEy;
-	protected double tB, tI, tx, ty, tsx, tsy;
+	protected double tB, tI;
 	
 	// Required for the first gradients
 	protected double[] du_dtx, du_dty, du_dtsx, du_dtsy;

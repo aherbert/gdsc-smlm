@@ -27,7 +27,7 @@ public class PoissonLikelihoodWrapperTest
 	static String[] NAME;
 	static
 	{
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, 1, 1, GaussianFunctionFactory.FIT_FIXED);
+		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, 1, 1, GaussianFunctionFactory.FIT_FIXED, null);
 		NAME = new String[7];
 		for (int i = 0; i < 7; i++)
 			NAME[i] = f1.getName(i);
@@ -109,7 +109,7 @@ public class PoissonLikelihoodWrapperTest
 
 	private void functionComputesGradientPerDatum(int flags)
 	{
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
+		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
 		// Setup
 		testbackground = testbackground_;
 		testamplitude1 = testamplitude1_;
@@ -300,7 +300,7 @@ public class PoissonLikelihoodWrapperTest
 
 	private void functionComputesGradient(int flags)
 	{
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags);
+		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
 		// Setup
 		testbackground = testbackground_;
 		testamplitude1 = testamplitude1_;
