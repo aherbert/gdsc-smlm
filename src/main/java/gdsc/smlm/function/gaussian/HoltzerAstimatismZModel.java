@@ -99,12 +99,15 @@ public class HoltzerAstimatismZModel implements AstimatismZModel
 		final double s = Math.sqrt(1 + one_d2 * (z2 + A * z3 + B * z4));
 		// Eq. 19a
 		ds_dz[0] = (one_d2 * (2 * z + A * 3 * z2 + B * 4 * z3)) / (2 * s);
-		// Eq. 19b [ Note this has been corrected to remove the power 2 from the 
-		// numerator of the second term, i.e. not 
-		// (one_d2 * (2 * tz + A * 3 * z2 + B * 4 * z3))^2 / (4 * Math.pow(ts, 1.5)) ]
+		// Eq. 19b 
 		ds_dz[1] = (one_d2 * (2 + A * 6 * z + B * 12 * z2)) / (2 * s) -
-				(one_d2 * (2 * z + A * 3 * z2 + B * 4 * z3)) / (4 * Math.pow(s, 1.5));
+				pow2(one_d2 * (2 * z + A * 3 * z2 + B * 4 * z3)) / (4 * s * s * s);
 		return s;
+	}
+	
+	private static double pow2(final double d)
+	{
+		return d*d;
 	}
 
 	/**
