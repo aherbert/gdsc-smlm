@@ -1,5 +1,7 @@
 package gdsc.smlm.function.gaussian.erf;
 
+import org.apache.commons.math3.util.Pair;
+
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -30,19 +32,19 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 
 	protected final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
 	protected final static double ONE_OVER_ROOT2PI = 1.0 / Math.sqrt(2 * Math.PI);
-	
+
 	protected final byte derivativeOrder;
 
 	// Required for the PSF
 	protected final double[] deltaEx, deltaEy;
 	protected double tB, tI;
-	
+
 	// Required for the first gradients
 	protected double[] du_dtx, du_dty, du_dtsx, du_dtsy;
 
 	// Required for the second gradients
 	protected double[] d2u_dtx2, d2u_dty2, d2u_dtsx2, d2u_dtsy2;
-	
+
 	/**
 	 * Instantiates a new erf gaussian 2D function.
 	 *
@@ -75,7 +77,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	{
 		return derivativeOrder < this.derivativeOrder;
 	}
-	
+
 	// Force implementation by making abstract
 	@Override
 	abstract public Gaussian2DFunction create(int derivativeOrder);
@@ -109,7 +111,35 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 
 		return tB + tI * deltaEx[x] * deltaEy[y];
 	}
+
+	@Override
+	public double[] computeValues(double[] variables)
+	{
+		initialise(variables);
+
+		final int n = maxx * maxy;
+		final double[] values = new double[n];
+
+		for (int y = 0, i = 0; y < maxy; y++)
+		{
+			final double tI_deltaEy = tI * deltaEy[y];
+			for (int x = 0; x < maxx; x++, i++)
+			{
+				values[i] = tB + tI_deltaEy * deltaEx[x];
+			}
+		}
+
+		return values;
+	}
 	
+	// Force implementation
+	@Override
+	public abstract double[][] computeJacobian(double[] variables);
+	
+	// Force implementation
+	@Override
+	public abstract Pair<double[], double[][]> computeValuesAndJacobian(double[] variables);
+
 	// TODO - Add function support for computing the second derivatives directly in a Newton-Raphson method
 
 }

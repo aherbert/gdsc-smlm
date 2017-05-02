@@ -159,7 +159,11 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		d2uda2[3] = d2u_dty2[y] * deltaEx[x];
 		// Working  example of this in GraspJ source code:
 		// https://github.com/isman7/graspj/blob/master/graspj/src/main/java/eu/brede/graspj/opencl/src/functions/psfmodel_derivatives_sigma.cl
-		d2uda2[4] = (d2u_dtsx2[x] * deltaEy[y] + d2u_dtsy2[y] * deltaEx[x] + 2 * du_dtsx[x] * du_dtsy[y] / tI);
+		//@formatter:off
+		d2uda2[4] = d2u_dtsx2[x] * deltaEy[y] + 
+				    d2u_dtsy2[y] * deltaEx[x] + 
+				    2 * du_dtsx[x] * du_dtsy[y] / tI;
+		//@formatter:on
 
 		return tB + tI * duda[1];
 	}
@@ -171,6 +175,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		initialise(variables);
 
 		final int n = maxx * maxy;
+		final int nParams = 5;
 		final double[][] jacobian = new double[n][];
 
 		for (int y = 0, i = 0; y < maxy; y++)
@@ -180,7 +185,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 			final double dudsy = this.du_dtsy[y];
 			for (int x = 0; x < maxx; x++, i++)
 			{
-				final double[] duda = new double[variables.length];
+				final double[] duda = new double[nParams];
 				duda[0] = 1.0;
 				duda[1] = deltaEx[x] * deltaEy;
 				duda[2] = du_dtx[x] * deltaEy;
@@ -200,6 +205,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		initialise(variables);
 
 		final int n = maxx * maxy;
+		final int nParams = 5;
 		final double[][] jacobian = new double[n][];
 		final double[] values = new double[n];
 
@@ -210,7 +216,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 			final double dudsy = this.du_dtsy[y];
 			for (int x = 0; x < maxx; x++, i++)
 			{
-				final double[] duda = new double[variables.length];
+				final double[] duda = new double[nParams];
 				duda[0] = 1.0;
 				duda[1] = deltaEx[x] * deltaEy;
 				duda[2] = du_dtx[x] * deltaEy;

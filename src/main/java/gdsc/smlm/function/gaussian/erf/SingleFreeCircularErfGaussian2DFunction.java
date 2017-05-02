@@ -387,6 +387,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 		initialise(variables);
 
 		final int n = maxx * maxy;
+		final int nParams = 6;
 		final double[][] jacobian = new double[n][];
 
 		for (int y = 0, i = 0; y < maxy; y++)
@@ -396,7 +397,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 			final double dudsy = this.du_dtsy[y];
 			for (int x = 0; x < maxx; x++, i++)
 			{
-				final double[] duda = new double[variables.length];
+				final double[] duda = new double[nParams];
 				duda[0] = 1.0;
 				duda[1] = deltaEx[x] * deltaEy;
 				duda[2] = du_dtx[x] * deltaEy;
@@ -417,6 +418,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 		initialise(variables);
 
 		final int n = maxx * maxy;
+		final int nParams = 6;
 		final double[][] jacobian = new double[n][];
 		final double[] values = new double[n];
 
@@ -427,7 +429,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 			final double dudsy = this.du_dtsy[y];
 			for (int x = 0; x < maxx; x++, i++)
 			{
-				final double[] duda = new double[variables.length];
+				final double[] duda = new double[nParams];
 				duda[0] = 1.0;
 				duda[1] = deltaEx[x] * deltaEy;
 				duda[2] = du_dtx[x] * deltaEy;

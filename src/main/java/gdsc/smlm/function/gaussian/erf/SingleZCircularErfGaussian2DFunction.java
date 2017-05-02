@@ -74,7 +74,7 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
 		final double tsx = a[Gaussian2DFunction.X_SD];
 		final double tsy = a[Gaussian2DFunction.Y_SD];
-		final double tz = a[Gaussian2DFunction.SHAPE];
+		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
@@ -172,7 +172,11 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 				d2u_dtsx2[x] * deltaEy[y] * dtsx_dtz * dtsx_dtz +
 				du_dsx * d2tsx_dtz2 +
 				d2u_dtsy2[y] * deltaEx[x] * dtsy_dtz * dtsy_dtz + 
-				du_dsy * d2tsy_dtz2;
+				du_dsy * d2tsy_dtz2 +
+				// Add the equivalent term we add in the circular version.
+				// Note: this is not in the Smith, et al (2010) paper but is 
+				// in the GraspJ source code and it works in JUnit tests.
+				+ 2 * du_dtsx[x] * dtsx_dtz * du_dtsy[y] * dtsy_dtz / tI;		
 		//@formatter:on
 		d2uda2[3] = d2u_dtx2[x] * deltaEy[y];
 		d2uda2[4] = d2u_dty2[y] * deltaEx[x];
@@ -187,6 +191,7 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 		initialise(variables);
 
 		final int n = maxx * maxy;
+		final int nParams = 5;
 		final double[][] jacobian = new double[n][];
 
 		for (int y = 0, i = 0; y < maxy; y++)
@@ -197,7 +202,7 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 			final double dudsy = this.du_dtsy[y] * dtsy_dtz;
 			for (int x = 0; x < maxx; x++, i++)
 			{
-				final double[] duda = new double[variables.length];
+				final double[] duda = new double[nParams];
 				duda[0] = 1.0;
 				duda[1] = deltaEx[x] * deltaEy;
 				duda[2] = du_dtsx[x] * deltaEy_by_dtsx_dtz + dudsy * deltaEx[x];
@@ -217,6 +222,7 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 		initialise(variables);
 
 		final int n = maxx * maxy;
+		final int nParams = 5;
 		final double[][] jacobian = new double[n][];
 		final double[] values = new double[n];
 
@@ -228,7 +234,7 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 			final double dudsy = this.du_dtsy[y] * dtsy_dtz;
 			for (int x = 0; x < maxx; x++, i++)
 			{
-				final double[] duda = new double[variables.length];
+				final double[] duda = new double[nParams];
 				duda[0] = 1.0;
 				duda[1] = deltaEx[x] * deltaEy;
 				duda[2] = du_dtsx[x] * deltaEy_by_dtsx_dtz + dudsy * deltaEx[x];
