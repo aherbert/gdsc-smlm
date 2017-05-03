@@ -50,6 +50,26 @@ public class EJMLLinearSolver
 	private int[] zerosMap = new int[0];
 
 	/**
+	 * Instantiates a new EJML linear solver.
+	 */
+	public EJMLLinearSolver()
+	{
+	}
+
+	/**
+	 * Instantiates a new EJML linear solver with tolerance for the linear solution
+	 *
+	 * @param significantDigits
+	 *            the significant digits for equality
+	 * @param maxAbsoluteError
+	 *            the max absolute error for equality
+	 */
+	public EJMLLinearSolver(int significantDigits, double maxAbsoluteError)
+	{
+		setEqual(new DoubleEquality(significantDigits, maxAbsoluteError));
+	}
+
+	/**
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].

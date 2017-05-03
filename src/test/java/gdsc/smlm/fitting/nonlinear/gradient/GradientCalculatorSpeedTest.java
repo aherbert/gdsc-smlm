@@ -10,7 +10,9 @@ import org.junit.Test;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.Statistics;
 import gdsc.smlm.TestSettings;
+import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.function.CameraNoiseModel;
 import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
@@ -32,7 +34,7 @@ public class GradientCalculatorSpeedTest
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
-	double Background = 2;
+	double Background = 0.5;
 	double Amplitude = 100;
 	double Angle = Math.PI;
 	double Xpos = 5;
@@ -478,9 +480,118 @@ public class GradientCalculatorSpeedTest
 
 			MLEGradientCalculator gc = new MLEGradientCalculator(1);
 			double o = gc.logLikelihood(xxx, new double[] { u }, func);
-			
+
 			Assert.assertEquals("sum log likelihood", ll, o, Math.abs(ll) * 1e-10);
 		}
+	}
+
+	@Test
+	public void gradientCalculatorComputesSameOutputWithBias()
+	{
+		Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
+		int nparams = func.getNumberOfGradients();
+		GradientCalculator calc = new GradientCalculator(nparams);
+		int n = func.size();
+
+		int iter = 100;
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
+
+		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+
+		ArrayList<double[][]> alphaList = new ArrayList<double[][]>(iter);
+		ArrayList<double[]> betaList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> xList = new ArrayList<double[]>(iter);
+
+		// Manipulate the background
+		double defaultBackground = Background;
+		try
+		{
+			Background = 1e-2;
+			createData(1, iter, paramsList, yList, true);
+
+			EJMLLinearSolver solver = new EJMLLinearSolver(5, 1e-6);
+
+			for (int i = 0; i < paramsList.size(); i++)
+			{
+				double[] y = yList.get(i);
+				double[] a = paramsList.get(i);
+				double[][] alpha = new double[nparams][nparams];
+				double[] beta = new double[nparams];
+				calc.findLinearised(n, y, a, alpha, beta, func);
+				alphaList.add(alpha);
+				betaList.add(beta.clone());
+				for (int j = 0; j < nparams; j++)
+				{
+					if (Math.abs(beta[j]) < 1e-6)
+						System.out.printf("[%d] Tiny beta %s %g\n", i, func.getName(j), beta[j]);
+				}
+				// Solve
+				if (!solver.solve(alpha, beta))
+					throw new AssertionError();
+				xList.add(beta);
+				//System.out.println(Arrays.toString(beta));
+			}
+
+			double[][] alpha = new double[nparams][nparams];
+			double[] beta = new double[nparams];
+
+			//for (int b = 1; b < 1000; b *= 2)
+			for (double b : new double[] { -500, -100, -10, -1, -0.1, 0, 0.1, 1, 10, 100, 500 })
+			{
+				Statistics[] rel = new Statistics[nparams];
+				Statistics[] abs = new Statistics[nparams];
+				for (int i = 0; i < nparams; i++)
+				{
+					rel[i] = new Statistics();
+					abs[i] = new Statistics();
+				}
+
+				for (int i = 0; i < paramsList.size(); i++)
+				{
+					double[] y = add(yList.get(i), b);
+					double[] a = paramsList.get(i).clone();
+					a[0] += b;
+					calc.findLinearised(n, y, a, alpha, beta, func);
+					double[][] alpha2 = alphaList.get(i);
+					double[] beta2 = betaList.get(i);
+					double[] x2 = xList.get(i);
+
+					Assert.assertArrayEquals("Beta", beta2, beta, 1e-10);
+					for (int j = 0; j < nparams; j++)
+					{
+						Assert.assertArrayEquals("Alpha", alpha2[j], alpha[j], 1e-10);
+					}
+
+					// Solve
+					solver.solve(alpha, beta);
+					Assert.assertArrayEquals("X", x2, beta, 1e-10);
+
+					for (int j = 0; j < nparams; j++)
+					{
+						rel[j].add(DoubleEquality.relativeError(x2[j], beta[j]));
+						abs[j].add(Math.abs(x2[j] - beta[j]));
+					}
+				}
+
+				for (int i = 0; i < nparams; i++)
+					System.out.printf("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b, func.getName(i),
+							rel[i].getMean(), rel[i].getStandardDeviation(), abs[i].getMean(),
+							abs[i].getStandardDeviation());
+			}
+		}
+		finally
+		{
+			Background = defaultBackground;
+		}
+	}
+
+	private double[] add(double[] d, double b)
+	{
+		d = d.clone();
+		for (int i = 0; i < d.length; i++)
+			d[i] += b;
+		return d;
 	}
 
 	/**
@@ -524,10 +635,10 @@ public class GradientCalculatorSpeedTest
 
 		if (randomiseParams)
 		{
-			// Randomise only the necessary parameters (i.e. not angle and X & Y widths should be the same)
 			params[0] = random(params[0]);
 			for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 			{
+				params[j] = random(params[j]);
 				params[j + 1] = random(params[j + 1]);
 				params[j + 2] = random(params[j + 2]);
 				params[j + 3] = random(params[j + 3]);
