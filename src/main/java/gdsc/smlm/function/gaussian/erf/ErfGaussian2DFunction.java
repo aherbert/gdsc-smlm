@@ -1,7 +1,8 @@
 package gdsc.smlm.function.gaussian.erf;
 
-import org.apache.commons.math3.util.Pair;
-
+import gdsc.smlm.function.Gradient1Procedure;
+import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -26,7 +27,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */
-public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
+public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implements Gradient2Function
 {
 	public static final int Z_POSITION = 2;
 
@@ -112,34 +113,41 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 		return tB + tI * deltaEx[x] * deltaEy[y];
 	}
 
-	@Override
-	public double[] computeValues(double[] variables)
+	/**
+	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	 * 
+	 * @param i
+	 *            Input predictor
+	 * @param duda
+	 *            Partial first gradient of function with respect to each coefficient
+	 * @param d2uda2
+	 *            Partial second gradient of function with respect to each coefficient
+	 * @return The predicted value
+	 */
+	public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.ValueProcedure)
+	 */
+	public void forEach(ValueProcedure procedure)
 	{
-		initialise(variables);
-
-		final int n = maxx * maxy;
-		final double[] values = new double[n];
-
-		for (int y = 0, i = 0; y < maxy; y++)
+		for (int y = 0; y < maxy; y++)
 		{
 			final double tI_deltaEy = tI * deltaEy[y];
-			for (int x = 0; x < maxx; x++, i++)
+			for (int x = 0; x < maxx; x++)
 			{
-				values[i] = tB + tI_deltaEy * deltaEx[x];
+				procedure.execute(tB + tI_deltaEy * deltaEx[x]);
 			}
 		}
-
-		return values;
 	}
-	
+
 	// Force implementation
 	@Override
-	public abstract double[][] computeJacobian(double[] variables);
-	
+	public abstract int getNumberOfGradients();
+
 	// Force implementation
 	@Override
-	public abstract Pair<double[], double[][]> computeValuesAndJacobian(double[] variables);
-
-	// TODO - Add function support for computing the second derivatives directly in a Newton-Raphson method
-
+	public abstract void forEach(Gradient1Procedure procedure);
 }

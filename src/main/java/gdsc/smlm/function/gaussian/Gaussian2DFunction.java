@@ -3,7 +3,10 @@ package gdsc.smlm.function.gaussian;
 import org.apache.commons.math3.util.Pair;
 
 import gdsc.smlm.function.ExtendedNonLinearFunction;
+import gdsc.smlm.function.Gradient1Procedure;
+import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.NoiseModel;
+import gdsc.smlm.function.ValueProcedure;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -27,7 +30,7 @@ import gdsc.smlm.function.NoiseModel;
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */
-public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction
+public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, GradientFunction
 {
 	/**
 	 * The factor for converting a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
@@ -329,11 +332,16 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction
 	public double[] computeValues(double[] variables)
 	{
 		initialise(variables);
-		final double[] values = new double[maxx * maxy];
-		for (int i = 0; i < values.length; i++)
+		final double[] values = new double[size()];
+		forEach(new ValueProcedure()
 		{
-			values[i] = eval(i);
-		}
+			int i = 0;
+
+			public void execute(double value)
+			{
+				values[i++] = value;
+			}
+		});
 		return values;
 	}
 
@@ -365,19 +373,65 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction
 	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
 	{
 		initialise(variables);
-
-		final int n = maxx * maxy;
+		final int n = size();
 		final double[][] jacobian = new double[n][];
 		final double[] values = new double[n];
-
-		for (int i = 0; i < n; ++i)
+		forEach(new Gradient1Procedure()
 		{
-			// Assume linear X from 0..N
-			final double[] dyda = new double[variables.length];
-			values[i] = eval(i, dyda);
-			jacobian[i] = dyda;
-		}
+			int i = 0;
 
+			public void execute(double value, double[] dy_da)
+			{
+				values[i] = value;
+				jacobian[i++] = dy_da.clone();
+			}
+		});
 		return new Pair<double[], double[][]>(values, jacobian);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#size()
+	 */
+	public int size()
+	{
+		return maxx * maxy;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
+	 */
+	public int getNumberOfGradients()
+	{
+		return gradientIndices().length;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.ValueProcedure)
+	 */
+	public void forEach(ValueProcedure procedure)
+	{
+		for (int i = 0, n = size(); i < n; i++)
+			procedure.execute(eval(i));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.Gradient1Procedure)
+	 */
+	public void forEach(Gradient1Procedure procedure)
+	{
+		final double[] duda = new double[getNumberOfGradients()];
+		for (int i = 0, n = size(); i < n; i++)
+		{
+			final double value = eval(i, duda);
+			procedure.execute(value, duda);
+		}
 	}
 }

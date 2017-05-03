@@ -1,7 +1,7 @@
 package gdsc.smlm.function.gaussian.erf;
 
-import org.apache.commons.math3.util.Pair;
-
+import gdsc.smlm.function.Gradient1Procedure;
+import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.gaussian.AstimatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
@@ -157,9 +157,9 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 
 		// Return in order of Gaussian2DFunction.createGradientIndices().
 		// Use pre-computed gradients
-		final double du_dsx = du_dtsx[x] * deltaEy[y]; 
-		final double du_dsy = du_dtsy[y] * deltaEx[x]; 
-		
+		final double du_dsx = du_dtsx[x] * deltaEy[y];
+		final double du_dsy = du_dtsy[y] * deltaEx[x];
+
 		duda[0] = 1.0;
 		duda[1] = deltaEx[x] * deltaEy[y];
 		duda[2] = du_dsx * dtsx_dtz + du_dsy * dtsy_dtz;
@@ -182,70 +182,6 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 		d2uda2[4] = d2u_dty2[y] * deltaEx[x];
 
 		return tB + tI * duda[1];
-	}
-
-	// Support for ExtendedNonLinear Function. This can take advantage of x/y iteration.
-	@Override
-	public double[][] computeJacobian(double[] variables)
-	{
-		initialise(variables);
-
-		final int n = maxx * maxy;
-		final int nParams = 5;
-		final double[][] jacobian = new double[n][];
-
-		for (int y = 0, i = 0; y < maxy; y++)
-		{
-			final double dudy = this.du_dty[y];
-			final double deltaEy = this.deltaEy[y];
-			final double deltaEy_by_dtsx_dtz = deltaEy * dtsx_dtz;
-			final double dudsy = this.du_dtsy[y] * dtsy_dtz;
-			for (int x = 0; x < maxx; x++, i++)
-			{
-				final double[] duda = new double[nParams];
-				duda[0] = 1.0;
-				duda[1] = deltaEx[x] * deltaEy;
-				duda[2] = du_dtsx[x] * deltaEy_by_dtsx_dtz + dudsy * deltaEx[x];
-				duda[3] = du_dtx[x] * deltaEy;
-				duda[4] = dudy * deltaEx[x];
-				jacobian[i] = duda;
-			}
-		}
-
-		return jacobian;
-	}
-
-	// Support for ExtendedNonLinear Function. This can take advantage of x/y iteration.
-	@Override
-	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
-	{
-		initialise(variables);
-
-		final int n = maxx * maxy;
-		final int nParams = 5;
-		final double[][] jacobian = new double[n][];
-		final double[] values = new double[n];
-
-		for (int y = 0, i = 0; y < maxy; y++)
-		{
-			final double dudy = this.du_dty[y];
-			final double deltaEy = this.deltaEy[y];
-			final double deltaEy_by_dtsx_dtz = deltaEy * dtsx_dtz;
-			final double dudsy = this.du_dtsy[y] * dtsy_dtz;
-			for (int x = 0; x < maxx; x++, i++)
-			{
-				final double[] duda = new double[nParams];
-				duda[0] = 1.0;
-				duda[1] = deltaEx[x] * deltaEy;
-				duda[2] = du_dtsx[x] * deltaEy_by_dtsx_dtz + dudsy * deltaEx[x];
-				duda[3] = du_dtx[x] * deltaEy;
-				duda[4] = dudy * deltaEx[x];
-				values[i] = tB + tI * duda[1];
-				jacobian[i] = duda;
-			}
-		}
-
-		return new Pair<double[], double[][]>(values, jacobian);
 	}
 
 	@Override
@@ -304,5 +240,89 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 	public int[] gradientIndices()
 	{
 		return gradientIndices;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
+	 */
+	public int getNumberOfGradients()
+	{
+		return 5;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
+	 */
+	public void forEach(Gradient1Procedure procedure)
+	{
+		final double[] duda = new double[getNumberOfGradients()];
+		duda[0] = 1.0;
+		for (int y = 0; y < maxy; y++)
+		{
+			final double du_dtsy = this.du_dty[y];
+			final double deltaEy = this.deltaEy[y];
+			final double deltaEy_by_dtsx_dtz = deltaEy * dtsx_dtz;
+			final double du_dtsy_by_dtsy_dtz = this.du_dtsy[y] * dtsy_dtz;
+			for (int x = 0; x < maxx; x++)
+			{
+				duda[1] = deltaEx[x] * deltaEy;
+				duda[2] = du_dtsx[x] * deltaEy_by_dtsx_dtz + du_dtsy_by_dtsy_dtz * deltaEx[x];
+				duda[3] = du_dtx[x] * deltaEy;
+				duda[4] = du_dtsy * deltaEx[x];
+				procedure.execute(tB + tI * duda[1], duda);
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
+	 */
+	public void forEach(Gradient2Procedure procedure)
+	{
+		final double[] duda = new double[getNumberOfGradients()];
+		final double[] d2uda2 = new double[getNumberOfGradients()];
+		duda[0] = 1.0;
+		final double dtsx_dtz_2 = dtsx_dtz * dtsx_dtz;
+		final double dtsy_dtz_2 = dtsy_dtz * dtsy_dtz;
+		final double two_dtsx_dtz_by_dtsy_dtz_tI = 2 * dtsx_dtz * dtsy_dtz / tI;
+		for (int y = 0; y < maxy; y++)
+		{
+			final double du_dtsy = this.du_dty[y];
+			final double deltaEy = this.deltaEy[y];
+			final double d2u_dty2 = this.d2u_dty2[y];
+			final double deltaEy_by_dtsx_dtz_2 = deltaEy * dtsx_dtz_2;
+			final double d2u_dtsy2_by_dtsy_dtz_2 = this.d2u_dtsy2[y] * dtsy_dtz_2;
+			final double two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI = two_dtsx_dtz_by_dtsy_dtz_tI * du_dtsy;
+			for (int x = 0; x < maxx; x++)
+			{
+				final double du_dsx = du_dtsx[x] * deltaEy;
+				final double du_dsy = du_dtsy * deltaEx[x];
+
+				duda[1] = deltaEx[x] * deltaEy;
+				duda[2] = du_dsx * dtsx_dtz + du_dsy * dtsy_dtz;
+				duda[3] = du_dtx[x] * deltaEy;
+				duda[4] = du_dtsy * deltaEx[x];
+				//@formatter:off
+				d2uda2[2] =
+						d2u_dtsx2[x] * deltaEy_by_dtsx_dtz_2 +
+						du_dsx * d2tsx_dtz2 +
+						d2u_dtsy2_by_dtsy_dtz_2 * deltaEx[x] + 
+						du_dsy * d2tsy_dtz2 +
+						// Add the equivalent term we add in the circular version.
+						// Note: this is not in the Smith, et al (2010) paper but is 
+						// in the GraspJ source code and it works in JUnit tests.
+						+ two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x];		
+				//@formatter:on
+				d2uda2[3] = d2u_dtx2[x] * deltaEy;
+				d2uda2[4] = d2u_dty2 * deltaEx[x];
+				procedure.execute(tB + tI * duda[1], duda, d2uda2);
+			}
+		}
 	}
 }

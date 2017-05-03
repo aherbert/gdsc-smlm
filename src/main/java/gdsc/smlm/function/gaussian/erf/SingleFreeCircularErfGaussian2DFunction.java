@@ -2,9 +2,10 @@ package gdsc.smlm.function.gaussian.erf;
 
 //import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.Pair;
 
 import gdsc.smlm.function.Erf;
+import gdsc.smlm.function.Gradient1Procedure;
+import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -148,7 +149,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	 * @param s
 	 *            the standard deviation of the Gaussian for dimension 0
 	 */
-	protected static void createFirstOrderTables(double tI, double[] deltaE, double[] du_dx, double[] du_ds, double u, double s)
+	protected static void createFirstOrderTables(double tI, double[] deltaE, double[] du_dx, double[] du_ds, double u,
+			double s)
 	{
 		createFirstOrderTables(ONE_OVER_ROOT2 / s, 0.5 / (s * s), tI * ONE_OVER_ROOT2PI / s,
 				tI * ONE_OVER_ROOT2PI / (s * s), deltaE, du_dx, du_ds, u);
@@ -219,8 +221,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	 * @param s
 	 *            the standard deviation of the Gaussian for dimension 0
 	 */
-	protected static void createSecondOrderTables(double tI, double[] deltaE, double[] du_dx, double[] du_ds, double[] d2u_dx2,
-			double[] d2u_ds2, double u, double s)
+	protected static void createSecondOrderTables(double tI, double[] deltaE, double[] du_dx, double[] du_ds,
+			double[] d2u_dx2, double[] d2u_ds2, double u, double s)
 	{
 		final double ss = s * s;
 		final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
@@ -345,16 +347,10 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 		return tB + tI * duda[1];
 	}
 
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param i
-	 *            Input predictor
-	 * @param duda
-	 *            Partial first gradient of function with respect to each coefficient
-	 * @param d2uda2
-	 *            Partial second gradient of function with respect to each coefficient
-	 * @return The predicted value
+	 * @see gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction#eval(int, double[], double[])
 	 */
 	public double eval(final int i, final double[] duda, final double[] d2uda2)
 	{
@@ -378,70 +374,6 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 		d2uda2[5] = d2u_dtsy2[y] * deltaEx[x];
 
 		return tB + tI * duda[1];
-	}
-
-	// Support for ExtendedNonLinear Function. This can take advantage of x/y iteration.
-	@Override
-	public double[][] computeJacobian(double[] variables)
-	{
-		initialise(variables);
-
-		final int n = maxx * maxy;
-		final int nParams = 6;
-		final double[][] jacobian = new double[n][];
-
-		for (int y = 0, i = 0; y < maxy; y++)
-		{
-			final double dudy = this.du_dty[y];
-			final double deltaEy = this.deltaEy[y];
-			final double dudsy = this.du_dtsy[y];
-			for (int x = 0; x < maxx; x++, i++)
-			{
-				final double[] duda = new double[nParams];
-				duda[0] = 1.0;
-				duda[1] = deltaEx[x] * deltaEy;
-				duda[2] = du_dtx[x] * deltaEy;
-				duda[3] = dudy * deltaEx[x];
-				duda[4] = du_dtsx[x] * deltaEy;
-				duda[5] = dudsy * deltaEx[x];
-				jacobian[i] = duda;
-			}
-		}
-
-		return jacobian;
-	}
-
-	// Support for ExtendedNonLinear Function. This can take advantage of x/y iteration.
-	@Override
-	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
-	{
-		initialise(variables);
-
-		final int n = maxx * maxy;
-		final int nParams = 6;
-		final double[][] jacobian = new double[n][];
-		final double[] values = new double[n];
-
-		for (int y = 0, i = 0; y < maxy; y++)
-		{
-			final double dudy = this.du_dty[y];
-			final double deltaEy = this.deltaEy[y];
-			final double dudsy = this.du_dtsy[y];
-			for (int x = 0; x < maxx; x++, i++)
-			{
-				final double[] duda = new double[nParams];
-				duda[0] = 1.0;
-				duda[1] = deltaEx[x] * deltaEy;
-				duda[2] = du_dtx[x] * deltaEy;
-				duda[3] = dudy * deltaEx[x];
-				duda[4] = du_dtsx[x] * deltaEy;
-				duda[5] = dudsy * deltaEx[x];
-				values[i] = tB + tI * duda[1];
-				jacobian[i] = duda;
-			}
-		}
-
-		return new Pair<double[], double[][]>(values, jacobian);
 	}
 
 	@Override
@@ -500,5 +432,74 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	public int[] gradientIndices()
 	{
 		return gradientIndices;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
+	 */
+	public int getNumberOfGradients()
+	{
+		return 6;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
+	 */
+	public void forEach(Gradient1Procedure procedure)
+	{
+		final double[] duda = new double[getNumberOfGradients()];
+		duda[0] = 1.0;
+		for (int y = 0; y < maxy; y++)
+		{
+			final double du_dty = this.du_dty[y];
+			final double deltaEy = this.deltaEy[y];
+			final double du_dtsy = this.du_dtsy[y];
+			for (int x = 0; x < maxx; x++)
+			{
+				duda[1] = deltaEx[x] * deltaEy;
+				duda[2] = du_dtx[x] * deltaEy;
+				duda[3] = du_dty * deltaEx[x];
+				duda[4] = du_dtsx[x] * deltaEy;
+				duda[5] = du_dtsy * deltaEx[x];
+				procedure.execute(tB + tI * duda[1], duda);
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
+	 */
+	public void forEach(Gradient2Procedure procedure)
+	{
+		final double[] duda = new double[getNumberOfGradients()];
+		final double[] d2uda2 = new double[getNumberOfGradients()];
+		duda[0] = 1.0;
+		for (int y = 0; y < maxy; y++)
+		{
+			final double du_dty = this.du_dty[y];
+			final double deltaEy = this.deltaEy[y];
+			final double du_dtsy = this.du_dtsy[y];
+			final double d2u_dty2 = this.d2u_dty2[y];
+			final double d2u_dtsy2 = this.d2u_dtsy2[y];
+			for (int x = 0; x < maxx; x++)
+			{
+				duda[1] = deltaEx[x] * deltaEy;
+				duda[2] = du_dtx[x] * deltaEy;
+				duda[3] = du_dty * deltaEx[x];
+				duda[4] = du_dtsx[x] * deltaEy;
+				duda[5] = du_dtsy * deltaEx[x];
+				d2uda2[2] = d2u_dtx2[x] * deltaEy;
+				d2uda2[3] = d2u_dty2 * deltaEx[x];
+				d2uda2[4] = d2u_dtsx2[x] * deltaEy;
+				d2uda2[5] = d2u_dtsy2 * deltaEx[x];
+				procedure.execute(tB + tI * duda[1], duda, d2uda2);
+			}
+		}
 	}
 }
