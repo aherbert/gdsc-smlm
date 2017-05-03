@@ -538,9 +538,11 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		ts.repeat(size);
 		ts.report();
 
-		//int n = ts.getSize() - 1;
-		//		Assert.assertTrue("0 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
-		//		n--;
-		//		Assert.assertTrue("1 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
+		int n = ts.getSize() - 1;
+		Assert.assertTrue("0 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
+		n--;
+		Assert.assertTrue("1 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
+		n--;
+		Assert.assertTrue("2 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
 	}
 }
