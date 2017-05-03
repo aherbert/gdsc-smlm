@@ -14,9 +14,6 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.UnitSphereRandomVectorGenerator;
 import org.apache.commons.math3.random.Well19937c;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolver;
-import org.ejml.factory.LinearSolverFactory;
 
 import gdsc.core.clustering.DensityCounter;
 import gdsc.core.clustering.DensityCounter.Molecule;
@@ -790,43 +787,88 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		// D1 = d1 + C21 * d2 + C31 * d3
 		// D2 = d2 + C12 * d1 + C32 * d3
 		// D3 = d3 + C13 * d1 + C23 * d2
-		// This is done using matrix decomposition
 
-		// Note: The linear solver uses LU decomposition. 
-		// We cannot use a faster method as the matrix A is not symmetric.
-		final LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.linear(3);
-		final DenseMatrix64F A = new DenseMatrix64F(3, 3);
-		A.set(0, 1);
-		A.set(1, C21);
-		A.set(2, C31);
-		A.set(3, C12);
-		A.set(4, 1);
-		A.set(5, C32);
-		A.set(6, C13);
-		A.set(7, C23);
-		A.set(8, 1);
-		final DenseMatrix64F B = new DenseMatrix64F(3, 1);
-		B.set(0, D1);
-		B.set(1, D2);
-		B.set(2, D3);
+		// Use matrix inversion so that: X = A^-1 * B 
+		double a = 1;
+		double b = C21;
+		double c = C31;
+		double d = C12;
+		double e = 1;
+		double f = C32;
+		double g = C13;
+		double h = C23;
+		double i = 1;
 
-		if (!linearSolver.setA(A))
-		{
+		double A = (e * i - f * h);
+		double B = -(d * i - f * g);
+		double C = (d * h - e * g);
+
+		double det = a * A + b * B + c * C;
+
+		double det_recip = 1.0 / det;
+
+		if (!Maths.isFinite(det_recip))
 			// Failed so reset to the observed densities
 			return new double[] { D1, D2, D3 };
-		}
 
-		// Input B is not modified to so we can re-use for output X
-		linearSolver.solve(B, B);
+		double D = -(b * i - c * h);
+		double E = (a * i - c * g);
+		double F = -(a * h - b * g);
+		double G = (b * f - c * e);
+		double H = -(a * f - c * d);
+		double I = (a * e - b * d);
 
-		final double[] b = B.getData();
+		a = det_recip * A;
+		b = det_recip * D;
+		c = det_recip * G;
+		d = det_recip * B;
+		e = det_recip * E;
+		f = det_recip * H;
+		g = det_recip * C;
+		h = det_recip * F;
+		i = det_recip * I;
+
+		final double[] x = new double[3];
+		x[0] = a * D1 + b * D2 + c * D3;
+		x[1] = d * D1 + e * D2 + f * D3;
+		x[2] = g * D1 + h * D2 + i * D3;
+
+		// Use matrix decomposition
+		//		// Note: The linear solver uses LU decomposition. 
+		//		// We cannot use a faster method as the matrix A is not symmetric.
+		//		final LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.linear(3);
+		//		final DenseMatrix64F A = new DenseMatrix64F(3, 3);
+		//		A.set(0, 1);
+		//		A.set(1, C21);
+		//		A.set(2, C31);
+		//		A.set(3, C12);
+		//		A.set(4, 1);
+		//		A.set(5, C32);
+		//		A.set(6, C13);
+		//		A.set(7, C23);
+		//		A.set(8, 1);
+		//		final DenseMatrix64F B = new DenseMatrix64F(3, 1);
+		//		B.set(0, D1);
+		//		B.set(1, D2);
+		//		B.set(2, D3);
+		//
+		//		if (!linearSolver.setA(A))
+		//		{
+		//			// Failed so reset to the observed densities
+		//			return new double[] { D1, D2, D3 };
+		//		}
+		//
+		//		// Input B is not modified to so we can re-use for output X
+		//		linearSolver.solve(B, B);
+		//
+		//		final double[] x = B.getData();
 
 		// Due to floating-point error in the decomposition we check the bounds
-		b[0] = Maths.clip(0, D1, b[0]);
-		b[1] = Maths.clip(0, D2, b[1]);
-		b[2] = Maths.clip(0, D3, b[2]);
+		x[0] = Maths.clip(0, D1, x[0]);
+		x[1] = Maths.clip(0, D2, x[1]);
+		x[2] = Maths.clip(0, D3, x[2]);
 
-		return b;
+		return x;
 	}
 
 	private class RunSettings
@@ -941,7 +983,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		if (executor != null)
 		{
 			// Shutdown the executor used to do the work
-			
+
 			if (cancelled)
 				// Stop immediately
 				executor.shutdownNow();
