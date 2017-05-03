@@ -31,7 +31,7 @@ import org.apache.commons.math3.util.FastMath;
 public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 {
 	private static final int[] gradientIndices = new int[0];
-	
+
 	protected double x0pos;
 	protected double x1pos;
 
@@ -49,6 +49,17 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 	public SingleSimpleGaussian2DFunction(int maxx, int maxy)
 	{
 		super(maxx, maxy);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+	 */
+	@Override
+	public Gaussian2DFunction copy()
+	{
+		return new SingleSimpleGaussian2DFunction(maxx, maxy);
 	}
 
 	/*

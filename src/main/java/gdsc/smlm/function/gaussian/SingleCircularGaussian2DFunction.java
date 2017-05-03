@@ -18,7 +18,8 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Evaluates an 2-dimensional Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into
+ * 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -57,6 +58,17 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+	 */
+	@Override
+	public Gaussian2DFunction copy()
+	{
+		return new SingleCircularGaussian2DFunction(maxx, maxy);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
 	 */
 	public void initialise(double[] a)
@@ -70,7 +82,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 
 		n = ONE_OVER_TWO_PI / sx2;
 		height = a[SIGNAL] * n;
-		
+
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
 		// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 

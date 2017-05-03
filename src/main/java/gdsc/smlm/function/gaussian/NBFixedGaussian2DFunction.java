@@ -16,7 +16,8 @@ package gdsc.smlm.function.gaussian;
 /**
  * Evaluates an 2-dimensional Gaussian function for a configured number of peaks.
  * <p>
- * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into
+ * 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -36,6 +37,17 @@ public class NBFixedGaussian2DFunction extends FixedGaussian2DFunction
 	public NBFixedGaussian2DFunction(int npeaks, int maxx, int maxy)
 	{
 		super(npeaks, maxx, maxy);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+	 */
+	@Override
+	public Gaussian2DFunction copy()
+	{
+		return new NBFixedGaussian2DFunction(npeaks, maxx, maxy);
 	}
 
 	/*

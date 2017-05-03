@@ -18,7 +18,8 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Evaluates an 2-dimensional Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into
+ * 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -60,6 +61,17 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 	public SingleFreeCircularGaussian2DFunction(int maxx, int maxy)
 	{
 		super(maxx, maxy);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+	 */
+	@Override
+	public Gaussian2DFunction copy()
+	{
+		return new SingleFreeCircularGaussian2DFunction(maxx, maxy);
 	}
 
 	/*
@@ -107,6 +119,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 		by = 0.5 * sin2t / sy3;
 		cy = cosSqt / sy3;
 	}
+
 	/**
 	 * Produce an output predicted value for a given set of input
 	 * predictors (x) and coefficients (a).

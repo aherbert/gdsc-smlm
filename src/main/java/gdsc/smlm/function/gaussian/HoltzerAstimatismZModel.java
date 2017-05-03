@@ -104,10 +104,10 @@ public class HoltzerAstimatismZModel implements AstimatismZModel
 				pow2(one_d2 * (2 * z + A * 3 * z2 + B * 4 * z3)) / (4 * s * s * s);
 		return s;
 	}
-	
+
 	private static double pow2(final double d)
 	{
-		return d*d;
+		return d * d;
 	}
 
 	/**

@@ -18,7 +18,8 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Evaluates an 2-dimensional Gaussian function for a configured number of peaks.
  * <p>
- * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into
+ * 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -44,6 +45,17 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	{
 		super(npeaks, maxx, maxy);
 		peakFactors = new double[npeaks][13];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+	 */
+	@Override
+	public Gaussian2DFunction copy()
+	{
+		return new FreeCircularGaussian2DFunction(npeaks, maxx, maxy);
 	}
 
 	protected static final int N = 0;
@@ -82,7 +94,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 			final double sinSqt = Math.sin(theta) * Math.sin(theta);
 			final double sin2t = Math.sin(2.0 * theta);
 
-			peakFactors[j][N] = ONE_OVER_TWO_PI / (sx*sy);
+			peakFactors[j][N] = ONE_OVER_TWO_PI / (sx * sy);
 			peakFactors[j][HEIGHT] = a[j * 6 + SIGNAL] * peakFactors[j][N];
 
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:

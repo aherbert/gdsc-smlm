@@ -68,6 +68,17 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+	 */
+	@Override
+	public Gaussian2DFunction copy()
+	{
+		return new SingleEllipticalGaussian2DFunction(maxx, maxy);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
 	 */
 	public void initialise(double[] a)

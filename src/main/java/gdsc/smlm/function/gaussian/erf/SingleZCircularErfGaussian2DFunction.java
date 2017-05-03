@@ -53,13 +53,19 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 	}
 
 	@Override
-	public Gaussian2DFunction create(int derivativeOrder)
+	public ErfGaussian2DFunction create(int derivativeOrder)
 	{
 		if (derivativeOrder == this.derivativeOrder)
 			return this;
 		return new SingleZCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
 	}
 
+	@Override
+	public ErfGaussian2DFunction copy()
+	{
+		return new SingleZCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

@@ -81,8 +81,16 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 
 	// Force implementation by making abstract
 	@Override
-	abstract public Gaussian2DFunction create(int derivativeOrder);
+	abstract public ErfGaussian2DFunction create(int derivativeOrder);
 
+	/**
+	 * Copy the function.
+	 *
+	 * @return a copy
+	 */
+	@Override
+	abstract public ErfGaussian2DFunction copy();
+	
 	/*
 	 * (non-Javadoc)
 	 * 

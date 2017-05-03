@@ -18,7 +18,8 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into
+ * 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -47,6 +48,17 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+	 */
+	@Override
+	public Gaussian2DFunction copy()
+	{
+		return new SingleNBEllipticalGaussian2DFunction(maxx, maxy);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.function.gaussian.SingleEllipticalGaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x, final double[] dyda)
@@ -67,11 +79,11 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 		final double dy2 = dy * dy;
 
 		// Calculate gradients
-		
+
 		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
 		dy_da[0] = n * exp;
 		final double y = height * exp;
-		
+
 		dy_da[1] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
 
 		dy_da[2] = y * (-2.0 * aa * dx - bb * dy);

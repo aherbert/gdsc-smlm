@@ -169,6 +169,13 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	}
 
 	/**
+	 * Copy the function.
+	 *
+	 * @return a copy
+	 */
+	abstract public Gaussian2DFunction copy();
+
+	/**
 	 * @return the number of peaks
 	 */
 	public abstract int getNPeaks();

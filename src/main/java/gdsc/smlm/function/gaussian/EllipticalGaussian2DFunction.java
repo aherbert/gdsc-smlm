@@ -18,7 +18,8 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Evaluates an 2-dimensional elliptical Gaussian function for a configured number of peaks.
  * <p>
- * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into
+ * 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -44,6 +45,17 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	{
 		super(npeaks, maxx, maxy);
 		peakFactors = new double[npeaks][16];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+	 */
+	@Override
+	public Gaussian2DFunction copy()
+	{
+		return new EllipticalGaussian2DFunction(npeaks, maxx, maxy);
 	}
 
 	protected static final int N = 0;
@@ -87,16 +99,16 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 			final double sin2t = Math.sin(2 * theta);
 			final double cos2t = Math.cos(2 * theta);
 
-			peakFactors[j][N] = ONE_OVER_TWO_PI / (sx*sy);
+			peakFactors[j][N] = ONE_OVER_TWO_PI / (sx * sy);
 			peakFactors[j][HEIGHT] = a[j * 6 + SIGNAL] * peakFactors[j][N];
-			
+
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
-			
+
 			peakFactors[j][AA] = -0.5 * (cosSqt / sx2 + sinSqt / sy2);
 			peakFactors[j][BB] = -0.25 * (-sin2t / sx2 + sin2t / sy2);
 			peakFactors[j][CC] = -0.5 * (sinSqt / sx2 + cosSqt / sy2);
-			
+
 			// For the angle gradient
 			peakFactors[j][AA2] = -(-sincost / sx2 + sincost / sy2);
 			peakFactors[j][BB2] = -0.5 * (-cos2t / sx2 + cos2t / sy2);

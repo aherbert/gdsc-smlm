@@ -60,13 +60,19 @@ public class SingleFixedErfGaussian2DFunction extends SingleFreeCircularErfGauss
 	}
 
 	@Override
-	public Gaussian2DFunction create(int derivativeOrder)
+	public ErfGaussian2DFunction create(int derivativeOrder)
 	{
 		if (derivativeOrder == this.derivativeOrder)
 			return this;
 		return new SingleFixedErfGaussian2DFunction(maxx, maxy, derivativeOrder);
 	}
 
+	@Override
+	public ErfGaussian2DFunction copy()
+	{
+		return new SingleFixedErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

@@ -48,6 +48,17 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
+	 */
+	@Override
+	public Gaussian2DFunction copy()
+	{
+		return new SingleNBFixedGaussian2DFunction(maxx, maxy);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.function.gaussian.SingleFixedGaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x, final double[] dyda)

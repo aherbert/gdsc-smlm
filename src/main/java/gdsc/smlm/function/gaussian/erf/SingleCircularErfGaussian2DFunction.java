@@ -44,13 +44,19 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 	}
 
 	@Override
-	public Gaussian2DFunction create(int derivativeOrder)
+	public ErfGaussian2DFunction create(int derivativeOrder)
 	{
 		if (derivativeOrder == this.derivativeOrder)
 			return this;
 		return new SingleCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
 	}
 
+	@Override
+	public ErfGaussian2DFunction copy()
+	{
+		return new SingleCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
