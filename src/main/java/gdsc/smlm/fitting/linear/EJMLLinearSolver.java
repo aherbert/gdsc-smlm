@@ -825,6 +825,8 @@ public class EJMLLinearSolver
 
 			// This should work on any matrix
 			linearSolver = LinearSolverFactory.linear(solverSize);
+			//linearSolver = LinearSolverFactory.leastSquares(solverSize, solverSize);
+			//linearSolver = LinearSolverFactory.pseudoInverse(false);
 
 			X = new DenseMatrix64F(solverSize, 1);
 			A_inv = new DenseMatrix64F(solverSize, solverSize);
