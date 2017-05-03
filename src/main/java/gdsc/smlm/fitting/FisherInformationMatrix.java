@@ -138,7 +138,7 @@ public class FisherInformationMatrix
 	 */
 	public static double[] computeCRLB2(double[][] m)
 	{
-		// https://en.wikipedia.org/wiki/Determinant		
+		// https://en.wikipedia.org/wiki/Invertible_matrix#Inversion_of_2_.C3.97_2_matrices		
 		double a = m[0][0];
 		double b = m[0][1];
 		double c = m[1][0];
@@ -167,7 +167,7 @@ public class FisherInformationMatrix
 	 */
 	public static double[] computeCRLB3(double[][] m)
 	{
-		// https://en.wikipedia.org/wiki/Determinant		
+		// https://en.wikipedia.org/wiki/Invertible_matrix#Inversion_of_3_.C3.97_3_matrices		
 		double a = m[0][0];
 		double b = m[0][1];
 		double c = m[0][2];
