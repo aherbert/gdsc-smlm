@@ -274,6 +274,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		{
 			final double du_dty = this.du_dty[y];
 			final double deltaEy = this.deltaEy[y];
+			final double du_dtsy = this.du_dtsy[y];
 			final double two_du_dtsy_tI = 2 * this.du_dtsy[y] / tI;
 			final double d2u_dty2 = this.d2u_dty2[y];
 			final double d2u_dtsy2 = this.d2u_dtsy2[y];
@@ -282,7 +283,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 				duda[1] = deltaEx[x] * deltaEy;
 				duda[2] = du_dtx[x] * deltaEy;
 				duda[3] = du_dty * deltaEx[x];
-				duda[4] = du_dtsx[x] * deltaEy;
+				duda[4] = du_dtsx[x] * deltaEy + du_dtsy * deltaEx[x];
 				d2uda2[2] = d2u_dtx2[x] * deltaEy;
 				d2uda2[3] = d2u_dty2 * deltaEx[x];
 				//@formatter:off

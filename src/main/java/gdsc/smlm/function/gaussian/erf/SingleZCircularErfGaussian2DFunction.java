@@ -263,7 +263,7 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 		duda[0] = 1.0;
 		for (int y = 0; y < maxy; y++)
 		{
-			final double du_dtsy = this.du_dty[y];
+			final double du_dty = this.du_dty[y];
 			final double deltaEy = this.deltaEy[y];
 			final double deltaEy_by_dtsx_dtz = deltaEy * dtsx_dtz;
 			final double du_dtsy_by_dtsy_dtz = this.du_dtsy[y] * dtsy_dtz;
@@ -272,7 +272,7 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 				duda[1] = deltaEx[x] * deltaEy;
 				duda[2] = du_dtsx[x] * deltaEy_by_dtsx_dtz + du_dtsy_by_dtsy_dtz * deltaEx[x];
 				duda[3] = du_dtx[x] * deltaEy;
-				duda[4] = du_dtsy * deltaEx[x];
+				duda[4] = du_dty * deltaEx[x];
 				procedure.execute(tB + tI * duda[1], duda);
 			}
 		}
@@ -293,8 +293,9 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 		final double two_dtsx_dtz_by_dtsy_dtz_tI = 2 * dtsx_dtz * dtsy_dtz / tI;
 		for (int y = 0; y < maxy; y++)
 		{
-			final double du_dtsy = this.du_dty[y];
+			final double du_dty = this.du_dty[y];
 			final double deltaEy = this.deltaEy[y];
+			final double du_dtsy = this.du_dtsy[y];
 			final double d2u_dty2 = this.d2u_dty2[y];
 			final double deltaEy_by_dtsx_dtz_2 = deltaEy * dtsx_dtz_2;
 			final double d2u_dtsy2_by_dtsy_dtz_2 = this.d2u_dtsy2[y] * dtsy_dtz_2;
@@ -307,20 +308,23 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 				duda[1] = deltaEx[x] * deltaEy;
 				duda[2] = du_dsx * dtsx_dtz + du_dsy * dtsy_dtz;
 				duda[3] = du_dtx[x] * deltaEy;
-				duda[4] = du_dtsy * deltaEx[x];
+				duda[4] = du_dty * deltaEx[x];
 				//@formatter:off
 				d2uda2[2] =
 						d2u_dtsx2[x] * deltaEy_by_dtsx_dtz_2 +
 						du_dsx * d2tsx_dtz2 +
-						d2u_dtsy2_by_dtsy_dtz_2 * deltaEx[x] + 
+						//d2u_dtsy2[y] * deltaEx[x] * dtsy_dtz_2 +
+						d2u_dtsy2_by_dtsy_dtz_2 * deltaEx[x] +
 						du_dsy * d2tsy_dtz2 +
 						// Add the equivalent term we add in the circular version.
 						// Note: this is not in the Smith, et al (2010) paper but is 
 						// in the GraspJ source code and it works in JUnit tests.
-						+ two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x];		
+						//2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
+						two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x]; 
 				//@formatter:on
 				d2uda2[3] = d2u_dtx2[x] * deltaEy;
 				d2uda2[4] = d2u_dty2 * deltaEx[x];
+
 				procedure.execute(tB + tI * duda[1], duda, d2uda2);
 			}
 		}
