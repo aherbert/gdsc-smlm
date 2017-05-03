@@ -63,18 +63,12 @@ public class FisherInformationMatrix
 		if (n < 5)
 		{
 			// We could solve this without linear algebra...
-			// Look for zero columns since the EJMLLinearSolver will handle those 
+			// Look for zero diagonal entries since the EJMLLinearSolver will handle those 
 			boolean ok = true;
-			OUTER: for (int i = 0; i < n; i++)
+			for (int i = 0; i < n; i++)
 			{
 				if (m[i][i] == 0)
 				{
-					// Check row and column
-					for (int j = 0; j < n; j++)
-					{
-						if (m[i][j] != 0 || m[j][i] != 0)
-							continue OUTER;
-					}
 					ok = false;
 					break;
 				}
@@ -118,8 +112,7 @@ public class FisherInformationMatrix
 		// Matrix inversion
 		double[][] m_inv = getMatrix();
 
-		EJMLLinearSolver solver = new EJMLLinearSolver();
-		solver.setEqual(equal);
+		EJMLLinearSolver solver = new EJMLLinearSolver(equal);
 		if (solver.invertSymmPosDef(m_inv))
 		{
 			// Check all diagonal values are zero or above

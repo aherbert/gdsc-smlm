@@ -30,6 +30,12 @@ import org.ejml.data.DenseMatrix64F;
  */
 public class EJMLLinearSolver
 {
+	// TODO - 
+	// Bit flags to indicate which solvers to use
+	// Method for inversion using the determinant
+	// Check for zeros only on the matrix diagonal
+	
+	
 	private LinearSolver<DenseMatrix64F> linearSolver;
 	private LinearSolver<DenseMatrix64F> choleskySolver;
 	private LinearSolver<DenseMatrix64F> choleskyLDLTSolver;
@@ -57,6 +63,16 @@ public class EJMLLinearSolver
 	}
 
 	/**
+	 * Instantiates a new EJML linear solver with tolerance for the linear solution.
+	 *
+	 * @param equal the object for equality
+	 */
+	public EJMLLinearSolver(DoubleEquality equal)
+	{
+		setEqual(equal);
+	}
+
+	/**
 	 * Instantiates a new EJML linear solver with tolerance for the linear solution
 	 *
 	 * @param significantDigits
@@ -66,7 +82,7 @@ public class EJMLLinearSolver
 	 */
 	public EJMLLinearSolver(int significantDigits, double maxAbsoluteError)
 	{
-		setEqual(new DoubleEquality(significantDigits, maxAbsoluteError));
+		this(new DoubleEquality(significantDigits, maxAbsoluteError));
 	}
 
 	/**
