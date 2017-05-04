@@ -566,8 +566,8 @@ public class EJMLLinearSolver
 		createSolver(A.numCols);
 		DenseMatrix64F A2 = (errorChecking) ? A.copy() : null;
 
-		LinearSolver<DenseMatrix64F> primarySolver = (A.numCols <= UnrolledInverseFromMinor.MAX) ? getInversionSolver()
-				: getCholeskyLDLTSolver();
+		LinearSolver<DenseMatrix64F> primarySolver = (A.numCols <= UnrolledInverseFromMinor.MAX)
+				? getInversionSolver() : getCholeskyLDLTSolver();
 
 		if (invert(primarySolver, A, A2, a, false))
 			return true;
@@ -604,8 +604,9 @@ public class EJMLLinearSolver
 				{
 					if (j == i)
 					{
+						--index;
 						// If using the pseudo inverse then the diagonal can be zero or 1
-						if (invalid(I.data[--index], 0) && invalid(I.data[--index], 1))
+						if (invalid(I.data[index], 1) && invalid(I.data[index], 0))
 							return false;
 					}
 					else
@@ -633,9 +634,9 @@ public class EJMLLinearSolver
 	private boolean invalid(double e, double o)
 	{
 		if (equal.almostEqualComplement(e, o))
-			return true;
+			return false;
 		System.out.printf("Bad solution: %g != %g (%g = %d)\n", e, o, DoubleEquality.relativeError(e, o),
 				DoubleEquality.complement(e, o));
-		return false;
+		return true;
 	}
 }
