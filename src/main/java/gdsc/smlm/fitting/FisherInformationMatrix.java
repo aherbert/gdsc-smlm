@@ -60,68 +60,75 @@ public class FisherInformationMatrix
 
 		inverted = NO;
 
-		if (n < 5)
+		//		if (n < 5)
+		//		{
+		//			// We could solve this without linear algebra...
+		//			// Look for zero diagonal entries since the EJMLLinearSolver will handle those 
+		//			boolean ok = true;
+		//			for (int i = 0; i < n; i++)
+		//			{
+		//				if (m[i][i] == 0)
+		//				{
+		//					ok = false;
+		//					break;
+		//				}
+		//			}
+		//			if (ok)
+		//			{
+		//				// Most likely to be used with larger matrices
+		//				if (n == 4)
+		//				{
+		//					crlb = computeCRLB4(m);
+		//					if (crlb != null)
+		//						inverted = YES;
+		//					return;
+		//				}
+		//				if (n == 3)
+		//				{
+		//					crlb = computeCRLB3(m);
+		//					if (crlb != null)
+		//						inverted = YES;
+		//					return;
+		//				}
+		//				if (n == 2)
+		//				{
+		//					crlb = computeCRLB2(m);
+		//					if (crlb != null)
+		//						inverted = YES;
+		//					return;
+		//				}
+		//				if (n == 1)
+		//				{
+		//					if (m[0][0] != 0)
+		//					{
+		//						crlb = new double[] { 1.0 / m[0][0] };
+		//						inverted = YES;
+		//					}
+		//					return;
+		//				}
+		//			}
+		//		}
+
+		// Matrix inversion
+		EJMLLinearSolver solver = new EJMLLinearSolver(equal);
+		// TODO - Use a DenseMatrix64F
+		//double[] crlb = solver.invertSymmPosDefDiagonal(new DenseMatrix64F(data));
+		double[] crlb = solver.invertSymmPosDefDiagonal(getMatrix());
+		if (crlb != null)
 		{
-			// We could solve this without linear algebra...
-			// Look for zero diagonal entries since the EJMLLinearSolver will handle those 
-			boolean ok = true;
-			for (int i = 0; i < n; i++)
+			// Check all diagonal values are zero or above
+			for (int i = n; i-- > 0;)
 			{
-				if (m[i][i] == 0)
+				if (crlb[i] < 0)
 				{
-					ok = false;
-					break;
-				}
-			}
-			if (ok)
-			{
-				// Most likely to be used with larger matrices
-				if (n == 4)
-				{
-					crlb = computeCRLB4(m);
-					if (crlb != null)
-						inverted = YES;
-					return;
-				}
-				if (n == 3)
-				{
-					crlb = computeCRLB3(m);
-					if (crlb != null)
-						inverted = YES;
-					return;
-				}
-				if (n == 2)
-				{
-					crlb = computeCRLB2(m);
-					if (crlb != null)
-						inverted = YES;
-					return;
-				}
-				if (n == 1)
-				{
-					if (m[0][0] != 0)
+					// A small error is OK
+					if (crlb[i] > -1e-2 || (equal != null && equal.almostEqualComplement(crlb[i], 0)))
 					{
-						crlb = new double[] { 1.0 / m[0][0] };
-						inverted = YES;
+						crlb[i] = 0;
+						continue;
 					}
 					return;
 				}
-			}
-		}
-
-		// Matrix inversion
-		double[][] m_inv = getMatrix();
-
-		EJMLLinearSolver solver = new EJMLLinearSolver(equal);
-		if (solver.invertSymmPosDef(m_inv))
-		{
-			// Check all diagonal values are zero or above
-			double[] crlb = new double[n];
-			for (int i = n; i-- > 0;)
-			{
-				if (m_inv[i][i] < 0)
-					return;
-				crlb[i] = Math.sqrt(m_inv[i][i]);
 			}
 
 			inverted = YES;

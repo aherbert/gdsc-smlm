@@ -38,8 +38,9 @@ import org.ejml.data.DenseMatrix64F;
 public class EJMLLinearSolver
 {
 	// TODO - 
-	// Rewrite to accept DenseMatrix64 as the primary input with wrapper function to accept double[][].
-	// Do not worry about double[] sine this is easily wrapped.
+	// Rewrite to accept DenseMatrix64 as the primary input with wrapper 
+	// functions to accept double[][].
+	// Do not worry about double[] since this is easily wrapped.
 
 	/**
 	 * Solve the matrix using direct inversion
@@ -628,8 +629,8 @@ public class EJMLLinearSolver
 	{
 		if (equal.almostEqualComplement(e, o))
 			return false;
-		System.out.printf("Bad solution: %g != %g (%g = %d)\n", e, o, DoubleEquality.relativeError(e, o),
-				DoubleEquality.complement(e, o));
+		//System.out.printf("Bad solution: %g != %g (%g = %d)\n", e, o, DoubleEquality.relativeError(e, o),
+		//		DoubleEquality.complement(e, o));
 		return true;
 	}
 
@@ -693,12 +694,26 @@ public class EJMLLinearSolver
 	{
 		final int numRows = A.numRows, numCols = A.numCols;
 		final double[][] out = new double[numRows][];
-		for (int i = 0, pos = 0; i < numRows; i++)
+		for (int i = 0, pos = 0; i < numRows; i++, pos += numRows)
 		{
 			out[i] = new double[numCols];
 			System.arraycopy(A.data, pos, out[i], 0, numCols);
-			pos += numCols;
 		}
 		return out;
+	}
+
+	/**
+	 * Convert a dense matrix to a row/column format
+	 *
+	 * @param A
+	 *            the matrix
+	 * @param out
+	 *            the row/column format
+	 */
+	private static void toSquareData(DenseMatrix64F A, double[][] out)
+	{
+		final int numRows = A.numRows;
+		for (int i = 0, pos = 0; i < numRows; i++, pos += numRows)
+			System.arraycopy(A.data, pos, out[i], 0, numRows);
 	}
 }
