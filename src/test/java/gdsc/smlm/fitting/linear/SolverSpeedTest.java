@@ -41,22 +41,23 @@ public class SolverSpeedTest
 	public void solveLinearAndGaussJordanReturnSameSolutionAndInversionResult()
 	{
 		int ITER = 100;
-		ArrayList<float[][]> A = copyAfloat(this.Adata, ITER);
-		ArrayList<float[]> B = copyBfloat(this.Bdata, ITER);
-		ArrayList<float[][]> A2 = copyAfloat(this.Adata, ITER);
-		ArrayList<float[]> B2 = copyBfloat(this.Bdata, ITER);
+		ArrayList<double[][]> A = copyAdouble(this.Adata, ITER);
+		ArrayList<double[]> B = copyBdouble(this.Bdata, ITER);
+		ArrayList<double[][]> A2 = copyAdouble(this.Adata, ITER);
+		ArrayList<double[]> B2 = copyBdouble(this.Bdata, ITER);
 
 		GaussJordan solver = new GaussJordan();
 		EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
 		for (int i = 0; i < A.size(); i++)
 		{
-			float[][] a = A.get(i);
-			float[] b = B.get(i);
-			float[][] a2 = A2.get(i);
-			float[] b2 = B2.get(i);
+			double[][] a = A.get(i);
+			double[] b = B.get(i);
+			double[][] a2 = A2.get(i);
+			double[] b2 = B2.get(i);
 			boolean r1 = solver.solve(a, b);
-			boolean r2 = solver2.solveLinearWithInversion(a2, b2);
+			boolean r2 = solver2.solveLinear(a2, b2);
+			solver2.invert(a2);
 			Assert.assertSame("Different solve result @ " + i, r1, r2);
 			for (int j = 0; j < b.length; j++)
 			{
@@ -72,20 +73,20 @@ public class SolverSpeedTest
 	public void solveLinearAndGaussJordanReturnSameSolutionResult()
 	{
 		int ITER = 100;
-		ArrayList<float[][]> A = copyAfloat(this.Adata, ITER);
-		ArrayList<float[]> B = copyBfloat(this.Bdata, ITER);
-		ArrayList<float[][]> A2 = copyAfloat(this.Adata, ITER);
-		ArrayList<float[]> B2 = copyBfloat(this.Bdata, ITER);
+		ArrayList<double[][]> A = copyAdouble(this.Adata, ITER);
+		ArrayList<double[]> B = copyBdouble(this.Bdata, ITER);
+		ArrayList<double[][]> A2 = copyAdouble(this.Adata, ITER);
+		ArrayList<double[]> B2 = copyBdouble(this.Bdata, ITER);
 
 		GaussJordan solver = new GaussJordan();
 		EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
 		for (int i = 0; i < ITER; i++)
 		{
-			float[][] a = A.get(i);
-			float[] b = B.get(i);
-			float[][] a2 = A2.get(i);
-			float[] b2 = B2.get(i);
+			double[][] a = A.get(i);
+			double[] b = B.get(i);
+			double[][] a2 = A2.get(i);
+			double[] b2 = B2.get(i);
 			boolean r1 = solver.solve(a, b);
 			boolean r2 = solver2.solve(a2, b2);
 			Assert.assertSame("Different solve result @ " + i, r1, r2);
@@ -475,7 +476,9 @@ public class SolverSpeedTest
 		ITER = FastMath.min(ITER, A.size());
 		for (int i = 0; i < ITER; i++)
 		{
-			solver.solveLinearWithInversion(A.get(i), B.get(i));
+			double[][]a = A.get(i);
+			solver.solveLinear(a, B.get(i));
+			solver.invert(a);
 		}
 	}
 

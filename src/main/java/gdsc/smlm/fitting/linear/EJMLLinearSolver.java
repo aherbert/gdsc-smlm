@@ -8,6 +8,7 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 
 import org.ejml.alg.dense.linsol.chol.LinearSolverCholLDL;
+import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
 
 /*----------------------------------------------------------------------------- 
@@ -27,18 +28,89 @@ import org.ejml.data.DenseMatrix64F;
  * Solves (one) linear equation, a x = b.
  * <p>
  * Wraps the LinearSolver class from the EJML (Efficient Java Matrix Library) library.
+ * <p>
+ * This class assumes that the input matrix is symmetric positive definite matrices, for instance it has been generated
+ * in the numerical solution of partial differential equations (for example a Hessian matrix).
+ * <p>
+ * If zeros occur on the diagonal of the matrix, for example if no gradient is available for a parameter, then the index
+ * can be excised from the matrix before solving.
  */
 public class EJMLLinearSolver
 {
 	// TODO - 
 	// Bit flags to indicate which solvers to use
-	// Method for inversion using the determinant
+	// Method for inversion using the determinant for n<=4
 	// Check for zeros only on the matrix diagonal
-	
-	
+
+	// Can we remove solveWithZeros?
+	// Is there a solver that will handle these entries?
+
+	// Rewrite the standard solve methods and update the tests.
+	// Check if we can solve matrices with zero columns.
+
+	/**
+	 * Solve the matrix using direct inversion
+	 */
+	private class InversionSolver implements LinearSolver<DenseMatrix64F>
+	{
+		private DenseMatrix64F A;
+
+		public boolean setA(DenseMatrix64F A)
+		{
+			if (A.numCols <= UnrolledInverseFromMinor.MAX)
+			{
+				// Direct inversion using the determinant 
+				if (A.numCols >= 2)
+				{
+					UnrolledInverseFromMinor.inv(A, A);
+				}
+				else
+				{
+					A.set(0, 1.0 / A.get(0));
+				}
+
+				// Check for NaN or Infinity
+				for (int i = A.data.length; i-- > 0;)
+					if (!Maths.isFinite(A.data[i]))
+						return false;
+
+				this.A = A;
+				return true;
+			}
+			return false;
+		}
+
+		public double quality()
+		{
+			return 0;
+		}
+
+		public void solve(DenseMatrix64F B, DenseMatrix64F X)
+		{
+			CommonOps.mult(A, B, X);
+		}
+
+		public void invert(DenseMatrix64F A_inv)
+		{
+			System.arraycopy(A.data, 0, A_inv.data, 0, A.data.length);
+		}
+
+		public boolean modifiesA()
+		{
+			return true;
+		}
+
+		public boolean modifiesB()
+		{
+			return false;
+		}
+	}
+
 	private LinearSolver<DenseMatrix64F> linearSolver;
+	private LinearSolver<DenseMatrix64F> pseudoInverseSolver;
 	private LinearSolver<DenseMatrix64F> choleskySolver;
 	private LinearSolver<DenseMatrix64F> choleskyLDLTSolver;
+	private LinearSolver<DenseMatrix64F> inversionSolver;
 	private LinearSolver<DenseMatrix64F> lastSuccessfulSolver = null;
 	private DenseMatrix64F X;
 	private DenseMatrix64F A_inv;
@@ -65,7 +137,8 @@ public class EJMLLinearSolver
 	/**
 	 * Instantiates a new EJML linear solver with tolerance for the linear solution.
 	 *
-	 * @param equal the object for equality
+	 * @param equal
+	 *            the object for equality
 	 */
 	public EJMLLinearSolver(DoubleEquality equal)
 	{
@@ -88,151 +161,6 @@ public class EJMLLinearSolver
 	/**
 	 * Solves (one) linear equation, a x = b
 	 * <p>
-	 * On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
-	 * 
-	 * @return False if the equation is singular (no solution)
-	 */
-	public boolean solveLinearWithInversion(float[][] a, float[] b)
-	{
-		// Convert data to double
-		double[] a2 = new double[b.length * b.length];
-		double[] b2 = new double[b.length];
-		for (int i = 0, index = 0; i < b.length; i++)
-		{
-			b2[i] = b[i];
-			for (int j = 0; j < b.length; j++)
-			{
-				a2[index++] = a[i][j];
-			}
-		}
-
-		DenseMatrix64F A = new DenseMatrix64F(b.length, b.length, true, a2);
-
-		createSolver(b.length);
-
-		if (!initialiseSolver(linearSolver, A))
-			return false;
-
-		DenseMatrix64F B = DenseMatrix64F.wrap(b.length, 1, b2);
-		DenseMatrix64F x = (linearSolver.modifiesB()) ? X : B;
-		linearSolver.solve(B, x);
-
-		zeroCount = 0;
-		invert(a);
-
-		// Copy back result
-		for (int i = 0; i < b.length; i++)
-		{
-			b[i] = (float) x.data[i];
-		}
-
-		return true;
-	}
-
-	/**
-	 * Solves (one) linear equation, a x = b
-	 * <p>
-	 * On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
-	 * 
-	 * @return False if the equation is singular (no solution)
-	 */
-	public boolean solveLinearWithInversion(double[][] a, double[] b)
-	{
-		DenseMatrix64F A = new DenseMatrix64F(a);
-
-		createSolver(b.length);
-
-		if (!initialiseSolver(linearSolver, A))
-			return false;
-
-		DenseMatrix64F B = DenseMatrix64F.wrap(b.length, 1, b);
-		DenseMatrix64F x = (linearSolver.modifiesB()) ? X : B;
-		linearSolver.solve(B, x);
-
-		zeroCount = 0;
-		invert(a);
-
-		// Copy back result
-		if (linearSolver.modifiesB())
-		{
-			for (int i = 0; i < b.length; i++)
-			{
-				b[i] = x.data[i];
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * Solves (one) linear equation, a x = b
-	 * <p>
-	 * On input have a[n][n], b[n]. On output b replaced by x[n].
-	 * 
-	 * @return False if the equation is singular (no solution)
-	 */
-	public boolean solveLinear(float[][] a, float[] b)
-	{
-		// Convert data to double
-		DenseMatrix64F[] data = wrapData(a, b);
-
-		if (solve(linearSolver, data[0], data[1]))
-		{
-			for (int i = 0; i < b.length; i++)
-				b[i] = (float) data[1].data[i];
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Solves (one) linear equation, a x = b
-	 * <p>
-	 * On input have a[n][n], b[n]. On output b replaced by x[n].
-	 * 
-	 * @return False if the equation is singular (no solution)
-	 */
-	public boolean solveCholesky(float[][] a, float[] b)
-	{
-		// Convert data to double
-		DenseMatrix64F[] data = wrapData(a, b);
-
-		if (solve(choleskySolver, data[0], data[1]))
-		{
-			for (int i = 0; i < b.length; i++)
-				b[i] = (float) data[1].data[i];
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Solves (one) linear equation, a x = b
-	 * <p>
-	 * On input have a[n][n], b[n]. On output b replaced by x[n].
-	 * 
-	 * @return False if the equation is singular (no solution)
-	 */
-	public boolean solveCholeskyLDLT(float[][] a, float[] b)
-	{
-		// Convert data to double
-		DenseMatrix64F[] data = wrapData(a, b);
-
-		if (solve(choleskyLDLTSolver, data[0], data[1]))
-		{
-			for (int i = 0; i < b.length; i++)
-				b[i] = (float) data[1].data[i];
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Solves (one) linear equation, a x = b
-	 * <p>
 	 * On input have a[n][n], b[n]. On output b replaced by x[n].
 	 * 
 	 * @return False if the equation is singular (no solution)
@@ -240,7 +168,7 @@ public class EJMLLinearSolver
 	public boolean solveLinear(double[][] a, double[] b)
 	{
 		createSolver(b.length);
-		return solve(linearSolver, new DenseMatrix64F(a), DenseMatrix64F.wrap(b.length, 1, b));
+		return solve(getLinearSolver(), new DenseMatrix64F(a), DenseMatrix64F.wrap(b.length, 1, b));
 	}
 
 	/**
@@ -253,7 +181,7 @@ public class EJMLLinearSolver
 	public boolean solveCholesky(double[][] a, double[] b)
 	{
 		createSolver(b.length);
-		return solve(choleskySolver, new DenseMatrix64F(a), DenseMatrix64F.wrap(b.length, 1, b));
+		return solve(getCholeskySolver(), new DenseMatrix64F(a), DenseMatrix64F.wrap(b.length, 1, b));
 	}
 
 	/**
@@ -266,7 +194,33 @@ public class EJMLLinearSolver
 	public boolean solveCholeskyLDLT(double[][] a, double[] b)
 	{
 		createSolver(b.length);
-		return solve(choleskyLDLTSolver, new DenseMatrix64F(a), DenseMatrix64F.wrap(b.length, 1, b));
+		return solve(getCholeskyLDLTSolver(), new DenseMatrix64F(a), DenseMatrix64F.wrap(b.length, 1, b));
+	}
+
+	/**
+	 * Solves (one) linear equation, a x = b
+	 * <p>
+	 * On input have a[n][n], b[n]. On output b replaced by x[n].
+	 * 
+	 * @return False if the equation is singular (no solution)
+	 */
+	public boolean solvePseudoInverse(double[][] a, double[] b)
+	{
+		createSolver(b.length);
+		return solve(getPseudoInverseSolver(), new DenseMatrix64F(a), DenseMatrix64F.wrap(b.length, 1, b));
+	}
+
+	/**
+	 * Solves (one) linear equation, a x = b by direct inversion. Works on small matrices up to size 5.
+	 * <p>
+	 * On input have a[n][n], b[n]. On output b replaced by x[n].
+	 * 
+	 * @return False if the equation is singular (no solution)
+	 */
+	public boolean solveDirectInversion(double[][] a, double[] b)
+	{
+		createSolver(b.length);
+		return solve(getInversionSolver(), new DenseMatrix64F(a), DenseMatrix64F.wrap(b.length, 1, b));
 	}
 
 	/**
@@ -279,19 +233,15 @@ public class EJMLLinearSolver
 	private boolean solve(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, DenseMatrix64F B)
 	{
 		zeroCount = 0;
-		DenseMatrix64F x = (solver.modifiesB()) ? X : B;
+		boolean copy = (errorChecking || solver.modifiesB());
+		DenseMatrix64F x = (copy) ? getX() : B;
 
 		if (!solve(solver, A, B, x))
 			return false;
 
 		// Copy back result if necessary
-		if (solver.modifiesB())
-		{
-			for (int i = 0; i < B.numRows; i++)
-			{
-				B.data[i] = x.data[i];
-			}
-		}
+		if (copy)
+			System.arraycopy(x.data, 0, B.data, 0, B.numRows);
 
 		return true;
 	}
@@ -321,43 +271,6 @@ public class EJMLLinearSolver
 		}
 		else
 			return solveUnsafe(solver, A, B, X);
-	}
-
-	/**
-	 * Check that the solution for x satisfies A x = b within the error tolerance
-	 * 
-	 * @param A
-	 * @param x
-	 * @param b
-	 * @return
-	 */
-	private boolean validate(DenseMatrix64F A, DenseMatrix64F x, DenseMatrix64F b)
-	{
-		if (errorChecking)
-		{
-			// Compute A x = b
-
-			// Used for debugging
-			//DenseMatrix64F b2 = new DenseMatrix64F(size, 1);
-			//CommonOps.mult(A, x, b2);
-			//return equal.almostEqualComplement(b.data, b2.data);
-
-			for (int i = 0, index = 0; i < b.numRows; i++)
-			{
-				double bi = 0;
-				for (int j = 0; j < b.numRows; j++)
-				{
-					bi += A.data[index++] * x.data[j];
-				}
-				if (!equal.almostEqualComplement(b.data[i], bi))
-				{
-					//System.out.printf("Bad solution: %g != %g (%g = %d)\n", b.data[i], bi, 
-					//		equal.relativeError(b.data[i], bi), equal.complement(b.data[i], bi));
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 	/**
@@ -415,11 +328,50 @@ public class EJMLLinearSolver
 	}
 
 	/**
+	 * Check that the solution for x satisfies A x = b within the error tolerance
+	 * 
+	 * @param A
+	 * @param x
+	 * @param b
+	 * @return
+	 */
+	private boolean validate(DenseMatrix64F A, DenseMatrix64F x, DenseMatrix64F b)
+	{
+		if (errorChecking)
+		{
+			// Compute A x = b
+
+			// Used for debugging
+			//DenseMatrix64F b2 = new DenseMatrix64F(size, 1);
+			//CommonOps.mult(A, x, b2);
+			//return equal.almostEqualComplement(b.data, b2.data);
+
+			for (int i = 0, index = 0; i < b.numRows; i++)
+			{
+				double bi = 0;
+				for (int j = 0; j < b.numRows; j++)
+				{
+					bi += A.data[index++] * x.data[j];
+				}
+				if (!equal.almostEqualComplement(b.data[i], bi))
+				{
+					//System.out.printf("Bad solution: %g != %g (%g = %d)\n", b.data[i], bi, 
+					//		DoubleEquality.relativeError(b.data[i], bi), DoubleEquality.complement(b.data[i], bi));
+					return false;
+				}
+			}
+			//System.out.println("OK");
+		}
+		return true;
+	}
+
+	/**
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On input have a[n][n], b[n]. On output b replaced by x[n].
 	 * <p>
-	 * Solve using the CholeskyLDLT method or if that fails the Linear decomposition.
+	 * Solve using the CholeskyLDLT method or, if that fails (due to a singular matrix), the PseudoInversion
+	 * decomposition.
 	 * 
 	 * @return False if the equation is singular (no solution)
 	 */
@@ -434,63 +386,24 @@ public class EJMLLinearSolver
 		// Note: Use solveSafe as we need the A and B matrix for the subsequent 
 		// solve attempt if failure
 
-		if (solveSafe(choleskyLDLTSolver, A, B, X))
+		if (solveSafe(getCholeskyLDLTSolver(), A, B, getX()))
 		{
 			if (validate(A, X, B))
 			{
-				for (int i = 0; i < b.length; i++)
-					b[i] = X.data[i];
+				System.arraycopy(X.data, 0, b, 0, b.length);
 				return true;
 			}
 		}
+		
+		// TODO - Count how often the primary method fails on a realistic set of fitting data
+		// since the PseudoInverse method is slow. We may want to try a different solver first,
+		// e.g. LinearSolver.
 
-		// No need for an explicit solveSafe this time. Use the solve() method which will include validate().
-		if (solve(linearSolver, A, B, X))
+		// No need for an explicit solveSafe this time. 
+		// Use the solve() method which will include validate().
+		if (solve(getPseudoInverseSolver(), A, B, X))
 		{
-			for (int i = 0; i < b.length; i++)
-				b[i] = X.data[i];
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Solves (one) linear equation, a x = b
-	 * <p>
-	 * On input have a[n][n], b[n]. On output b replaced by x[n].
-	 * <p>
-	 * Solve using the CholeskyLDLT method or if that fails the Linear decomposition.
-	 * 
-	 * @return False if the equation is singular (no solution)
-	 */
-	public boolean solve(float[][] a, float[] b)
-	{
-		zeroCount = 0;
-		DenseMatrix64F[] data = wrapData(a, b);
-		DenseMatrix64F A = data[0];
-		DenseMatrix64F B = data[1];
-
-		createSolver(b.length);
-
-		// Note: Use solveSafe as we need the A and B matrix for the subsequent 
-		// solve attempt if failure
-
-		if (solveSafe(choleskyLDLTSolver, A, B, X))
-		{
-			if (validate(A, X, B))
-			{
-				for (int i = 0; i < b.length; i++)
-					b[i] = (float) X.data[i];
-				return true;
-			}
-		}
-
-		// No need for an explicit solveSafe this time. Use the solve() method which will include validate().
-		if (solve(linearSolver, A, B, X))
-		{
-			for (int i = 0; i < b.length; i++)
-				b[i] = (float) X.data[i];
+			System.arraycopy(X.data, 0, b, 0, b.length);
 			return true;
 		}
 
@@ -528,7 +441,7 @@ public class EJMLLinearSolver
 		// Note: Use solveSafe as we need the A and B matrix for the subsequent 
 		// solve attempt if failure
 
-		if (solveSafe(choleskyLDLTSolver, A, B, X))
+		if (solveSafe(getCholeskyLDLTSolver(), A, B, X))
 		{
 			if (validate(A, X, B))
 			{
@@ -539,7 +452,7 @@ public class EJMLLinearSolver
 		}
 
 		// No need for an explicit solveSafe this time. Use the solve() method which will include validate().
-		if (solve(linearSolver, A, B, X))
+		if (solve(getLinearSolver(), A, B, X))
 		{
 			for (int i = 0; i < X.data.length; i++)
 				b[zerosMap[i]] = X.data[i];
@@ -547,94 +460,6 @@ public class EJMLLinearSolver
 		}
 
 		return false;
-	}
-
-	/**
-	 * Solves (one) linear equation, a x = b
-	 * <p>
-	 * On input have a[n][n], b[n]. On output b replaced by x[n].
-	 * <p>
-	 * Solve using the CholeskyLDLT method or if that fails the Linear decomposition.
-	 * <p>
-	 * Note: Any zero elements in b are not solved.
-	 * 
-	 * @return False if the equation is singular (no solution)
-	 */
-	public boolean solveWithZeros(float[][] a, float[] b)
-	{
-		checkForZeros(b);
-		if (zeroCount == 0)
-			return solve(a, b);
-
-		if (b.length == zeroCount)
-			// This can be solved using all zeros but it cannot be inverted
-			return false;
-
-		createSolver(b.length - zeroCount);
-
-		DenseMatrix64F[] data = wrapDataWithZeros(a, b);
-		DenseMatrix64F A = data[0];
-		DenseMatrix64F B = data[1];
-		DenseMatrix64F X = new DenseMatrix64F(B.numRows, 1);
-
-		// Note: Use solveSafe as we need the A and B matrix for the subsequent 
-		// solve attempt if failure
-
-		if (solveSafe(choleskyLDLTSolver, A, B, X))
-		{
-			if (validate(A, X, B))
-			{
-				for (int i = 0; i < X.data.length; i++)
-					b[zerosMap[i]] = (float) X.data[i];
-				return true;
-			}
-		}
-
-		// No need for an explicit solveSafe this time. Use the solve() method which will include validate().
-		if (solve(linearSolver, A, B, X))
-		{
-			for (int i = 0; i < X.data.length; i++)
-				b[zerosMap[i]] = (float) X.data[i];
-			return true;
-		}
-
-		return false;
-	}
-
-	private void checkForZeros(float[] b)
-	{
-		zeroCount = 0;
-		for (int i = 0; i < b.length; i++)
-			if (isZero(b[i]))
-				zeroCount++;
-	}
-
-	private boolean isZero(float f)
-	{
-		return f == 0; // Q. Should this be an fEQ operation?
-	}
-
-	private void createZeroArrays(float[] b)
-	{
-		// Resize array if necessary
-		if (zeros.length < b.length)
-		{
-			zeros = new boolean[b.length];
-			zerosMap = new int[b.length];
-		}
-		for (int i = 0, j = 0; i < b.length; i++)
-		{
-			if (isZero(b[i]))
-			{
-				zeros[i] = true;
-			}
-			else
-			{
-				zeros[i] = false;
-				// Map new data index back to original index
-				zerosMap[j++] = i;
-			}
-		}
 	}
 
 	private void checkForZeros(double[] b)
@@ -728,8 +553,13 @@ public class EJMLLinearSolver
 		if (lastSuccessfulSolver == null)
 			return false;
 
-		lastSuccessfulSolver.invert(A_inv);
+		lastSuccessfulSolver.invert(getA_inv());
 
+		return checkA_inv(a);
+	}
+
+	private boolean checkA_inv(double[][] a)
+	{
 		// Check for NaN or Infinity
 		for (int i = A_inv.data.length; i-- > 0;)
 			if (!Maths.isFinite(A_inv.data[i]))
@@ -761,58 +591,6 @@ public class EJMLLinearSolver
 				for (int j = 0; j < solverSize; j++)
 				{
 					a[i][j] = A_inv.data[index++];
-				}
-		}
-
-		return true;
-	}
-
-	/**
-	 * Computes the inverse of the 'A' matrix passed into the last successful solve method.
-	 * <p>
-	 * On output a[n][n] replaced by the inverse of the solved matrix a. If any column/row index was removed (as it was
-	 * set to zero in the input matrix) then the resulting column/row index will be set to zero.
-	 * 
-	 * @return False if the last solve attempt failed, or inversion produces non finite values
-	 */
-	public boolean invert(float[][] a)
-	{
-		if (lastSuccessfulSolver == null)
-			return false;
-
-		lastSuccessfulSolver.invert(A_inv);
-
-		// Check for NaN or Infinity
-		for (int i = A_inv.data.length; i-- > 0;)
-			if (!Maths.isFinite(A_inv.data[i]))
-				return false;
-
-		if (zeroCount > 0)
-		{
-			int size = this.solverSize + zeroCount;
-			for (int i = 0, index = 0; i < size; i++)
-			{
-				if (zeros[i])
-				{
-					// Set all zero columns to zer0
-					for (int j = 0; j < size; j++)
-						a[i][j] = a[j][i] = 0;
-					continue;
-				}
-				for (int j = 0; j < size; j++)
-				{
-					if (zeros[j])
-						continue;
-					a[i][j] = (float) A_inv.data[index++];
-				}
-			}
-		}
-		else
-		{
-			for (int i = 0, index = 0; i < solverSize; i++)
-				for (int j = 0; j < solverSize; j++)
-				{
-					a[i][j] = (float) A_inv.data[index++];
 				}
 		}
 
@@ -854,59 +632,68 @@ public class EJMLLinearSolver
 		{
 			solverSize = length;
 
-			choleskyLDLTSolver = new LinearSolverCholLDL();
+			// Reset size dependent objects
+			choleskySolver = null;
+			linearSolver = null;
+			X = null;
+			A_inv = null;
+		}
+	}
 
+	private DenseMatrix64F getX()
+	{
+		if (X == null)
+			X = new DenseMatrix64F(solverSize, 1);
+		return X;
+	}
+
+	private DenseMatrix64F getA_inv()
+	{
+		if (A_inv == null)
+			A_inv = new DenseMatrix64F(solverSize, solverSize);
+		return A_inv;
+	}
+
+	private LinearSolver<DenseMatrix64F> getCholeskyLDLTSolver()
+	{
+		// This is a Cholesky LDLT solver that should be faster than the Cholesky solver.
+		// It only works on symmetric positive definite matrices.
+		if (choleskyLDLTSolver == null)
+			choleskyLDLTSolver = new LinearSolverCholLDL();
+		return choleskyLDLTSolver;
+	}
+
+	private LinearSolver<DenseMatrix64F> getCholeskySolver()
+	{
+		if (choleskySolver == null)
 			// This is a Cholesky solver that only works on symmetric positive definite matrices
 			choleskySolver = LinearSolverFactory.symmPosDef(solverSize);
+		return choleskySolver;
+	}
 
+	private LinearSolver<DenseMatrix64F> getLinearSolver()
+	{
+		if (linearSolver == null)
 			// This should work on any matrix
 			linearSolver = LinearSolverFactory.linear(solverSize);
-			//linearSolver = LinearSolverFactory.leastSquares(solverSize, solverSize);
-			//linearSolver = LinearSolverFactory.pseudoInverse(false);
-
-			X = new DenseMatrix64F(solverSize, 1);
-			A_inv = new DenseMatrix64F(solverSize, solverSize);
-		}
+		return linearSolver;
 	}
 
-	private DenseMatrix64F[] wrapData(float[][] a, float[] b)
+	private LinearSolver<DenseMatrix64F> getPseudoInverseSolver()
 	{
-		double[] a2 = new double[b.length * b.length];
-		double[] b2 = new double[b.length];
-		for (int i = 0, index = 0; i < b.length; i++)
-		{
-			b2[i] = b[i];
-			for (int j = 0; j < b.length; j++)
-			{
-				a2[index++] = a[i][j];
-			}
-		}
-		return new DenseMatrix64F[] { DenseMatrix64F.wrap(b.length, b.length, a2),
-				DenseMatrix64F.wrap(b.length, 1, b2) };
+		// The pseudo inverse is constructed using the non-singular sub matrix of A
+
+		if (pseudoInverseSolver == null)
+			pseudoInverseSolver = LinearSolverFactory.pseudoInverse(false);
+		return pseudoInverseSolver;
 	}
 
-	private DenseMatrix64F[] wrapDataWithZeros(float[][] a, float[] b)
+	private LinearSolver<DenseMatrix64F> getInversionSolver()
 	{
-		createZeroArrays(b);
-
-		int size = b.length - zeroCount;
-		double[] a2 = new double[size * size];
-		double[] b2 = new double[size];
-		for (int i = 0, ii = 0, index = 0; i < b.length; i++)
-		{
-			if (zeros[i])
-				continue;
-
-			b2[ii++] = b[i];
-			for (int j = 0; j < b.length; j++)
-			{
-				if (zeros[j])
-					continue;
-
-				a2[index++] = a[i][j];
-			}
-		}
-		return new DenseMatrix64F[] { DenseMatrix64F.wrap(size, size, a2), DenseMatrix64F.wrap(size, 1, b2) };
+		if (inversionSolver == null)
+			// This should work on any matrix
+			inversionSolver = new InversionSolver();
+		return inversionSolver;
 	}
 
 	private DenseMatrix64F[] wrapDataWithZeros(double[][] a, double[] b)
@@ -933,31 +720,6 @@ public class EJMLLinearSolver
 		return new DenseMatrix64F[] { DenseMatrix64F.wrap(size, size, a2), DenseMatrix64F.wrap(size, 1, b2) };
 	}
 
-	private DenseMatrix64F wrapDataWithZeros(double[][] a)
-	{
-		checkForZerosAndCreateZeroArrays(a);
-
-		if (zeroCount == 0)
-			return new DenseMatrix64F(a);
-
-		final int length = a.length;
-
-		int size = length - zeroCount;
-		double[] a2 = new double[size * size];
-		for (int i = 0, index = 0; i < length; i++)
-		{
-			if (zeros[i])
-				continue;
-			for (int j = 0; j < length; j++)
-			{
-				if (zeros[j])
-					continue;
-				a2[index++] = a[i][j];
-			}
-		}
-		return DenseMatrix64F.wrap(size, size, a2);
-	}
-
 	/**
 	 * @param equal
 	 *            the equality class to compare that the solution x in A x = b is within tolerance
@@ -979,8 +741,7 @@ public class EJMLLinearSolver
 	/**
 	 * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the inverse of a.
 	 * <p>
-	 * Note: Rows and columns for element i that are entirely zero are removed before inversion and the result will have
-	 * zero in the result.
+	 * Note: If the matrix is singular then a pseudo inverse will be computed.
 	 *
 	 * @param a
 	 *            the matrix a
@@ -988,75 +749,105 @@ public class EJMLLinearSolver
 	 */
 	public boolean invertSymmPosDef(double[][] a)
 	{
-		DenseMatrix64F A = wrapDataWithZeros(a);
-		DenseMatrix64F A2 = (errorChecking) ? A.copy() : null;
-		createSolver(A.numCols);
-		if (!initialiseSolver(choleskySolver, A))
-		{
-			if (choleskySolver.modifiesA())
-				A = wrapDataWithZeros(a);
-			if (!initialiseSolver(linearSolver, A))
-				return false;
-		}
+		zeroCount = 0;
+		DenseMatrix64F A = new DenseMatrix64F(a);
 
+		createSolver(A.numCols);
+		DenseMatrix64F A2 = (errorChecking) ? A.copy() : null;
+		if (A.numCols <= UnrolledInverseFromMinor.MAX)
+		{
+			getA_inv();
+			// Direct inversion using the determinant 
+			if (A.numCols >= 2)
+			{
+				UnrolledInverseFromMinor.inv(A, A_inv);
+			}
+			else
+			{
+				A_inv.set(0, 1.0 / A.get(0));
+			}
+
+			// Check the inversion did not produce invalid numbers 
+			if (!checkA_inv(a) || (errorChecking && !validateInversion(A2, false)))
+			{
+				// Assume the matrix was singular so we create a pseudo inverse
+				return invert(getPseudoInverseSolver(), A, A2, a, true);
+			}
+			return true;
+		}
+		else
+		{
+			if (invert(getCholeskyLDLTSolver(), A, A2, a, false))
+				return true;
+
+			if (choleskyLDLTSolver.modifiesA())
+				A = (errorChecking) ? A2.copy() : new DenseMatrix64F(a);
+			return invert(getPseudoInverseSolver(), A, A2, a, true);
+		}
+	}
+
+	private boolean invert(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, DenseMatrix64F A2, double[][] a,
+			boolean pseudoInverse)
+	{
+		if (!initialiseSolver(solver, A))
+			return false;
 		if (!invert(a))
 			return false;
-
-		if (errorChecking)
-			return validateInversion(A2);
-
+		if (A2 != null)
+			return validateInversion(A2, pseudoInverse);
 		return true;
 	}
 
-	private boolean validateInversion(DenseMatrix64F A)
+	private boolean validateInversion(DenseMatrix64F A, boolean pseudoInverse)
 	{
+		// Check for the identity matrix:
 		// Compute A A_inv = I
 		final int n = A.numCols;
 		DenseMatrix64F I = new DenseMatrix64F(n, n);
 		CommonOps.mult(A, A_inv, I);
 
-		for (int i = n, index = I.data.length; i-- > 0;)
+		if (pseudoInverse)
 		{
-			for (int j = n; j-- > 0;)
+			for (int i = n, index = I.data.length; i-- > 0;)
 			{
-				double target = (j == i) ? 1 : 0;
-				if (!equal.almostEqualComplement(I.data[--index], target))
+				for (int j = n; j-- > 0;)
 				{
-					System.out.printf("Bad solution: %g != %g (%g = %d)\n", I.data[index], target,
-							DoubleEquality.relativeError(I.data[index], target),
-							DoubleEquality.complement(I.data[index], target));
-					return false;
+					if (j == i)
+					{
+						// If using the pseudo inverse then the diagonal can be zero or 1
+						if (invalid(I.data[--index], 0) && invalid(I.data[--index], 1))
+							return false;
+					}
+					else
+					{
+						if (invalid(I.data[--index], 0))
+							return false;
+					}
+				}
+			}
+		}
+		else
+		{
+			for (int i = n, index = I.data.length; i-- > 0;)
+			{
+				for (int j = n; j-- > 0;)
+				{
+					if (invalid(I.data[--index], (j == i) ? 1 : 0))
+						return false;
 				}
 			}
 		}
 		return true;
 	}
 
-	/**
-	 * Computes the inverse of the matrix. This should work on any square matrix. On output a is replaced by the
-	 * inverse of a.
-	 * <p>
-	 * Note: Rows and columns for element i that are entirely zero are removed before inversion and the result will have
-	 * zero in the result.
-	 * 
-	 * @param a
-	 *            the matrix a
-	 * @return False if there is no solution
-	 */
-	public boolean invertLinear(double[][] a)
+	private boolean invalid(double e, double o)
 	{
-		DenseMatrix64F A = wrapDataWithZeros(a);
-		DenseMatrix64F A2 = (errorChecking) ? A.copy() : null;
-		createSolver(A.numCols);
-		if (!initialiseSolver(linearSolver, A))
-			return false;
-
-		if (!invert(a))
-			return false;
-
-		if (errorChecking)
-			return validateInversion(A2);
-
-		return true;
+		if (equal.almostEqualComplement(e, o))
+		{
+			System.out.printf("Bad solution: %g != %g (%g = %d)\n", e, o, DoubleEquality.relativeError(e, o),
+					DoubleEquality.complement(e, o));
+			return true;
+		}
+		return false;
 	}
 }
