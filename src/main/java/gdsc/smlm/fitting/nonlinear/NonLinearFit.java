@@ -254,22 +254,26 @@ public class NonLinearFit extends BaseFunctionSolver
 	 */
 	protected boolean solve(double[][] a, double[] b)
 	{
+		// 04-May-2017
+		// EJMLLinearSolver was updated to use the pseudoInverse to create a solution
+		// when the matrix is singular. Thus we no longer check for zeros.		
+
 		// If the gradient vector is very small set to zero so that this is ignored.
 
 		// TODO - At what level should gradients be ignored (i.e. the parameter has no effect?).
 		// Note that analysis on a test dataset showed no difference in results. Those that are caught 
 		// for bad gradients must therefore go on to fail on peak filtering criteria. At least this
 		// gives the option of not filtering.
-		for (int i = b.length; i-- > 0;)
-			if (Math.abs(b[i]) < 1e-16)
-				b[i] = 0;
+		//for (int i = b.length; i-- > 0;)
+		//	if (Math.abs(b[i]) < 1e-16)
+		//		b[i] = 0;
 
 		// TODO
 		// Q. Do we need a better qr decomposition that uses the largest Eigen column first. 
 		// There is a version from Apache commons math.
 		// We could assess the magnitude of each value in the gradient vector and rearrange.
 
-		return solver.solveWithZeros(a, b);
+		return solver.solve(a, b);
 	}
 
 	/**
@@ -324,12 +328,17 @@ public class NonLinearFit extends BaseFunctionSolver
 
 		if (a_dev != null)
 		{
+			// Copy the diagonal from the current solution alpha (so we do not 
+			// recompute it if inversion fails) 
+			final double[] I = new double[beta.length];
+			for (int i = I.length; i-- > 0;)
+				I[i] = alpha[i][i];
 			if (!computeDeviations(a_dev))
 			{
 				// Matrix inversion failed. In order to return a solution 
 				// return the reciprocal of the diagonal of the Fisher information 
 				// for a loose bound on the limit 
-				final double[] I = calculator.fisherInformationDiagonal(n, a, f);
+				//final double[] I = calculator.fisherInformationDiagonal(n, a, f);
 				Arrays.fill(a_dev, 0);
 				for (int i = gradientIndices.length; i-- > 0;)
 					a_dev[gradientIndices[i]] = FisherInformationMatrix.reciprocalSqrt(I[i]);
@@ -363,18 +372,11 @@ public class NonLinearFit extends BaseFunctionSolver
 	 */
 	private boolean computeDeviations(double[] a_dev)
 	{
-		// This is used to calculate the parameter covariance matrix.
-		// Solve the gradient matrix corresponding to the best Chi-squared 
-		// stored in alpha and beta. 
-		// Do not use the solve() method as this sets beta to zero for small values
-		// thus preventing inversion.
-		if (!solver.solveWithZeros(alpha, beta))
+		// Call the invert method directly on alpha 
+		if (!solver.invertSymmPosDef(alpha))
 			return false;
 
-		if (!solver.invert(covar))
-			return false;
-
-		setDeviations(a_dev, covar);
+		setDeviations(a_dev, alpha);
 
 		return true;
 	}

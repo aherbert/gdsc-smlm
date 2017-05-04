@@ -19,6 +19,7 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 public class EJMLLinearSolverTest
 {
+	//@formatter:off
 	@Test
 	public void canSolveLinearEquation()
 	{
@@ -27,14 +28,18 @@ public class EJMLLinearSolverTest
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] { new double[] { 2, -1, 0 }, new double[] { -1, 2, -1 },
-				new double[] { 0, -1, 2 } };
+		double[][] a = new double[][] { 
+			new double[] { 2, -1, 0 }, 
+			new double[] { -1, 2, -1 },
+			new double[] { 0, -1, 2 } };
 		double[] b = new double[] { 3, 3, 4 };
 
 		// Expected solution
 		double[] x = new double[] { 4.75, 6.5, 5.25 };
-		double[][] a_inv = new double[][] { new double[] { 0.75, 0.5, 0.25 }, new double[] { 0.5, 1, 0.5 },
-				new double[] { 0.25, 0.5, 0.75 } };
+		double[][] a_inv = new double[][] { 
+			new double[] { 0.75, 0.5, 0.25 }, 
+			new double[] { 0.5, 1, 0.5 },
+			new double[] { 0.25, 0.5, 0.75 } };
 
 		boolean result = solver.solve(a, b);
 		solver.invert(a);
@@ -49,7 +54,7 @@ public class EJMLLinearSolverTest
 			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
 		}
 	}
-
+	
 	@Test
 	public void canSolveLinearEquationWithZeroInB()
 	{
@@ -58,14 +63,18 @@ public class EJMLLinearSolverTest
 		// Solves (one) linear equation, a x = b, for x[n]
 
 		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
-		double[][] a = new double[][] { new double[] { 2, -1, 0 }, new double[] { -1, 2, -1 },
-				new double[] { 0, -1, 2 } };
+		double[][] a = new double[][] { 
+			new double[] { 2, -1, 0 }, 
+			new double[] { -1, 2, -1 },
+			new double[] { 0, -1, 2 } };
 		double[] b = new double[] { 3, 0, 4 };
 
 		// Expected solution
 		double[] x = new double[] { 3.25, 3.5, 3.75 };
-		double[][] a_inv = new double[][] { new double[] { 0.75, 0.5, 0.25 }, new double[] { 0.5, 1, 0.5 },
-				new double[] { 0.25, 0.5, 0.75 } };
+		double[][] a_inv = new double[][] { 
+			new double[] { 0.75, 0.5, 0.25 }, 
+			new double[] { 0.5, 1, 0.5 },
+			new double[] { 0.25, 0.5, 0.75 } };
 
 		boolean result = solver.solve(a, b);
 		solver.invert(a);
@@ -88,14 +97,20 @@ public class EJMLLinearSolverTest
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
-		double[][] a = new double[][] { new double[] { 2, 0, -1, 0 }, new double[] { 0, 0, 0, 0 },
-				new double[] { -1, 0, 2, -1 }, new double[] { 0, 0, -1, 2 } };
+		double[][] a = new double[][] { 
+			new double[] { 2, 0, -1, 0 }, 
+			new double[] { 0, 0, 0, 0 },
+			new double[] { -1, 0, 2, -1 }, 
+			new double[] { 0, 0, -1, 2 } };
 		double[] b = new double[] { 3, 0, 3, 4 };
 
 		// Expected solution
 		double[] x = new double[] { 4.75, 0, 6.5, 5.25 };
-		double[][] a_inv = new double[][] { new double[] { 0.75, 0, 0.5, 0.25 }, new double[] { 0, 0, 0, 0 },
-				new double[] { 0.5, 0, 1, 0.5 }, new double[] { 0.25, 0, 0.5, 0.75 } };
+		double[][] a_inv = new double[][] { 
+			new double[] { 0.75, 0, 0.5, 0.25 }, 
+			new double[] { 0, 0, 0, 0 },
+			new double[] { 0.5, 0, 1, 0.5 },
+			new double[] { 0.25, 0, 0.5, 0.75 } };
 
 		boolean result = solver.solve(a, b);
 		solver.invert(a);
@@ -120,17 +135,24 @@ public class EJMLLinearSolverTest
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
-		double[][] a = new double[][] { new double[] { 2, 0, -1, 0, 0, 0 }, new double[] { 0, 0, 0, 0, 0, 0 },
-				new double[] { -1, 0, 2, 0, 0, -1 }, new double[] { 0, 0, 0, 0, 0, 0 },
-				new double[] { 0, 0, 0, 0, 0, 0 }, new double[] { 0, 0, -1, 0, 0, 2 } };
+		double[][] a = new double[][] { 
+			new double[] { 2, 0, -1, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
+			new double[] { -1, 0, 2, 0, 0, -1 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
+			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, -1, 0, 0, 2 } };
 		double[] b = new double[] { 3, 0, 3, 0, 0, 4 };
 
 		// Expected solution
 		double[] x = new double[] { 4.75, 0, 6.5, 0, 0, 5.25 };
-		double[][] a_inv = new double[][] { new double[] { 0.75, 0, 0.5, 0, 0, 0.25 },
-				new double[] { 0, 0, 0, 0, 0, 0 }, new double[] { 0.5, 0, 1, 0, 0, 0.5 },
-				new double[] { 0, 0, 0, 0, 0, 0 }, new double[] { 0, 0, 0, 0, 0, 0 },
-				new double[] { 0.25, 0, 0.5, 0, 0, 0.75 } };
+		double[][] a_inv = new double[][] { 
+			new double[] { 0.75, 0, 0.5, 0, 0, 0.25 },
+			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0.5, 0, 1, 0, 0, 0.5 },
+			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
+			new double[] { 0.25, 0, 0.5, 0, 0, 0.75 } };
 
 		boolean result = solver.solve(a, b);
 		solver.invert(a);
@@ -145,6 +167,37 @@ public class EJMLLinearSolverTest
 			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
 		}
 	}
+	
+	@Test
+	public void canInvert()
+	{
+		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+
+		// Solves (one) linear equation, a x = b, for x[n]
+
+		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
+		double[][] a = new double[][] { 
+			new double[] { 2, -1, 0 }, 
+			new double[] { -1, 2, -1 },
+			new double[] { 0, -1, 2 } };
+
+		// Expected solution
+		double[][] a_inv = new double[][] { 
+			new double[] { 0.75, 0.5, 0.25 }, 
+			new double[] { 0.5, 1, 0.5 },
+			new double[] { 0.25, 0.5, 0.75 } };
+
+		boolean result = solver.invertSymmPosDef(a);
+
+		Assert.assertTrue("Failed to invert", result);
+
+		for (int i = 0; i < a[0].length; i++)
+		{
+			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
+			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
+		}
+	}	
+	//@formatter:on
 
 	private abstract class SolverTimingTask extends BaseTimingTask
 	{
