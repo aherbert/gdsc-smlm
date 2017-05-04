@@ -549,7 +549,7 @@ public class EJMLLinearSolver
 	{
 		return equal;
 	}
-
+	
 	/**
 	 * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the inverse of a.
 	 * <p>
@@ -562,12 +562,12 @@ public class EJMLLinearSolver
 	public boolean invertSymmPosDef(double[][] a)
 	{
 		DenseMatrix64F A = new DenseMatrix64F(a);
-
+		
 		createSolver(A.numCols);
 		DenseMatrix64F A2 = (errorChecking) ? A.copy() : null;
 
-		LinearSolver<DenseMatrix64F> primarySolver = (A.numCols <= UnrolledInverseFromMinor.MAX)
-				? getInversionSolver() : getCholeskyLDLTSolver();
+		LinearSolver<DenseMatrix64F> primarySolver = (A.numCols <= UnrolledInverseFromMinor.MAX) ? getInversionSolver()
+				: getCholeskyLDLTSolver();
 
 		if (invert(primarySolver, A, A2, a, false))
 			return true;
@@ -638,5 +638,54 @@ public class EJMLLinearSolver
 		System.out.printf("Bad solution: %g != %g (%g = %d)\n", e, o, DoubleEquality.relativeError(e, o),
 				DoubleEquality.complement(e, o));
 		return true;
+	}
+
+	/**
+	 * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal.
+	 * <p>
+	 * Note: If the matrix is singular then a pseudo inverse will be computed.
+	 *
+	 * @param a
+	 *            the matrix a
+	 * @return The diagonal of the inverted matrix (or null)
+	 */
+	public double[] invertSymmPosDefDiagonal(double[][] a)
+	{
+		DenseMatrix64F A = new DenseMatrix64F(a);		
+		
+		// Try a fast inversion of the diagonal
+		if (A.numCols <= UnrolledInverseFromMinorExt.MAX)
+		{
+			double[] d = UnrolledInverseFromMinorExt.inv(A);
+			if (d != null)
+				return d;
+		}
+
+		createSolver(A.numCols);
+		DenseMatrix64F A2 = (errorChecking) ? A.copy() : null;
+
+		if (A.numCols <= UnrolledInverseFromMinorExt.MAX)
+		{
+			// The fast inversion failed so try a pseudo-inverse
+			if (!invert(getPseudoInverseSolver(), A, A2, a, true))
+				return null;
+		}
+		else
+		{
+			// The matrix was too big for fast inversion so try linear algebra
+			if (!invert(getCholeskyLDLTSolver(), A, A2, a, false))
+			{
+				if (choleskyLDLTSolver.modifiesA())
+					A = (errorChecking) ? A2.copy() : new DenseMatrix64F(a);
+				if (!invert(getPseudoInverseSolver(), A, A2, a, true))
+					return null;
+			}
+		}
+
+		// We reach here when 'a' has been inverted
+		double[] d = new double[A.numCols];
+		for (int i = 0; i < d.length; i++)
+			d[i] = a[i][i];
+		return d;
 	}
 }
