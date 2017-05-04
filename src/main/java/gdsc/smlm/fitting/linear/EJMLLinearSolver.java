@@ -38,15 +38,8 @@ import org.ejml.data.DenseMatrix64F;
 public class EJMLLinearSolver
 {
 	// TODO - 
-	// Bit flags to indicate which solvers to use
-	// Method for inversion using the determinant for n<=4
-	// Check for zeros only on the matrix diagonal
-
-	// Can we remove solveWithZeros?
-	// Is there a solver that will handle these entries?
-
-	// Rewrite the standard solve methods and update the tests.
-	// Check if we can solve matrices with zero columns.
+	// Rewrite to accept DenseMatrix64 as the primary input with wrapper function to accept double[][].
+	// Do not worry about double[] sine this is easily wrapped.
 
 	/**
 	 * Solve the matrix using direct inversion
@@ -549,7 +542,7 @@ public class EJMLLinearSolver
 	{
 		return equal;
 	}
-	
+
 	/**
 	 * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the inverse of a.
 	 * <p>
@@ -562,7 +555,7 @@ public class EJMLLinearSolver
 	public boolean invertSymmPosDef(double[][] a)
 	{
 		DenseMatrix64F A = new DenseMatrix64F(a);
-		
+
 		createSolver(A.numCols);
 		DenseMatrix64F A2 = (errorChecking) ? A.copy() : null;
 
@@ -651,8 +644,8 @@ public class EJMLLinearSolver
 	 */
 	public double[] invertSymmPosDefDiagonal(double[][] a)
 	{
-		DenseMatrix64F A = new DenseMatrix64F(a);		
-		
+		DenseMatrix64F A = new DenseMatrix64F(a);
+
 		// Try a fast inversion of the diagonal
 		if (A.numCols <= UnrolledInverseFromMinorExt.MAX)
 		{
@@ -687,5 +680,25 @@ public class EJMLLinearSolver
 		for (int i = 0; i < d.length; i++)
 			d[i] = a[i][i];
 		return d;
+	}
+
+	/**
+	 * Convert a dense matrix to a row/column format
+	 *
+	 * @param A
+	 *            the matrix
+	 * @return the row/column format
+	 */
+	public static double[][] toData(DenseMatrix64F A)
+	{
+		final int numRows = A.numRows, numCols = A.numCols;
+		final double[][] out = new double[numRows][];
+		for (int i = 0, pos = 0; i < numRows; i++)
+		{
+			out[i] = new double[numCols];
+			System.arraycopy(A.data, pos, out[i], 0, numCols);
+			pos += numCols;
+		}
+		return out;
 	}
 }
