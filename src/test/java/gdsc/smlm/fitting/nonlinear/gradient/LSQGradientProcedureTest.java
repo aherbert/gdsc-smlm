@@ -228,8 +228,14 @@ public class LSQGradientProcedureTest
 			{
 				int seed = 0;
 				for (int i = a.length; i-- > 0;)
-					seed += Double.hashCode(a[i]);
+					seed += hashCode(a[i]);
 				r.setSeed(seed);
+			}
+
+			private int hashCode(double d)
+			{
+		        long bits = Double.doubleToLongBits(d);
+		        return (int)(bits ^ (bits >>> 32));
 			}
 
 			public int[] gradientIndices()
