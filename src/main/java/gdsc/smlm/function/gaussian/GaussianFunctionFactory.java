@@ -3,7 +3,7 @@ package gdsc.smlm.function.gaussian;
 import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
-import gdsc.smlm.function.gaussian.erf.SingleZCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -54,7 +54,7 @@ public class GaussianFunctionFactory
 	public static final int FIT_ERF_FREE_CIRCLE = FIT_FREE_CIRCLE | FIT_ERF;
 	public static final int FIT_ERF_CIRCLE = FIT_CIRCLE | FIT_ERF;
 	public static final int FIT_ERF_FIXED = FIT_FIXED | FIT_ERF;
-	public static final int FIT_ERF_Z_CIRCLE = FIT_BACKGROUND | FIT_Z | FIT_SIGNAL | FIT_ERF;
+	public static final int FIT_ERF_ASTIGMATISM = FIT_BACKGROUND | FIT_Z | FIT_SIGNAL | FIT_ERF;
 
 	/**
 	 * Create the correct 2D Gaussian function for the specified parameters.
@@ -93,7 +93,7 @@ public class GaussianFunctionFactory
 						return new SingleCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
 					// Z-depth function
 					if ((flags & FIT_Z) == FIT_Z)
-						return new SingleZCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
+						return new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
 					// Fixed width
 					if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
 						return new SingleFixedErfGaussian2DFunction(maxx, maxy, derivativeOrder);

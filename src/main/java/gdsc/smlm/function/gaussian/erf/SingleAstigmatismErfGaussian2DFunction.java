@@ -21,12 +21,12 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
-public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfGaussian2DFunction
+public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularErfGaussian2DFunction
 {
 	private static final int[] gradientIndices;
 	static
 	{
-		gradientIndices = createGradientIndices(1, new SingleZCircularErfGaussian2DFunction(1, 1, 0, null));
+		gradientIndices = createGradientIndices(1, new SingleAstigmatismErfGaussian2DFunction(1, 1, 0, null));
 	}
 
 	protected final AstimatismZModel zModel;
@@ -46,7 +46,7 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 	 * @param zModel
 	 *            the z model
 	 */
-	public SingleZCircularErfGaussian2DFunction(int maxx, int maxy, int derivativeOrder, AstimatismZModel zModel)
+	public SingleAstigmatismErfGaussian2DFunction(int maxx, int maxy, int derivativeOrder, AstimatismZModel zModel)
 	{
 		super(maxx, maxy, derivativeOrder);
 		this.zModel = zModel;
@@ -57,13 +57,13 @@ public class SingleZCircularErfGaussian2DFunction extends SingleFreeCircularErfG
 	{
 		if (derivativeOrder == this.derivativeOrder)
 			return this;
-		return new SingleZCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
+		return new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
 	}
 
 	@Override
 	public ErfGaussian2DFunction copy()
 	{
-		return new SingleZCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
+		return new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
 	}
 	
 	/*
