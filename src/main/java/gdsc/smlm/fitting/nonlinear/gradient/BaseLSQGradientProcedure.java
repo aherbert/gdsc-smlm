@@ -1,0 +1,223 @@
+package gdsc.smlm.fitting.nonlinear.gradient;
+
+import gdsc.smlm.function.Gradient1Procedure;
+import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.ValueProcedure;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2017 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+/**
+ * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a function)
+ * and the scaled gradient vector of the function's partial first derivatives with respect to the parameters.
+ * This is used within the Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
+ * set of data points (x, y).
+ * <p>
+ * Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving
+ * the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
+ */
+public abstract class BaseLSQGradientProcedure implements Gradient1Procedure, ValueProcedure
+{
+	protected final double[] y;
+	protected final Gradient1Function func;
+
+	/**
+	 * The number of gradients
+	 */
+	public final int n;
+	/**
+	 * The scaled gradient vector of the function's partial first derivatives with respect to the parameters
+	 * (size n)
+	 * <p>
+	 * Apply a factor of -2 to compute the actual gradient of the sum-of-squares:
+	 * See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models
+	 */
+	public final double[] beta;
+	/**
+	 * The sum-of-squares value for the fit
+	 */
+	public double ssx;
+
+	protected int yi;
+	protected boolean isNanGradients;
+
+	/**
+	 * @param y
+	 *            Data to fit
+	 * @param func
+	 *            Gradient function
+	 */
+	public BaseLSQGradientProcedure(final double[] y, final Gradient1Function func)
+	{
+		this.y = y;
+		this.func = func;
+		this.n = func.getNumberOfGradients();
+		beta = new double[n];
+	}
+
+	/**
+	 * Evaluate the function and compute the sum-of-squares and the curvature matrix.
+	 * <p>
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+	 *
+	 * @param a
+	 *            Set of coefficients for the function
+	 */
+	public void gradient(final double[] a)
+	{
+		ssx = 0;
+		yi = 0;
+		initialise();
+		func.initialise1(a);
+		func.forEach((Gradient1Procedure) this);
+		isNanGradients = checkGradients();
+		finish();
+	}
+
+	/**
+	 * Evaluate the function and compute the sum-of-squares.
+	 *
+	 * @param a
+	 *            Set of coefficients for the function
+	 */
+	public void value(final double[] a)
+	{
+		ssx = 0;
+		yi = 0;
+		func.initialise0(a);
+		func.forEach((ValueProcedure) this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
+	 */
+	public void execute(double value)
+	{
+		final double dy = y[yi++] - value;
+		ssx += dy * dy;
+	}
+
+	protected abstract void initialise();
+
+	protected abstract boolean checkGradients();
+
+	protected abstract void finish();
+
+	/**
+	 * Get the scaled Hessian curvature matrix (size n*n).
+	 *
+	 * @return the alpha
+	 */
+	public double[][] getAlphaMatrix()
+	{
+		double[][] a = new double[n][n];
+		getAlphaMatrix(a);
+		return a;
+	}
+
+	/**
+	 * Get the scaled Hessian curvature matrix (size n*n) into the provided storage
+	 *
+	 * @param a
+	 *            the alpha
+	 */
+	public abstract void getAlphaMatrix(double[][] alpha);
+
+	/**
+	 * Get the scaled Hessian curvature matrix (size n*n).
+	 *
+	 * @return the alpha
+	 */
+	public double[] getAlphaLinear()
+	{
+		double[] a = new double[n * n];
+		getAlphaLinear(a);
+		return a;
+	}
+
+	/**
+	 * Get the scaled Hessian curvature matrix (size n*n) into the provided storage
+	 *
+	 * @param a
+	 *            the alpha
+	 */
+	public abstract void getAlphaLinear(double[] alpha);
+
+	/**
+	 * @return True if the last calculation produced gradients with NaN values
+	 */
+	public boolean isNaNGradients()
+	{
+		return isNanGradients;
+	}
+
+	/**
+	 * Convert linear data to a row/column format.
+	 *
+	 * @param data
+	 *            the data
+	 * @return the row/column format
+	 */
+	protected double[][] toMatrix(double[] data)
+	{
+		return toMatrix(data, new double[n][n]);
+	}
+
+	/**
+	 * Convert linear data to a row/column format.
+	 *
+	 * @param data
+	 *            the data
+	 * @param out
+	 *            the row/column format
+	 * @return the row/column format
+	 */
+	protected double[][] toMatrix(double[] data, double[][] out)
+	{
+		for (int i = 0, pos = 0; i < n; i++, pos += n)
+		{
+			System.arraycopy(data, pos, out[i], 0, n);
+		}
+		return out;
+	}
+
+	/**
+	 * Convert a the row/column format matrix to a linear data.
+	 *
+	 * @param data
+	 *            the data
+	 * @return the linear data
+	 */
+	protected double[] toLinear(double[][] data)
+	{
+		return toLinear(data, new double[n * n]);
+	}
+
+	/**
+	 * Convert a the row/column format matrix to a linear data.
+	 *
+	 * @param data
+	 *            the data
+	 * @param out
+	 *            the linear data
+	 * @return the linear data
+	 */
+	protected double[] toLinear(double[][] data, double[] out)
+	{
+		for (int i = 0, pos = 0; i < n; i++, pos += n)
+			System.arraycopy(data[i], 0, out, pos, n);
+		return out;
+	}
+}
