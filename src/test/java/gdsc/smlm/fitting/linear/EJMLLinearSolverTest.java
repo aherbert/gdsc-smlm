@@ -197,6 +197,93 @@ public class EJMLLinearSolverTest
 			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
 		}
 	}	
+	
+	@Test
+	public void canInvertWithZeros()
+	{
+		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+
+		// Solves (one) linear equation, a x = b, for x[n]
+
+		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
+		double[][] a = new double[][] { 
+			new double[] { 2, 0, -1, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
+			new double[] { -1, 0, 2, 0, 0, -1 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
+			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, -1, 0, 0, 2 } };
+
+		// Expected solution
+		double[][] a_inv = new double[][] { 
+			new double[] { 0.75, 0, 0.5, 0, 0, 0.25 },
+			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0.5, 0, 1, 0, 0, 0.5 },
+			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
+			new double[] { 0.25, 0, 0.5, 0, 0, 0.75 } };
+
+		boolean result = solver.invertSymmPosDef(a);
+
+		Assert.assertTrue("Failed to invert", result);
+
+		for (int i = 0; i < a[0].length; i++)
+		{
+			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
+			Assert.assertArrayEquals("Bad inversion", a_inv[i], a[i], 1e-4f);
+		}
+	}	
+	
+	@Test
+	public void canInvertDiagonal()
+	{
+		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+
+		// Solves (one) linear equation, a x = b, for x[n]
+
+		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
+		double[][] a = new double[][] { 
+			new double[] { 2, -1, 0 }, 
+			new double[] { -1, 2, -1 },
+			new double[] { 0, -1, 2 } };
+
+		// Expected solution
+		double[] e = new double[] { 0.75, 1, 0.75 };
+
+		double[] o = solver.invertSymmPosDefDiagonal(a);
+
+		Assert.assertNotNull("Failed to invert", o);
+
+		log("a diagonal = %s\n", Arrays.toString(o));
+		Assert.assertArrayEquals("Bad inversion", e, o, 1e-4);
+	}		
+	
+	@Test
+	public void canInvertDiagonalWithZeros()
+	{
+		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+
+		// Solves (one) linear equation, a x = b, for x[n]
+
+		// Taken from https://en.wikipedia.org/wiki/Positive-definite_matrix
+		double[][] a = new double[][] { 
+			new double[] { 2, 0, -1, 0, 0, 0 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
+			new double[] { -1, 0, 2, 0, 0, -1 }, 
+			new double[] { 0, 0, 0, 0, 0, 0 },
+			new double[] { 0, 0, 0, 0, 0, 0 }, 
+			new double[] { 0, 0, -1, 0, 0, 2 } };
+
+		// Expected solution
+		double[] e = new double[] { 0.75, 0, 1, 0, 0, 0.75 };
+
+		double[] o = solver.invertSymmPosDefDiagonal(a);
+
+		Assert.assertNotNull("Failed to invert", o);
+
+		log("a diagonal = %s\n", Arrays.toString(o));
+		Assert.assertArrayEquals("Bad inversion", e, o, 1e-4);
+	}		
 	//@formatter:on
 
 	private abstract class SolverTimingTask extends BaseTimingTask
