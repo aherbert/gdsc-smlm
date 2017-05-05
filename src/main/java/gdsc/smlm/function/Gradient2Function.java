@@ -14,10 +14,19 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Defines function that can produce gradients
+ * Defines function that can produce second order gradients
  */
-public interface Gradient2Function extends GradientFunction
+public interface Gradient2Function extends Gradient1Function
 {
+	/**
+	 * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
+	 * initialisation.
+	 * 
+	 * @param a
+	 *            An array of coefficients
+	 */
+	void initialise2(final double[] a);
+	
 	/**
 	 * Applies the procedure for the valid range of the function.
 	 *

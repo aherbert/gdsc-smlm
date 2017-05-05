@@ -29,7 +29,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	private static final int[] gradientIndices;
 	static
 	{
-		gradientIndices = createGradientIndices(1, new SingleFreeCircularErfGaussian2DFunction(1, 1, 0));
+		gradientIndices = createGradientIndices(1, new SingleFreeCircularErfGaussian2DFunction(1, 1));
 	}
 
 	/**
@@ -39,51 +39,43 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 * @param maxy
 	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param derivativeOrder
-	 *            Set to the order of partial derivatives required
 	 */
-	public SingleFreeCircularErfGaussian2DFunction(int maxx, int maxy, int derivativeOrder)
+	public SingleFreeCircularErfGaussian2DFunction(int maxx, int maxy)
 	{
-		super(maxx, maxy, derivativeOrder);
+		super(maxx, maxy);
 	}
 
-	@Override
-	protected void createArrays()
-	{
-		if (derivativeOrder <= 0)
-			return;
-		du_dtx = new double[this.maxx];
-		du_dty = new double[this.maxy];
-		du_dtsx = new double[this.maxx];
-		du_dtsy = new double[this.maxy];
-		if (derivativeOrder <= 1)
-			return;
-		d2u_dtx2 = new double[this.maxx];
-		d2u_dty2 = new double[this.maxy];
-		d2u_dtsx2 = new double[this.maxx];
-		d2u_dtsy2 = new double[this.maxy];
-	}
-
-	@Override
-	public ErfGaussian2DFunction create(int derivativeOrder)
-	{
-		if (derivativeOrder == this.derivativeOrder)
-			return this;
-		return new SingleFreeCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
-	}
-	
 	@Override
 	public ErfGaussian2DFunction copy()
 	{
-		return new SingleFreeCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+		return new SingleFreeCircularErfGaussian2DFunction(maxx, maxy);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#initialise0(double[])
 	 */
-	public void initialise(double[] a)
+	public void initialise0(double[] a)
+	{
+		tI = a[Gaussian2DFunction.SIGNAL];
+		tB = a[Gaussian2DFunction.BACKGROUND];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double tsx = a[Gaussian2DFunction.X_SD];
+		final double tsy = a[Gaussian2DFunction.Y_SD];
+
+		createDeltaETable(ONE_OVER_ROOT2 / tsx, deltaEx, tx);
+		createDeltaETable(ONE_OVER_ROOT2 / tsy, deltaEy, ty);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#initialise1(double[])
+	 */
+	public void initialise1(double[] a)
 	{
 		tI = a[Gaussian2DFunction.SIGNAL];
 		tB = a[Gaussian2DFunction.BACKGROUND];
@@ -95,22 +87,31 @@ public class SingleFreeCircularErfGaussian2DFunction extends ErfGaussian2DFuncti
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
+		create1Arrays();
+		createFirstOrderTables(tI, deltaEx, du_dtx, du_dtsx, tx, tsx);
+		createFirstOrderTables(tI, deltaEy, du_dty, du_dtsy, ty, tsy);
+	}
 
-		if (derivativeOrder == (byte) 2)
-		{
-			createSecondOrderTables(tI, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx, tsx);
-			createSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, tsy);
-		}
-		else if (derivativeOrder == (byte) 1)
-		{
-			createFirstOrderTables(tI, deltaEx, du_dtx, du_dtsx, tx, tsx);
-			createFirstOrderTables(tI, deltaEy, du_dty, du_dtsy, ty, tsy);
-		}
-		else
-		{
-			createDeltaETable(ONE_OVER_ROOT2 / tsx, deltaEx, tx);
-			createDeltaETable(ONE_OVER_ROOT2 / tsy, deltaEy, ty);
-		}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.Gradient2Function#initialise2(double[])
+	 */
+	public void initialise2(double[] a)
+	{
+		tI = a[Gaussian2DFunction.SIGNAL];
+		tB = a[Gaussian2DFunction.BACKGROUND];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double tsx = a[Gaussian2DFunction.X_SD];
+		final double tsy = a[Gaussian2DFunction.Y_SD];
+
+		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// since the Gaussian is XY separable
+		create2Arrays();
+		createSecondOrderTables(tI, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx, tsx);
+		createSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, tsy);
 	}
 
 	/**

@@ -14,18 +14,10 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Defines function that can produce gradients
+ * Defines function that can produce first order gradients
  */
-public interface GradientFunction
+public interface Gradient1Function extends ValueFunction
 {
-	/**
-	 * Returns the size of the valid range of the function. Procedures passed to the forEach methods will be expected to
-	 * be called this number of times.
-	 *
-	 * @return the size
-	 */
-	int size();
-
 	/**
 	 * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
 	 * initialisation.
@@ -33,7 +25,7 @@ public interface GradientFunction
 	 * @param a
 	 *            An array of coefficients
 	 */
-	void initialise(final double[] a);
+	void initialise1(final double[] a);
 
 	/**
 	 * The function will evaluate the gradient for up to n parameters where n <= a.length. This method
@@ -49,15 +41,7 @@ public interface GradientFunction
 	 * @return the number of gradients
 	 */
 	int getNumberOfGradients();
-
-	/**
-	 * Applies the procedure for the valid range of the function.
-	 *
-	 * @param procedure
-	 *            the procedure
-	 */
-	public void forEach(ValueProcedure procedure);
-
+	
 	/**
 	 * Applies the procedure for the valid range of the function.
 	 *

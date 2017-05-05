@@ -26,7 +26,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 	private static final int[] gradientIndices;
 	static
 	{
-		gradientIndices = createGradientIndices(1, new SingleAstigmatismErfGaussian2DFunction(1, 1, 0, null));
+		gradientIndices = createGradientIndices(1, new SingleAstigmatismErfGaussian2DFunction(1, 1, null));
 	}
 
 	protected final AstimatismZModel zModel;
@@ -41,37 +41,49 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 * @param maxy
 	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param derivativeOrder
-	 *            Set to the order of partial derivatives required
 	 * @param zModel
 	 *            the z model
 	 */
-	public SingleAstigmatismErfGaussian2DFunction(int maxx, int maxy, int derivativeOrder, AstimatismZModel zModel)
+	public SingleAstigmatismErfGaussian2DFunction(int maxx, int maxy, AstimatismZModel zModel)
 	{
-		super(maxx, maxy, derivativeOrder);
+		super(maxx, maxy);
 		this.zModel = zModel;
-	}
-
-	@Override
-	public ErfGaussian2DFunction create(int derivativeOrder)
-	{
-		if (derivativeOrder == this.derivativeOrder)
-			return this;
-		return new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
 	}
 
 	@Override
 	public ErfGaussian2DFunction copy()
 	{
-		return new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
+		return new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
+	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise0(double[])
 	 */
-	public void initialise(double[] a)
+	public void initialise0(double[] a)
+	{
+		tI = a[Gaussian2DFunction.SIGNAL];
+		tB = a[Gaussian2DFunction.BACKGROUND];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double tsx = a[Gaussian2DFunction.X_SD];
+		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
+
+		final double sx = tsx * zModel.getSx(tz);
+		final double sy = tsy * zModel.getSy(tz);
+		createDeltaETable(ONE_OVER_ROOT2 / sx, deltaEx, tx);
+		createDeltaETable(ONE_OVER_ROOT2 / sy, deltaEy, ty);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise1(double[])
+	 */
+	public void initialise1(double[] a)
 	{
 		tI = a[Gaussian2DFunction.SIGNAL];
 		tB = a[Gaussian2DFunction.BACKGROUND];
@@ -84,36 +96,44 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
+		final double[] ds_dz = new double[2];
+		final double sx = tsx * zModel.getSx(tz, ds_dz);
+		dtsx_dtz = tsx * ds_dz[0];
+		final double sy = tsy * zModel.getSy(tz, ds_dz);
+		dtsy_dtz = tsy * ds_dz[0];
+		create1Arrays();
+		createFirstOrderTables(tI, deltaEx, du_dtx, du_dtsx, tx, sx);
+		createFirstOrderTables(tI, deltaEy, du_dty, du_dtsy, ty, sy);
+	}
 
-		if (derivativeOrder == (byte) 2)
-		{
-			final double[] ds_dz = new double[2];
-			final double sx = tsx * zModel.getSx2(tz, ds_dz);
-			dtsx_dtz = tsx * ds_dz[0];
-			d2tsx_dtz2 = tsx * ds_dz[1];
-			final double sy = tsy * zModel.getSy2(tz, ds_dz);
-			dtsy_dtz = tsy * ds_dz[0];
-			d2tsy_dtz2 = tsy * ds_dz[1];
-			createSecondOrderTables(tI, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx, sx);
-			createSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, sy);
-		}
-		else if (derivativeOrder == (byte) 1)
-		{
-			final double[] ds_dz = new double[2];
-			final double sx = tsx * zModel.getSx(tz, ds_dz);
-			dtsx_dtz = tsx * ds_dz[0];
-			final double sy = tsy * zModel.getSy(tz, ds_dz);
-			dtsy_dtz = tsy * ds_dz[0];
-			createFirstOrderTables(tI, deltaEx, du_dtx, du_dtsx, tx, sx);
-			createFirstOrderTables(tI, deltaEy, du_dty, du_dtsy, ty, sy);
-		}
-		else
-		{
-			final double sx = tsx * zModel.getSx(tz);
-			final double sy = tsy * zModel.getSy(tz);
-			createDeltaETable(ONE_OVER_ROOT2 / sx, deltaEx, tx);
-			createDeltaETable(ONE_OVER_ROOT2 / sy, deltaEy, ty);
-		}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise2(double[])
+	 */
+	public void initialise2(double[] a)
+	{
+		tI = a[Gaussian2DFunction.SIGNAL];
+		tB = a[Gaussian2DFunction.BACKGROUND];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double tsx = a[Gaussian2DFunction.X_SD];
+		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
+
+		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// since the Gaussian is XY separable
+		final double[] ds_dz = new double[2];
+		final double sx = tsx * zModel.getSx2(tz, ds_dz);
+		dtsx_dtz = tsx * ds_dz[0];
+		d2tsx_dtz2 = tsx * ds_dz[1];
+		final double sy = tsy * zModel.getSy2(tz, ds_dz);
+		dtsy_dtz = tsy * ds_dz[0];
+		d2tsy_dtz2 = tsy * ds_dz[1];
+		create2Arrays();
+		createSecondOrderTables(tI, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx, sx);
+		createSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, sy);
 	}
 
 	/**

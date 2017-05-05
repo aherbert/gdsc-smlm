@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-import gdsc.smlm.function.GradientFunction;
+import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -32,7 +32,7 @@ public class LSQGradientProcedureMatrix6 extends LSQGradientProcedureMatrix
 	 * @param func
 	 *            Gradient function
 	 */
-	public LSQGradientProcedureMatrix6(final double[] y, final GradientFunction func)
+	public LSQGradientProcedureMatrix6(final double[] y, final Gradient1Function func)
 	{
 		super(y, func);
 		if (n != 6)
@@ -82,8 +82,6 @@ public class LSQGradientProcedureMatrix6 extends LSQGradientProcedureMatrix
 
 	protected void initialise()
 	{
-		ssx = 0;
-		yi = 0;
 		alpha[0][0] = 0;
 		alpha[1][0] = 0;
 		alpha[1][1] = 0;
@@ -130,6 +128,5 @@ public class LSQGradientProcedureMatrix6 extends LSQGradientProcedureMatrix
 		alpha[3][4] = alpha[4][3];
 		alpha[3][5] = alpha[5][3];
 		alpha[4][5] = alpha[5][4];
-		isNanGradients = checkGradients();
 	}
 }

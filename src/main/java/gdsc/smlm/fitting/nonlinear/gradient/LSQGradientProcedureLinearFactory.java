@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-import gdsc.smlm.function.GradientFunction;
+import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -18,7 +18,7 @@ import gdsc.smlm.function.GradientFunction;
 /**
  * Create a gradient procedure.
  */
-public class LSQGradientProcedureLinearFactory
+public class LSQGradientProcedureLinearFactory extends BaseLSQGradientProcedureFactory
 {
 	/**
 	 * Create a new gradient calculator
@@ -29,16 +29,25 @@ public class LSQGradientProcedureLinearFactory
 	 *            Gradient function
 	 * @return the gradient procedure
 	 */
-	public static LSQGradientProcedureLinear create(final double[] y, final GradientFunction func)
+	public static LSQGradientProcedureLinear create(final double[] y, final Gradient1Function func)
 	{
 		switch (func.getNumberOfGradients())
 		{
+			case 5:
+				return new LSQGradientProcedureLinear5(y, func);
+			case 4:
+				return new LSQGradientProcedureLinear4(y, func);
 			case 6:
-				// free circular single Gaussian
 				return new LSQGradientProcedureLinear6(y, func);
 
 			default:
 				return new LSQGradientProcedureLinear(y, func);
 		}
+	}
+	
+	// Instance method for testing
+	BaseLSQGradientProcedure createProcedure(final double[] y, final Gradient1Function func)
+	{
+		return create(y, func);
 	}
 }

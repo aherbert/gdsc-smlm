@@ -75,28 +75,22 @@ public class GaussianFunctionFactory
 	{
 		if ((flags & FIT_ERF) == FIT_ERF)
 		{
-			int derivativeOrder = 1;
-			if ((flags & FIT_2_DERIVATIVES) == FIT_2_DERIVATIVES)
-				derivativeOrder = 2;
-			else if ((flags & FIT_0_DERIVATIVES) == FIT_0_DERIVATIVES)
-				derivativeOrder = 0;
-
 			if (nPeaks == 1)
 			{
 				if ((flags & FIT_BACKGROUND) == FIT_BACKGROUND)
 				{
 					// Independent X/Y width
 					if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
-						return new SingleFreeCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+						return new SingleFreeCircularErfGaussian2DFunction(maxx, maxy);
 					// Combined X/Y width
 					if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
-						return new SingleCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+						return new SingleCircularErfGaussian2DFunction(maxx, maxy);
 					// Z-depth function
 					if ((flags & FIT_Z) == FIT_Z)
-						return new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, derivativeOrder, zModel);
+						return new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
 					// Fixed width
 					if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
-						return new SingleFixedErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+						return new SingleFixedErfGaussian2DFunction(maxx, maxy);
 				}
 			}
 			else

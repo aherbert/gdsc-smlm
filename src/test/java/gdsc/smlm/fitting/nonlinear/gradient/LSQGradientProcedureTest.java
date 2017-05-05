@@ -3,21 +3,18 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
-import gdsc.core.utils.PseudoRandomGenerator;
+import gdsc.core.utils.Statistics;
 import gdsc.smlm.TestSettings;
-import gdsc.smlm.function.Gradient1Procedure;
-import gdsc.smlm.function.GradientFunction;
-import gdsc.smlm.function.ValueProcedure;
-import gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFunction;
+import gdsc.smlm.fitting.linear.EJMLLinearSolver;
+import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
-import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
-import gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 
 /**
@@ -41,71 +38,101 @@ public class LSQGradientProcedureTest
 
 	RandomDataGenerator rdg;
 
-	private class DummyGradientFunction implements GradientFunction
-	{
-		int n;
-
-		DummyGradientFunction(int n)
-		{
-			this.n = n;
-		}
-
-		public int size()
-		{
-			return 0;
-		}
-
-		public void initialise(double[] a)
-		{
-		}
-
-		public int[] gradientIndices()
-		{
-			return null;
-		}
-
-		public int getNumberOfGradients()
-		{
-			return n;
-		}
-
-		public void forEach(ValueProcedure procedure)
-		{
-		}
-
-		public void forEach(Gradient1Procedure procedure)
-		{
-		}
-	}
-
 	@Test
 	public void gradientCalculatorFactoryCreatesOptimisedCalculators()
 	{
 		double[] y = new double[0];
 		Assert.assertEquals(LSQGradientProcedureMatrixFactory.create(y, new DummyGradientFunction(6)).getClass(),
 				LSQGradientProcedureMatrix6.class);
+		Assert.assertEquals(LSQGradientProcedureMatrixFactory.create(y, new DummyGradientFunction(5)).getClass(),
+				LSQGradientProcedureMatrix5.class);
+		Assert.assertEquals(LSQGradientProcedureMatrixFactory.create(y, new DummyGradientFunction(4)).getClass(),
+				LSQGradientProcedureMatrix4.class);
+
+		Assert.assertEquals(LSQGradientProcedureLinearFactory.create(y, new DummyGradientFunction(6)).getClass(),
+				LSQGradientProcedureLinear6.class);
+		Assert.assertEquals(LSQGradientProcedureLinearFactory.create(y, new DummyGradientFunction(5)).getClass(),
+				LSQGradientProcedureLinear5.class);
+		Assert.assertEquals(LSQGradientProcedureLinearFactory.create(y, new DummyGradientFunction(4)).getClass(),
+				LSQGradientProcedureLinear4.class);
+
+		Assert.assertEquals(LSQGradientProcedureFactory.create(y, new DummyGradientFunction(6)).getClass(),
+				LSQGradientProcedure6.class);
+		Assert.assertEquals(LSQGradientProcedureFactory.create(y, new DummyGradientFunction(5)).getClass(),
+				LSQGradientProcedure5.class);
+		Assert.assertEquals(LSQGradientProcedureFactory.create(y, new DummyGradientFunction(4)).getClass(),
+				LSQGradientProcedure4.class);
+	}
+
+	@Test
+	public void gradientProcedureLinearComputesSameAsGradientCalculator()
+	{
+		gradientProcedureComputesSameAsGradientCalculator(new LSQGradientProcedureLinearFactory());
+	}
+
+	@Test
+	public void gradientProcedureMatrixComputesSameAsGradientCalculator()
+	{
+		gradientProcedureComputesSameAsGradientCalculator(new LSQGradientProcedureMatrixFactory());
 	}
 
 	@Test
 	public void gradientProcedureComputesSameAsGradientCalculator()
 	{
-		gradientProcedureComputesSameAsGradientCalculator(
-				new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth, 1), 6);
+		gradientProcedureComputesSameAsGradientCalculator(new LSQGradientProcedureFactory());
+	}
+
+	private void gradientProcedureComputesSameAsGradientCalculator(BaseLSQGradientProcedureFactory factory)
+	{
+		gradientProcedureComputesSameAsGradientCalculator(4, factory);
+		gradientProcedureComputesSameAsGradientCalculator(5, factory);
+		gradientProcedureComputesSameAsGradientCalculator(6, factory);
+		gradientProcedureComputesSameAsGradientCalculator(11, factory);
+		gradientProcedureComputesSameAsGradientCalculator(21, factory);
 	}
 
 	@Test
-	public void gradientProcedureIsFasterThanGradientCalculator()
+	public void gradientProcedureLinearIsNotSlowerThanGradientCalculator()
 	{
-		gradientProcedureIsFasterThanGradientCalculator(
-				new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth, 1), 6);
+		gradientProcedureIsNotSlowerThanGradientCalculator(new LSQGradientProcedureLinearFactory());
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(ErfGaussian2DFunction func, int nparams)
+	@Test
+	public void gradientProcedureMatrixIsNotSlowerThanGradientCalculator()
 	{
-		// Check the function is the correct size
-		Assert.assertEquals(nparams, func.gradientIndices().length);
+		gradientProcedureIsNotSlowerThanGradientCalculator(new LSQGradientProcedureMatrixFactory());
+	}
 
-		int iter = 100;
+	@Test
+	public void gradientProcedureIsNotSlowerThanGradientCalculator()
+	{
+		gradientProcedureIsNotSlowerThanGradientCalculator(new LSQGradientProcedureFactory());
+	}
+
+	private void gradientProcedureIsNotSlowerThanGradientCalculator(BaseLSQGradientProcedureFactory factory)
+	{
+		gradientProcedureIsNotSlowerThanGradientCalculator(4, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(4, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(4, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(5, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(5, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(5, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(6, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(6, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(6, factory);
+		// 2 peaks
+		gradientProcedureIsNotSlowerThanGradientCalculator(11, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(11, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(11, factory);
+		// 4 peaks
+		gradientProcedureIsNotSlowerThanGradientCalculator(21, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(21, factory);
+		gradientProcedureIsNotSlowerThanGradientCalculator(21, factory);
+	}
+
+	private void gradientProcedureComputesSameAsGradientCalculator(int nparams, BaseLSQGradientProcedureFactory factory)
+	{
+		int iter = 10;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
 
 		double[][] alpha = new double[nparams][nparams];
@@ -114,32 +141,39 @@ public class LSQGradientProcedureTest
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
 
-		int[] x = createData(1, iter, paramsList, yList);
+		int[] x = createFakeData(nparams, iter, paramsList, yList);
+		int n = x.length;
+		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
 		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
+		String name = factory.getClass().getSimpleName();
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LSQGradientProcedureMatrix p = LSQGradientProcedureMatrixFactory.create(yList.get(i), func);
-			p.run(paramsList.get(i));
+			BaseLSQGradientProcedure p = factory.createProcedure(yList.get(i), func);
+			p.gradient(paramsList.get(i));
 			double s = p.ssx;
-			double s2 = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
+			double s2 = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 			// Exactly the same ...
-			Assert.assertEquals("Result: Not same @ " + i, s, s2, 0);
-			Assert.assertArrayEquals("Observations: Not same beta @ " + i, p.beta, beta, 0);
+			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, 0);
+			Assert.assertArrayEquals(name + " Observations: Not same beta @ " + i, p.beta, beta, 0);
+
+			double[] al = p.getAlphaLinear();
+			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, al, new DenseMatrix64F(alpha).data,
+					0);
+
+			double[][] am = p.getAlphaMatrix();
 			for (int j = 0; j < nparams; j++)
-				Assert.assertArrayEquals("Observations: Not same alpha @ " + i, p.alpha[j], alpha[j], 0);
+				Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am[j], alpha[j], 0);
 		}
 	}
 
-	private void gradientProcedureIsFasterThanGradientCalculator(ErfGaussian2DFunction func, int nparams)
+	private void gradientProcedureIsNotSlowerThanGradientCalculator(int nparams,
+			BaseLSQGradientProcedureFactory factory)
 	{
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
 
-		// Check the function is the correct size
-		Assert.assertEquals(nparams, func.gradientIndices().length);
-
-		int iter = 10000;
+		int iter = 1000;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
@@ -147,124 +181,84 @@ public class LSQGradientProcedureTest
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
 
-		int[] x = createData(1, iter, paramsList, yList);
+		int[] x = createFakeData(nparams, iter, paramsList, yList);
+		int n = x.length;
+		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
 		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
 		for (int i = 0; i < paramsList.size(); i++)
-			calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
+			calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LSQGradientProcedureMatrix p = LSQGradientProcedureMatrixFactory.create(yList.get(i), func);
-			p.run(paramsList.get(i));
+			BaseLSQGradientProcedure p = factory.createProcedure(yList.get(i), func);
+			p.gradient(paramsList.get(i));
 		}
 
+		// Realistic loops for an optimisation
+		int loops = 15;
+
 		long start1 = System.nanoTime();
-		for (int i = 0; i < paramsList.size(); i++)
-			calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
+		for (int i = 0, k = 0; i < iter; i++)
+		{
+			calc = GradientCalculatorFactory.newCalculator(nparams, false);
+			for (int j = loops; j-- > 0;)
+				calc.findLinearised(n, yList.get(i), paramsList.get(k++ % iter), alpha, beta, func);
+		}
 		start1 = System.nanoTime() - start1;
 
 		long start2 = System.nanoTime();
-		for (int i = 0; i < paramsList.size(); i++)
+		for (int i = 0, k = 0; i < iter; i++)
 		{
-			LSQGradientProcedureMatrix p = LSQGradientProcedureMatrixFactory.create(yList.get(i), func);
-			p.run(paramsList.get(i));
+			BaseLSQGradientProcedure p = factory.createProcedure(yList.get(i), func);
+			for (int j = loops; j-- > 0;)
+				p.gradient(paramsList.get(k++ % iter));
 		}
 		start2 = System.nanoTime() - start2;
 
-		log("Linearised GradientCalculator = %d : GradientProcedure%d = %d : %fx\n", start1, nparams, start2,
+		log("GradientCalculator = %d : %s %d = %d : %fx\n", start1, factory.getClass().getSimpleName(), nparams, start2,
 				(1.0 * start1) / start2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
+		{
+			// Add contingency
+			Assert.assertTrue(start2 < start1 * 1.5);
+		}
 	}
 
 	@Test
-	public void gradientProcedureLinear4IsFasterThanGradientProcedureMatrix()
+	public void gradientProcedureIsFasterUnrolledThanGradientProcedureMatrix()
 	{
-		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(
-				new SingleFixedErfGaussian2DFunction(blockWidth, blockWidth, 1), 4);
+		gradientProcedure2IsFasterUnrolledThanGradientProcedure1(new LSQGradientProcedureMatrixFactory(),
+				new LSQGradientProcedureFactory());
 	}
 
 	@Test
-	public void gradientProcedureLinear5IsFasterThanGradientProcedureMatrix()
+	public void gradientProcedureLinearIsFasterUnrolledThanGradientProcedureMatrix()
 	{
-		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(
-				new SingleCircularErfGaussian2DFunction(blockWidth, blockWidth, 1), 5);
-	}
-	
-	@Test
-	public void gradientProcedureLinear6IsFasterThanGradientProcedureMatrix()
-	{
-		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(
-				new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth, 1), 6);
-	}
-	
-	@Test
-	public void gradientProcedureLinear7IsFasterThanGradientProcedureMatrix()
-	{
-		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(
-				new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth), 7);
+		gradientProcedure2IsFasterUnrolledThanGradientProcedure1(new LSQGradientProcedureMatrixFactory(),
+				new LSQGradientProcedureLinearFactory());
 	}
 
-	private void gradientProcedureLinearIsFasterThanGradientProcedureMatrix(GradientFunction func, final int nparams)
+	private void gradientProcedure2IsFasterUnrolledThanGradientProcedure1(BaseLSQGradientProcedureFactory factory1,
+			BaseLSQGradientProcedureFactory factory2)
+	{
+		// Assert the unrolled versions
+		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(4, factory1, factory2, true);
+		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(5, factory1, factory2, true);
+		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(6, factory1, factory2, true);
+		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(11, factory1, factory2, false);
+		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(11, factory1, factory2, false);
+		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(21, factory1, factory2, false);
+		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(21, factory1, factory2, false);
+	}
+
+	private void gradientProcedureLinearIsFasterThanGradientProcedureMatrix(final int nparams,
+			BaseLSQGradientProcedureFactory factory1, BaseLSQGradientProcedureFactory factory2, boolean doAssert)
 	{
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
 
-		// Check the function is the correct size
-		Assert.assertEquals(nparams, func.gradientIndices().length);
-
-		// Remove the timing of the function call by creating a dummy function
-		final PseudoRandomGenerator r = new PseudoRandomGenerator(10000, new Well19937c(30051977));
-		final double[] dy_da = new double[nparams];
-		GradientFunction gf = new GradientFunction()
-		{
-			public int size()
-			{
-				return 0;
-			}
-
-			public void initialise(double[] a)
-			{
-				int seed = 0;
-				for (int i = a.length; i-- > 0;)
-					seed += hashCode(a[i]);
-				r.setSeed(seed);
-			}
-
-			private int hashCode(double d)
-			{
-		        long bits = Double.doubleToLongBits(d);
-		        return (int)(bits ^ (bits >>> 32));
-			}
-
-			public int[] gradientIndices()
-			{
-				return null;
-			}
-
-			public int getNumberOfGradients()
-			{
-				return nparams;
-			}
-
-			public void forEach(ValueProcedure procedure)
-			{
-
-			}
-
-			public void forEach(Gradient1Procedure procedure)
-			{
-				for (int i = nparams; i-- > 0;)
-					dy_da[i] = r.nextDouble();
-				procedure.execute(r.nextDouble(), dy_da);
-				//procedure.execute(0, dy_da);
-			}
-		};
-
-		//func = gf;
-
-		int iter = 10000;
+		int iter = 100;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
@@ -272,282 +266,208 @@ public class LSQGradientProcedureTest
 
 		createData(1, iter, paramsList, yList);
 
+		// Remove the timing of the function call by creating a dummy function
+		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
+
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LSQGradientProcedureMatrix p = LSQGradientProcedureMatrixFactory.create(yList.get(i), func);
-			p.run(paramsList.get(i));
-			p.run(paramsList.get(i));
+			BaseLSQGradientProcedure p = factory1.createProcedure(yList.get(i), func);
+			p.gradient(paramsList.get(i));
+			p.gradient(paramsList.get(i));
 
-			LSQGradientProcedureLinear p2 = LSQGradientProcedureLinearFactory.create(yList.get(i), func);
-			p2.run(paramsList.get(i));
-			p2.run(paramsList.get(i));
+			BaseLSQGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
+			p2.gradient(paramsList.get(i));
+			p2.gradient(paramsList.get(i));
 
 			// Check they are the same
-			DenseMatrix64F m1 = new DenseMatrix64F(p.alpha);
-			Assert.assertArrayEquals("A " + i, m1.data, p2.alpha, 0);
+			Assert.assertArrayEquals("A " + i, p.getAlphaLinear(), p2.getAlphaLinear(), 0);
 			Assert.assertArrayEquals("B " + i, p.beta, p2.beta, 0);
 		}
 
+		// Realistic loops for an optimisation
+		int loops = 15;
+
 		long start1 = System.nanoTime();
-		for (int i = 0; i < paramsList.size(); i++)
+		for (int i = 0, k = 0; i < paramsList.size(); i++)
 		{
-			LSQGradientProcedureMatrix p = LSQGradientProcedureMatrixFactory.create(yList.get(i), func);
-			p.run(paramsList.get(i));
-			p.run(paramsList.get(i));
-			p.run(paramsList.get(i));
+			BaseLSQGradientProcedure p = factory1.createProcedure(yList.get(i), func);
+			for (int j = loops; j-- > 0;)
+				p.gradient(paramsList.get(k++ % iter));
 		}
 		start1 = System.nanoTime() - start1;
 
 		long start2 = System.nanoTime();
-		for (int i = 0; i < paramsList.size(); i++)
+		for (int i = 0, k = 0; i < paramsList.size(); i++)
 		{
-			LSQGradientProcedureLinear p2 = LSQGradientProcedureLinearFactory.create(yList.get(i), func);
-			p2.run(paramsList.get(i));
-			p2.run(paramsList.get(i));
-			p2.run(paramsList.get(i));
+			BaseLSQGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
+			for (int j = loops; j-- > 0;)
+				p2.gradient(paramsList.get(k++ % iter));
 		}
 		start2 = System.nanoTime() - start2;
 
-		func = gf;
-
-		long start3 = System.nanoTime();
-		for (int i = 0; i < paramsList.size(); i++)
-		{
-			LSQGradientProcedureMatrix p = LSQGradientProcedureMatrixFactory.create(yList.get(i), func);
-			p.run(paramsList.get(i));
-			p.run(paramsList.get(i));
-			p.run(paramsList.get(i));
-		}
-		start3 = System.nanoTime() - start3;
-
-		long start4 = System.nanoTime();
-		for (int i = 0; i < paramsList.size(); i++)
-		{
-			LSQGradientProcedureLinear p2 = LSQGradientProcedureLinearFactory.create(yList.get(i), func);
-			p2.run(paramsList.get(i));
-			p2.run(paramsList.get(i));
-			p2.run(paramsList.get(i));
-		}
-		start4 = System.nanoTime() - start4;
-
-		log("GradientProcedure = %d : GradientProcedureLinear %d = %d : %fx\n", start1, nparams, start2,
-				(1.0 * start1) / start2);
-		log("GradientProcedure = %d : GradientProcedureLinear %d dummy = %d : %fx\n", start3, nparams, start4,
-				(1.0 * start3) / start4);
-		if (TestSettings.ASSERT_SPEED_TESTS)
+		log("%s = %d : %s %d = %d : %fx\n", factory1.getClass().getSimpleName(), start1,
+				factory2.getClass().getSimpleName(), nparams, start2, (1.0 * start1) / start2);
+		if (doAssert)
 			Assert.assertTrue(start2 < start1);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start4 < start3);
 	}
 
-	//	@Test
-	//	public void gradientCalculatorComputesGradient()
-	//	{
-	//		gradientCalculatorComputesGradient(new GradientCalculator(7));
-	//	}
-	//
-	//	@Test
-	//	public void mleGradientCalculatorComputesGradient()
-	//	{
-	//		gradientCalculatorComputesGradient(new MLEGradientCalculator(7));
-	//	}
-	//
-	//	private void gradientCalculatorComputesGradient(GradientCalculator calc)
-	//	{
-	//		int nparams = calc.nparams;
-	//		Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
-	//		// Check the function is the correct size
-	//		Assert.assertEquals(nparams, func.gradientIndices().length);
-	//
-	//		int iter = 100;
-	//		rdg = new RandomDataGenerator(new Well19937c(30051977));
-	//
-	//		double[] beta = new double[nparams];
-	//		double[] beta2 = new double[nparams];
-	//
-	//		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-	//		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
-	//
-	//		int[] x = createData(1, iter, paramsList, yList, true);
-	//
-	//		double delta = 1e-3;
-	//		DoubleEquality eq = new DoubleEquality(3, 1e-3);
-	//
-	//		for (int i = 0; i < paramsList.size(); i++)
-	//		{
-	//			double[] y = yList.get(i);
-	//			double[] a = paramsList.get(i);
-	//			double[] a2 = a.clone();
-	//			//double s = 
-	//			calc.evaluate(x, y, a, beta, func);
-	//
-	//			for (int j = 0; j < nparams; j++)
-	//			{
-	//				double d = (a[j] == 0) ? 1e-3 : a[j] * delta;
-	//				a2[j] = a[j] + d;
-	//				double s1 = calc.evaluate(x, y, a2, beta2, func);
-	//				a2[j] = a[j] - d;
-	//				double s2 = calc.evaluate(x, y, a2, beta2, func);
-	//				a2[j] = a[j];
-	//
-	//				double gradient = (s1 - s2) / (2 * d);
-	//				//System.out.printf("[%d,%d] %f  (%f+/-%f)  %f  ?=  %f\n", i, j, s, a[j], d, beta[j], gradient);
-	//				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualComplement(beta[j], gradient));
-	//			}
-	//		}
-	//	}
-	//
-	//	@Test
-	//	public void mleGradientCalculatorComputesLikelihood()
-	//	{
-//		//@formatter:off
-//		NonLinearFunction func = new NonLinearFunction(){
-//			double u;
-//			public void initialise(double[] a) { u = a[0]; }
-//			public int[] gradientIndices() { return null; }
-//			public double eval(int x, double[] dyda)  { return 0; }
-//			public double eval(int x) {
-//				return u;
-//			}
-//			public double eval(int x, double[] dyda, double[] w) { return 0; }
-//			public double evalw(int x, double[] w) { return 0; }
-//			public boolean canComputeWeights() { return false; }};
-//		//@formatter:on
-	//
-	//		int[] xx = Utils.newArray(100, 0, 1);
-	//		double[] xxx = Utils.newArray(100, 0, 1.0);
-	//		for (double u : new double[] { 0.79, 2.5, 5.32 })
-	//		{
-	//			double ll = 0;
-	//			PoissonDistribution pd = new PoissonDistribution(u);
-	//			for (int x : xx)
-	//			{
-	//				double o = MLEGradientCalculator.likelihood(u, x);
-	//				double e = pd.probability(x);
-	//				Assert.assertEquals("likelihood", e, o, e * 1e-10);
-	//
-	//				o = MLEGradientCalculator.logLikelihood(u, x);
-	//				e = pd.logProbability(x);
-	//				Assert.assertEquals("log likelihood", e, o, Math.abs(e) * 1e-10);
-	//
-	//				ll += e;
-	//			}
-	//
-	//			MLEGradientCalculator gc = new MLEGradientCalculator(1);
-	//			double o = gc.logLikelihood(xxx, new double[] { u }, func);
-	//
-	//			Assert.assertEquals("sum log likelihood", ll, o, Math.abs(ll) * 1e-10);
-	//		}
-	//	}
-	//
-	//	@Test
-	//	public void gradientCalculatorComputesSameOutputWithBias()
-	//	{
-	//		Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
-	//		int nparams = func.getNumberOfGradients();
-	//		GradientCalculator calc = new GradientCalculator(nparams);
-	//		int n = func.size();
-	//
-	//		int iter = 100;
-	//		rdg = new RandomDataGenerator(new Well19937c(30051977));
-	//
-	//		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-	//		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
-	//
-	//		ArrayList<double[][]> alphaList = new ArrayList<double[][]>(iter);
-	//		ArrayList<double[]> betaList = new ArrayList<double[]>(iter);
-	//		ArrayList<double[]> xList = new ArrayList<double[]>(iter);
-	//
-	//		// Manipulate the background
-	//		double defaultBackground = Background;
-	//		try
-	//		{
-	//			Background = 1e-2;
-	//			createData(1, iter, paramsList, yList, true);
-	//
-	//			EJMLLinearSolver solver = new EJMLLinearSolver(5, 1e-6);
-	//
-	//			for (int i = 0; i < paramsList.size(); i++)
-	//			{
-	//				double[] y = yList.get(i);
-	//				double[] a = paramsList.get(i);
-	//				double[][] alpha = new double[nparams][nparams];
-	//				double[] beta = new double[nparams];
-	//				calc.findLinearised(n, y, a, alpha, beta, func);
-	//				alphaList.add(alpha);
-	//				betaList.add(beta.clone());
-	//				for (int j = 0; j < nparams; j++)
-	//				{
-	//					if (Math.abs(beta[j]) < 1e-6)
-	//						System.out.printf("[%d] Tiny beta %s %g\n", i, func.getName(j), beta[j]);
-	//				}
-	//				// Solve
-	//				if (!solver.solve(alpha, beta))
-	//					throw new AssertionError();
-	//				xList.add(beta);
-	//				//System.out.println(Arrays.toString(beta));
-	//			}
-	//
-	//			double[][] alpha = new double[nparams][nparams];
-	//			double[] beta = new double[nparams];
-	//
-	//			//for (int b = 1; b < 1000; b *= 2)
-	//			for (double b : new double[] { -500, -100, -10, -1, -0.1, 0, 0.1, 1, 10, 100, 500 })
-	//			{
-	//				Statistics[] rel = new Statistics[nparams];
-	//				Statistics[] abs = new Statistics[nparams];
-	//				for (int i = 0; i < nparams; i++)
-	//				{
-	//					rel[i] = new Statistics();
-	//					abs[i] = new Statistics();
-	//				}
-	//
-	//				for (int i = 0; i < paramsList.size(); i++)
-	//				{
-	//					double[] y = add(yList.get(i), b);
-	//					double[] a = paramsList.get(i).clone();
-	//					a[0] += b;
-	//					calc.findLinearised(n, y, a, alpha, beta, func);
-	//					double[][] alpha2 = alphaList.get(i);
-	//					double[] beta2 = betaList.get(i);
-	//					double[] x2 = xList.get(i);
-	//
-	//					Assert.assertArrayEquals("Beta", beta2, beta, 1e-10);
-	//					for (int j = 0; j < nparams; j++)
-	//					{
-	//						Assert.assertArrayEquals("Alpha", alpha2[j], alpha[j], 1e-10);
-	//					}
-	//
-	//					// Solve
-	//					solver.solve(alpha, beta);
-	//					Assert.assertArrayEquals("X", x2, beta, 1e-10);
-	//
-	//					for (int j = 0; j < nparams; j++)
-	//					{
-	//						rel[j].add(DoubleEquality.relativeError(x2[j], beta[j]));
-	//						abs[j].add(Math.abs(x2[j] - beta[j]));
-	//					}
-	//				}
-	//
-	//				for (int i = 0; i < nparams; i++)
-	//					System.out.printf("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b, func.getName(i),
-	//							rel[i].getMean(), rel[i].getStandardDeviation(), abs[i].getMean(),
-	//							abs[i].getStandardDeviation());
-	//			}
-	//		}
-	//		finally
-	//		{
-	//			Background = defaultBackground;
-	//		}
-	//	}
-	//
-	//	private double[] add(double[] d, double b)
-	//	{
-	//		d = d.clone();
-	//		for (int i = 0; i < d.length; i++)
-	//			d[i] += b;
-	//		return d;
-	//	}
+	@Test
+	public void gradientCalculatorComputesGradient()
+	{
+		gradientCalculatorComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
+	}
+
+	private void gradientCalculatorComputesGradient(ErfGaussian2DFunction func)
+	{
+		int nparams = func.getNumberOfGradients();
+		int[] indices = func.gradientIndices();
+
+		int iter = 100;
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
+
+		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+
+		createData(1, iter, paramsList, yList, true);
+
+		double delta = 1e-3;
+		DoubleEquality eq = new DoubleEquality(3, 1e-3);
+
+		for (int i = 0; i < paramsList.size(); i++)
+		{
+			double[] y = yList.get(i);
+			double[] a = paramsList.get(i);
+			double[] a2 = a.clone();
+			BaseLSQGradientProcedure p = LSQGradientProcedureFactory.create(y, func);
+			p.gradient(a);
+			//double s = p.ssx;
+			double[] beta = p.beta.clone();
+			for (int j = 0; j < nparams; j++)
+			{
+				int k = indices[j];
+				double d = (a[k] == 0) ? 1e-3 : a[k] * delta;
+				a2[k] = a[k] + d;
+				p.value(a2);
+				double s1 = p.ssx;
+				a2[k] = a[k] - d;
+				p.value(a2);
+				double s2 = p.ssx;
+				a2[k] = a[k];
+
+				// Apply a factor of -2 to compute the actual gradients:
+				// See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models 
+				beta[j] *= -2;
+
+				double gradient = (s1 - s2) / (2 * d);
+				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, k, s, func.getName(k), a[k], d, beta[j],
+				//		gradient);
+				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualComplement(beta[j], gradient));
+			}
+		}
+	}
+
+	@Test
+	public void gradientCalculatorComputesSameOutputWithBias()
+	{
+		ErfGaussian2DFunction func = new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth);
+		int nparams = func.getNumberOfGradients();
+
+		int iter = 100;
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
+
+		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+
+		ArrayList<double[]> alphaList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> betaList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> xList = new ArrayList<double[]>(iter);
+
+		// Manipulate the background
+		double defaultBackground = Background;
+		try
+		{
+			Background = 1e-2;
+			createData(1, iter, paramsList, yList, true);
+
+			EJMLLinearSolver solver = new EJMLLinearSolver(5, 1e-6);
+
+			for (int i = 0; i < paramsList.size(); i++)
+			{
+				double[] y = yList.get(i);
+				double[] a = paramsList.get(i);
+				BaseLSQGradientProcedure p = LSQGradientProcedureFactory.create(y, func);
+				p.gradient(a);
+				double[] beta = p.beta;
+				alphaList.add(p.getAlphaLinear());
+				betaList.add(beta.clone());
+				for (int j = 0; j < nparams; j++)
+				{
+					if (Math.abs(beta[j]) < 1e-6)
+						System.out.printf("[%d] Tiny beta %s %g\n", i, func.getName(j), beta[j]);
+				}
+				// Solve
+				if (!solver.solve(p.getAlphaMatrix(), beta))
+					throw new AssertionError();
+				xList.add(beta);
+				//System.out.println(Arrays.toString(beta));
+			}
+
+			//for (int b = 1; b < 1000; b *= 2)
+			for (double b : new double[] { -500, -100, -10, -1, -0.1, 0, 0.1, 1, 10, 100, 500 })
+			{
+				Statistics[] rel = new Statistics[nparams];
+				Statistics[] abs = new Statistics[nparams];
+				for (int i = 0; i < nparams; i++)
+				{
+					rel[i] = new Statistics();
+					abs[i] = new Statistics();
+				}
+
+				for (int i = 0; i < paramsList.size(); i++)
+				{
+					double[] y = add(yList.get(i), b);
+					double[] a = paramsList.get(i).clone();
+					a[0] += b;
+					BaseLSQGradientProcedure p = LSQGradientProcedureFactory.create(y, func);
+					p.gradient(a);
+					double[] beta = p.beta;
+					double[] alpha2 = alphaList.get(i);
+					double[] beta2 = betaList.get(i);
+					double[] x2 = xList.get(i);
+
+					Assert.assertArrayEquals("Beta", beta2, beta, 1e-10);
+					Assert.assertArrayEquals("Alpha", alpha2, p.getAlphaLinear(), 1e-10);
+
+					// Solve
+					solver.solve(p.getAlphaMatrix(), beta);
+					Assert.assertArrayEquals("X", x2, beta, 1e-10);
+
+					for (int j = 0; j < nparams; j++)
+					{
+						rel[j].add(DoubleEquality.relativeError(x2[j], beta[j]));
+						abs[j].add(Math.abs(x2[j] - beta[j]));
+					}
+				}
+
+				for (int i = 0; i < nparams; i++)
+					System.out.printf("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b, func.getName(i),
+							rel[i].getMean(), rel[i].getStandardDeviation(), abs[i].getMean(),
+							abs[i].getStandardDeviation());
+			}
+		}
+		finally
+		{
+			Background = defaultBackground;
+		}
+	}
+
+	private double[] add(double[] d, double b)
+	{
+		d = d.clone();
+		for (int i = 0; i < d.length; i++)
+			d[i] += b;
+		return d;
+	}
 
 	/**
 	 * Create random elliptical Gaussian data an returns the data plus an estimate of the parameters.
@@ -568,7 +488,7 @@ public class LSQGradientProcedureTest
 
 		// Generate a 2D Gaussian
 		SingleFreeCircularErfGaussian2DFunction func = new SingleFreeCircularErfGaussian2DFunction(blockWidth,
-				blockWidth, 1);
+				blockWidth);
 		params[0] = random(Background);
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 		{
@@ -627,6 +547,40 @@ public class LSQGradientProcedureTest
 			yList.add(y);
 		}
 		return x;
+	}
+
+	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
+	{
+		int[] x = new int[blockWidth * blockWidth];
+		for (int i = 0; i < x.length; i++)
+			x[i] = i;
+		for (int i = 0; i < iter; i++)
+		{
+			double[] params = new double[nparams];
+			double[] y = createFakeData(params);
+			paramsList.add(params);
+			yList.add(y);
+		}
+		return x;
+	}
+
+	private double[] createFakeData(double[] params)
+	{
+		int n = blockWidth * blockWidth;
+		RandomGenerator r = rdg.getRandomGenerator();
+
+		for (int i = 0; i < params.length; i++)
+		{
+			params[i] = r.nextDouble();
+		}
+
+		double[] y = new double[n];
+		for (int i = 0; i < y.length; i++)
+		{
+			y[i] = r.nextDouble();
+		}
+
+		return y;
 	}
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)

@@ -4,7 +4,7 @@ import org.apache.commons.math3.util.Pair;
 
 import gdsc.smlm.function.ExtendedNonLinearFunction;
 import gdsc.smlm.function.Gradient1Procedure;
-import gdsc.smlm.function.GradientFunction;
+import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.NoiseModel;
 import gdsc.smlm.function.ValueProcedure;
 
@@ -30,7 +30,7 @@ import gdsc.smlm.function.ValueProcedure;
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */
-public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, GradientFunction
+public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, Gradient1Function
 {
 	/**
 	 * The factor for converting a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
@@ -126,46 +126,6 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	public int getMaxY()
 	{
 		return maxy;
-	}
-
-	/**
-	 * Gets the order of partial derivatives that can be computed.
-	 *
-	 * @return the derivative order
-	 */
-	public int getDerivativeOrder()
-	{
-		return 1;
-	}
-
-	/**
-	 * Checks if there is an overhead to computing derivatives of the given order. The input order is expected to be
-	 * less than the value returned from {@link #getDerivativeOrder()}.
-	 *
-	 * @param derivativeOrder
-	 *            the derivative order
-	 * @return true, if is overhead
-	 */
-	public boolean isOverhead(int derivativeOrder)
-	{
-		return false;
-	}
-
-	/**
-	 * Creates a new function with the ability to compute derivatives of the chosen order. Note that computation of
-	 * higher order derivatives may incur an overhead and so a function can be created with only the derivatives
-	 * required.
-	 * <p>
-	 * If the derivative order matches the current derivative order for this function then the same object may be
-	 * returned.
-	 *
-	 * @param derivativeOrder
-	 *            the derivative order
-	 * @return the gaussian 2D function
-	 */
-	public Gaussian2DFunction create(int derivativeOrder)
-	{
-		return this;
 	}
 
 	/**
@@ -338,7 +298,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 */
 	public double[] computeValues(double[] variables)
 	{
-		initialise(variables);
+		initialise0(variables);
 		final double[] values = new double[size()];
 		forEach(new ValueProcedure()
 		{
@@ -379,7 +339,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 */
 	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
 	{
-		initialise(variables);
+		initialise1(variables);
 		final int n = size();
 		final double[][] jacobian = new double[n][];
 		final double[] values = new double[n];
@@ -440,5 +400,23 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 			final double value = eval(i, duda);
 			procedure.execute(value, duda);
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.function.ValueFunction#initialise0(double[])
+	 */
+	public void initialise0(double[] a)
+	{
+		// TODO - Update these functions to support initialisation
+		// for computing the value only
+		initialise(a);
+	}
+
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.function.Gradient1Function#initialise1(double[])
+	 */
+	public void initialise1(double[] a)
+	{
+		initialise(a);
 	}
 }

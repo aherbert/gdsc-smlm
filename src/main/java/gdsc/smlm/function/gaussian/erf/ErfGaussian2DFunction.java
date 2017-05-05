@@ -34,8 +34,6 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 	protected final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
 	protected final static double ONE_OVER_ROOT2PI = 1.0 / Math.sqrt(2 * Math.PI);
 
-	protected final byte derivativeOrder;
-
 	// Required for the PSF
 	protected final double[] deltaEx, deltaEy;
 	protected double tB, tI;
@@ -53,35 +51,34 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 * @param maxy
 	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param derivativeOrder
-	 *            Set to the order of partial derivatives required
 	 */
-	public ErfGaussian2DFunction(int maxx, int maxy, int derivativeOrder)
+	public ErfGaussian2DFunction(int maxx, int maxy)
 	{
 		super(maxx, maxy);
-		this.derivativeOrder = (byte) derivativeOrder;
 		deltaEx = new double[this.maxx];
 		deltaEy = new double[this.maxy];
-		createArrays();
 	}
 
-	protected abstract void createArrays();
-
-	@Override
-	public int getDerivativeOrder()
+	protected void create1Arrays()
 	{
-		return derivativeOrder;
+		if (du_dtx != null)
+			return;
+		du_dtx = new double[this.maxx];
+		du_dty = new double[this.maxy];
+		du_dtsx = new double[this.maxx];
+		du_dtsy = new double[this.maxy];
 	}
 
-	@Override
-	public boolean isOverhead(int derivativeOrder)
+	protected void create2Arrays()
 	{
-		return derivativeOrder < this.derivativeOrder;
+		if (d2u_dtx2 != null)
+			return;
+		d2u_dtx2 = new double[this.maxx];
+		d2u_dty2 = new double[this.maxy];
+		d2u_dtsx2 = new double[this.maxx];
+		d2u_dtsy2 = new double[this.maxy];
+		create1Arrays();
 	}
-
-	// Force implementation by making abstract
-	@Override
-	abstract public ErfGaussian2DFunction create(int derivativeOrder);
 
 	/**
 	 * Copy the function.
@@ -90,7 +87,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 	 */
 	@Override
 	abstract public ErfGaussian2DFunction copy();
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -133,7 +130,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 	 * @return The predicted value
 	 */
 	public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -158,4 +155,14 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 	// Force implementation
 	@Override
 	public abstract void forEach(Gradient1Procedure procedure);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.NonLinearFunction#initialise(double[])
+	 */
+	public void initialise(double[] a)
+	{
+		initialise1(a);
+	}
 }

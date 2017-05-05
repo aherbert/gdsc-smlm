@@ -16,7 +16,7 @@ public class SingleAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFun
 		double Ay = 0.164;
 		double By = 0.0417;
 		zModel = HoltzerAstimatismZModel.create(gamma, d, Ax, Bx, Ay, By);
-		f1 = new SingleAstigmatismErfGaussian2DFunction(maxx, maxx, 2, zModel);
+		f1 = new SingleAstigmatismErfGaussian2DFunction(maxx, maxx, zModel);
 	}
 
 	protected void postInit()

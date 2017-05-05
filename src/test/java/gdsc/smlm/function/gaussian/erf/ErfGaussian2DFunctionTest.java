@@ -78,6 +78,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 	private void functionComputesSecondTargetGradient(int targetParameter)
 	{
+		ErfGaussian2DFunction f1 = (ErfGaussian2DFunction )this.f1; 
 		int gradientIndex = findGradientIndex(f1, targetParameter);
 		double[] dyda = new double[f1.getNumberOfGradients()];
 		double[] dyda2 = new double[dyda.length];
@@ -100,7 +101,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 							for (double[] w1 : testw1)
 							{
 								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
-								f1.initialise(a);
+								f1.initialise2(a);
 
 								// Numerically solve gradient. 
 								// Calculate the step size h to be an exact numerical representation
@@ -115,19 +116,19 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 								// Evaluate at (x+h) and (x-h)
 								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
 								a[targetParameter] = xx + h;
-								f1a.initialise(a);
+								f1a.initialise1(a);
 
 								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
 								a[targetParameter] = xx - h;
-								f1b.initialise(a);
+								f1b.initialise1(a);
 
 								for (int x : testx)
 									for (int y : testy)
 									{
 										int i = y * maxx + x;
-										f1a.eval(i, dyda, dyda2);
+										f1a.eval(i, dyda);
 										double value2 = dyda[gradientIndex];
-										f1b.eval(i, dyda, dyda2);
+										f1b.eval(i, dyda);
 										double value3 = dyda[gradientIndex];
 										f1.eval(i, dyda, dyda2);
 
@@ -150,6 +151,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	private class FunctionTimingTask extends BaseTimingTask
 	{
 		Gaussian2DFunction f;
+		ErfGaussian2DFunction f2;
 		double[][] x;
 		int order;
 		final double[] dyda, d2yda2;
@@ -159,6 +161,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		{
 			super(f.getClass().getSimpleName() + " " + order + " eval");
 			this.f = f;
+			if (order == 2)
+				f2 = (ErfGaussian2DFunction) f;
 			this.x = x;
 			this.order = order;
 			dyda = new double[f.getNumberOfGradients()];
@@ -183,7 +187,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			{
 				for (int i = 0; i < x.length; i++)
 				{
-					f.initialise(x[i]);
+					f.initialise0(x[i]);
 					for (int j = 0; j < n; j++)
 						s += f.eval(j);
 				}
@@ -192,7 +196,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			{
 				for (int i = 0; i < x.length; i++)
 				{
-					f.initialise(x[i]);
+					f.initialise1(x[i]);
 					for (int j = 0; j < n; j++)
 						s += f.eval(j, dyda);
 				}
@@ -201,9 +205,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			{
 				for (int i = 0; i < x.length; i++)
 				{
-					f.initialise(x[i]);
+					f2.initialise2(x[i]);
 					for (int j = 0; j < n; j++)
-						s += f.eval(j, dyda, d2yda2);
+						s += f2.eval(j, dyda, d2yda2);
 				}
 			}
 			return s;
@@ -214,9 +218,6 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionIsFasterThanEquivalentGaussian2DFunction()
 	{
-		final ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) this.f1.create(2);
-		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1.create(1);
-		final ErfGaussian2DFunction f0 = (ErfGaussian2DFunction) this.f1.create(0);
 		int flags = this.flags & ~GaussianFunctionFactory.FIT_ERF;
 		final Gaussian2DFunction gf = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, zModel);
 
@@ -251,9 +252,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		TimingService ts = new TimingService(runs);
 		ts.execute(new FunctionTimingTask(gf, x2, 1));
 		ts.execute(new FunctionTimingTask(gf, x2, 0));
-		ts.execute(new FunctionTimingTask(f2, x, 2));
+		ts.execute(new FunctionTimingTask(f1, x, 2));
 		ts.execute(new FunctionTimingTask(f1, x, 1));
-		ts.execute(new FunctionTimingTask(f0, x, 0));
+		ts.execute(new FunctionTimingTask(f1, x, 0));
 
 		int size = ts.getSize();
 		ts.repeat(size);
@@ -269,8 +270,6 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesValueAndJacobian()
 	{
-		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1.create(1);
-
 		final int n = f1.size();
 		double[] du_da = new double[f1.getNumberOfGradients()];
 
@@ -303,7 +302,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesGradientForEach()
 	{
-		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1.create(2);
+		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
 		final int n = f1.size();
 		double[] du_da = new double[f1.getNumberOfGradients()];
@@ -323,7 +322,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 							for (double[] w1 : testw1)
 							{
 								double[] a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
-								f1.initialise(a);
+								f1.initialise2(a);
 
 								// Compute single
 								for (int i = 0; i < n; i++)
@@ -395,9 +394,11 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		void run(double[] a)
 		{
 			f = f.copy();
-			f.initialise(a);
+			initialise(a);
 			forEach();
 		}
+
+		abstract void initialise(double[] a);
 
 		abstract void forEach();
 	}
@@ -407,6 +408,12 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		Procedure0(ErfGaussian2DFunction f)
 		{
 			super(f);
+		}
+
+		@Override
+		void initialise(double[] a)
+		{
+			f.initialise0(a);
 		}
 
 		@Override
@@ -429,6 +436,12 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		}
 
 		@Override
+		void initialise(double[] a)
+		{
+			f.initialise1(a);
+		}
+
+		@Override
 		void forEach()
 		{
 			f.forEach(this);
@@ -445,6 +458,12 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		Procedure2(ErfGaussian2DFunction f)
 		{
 			super(f);
+		}
+
+		@Override
+		void initialise(double[] a)
+		{
+			f.initialise2(a);
 		}
 
 		@Override
@@ -507,9 +526,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionIsFasterUsingForEach()
 	{
-		final ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) this.f1.create(2);
-		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1.create(1);
-		final ErfGaussian2DFunction f0 = (ErfGaussian2DFunction) this.f1.create(0);
+		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
 		final TurboList<double[]> params = new TurboList<double[]>();
 		for (double background : testbackground)
@@ -527,12 +544,12 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		int runs = 10000 / x.length;
 		TimingService ts = new TimingService(runs);
-		ts.execute(new FunctionTimingTask(f2, x, 2));
+		ts.execute(new FunctionTimingTask(f1, x, 2));
 		ts.execute(new FunctionTimingTask(f1, x, 1));
-		ts.execute(new FunctionTimingTask(f0, x, 0));
-		ts.execute(new ForEachTimingTask(f2, x, 2));
+		ts.execute(new FunctionTimingTask(f1, x, 0));
+		ts.execute(new ForEachTimingTask(f1, x, 2));
 		ts.execute(new ForEachTimingTask(f1, x, 1));
-		ts.execute(new ForEachTimingTask(f0, x, 0));
+		ts.execute(new ForEachTimingTask(f1, x, 0));
 
 		int size = ts.getSize();
 		ts.repeat(size);

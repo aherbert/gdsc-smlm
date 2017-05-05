@@ -25,7 +25,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 	private static final int[] gradientIndices;
 	static
 	{
-		gradientIndices = createGradientIndices(1, new SingleCircularErfGaussian2DFunction(1, 1, 0));
+		gradientIndices = createGradientIndices(1, new SingleCircularErfGaussian2DFunction(1, 1));
 	}
 
 	/**
@@ -35,34 +35,33 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 * @param maxy
 	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-	 * @param derivativeOrder
-	 *            Set to the order of partial derivatives required
 	 */
-	public SingleCircularErfGaussian2DFunction(int maxx, int maxy, int derivativeOrder)
+	public SingleCircularErfGaussian2DFunction(int maxx, int maxy)
 	{
-		super(maxx, maxy, derivativeOrder);
-	}
-
-	@Override
-	public ErfGaussian2DFunction create(int derivativeOrder)
-	{
-		if (derivativeOrder == this.derivativeOrder)
-			return this;
-		return new SingleCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+		super(maxx, maxy);
 	}
 
 	@Override
 	public ErfGaussian2DFunction copy()
 	{
-		return new SingleCircularErfGaussian2DFunction(maxx, maxy, derivativeOrder);
+		return new SingleCircularErfGaussian2DFunction(maxx, maxy);
 	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
-	 */
-	public void initialise(double[] a)
+
+	public void initialise0(double[] a)
+	{
+		tI = a[Gaussian2DFunction.SIGNAL];
+		tB = a[Gaussian2DFunction.BACKGROUND];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double s = a[Gaussian2DFunction.X_SD];
+
+		final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
+		createDeltaETable(one_sSqrt2, deltaEx, tx);
+		createDeltaETable(one_sSqrt2, deltaEy, ty);
+	}
+
+	public void initialise1(double[] a)
 	{
 		tI = a[Gaussian2DFunction.SIGNAL];
 		tB = a[Gaussian2DFunction.BACKGROUND];
@@ -73,38 +72,40 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
+		final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
+		final double one_2ss = 0.5 / (s * s);
+		final double I_sSqrt2pi = tI * ONE_OVER_ROOT2PI / s;
+		final double I_ssSqrt2pi = tI * ONE_OVER_ROOT2PI / (s * s);
+		create1Arrays();
+		createFirstOrderTables(one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, deltaEx, du_dtx, du_dtsx, tx);
+		createFirstOrderTables(one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, deltaEy, du_dty, du_dtsy, ty);
+	}
 
-		if (derivativeOrder == (byte) 2)
-		{
-			final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
-			final double ss = s * s;
-			final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
-			final double one_2ss = 0.5 / ss;
-			final double I_sSqrt2pi = tI * ONE_OVER_ROOT2PI / s;
-			final double I_ssSqrt2pi = tI * ONE_OVER_ROOT2PI / ss;
-			final double I_sssSqrt2pi = I_sSqrt2pi / ss;
-			final double one_sssSqrt2pi = one_sSqrt2pi / ss;
-			final double one_sssssSqrt2pi = one_sssSqrt2pi / ss;
-			createSecondOrderTables(tI, one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, I_sssSqrt2pi, ss, one_sssSqrt2pi,
-					one_sssssSqrt2pi, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx);
-			createSecondOrderTables(tI, one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, I_sssSqrt2pi, ss, one_sssSqrt2pi,
-					one_sssssSqrt2pi, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty);
-		}
-		else if (derivativeOrder == (byte) 1)
-		{
-			final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
-			final double one_2ss = 0.5 / (s * s);
-			final double I_sSqrt2pi = tI * ONE_OVER_ROOT2PI / s;
-			final double I_ssSqrt2pi = tI * ONE_OVER_ROOT2PI / (s * s);
-			createFirstOrderTables(one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, deltaEx, du_dtx, du_dtsx, tx);
-			createFirstOrderTables(one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, deltaEy, du_dty, du_dtsy, ty);
-		}
-		else
-		{
-			final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
-			createDeltaETable(one_sSqrt2, deltaEx, tx);
-			createDeltaETable(one_sSqrt2, deltaEy, ty);
-		}
+	public void initialise2(double[] a)
+	{
+		tI = a[Gaussian2DFunction.SIGNAL];
+		tB = a[Gaussian2DFunction.BACKGROUND];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double s = a[Gaussian2DFunction.X_SD];
+
+		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// since the Gaussian is XY separable
+		final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
+		final double ss = s * s;
+		final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
+		final double one_2ss = 0.5 / ss;
+		final double I_sSqrt2pi = tI * ONE_OVER_ROOT2PI / s;
+		final double I_ssSqrt2pi = tI * ONE_OVER_ROOT2PI / ss;
+		final double I_sssSqrt2pi = I_sSqrt2pi / ss;
+		final double one_sssSqrt2pi = one_sSqrt2pi / ss;
+		final double one_sssssSqrt2pi = one_sssSqrt2pi / ss;
+		create2Arrays();
+		createSecondOrderTables(tI, one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, I_sssSqrt2pi, ss, one_sssSqrt2pi,
+				one_sssssSqrt2pi, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx);
+		createSecondOrderTables(tI, one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, I_sssSqrt2pi, ss, one_sssSqrt2pi,
+				one_sssssSqrt2pi, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty);
 	}
 
 	/**
@@ -231,6 +232,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 	{
 		return gradientIndices;
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -240,7 +242,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 	{
 		return 5;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

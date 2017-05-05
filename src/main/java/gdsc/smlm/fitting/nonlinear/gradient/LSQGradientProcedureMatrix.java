@@ -1,7 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-import gdsc.smlm.function.Gradient1Procedure;
-import gdsc.smlm.function.GradientFunction;
+import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -25,31 +24,12 @@ import gdsc.smlm.function.GradientFunction;
  * Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving
  * the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
  */
-public class LSQGradientProcedureMatrix implements Gradient1Procedure
+public class LSQGradientProcedureMatrix extends BaseLSQGradientProcedure
 {
-	protected final double[] y;
-	protected final GradientFunction func;
-	
-	/**
-	 * The number of gradients
-	 */
-	public final int n;
 	/**
 	 * The scaled Hessian curvature matrix (size n*n)
 	 */
 	public final double[][] alpha;
-	/**
-	 * The scaled gradient vector of the function's partial first derivatives with respect to the parameters
-	 * (size n)
-	 */
-	public final double[] beta;
-	/**
-	 * The sum-of-squares value for the fit
-	 */
-	public double ssx;
-
-	protected int yi;
-	protected boolean isNanGradients;
 
 	/**
 	 * @param y
@@ -57,13 +37,10 @@ public class LSQGradientProcedureMatrix implements Gradient1Procedure
 	 * @param func
 	 *            Gradient function
 	 */
-	public LSQGradientProcedureMatrix(final double[] y, final GradientFunction func)
+	public LSQGradientProcedureMatrix(final double[] y, final Gradient1Function func)
 	{
-		this.y = y;
-		this.func = func;
-		this.n = func.getNumberOfGradients();
+		super(y, func);
 		alpha = new double[n][n];
-		beta = new double[n];
 	}
 
 	/*
@@ -93,26 +70,8 @@ public class LSQGradientProcedureMatrix implements Gradient1Procedure
 		ssx += dy * dy;
 	}
 
-	/**
-	 * Evaluate the function and compute the sum-of-squares and the curvature matrix.
-	 * <p>
-	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
-	 *
-	 * @param a
-	 *            Set of coefficients for the function
-	 */
-	public void run(final double[] a)
-	{
-		initialise();
-		func.initialise(a);
-		func.forEach(this);
-		finish();
-	}
-
 	protected void initialise()
 	{
-		ssx = 0;
-		yi = 0;
 		for (int i = 0; i < n; i++)
 		{
 			beta[i] = 0;
@@ -127,7 +86,6 @@ public class LSQGradientProcedureMatrix implements Gradient1Procedure
 		for (int i = 0; i < n - 1; i++)
 			for (int j = i + 1; j < n; j++)
 				alpha[i][j] = alpha[j][i];
-		isNanGradients = checkGradients();
 	}
 
 	protected boolean checkGradients()
@@ -143,11 +101,22 @@ public class LSQGradientProcedureMatrix implements Gradient1Procedure
 		return false;
 	}
 
-	/**
-	 * @return True if the last calculation produced gradients with NaN values
-	 */
-	public boolean isNaNGradients()
+	@Override
+	public double[][] getAlphaMatrix()
 	{
-		return isNanGradients;
+		return alpha;
+	}
+
+	@Override
+	public void getAlphaMatrix(double[][] alpha)
+	{
+		for (int i=0; i<n; i++)
+			System.arraycopy(this.alpha, 0, alpha, 0, n);
+	}
+
+	@Override
+	public void getAlphaLinear(double[] alpha)
+	{
+		toLinear(this.alpha, alpha);
 	}
 }

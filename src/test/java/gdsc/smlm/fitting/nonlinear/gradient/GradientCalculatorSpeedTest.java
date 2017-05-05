@@ -423,8 +423,7 @@ public class GradientCalculatorSpeedTest
 			double[] y = yList.get(i);
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
-			//double s = 
-			calc.evaluate(x, y, a, beta, func);
+			double s = calc.evaluate(x, y, a, beta, func);
 
 			for (int j = 0; j < nparams; j++)
 			{
@@ -436,9 +435,11 @@ public class GradientCalculatorSpeedTest
 				a2[j] = a[j];
 
 				double gradient = (s1 - s2) / (2 * d);
-				//System.out.printf("[%d,%d] %f  (%f+/-%f)  %f  ?=  %f\n", i, j, s, a[j], d, beta[j], gradient);
+				System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, j, s, func.getName(j), a[j], d, beta[j],
+						gradient);
 				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualComplement(beta[j], gradient));
 			}
+			break;
 		}
 	}
 
