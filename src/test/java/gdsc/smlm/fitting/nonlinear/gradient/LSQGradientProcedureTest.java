@@ -112,21 +112,11 @@ public class LSQGradientProcedureTest
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(BaseLSQGradientProcedureFactory factory)
 	{
 		gradientProcedureIsNotSlowerThanGradientCalculator(4, factory);
-		gradientProcedureIsNotSlowerThanGradientCalculator(4, factory);
-		gradientProcedureIsNotSlowerThanGradientCalculator(4, factory);
 		gradientProcedureIsNotSlowerThanGradientCalculator(5, factory);
-		gradientProcedureIsNotSlowerThanGradientCalculator(5, factory);
-		gradientProcedureIsNotSlowerThanGradientCalculator(5, factory);
-		gradientProcedureIsNotSlowerThanGradientCalculator(6, factory);
-		gradientProcedureIsNotSlowerThanGradientCalculator(6, factory);
 		gradientProcedureIsNotSlowerThanGradientCalculator(6, factory);
 		// 2 peaks
 		gradientProcedureIsNotSlowerThanGradientCalculator(11, factory);
-		gradientProcedureIsNotSlowerThanGradientCalculator(11, factory);
-		gradientProcedureIsNotSlowerThanGradientCalculator(11, factory);
 		// 4 peaks
-		gradientProcedureIsNotSlowerThanGradientCalculator(21, factory);
-		gradientProcedureIsNotSlowerThanGradientCalculator(21, factory);
 		gradientProcedureIsNotSlowerThanGradientCalculator(21, factory);
 	}
 
@@ -168,22 +158,63 @@ public class LSQGradientProcedureTest
 		}
 	}
 
-	private void gradientProcedureIsNotSlowerThanGradientCalculator(int nparams,
-			BaseLSQGradientProcedureFactory factory)
+	private abstract class Timer
+	{
+		private int loops;
+		int min;
+
+		Timer()
+		{
+		}
+
+		Timer(int min)
+		{
+			this.min = min;
+		}
+
+		long getTime()
+		{
+			// Run till stable timing
+			long t1 = time();
+			for (int i = 0; i < 10; i++)
+			{
+				long t2 = t1;
+				t1 = time();
+				if (loops >= min && DoubleEquality.relativeError(t1, t2) < 0.02) // 2% difference
+					break;
+			}
+			return t1;
+		}
+
+		long time()
+		{
+			loops++;
+			long t = System.nanoTime();
+			run();
+			t = System.nanoTime() - t;
+			//System.out.printf("[%d] Time = %d\n", loops, t);
+			return t;
+		}
+
+		abstract void run();
+	}
+
+	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams,
+			final BaseLSQGradientProcedureFactory factory)
 	{
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
 
-		int iter = 1000;
+		final int iter = 1000;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
-		double[][] alpha = new double[nparams][nparams];
-		double[] beta = new double[nparams];
+		final double[][] alpha = new double[nparams][nparams];
+		final double[] beta = new double[nparams];
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
 
 		int[] x = createFakeData(nparams, iter, paramsList, yList);
-		int n = x.length;
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		final int n = x.length;
+		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
 		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
@@ -197,32 +228,45 @@ public class LSQGradientProcedureTest
 		}
 
 		// Realistic loops for an optimisation
-		int loops = 15;
+		final int loops = 15;
 
-		long start1 = System.nanoTime();
-		for (int i = 0, k = 0; i < iter; i++)
+		// Run till stable timing
+		Timer t1 = new Timer()
 		{
-			calc = GradientCalculatorFactory.newCalculator(nparams, false);
-			for (int j = loops; j-- > 0;)
-				calc.findLinearised(n, yList.get(i), paramsList.get(k++ % iter), alpha, beta, func);
-		}
-		start1 = System.nanoTime() - start1;
+			@Override
+			void run()
+			{
+				for (int i = 0, k = 0; i < iter; i++)
+				{
+					GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+					for (int j = loops; j-- > 0;)
+						calc.findLinearised(n, yList.get(i), paramsList.get(k++ % iter), alpha, beta, func);
+				}
+			}
+		};
+		long time1 = t1.getTime();
 
-		long start2 = System.nanoTime();
-		for (int i = 0, k = 0; i < iter; i++)
+		Timer t2 = new Timer(t1.loops)
 		{
-			BaseLSQGradientProcedure p = factory.createProcedure(yList.get(i), func);
-			for (int j = loops; j-- > 0;)
-				p.gradient(paramsList.get(k++ % iter));
-		}
-		start2 = System.nanoTime() - start2;
+			@Override
+			void run()
+			{
+				for (int i = 0, k = 0; i < iter; i++)
+				{
+					BaseLSQGradientProcedure p = factory.createProcedure(yList.get(i), func);
+					for (int j = loops; j-- > 0;)
+						p.gradient(paramsList.get(k++ % iter));
+				}
+			}
+		};
+		long time2 = t2.getTime();
 
-		log("GradientCalculator = %d : %s %d = %d : %fx\n", start1, factory.getClass().getSimpleName(), nparams, start2,
-				(1.0 * start1) / start2);
+		log("GradientCalculator = %d : %s %d = %d : %fx\n", time1, factory.getClass().getSimpleName(), nparams, time2,
+				(1.0 * time1) / time2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
 		{
 			// Add contingency
-			Assert.assertTrue(start2 < start1 * 1.5);
+			Assert.assertTrue(time2 < time1 * 1.5);
 		}
 	}
 
@@ -248,26 +292,25 @@ public class LSQGradientProcedureTest
 		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(5, factory1, factory2, true);
 		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(6, factory1, factory2, true);
 		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(11, factory1, factory2, false);
-		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(11, factory1, factory2, false);
-		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(21, factory1, factory2, false);
 		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(21, factory1, factory2, false);
 	}
 
 	private void gradientProcedureLinearIsFasterThanGradientProcedureMatrix(final int nparams,
-			BaseLSQGradientProcedureFactory factory1, BaseLSQGradientProcedureFactory factory2, boolean doAssert)
+			final BaseLSQGradientProcedureFactory factory1, final BaseLSQGradientProcedureFactory factory2,
+			boolean doAssert)
 	{
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
 
-		int iter = 100;
+		final int iter = 100;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
 
 		createData(1, iter, paramsList, yList);
 
 		// Remove the timing of the function call by creating a dummy function
-		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
+		final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -285,30 +328,43 @@ public class LSQGradientProcedureTest
 		}
 
 		// Realistic loops for an optimisation
-		int loops = 15;
+		final int loops = 15;
 
-		long start1 = System.nanoTime();
-		for (int i = 0, k = 0; i < paramsList.size(); i++)
+		// Run till stable timing
+		Timer t1 = new Timer()
 		{
-			BaseLSQGradientProcedure p = factory1.createProcedure(yList.get(i), func);
-			for (int j = loops; j-- > 0;)
-				p.gradient(paramsList.get(k++ % iter));
-		}
-		start1 = System.nanoTime() - start1;
+			@Override
+			void run()
+			{
+				for (int i = 0, k = 0; i < paramsList.size(); i++)
+				{
+					BaseLSQGradientProcedure p = factory1.createProcedure(yList.get(i), func);
+					for (int j = loops; j-- > 0;)
+						p.gradient(paramsList.get(k++ % iter));
+				}
+			}
+		};
+		long time1 = t1.getTime();
 
-		long start2 = System.nanoTime();
-		for (int i = 0, k = 0; i < paramsList.size(); i++)
+		Timer t2 = new Timer(t1.loops)
 		{
-			BaseLSQGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
-			for (int j = loops; j-- > 0;)
-				p2.gradient(paramsList.get(k++ % iter));
-		}
-		start2 = System.nanoTime() - start2;
+			@Override
+			void run()
+			{
+				for (int i = 0, k = 0; i < paramsList.size(); i++)
+				{
+					BaseLSQGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
+					for (int j = loops; j-- > 0;)
+						p2.gradient(paramsList.get(k++ % iter));
+				}
+			}
+		};
+		long time2 = t2.getTime();
 
-		log("%s = %d : %s %d = %d : %fx\n", factory1.getClass().getSimpleName(), start1,
-				factory2.getClass().getSimpleName(), nparams, start2, (1.0 * start1) / start2);
+		log("%s = %d : %s %d = %d : %fx\n", factory1.getClass().getSimpleName(), time1,
+				factory2.getClass().getSimpleName(), nparams, time2, (1.0 * time1) / time2);
 		if (doAssert)
-			Assert.assertTrue(start2 < start1);
+			Assert.assertTrue(time2 < time1);
 	}
 
 	@Test
