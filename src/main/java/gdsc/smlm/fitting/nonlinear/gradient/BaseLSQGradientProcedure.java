@@ -49,7 +49,6 @@ public abstract class BaseLSQGradientProcedure implements Gradient1Procedure, Va
 	public double ssx;
 
 	protected int yi;
-	protected boolean isNanGradients;
 
 	/**
 	 * @param y
@@ -80,7 +79,6 @@ public abstract class BaseLSQGradientProcedure implements Gradient1Procedure, Va
 		initialise();
 		func.initialise1(a);
 		func.forEach((Gradient1Procedure) this);
-		isNanGradients = checkGradients();
 		finish();
 	}
 
@@ -109,10 +107,21 @@ public abstract class BaseLSQGradientProcedure implements Gradient1Procedure, Va
 		ssx += dy * dy;
 	}
 
+	/**
+	 * Initialise for the computation using first order gradients.
+	 */
 	protected abstract void initialise();
 
+	/**
+	 * Check gradients for NaN values.
+	 *
+	 * @return True if the current gradients contain NaN values
+	 */
 	protected abstract boolean checkGradients();
 
+	/**
+	 * Finish the computation using first order gradients.
+	 */
 	protected abstract void finish();
 
 	/**
@@ -160,7 +169,7 @@ public abstract class BaseLSQGradientProcedure implements Gradient1Procedure, Va
 	 */
 	public boolean isNaNGradients()
 	{
-		return isNanGradients;
+		return checkGradients();
 	}
 
 	/**
