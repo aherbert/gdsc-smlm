@@ -80,6 +80,21 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 		}
 	}
 
+	/**
+	 * Gets the peak number of the parameter assuming a 2D Gaussian function packed as: background + n * [signal, shape,
+	 * position0, position1, sd0, sd1].
+	 *
+	 * @param index
+	 *            the index (zero or above)
+	 * @return the peak number
+	 */
+	public static int getPeak(int index)
+	{
+		if (index < 1)
+			return 0;
+		return (index - 1) / 6;
+	}
+
 	protected String getShapeName()
 	{
 		// This method provides a link between the simple Gaussian functions in this package 
@@ -251,7 +266,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	protected static int[] createGradientIndices(int nPeaks, Gaussian2DFunction gf)
 	{
 		// Parameters are: 
-		// Background + n * { Signal, Angle, Xpos, Ypos, Xsd, Ysd }
+		// Background + n * { Signal, Shape, Xpos, Ypos, Xsd, Ysd }
 		int nparams = (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getParametersPerPeak();
 		int[] indices = new int[nparams];
 
@@ -402,7 +417,9 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.function.ValueFunction#initialise0(double[])
 	 */
 	public void initialise0(double[] a)
@@ -412,7 +429,9 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 		initialise(a);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.function.Gradient1Function#initialise1(double[])
 	 */
 	public void initialise1(double[] a)

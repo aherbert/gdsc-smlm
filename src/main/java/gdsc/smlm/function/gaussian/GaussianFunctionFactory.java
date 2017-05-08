@@ -3,6 +3,10 @@ package gdsc.smlm.function.gaussian;
 import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.MultiAstigmatismErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.MultiCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.MultiFixedErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -43,11 +47,6 @@ public class GaussianFunctionFactory
 	// Special options for fixed function to be able to fix the signal
 	public static final int FIT_NS_FIXED = FIT_BACKGROUND;
 	public static final int FIT_NS_NB_FIXED = 0;
-
-	// Flags to specify which derivatives to compute. 
-	// If absent the function will be able to compute the 1st derivatives.
-	public static final int FIT_0_DERIVATIVES = 0x00000040;
-	public static final int FIT_2_DERIVATIVES = 0x00000080;
 
 	// Flags for ERF Gaussian functions
 	public static final int FIT_ERF = 0x00000100;
@@ -95,7 +94,21 @@ public class GaussianFunctionFactory
 			}
 			else
 			{
-				// TODO Multipeak
+				if ((flags & FIT_BACKGROUND) == FIT_BACKGROUND)
+				{
+					// Independent X/Y width
+					if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+						return new MultiFreeCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
+					// Combined X/Y width
+					if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
+						return new MultiCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
+					// Z-depth function
+					if ((flags & FIT_Z) == FIT_Z)
+						return new MultiAstigmatismErfGaussian2DFunction(nPeaks, maxx, maxy, zModel);
+					// Fixed width
+					if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+						return new MultiFixedErfGaussian2DFunction(nPeaks, maxx, maxy);
+				}
 			}
 		}
 

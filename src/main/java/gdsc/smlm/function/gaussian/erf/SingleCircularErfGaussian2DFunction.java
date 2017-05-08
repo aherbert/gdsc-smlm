@@ -22,7 +22,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGaussian2DFunction
 {
-	private static final int[] gradientIndices;
+	static final int[] gradientIndices;
 	static
 	{
 		gradientIndices = createGradientIndices(1, new SingleCircularErfGaussian2DFunction(1, 1));
@@ -49,8 +49,8 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 	public void initialise0(double[] a)
 	{
-		tI = a[Gaussian2DFunction.SIGNAL];
 		tB = a[Gaussian2DFunction.BACKGROUND];
+		tI = a[Gaussian2DFunction.SIGNAL];
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
@@ -63,8 +63,9 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 	public void initialise1(double[] a)
 	{
-		tI = a[Gaussian2DFunction.SIGNAL];
+		create1Arrays();
 		tB = a[Gaussian2DFunction.BACKGROUND];
+		tI = a[Gaussian2DFunction.SIGNAL];
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
@@ -76,15 +77,15 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		final double one_2ss = 0.5 / (s * s);
 		final double I_sSqrt2pi = tI * ONE_OVER_ROOT2PI / s;
 		final double I_ssSqrt2pi = tI * ONE_OVER_ROOT2PI / (s * s);
-		create1Arrays();
 		createFirstOrderTables(one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, deltaEx, du_dtx, du_dtsx, tx);
 		createFirstOrderTables(one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, deltaEy, du_dty, du_dtsy, ty);
 	}
 
 	public void initialise2(double[] a)
 	{
-		tI = a[Gaussian2DFunction.SIGNAL];
+		create2Arrays();
 		tB = a[Gaussian2DFunction.BACKGROUND];
+		tI = a[Gaussian2DFunction.SIGNAL];
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
@@ -101,7 +102,6 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		final double I_sssSqrt2pi = I_sSqrt2pi / ss;
 		final double one_sssSqrt2pi = one_sSqrt2pi / ss;
 		final double one_sssssSqrt2pi = one_sssSqrt2pi / ss;
-		create2Arrays();
 		createSecondOrderTables(tI, one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, I_sssSqrt2pi, ss, one_sssSqrt2pi,
 				one_sssssSqrt2pi, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx);
 		createSecondOrderTables(tI, one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, I_sssSqrt2pi, ss, one_sssSqrt2pi,
@@ -173,12 +173,6 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		//@formatter:on
 
 		return tB + tI * duda[1];
-	}
-
-	@Override
-	public int getNPeaks()
-	{
-		return 1;
 	}
 
 	@Override

@@ -7,6 +7,6 @@ public class SingleFixedErfGaussian2DFunctionTest extends ErfGaussian2DFunctionT
 	protected void init()
 	{
 		flags = GaussianFunctionFactory.FIT_ERF_FIXED; 
-		f1 = new SingleFixedErfGaussian2DFunction(maxx, maxx);
+		f1 = new SingleFixedErfGaussian2DFunction(maxx, maxy);
 	}
 }

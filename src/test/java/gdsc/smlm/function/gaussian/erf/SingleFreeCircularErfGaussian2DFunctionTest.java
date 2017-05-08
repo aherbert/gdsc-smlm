@@ -7,6 +7,6 @@ public class SingleFreeCircularErfGaussian2DFunctionTest extends ErfGaussian2DFu
 	protected void init()
 	{
 		flags = GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE; 
-		f1 = new SingleFreeCircularErfGaussian2DFunction(maxx, maxx);
+		f1 = new SingleFreeCircularErfGaussian2DFunction(maxx, maxy);
 	}
 }

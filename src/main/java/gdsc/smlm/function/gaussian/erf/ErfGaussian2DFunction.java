@@ -2,7 +2,6 @@ package gdsc.smlm.function.gaussian.erf;
 
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Function;
-import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -35,8 +34,8 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 	protected final static double ONE_OVER_ROOT2PI = 1.0 / Math.sqrt(2 * Math.PI);
 
 	// Required for the PSF
-	protected final double[] deltaEx, deltaEy;
-	protected double tB, tI;
+	protected double[] deltaEx, deltaEy;
+	protected double tB;
 
 	// Required for the first gradients
 	protected double[] du_dtx, du_dty, du_dtsx, du_dtsy;
@@ -47,36 +46,44 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 	/**
 	 * Instantiates a new erf gaussian 2D function.
 	 *
+	 * @param nPeaks
+	 *            The number of peaks
 	 * @param maxx
 	 *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 * @param maxy
 	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 */
-	public ErfGaussian2DFunction(int maxx, int maxy)
+	public ErfGaussian2DFunction(int nPeaks, int maxx, int maxy)
 	{
 		super(maxx, maxy);
-		deltaEx = new double[this.maxx];
-		deltaEy = new double[this.maxy];
+		deltaEx = new double[nPeaks * this.maxx];
+		deltaEy = new double[nPeaks * this.maxy];
 	}
 
+	/**
+	 * Creates the arrays needed to compute the first-order partial derivatives.
+	 */
 	protected void create1Arrays()
 	{
 		if (du_dtx != null)
 			return;
-		du_dtx = new double[this.maxx];
-		du_dty = new double[this.maxy];
-		du_dtsx = new double[this.maxx];
-		du_dtsy = new double[this.maxy];
+		du_dtx = new double[deltaEx.length];
+		du_dty = new double[deltaEy.length];
+		du_dtsx = new double[deltaEx.length];
+		du_dtsy = new double[deltaEy.length];
 	}
 
+	/**
+	 * Creates the arrays needed to compute the first and second order partial derivatives.
+	 */
 	protected void create2Arrays()
 	{
 		if (d2u_dtx2 != null)
 			return;
-		d2u_dtx2 = new double[this.maxx];
-		d2u_dty2 = new double[this.maxy];
-		d2u_dtsx2 = new double[this.maxx];
-		d2u_dtsy2 = new double[this.maxy];
+		d2u_dtx2 = new double[deltaEx.length];
+		d2u_dty2 = new double[deltaEy.length];
+		d2u_dtsx2 = new double[deltaEx.length];
+		d2u_dtsy2 = new double[deltaEy.length];
 		create1Arrays();
 	}
 
@@ -105,24 +112,6 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 	 * 
 	 * @param i
 	 *            Input predictor
-	 * @return The Gaussian value
-	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
-	 */
-	public double eval(final int i)
-	{
-		// Unpack the predictor into the dimensions
-		final int y = i / maxx;
-		final int x = i % maxx;
-
-		return tB + tI * deltaEx[x] * deltaEy[y];
-	}
-
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 * 
-	 * @param i
-	 *            Input predictor
 	 * @param duda
 	 *            Partial first gradient of function with respect to each coefficient
 	 * @param d2uda2
@@ -131,28 +120,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 	 */
 	public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.ValueProcedure)
-	 */
-	public void forEach(ValueProcedure procedure)
-	{
-		for (int y = 0; y < maxy; y++)
-		{
-			final double tI_deltaEy = tI * deltaEy[y];
-			for (int x = 0; x < maxx; x++)
-			{
-				procedure.execute(tB + tI_deltaEy * deltaEx[x]);
-			}
-		}
-	}
-
-	// Force implementation
-	@Override
-	public abstract int getNumberOfGradients();
-
-	// Force implementation
+	// Force new implementation from the base Gaussian2DFunction
 	@Override
 	public abstract void forEach(Gradient1Procedure procedure);
 

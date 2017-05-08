@@ -23,7 +23,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularErfGaussian2DFunction
 {
-	private static final int[] gradientIndices;
+	static final int[] gradientIndices;
 	static
 	{
 		gradientIndices = createGradientIndices(1, new SingleAstigmatismErfGaussian2DFunction(1, 1, null));
@@ -63,8 +63,8 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 	 */
 	public void initialise0(double[] a)
 	{
-		tI = a[Gaussian2DFunction.SIGNAL];
 		tB = a[Gaussian2DFunction.BACKGROUND];
+		tI = a[Gaussian2DFunction.SIGNAL];
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
@@ -85,8 +85,9 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 	 */
 	public void initialise1(double[] a)
 	{
-		tI = a[Gaussian2DFunction.SIGNAL];
+		create1Arrays();
 		tB = a[Gaussian2DFunction.BACKGROUND];
+		tI = a[Gaussian2DFunction.SIGNAL];
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
@@ -96,12 +97,11 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
-		final double[] ds_dz = new double[2];
+		final double[] ds_dz = new double[1];
 		final double sx = tsx * zModel.getSx(tz, ds_dz);
 		dtsx_dtz = tsx * ds_dz[0];
 		final double sy = tsy * zModel.getSy(tz, ds_dz);
 		dtsy_dtz = tsy * ds_dz[0];
-		create1Arrays();
 		createFirstOrderTables(tI, deltaEx, du_dtx, du_dtsx, tx, sx);
 		createFirstOrderTables(tI, deltaEy, du_dty, du_dtsy, ty, sy);
 	}
@@ -113,8 +113,9 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 	 */
 	public void initialise2(double[] a)
 	{
-		tI = a[Gaussian2DFunction.SIGNAL];
+		create2Arrays();
 		tB = a[Gaussian2DFunction.BACKGROUND];
+		tI = a[Gaussian2DFunction.SIGNAL];
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
@@ -131,7 +132,6 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		final double sy = tsy * zModel.getSy2(tz, ds_dz);
 		dtsy_dtz = tsy * ds_dz[0];
 		d2tsy_dtz2 = tsy * ds_dz[1];
-		create2Arrays();
 		createSecondOrderTables(tI, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx, sx);
 		createSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, sy);
 	}
@@ -202,18 +202,12 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 				// Add the equivalent term we add in the circular version.
 				// Note: this is not in the Smith, et al (2010) paper but is 
 				// in the GraspJ source code and it works in JUnit tests.
-				+ 2 * du_dtsx[x] * dtsx_dtz * du_dtsy[y] * dtsy_dtz / tI;		
+				2 * du_dtsx[x] * dtsx_dtz * du_dtsy[y] * dtsy_dtz / tI;		
 		//@formatter:on
 		d2uda2[3] = d2u_dtx2[x] * deltaEy[y];
 		d2uda2[4] = d2u_dty2[y] * deltaEx[x];
 
 		return tB + tI * duda[1];
-	}
-
-	@Override
-	public int getNPeaks()
-	{
-		return 1;
 	}
 
 	@Override
