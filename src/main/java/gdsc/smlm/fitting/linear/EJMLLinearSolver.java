@@ -543,7 +543,7 @@ public class EJMLLinearSolver
 				: getCholeskyLDLTSolver();
 
 		if (invertSafe(primarySolver, A, false))
-			;//return true;
+			return true;
 
 		return invertUnsafe(getPseudoInverseSolver(), A, true);
 	}
@@ -738,6 +738,24 @@ public class EJMLLinearSolver
 	}
 
 	/**
+	 * Create a new DenseMatrix from the input matrix a. Modifications to the matrix are passed through to the input
+	 * array!
+	 * <p>
+	 * This is provided as a bridge method between the functions that accept primitive arrays and those that accept
+	 * DenseMatrix.
+	 *
+	 * @param a
+	 *            the matrix
+	 * @param n
+	 *            the number of columns/rows
+	 * @return the dense matrix
+	 */
+	public static DenseMatrix64F toA(double[] a, int n)
+	{
+		return DenseMatrix64F.wrap(n, n, a);
+	}
+
+	/**
 	 * Wrap the input array b in a DenseMatrix. Modifications to the matrix are passed through to the input array.
 	 * <p>
 	 * This is provided as a bridge method between the functions that accept primitive arrays and those that accept
@@ -889,5 +907,143 @@ public class EJMLLinearSolver
 	public double[] invertSymmPosDefDiagonal(double[][] a)
 	{
 		return invertSymmPosDefDiagonal(new DenseMatrix64F(a));
+	}
+
+	/**
+	 * Solves (one) linear equation, a x = b
+	 * <p>
+	 * On output b replaced by x. Matrix a may be modified.
+	 * 
+	 * @return False if the equation is singular (no solution)
+	 */
+	public boolean solveLinear(double[] a, double[] b)
+	{
+		return solveLinear(toA(a, b.length), toB(b));
+	}
+
+	/**
+	 * Solves (one) linear equation, a x = b
+	 * <p>
+	 * On output b replaced by x. Matrix a may be modified.
+	 * 
+	 * @return False if the equation is singular (no solution)
+	 */
+	public boolean solveCholesky(double[] a, double[] b)
+	{
+		return solveCholesky(toA(a, b.length), toB(b));
+	}
+
+	/**
+	 * Solves (one) linear equation, a x = b
+	 * <p>
+	 * On output b replaced by x. Matrix a may be modified.
+	 * 
+	 * @return False if the equation is singular (no solution)
+	 */
+	public boolean solveCholeskyLDLT(double[] a, double[] b)
+	{
+		return solveCholeskyLDLT(toA(a, b.length), toB(b));
+	}
+
+	/**
+	 * Solves (one) linear equation, a x = b
+	 * <p>
+	 * On output b replaced by x. Matrix a may be modified.
+	 * 
+	 * @return False if the equation is singular (no solution)
+	 */
+	public boolean solvePseudoInverse(double[] a, double[] b)
+	{
+		return solvePseudoInverse(toA(a, b.length), toB(b));
+	}
+
+	/**
+	 * Solves (one) linear equation, a x = b by direct inversion. Works on small matrices up to size 5.
+	 * <p>
+	 * On output b replaced by x. Matrix a may be modified.
+	 * 
+	 * @return False if the equation is singular (no solution)
+	 */
+	public boolean solveDirectInversion(double[] a, double[] b)
+	{
+		return solveDirectInversion(toA(a, b.length), toB(b));
+	}
+
+	/**
+	 * Solves (one) linear equation, a x = b
+	 * <p>
+	 * On output b replaced by x. Matrix a may be modified.
+	 * <p>
+	 * Solve using the CholeskyLDLT method or, if that fails (due to a singular matrix), the PseudoInversion
+	 * decomposition.
+	 * 
+	 * @return False if the equation is singular (no solution)
+	 */
+	public boolean solve(double[] a, double[] b)
+	{
+		return solve(toA(a, b.length), toB(b));
+	}
+
+	/**
+	 * Computes the inverse of the 'A' matrix passed into the last successful solve method.
+	 * <p>
+	 * On output a[n][n] replaced by the inverse of the solved matrix a. If any column/row index was removed (as it was
+	 * set to zero in the input matrix) then the resulting column/row index will be set to zero.
+	 * 
+	 * @param a
+	 *            the matrix a
+	 * @return False if the last solve attempt failed, or inversion produces non finite values
+	 */
+	public boolean invert(double[] a)
+	{
+		if (lastSuccessfulSolver == null)
+			return false;
+
+		lastSuccessfulSolver.invert(getA_inv());
+
+		// Check for NaN or Infinity
+		double[] a_inv = A_inv.data;
+		for (int i = a_inv.length; i-- > 0;)
+			if (!Maths.isFinite(a_inv[i]))
+				return false;
+
+		// Q. Should we check the product is the identity matrix?
+		// This will require that we have the original matrix A used to initialise the solver.
+
+		System.arraycopy(a_inv, 0, a, 0, a_inv.length);
+		
+		return true;
+	}
+
+	/**
+	 * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the inverse of a.
+	 * <p>
+	 * Note: If the matrix is singular then a pseudo inverse will be computed.
+	 *
+	 * @param a
+	 *            the matrix a
+	 * @param n
+	 *            the number of columns/rows
+	 * @return False if there is no solution
+	 */
+	public boolean invertSymmPosDef(double[] a, int n)
+	{
+		return invertSymmPosDef(toA(a, n));
+	}
+
+	/**
+	 * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal.
+	 * <p>
+	 * Note: If the matrix is singular then a pseudo inverse will be computed.
+	 *
+	 * @param a
+	 *            the matrix a
+	 * @param n
+	 *            the number of columns/rows
+	 * @return The diagonal of the inverted matrix (or null)
+	 */
+	public double[] invertSymmPosDefDiagonal(double[] a, int n)
+	{
+		return invertSymmPosDefDiagonal(toA(a, n));
 	}
 }
