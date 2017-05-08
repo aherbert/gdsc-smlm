@@ -93,38 +93,38 @@ public class SpeedTest
 	@Test
 	public void freeCircularComputesSameAsEllipticalSinglePeakNB()
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE,
-				GaussianFunctionFactory.FIT_NB_ELLIPTICAL);
+		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
 	@Test
 	public void freeCircularFasterThanEllipticalSinglePeakNB()
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE, GaussianFunctionFactory.FIT_NB_ELLIPTICAL);
+		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
 	@Test
 	public void circularComputesSameAsFreeCircularSinglePeakNB()
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_NB_CIRCLE, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE);
+		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void circularFasterThanFreeCircularSinglePeakNB()
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_NB_CIRCLE, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE);
+		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fixedComputesSameAsFreeCircularSinglePeakNB()
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_NB_FIXED, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE);
+		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fixedFasterThanFreeCircularSinglePeakNB()
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_NB_FIXED, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE);
+		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
@@ -166,38 +166,38 @@ public class SpeedTest
 	@Test
 	public void freeCircularComputesSameAsEllipticalDoublePeakNB()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE,
-				GaussianFunctionFactory.FIT_NB_ELLIPTICAL);
+		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
 	@Test
 	public void freeCircularFasterThanEllipticalDoublePeakNB()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE, GaussianFunctionFactory.FIT_NB_ELLIPTICAL);
+		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
 	@Test
 	public void circularComputesSameAsFreeCircularDoublePeakNB()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_NB_CIRCLE, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE);
+		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void circularFasterThanFreeCircularDoublePeakNB()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_NB_CIRCLE, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE);
+		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fixedComputesSameAsFreeCircularDoublePeakNB()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_NB_FIXED, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE);
+		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fixedFasterThanFreeCircularDoublePeakNB()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_NB_FIXED, GaussianFunctionFactory.FIT_NB_FREE_CIRCLE);
+		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	void f1ComputesSameAsf2(int npeaks, int flags1, int flags2)

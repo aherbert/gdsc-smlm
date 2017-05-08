@@ -4,7 +4,7 @@ public class SingleNSNBFixedGaussian2DFunctionTest extends Gaussian2DFunctionTes
 {
 	protected void init()
 	{
-		flags = GaussianFunctionFactory.FIT_NS_NB_FIXED;
+		flags = GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED;
 		f1 = new SingleNSNBFixedGaussian2DFunction(maxx, maxx);
 	}
 }

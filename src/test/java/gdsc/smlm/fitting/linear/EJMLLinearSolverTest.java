@@ -432,13 +432,13 @@ public class EJMLLinearSolverTest
 	@Test
 	public void runSpeedTest3()
 	{
-		runSpeedTest(GaussianFunctionFactory.FIT_NB_FIXED);
+		runSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
 	@Test
 	public void runSpeedTest2()
 	{
-		runSpeedTest(GaussianFunctionFactory.FIT_NS_NB_FIXED);
+		runSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
 	}
 
 	private void runSpeedTest(int flags)

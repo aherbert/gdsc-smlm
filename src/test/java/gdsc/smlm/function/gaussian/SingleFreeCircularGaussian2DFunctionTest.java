@@ -7,7 +7,7 @@ public class SingleFreeCircularGaussian2DFunctionTest extends Gaussian2DFunction
 {
 	protected void init()
 	{
-		flags = GaussianFunctionFactory.FIT_FREE_CIRCLE; 
+		flags = GaussianFunctionFactory.FIT_SIMPLE_FREE_CIRCLE; 
 		f1 = new SingleFreeCircularGaussian2DFunction(maxx, maxx);
 	}
 }

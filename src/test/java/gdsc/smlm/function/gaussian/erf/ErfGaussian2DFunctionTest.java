@@ -7,6 +7,7 @@ import gdsc.core.TestSettings;
 import gdsc.core.ij.Utils;
 import gdsc.core.test.BaseTimingTask;
 import gdsc.core.test.TimingService;
+import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
@@ -26,6 +27,27 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		h_ = 0.0001;
 	}
 
+	@Test
+	public void factoryDefaultsToErfGaussian2DFunction()
+	{
+		Gaussian2DFunction f, f2;
+
+		int flags2 = BitFlags.unset(flags, GaussianFunctionFactory.FIT_ERF); 
+		
+		if (this.f2 != null)
+		{
+			f = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
+			f2 = GaussianFunctionFactory.create2D(2, maxx, maxy, flags2, zModel);
+			Assert.assertTrue("Incorrect function2", f.getClass() == f2.getClass());
+		}
+		else
+		{
+			f = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
+			f2 = GaussianFunctionFactory.create2D(1, maxx, maxy, flags2, zModel);
+			Assert.assertTrue("Incorrect function1", f.getClass() == f2.getClass());
+		}
+	}
+	
 	@Test
 	public void functionComputesSecondBackgroundGradient()
 	{

@@ -7,7 +7,7 @@ public class EllipticalGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
 	protected void init()
 	{
-		flags = GaussianFunctionFactory.FIT_ELLIPTICAL; 
+		flags = GaussianFunctionFactory.FIT_SIMPLE_ELLIPTICAL; 
 		f1 = new EllipticalGaussian2DFunction(1, maxx, maxy);
 		f2 = new EllipticalGaussian2DFunction(2, maxx, maxy);
 	}

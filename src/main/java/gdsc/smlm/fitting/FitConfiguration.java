@@ -612,16 +612,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		switch (fitFunction)
 		{
 			case CIRCULAR:
-				flags = GaussianFunctionFactory.FIT_NB_CIRCLE;
+				flags = GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE;
 				break;
 			case FIXED:
-				flags = GaussianFunctionFactory.FIT_NB_FIXED;
+				flags = GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED;
 				break;
 			case FREE_CIRCULAR:
-				flags = GaussianFunctionFactory.FIT_NB_FREE_CIRCLE;
+				flags = GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE;
 				break;
 			case FREE:
-				flags = GaussianFunctionFactory.FIT_NB_ELLIPTICAL;
+				flags = GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL;
 				break;
 			default:
 				throw new RuntimeException("Unknown fitting function");

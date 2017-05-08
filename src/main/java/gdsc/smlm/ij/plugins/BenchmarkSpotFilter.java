@@ -487,7 +487,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 
 			double[] allParams = new double[1 + 6 * actual.length];
-			final int flags = GaussianFunctionFactory.FIT_NS_NB_FIXED;
+			final int flags = GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED;
 			for (int i = 0; i < actual.length; i++)
 			{
 				// Bounding rectangle for the spot. This serves as the reference frame 0,0

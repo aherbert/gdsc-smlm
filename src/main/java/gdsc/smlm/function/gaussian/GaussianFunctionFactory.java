@@ -23,40 +23,150 @@ import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
  *---------------------------------------------------------------------------*/
 
 /**
- * Creates the appropriate Gaussian function
+ * Creates the appropriate Gaussian function.
+ * <p>
+ * Note that currently all functions support computing gradients for x/y position.
  */
 public class GaussianFunctionFactory
 {
+	/**
+	 * Compute gradients for background 
+	 */
 	public static final int FIT_BACKGROUND = 0x00000001;
+	/**
+	 * Compute gradients for rotation angle 
+	 */
 	public static final int FIT_ANGLE = 0x00000002;
+	/**
+	 * Compute gradients for x width
+	 */
 	public static final int FIT_X_WIDTH = 0x00000004;
+	/**
+	 * Compute gradients for y width 
+	 */
 	public static final int FIT_Y_WIDTH = 0x00000008;
+	/**
+	 * Compute gradients for signal 
+	 */
 	public static final int FIT_SIGNAL = 0x00000010;
+	/**
+	 * Compute gradients for z position 
+	 */
 	public static final int FIT_Z = 0x00000020;
 
+	/**
+	 * An elliptical 2D Gaussian with gradients for background, signal, rotation angle, x/y position, x/y width
+	 */
 	public static final int FIT_ELLIPTICAL = FIT_BACKGROUND | FIT_ANGLE | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
+	/**
+	 * An elliptical 2D Gaussian with gradients for background, signal, x/y position, x/y width
+	 */
 	public static final int FIT_FREE_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
+	/**
+	 * An 2D Gaussian with gradients for background, signal, x/y position, width
+	 */
 	public static final int FIT_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH | FIT_SIGNAL;
+	/**
+	 * An 2D Gaussian with gradients for background, signal, x/y position
+	 */
 	public static final int FIT_FIXED = FIT_BACKGROUND | FIT_SIGNAL;
+	/**
+	 * An elliptical 2D Gaussian with gradients for background, signal, x/y/z position. The z position determines the
+	 * x/y width using an astigmatism model.
+	 */
+	public static final int FIT_ASTIGMATISM = FIT_BACKGROUND | FIT_Z | FIT_SIGNAL;
 
-	public static final int FIT_NB_ELLIPTICAL = FIT_ANGLE | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
-	public static final int FIT_NB_FREE_CIRCLE = FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
-	public static final int FIT_NB_CIRCLE = FIT_X_WIDTH | FIT_SIGNAL;
-	public static final int FIT_NB_FIXED = FIT_SIGNAL;
+	// -=-=-=-=-=-=-=-=-=-=-=-=-
+	// Flags for ERF Gaussian functions.
+	// These are evaluated as a full integration over the pixel using the error function (erf)
+	// -=-=-=-=-=-=-=-=-=-=-=-=-
 
-	// Special options for fixed function to be able to fix the signal
-	public static final int FIT_NS_FIXED = FIT_BACKGROUND;
-	public static final int FIT_NS_NB_FIXED = 0;
-
-	// Flags for ERF Gaussian functions
+	/**
+	 * Use a full integration over the pixel using the error function (erf). A rotation angle is not supported.
+	 */
 	public static final int FIT_ERF = 0x00000100;
+	/**
+	 * An elliptical 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y position, x/y
+	 * width
+	 */
 	public static final int FIT_ERF_FREE_CIRCLE = FIT_FREE_CIRCLE | FIT_ERF;
+	/**
+	 * An 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y position, width
+	 */
 	public static final int FIT_ERF_CIRCLE = FIT_CIRCLE | FIT_ERF;
+	/**
+	 * An 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y position
+	 */
 	public static final int FIT_ERF_FIXED = FIT_FIXED | FIT_ERF;
+	/**
+	 * An elliptical 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y/z position. The
+	 * z position determines the x/y width using an astigmatism model.
+	 */
 	public static final int FIT_ERF_ASTIGMATISM = FIT_BACKGROUND | FIT_Z | FIT_SIGNAL | FIT_ERF;
+
+	// -=-=-=-=-=-=-=-=-=-=-=-=-
+	// Flags for simple Gaussian functions. 
+	// These are evaluated using a single exponential at the centre of the pixel. 
+	// They support rotating the X/Y elliptical Gaussian (if X and Y are different).
+	// -=-=-=-=-=-=-=-=-=-=-=-=-
+
+	/**
+	 * Use a single exponential at the centre of the pixel. A rotation angle is supported.
+	 */
+	public static final int FIT_SIMPLE = 0x00000200;
+	/**
+	 * An elliptical 2D Gaussian (single exponential per pixel) with gradients for background, signal, rotation angle,
+	 * x/y position, x/y width
+	 */
+	public static final int FIT_SIMPLE_ELLIPTICAL = FIT_ELLIPTICAL | FIT_SIMPLE;
+	/**
+	 * An elliptical 2D Gaussian (single exponential per pixel) with gradients for background, signal, x/y position, x/y
+	 * width
+	 */
+	public static final int FIT_SIMPLE_FREE_CIRCLE = FIT_FREE_CIRCLE | FIT_SIMPLE;
+	/**
+	 * An 2D Gaussian (single exponential per pixel) with gradients for background, signal, x/y position, width
+	 */
+	public static final int FIT_SIMPLE_CIRCLE = FIT_CIRCLE | FIT_SIMPLE;
+	/**
+	 * An 2D Gaussian (single exponential per pixel) with gradients for background, signal, x/y position
+	 */
+	public static final int FIT_SIMPLE_FIXED = FIT_FIXED | FIT_SIMPLE;
+
+	// Extra support for functions without background
+
+	/**
+	 * An elliptical 2D Gaussian (single exponential per pixel) with gradients for signal, rotation angle,
+	 * x/y position, x/y width
+	 */
+	public static final int FIT_SIMPLE_NB_ELLIPTICAL = FIT_ANGLE | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL | FIT_SIMPLE;
+	/**
+	 * An elliptical 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position, x/y
+	 * width
+	 */
+	public static final int FIT_SIMPLE_NB_FREE_CIRCLE = FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL | FIT_SIMPLE;
+	/**
+	 * An 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position, width
+	 */
+	public static final int FIT_SIMPLE_NB_CIRCLE = FIT_X_WIDTH | FIT_SIGNAL | FIT_SIMPLE;
+	/**
+	 * An 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position
+	 */
+	public static final int FIT_SIMPLE_NB_FIXED = FIT_SIGNAL | FIT_SIMPLE;
+
+	/**
+	 * An 2D Gaussian (single exponential per pixel) with gradients for background, x/y position
+	 */
+	public static final int FIT_SIMPLE_NS_FIXED = FIT_BACKGROUND | FIT_SIMPLE;
+	/**
+	 * An 2D Gaussian (single exponential per pixel) with gradients for x/y position
+	 */
+	public static final int FIT_SIMPLE_NS_NB_FIXED = FIT_SIMPLE;
 
 	/**
 	 * Create the correct 2D Gaussian function for the specified parameters.
+	 * <p>
+	 * Defaults to using the ERF Gaussian functions if the user has not requested a simple Gaussian or angle fitting.
 	 *
 	 * @param nPeaks
 	 *            The number of peaks (N)
@@ -72,7 +182,8 @@ public class GaussianFunctionFactory
 	 */
 	public static Gaussian2DFunction create2D(int nPeaks, int maxx, int maxy, int flags, AstimatismZModel zModel)
 	{
-		if ((flags & FIT_ERF) == FIT_ERF)
+		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
+		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
 		{
 			if (nPeaks == 1)
 			{
@@ -112,6 +223,7 @@ public class GaussianFunctionFactory
 			}
 		}
 
+		// Legacy simple Gaussian functions
 		if (nPeaks == 1)
 		{
 			if ((flags & FIT_BACKGROUND) == FIT_BACKGROUND)

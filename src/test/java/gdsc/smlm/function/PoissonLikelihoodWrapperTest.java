@@ -86,25 +86,25 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitNBFixedComputesGradientPerDatum()
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_NB_FIXED);
+		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
 	@Test
 	public void fitNBCircleComputesGradientPerDatum()
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_NB_CIRCLE);
+		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
 	}
 
 	@Test
 	public void fitNBFreeCircleComputesGradientPerDatum()
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_NB_FREE_CIRCLE);
+		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fitNBEllipticalComputesGradientPerDatum()
 	{
-		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_NB_ELLIPTICAL);
+		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
 	private void functionComputesGradientPerDatum(int flags)
@@ -273,19 +273,19 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitNBFixedComputesGradient()
 	{
-		functionComputesGradient(GaussianFunctionFactory.FIT_NB_FIXED);
+		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
 	@Test
 	public void fitNBCircleComputesGradient()
 	{
-		functionComputesGradient(GaussianFunctionFactory.FIT_NB_CIRCLE);
+		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
 	}
 
 	@Test
 	public void fitNBFreeCircleComputesGradient()
 	{
-		functionComputesGradient(GaussianFunctionFactory.FIT_NB_FREE_CIRCLE);
+		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
@@ -294,7 +294,7 @@ public class PoissonLikelihoodWrapperTest
 		// The elliptical function gradient evaluation is worse 
 		DoubleEquality tmp = eq;
 		eq = eqPerDatum;
-		functionComputesGradient(GaussianFunctionFactory.FIT_NB_ELLIPTICAL);
+		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 		eq = tmp;
 	}
 
