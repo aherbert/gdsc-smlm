@@ -20,6 +20,9 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
  * for use in NonLinearFit
+ * <p>
+ * Note: This class is a test-bed for implementation strategies. The fastest strategy can then be used for other
+ * gradient procedures.
  */
 public class LSQGradientProcedureTest
 {
@@ -267,6 +270,50 @@ public class LSQGradientProcedureTest
 		{
 			// Add contingency
 			Assert.assertTrue(time2 < time1 * 1.5);
+		}
+	}
+
+	@Test
+	public void gradientProcedureUnrolledComputesSameAsGradientProcedure()
+	{
+		// Test the method that will be used for the standard and unrolled versions
+		// for all other 'gradient procedures'
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(4);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(5);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(6);
+	}
+
+	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams)
+	{
+		int iter = 10;
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
+
+		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+
+		createFakeData(nparams, iter, paramsList, yList);
+		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+
+		String name = GradientCalculator.class.getSimpleName();
+		for (int i = 0; i < paramsList.size(); i++)
+		{
+			BaseLSQGradientProcedure p1 = LSQGradientProcedureFactory.create(yList.get(i), func);
+			p1.gradient(paramsList.get(i));
+
+			BaseLSQGradientProcedure p2 = new LSQGradientProcedure(yList.get(i), func);
+			p2.gradient(paramsList.get(i));
+
+			// Exactly the same ...
+			Assert.assertEquals(name + " Result: Not same @ " + i, p1.ssx, p2.ssx, 0);
+			Assert.assertArrayEquals(name + " Observations: Not same beta @ " + i, p1.beta, p2.beta, 0);
+
+			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p1.getAlphaLinear(),
+					p2.getAlphaLinear(), 0);
+
+			double[][] am1 = p1.getAlphaMatrix();
+			double[][] am2 = p2.getAlphaMatrix();
+			for (int j = 0; j < nparams; j++)
+				Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am1[j], am2[j], 0);
 		}
 	}
 
