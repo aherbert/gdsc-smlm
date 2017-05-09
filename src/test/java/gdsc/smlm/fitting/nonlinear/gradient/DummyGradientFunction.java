@@ -1,10 +1,12 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient1Procedure;
+import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.ValueProcedure;
 
-class DummyGradientFunction implements Gradient1Function
+class DummyGradientFunction implements Gradient1Function, Gradient2Function
 {
 	int n;
 
@@ -25,7 +27,11 @@ class DummyGradientFunction implements Gradient1Function
 	public void initialise1(double[] a)
 	{
 	}
-	
+
+	public void initialise2(double[] a)
+	{
+	}
+
 	public int[] gradientIndices()
 	{
 		return null;
@@ -41,6 +47,10 @@ class DummyGradientFunction implements Gradient1Function
 	}
 
 	public void forEach(Gradient1Procedure procedure)
+	{
+	}
+
+	public void forEach(Gradient2Procedure procedure)
 	{
 	}
 }
