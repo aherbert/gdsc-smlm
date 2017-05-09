@@ -34,7 +34,8 @@ public class GradientCalculator6 extends GradientCalculator
 	 * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], double[] double[], double[][], double[],
 	 * gdsc.fitting.function.NonLinearFunction)
 	 */
-	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta,
+			NonLinearFunction func)
 	{
 		double ssx = 0;
 		final double[] dy_da = new double[6];
@@ -60,14 +61,14 @@ public class GradientCalculator6 extends GradientCalculator
 		alpha[5][3] = 0;
 		alpha[5][4] = 0;
 		alpha[5][5] = 0;
-		
+
 		beta[0] = 0;
 		beta[1] = 0;
 		beta[2] = 0;
 		beta[3] = 0;
 		beta[4] = 0;
 		beta[5] = 0;
-		
+
 		func.initialise(a);
 
 		if (func.canComputeWeights())
@@ -205,14 +206,14 @@ public class GradientCalculator6 extends GradientCalculator
 		alpha[5][3] = 0;
 		alpha[5][4] = 0;
 		alpha[5][5] = 0;
-		
+
 		beta[0] = 0;
 		beta[1] = 0;
 		beta[2] = 0;
 		beta[3] = 0;
 		beta[4] = 0;
 		beta[5] = 0;
-		
+
 		func.initialise(a);
 
 		if (func.canComputeWeights())

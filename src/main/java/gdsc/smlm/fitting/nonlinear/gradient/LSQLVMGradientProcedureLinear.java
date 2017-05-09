@@ -130,7 +130,7 @@ public class LSQLVMGradientProcedureLinear extends BaseLSQLVMGradientProcedure
 	{
 		return alpha;
 	}
-	
+
 	@Override
 	public void getAlphaLinear(double[] alpha)
 	{

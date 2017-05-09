@@ -110,7 +110,7 @@ public class LSQLVMGradientProcedureMatrix extends BaseLSQLVMGradientProcedure
 	@Override
 	public void getAlphaMatrix(double[][] alpha)
 	{
-		for (int i=0; i<n; i++)
+		for (int i = 0; i < n; i++)
 			System.arraycopy(this.alpha, 0, alpha, 0, n);
 	}
 

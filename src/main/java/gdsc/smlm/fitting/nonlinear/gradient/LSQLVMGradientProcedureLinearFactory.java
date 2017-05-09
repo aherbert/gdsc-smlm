@@ -44,7 +44,7 @@ public class LSQLVMGradientProcedureLinearFactory extends BaseLSQLVMGradientProc
 				return new LSQLVMGradientProcedureLinear(y, func);
 		}
 	}
-	
+
 	// Instance method for testing
 	BaseLSQLVMGradientProcedure createProcedure(final double[] y, final Gradient1Function func)
 	{

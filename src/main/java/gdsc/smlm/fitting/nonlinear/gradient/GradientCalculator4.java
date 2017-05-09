@@ -34,7 +34,8 @@ public class GradientCalculator4 extends GradientCalculator
 	 * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], double[] double[], double[][], double[],
 	 * gdsc.fitting.function.NonLinearFunction)
 	 */
-	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta,
+			NonLinearFunction func)
 	{
 		double ssx = 0;
 		final double[] dy_da = new double[4];
@@ -49,7 +50,7 @@ public class GradientCalculator4 extends GradientCalculator
 		alpha[3][1] = 0;
 		alpha[3][2] = 0;
 		alpha[3][3] = 0;
-		
+
 		beta[0] = 0;
 		beta[1] = 0;
 		beta[2] = 0;
@@ -142,7 +143,7 @@ public class GradientCalculator4 extends GradientCalculator
 		alpha[3][1] = 0;
 		alpha[3][2] = 0;
 		alpha[3][3] = 0;
-		
+
 		beta[0] = 0;
 		beta[1] = 0;
 		beta[2] = 0;

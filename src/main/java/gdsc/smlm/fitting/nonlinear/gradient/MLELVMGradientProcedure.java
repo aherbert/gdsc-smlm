@@ -57,7 +57,7 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 		if (fi > 0)
 		{
 			final double xi = y[yi++];
-			
+
 			// We assume y[i] is positive
 			if (xi == 0)
 			{
@@ -94,7 +94,7 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 		if (fi > 0)
 		{
 			final double xi = y[yi++];
-			
+
 			// We assume y[i] is positive
 			if (xi == 0)
 			{
@@ -106,14 +106,14 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 			}
 		}
 	}
-	
+
 	@Override
 	protected void finishGradient()
 	{
 		// Move the factor of 2 to the end
 		value *= 2;
 	}
-	
+
 	@Override
 	protected void finishValue()
 	{

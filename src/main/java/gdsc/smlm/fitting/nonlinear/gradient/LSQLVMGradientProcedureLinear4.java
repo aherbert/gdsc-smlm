@@ -58,7 +58,7 @@ public class LSQLVMGradientProcedureLinear4 extends LSQLVMGradientProcedureLinea
 		alpha[10] += dy_da[2] * dy_da[2];
 		alpha[11] += dy_da[2] * dy_da[3];
 		alpha[15] += dy_da[3] * dy_da[3];
-		
+
 		beta[0] += dy_da[0] * dy;
 		beta[1] += dy_da[1] * dy;
 		beta[2] += dy_da[2] * dy;

@@ -68,7 +68,7 @@ public class GradientCalculator7 extends GradientCalculator
 		alpha[6][4] = 0;
 		alpha[6][5] = 0;
 		alpha[6][6] = 0;
-		
+
 		beta[0] = 0;
 		beta[1] = 0;
 		beta[2] = 0;
@@ -243,7 +243,7 @@ public class GradientCalculator7 extends GradientCalculator
 		alpha[6][4] = 0;
 		alpha[6][5] = 0;
 		alpha[6][6] = 0;
-		
+
 		beta[0] = 0;
 		beta[1] = 0;
 		beta[2] = 0;
@@ -251,7 +251,7 @@ public class GradientCalculator7 extends GradientCalculator
 		beta[4] = 0;
 		beta[5] = 0;
 		beta[6] = 0;
-		
+
 		func.initialise(a);
 
 		if (func.canComputeWeights())
@@ -379,7 +379,6 @@ public class GradientCalculator7 extends GradientCalculator
 		return checkGradients(alpha, beta, nparams, ssx);
 	}
 
-
 	/**
 	 * Zero the working region of the input matrix alpha and vector beta
 	 *
@@ -470,7 +469,7 @@ public class GradientCalculator7 extends GradientCalculator
 		alpha[4][6] = alpha[6][4];
 		alpha[5][6] = alpha[6][5];
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

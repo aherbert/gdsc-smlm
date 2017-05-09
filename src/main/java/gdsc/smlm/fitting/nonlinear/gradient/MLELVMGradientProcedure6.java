@@ -50,7 +50,7 @@ public class MLELVMGradientProcedure6 extends MLELVMGradientProcedure
 		if (fi > 0)
 		{
 			final double xi = y[yi++];
-			
+
 			// We assume y[i] is positive
 			if (xi == 0)
 			{
@@ -65,7 +65,7 @@ public class MLELVMGradientProcedure6 extends MLELVMGradientProcedure
 			else
 			{
 				value += (fi - xi - xi * Math.log(fi / xi));
-				
+
 				final double xi_fi2 = xi / fi / fi;
 				final double e = 1 - (xi / fi);
 
@@ -75,7 +75,7 @@ public class MLELVMGradientProcedure6 extends MLELVMGradientProcedure
 				beta[3] -= e * dfi_da[3];
 				beta[4] -= e * dfi_da[4];
 				beta[5] -= e * dfi_da[5];
-				
+
 				alpha[0] += dfi_da[0] * xi_fi2 * dfi_da[0];
 				double w;
 				w = dfi_da[1] * xi_fi2;
@@ -105,31 +105,12 @@ public class MLELVMGradientProcedure6 extends MLELVMGradientProcedure
 				alpha[20] += w * dfi_da[5];
 			}
 		}
-	}	
+	}
 
+	@Override
 	protected void initialiseGradient()
 	{
-		alpha[0] = 0;
-		alpha[1] = 0;
-		alpha[2] = 0;
-		alpha[3] = 0;
-		alpha[4] = 0;
-		alpha[5] = 0;
-		alpha[6] = 0;
-		alpha[7] = 0;
-		alpha[8] = 0;
-		alpha[9] = 0;
-		alpha[10] = 0;
-		alpha[11] = 0;
-		alpha[12] = 0;
-		alpha[13] = 0;
-		alpha[14] = 0;
-		alpha[15] = 0;
-		alpha[16] = 0;
-		alpha[17] = 0;
-		alpha[18] = 0;
-		alpha[19] = 0;
-		alpha[20] = 0;
+		GradientProcedureHelper.initialiseWorkingMatrix6(alpha);
 		beta[0] = 0;
 		beta[1] = 0;
 		beta[2] = 0;
@@ -141,84 +122,12 @@ public class MLELVMGradientProcedure6 extends MLELVMGradientProcedure
 	@Override
 	public void getAlphaMatrix(double[][] alpha)
 	{
-		// Generate symmetric matrix
-		alpha[0][0] = this.alpha[0];
-		alpha[1][0] = this.alpha[1];
-		alpha[0][1] = this.alpha[1];
-		alpha[1][1] = this.alpha[2];
-		alpha[2][0] = this.alpha[3];
-		alpha[0][2] = this.alpha[3];
-		alpha[2][1] = this.alpha[4];
-		alpha[1][2] = this.alpha[4];
-		alpha[2][2] = this.alpha[5];
-		alpha[3][0] = this.alpha[6];
-		alpha[0][3] = this.alpha[6];
-		alpha[3][1] = this.alpha[7];
-		alpha[1][3] = this.alpha[7];
-		alpha[3][2] = this.alpha[8];
-		alpha[2][3] = this.alpha[8];
-		alpha[3][3] = this.alpha[9];
-		alpha[4][0] = this.alpha[10];
-		alpha[0][4] = this.alpha[10];
-		alpha[4][1] = this.alpha[11];
-		alpha[1][4] = this.alpha[11];
-		alpha[4][2] = this.alpha[12];
-		alpha[2][4] = this.alpha[12];
-		alpha[4][3] = this.alpha[13];
-		alpha[3][4] = this.alpha[13];
-		alpha[4][4] = this.alpha[14];
-		alpha[5][0] = this.alpha[15];
-		alpha[0][5] = this.alpha[15];
-		alpha[5][1] = this.alpha[16];
-		alpha[1][5] = this.alpha[16];
-		alpha[5][2] = this.alpha[17];
-		alpha[2][5] = this.alpha[17];
-		alpha[5][3] = this.alpha[18];
-		alpha[3][5] = this.alpha[18];
-		alpha[5][4] = this.alpha[19];
-		alpha[4][5] = this.alpha[19];
-		alpha[5][5] = this.alpha[20];
+		GradientProcedureHelper.getMatrix6(this.alpha, alpha);
 	}
 
 	@Override
 	public void getAlphaLinear(double[] alpha)
 	{
-		// Generate symmetric matrix
-		alpha[0] = this.alpha[0];
-		alpha[6] = this.alpha[1];
-		alpha[1] = this.alpha[1];
-		alpha[7] = this.alpha[2];
-		alpha[12] = this.alpha[3];
-		alpha[2] = this.alpha[3];
-		alpha[13] = this.alpha[4];
-		alpha[8] = this.alpha[4];
-		alpha[14] = this.alpha[5];
-		alpha[18] = this.alpha[6];
-		alpha[3] = this.alpha[6];
-		alpha[19] = this.alpha[7];
-		alpha[9] = this.alpha[7];
-		alpha[20] = this.alpha[8];
-		alpha[15] = this.alpha[8];
-		alpha[21] = this.alpha[9];
-		alpha[24] = this.alpha[10];
-		alpha[4] = this.alpha[10];
-		alpha[25] = this.alpha[11];
-		alpha[10] = this.alpha[11];
-		alpha[26] = this.alpha[12];
-		alpha[16] = this.alpha[12];
-		alpha[27] = this.alpha[13];
-		alpha[22] = this.alpha[13];
-		alpha[28] = this.alpha[14];
-		alpha[30] = this.alpha[15];
-		alpha[5] = this.alpha[15];
-		alpha[31] = this.alpha[16];
-		alpha[11] = this.alpha[16];
-		alpha[32] = this.alpha[17];
-		alpha[17] = this.alpha[17];
-		alpha[33] = this.alpha[18];
-		alpha[23] = this.alpha[18];
-		alpha[34] = this.alpha[19];
-		alpha[29] = this.alpha[19];
-		alpha[35] = this.alpha[20];
-	}	
+		GradientProcedureHelper.getLinear6(this.alpha, alpha);
+	}
 }

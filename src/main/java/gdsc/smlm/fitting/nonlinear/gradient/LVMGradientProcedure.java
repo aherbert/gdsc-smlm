@@ -95,7 +95,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	 * Finish the computation using first order gradients.
 	 */
 	protected abstract void finishGradient();
-	
+
 	/**
 	 * Evaluate the function and compute the sum-of-squares.
 	 *

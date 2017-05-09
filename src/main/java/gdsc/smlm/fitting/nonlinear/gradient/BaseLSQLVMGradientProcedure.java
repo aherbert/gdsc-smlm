@@ -48,13 +48,13 @@ public abstract class BaseLSQLVMGradientProcedure extends LVMGradientProcedure
 		final double dy = y[yi++] - value;
 		this.value += dy * dy;
 	}
-	
+
 	@Override
 	protected void initialiseValue()
 	{
 		// Do nothing		
 	}
-	
+
 	@Override
 	protected void finishValue()
 	{

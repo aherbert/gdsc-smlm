@@ -27,7 +27,7 @@ import gdsc.smlm.function.NonLinearFunction;
  */
 public class MLEGradientCalculator5 extends MLEGradientCalculator
 {
-	
+
 	/**
 	 * Instantiates a new MLE gradient calculator.
 	 */

@@ -58,7 +58,7 @@ public class LSQLVMGradientProcedure4 extends LSQLVMGradientProcedure
 		alpha[7] += dy_da[3] * dy_da[1];
 		alpha[8] += dy_da[3] * dy_da[2];
 		alpha[9] += dy_da[3] * dy_da[3];
-		
+
 		beta[0] += dy_da[0] * dy;
 		beta[1] += dy_da[1] * dy;
 		beta[2] += dy_da[2] * dy;
@@ -67,18 +67,10 @@ public class LSQLVMGradientProcedure4 extends LSQLVMGradientProcedure
 		this.value += dy * dy;
 	}
 
+	@Override
 	protected void initialiseGradient()
 	{
-		alpha[0] = 0;
-		alpha[1] = 0;
-		alpha[2] = 0;
-		alpha[3] = 0;
-		alpha[4] = 0;
-		alpha[5] = 0;
-		alpha[6] = 0;
-		alpha[7] = 0;
-		alpha[8] = 0;
-		alpha[9] = 0;
+		GradientProcedureHelper.initialiseWorkingMatrix4(alpha);
 		beta[0] = 0;
 		beta[1] = 0;
 		beta[2] = 0;
@@ -88,45 +80,12 @@ public class LSQLVMGradientProcedure4 extends LSQLVMGradientProcedure
 	@Override
 	public void getAlphaMatrix(double[][] alpha)
 	{
-		// Generate symmetric matrix
-		alpha[0][0] = this.alpha[0];
-		alpha[1][0] = this.alpha[1];
-		alpha[0][1] = this.alpha[1];
-		alpha[1][1] = this.alpha[2];
-		alpha[2][0] = this.alpha[3];
-		alpha[0][2] = this.alpha[3];
-		alpha[2][1] = this.alpha[4];
-		alpha[1][2] = this.alpha[4];
-		alpha[2][2] = this.alpha[5];
-		alpha[3][0] = this.alpha[6];
-		alpha[0][3] = this.alpha[6];
-		alpha[3][1] = this.alpha[7];
-		alpha[1][3] = this.alpha[7];
-		alpha[3][2] = this.alpha[8];
-		alpha[2][3] = this.alpha[8];
-		alpha[3][3] = this.alpha[9];
-
+		GradientProcedureHelper.getMatrix4(this.alpha, alpha);
 	}
 
 	@Override
 	public void getAlphaLinear(double[] alpha)
 	{
-		// Generate symmetric matrix
-		alpha[0] = this.alpha[0];
-		alpha[4] = this.alpha[1];
-		alpha[1] = this.alpha[1];
-		alpha[5] = this.alpha[2];
-		alpha[8] = this.alpha[3];
-		alpha[2] = this.alpha[3];
-		alpha[9] = this.alpha[4];
-		alpha[6] = this.alpha[4];
-		alpha[10] = this.alpha[5];
-		alpha[12] = this.alpha[6];
-		alpha[3] = this.alpha[6];
-		alpha[13] = this.alpha[7];
-		alpha[7] = this.alpha[7];
-		alpha[14] = this.alpha[8];
-		alpha[11] = this.alpha[8];
-		alpha[15] = this.alpha[9];
+		GradientProcedureHelper.getLinear4(this.alpha, alpha);
 	}
 }
