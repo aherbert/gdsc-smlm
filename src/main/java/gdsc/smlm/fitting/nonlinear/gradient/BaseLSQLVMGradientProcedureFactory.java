@@ -18,8 +18,8 @@ import gdsc.smlm.function.Gradient1Function;
 /**
  * Create a gradient procedure.
  */
-abstract class BaseLSQGradientProcedureFactory
+abstract class BaseLSQLVMGradientProcedureFactory
 {
 	// Instance method for testing
-	abstract BaseLSQGradientProcedure createProcedure(final double[] y, final Gradient1Function func);
+	abstract BaseLSQLVMGradientProcedure createProcedure(final double[] y, final Gradient1Function func);
 }

@@ -24,7 +24,7 @@ import gdsc.smlm.function.Gradient1Function;
  * Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving
  * the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
  */
-public class LSQGradientProcedureLinear6 extends LSQGradientProcedureLinear
+public class LSQLVMGradientProcedureLinear4 extends LSQLVMGradientProcedureLinear
 {
 	/**
 	 * @param y
@@ -32,11 +32,11 @@ public class LSQGradientProcedureLinear6 extends LSQGradientProcedureLinear
 	 * @param func
 	 *            Gradient function
 	 */
-	public LSQGradientProcedureLinear6(final double[] y, final Gradient1Function func)
+	public LSQLVMGradientProcedureLinear4(final double[] y, final Gradient1Function func)
 	{
 		super(y, func);
-		if (n != 6)
-			throw new IllegalArgumentException("Function must compute 6 gradients");
+		if (n != 4)
+			throw new IllegalArgumentException("Function must compute 4 gradients");
 	}
 
 	/*
@@ -52,81 +52,47 @@ public class LSQGradientProcedureLinear6 extends LSQGradientProcedureLinear
 		alpha[1] += dy_da[0] * dy_da[1];
 		alpha[2] += dy_da[0] * dy_da[2];
 		alpha[3] += dy_da[0] * dy_da[3];
-		alpha[4] += dy_da[0] * dy_da[4];
-		alpha[5] += dy_da[0] * dy_da[5];
-		alpha[7] += dy_da[1] * dy_da[1];
-		alpha[8] += dy_da[1] * dy_da[2];
-		alpha[9] += dy_da[1] * dy_da[3];
-		alpha[10] += dy_da[1] * dy_da[4];
-		alpha[11] += dy_da[1] * dy_da[5];
-		alpha[14] += dy_da[2] * dy_da[2];
-		alpha[15] += dy_da[2] * dy_da[3];
-		alpha[16] += dy_da[2] * dy_da[4];
-		alpha[17] += dy_da[2] * dy_da[5];
-		alpha[21] += dy_da[3] * dy_da[3];
-		alpha[22] += dy_da[3] * dy_da[4];
-		alpha[23] += dy_da[3] * dy_da[5];
-		alpha[28] += dy_da[4] * dy_da[4];
-		alpha[29] += dy_da[4] * dy_da[5];
-		alpha[35] += dy_da[5] * dy_da[5];
+		alpha[5] += dy_da[1] * dy_da[1];
+		alpha[6] += dy_da[1] * dy_da[2];
+		alpha[7] += dy_da[1] * dy_da[3];
+		alpha[10] += dy_da[2] * dy_da[2];
+		alpha[11] += dy_da[2] * dy_da[3];
+		alpha[15] += dy_da[3] * dy_da[3];
 		
 		beta[0] += dy_da[0] * dy;
 		beta[1] += dy_da[1] * dy;
 		beta[2] += dy_da[2] * dy;
 		beta[3] += dy_da[3] * dy;
-		beta[4] += dy_da[4] * dy;
-		beta[5] += dy_da[5] * dy;
 
-		ssx += dy * dy;
+		this.value += dy * dy;
 	}
 
-	protected void initialise()
+	protected void initialiseGradient()
 	{
 		alpha[0] = 0;
 		alpha[1] = 0;
 		alpha[2] = 0;
 		alpha[3] = 0;
-		alpha[4] = 0;
 		alpha[5] = 0;
+		alpha[6] = 0;
 		alpha[7] = 0;
-		alpha[8] = 0;
-		alpha[9] = 0;
 		alpha[10] = 0;
 		alpha[11] = 0;
-		alpha[14] = 0;
 		alpha[15] = 0;
-		alpha[16] = 0;
-		alpha[17] = 0;
-		alpha[21] = 0;
-		alpha[22] = 0;
-		alpha[23] = 0;
-		alpha[28] = 0;
-		alpha[29] = 0;
-		alpha[35] = 0;
+
 		beta[0] = 0;
 		beta[1] = 0;
 		beta[2] = 0;
 		beta[3] = 0;
-		beta[4] = 0;
-		beta[5] = 0;
 	}
 
-	protected void finish()
+	protected void finishGradient()
 	{
-		alpha[6] = alpha[1];
-		alpha[12] = alpha[2];
-		alpha[18] = alpha[3];
-		alpha[24] = alpha[4];
-		alpha[30] = alpha[5];
-		alpha[13] = alpha[8];
-		alpha[19] = alpha[9];
-		alpha[25] = alpha[10];
-		alpha[31] = alpha[11];
-		alpha[20] = alpha[15];
-		alpha[26] = alpha[16];
-		alpha[32] = alpha[17];
-		alpha[27] = alpha[22];
-		alpha[33] = alpha[23];
-		alpha[34] = alpha[29];
+		alpha[4] = alpha[1];
+		alpha[8] = alpha[2];
+		alpha[12] = alpha[3];
+		alpha[9] = alpha[6];
+		alpha[13] = alpha[7];
+		alpha[14] = alpha[11];
 	}
 }

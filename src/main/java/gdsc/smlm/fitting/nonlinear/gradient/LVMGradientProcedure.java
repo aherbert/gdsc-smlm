@@ -18,7 +18,7 @@ import gdsc.smlm.function.ValueProcedure;
  *---------------------------------------------------------------------------*/
 
 /**
- * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a function)
+ * Calculates the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function)
  * and the scaled gradient vector of the function's partial first derivatives with respect to the parameters.
  * This is used within the Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
@@ -26,7 +26,7 @@ import gdsc.smlm.function.ValueProcedure;
  * Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving
  * the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
  */
-public abstract class BaseLSQGradientProcedure implements Gradient1Procedure, ValueProcedure
+public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueProcedure
 {
 	protected final double[] y;
 	protected final Gradient1Function func;
@@ -38,15 +38,12 @@ public abstract class BaseLSQGradientProcedure implements Gradient1Procedure, Va
 	/**
 	 * The scaled gradient vector of the function's partial first derivatives with respect to the parameters
 	 * (size n)
-	 * <p>
-	 * Apply a factor of -2 to compute the actual gradient of the sum-of-squares:
-	 * See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models
 	 */
 	public final double[] beta;
 	/**
-	 * The sum-of-squares value for the fit
+	 * The value for the fit
 	 */
-	public double ssx;
+	public double value;
 
 	protected int yi;
 
@@ -56,7 +53,7 @@ public abstract class BaseLSQGradientProcedure implements Gradient1Procedure, Va
 	 * @param func
 	 *            Gradient function
 	 */
-	public BaseLSQGradientProcedure(final double[] y, final Gradient1Function func)
+	public LVMGradientProcedure(final double[] y, final Gradient1Function func)
 	{
 		this.y = y;
 		this.func = func;
@@ -74,43 +71,18 @@ public abstract class BaseLSQGradientProcedure implements Gradient1Procedure, Va
 	 */
 	public void gradient(final double[] a)
 	{
-		ssx = 0;
+		value = 0;
 		yi = 0;
-		initialise();
+		initialiseGradient();
 		func.initialise1(a);
 		func.forEach((Gradient1Procedure) this);
-		finish();
-	}
-
-	/**
-	 * Evaluate the function and compute the sum-of-squares.
-	 *
-	 * @param a
-	 *            Set of coefficients for the function
-	 */
-	public void value(final double[] a)
-	{
-		ssx = 0;
-		yi = 0;
-		func.initialise0(a);
-		func.forEach((ValueProcedure) this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
-	 */
-	public void execute(double value)
-	{
-		final double dy = y[yi++] - value;
-		ssx += dy * dy;
+		finishGradient();
 	}
 
 	/**
 	 * Initialise for the computation using first order gradients.
 	 */
-	protected abstract void initialise();
+	protected abstract void initialiseGradient();
 
 	/**
 	 * Check gradients for NaN values.
@@ -122,7 +94,33 @@ public abstract class BaseLSQGradientProcedure implements Gradient1Procedure, Va
 	/**
 	 * Finish the computation using first order gradients.
 	 */
-	protected abstract void finish();
+	protected abstract void finishGradient();
+	
+	/**
+	 * Evaluate the function and compute the sum-of-squares.
+	 *
+	 * @param a
+	 *            Set of coefficients for the function
+	 */
+	public void value(final double[] a)
+	{
+		value = 0;
+		yi = 0;
+		initialiseValue();
+		func.initialise0(a);
+		func.forEach((ValueProcedure) this);
+		finishValue();
+	}
+
+	/**
+	 * Initialise for the computation of the value.
+	 */
+	protected abstract void initialiseValue();
+
+	/**
+	 * Finish the computation of the value.
+	 */
+	protected abstract void finishValue();
 
 	/**
 	 * Get the scaled Hessian curvature matrix (size n*n).

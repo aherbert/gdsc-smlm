@@ -24,7 +24,7 @@ import gdsc.smlm.function.Gradient1Function;
  * Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving
  * the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
  */
-public class LSQGradientProcedureMatrix6 extends LSQGradientProcedureMatrix
+public class LSQLVMGradientProcedureLinear6 extends LSQLVMGradientProcedureLinear
 {
 	/**
 	 * @param y
@@ -32,7 +32,7 @@ public class LSQGradientProcedureMatrix6 extends LSQGradientProcedureMatrix
 	 * @param func
 	 *            Gradient function
 	 */
-	public LSQGradientProcedureMatrix6(final double[] y, final Gradient1Function func)
+	public LSQLVMGradientProcedureLinear6(final double[] y, final Gradient1Function func)
 	{
 		super(y, func);
 		if (n != 6)
@@ -48,28 +48,28 @@ public class LSQGradientProcedureMatrix6 extends LSQGradientProcedureMatrix
 	{
 		final double dy = y[yi++] - value;
 
-		alpha[0][0] += dy_da[0] * dy_da[0];
-		alpha[1][0] += dy_da[1] * dy_da[0];
-		alpha[1][1] += dy_da[1] * dy_da[1];
-		alpha[2][0] += dy_da[2] * dy_da[0];
-		alpha[2][1] += dy_da[2] * dy_da[1];
-		alpha[2][2] += dy_da[2] * dy_da[2];
-		alpha[3][0] += dy_da[3] * dy_da[0];
-		alpha[3][1] += dy_da[3] * dy_da[1];
-		alpha[3][2] += dy_da[3] * dy_da[2];
-		alpha[3][3] += dy_da[3] * dy_da[3];
-		alpha[4][0] += dy_da[4] * dy_da[0];
-		alpha[4][1] += dy_da[4] * dy_da[1];
-		alpha[4][2] += dy_da[4] * dy_da[2];
-		alpha[4][3] += dy_da[4] * dy_da[3];
-		alpha[4][4] += dy_da[4] * dy_da[4];
-		alpha[5][0] += dy_da[5] * dy_da[0];
-		alpha[5][1] += dy_da[5] * dy_da[1];
-		alpha[5][2] += dy_da[5] * dy_da[2];
-		alpha[5][3] += dy_da[5] * dy_da[3];
-		alpha[5][4] += dy_da[5] * dy_da[4];
-		alpha[5][5] += dy_da[5] * dy_da[5];
-
+		alpha[0] += dy_da[0] * dy_da[0];
+		alpha[1] += dy_da[0] * dy_da[1];
+		alpha[2] += dy_da[0] * dy_da[2];
+		alpha[3] += dy_da[0] * dy_da[3];
+		alpha[4] += dy_da[0] * dy_da[4];
+		alpha[5] += dy_da[0] * dy_da[5];
+		alpha[7] += dy_da[1] * dy_da[1];
+		alpha[8] += dy_da[1] * dy_da[2];
+		alpha[9] += dy_da[1] * dy_da[3];
+		alpha[10] += dy_da[1] * dy_da[4];
+		alpha[11] += dy_da[1] * dy_da[5];
+		alpha[14] += dy_da[2] * dy_da[2];
+		alpha[15] += dy_da[2] * dy_da[3];
+		alpha[16] += dy_da[2] * dy_da[4];
+		alpha[17] += dy_da[2] * dy_da[5];
+		alpha[21] += dy_da[3] * dy_da[3];
+		alpha[22] += dy_da[3] * dy_da[4];
+		alpha[23] += dy_da[3] * dy_da[5];
+		alpha[28] += dy_da[4] * dy_da[4];
+		alpha[29] += dy_da[4] * dy_da[5];
+		alpha[35] += dy_da[5] * dy_da[5];
+		
 		beta[0] += dy_da[0] * dy;
 		beta[1] += dy_da[1] * dy;
 		beta[2] += dy_da[2] * dy;
@@ -77,32 +77,32 @@ public class LSQGradientProcedureMatrix6 extends LSQGradientProcedureMatrix
 		beta[4] += dy_da[4] * dy;
 		beta[5] += dy_da[5] * dy;
 
-		ssx += dy * dy;
+		this.value += dy * dy;
 	}
 
-	protected void initialise()
+	protected void initialiseGradient()
 	{
-		alpha[0][0] = 0;
-		alpha[1][0] = 0;
-		alpha[1][1] = 0;
-		alpha[2][0] = 0;
-		alpha[2][1] = 0;
-		alpha[2][2] = 0;
-		alpha[3][0] = 0;
-		alpha[3][1] = 0;
-		alpha[3][2] = 0;
-		alpha[3][3] = 0;
-		alpha[4][0] = 0;
-		alpha[4][1] = 0;
-		alpha[4][2] = 0;
-		alpha[4][3] = 0;
-		alpha[4][4] = 0;
-		alpha[5][0] = 0;
-		alpha[5][1] = 0;
-		alpha[5][2] = 0;
-		alpha[5][3] = 0;
-		alpha[5][4] = 0;
-		alpha[5][5] = 0;
+		alpha[0] = 0;
+		alpha[1] = 0;
+		alpha[2] = 0;
+		alpha[3] = 0;
+		alpha[4] = 0;
+		alpha[5] = 0;
+		alpha[7] = 0;
+		alpha[8] = 0;
+		alpha[9] = 0;
+		alpha[10] = 0;
+		alpha[11] = 0;
+		alpha[14] = 0;
+		alpha[15] = 0;
+		alpha[16] = 0;
+		alpha[17] = 0;
+		alpha[21] = 0;
+		alpha[22] = 0;
+		alpha[23] = 0;
+		alpha[28] = 0;
+		alpha[29] = 0;
+		alpha[35] = 0;
 		beta[0] = 0;
 		beta[1] = 0;
 		beta[2] = 0;
@@ -111,22 +111,22 @@ public class LSQGradientProcedureMatrix6 extends LSQGradientProcedureMatrix
 		beta[5] = 0;
 	}
 
-	protected void finish()
+	protected void finishGradient()
 	{
-		alpha[0][1] = alpha[1][0];
-		alpha[0][2] = alpha[2][0];
-		alpha[0][3] = alpha[3][0];
-		alpha[0][4] = alpha[4][0];
-		alpha[0][5] = alpha[5][0];
-		alpha[1][2] = alpha[2][1];
-		alpha[1][3] = alpha[3][1];
-		alpha[1][4] = alpha[4][1];
-		alpha[1][5] = alpha[5][1];
-		alpha[2][3] = alpha[3][2];
-		alpha[2][4] = alpha[4][2];
-		alpha[2][5] = alpha[5][2];
-		alpha[3][4] = alpha[4][3];
-		alpha[3][5] = alpha[5][3];
-		alpha[4][5] = alpha[5][4];
+		alpha[6] = alpha[1];
+		alpha[12] = alpha[2];
+		alpha[18] = alpha[3];
+		alpha[24] = alpha[4];
+		alpha[30] = alpha[5];
+		alpha[13] = alpha[8];
+		alpha[19] = alpha[9];
+		alpha[25] = alpha[10];
+		alpha[31] = alpha[11];
+		alpha[20] = alpha[15];
+		alpha[26] = alpha[16];
+		alpha[32] = alpha[17];
+		alpha[27] = alpha[22];
+		alpha[33] = alpha[23];
+		alpha[34] = alpha[29];
 	}
 }

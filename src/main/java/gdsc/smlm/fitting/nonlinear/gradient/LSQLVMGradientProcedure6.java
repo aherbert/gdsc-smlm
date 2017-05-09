@@ -24,7 +24,7 @@ import gdsc.smlm.function.Gradient1Function;
  * Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving
  * the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
  */
-public class LSQGradientProcedure6 extends LSQGradientProcedure
+public class LSQLVMGradientProcedure6 extends LSQLVMGradientProcedure
 {
 	/**
 	 * @param y
@@ -32,7 +32,7 @@ public class LSQGradientProcedure6 extends LSQGradientProcedure
 	 * @param func
 	 *            Gradient function
 	 */
-	public LSQGradientProcedure6(final double[] y, final Gradient1Function func)
+	public LSQLVMGradientProcedure6(final double[] y, final Gradient1Function func)
 	{
 		super(y, func);
 		if (n != 6)
@@ -77,10 +77,10 @@ public class LSQGradientProcedure6 extends LSQGradientProcedure
 		beta[4] += dy_da[4] * dy;
 		beta[5] += dy_da[5] * dy;
 
-		ssx += dy * dy;
+		this.value += dy * dy;
 	}
 
-	protected void initialise()
+	protected void initialiseGradient()
 	{
 		alpha[0] = 0;
 		alpha[1] = 0;

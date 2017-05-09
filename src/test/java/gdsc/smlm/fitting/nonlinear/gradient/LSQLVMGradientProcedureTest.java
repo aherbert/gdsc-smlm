@@ -19,12 +19,12 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
- * for use in NonLinearFit
+ * for use in the LVM algorithm. 
  * <p>
  * Note: This class is a test-bed for implementation strategies. The fastest strategy can then be used for other
  * gradient procedures.
  */
-public class LSQGradientProcedureTest
+public class LSQLVMGradientProcedureTest
 {
 	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(6, 1e-16);
@@ -45,47 +45,47 @@ public class LSQGradientProcedureTest
 	public void gradientCalculatorFactoryCreatesOptimisedCalculators()
 	{
 		double[] y = new double[0];
-		Assert.assertEquals(LSQGradientProcedureMatrixFactory.create(y, new DummyGradientFunction(6)).getClass(),
-				LSQGradientProcedureMatrix6.class);
-		Assert.assertEquals(LSQGradientProcedureMatrixFactory.create(y, new DummyGradientFunction(5)).getClass(),
-				LSQGradientProcedureMatrix5.class);
-		Assert.assertEquals(LSQGradientProcedureMatrixFactory.create(y, new DummyGradientFunction(4)).getClass(),
-				LSQGradientProcedureMatrix4.class);
+		Assert.assertEquals(LSQLVMGradientProcedureMatrixFactory.create(y, new DummyGradientFunction(6)).getClass(),
+				LSQLVMGradientProcedureMatrix6.class);
+		Assert.assertEquals(LSQLVMGradientProcedureMatrixFactory.create(y, new DummyGradientFunction(5)).getClass(),
+				LSQLVMGradientProcedureMatrix5.class);
+		Assert.assertEquals(LSQLVMGradientProcedureMatrixFactory.create(y, new DummyGradientFunction(4)).getClass(),
+				LSQLVMGradientProcedureMatrix4.class);
 
-		Assert.assertEquals(LSQGradientProcedureLinearFactory.create(y, new DummyGradientFunction(6)).getClass(),
-				LSQGradientProcedureLinear6.class);
-		Assert.assertEquals(LSQGradientProcedureLinearFactory.create(y, new DummyGradientFunction(5)).getClass(),
-				LSQGradientProcedureLinear5.class);
-		Assert.assertEquals(LSQGradientProcedureLinearFactory.create(y, new DummyGradientFunction(4)).getClass(),
-				LSQGradientProcedureLinear4.class);
+		Assert.assertEquals(LSQLVMGradientProcedureLinearFactory.create(y, new DummyGradientFunction(6)).getClass(),
+				LSQLVMGradientProcedureLinear6.class);
+		Assert.assertEquals(LSQLVMGradientProcedureLinearFactory.create(y, new DummyGradientFunction(5)).getClass(),
+				LSQLVMGradientProcedureLinear5.class);
+		Assert.assertEquals(LSQLVMGradientProcedureLinearFactory.create(y, new DummyGradientFunction(4)).getClass(),
+				LSQLVMGradientProcedureLinear4.class);
 
-		Assert.assertEquals(LSQGradientProcedureFactory.create(y, new DummyGradientFunction(6)).getClass(),
-				LSQGradientProcedure6.class);
-		Assert.assertEquals(LSQGradientProcedureFactory.create(y, new DummyGradientFunction(5)).getClass(),
-				LSQGradientProcedure5.class);
-		Assert.assertEquals(LSQGradientProcedureFactory.create(y, new DummyGradientFunction(4)).getClass(),
-				LSQGradientProcedure4.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, new DummyGradientFunction(6)).getClass(),
+				LSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, new DummyGradientFunction(5)).getClass(),
+				LSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, new DummyGradientFunction(4)).getClass(),
+				LSQLVMGradientProcedure4.class);
 	}
 
 	@Test
 	public void gradientProcedureLinearComputesSameAsGradientCalculator()
 	{
-		gradientProcedureComputesSameAsGradientCalculator(new LSQGradientProcedureLinearFactory());
+		gradientProcedureComputesSameAsGradientCalculator(new LSQLVMGradientProcedureLinearFactory());
 	}
 
 	@Test
 	public void gradientProcedureMatrixComputesSameAsGradientCalculator()
 	{
-		gradientProcedureComputesSameAsGradientCalculator(new LSQGradientProcedureMatrixFactory());
+		gradientProcedureComputesSameAsGradientCalculator(new LSQLVMGradientProcedureMatrixFactory());
 	}
 
 	@Test
 	public void gradientProcedureComputesSameAsGradientCalculator()
 	{
-		gradientProcedureComputesSameAsGradientCalculator(new LSQGradientProcedureFactory());
+		gradientProcedureComputesSameAsGradientCalculator(new LSQLVMGradientProcedureFactory());
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(BaseLSQGradientProcedureFactory factory)
+	private void gradientProcedureComputesSameAsGradientCalculator(BaseLSQLVMGradientProcedureFactory factory)
 	{
 		gradientProcedureComputesSameAsGradientCalculator(4, factory);
 		gradientProcedureComputesSameAsGradientCalculator(5, factory);
@@ -97,22 +97,22 @@ public class LSQGradientProcedureTest
 	@Test
 	public void gradientProcedureLinearIsNotSlowerThanGradientCalculator()
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(new LSQGradientProcedureLinearFactory());
+		gradientProcedureIsNotSlowerThanGradientCalculator(new LSQLVMGradientProcedureLinearFactory());
 	}
 
 	@Test
 	public void gradientProcedureMatrixIsNotSlowerThanGradientCalculator()
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(new LSQGradientProcedureMatrixFactory());
+		gradientProcedureIsNotSlowerThanGradientCalculator(new LSQLVMGradientProcedureMatrixFactory());
 	}
 
 	@Test
 	public void gradientProcedureIsNotSlowerThanGradientCalculator()
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(new LSQGradientProcedureFactory());
+		gradientProcedureIsNotSlowerThanGradientCalculator(new LSQLVMGradientProcedureFactory());
 	}
 
-	private void gradientProcedureIsNotSlowerThanGradientCalculator(BaseLSQGradientProcedureFactory factory)
+	private void gradientProcedureIsNotSlowerThanGradientCalculator(BaseLSQLVMGradientProcedureFactory factory)
 	{
 		gradientProcedureIsNotSlowerThanGradientCalculator(4, factory);
 		gradientProcedureIsNotSlowerThanGradientCalculator(5, factory);
@@ -123,7 +123,7 @@ public class LSQGradientProcedureTest
 		gradientProcedureIsNotSlowerThanGradientCalculator(21, factory);
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(int nparams, BaseLSQGradientProcedureFactory factory)
+	private void gradientProcedureComputesSameAsGradientCalculator(int nparams, BaseLSQLVMGradientProcedureFactory factory)
 	{
 		int iter = 10;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
@@ -143,9 +143,9 @@ public class LSQGradientProcedureTest
 		String name = factory.getClass().getSimpleName();
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			BaseLSQGradientProcedure p = factory.createProcedure(yList.get(i), func);
+			BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
 			p.gradient(paramsList.get(i));
-			double s = p.ssx;
+			double s = p.value;
 			double s2 = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 			// Exactly the same ...
 			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, 0);
@@ -203,7 +203,7 @@ public class LSQGradientProcedureTest
 	}
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams,
-			final BaseLSQGradientProcedureFactory factory)
+			final BaseLSQLVMGradientProcedureFactory factory)
 	{
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
 
@@ -226,7 +226,7 @@ public class LSQGradientProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			BaseLSQGradientProcedure p = factory.createProcedure(yList.get(i), func);
+			BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
 			p.gradient(paramsList.get(i));
 		}
 
@@ -256,7 +256,7 @@ public class LSQGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					BaseLSQGradientProcedure p = factory.createProcedure(yList.get(i), func);
+					BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p.gradient(paramsList.get(k++ % iter));
 				}
@@ -297,14 +297,14 @@ public class LSQGradientProcedureTest
 		String name = GradientCalculator.class.getSimpleName();
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			BaseLSQGradientProcedure p1 = LSQGradientProcedureFactory.create(yList.get(i), func);
+			BaseLSQLVMGradientProcedure p1 = LSQLVMGradientProcedureFactory.create(yList.get(i), func);
 			p1.gradient(paramsList.get(i));
 
-			BaseLSQGradientProcedure p2 = new LSQGradientProcedure(yList.get(i), func);
+			BaseLSQLVMGradientProcedure p2 = new LSQLVMGradientProcedure(yList.get(i), func);
 			p2.gradient(paramsList.get(i));
 
 			// Exactly the same ...
-			Assert.assertEquals(name + " Result: Not same @ " + i, p1.ssx, p2.ssx, 0);
+			Assert.assertEquals(name + " Result: Not same @ " + i, p1.value, p2.value, 0);
 			Assert.assertArrayEquals(name + " Observations: Not same beta @ " + i, p1.beta, p2.beta, 0);
 
 			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p1.getAlphaLinear(),
@@ -320,19 +320,19 @@ public class LSQGradientProcedureTest
 	@Test
 	public void gradientProcedureIsFasterUnrolledThanGradientProcedureMatrix()
 	{
-		gradientProcedure2IsFasterUnrolledThanGradientProcedure1(new LSQGradientProcedureMatrixFactory(),
-				new LSQGradientProcedureFactory());
+		gradientProcedure2IsFasterUnrolledThanGradientProcedure1(new LSQLVMGradientProcedureMatrixFactory(),
+				new LSQLVMGradientProcedureFactory());
 	}
 
 	@Test
 	public void gradientProcedureLinearIsFasterUnrolledThanGradientProcedureMatrix()
 	{
-		gradientProcedure2IsFasterUnrolledThanGradientProcedure1(new LSQGradientProcedureMatrixFactory(),
-				new LSQGradientProcedureLinearFactory());
+		gradientProcedure2IsFasterUnrolledThanGradientProcedure1(new LSQLVMGradientProcedureMatrixFactory(),
+				new LSQLVMGradientProcedureLinearFactory());
 	}
 
-	private void gradientProcedure2IsFasterUnrolledThanGradientProcedure1(BaseLSQGradientProcedureFactory factory1,
-			BaseLSQGradientProcedureFactory factory2)
+	private void gradientProcedure2IsFasterUnrolledThanGradientProcedure1(BaseLSQLVMGradientProcedureFactory factory1,
+			BaseLSQLVMGradientProcedureFactory factory2)
 	{
 		// Assert the unrolled versions
 		gradientProcedureLinearIsFasterThanGradientProcedureMatrix(4, factory1, factory2, true);
@@ -343,7 +343,7 @@ public class LSQGradientProcedureTest
 	}
 
 	private void gradientProcedureLinearIsFasterThanGradientProcedureMatrix(final int nparams,
-			final BaseLSQGradientProcedureFactory factory1, final BaseLSQGradientProcedureFactory factory2,
+			final BaseLSQLVMGradientProcedureFactory factory1, final BaseLSQLVMGradientProcedureFactory factory2,
 			boolean doAssert)
 	{
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
@@ -361,11 +361,11 @@ public class LSQGradientProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			BaseLSQGradientProcedure p = factory1.createProcedure(yList.get(i), func);
+			BaseLSQLVMGradientProcedure p = factory1.createProcedure(yList.get(i), func);
 			p.gradient(paramsList.get(i));
 			p.gradient(paramsList.get(i));
 
-			BaseLSQGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
+			BaseLSQLVMGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
 			p2.gradient(paramsList.get(i));
 			p2.gradient(paramsList.get(i));
 
@@ -385,7 +385,7 @@ public class LSQGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					BaseLSQGradientProcedure p = factory1.createProcedure(yList.get(i), func);
+					BaseLSQLVMGradientProcedure p = factory1.createProcedure(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p.gradient(paramsList.get(k++ % iter));
 				}
@@ -400,7 +400,7 @@ public class LSQGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					BaseLSQGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
+					BaseLSQLVMGradientProcedure p2 = factory2.createProcedure(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p2.gradient(paramsList.get(k++ % iter));
 				}
@@ -441,7 +441,7 @@ public class LSQGradientProcedureTest
 			double[] y = yList.get(i);
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
-			BaseLSQGradientProcedure p = LSQGradientProcedureFactory.create(y, func);
+			BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
 			p.gradient(a);
 			//double s = p.ssx;
 			double[] beta = p.beta.clone();
@@ -451,10 +451,10 @@ public class LSQGradientProcedureTest
 				double d = (a[k] == 0) ? 1e-3 : a[k] * delta;
 				a2[k] = a[k] + d;
 				p.value(a2);
-				double s1 = p.ssx;
+				double s1 = p.value;
 				a2[k] = a[k] - d;
 				p.value(a2);
-				double s2 = p.ssx;
+				double s2 = p.value;
 				a2[k] = a[k];
 
 				// Apply a factor of -2 to compute the actual gradients:
@@ -498,7 +498,7 @@ public class LSQGradientProcedureTest
 			{
 				double[] y = yList.get(i);
 				double[] a = paramsList.get(i);
-				BaseLSQGradientProcedure p = LSQGradientProcedureFactory.create(y, func);
+				BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
 				p.gradient(a);
 				double[] beta = p.beta;
 				alphaList.add(p.getAlphaLinear());
@@ -531,7 +531,7 @@ public class LSQGradientProcedureTest
 					double[] y = add(yList.get(i), b);
 					double[] a = paramsList.get(i).clone();
 					a[0] += b;
-					BaseLSQGradientProcedure p = LSQGradientProcedureFactory.create(y, func);
+					BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
 					p.gradient(a);
 					double[] beta = p.beta;
 					double[] alpha2 = alphaList.get(i);

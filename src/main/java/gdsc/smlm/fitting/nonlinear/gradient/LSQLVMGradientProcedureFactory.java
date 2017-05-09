@@ -18,7 +18,7 @@ import gdsc.smlm.function.Gradient1Function;
 /**
  * Create a gradient procedure.
  */
-public class LSQGradientProcedureMatrixFactory extends BaseLSQGradientProcedureFactory
+public class LSQLVMGradientProcedureFactory extends BaseLSQLVMGradientProcedureFactory
 {
 	/**
 	 * Create a new gradient calculator
@@ -29,24 +29,24 @@ public class LSQGradientProcedureMatrixFactory extends BaseLSQGradientProcedureF
 	 *            Gradient function
 	 * @return the gradient procedure
 	 */
-	public static LSQGradientProcedureMatrix create(final double[] y, final Gradient1Function func)
+	public static LSQLVMGradientProcedure create(final double[] y, final Gradient1Function func)
 	{
 		switch (func.getNumberOfGradients())
 		{
 			case 5:
-				return new LSQGradientProcedureMatrix5(y, func);
+				return new LSQLVMGradientProcedure5(y, func);
 			case 4:
-				return new LSQGradientProcedureMatrix4(y, func);
+				return new LSQLVMGradientProcedure4(y, func);
 			case 6:
-				return new LSQGradientProcedureMatrix6(y, func);
+				return new LSQLVMGradientProcedure6(y, func);
 
 			default:
-				return new LSQGradientProcedureMatrix(y, func);
+				return new LSQLVMGradientProcedure(y, func);
 		}
 	}
 	
 	// Instance method for testing
-	BaseLSQGradientProcedure createProcedure(final double[] y, final Gradient1Function func)
+	BaseLSQLVMGradientProcedure createProcedure(final double[] y, final Gradient1Function func)
 	{
 		return create(y, func);
 	}
