@@ -42,7 +42,7 @@ public class LSQLVMGradientProcedureTest
 	RandomDataGenerator rdg;
 
 	@Test
-	public void gradientCalculatorFactoryCreatesOptimisedCalculators()
+	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		double[] y = new double[0];
 		Assert.assertEquals(LSQLVMGradientProcedureMatrixFactory.create(y, new DummyGradientFunction(6)).getClass(),
@@ -408,7 +408,7 @@ public class LSQLVMGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("%s = %d : %s %d = %d : %fx\n", factory1.getClass().getSimpleName(), time1,
+		log("Standard %s = %d : Unrolled %s %d = %d : %fx\n", factory1.getClass().getSimpleName(), time1,
 				factory2.getClass().getSimpleName(), nparams, time2, (1.0 * time1) / time2);
 		if (doAssert)
 			Assert.assertTrue(time2 < time1);

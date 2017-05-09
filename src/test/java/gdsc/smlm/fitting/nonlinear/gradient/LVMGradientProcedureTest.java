@@ -37,7 +37,7 @@ public class LVMGradientProcedureTest
 	RandomDataGenerator rdg;
 
 	@Test
-	public void gradientCalculatorFactoryCreatesOptimisedCalculators()
+	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		double[] y = new double[0];
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, new DummyGradientFunction(6), false).getClass(),
@@ -387,7 +387,7 @@ public class LVMGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("%s = %d : %s %d = %d : %fx\n", mle, time1, mle, nparams, time2, (1.0 * time1) / time2);
+		log("Standard %b = %d : Unrolled %b %d = %d : %fx\n", mle, time1, mle, nparams, time2, (1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1);
 	}
 
