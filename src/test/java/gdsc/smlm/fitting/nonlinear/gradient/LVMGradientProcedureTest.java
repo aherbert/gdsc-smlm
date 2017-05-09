@@ -171,7 +171,7 @@ public class LVMGradientProcedureTest
 			long t = System.nanoTime();
 			run();
 			t = System.nanoTime() - t;
-			System.out.printf("[%d] Time = %d\n", loops, t);
+			//System.out.printf("[%d] Time = %d\n", loops, t);
 			return t;
 		}
 
@@ -194,7 +194,7 @@ public class LVMGradientProcedureTest
 		final int n = x.length;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -216,7 +216,7 @@ public class LVMGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+					GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
 					for (int j = loops; j-- > 0;)
 						calc.findLinearised(n, yList.get(i), paramsList.get(k++ % iter), alpha, beta, func);
 				}
