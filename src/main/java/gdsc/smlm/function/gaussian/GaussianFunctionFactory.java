@@ -3,10 +3,12 @@ package gdsc.smlm.function.gaussian;
 import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.SingleNBFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.MultiNBFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -63,11 +65,11 @@ public class GaussianFunctionFactory
 	 */
 	public static final int FIT_FREE_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
 	/**
-	 * An 2D Gaussian with gradients for background, signal, x/y position, width
+	 * A 2D Gaussian with gradients for background, signal, x/y position, width
 	 */
 	public static final int FIT_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH | FIT_SIGNAL;
 	/**
-	 * An 2D Gaussian with gradients for background, signal, x/y position
+	 * A 2D Gaussian with gradients for background, signal, x/y position
 	 */
 	public static final int FIT_FIXED = FIT_BACKGROUND | FIT_SIGNAL;
 	/**
@@ -91,11 +93,11 @@ public class GaussianFunctionFactory
 	 */
 	public static final int FIT_ERF_FREE_CIRCLE = FIT_FREE_CIRCLE | FIT_ERF;
 	/**
-	 * An 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y position, width
+	 * A 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y position, width
 	 */
 	public static final int FIT_ERF_CIRCLE = FIT_CIRCLE | FIT_ERF;
 	/**
-	 * An 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y position
+	 * A 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y position
 	 */
 	public static final int FIT_ERF_FIXED = FIT_FIXED | FIT_ERF;
 	/**
@@ -125,16 +127,22 @@ public class GaussianFunctionFactory
 	 */
 	public static final int FIT_SIMPLE_FREE_CIRCLE = FIT_FREE_CIRCLE | FIT_SIMPLE;
 	/**
-	 * An 2D Gaussian (single exponential per pixel) with gradients for background, signal, x/y position, width
+	 * A 2D Gaussian (single exponential per pixel) with gradients for background, signal, x/y position, width
 	 */
 	public static final int FIT_SIMPLE_CIRCLE = FIT_CIRCLE | FIT_SIMPLE;
 	/**
-	 * An 2D Gaussian (single exponential per pixel) with gradients for background, signal, x/y position
+	 * A 2D Gaussian (single exponential per pixel) with gradients for background, signal, x/y position
 	 */
 	public static final int FIT_SIMPLE_FIXED = FIT_FIXED | FIT_SIMPLE;
 
 	// Extra support for functions without background
 
+	/**
+	 * An elliptical 2D Gaussian (full integration per pixel) with gradients for signal, x/y position, x/y
+	 * width
+	 */
+	public static final int FIT_ERF_NB_FREE_CIRCLE = FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL | FIT_ERF;
+	
 	/**
 	 * An elliptical 2D Gaussian (single exponential per pixel) with gradients for signal, rotation angle,
 	 * x/y position, x/y width
@@ -146,20 +154,20 @@ public class GaussianFunctionFactory
 	 */
 	public static final int FIT_SIMPLE_NB_FREE_CIRCLE = FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL | FIT_SIMPLE;
 	/**
-	 * An 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position, width
+	 * A 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position, width
 	 */
 	public static final int FIT_SIMPLE_NB_CIRCLE = FIT_X_WIDTH | FIT_SIGNAL | FIT_SIMPLE;
 	/**
-	 * An 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position
+	 * A 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position
 	 */
 	public static final int FIT_SIMPLE_NB_FIXED = FIT_SIGNAL | FIT_SIMPLE;
 
 	/**
-	 * An 2D Gaussian (single exponential per pixel) with gradients for background, x/y position
+	 * A 2D Gaussian (single exponential per pixel) with gradients for background, x/y position
 	 */
 	public static final int FIT_SIMPLE_NS_FIXED = FIT_BACKGROUND | FIT_SIMPLE;
 	/**
-	 * An 2D Gaussian (single exponential per pixel) with gradients for x/y position
+	 * A 2D Gaussian (single exponential per pixel) with gradients for x/y position
 	 */
 	public static final int FIT_SIMPLE_NS_NB_FIXED = FIT_SIMPLE;
 
@@ -202,6 +210,8 @@ public class GaussianFunctionFactory
 					if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
 						return new SingleFixedErfGaussian2DFunction(maxx, maxy);
 				}
+				if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+					return new SingleNBFreeCircularErfGaussian2DFunction(maxx, maxy);
 			}
 			else
 			{
@@ -220,6 +230,8 @@ public class GaussianFunctionFactory
 					if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
 						return new MultiFixedErfGaussian2DFunction(nPeaks, maxx, maxy);
 				}
+				if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+					return new MultiNBFreeCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
 			}
 		}
 
