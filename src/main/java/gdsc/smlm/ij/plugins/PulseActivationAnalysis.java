@@ -2132,8 +2132,6 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			sim_precision[c] = Math.abs(gd.getNextNumber());
 			ct[2 * c] = Math.abs(gd.getNextNumber());
 			ct[2 * c + 1] = Math.abs(gd.getNextNumber());
-			for (int i = 0; i < ct.length; i += 2)
-				validateCrosstalk(i, i + 1);
 		}
 
 		if (gd.invalidNumber())
