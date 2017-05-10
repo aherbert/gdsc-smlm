@@ -27,7 +27,7 @@ public class NewtonRaphsonGradient2ProcedureFactory
 	 *            Gradient function
 	 * @return the gradient procedure
 	 */
-	public static NewtonRaphsonGradient2Procedure create2(final double[] x, final Gradient2Function func)
+	public static NewtonRaphsonGradient2Procedure create(final double[] x, final Gradient2Function func)
 	{
 		return new NewtonRaphsonGradient2Procedure(x, func);
 		// Note:
