@@ -13,10 +13,6 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.Gradient1Function;
 
-/**
- * Contains speed tests for the methods for calculating the Hessian and gradient vector
- * for use in the LVM algorithm.
- */
 public class PoissonGradientProcedureTest
 {
 	boolean speedTests = true;
@@ -316,7 +312,7 @@ public class PoissonGradientProcedureTest
 		log("Standard %d : Unrolled %d = %d : %fx\n", time1, nparams, time2, (1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1);
 	}
-
+	
 	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
 	{
 		int[] x = new int[blockWidth * blockWidth];
