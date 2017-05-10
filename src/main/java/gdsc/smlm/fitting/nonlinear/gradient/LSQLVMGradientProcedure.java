@@ -100,30 +100,12 @@ public class LSQLVMGradientProcedure extends BaseLSQLVMGradientProcedure
 	@Override
 	public void getAlphaMatrix(double[][] alpha)
 	{
-		// Generate symmetric matrix
-		for (int j = 0, i = 0; j < n; j++)
-			for (int k = 0; k <= j; k++)
-			{
-				//System.out.printf("alpha[%d][%d] = this.alpha[%d];\n", j, k, i);
-				//if (j != k)
-				//	System.out.printf("alpha[%d][%d] = this.alpha[%d];\n", k, j, i);
-				alpha[j][k] = alpha[k][j] = this.alpha[i++];
-			}
-		//throw new RuntimeException();
+		GradientProcedureHelper.getMatrix(this.alpha, alpha, n);
 	}
 
 	@Override
 	public void getAlphaLinear(double[] alpha)
 	{
-		// Generate symmetric matrix
-		for (int j = 0, i = 0; j < n; j++)
-			for (int k = 0; k <= j; k++)
-			{
-				//System.out.printf("alpha[%d] = this.alpha[%d];\n", j * n + k, i);
-				//if (j != k)
-				//	System.out.printf("alpha[%d] = this.alpha[%d];\n", k * n + j, i);
-				alpha[j * n + k] = alpha[k * n + j] = this.alpha[i++];
-			}
-		//throw new RuntimeException();
+		GradientProcedureHelper.getMatrix(this.alpha, alpha, n);
 	}
 }

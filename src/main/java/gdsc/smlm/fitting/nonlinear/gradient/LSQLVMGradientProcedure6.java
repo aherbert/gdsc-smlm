@@ -101,6 +101,6 @@ public class LSQLVMGradientProcedure6 extends LSQLVMGradientProcedure
 	@Override
 	public void getAlphaLinear(double[] alpha)
 	{
-		GradientProcedureHelper.getLinear6(this.alpha, alpha);
+		GradientProcedureHelper.getMatrix6(this.alpha, alpha);
 	}
 }

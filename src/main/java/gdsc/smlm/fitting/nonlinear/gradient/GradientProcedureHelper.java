@@ -76,6 +76,20 @@ class GradientProcedureHelper
 		data[20] = 0;
 	}
 
+	static void getMatrix(double[] data, double[][] matrix, int n)
+	{
+		// Generate symmetric matrix
+		for (int j = 0, i = 0; j < n; j++)
+			for (int k = 0; k <= j; k++)
+			{
+				//System.out.printf("matrix[%d][%d] = data[%d];\n", j, k, i);
+				//if (j != k)
+				//	System.out.printf("matrix[%d][%d] = data[%d];\n", k, j, i);
+				matrix[j][k] = matrix[k][j] = data[i++];
+			}
+		//throw new RuntimeException();
+	}
+
 	static void getMatrix4(double[] data, double[][] matrix)
 	{
 		matrix[0][0] = data[0];
@@ -166,7 +180,21 @@ class GradientProcedureHelper
 		matrix[5][5] = data[20];
 	}
 
-	static void getLinear4(double[] data, double[] matrix)
+	static void getMatrix(double[] data, double[] matrix, int n)
+	{
+		// Generate symmetric matrix
+		for (int j = 0, i = 0; j < n; j++)
+			for (int k = 0; k <= j; k++)
+			{
+				//System.out.printf("matrix[%d] = data[%d];\n", j * n + k, i);
+				//if (j != k)
+				//	System.out.printf("matrix[%d] = data[%d];\n", k * n + j, i);
+				matrix[j * n + k] = matrix[k * n + j] = data[i++];
+			}
+		//throw new RuntimeException();
+	}
+
+	static void getMatrix4(double[] data, double[] matrix)
 	{
 		matrix[0] = data[0];
 		matrix[4] = data[1];
@@ -186,7 +214,7 @@ class GradientProcedureHelper
 		matrix[15] = data[9];
 	}
 
-	static void getLinear5(double[] data, double[] matrix)
+	static void getMatrix5(double[] data, double[] matrix)
 	{
 		matrix[0] = data[0];
 		matrix[5] = data[1];
@@ -215,7 +243,7 @@ class GradientProcedureHelper
 		matrix[24] = data[14];
 	}
 
-	static void getLinear6(double[] data, double[] matrix)
+	static void getMatrix6(double[] data, double[] matrix)
 	{
 		// Generate symmetric matrix
 		matrix[0] = data[0];

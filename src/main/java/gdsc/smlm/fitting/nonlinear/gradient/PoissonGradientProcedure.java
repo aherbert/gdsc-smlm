@@ -2,8 +2,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.special.Gamma;
-
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient1Procedure;
 
@@ -144,12 +142,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 */
 	public void getMatrix(double[][] matrix)
 	{
-		// Generate symmetric matrix
-		for (int j = 0, i = 0; j < n; j++)
-			for (int k = 0; k <= j; k++)
-			{
-				matrix[j][k] = matrix[k][j] = data[i++];
-			}
+		GradientProcedureHelper.getMatrix(data, matrix, n);
 	}
 
 	/**
@@ -173,12 +166,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 */
 	public void getLinear(double[] matrix)
 	{
-		// Generate symmetric matrix
-		for (int j = 0, i = 0; j < n; j++)
-			for (int k = 0; k <= j; k++)
-			{
-				matrix[j * n + k] = matrix[k * n + j] = data[i++];
-			}
+		GradientProcedureHelper.getMatrix(data, matrix, n);
 	}
 
 	/**
@@ -187,45 +175,5 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	public boolean isNaNGradients()
 	{
 		return checkGradients();
-	}
-
-	/**
-	 * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
-	 *
-	 * @param u
-	 *            the mean
-	 * @param x
-	 *            the x
-	 * @return the log likelihood
-	 */
-	public static double logLikelihood(double u, double x)
-	{
-		if (x == 0)
-			return -u;
-		return x * Math.log(u) - u - logFactorial(x);
-	}
-
-	private static double logFactorial(double k)
-	{
-		if (k <= 1)
-			return 0;
-		return Gamma.logGamma(k + 1);
-	}
-
-	/**
-	 * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
-	 *
-	 * @param u
-	 *            the mean
-	 * @param x
-	 *            the x
-	 * @return the log likelihood
-	 */
-	public static double logLikelihood(double[] u, double[] x)
-	{
-		double ll = 0;
-		for (int i = u.length; i-- > 0;)
-			ll += logLikelihood(u[i], x[i]);
-		return ll;
 	}
 }

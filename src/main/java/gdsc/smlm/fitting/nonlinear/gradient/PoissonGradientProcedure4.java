@@ -73,6 +73,6 @@ public class PoissonGradientProcedure4 extends PoissonGradientProcedure
 	@Override
 	public void getLinear(double[] matrix)
 	{
-		GradientProcedureHelper.getLinear4(data, matrix);
+		GradientProcedureHelper.getMatrix4(data, matrix);
 	}
 }

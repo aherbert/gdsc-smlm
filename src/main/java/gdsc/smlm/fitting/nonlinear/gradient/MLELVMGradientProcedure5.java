@@ -118,6 +118,6 @@ public class MLELVMGradientProcedure5 extends MLELVMGradientProcedure
 	@Override
 	public void getAlphaLinear(double[] alpha)
 	{
-		GradientProcedureHelper.getLinear5(this.alpha, alpha);
+		GradientProcedureHelper.getMatrix5(this.alpha, alpha);
 	}
 }
