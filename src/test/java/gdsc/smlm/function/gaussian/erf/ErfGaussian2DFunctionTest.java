@@ -3,7 +3,6 @@ package gdsc.smlm.function.gaussian.erf;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.TestSettings;
 import gdsc.core.ij.Utils;
 import gdsc.core.test.BaseTimingTask;
 import gdsc.core.test.TimingService;
@@ -11,6 +10,7 @@ import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.ValueProcedure;
