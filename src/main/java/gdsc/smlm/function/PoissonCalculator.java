@@ -197,6 +197,6 @@ public class PoissonCalculator
 	{
 		// The ChiSquaredDistribution just wraps the gamma distribution for this function
 		//return new ChiSquaredDistribution(degreesOfFreedom).cumulativeProbability(llr);
-		return new GammaDistribution(degreesOfFreedom / 2, 2).cumulativeProbability(logLikelihoodRatio);
+		return new GammaDistribution(null, degreesOfFreedom / 2.0, 2.0).cumulativeProbability(logLikelihoodRatio);
 	}
 }

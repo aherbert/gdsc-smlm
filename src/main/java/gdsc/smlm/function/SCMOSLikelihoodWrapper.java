@@ -1,6 +1,5 @@
 package gdsc.smlm.function;
 
-import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
@@ -350,11 +349,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	{
 		double llr = computeLogLikelihoodRatio(ll);
 		int degreesOfFreedom = x.length - nVariables;
-		double p;
-		// The ChiSquaredDistribution just wraps the gamma distribution for this function
-		//p = new ChiSquaredDistribution(degreesOfFreedom).cumulativeProbability(llr);
-		p = new GammaDistribution(degreesOfFreedom / 2, 2).cumulativeProbability(llr);
-		return p;
+		return PoissonCalculator.computePValue(llr, degreesOfFreedom);
 	}
 
 	/*
