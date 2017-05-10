@@ -16,10 +16,10 @@ package gdsc.smlm.function.gaussian;
 /**
  * Implements a astigmatism model of a 2D Gaussian function, where z-depth determines the x and y width.
  * <p>
- * 
- * @see Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+ * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
  *      Nature Methods 7, 373-375 (supplementary note).
- * @see Holtzer, L., Meckel, T. & Schmidt, T. Nanometric three-dimensional tracking of individual quantum dots in cells.
+ * <p>     
+ * Ref: Holtzer, L., Meckel, T. & Schmidt, T. Nanometric three-dimensional tracking of individual quantum dots in cells.
  *      Applied Physics Letters 90, 1–3 (2007).
  */
 public class HoltzerAstimatismZModel implements AstimatismZModel
