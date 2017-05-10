@@ -371,7 +371,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
 			NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.create(y, func);
-			double ll = p.computeLogLikelihood(a);
+			//double ll = p.computeLogLikelihood(a);
 			p.computeUpdate(a);
 			double[] d1 = p.d1.clone();
 			double[] d2 = p.d2.clone();
@@ -391,8 +391,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 
 				double gradient1 = (llh - lll) / (2 * d);
 				double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
-				System.out.printf("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f\n", i, k, ll, func.getName(k), a[k], d, 
-						gradient1, d1[j], gradient2, d2[j]);
+				//System.out.printf("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f\n", i, k, ll, func.getName(k), a[k], d, 
+				//		gradient1, d1[j], gradient2, d2[j]);
 				Assert.assertTrue("Not same gradient1 @ " + j, eq.almostEqualComplement(gradient1, d1[j]));
 				Assert.assertTrue("Not same gradient2 @ " + j, eq.almostEqualComplement(gradient2, d2[j]));
 			}
