@@ -2378,7 +2378,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		 */
 		private MultiPathFitResult.FitResult fitAsDoublet(FitResult fitResult, double[] region, Rectangle regionBounds,
 				double residualsThreshold, CandidateList neighbours, PeakResult[] peakNeighbours, QuadrantAnalysis qa,
-				double singleSumOfSquares, double singelValue)
+				double singleSumOfSquares, double singleValue)
 		{
 			final int width = regionBounds.width;
 			final int height = regionBounds.height;
