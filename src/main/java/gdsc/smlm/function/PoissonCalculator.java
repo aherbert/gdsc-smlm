@@ -42,7 +42,7 @@ public class PoissonCalculator
 	private static double logFactorial(double k)
 	{
 		if (k <= 1)
-			return 0;
+			return 0.0;
 		return Gamma.logGamma(k + 1);
 	}
 
@@ -57,7 +57,7 @@ public class PoissonCalculator
 	 */
 	public static double logLikelihood(double[] u, double[] x)
 	{
-		double ll = 0;
+		double ll = 0.0;
 		for (int i = u.length; i-- > 0;)
 			ll += logLikelihood(u[i], x[i]);
 		return ll;
@@ -101,7 +101,7 @@ public class PoissonCalculator
 	 */
 	public static double maximumLogLikelihood(double x)
 	{
-		return (x > 0) ? logLikelihood(x, x) : 0;
+		return (x > 0.0) ? logLikelihood(x, x) : 0.0;
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class PoissonCalculator
 	 */
 	public static double maximumLogLikelihood(double[] x)
 	{
-		double ll = 0;
+		double ll = 0.0;
 		for (int i = x.length; i-- > 0;)
 			ll += maximumLogLikelihood(x[i]);
 		return ll;
@@ -128,7 +128,7 @@ public class PoissonCalculator
 	 */
 	public static double maximumLikelihood(double x)
 	{
-		return (x > 0) ? likelihood(x, x) : 1;
+		return (x > 0.0) ? likelihood(x, x) : 1;
 	}
 
 	/**
@@ -161,12 +161,12 @@ public class PoissonCalculator
 		// i.e., have the same or greater log-likelihood—than the model with fewer parameters 
 		// (here null)
 
-		double ll = 0;
+		double ll = 0.0;
 		for (int i = u.length; i-- > 0;)
 		{
 			//ll += logLikelihood(u[i], x[i]) - maximumLogLikelihood(x[i]);
 
-			if (x[i] > 0)
+			if (x[i] > 0.0)
 			{
 				//ll += (x[i] * Math.log(u[i]) - u[i]) - (x[i] * Math.log(x[i]) - x[i]);
 				//ll += x[i] * Math.log(u[i]) - u[i] - x[i] * Math.log(x[i]) + x[i];
@@ -178,7 +178,7 @@ public class PoissonCalculator
 				ll -= u[i];
 			}
 		}
-		return -2 * ll;
+		return -2.0 * ll;
 	}
 
 	/**
