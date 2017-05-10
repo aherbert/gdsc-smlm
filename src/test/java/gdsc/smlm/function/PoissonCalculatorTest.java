@@ -14,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.ij.Utils;
+import gdsc.smlm.TestSettings;
 
 public class PoissonCalculatorTest
 {
@@ -23,7 +24,7 @@ public class PoissonCalculatorTest
 	double P_LIMIT = 0.999999;
 
 	@Test
-	public void canCopmuteLikelihoodForIntegerData()
+	public void canComputeLikelihoodForIntegerData()
 	{
 		for (double u : photons)
 		{
@@ -42,7 +43,7 @@ public class PoissonCalculatorTest
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithRealDataForCountAbove8()
+	public void cumulativeProbabilityIsOneWithRealDataForCountAbove4()
 	{
 		for (double mu : photons)
 		{
@@ -53,7 +54,7 @@ public class PoissonCalculatorTest
 			double sd = Math.sqrt(mu);
 			double min = (int) Math.max(0, mu - 4 * sd);
 
-			cumulativeProbabilityIsOneWithRealData(mu, min, max, mu > 8);
+			cumulativeProbabilityIsOneWithRealData(mu, min, max, mu >= 4);
 		}
 	}
 
@@ -75,7 +76,7 @@ public class PoissonCalculatorTest
 			}
 		}, min, max);
 
-		//System.out.printf("mu=%f, p=%f\n", mu, p);
+		System.out.printf("mu=%f, p=%f\n", mu, p);
 		if (test)
 		{
 			Assert.assertEquals(String.format("mu=%f", mu), P_LIMIT, p, 0.02);
@@ -127,11 +128,11 @@ public class PoissonCalculatorTest
 	public void canComputeLogLikelihoodRatio()
 	{
 		final double n2 = maxx * maxx * 0.5;
-		// Functions must produce a strictly positive output
+		// Functions must produce a strictly positive output so add background
 		//@formatter:off
 		canComputeLogLikelihoodRatio(new BaseNonLinearFunction("Quadratic")
 		{
-			public double eval(int x) {	return 0.1 + 10 * a[0] * (x-n2) * (x-n2); }
+			public double eval(int x) {	return 0.1 + a[0] * (x-n2) * (x-n2); }
 		});		
 		canComputeLogLikelihoodRatio(new BaseNonLinearFunction("Gaussian")
 		{
@@ -173,6 +174,9 @@ public class PoissonCalculatorTest
 
 		double max = Double.NEGATIVE_INFINITY;
 		double maxa = 0;
+
+		//TestSettings.setLogLevel(gdsc.smlm.TestSettings.LogLevel.DEBUG);
+
 		for (int i = 5; i <= 15; i++)
 		{
 			a[0] = (double) i / 10;
@@ -193,7 +197,7 @@ public class PoissonCalculatorTest
 			}
 			llr2 = -2 * Math.log(product.doubleValue());
 			double p = 1 - PoissonCalculator.computePValue(llr, n - 1);
-			System.out.printf("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
+			TestSettings.info("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
 					product.round(new MathContext(4)).toString(), p);
 			if (max < ll)
 			{
