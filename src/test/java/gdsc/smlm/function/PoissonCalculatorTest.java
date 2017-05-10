@@ -258,7 +258,7 @@ public class PoissonCalculatorTest
 	private void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(BaseNonLinearFunction nlf1,
 			BaseNonLinearFunction nlf2, BaseNonLinearFunction nlf3)
 	{
-		System.out.println(nlf1.name);
+		//System.out.println(nlf1.name);
 
 		int n = maxx * maxx;
 
@@ -294,17 +294,17 @@ public class PoissonCalculatorTest
 		double ll1a = PoissonCalculator.logLikelihood(b12, x);
 		double ll2a = PoissonCalculator.logLikelihood(add(b12, b3), x);
 		double llra = -2 * (ll1a - ll2a);
-		System.out.printf("x|(a+b+c) ll1=%f, ll2=%f, llra=%f\n", ll1a, ll2a, llra);
+		//System.out.printf("x|(a+b+c) ll1=%f, ll2=%f, llra=%f\n", ll1a, ll2a, llra);
 
 		// Compute the LLR of adding b3 to b2 given we already have x minus b1
 		x = subtract(x, b1);
 		double ll1b = PoissonCalculator.logLikelihood(b2, x);
 		double ll2b = PoissonCalculator.logLikelihood(add(b2, b3), x);
 		double llrb = -2 * (ll1b - ll2b);
-		System.out.printf("x-a|(b+c) : ll1=%f, ll2=%f, llrb=%f\n", ll1b, ll2b, llrb);
+		//System.out.printf("x-a|(b+c) : ll1=%f, ll2=%f, llrb=%f\n", ll1b, ll2b, llrb);
 
-		System.out.printf("llr=%f (%g), llr2=%f (%g)\n", llra, PoissonCalculator.computePValue(llra, 1), llrb,
-				PoissonCalculator.computePValue(llrb, 1));
+		//System.out.printf("llr=%f (%g), llr2=%f (%g)\n", llra, PoissonCalculator.computePValue(llra, 1), llrb,
+		//		PoissonCalculator.computePValue(llrb, 1));
 		Assert.assertNotEquals("Log-likelihood ratio", llra, llrb, llra * 1e-10);
 
 	}
