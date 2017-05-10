@@ -1,6 +1,5 @@
 package gdsc.smlm.function;
 
-import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
@@ -196,7 +195,15 @@ public class PoissonCalculator
 	public static double computePValue(double logLikelihoodRatio, int degreesOfFreedom)
 	{
 		// The ChiSquaredDistribution just wraps the gamma distribution for this function
-		//return new ChiSquaredDistribution(degreesOfFreedom).cumulativeProbability(llr);
-		return new GammaDistribution(null, degreesOfFreedom / 2.0, 2.0).cumulativeProbability(logLikelihoodRatio);
+		//return new ChiSquaredDistribution(degreesOfFreedom).cumulativeProbability(logLikelihoodRatio);
+		//return new GammaDistribution(null, degreesOfFreedom / 2.0, 2.0).cumulativeProbability(logLikelihoodRatio);
+		if (logLikelihoodRatio <= 0)
+		{
+			return 0;
+		}
+		else
+		{
+			return Gamma.regularizedGammaP(degreesOfFreedom / 2.0, logLikelihoodRatio / 2.0);
+		}
 	}
 }
