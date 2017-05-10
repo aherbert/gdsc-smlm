@@ -630,7 +630,7 @@ public class GradientCalculatorSpeedTest
 			double[] beta = new double[7];
 			double llr = PoissonCalculator.logLikelihoodRatio(u, x);
 			double llr2 = calc.findLinearised(n, x, a, alpha, beta, func);
-			System.out.printf("llr=%f, llr2=%f\n", llr, llr2);
+			//System.out.printf("llr=%f, llr2=%f\n", llr, llr2);
 			Assert.assertEquals("Log-likelihood ratio", llr, llr2, llr * 1e-10);
 		}
 	}
