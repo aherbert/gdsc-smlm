@@ -96,8 +96,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 					func);
 			double s = p.computeLogLikelihood(paramsList.get(i));
 			double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
-			// Exactly the same ...
-			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, 0);
+			// Virtually the same ...
+			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, 1e-10);
 		}
 	}
 
@@ -231,24 +231,30 @@ public class NewtonRaphsonGradient2ProcedureTest
 		createFakeData(nparams, iter, paramsList, yList);
 		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
+		NewtonRaphsonGradient2Procedure p1, p2;
 		String name = String.format("[%d]", nparams);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			NewtonRaphsonGradient2Procedure p1 = new NewtonRaphsonGradient2Procedure(yList.get(i), func);
-			NewtonRaphsonGradient2Procedure p2 = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i),
-					func);
+			p1 = new NewtonRaphsonGradient2Procedure(yList.get(i), func);
+			p2 = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			double[] a = paramsList.get(i);
 
 			double ll1 = p1.computeLogLikelihood(a);
 			double ll2 = p2.computeLogLikelihood(a);
 			Assert.assertEquals(name + " LL: Not same @ " + i, ll1, ll2, 0);
 
+			p1 = new NewtonRaphsonGradient2Procedure(yList.get(i), func);
+			p2 = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p1.computeFirstDerivative(a);
 			p2.computeFirstDerivative(a);
+			Assert.assertArrayEquals(name + " first derivative value: Not same @ " + i, p1.u, p2.u, 0);
 			Assert.assertArrayEquals(name + " first derivative: Not same @ " + i, p1.d1, p2.d1, 0);
 
+			p1 = new NewtonRaphsonGradient2Procedure(yList.get(i), func);
+			p2 = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p1.computeUpdate(a);
 			p2.computeUpdate(a);
+			Assert.assertArrayEquals(name + " update value: Not same @ " + i, p1.u, p2.u, 0);
 			Assert.assertArrayEquals(name + " update: Not same d1 @ " + i, p1.d1, p2.d1, 0);
 			Assert.assertArrayEquals(name + " update: Not same d2 @ " + i, p1.d2, p2.d2, 0);
 			Assert.assertArrayEquals(name + " update: Not same update @ " + i, p1.getUpdate(), p2.getUpdate(), 0);
@@ -336,7 +342,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 	public void gradientCalculatorComputesGradient()
 	{
 		gradientCalculatorComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
-		
+
 		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
 		double gamma = 0.389;
 		double d = 0.531;
@@ -344,7 +350,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 		double Bx = -0.073;
 		double Ay = 0.164;
 		double By = 0.0417;
-		HoltzerAstimatismZModel zModel = HoltzerAstimatismZModel.create(gamma, d, Ax, Bx, Ay, By);		
+		HoltzerAstimatismZModel zModel = HoltzerAstimatismZModel.create(gamma, d, Ax, Bx, Ay, By);
 		gradientCalculatorComputesGradient(new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
 	}
 

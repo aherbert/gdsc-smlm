@@ -2,11 +2,10 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.special.Gamma;
-
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.Gradient2Procedure;
+import gdsc.smlm.function.PoissonCalculator;
 import gdsc.smlm.function.ValueProcedure;
 
 /*----------------------------------------------------------------------------- 
@@ -49,8 +48,11 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	/** Counter */
 	protected int k;
 
-	/** The log likelihood. */
-	protected double ll;
+	/**
+	 * The value of the function. This is updated by calls to {@link #computeValue(double[])},
+	 * {@link #computeFirstDerivative(double[])}, {@link #computeUpdate(double[])}
+	 */
+	public final double[] u;
 
 	/**
 	 * @param x
@@ -61,6 +63,7 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	public NewtonRaphsonGradient2Procedure(final double[] x, final Gradient2Function func)
 	{
 		this.x = x;
+		this.u = new double[x.length];
 		this.func = func;
 		this.n = func.getNumberOfGradients();
 		d1 = new double[n];
@@ -68,7 +71,8 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	}
 
 	/**
-	 * Calculates the Newton-Raphson update vector for a Poisson process.
+	 * Calculates the Newton-Raphson update vector for a Poisson process as the first derivative divided by the second
+	 * derivative.
 	 *
 	 * @param a
 	 *            Set of coefficients for the function
@@ -102,6 +106,7 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	 */
 	public void execute(double uk, double[] duk_dt, double[] d2uk_dt2)
 	{
+		u[k] = uk;
 		final double xk = x[k++];
 		final double xk_uk_minus1 = xk / uk - 1.0;
 		final double xk_uk2 = xk / (uk * uk);
@@ -158,6 +163,7 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	 */
 	public void execute(double uk, double[] duk_dt)
 	{
+		u[k] = uk;
 		final double xk = x[k++];
 		final double xk_uk_minus1 = xk / uk - 1.0;
 		for (int i = 0; i < n; i++)
@@ -167,19 +173,18 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	}
 
 	/**
-	 * Calculates the Poisson log likelihood.
+	 * Compute the value of the function.
 	 *
 	 * @param a
-	 *            Set of coefficients for the function
-	 * @return the Poisson log likelihood
+	 *            the a
+	 * @return the double[]
 	 */
-	public double computeLogLikelihood(final double[] a)
+	public double[] computeValue(final double[] a)
 	{
-		ll = 0;
 		k = 0;
 		func.initialise0(a);
 		func.forEach((ValueProcedure) this);
-		return ll;
+		return u;
 	}
 
 	/**
@@ -191,30 +196,19 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	 */
 	public void execute(double uk)
 	{
-		ll += logLikelihood(uk, x[k++]);
+		u[k++] = uk;
 	}
 
 	/**
-	 * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
+	 * Calculates the Poisson log likelihood.
 	 *
-	 * @param u
-	 *            the mean
-	 * @param x
-	 *            the x
-	 * @return the log likelihood
+	 * @param a
+	 *            Set of coefficients for the function
+	 * @return the Poisson log likelihood
 	 */
-	public static double logLikelihood(double u, double x)
+	public double computeLogLikelihood(final double[] a)
 	{
-		// X is not zero very often so skip this ...
-		//if (x == 0)
-		//	return -u;
-		return x * Math.log(u) - u - logFactorial(x);
-	}
-
-	private static double logFactorial(double k)
-	{
-		if (k <= 1)
-			return 0;
-		return Gamma.logGamma(k + 1);
+		computeValue(a);
+		return PoissonCalculator.logLikelihood(u, x);
 	}
 }

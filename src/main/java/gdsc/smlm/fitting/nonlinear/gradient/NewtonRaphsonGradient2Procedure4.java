@@ -52,6 +52,7 @@ public class NewtonRaphsonGradient2Procedure4 extends NewtonRaphsonGradient2Proc
 	@Override
 	public void execute(double uk, double[] duk_dt, double[] d2uk_dt2)
 	{
+		u[k] = uk;
 		final double xk = x[k++];
 		final double xk_uk_minus1 = xk / uk - 1.0;
 		final double xk_uk2 = xk / (uk * uk);
@@ -90,6 +91,7 @@ public class NewtonRaphsonGradient2Procedure4 extends NewtonRaphsonGradient2Proc
 	@Override
 	public void execute(double uk, double[] duk_dt)
 	{
+		u[k] = uk;
 		final double xk = x[k++];
 		final double xk_uk_minus1 = xk / uk - 1.0;
 		d1[0] += duk_dt[0] * xk_uk_minus1;
