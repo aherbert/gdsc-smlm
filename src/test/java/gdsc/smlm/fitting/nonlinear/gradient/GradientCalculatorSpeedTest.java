@@ -15,6 +15,7 @@ import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.function.CameraNoiseModel;
 import gdsc.smlm.function.NonLinearFunction;
+import gdsc.smlm.function.PoissonCalculator;
 import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleCircularGaussian2DFunction;
@@ -593,6 +594,45 @@ public class GradientCalculatorSpeedTest
 		for (int i = 0; i < d.length; i++)
 			d[i] += b;
 		return d;
+	}
+
+	@Test
+	public void mleCalculatorComputesLogLikelihoodRatio()
+	{
+		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
+		int n = blockWidth * blockWidth;
+		double[] a = new double[7];
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		for (int run = 5; run-- > 0;)
+		{
+			a[0] = random(Background);
+			a[1] = random(Amplitude);
+			a[2] = random(Angle);
+			a[3] = random(Xpos);
+			a[4] = random(Ypos);
+			a[5] = random(Xwidth);
+			a[6] = random(Ywidth);
+
+			// Simulate Poisson process
+			func.initialise(a);
+			double[] x = Utils.newArray(n, 0, 1.0);
+			double[] u = new double[x.length];
+			for (int i = 0; i < n; i++)
+			{
+				u[i] = func.eval(i);
+				if (u[i] > 0)
+					x[i] = rdg.nextPoisson(u[i]);
+			}
+
+			GradientCalculator calc = GradientCalculatorFactory.newCalculator(func.getNumberOfGradients(), true);
+
+			double[][] alpha = new double[7][7];
+			double[] beta = new double[7];
+			double llr = PoissonCalculator.logLikelihoodRatio(u, x);
+			double llr2 = calc.findLinearised(n, x, a, alpha, beta, func);
+			System.out.printf("llr=%f, llr2=%f\n", llr, llr2);
+			Assert.assertEquals("Log-likelihood ratio", llr, llr2, llr * 1e-10);
+		}
 	}
 
 	/**
