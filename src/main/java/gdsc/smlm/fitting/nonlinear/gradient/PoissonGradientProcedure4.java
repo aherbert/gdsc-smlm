@@ -17,9 +17,9 @@ import gdsc.smlm.function.Gradient1Function;
 
 /**
  * Calculates the Fisher information matrix for a Poisson process.
- * 
- * @see Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
- *      Nature Methods 7, 373-375 (supplementary note), Eq. 9.
+ * <p>
+ * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+ * Nature Methods 7, 373-375 (supplementary note), Eq. 12.
  */
 public class PoissonGradientProcedure4 extends PoissonGradientProcedure
 {

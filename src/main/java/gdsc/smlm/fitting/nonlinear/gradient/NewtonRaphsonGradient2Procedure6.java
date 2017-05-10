@@ -17,9 +17,9 @@ import gdsc.smlm.function.Gradient2Function;
 
 /**
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second partial derivatives.
- * 
- * @see Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
- *      Nature Methods 7, 373-375 (supplementary note), Eq. 12.
+ * <p>
+ * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+ * Nature Methods 7, 373-375 (supplementary note), Eq. 12.
  */
 public class NewtonRaphsonGradient2Procedure6 extends NewtonRaphsonGradient2Procedure
 {

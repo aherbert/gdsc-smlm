@@ -23,9 +23,9 @@ import gdsc.smlm.function.ValueProcedure;
 
 /**
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second partial derivatives.
- * 
- * @see Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
- *      Nature Methods 7, 373-375 (supplementary note), Eq. 12.
+ * <p>
+ * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+ * Nature Methods 7, 373-375 (supplementary note), Eq. 12.
  */
 public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient1Procedure, Gradient2Procedure
 {
@@ -210,5 +210,18 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	{
 		computeValue(a);
 		return PoissonCalculator.logLikelihood(u, x);
+	}
+
+	/**
+	 * Calculates the Poisson log likelihood ratio.
+	 *
+	 * @param a
+	 *            Set of coefficients for the function
+	 * @return the Poisson log likelihood ratio
+	 */
+	public double computeLogLikelihoodRatio(final double[] a)
+	{
+		computeValue(a);
+		return PoissonCalculator.logLikelihoodRatio(u, x);
 	}
 }
