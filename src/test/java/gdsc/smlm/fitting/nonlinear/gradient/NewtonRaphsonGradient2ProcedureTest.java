@@ -5,15 +5,15 @@ import java.util.ArrayList;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
-import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
-import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.gaussian.HoltzerAstimatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 
 /**
@@ -41,11 +41,14 @@ public class NewtonRaphsonGradient2ProcedureTest
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		double[] y = new double[0];
-		Assert.assertEquals(NewtonRaphsonGradient2ProcedureFactory.create(y, new DummyGradientFunction(4)).getClass(),
+		Assert.assertEquals(
+				NewtonRaphsonGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(4)).getClass(),
 				NewtonRaphsonGradient2Procedure4.class);
-		Assert.assertEquals(NewtonRaphsonGradient2ProcedureFactory.create(y, new DummyGradientFunction(5)).getClass(),
+		Assert.assertEquals(
+				NewtonRaphsonGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(5)).getClass(),
 				NewtonRaphsonGradient2Procedure5.class);
-		Assert.assertEquals(NewtonRaphsonGradient2ProcedureFactory.create(y, new DummyGradientFunction(6)).getClass(),
+		Assert.assertEquals(
+				NewtonRaphsonGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(6)).getClass(),
 				NewtonRaphsonGradient2Procedure6.class);
 	}
 
@@ -64,7 +67,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 	{
 		// Note: The procedure does not have a lot of work within loops. It is only a single loop
 		// so unrolling does not produce performance gains. The JVM can optimise this. 
-		
+
 		gradientProcedureIsNotSlowerThanGradientCalculator(4);
 		gradientProcedureIsNotSlowerThanGradientCalculator(5);
 		gradientProcedureIsNotSlowerThanGradientCalculator(6);
@@ -89,7 +92,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.create(yList.get(i), func);
+			NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i),
+					func);
 			double s = p.computeLogLikelihood(paramsList.get(i));
 			double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
 			// Exactly the same ...
@@ -158,7 +162,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.create(yList.get(i), func);
+			NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i),
+					func);
 			p.computeLogLikelihood(paramsList.get(i));
 		}
 
@@ -189,8 +194,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.create(yList.get(i),
-							func);
+					NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory
+							.createUnrolled(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p.computeLogLikelihood(paramsList.get(k++ % iter));
 				}
@@ -230,7 +235,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			NewtonRaphsonGradient2Procedure p1 = new NewtonRaphsonGradient2Procedure(yList.get(i), func);
-			NewtonRaphsonGradient2Procedure p2 = NewtonRaphsonGradient2ProcedureFactory.create(yList.get(i), func);
+			NewtonRaphsonGradient2Procedure p2 = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i),
+					func);
 			double[] a = paramsList.get(i);
 
 			double ll1 = p1.computeLogLikelihood(a);
@@ -278,7 +284,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 			p1.computeUpdate(paramsList.get(i));
 			p1.computeUpdate(paramsList.get(i));
 
-			NewtonRaphsonGradient2Procedure p2 = NewtonRaphsonGradient2ProcedureFactory.create(yList.get(i), func);
+			NewtonRaphsonGradient2Procedure p2 = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i),
+					func);
 			p2.computeUpdate(paramsList.get(i));
 			p2.computeUpdate(paramsList.get(i));
 
@@ -312,8 +319,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					NewtonRaphsonGradient2Procedure p2 = NewtonRaphsonGradient2ProcedureFactory.create(yList.get(i),
-							func);
+					NewtonRaphsonGradient2Procedure p2 = NewtonRaphsonGradient2ProcedureFactory
+							.createUnrolled(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p2.computeUpdate(paramsList.get(k++ % iter));
 				}
@@ -325,68 +332,72 @@ public class NewtonRaphsonGradient2ProcedureTest
 		Assert.assertTrue(time2 < time1 * 1.5);
 	}
 
-	// TODO - Check the first and second derivatives
+	@Test
+	public void gradientCalculatorComputesGradient()
+	{
+		gradientCalculatorComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
+		
+		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
+		double gamma = 0.389;
+		double d = 0.531;
+		double Ax = -0.0708;
+		double Bx = -0.073;
+		double Ay = 0.164;
+		double By = 0.0417;
+		HoltzerAstimatismZModel zModel = HoltzerAstimatismZModel.create(gamma, d, Ax, Bx, Ay, By);		
+		gradientCalculatorComputesGradient(new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
+	}
 
-	//	@Test
-	//	public void gradientCalculatorLSQComputesGradient()
-	//	{
-	//		gradientCalculatorComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), false);
-	//	}
-	//
-	//	@Test
-	//	public void gradientCalculatorMLEComputesGradient()
-	//	{
-	//		gradientCalculatorComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), true);
-	//	}
-	//
-	//	private void gradientCalculatorComputesGradient(ErfGaussian2DFunction func, boolean mle)
-	//	{
-	//		int nparams = func.getNumberOfGradients();
-	//		int[] indices = func.gradientIndices();
-	//
-	//		int iter = 100;
-	//		rdg = new RandomDataGenerator(new Well19937c(30051977));
-	//
-	//		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-	//		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
-	//
-	//		createData(1, iter, paramsList, yList, true);
-	//
-	//		double delta = 1e-3;
-	//		DoubleEquality eq = new DoubleEquality(3, 1e-3);
-	//
-	//		for (int i = 0; i < paramsList.size(); i++)
-	//		{
-	//			double[] y = yList.get(i);
-	//			double[] a = paramsList.get(i);
-	//			double[] a2 = a.clone();
-	//			NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.create(y, func);
-	//			p.gradient(a);
-	//			//double s = p.value;
-	//			double[] beta = p.beta.clone();
-	//			for (int j = 0; j < nparams; j++)
-	//			{
-	//				int k = indices[j];
-	//				double d = (a[k] == 0) ? 1e-3 : a[k] * delta;
-	//				a2[k] = a[k] + d;
-	//				p.value(a2);
-	//				double s1 = p.value;
-	//				a2[k] = a[k] - d;
-	//				p.value(a2);
-	//				double s2 = p.value;
-	//				a2[k] = a[k];
-	//
-	//				// Apply a factor of -2 to compute the actual gradients:
-	//				// See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models
-	//				beta[j] *= -2;
-	//
-	//				double gradient = (s1 - s2) / (2 * d);
-	//				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, k, s, func.getName(k), a[k], d, beta[j],
-	//				//		gradient);
-	//				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualComplement(beta[j], gradient));
-	//			}
-	//		}
-	//	}
+	private void gradientCalculatorComputesGradient(ErfGaussian2DFunction func)
+	{
+		// Check the first and second derivatives
+		int nparams = func.getNumberOfGradients();
+		int[] indices = func.gradientIndices();
+
+		int iter = 100;
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
+
+		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+
+		createData(1, iter, paramsList, yList, true);
+
+		double delta = 1e-3;
+		DoubleEquality eq = new DoubleEquality(3, 1e-3);
+
+		for (int i = 0; i < paramsList.size(); i++)
+		{
+			double[] y = yList.get(i);
+			double[] a = paramsList.get(i);
+			double[] a2 = a.clone();
+			NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.create(y, func);
+			double ll = p.computeLogLikelihood(a);
+			p.computeUpdate(a);
+			double[] d1 = p.d1.clone();
+			double[] d2 = p.d2.clone();
+			for (int j = 0; j < nparams; j++)
+			{
+				int k = indices[j];
+				double d = (a[k] == 0) ? 1e-3 : a[k] * delta;
+				a2[k] = a[k] + d;
+				double llh = p.computeLogLikelihood(a2);
+				p.computeFirstDerivative(a2);
+				double[] d1h = p.d1.clone();
+				a2[k] = a[k] - d;
+				double lll = p.computeLogLikelihood(a2);
+				p.computeFirstDerivative(a2);
+				double[] d1l = p.d1.clone();
+				a2[k] = a[k];
+
+				double gradient1 = (llh - lll) / (2 * d);
+				double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
+				System.out.printf("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f\n", i, k, ll, func.getName(k), a[k], d, 
+						gradient1, d1[j], gradient2, d2[j]);
+				Assert.assertTrue("Not same gradient1 @ " + j, eq.almostEqualComplement(gradient1, d1[j]));
+				Assert.assertTrue("Not same gradient2 @ " + j, eq.almostEqualComplement(gradient2, d2[j]));
+			}
+		}
+	}
 
 	/**
 	 * Create random elliptical Gaussian data an returns the data plus an estimate of the parameters.
