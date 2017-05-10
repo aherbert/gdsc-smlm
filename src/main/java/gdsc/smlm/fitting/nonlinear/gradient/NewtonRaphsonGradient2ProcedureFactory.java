@@ -27,7 +27,23 @@ public class NewtonRaphsonGradient2ProcedureFactory
 	 *            Gradient function
 	 * @return the gradient procedure
 	 */
-	public static NewtonRaphsonGradient2Procedure create(final double[] x, final Gradient2Function func)
+	public static NewtonRaphsonGradient2Procedure create2(final double[] x, final Gradient2Function func)
+	{
+		return new NewtonRaphsonGradient2Procedure(x, func);
+		// Note:
+		// JUnit speed tests show the unrolled version are slower, i.e. the JVM is able to 
+		// efficiently optimise the single for loops in the procedure
+		//return createUnrolled(x, func);
+	}
+	
+	/**
+	 * Create a new gradient procedure that has the loops unrolled.
+	 *
+	 * @param func
+	 *            Gradient function
+	 * @return the gradient procedure
+	 */
+	static NewtonRaphsonGradient2Procedure createUnrolled(final double[] x, final Gradient2Function func)
 	{
 		switch (func.getNumberOfGradients())
 		{
