@@ -739,8 +739,8 @@ public class LVMGradientProcedureTest
 		int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
-		SingleFreeCircularErfGaussian2DFunction func = new SingleFreeCircularErfGaussian2DFunction(blockWidth,
-				blockWidth);
+		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
+				blockWidth, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 		params[0] = random(Background);
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 		{

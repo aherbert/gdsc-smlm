@@ -14,6 +14,7 @@ import gdsc.core.utils.Statistics;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 
@@ -590,8 +591,8 @@ public class LSQLVMGradientProcedureTest
 		int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
-		SingleFreeCircularErfGaussian2DFunction func = new SingleFreeCircularErfGaussian2DFunction(blockWidth,
-				blockWidth);
+		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
+				blockWidth, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 		params[0] = random(Background);
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 		{

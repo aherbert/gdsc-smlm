@@ -166,11 +166,11 @@ public class NewtonRaphsonGradient2ProcedureTest
 			// Reset to peak 1
 			for (int j = 0; j < 7; j++)
 				a1[j] = a2[j];
-			
+
 			// Compute peak 1+2
 			NewtonRaphsonGradient2Procedure p12 = NewtonRaphsonGradient2ProcedureFactory.create(x, f2);
 			double[] up1 = Arrays.copyOf(p12.computeUpdate(a2), f1.getNumberOfGradients());
-			
+
 			// Compute peak 1+(precomputed 2)
 			NewtonRaphsonGradient2Procedure p1b2 = NewtonRaphsonGradient2ProcedureFactory.create(x, b, f1);
 			double[] up2 = p1b2.computeUpdate(a1);
@@ -181,7 +181,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 			double[] v1 = p12.computeValue(a2);
 			double[] v2 = p1b2.computeValue(a1);
 			Assert.assertArrayEquals(" Value: Not same @ " + i, v1, v2, 1e-10);
-			
+
 			double[] d1 = Arrays.copyOf(p12.computeFirstDerivative(a2), f1.getNumberOfGradients());
 			double[] d2 = p1b2.computeFirstDerivative(a1);
 			Assert.assertArrayEquals(" 1st derivative: Not same @ " + i, d1, d2, 1e-10);
@@ -510,8 +510,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 		int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
-		SingleFreeCircularErfGaussian2DFunction func = new SingleFreeCircularErfGaussian2DFunction(blockWidth,
-				blockWidth);
+		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
+				blockWidth, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 		params[0] = random(Background);
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 		{
