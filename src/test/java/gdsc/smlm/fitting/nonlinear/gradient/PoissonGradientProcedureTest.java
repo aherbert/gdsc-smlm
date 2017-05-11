@@ -9,6 +9,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.Gradient1Function;
@@ -39,6 +40,22 @@ public class PoissonGradientProcedureTest
 				PoissonGradientProcedure5.class);
 		Assert.assertEquals(PoissonGradientProcedureFactory.create(new DummyGradientFunction(4)).getClass(),
 				PoissonGradientProcedure4.class);
+		double[] b = null;
+		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(6)).getClass(),
+				PoissonGradientProcedure6.class);
+		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(5)).getClass(),
+				PoissonGradientProcedure5.class);
+		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(4)).getClass(),
+				PoissonGradientProcedure4.class);
+		b = new double[new DummyGradientFunction(4).size()];
+		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(6)).getClass(),
+				PoissonGradientProcedureB6.class);
+		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(5)).getClass(),
+				PoissonGradientProcedureB5.class);
+		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(4)).getClass(),
+				PoissonGradientProcedureB4.class);
+		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(1)).getClass(),
+				PoissonGradientProcedureB.class);
 	}
 
 	@Test
@@ -204,12 +221,20 @@ public class PoissonGradientProcedureTest
 	@Test
 	public void gradientProcedureUnrolledComputesSameAsGradientProcedure()
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(4);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(5);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(6);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, false);
 	}
 
-	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams)
+	@Test
+	public void gradientProcedureUnrolledComputesSameAsGradientProcedureWithPrecomputed()
+	{
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, true);
+	}
+
+	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean precomputed)
 	{
 		int iter = 10;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
@@ -219,18 +244,20 @@ public class PoissonGradientProcedureTest
 		createFakeParams(nparams, iter, paramsList);
 		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
+		double[] b = (precomputed) ? Utils.newArray(func.size(), 0.1, 1.3) : null;
+
 		String name = String.format("[%d]", nparams);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			PoissonGradientProcedure p1 = new PoissonGradientProcedure(func);
+			PoissonGradientProcedure p1 = (precomputed) ? new PoissonGradientProcedureB(b, func)
+					: new PoissonGradientProcedure(func);
 			p1.computeFisherInformation(paramsList.get(i));
 
-			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(func);
+			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(b, func);
 			p2.computeFisherInformation(paramsList.get(i));
 
 			// Exactly the same ...
-			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p1.getLinear(),
-					p2.getLinear(), 0);
+			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, p1.getLinear(), p2.getLinear(), 0);
 
 			double[][] am1 = p1.getMatrix();
 			double[][] am2 = p2.getMatrix();
@@ -242,12 +269,20 @@ public class PoissonGradientProcedureTest
 	@Test
 	public void gradientProcedureIsFasterUnrolledThanGradientProcedure()
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(4);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(5);
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(6);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(4, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(5, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(6, false);
 	}
 
-	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams)
+	@Test
+	public void gradientProcedureIsFasterUnrolledThanGradientProcedureWithPrecomputed()
+	{
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(4, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(5, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(6, true);
+	}
+
+	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
 	{
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
 
@@ -260,14 +295,16 @@ public class PoissonGradientProcedureTest
 
 		// Remove the timing of the function call by creating a dummy function
 		final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
+		final double[] b = (precomputed) ? Utils.newArray(func.size(), 0.1, 1.3) : null;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			PoissonGradientProcedure p1 = new PoissonGradientProcedure(func);
+			PoissonGradientProcedure p1 = (precomputed) ? new PoissonGradientProcedureB(b, func)
+					: new PoissonGradientProcedure(func);
 			p1.computeFisherInformation(paramsList.get(i));
 			p1.computeFisherInformation(paramsList.get(i));
 
-			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(func);
+			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(b, func);
 			p2.computeFisherInformation(paramsList.get(i));
 			p2.computeFisherInformation(paramsList.get(i));
 
@@ -286,7 +323,8 @@ public class PoissonGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					PoissonGradientProcedure p1 = new PoissonGradientProcedure(func);
+					PoissonGradientProcedure p1 = (precomputed) ? new PoissonGradientProcedureB(b, func)
+							: new PoissonGradientProcedure(func);
 					for (int j = loops; j-- > 0;)
 						p1.computeFisherInformation(paramsList.get(k++ % iter));
 				}
@@ -301,7 +339,7 @@ public class PoissonGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(func);
+					PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(b, func);
 					for (int j = loops; j-- > 0;)
 						p2.computeFisherInformation(paramsList.get(k++ % iter));
 				}
@@ -309,10 +347,11 @@ public class PoissonGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("Standard %d : Unrolled %d = %d : %fx\n", time1, nparams, time2, (1.0 * time1) / time2);
+		log("Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n", precomputed, time1, nparams, time2,
+				(1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1);
 	}
-	
+
 	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
 	{
 		int[] x = new int[blockWidth * blockWidth];
