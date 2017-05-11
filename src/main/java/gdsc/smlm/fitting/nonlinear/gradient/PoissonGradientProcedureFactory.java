@@ -42,4 +42,35 @@ public class PoissonGradientProcedureFactory
 				return new PoissonGradientProcedure(func);
 		}
 	}
+	
+	/**
+	 * Create a new gradient procedure.
+	 *
+	 * @param b
+	 *            Baseline pre-computed y-values
+	 * @param func
+	 *            Gradient function
+	 * @return the gradient procedure
+	 */
+	public static PoissonGradientProcedure create(final double[] b, final Gradient1Function func)
+	{
+		// Use baseline version if appropriate
+		if (b != null && b.length == func.size())
+		{
+			switch (func.getNumberOfGradients())
+			{
+				case 5:
+					return new PoissonGradientProcedureB5(b, func);
+				case 4:
+					return new PoissonGradientProcedureB4(b, func);
+				case 6:
+					return new PoissonGradientProcedureB6(b, func);
+
+				default:
+					return new PoissonGradientProcedureB(b, func);
+			}
+		}
+		
+		return create(func);
+	}
 }

@@ -33,12 +33,13 @@ public class LVMGradientProcedureFactory
 	 *            Set to true to create a Maximum Likelihood Estimator for Poisson data (default is Least Squares)
 	 * @return the gradient procedure
 	 */
-	public static LVMGradientProcedure create(final double[] y, final double[] b, final Gradient1Function func, boolean mle)
+	public static LVMGradientProcedure create(final double[] y, final double[] b, final Gradient1Function func,
+			boolean mle)
 	{
 		if (mle)
 		{
 			// Use baseline version if appropriate
-			if (b!=null && b.length==y.length)
+			if (b != null && b.length == y.length)
 			{
 				switch (func.getNumberOfGradients())
 				{
@@ -81,7 +82,7 @@ public class LVMGradientProcedureFactory
 				return new LSQLVMGradientProcedure(y, b, func);
 		}
 	}
-	
+
 	/**
 	 * Create a new gradient calculator.
 	 *

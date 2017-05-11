@@ -25,10 +25,10 @@ import gdsc.smlm.function.Gradient1Function;
  * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
-public class MLELVMGradientProcedureB extends LSQLVMGradientProcedure
+public class MLELVMGradientProcedureB extends MLELVMGradientProcedure
 {
 	protected final double[] b;
-	
+
 	/**
 	 * @param y
 	 *            Data to fit (must be positive)
@@ -39,10 +39,8 @@ public class MLELVMGradientProcedureB extends LSQLVMGradientProcedure
 	 */
 	public MLELVMGradientProcedureB(final double[] y, final double[] b, final Gradient1Function func)
 	{
-		// Do not pass the baseline to the super-class
 		super(y, func);
 		this.b = b;
-		// We could check that y is positive ...
 	}
 
 	/*
@@ -53,43 +51,7 @@ public class MLELVMGradientProcedureB extends LSQLVMGradientProcedure
 	public void execute(double fi, double[] dfi_da)
 	{
 		// Add the baseline to the function value
-		fi += b[++yi];
-		
-		// Function must produce a strictly positive output.
-		// ---
-		// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-		// effectively ignores any function value below zero. This could lead to a 
-		// situation where the best chisq value can be achieved by setting the output
-		// function to produce 0 for all evaluations.
-		// Optimally the function should be bounded to always produce a positive number.
-		// ---
-		if (fi > 0)
-		{
-			final double xi = y[yi];
-
-			// We assume y[i] is positive
-			if (xi == 0)
-			{
-				value += fi;
-				for (int k = 0; k < n; k++)
-				{
-					beta[k] -= dfi_da[k];
-				}
-			}
-			else
-			{
-				value += (fi - xi - xi * Math.log(fi / xi));
-				final double xi_fi2 = xi / fi / fi;
-				final double e = 1 - (xi / fi);
-				for (int k = 0, i = 0; k < n; k++)
-				{
-					beta[k] -= e * dfi_da[k];
-					final double w = dfi_da[k] * xi_fi2;
-					for (int l = 0; l <= k; l++)
-						alpha[i++] += w * dfi_da[l];
-				}
-			}
-		}
+		super.execute(fi + b[yi + 1], dfi_da);
 	}
 
 	/*
@@ -100,36 +62,6 @@ public class MLELVMGradientProcedureB extends LSQLVMGradientProcedure
 	public void execute(double fi)
 	{
 		// Add the baseline to the function value
-		fi += b[++yi];
-		
-		// Function must produce a strictly positive output.
-		if (fi > 0)
-		{
-			final double xi = y[yi];
-
-			// We assume y[i] is positive
-			if (xi == 0)
-			{
-				value += fi;
-			}
-			else
-			{
-				value += (fi - xi - xi * Math.log(fi / xi));
-			}
-		}
-	}
-
-	@Override
-	protected void finishGradient()
-	{
-		// Move the factor of 2 to the end
-		value *= 2;
-	}
-
-	@Override
-	protected void finishValue()
-	{
-		// Move the factor of 2 to the end
-		value *= 2;
+		super.execute(fi + b[yi + 1]);
 	}
 }
