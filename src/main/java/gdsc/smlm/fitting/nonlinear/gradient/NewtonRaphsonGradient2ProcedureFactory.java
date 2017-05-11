@@ -23,6 +23,8 @@ public class NewtonRaphsonGradient2ProcedureFactory
 	/**
 	 * Create a new gradient procedure.
 	 *
+	 * @param x
+	 *            Data to fit (must be positive, i.e. the value of a Poisson process)
 	 * @param func
 	 *            Gradient function
 	 * @return the gradient procedure
@@ -32,8 +34,28 @@ public class NewtonRaphsonGradient2ProcedureFactory
 		return new NewtonRaphsonGradient2Procedure(x, func);
 		// Note:
 		// JUnit speed tests show the unrolled version are slower, i.e. the JVM is able to 
-		// efficiently optimise the single for loops in the procedure
+		// efficiently optimise the single for loops in the procedure. So just return the 
+		// default implementation.
 		//return createUnrolled(x, func);
+	}
+
+	/**
+	 * Create a new gradient procedure.
+	 *
+	 * @param x
+	 *            Data to fit (must be positive, i.e. the value of a Poisson process)
+	 * @param b
+	 *            Baseline pre-computed y-values
+	 * @param func
+	 *            Gradient function
+	 * @return the gradient procedure
+	 */
+	public static NewtonRaphsonGradient2Procedure create(final double[] x, final double[] b,
+			final Gradient2Function func)
+	{
+		if (b != null && b.length == x.length)
+			return new NewtonRaphsonGradient2ProcedureB(x, b, func);
+		return new NewtonRaphsonGradient2Procedure(x, func);
 	}
 
 	/**
