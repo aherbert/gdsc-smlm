@@ -12,7 +12,11 @@ import org.junit.Test;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
+import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 
 public class PoissonGradientProcedureTest
 {
@@ -350,6 +354,50 @@ public class PoissonGradientProcedureTest
 		log("Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n", precomputed, time1, nparams, time2,
 				(1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1);
+	}
+
+	@Test
+	public void crlbIsHigherWithPrecomputed()
+	{
+		int iter = 10;
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
+
+		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
+				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
+
+		double[] a = new double[7];
+		int n = func.getNumberOfGradients();
+
+		// Get a background
+		double[] b = new double[func.size()];
+		for (int i = 0; i < b.length; i++)
+			b[i] = rdg.nextUniform(1, 2);
+
+		for (int i = 0; i < iter; i++)
+		{
+			a[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(0.1, 0.3);
+			a[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
+			a[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(4, 6);
+			a[Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(4, 6);
+			a[Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
+			a[Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
+
+			PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(func);
+			p1.computeFisherInformation(a);
+
+			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(b, func);
+			p2.computeFisherInformation(a);
+
+			FisherInformationMatrix m1 = new FisherInformationMatrix(p1.getLinear(), n);
+			FisherInformationMatrix m2 = new FisherInformationMatrix(p2.getLinear(), n);
+			double[] crlb1 = m1.crlb();
+			double[] crlb2 = m2.crlb();
+			Assert.assertNotNull(crlb1);
+			Assert.assertNotNull(crlb2);
+			//System.out.printf("%s : %s\n", Arrays.toString(crlb1), Arrays.toString(crlb2));
+			for (int j = 0; j < n; j++)
+				Assert.assertTrue(crlb1[j] < crlb2[j]);
+		}
 	}
 
 	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
