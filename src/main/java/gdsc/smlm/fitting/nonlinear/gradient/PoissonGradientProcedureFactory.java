@@ -42,7 +42,7 @@ public class PoissonGradientProcedureFactory
 				return new PoissonGradientProcedure(func);
 		}
 	}
-	
+
 	/**
 	 * Create a new gradient procedure.
 	 *
@@ -70,7 +70,7 @@ public class PoissonGradientProcedureFactory
 					return new PoissonGradientProcedureB(b, func);
 			}
 		}
-		
+
 		return create(func);
 	}
 }

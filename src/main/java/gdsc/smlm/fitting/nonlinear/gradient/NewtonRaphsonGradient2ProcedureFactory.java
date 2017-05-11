@@ -35,7 +35,7 @@ public class NewtonRaphsonGradient2ProcedureFactory
 		// efficiently optimise the single for loops in the procedure
 		//return createUnrolled(x, func);
 	}
-	
+
 	/**
 	 * Create a new gradient procedure that has the loops unrolled.
 	 *

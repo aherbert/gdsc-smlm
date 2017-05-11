@@ -25,5 +25,7 @@ abstract class BaseLSQLVMGradientProcedureFactory
 	{
 		return createProcedure(y, null, func);
 	}
-	abstract BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b, final Gradient1Function func);
+
+	abstract BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b,
+			final Gradient1Function func);
 }

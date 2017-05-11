@@ -36,7 +36,7 @@ public abstract class BaseLSQLVMGradientProcedure extends LVMGradientProcedure
 	{
 		super(y, func);
 	}
-	
+
 	/**
 	 * @param y
 	 *            Data to fit
