@@ -131,6 +131,16 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 	 */
 	public void initialise(double[] a)
 	{
+		// The base Gaussian2DFunction does all the work in NonLinearFunction#initialise(double[]).
+		// The ERF Gaussian2DFunction does all the work in Gradient1Function.initialise1(double[])  
 		initialise1(a);
 	}
+	
+	// Force new implementation from the base Gaussian2DFunction
+	@Override
+	public abstract void initialise0(double[] a);	
+	
+	// Force new implementation from the base Gaussian2DFunction
+	@Override
+	public abstract void initialise1(double[] a);	
 }
