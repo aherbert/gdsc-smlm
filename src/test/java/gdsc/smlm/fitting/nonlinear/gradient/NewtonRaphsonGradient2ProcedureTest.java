@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -11,6 +12,9 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.ValueProcedure;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.HoltzerAstimatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
@@ -98,6 +102,89 @@ public class NewtonRaphsonGradient2ProcedureTest
 			double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
 			// Virtually the same ...
 			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, 1e-10);
+		}
+	}
+
+	@Test
+	public void gradientProcedureComputesSameWithPrecomputed()
+	{
+		int iter = 10;
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
+
+		ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
+				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
+		ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(2, 10, 10,
+				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
+
+		double[] a1 = new double[7];
+		double[] a2 = new double[13];
+
+		final double[] x = new double[f1.size()];
+		final double[] b = new double[f1.size()];
+
+		for (int i = 0; i < iter; i++)
+		{
+			a2[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(0.1, 0.3);
+			a2[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
+			a2[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(3, 5);
+			a2[Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(3, 5);
+			a2[Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
+			a2[Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
+			a2[6 + Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
+			a2[6 + Gaussian2DFunction.X_POSITION] = rdg.nextUniform(5, 7);
+			a2[6 + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(5, 7);
+			a2[6 + Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
+			a2[6 + Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
+
+			// Simulate Poisson data
+			f2.initialise0(a2);
+			f1.forEach(new ValueProcedure()
+			{
+				int k = 0;
+
+				public void execute(double value)
+				{
+					x[k++] = (value > 0) ? rdg.nextPoisson(value) : 0;
+				}
+			});
+
+			// Precompute peak 2 (no background)
+			a1[Gaussian2DFunction.BACKGROUND] = 0;
+			for (int j = 1; j < 7; j++)
+				a1[j] = a2[6 + j];
+			f1.initialise0(a1);
+			f1.forEach(new ValueProcedure()
+			{
+				int k = 0;
+
+				public void execute(double value)
+				{
+					b[k++] = value;
+				}
+			});
+
+			// Reset to peak 1
+			for (int j = 0; j < 7; j++)
+				a1[j] = a2[j];
+			
+			// Compute peak 1+2
+			NewtonRaphsonGradient2Procedure p12 = NewtonRaphsonGradient2ProcedureFactory.create(x, f2);
+			double[] up1 = Arrays.copyOf(p12.computeUpdate(a2), f1.getNumberOfGradients());
+			
+			// Compute peak 1+(precomputed 2)
+			NewtonRaphsonGradient2Procedure p1b2 = NewtonRaphsonGradient2ProcedureFactory.create(x, b, f1);
+			double[] up2 = p1b2.computeUpdate(a1);
+
+			Assert.assertArrayEquals(" Result: Not same @ " + i, p12.u, p1b2.u, 1e-10);
+			Assert.assertArrayEquals(" Update: Not same @ " + i, up1, up2, 1e-10);
+
+			double[] v1 = p12.computeValue(a2);
+			double[] v2 = p1b2.computeValue(a1);
+			Assert.assertArrayEquals(" Value: Not same @ " + i, v1, v2, 1e-10);
+			
+			double[] d1 = Arrays.copyOf(p12.computeFirstDerivative(a2), f1.getNumberOfGradients());
+			double[] d2 = p1b2.computeFirstDerivative(a1);
+			Assert.assertArrayEquals(" 1st derivative: Not same @ " + i, d1, d2, 1e-10);
 		}
 	}
 
