@@ -71,26 +71,21 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	 */
 	public LVMGradientProcedure(final double[] y, final double[] b, final Gradient1Function func)
 	{
-		this.y = y;
+		// Process the baseline. This could be part of the function that has been pre-evaluated
+		if (b != null && b.length == y.length)
+		{
+			// For sum-of-squares we can just remove the baseline from the y-values
+			this.y = new double[y.length];
+			for (int i = 0, n = b.length; i < n; i++)
+				this.y[i] = y[i] - b[i];
+		}
+		else
+		{
+			this.y = y;
+		}
 		this.func = func;
 		this.n = func.getNumberOfGradients();
 		beta = new double[n];
-		// Delegate this so sub-classes can override
-		if (b != null && b.length == y.length)
-			processBaseline(b);
-	}
-
-	/**
-	 * Process the baseline. This could be part of the function that has been pre-evaluated
-	 *
-	 * @param b
-	 *            Baseline pre-computed y-values (will always match y.length)
-	 */
-	protected void processBaseline(double[] b)
-	{
-		// For sum-of-squares we can just remove the baseline from the y-values
-		for (int i = 0, n = b.length; i < n; i++)
-			y[i] -= b[i];
 	}
 
 	/**

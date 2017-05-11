@@ -48,8 +48,7 @@ public class MLELVMGradientProcedureB4 extends MLELVMGradientProcedureB
 	public void execute(double fi, double[] dfi_da)
 	{
 		// Add the baseline to the function value
-		fi += b[++yi];
-		
+		fi += b[++yi];		
 		if (fi > 0)
 		{
 			final double xi = y[yi];

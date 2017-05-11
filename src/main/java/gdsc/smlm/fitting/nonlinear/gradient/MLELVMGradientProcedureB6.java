@@ -109,7 +109,6 @@ public class MLELVMGradientProcedureB6 extends MLELVMGradientProcedureB
 				alpha[20] += w * dfi_da[5];
 			}
 		}
-		yi++;
 	}
 
 	@Override

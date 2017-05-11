@@ -36,7 +36,7 @@ class FakeGradientFunction implements Gradient2Function, Gradient1Function, NonL
 
 	public int size()
 	{
-		return 0;
+		return n;
 	}
 
 	public void initialise(double[] a)
@@ -62,7 +62,7 @@ class FakeGradientFunction implements Gradient2Function, Gradient1Function, NonL
 	{
 		initialise(a);
 	}
-	
+
 	private int hashCode(double d)
 	{
 		long bits = Double.doubleToLongBits(d);
@@ -81,8 +81,10 @@ class FakeGradientFunction implements Gradient2Function, Gradient1Function, NonL
 
 	public void forEach(ValueProcedure procedure)
 	{
-		for (int i = 0; i < n; i++)
-			procedure.execute(r.nextDouble());
+		// Simulate a 2D forEach
+		for (int y = 0; y < maxx; y++)
+			for (int x = 0; x < maxx; x++)
+				procedure.execute(r.nextDouble());
 	}
 
 	public void forEach(Gradient1Procedure procedure)
@@ -99,11 +101,11 @@ class FakeGradientFunction implements Gradient2Function, Gradient1Function, NonL
 			}
 		}
 	}
-	
+
 	public void forEach(Gradient2Procedure procedure)
 	{
 		final double[] d2y_da2 = new double[nparams];
-		
+
 		// Simulate a 2D forEach
 		for (int y = 0; y < maxx; y++)
 		{
