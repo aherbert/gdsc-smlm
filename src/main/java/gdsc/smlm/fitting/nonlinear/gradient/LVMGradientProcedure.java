@@ -62,6 +62,38 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	}
 
 	/**
+	 * @param y
+	 *            Data to fit
+	 * @param b
+	 *            Baseline pre-computed y-values
+	 * @param func
+	 *            Gradient function
+	 */
+	public LVMGradientProcedure(final double[] y, final double[] b, final Gradient1Function func)
+	{
+		this.y = y;
+		this.func = func;
+		this.n = func.getNumberOfGradients();
+		beta = new double[n];
+		// Delegate this so sub-classes can override
+		if (b != null && b.length == y.length)
+			processBaseline(b);
+	}
+
+	/**
+	 * Process the baseline. This could be part of the function that has been pre-evaluated
+	 *
+	 * @param b
+	 *            Baseline pre-computed y-values (will always match y.length)
+	 */
+	protected void processBaseline(double[] b)
+	{
+		// For sum-of-squares we can just remove the baseline from the y-values
+		for (int i = 0, n = b.length; i < n; i++)
+			y[i] -= b[i];
+	}
+
+	/**
 	 * Evaluate the function and compute the sum-of-squares and the curvature matrix.
 	 * <p>
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
@@ -72,7 +104,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	public void gradient(final double[] a)
 	{
 		value = 0;
-		yi = 0;
+		yi = -1;
 		initialiseGradient();
 		func.initialise1(a);
 		func.forEach((Gradient1Procedure) this);
@@ -105,7 +137,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	public void value(final double[] a)
 	{
 		value = 0;
-		yi = 0;
+		yi = -1;
 		initialiseValue();
 		func.initialise0(a);
 		func.forEach((ValueProcedure) this);

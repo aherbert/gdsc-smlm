@@ -29,12 +29,14 @@ public class LSQLVMGradientProcedureMatrix4 extends LSQLVMGradientProcedureMatri
 	/**
 	 * @param y
 	 *            Data to fit
+	 * @param b
+	 *            Baseline pre-computed y-values
 	 * @param func
 	 *            Gradient function
 	 */
-	public LSQLVMGradientProcedureMatrix4(final double[] y, final Gradient1Function func)
+	public LSQLVMGradientProcedureMatrix4(final double[] y, final double[] b, final Gradient1Function func)
 	{
-		super(y, func);
+		super(y, b, func);
 		if (n != 4)
 			throw new IllegalArgumentException("Function must compute 4 gradients");
 	}
@@ -46,7 +48,7 @@ public class LSQLVMGradientProcedureMatrix4 extends LSQLVMGradientProcedureMatri
 	 */
 	public void execute(double value, double[] dy_da)
 	{
-		final double dy = y[yi++] - value;
+		final double dy = y[++yi] - value;
 
 		alpha[0][0] += dy_da[0] * dy_da[0];
 		alpha[1][0] += dy_da[1] * dy_da[0];

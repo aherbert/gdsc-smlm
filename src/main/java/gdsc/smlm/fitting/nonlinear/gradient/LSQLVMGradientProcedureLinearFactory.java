@@ -25,29 +25,31 @@ public class LSQLVMGradientProcedureLinearFactory extends BaseLSQLVMGradientProc
 	 * 
 	 * @param y
 	 *            Data to fit
+	 * @param b
+	 *            Baseline pre-computed y-values
 	 * @param func
 	 *            Gradient function
 	 * @return the gradient procedure
 	 */
-	public static LSQLVMGradientProcedureLinear create(final double[] y, final Gradient1Function func)
+	public static LSQLVMGradientProcedureLinear create(final double[] y, final double[] b, final Gradient1Function func)
 	{
 		switch (func.getNumberOfGradients())
 		{
 			case 5:
-				return new LSQLVMGradientProcedureLinear5(y, func);
+				return new LSQLVMGradientProcedureLinear5(y, b, func);
 			case 4:
-				return new LSQLVMGradientProcedureLinear4(y, func);
+				return new LSQLVMGradientProcedureLinear4(y, b, func);
 			case 6:
-				return new LSQLVMGradientProcedureLinear6(y, func);
+				return new LSQLVMGradientProcedureLinear6(y, b, func);
 
 			default:
-				return new LSQLVMGradientProcedureLinear(y, func);
+				return new LSQLVMGradientProcedureLinear(y, b, func);
 		}
 	}
 
 	// Instance method for testing
-	BaseLSQLVMGradientProcedure createProcedure(final double[] y, final Gradient1Function func)
+	BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b, final Gradient1Function func)
 	{
-		return create(y, func);
+		return create(y, b, func);
 	}
 }

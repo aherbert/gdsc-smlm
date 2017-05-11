@@ -47,9 +47,10 @@ public class MLELVMGradientProcedure5 extends MLELVMGradientProcedure
 	 */
 	public void execute(double fi, double[] dfi_da)
 	{
+		++yi;
 		if (fi > 0)
 		{
-			final double xi = y[yi++];
+			final double xi = y[yi];
 
 			// We assume y[i] is positive
 			if (xi == 0)

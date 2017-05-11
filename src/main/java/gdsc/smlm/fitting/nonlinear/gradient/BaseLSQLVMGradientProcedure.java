@@ -36,6 +36,19 @@ public abstract class BaseLSQLVMGradientProcedure extends LVMGradientProcedure
 	{
 		super(y, func);
 	}
+	
+	/**
+	 * @param y
+	 *            Data to fit
+	 * @param b
+	 *            Baseline pre-computed y-values
+	 * @param func
+	 *            Gradient function
+	 */
+	public BaseLSQLVMGradientProcedure(final double[] y, final double[] b, final Gradient1Function func)
+	{
+		super(y, b, func);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -45,7 +58,7 @@ public abstract class BaseLSQLVMGradientProcedure extends LVMGradientProcedure
 	public void execute(double value)
 	{
 		// Produce a sum-of-squares
-		final double dy = y[yi++] - value;
+		final double dy = y[++yi] - value;
 		this.value += dy * dy;
 	}
 

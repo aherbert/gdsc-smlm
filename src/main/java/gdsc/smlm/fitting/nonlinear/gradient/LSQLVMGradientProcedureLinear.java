@@ -34,12 +34,14 @@ public class LSQLVMGradientProcedureLinear extends BaseLSQLVMGradientProcedure
 	/**
 	 * @param y
 	 *            Data to fit
+	 * @param b
+	 *            Baseline pre-computed y-values
 	 * @param func
 	 *            Gradient function
 	 */
-	public LSQLVMGradientProcedureLinear(final double[] y, final Gradient1Function func)
+	public LSQLVMGradientProcedureLinear(final double[] y, final double[] b, final Gradient1Function func)
 	{
-		super(y, func);
+		super(y, b, func);
 		alpha = new double[n * n];
 	}
 
@@ -50,7 +52,7 @@ public class LSQLVMGradientProcedureLinear extends BaseLSQLVMGradientProcedure
 	 */
 	public void execute(double value, double[] dy_da)
 	{
-		final double dy = y[yi++] - value;
+		final double dy = y[++yi] - value;
 
 		// Compute:
 		// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function; 

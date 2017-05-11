@@ -25,18 +25,21 @@ import gdsc.smlm.function.Gradient1Function;
  * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
-public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
+public class MLELVMGradientProcedureB5 extends MLELVMGradientProcedureB
 {
 	/**
 	 * @param y
 	 *            Data to fit (must be positive)
+	 * @param b
+	 *            Baseline pre-computed y-values
 	 * @param func
 	 *            Gradient function
 	 */
-	public MLELVMGradientProcedure(final double[] y, final Gradient1Function func)
+	public MLELVMGradientProcedureB5(final double[] y, final double[] b, final Gradient1Function func)
 	{
-		super(y, func);
-		// We could check that y is positive ...
+		super(y, b, func);
+		if (n != 5)
+			throw new IllegalArgumentException("Function must compute 5 gradients");
 	}
 
 	/*
@@ -46,15 +49,8 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 	 */
 	public void execute(double fi, double[] dfi_da)
 	{
-		++yi;
-		// Function must produce a strictly positive output.
-		// ---
-		// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-		// effectively ignores any function value below zero. This could lead to a 
-		// situation where the best chisq value can be achieved by setting the output
-		// function to produce 0 for all evaluations.
-		// Optimally the function should be bounded to always produce a positive number.
-		// ---
+		// Add the baseline to the function value
+		fi += b[++yi];		
 		if (fi > 0)
 		{
 			final double xi = y[yi];
@@ -63,63 +59,69 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 			if (xi == 0)
 			{
 				value += fi;
-				for (int k = 0; k < n; k++)
-				{
-					beta[k] -= dfi_da[k];
-				}
+				beta[0] -= dfi_da[0];
+				beta[1] -= dfi_da[1];
+				beta[2] -= dfi_da[2];
+				beta[3] -= dfi_da[3];
+				beta[4] -= dfi_da[4];
 			}
 			else
 			{
 				value += (fi - xi - xi * Math.log(fi / xi));
+
 				final double xi_fi2 = xi / fi / fi;
 				final double e = 1 - (xi / fi);
-				for (int k = 0, i = 0; k < n; k++)
-				{
-					beta[k] -= e * dfi_da[k];
-					final double w = dfi_da[k] * xi_fi2;
-					for (int l = 0; l <= k; l++)
-						alpha[i++] += w * dfi_da[l];
-				}
-			}
-		}
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
-	 */
-	public void execute(double fi)
-	{
-		++yi;
-		// Function must produce a strictly positive output.
-		if (fi > 0)
-		{
-			final double xi = y[yi];
+				beta[0] -= e * dfi_da[0];
+				beta[1] -= e * dfi_da[1];
+				beta[2] -= e * dfi_da[2];
+				beta[3] -= e * dfi_da[3];
+				beta[4] -= e * dfi_da[4];
 
-			// We assume y[i] is positive
-			if (xi == 0)
-			{
-				value += fi;
-			}
-			else
-			{
-				value += (fi - xi - xi * Math.log(fi / xi));
+				alpha[0] += dfi_da[0] * xi_fi2 * dfi_da[0];
+				double w;
+				w = dfi_da[1] * xi_fi2;
+				alpha[1] += w * dfi_da[0];
+				alpha[2] += w * dfi_da[1];
+				w = dfi_da[2] * xi_fi2;
+				alpha[3] += w * dfi_da[0];
+				alpha[4] += w * dfi_da[1];
+				alpha[5] += w * dfi_da[2];
+				w = dfi_da[3] * xi_fi2;
+				alpha[6] += w * dfi_da[0];
+				alpha[7] += w * dfi_da[1];
+				alpha[8] += w * dfi_da[2];
+				alpha[9] += w * dfi_da[3];
+				w = dfi_da[4] * xi_fi2;
+				alpha[10] += w * dfi_da[0];
+				alpha[11] += w * dfi_da[1];
+				alpha[12] += w * dfi_da[2];
+				alpha[13] += w * dfi_da[3];
+				alpha[14] += w * dfi_da[4];
 			}
 		}
 	}
 
 	@Override
-	protected void finishGradient()
+	protected void initialiseGradient()
 	{
-		// Move the factor of 2 to the end
-		value *= 2;
+		GradientProcedureHelper.initialiseWorkingMatrix5(alpha);
+		beta[0] = 0;
+		beta[1] = 0;
+		beta[2] = 0;
+		beta[3] = 0;
+		beta[4] = 0;
 	}
 
 	@Override
-	protected void finishValue()
+	public void getAlphaMatrix(double[][] alpha)
 	{
-		// Move the factor of 2 to the end
-		value *= 2;
+		GradientProcedureHelper.getMatrix5(this.alpha, alpha);
+	}
+
+	@Override
+	public void getAlphaLinear(double[] alpha)
+	{
+		GradientProcedureHelper.getMatrix5(this.alpha, alpha);
 	}
 }

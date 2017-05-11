@@ -25,17 +25,19 @@ import gdsc.smlm.function.Gradient1Function;
  * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
-public class MLELVMGradientProcedure6 extends MLELVMGradientProcedure
+public class MLELVMGradientProcedureB6 extends MLELVMGradientProcedureB
 {
 	/**
 	 * @param y
 	 *            Data to fit (must be positive)
+	 * @param b
+	 *            Baseline pre-computed y-values
 	 * @param func
 	 *            Gradient function
 	 */
-	public MLELVMGradientProcedure6(final double[] y, final Gradient1Function func)
+	public MLELVMGradientProcedureB6(final double[] y, final double[] b, final Gradient1Function func)
 	{
-		super(y, func);
+		super(y, b, func);
 		if (n != 6)
 			throw new IllegalArgumentException("Function must compute 6 gradients");
 	}
@@ -47,7 +49,8 @@ public class MLELVMGradientProcedure6 extends MLELVMGradientProcedure
 	 */
 	public void execute(double fi, double[] dfi_da)
 	{
-		++yi;
+		// Add the baseline to the function value
+		fi += b[++yi];		
 		if (fi > 0)
 		{
 			final double xi = y[yi];
@@ -106,6 +109,7 @@ public class MLELVMGradientProcedure6 extends MLELVMGradientProcedure
 				alpha[20] += w * dfi_da[5];
 			}
 		}
+		yi++;
 	}
 
 	@Override

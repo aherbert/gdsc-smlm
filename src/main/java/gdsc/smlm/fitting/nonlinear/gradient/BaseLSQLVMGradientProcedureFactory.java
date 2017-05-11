@@ -20,6 +20,10 @@ import gdsc.smlm.function.Gradient1Function;
  */
 abstract class BaseLSQLVMGradientProcedureFactory
 {
-	// Instance method for testing
-	abstract BaseLSQLVMGradientProcedure createProcedure(final double[] y, final Gradient1Function func);
+	// Instance methods for testing
+	BaseLSQLVMGradientProcedure createProcedure(final double[] y, final Gradient1Function func)
+	{
+		return createProcedure(y, null, func);
+	}
+	abstract BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b, final Gradient1Function func);
 }

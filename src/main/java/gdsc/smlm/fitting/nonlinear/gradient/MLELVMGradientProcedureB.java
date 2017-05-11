@@ -25,17 +25,23 @@ import gdsc.smlm.function.Gradient1Function;
  * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
-public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
+public class MLELVMGradientProcedureB extends LSQLVMGradientProcedure
 {
+	protected final double[] b;
+	
 	/**
 	 * @param y
 	 *            Data to fit (must be positive)
+	 * @param b
+	 *            Baseline pre-computed y-values
 	 * @param func
 	 *            Gradient function
 	 */
-	public MLELVMGradientProcedure(final double[] y, final Gradient1Function func)
+	public MLELVMGradientProcedureB(final double[] y, final double[] b, final Gradient1Function func)
 	{
+		// Do not pass the baseline to the super-class
 		super(y, func);
+		this.b = b;
 		// We could check that y is positive ...
 	}
 
@@ -46,7 +52,9 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 	 */
 	public void execute(double fi, double[] dfi_da)
 	{
-		++yi;
+		// Add the baseline to the function value
+		fi += b[++yi];
+		
 		// Function must produce a strictly positive output.
 		// ---
 		// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
@@ -91,7 +99,9 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 	 */
 	public void execute(double fi)
 	{
-		++yi;
+		// Add the baseline to the function value
+		fi += b[++yi];
+		
 		// Function must produce a strictly positive output.
 		if (fi > 0)
 		{
