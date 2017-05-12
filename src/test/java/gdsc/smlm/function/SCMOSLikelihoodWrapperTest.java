@@ -622,6 +622,11 @@ public class SCMOSLikelihoodWrapperTest
 			{
 				return 0;
 			}
+
+			public int getNumberOfGradients()
+			{
+				return 0;
+			}
 		};
 		SCMOSLikelihoodWrapper f = new SCMOSLikelihoodWrapper(nlf, a, k, n, var, g, o);
 
@@ -727,6 +732,11 @@ public class SCMOSLikelihoodWrapperTest
 		{
 			return 0;
 		}
+
+		public int getNumberOfGradients()
+		{
+			return 1;
+		}
 	}
 
 	@Test
@@ -803,9 +813,9 @@ public class SCMOSLikelihoodWrapperTest
 				product = product.multiply(new BigDecimal(ratio));
 			}
 			double llr2 = -2 * Math.log(product.doubleValue());
-			double p = 1 - f.computePValue(ll);
+			double q = f.computeQValue(ll);
 			System.out.printf("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
-					product.round(new MathContext(4)).toString(), p);
+					product.round(new MathContext(4)).toString(), q);
 			if (min > ll)
 			{
 				min = ll;

@@ -458,7 +458,9 @@ public class GradientCalculatorSpeedTest
 			}
 			public double eval(int x, double[] dyda, double[] w) { return 0; }
 			public double evalw(int x, double[] w) { return 0; }
-			public boolean canComputeWeights() { return false; }};
+			public boolean canComputeWeights() { return false; }
+			public int getNumberOfGradients() {	return 0; }
+		};
 		//@formatter:on
 
 		int[] xx = Utils.newArray(100, 0, 1);

@@ -14,53 +14,45 @@ package gdsc.smlm.fitting;
  *---------------------------------------------------------------------------*/
 
 /**
- * Defines methods to fit a function with coefficients (a) for a
- * set of data points (x, y).
+ * Defines methods to fit a function with coefficients (a).
  */
 public interface FunctionSolver
 {
 	/**
-	 * Fit a function with coefficients (a) for a set of data points (x, y).
+	 * Gets the type.
+	 *
+	 * @return the type
+	 */
+	public FunctionSolverType getType();
+
+	/**
+	 * Fit a function with coefficients (a) for a set of data points (y).
 	 * <p>
 	 * It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from zero.
-	 * 
-	 * @param n
-	 *            The number of points to fit, n <= y.length (allows input data y to be used as a buffer)
+	 *
 	 * @param y
-	 *            Set of n data points to fit (input)
-	 * @param y_fit
-	 *            Fitted data points (output)
+	 *            Set of data points to fit (input)
+	 * @param f
+	 *            The evaluated function data points (output)
 	 * @param a
 	 *            Set of m coefficients (input/output)
 	 * @param a_dev
 	 *            Standard deviation of the set of m coefficients (output)
-	 * @param error
-	 *            Output parameter. The Mean-Squared Error (MSE) for the fit if noise is 0. If noise is provided then
-	 *            this will be applied to create a reduced chi-square measure.
-	 * @param noise
-	 *            Estimate of the noise in the individual measurements
 	 * @return The fit status
 	 */
-	public FitStatus fit(final int n, final double[] y, final double[] y_fit, final double[] a, final double[] a_dev,
-			final double[] error, final double noise);
+	public FitStatus fit(final double[] y, final double[] f, final double[] a, final double[] a_dev);
 
 	/**
-	 * @return the total Sum Of Squares of the input data points
-	 */
-	public double getTotalSumOfSquares();
-
-	/**
-	 * @return the residual Sum Of Squares
-	 */
-	public double getResidualSumOfSquares();
-
-	/**
-	 * @return the number Of Fitted Parameters
+	 * Gets the number of fitted parameters.
+	 *
+	 * @return the number of fitted parameters
 	 */
 	public int getNumberOfFittedParameters();
 
 	/**
-	 * @return the number Of Fitted Points
+	 * Gets the number of fitted points.
+	 *
+	 * @return the number of fitted points
 	 */
 	public int getNumberOfFittedPoints();
 
@@ -77,7 +69,7 @@ public interface FunctionSolver
 	/**
 	 * Specifies if the function solver supports a bounded search (i.e. a search of parameter space within the total
 	 * allowed space of valid parameters, or the parameter constraints). If true then the bounds can be set before a
-	 * call to the {@link #fit(int, double[], double[], double[], double[], double[], double)} method.
+	 * call to the fit(...) method.
 	 * 
 	 * @return True if the function solver supports a bounded search
 	 */
@@ -85,7 +77,7 @@ public interface FunctionSolver
 
 	/**
 	 * Specifies if the function solver supports constraints on the parameters. If true then the constraints can be set
-	 * before a call to the {@link #fit(int, double[], double[], double[], double[], double[], double)} method.
+	 * before a call to the fit(...) method.
 	 * <p>
 	 * Note that constraints are to be used to specify the values that are absolutely not allowed. They are not meant to
 	 * be as restrictive as the bounds for a solver that supports a bounded search. For example the constraints on a
@@ -117,7 +109,7 @@ public interface FunctionSolver
 	public void setConstraints(double[] lower, double[] upper);
 
 	/**
-	 * The function value for the solution.
+	 * The optimised function value for the solution.
 	 *
 	 * @return the value
 	 */
@@ -128,17 +120,15 @@ public interface FunctionSolver
 	 * <p>
 	 * It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from zero.
 	 * 
-	 * @param n
-	 *            The number of points, n <= y.length (allows input data y to be used as a buffer)
 	 * @param y
-	 *            Set of n data points (input)
-	 * @param y_fit
-	 *            The evaluated data points (output)
+	 *            Set of data points (input)
+	 * @param f
+	 *            The evaluated function data points (output)
 	 * @param a
 	 *            Set of m coefficients (input)
 	 * @return True if evaluation was performed
 	 */
-	public boolean evaluate(final int n, final double[] y, final double[] y_fit, final double[] a);
+	public boolean evaluate(final double[] y, final double[] f, final double[] a);
 
 	/**
 	 * Gets the name of the parameter i.

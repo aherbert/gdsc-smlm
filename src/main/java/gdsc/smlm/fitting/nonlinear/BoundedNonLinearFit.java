@@ -296,12 +296,10 @@ public class BoundedNonLinearFit extends NonLinearFit
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#computeFit(int, double[], double[], double[], double[], double[],
-	 * double)
+	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#computeFit(double[], double[], double[], double[])
 	 */
 	@Override
-	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
-			double noise)
+	public FitStatus computeFit(double[] y, double[] y_fit, double[] a, double[] a_dev)
 	{
 		// Initialise for clamping
 		if (isClamped)
@@ -319,7 +317,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 				clamp = clampInitial;
 			}
 		}
-		return super.computeFit(n, y, y_fit, a, a_dev, error, noise);
+		return super.computeFit(y, y_fit, a, a_dev);
 	}
 
 	/*

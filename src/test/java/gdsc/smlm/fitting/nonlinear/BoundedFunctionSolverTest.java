@@ -259,7 +259,8 @@ public class BoundedFunctionSolverTest
 
 	private NonLinearFit getLVM(int bounded, int clamping, boolean mle)
 	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_CIRCLE, null);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_CIRCLE,
+				null);
 		StoppingCriteria sc = new ErrorStoppingCriteria(5);
 		sc.setMaximumIterations(100);
 		NonLinearFit solver = (bounded != 0 || clamping != 0) ? new BoundedNonLinearFit(f, sc)
@@ -542,9 +543,8 @@ public class BoundedFunctionSolverTest
 
 	private double[] fitGaussian(FunctionSolver solver, double[] data, double[] params, double[] expected)
 	{
-		double[] error = new double[1];
 		params = params.clone();
-		FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
+		FitStatus status = solver.fit(data, null, params, null);
 		if (status != FitStatus.OK)
 			Assert.assertTrue(String.format("Fit Failed: %s i=%d: %s != %s", status.toString(), solver.getIterations(),
 					Arrays.toString(params), Arrays.toString(expected)), false);
@@ -565,7 +565,8 @@ public class BoundedFunctionSolverTest
 	{
 		double[] data = new double[size * size];
 		int n = params.length / 6;
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, GaussianFunctionFactory.FIT_CIRCLE, null);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, GaussianFunctionFactory.FIT_CIRCLE,
+				null);
 		f.initialise(params);
 		final double bias = (withBias) ? BoundedFunctionSolverTest.bias : 0;
 		for (int i = 0; i < data.length; i++)

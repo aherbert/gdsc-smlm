@@ -3,7 +3,7 @@ package gdsc.smlm.function;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2017 Alex Herbert
+ * Copyright (C) 2013 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -14,24 +14,31 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Defines function that can produce first order gradients
+ * Defines a function that can compute gradients
  */
-public interface Gradient1Function extends ValueFunction, GradientFunction
+public interface GradientFunction
 {
 	/**
 	 * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
-	 * initialisation for computing the first order gradients.
+	 * initialisation.
 	 * 
 	 * @param a
 	 *            An array of coefficients
 	 */
-	void initialise1(final double[] a);
+	void initialise(final double[] a);
 
 	/**
-	 * Applies the procedure for the valid range of the function.
-	 *
-	 * @param procedure
-	 *            the procedure
+	 * The function will evaluate the gradient for up to n parameters where n <= a.length. This method
+	 * returns the indices that are evaluated.
+	 * 
+	 * @return The gradient indices
 	 */
-	public void forEach(Gradient1Procedure procedure);
+	int[] gradientIndices();
+	
+	/**
+	 * Gets the number of gradients. The function will evaluate this many partial derivatives.
+	 *
+	 * @return the number of gradients
+	 */
+	int getNumberOfGradients();
 }

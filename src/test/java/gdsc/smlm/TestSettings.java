@@ -19,7 +19,7 @@ public class TestSettings
 	// TODO - Add a logging framework for the tests. 
 
 	// Low log levels are prioritised
-	
+
 	public enum LogLevel
 	{
 		SILENT
@@ -59,9 +59,12 @@ public class TestSettings
 	}
 
 	/** The verbosity for logging. */
-	private static LogLevel logLevel = LogLevel.INFO;
-
+	private static LogLevel logLevel;
 	private static int verbosity;
+	static
+	{
+		setLogLevel(LogLevel.INFO);
+	}
 
 	public static void setLogLevel(LogLevel logLevel)
 	{

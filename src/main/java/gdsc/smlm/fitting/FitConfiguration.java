@@ -117,7 +117,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private StoppingCriteria stoppingCriteria = null;
 	private Gaussian2DFunction gaussianFunction = null;
 	private NoiseModel noiseModel = null;
-	private FunctionSolver functionSolver = null;
+	private BaseFunctionSolver functionSolver = null;
 
 	private DynamicPeakResult dynamicPeakResult = new DynamicPeakResult();
 
@@ -2059,7 +2059,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		else
 		{
 			// Update with the solver with the latest function.
-			((BaseFunctionSolver) functionSolver).setNonLinearFunction(gaussianFunction);
+			functionSolver.setGradientFunction(gaussianFunction);
 
 			// Note: We must carefully update anything that depends on the function.
 			if (useClamping && functionSolver instanceof BoundedNonLinearFit)
@@ -2085,7 +2085,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		functionSolver = null;
 	}
 
-	private FunctionSolver createFunctionSolver()
+	private BaseFunctionSolver createFunctionSolver()
 	{
 		if (gaussianFunction == null)
 		{

@@ -35,9 +35,13 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitResult;
-import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.fitting.FunctionSolver;
+import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.Gaussian2DFitter;
+import gdsc.smlm.fitting.LSEFunctionSolver;
+import gdsc.smlm.fitting.MLEFunctionSolver;
+import gdsc.smlm.fitting.WLSEFunctionSolver;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -948,7 +952,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		MultiPathFitResult.FitResult resultSingle = null;
 		double[] singleRegion = null;
 		double[] singleResiduals = null;
-		double singleSumOfSquares = 0;
 		double singleValue = 0;
 		MultiPathFitResult.FitResult resultDoublet = null;
 		boolean computedDoublet = false;
@@ -1656,8 +1659,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		 */
 		private void updateError(FitResult result)
 		{
-			final double r2 = 1 - (gf.getFinalResidualSumOfSquares() / gf.getTotalSumOfSquares());
-			result.setError(r2);
+			// The error is now set by the function solver. Not all function solvers can compute 
+			// the sum-of-squares so we can no longer update the error to be the independent
+			// of the solver.
+
+			//final double r2 = 1 - (gf.getFinalResidualSumOfSquares() / gf.getTotalSumOfSquares());
+			//result.setError(r2);
 		}
 
 		public double getMultiQAScore()
@@ -1814,8 +1821,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				gf.setComputeResiduals(true);
 			}
 
-			double singleSumOfSquares = gf.getFinalResidualSumOfSquares();
-			double singleValue = gf.getValue();
+			double singleValue = getFitValue();
 
 			//          // Debugging:
 			//			// The evaluate computes the residuals. These should be similar to the original residuals
@@ -1832,7 +1838,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			//				}
 
 			resultMultiDoublet = fitAsDoublet(fitResult, region, regionBounds, residualsThreshold, neighbours,
-					peakNeighbours2, multiQA, singleSumOfSquares, singleValue);
+					peakNeighbours2, multiQA, singleValue);
 
 			//			if (resultMultiDoublet != null && resultMultiDoublet.status == FitStatus.BAD_PARAMETERS.ordinal())
 			//			{
@@ -2076,8 +2082,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			final FitResult fitResult = gf.fit(region, width, height, 1, params, amplitudeEstimate,
 					params[Gaussian2DFunction.BACKGROUND] == 0);
-			singleSumOfSquares = gf.getFinalResidualSumOfSquares();
-			singleValue = gf.getValue();
+			singleValue = getFitValue();
 			updateError(fitResult);
 
 			// Ensure the initial parameters are at the candidate position since we may have used an estimate.
@@ -2248,6 +2253,28 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return resultSingle;
 		}
 
+		private double getFitValue()
+		{
+			FunctionSolver solver = gf.getFunctionSolver();
+			if (solver.getType() == FunctionSolverType.MLE)
+				return ((MLEFunctionSolver) solver).getLogLikelihood();
+			else if (solver.getType() == FunctionSolverType.WLSE)
+				return ((WLSEFunctionSolver) solver).getChiSquared();
+			else
+				return ((LSEFunctionSolver) solver).getAdjustedCoefficientOfDetermination();
+		}
+
+		private String getFitValueName()
+		{
+			FunctionSolver solver = gf.getFunctionSolver();
+			if (solver.getType() == FunctionSolverType.MLE)
+				return "Log-likelihood";
+			else if (solver.getType() == FunctionSolverType.WLSE)
+				return "Chi-Squared";
+			else
+				return "Adjusted R^2";
+		}
+
 		private double[] convertParameters(double[] params)
 		{
 			// Convert radians to degrees (if elliptical fitting)
@@ -2310,7 +2337,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			final double[] region = singleRegion;
 
 			resultDoublet = fitAsDoublet((FitResult) resultSingle.data, region, regionBounds, residualsThreshold,
-					neighbours, peakNeighbours, singleQA, singleSumOfSquares, singleValue);
+					neighbours, peakNeighbours, singleQA, singleValue);
 
 			return resultDoublet;
 		}
@@ -2374,11 +2401,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		 *            the peak neighbours
 		 * @param qa
 		 *            the qa object that performed quadrant analysis
+		 * @param singleValue
+		 *            the objective function value from fitting a single peak
 		 * @return the multi path fit result. fit result
 		 */
 		private MultiPathFitResult.FitResult fitAsDoublet(FitResult fitResult, double[] region, Rectangle regionBounds,
 				double residualsThreshold, CandidateList neighbours, PeakResult[] peakNeighbours, QuadrantAnalysis qa,
-				double singleSumOfSquares, double singleValue)
+				double singleValue)
 		{
 			final int width = regionBounds.width;
 			final int height = regionBounds.height;
@@ -2450,36 +2479,60 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Adjusted Coefficient of determination is not good for non-linear models. Use the 
 				// Bayesian Information Criterion (BIC):
 
-				final double doubleSumOfSquares = gf.getFinalResidualSumOfSquares();
+				// TODO - Make the selection criteria for Doublets configurable:
+				// MLE - AIC, BIC, LLR
+				// WLSE - AIC, BIC, q-values of each chi-square
+				// LSE - Adjusted coefficient of determination 
+				
+				// Note: Numerical recipes pp 669 uses 0.1 for q-value for weighted least squares fitting
+				// This is 0.9 for p!
 
+				double doubleValue = getFitValue();
 				final int length = width * height;
-				final double ic1, ic2;
+				double ic1 = Double.NaN, ic2 = Double.NaN;
+				final boolean improvement;
 
-				// Get the likelihood for the fit.
-				if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
+				FunctionSolver solver = gf.getFunctionSolver();
+				if (solver.getType() == FunctionSolverType.MLE
+				//&& fitConfig.isModelCamera()
+				)
 				{
-					// This is computed directly by the maximum likelihood estimator. 
+					// ------------
+					// TODO: Check this is still true as we may need to change the improvement criterion. 
+					// Note: the residuals are no longer computed for all solvers.
 					// The MLE is only good if we are modelling the camera noise. 
 					// The MLE put out by the Poisson model is not better than using the IC from the fit residuals.
-					final double doubleValue = gf.getValue();
+					// ------------
 					ic1 = Maths.getBayesianInformationCriterion(singleValue, length,
 							fitResult.getNumberOfFittedParameters());
 					ic2 = Maths.getBayesianInformationCriterion(doubleValue, length,
 							newFitResult.getNumberOfFittedParameters());
+					improvement = ic2 > ic1;
 					if (logger != null)
-						logger.info("Model improvement - Sum-of-squares, MLE (IC) : %f, %f (%f) => %f, %f (%f) : %f",
-								singleSumOfSquares, singleValue, ic1, doubleSumOfSquares, doubleValue, ic2, ic1 - ic2);
+						logger.info("Model improvement - Log likelihood (IC) : %f (%f) => %f (%f) : %f", singleValue,
+								ic1, doubleValue, ic2, ic1 - ic2);
+				}
+				else if (solver.getType() == FunctionSolverType.WLSE)
+				{
+					// If using the weighted least squares estimator then we can get the log likelihood from an approximation
+					ic1 = Maths.getBayesianInformationCriterionFromResiduals(singleValue, length,
+							fitResult.getNumberOfFittedParameters());
+					ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleValue, length,
+							newFitResult.getNumberOfFittedParameters());
+					improvement = ic2 > ic1;
+					if (logger != null)
+						logger.info("Model improvement - Chi-squared (IC) : %f (%f) => %f (%f) : %f", singleValue, ic1,
+								doubleValue, ic2, ic1 - ic2);
+				}
+				else if (solver.getType() == FunctionSolverType.LSE)
+				{
+					improvement = doubleValue > singleValue;
+					if (logger != null)
+						logger.info("Model improvement - Adjusted R^2 : %f => %f", singleValue, doubleValue);
 				}
 				else
 				{
-					// If using the least squares estimator then we can get the log likelihood from an approximation
-					ic1 = Maths.getBayesianInformationCriterionFromResiduals(singleSumOfSquares, length,
-							fitResult.getNumberOfFittedParameters());
-					ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
-							newFitResult.getNumberOfFittedParameters());
-					if (logger != null)
-						logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f",
-								singleSumOfSquares, ic1, doubleSumOfSquares, ic2, ic1 - ic2);
+					throw new IllegalStateException("Unable to calculate solution improvement");
 				}
 
 				if (logger2 != null)
@@ -2495,17 +2548,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 							peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
 						}
 					}
-					String msg = String.format(
-							"Doublet %d [%d,%d] %s (%s) [%f -> %f] SS [%f -> %f] IC [%f -> %f] = %s\n", slice,
+					String msg = String.format("Doublet %d [%d,%d] %s (%s) %s [%f -> %f] IC [%f -> %f] = %s\n", slice,
 							cc.fromRegionToGlobalX(cx), cc.fromRegionToGlobalY(cy), newFitResult.getStatus(),
-							newFitResult.getStatusData(), singleValue, gf.getValue(), singleSumOfSquares,
-							doubleSumOfSquares, ic1, ic2, Arrays.toString(peakParams));
+							newFitResult.getStatusData(), getFitValueName(), singleValue, doubleValue, ic1, ic2,
+							Arrays.toString(peakParams));
 					logger2.debug(msg);
 				}
 
 				// Check if the predictive power of the model is better with two peaks:
 				// IC should be lower
-				if (ic2 > ic1)
+				if (improvement)
 				{
 					return createResult(newFitResult, null, FitStatus.NO_MODEL_IMPROVEMENT);
 				}

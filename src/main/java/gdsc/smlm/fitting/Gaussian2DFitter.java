@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.smlm.fitting.nonlinear.BaseFunctionSolver;
+import gdsc.smlm.fitting.nonlinear.LSEBaseFunctionSolver;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -355,12 +355,11 @@ public class Gaussian2DFitter
 		final int[] position = new int[2];
 
 		// Fitting variables
-		double[] y = data; // Value at index
-		y_fit = (computeResiduals || fitConfiguration.isApplyGainBeforeFitting()) ? new double[cumul_region[2]] : null; // Predicted points
+		final int ySize = cumul_region[2];
+		double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize); // Value at index
+		y_fit = (computeResiduals || fitConfiguration.isApplyGainBeforeFitting()) ? new double[ySize] : null; // Predicted points
 		solver = null;
 		double[] params_dev = null; // standard deviations for parameters for the fitting function
-		double[] error = { 0 }; // The fit Chi-squared value
-		final int ySize = cumul_region[2];
 
 		final int paramsPerPeak = 6;
 
@@ -368,7 +367,7 @@ public class Gaussian2DFitter
 		if (background == 0 && !zeroBackground)
 		{
 			// Get background
-			background = getBackground(data, maxx, maxy, npeaks);
+			background = getBackground(y, maxx, maxy, npeaks);
 			params[0] = background;
 
 			// Input estimates are either signal or amplitude, both of which are above background.
@@ -412,7 +411,8 @@ public class Gaussian2DFitter
 
 		// Check there are peaks to fit
 		if (zeroHeight == npeaks)
-			return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0, null, 0, 0);
+			return new FitResult(FitStatus.BAD_PARAMETERS, 0, Double.NaN, initialParams, null, null, npeaks, 0, null, 0,
+					0);
 
 		// Set all zero height peaks to a fraction of the maximum to allow fitting
 		if (zeroHeight > 0)
@@ -426,11 +426,11 @@ public class Gaussian2DFitter
 			}
 			if (max == 0)
 			{
-				max = data[0];
+				max = y[0];
 				for (int i = maxx * maxy; --i > 0;)
-					if (max < data[i])
-						max = data[i];
-				max -= getBackground(data, maxx, maxy, 2);
+					if (max < y[i])
+						max = y[i];
+				max -= getBackground(y, maxx, maxy, 2);
 			}
 			max *= 0.1; // Use fraction of the max peak
 			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
@@ -449,8 +449,8 @@ public class Gaussian2DFitter
 			if (max == 0)
 			{
 				for (int i = maxx * maxy; --i > 0;)
-					max += data[i];
-				max -= ySize * getBackground(data, maxx, maxy, 2);
+					max += y[i];
+				max -= ySize * getBackground(y, maxx, maxy, 2);
 			}
 			max *= 0.1; // Use fraction of the max peak
 			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
@@ -490,8 +490,8 @@ public class Gaussian2DFitter
 				{
 					// Fail if the width cannot be estimated due to out of bounds
 					if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
-						return new FitResult(FitStatus.FAILED_TO_ESTIMATE_WIDTH, 0, 0, initialParams, null, null, npeaks, 0, null,
-								0, 0);
+						return new FitResult(FitStatus.FAILED_TO_ESTIMATE_WIDTH, 0, Double.NaN, initialParams, null,
+								null, npeaks, 0, null, 0, 0);
 
 					sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
 				}
@@ -509,8 +509,8 @@ public class Gaussian2DFitter
 					{
 						// Fail if the width cannot be estimated
 						if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
-							return new FitResult(FitStatus.FAILED_TO_ESTIMATE_WIDTH, 0, 0, initialParams, null, null, npeaks, 0,
-									null, 0, 0);
+							return new FitResult(FitStatus.FAILED_TO_ESTIMATE_WIDTH, 0, Double.NaN, initialParams, null,
+									null, npeaks, 0, null, 0, 0);
 
 						sy = fwhm2sd(half_max_linewidth(y, index, position, dim, 1, cumul_region, background));
 					}
@@ -642,8 +642,7 @@ public class Gaussian2DFitter
 			setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
 		}
 
-		final double noise = 0; // //fitConfiguration.getNoise()
-		FitStatus result = solver.fit(ySize, y, y_fit, params, params_dev, error, noise);
+		FitStatus result = solver.fit(y, y_fit, params, params_dev);
 
 		// -----------------------
 
@@ -652,7 +651,7 @@ public class Gaussian2DFitter
 			// For debugging
 			//double[] initialParams2 = initialParams.clone();
 			//double[] params2 = params.clone();
-			
+
 			if (fitConfiguration.isApplyGainBeforeFitting())
 			{
 				// Update all the output parameters
@@ -692,9 +691,6 @@ public class Gaussian2DFitter
 				params[i - 1] = Math.abs(params[i - 1]);
 			}
 
-			// TODO - Compare the Chi-squared value for the curve against the standard deviation of 
-			// the data, i.e. how a flat plane would fit the data. If no better then mark as a bad fit.
-
 			Object statusData = null;
 			if (fitConfiguration.isFitValidation())
 			{
@@ -714,13 +710,16 @@ public class Gaussian2DFitter
 						y_fit[i] *= gain;
 
 					// The sum-of-squares will be incorrect so fix this
-					((BaseFunctionSolver) solver).updateSumOfSquares(ySize, data, y_fit);
+					if (solver.getType() == FunctionSolverType.LSE && solver instanceof LSEBaseFunctionSolver)
+					{
+						((LSEBaseFunctionSolver) solver).updateSumOfSquares(Arrays.copyOf(data, ySize), y_fit);
+					}
 				}
 			}
 
-			fitResult = new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0), error[0],
-					initialParams, params, params_dev, npeaks, solver.getNumberOfFittedParameters(), statusData,
-					getIterations(), getEvaluations());
+			fitResult = new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0),
+					solver.getValue(), initialParams, params, params_dev, npeaks, solver.getNumberOfFittedParameters(),
+					statusData, solver.getIterations(), solver.getEvaluations());
 		}
 		else
 		{
@@ -735,8 +734,8 @@ public class Gaussian2DFitter
 			initialParams[0] += bias;
 
 			y_fit = null;
-			fitResult = new FitResult(result, 0, 0, initialParams, null, null, npeaks,
-					solver.getNumberOfFittedParameters(), null, getIterations(), getEvaluations());
+			fitResult = new FitResult(result, 0, Double.NaN, initialParams, null, null, npeaks,
+					solver.getNumberOfFittedParameters(), null, solver.getIterations(), solver.getEvaluations());
 		}
 
 		return fitResult;
@@ -930,7 +929,7 @@ public class Gaussian2DFitter
 				upper[j + Gaussian2DFunction.SHAPE] = Math.PI;
 			}
 			// TODO - Add support for z-depth fitting in the shape parameter			
-			
+
 			lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * min_wf;
 			upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * max_wf;
 			lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * min_wf;
@@ -960,14 +959,12 @@ public class Gaussian2DFitter
 		{
 			if (params[i] < lower[i])
 			{
-				System.out.printf("Param %d (%s) too low %f < %f\n", i, solver.getName(i), params[i],
-						lower[i]);
+				System.out.printf("Param %d (%s) too low %f < %f\n", i, solver.getName(i), params[i], lower[i]);
 				lower[i] = params[i] - (lower[i] - params[i]);
 			}
 			if (params[i] > upper[i])
 			{
-				System.out.printf("Param %d (%s) too high %f > %f\n", i, solver.getName(i), params[i],
-						upper[i]);
+				System.out.printf("Param %d (%s) too high %f > %f\n", i, solver.getName(i), params[i], upper[i]);
 				upper[i] = params[i] + (params[i] - upper[i]);
 			}
 		}
@@ -1176,51 +1173,13 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * @return The number of iterations used in the last fit
+	 * Gets the function solver from the last call to a fit(...) method.
+	 *
+	 * @return the function solver
 	 */
-	public int getIterations()
+	public FunctionSolver getFunctionSolver()
 	{
-		return (solver != null) ? solver.getIterations() : 0;
-	}
-
-	/**
-	 * @return The number of evaluations used in the last fit
-	 */
-	public int getEvaluations()
-	{
-		return (solver != null) ? solver.getEvaluations() : 0;
-	}
-
-	/**
-	 * @return the totalSumOfSquares for the last fit
-	 */
-	public double getTotalSumOfSquares()
-	{
-		return (solver != null) ? solver.getTotalSumOfSquares() : 0;
-	}
-
-	/**
-	 * @return the finalResidualSumOfSquares for the last fit
-	 */
-	public double getFinalResidualSumOfSquares()
-	{
-		return (solver != null) ? solver.getResidualSumOfSquares() : 0;
-	}
-
-	/**
-	 * @return the numberOfFittedParameters for the last fit
-	 */
-	public int getNumberOfFittedParameters()
-	{
-		return (solver != null) ? solver.getNumberOfFittedParameters() : 0;
-	}
-
-	/**
-	 * @return the numberOfFittedPoints for the last fit
-	 */
-	public int getNumberOfFittedPoints()
-	{
-		return (solver != null) ? solver.getNumberOfFittedPoints() : 0;
+		return solver;
 	}
 
 	/**
@@ -1291,8 +1250,8 @@ public class Gaussian2DFitter
 	 */
 	public boolean evaluate(double[] data, int maxx, int maxy, int npeaks, double[] params)
 	{
-		double[] y = data;
 		final int ySize = maxx * maxy;
+		double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize);
 		y_fit = (computeResiduals || fitConfiguration.isApplyGainBeforeFitting()) ? new double[ySize] : null; // Predicted points
 
 		// Subtract the bias
@@ -1360,7 +1319,7 @@ public class Gaussian2DFitter
 		//	setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
 		//}
 
-		final boolean result = solver.evaluate(ySize, y, y_fit, params);
+		final boolean result = solver.evaluate(y, y_fit, params);
 
 		if (result)
 		{
@@ -1376,7 +1335,10 @@ public class Gaussian2DFitter
 						y_fit[i] *= gain;
 
 					// The sum-of-squares will be incorrect so fix this
-					((BaseFunctionSolver) solver).updateSumOfSquares(ySize, data, y_fit);
+					if (solver.getType() == FunctionSolverType.LSE && solver instanceof LSEBaseFunctionSolver)
+					{
+						((LSEBaseFunctionSolver) solver).updateSumOfSquares(Arrays.copyOf(data, ySize), y_fit);
+					}
 				}
 			}
 		}

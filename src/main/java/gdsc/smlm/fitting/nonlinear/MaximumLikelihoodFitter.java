@@ -2,6 +2,7 @@ package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.function.FixedNonLinearFunction;
 import gdsc.smlm.function.LikelihoodWrapper;
 import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
@@ -70,7 +71,7 @@ import org.apache.commons.math3.util.FastMath;
  * The probability mass function can be changed to a Poisson-Gaussian or Poisson-Gamma-Gaussian distribution in order to
  * model the counts from a CCD/EMCCD camera.
  */
-public class MaximumLikelihoodFitter extends BaseFunctionSolver
+public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 {
 	/**
 	 * Wrap the LikelihoodFunction with classes that implement the required interfaces
@@ -348,13 +349,12 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFit(int, double[], double[], double[], double[],
-	 * double[], double)
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFit(double[], double[], double[], double[])
 	 */
-	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
-			double noise)
+	public FitStatus computeFit(double[] y, double[] y_fit, double[] a, double[] a_dev)
 	{
-		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper(n, y, a);
+		final int n = y.length;
+		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
 
 		@SuppressWarnings("rawtypes")
 		BaseOptimizer baseOptimiser = null;
@@ -668,18 +668,6 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			//System.out.printf("Iter = %d, Eval = %d, %g @ %s\n", iterations, evaluations, optimum.getValue(), 
 			//	java.util.Arrays.toString(solution));
 
-			// Compute residuals for the FunctionSolver interface
-			if (y_fit == null || y_fit.length < n)
-				y_fit = new double[n];
-			f.initialise(a);
-			residualSumOfSquares = 0;
-			for (int i = 0; i < n; i++)
-			{
-				y_fit[i] = f.eval(i);
-				final double residual = y[i] - y_fit[i];
-				residualSumOfSquares += residual * residual;
-			}
-
 			if (a_dev != null)
 			{
 				// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
@@ -692,7 +680,6 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 					a_dev[gradientIndices[i]] = crlb[i];
 			}
 
-			error[0] = NonLinearFit.getError(residualSumOfSquares, noise, n, f.gradientIndices().length);
 			// Reverse negative log likelihood for maximum likelihood score
 			value = -optimum.getValue();
 		}
@@ -742,7 +729,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		return FitStatus.OK;
 	}
 
-	private LikelihoodWrapper createLikelihoodWrapper(int n, double[] y, double[] a)
+	private LikelihoodWrapper createLikelihoodWrapper(NonLinearFunction f, int n, double[] y, double[] a)
 	{
 		LikelihoodWrapper maximumLikelihoodFunction = null;
 
@@ -1017,29 +1004,37 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	}
 
 	@Override
-	public boolean computeValue(int n, double[] y, double[] y_fit, double[] a)
+	public boolean computeValue(double[] y, double[] y_fit, double[] a)
 	{
-		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper(n, y, a);
+		final int n = y.length;
+		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
 
 		final double l = maximumLikelihoodFunction.likelihood(a);
 		if (l == Double.POSITIVE_INFINITY)
 			return false;
 
-		// Compute residuals for the FunctionSolver interface
-		if (y_fit == null || y_fit.length < n)
-			y_fit = new double[n];
-		f.initialise(a);
-		residualSumOfSquares = 0;
-		for (int i = 0; i < n; i++)
-		{
-			y_fit[i] = f.eval(i);
-			final double residual = y[i] - y_fit[i];
-			residualSumOfSquares += residual * residual;
-		}
-
 		// Reverse negative log likelihood for maximum likelihood score
 		value = -l;
 
 		return false;
+	}
+
+	@Override
+	protected double computeObservedLogLikelihood(double[] y, double[] a)
+	{
+		if (lastY != null)
+		{
+			final int n = y.length;
+			LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper(new FixedNonLinearFunction(y), n, y,
+					a);
+
+			final double l = maximumLikelihoodFunction.likelihood(a);
+			if (l == Double.POSITIVE_INFINITY)
+				return Double.NEGATIVE_INFINITY;
+
+			// Reverse negative log likelihood for maximum likelihood score
+			value = -l;
+		}
+		throw new IllegalStateException();
 	}
 }

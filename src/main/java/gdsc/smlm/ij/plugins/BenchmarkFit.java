@@ -265,7 +265,6 @@ public class BenchmarkFit implements PlugIn
 			}
 
 			double[][] bounds = null;
-			double[] error = new double[1];
 			double[][] result = new double[xy.length][];
 			long[] time = new long[xy.length];
 			int c = 0;
@@ -285,7 +284,7 @@ public class BenchmarkFit implements PlugIn
 				else if (solver.isConstrained())
 					setConstraints(solver);
 
-				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
+				final FitStatus status = solver.fit(data, null, params, null);
 				if (isValid(status, params, size))
 				{
 					// Subtract the fitted bias from the background

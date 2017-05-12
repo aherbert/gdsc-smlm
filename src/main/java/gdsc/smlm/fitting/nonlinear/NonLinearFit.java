@@ -5,11 +5,16 @@ import java.util.Arrays;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.fitting.FunctionSolverType;
+import gdsc.smlm.fitting.MLEFunctionSolver;
+import gdsc.smlm.fitting.WLSEFunctionSolver;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
+import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.NonLinearFunction;
+import gdsc.smlm.function.PoissonCalculator;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -32,7 +37,7 @@ import gdsc.smlm.function.NonLinearFunction;
  * Uses Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
  */
-public class NonLinearFit extends BaseFunctionSolver
+public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSolver, WLSEFunctionSolver
 {
 	protected static final int SUM_OF_SQUARES_BEST = 0;
 	protected static final int SUM_OF_SQUARES_OLD = 1;
@@ -54,7 +59,9 @@ public class NonLinearFit extends BaseFunctionSolver
 
 	protected double initialResidualSumOfSquares;
 
-	private boolean mle = false;
+	protected NonLinearFunction func;
+	protected double[] lastY_fit;
+	protected double ll = Double.NaN;
 
 	/**
 	 * Default constructor
@@ -95,7 +102,15 @@ public class NonLinearFit extends BaseFunctionSolver
 	public NonLinearFit(NonLinearFunction func, StoppingCriteria sc, int significantDigits, double maxAbsoluteError)
 	{
 		super(func);
+		this.func = func;
 		init(sc, significantDigits, maxAbsoluteError);
+	}
+
+	@Override
+	protected void preProcess()
+	{
+		super.preProcess();
+		ll = Double.NaN;
 	}
 
 	private void init(StoppingCriteria sc, int significantDigits, double maxAbsoluteError)
@@ -117,7 +132,7 @@ public class NonLinearFit extends BaseFunctionSolver
 			lambda = initialLambda;
 			for (int j = a.length; j-- > 0;)
 				ap[j] = a[j];
-			sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = calculator.findLinearised(n, y, a, alpha, beta, f);
+			sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = calculator.findLinearised(n, y, a, alpha, beta, func);
 			initialResidualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
 			if (calculator.isNaNGradients())
 			{
@@ -139,7 +154,7 @@ public class NonLinearFit extends BaseFunctionSolver
 		// Update the parameters. Ensure to use the gradient indices to update the correct parameters
 		updateFitParameters(a, gradientIndices, m, da, ap);
 
-		sumOfSquaresWorking[SUM_OF_SQUARES_NEW] = calculator.findLinearised(n, y, ap, covar, da, f);
+		sumOfSquaresWorking[SUM_OF_SQUARES_NEW] = calculator.findLinearised(n, y, ap, covar, da, func);
 
 		if (calculator.isNaNGradients())
 		{
@@ -299,8 +314,7 @@ public class NonLinearFit extends BaseFunctionSolver
 			ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
 	}
 
-	private FitStatus doFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
-			StoppingCriteria sc, double noise)
+	private FitStatus doFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, StoppingCriteria sc)
 	{
 		final int[] gradientIndices = f.gradientIndices();
 
@@ -351,14 +365,8 @@ public class NonLinearFit extends BaseFunctionSolver
 		if (y_fit != null)
 		{
 			for (int i = 0; i < n; i++)
-				y_fit[i] = f.eval(i);
+				y_fit[i] = func.eval(i);
 		}
-
-		// Weighted SS is not the correct sum-of-squares.
-		// The MLE did not calculate the sum-of-squares.
-		residualSumOfSquares = (mle || f.canComputeWeights()) ? computeSS(y, y_fit, n) : value;
-
-		error[0] = getError(residualSumOfSquares, noise, n, gradientIndices.length);
 
 		return FitStatus.OK;
 	}
@@ -381,39 +389,12 @@ public class NonLinearFit extends BaseFunctionSolver
 		return true;
 	}
 
-	private double computeSS(double[] y, double[] y_fit, int n)
-	{
-		double ss = 0;
-		if (y_fit != null)
-		{
-			// Compute using the output fit data
-			for (int i = 0; i < n; i++)
-			{
-				final double residual = y[i] - y_fit[i];
-				ss += residual * residual;
-			}
-		}
-		else
-		{
-			// Compute again using the function. Not very expensive as we do not need the gradients.
-			// Note: We could change fitting to always store the current fit data. 
-			for (int i = 0; i < n; i++)
-			{
-				final double residual = y[i] - f.eval(i);
-				ss += residual * residual;
-			}
-		}
-		return ss;
-	}
-
 	/**
 	 * Uses Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
 	 * set of data points (x, y).
 	 * <p>
 	 * It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from zero.
-	 * 
-	 * @param n
-	 *            The number of points to fit, n <= y.length (allows input data y to be used as a buffer)
+	 *
 	 * @param y
 	 *            Set of n data points to fit (input)
 	 * @param y_fit
@@ -422,20 +403,15 @@ public class NonLinearFit extends BaseFunctionSolver
 	 *            Set of m coefficients (input/output)
 	 * @param a_dev
 	 *            Standard deviation of the set of m coefficients (output)
-	 * @param error
-	 *            Output parameter. The Mean-Squared Error (MSE) for the fit if noise is 0. If noise is provided then
-	 *            this will be applied to create a reduced chi-square measure.
-	 * @param noise
-	 *            Estimate of the noise in the individual measurements
 	 * @return The fit status
 	 */
-	public FitStatus computeFit(final int n, double[] y, final double[] y_fit, final double[] a, final double[] a_dev,
-			final double[] error, final double noise)
+	public FitStatus computeFit(double[] y, double[] y_fit, final double[] a, final double[] a_dev)
 	{
+		int n = y.length;
 		final int nparams = f.gradientIndices().length;
 
 		// Create dynamically for the parameter sizes
-		calculator = GradientCalculatorFactory.newCalculator(nparams, mle);
+		calculator = GradientCalculatorFactory.newCalculator(nparams, isMLE());
 
 		// Initialise storage. 
 		// Note that covar and da are passed to EJMLLinerSolver and so must be the correct size. 
@@ -448,11 +424,27 @@ public class NonLinearFit extends BaseFunctionSolver
 		// Store the { best, previous, new } sum-of-squares values 
 		sumOfSquaresWorking = new double[3];
 
-		if (mle)
+		if (isMLE())
+		{
 			// We must have positive data
 			y = ensurePositive(n, y);
 
-		final FitStatus result = doFit(n, y, y_fit, a, a_dev, error, sc, noise);
+			// Store the function values for use in computing the log likelihood
+			lastY = y;
+			if (y_fit == null)
+			{
+				// Re-use space
+				if (lastY_fit == null || lastY_fit.length < y.length)
+					lastY_fit = new double[y.length];
+				y_fit = lastY_fit;
+			}
+			else
+			{
+				lastY_fit = y_fit;
+			}
+		}
+
+		final FitStatus result = doFit(n, y, y_fit, a, a_dev, sc);
 		this.evaluations = this.iterations = sc.getIteration();
 
 		return result;
@@ -551,7 +543,7 @@ public class NonLinearFit extends BaseFunctionSolver
 	 */
 	public boolean isMLE()
 	{
-		return mle;
+		return type == FunctionSolverType.MLE;
 	}
 
 	/**
@@ -565,38 +557,126 @@ public class NonLinearFit extends BaseFunctionSolver
 	 */
 	public void setMLE(boolean mle)
 	{
-		this.mle = mle;
+		if (mle)
+			type = FunctionSolverType.MLE;
+		else
+		{
+			type = (func.canComputeWeights()) ? FunctionSolverType.WLSE : FunctionSolverType.LSE;
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(int, double[], double[], double[])
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
 	 */
 	@Override
-	public boolean computeValue(int n, double[] y, double[] y_fit, double[] a)
+	public boolean computeValue(double[] y, double[] y_fit, double[] a)
 	{
+		final int n = y.length;
 		final int nparams = f.gradientIndices().length;
 
 		// Create dynamically for the parameter sizes
-		calculator = GradientCalculatorFactory.newCalculator(nparams, mle);
+		calculator = GradientCalculatorFactory.newCalculator(nparams, isMLE());
 
-		if (mle)
+		if (isMLE())
+		{
 			// We must have positive data
 			y = ensurePositive(n, y);
 
-		boolean requireResiduals = mle || f.canComputeWeights();
+			// Store the function values for use in computing the log likelihood
+			lastY = y;
+			if (y_fit == null)
+			{
+				// Re-use space
+				if (lastY_fit == null || lastY_fit.length < y.length)
+					lastY_fit = new double[y.length];
+				y_fit = lastY_fit;
+			}
+			else
+			{
+				lastY_fit = y_fit;
+			}
+		}
 
-		if (requireResiduals)
-			if (y_fit == null || y_fit.length < n)
-				y_fit = new double[n];
-
-		value = calculator.findLinearised(n, y, y_fit, a, f);
-
-		// Weighted SS is not the correct sum-of-squares.
-		// The MLE did not calculate the sum-of-squares.
-		residualSumOfSquares = (requireResiduals) ? computeSS(y, y_fit, n) : value;
+		value = calculator.findLinearised(n, y, y_fit, a, func);
 
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.LSEBaseFunctionSolver#getTotalSumOfSquares()
+	 */
+	@Override
+	public double getTotalSumOfSquares()
+	{
+		if (type == FunctionSolverType.LSE)
+			return super.getTotalSumOfSquares();
+		throw new IllegalStateException();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.WLSEFunctionSolver#getChiSquared()
+	 */
+	public double getChiSquared()
+	{
+		if (type == FunctionSolverType.WLSE)
+			// The weighted MLE will produce the chi-squared
+			return value;
+		throw new IllegalStateException();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
+	 */
+	public double getLogLikelihood()
+	{
+		if (type == FunctionSolverType.MLE && lastY != null)
+		{
+			// The MLE version directly computes the log-likelihood ratio.
+			// We must compute the log likelihood for a Poisson MLE.
+			if (Double.isNaN(ll))
+				ll = PoissonCalculator.logLikelihood(lastY_fit, lastY);
+			return ll;
+		}
+		throw new IllegalStateException();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
+	 */
+	public double getLogLikelihoodRatio()
+	{
+		if (type == FunctionSolverType.MLE)
+			// The MLE version directly computes the log-likelihood ratio
+			return value;
+		throw new IllegalStateException();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getQ()
+	 */
+	public double getQ()
+	{
+		if (type == FunctionSolverType.MLE)
+			// Value will be the log-likelihood ratio for the MLE.
+			// Wilks theorum states the LLR approaches the chi-squared distribution for large n.
+			return ChiSquaredDistributionTable.computeQValue(value,
+					getNumberOfFittedPoints() - getNumberOfFittedParameters());
+		if (type == FunctionSolverType.WLSE)
+			// Value will be the Chi-squared
+			return ChiSquaredDistributionTable.computeQValue(value,
+					getNumberOfFittedPoints() - getNumberOfFittedParameters());
+		throw new IllegalStateException();
 	}
 }

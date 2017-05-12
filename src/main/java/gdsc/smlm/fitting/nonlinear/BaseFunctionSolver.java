@@ -4,7 +4,8 @@ import java.util.Arrays;
 
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
-import gdsc.smlm.function.NonLinearFunction;
+import gdsc.smlm.fitting.FunctionSolverType;
+import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -25,73 +26,115 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public abstract class BaseFunctionSolver implements FunctionSolver
 {
-	protected NonLinearFunction f;
+	protected FunctionSolverType type;
+	protected GradientFunction f;
 
 	private int maxEvaluations = 20;
 
-	protected double totalSumOfSquares;
-	protected double residualSumOfSquares;
 	protected int numberOfFittedPoints;
 	protected int iterations;
 	protected int evaluations;
 	protected double value;
 
+	// Cache the data to fit on success
+	protected double[] lastY, lastA;
+
 	/**
-	 * Default constructor
-	 * 
+	 * Default constructor.
+	 *
+	 * @param type
+	 *            the type
+	 * @param f
+	 *            the f
 	 * @throws NullPointerException
 	 *             if the function is null
 	 */
-	public BaseFunctionSolver(NonLinearFunction f)
+	public BaseFunctionSolver(FunctionSolverType type, GradientFunction f)
 	{
-		setNonLinearFunction(f);
+		setGradientFunction(f);
+		this.type = type;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, double[], double[], double[], double[], double[], double)
+	 * @see gdsc.smlm.fitting.FunctionSolver#getType()
 	 */
-	public FitStatus fit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error, double noise)
+	public FunctionSolverType getType()
+	{
+		return type;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.FunctionSolver#fit(double[], double[], double[], double[])
+	 */
+	public FitStatus fit(double[] y, double[] y_fit, double[] a, double[] a_dev)
 	{
 		// Reset the results
-		residualSumOfSquares = 0;
-		numberOfFittedPoints = n;
+		numberOfFittedPoints = y.length;
 		iterations = 0;
 		evaluations = 0;
 		value = 0;
-		FitStatus status = computeFit(n, y, y_fit, a, a_dev, error, noise);
-		// Compute the total sum of squares if a good fit
+		lastY = null;
+		lastA = null;
+		preProcess();
+		FitStatus status = computeFit(y, y_fit, a, a_dev);
 		if (status == FitStatus.OK)
-			totalSumOfSquares = getSumOfSquares(n, y);
+		{
+			lastY = y;
+			lastA = a;
+			postProcess();
+		}
 		return status;
+
+	}
+
+	/**
+	 * Run before fit/evaluate
+	 */
+	protected void preProcess()
+	{
+		
+	}
+	
+	/**
+	 * Run if the fit/evaluate was successful
+	 */
+	protected void postProcess()
+	{
+		
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#evaluate(int, double[], double[], double[])
+	 * @see gdsc.smlm.fitting.FunctionSolver#evaluate(double[], double[], double[])
 	 */
-	public boolean evaluate(int n, double[] y, double[] y_fit, double[] a)
+	public boolean evaluate(double[] y, double[] y_fit, double[] a)
 	{
 		// Reset the results
-		residualSumOfSquares = 0;
-		numberOfFittedPoints = n;
+		numberOfFittedPoints = y.length;
 		iterations = 0;
 		evaluations = 0;
 		value = 0;
-		boolean status = computeValue(n, y, y_fit, a);
-		// Compute the total sum of squares if a good fit
+		lastY = null;
+		lastA = null;
+		preProcess();
+		boolean status = computeValue(y, y_fit, a);
 		if (status)
-			totalSumOfSquares = getSumOfSquares(n, y);
+		{
+			lastY = y;
+			lastA = a;
+			postProcess();
+		}
 		return status;
 	}
 
 	/**
 	 * Compute fit.
 	 *
-	 * @param n
-	 *            the n
 	 * @param y
 	 *            the y
 	 * @param y_fit
@@ -100,20 +143,13 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 *            the a
 	 * @param a_dev
 	 *            the a_dev
-	 * @param error
-	 *            the error
-	 * @param noise
-	 *            the noise
 	 * @return the fit status
 	 */
-	public abstract FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
-			double noise);
+	public abstract FitStatus computeFit(double[] y, double[] y_fit, double[] a, double[] a_dev);
 
 	/**
 	 * Evaluate the function.
 	 *
-	 * @param n
-	 *            the n
 	 * @param y
 	 *            the y
 	 * @param y_fit
@@ -122,7 +158,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 *            the a
 	 * @return true if evaluated
 	 */
-	public abstract boolean computeValue(int n, double[] y, double[] y_fit, double[] a);
+	public abstract boolean computeValue(double[] y, double[] y_fit, double[] a);
 
 	public double[] getInitialSolution(double[] params)
 	{
@@ -148,61 +184,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 			deviations[indices[i]] = Math.sqrt(covar[i][i]);
 	}
 
-	public static double getSumOfSquares(final int n, double[] y)
-	{
-		double sx = 0, ssx = 0;
-		for (int i = n; i-- > 0;)
-		{
-			sx += y[i];
-			ssx += y[i] * y[i];
-		}
-		final double sumOfSquares = ssx - (sx * sx) / (n);
-		return sumOfSquares;
-	}
-
-	/**
-	 * Compute the error
-	 * 
-	 * @param residualSumOfSquares
-	 * @param noise
-	 * @param numberOfFittedPoints
-	 * @param numberOfFittedParameters
-	 * @return the error
-	 */
-	public static double getError(double residualSumOfSquares, double noise, int numberOfFittedPoints,
-			int numberOfFittedParameters)
-	{
-		double error = residualSumOfSquares;
-
-		// Divide by the uncertainty in the individual measurements yi to get the chi-squared
-		if (noise > 0)
-		{
-			error /= numberOfFittedPoints * noise * noise;
-		}
-
-		// This updates the chi-squared value to the average error for a single fitted
-		// point using the degrees of freedom (N-M)?
-		// Note: This matches the mean squared error output from the MatLab fitting code.
-		// If a noise estimate was provided for individual measurements then this will be the
-		// reduced chi-square (see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2892436/)
-		if (numberOfFittedPoints > numberOfFittedParameters)
-			error /= (numberOfFittedPoints - numberOfFittedParameters);
-		else
-			error = 0;
-
-		return error;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#getTotalSumOfSquares()
-	 */
-	public double getTotalSumOfSquares()
-	{
-		return totalSumOfSquares;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -210,7 +191,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 */
 	public int getNumberOfFittedParameters()
 	{
-		return f.gradientIndices().length;
+		return f.getNumberOfGradients();
 	}
 
 	/*
@@ -221,16 +202,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	public int getNumberOfFittedPoints()
 	{
 		return numberOfFittedPoints;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#getResidualSumOfSquares()
-	 */
-	public double getResidualSumOfSquares()
-	{
-		return residualSumOfSquares;
 	}
 
 	/*
@@ -326,7 +297,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * @throws NullPointerException
 	 *             if the function is null
 	 */
-	public void setNonLinearFunction(NonLinearFunction f)
+	public void setGradientFunction(GradientFunction f)
 	{
 		if (f == null)
 			throw new NullPointerException("Function must not be null");
@@ -336,29 +307,9 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	/**
 	 * @return The function
 	 */
-	public NonLinearFunction getNonLinearFunction()
+	public GradientFunction getGradientFunction()
 	{
 		return f;
-	}
-
-	/**
-	 * Update the total and residual sum-of-squares using the given data
-	 * 
-	 * @param n
-	 *            The number of data points
-	 * @param y
-	 *            The data
-	 * @param residuals
-	 *            The fit residuals
-	 */
-	public void updateSumOfSquares(int n, double[] y, double[] residuals)
-	{
-		totalSumOfSquares = getSumOfSquares(n, y);
-		residualSumOfSquares = 0;
-		for (int i = 0; i < n; i++)
-		{
-			residualSumOfSquares += residuals[i] * residuals[i];
-		}
 	}
 
 	/*

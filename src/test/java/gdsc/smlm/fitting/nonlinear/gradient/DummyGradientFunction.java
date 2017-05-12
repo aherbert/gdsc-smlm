@@ -53,4 +53,8 @@ class DummyGradientFunction implements Gradient1Function, Gradient2Function
 	public void forEach(Gradient2Procedure procedure)
 	{
 	}
+
+	public void initialise(double[] a)
+	{
+	}
 }

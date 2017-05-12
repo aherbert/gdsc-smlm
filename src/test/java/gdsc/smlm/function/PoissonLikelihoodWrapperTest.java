@@ -595,6 +595,11 @@ public class PoissonLikelihoodWrapperTest
 			{
 				return 0;
 			}
+
+			public int getNumberOfGradients()
+			{
+				return 0;
+			}
 		};
 		PoissonLikelihoodWrapper f = new PoissonLikelihoodWrapper(nlf, a, Arrays.copyOf(k, n), n, alpha);
 

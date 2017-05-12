@@ -122,6 +122,11 @@ public class PoissonCalculatorTest
 		{
 			return 0;
 		}
+
+		public int getNumberOfGradients()
+		{
+			return 1;
+		}
 	}
 
 	@Test
@@ -177,6 +182,11 @@ public class PoissonCalculatorTest
 
 		//TestSettings.setLogLevel(gdsc.smlm.TestSettings.LogLevel.DEBUG);
 
+		int df = n - 1;
+		ChiSquaredDistributionTable table = new ChiSquaredDistributionTable(0.05, df);
+		ChiSquaredDistributionTable table2 = new ChiSquaredDistributionTable(0.001, df);
+		System.out.printf("Chi2 = %f (q=%.3f), %f (q=%.3f)\n", table.getChiSquared(df), table.getQValue(),
+				table2.getChiSquared(df), table2.getQValue());
 		for (int i = 5; i <= 15; i++)
 		{
 			a[0] = (double) i / 10;
@@ -196,9 +206,12 @@ public class PoissonCalculatorTest
 				product = product.multiply(new BigDecimal(ratio));
 			}
 			llr2 = -2 * Math.log(product.doubleValue());
-			double p = 1 - PoissonCalculator.computePValue(llr, n - 1);
-			TestSettings.info("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
-					product.round(new MathContext(4)).toString(), p);
+			double p = ChiSquaredDistributionTable.computePValue(llr, df);
+			double q = ChiSquaredDistributionTable.computeQValue(llr, df);
+			TestSettings.info(
+					"a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f, q=%f (significant=%b @ %.3f, significant=%b @ %.3f)\n",
+					a[0], ll, ll2, llr, llr2, product.round(new MathContext(4)).toString(), p, q,
+					table.isSignificant(llr, df), table.getQValue(), table2.isSignificant(llr, df), table2.getQValue());
 			if (max < ll)
 			{
 				max = ll;

@@ -335,21 +335,18 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	}
 
 	/**
-	 * Compute the p-value of the log-likelihood ratio using Wilk's theorem that the ratio asymptotically approaches a
-	 * Chi-squared distribution with degrees of freedom equal to the difference in dimensionality of the two models
-	 * (alternative and null).
-	 * 
-	 * @see https://en.wikipedia.org/wiki/Likelihood-ratio_test#Wilks.27_theorem
+	 * Compute the q-value of the log-likelihood ratio. This is the probability that a value of LLR as poor as the value
+	 * should occur by chance.
 	 *
 	 * @param ll
 	 *            the minimum negative log likelihood of the function (the null model)
 	 * @return the p-value
 	 */
-	public double computePValue(double ll)
+	public double computeQValue(double ll)
 	{
 		double llr = computeLogLikelihoodRatio(ll);
 		int degreesOfFreedom = x.length - nVariables;
-		return PoissonCalculator.computePValue(llr, degreesOfFreedom);
+		return ChiSquaredDistributionTable.computeQValue(llr, degreesOfFreedom);
 	}
 
 	/*

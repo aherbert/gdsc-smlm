@@ -42,7 +42,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 		this.a = a.clone();
 		this.n = n;
 		// This wrapper will evaluate all the indices that are not fixed
-		gradientIndices = new int[fun.gradientIndices().length];
+		gradientIndices = new int[fun.getNumberOfGradients()];
 		for (int i = 0; i < gradientIndices.length; i++)
 			gradientIndices[i] = i;
 	}
@@ -71,6 +71,12 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 		return gradientIndices;
 	}
 
+
+	public int getNumberOfGradients()
+	{
+		return gradientIndices.length;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

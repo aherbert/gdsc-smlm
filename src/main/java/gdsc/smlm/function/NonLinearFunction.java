@@ -16,25 +16,8 @@ package gdsc.smlm.function;
 /**
  * Defines the non-linear fitting function
  */
-public interface NonLinearFunction
+public interface NonLinearFunction extends GradientFunction
 {
-	/**
-	 * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
-	 * initialisation.
-	 * 
-	 * @param a
-	 *            An array of coefficients
-	 */
-	void initialise(final double[] a);
-
-	/**
-	 * The function will evaluate the gradient for up to n parameters where n <= a.length. This method
-	 * returns the indices that are evaluated.
-	 * 
-	 * @return The gradient indices
-	 */
-	int[] gradientIndices();
-
 	/**
 	 * The non-linear fitting function. Produce an output predicted value for a given input
 	 * predictor (x) and partial gradient for each of the coefficients (a).

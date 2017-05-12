@@ -252,7 +252,6 @@ public class PSFDrift implements PlugIn
 					data[i] -= bias;
 			}
 
-			double[] error = new double[1];
 			int resultPosition = job.index;
 			for (double[] centre : xy)
 			{
@@ -266,7 +265,7 @@ public class PSFDrift implements PlugIn
 					setBounds(solver);
 				else if (solver.isConstrained())
 					setConstraints(solver);
-				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
+				final FitStatus status = solver.fit(data, null, params, null);
 				// Subtract the fitted bias from the background
 				if (!fitConfig.isRemoveBiasBeforeFitting())
 					params[Gaussian2DFunction.BACKGROUND] -= bias;

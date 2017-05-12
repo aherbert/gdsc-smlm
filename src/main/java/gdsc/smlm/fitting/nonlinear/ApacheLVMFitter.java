@@ -26,6 +26,8 @@ import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.function.ExtendedNonLinearFunction;
 import gdsc.smlm.function.MultivariateMatrixFunctionWrapper;
 import gdsc.smlm.function.MultivariateVectorFunctionWrapper;
+import gdsc.smlm.function.NonLinearFunction;
+import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -45,7 +47,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  * Uses Apache Commons Math Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
  */
-public class ApacheLVMFitter extends BaseFunctionSolver
+public class ApacheLVMFitter extends LSEBaseFunctionSolver
 {
 	/**
 	 * Default constructor
@@ -55,15 +57,9 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 		super(gf);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFit(int, double[], double[], double[], double[],
-	 * double[], double)
-	 */
-	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
-			double noise)
+	public FitStatus computeFit(double[] y, final double[] y_fit, double[] a, double[] a_dev)
 	{
+		int n = y.length;
 		try
 		{
 			// Different convergence thresholds seem to have no effect on the resulting fit, only the number of
@@ -129,8 +125,8 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 			else
 			{
 				// Compute separately
-				builder.model(new MultivariateVectorFunctionWrapper(f, a, n),
-						new MultivariateMatrixFunctionWrapper(f, a, n));
+				builder.model(new MultivariateVectorFunctionWrapper((NonLinearFunction) f, a, n),
+						new MultivariateMatrixFunctionWrapper((NonLinearFunction) f, a, n));
 			}
 
 			LeastSquaresProblem problem = builder.build();
@@ -156,7 +152,7 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 					final int[] gradientIndices = f.gradientIndices();
 					final int nparams = gradientIndices.length;
 					GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams);
-					final double[] I = calculator.fisherInformationDiagonal(n, a, f);
+					final double[] I = calculator.fisherInformationDiagonal(n, a, (NonLinearFunction) f);
 					Arrays.fill(a_dev, 0);
 					for (int i = nparams; i-- > 0;)
 						a_dev[gradientIndices[i]] = FisherInformationMatrix.reciprocalSqrt(I[i]);
@@ -165,23 +161,21 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 			// Compute sum-of-squares
 			if (y_fit != null)
 			{
-				residualSumOfSquares = 0;
-				f.initialise(a);
-				for (int i = 0; i < n; i++)
+				Gaussian2DFunction f = (Gaussian2DFunction) this.f; 
+				f.initialise0(a);
+				f.forEach(new ValueProcedure()
 				{
-					y_fit[i] = f.eval(i);
-					final double dy = y[i] - y_fit[i];
-					residualSumOfSquares += dy * dy;
-				}
-			}
-			else
-			{
-				// As this is unweighted then we can do this
-				residualSumOfSquares = optimum.getResiduals().dotProduct(optimum.getResiduals());
+					int i = 0;
+
+					public void execute(double value)
+					{
+						y_fit[i] = value;
+					}
+				});
 			}
 
-			value = residualSumOfSquares;
-			error[0] = getError(residualSumOfSquares, noise, n, initialSolution.length);
+			// As this is unweighted then we can do this to get the sum of squared residuals
+			value = optimum.getResiduals().dotProduct(optimum.getResiduals());
 		}
 		catch (TooManyEvaluationsException e)
 		{
@@ -205,21 +199,15 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 		return FitStatus.OK;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(int, double[], double[], double[])
-	 */
 	@Override
-	public boolean computeValue(int n, double[] y, double[] y_fit, double[] a)
+	public boolean computeValue(double[] y, double[] y_fit, double[] a)
 	{
 		final int nparams = f.gradientIndices().length;
 
 		GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams, false);
 
-		value = calculator.findLinearised(n, y, y_fit, a, f);
-
-		residualSumOfSquares = value;
+		// Since we know the function is a Gaussian2DFunction
+		value = calculator.findLinearised(y.length, y, y_fit, a, (NonLinearFunction) f);
 
 		return true;
 	}

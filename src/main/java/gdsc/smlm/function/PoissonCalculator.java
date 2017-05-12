@@ -179,31 +179,4 @@ public class PoissonCalculator
 		}
 		return -2.0 * ll;
 	}
-
-	/**
-	 * Compute the p-value of the log-likelihood ratio using Wilk's theorem that the ratio asymptotically approaches a
-	 * Chi-squared distribution with degrees of freedom equal to the difference in dimensionality of the two models
-	 * (alternative and null).
-	 *
-	 * @param logLikelihoodRatio
-	 *            the log-likelihood ratio
-	 * @param degreesOfFreedom
-	 *            the degrees of freedom
-	 * @return the p-value
-	 * @see https://en.wikipedia.org/wiki/Likelihood-ratio_test#Wilks.27_theorem
-	 */
-	public static double computePValue(double logLikelihoodRatio, int degreesOfFreedom)
-	{
-		// The ChiSquaredDistribution just wraps the gamma distribution for this function
-		//return new ChiSquaredDistribution(degreesOfFreedom).cumulativeProbability(logLikelihoodRatio);
-		//return new GammaDistribution(null, degreesOfFreedom / 2.0, 2.0).cumulativeProbability(logLikelihoodRatio);
-		if (logLikelihoodRatio <= 0)
-		{
-			return 0;
-		}
-		else
-		{
-			return Gamma.regularizedGammaP(degreesOfFreedom / 2.0, logLikelihoodRatio / 2.0);
-		}
-	}
 }

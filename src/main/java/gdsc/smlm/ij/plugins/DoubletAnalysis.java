@@ -60,6 +60,12 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.fitting.FunctionSolver;
+import gdsc.smlm.fitting.LSEFunctionSolver;
+// TODO - add support for using the chi-squared distribution to generate a q-value for the fit
+//import gdsc.smlm.fitting.WLSEFunctionSolver;
+//import gdsc.smlm.fitting.MLEFunctionSolver;
+import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
@@ -719,15 +725,17 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					final DoubletResult result = new DoubletResult(frame, noise, spot, n, neighbourCount,
 							almostNeighbourCount, j);
 					result.fitResult1 = gf.fit(region, width, height, 1, params, amplitudeEstimate);
-					result.iter1 = gf.getIterations();
-					result.eval1 = gf.getEvaluations();
+					FunctionSolver f1 = gf.getFunctionSolver();
+					result.iter1 = f1.getIterations();
+					result.eval1 = f1.getEvaluations();
 
 					// For now only process downstream if the fit was reasonable. This allows a good attempt at doublet fitting.
 					result.good1 = goodFit(result.fitResult1, width, height) == 2;
 
 					if (result.good1)
 					{
-						result.sumOfSquares1 = gf.getFinalResidualSumOfSquares();
+						result.sumOfSquares1 = (f1.getType() == FunctionSolverType.LSE)
+								? ((LSEFunctionSolver) f1).getTotalSumOfSquares() : 0;
 						result.value1 = gf.getValue();
 
 						// Compute residuals and fit as a doublet
@@ -773,15 +781,17 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							gf.setComputeResiduals(true);
 							fitConfig.setMaxIterations(maxIterations);
 							fitConfig.setMaxFunctionEvaluations(maxEvaluations);
-							result.iter2 = gf.getIterations();
-							result.eval2 = gf.getEvaluations();
+							FunctionSolver f2 = gf.getFunctionSolver();
+							result.iter2 = f2.getIterations();
+							result.eval2 = f2.getEvaluations();
 							int r2 = goodFit2(result.fitResult2, width, height);
 
 							// Store all results if we made a fit, even if the fit was not good
 							if (r2 != 0)
 							{
 								result.good2 = r2 == 2;
-								result.sumOfSquares2 = gf.getFinalResidualSumOfSquares();
+								result.sumOfSquares2 = (f2.getType() == FunctionSolverType.LSE)
+										? ((LSEFunctionSolver) f2).getTotalSumOfSquares() : 0;
 								result.value2 = gf.getValue();
 
 								final int length = width * height;
@@ -838,12 +848,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 									result.mbic1 = result.bic1;
 									result.mbic2 = result.bic2;
 								}
-								result.r1 = Maths.getAdjustedCoefficientOfDetermination(result.sumOfSquares1,
-										gf.getTotalSumOfSquares(), length,
-										result.fitResult1.getNumberOfFittedParameters());
-								result.r2 = Maths.getAdjustedCoefficientOfDetermination(result.sumOfSquares2,
-										gf.getTotalSumOfSquares(), length,
-										result.fitResult2.getNumberOfFittedParameters());
+								if (f1.getType() == FunctionSolverType.LSE)
+								{
+									result.r1 = ((LSEFunctionSolver) f1).getAdjustedCoefficientOfDetermination();
+									result.r2 = ((LSEFunctionSolver) f2).getAdjustedCoefficientOfDetermination();
+								}
 
 								// Debugging: see if the AIC or BIC ever differ								
 								//if (Math.signum(result.aic1 - result.aic2) != Math.signum(result.bic1 - result.bic2))
