@@ -30,91 +30,147 @@ import org.apache.commons.math3.special.Gamma;
 public class ChiSquaredDistributionTable
 {
 	/**
-	 * The p-value for computing the value using the cumulative probability (p=1-q)
+	 * The p-value for computing the value using the cumulative probability
 	 */
 	private final double p;
 
+	/** The chi squared critical value table */
 	final double[] chiSquared;
 
 	/**
-	 * Instantiates a new chi squared distribution table. Q is 1-p, with p the cumulative probability of the chi-squared
+	 * The direction of the critical value table. Values more extreme that the critical value in this direction are
+	 * rejected.
+	 */
+	final int direction;
+
+	/**
+	 * Instantiates a new chi squared distribution table with p the cumulative probability of the chi-squared
 	 * distribution.
 	 * <p>
-	 * Setting q will cause {@link #getChiSquared(int)} to generate a value where the probability of a random
+	 * Setting q will cause {@link #getCrititalValue(int)} to generate a value where the probability of a random
 	 * chi-squared observation above that value is equal to q.
+	 * <p>
+	 * Setting Q to a lower value allows poorer Chi squared values to be passed as significant. A typical value is 0.05
+	 * to 0.001.
 	 *
-	 * @param q
-	 *            the q-value for significance (lower will produce a higher allowed chi-squared value)
+	 * @param significance
+	 *            the significance
 	 * @param df
 	 *            the maximum degrees of freedom
+	 * @param upperTailed
+	 *            Set to true to create upper tailed significance testing (otherwise lower tailed)
 	 */
-	public ChiSquaredDistributionTable(double q, int df)
+	private ChiSquaredDistributionTable(double significance, int df, boolean upperTailed)
 	{
-		this.p = 1 - q;
+		// Convert the significance to a cumulative probability
+		this.p = (upperTailed) ? 1 - significance : significance;
+		// Fill table with NaN
 		chiSquared = new double[df + 1];
 		Arrays.fill(chiSquared, Double.NaN);
+		// Set the direction of the table
+		direction = (upperTailed) ? 1 : -1;
 	}
 
 	/**
-	 * Get the q-value for significance.
+	 * Creates an upper-tailed Chi squared critical value table. If the test statistic is above the critical value then
+	 * it will be rejected. A low significance value indicates greater statistical significance, i.e. greater confidence
+	 * that the observed deviation from the null hypothesis is significant.
+	 *
+	 * @param significance
+	 *            the significance
+	 * @param maximumDegreesOfFreedom
+	 *            the maximum degrees of freedom
+	 * @return the chi squared distribution table
+	 */
+	public static ChiSquaredDistributionTable createUpperTailed(double significance, int maximumDegreesOfFreedom)
+	{
+		return new ChiSquaredDistributionTable(significance, maximumDegreesOfFreedom, true);
+	}
+
+	/**
+	 * Creates a lower-tailed Chi squared critical value table. If the test statistic is below the critical value then
+	 * it will be rejected. A low significance value indicates greater statistical significance, i.e. greater confidence
+	 * that the observed deviation from the null hypothesis is significant.
+	 *
+	 * @param significance
+	 *            the significance
+	 * @param maximumDegreesOfFreedom
+	 *            the maximum degrees of freedom
+	 * @return the chi squared distribution table
+	 */
+	public static ChiSquaredDistributionTable createLowerTailed(double significance, int maximumDegreesOfFreedom)
+	{
+		return new ChiSquaredDistributionTable(significance, maximumDegreesOfFreedom, false);
+	}
+
+	/**
+	 * Checks if the table upper tailed. Values more extreme than this direction (upper/lower) are rejected.
+	 *
+	 * @return true, if is upper tailed
+	 */
+	public boolean isUpperTailed()
+	{
+		return direction == 1;
+	}
+
+	/**
+	 * Get the p-value for significance.
 	 * <p>
-	 * Q refers to the probability of Chi squared being equal to or above a given value by chance.
+	 * Refers to the probability of Chi squared being more extreme than the critical value by chance. The direction of
+	 * the extreme is determined by {@link #isUpperTailed()}.
 	 *
 	 * @return the q value
 	 */
-	public double getQValue()
+	public double getSignificanceValue()
 	{
-		return 1 - p;
+		return (isUpperTailed()) ? 1 - p : p;
 	}
 
 	/**
-	 * Gets the chi squared value for the configured significance level and degrees of freedom.
+	 * Gets the critical value of chi squared value for the configured significance level and degrees of freedom.
 	 * <p>
 	 * This is the value of Chi squared where the chance of obtaining a value more extreme than this point is equal to
-	 * the configured significance level (q-value).
+	 * the configured significance level.
 	 *
 	 * @param degreesOfFreedom
 	 *            the degrees of freedom
 	 * @return the chi squared
 	 */
-	public double getChiSquared(int degreesOfFreedom)
+	public double getCrititalValue(int degreesOfFreedom)
 	{
 		if (degreesOfFreedom >= chiSquared.length)
 			throw new IllegalStateException("Maximum degrees of freedom = " + (chiSquared.length - 1));
 		if (Double.isNaN(chiSquared[degreesOfFreedom]))
-			chiSquared[degreesOfFreedom] = new ChiSquaredDistribution(null, degreesOfFreedom)
-					.inverseCumulativeProbability(p);
+			chiSquared[degreesOfFreedom] = getChiSquared(p, degreesOfFreedom);
 		return chiSquared[degreesOfFreedom];
 	}
 
 	/**
-	 * Checks if the value of chi-squared is significant at the configured significance level. Tests if Chi squared is
-	 * below {@link #getChiSquared(int)}.
+	 * Checks if the value of chi-squared is more extreme than the critical value at the configured significance level.
 	 *
 	 * @param chiSquared
 	 *            the chi squared
 	 * @param degreesOfFreedom
 	 *            the degrees of freedom
-	 * @return true, if is significant
+	 * @return true, if is more extreme
 	 */
-	public boolean isSignificant(double chiSquared, int degreesOfFreedom)
+	public boolean reject(double chiSquared, int degreesOfFreedom)
 	{
-		double level = getChiSquared(degreesOfFreedom);
-		return chiSquared < level;
+		return Double.compare(chiSquared, getCrititalValue(degreesOfFreedom)) == direction;
 	}
 
 	/**
-	 * Gets the chi squared value for the configured significance level and degrees of freedom.
+	 * Gets the chi squared value for the cumulative probability and degrees of freedom.
 	 *
 	 * @param p
-	 *            the p-value for significance (lower will produce a higher chi-squared value)
+	 *            the cumulative probability
 	 * @param degreesOfFreedom
 	 *            the degrees of freedom
 	 * @return the chi squared
 	 */
 	public static double getChiSquared(double p, int degreesOfFreedom)
 	{
-		return new ChiSquaredDistribution(null, degreesOfFreedom).inverseCumulativeProbability(1 - p);
+		return new ChiSquaredDistribution(null, degreesOfFreedom).inverseCumulativeProbability(p);
 	}
 
 	/**

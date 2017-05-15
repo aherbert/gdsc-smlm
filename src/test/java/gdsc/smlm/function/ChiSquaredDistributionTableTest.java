@@ -59,16 +59,28 @@ public class ChiSquaredDistributionTableTest
 		DenseMatrix64F m = new DenseMatrix64F(chi2);
 		CommonOps.transpose(m);
 		int max = m.numCols;
-		double[] e = m.data;
+		double[] et = m.data;
 		for (int i = 0, j = 0; i < p.length; i++)
 		{
-			ChiSquaredDistributionTable table = new ChiSquaredDistributionTable(p[i], max);
+			ChiSquaredDistributionTable upperTable = ChiSquaredDistributionTable.createUpperTailed(p[i], max);
+			// Use 1-p as the significance level to get the same critical values
+			ChiSquaredDistributionTable lowerTable = ChiSquaredDistributionTable.createLowerTailed(1 - p[i], max);
 			for (int df = 1; df <= max; df++)
 			{
-				double o = table.getChiSquared(df);
-				System.out.printf("p=%.3f,df=%d = %f (q=%f)\n", p[i], df, o, 
-						ChiSquaredDistributionTable.computeQValue(o, df));
-				Assert.assertEquals(e[j++], o, 1e-2);
+				double o = upperTable.getCrititalValue(df);
+				double e = et[j++];
+				//System.out.printf("p=%.3f,df=%d = %f\n", p[i], df, o);
+				Assert.assertEquals(e, o, 1e-2);
+				
+				// The test only stores 2 decimal places so use the computed value to set upper/lower
+				double u = o * 1.01;
+				double l = o * 0.99;
+				
+				Assert.assertTrue("Upper did not reject", upperTable.reject(u, df));
+				Assert.assertFalse("Upper did not accept", upperTable.reject(l, df));
+				
+				Assert.assertTrue("Lower did not reject", lowerTable.reject(l, df));
+				Assert.assertFalse("Loweer did not accept", lowerTable.reject(u, df));
 			}
 		}
 	}
