@@ -76,11 +76,13 @@ public class ChiSquaredDistributionTableTest
 				double u = o * 1.01;
 				double l = o * 0.99;
 				
-				Assert.assertTrue("Upper did not reject", upperTable.reject(u, df));
-				Assert.assertFalse("Upper did not accept", upperTable.reject(l, df));
+				Assert.assertTrue("Upper did not reject higher", upperTable.reject(u, df));
+				Assert.assertFalse("Upper did not reject actual value", upperTable.reject(o, df));
+				Assert.assertFalse("Upper did not accept lower", upperTable.reject(l, df));
 				
-				Assert.assertTrue("Lower did not reject", lowerTable.reject(l, df));
-				Assert.assertFalse("Loweer did not accept", lowerTable.reject(u, df));
+				Assert.assertTrue("Lower did not reject lower", lowerTable.reject(l, df));
+				Assert.assertFalse("Lower did not accept actual value", lowerTable.reject(o, df));
+				Assert.assertFalse("Lower did not accept higher", lowerTable.reject(u, df));
 			}
 		}
 	}
