@@ -36,6 +36,9 @@ import gdsc.smlm.function.PoissonCalculator;
 /**
  * Uses Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
+ * <p>
+ * The MLEFunctionSolver is supported if the flag to use a Poisson MLE model is set. If the function supports weights
+ * then the WLSEFunctionSolver is supported. The default implementation supports the LSEFunctionSolver.
  */
 public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSolver, WLSEFunctionSolver
 {
