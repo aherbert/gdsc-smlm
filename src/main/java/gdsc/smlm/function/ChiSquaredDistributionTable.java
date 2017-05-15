@@ -74,7 +74,8 @@ public class ChiSquaredDistributionTable
 	/**
 	 * Creates an upper-tailed Chi squared critical value table. If the test statistic is above the critical value then
 	 * it will be rejected. A low significance value indicates greater statistical significance, i.e. greater confidence
-	 * that the observed deviation from the null hypothesis is significant.
+	 * that the observed deviation from the null hypothesis is significant. The test will provide 100 * (1 -
+	 * significance) percent confidence.
 	 *
 	 * @param significance
 	 *            the significance
@@ -90,7 +91,8 @@ public class ChiSquaredDistributionTable
 	/**
 	 * Creates a lower-tailed Chi squared critical value table. If the test statistic is below the critical value then
 	 * it will be rejected. A low significance value indicates greater statistical significance, i.e. greater confidence
-	 * that the observed deviation from the null hypothesis is significant.
+	 * that the observed deviation from the null hypothesis is significant. The test will provide 100 * (1 -
+	 * significance) percent confidence.
 	 *
 	 * @param significance
 	 *            the significance
@@ -147,6 +149,8 @@ public class ChiSquaredDistributionTable
 
 	/**
 	 * Checks if the value of chi-squared is more extreme than the critical value at the configured significance level.
+	 * <p>
+	 * Returns true iff the null hypothesis can be rejected with 100 * (1 - significance) percent confidence.
 	 *
 	 * @param chiSquared
 	 *            the chi squared

@@ -157,8 +157,8 @@ public class PoissonCalculatorTest
 		// Simulate Poisson process
 		nlf.initialise(a);
 		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
-		double[] x = Utils.newArray(n, 0, 1.0);
-		double[] u = new double[x.length];
+		double[] x = new double[n];
+		double[] u = new double[n];
 		for (int i = 0; i < n; i++)
 		{
 			u[i] = nlf.eval(i);
@@ -183,10 +183,15 @@ public class PoissonCalculatorTest
 		//TestSettings.setLogLevel(gdsc.smlm.TestSettings.LogLevel.DEBUG);
 
 		int df = n - 1;
-		ChiSquaredDistributionTable table = new ChiSquaredDistributionTable(0.05, df);
-		ChiSquaredDistributionTable table2 = new ChiSquaredDistributionTable(0.001, df);
-		System.out.printf("Chi2 = %f (q=%.3f), %f (q=%.3f)\n", table.getChiSquared(df), table.getQValue(),
-				table2.getChiSquared(df), table2.getQValue());
+		ChiSquaredDistributionTable table = ChiSquaredDistributionTable.createUpperTailed(0.05, df);
+		ChiSquaredDistributionTable table2 = ChiSquaredDistributionTable.createUpperTailed(0.001, df);
+		System.out.printf("Chi2 = %f (q=%.3f), %f (q=%.3f)  %f %b  %f\n", table.getCrititalValue(df),
+				table.getSignificanceValue(), table2.getCrititalValue(df), table2.getSignificanceValue(),
+				ChiSquaredDistributionTable.computeQValue(24, 2),
+				ChiSquaredDistributionTable.createUpperTailed(0.05, 2).reject(24, 2),
+				ChiSquaredDistributionTable.getChiSquared(1e-6, 2)
+
+		);
 		for (int i = 5; i <= 15; i++)
 		{
 			a[0] = (double) i / 10;
@@ -209,9 +214,9 @@ public class PoissonCalculatorTest
 			double p = ChiSquaredDistributionTable.computePValue(llr, df);
 			double q = ChiSquaredDistributionTable.computeQValue(llr, df);
 			TestSettings.info(
-					"a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f, q=%f (significant=%b @ %.3f, significant=%b @ %.3f)\n",
-					a[0], ll, ll2, llr, llr2, product.round(new MathContext(4)).toString(), p, q,
-					table.isSignificant(llr, df), table.getQValue(), table2.isSignificant(llr, df), table2.getQValue());
+					"a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f, q=%f (reject=%b @ %.3f, reject=%b @ %.3f)\n",
+					a[0], ll, ll2, llr, llr2, product.round(new MathContext(4)).toString(), p, q, table.reject(llr, df),
+					table.getSignificanceValue(), table2.reject(llr, df), table2.getSignificanceValue());
 			if (max < ll)
 			{
 				max = ll;
