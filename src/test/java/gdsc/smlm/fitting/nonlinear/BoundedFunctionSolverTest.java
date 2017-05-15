@@ -29,7 +29,6 @@ public class BoundedFunctionSolverTest
 	RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
 
 	// Basic Gaussian
-	static double bias = 100;
 	static double[] params = new double[7];
 	static double[] base = { 0.8, 1, 1.2 };
 	static double[] signal = { 1000, 2000, 5000, 10000 }; // 100, 200, 400, 800 };
@@ -66,7 +65,117 @@ public class BoundedFunctionSolverTest
 		defaultClampValues[Gaussian2DFunction.Y_SD] = 3;
 	}
 
-	// TODO - Test if local search param if useful when using clamping
+	// The following tests ensure that the LVM can fit data without 
+	// requiring a bias (i.e. an offset to the background).
+	// In a previous version the LVM fitter was stable only if a bias existed.
+	// The exact source of this instability is unknown as it could be due to 
+	// how the data was processed before or after fitting, or within the LVM 
+	// fitter itself. However the process should be the same without a bias
+	// and these tests ensure that is true.
+
+	@Test
+	public void fitSingleGaussianLVMWithoutBias()
+	{
+		fitSingleGaussianLVMWithoutBias(false, 0);
+	}
+
+	@Test
+	public void fitSingleGaussianCLVMWithoutBias()
+	{
+		fitSingleGaussianLVMWithoutBias(false, 1);
+	}
+
+	@Test
+	public void fitSingleGaussianDCLVMWithoutBias()
+	{
+		fitSingleGaussianLVMWithoutBias(false, 2);
+	}
+
+	@Test
+	public void fitSingleGaussianBLVMWithoutBias()
+	{
+		fitSingleGaussianLVMWithoutBias(true, 0);
+	}
+
+	@Test
+	public void fitSingleGaussianBCLVMWithoutBias()
+	{
+		fitSingleGaussianLVMWithoutBias(true, 1);
+	}
+
+	@Test
+	public void fitSingleGaussianBDCLVMWithoutBias()
+	{
+		fitSingleGaussianLVMWithoutBias(true, 2);
+	}
+
+	private void fitSingleGaussianLVMWithoutBias(boolean applyBounds, int clamping)
+	{
+		double bias = 100;
+
+		NonLinearFit solver = getLVM((applyBounds) ? 2 : 1, clamping, false);
+		NonLinearFit solver2 = getLVM((applyBounds) ? 2 : 1, clamping, false);
+
+		String name = getLVMName(applyBounds, clamping, false);
+
+		int LOOPS = 5;
+		randomGenerator.setSeed(seed);
+		StoredDataStatistics[] stats = new StoredDataStatistics[6];
+
+		for (double s : signal)
+		{
+			double[] expected = createParams(1, s, 0, 0, 1);
+			double[] lower = null, upper = null;
+			if (applyBounds)
+			{
+				lower = createParams(0, s * 0.5, -0.2, -0.2, 0.8);
+				upper = createParams(3, s * 2, 0.2, 0.2, 1.2);
+				solver.setBounds(lower, upper);
+			}
+
+			double[] expected2 = addBiasToParams(expected, bias);
+			if (applyBounds)
+			{
+				double[] lower2 = addBiasToParams(lower, bias);
+				double[] upper2 = addBiasToParams(upper, bias);
+				solver2.setBounds(lower2, upper2);
+			}
+
+			for (double n : noise)
+			{
+				for (int loop = LOOPS; loop-- > 0;)
+				{
+					double[] data = drawGaussian(expected, n);
+					double[] data2 = data.clone();
+					for (int i = 0; i < data.length; i++)
+						data2[i] += bias;
+
+					for (int i = 0; i < stats.length; i++)
+						stats[i] = new StoredDataStatistics();
+
+					for (double db : base)
+						for (double dx : shift)
+							for (double dy : shift)
+								for (double dsx : factor)
+								{
+									double[] p = createParams(db, s, dx, dy, dsx);
+									double[] p2 = addBiasToParams(p, bias);
+
+									double[] fp = fitGaussian(solver, data, p, expected);
+									double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
+
+									// The result should be the same without a bias
+									Assert.assertEquals(name + " Iterations", solver.getEvaluations(),
+											solver2.getEvaluations());
+									fp2[0] -= bias;
+									Assert.assertArrayEquals(name + " Solution", fp, fp2, 1e-6);
+								}
+				}
+			}
+		}
+	}
+
+	// TODO - Test if local search param is useful when using clamping
 
 	// Standard LVM
 	@Test
@@ -135,7 +244,7 @@ public class BoundedFunctionSolverTest
 
 	private void fitSingleGaussianLVM(int bounded, int clamping, boolean mle)
 	{
-		canFitSingleGaussian(getLVM(bounded, clamping, mle), bounded == 2, !mle);
+		canFitSingleGaussian(getLVM(bounded, clamping, mle), bounded == 2);
 	}
 
 	// Is Bounded/Clamped LVM better?
@@ -253,7 +362,7 @@ public class BoundedFunctionSolverTest
 	{
 		NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
 		NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
-		canFitSingleGaussianBetter(solver, bounded, !mle, solver2, bounded2, !mle2, getLVMName(bounded, clamping, mle),
+		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getLVMName(bounded, clamping, mle),
 				getLVMName(bounded2, clamping2, mle2));
 	}
 
@@ -286,25 +395,25 @@ public class BoundedFunctionSolverTest
 				((mle) ? " MLE" : "");
 	}
 
-	private void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds, boolean withBias)
+	private void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds)
 	{
 		randomGenerator.setSeed(seed);
 		for (double s : signal)
 		{
-			double[] expected = createParams(1, s, 0, 0, 1, withBias);
-			double[] lower = createParams(0, s * 0.5, -0.2, -0.2, 0.8, withBias);
-			double[] upper = createParams(3, s * 2, 0.2, 0.2, 1.2, withBias);
+			double[] expected = createParams(1, s, 0, 0, 1);
+			double[] lower = createParams(0, s * 0.5, -0.2, -0.2, 0.8);
+			double[] upper = createParams(3, s * 2, 0.2, 0.2, 1.2);
 			if (applyBounds)
 				solver.setBounds(lower, upper);
 			for (double n : noise)
 			{
-				double[] data = drawGaussian(expected, n, withBias);
+				double[] data = drawGaussian(expected, n);
 				for (double db : base)
 					for (double dx : shift)
 						for (double dy : shift)
 							for (double dsx : factor)
 							{
-								double[] p = createParams(db, s, dx, dy, dsx, withBias);
+								double[] p = createParams(db, s, dx, dy, dsx);
 								double[] fp = fitGaussian(solver, data, p, expected);
 								for (int i = 0; i < expected.length; i++)
 								{
@@ -324,12 +433,11 @@ public class BoundedFunctionSolverTest
 		}
 	}
 
-	private void canFitSingleGaussianBetter(FunctionSolver solver, boolean applyBounds, boolean withBias,
-			FunctionSolver solver2, boolean applyBounds2, boolean withBias2, String name, String name2)
+	private void canFitSingleGaussianBetter(FunctionSolver solver, boolean applyBounds, FunctionSolver solver2,
+			boolean applyBounds2, String name, String name2)
 	{
 		int LOOPS = 5;
 		randomGenerator.setSeed(seed);
-		double bias2 = (withBias != withBias2) ? (withBias) ? -bias : bias : 0;
 		StoredDataStatistics[] stats = new StoredDataStatistics[6];
 		String[] statName = { "Signal", "X", "Y" };
 
@@ -341,30 +449,23 @@ public class BoundedFunctionSolverTest
 		int i1 = 0, i2 = 0;
 		for (double s : signal)
 		{
-			double[] expected = createParams(1, s, 0, 0, 1, withBias);
+			double[] expected = createParams(1, s, 0, 0, 1);
+			double[] lower = null, upper = null;
+			if (applyBounds || applyBounds2)
+			{
+				lower = createParams(0, s * 0.5, -0.2, -0.2, 0.8);
+				upper = createParams(3, s * 2, 0.2, 0.2, 1.2);
+			}
 			if (applyBounds)
-			{
-				double[] lower = createParams(0, s * 0.5, -0.2, -0.2, 0.8, withBias);
-				double[] upper = createParams(3, s * 2, 0.2, 0.2, 1.2, withBias);
 				solver.setBounds(lower, upper);
-			}
-
-			double[] expected2 = createParams(1, s, 0, 0, 1, withBias2);
 			if (applyBounds2)
-			{
-				double[] lower2 = createParams(0, s * 0.5, -0.2, -0.2, 0.8, withBias2);
-				double[] upper2 = createParams(3, s * 2, 0.2, 0.2, 1.2, withBias2);
-				solver2.setBounds(lower2, upper2);
-			}
+				solver2.setBounds(lower, upper);
 
 			for (double n : noise)
 			{
 				for (int loop = LOOPS; loop-- > 0;)
 				{
-					double[] data = drawGaussian(expected, n, withBias);
-					double[] data2 = data.clone();
-					for (int i = 0; i < data.length; i++)
-						data2[i] += bias2;
+					double[] data = drawGaussian(expected, n);
 
 					for (int i = 0; i < stats.length; i++)
 						stats[i] = new StoredDataStatistics();
@@ -374,21 +475,20 @@ public class BoundedFunctionSolverTest
 							for (double dy : shift)
 								for (double dsx : factor)
 								{
-									double[] p = createParams(db, s, dx, dy, dsx, withBias);
+									double[] p = createParams(db, s, dx, dy, dsx);
 									double[] fp = fitGaussian(solver, data, p, expected);
 									i1 += solver.getEvaluations();
 
-									double[] p2 = createParams(db, s, dx, dy, dsx, withBias2);
-									double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
+									double[] fp2 = fitGaussian(solver2, data, p, expected);
 									i2 += solver2.getEvaluations();
 
 									// Get the mean and sd (the fit precision)
-									compare(fp, expected, fp2, expected2, Gaussian2DFunction.SIGNAL, stats[0],
+									compare(fp, expected, fp2, expected, Gaussian2DFunction.SIGNAL, stats[0],
 											stats[1]);
 
-									compare(fp, expected, fp2, expected2, Gaussian2DFunction.X_POSITION, stats[2],
+									compare(fp, expected, fp2, expected, Gaussian2DFunction.X_POSITION, stats[2],
 											stats[3]);
-									compare(fp, expected, fp2, expected2, Gaussian2DFunction.Y_POSITION, stats[4],
+									compare(fp, expected, fp2, expected, Gaussian2DFunction.Y_POSITION, stats[4],
 											stats[5]);
 
 									// Use the distance
@@ -528,16 +628,21 @@ public class BoundedFunctionSolverTest
 		stats2.add(o2 - e2);
 	}
 
-	private double[] createParams(double db, double signal, double dx, double dy, double dsx, boolean withBias)
+	private double[] createParams(double db, double signal, double dx, double dy, double dsx)
 	{
 		double[] p = params.clone();
 		p[Gaussian2DFunction.BACKGROUND] *= db;
-		if (withBias)
-			p[Gaussian2DFunction.BACKGROUND] += bias;
 		p[Gaussian2DFunction.SIGNAL] = signal;
 		p[Gaussian2DFunction.X_POSITION] += dx;
 		p[Gaussian2DFunction.Y_POSITION] += dy;
 		p[Gaussian2DFunction.X_SD] *= dsx;
+		return p;
+	}
+
+	private double[] addBiasToParams(double[] p, double bias)
+	{
+		p = p.clone();
+		p[Gaussian2DFunction.BACKGROUND] += bias;
 		return p;
 	}
 
@@ -561,17 +666,16 @@ public class BoundedFunctionSolverTest
 	 * @param withBias
 	 * @return The data
 	 */
-	private double[] drawGaussian(double[] params, double noise, boolean withBias)
+	private double[] drawGaussian(double[] params, double noise)
 	{
 		double[] data = new double[size * size];
 		int n = params.length / 6;
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, GaussianFunctionFactory.FIT_CIRCLE,
 				null);
 		f.initialise(params);
-		final double bias = (withBias) ? BoundedFunctionSolverTest.bias : 0;
 		for (int i = 0; i < data.length; i++)
 		{
-			data[i] = bias + dataGenerator.nextPoisson(f.eval(i) - bias);
+			data[i] = dataGenerator.nextPoisson(f.eval(i));
 		}
 		if (noise != 0)
 			for (int i = 0; i < data.length; i++)

@@ -152,7 +152,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 			}
 			applyBounds(ap, gradientIndices);
 
-			// If using clamping should we can optionally only update lambda if we 
+			// If using clamping we can optionally only update lambda if we 
 			// are close to the correct solution.
 			if (localSearch != 0)
 				nonLocalSearch = checkForNonLocalSearch(a, gradientIndices, m, ap);
