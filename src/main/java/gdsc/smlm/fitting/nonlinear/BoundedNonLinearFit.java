@@ -35,34 +35,37 @@ public class BoundedNonLinearFit extends NonLinearFit
 	private ParameterBounds bounds;
 
 	/**
-	 * Default constructor
-	 * 
+	 * Default constructor.
+	 *
 	 * @param func
 	 *            The function to fit
+	 * @param bounds
+	 *            the bounds
 	 */
-	public BoundedNonLinearFit(NonLinearFunction func)
+	public BoundedNonLinearFit(NonLinearFunction func, ParameterBounds bounds)
 	{
-		super(func, null);
-		bounds = new ParameterBounds(func);
+		this(func, null, bounds);
 	}
 
 	/**
-	 * Default constructor
-	 * 
+	 * Default constructor.
+	 *
 	 * @param func
 	 *            The function to fit
 	 * @param sc
 	 *            The stopping criteria
+	 * @param bounds
+	 *            the bounds
 	 */
-	public BoundedNonLinearFit(NonLinearFunction func, StoppingCriteria sc)
+	public BoundedNonLinearFit(NonLinearFunction func, StoppingCriteria sc, ParameterBounds bounds)
 	{
 		super(func, sc);
-		bounds = new ParameterBounds(func);
+		setBounds(bounds);
 	}
 
 	/**
-	 * Default constructor
-	 * 
+	 * Default constructor.
+	 *
 	 * @param func
 	 *            The function to fit
 	 * @param sc
@@ -71,12 +74,14 @@ public class BoundedNonLinearFit extends NonLinearFit
 	 *            Validate the Levenberg-Marquardt fit solution to the specified number of significant digits
 	 * @param maxAbsoluteError
 	 *            Validate the Levenberg-Marquardt fit solution using the specified maximum absolute error
+	 * @param bounds
+	 *            the bounds
 	 */
 	public BoundedNonLinearFit(NonLinearFunction func, StoppingCriteria sc, int significantDigits,
-			double maxAbsoluteError)
+			double maxAbsoluteError, ParameterBounds bounds)
 	{
 		super(func, sc, significantDigits, maxAbsoluteError);
-		bounds = new ParameterBounds(func);
+		setBounds(bounds);
 	}
 
 	/*
@@ -175,44 +180,6 @@ public class BoundedNonLinearFit extends NonLinearFit
 	}
 
 	/**
-	 * Sets the parameter specific clamp values. This is the maximum permissible update to the parameter.
-	 * <p>
-	 * See Stetson PB (1987) DAOPHOT: A compute program for crowded-field stellar photometry. Publ Astrom Soc Pac
-	 * 99:191-222.
-	 * <p>
-	 * Warning: If the function is changed then the clamp values may require updating. However setting a new function
-	 * does not set the clamp values to null to allow caching when the clamp values are unchanged.
-	 *
-	 * @param clampValues
-	 *            the new clamp values
-	 */
-	public void setClampValues(double[] clampValues)
-	{
-		bounds.setClampValues(clampValues);
-	}
-
-	/**
-	 * Checks if is dynamic clamping. The clamping factor will be reduced by a factor of 2 when the direction changes.
-	 *
-	 * @return true, if is dynamic clamping
-	 */
-	public boolean isDynamicClamp()
-	{
-		return bounds.isDynamicClamp();
-	}
-
-	/**
-	 * Set to true to reduce the clamp factor by a factor of when the direction changes.
-	 *
-	 * @param dynamicClamp
-	 *            the new dynamic clamp
-	 */
-	public void setDynamicClamp(boolean dynamicClamp)
-	{
-		bounds.setDynamicClamp(dynamicClamp);
-	}
-
-	/**
 	 * Warning: If the function is changed then the clamp values may require updating. However setting a new function
 	 * does not set the clamp values to null to allow caching when the clamp values are unchanged, e.g. evaluation of a
 	 * different function in the same parameter space.
@@ -227,7 +194,19 @@ public class BoundedNonLinearFit extends NonLinearFit
 	public void setGradientFunction(GradientFunction f)
 	{
 		super.setGradientFunction(f);
-		if (bounds != null)
-			bounds.setGradientFunction(f);
+		bounds.setGradientFunction(f);
+	}
+
+	/**
+	 * Sets the bounds. This can be used for dynamic clamping of the parameter updates.
+	 *
+	 * @param bounds
+	 *            the new bounds
+	 */
+	public void setBounds(ParameterBounds bounds)
+	{
+		if (bounds == null)
+			bounds = new ParameterBounds(f);
+		this.bounds = bounds;
 	}
 }

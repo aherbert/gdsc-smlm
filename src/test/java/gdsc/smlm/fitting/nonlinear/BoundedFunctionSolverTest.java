@@ -372,17 +372,15 @@ public class BoundedFunctionSolverTest
 				null);
 		StoppingCriteria sc = new ErrorStoppingCriteria(5);
 		sc.setMaximumIterations(100);
-		NonLinearFit solver = (bounded != 0 || clamping != 0) ? new BoundedNonLinearFit(f, sc)
+		NonLinearFit solver = (bounded != 0 || clamping != 0) ? new BoundedNonLinearFit(f, sc, null)
 				: new NonLinearFit(f, sc);
 		if (clamping != 0)
 		{
 			BoundedNonLinearFit bsolver = (BoundedNonLinearFit) solver;
-			bsolver.setClampValues(defaultClampValues);
-			bsolver.setDynamicClamp(clamping == 2);
-			// Local search anecdotally only works with clamped LVM fitters that are not bounded.
-			// It must act like a soft-bounding search. For now this is not a used feature and
-			// will not be formally tested 
-			//bsolver.setLocalSearch(3);
+			ParameterBounds bounds = new ParameterBounds(f);
+			bounds.setClampValues(defaultClampValues);
+			bounds.setDynamicClamp(clamping == 2);
+			bsolver.setBounds(bounds);
 		}
 		solver.setMLE(mle);
 		solver.setInitialLambda(1);
@@ -483,8 +481,7 @@ public class BoundedFunctionSolverTest
 									i2 += solver2.getEvaluations();
 
 									// Get the mean and sd (the fit precision)
-									compare(fp, expected, fp2, expected, Gaussian2DFunction.SIGNAL, stats[0],
-											stats[1]);
+									compare(fp, expected, fp2, expected, Gaussian2DFunction.SIGNAL, stats[0], stats[1]);
 
 									compare(fp, expected, fp2, expected, Gaussian2DFunction.X_POSITION, stats[2],
 											stats[3]);

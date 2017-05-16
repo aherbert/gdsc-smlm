@@ -24,6 +24,7 @@ import gdsc.smlm.fitting.nonlinear.BoundedNonLinearFit;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
 import gdsc.smlm.fitting.nonlinear.NonLinearFit;
+import gdsc.smlm.fitting.nonlinear.ParameterBounds;
 import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria;
@@ -89,11 +90,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private double relativeThreshold = 1e-6;
 	private double absoluteThreshold = 1e-16;
 
-	// Options for the bounded LVM
+	// Options for clamping
 	private boolean useClamping = false;
 	private boolean useDynamicClamping = false;
 	private double[] clampValues;
 	private int nClampPeaks;
+	private ParameterBounds bounds = null;
 
 	private static double[] defaultClampValues;
 	static
@@ -2062,7 +2064,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			functionSolver.setGradientFunction(gaussianFunction);
 
 			// Note: We must carefully update anything that depends on the function.
-			if (useClamping && functionSolver instanceof BoundedNonLinearFit)
+			if (bounds != null)
 			{
 				// We have to update the clamping.
 				// Note this code is only executed if the clamp settings have not changed
@@ -2071,7 +2073,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				// and the solver).
 				// All that is different is the number of peaks in the function. 
 				if (gaussianFunction.getNPeaks() > nClampPeaks)
-					setClampValues((BoundedNonLinearFit) functionSolver);
+					setClampValues(bounds);
 			}
 		}
 		return functionSolver;
@@ -2083,6 +2085,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private void invalidateFunctionSolver()
 	{
 		functionSolver = null;
+		bounds = null;
 	}
 
 	private BaseFunctionSolver createFunctionSolver()
@@ -2163,9 +2166,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 					throw new IllegalArgumentException("The gain is required for the " + fitSolver.getName());
 				}
 
-				BoundedNonLinearFit bnlinfit = new BoundedNonLinearFit(gaussianFunction, getStoppingCriteria());
 				if (useClamping)
-					setClampValues(bnlinfit);
+				{
+					bounds = new ParameterBounds(gaussianFunction);
+					setClampValues(bounds);
+				}
+				BoundedNonLinearFit bnlinfit = new BoundedNonLinearFit(gaussianFunction, getStoppingCriteria(), bounds);
 				nlinfit = bnlinfit;
 
 				break;
@@ -2198,7 +2204,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		return nlinfit;
 	}
 
-	private void setClampValues(BoundedNonLinearFit bnlinfit)
+	private void setClampValues(ParameterBounds bounds)
 	{
 		double[] clamp = getClampValues();
 		// The units are photons. This is OK for the LVM MLE but not for the LVM.
@@ -2222,8 +2228,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			for (int j = 1; j <= 6; j++)
 				clampValues[i + j] = clamp[j];
 		}
-		bnlinfit.setClampValues(clampValues);
-		bnlinfit.setDynamicClamp(useDynamicClamping);
+		bounds.setClampValues(clampValues);
+		bounds.setDynamicClamp(useDynamicClamping);
 	}
 
 	/**
