@@ -13,6 +13,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
+import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.PoissonCalculator;
 
@@ -514,16 +515,16 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		return initialResidualSumOfSquares;
 	}
 
-	/**
-	 * Set the non-linear function for the {@link #fit(int, double[], double[], double[], double[], double[], double)}
-	 * method
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param sc
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setGradientFunction(gdsc.smlm.function.GradientFunction)
 	 */
-	public void setNonLinearFunction(NonLinearFunction func)
+	public void setGradientFunction(GradientFunction f)
 	{
-		if (func != null)
-			this.f = func;
+		super.setGradientFunction(f);
+		if (!(f instanceof NonLinearFunction))
+			throw new IllegalArgumentException("Function must be a NonLinearFunction");
 	}
 
 	/**
