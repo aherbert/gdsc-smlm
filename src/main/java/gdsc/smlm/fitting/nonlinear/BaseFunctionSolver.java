@@ -83,8 +83,10 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		FitStatus status = computeFit(y, y_fit, a, a_dev);
 		if (status == FitStatus.OK)
 		{
-			lastY = y;
-			lastA = a;
+			if (lastY == null)
+				lastY = y;
+			if (lastA == null)
+				lastA = a;
 			postProcess();
 		}
 		return status;
@@ -125,8 +127,10 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		boolean status = computeValue(y, y_fit, a);
 		if (status)
 		{
-			lastY = y;
-			lastA = a;
+			if (lastY == null)
+				lastY = y;
+			if (lastA == null)
+				lastA = a;
 			postProcess();
 		}
 		return status;
@@ -136,13 +140,13 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * Compute fit.
 	 *
 	 * @param y
-	 *            the y
+	 *            the y values to fit
 	 * @param y_fit
-	 *            the y_fit
+	 *            the final fitted y values
 	 * @param a
-	 *            the a
+	 *            the parameters a
 	 * @param a_dev
-	 *            the a_dev
+	 *            the deviations for the parameters a
 	 * @return the fit status
 	 */
 	public abstract FitStatus computeFit(double[] y, double[] y_fit, double[] a, double[] a_dev);
@@ -151,11 +155,11 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * Evaluate the function.
 	 *
 	 * @param y
-	 *            the y
+	 *            the y values to fit
 	 * @param y_fit
-	 *            the y_fit
+	 *            the final fitted y values
 	 * @param a
-	 *            the a
+	 *            the parameters a
 	 * @return true if evaluated
 	 */
 	public abstract boolean computeValue(double[] y, double[] y_fit, double[] a);
