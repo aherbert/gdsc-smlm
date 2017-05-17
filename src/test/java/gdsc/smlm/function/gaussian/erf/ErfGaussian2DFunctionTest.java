@@ -1,5 +1,6 @@
 package gdsc.smlm.function.gaussian.erf;
 
+import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,6 +26,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		super();
 		// The derivative check can be tighter with the ERF since it is a true integration
 		h_ = 0.0001;
+		eq3 = new DoubleEquality(5e-3, 1e-3); // For the Gaussian integral
 	}
 
 	@Test
@@ -126,10 +128,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 								final double xx = a[targetParameter];
 
 								// Get h to minimise roundoff error
-								double h = h_; //((xx == 0) ? 1 : xx) * h_;
-								final double temp = xx + h;
-								doNothing(temp);
-								h = temp - xx;
+								double h = Precision.representableDelta(xx, h_);
 
 								// Evaluate at (x+h) and (x-h)
 								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
@@ -158,7 +157,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 										//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
 										//		gradientIndex, dyda2[gradientIndex], error);
 										Assert.assertTrue(gradient + " != " + dyda2[gradientIndex],
-												eq.almostEqualComplement(gradient, dyda2[gradientIndex]));
+												eq.almostEqualRelativeOrAbsolute(gradient, dyda2[gradientIndex]));
 									}
 							}
 		System.out.printf("functionComputesSecondTargetGradient %s %s (error %s +/- %s)\n",
@@ -272,10 +271,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 													final double xx = a[targetParameter];
 
 													// Get h to minimise roundoff error
-													double h = h_; //((xx == 0) ? 1 : xx) * h_;
-													final double temp = xx + h;
-													doNothing(temp);
-													h = temp - xx;
+													double h = Precision.representableDelta(xx, h_);
 
 													// Evaluate at (x+h) and (x-h)
 													a = createParameters(background, amplitude1, shape1, cx1, cy1,
@@ -308,7 +304,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
 															//		gradientIndex, dyda2[gradientIndex], error);
 															Assert.assertTrue(gradient + " != " + dyda2[gradientIndex],
-																	eq.almostEqualComplement(gradient,
+																	eq.almostEqualRelativeOrAbsolute(gradient,
 																			dyda2[gradientIndex]));
 														}
 												}

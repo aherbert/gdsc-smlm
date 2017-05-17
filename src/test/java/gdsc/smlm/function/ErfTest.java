@@ -3,6 +3,7 @@ package gdsc.smlm.function;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -436,18 +437,18 @@ public class ErfTest
 		int steps = 10000;
 		double step = (double) range / steps;
 		double delta = 1e-3;
-		DoubleEquality eq = new DoubleEquality(4, 1e-6);
+		DoubleEquality eq = new DoubleEquality(5e-4, 1e-6);
 		for (int i = 0; i < steps; i++)
 		{
 			double x = i * step;
-			double x1 = x + delta;
-			double x2 = x - delta;
+			double x1 = x + Precision.representableDelta(x, delta);
+			double x2 = x - Precision.representableDelta(x, delta);
 			double o1 = erf.erf(x1);
 			double o2 = erf.erf(x2);
 			double delta2 = x1 - x2;
 			double g = (o1 - o2) / delta2;
 			double e = gdsc.smlm.function.Erf.dErf_dx(x);
-			if (!eq.almostEqualComplement(e, g))
+			if (!eq.almostEqualRelativeOrAbsolute(e, g))
 				Assert.assertTrue(x + " : " + e + " != " + g, false);
 		}
 	}

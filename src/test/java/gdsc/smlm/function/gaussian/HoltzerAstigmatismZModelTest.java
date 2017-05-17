@@ -7,7 +7,7 @@ import gdsc.core.utils.DoubleEquality;
 
 public class HoltzerAstigmatismZModelTest
 {
-	protected DoubleEquality eq = new DoubleEquality(5, 1e-7);
+	protected DoubleEquality eq = new DoubleEquality(1e-5, 1e-7);
 
 	// Compute as per Numerical Recipes 5.7.
 	// Approximate error accuracy in single precision: Ef
@@ -65,11 +65,11 @@ public class HoltzerAstigmatismZModelTest
 			//double error = DoubleEquality.relativeError(o, e);
 			if (Math.abs(z) > 0.02)
 				Assert.assertTrue(e1 + " sign != " + o1, (e1 * o1) >= 0);
-			Assert.assertTrue(e1 + " != " + o1, eq.almostEqualComplement(e1, o1));
+			Assert.assertTrue(e1 + " != " + o1, eq.almostEqualRelativeOrAbsolute(e1, o1));
 
 			if (Math.abs(z) > 0.02)
 				Assert.assertTrue(e2 + " sign != " + o2, (e2 * o2) >= 0);
-			Assert.assertTrue(e2 + " != " + o2, eq.almostEqualComplement(e2, o2));
+			Assert.assertTrue(e2 + " != " + o2, eq.almostEqualRelativeOrAbsolute(e2, o2));
 		}
 	}
 }

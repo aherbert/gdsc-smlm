@@ -23,7 +23,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canSolveLinearEquation()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -58,7 +58,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canSolveLinearEquationWithZeroInB()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -93,7 +93,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canSolveLinearEquationWithZeroInA()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -130,7 +130,7 @@ public class EJMLLinearSolverTest
 	public void canSolveLinearEquationWithZerosInA()
 	{
 		EJMLLinearSolver solver = new EJMLLinearSolver();
-		DoubleEquality eq = new DoubleEquality(3, 1e-16);
+		DoubleEquality eq = new DoubleEquality(5e-3, 1e-16);
 		solver.setEqual(eq);
 
 		// Solves (one) linear equation, a x = b, for x[n]
@@ -171,7 +171,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvert()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -201,7 +201,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvertWithZeros()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -237,7 +237,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvertDiagonal()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -261,7 +261,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvertDiagonalWithZeros()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(3, 1e-6);
+		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -300,7 +300,7 @@ public class EJMLLinearSolverTest
 			this.a = a;
 			this.b = b;
 			// Check the solver gets a good answer
-			solver.setEqual(new DoubleEquality(3, 1e-6));
+			solver.setEqual(new DoubleEquality(5e-3, 1e-6));
 			Object data = getData(0);
 
 			a = (double[][][]) ((Object[]) data)[0];

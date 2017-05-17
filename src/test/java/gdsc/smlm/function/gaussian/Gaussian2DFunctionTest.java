@@ -8,13 +8,15 @@ import gdsc.core.utils.Statistics;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
+import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
 public abstract class Gaussian2DFunctionTest
 {
-	protected DoubleEquality eq = new DoubleEquality(2, 1e-3);
-	protected DoubleEquality eq2 = new DoubleEquality(5, 1e-8);
+	protected DoubleEquality eq = new DoubleEquality(1e-2, 1e-3);
+	protected DoubleEquality eq2 = new DoubleEquality(1e-5, 1e-8);
+	protected DoubleEquality eq3 = new DoubleEquality(1e-1, 1e-3); // For the Gaussian integral
 
 	// Compute as per Numerical Recipes 5.7.
 	// Approximate error accuracy in single precision: Ef
@@ -184,7 +186,7 @@ public abstract class Gaussian2DFunctionTest
 										double y1 = f1.eval(y * maxx + x, dyda);
 										double y2 = f1.eval(y * maxx + x);
 
-										Assert.assertTrue(y1 + " != " + y2, eq2.almostEqualComplement(y1, y2));
+										Assert.assertTrue(y1 + " != " + y2, eq2.almostEqualRelativeOrAbsolute(y1, y2));
 									}
 	}
 
@@ -262,10 +264,7 @@ public abstract class Gaussian2DFunctionTest
 								final double xx = a[targetParameter];
 
 								// Get h to minimise roundoff error
-								double h = h_; //((xx == 0) ? 1 : xx) * h_;
-								final double temp = xx + h;
-								doNothing(temp);
-								h = temp - xx;
+								double h = Precision.representableDelta(xx, h_);
 
 								// Evaluate at (x+h) and (x-h)
 								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
@@ -293,7 +292,7 @@ public abstract class Gaussian2DFunctionTest
 										//		gradientIndex, dyda2[gradientIndex], error);
 										//System.out.printf("[%d,%d] %f == [%d] %f?\n", x, y, gradient, gradientIndex, dyda[gradientIndex]);
 										Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
-												eq.almostEqualComplement(gradient, dyda[gradientIndex]));
+												eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]));
 									}
 							}
 		System.out.printf("functionComputesTargetGradient %s %s (error %s +/- %s)\n", f1.getClass().getSimpleName(),
@@ -341,7 +340,7 @@ public abstract class Gaussian2DFunctionTest
 															double y2 = f2.eval(y * maxx + x);
 
 															Assert.assertTrue(y1 + " != " + y2,
-																	eq2.almostEqualComplement(y1, y2));
+																	eq2.almostEqualRelativeOrAbsolute(y1, y2));
 														}
 	}
 
@@ -448,10 +447,7 @@ public abstract class Gaussian2DFunctionTest
 													final double xx = a[targetParameter];
 
 													// Get h to minimise roundoff error
-													double h = h_; //((xx == 0) ? 1 : xx) * h_;
-													double temp = xx + h;
-													doNothing(temp);
-													h = temp - xx;
+													double h = Precision.representableDelta(xx, h_);
 
 													// Evaluate at (x+h) and (x-h)
 													a = createParameters(background, amplitude1, shape1, cx1, cy1,
@@ -483,7 +479,7 @@ public abstract class Gaussian2DFunctionTest
 															//		gradientIndex, dyda2[gradientIndex], error);
 															//System.out.printf("[%d,%d] %f == [%d] %f?\n", x, y, gradient, gradientIndex, dyda[gradientIndex]);
 															Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
-																	eq.almostEqualComplement(gradient,
+																	eq.almostEqualRelativeOrAbsolute(gradient,
 																			dyda[gradientIndex]));
 														}
 												}
@@ -536,7 +532,7 @@ public abstract class Gaussian2DFunctionTest
 								double r2 = f2.eval(index);
 								//System.out.printf("%d,%d r1=%f\n", index%maxx, index/maxx, r1);
 								sum += r1;
-								final boolean ok = eq2.almostEqualComplement(r1, r2);
+								final boolean ok = eq2.almostEqualRelativeOrAbsolute(r1, r2);
 								if (!ok)
 									Assert.assertTrue(
 											String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx),
@@ -544,7 +540,7 @@ public abstract class Gaussian2DFunctionTest
 							}
 
 							Assert.assertTrue(sum + " != " + amplitude1,
-									eq.almostEqualComplement((double) sum, amplitude1));
+									eq3.almostEqualRelativeOrAbsolute((double) sum, amplitude1));
 						}
 	}
 

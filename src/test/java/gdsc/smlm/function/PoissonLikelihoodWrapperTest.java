@@ -6,6 +6,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,8 +22,8 @@ public class PoissonLikelihoodWrapperTest
 	// Set this at the range output from cumulativeProbabilityIsOneWithIntegerData
 	int[] maxRange = { 6, 7, 10, 13, 17, 29, 149, 1141 };
 
-	DoubleEquality eqPerDatum = new DoubleEquality(2, 0.01);
-	DoubleEquality eq = new DoubleEquality(3, 0.001);
+	DoubleEquality eqPerDatum = new DoubleEquality(5e-2, 0.01);
+	DoubleEquality eq = new DoubleEquality(5e-3, 0.001);
 
 	static String[] NAME;
 	static
@@ -203,10 +204,7 @@ public class PoissonLikelihoodWrapperTest
 								final double xx = a[targetParameter];
 
 								// Get h to minimise roundoff error
-								double h = h_; // ((xx == 0) ? 1 : xx) * h_;
-								final double temp = xx + h;
-								doNothing(temp);
-								h = temp - xx;
+								double h = Precision.representableDelta(xx, h_);
 
 								for (int x : testx)
 									for (int y : testy)
@@ -230,7 +228,7 @@ public class PoissonLikelihoodWrapperTest
 										if (!ok)
 											Assert.assertTrue(NAME[targetParameter] + ": " + gradient + " != " +
 													dyda[gradientIndex], ok);
-										ok = eqPerDatum.almostEqualComplement(gradient, dyda[gradientIndex]);
+										ok = eqPerDatum.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
 										if (ok)
 											count++;
 										total++;
@@ -395,10 +393,7 @@ public class PoissonLikelihoodWrapperTest
 								final double xx = a[targetParameter];
 
 								// Get h to minimise roundoff error
-								double h = h_; // ((xx == 0) ? 1 : xx) * h_;
-								final double temp = xx + h;
-								doNothing(temp);
-								h = temp - xx;
+								double h = Precision.representableDelta(xx, h_);
 
 								ff1.likelihood(getVariables(indices, a), dyda);
 
@@ -417,7 +412,7 @@ public class PoissonLikelihoodWrapperTest
 								if (!ok)
 									Assert.assertTrue(
 											NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex], ok);
-								ok = eq.almostEqualComplement(gradient, dyda[gradientIndex]);
+								ok = eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
 								if (ok)
 									count++;
 								total++;
@@ -444,11 +439,6 @@ public class PoissonLikelihoodWrapperTest
 		int i = f.findGradientIndex(targetParameter);
 		Assert.assertTrue("Cannot find gradient index", i >= 0);
 		return i;
-	}
-
-	private void doNothing(double f)
-	{
-
 	}
 
 	double[] createParameters(double... args)

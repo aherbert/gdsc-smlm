@@ -13,6 +13,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,8 +26,8 @@ public class SCMOSLikelihoodWrapperTest
 {
 	private double[] photons = { 1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10, 100, 1000 };
 
-	DoubleEquality eqPerDatum = new DoubleEquality(2, 0.01);
-	DoubleEquality eq = new DoubleEquality(3, 0.001);
+	DoubleEquality eqPerDatum = new DoubleEquality(5e12, 0.01);
+	DoubleEquality eq = new DoubleEquality(5e-3, 0.001);
 
 	static String[] NAME;
 	static
@@ -239,10 +240,7 @@ public class SCMOSLikelihoodWrapperTest
 								final double xx = a[targetParameter];
 
 								// Get h to minimise roundoff error
-								double h = h_; // ((xx == 0) ? 1 : xx) * h_;
-								final double temp = xx + h;
-								doNothing(temp);
-								h = temp - xx;
+								double h = Precision.representableDelta(xx, h_);
 
 								for (int x : testx)
 									for (int y : testy)
@@ -266,7 +264,7 @@ public class SCMOSLikelihoodWrapperTest
 										if (!ok)
 											Assert.assertTrue(NAME[targetParameter] + ": " + gradient + " != " +
 													dyda[gradientIndex], ok);
-										ok = eqPerDatum.almostEqualComplement(gradient, dyda[gradientIndex]);
+										ok = eqPerDatum.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
 										if (ok)
 											count++;
 										total++;
@@ -437,10 +435,7 @@ public class SCMOSLikelihoodWrapperTest
 								final double xx = a[targetParameter];
 
 								// Get h to minimise roundoff error
-								double h = h_; // ((xx == 0) ? 1 : xx) * h_;
-								final double temp = xx + h;
-								doNothing(temp);
-								h = temp - xx;
+								double h = Precision.representableDelta(xx, h_);
 
 								ff1.likelihood(getVariables(indices, a), dyda);
 
@@ -459,7 +454,7 @@ public class SCMOSLikelihoodWrapperTest
 								if (!ok)
 									Assert.assertTrue(
 											NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex], ok);
-								ok = eq.almostEqualComplement(gradient, dyda[gradientIndex]);
+								ok = eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
 								if (ok)
 									count++;
 								total++;
@@ -486,11 +481,6 @@ public class SCMOSLikelihoodWrapperTest
 		int i = f.findGradientIndex(targetParameter);
 		Assert.assertTrue("Cannot find gradient index", i >= 0);
 		return i;
-	}
-
-	private void doNothing(double f)
-	{
-
 	}
 
 	double[] createParameters(double... args)
