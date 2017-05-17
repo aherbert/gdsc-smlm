@@ -194,7 +194,8 @@ public class BoundedNonLinearFit extends NonLinearFit
 	public void setGradientFunction(GradientFunction f)
 	{
 		super.setGradientFunction(f);
-		bounds.setGradientFunction(f);
+		if (bounds != null)
+			bounds.setGradientFunction(f);
 	}
 
 	/**
