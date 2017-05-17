@@ -324,14 +324,14 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 		sc.initialise(a);
 		if (!nonLinearModel(n, y, a, true))
-			return (calculator.isNaNGradients()) ? FitStatus.INVALID_GRADIENTS_IN_NON_LINEAR_MODEL
+			return (calculator.isNaNGradients()) ? FitStatus.INVALID_GRADIENTS
 					: FitStatus.SINGULAR_NON_LINEAR_MODEL;
 		sc.evaluate(sumOfSquaresWorking[SUM_OF_SQUARES_OLD], sumOfSquaresWorking[SUM_OF_SQUARES_NEW], a);
 
 		while (sc.areNotSatisfied())
 		{
 			if (!nonLinearModel(n, y, a, false))
-				return (calculator.isNaNGradients()) ? FitStatus.INVALID_GRADIENTS_IN_NON_LINEAR_MODEL
+				return (calculator.isNaNGradients()) ? FitStatus.INVALID_GRADIENTS
 						: FitStatus.SINGULAR_NON_LINEAR_MODEL;
 
 			sc.evaluate(sumOfSquaresWorking[SUM_OF_SQUARES_OLD], sumOfSquaresWorking[SUM_OF_SQUARES_NEW], a);

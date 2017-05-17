@@ -22,7 +22,7 @@ public enum FitStatus
 	OK{ public String getName() { return "OK"; }},
 	SINGULAR_NON_LINEAR_MODEL{ public String getName() { return "Singular non-linear model"; }},
 	SINGULAR_NON_LINEAR_SOLUTION{ public String getName() { return "Singular non-linear solution"; }},
-	INVALID_GRADIENTS_IN_NON_LINEAR_MODEL{ public String getName() { return "Invalid gradients in non-linear model"; }},
+	INVALID_GRADIENTS{ public String getName() { return "Invalid gradients"; }},
 	FAILED_TO_CONVERGE{ public String getName() { return "Failed to converge"; }},
 	TOO_MANY_ITERATIONS{ public String getName() { return "Too many iterations"; }},
 	TOO_MANY_EVALUATIONS{ public String getName() { return "Too many evaluations"; }},

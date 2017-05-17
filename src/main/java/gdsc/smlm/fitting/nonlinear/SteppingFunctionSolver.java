@@ -95,58 +95,67 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		if (bounds != null)
 			bounds.initialise();
 
-		lastY = y = prepare(y);
-
-		// First evaluation
-		double currentValue = computeFitValue(y, a);
-
-		int status = 0;
-		while (true)
+		try
 		{
-			// Compute next step
-			computeStep(step);
+			lastY = y = prepareFitValue(y, a);
 
-			// Apply bounds to the step
-			if (bounds != null)
-				bounds.applyBounds(a, step, newA);
+			// First evaluation
+			double currentValue = computeFitValue(y, a);
 
-			// Evaluate
-			double newValue = computeFitValue(y, newA);
-
-			// Check stopping criteria
-			status = tc.converged(currentValue, a, newValue, newA);
-			if (status != 0)
+			int status = 0;
+			while (true)
 			{
-				value = newValue;
-				System.arraycopy(newA, 0, a, 0, a.length);
-				break;
-			}
+				// Compute next step
+				computeStep(step);
 
-			// Check if the step was an improvement
-			if (accept(currentValue, a, newValue, newA))
-			{
-				currentValue = newValue;
-				System.arraycopy(newA, 0, a, 0, a.length);
+				// Apply bounds to the step
 				if (bounds != null)
-					bounds.accepted(a, newA);
+					bounds.applyBounds(a, step, newA);
+
+				// Evaluate
+				double newValue = computeFitValue(y, newA);
+
+				// Check stopping criteria
+				status = tc.converged(currentValue, a, newValue, newA);
+				if (status != 0)
+				{
+					value = newValue;
+					System.arraycopy(newA, 0, a, 0, a.length);
+					break;
+				}
+
+				// Check if the step was an improvement
+				if (accept(currentValue, a, newValue, newA))
+				{
+					currentValue = newValue;
+					System.arraycopy(newA, 0, a, 0, a.length);
+					if (bounds != null)
+						bounds.accepted(a, newA);
+				}
 			}
-		}
 
-		if (BitFlags.anySet(status, ToleranceChecker.STATUS_CONVERGED))
+			if (BitFlags.anySet(status, ToleranceChecker.STATUS_CONVERGED))
+			{
+				if (a_dev != null)
+					computeDeviations(a_dev);
+				if (y_fit != null)
+					computeFunctionValue(y_fit);
+				return FitStatus.OK;
+			}
+
+			// Check the iterations
+			if (BitFlags.areSet(status, ToleranceChecker.STATUS_MAX_ITERATIONS))
+				return FitStatus.TOO_MANY_ITERATIONS;
+
+			// We should not reach here unless we missed something
+			return FitStatus.FAILED_TO_CONVERGE;
+		}
+		catch (FunctionSolverException e)
 		{
-			if (a_dev != null)
-				computeDeviations(a_dev);
-			if (y_fit != null)
-				computeFunctionValue(y_fit);
-			return FitStatus.OK;
+			// XXX - debugging
+			System.out.printf("%s failed: %s\n", getClass().getSimpleName(), e.fitStatus.getName());
+			return e.fitStatus;
 		}
-
-		// Check the iterations
-		if (BitFlags.areSet(status, ToleranceChecker.STATUS_MAX_ITERATIONS))
-			return FitStatus.TOO_MANY_ITERATIONS;
-
-		// We should not reach here unless we missed something
-		return FitStatus.FAILED_TO_CONVERGE;
 	}
 
 	/**
@@ -154,12 +163,11 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 *
 	 * @param y
 	 *            the y
+	 * @param a
+	 *            the parameters
 	 * @return the new y
 	 */
-	protected double[] prepare(double[] y)
-	{
-		return y;
-	}
+	protected abstract double[] prepareFitValue(double[] y, double[] a);
 
 	/**
 	 * Compute the fit value using the parameters. This method is followed by a call to {@link #computeStep(double[])}
@@ -226,12 +234,23 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	public boolean computeValue(double[] y, double[] y_fit, double[] a)
 	{
 		gradientIndices = f.gradientIndices();
-		lastY = y = prepare(y);
+		lastY = y = prepareFunctionValue(y, a);
 		if (y_fit == null)
 			y_fit = new double[y.length];
 		value = computeFunctionValue(y, y_fit, a);
 		return true;
 	}
+
+	/**
+	 * Prepare y for computing the function value, e.g. ensure strictly positive values.
+	 *
+	 * @param y
+	 *            the y
+	 * @param a
+	 *            the parameters
+	 * @return the new y
+	 */
+	protected abstract double[] prepareFunctionValue(double[] y, double[] a);
 
 	/**
 	 * Compute the function value.

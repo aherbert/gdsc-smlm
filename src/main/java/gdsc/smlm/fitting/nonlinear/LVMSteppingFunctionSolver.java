@@ -1,10 +1,13 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.ValueFunction;
+import gdsc.smlm.function.ValueProcedure;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -22,10 +25,22 @@ import gdsc.smlm.function.Gradient1Function;
 /**
  * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a).
  */
-public class LVMSteppingFunctionSolver extends SteppingFunctionSolver
+public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 {
 	protected EJMLLinearSolver solver = new EJMLLinearSolver();
-	protected LVMGradientProcedure calculator;
+	protected LVMGradientProcedure gradientProcedure;
+
+	protected double initialLambda = 0.01;
+	protected double lambda;
+
+	// Alpha = Scaled Hessian matrix
+	// beta  = Gradient vector
+	// We want to solve: A x = b to find the update x
+
+	// Current best alpha and beta 
+	protected double[] alpha, beta;
+	// Working alpha and beta 
+	protected double[] walpha, wbeta;
 
 	// TODO - Determine what a good solution tolerance would be. 
 	// We may not need to be that strict to accept the solution.
@@ -115,44 +130,211 @@ public class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	}
 
 	@Override
+	protected double[] prepareFitValue(double[] y, double[] a)
+	{
+		// Ensure the gradient procedure is created
+		y = prepareY(y);
+		gradientProcedure = createGradientProcedure(y);
+
+		// Set up the current best Hessian matrix and gradient parameter
+		lambda = initialLambda;
+		int n = gradientProcedure.n;
+		alpha = null;
+		beta = null;
+		walpha = new double[n * n];
+		wbeta = new double[n];
+
+		return y;
+	}
+
+	/**
+	 * Prepare Y for the gradient procedure, e.g. ensure positive values.
+	 *
+	 * @param y
+	 *            the y
+	 * @return the new y
+	 */
+	protected double[] prepareY(double[] y)
+	{
+		return y;
+	}
+
+	/**
+	 * Creates the gradient procedure.
+	 *
+	 * @param y
+	 *            the y
+	 * @return the LVM gradient procedure
+	 */
+	protected abstract LVMGradientProcedure createGradientProcedure(double[] y);
+
+	@Override
 	protected double computeFitValue(double[] y, double[] a)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		gradientProcedure.gradient(a);
+
+		if (gradientProcedure.isNaNGradients())
+			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+
+		if (alpha == null)
+		{
+			// This is the first computation:
+			// Set the current alpha and beta
+			alpha = gradientProcedure.getAlphaLinear();
+			beta = gradientProcedure.beta.clone();
+		}
+		else
+		{
+			// This is a subsequent computation:
+			// Store the working alpha and beta which may be accepted
+			gradientProcedure.getAlphaLinear(walpha);
+			gradientProcedure.getBeta(wbeta);
+		}
+
+		return gradientProcedure.value;
 	}
 
 	@Override
 	protected void computeStep(double[] step)
 	{
-		// TODO Auto-generated method stub
+		// Alpha = Scaled Hessian matrix
+		// beta  = Gradient vector
+		// We want to solve: A x = b to find the update x
 
+		final int n = gradientProcedure.n;
+		System.arraycopy(beta, 0, step, 0, n);
+		System.arraycopy(alpha, 0, walpha, 0, alpha.length);
+		final double scale = (1.0 + lambda);
+		for (int i = 0; i < n; i += (n + 1))
+		{
+			// Scale the diagonal of the Hessian to favour direct descent
+			walpha[i] *= scale;
+		}
+		if (!solver.solve(walpha, step))
+			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_MODEL);
 	}
 
 	@Override
 	protected boolean accept(double currentValue, double[] a, double newValue, double[] newA)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		if (newValue <= currentValue)
+		{
+			// Update the current alpha and beta:
+			// We can do this by swapping storage.
+			double[] tmp = alpha;
+			alpha = walpha;
+			walpha = tmp;
+			tmp = beta;
+			beta = wbeta;
+			wbeta = tmp;
+
+			// Decrease Lambda
+			lambda *= 0.1;
+			return true;
+		}
+		else
+		{
+			// Increase Lambda
+			lambda *= 10.0;
+			return false;
+		}
 	}
 
 	@Override
-	protected void computeDeviations(double[] a_dev)
+	protected double[] prepareFunctionValue(double[] y, double[] a)
 	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void computeFunctionValue(double[] y_fit)
-	{
-		// TODO Auto-generated method stub
-
+		// Ensure the gradient procedure is created 
+		y = prepareY(y);
+		gradientProcedure = createGradientProcedure(y);
+		return y;
 	}
 
 	@Override
 	protected double computeFunctionValue(double[] y, double[] y_fit, double[] a)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		gradientProcedure.value(a);
+		return gradientProcedure.value;
+	}
+
+	@Override
+	protected void computeFunctionValue(final double[] y_fit)
+	{
+		computeFunction(y_fit);
+	}
+
+	private static class SimpleValueProcedure implements ValueProcedure
+	{
+		int i = 0;
+		double[] y_fit;
+
+		SimpleValueProcedure(double[] y_fit)
+		{
+			this.y_fit = y_fit;
+		};
+
+		public void execute(double value)
+		{
+			y_fit[i++] = value;
+		}
+	}
+
+	private static class SimpleBValueProcedure extends SimpleValueProcedure
+	{
+		double[] b;
+
+		SimpleBValueProcedure(double[] y_fit, double[] b)
+		{
+			super(y_fit);
+			this.b = b;
+		};
+
+		public void execute(double value)
+		{
+			y_fit[i] = value + b[i];
+			i++;
+		}
+	}
+
+	/**
+	 * Utility method to compute the function values using the preinitialised function.
+	 *
+	 * @param y_fit
+	 *            the function values
+	 */
+	protected void computeFunction(double[] y_fit)
+	{
+		ValueFunction f = (ValueFunction) this.f;
+		f.forEach(new SimpleValueProcedure(y_fit));
+	}
+
+	/**
+	 * Utility method to compute the function values using the preinitialised function.
+	 *
+	 * @param y_fit
+	 *            the function values
+	 * @param b
+	 *            Baseline pre-computed y-values
+	 */
+	protected void computeFunction(final double[] y_fit, final double[] b)
+	{
+		ValueFunction f = (ValueFunction) this.f;
+		f.forEach(new SimpleBValueProcedure(y_fit, b));
+	}
+
+	/**
+	 * @param initialLambda
+	 *            the initial lambda for the Levenberg-Marquardt fitting routine
+	 */
+	public void setInitialLambda(double initialLambda)
+	{
+		this.initialLambda = initialLambda;
+	}
+
+	/**
+	 * @return the initialLambda
+	 */
+	public double getInitialLambda()
+	{
+		return initialLambda;
 	}
 }

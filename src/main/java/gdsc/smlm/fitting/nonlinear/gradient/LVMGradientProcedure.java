@@ -190,6 +190,17 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 	public abstract void getAlphaLinear(double[] alpha);
 
 	/**
+	 * Get the scaled gradient vector (size n) into the provided storage.
+	 *
+	 * @param beta
+	 *            the beta
+	 */
+	public void getBeta(double[] beta)
+	{
+		System.arraycopy(this.beta, 0, beta, 0, n);
+	}
+
+	/**
 	 * @return True if the last calculation produced gradients with NaN values
 	 */
 	public boolean isNaNGradients()
@@ -253,5 +264,11 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 		for (int i = 0, pos = 0; i < n; i++, pos += n)
 			System.arraycopy(data[i], 0, out, pos, n);
 		return out;
+	}
+
+	public void functionValue(double[] y_fit)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }
