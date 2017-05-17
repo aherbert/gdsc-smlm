@@ -26,7 +26,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	private int iterationCount;
 	private int iterationLimit = 1;
 	private int significantDigits;
-	private long maxUlps;
+	private double maxRelativeError;
 	private boolean avoidPlateau = false;
 
 	private int insignificantImprovmentIteration;
@@ -97,10 +97,9 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	{
 		// Use a comparison of error to a set number of significant digits
 
-		final long c = DoubleEquality.signedComplement(newError, oldError);
 		int result;
 
-		if (c > 0)
+		if (newError > oldError)
 		{
 			// Fit is worse
 			// Setting the iteration count to zero forces the negligible improvements to be sequential.
@@ -124,7 +123,8 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 
 			// Check if equal or the fit is near perfect
 			boolean negligable = false;
-			if (Math.abs(c) < maxUlps || newError < 0.001 || false)
+			if (DoubleEquality.almostEqualRelativeOrAbsolute(oldError, newError, maxRelativeError, 0) ||
+					newError < 0.001 || false)
 			{
 				negligable = true;
 			}
@@ -247,7 +247,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	public void setSignificantDigits(int significantDigits)
 	{
 		this.significantDigits = significantDigits;
-		maxUlps = DoubleEquality.getUlps(significantDigits);
+		maxRelativeError = DoubleEquality.getMaxRelativeError(significantDigits);
 	}
 
 	/**

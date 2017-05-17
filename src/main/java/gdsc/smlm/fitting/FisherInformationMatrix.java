@@ -96,7 +96,7 @@ public class FisherInformationMatrix
 				if (crlb[i] < 0)
 				{
 					// A small error is OK
-					if (crlb[i] > -1e-2 || (equal != null && equal.almostEqualComplement(crlb[i], 0)))
+					if (crlb[i] > -1e-2)
 					{
 						crlb[i] = 0;
 						continue;

@@ -131,12 +131,26 @@ public class EJMLLinearSolver
 	}
 
 	/**
+	 * Instantiates a new EJML linear solver with tolerance for the linear solution.
+	 *
+	 * @param maxRelativeError
+	 *            the max relative error for equality
+	 * @param maxAbsoluteError
+	 *            the max absolute error for equality
+	 */
+	public EJMLLinearSolver(double maxRelativeError, double maxAbsoluteError)
+	{
+		this(new DoubleEquality(maxRelativeError, maxAbsoluteError));
+	}
+
+	/**
 	 * Instantiates a new EJML linear solver with tolerance for the linear solution
 	 *
 	 * @param significantDigits
 	 *            the significant digits for equality
 	 * @param maxAbsoluteError
 	 *            the max absolute error for equality
+	 * @deprecated
 	 */
 	public EJMLLinearSolver(int significantDigits, double maxAbsoluteError)
 	{
@@ -336,7 +350,7 @@ public class EJMLLinearSolver
 			{
 				bi += A.data[index++] * x.data[j];
 			}
-			if (!equal.almostEqualComplement(b.data[i], bi))
+			if (!equal.almostEqualRelativeOrAbsolute(b.data[i], bi))
 			{
 				//System.out.printf("Bad solution: %g != %g (%g = %d)\n", b.data[i], bi, 
 				//		DoubleEquality.relativeError(b.data[i], bi), DoubleEquality.complement(b.data[i], bi));
@@ -635,7 +649,7 @@ public class EJMLLinearSolver
 
 	private boolean invalid(double e, double o)
 	{
-		if (equal.almostEqualComplement(e, o))
+		if (equal.almostEqualRelativeOrAbsolute(e, o))
 			return false;
 		//System.out.printf("Bad solution: %g != %g (%g = %d)\n", e, o, DoubleEquality.relativeError(e, o),
 		//		DoubleEquality.complement(e, o));
@@ -1011,7 +1025,7 @@ public class EJMLLinearSolver
 		// This will require that we have the original matrix A used to initialise the solver.
 
 		System.arraycopy(a_inv, 0, a, 0, a_inv.length);
-		
+
 		return true;
 	}
 

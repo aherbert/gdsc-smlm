@@ -138,7 +138,7 @@ public class FisherInformationMatrixTest
 
 		// Create matrix
 		FisherInformationMatrix m = new FisherInformationMatrix(I);
-		DoubleEquality eq = new DoubleEquality(3, 1e-6);
+		DoubleEquality eq = new DoubleEquality(1e-3, 1e-6);
 		m.setEqual(eq);
 
 		return m;

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,7 +28,7 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 public class NewtonRaphsonGradient2ProcedureTest
 {
 	boolean speedTests = true;
-	DoubleEquality eq = new DoubleEquality(6, 1e-16);
+	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
@@ -456,7 +457,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 		createData(1, iter, paramsList, yList, true);
 
 		double delta = 1e-3;
-		DoubleEquality eq = new DoubleEquality(3, 1e-3);
+		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -471,7 +472,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 			for (int j = 0; j < nparams; j++)
 			{
 				int k = indices[j];
-				double d = (a[k] == 0) ? 1e-3 : a[k] * delta;
+				double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
 				a2[k] = a[k] + d;
 				double llh = p.computeLogLikelihood(a2);
 				p.computeFirstDerivative(a2);
@@ -486,8 +487,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 				double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
 				//System.out.printf("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f\n", i, k, ll, func.getName(k), a[k], d, 
 				//		gradient1, d1[j], gradient2, d2[j]);
-				Assert.assertTrue("Not same gradient1 @ " + j, eq.almostEqualComplement(gradient1, d1[j]));
-				Assert.assertTrue("Not same gradient2 @ " + j, eq.almostEqualComplement(gradient2, d2[j]));
+				Assert.assertTrue("Not same gradient1 @ " + j, eq.almostEqualRelativeOrAbsolute(gradient1, d1[j]));
+				Assert.assertTrue("Not same gradient2 @ " + j, eq.almostEqualRelativeOrAbsolute(gradient2, d2[j]));
 			}
 		}
 	}

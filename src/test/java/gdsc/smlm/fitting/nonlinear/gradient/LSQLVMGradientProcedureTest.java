@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,7 +29,7 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 public class LSQLVMGradientProcedureTest
 {
 	boolean speedTests = true;
-	DoubleEquality eq = new DoubleEquality(6, 1e-16);
+	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
@@ -435,7 +436,7 @@ public class LSQLVMGradientProcedureTest
 		createData(1, iter, paramsList, yList, true);
 
 		double delta = 1e-3;
-		DoubleEquality eq = new DoubleEquality(3, 1e-3);
+		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -449,7 +450,7 @@ public class LSQLVMGradientProcedureTest
 			for (int j = 0; j < nparams; j++)
 			{
 				int k = indices[j];
-				double d = (a[k] == 0) ? 1e-3 : a[k] * delta;
+				double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
 				a2[k] = a[k] + d;
 				p.value(a2);
 				double s1 = p.value;
@@ -465,7 +466,7 @@ public class LSQLVMGradientProcedureTest
 				double gradient = (s1 - s2) / (2 * d);
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, k, s, func.getName(k), a[k], d, beta[j],
 				//		gradient);
-				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualComplement(beta[j], gradient));
+				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[j], gradient));
 			}
 		}
 	}
@@ -493,7 +494,7 @@ public class LSQLVMGradientProcedureTest
 			Background = 1e-2;
 			createData(1, iter, paramsList, yList, true);
 
-			EJMLLinearSolver solver = new EJMLLinearSolver(5, 1e-6);
+			EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
 
 			for (int i = 0; i < paramsList.size(); i++)
 			{

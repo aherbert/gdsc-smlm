@@ -37,7 +37,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 	public ParameterStoppingCriteria(Gaussian2DFunction func)
 	{
 		super(func);
-		eq = new DoubleEquality(significantDigits, 1e-16);
+		eq = new DoubleEquality(DoubleEquality.getMaxRelativeError(significantDigits), 1e-16);
 	}
 
 	/*
@@ -100,17 +100,17 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 	protected boolean noCoordinateChange(double[] a)
 	{
 		// Old code does not correctly compute difference in angles. This is ignored for now.
-		//return eq.almostEqualComplement(bestA, a);
+		//return eq.almostEqualRelativeOrAbsolute(bestA, a);
 
 		if (func.evaluatesBackground())
 		{
-			if (!eq.almostEqualComplement(bestA[Gaussian2DFunction.BACKGROUND], a[Gaussian2DFunction.BACKGROUND]))
+			if (!eq.almostEqualRelativeOrAbsolute(bestA[Gaussian2DFunction.BACKGROUND], a[Gaussian2DFunction.BACKGROUND]))
 				return false;
 		}
 
 		for (int i = 0; i < peaks; i++)
 		{
-			if (!eq.almostEqualComplement(bestA[i * 6 + Gaussian2DFunction.SIGNAL], a[i * 6 +
+			if (!eq.almostEqualRelativeOrAbsolute(bestA[i * 6 + Gaussian2DFunction.SIGNAL], a[i * 6 +
 					Gaussian2DFunction.SIGNAL]))
 				return false;
 
@@ -126,7 +126,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 
 			for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
 			{
-				if (!eq.almostEqualComplement(bestA[k], a[k]))
+				if (!eq.almostEqualRelativeOrAbsolute(bestA[k], a[k]))
 					return false;
 			}
 		}
@@ -150,7 +150,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 	public void setSignificantDigits(int significantDigits)
 	{
 		this.significantDigits = significantDigits;
-		eq.setSignificantDigits(significantDigits);
+		eq.setMaxRelativeError(DoubleEquality.getMaxRelativeError(significantDigits));
 		angleLimit = 1.0 / Math.pow(10, significantDigits - 1);
 	}
 

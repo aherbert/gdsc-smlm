@@ -88,7 +88,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 */
 	public NonLinearFit(NonLinearFunction func, StoppingCriteria sc)
 	{
-		this(func, sc, 3, 1e-10);
+		this(func, sc, 1e-3, 1e-10);
 	}
 
 	/**
@@ -98,16 +98,16 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 *            The function to fit
 	 * @param sc
 	 *            The stopping criteria
-	 * @param significantDigits
-	 *            Validate the Levenberg-Marquardt fit solution to the specified number of significant digits
+	 * @param maxRelativeError
+	 *            Validate the Levenberg-Marquardt fit solution using the specified maximum relative error
 	 * @param maxAbsoluteError
 	 *            Validate the Levenberg-Marquardt fit solution using the specified maximum absolute error
 	 */
-	public NonLinearFit(NonLinearFunction func, StoppingCriteria sc, int significantDigits, double maxAbsoluteError)
+	public NonLinearFit(NonLinearFunction func, StoppingCriteria sc, double maxRelativeError, double maxAbsoluteError)
 	{
 		super(func);
 		this.func = func;
-		init(sc, significantDigits, maxAbsoluteError);
+		init(sc, maxRelativeError, maxAbsoluteError);
 	}
 
 	@Override
@@ -117,10 +117,10 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		ll = Double.NaN;
 	}
 
-	private void init(StoppingCriteria sc, int significantDigits, double maxAbsoluteError)
+	private void init(StoppingCriteria sc, double maxRelativeError, double maxAbsoluteError)
 	{
 		setStoppingCriteria(sc);
-		solver.setEqual(new DoubleEquality(significantDigits, maxAbsoluteError));
+		solver.setEqual(new DoubleEquality(maxRelativeError, maxAbsoluteError));
 	}
 
 	protected boolean nonLinearModel(int n, double[] y, double[] a, boolean initialStage)

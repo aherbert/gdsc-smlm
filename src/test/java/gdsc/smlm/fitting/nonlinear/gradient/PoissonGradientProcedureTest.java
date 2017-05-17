@@ -21,7 +21,7 @@ import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 public class PoissonGradientProcedureTest
 {
 	boolean speedTests = true;
-	DoubleEquality eq = new DoubleEquality(6, 1e-16);
+	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;

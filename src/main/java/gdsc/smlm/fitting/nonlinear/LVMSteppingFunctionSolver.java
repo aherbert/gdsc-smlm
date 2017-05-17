@@ -30,7 +30,7 @@ public class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	// TODO - Determine what a good solution tolerance would be. 
 	// We may not need to be that strict to accept the solution.
 
-	public static final int DEFAULT_SIGNIFICANT_DIGITS = 3;
+	public static final double DEFAULT_MAX_RELATIVE_ERROR = 1e-3;
 	public static final double DEFAULT_MAX_ABSOLUTE_ERROR = 1e-4;
 
 	/**
@@ -45,28 +45,28 @@ public class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	 */
 	public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f)
 	{
-		this(type, f, DEFAULT_SIGNIFICANT_DIGITS, DEFAULT_MAX_ABSOLUTE_ERROR);
+		this(type, f, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
 	}
 
 	/**
-	 * Create a new stepping function solver
+	 * Create a new stepping function solver.
 	 *
 	 * @param type
 	 *            the type
 	 * @param f
 	 *            the function
-	 * @param significantDigits
-	 *            Validate the Levenberg-Marquardt fit solution to the specified number of significant digits
+	 * @param maxRelativeError
+	 *            Validate the Levenberg-Marquardt fit solution using the specified maximum relative error
 	 * @param maxAbsoluteError
 	 *            Validate the Levenberg-Marquardt fit solution using the specified maximum absolute error
 	 * @throws NullPointerException
 	 *             if the function is null
 	 */
-	public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f, int significantDigits,
+	public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f, double maxRelativeError,
 			double maxAbsoluteError)
 	{
 		super(type, f);
-		solver.setEqual(new DoubleEquality(significantDigits, maxAbsoluteError));
+		solver.setEqual(new DoubleEquality(maxRelativeError, maxAbsoluteError));
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f, ToleranceChecker tc,
 			ParameterBounds bounds)
 	{
-		this(type, f, tc, bounds, DEFAULT_SIGNIFICANT_DIGITS, DEFAULT_MAX_ABSOLUTE_ERROR);
+		this(type, f, tc, bounds, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
 	}
 
 	/**
@@ -100,18 +100,18 @@ public class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	 *            the tolerance checker
 	 * @param bounds
 	 *            the bounds
-	 * @param significantDigits
-	 *            Validate the Levenberg-Marquardt fit solution to the specified number of significant digits
+	 * @param maxRelativeError
+	 *            Validate the Levenberg-Marquardt fit solution using the specified maximum relative error
 	 * @param maxAbsoluteError
 	 *            Validate the Levenberg-Marquardt fit solution using the specified maximum absolute error
 	 * @throws NullPointerException
 	 *             if the function or tolerance checker is null
 	 */
 	public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f, ToleranceChecker tc,
-			ParameterBounds bounds, int significantDigits, double maxAbsoluteError)
+			ParameterBounds bounds, double maxRelativeError, double maxAbsoluteError)
 	{
 		super(type, f, tc, bounds);
-		solver.setEqual(new DoubleEquality(significantDigits, maxAbsoluteError));
+		solver.setEqual(new DoubleEquality(maxRelativeError, maxAbsoluteError));
 	}
 
 	@Override

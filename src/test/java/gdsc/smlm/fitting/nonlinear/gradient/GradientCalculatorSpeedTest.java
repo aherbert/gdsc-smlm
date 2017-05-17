@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,7 +32,7 @@ import gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
 public class GradientCalculatorSpeedTest
 {
 	boolean speedTests = false;
-	DoubleEquality eq = new DoubleEquality(6, 1e-16);
+	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
@@ -228,21 +229,21 @@ public class GradientCalculatorSpeedTest
 		{
 			double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 			double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-			Assert.assertTrue("Result: Not same @ " + i, eq.almostEqualComplement(s, s2));
-			Assert.assertTrue("Observations: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
+			Assert.assertTrue("Result: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
+			Assert.assertTrue("Observations: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
-				Assert.assertTrue("Observations: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
+				Assert.assertTrue("Observations: Not same alpha @ " + i, eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
 		}
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
 			double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-			Assert.assertTrue("N-Result: Not same @ " + i, eq.almostEqualComplement(s, s2));
-			Assert.assertTrue("N-observations: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
+			Assert.assertTrue("N-Result: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
+			Assert.assertTrue("N-observations: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
 				Assert.assertTrue("N-observations: Not same alpha @ " + i,
-						eq.almostEqualComplement(alpha[j], alpha2[j]));
+						eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
 		}
 
 		if (!mle)
@@ -253,22 +254,22 @@ public class GradientCalculatorSpeedTest
 			{
 				double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 				double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-				Assert.assertTrue("Result+Noise: Not same @ " + i, eq.almostEqualComplement(s, s2));
-				Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
+				Assert.assertTrue("Result+Noise: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
+				Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 				for (int j = 0; j < beta.length; j++)
 					Assert.assertTrue("Observations+Noise: Not same alpha @ " + i,
-							eq.almostEqualComplement(alpha[j], alpha2[j]));
+							eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
 			}
 
 			for (int i = 0; i < paramsList.size(); i++)
 			{
 				double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
 				double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-				Assert.assertTrue("N-Result+Noise: Not same @ " + i, eq.almostEqualComplement(s, s2));
-				Assert.assertTrue("N-Observations+Noise: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
+				Assert.assertTrue("N-Result+Noise: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
+				Assert.assertTrue("N-Observations+Noise: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 				for (int j = 0; j < beta.length; j++)
 					Assert.assertTrue("N-Observations+Noise: Not same alpha @ " + i,
-							eq.almostEqualComplement(alpha[j], alpha2[j]));
+							eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
 			}
 		}
 
@@ -277,7 +278,7 @@ public class GradientCalculatorSpeedTest
 		{
 			beta = calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
 			beta2 = calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
-			Assert.assertTrue("Not same diagonal @ " + i, eq.almostEqualComplement(beta, beta2));
+			Assert.assertTrue("Not same diagonal @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 		}
 	}
 
@@ -417,7 +418,7 @@ public class GradientCalculatorSpeedTest
 		int[] x = createData(1, iter, paramsList, yList, true);
 
 		double delta = 1e-3;
-		DoubleEquality eq = new DoubleEquality(3, 1e-3);
+		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -429,7 +430,7 @@ public class GradientCalculatorSpeedTest
 
 			for (int j = 0; j < nparams; j++)
 			{
-				double d = (a[j] == 0) ? 1e-3 : a[j] * delta;
+				double d = Precision.representableDelta(a[j], (a[j] == 0) ? 1e-3 : a[j] * delta);
 				a2[j] = a[j] + d;
 				double s1 = calc.evaluate(x, y, a2, beta2, func);
 				a2[j] = a[j] - d;
@@ -439,7 +440,7 @@ public class GradientCalculatorSpeedTest
 				double gradient = (s1 - s2) / (2 * d);
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, j, s, func.getName(j), a[j], d, beta[j],
 				//		gradient);
-				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualComplement(beta[j], gradient));
+				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[j], gradient));
 			}
 		}
 	}
@@ -514,7 +515,7 @@ public class GradientCalculatorSpeedTest
 			Background = 1e-2;
 			createData(1, iter, paramsList, yList, true);
 
-			EJMLLinearSolver solver = new EJMLLinearSolver(5, 1e-6);
+			EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
 
 			for (int i = 0; i < paramsList.size(); i++)
 			{
