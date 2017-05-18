@@ -428,6 +428,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		// Store the { best, previous, new } sum-of-squares values 
 		sumOfSquaresWorking = new double[3];
 
+		boolean copyYfit = false;
 		if (isMLE())
 		{
 			// We must have positive data
@@ -441,16 +442,26 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 				if (lastY_fit == null || lastY_fit.length < y.length)
 					lastY_fit = new double[y.length];
 				y_fit = lastY_fit;
-			}
-			else
-			{
-				lastY_fit = y_fit;
+				// We will not need to copy y_fit later since lastY_fit is used direct
+				copyYfit = false;
 			}
 		}
 
 		final FitStatus result = doFit(n, y, y_fit, a, a_dev, sc);
 		this.evaluations = this.iterations = sc.getIteration();
 
+		if (isMLE())
+		{
+			// Ensure we have a private copy of the the y_fit since the any calling
+			// code may modify it
+			if (copyYfit)
+			{
+				if (lastY_fit == null || lastY_fit.length < y.length)
+					lastY_fit = new double[y.length];
+				System.arraycopy(y_fit, 0, lastY_fit, 0, y.length);
+			}
+		}		
+		
 		return result;
 	}
 
