@@ -128,7 +128,7 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 		// The last Hessian matrix should be stored in the working alpha
 		if (!solver.invertSymmPosDef(walpha, beta.length))
 			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
-		setDeviations(a_dev, walpha);
+		setDeviationsFromLinearMatrix(a_dev, walpha);
 	}
 
 	/**

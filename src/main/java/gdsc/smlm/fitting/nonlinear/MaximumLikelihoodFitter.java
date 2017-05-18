@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.FixedNonLinearFunction;
@@ -673,11 +674,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
 				// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix.
 				FisherInformationMatrix m = new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
-				double[] crlb = m.crlb(true);
-				Arrays.fill(a_dev, 0);
-				final int[] gradientIndices = f.gradientIndices();
-				for (int i = gradientIndices.length; i-- > 0;)
-					a_dev[gradientIndices[i]] = crlb[i];
+				m.setEqual(new DoubleEquality(1e-3, 1e-3));
+				setDeviations(a_dev, m.crlb(true));
 			}
 
 			// Reverse negative log likelihood for maximum likelihood score

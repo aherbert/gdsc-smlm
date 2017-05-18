@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
@@ -34,7 +34,6 @@ import gdsc.smlm.function.PoissonCalculator;
  */
 public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver implements MLEFunctionSolver
 {
-
 	/** The last Y fit. */
 	protected double[] lastY_fit;
 
@@ -185,9 +184,10 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		p.computeFisherInformation(lastA);
 		p.getLinear(walpha);
 
-		if (!solver.invertSymmPosDef(walpha, beta.length))
-			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
-		setDeviations(a_dev, walpha);
+		// Use a dedicated solver optimised for inverting the matrix diagonal 
+		FisherInformationMatrix m = new FisherInformationMatrix(walpha, beta.length);
+		m.setEqual(solver.getEqual());
+		setDeviations(a_dev, m.crlb(true));
 	}
 
 	/*

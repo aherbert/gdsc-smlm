@@ -205,10 +205,10 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 		System.arraycopy(beta, 0, step, 0, n);
 		System.arraycopy(alpha, 0, walpha, 0, alpha.length);
 		final double scale = (1.0 + lambda);
-		for (int i = 0; i < n; i += (n + 1))
+		for (int i = 0, j = 0; i < n; i++, j += (n + 1))
 		{
 			// Scale the diagonal of the Hessian to favour direct descent
-			walpha[i] *= scale;
+			walpha[j] *= scale;
 		}
 		if (!solver.solve(walpha, step))
 			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_MODEL);

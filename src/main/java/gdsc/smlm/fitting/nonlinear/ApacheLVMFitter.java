@@ -19,6 +19,7 @@ import org.apache.commons.math3.linear.SingularMatrixException;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.math3.util.Precision;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
@@ -142,7 +143,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 				try
 				{
 					double[][] covar = optimum.getCovariances(threshold).getData();
-					setDeviations(a_dev, covar);
+					setDeviationsFromMatrix(a_dev, covar);
 				}
 				catch (SingularMatrixException e)
 				{
@@ -152,16 +153,19 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 					final int[] gradientIndices = f.gradientIndices();
 					final int nparams = gradientIndices.length;
 					GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams);
-					final double[] I = calculator.fisherInformationDiagonal(n, a, (NonLinearFunction) f);
-					Arrays.fill(a_dev, 0);
-					for (int i = nparams; i-- > 0;)
-						a_dev[gradientIndices[i]] = FisherInformationMatrix.reciprocal(I[i]);
+					double[][] alpha = new double[nparams][nparams];
+					double[] beta = new double[nparams];
+					calculator.findLinearised(nparams, y, a, alpha, beta, (NonLinearFunction) f);
+
+					FisherInformationMatrix m = new FisherInformationMatrix(alpha);
+					m.setEqual(new DoubleEquality(1e-3, 1e-3));
+					setDeviations(a_dev, m.crlb(true));
 				}
 			}
-			// Compute sum-of-squares
+			// Compute function value
 			if (y_fit != null)
 			{
-				Gaussian2DFunction f = (Gaussian2DFunction) this.f; 
+				Gaussian2DFunction f = (Gaussian2DFunction) this.f;
 				f.initialise0(a);
 				f.forEach(new ValueProcedure()
 				{
@@ -175,6 +179,8 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 			}
 
 			// As this is unweighted then we can do this to get the sum of squared residuals
+			// This is the same as optimum.getCost() * optimum.getCost(); The getCost() function
+			// just computes the dot product anyway.
 			value = optimum.getResiduals().dotProduct(optimum.getResiduals());
 		}
 		catch (TooManyEvaluationsException e)

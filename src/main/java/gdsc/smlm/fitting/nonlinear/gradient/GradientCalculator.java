@@ -695,7 +695,7 @@ public class GradientCalculator
 	 * @param x
 	 *            n observations
 	 * @param a
-	 *            Set of m coefficients
+	 *            Set of m coefficients (if null then the function must be pre-initialised)
 	 * @param func
 	 *            Non-linear fitting function
 	 * @return I
@@ -731,18 +731,19 @@ public class GradientCalculator
 	 * @param n
 	 *            The number of data points
 	 * @param a
-	 *            Set of m coefficients
+	 *            Set of m coefficients (if null then the function must be pre-initialised)
 	 * @param func
 	 *            Non-linear fitting function
 	 * @return I
 	 */
 	public double[][] fisherInformationMatrix(final int n, final double[] a, final NonLinearFunction func)
 	{
-		final double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[nparams];
 
 		final double[][] alpha = new double[nparams][nparams];
 
-		func.initialise(a);
+		if (a != null)
+			func.initialise(a);
 
 		for (int i = 0; i < n; i++)
 		{

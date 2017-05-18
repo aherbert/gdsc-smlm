@@ -180,7 +180,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 			params[indices[i]] = solution[i];
 	}
 
-	public void setDeviations(double[] deviations, double[][] covar)
+	public void setDeviationsFromMatrix(double[] deviations, double[][] covar)
 	{
 		Arrays.fill(deviations, 0);
 		final int[] indices = f.gradientIndices();
@@ -188,12 +188,21 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 			deviations[indices[i]] = covar[i][i];
 	}
 
+	public void setDeviationsFromLinearMatrix(double[] deviations, double[] covar)
+	{
+		Arrays.fill(deviations, 0);
+		final int[] indices = f.gradientIndices();
+		final int n = indices.length;
+		for (int i = 0, j = 0; i < n; i++, j += (n + 1))
+			deviations[indices[i]] = covar[j];
+	}
+
 	public void setDeviations(double[] deviations, double[] covar)
 	{
 		Arrays.fill(deviations, 0);
 		final int[] indices = f.gradientIndices();
 		final int n = indices.length;
-		for (int i = 0; i < n; i += (n + 1))
+		for (int i = 0; i < n; i++)
 			deviations[indices[i]] = covar[i];
 	}
 

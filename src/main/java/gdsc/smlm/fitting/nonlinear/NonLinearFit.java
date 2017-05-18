@@ -11,6 +11,7 @@ import gdsc.smlm.fitting.WLSEFunctionSolver;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import gdsc.smlm.fitting.nonlinear.gradient.MLEGradientCalculator;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.GradientFunction;
@@ -324,8 +325,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 		sc.initialise(a);
 		if (!nonLinearModel(n, y, a, true))
-			return (calculator.isNaNGradients()) ? FitStatus.INVALID_GRADIENTS
-					: FitStatus.SINGULAR_NON_LINEAR_MODEL;
+			return (calculator.isNaNGradients()) ? FitStatus.INVALID_GRADIENTS : FitStatus.SINGULAR_NON_LINEAR_MODEL;
 		sc.evaluate(sumOfSquaresWorking[SUM_OF_SQUARES_OLD], sumOfSquaresWorking[SUM_OF_SQUARES_NEW], a);
 
 		while (sc.areNotSatisfied())
@@ -359,7 +359,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 				//final double[] I = calculator.fisherInformationDiagonal(n, a, f);
 				Arrays.fill(a_dev, 0);
 				for (int i = gradientIndices.length; i-- > 0;)
-					a_dev[gradientIndices[i]] = FisherInformationMatrix.reciprocalSqrt(I[i]);
+					a_dev[gradientIndices[i]] = FisherInformationMatrix.reciprocal(I[i]);
 			}
 		}
 
@@ -384,12 +384,28 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 */
 	private boolean computeDeviations(double[] a_dev)
 	{
-		// Call the invert method directly on alpha 
-		if (!solver.invertSymmPosDef(alpha))
-			return false;
+		if (isMLE())
+		{
+			// The Hessian matrix refers to the log-likelihood ratio.
+			// Compute and invert a matrix related to the Poisson log-likelihood.
+			// This assumes this does achieve the maximum likelihood estimate for a 
+			// Poisson process.
+			MLEGradientCalculator c = (MLEGradientCalculator) calculator;
+			double[][] I = c.fisherInformationMatrix(lastY.length, null, func);
+			
+			// Use a dedicated solver optimised for inverting the matrix diagonal 
+			FisherInformationMatrix m = new FisherInformationMatrix(I);
+			m.setEqual(solver.getEqual());
+			setDeviations(a_dev, m.crlb(true));
+		}
+		else
+		{
+			// Call the invert method directly on alpha 
+			if (!solver.invertSymmPosDef(alpha))
+				return false;
 
-		setDeviations(a_dev, alpha);
-
+			setDeviationsFromMatrix(a_dev, alpha);
+		}
 		return true;
 	}
 
@@ -460,8 +476,8 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 					lastY_fit = new double[y.length];
 				System.arraycopy(y_fit, 0, lastY_fit, 0, y.length);
 			}
-		}		
-		
+		}
+
 		return result;
 	}
 
