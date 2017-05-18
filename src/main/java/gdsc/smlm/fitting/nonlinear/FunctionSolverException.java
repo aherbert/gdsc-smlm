@@ -16,33 +16,58 @@ import gdsc.smlm.fitting.FitStatus;
  *---------------------------------------------------------------------------*/
 
 /**
- * Exception to throw if a function solver failed
+ * Exception to throw if a function solver failed.
  */
 public class FunctionSolverException extends RuntimeException
 {
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = -5131234527135746186L;
 
 	/** The fit status. This indicates why the solver failed. */
 	public final FitStatus fitStatus;
 
+	/**
+	 * Instantiates a new function solver exception.
+	 *
+	 * @param fitStatus the fit status
+	 */
 	public FunctionSolverException(FitStatus fitStatus)
 	{
 		super();
 		this.fitStatus = fitStatus;
 	}
 
+	/**
+	 * Instantiates a new function solver exception.
+	 *
+	 * @param fitStatus the fit status
+	 * @param message the message
+	 */
 	public FunctionSolverException(FitStatus fitStatus, String message)
 	{
 		super(message);
 		this.fitStatus = fitStatus;
 	}
 
+	/**
+	 * Instantiates a new function solver exception.
+	 *
+	 * @param fitStatus the fit status
+	 * @param message the message
+	 * @param cause the cause
+	 */
 	public FunctionSolverException(FitStatus fitStatus, String message, Throwable cause)
 	{
 		super(message, cause);
 		this.fitStatus = fitStatus;
 	}
 
+	/**
+	 * Instantiates a new function solver exception.
+	 *
+	 * @param fitStatus the fit status
+	 * @param cause the cause
+	 */
 	public FunctionSolverException(FitStatus fitStatus, Throwable cause)
 	{
 		super(cause);
