@@ -337,7 +337,7 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * Gets a reference to the matrix. 
+	 * Gets a reference to the matrix.
 	 *
 	 * @return the matrix
 	 */

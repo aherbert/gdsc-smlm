@@ -34,7 +34,7 @@ public interface GradientFunction
 	 * @return The gradient indices
 	 */
 	int[] gradientIndices();
-	
+
 	/**
 	 * Gets the number of gradients. The function will evaluate this many partial derivatives.
 	 *

@@ -40,7 +40,8 @@ public interface LSEFunctionSolver extends FunctionSolver
 	public double getCoefficientOfDetermination();
 
 	/**
-	 * Gets the adjusted coefficient of determination (Adjusted R^2 = 1 - [SSresiduals / SStotal] * [[n - 1] / [n - p - 1]])
+	 * Gets the adjusted coefficient of determination (Adjusted R^2 = 1 - [SSresiduals / SStotal] * [[n - 1] / [n - p -
+	 * 1]])
 	 *
 	 * @return the adjusted coefficient of determination
 	 */

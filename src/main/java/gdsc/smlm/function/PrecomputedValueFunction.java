@@ -26,9 +26,12 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 	/**
 	 * Instantiates a new precomputed value function.
 	 *
-	 * @param f the function
-	 * @param values the precomputed  values
-	 * @throws IllegalArgumentException if the values length does not match the function size
+	 * @param f
+	 *            the function
+	 * @param values
+	 *            the precomputed values
+	 * @throws IllegalArgumentException
+	 *             if the values length does not match the function size
 	 */
 	public PrecomputedValueFunction(ValueFunction f, double[] values)
 	{

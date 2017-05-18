@@ -27,7 +27,7 @@ public class FixedNonLinearFunction implements NonLinearFunction
 
 	public void initialise(double[] a)
 	{
-		
+
 	}
 
 	public int[] gradientIndices()

@@ -66,7 +66,7 @@ public class PoissonFunction implements LikelihoodFunction
 		if (nonInteger)
 		{
 			//return (FastMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
-			
+
 			final double ll = -e + o * Math.log(e) - logFactorial(o);
 			return FastMath.exp(ll) * alpha;
 		}

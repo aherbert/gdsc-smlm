@@ -102,11 +102,12 @@ public class FitResult
 	{
 		return error;
 	}
-	
+
 	/**
 	 * Sets the error. This can be used to update the error using a different metric.
 	 *
-	 * @param error the new error
+	 * @param error
+	 *            the new error
 	 */
 	public void setError(double error)
 	{
@@ -195,12 +196,14 @@ public class FitResult
 	{
 		return evaluations;
 	}
-	
+
 	/**
 	 * Sets the status.
 	 *
-	 * @param fitStatus the fit status
-	 * @param data the data
+	 * @param fitStatus
+	 *            the fit status
+	 * @param data
+	 *            the data
 	 */
 	public void setStatus(FitStatus fitStatus, Object data)
 	{

@@ -71,12 +71,11 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 		return gradientIndices;
 	}
 
-
 	public int getNumberOfGradients()
 	{
 		return gradientIndices.length;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

@@ -63,7 +63,7 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 	public void forEach(Gradient1Procedure procedure)
 	{
 		this.procedure = procedure;
-		f1.forEach((Gradient1Procedure)this);
+		f1.forEach((Gradient1Procedure) this);
 	}
 
 	public void execute(double value, double[] dy_da)

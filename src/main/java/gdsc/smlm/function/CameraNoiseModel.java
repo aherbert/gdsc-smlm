@@ -32,9 +32,10 @@ public abstract class CameraNoiseModel implements NoiseModel
 		setReadNoise(readNoise);
 		setBias(bias);
 	}
-	
+
 	/**
 	 * Factory method for creating camera noise models from the sub-classes
+	 * 
 	 * @param readNoise
 	 * @param bias
 	 * @param emCCD
@@ -42,7 +43,7 @@ public abstract class CameraNoiseModel implements NoiseModel
 	 */
 	public static CameraNoiseModel createNoiseModel(final double readNoise, final double bias, final boolean emCCD)
 	{
-		return (emCCD) ? new EMCCDCameraNoiseModel(readNoise, bias) : new CCDCameraNoiseModel(readNoise, bias); 
+		return (emCCD) ? new EMCCDCameraNoiseModel(readNoise, bias) : new CCDCameraNoiseModel(readNoise, bias);
 	}
 
 	/**

@@ -98,7 +98,9 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		super(FunctionSolverType.LSE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#preProcess()
 	 */
 	@Override
@@ -107,7 +109,9 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		totalSumOfSquares = Double.NaN;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#createGradientProcedure(double[])
 	 */
 	@Override
@@ -116,7 +120,9 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		return LSQLVMGradientProcedureFactory.create(y, (Gradient1Function) f);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeDeviations(double[])
 	 */
 	@Override
@@ -128,7 +134,9 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		setDeviations(a_dev, walpha);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getTotalSumOfSquares()
 	 */
 	public double getTotalSumOfSquares()
@@ -140,7 +148,9 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		return totalSumOfSquares;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getResidualSumOfSquares()
 	 */
 	public double getResidualSumOfSquares()
@@ -148,7 +158,9 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		return value;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getCoefficientOfDetermination()
 	 */
 	public double getCoefficientOfDetermination()
@@ -156,7 +168,9 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		return 1.0 - (value / getTotalSumOfSquares());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getAdjustedCoefficientOfDetermination()
 	 */
 	public double getAdjustedCoefficientOfDetermination()
@@ -165,7 +179,9 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 				getNumberOfFittedParameters());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getMeanSquaredError()
 	 */
 	public double getMeanSquaredError()

@@ -37,7 +37,7 @@ public enum FitCriteria
 	 */
 	PARAMETERS{ public String getName() { return "Parameters"; }};
 	//@formatter:on
-	
+
 	@Override
 	public String toString()
 	{

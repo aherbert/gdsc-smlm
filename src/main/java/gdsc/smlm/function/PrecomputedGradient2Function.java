@@ -57,7 +57,7 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function
 	public void forEach(Gradient2Procedure procedure)
 	{
 		this.procedure = procedure;
-		f2.forEach((Gradient2Procedure)this);
+		f2.forEach((Gradient2Procedure) this);
 	}
 
 	public void execute(double value, double[] dy_da, double[] d2y_da2)

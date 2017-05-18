@@ -73,7 +73,7 @@ public interface NonLinearFunction extends GradientFunction
 	 * @return The predicted value y
 	 */
 	double evalw(final int x, final double[] w);
-	
+
 	/**
 	 * @return True if the {@link #eval(int, double[], double[])} can compute weights other than 1
 	 */

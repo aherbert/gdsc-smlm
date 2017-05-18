@@ -141,7 +141,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 				k[i] *= this.alpha;
 				sum += logFactorial(k[i]);
 			}
-			
+
 			// We subtract this as we are computing the negative log likelihood
 			sum -= n * logAlpha;
 		}
@@ -281,10 +281,10 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			//gradient[j] = dl_da[j] * (1 - k / l);
 			gradient[j] = dl_da[j] * factor;
 		}
-		
+
 		// The probability = p * alpha
 		// Log(probability) = log(p) + log(alpha)
-		
+
 		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : logFactorial(k)) - logAlpha;
 	}
 
