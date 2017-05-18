@@ -4,7 +4,7 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.WLSEFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
-import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory;
+import gdsc.smlm.fitting.nonlinear.gradient.WLSQLVMGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.Gradient1Function;
 
@@ -26,15 +26,15 @@ import gdsc.smlm.function.Gradient1Function;
  * estimation.
  * <p>
  * This solver computes a modified Chi-squared expression to perform Weighted Least Squares Estimation assuming a
- * Poisson model. The weight is equal to 1/[RNi + max(yi, 0) + 1].
+ * Poisson model with a Gaussian noise component. The weight per observation is equal to 1/[variance + max(y, 0) + 1].
  * <p>
  * See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS cameras - characterisation
  * of a computationally efficient localization approach. Optical Express 25, Issue 10, pp 11701-11716.
  */
 public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver implements WLSEFunctionSolver
 {
-	/** The per observation read noise term. */
-	private double[] rn;
+	/** The per observation variance term. */
+	private double[] var;
 
 	/**
 	 * Create a new stepping function solver.
@@ -113,9 +113,7 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 	@Override
 	protected LVMGradientProcedure createGradientProcedure(double[] y)
 	{
-		// TODO - Create a procedure with the read noise
-
-		return LVMGradientProcedureFactory.create(y, (Gradient1Function) f, false);
+		return WLSQLVMGradientProcedureFactory.create(y, var, (Gradient1Function) f);
 	}
 
 	/*
@@ -126,6 +124,7 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 	@Override
 	protected void computeDeviations(double[] a_dev)
 	{
+		// TODO. Check if these deviations are correct.
 		// The last Hessian matrix should be stored in the working alpha
 		if (!solver.invertSymmPosDef(walpha, beta.length))
 			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
@@ -138,21 +137,21 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 	 *
 	 * @return the read noise
 	 */
-	protected double[] getReadNoise()
+	protected double[] getVariance()
 	{
-		return rn;
+		return var;
 	}
 
 	/**
 	 * Sets the per observation read noise. This must match the length of the fitted observations or it is ignored (i.e.
 	 * set to zero for all observations).
 	 *
-	 * @param readNoise
+	 * @param variance
 	 *            the new read noise
 	 */
-	protected void setReadNoise(double[] readNoise)
+	protected void setVariance(double[] variance)
 	{
-		this.rn = readNoise;
+		this.var = variance;
 	}
 
 	/*

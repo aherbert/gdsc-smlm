@@ -18,7 +18,7 @@ import gdsc.smlm.function.Gradient1Function;
 /**
  * Create a gradient procedure.
  */
-public class LSQLVMGradientProcedureMatrixFactory extends BaseLSQLVMGradientProcedureFactory
+public class MLELVMGradientProcedureFactory
 {
 	/**
 	 * Create a new gradient procedure
@@ -31,25 +31,33 @@ public class LSQLVMGradientProcedureMatrixFactory extends BaseLSQLVMGradientProc
 	 *            Gradient function
 	 * @return the gradient procedure
 	 */
-	public static LSQLVMGradientProcedureMatrix create(final double[] y, final double[] b, final Gradient1Function func)
+	public static MLELVMGradientProcedure create(final double[] y, final double[] b, final Gradient1Function func)
+	{
+		return create(y, GradientProcedureHelper.wrapGradient1Function(func, b));
+	}
+
+	/**
+	 * Create a new gradient procedure
+	 * 
+	 * @param y
+	 *            Data to fit
+	 * @param func
+	 *            Gradient function
+	 * @return the gradient procedure
+	 */
+	public static MLELVMGradientProcedure create(final double[] y, final Gradient1Function func)
 	{
 		switch (func.getNumberOfGradients())
 		{
 			case 5:
-				return new LSQLVMGradientProcedureMatrix5(y, b, func);
+				return new MLELVMGradientProcedure5(y, func);
 			case 4:
-				return new LSQLVMGradientProcedureMatrix4(y, b, func);
+				return new MLELVMGradientProcedure4(y, func);
 			case 6:
-				return new LSQLVMGradientProcedureMatrix6(y, b, func);
+				return new MLELVMGradientProcedure6(y, func);
 
 			default:
-				return new LSQLVMGradientProcedureMatrix(y, b, func);
+				return new MLELVMGradientProcedure(y, func);
 		}
-	}
-
-	// Instance method for testing
-	BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b, final Gradient1Function func)
-	{
-		return create(y, b, func);
-	}
+	}	
 }

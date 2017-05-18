@@ -21,7 +21,7 @@ import gdsc.smlm.function.Gradient1Function;
 public class LSQLVMGradientProcedureLinearFactory extends BaseLSQLVMGradientProcedureFactory
 {
 	/**
-	 * Create a new gradient calculator
+	 * Create a new gradient procedure
 	 * 
 	 * @param y
 	 *            Data to fit

@@ -4,8 +4,8 @@ import gdsc.core.utils.Maths;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.LSEFunctionSolver;
+import gdsc.smlm.fitting.nonlinear.gradient.LSQLVMGradientProcedureFactory;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
-import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory;
 import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
@@ -113,7 +113,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	@Override
 	protected LVMGradientProcedure createGradientProcedure(double[] y)
 	{
-		return LVMGradientProcedureFactory.create(y, (Gradient1Function) f, false);
+		return LSQLVMGradientProcedureFactory.create(y, (Gradient1Function) f);
 	}
 
 	/* (non-Javadoc)

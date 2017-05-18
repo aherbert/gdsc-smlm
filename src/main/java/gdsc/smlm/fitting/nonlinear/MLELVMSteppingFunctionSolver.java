@@ -4,7 +4,7 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
-import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory;
+import gdsc.smlm.fitting.nonlinear.gradient.MLELVMGradientProcedureFactory;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
@@ -130,7 +130,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	@Override
 	protected LVMGradientProcedure createGradientProcedure(double[] y)
 	{
-		return LVMGradientProcedureFactory.create(y, (Gradient1Function) f, false);
+		return MLELVMGradientProcedureFactory.create(y, (Gradient1Function) f);
 	}
 
 	/*

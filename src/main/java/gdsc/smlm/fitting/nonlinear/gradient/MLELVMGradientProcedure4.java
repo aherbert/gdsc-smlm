@@ -21,7 +21,7 @@ import gdsc.smlm.function.Gradient1Function;
  * This is used within the Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
  * <p>
- * This calculator computes a modified Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson
+ * This procedure computes a modified Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson
  * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
