@@ -15,6 +15,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.TestSettings;
+import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory.Type;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.PrecomputedGradient1Function;
 import gdsc.smlm.function.ValueProcedure;
@@ -48,36 +49,107 @@ public class LVMGradientProcedureTest
 	@Test
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
+		DummyGradientFunction[] f = new DummyGradientFunction[7];
+		for (int i = 1; i < f.length; i++)
+			f[i] = new DummyGradientFunction(i);
+
+		LVMGradientProcedureFactory.Type MLE = LVMGradientProcedureFactory.Type.MLE;
+		LVMGradientProcedureFactory.Type WLSQ = LVMGradientProcedureFactory.Type.WLSQ;
+		LVMGradientProcedureFactory.Type LSQ = LVMGradientProcedureFactory.Type.LSQ;
+
+		//@formatter:off
+		
+		// Generic factory
 		double[] y = new double[0];
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, new DummyGradientFunction(6), false).getClass(),
-				LSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, new DummyGradientFunction(5), false).getClass(),
-				LSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, new DummyGradientFunction(4), false).getClass(),
-				LSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, new DummyGradientFunction(6), true).getClass(),
-				MLELVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, new DummyGradientFunction(5), true).getClass(),
-				MLELVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, new DummyGradientFunction(4), true).getClass(),
-				MLELVMGradientProcedure4.class);
 		double[] b = null;
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(6), true).getClass(),
-				MLELVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(5), true).getClass(),
-				MLELVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(4), true).getClass(),
-				MLELVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], LSQ).getClass(), LSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], LSQ).getClass(), LSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], LSQ).getClass(), LSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], LSQ).getClass(), LSQLVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], MLE).getClass(), MLELVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], MLE).getClass(), MLELVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], MLE).getClass(), MLELVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], MLE).getClass(), MLELVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], WLSQ).getClass(), WLSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], WLSQ).getClass(), WLSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], WLSQ).getClass(), WLSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], WLSQ).getClass(), WLSQLVMGradientProcedure.class);
+		
+		// Handle null background
+		b = null;
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], LSQ).getClass(), LSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], LSQ).getClass(), LSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], LSQ).getClass(), LSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], LSQ).getClass(), LSQLVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], MLE).getClass(), MLELVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], MLE).getClass(), MLELVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], MLE).getClass(), MLELVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], MLE).getClass(), MLELVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], WLSQ).getClass(), WLSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], WLSQ).getClass(), WLSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], WLSQ).getClass(), WLSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], WLSQ).getClass(), WLSQLVMGradientProcedure.class);
+		
 		// Handle the pre-computed background
-		b = new double[new DummyGradientFunction(6).size()];
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(1), true).getClass(),
-				MLELVMGradientProcedure.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(6), true).getClass(),
-				MLELVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(5), true).getClass(),
-				MLELVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(4), true).getClass(),
-				MLELVMGradientProcedure4.class);
+		b = new double[f[6].size()];
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], LSQ).getClass(), LSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], LSQ).getClass(), LSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], LSQ).getClass(), LSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], LSQ).getClass(), LSQLVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], MLE).getClass(), MLELVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], MLE).getClass(), MLELVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], MLE).getClass(), MLELVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], MLE).getClass(), MLELVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], WLSQ).getClass(), WLSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], WLSQ).getClass(), WLSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], WLSQ).getClass(), WLSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], WLSQ).getClass(), WLSQLVMGradientProcedure.class);
+
+		// Dedicated factories
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[6]).getClass(), LSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[5]).getClass(), LSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[4]).getClass(), LSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[1]).getClass(), LSQLVMGradientProcedure.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, f[6]).getClass(), MLELVMGradientProcedure6.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, f[5]).getClass(), MLELVMGradientProcedure5.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, f[4]).getClass(), MLELVMGradientProcedure4.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, f[1]).getClass(), MLELVMGradientProcedure.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[6]).getClass(), WLSQLVMGradientProcedure6.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[5]).getClass(), WLSQLVMGradientProcedure5.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[4]).getClass(), WLSQLVMGradientProcedure4.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[1]).getClass(), WLSQLVMGradientProcedure.class);
+
+		// Handle null background
+		b = null;
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[6]).getClass(), LSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[5]).getClass(), LSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[4]).getClass(), LSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[1]).getClass(), LSQLVMGradientProcedure.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[6]).getClass(), MLELVMGradientProcedure6.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[5]).getClass(), MLELVMGradientProcedure5.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[4]).getClass(), MLELVMGradientProcedure4.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[1]).getClass(), MLELVMGradientProcedure.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[6]).getClass(), WLSQLVMGradientProcedure6.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[5]).getClass(), WLSQLVMGradientProcedure5.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[4]).getClass(), WLSQLVMGradientProcedure4.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[1]).getClass(), WLSQLVMGradientProcedure.class);
+
+		// Handle the pre-computed background
+		b = new double[f[6].size()];
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[6]).getClass(), LSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[5]).getClass(), LSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[4]).getClass(), LSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[1]).getClass(), LSQLVMGradientProcedure.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[6]).getClass(), MLELVMGradientProcedure6.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[5]).getClass(), MLELVMGradientProcedure5.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[4]).getClass(), MLELVMGradientProcedure4.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[1]).getClass(), MLELVMGradientProcedure.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[6]).getClass(), WLSQLVMGradientProcedure6.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[5]).getClass(), WLSQLVMGradientProcedure5.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[4]).getClass(), WLSQLVMGradientProcedure4.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[1]).getClass(), WLSQLVMGradientProcedure.class);
+		
+		//@formatter:on
 	}
 
 	@Test
@@ -145,7 +217,8 @@ public class LVMGradientProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, mle);
+			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func,
+					(mle) ? Type.MLE : Type.LSQ);
 			p.gradient(paramsList.get(i));
 			double s = p.value;
 			double s2 = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -225,9 +298,11 @@ public class LVMGradientProcedureTest
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 
+		final Type type = (mle) ? Type.MLE : Type.LSQ;
+
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, mle);
+			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type);
 			p.gradient(paramsList.get(i));
 		}
 
@@ -257,7 +332,7 @@ public class LVMGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, mle);
+					LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type);
 					for (int j = loops; j-- > 0;)
 						p.gradient(paramsList.get(k++ % iter));
 				}
@@ -277,35 +352,47 @@ public class LVMGradientProcedureTest
 	@Test
 	public void gradientProcedureLSQUnrolledComputesSameAsGradientProcedure()
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(false, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.LSQ, false);
 	}
 
 	@Test
 	public void gradientProcedureMLEUnrolledComputesSameAsGradientProcedure()
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(true, false);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.MLE, false);
+	}
+
+	@Test
+	public void gradientProcedureWLSQUnrolledComputesSameAsGradientProcedure()
+	{
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.WLSQ, false);
 	}
 
 	@Test
 	public void gradientProcedureLSQUnrolledComputesSameAsGradientProcedureWithPrecomputed()
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(false, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.LSQ, true);
 	}
 
 	@Test
 	public void gradientProcedureMLEUnrolledComputesSameAsGradientProcedureWithPrecomputed()
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(true, true);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.MLE, true);
 	}
 
-	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(boolean mle, boolean precomputed)
+	@Test
+	public void gradientProcedureWLSQUnrolledComputesSameAsGradientProcedureWithPrecomputed()
 	{
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, mle, precomputed);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, mle, precomputed);
-		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, mle, precomputed);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.WLSQ, true);
 	}
 
-	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean mle, boolean precomputed)
+	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(Type type, boolean precomputed)
+	{
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(4, type, precomputed);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(5, type, precomputed);
+		gradientProcedureUnrolledComputesSameAsGradientProcedure(6, type, precomputed);
+	}
+
+	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, Type type, boolean precomputed)
 	{
 		int iter = 10;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
@@ -322,14 +409,13 @@ public class LVMGradientProcedureTest
 			func = new PrecomputedGradient1Function(func, b);
 		}
 
-		String name = String.format("[%d] %b", nparams, mle);
+		String name = String.format("[%d] %b", nparams, type);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p1 = (mle) ? new MLELVMGradientProcedure(yList.get(i), func)
-					: new LSQLVMGradientProcedure(yList.get(i), func);
+			LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func);
 			p1.gradient(paramsList.get(i));
 
-			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, mle);
+			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type);
 			p2.gradient(paramsList.get(i));
 
 			// Exactly the same ...
@@ -346,38 +432,63 @@ public class LVMGradientProcedureTest
 		}
 	}
 
+	private LVMGradientProcedure createProcedure(Type type, double[] y, Gradient1Function func)
+	{
+		switch (type)
+		{
+			case MLE:
+				return new MLELVMGradientProcedure(y, func);
+			case WLSQ:
+				return new WLSQLVMGradientProcedure(y, null, func);
+			default:
+				return new LSQLVMGradientProcedure(y, func);
+		}
+	}
+
 	@Test
 	public void gradientProcedureLSQIsFasterUnrolledThanGradientProcedure()
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(false, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.LSQ, false);
 	}
 
 	@Test
 	public void gradientProcedureMLEIsFasterUnrolledThanGradientProcedure()
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(true, false);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.MLE, false);
+	}
+
+	@Test
+	public void gradientProcedureWLSQIsFasterUnrolledThanGradientProcedure()
+	{
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.WLSQ, false);
 	}
 
 	@Test
 	public void gradientProcedureLSQIsFasterUnrolledThanGradientProcedureWithPrecomputed()
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(false, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.LSQ, true);
 	}
 
 	@Test
 	public void gradientProcedureMLEIsFasterUnrolledThanGradientProcedureWithPrecomputed()
 	{
-		gradientProcedureIsFasterUnrolledThanGradientProcedure(true, true);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.MLE, true);
 	}
 
-	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(boolean mle, boolean precomputed)
+	@Test
+	public void gradientProcedureWLSQIsFasterUnrolledThanGradientProcedureWithPrecomputed()
 	{
-		gradientProcedureLinearIsFasterThanGradientProcedure(4, mle, precomputed);
-		gradientProcedureLinearIsFasterThanGradientProcedure(5, mle, precomputed);
-		gradientProcedureLinearIsFasterThanGradientProcedure(6, mle, precomputed);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(Type.WLSQ, true);
 	}
 
-	private void gradientProcedureLinearIsFasterThanGradientProcedure(final int nparams, final boolean mle,
+	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(Type type, boolean precomputed)
+	{
+		gradientProcedureLinearIsFasterThanGradientProcedure(4, type, precomputed);
+		gradientProcedureLinearIsFasterThanGradientProcedure(5, type, precomputed);
+		gradientProcedureLinearIsFasterThanGradientProcedure(6, type, precomputed);
+	}
+
+	private void gradientProcedureLinearIsFasterThanGradientProcedure(final int nparams, final Type type,
 			final boolean precomputed)
 	{
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
@@ -405,12 +516,11 @@ public class LVMGradientProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p1 = (mle) ? new MLELVMGradientProcedure(yList.get(i), func)
-					: new LSQLVMGradientProcedure(yList.get(i), func);
+			LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func);
 			p1.gradient(paramsList.get(i));
 			p1.gradient(paramsList.get(i));
 
-			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, mle);
+			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type);
 			p2.gradient(paramsList.get(i));
 			p2.gradient(paramsList.get(i));
 
@@ -430,8 +540,7 @@ public class LVMGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					LVMGradientProcedure p1 = (mle) ? new MLELVMGradientProcedure(yList.get(i), func)
-							: new LSQLVMGradientProcedure(yList.get(i), func);
+					LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p1.gradient(paramsList.get(k++ % iter));
 				}
@@ -446,7 +555,7 @@ public class LVMGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, mle);
+					LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type);
 					for (int j = loops; j-- > 0;)
 						p2.gradient(paramsList.get(k++ % iter));
 				}
@@ -454,40 +563,54 @@ public class LVMGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("MLE=%b, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n", mle, precomputed, time1, nparams,
-				time2, (1.0 * time1) / time2);
+		log("%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n", type, precomputed, time1, nparams, time2,
+				(1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1);
 	}
 
 	@Test
 	public void gradientProcedureLSQComputesGradient()
 	{
-		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), false,
+		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.LSQ,
 				false);
 	}
 
 	@Test
 	public void gradientProcedureMLEComputesGradient()
 	{
-		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), true,
+		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.MLE,
 				false);
+	}
+
+	@Test
+	public void gradientProcedureWLSQComputesGradient()
+	{
+		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+				Type.WLSQ, false);
 	}
 
 	@Test
 	public void gradientProcedureLSQComputesGradientWithPrecomputed()
 	{
-		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), false,
+		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.LSQ,
 				true);
 	}
 
 	@Test
 	public void gradientProcedureMLEComputesGradientWithPrecomputed()
 	{
-		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), true,
+		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.MLE,
 				true);
 	}
 
-	private void gradientProcedureComputesGradient(ErfGaussian2DFunction func, boolean mle, boolean precomputed)
+	@Test
+	public void gradientProcedureWLSQComputesGradientWithPrecomputed()
+	{
+		gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+				Type.WLSQ, true);
+	}
+
+	private void gradientProcedureComputesGradient(ErfGaussian2DFunction func, Type type, boolean precomputed)
 	{
 		int nparams = func.getNumberOfGradients();
 		int[] indices = func.gradientIndices();
@@ -519,9 +642,9 @@ public class LVMGradientProcedureTest
 				}
 			}
 
-			LVMGradientProcedure p = LVMGradientProcedureFactory.create(y, b, func, mle);
+			LVMGradientProcedure p = LVMGradientProcedureFactory.create(y, b, func, type);
 			p.gradient(a);
-			double s = p.value;
+			//double s = p.value;
 			double[] beta = p.beta.clone();
 			for (int j = 0; j < nparams; j++)
 			{
@@ -540,8 +663,8 @@ public class LVMGradientProcedureTest
 				beta[j] *= -2;
 
 				double gradient = (s1 - s2) / (2 * d);
-				System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, k, s, func.getName(k), a[k], d, beta[j],
-						gradient);
+				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, k, s, func.getName(k), a[k], d, beta[j],
+				//		gradient);
 				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[j], gradient));
 			}
 		}
@@ -550,16 +673,22 @@ public class LVMGradientProcedureTest
 	@Test
 	public void gradientProcedureLSQSupportsPrecomputed()
 	{
-		gradientProcedureSupportsPrecomputed(false);
+		gradientProcedureSupportsPrecomputed(Type.LSQ);
 	}
 
 	@Test
 	public void gradientProcedureMLESupportsPrecomputed()
 	{
-		gradientProcedureSupportsPrecomputed(true);
+		gradientProcedureSupportsPrecomputed(Type.MLE);
 	}
 
-	private void gradientProcedureSupportsPrecomputed(final boolean mle)
+	@Test
+	public void gradientProcedureWLSQSupportsPrecomputed()
+	{
+		gradientProcedureSupportsPrecomputed(Type.WLSQ);
+	}
+
+	private void gradientProcedureSupportsPrecomputed(final Type type)
 	{
 		int iter = 10;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
@@ -584,7 +713,7 @@ public class LVMGradientProcedureTest
 		// We want to know when:
 		// y|peak1+peak2+peak3 != y-peak3|peak1+peak2
 		// i.e. we cannot subtract a precomputed peak from the data, it must be included in the fit
-		// E.G. LSQ - subtraction is OK, MLE - subtraction is not allowed
+		// E.G. LSQ - subtraction is OK, MLE/WLSQ - subtraction is not allowed
 
 		Gaussian2DFunction f123 = GaussianFunctionFactory.create2D(3, blockWidth, blockWidth,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -621,7 +750,7 @@ public class LVMGradientProcedureTest
 				{
 					b[k] = value;
 					// Remove negatives for MLE
-					if (mle)
+					if (type == Type.MLE)
 					{
 						y[k] = Math.max(0, y[k]);
 						y_b[k] = Math.max(0, y[k] - value);
@@ -635,10 +764,10 @@ public class LVMGradientProcedureTest
 			});
 
 			// These should be the same
-			LVMGradientProcedure p123 = LVMGradientProcedureFactory.create(y, f123, mle);
-			LVMGradientProcedure p12b3 = LVMGradientProcedureFactory.create(y, b, f12, mle);
+			LVMGradientProcedure p123 = LVMGradientProcedureFactory.create(y, f123, type);
+			LVMGradientProcedure p12b3 = LVMGradientProcedureFactory.create(y, b, f12, type);
 			// This may be different
-			LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, mle);
+			LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, type);
 
 			// Check they are the same
 			p123.gradient(a3peaks);
@@ -649,7 +778,7 @@ public class LVMGradientProcedureTest
 			double[] beta = p12b3.beta.clone();
 			double[][] alpha = p12b3.getAlphaMatrix();
 
-			System.out.printf("MLE=%b [%d] p12b3  %f  %f\n", mle, i, p123.value, s);
+			System.out.printf("MLE=%b [%d] p12b3  %f  %f\n", type, i, p123.value, s);
 
 			Assert.assertTrue("p12b3 Not same value @ " + i, eq.almostEqualRelativeOrAbsolute(p123.value, s));
 			Assert.assertTrue("p12b3 Not same gradient @ " + i, eq.almostEqualRelativeOrAbsolute(beta, p123.beta));
@@ -685,9 +814,9 @@ public class LVMGradientProcedureTest
 			beta = p12m3.beta.clone();
 			alpha = p12m3.getAlphaMatrix();
 
-			System.out.printf("MLE=%b [%d] p12m3  %f  %f\n", mle, i, p123.value, s);
+			System.out.printf("%s [%d] p12m3  %f  %f\n", type, i, p123.value, s);
 
-			if (mle)
+			if (type != Type.LSQ)
 			{
 				Assert.assertFalse("p12b3 Same value @ " + i, eq.almostEqualRelativeOrAbsolute(p123.value, s));
 				Assert.assertFalse("p12b3 Same gradient @ " + i, eq.almostEqualRelativeOrAbsolute(beta, p123.beta));

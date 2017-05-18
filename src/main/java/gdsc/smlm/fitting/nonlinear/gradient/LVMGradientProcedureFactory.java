@@ -20,6 +20,11 @@ import gdsc.smlm.function.Gradient1Function;
  */
 public class LVMGradientProcedureFactory
 {
+	public enum Type
+	{
+		LSQ, MLE, WLSQ
+	}
+
 	/**
 	 * Create a new gradient calculator.
 	 *
@@ -29,60 +34,14 @@ public class LVMGradientProcedureFactory
 	 *            Baseline pre-computed y-values
 	 * @param func
 	 *            Gradient function
-	 * @param mle
-	 *            Set to true to create a Maximum Likelihood Estimator for Poisson data (default is Least Squares)
+	 * @param type
+	 *            the type
 	 * @return the gradient procedure
 	 */
 	public static LVMGradientProcedure create(final double[] y, final double[] b, final Gradient1Function func,
-			boolean mle)
+			Type type)
 	{
-		return create(y, GradientProcedureHelper.wrapGradient1Function(func, b), mle);
-
-		//if (mle)
-		//{
-		//	// Use baseline version if appropriate
-		//	if (b != null && b.length == y.length)
-		//	{
-		//		switch (func.getNumberOfGradients())
-		//		{
-		//			case 5:
-		//				return new MLELVMGradientProcedureB5(y, b, func);
-		//			case 4:
-		//				return new MLELVMGradientProcedureB4(y, b, func);
-		//			case 6:
-		//				return new MLELVMGradientProcedureB6(y, b, func);
-		//			default:
-		//				return new MLELVMGradientProcedureB(y, b, func);
-		//		}
-		//	}
-		//	else
-		//	{
-		//		switch (func.getNumberOfGradients())
-		//		{
-		//			case 5:
-		//				return new MLELVMGradientProcedure5(y, func);
-		//			case 4:
-		//				return new MLELVMGradientProcedure4(y, func);
-		//			case 6:
-		//				return new MLELVMGradientProcedure6(y, func);
-		//			default:
-		//				return new MLELVMGradientProcedure(y, func);
-		//		}
-		//	}
-		//}
-		//
-		//switch (func.getNumberOfGradients())
-		//{
-		//	case 5:
-		//		return new LSQLVMGradientProcedure5(y, b, func);
-		//	case 4:
-		//		return new LSQLVMGradientProcedure4(y, b, func);
-		//	case 6:
-		//		return new LSQLVMGradientProcedure6(y, b, func);
-		//
-		//	default:
-		//		return new LSQLVMGradientProcedure(y, b, func);
-		//}
+		return create(y, GradientProcedureHelper.wrapGradient1Function(func, b), type);
 	}
 
 	/**
@@ -92,38 +51,22 @@ public class LVMGradientProcedureFactory
 	 *            Data to fit
 	 * @param func
 	 *            Gradient function
-	 * @param mle
-	 *            Set to true to create a Maximum Likelihood Estimator for Poisson data (default is Least Squares)
+	 * @param type
+	 *            the type
 	 * @return the gradient procedure
 	 */
-	public static LVMGradientProcedure create(final double[] y, final Gradient1Function func, boolean mle)
+	public static LVMGradientProcedure create(final double[] y, final Gradient1Function func, Type type)
 	{
-		if (mle)
+		switch (type)
 		{
-			switch (func.getNumberOfGradients())
-			{
-				case 5:
-					return new MLELVMGradientProcedure5(y, func);
-				case 4:
-					return new MLELVMGradientProcedure4(y, func);
-				case 6:
-					return new MLELVMGradientProcedure6(y, func);
-				default:
-					return new MLELVMGradientProcedure(y, func);
-			}
-		}
-
-		switch (func.getNumberOfGradients())
-		{
-			case 5:
-				return new LSQLVMGradientProcedure5(y, func);
-			case 4:
-				return new LSQLVMGradientProcedure4(y, func);
-			case 6:
-				return new LSQLVMGradientProcedure6(y, func);
-
+			case WLSQ:
+				// Do not support per observation weights
+				return WLSQLVMGradientProcedureFactory.create(y, null, func);
+			case MLE:
+				return MLELVMGradientProcedureFactory.create(y, func);
+			case LSQ:
 			default:
-				return new LSQLVMGradientProcedure(y, func);
+				return LSQLVMGradientProcedureFactory.create(y, func);
 		}
 	}
 }
