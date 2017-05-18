@@ -16,6 +16,7 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.PrecomputedGradient1Function;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -67,16 +68,16 @@ public class LVMGradientProcedureTest
 				MLELVMGradientProcedure5.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(4), true).getClass(),
 				MLELVMGradientProcedure4.class);
-		// Specialised versions to handle the pre-computed background
-		b = new double[0];
+		// Handle the pre-computed background
+		b = new double[new DummyGradientFunction(6).size()];
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(1), true).getClass(),
-				MLELVMGradientProcedureB.class);
+				MLELVMGradientProcedure.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(6), true).getClass(),
-				MLELVMGradientProcedureB6.class);
+				MLELVMGradientProcedure6.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(5), true).getClass(),
-				MLELVMGradientProcedureB5.class);
+				MLELVMGradientProcedure5.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, new DummyGradientFunction(4), true).getClass(),
-				MLELVMGradientProcedureB4.class);
+				MLELVMGradientProcedure4.class);
 	}
 
 	@Test
@@ -313,20 +314,22 @@ public class LVMGradientProcedureTest
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
-		double[] b = (precomputed) ? Utils.newArray(func.size(), 0.1, 1.3) : null;
+		if (precomputed)
+		{
+			double[] b = Utils.newArray(func.size(), 0.1, 1.3);
+			func = new PrecomputedGradient1Function(func, b);
+		}
 
 		String name = String.format("[%d] %b", nparams, mle);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p1 = (mle)
-					? (precomputed) ? new MLELVMGradientProcedureB(yList.get(i), b, func)
-							: new MLELVMGradientProcedure(yList.get(i), func)
-					: new LSQLVMGradientProcedure(yList.get(i), b, func);
+			LVMGradientProcedure p1 = (mle) ? new MLELVMGradientProcedure(yList.get(i), func)
+					: new LSQLVMGradientProcedure(yList.get(i), func);
 			p1.gradient(paramsList.get(i));
 
-			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), b, func, mle);
+			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, mle);
 			p2.gradient(paramsList.get(i));
 
 			// Exactly the same ...
@@ -388,19 +391,26 @@ public class LVMGradientProcedureTest
 		createData(1, iter, paramsList, yList);
 
 		// Remove the timing of the function call by creating a dummy function
-		final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
-		final double[] b = (precomputed) ? Utils.newArray(func.size(), 0.1, 1.3) : null;
+		FakeGradientFunction fgf = new FakeGradientFunction(blockWidth, nparams);
+		final Gradient1Function func;
+		if (precomputed)
+		{
+			final double[] b = Utils.newArray(fgf.size(), 0.1, 1.3);
+			func = new PrecomputedGradient1Function(fgf, b);
+		}
+		else
+		{
+			func = fgf;
+		}
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p1 = (mle)
-					? (precomputed) ? new MLELVMGradientProcedureB(yList.get(i), b, func)
-							: new MLELVMGradientProcedure(yList.get(i), func)
-					: new LSQLVMGradientProcedure(yList.get(i), b, func);
+			LVMGradientProcedure p1 = (mle) ? new MLELVMGradientProcedure(yList.get(i), func)
+					: new LSQLVMGradientProcedure(yList.get(i), func);
 			p1.gradient(paramsList.get(i));
 			p1.gradient(paramsList.get(i));
 
-			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), b, func, mle);
+			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, mle);
 			p2.gradient(paramsList.get(i));
 			p2.gradient(paramsList.get(i));
 
@@ -420,10 +430,8 @@ public class LVMGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					LVMGradientProcedure p1 = (mle)
-							? (precomputed) ? new MLELVMGradientProcedureB(yList.get(i), b, func)
-									: new MLELVMGradientProcedure(yList.get(i), func)
-							: new LSQLVMGradientProcedure(yList.get(i), b, func);
+					LVMGradientProcedure p1 = (mle) ? new MLELVMGradientProcedure(yList.get(i), func)
+							: new LSQLVMGradientProcedure(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p1.gradient(paramsList.get(k++ % iter));
 				}
@@ -438,7 +446,7 @@ public class LVMGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), b, func, mle);
+					LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, mle);
 					for (int j = loops; j-- > 0;)
 						p2.gradient(paramsList.get(k++ % iter));
 				}
@@ -666,8 +674,8 @@ public class LVMGradientProcedureTest
 				beta[j] *= -2;
 
 				double gradient = (s1 - s2) / (2 * d);
-				System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s, f12.getName(k), a2peaks[k], d,
-						beta[j], gradient, DoubleEquality.relativeError(gradient, beta[j]));
+				System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s, f12.getName(k), a2peaks[k],
+						d, beta[j], gradient, DoubleEquality.relativeError(gradient, beta[j]));
 				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[j], gradient));
 			}
 
@@ -694,9 +702,10 @@ public class LVMGradientProcedureTest
 				Assert.assertTrue("p12b3 Not same value @ " + i, eq.almostEqualRelativeOrAbsolute(p123.value, s));
 				Assert.assertTrue("p12b3 Not same gradient @ " + i, eq.almostEqualRelativeOrAbsolute(beta, p123.beta));
 				for (int j = 0; j < alpha.length; j++)
-					Assert.assertTrue("p12b3 Not same alpha @ " + j, eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]));
+					Assert.assertTrue("p12b3 Not same alpha @ " + j,
+							eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]));
 			}
-			
+
 			// Check actual gradients are correct
 			for (int j = 0; j < nparams; j++)
 			{
@@ -715,10 +724,10 @@ public class LVMGradientProcedureTest
 				beta[j] *= -2;
 
 				double gradient = (s1 - s2) / (2 * d);
-				System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s, f12.getName(k), a2peaks[k], d,
-						beta[j], gradient, DoubleEquality.relativeError(gradient, beta[j]));
+				System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s, f12.getName(k), a2peaks[k],
+						d, beta[j], gradient, DoubleEquality.relativeError(gradient, beta[j]));
 				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[j], gradient));
-			}			
+			}
 		}
 	}
 

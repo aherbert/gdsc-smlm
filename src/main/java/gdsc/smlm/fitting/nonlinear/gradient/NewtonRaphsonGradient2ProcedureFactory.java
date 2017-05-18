@@ -53,9 +53,7 @@ public class NewtonRaphsonGradient2ProcedureFactory
 	public static NewtonRaphsonGradient2Procedure create(final double[] x, final double[] b,
 			final Gradient2Function func)
 	{
-		if (b != null && b.length == x.length)
-			return new NewtonRaphsonGradient2ProcedureB(x, b, func);
-		return new NewtonRaphsonGradient2Procedure(x, func);
+		return create(x, GradientProcedureHelper.wrapGradient2Function(func, b));
 	}
 
 	/**

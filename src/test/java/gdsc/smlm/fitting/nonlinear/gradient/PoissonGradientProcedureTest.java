@@ -52,14 +52,15 @@ public class PoissonGradientProcedureTest
 		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(4)).getClass(),
 				PoissonGradientProcedure4.class);
 		b = new double[new DummyGradientFunction(4).size()];
+		// No longer have dedicated procedures since we used a wrapped function
 		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(6)).getClass(),
-				PoissonGradientProcedureB6.class);
+				PoissonGradientProcedure6.class);
 		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(5)).getClass(),
-				PoissonGradientProcedureB5.class);
+				PoissonGradientProcedure5.class);
 		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(4)).getClass(),
-				PoissonGradientProcedureB4.class);
+				PoissonGradientProcedure4.class);
 		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(1)).getClass(),
-				PoissonGradientProcedureB.class);
+				PoissonGradientProcedure.class);
 	}
 
 	@Test

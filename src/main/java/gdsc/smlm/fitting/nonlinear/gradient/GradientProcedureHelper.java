@@ -1,5 +1,12 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
+import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.PrecomputedGradient1Function;
+import gdsc.smlm.function.PrecomputedGradient2Function;
+import gdsc.smlm.function.PrecomputedValueFunction;
+import gdsc.smlm.function.ValueFunction;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -282,5 +289,59 @@ class GradientProcedureHelper
 		matrix[34] = data[19];
 		matrix[29] = data[19];
 		matrix[35] = data[20];
+	}
+
+	/**
+	 * Wrap a function with pre-computed values.
+	 *
+	 * @param func
+	 *            the function
+	 * @param b
+	 *            Baseline pre-computed y-values
+	 * @return the wrapped function (or the original if pre-computed values are null or wrong length)
+	 */
+	public static ValueFunction wrapValueFunction(final ValueFunction func, final double[] b)
+	{
+		if (b != null && b.length == func.size())
+		{
+			return new PrecomputedValueFunction(func, b);
+		}
+		return func;
+	}
+
+	/**
+	 * Wrap a function with pre-computed values.
+	 *
+	 * @param func
+	 *            the function
+	 * @param b
+	 *            Baseline pre-computed y-values
+	 * @return the wrapped function (or the original if pre-computed values are null or wrong length)
+	 */
+	public static Gradient1Function wrapGradient1Function(final Gradient1Function func, final double[] b)
+	{
+		if (b != null && b.length == func.size())
+		{
+			return new PrecomputedGradient1Function(func, b);
+		}
+		return func;
+	}
+
+	/**
+	 * Wrap a function with pre-computed values.
+	 *
+	 * @param func
+	 *            the function
+	 * @param b
+	 *            Baseline pre-computed y-values
+	 * @return the wrapped function (or the original if pre-computed values are null or wrong length)
+	 */
+	public static Gradient2Function wrapGradient2Function(final Gradient2Function func, final double[] b)
+	{
+		if (b != null && b.length == func.size())
+		{
+			return new PrecomputedGradient2Function(func, b);
+		}
+		return func;
 	}
 }
