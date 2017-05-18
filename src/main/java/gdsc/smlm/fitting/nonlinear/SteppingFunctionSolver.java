@@ -97,10 +97,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 		try
 		{
-			lastY = y = prepareFitValue(y, a);
+			lastY = prepareFitValue(y, a);
 
 			// First evaluation
-			double currentValue = computeFitValue(y, a);
+			double currentValue = computeFitValue(a);
 
 			int status = 0;
 			while (true)
@@ -113,7 +113,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 					bounds.applyBounds(a, step, newA);
 
 				// Evaluate
-				double newValue = computeFitValue(y, newA);
+				double newValue = computeFitValue(newA);
 
 				// Check stopping criteria
 				status = tc.converged(currentValue, a, newValue, newA);
@@ -139,7 +139,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 				if (a_dev != null)
 					computeDeviations(a_dev);
 				if (y_fit != null)
-					computeFunctionValue(y_fit);
+					computeValues(y_fit);
 				return FitStatus.OK;
 			}
 
@@ -170,16 +170,16 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	protected abstract double[] prepareFitValue(double[] y, double[] a);
 
 	/**
-	 * Compute the fit value using the parameters. This method is followed by a call to {@link #computeStep(double[])}
-	 * so the step could be pre-computed here.
+	 * Compute the fit value using the parameters. The y data is the same as that passed to
+	 * {@link #prepareFitValue(double[], double[])}.
+	 * <p>
+	 * This method is followed by a call to {@link #computeStep(double[])} so the step could be pre-computed here.
 	 *
-	 * @param y
-	 *            the y
 	 * @param a
 	 *            the parameters
 	 * @return the fit value
 	 */
-	protected abstract double computeFitValue(double[] y, double[] a);
+	protected abstract double computeFitValue(double[] a);
 
 	/**
 	 * Compute the update step for the current parameters.
@@ -218,13 +218,13 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	protected abstract void computeDeviations(double[] a_dev);
 
 	/**
-	 * Compute function value using the y and parameters a from the last call to
+	 * Compute the function y-values using the y and parameters a from the last call to
 	 * {@link #computeFitValue(double[], double[])}.
 	 *
 	 * @param y_fit
-	 *            the y fit
+	 *            the y fit values
 	 */
-	protected abstract void computeFunctionValue(double[] y_fit);
+	protected abstract void computeValues(double[] y_fit);
 
 	/*
 	 * (non-Javadoc)
@@ -234,10 +234,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	public boolean computeValue(double[] y, double[] y_fit, double[] a)
 	{
 		gradientIndices = f.gradientIndices();
-		lastY = y = prepareFunctionValue(y, a);
-		if (y_fit == null)
-			y_fit = new double[y.length];
-		value = computeFunctionValue(y, y_fit, a);
+		lastY = prepareFunctionValue(y, a);
+		//if (y_fit == null)
+		//	y_fit = new double[y.length];
+		value = computeFunctionValue(y_fit, a);
 		return true;
 	}
 
@@ -253,17 +253,16 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	protected abstract double[] prepareFunctionValue(double[] y, double[] a);
 
 	/**
-	 * Compute the function value.
+	 * Compute the function value. The y data is the same as that passed to
+	 * {@link #prepareFunctionValue(double[], double[])}
 	 *
-	 * @param y
-	 *            the y
 	 * @param y_fit
-	 *            the y fit (this will not be null)
+	 *            the y fit (this may be null)
 	 * @param a
 	 *            the parameters
 	 * @return the function value
 	 */
-	protected abstract double computeFunctionValue(double[] y, double[] y_fit, double[] a);
+	protected abstract double computeFunctionValue(double[] y_fit, double[] a);
 
 	/*
 	 * (non-Javadoc)

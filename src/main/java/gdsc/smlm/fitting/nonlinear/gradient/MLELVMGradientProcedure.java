@@ -55,12 +55,12 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 		// function to produce 0 for all evaluations.
 		// Optimally the function should be bounded to always produce a positive number.
 		// ---
-		if (fi > 0)
+		if (fi > 0.0)
 		{
 			final double xi = y[yi];
 
 			// We assume y[i] is positive
-			if (xi == 0)
+			if (xi <= 0.0)
 			{
 				value += fi;
 				for (int k = 0; k < n; k++)
@@ -93,12 +93,12 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 	{
 		++yi;
 		// Function must produce a strictly positive output.
-		if (fi > 0)
+		if (fi > 0.0)
 		{
 			final double xi = y[yi];
 
 			// We assume y[i] is positive
-			if (xi == 0)
+			if (xi <= 0.0)
 			{
 				value += fi;
 			}

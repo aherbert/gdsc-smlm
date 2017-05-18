@@ -142,7 +142,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 */
 	public double getCoefficientOfDetermination()
 	{
-		return 1.0 - (value / totalSumOfSquares);
+		return 1.0 - (value / getTotalSumOfSquares());
 	}
 
 	/*
@@ -152,7 +152,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 */
 	public double getAdjustedCoefficientOfDetermination()
 	{
-		return Maths.getAdjustedCoefficientOfDetermination(value, totalSumOfSquares, getNumberOfFittedPoints(),
+		return Maths.getAdjustedCoefficientOfDetermination(value, getTotalSumOfSquares(), getNumberOfFittedPoints(),
 				getNumberOfFittedParameters());
 	}
 

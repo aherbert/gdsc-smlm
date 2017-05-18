@@ -37,7 +37,7 @@ public interface FunctionSolver
 	 * @param a
 	 *            Set of m coefficients (input/output)
 	 * @param a_dev
-	 *            Standard deviation of the set of m coefficients (output)
+	 *            Variance of the set of m coefficients (output)
 	 * @return The fit status
 	 */
 	public FitStatus fit(final double[] y, final double[] f, final double[] a, final double[] a_dev);

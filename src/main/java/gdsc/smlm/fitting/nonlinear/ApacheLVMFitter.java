@@ -155,7 +155,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 					final double[] I = calculator.fisherInformationDiagonal(n, a, (NonLinearFunction) f);
 					Arrays.fill(a_dev, 0);
 					for (int i = nparams; i-- > 0;)
-						a_dev[gradientIndices[i]] = FisherInformationMatrix.reciprocalSqrt(I[i]);
+						a_dev[gradientIndices[i]] = FisherInformationMatrix.reciprocal(I[i]);
 				}
 			}
 			// Compute sum-of-squares

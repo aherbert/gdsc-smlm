@@ -87,7 +87,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			else
 			{
 				// We assume y[i] is positive
-				if (xi == 0)
+				if (xi <= 0.0)
 				{
 					chisq += fi;
 					compute0(beta, dfi_da, fi);
@@ -161,7 +161,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			else
 			{
 				// We assume y[i] is positive
-				if (xi == 0)
+				if (xi <= 0.0)
 					chisq += fi;
 				else
 					chisq += (fi - xi - xi * Math.log(fi / xi));
@@ -216,7 +216,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				else
 				{
 					// We assume y[i] is positive
-					if (xi == 0)
+					if (xi <= 0.0)
 						chisq += fi;
 					else
 						chisq += (fi - xi - xi * Math.log(fi / xi));
@@ -249,7 +249,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				else
 				{
 					// We assume y[i] is positive
-					if (xi == 0)
+					if (xi <= 0.0)
 						chisq += fi;
 					else
 						chisq += (fi - xi - xi * Math.log(fi / xi));
@@ -305,7 +305,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			else
 			{
 				// We assume y[i] is positive
-				if (xi == 0)
+				if (xi <= 0.0)
 				{
 					chisq += fi;
 					compute0(beta, dfi_da, fi);
@@ -385,7 +385,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			else
 			{
 				// We assume y[i] is positive
-				if (xi == 0)
+				if (xi <= 0.0)
 					chisq += fi;
 				else
 					chisq += (fi - xi - xi * Math.log(fi / xi));
@@ -458,7 +458,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				else
 				{
 					// We assume y[i] is positive
-					if (xi == 0)
+					if (xi <= 0.0)
 						chisq += fi;
 					else
 						chisq += (fi - xi - xi * Math.log(fi / xi));
@@ -491,7 +491,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				else
 				{
 					// We assume y[i] is positive
-					if (xi == 0)
+					if (xi <= 0.0)
 						chisq += fi;
 					else
 						chisq += (fi - xi - xi * Math.log(fi / xi));
@@ -699,7 +699,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			else
 			{
 				// We assume y[i] is positive
-				if (xi == 0)
+				if (xi <= 0.0)
 					chisq += fi;
 				else
 					chisq += (fi - xi - xi * Math.log(fi / xi));

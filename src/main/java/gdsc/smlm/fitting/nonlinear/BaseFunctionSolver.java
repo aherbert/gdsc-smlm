@@ -98,15 +98,15 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 */
 	protected void preProcess()
 	{
-		
+
 	}
-	
+
 	/**
 	 * Run if the fit/evaluate was successful
 	 */
 	protected void postProcess()
 	{
-		
+
 	}
 
 	/*
@@ -185,7 +185,16 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		Arrays.fill(deviations, 0);
 		final int[] indices = f.gradientIndices();
 		for (int i = 0; i < indices.length; i++)
-			deviations[indices[i]] = Math.sqrt(covar[i][i]);
+			deviations[indices[i]] = covar[i][i];
+	}
+
+	public void setDeviations(double[] deviations, double[] covar)
+	{
+		Arrays.fill(deviations, 0);
+		final int[] indices = f.gradientIndices();
+		final int n = indices.length;
+		for (int i = 0; i < n; i += (n + 1))
+			deviations[indices[i]] = covar[i];
 	}
 
 	/*
@@ -328,5 +337,49 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 			((Gaussian2DFunction) f).getName(i);
 		}
 		return "Unknown";
+	}
+
+	/**
+	 * Ensure positive values. If values are negative a copy is made with those values set to zero.
+	 *
+	 * @param y
+	 *            the y
+	 * @return the positive y values
+	 */
+	public static double[] ensurePositive(double[] y)
+	{
+		return ensurePositive(y.length, y);
+	}
+
+	/**
+	 * Ensure positive values. If values are negative a copy is made with those values set to zero.
+	 *
+	 * @param n
+	 *            the number of values to check
+	 * @param y
+	 *            the y
+	 * @return the positive y values
+	 */
+	public static double[] ensurePositive(final int n, double[] y)
+	{
+		for (int i = 0; i < n; i++)
+		{
+			if (y[i] < 0)
+			{
+				// Not positive so create a clone
+
+				final double[] y2 = new double[n];
+				if (i != 0)
+					// Copy the values that were positive
+					System.arraycopy(y, 0, y2, 0, i);
+				y2[i] = 0; // We know this was not positive
+				while (++i < n)
+				{
+					y2[i] = (y[i] < 0) ? 0 : y[i];
+				}
+				return y2;
+			}
+		}
+		return y;
 	}
 }

@@ -265,10 +265,4 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
 			System.arraycopy(data[i], 0, out, pos, n);
 		return out;
 	}
-
-	public void functionValue(double[] y_fit)
-	{
-		// TODO Auto-generated method stub
-		
-	}
 }

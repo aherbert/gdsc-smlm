@@ -169,7 +169,7 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	protected abstract LVMGradientProcedure createGradientProcedure(double[] y);
 
 	@Override
-	protected double computeFitValue(double[] y, double[] a)
+	protected double computeFitValue(double[] a)
 	{
 		gradientProcedure.gradient(a);
 
@@ -250,16 +250,15 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	}
 
 	@Override
-	protected double computeFunctionValue(double[] y, double[] y_fit, double[] a)
+	protected double computeFunctionValue(double[] y_fit, double[] a)
 	{
 		gradientProcedure.value(a);
+		if (y_fit != null)
+			// This simple implementation causes a double evaluation of the function 
+			// but only a single initialisation. The following method can be overriden
+			// to use cached function values.
+			computeValues(y_fit);
 		return gradientProcedure.value;
-	}
-
-	@Override
-	protected void computeFunctionValue(final double[] y_fit)
-	{
-		computeFunction(y_fit);
 	}
 
 	private static class SimpleValueProcedure implements ValueProcedure
@@ -277,48 +276,19 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 			y_fit[i++] = value;
 		}
 	}
-
-	private static class SimpleBValueProcedure extends SimpleValueProcedure
-	{
-		double[] b;
-
-		SimpleBValueProcedure(double[] y_fit, double[] b)
-		{
-			super(y_fit);
-			this.b = b;
-		};
-
-		public void execute(double value)
-		{
-			y_fit[i] = value + b[i];
-			i++;
-		}
-	}
-
+	
 	/**
 	 * Utility method to compute the function values using the preinitialised function.
-	 *
-	 * @param y_fit
-	 *            the function values
+	 * Sub-classes may override this if they have cached the function values from the 
+	 * last execution of a forEach procedure.
+
+	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeValues(double[])
 	 */
-	protected void computeFunction(double[] y_fit)
+	@Override
+	protected void computeValues(final double[] y_fit)
 	{
 		ValueFunction f = (ValueFunction) this.f;
 		f.forEach(new SimpleValueProcedure(y_fit));
-	}
-
-	/**
-	 * Utility method to compute the function values using the preinitialised function.
-	 *
-	 * @param y_fit
-	 *            the function values
-	 * @param b
-	 *            Baseline pre-computed y-values
-	 */
-	protected void computeFunction(final double[] y_fit, final double[] b)
-	{
-		ValueFunction f = (ValueFunction) this.f;
-		f.forEach(new SimpleBValueProcedure(y_fit, b));
 	}
 
 	/**

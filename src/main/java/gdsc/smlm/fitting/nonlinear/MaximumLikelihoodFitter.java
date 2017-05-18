@@ -673,7 +673,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
 				// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix.
 				FisherInformationMatrix m = new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
-				double[] crlb = m.crlbSqrt(true);
+				double[] crlb = m.crlb(true);
 				Arrays.fill(a_dev, 0);
 				final int[] gradientIndices = f.gradientIndices();
 				for (int i = gradientIndices.length; i-- > 0;)

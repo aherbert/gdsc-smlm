@@ -465,31 +465,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		return result;
 	}
 
-	private static double[] ensurePositive(int n, double[] y)
-	{
-		if (hasNegatives(n, y))
-		{
-			final double[] y2 = new double[n];
-			for (int i = n; i-- > 0;)
-			{
-				if (y[i] < 0)
-					y2[i] = 0;
-				else
-					y2[i] = y[i];
-			}
-			y = y2;
-		}
-		return y;
-	}
-
-	private static boolean hasNegatives(int n, final double[] y)
-	{
-		for (int i = n; i-- > 0;)
-			if (y[i] < 0)
-				return true;
-		return false;
-	}
-
 	/**
 	 * Used for debugging
 	 * 

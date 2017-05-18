@@ -89,7 +89,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 */
 	protected void initialiseWorkingMatrix()
 	{
-		Arrays.fill(data, 0);
+		Arrays.fill(data, 0.0);
 	}
 
 	/*
@@ -99,7 +99,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 */
 	public void execute(double value, double[] dy_da)
 	{
-		if (value > 0)
+		if (value > 0.0)
 		{
 			final double f = 1.0 / value;
 			for (int j = 0, i = 0; j < n; j++)
