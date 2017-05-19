@@ -139,7 +139,7 @@ public class FisherInformationMatrix
 			// Check all diagonal values are zero or above
 			if (inversionTolerance > 0)
 			{
-				// Already checked so just ignored values just below zero
+				// Already checked so just ignore values just below zero
 				for (int i = m.numCols; i-- > 0;)
 					if (crlb[i] < 0)
 						crlb[i] = 0;
