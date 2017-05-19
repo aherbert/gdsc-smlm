@@ -28,6 +28,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
 	protected static final int PARAMETERS_PER_PEAK = 6;
 
+	protected boolean[] zeroAngle;
 	protected final double[][] peakFactors;
 	protected double[] a;
 
@@ -44,6 +45,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	public EllipticalGaussian2DFunction(int npeaks, int maxx, int maxy)
 	{
 		super(npeaks, maxx, maxy);
+		zeroAngle = new boolean[npeaks];
 		peakFactors = new double[npeaks][16];
 	}
 
@@ -108,6 +110,8 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 				// sin2t = 0
 				// cos2t = 1
 
+				zeroAngle[j] = true;
+
 				peakFactors[j][AA] = -0.5 / sx2;
 				peakFactors[j][BB] = 0;
 				peakFactors[j][CC] = -0.5 / sy2;
@@ -131,6 +135,8 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 			}
 			else
 			{
+				zeroAngle[j] = false;
+
 				final double cosSqt = Math.cos(theta) * Math.cos(theta);
 				final double sinSqt = Math.sin(theta) * Math.sin(theta);
 				final double sincost = Math.sin(theta) * Math.cos(theta);
@@ -203,7 +209,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		for (int j = 0; j < npeaks; j++)
 		{
-			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
+			y_fit += gaussian(x0, x1, dyda, apos, dydapos, zeroAngle[j], peakFactors[j]);
 			apos += 6;
 			dydapos += PARAMETERS_PER_PEAK;
 		}
@@ -212,7 +218,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	protected double gaussian(final int x0, final int x1, final double[] dy_da, final int apos, final int dydapos,
-			final double[] factors)
+			final boolean zeroAngle, final double[] factors)
 	{
 		final double dx = x0 - a[apos + X_POSITION];
 		final double dy = x1 - a[apos + Y_POSITION];
@@ -221,34 +227,41 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final double dy2 = dy * dy;
 
 		final double aa = factors[AA];
-		final double bb = factors[BB];
 		final double cc = factors[CC];
-		final double aa2 = factors[AA2];
-		final double bb2 = factors[BB2];
-		final double cc2 = factors[CC2];
-		final double nx = factors[NX];
-		final double ax = factors[AX];
-		final double bx = factors[BX];
-		final double cx = factors[CX];
-		final double ny = factors[NY];
-		final double ay = factors[AY];
-		final double by = factors[BY];
-		final double cy = factors[CY];
 
 		// Calculate gradients
+		if (zeroAngle)
+		{
+			final double exp = FastMath.exp(aa * dx2 + cc * dy2);
+			dy_da[dydapos] = factors[N] * exp;
+			final double y = factors[HEIGHT] * exp;
+			dy_da[dydapos + 1] = y * (factors[BB2] * dxy);
 
-		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-		dy_da[dydapos] = factors[N] * exp;
-		final double y = factors[HEIGHT] * exp;
-		dy_da[dydapos + 1] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
+			dy_da[dydapos + 2] = y * (-2.0 * aa * dx);
+			dy_da[dydapos + 3] = y * (-2.0 * cc * dy);
 
-		dy_da[dydapos + 2] = y * (-2.0 * aa * dx - bb * dy);
-		dy_da[dydapos + 3] = y * (-2.0 * cc * dy - bb * dx);
+			dy_da[dydapos + 4] = y * (factors[NX] + factors[AX] * dx2);
+			dy_da[dydapos + 5] = y * (factors[NY] + factors[CY] * dy2);
 
-		dy_da[dydapos + 4] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
-		dy_da[dydapos + 5] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
+			return y;
+		}
+		else
+		{
+			final double bb = factors[BB];
 
-		return y;
+			final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+			dy_da[dydapos] = factors[N] * exp;
+			final double y = factors[HEIGHT] * exp;
+			dy_da[dydapos + 1] = y * (factors[AA2] * dx2 + factors[BB2] * dxy + factors[CC2] * dy2);
+
+			dy_da[dydapos + 2] = y * (-2.0 * aa * dx - bb * dy);
+			dy_da[dydapos + 3] = y * (-2.0 * cc * dy - bb * dx);
+
+			dy_da[dydapos + 4] = y * (factors[NX] + factors[AX] * dx2 + factors[BX] * dxy + factors[CX] * dy2);
+			dy_da[dydapos + 5] = y * (factors[NY] + factors[AY] * dx2 + factors[BY] * dxy + factors[CY] * dy2);
+
+			return y;
+		}
 	}
 
 	/*
@@ -270,22 +283,23 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		for (int j = 0; j < npeaks; j++, apos += 6)
 		{
-			y_fit += gaussian(x0, x1, apos, peakFactors[j]);
+			y_fit += gaussian(x0, x1, apos, zeroAngle[j], peakFactors[j]);
 		}
 
 		return y_fit;
 	}
 
-	protected double gaussian(final int x0, final int x1, final int apos, final double[] factors)
+	protected double gaussian(final int x0, final int x1, final int apos, final boolean zeroAngle,
+			final double[] factors)
 	{
 		final double dx = x0 - a[apos + X_POSITION];
 		final double dy = x1 - a[apos + Y_POSITION];
 
-		final double aa = factors[AA];
-		final double bb = factors[BB];
-		final double cc = factors[CC];
-
-		return factors[HEIGHT] * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
+		if (zeroAngle)
+			return factors[HEIGHT] * FastMath.exp(factors[AA] * dx * dx + factors[CC] * dy * dy);
+		else
+			return factors[HEIGHT] *
+					FastMath.exp(factors[AA] * dx * dx + factors[BB] * dx * dy + factors[CC] * dy * dy);
 	}
 
 	@Override

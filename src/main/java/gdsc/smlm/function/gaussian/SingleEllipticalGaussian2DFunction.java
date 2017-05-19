@@ -35,6 +35,7 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	protected double x0pos;
 	protected double x1pos;
 
+	protected boolean zeroAngle;
 	protected double n;
 	protected double height;
 	protected double aa;
@@ -104,6 +105,8 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 
 		if (theta == 0)
 		{
+			zeroAngle = true;
+
 			// cosSqt = 1
 			// sinSqt = 0
 			// sincost = 0
@@ -133,6 +136,8 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		}
 		else
 		{
+			zeroAngle = false;
+
 			final double cosSqt = Math.cos(theta) * Math.cos(theta);
 			final double sinSqt = Math.sin(theta) * Math.sin(theta);
 			final double sincost = Math.sin(theta) * Math.cos(theta);
@@ -209,19 +214,36 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		final double dy2 = dy * dy;
 
 		// Calculate gradients
+		if (zeroAngle)
+		{
+			final double exp = FastMath.exp(aa * dx2 + cc * dy2);
+			dy_da[1] = n * exp;
+			final double y = height * exp;
+			dy_da[2] = y * (bb2 * dxy);
 
-		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-		dy_da[1] = n * exp;
-		final double y = height * exp;
-		dy_da[2] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
+			dy_da[3] = y * (-2.0 * aa * dx);
+			dy_da[4] = y * (-2.0 * cc * dy);
 
-		dy_da[3] = y * (-2.0 * aa * dx - bb * dy);
-		dy_da[4] = y * (-2.0 * cc * dy - bb * dx);
+			dy_da[5] = y * (nx + ax * dx2);
+			dy_da[6] = y * (ny + cy * dy2);
 
-		dy_da[5] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
-		dy_da[6] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
+			return y;
+		}
+		else
+		{
+			final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+			dy_da[1] = n * exp;
+			final double y = height * exp;
+			dy_da[2] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
 
-		return y;
+			dy_da[3] = y * (-2.0 * aa * dx - bb * dy);
+			dy_da[4] = y * (-2.0 * cc * dy - bb * dx);
+
+			dy_da[5] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
+			dy_da[6] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
+
+			return y;
+		}
 	}
 
 	/*
@@ -238,7 +260,10 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		final double dx = x0 - x0pos;
 		final double dy = x1 - x1pos;
 
-		return background + height * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
+		if (zeroAngle)
+			return background + height * FastMath.exp(aa * dx * dx + cc * dy * dy);
+		else
+			return background + height * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
 	}
 
 	@Override

@@ -32,11 +32,11 @@ import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 public class GaussianFunctionFactory
 {
 	/**
-	 * Compute gradients for background 
+	 * Compute gradients for background
 	 */
 	public static final int FIT_BACKGROUND = 0x00000001;
 	/**
-	 * Compute gradients for rotation angle 
+	 * Compute gradients for rotation angle
 	 */
 	public static final int FIT_ANGLE = 0x00000002;
 	/**
@@ -44,15 +44,15 @@ public class GaussianFunctionFactory
 	 */
 	public static final int FIT_X_WIDTH = 0x00000004;
 	/**
-	 * Compute gradients for y width 
+	 * Compute gradients for y width
 	 */
 	public static final int FIT_Y_WIDTH = 0x00000008;
 	/**
-	 * Compute gradients for signal 
+	 * Compute gradients for signal
 	 */
 	public static final int FIT_SIGNAL = 0x00000010;
 	/**
-	 * Compute gradients for z position 
+	 * Compute gradients for z position
 	 */
 	public static final int FIT_Z = 0x00000020;
 
@@ -142,7 +142,7 @@ public class GaussianFunctionFactory
 	 * width
 	 */
 	public static final int FIT_ERF_NB_FREE_CIRCLE = FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL | FIT_ERF;
-	
+
 	/**
 	 * An elliptical 2D Gaussian (single exponential per pixel) with gradients for signal, rotation angle,
 	 * x/y position, x/y width

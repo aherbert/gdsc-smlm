@@ -36,6 +36,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 	protected double x0pos;
 	protected double x1pos;
 
+	protected boolean zeroAngle;
 	protected double n;
 	protected double height;
 	protected double aa;
@@ -99,9 +100,11 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
 		// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
-		
+
 		if (theta == 0)
 		{
+			zeroAngle = true;
+
 			// cosSqt = 1
 			// sinSqt = 0
 			// sin2t = 0
@@ -124,6 +127,8 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 		}
 		else
 		{
+			zeroAngle = false;
+
 			final double cosSqt = Math.cos(theta) * Math.cos(theta);
 			final double sinSqt = Math.sin(theta) * Math.sin(theta);
 			final double sin2t = Math.sin(2 * theta);
@@ -193,18 +198,32 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 		final double dy2 = dy * dy;
 
 		// Calculate gradients
+		if (zeroAngle)
+		{
+			final double exp = FastMath.exp(aa * dx2 + cc * dy2);
+			dy_da[1] = n * exp;
+			final double y = height * exp;
 
-		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-		dy_da[1] = n * exp;
-		final double y = height * exp;
+			dy_da[2] = y * (-2.0 * aa * dx);
+			dy_da[3] = y * (-2.0 * cc * dy);
 
-		dy_da[2] = y * (-2.0 * aa * dx - bb * dy);
-		dy_da[3] = y * (-2.0 * cc * dy - bb * dx);
+			dy_da[4] = y * (nx + ax * dx2);
+			dy_da[5] = y * (ny + cy * dy2);
+			return y;
+		}
+		else
+		{
+			final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+			dy_da[1] = n * exp;
+			final double y = height * exp;
 
-		dy_da[4] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
-		dy_da[5] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
+			dy_da[2] = y * (-2.0 * aa * dx - bb * dy);
+			dy_da[3] = y * (-2.0 * cc * dy - bb * dx);
 
-		return y;
+			dy_da[4] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
+			dy_da[5] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
+			return y;
+		}
 	}
 
 	/*
@@ -221,7 +240,10 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 		final double dx = x0 - x0pos;
 		final double dy = x1 - x1pos;
 
-		return background + height * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
+		if (zeroAngle)
+			return background + height * FastMath.exp(aa * dx * dx + cc * dy * dy);
+		else
+			return background + height * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
 	}
 
 	@Override

@@ -70,7 +70,7 @@ public class NBEllipticalGaussian2DFunction extends EllipticalGaussian2DFunction
 
 		for (int j = 0; j < npeaks; j++)
 		{
-			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
+			y_fit += gaussian(x0, x1, dyda, apos, dydapos, zeroAngle[j], peakFactors[j]);
 			apos += 6;
 			dydapos += PARAMETERS_PER_PEAK;
 		}
