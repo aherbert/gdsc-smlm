@@ -170,11 +170,13 @@ public class NewtonRaphsonGradient2ProcedureTest
 
 			// Compute peak 1+2
 			NewtonRaphsonGradient2Procedure p12 = NewtonRaphsonGradient2ProcedureFactory.create(x, f2);
-			double[] up1 = Arrays.copyOf(p12.computeUpdate(a2), f1.getNumberOfGradients());
+			p12.computeUpdate(a2);
+			double[] up1 = Arrays.copyOf(p12.getUpdate(), f1.getNumberOfGradients());
 
 			// Compute peak 1+(precomputed 2)
 			NewtonRaphsonGradient2Procedure p1b2 = NewtonRaphsonGradient2ProcedureFactory.create(x, b, f1);
-			double[] up2 = p1b2.computeUpdate(a1);
+			p1b2.computeUpdate(a1);
+			double[] up2 = p1b2.getUpdate();
 
 			Assert.assertArrayEquals(" Result: Not same @ " + i, p12.u, p1b2.u, 1e-10);
 			Assert.assertArrayEquals(" Update: Not same @ " + i, up1, up2, 1e-10);
