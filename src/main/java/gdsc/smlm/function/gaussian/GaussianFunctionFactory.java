@@ -4,6 +4,7 @@ import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleNBFreeCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiFixedErfGaussian2DFunction;
@@ -195,42 +196,42 @@ public class GaussianFunctionFactory
 		{
 			if (nPeaks == 1)
 			{
-				if ((flags & FIT_BACKGROUND) == FIT_BACKGROUND)
+				if ((flags & FIT_BACKGROUND) != 0)
 				{
 					// Independent X/Y width
-					if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+					if ((flags & FIT_Y_WIDTH) != 0)
 						return new SingleFreeCircularErfGaussian2DFunction(maxx, maxy);
 					// Combined X/Y width
-					if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
+					if ((flags & FIT_X_WIDTH) != 0)
 						return new SingleCircularErfGaussian2DFunction(maxx, maxy);
 					// Z-depth function
-					if ((flags & FIT_Z) == FIT_Z)
+					if ((flags & FIT_Z) != 0)
 						return new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
 					// Fixed width
-					if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+					if ((flags & FIT_SIGNAL) != 0)
 						return new SingleFixedErfGaussian2DFunction(maxx, maxy);
 				}
-				if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+				if ((flags & FIT_Y_WIDTH) != 0)
 					return new SingleNBFreeCircularErfGaussian2DFunction(maxx, maxy);
 			}
 			else
 			{
-				if ((flags & FIT_BACKGROUND) == FIT_BACKGROUND)
+				if ((flags & FIT_BACKGROUND) != 0)
 				{
 					// Independent X/Y width
-					if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+					if ((flags & FIT_Y_WIDTH) != 0)
 						return new MultiFreeCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
 					// Combined X/Y width
-					if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
+					if ((flags & FIT_X_WIDTH) != 0)
 						return new MultiCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
 					// Z-depth function
-					if ((flags & FIT_Z) == FIT_Z)
+					if ((flags & FIT_Z) != 0)
 						return new MultiAstigmatismErfGaussian2DFunction(nPeaks, maxx, maxy, zModel);
 					// Fixed width
-					if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+					if ((flags & FIT_SIGNAL) != 0)
 						return new MultiFixedErfGaussian2DFunction(nPeaks, maxx, maxy);
 				}
-				if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+				if ((flags & FIT_Y_WIDTH) != 0)
 					return new MultiNBFreeCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
 			}
 		}
@@ -238,65 +239,127 @@ public class GaussianFunctionFactory
 		// Legacy simple Gaussian functions
 		if (nPeaks == 1)
 		{
-			if ((flags & FIT_BACKGROUND) == FIT_BACKGROUND)
+			if ((flags & FIT_BACKGROUND) != 0)
 			{
-				if ((flags & FIT_ANGLE) == FIT_ANGLE)
+				if ((flags & FIT_ANGLE) != 0)
 					return new SingleEllipticalGaussian2DFunction(maxx, maxy);
-				if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+				if ((flags & FIT_Y_WIDTH) != 0)
 					return new SingleFreeCircularGaussian2DFunction(maxx, maxy);
-				if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
+				if ((flags & FIT_X_WIDTH) != 0)
 					return new SingleCircularGaussian2DFunction(maxx, maxy);
 
 				// Fixed function
-				if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+				if ((flags & FIT_SIGNAL) != 0)
 					return new SingleFixedGaussian2DFunction(maxx, maxy);
 
 				return new SingleNSFixedGaussian2DFunction(maxx, maxy);
 			}
 
-			if ((flags & FIT_ANGLE) == FIT_ANGLE)
+			if ((flags & FIT_ANGLE) != 0)
 				return new SingleNBEllipticalGaussian2DFunction(maxx, maxy);
-			if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+			if ((flags & FIT_Y_WIDTH) != 0)
 				return new SingleNBFreeCircularGaussian2DFunction(maxx, maxy);
-			if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
+			if ((flags & FIT_X_WIDTH) != 0)
 				return new SingleNBCircularGaussian2DFunction(maxx, maxy);
 
 			// Fixed function
-			if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+			if ((flags & FIT_SIGNAL) != 0)
 				return new SingleNBFixedGaussian2DFunction(maxx, maxy);
 
 			return new SingleNSNBFixedGaussian2DFunction(maxx, maxy);
 		}
 		else
 		{
-			if ((flags & FIT_BACKGROUND) == FIT_BACKGROUND)
+			if ((flags & FIT_BACKGROUND) != 0)
 			{
-				if ((flags & FIT_ANGLE) == FIT_ANGLE)
+				if ((flags & FIT_ANGLE) != 0)
 					return new EllipticalGaussian2DFunction(nPeaks, maxx, maxy);
-				if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+				if ((flags & FIT_Y_WIDTH) != 0)
 					return new FreeCircularGaussian2DFunction(nPeaks, maxx, maxy);
-				if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
+				if ((flags & FIT_X_WIDTH) != 0)
 					return new CircularGaussian2DFunction(nPeaks, maxx, maxy);
 
 				// Fixed function
-				if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+				if ((flags & FIT_SIGNAL) != 0)
 					return new FixedGaussian2DFunction(nPeaks, maxx, maxy);
 
 				return new NSFixedGaussian2DFunction(nPeaks, maxx, maxy);
 			}
 
-			if ((flags & FIT_ANGLE) == FIT_ANGLE)
+			if ((flags & FIT_ANGLE) != 0)
 				return new NBEllipticalGaussian2DFunction(nPeaks, maxx, maxy);
-			if ((flags & FIT_Y_WIDTH) == FIT_Y_WIDTH)
+			if ((flags & FIT_Y_WIDTH) != 0)
 				return new NBFreeCircularGaussian2DFunction(nPeaks, maxx, maxy);
-			if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
+			if ((flags & FIT_X_WIDTH) != 0)
 				return new NBCircularGaussian2DFunction(nPeaks, maxx, maxy);
 
 			// Fixed function
-			if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+			if ((flags & FIT_SIGNAL) != 0)
 				return new NBFixedGaussian2DFunction(nPeaks, maxx, maxy);
 
 			return new NSNBFixedGaussian2DFunction(nPeaks, maxx, maxy);
 		}
+	}
+
+	/**
+	 * Freeze the Gaussian function parameters to a set of parameters and function flags that will evaluate faster. The
+	 * widths of the input parameters may be modified. The shape will remain unchanged even if the function flags are
+	 * altered.
+	 *
+	 * @param flags
+	 *            The function flags (defines the type of function)
+	 * @param zModel
+	 *            the z model
+	 * @param a
+	 *            the parameters of the function (modified in place)
+	 * @return the flags for the new function
+	 */
+	public static int freeze(int flags, AstimatismZModel zModel, double[] a)
+	{
+		int nPeaks = a.length / 6;
+
+		// TODO - Add test that the returned function computes the same as the parent function
+
+		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
+		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
+		{
+			// Check for z-model 
+			if ((flags & FIT_Z) != 0 && zModel != null)
+			{
+				// Convert the parameters for a free-circle function
+				for (int i = 0, j = 0; i < nPeaks; i++, j += 6)
+				{
+					final double tz = a[j + ErfGaussian2DFunction.Z_POSITION];
+					a[j + Gaussian2DFunction.X_SD] *= zModel.getSx(tz);
+					a[j + Gaussian2DFunction.Y_SD] *= zModel.getSy(tz);
+					//a[ErfGaussian2DFunction.Z_POSITION] = 0;
+				}
+
+				return FIT_ERF_FREE_CIRCLE;
+			}
+
+			// Check the need for X/Y widths
+			if ((flags & FIT_Y_WIDTH) == 0)
+			{
+				for (int i = 0, j = 0; i < nPeaks; i++, j += 6)
+					a[j + Gaussian2DFunction.Y_SD] = a[j + Gaussian2DFunction.X_SD];
+				return FIT_ERF_FIXED;
+			}
+
+			return FIT_ERF_FREE_CIRCLE;
+		}
+
+		// Legacy simple Gaussian functions
+
+		// Check the need for X/Y widths
+		if ((flags & FIT_Y_WIDTH) == 0)
+		{
+			for (int i = 0, j = 0; i < nPeaks; i++, j += 6)
+				a[j + Gaussian2DFunction.Y_SD] = a[j + Gaussian2DFunction.X_SD];
+			return FIT_SIMPLE_FIXED;
+		}
+
+		// Default to free circle (which can use the angle if present)
+		return FIT_SIMPLE_FREE_CIRCLE;
 	}
 }
