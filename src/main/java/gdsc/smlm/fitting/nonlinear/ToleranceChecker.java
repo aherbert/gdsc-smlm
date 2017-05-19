@@ -23,6 +23,11 @@ package gdsc.smlm.fitting.nonlinear;
  */
 public class ToleranceChecker
 {
+	/** The constant to use for a tolerance that is ignored */
+	public static final double IGNORE_TOLERANCE = -1.0;
+	/** The constant to use for a max iterations that is ignored */
+	public static final int IGNORE_MAX_ITERATIONS = 0;
+	
 	/** Flag to indicate the max iterations have been reached. This is a failure to converge. */
 	public static final int STATUS_MAX_ITERATIONS = 0x00000001;
 	/** Flag to indicate convergence on the value. */
@@ -85,7 +90,7 @@ public class ToleranceChecker
 	 */
 	public ToleranceChecker(double relativeParameters, double absoluteParameters)
 	{
-		this(false, -1, -1, relativeParameters, absoluteParameters, 0);
+		this(false, IGNORE_TOLERANCE, IGNORE_TOLERANCE, relativeParameters, absoluteParameters, IGNORE_MAX_ITERATIONS);
 	}
 
 	/**
