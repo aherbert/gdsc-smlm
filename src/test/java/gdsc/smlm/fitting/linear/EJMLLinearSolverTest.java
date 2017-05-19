@@ -291,6 +291,7 @@ public class EJMLLinearSolverTest
 	{
 		DenseMatrix64F[] a;
 		DenseMatrix64F[] b;
+		final boolean badSolver;
 		// No validation for a pure speed test
 		EJMLLinearSolver solver = new EJMLLinearSolver();
 
@@ -302,16 +303,25 @@ public class EJMLLinearSolverTest
 			this.b = b;
 			// Check the solver gets a good answer
 			solver.setEqual(new DoubleEquality(5e-3, 1e-6));
+			int fail = 0;
 			Object data = getData(0);
-
 			a = (DenseMatrix64F[]) ((Object[]) data)[0];
 			b = (DenseMatrix64F[]) ((Object[]) data)[1];
 			for (int i = 0; i < a.length; i++)
 			{
 				if (!solve(a[i], b[i]))
 				{
-					throw new RuntimeException(getName() + " failed to solve");
+					fail++;
 				}
+			}
+			if (fail > 0)
+			{
+				log(getName() + " failed to invert %d/%d\n", fail, a.length);
+				badSolver = true;
+			}
+			else
+			{
+				badSolver = false;
 			}
 			solver.setEqual(null);
 		}
@@ -416,6 +426,12 @@ public class EJMLLinearSolverTest
 
 	// Create a speed test of the different methods
 	@Test
+	public void runSolverSpeedTest6()
+	{
+		runSolverSpeedTest(GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
+	}
+	
+	@Test
 	public void runSolverSpeedTest5()
 	{
 		runSolverSpeedTest(GaussianFunctionFactory.FIT_ERF_CIRCLE);
@@ -488,13 +504,17 @@ public class EJMLLinearSolverTest
 
 		DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[aList.size()]);
 		DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[bList.size()]);
-		int runs = 10000 / a.length;
+		int runs = 100000 / a.length;
 		TimingService ts = new TimingService(runs);
-		ts.execute(new PseudoInverseSolverTimingTask(a, b));
-		ts.execute(new LinearSolverTimingTask(a, b));
-		ts.execute(new CholeskySolverTimingTask(a, b));
-		ts.execute(new CholeskyLDLTSolverTimingTask(a, b));
-		ts.execute(new DirectInversionSolverTimingTask(a, b));
+		TurboList<SolverTimingTask> tasks = new TurboList<SolverTimingTask>();
+		tasks.add(new PseudoInverseSolverTimingTask(a, b));
+		tasks.add(new LinearSolverTimingTask(a, b));
+		tasks.add(new CholeskySolverTimingTask(a, b));
+		tasks.add(new CholeskyLDLTSolverTimingTask(a, b));
+		tasks.add(new DirectInversionSolverTimingTask(a, b));
+		for (SolverTimingTask task : tasks)
+			if (!task.badSolver)
+				ts.execute(task);
 		ts.repeat();
 		ts.report();
 	}
@@ -561,7 +581,7 @@ public class EJMLLinearSolverTest
 
 		public int getSize()
 		{
-			return (badSolver) ? 0 : 1;
+			return 1;
 		}
 
 		public Object getData(int i)
@@ -690,6 +710,12 @@ public class EJMLLinearSolverTest
 
 	// Create a speed test of the different methods
 	@Test
+	public void runInversionSpeedTest6()
+	{
+		runInversionSpeedTest(GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
+	}
+
+	@Test
 	public void runInversionSpeedTest5()
 	{
 		runInversionSpeedTest(GaussianFunctionFactory.FIT_ERF_CIRCLE);
@@ -761,12 +787,12 @@ public class EJMLLinearSolverTest
 		DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[aList.size()]);
 		boolean[] ignore = new boolean[a.length];
 		double[][] answer = new double[a.length][];
-		int runs = 10000 / a.length;
+		int runs = 100000 / a.length;
 		TimingService ts = new TimingService(runs);
 		TurboList<InversionTimingTask> tasks = new TurboList<InversionTimingTask>();
 		tasks.add(new PseudoInverseInversionTimingTask(a, ignore, answer));
-		tasks.add(new LinearInversionTimingTask(a, ignore, answer));
 		tasks.add(new CholeskyInversionTimingTask(a, ignore, answer));
+		tasks.add(new LinearInversionTimingTask(a, ignore, answer));
 		tasks.add(new CholeskyLDLTInversionTimingTask(a, ignore, answer));
 		tasks.add(new DirectInversionInversionTimingTask(a, ignore, answer));
 		tasks.add(new DiagonalDirectInversionInversionTimingTask(a, ignore, answer));

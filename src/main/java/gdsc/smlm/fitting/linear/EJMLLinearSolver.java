@@ -414,10 +414,15 @@ public class EJMLLinearSolver
 	{
 		createSolver(A.numCols);
 
+		// Speed tests show the Cholesky solver marginally outperforms the 
+		// CholeskyLDLT solver as the size increases. Note: The EJML factory 
+		// returns a Cholesky solver for symmetric positive definite matrices 
+		// so we use this.
+		
 		// Note: Use solveSafe as we need the A and B matrix for the subsequent 
 		// solve attempt if failure
 
-		if (solveSafe(getCholeskyLDLTSolver(), A, B, getX()))
+		if (solveSafe(getCholeskySolver(), A, B, getX()))
 		{
 			if (!errorChecking || validate(A, X, B))
 			{
@@ -452,7 +457,7 @@ public class EJMLLinearSolver
 			return false;
 		return getPseudoInverseSolver().modifiesA();
 	}
-	
+
 	/**
 	 * Computes the inverse of the 'A' matrix passed into the last successful solve method.
 	 * <p>
@@ -671,9 +676,14 @@ public class EJMLLinearSolver
 	{
 		createSolver(A.numCols);
 
-		LinearSolver<DenseMatrix64F> primarySolver = (A.numCols <= UnrolledInverseFromMinor.MAX) ? getInversionSolver()
-				: getCholeskyLDLTSolver();
-
+		// Speed tests show the Cholesky solver marginally outperforms the 
+		// CholeskyLDLT solver as the size increases.
+		// The DirectInversion solver is faster when the size < 5.		
+		// Note: The EJML factory returns a Cholesky solver for symmetric 
+		// positive definite matrices so we use this in preference to a CholeskyLDLT.
+		
+		LinearSolver<DenseMatrix64F> primarySolver = (A.numCols < 5) ? getInversionSolver()
+				: getCholeskySolver();
 		if (invertSafe(primarySolver, A, false))
 			return true;
 
@@ -693,7 +703,7 @@ public class EJMLLinearSolver
 			if (!Maths.isFinite(a_inv[i]))
 				return false;
 
-		if (isInversionTolerance() && invalidInversion(Ain, pseudoInverse))
+		if (isInversionTolerance() && invalidInversion(A, pseudoInverse))
 			return false;
 
 		System.arraycopy(a_inv, 0, A.data, 0, a_inv.length);
@@ -712,9 +722,12 @@ public class EJMLLinearSolver
 		double[] a_inv = A_inv.data;
 		for (int i = a_inv.length; i-- > 0;)
 			if (!Maths.isFinite(a_inv[i]))
+			{
+				System.out.printf("Not finite\n");
 				return false;
+			}
 
-		if (isInversionTolerance() && invalidInversion(Ain, pseudoInverse))
+		if (isInversionTolerance() && invalidInversion(A, pseudoInverse))
 			return false;
 
 		System.arraycopy(a_inv, 0, A.data, 0, a_inv.length);
@@ -767,14 +780,15 @@ public class EJMLLinearSolver
 
 	private boolean invalid(double e, double o)
 	{
-		//if (Math.abs(e-o) > inversionTolerance)
-		//System.out.printf("Bad solution: %g != %g (%g = %d)\n", e, o, DoubleEquality.relativeError(e, o),
-		//		DoubleEquality.complement(e, o));
+		//if (Math.abs(e - o) > inversionTolerance)
+		//	System.out.printf("Bad solution: %g != %g (%g = %d)\n", e, o, DoubleEquality.relativeError(e, o),
+		//			DoubleEquality.complement(e, o));
 		return (Math.abs(e - o) > inversionTolerance);
 	}
 
 	/**
-	 * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal. May modify the matrix. 
+	 * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal. May modify the
+	 * matrix.
 	 * <p>
 	 * Note: If the matrix is singular then a pseudo inverse will be computed.
 	 *
@@ -816,7 +830,7 @@ public class EJMLLinearSolver
 			d[i] = A.get(j);
 		return d;
 	}
-	
+
 	/**
 	 * Checks if an inversion may modify A.
 	 *
@@ -1114,7 +1128,7 @@ public class EJMLLinearSolver
 			return null;
 		return UnrolledInverseFromMinorExt.inv(toA(a));
 	}
-	
+
 	/**
 	 * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the inverse of a.
 	 * <p>
