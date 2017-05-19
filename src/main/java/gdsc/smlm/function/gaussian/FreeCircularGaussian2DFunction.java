@@ -90,15 +90,39 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 			final double sy2 = sy * sy;
 			final double sx3 = sx2 * sx;
 			final double sy3 = sy2 * sy;
-			final double cosSqt = Math.cos(theta) * Math.cos(theta);
-			final double sinSqt = Math.sin(theta) * Math.sin(theta);
-			final double sin2t = Math.sin(2.0 * theta);
-
 			peakFactors[j][N] = ONE_OVER_TWO_PI / (sx * sy);
 			peakFactors[j][HEIGHT] = a[j * 6 + SIGNAL] * peakFactors[j][N];
 
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+
+			if (theta == 0)
+			{
+				// cosSqt = 1
+				// sinSqt = 0
+				// sin2t = 0
+				
+				peakFactors[j][AA] = -0.5 / sx2;
+				peakFactors[j][BB] = 0;
+				peakFactors[j][CC] = -0.5 / sy2;
+
+				// For the x-width gradient
+				peakFactors[j][NX] = -1.0 / sx;
+				peakFactors[j][AX] = 1.0 / sx3;
+				peakFactors[j][BX] = 0;
+				peakFactors[j][CX] = 0;
+
+				// For the y-width gradient
+				peakFactors[j][NY] = -1.0 / sy;
+				peakFactors[j][AY] = 0;
+				peakFactors[j][BY] = 0;
+				peakFactors[j][CY] = 1.0 / sy3;
+			}
+			else
+			{
+			final double cosSqt = Math.cos(theta) * Math.cos(theta);
+			final double sinSqt = Math.sin(theta) * Math.sin(theta);
+			final double sin2t = Math.sin(2.0 * theta);
 
 			peakFactors[j][AA] = -0.5 * (cosSqt / sx2 + sinSqt / sy2);
 			peakFactors[j][BB] = -0.25 * (-sin2t / sx2 + sin2t / sy2);
@@ -115,6 +139,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 			peakFactors[j][AY] = sinSqt / sy3;
 			peakFactors[j][BY] = 0.5 * sin2t / sy3;
 			peakFactors[j][CY] = cosSqt / sy3;
+			}
 		}
 	}
 

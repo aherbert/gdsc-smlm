@@ -93,11 +93,6 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 			final double sy2 = sy * sy;
 			final double sx3 = sx2 * sx;
 			final double sy3 = sy2 * sy;
-			final double cosSqt = Math.cos(theta) * Math.cos(theta);
-			final double sinSqt = Math.sin(theta) * Math.sin(theta);
-			final double sincost = Math.sin(theta) * Math.cos(theta);
-			final double sin2t = Math.sin(2 * theta);
-			final double cos2t = Math.cos(2 * theta);
 
 			peakFactors[j][N] = ONE_OVER_TWO_PI / (sx * sy);
 			peakFactors[j][HEIGHT] = a[j * 6 + SIGNAL] * peakFactors[j][N];
@@ -105,26 +100,64 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 
-			peakFactors[j][AA] = -0.5 * (cosSqt / sx2 + sinSqt / sy2);
-			peakFactors[j][BB] = -0.25 * (-sin2t / sx2 + sin2t / sy2);
-			peakFactors[j][CC] = -0.5 * (sinSqt / sx2 + cosSqt / sy2);
+			if (theta == 0)
+			{
+				// cosSqt = 1
+				// sinSqt = 0
+				// sincost = 0
+				// sin2t = 0
+				// cos2t = 1
 
-			// For the angle gradient
-			peakFactors[j][AA2] = -(-sincost / sx2 + sincost / sy2);
-			peakFactors[j][BB2] = -0.5 * (-cos2t / sx2 + cos2t / sy2);
-			peakFactors[j][CC2] = -(sincost / sx2 - sincost / sy2);
+				peakFactors[j][AA] = -0.5 / sx2;
+				peakFactors[j][BB] = 0;
+				peakFactors[j][CC] = -0.5 / sy2;
 
-			// For the x-width gradient
-			peakFactors[j][NX] = -1.0 / sx;
-			peakFactors[j][AX] = cosSqt / sx3;
-			peakFactors[j][BX] = -0.5 * sin2t / sx3;
-			peakFactors[j][CX] = sinSqt / sx3;
+				// For the angle gradient
+				peakFactors[j][AA2] = 0;
+				peakFactors[j][BB2] = -0.5 * (-1.0 / sx2 + 1.0 / sy2);
+				peakFactors[j][CC2] = 0;
 
-			// For the y-width gradient
-			peakFactors[j][NY] = -1.0 / sy;
-			peakFactors[j][AY] = sinSqt / sy3;
-			peakFactors[j][BY] = 0.5 * sin2t / sy3;
-			peakFactors[j][CY] = cosSqt / sy3;
+				// For the x-width gradient
+				peakFactors[j][NX] = -1.0 / sx;
+				peakFactors[j][AX] = 1.0 / sx3;
+				peakFactors[j][BX] = 0;
+				peakFactors[j][CX] = 0;
+
+				// For the y-width gradient
+				peakFactors[j][NY] = -1.0 / sy;
+				peakFactors[j][AY] = 0;
+				peakFactors[j][BY] = 0;
+				peakFactors[j][CY] = 1.0 / sy3;
+			}
+			else
+			{
+				final double cosSqt = Math.cos(theta) * Math.cos(theta);
+				final double sinSqt = Math.sin(theta) * Math.sin(theta);
+				final double sincost = Math.sin(theta) * Math.cos(theta);
+				final double sin2t = Math.sin(2 * theta);
+				final double cos2t = Math.cos(2 * theta);
+
+				peakFactors[j][AA] = -0.5 * (cosSqt / sx2 + sinSqt / sy2);
+				peakFactors[j][BB] = -0.25 * (-sin2t / sx2 + sin2t / sy2);
+				peakFactors[j][CC] = -0.5 * (sinSqt / sx2 + cosSqt / sy2);
+
+				// For the angle gradient
+				peakFactors[j][AA2] = -(-sincost / sx2 + sincost / sy2);
+				peakFactors[j][BB2] = -0.5 * (-cos2t / sx2 + cos2t / sy2);
+				peakFactors[j][CC2] = -(sincost / sx2 - sincost / sy2);
+
+				// For the x-width gradient
+				peakFactors[j][NX] = -1.0 / sx;
+				peakFactors[j][AX] = cosSqt / sx3;
+				peakFactors[j][BX] = -0.5 * sin2t / sx3;
+				peakFactors[j][CX] = sinSqt / sx3;
+
+				// For the y-width gradient
+				peakFactors[j][NY] = -1.0 / sy;
+				peakFactors[j][AY] = sinSqt / sy3;
+				peakFactors[j][BY] = 0.5 * sin2t / sy3;
+				peakFactors[j][CY] = cosSqt / sy3;
+			}
 		}
 	}
 

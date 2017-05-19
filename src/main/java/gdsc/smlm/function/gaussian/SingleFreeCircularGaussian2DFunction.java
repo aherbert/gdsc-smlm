@@ -93,31 +93,57 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 		final double sy2 = sy * sy;
 		final double sx3 = sx2 * sx;
 		final double sy3 = sy2 * sy;
-		final double cosSqt = Math.cos(theta) * Math.cos(theta);
-		final double sinSqt = Math.sin(theta) * Math.sin(theta);
-		final double sin2t = Math.sin(2 * theta);
 
 		n = ONE_OVER_TWO_PI / (sx * sy);
 		height = a[SIGNAL] * n;
 
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
 		// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+		
+		if (theta == 0)
+		{
+			// cosSqt = 1
+			// sinSqt = 0
+			// sin2t = 0
 
-		aa = -0.5 * (cosSqt / sx2 + sinSqt / sy2);
-		bb = -0.25 * (-sin2t / sx2 + sin2t / sy2);
-		cc = -0.5 * (sinSqt / sx2 + cosSqt / sy2);
+			aa = -0.5 / sx2;
+			bb = 0;
+			cc = -0.5 / sy2;
 
-		// For the x-width gradient
-		nx = -1 / sx;
-		ax = cosSqt / sx3;
-		bx = -0.5 * sin2t / sx3;
-		cx = sinSqt / sx3;
+			// For the x-width gradient
+			nx = -1.0 / sx;
+			ax = 1.0 / sx3;
+			bx = 0;
+			cx = 0;
 
-		// For the y-width gradient
-		ny = -1 / sy;
-		ay = sinSqt / sy3;
-		by = 0.5 * sin2t / sy3;
-		cy = cosSqt / sy3;
+			// For the y-width gradient
+			ny = -1.0 / sy;
+			ay = 0;
+			by = 0;
+			cy = 1.0 / sy3;
+		}
+		else
+		{
+			final double cosSqt = Math.cos(theta) * Math.cos(theta);
+			final double sinSqt = Math.sin(theta) * Math.sin(theta);
+			final double sin2t = Math.sin(2 * theta);
+
+			aa = -0.5 * (cosSqt / sx2 + sinSqt / sy2);
+			bb = -0.25 * (-sin2t / sx2 + sin2t / sy2);
+			cc = -0.5 * (sinSqt / sx2 + cosSqt / sy2);
+
+			// For the x-width gradient
+			nx = -1.0 / sx;
+			ax = cosSqt / sx3;
+			bx = -0.5 * sin2t / sx3;
+			cx = sinSqt / sx3;
+
+			// For the y-width gradient
+			ny = -1.0 / sy;
+			ay = sinSqt / sy3;
+			by = 0.5 * sin2t / sy3;
+			cy = cosSqt / sy3;
+		}
 	}
 
 	/**
