@@ -34,13 +34,13 @@ public class ToleranceChecker
 	/** Flag to indicate all valid convergence flags. */
 	public static final int STATUS_CONVERGED = STATUS_VALUE | STATUS_PARAMETERS | STATUS_TARGET_ITERATIONS;
 
-	/** The relative tolerance threshold for the value. Set to zero to disable. */
+	/** The relative tolerance threshold for the value. Set to negative to disable. */
 	public final double relativeValue;
-	/** The absolute tolerance threshold for the value. Set to zero to disable. */
+	/** The absolute tolerance threshold for the value. Set to negative to disable. */
 	public final double absoluteValue;
-	/** The relative tolerance threshold for the parameters. Set to zero to disable. */
+	/** The relative tolerance threshold for the parameters. Set to negative to disable. */
 	public final double relativeParameters;
-	/** The absolute tolerance threshold for the parameters. Set to zero to disable. */
+	/** The absolute tolerance threshold for the parameters. Set to negative to disable. */
 	public final double absoluteParameters;
 	/**
 	 * Flag indicating if the value will be checked for convergence. Either {@link #relativeValue} or
@@ -70,39 +70,43 @@ public class ToleranceChecker
 	/**
 	 * Build an instance with specified thresholds. This only checks convergence using the parameters.
 	 * <p>
-	 * In order to perform only relative checks, the absolute tolerance
-	 * must be set to a negative value. In order to perform only absolute
-	 * checks, the relative tolerance must be set to a negative value.
+	 * In order to perform only relative checks, the absolute tolerance must be set to a negative value. In order to
+	 * perform only absolute checks, the relative tolerance must be set to a negative value.
+	 * <p>
+	 * Note: If a tolerance is set to zero then an exact match will achieve equality. Only negative values disable the
+	 * tolerance.
 	 *
 	 * @param relativeParameters
-	 *            relative tolerance threshold on the parameters. Set to zero to disable.
+	 *            relative tolerance threshold on the parameters. Set to negative to disable.
 	 * @param absoluteParameters
-	 *            absolute tolerance threshold on the parameters. Set to zero to disable.
+	 *            absolute tolerance threshold on the parameters. Set to negative to disable.
 	 * @throws IllegalArgumentException
 	 *             if none of the convergence criteria are valid (i.e. convergence is not possible)
 	 */
 	public ToleranceChecker(double relativeParameters, double absoluteParameters)
 	{
-		this(false, 0, 0, relativeParameters, absoluteParameters, 0);
+		this(false, -1, -1, relativeParameters, absoluteParameters, 0);
 	}
 
 	/**
 	 * Build an instance with specified thresholds.
 	 * <p>
-	 * In order to perform only relative checks, the absolute tolerance
-	 * must be set to a negative value. In order to perform only absolute
-	 * checks, the relative tolerance must be set to a negative value.
+	 * In order to perform only relative checks, the absolute tolerance must be set to a negative value. In order to
+	 * perform only absolute checks, the relative tolerance must be set to a negative value.
+	 * <p>
+	 * Note: If a tolerance is set to zero then an exact match will achieve equality. Only negative values disable the
+	 * tolerance.
 	 *
 	 * @param minimiseValue
 	 *            Set to true to ensure the value is minimised at converge (otherwise it is maximised)
 	 * @param relativeValue
-	 *            relative tolerance threshold on the value. Set to zero to disable.
+	 *            relative tolerance threshold on the value. Set to negative to disable.
 	 * @param absoluteValue
-	 *            absolute tolerance threshold on the value. Set to zero to disable.
+	 *            absolute tolerance threshold on the value. Set to negative to disable.
 	 * @param relativeParameters
-	 *            relative tolerance threshold on the parameters. Set to zero to disable.
+	 *            relative tolerance threshold on the parameters. Set to negative to disable.
 	 * @param absoluteParameters
-	 *            absolute tolerance threshold on the parameters. Set to zero to disable.
+	 *            absolute tolerance threshold on the parameters. Set to negative to disable.
 	 * @param maxIterations
 	 *            The maximum number of allowed iterations.
 	 *            Set above zero to limit the iterations. Set below zero to define a specific number of iterations until
@@ -113,8 +117,8 @@ public class ToleranceChecker
 	public ToleranceChecker(boolean minimiseValue, double relativeValue, double absoluteValue,
 			double relativeParameters, double absoluteParameters, int maxIterations)
 	{
-		checkValue = (relativeValue > 0 || absoluteValue > 0);
-		checkParameters = (relativeParameters > 0 || absoluteParameters > 0);
+		checkValue = (relativeValue >= 0 || absoluteValue >= 0);
+		checkParameters = (relativeParameters >= 0 || absoluteParameters >= 0);
 
 		if (!(checkValue || checkParameters || maxIterations != 0))
 			throw new IllegalArgumentException("No valid convergence criteria");
