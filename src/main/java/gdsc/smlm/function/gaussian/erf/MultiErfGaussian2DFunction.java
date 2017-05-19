@@ -141,15 +141,32 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 		// Unroll for the number of peaks
 		if (nPeaks == 2)
 		{
-			for (int y = 0; y < maxy; y++)
+			if (tB == 0)
 			{
-				// Pre-compute
-				final double tI_deltaEy0 = tI[0] * deltaEy[y];
-				final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
-
-				for (int x = 0; x < maxx; x++)
+				for (int y = 0; y < maxy; y++)
 				{
-					procedure.execute(tB + tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
+					// Pre-compute
+					final double tI_deltaEy0 = tI[0] * deltaEy[y];
+					final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
+
+					for (int x = 0; x < maxx; x++)
+					{
+						procedure.execute(tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
+					}
+				}
+			}
+			else
+			{
+				for (int y = 0; y < maxy; y++)
+				{
+					// Pre-compute
+					final double tI_deltaEy0 = tI[0] * deltaEy[y];
+					final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
+
+					for (int x = 0; x < maxx; x++)
+					{
+						procedure.execute(tB + tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
+					}
 				}
 			}
 		}

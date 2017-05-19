@@ -73,12 +73,26 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 	 */
 	public void forEach(ValueProcedure procedure)
 	{
-		for (int y = 0; y < maxy; y++)
+		if (tB == 0)
 		{
-			final double tI_deltaEy = tI * deltaEy[y];
-			for (int x = 0; x < maxx; x++)
+			for (int y = 0; y < maxy; y++)
 			{
-				procedure.execute(tB + tI_deltaEy * deltaEx[x]);
+				final double tI_deltaEy = tI * deltaEy[y];
+				for (int x = 0; x < maxx; x++)
+				{
+					procedure.execute(tI_deltaEy * deltaEx[x]);
+				}
+			}
+		}
+		else
+		{
+			for (int y = 0; y < maxy; y++)
+			{
+				final double tI_deltaEy = tI * deltaEy[y];
+				for (int x = 0; x < maxx; x++)
+				{
+					procedure.execute(tB + tI_deltaEy * deltaEx[x]);
+				}
 			}
 		}
 	}
