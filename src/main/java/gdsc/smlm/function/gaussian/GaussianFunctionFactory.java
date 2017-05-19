@@ -306,6 +306,8 @@ public class GaussianFunctionFactory
 	 * widths of the input parameters may be modified. The shape will remain unchanged even if the function flags are
 	 * altered.
 	 *
+	 * @param nPeaks
+	 *            The number of peaks (N)
 	 * @param flags
 	 *            The function flags (defines the type of function)
 	 * @param zModel
@@ -314,11 +316,9 @@ public class GaussianFunctionFactory
 	 *            the parameters of the function (modified in place)
 	 * @return the flags for the new function
 	 */
-	public static int freeze(int flags, AstimatismZModel zModel, double[] a)
+	public static int freeze(int nPeak, int flags, AstimatismZModel zModel, double[] a)
 	{
 		int nPeaks = a.length / 6;
-
-		// TODO - Add test that the returned function computes the same as the parent function
 
 		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
 		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
@@ -356,6 +356,63 @@ public class GaussianFunctionFactory
 		{
 			for (int i = 0, j = 0; i < nPeaks; i++, j += 6)
 				a[j + Gaussian2DFunction.Y_SD] = a[j + Gaussian2DFunction.X_SD];
+			return FIT_SIMPLE_FIXED;
+		}
+
+		// Default to free circle (which can use the angle if present)
+		return FIT_SIMPLE_FREE_CIRCLE;
+	}
+
+	/**
+	 * Freeze the Gaussian function parameters to a set of parameters and function flags that will evaluate faster. The
+	 * widths of the input parameters may be modified. The shape will remain unchanged even if the function flags are
+	 * altered.
+	 *
+	 * @param flags
+	 *            The function flags (defines the type of function)
+	 * @param zModel
+	 *            the z model
+	 * @param a
+	 *            the parameters of the function (modified in place)
+	 * @return the flags for the new function
+	 */
+	public static int freeze(int flags, AstimatismZModel zModel, double[] a)
+	{
+		int nPeaks = a.length / 6;
+		if (nPeaks > 1)
+			return freeze(nPeaks, flags, zModel, a);
+
+		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
+		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
+		{
+			// Check for z-model 
+			if ((flags & FIT_Z) != 0 && zModel != null)
+			{
+				// Convert the parameters for a free-circle function
+				final double tz = a[ErfGaussian2DFunction.Z_POSITION];
+				a[Gaussian2DFunction.X_SD] *= zModel.getSx(tz);
+				a[Gaussian2DFunction.Y_SD] *= zModel.getSy(tz);
+				//a[ErfGaussian2DFunction.Z_POSITION] = 0;
+
+				return FIT_ERF_FREE_CIRCLE;
+			}
+
+			// Check the need for X/Y widths
+			if ((flags & FIT_Y_WIDTH) == 0)
+			{
+				a[Gaussian2DFunction.Y_SD] = a[Gaussian2DFunction.X_SD];
+				return FIT_ERF_FIXED;
+			}
+
+			return FIT_ERF_FREE_CIRCLE;
+		}
+
+		// Legacy simple Gaussian functions
+
+		// Check the need for X/Y widths
+		if ((flags & FIT_Y_WIDTH) == 0)
+		{
+			a[Gaussian2DFunction.Y_SD] = a[Gaussian2DFunction.X_SD];
 			return FIT_SIMPLE_FIXED;
 		}
 

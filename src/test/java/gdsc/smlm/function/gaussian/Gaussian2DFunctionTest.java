@@ -122,7 +122,7 @@ public abstract class Gaussian2DFunctionTest
 			return;
 
 		int[] gradientIndices = gf.gradientIndices();
-		logf("Function%d %s %s\n", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices));
+		log("Function%d %s %s\n", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices));
 
 		Assert.assertEquals("Incorrect number of peaks", gf.getNPeaks(), npeaks);
 
@@ -170,24 +170,46 @@ public abstract class Gaussian2DFunctionTest
 		double[] dyda = new double[f1.gradientIndices().length];
 		double[] a;
 
-		for (int x : testx)
-			for (int y : testy)
-				for (double background : testbackground)
-					// Peak 1
-					for (double amplitude1 : testamplitude1)
-						for (double shape1 : testshape1)
-							for (double cx1 : testcx1)
-								for (double cy1 : testcy1)
-									for (double[] w1 : testw1)
-									{
-										a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
+		boolean record = true;
+		
+		for (double background : testbackground)
+			// Peak 1
+			for (double amplitude1 : testamplitude1)
+				for (double shape1 : testshape1)
+					for (double cx1 : testcx1)
+						for (double cy1 : testcy1)
+							for (double[] w1 : testw1)
+							{
+								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
 
-										f1.initialise(a);
-										double y1 = f1.eval(y * maxx + x, dyda);
-										double y2 = f1.eval(y * maxx + x);
+								f1.initialise(a);
+
+								// Test the frozen version
+								int flags = GaussianFunctionFactory.freeze(1, this.flags, zModel, a);
+								Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, f1.getMaxX(), f1.getMaxY(),
+										flags, zModel);
+								f.initialise(a);
+								if (record)
+								{
+									record = false;
+									log("%s frozen to %s\n", f1.getClass().getSimpleName(), f.getClass().getSimpleName());
+								}
+
+								for (int x : testx)
+									for (int y : testy)
+									{
+										int xx = y * maxx + x;
+										double y1 = f1.eval(xx, dyda);
+										double y2 = f1.eval(xx);
 
 										Assert.assertTrue(y1 + " != " + y2, eq2.almostEqualRelativeOrAbsolute(y1, y2));
+
+										y2 = f.eval(xx);
+
+										Assert.assertTrue(y1 + " != frozen " + y2,
+												eq2.almostEqualRelativeOrAbsolute(y1, y2));
 									}
+							}
 	}
 
 	@Test
@@ -315,33 +337,55 @@ public abstract class Gaussian2DFunctionTest
 		double[] dyda = new double[f2.gradientIndices().length];
 		double[] a;
 
-		for (int x : testx)
-			for (int y : testy)
-				for (double background : testbackground)
-					// Peak 1
-					for (double amplitude1 : testamplitude1)
-						for (double shape1 : testshape1)
-							for (double cx1 : testcx1)
-								for (double cy1 : testcy1)
-									for (double[] w1 : testw1)
-										// Peak 2
-										for (double amplitude2 : testamplitude2)
-											for (double shape2 : testshape2)
-												for (double cx2 : testcx2)
-													for (double cy2 : testcy2)
-														for (double[] w2 : testw2)
-														{
-															a = createParameters(background, amplitude1, shape1, cx1,
-																	cy1, w1[0], w1[1], amplitude2, shape2, cx2, cy2,
-																	w2[0], w2[1]);
+		boolean record = true;
+		
+		for (double background : testbackground)
+			// Peak 1
+			for (double amplitude1 : testamplitude1)
+				for (double shape1 : testshape1)
+					for (double cx1 : testcx1)
+						for (double cy1 : testcy1)
+							for (double[] w1 : testw1)
+								// Peak 2
+								for (double amplitude2 : testamplitude2)
+									for (double shape2 : testshape2)
+										for (double cx2 : testcx2)
+											for (double cy2 : testcy2)
+												for (double[] w2 : testw2)
+												{
+													a = createParameters(background, amplitude1, shape1, cx1, cy1,
+															w1[0], w1[1], amplitude2, shape2, cx2, cy2, w2[0], w2[1]);
 
-															f2.initialise(a);
-															double y1 = f2.eval(y * maxx + x, dyda);
-															double y2 = f2.eval(y * maxx + x);
+													f2.initialise(a);
+
+													// Test the frozen version
+													int flags = GaussianFunctionFactory.freeze(2, this.flags, zModel,
+															a);
+													Gaussian2DFunction f = GaussianFunctionFactory.create2D(2,
+															f2.getMaxX(), f2.getMaxY(), flags, zModel);
+													f.initialise(a);
+													if (record)
+													{
+														record = false;
+														log("%s frozen to %s\n", f2.getClass().getSimpleName(), f.getClass().getSimpleName());
+													}
+
+													for (int x : testx)
+														for (int y : testy)
+														{
+															int xx = y * maxx + x;
+															double y1 = f2.eval(xx, dyda);
+															double y2 = f2.eval(xx);
 
 															Assert.assertTrue(y1 + " != " + y2,
 																	eq2.almostEqualRelativeOrAbsolute(y1, y2));
+
+															y2 = f.eval(xx);
+
+															Assert.assertTrue(y1 + " != frozen " + y2,
+																	eq2.almostEqualRelativeOrAbsolute(y1, y2));
 														}
+												}
 	}
 
 	@Test
@@ -554,7 +598,7 @@ public abstract class Gaussian2DFunctionTest
 		System.out.println(message);
 	}
 
-	protected void logf(String format, Object... args)
+	protected void log(String format, Object... args)
 	{
 		System.out.printf(format, args);
 	}
