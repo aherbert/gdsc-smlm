@@ -76,15 +76,31 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	 *
 	 * @param a
 	 *            Set of coefficients for the function
-	 * @return the update vector of the function's parameters
 	 */
-	public double[] computeUpdate(final double[] a)
+	public void computeUpdate(final double[] a)
 	{
 		k = 0;
 		reset2();
 		func.initialise2(a);
 		func.forEach((Gradient2Procedure) this);
-		return getUpdate();
+	}
+
+	/**
+	 * Calculates the Newton-Raphson update vector for a Poisson process as the first derivative divided by the second
+	 * derivative. The update is written to the provided storage.
+	 *
+	 * @param a
+	 *            Set of coefficients for the function
+	 * @param update
+	 *            the update
+	 * @return the update vector of the function's parameters
+	 */
+	public double[] computeUpdate(final double[] a, double[] update)
+	{
+		computeUpdate(a);
+		if (update == null || update.length < n)
+			update = new double[n];
+		return getUpdate(update);
 	}
 
 	/**
@@ -125,6 +141,18 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	public double[] getUpdate()
 	{
 		double[] update = new double[n];
+		return getUpdate(update);
+	}
+
+	/**
+	 * Gets the update vector of the function's parameters (size n). The update is written to the provided storage.
+	 *
+	 * @param update
+	 *            the update
+	 * @return the update vector
+	 */
+	public double[] getUpdate(double[] update)
+	{
 		for (int i = 0; i < n; i++)
 			update[i] = d1[i] / d2[i];
 		return update;
@@ -209,9 +237,19 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	public double computeLogLikelihood(final double[] a)
 	{
 		computeValue(a);
-		return PoissonCalculator.logLikelihood(u, x);
+		return computeLogLikelihood();
 	}
 
+	/**
+	 * Calculates the Poisson log likelihood using the last value of the function.
+	 *
+	 * @return the Poisson log likelihood
+	 */
+	public double computeLogLikelihood()
+	{
+		return PoissonCalculator.logLikelihood(u, x);
+	}
+	
 	/**
 	 * Calculates the Poisson log likelihood ratio.
 	 *
@@ -222,6 +260,31 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	public double computeLogLikelihoodRatio(final double[] a)
 	{
 		computeValue(a);
+		return computeLogLikelihoodRatio();
+	}
+
+	/**
+	 * Calculates the Poisson log likelihood ratio using the last value of the function.
+	 *
+	 * @return the Poisson log likelihood ratio
+	 */
+	public double computeLogLikelihoodRatio()
+	{
 		return PoissonCalculator.logLikelihoodRatio(u, x);
+	}
+
+	/**
+	 * @return True if the last update calculation produced gradients with NaN values
+	 */
+	public boolean isNaNGradients()
+	{
+		for (int i = n; i-->0;)
+		{
+			if (Double.isNaN(d1[i]))
+				return true;
+			if (Double.isNaN(d2[i]))
+				return true;
+		}
+		return false;
 	}
 }

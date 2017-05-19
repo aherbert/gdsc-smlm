@@ -6,8 +6,6 @@ import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
 import gdsc.smlm.function.Gradient1Function;
-import gdsc.smlm.function.ValueFunction;
-import gdsc.smlm.function.ValueProcedure;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -259,36 +257,6 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 			// to use cached function values.
 			computeValues(y_fit);
 		return gradientProcedure.value;
-	}
-
-	private static class SimpleValueProcedure implements ValueProcedure
-	{
-		int i = 0;
-		double[] y_fit;
-
-		SimpleValueProcedure(double[] y_fit)
-		{
-			this.y_fit = y_fit;
-		};
-
-		public void execute(double value)
-		{
-			y_fit[i++] = value;
-		}
-	}
-	
-	/**
-	 * Utility method to compute the function values using the preinitialised function.
-	 * Sub-classes may override this if they have cached the function values from the 
-	 * last execution of a forEach procedure.
-
-	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeValues(double[])
-	 */
-	@Override
-	protected void computeValues(final double[] y_fit)
-	{
-		ValueFunction f = (ValueFunction) this.f;
-		f.forEach(new SimpleValueProcedure(y_fit));
 	}
 
 	/**

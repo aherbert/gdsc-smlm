@@ -226,9 +226,8 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 */
 	public double getQ()
 	{
-		// Value will be the log-likelihood ratio for the MLE.
 		// Wilks theorum states the LLR approaches the chi-squared distribution for large n.
-		return ChiSquaredDistributionTable.computeQValue(value,
+		return ChiSquaredDistributionTable.computeQValue(getLogLikelihoodRatio(),
 				getNumberOfFittedPoints() - getNumberOfFittedParameters());
 	}
 }

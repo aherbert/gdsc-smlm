@@ -6,6 +6,8 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.GradientFunction;
+import gdsc.smlm.function.ValueFunction;
+import gdsc.smlm.function.ValueProcedure;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -25,6 +27,25 @@ import gdsc.smlm.function.GradientFunction;
  */
 public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 {
+	/**
+	 * Simple class to allow the values to be computed.
+	 */
+	private static class SimpleValueProcedure implements ValueProcedure
+	{
+		int i = 0;
+		double[] y_fit;
+
+		SimpleValueProcedure(double[] y_fit)
+		{
+			this.y_fit = y_fit;
+		};
+
+		public void execute(double value)
+		{
+			y_fit[i++] = value;
+		}
+	}
+	
 	protected int[] gradientIndices;
 	protected final ToleranceChecker tc;
 	protected ParameterBounds bounds;
@@ -242,11 +263,19 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	/**
 	 * Compute the function y-values using the y and parameters a from the last call to
 	 * {@link #computeFitValue(double[], double[])}.
-	 *
+	 *<p>
+	 * Utility method to compute the function values using the preinitialised function.
+	 * Sub-classes may override this if they have cached the function values from the 
+	 * last execution of a forEach procedure.
+	 * 
 	 * @param y_fit
 	 *            the y fit values
 	 */
-	protected abstract void computeValues(double[] y_fit);
+	protected void computeValues(double[] y_fit)
+	{
+		ValueFunction f = (ValueFunction) this.f;
+		f.forEach(new SimpleValueProcedure(y_fit));
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -285,7 +314,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * @return the function value
 	 */
 	protected abstract double computeFunctionValue(double[] y_fit, double[] a);
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

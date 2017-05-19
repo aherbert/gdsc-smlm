@@ -72,7 +72,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 *
 	 * @param a
-	 *            Set of coefficients for the function
+	 *            Set of coefficients for the function (if null then the function must be pre-initialised)
 	 */
 	public void computeFisherInformation(final double[] a)
 	{
@@ -80,7 +80,8 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 			data = new double[n * (n + 1) / 2];
 		else
 			initialiseWorkingMatrix();
-		func.initialise1(a);
+		if (a != null)
+			func.initialise1(a);
 		func.forEach((Gradient1Procedure) this);
 	}
 
