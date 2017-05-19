@@ -416,30 +416,30 @@ public class EJMLLinearSolverTest
 
 	// Create a speed test of the different methods
 	@Test
-	public void runSpeedTest5()
+	public void runSolverSpeedTest5()
 	{
-		runSpeedTest(GaussianFunctionFactory.FIT_ERF_CIRCLE);
+		runSolverSpeedTest(GaussianFunctionFactory.FIT_ERF_CIRCLE);
 	}
 
 	@Test
-	public void runSpeedTest4()
+	public void runSolverSpeedTest4()
 	{
-		runSpeedTest(GaussianFunctionFactory.FIT_ERF_FIXED);
+		runSolverSpeedTest(GaussianFunctionFactory.FIT_ERF_FIXED);
 	}
 
 	@Test
-	public void runSpeedTest3()
+	public void runSolverSpeedTest3()
 	{
-		runSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
+		runSolverSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
 	@Test
-	public void runSpeedTest2()
+	public void runSolverSpeedTest2()
 	{
-		runSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
+		runSolverSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
 	}
 
-	private void runSpeedTest(int flags)
+	private void runSolverSpeedTest(int flags)
 	{
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		int n = f0.size();
@@ -490,11 +490,289 @@ public class EJMLLinearSolverTest
 		DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[bList.size()]);
 		int runs = 10000 / a.length;
 		TimingService ts = new TimingService(runs);
+		ts.execute(new PseudoInverseSolverTimingTask(a, b));
 		ts.execute(new LinearSolverTimingTask(a, b));
 		ts.execute(new CholeskySolverTimingTask(a, b));
 		ts.execute(new CholeskyLDLTSolverTimingTask(a, b));
-		ts.execute(new PseudoInverseSolverTimingTask(a, b));
 		ts.execute(new DirectInversionSolverTimingTask(a, b));
+		ts.repeat();
+		ts.report();
+	}
+
+	private abstract class InversionTimingTask extends BaseTimingTask
+	{
+		DenseMatrix64F[] a;
+		boolean[] ignore;
+		final boolean badSolver;
+		// No validation for a pure speed test
+		EJMLLinearSolver solver = new EJMLLinearSolver();
+
+		public InversionTimingTask(String name, DenseMatrix64F[] a, boolean[] ignore, double[][] answer)
+		{
+			super(name + " " + a[0].numCols);
+			// Clone the data
+			this.a = a;
+			this.ignore = ignore;
+			// Check the inversion gets a good answer
+			solver.setInversionTolerance(1e-2);
+			int fail = 0;
+			boolean[] failed = new boolean[a.length];
+			for (int i = 0; i < a.length; i++)
+			{
+				double[] b = invert(a[i].copy());
+				if (b == null)
+				{
+					failed[i] = true;
+					fail++;
+				}
+				else if (answer[i] == null)
+				{
+					answer[i] = b;
+				}
+				else
+				{
+					// Check against the existing answer
+					for (int j = 0; j < b.length; j++)
+						if (!DoubleEquality.almostEqualRelativeOrAbsolute(b[j], answer[i][j], 1e-3, 1e-4))
+						{
+							failed[i] = true;
+							fail++;
+							break;
+						}
+				}
+			}
+			if (fail > 0)
+				log(getName() + " failed to invert %d/%d\n", fail, a.length);
+			solver.setInversionTolerance(0);
+			if (fail == a.length)
+			{
+				// This solver cannot do the inversion
+				badSolver = true;
+			}
+			else
+			{
+				badSolver = false;
+				// Flag those we cannot do as bad
+				for (int i = 0; i < a.length; i++)
+					if (failed[i])
+						ignore[i] = true;
+			}
+		}
+
+		public int getSize()
+		{
+			return (badSolver) ? 0 : 1;
+		}
+
+		public Object getData(int i)
+		{
+			// Clone
+			int n = a.length;
+			DenseMatrix64F[] a = new DenseMatrix64F[n];
+			while (n-- > 0)
+			{
+				if (!ignore[n])
+					a[n] = this.a[n].copy();
+			}
+			return a;
+		}
+
+		public Object run(Object data)
+		{
+			DenseMatrix64F[] a = (DenseMatrix64F[]) data;
+			for (int i = 0; i < a.length; i++)
+			{
+				if (!ignore[i])
+					invert(a[i]);
+			}
+			return null;
+		}
+
+		abstract double[] invert(DenseMatrix64F a);
+
+		double[] extract(DenseMatrix64F a)
+		{
+			int n = a.numCols;
+			double[] b = new double[n];
+			for (int i = 0, j = 0; i < n; i++, j += n + 1)
+				b[i] = a.data[j];
+			return b;
+		}
+	}
+
+	private class LinearInversionTimingTask extends InversionTimingTask
+	{
+		public LinearInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore, double[][] answer)
+		{
+			super("Linear Inversion", a, ignore, answer);
+		}
+
+		double[] invert(DenseMatrix64F a)
+		{
+			if (solver.invertLinear(a))
+				return extract(a);
+			return null;
+		}
+	}
+
+	private class CholeskyInversionTimingTask extends InversionTimingTask
+	{
+		public CholeskyInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore, double[][] answer)
+		{
+			super("Cholesky Inversion", a, ignore, answer);
+		}
+
+		double[] invert(DenseMatrix64F a)
+		{
+			if (solver.invertCholesky(a))
+				return extract(a);
+			return null;
+		}
+	}
+
+	private class CholeskyLDLTInversionTimingTask extends InversionTimingTask
+	{
+		public CholeskyLDLTInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore, double[][] answer)
+		{
+			super("CholeskyLDLT Inversion", a, ignore, answer);
+		}
+
+		double[] invert(DenseMatrix64F a)
+		{
+			if (solver.invertCholeskyLDLT(a))
+				return extract(a);
+			return null;
+		}
+	}
+
+	private class PseudoInverseInversionTimingTask extends InversionTimingTask
+	{
+		public PseudoInverseInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore, double[][] answer)
+		{
+			super("PseudoInverse Inversion", a, ignore, answer);
+		}
+
+		double[] invert(DenseMatrix64F a)
+		{
+			if (solver.invertPseudoInverse(a))
+				return extract(a);
+			return null;
+		}
+	}
+
+	private class DirectInversionInversionTimingTask extends InversionTimingTask
+	{
+		public DirectInversionInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore, double[][] answer)
+		{
+			super("DirectInversion Inversion", a, ignore, answer);
+		}
+
+		double[] invert(DenseMatrix64F a)
+		{
+			if (solver.invertDirectInversion(a))
+				return extract(a);
+			return null;
+		}
+	}
+
+	private class DiagonalDirectInversionInversionTimingTask extends InversionTimingTask
+	{
+		public DiagonalDirectInversionInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore, double[][] answer)
+		{
+			super("DiagonalDirectInversion Inversion", a, ignore, answer);
+		}
+
+		double[] invert(DenseMatrix64F a)
+		{
+			return solver.invertDiagonalDirectInversion(a);
+		}
+	}
+
+	// Create a speed test of the different methods
+	@Test
+	public void runInversionSpeedTest5()
+	{
+		runInversionSpeedTest(GaussianFunctionFactory.FIT_ERF_CIRCLE);
+	}
+
+	@Test
+	public void runInversionSpeedTest4()
+	{
+		runInversionSpeedTest(GaussianFunctionFactory.FIT_ERF_FIXED);
+	}
+
+	@Test
+	public void runInversionSpeedTest3()
+	{
+		runInversionSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
+	}
+
+	@Test
+	public void runInversionSpeedTest2()
+	{
+		runInversionSpeedTest(GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
+	}
+
+	private void runInversionSpeedTest(int flags)
+	{
+		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
+		int n = f0.size();
+		final double[] y = new double[n];
+		final TurboList<DenseMatrix64F> aList = new TurboList<DenseMatrix64F>();
+		double[] testbackground = new double[] { 0.2, 0.7 };
+		double[] testsignal1 = new double[] { 30, 100, 300 };
+		double[] testcx1 = new double[] { 4.9, 5.3 };
+		double[] testcy1 = new double[] { 4.8, 5.2 };
+		double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
+		int np = f0.getNumberOfGradients();
+		GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
+		final RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		//double lambda = 10;
+		for (double background : testbackground)
+			// Peak 1
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double w1 : testw1)
+						{
+							double[] p = new double[] { background, signal1, 0, cx1, cy1, w1, w1 };
+							f0.initialise(p);
+							f0.forEach(new ValueProcedure()
+							{
+								int i = 0;
+
+								public void execute(double value)
+								{
+									// Poisson data 
+									y[i++] = rdg.nextPoisson(value);
+								}
+							});
+							double[][] alpha = new double[np][np];
+							double[] beta = new double[np];
+							//double ss = 
+							calc.findLinearised(n, y, p, alpha, beta, f0);
+							//System.out.printf("SS = %f\n", ss);
+							// As per the LVM algorithm
+							//for (int i = 0; i < np; i++)
+							//	alpha[i][i] *= lambda;
+							aList.add(EJMLLinearSolver.toA(alpha));
+						}
+
+		DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[aList.size()]);
+		boolean[] ignore = new boolean[a.length];
+		double[][] answer = new double[a.length][];
+		int runs = 10000 / a.length;
+		TimingService ts = new TimingService(runs);
+		TurboList<InversionTimingTask> tasks = new TurboList<InversionTimingTask>();
+		tasks.add(new PseudoInverseInversionTimingTask(a, ignore, answer));
+		tasks.add(new LinearInversionTimingTask(a, ignore, answer));
+		tasks.add(new CholeskyInversionTimingTask(a, ignore, answer));
+		tasks.add(new CholeskyLDLTInversionTimingTask(a, ignore, answer));
+		tasks.add(new DirectInversionInversionTimingTask(a, ignore, answer));
+		tasks.add(new DiagonalDirectInversionInversionTimingTask(a, ignore, answer));
+		for (InversionTimingTask task : tasks)
+			if (!task.badSolver)
+				ts.execute(task);
 		ts.repeat();
 		ts.report();
 	}
