@@ -1,7 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.core.utils.Maths;
-import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.LSEFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LSQLVMGradientProcedureFactory;
@@ -123,15 +123,13 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeDeviations(double[])
+	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
 	 */
 	@Override
-	protected void computeDeviations(double[] a_dev)
+	protected FisherInformationMatrix computeFisherInformationMatrix()
 	{
-		// The last Hessian matrix should be stored in the working alpha
-		if (!solver.invertSymmPosDef(walpha, beta.length))
-			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
-		setDeviationsFromLinearMatrix(a_dev, walpha);
+		// The last Hessian matrix should be stored in the working alpha.
+		return new FisherInformationMatrix(walpha, beta.length);
 	}
 
 	/*

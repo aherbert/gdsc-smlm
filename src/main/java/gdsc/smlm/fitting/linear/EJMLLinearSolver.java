@@ -37,11 +37,6 @@ import org.ejml.data.DenseMatrix64F;
  */
 public class EJMLLinearSolver
 {
-	// TODO - 
-	// Rewrite to accept DenseMatrix64 as the primary input with wrapper 
-	// functions to accept double[][].
-	// Do not worry about double[] since this is easily wrapped.
-
 	/**
 	 * Solve the matrix using direct inversion
 	 */
@@ -111,6 +106,7 @@ public class EJMLLinearSolver
 	private int solverSize = 0;
 	private boolean errorChecking = false;
 	private DoubleEquality equal = null;
+	private double inversionTolerance = 0;
 
 	/**
 	 * Instantiates a new EJML linear solver.
@@ -133,6 +129,20 @@ public class EJMLLinearSolver
 	/**
 	 * Instantiates a new EJML linear solver with tolerance for the linear solution.
 	 *
+	 * @param equal
+	 *            the object for equality
+	 * @param inversionTolerance
+	 *            the inversion tolerance
+	 */
+	public EJMLLinearSolver(DoubleEquality equal, double inversionTolerance)
+	{
+		setEqual(equal);
+		setInversionTolerance(inversionTolerance);
+	}
+
+	/**
+	 * Instantiates a new EJML linear solver with tolerance for the linear solution.
+	 *
 	 * @param maxRelativeError
 	 *            the max relative error for equality
 	 * @param maxAbsoluteError
@@ -141,6 +151,21 @@ public class EJMLLinearSolver
 	public EJMLLinearSolver(double maxRelativeError, double maxAbsoluteError)
 	{
 		this(new DoubleEquality(maxRelativeError, maxAbsoluteError));
+	}
+
+	/**
+	 * Instantiates a new EJML linear solver with tolerance for the linear solution.
+	 *
+	 * @param maxRelativeError
+	 *            the max relative error for equality
+	 * @param maxAbsoluteError
+	 *            the max absolute error for equality
+	 * @param inversionTolerance
+	 *            the inversion tolerance
+	 */
+	public EJMLLinearSolver(double maxRelativeError, double maxAbsoluteError, double inversionTolerance)
+	{
+		this(new DoubleEquality(maxRelativeError, maxAbsoluteError), inversionTolerance);
 	}
 
 	/**
@@ -155,6 +180,20 @@ public class EJMLLinearSolver
 	public EJMLLinearSolver(int significantDigits, double maxAbsoluteError)
 	{
 		this(new DoubleEquality(significantDigits, maxAbsoluteError));
+	}
+
+	/**
+	 * Creates the solver for inversion.
+	 *
+	 * @param inversionTolerance
+	 *            the inversion tolerance
+	 * @return the EJML linear solver
+	 */
+	public static EJMLLinearSolver createForInversion(double inversionTolerance)
+	{
+		final EJMLLinearSolver s = new EJMLLinearSolver();
+		s.setInversionTolerance(inversionTolerance);
+		return s;
 	}
 
 	/**
@@ -403,6 +442,18 @@ public class EJMLLinearSolver
 	}
 
 	/**
+	 * Checks if a solve may modify A.
+	 *
+	 * @return true, if a solve may modify A
+	 */
+	public boolean solveModifiesA()
+	{
+		if (errorChecking)
+			return false;
+		return getPseudoInverseSolver().modifiesA();
+	}
+	
+	/**
 	 * Computes the inverse of the 'A' matrix passed into the last successful solve method.
 	 * <p>
 	 * On output a[n][n] replaced by the inverse of the solved matrix a.
@@ -412,7 +463,7 @@ public class EJMLLinearSolver
 	 * 
 	 * @return False if the last solve attempt failed, or inversion produces non finite values
 	 */
-	public boolean invert(DenseMatrix64F A)
+	public boolean invertLastA(DenseMatrix64F A)
 	{
 		if (lastSuccessfulSolver == null)
 			return false;
@@ -541,6 +592,73 @@ public class EJMLLinearSolver
 	}
 
 	/**
+	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
+	 * 
+	 * @return False if the matrix is singular (no solution)
+	 */
+	public boolean invertLinear(DenseMatrix64F A)
+	{
+		createSolver(A.numCols);
+		return invertUnsafe(getLinearSolver(), A, false);
+	}
+
+	/**
+	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
+	 * 
+	 * @return False if the matrix is singular (no solution)
+	 */
+	public boolean invertCholesky(DenseMatrix64F A)
+	{
+		createSolver(A.numCols);
+		return invertUnsafe(getCholeskySolver(), A, false);
+	}
+
+	/**
+	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
+	 * 
+	 * @return False if the matrix is singular (no solution)
+	 */
+	public boolean invertCholeskyLDLT(DenseMatrix64F A)
+	{
+		createSolver(A.numCols);
+		return invertUnsafe(getCholeskyLDLTSolver(), A, false);
+	}
+
+	/**
+	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
+	 * 
+	 * @return False if the matrix is singular (no solution)
+	 */
+	public boolean invertPseudoInverse(DenseMatrix64F A)
+	{
+		createSolver(A.numCols);
+		return invertUnsafe(getPseudoInverseSolver(), A, true);
+	}
+
+	/**
+	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
+	 * 
+	 * @return False if the matrix is singular (no solution)
+	 */
+	public boolean invertDirectInversion(DenseMatrix64F A)
+	{
+		createSolver(A.numCols);
+		return invertUnsafe(getInversionSolver(), A, false);
+	}
+
+	/**
+	 * Invert symmetric positive definite matrix A and returns only the diagonal.
+	 * <p>
+	 * Only supports matrix size up to 5.
+	 * 
+	 * @return The diagonal of A^-1 (or null if the matrix is singular (no solution) or too large)
+	 */
+	public double[] invertDiagonalDirectInversion(DenseMatrix64F A)
+	{
+		return (A.numCols <= UnrolledInverseFromMinorExt.MAX) ? UnrolledInverseFromMinorExt.inv(A) : null;
+	}
+
+	/**
 	 * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the inverse of a.
 	 * <p>
 	 * Note: If the matrix is singular then a pseudo inverse will be computed.
@@ -549,7 +667,7 @@ public class EJMLLinearSolver
 	 *            the matrix a
 	 * @return False if there is no solution
 	 */
-	public boolean invertSymmPosDef(DenseMatrix64F A)
+	public boolean invert(DenseMatrix64F A)
 	{
 		createSolver(A.numCols);
 
@@ -564,7 +682,7 @@ public class EJMLLinearSolver
 
 	private boolean invertSafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, boolean pseudoInverse)
 	{
-		DenseMatrix64F Ain = (solver.modifiesA() || errorChecking) ? A.copy() : A;
+		DenseMatrix64F Ain = (solver.modifiesA() || isInversionTolerance()) ? A.copy() : A;
 		if (!initialiseSolver(solver, Ain))
 			return false;
 		solver.invert(getA_inv());
@@ -575,7 +693,7 @@ public class EJMLLinearSolver
 			if (!Maths.isFinite(a_inv[i]))
 				return false;
 
-		if (errorChecking && invalidInversion(Ain, pseudoInverse))
+		if (isInversionTolerance() && invalidInversion(Ain, pseudoInverse))
 			return false;
 
 		System.arraycopy(a_inv, 0, A.data, 0, a_inv.length);
@@ -585,7 +703,7 @@ public class EJMLLinearSolver
 
 	private boolean invertUnsafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, boolean pseudoInverse)
 	{
-		DenseMatrix64F Ain = (errorChecking) ? A.copy() : A;
+		DenseMatrix64F Ain = (isInversionTolerance()) ? A.copy() : A;
 		if (!initialiseSolver(solver, Ain))
 			return false;
 		solver.invert(getA_inv());
@@ -596,7 +714,7 @@ public class EJMLLinearSolver
 			if (!Maths.isFinite(a_inv[i]))
 				return false;
 
-		if (errorChecking && invalidInversion(Ain, pseudoInverse))
+		if (isInversionTolerance() && invalidInversion(Ain, pseudoInverse))
 			return false;
 
 		System.arraycopy(a_inv, 0, A.data, 0, a_inv.length);
@@ -649,15 +767,14 @@ public class EJMLLinearSolver
 
 	private boolean invalid(double e, double o)
 	{
-		if (equal.almostEqualRelativeOrAbsolute(e, o))
-			return false;
+		//if (Math.abs(e-o) > inversionTolerance)
 		//System.out.printf("Bad solution: %g != %g (%g = %d)\n", e, o, DoubleEquality.relativeError(e, o),
 		//		DoubleEquality.complement(e, o));
-		return true;
+		return (Math.abs(e - o) > inversionTolerance);
 	}
 
 	/**
-	 * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal.
+	 * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal. May modify the matrix. 
 	 * <p>
 	 * Note: If the matrix is singular then a pseudo inverse will be computed.
 	 *
@@ -665,7 +782,7 @@ public class EJMLLinearSolver
 	 *            the matrix a
 	 * @return The diagonal of the inverted matrix (or null)
 	 */
-	public double[] invertSymmPosDefDiagonal(DenseMatrix64F A)
+	public double[] invertDiagonal(DenseMatrix64F A)
 	{
 		// Try a fast inversion of the diagonal
 		if (A.numCols <= UnrolledInverseFromMinorExt.MAX)
@@ -696,9 +813,20 @@ public class EJMLLinearSolver
 		// We reach here when 'a' has been inverted
 		double[] d = new double[A.numCols];
 		for (int i = 0, j = 0; i < d.length; i++, j += A.numCols + 1)
-			//d[i] = A.get(i, i);
 			d[i] = A.get(j);
 		return d;
+	}
+	
+	/**
+	 * Checks if an inversion may modify A.
+	 *
+	 * @return true, if an inversion may modify A
+	 */
+	public boolean invertModifiesA()
+	{
+		if (isInversionTolerance())
+			return false;
+		return getPseudoInverseSolver().modifiesA();
 	}
 
 	/**
@@ -871,7 +999,7 @@ public class EJMLLinearSolver
 	 *            the matrix a
 	 * @return False if the last solve attempt failed, or inversion produces non finite values
 	 */
-	public boolean invert(double[][] a)
+	public boolean invertLastA(double[][] a)
 	{
 		if (lastSuccessfulSolver == null)
 			return false;
@@ -892,6 +1020,102 @@ public class EJMLLinearSolver
 	}
 
 	/**
+	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
+	 * 
+	 * @param a
+	 *            the matrix a
+	 * @return False if the matrix is singular (no solution)
+	 */
+	public boolean invertLinear(double[][] a)
+	{
+		DenseMatrix64F A = toA(a);
+		if (!invertLinear(A))
+			return false;
+		toSquareData(A, a);
+		return true;
+	}
+
+	/**
+	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
+	 * 
+	 * @param a
+	 *            the matrix a
+	 * @return False if the matrix is singular (no solution)
+	 */
+	public boolean invertCholesky(double[][] a)
+	{
+		DenseMatrix64F A = toA(a);
+		if (!invertCholesky(A))
+			return false;
+		toSquareData(A, a);
+		return true;
+	}
+
+	/**
+	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
+	 * 
+	 * @param a
+	 *            the matrix a
+	 * @return False if the matrix is singular (no solution)
+	 */
+	public boolean invertCholeskyLDLT(double[][] a)
+	{
+		DenseMatrix64F A = toA(a);
+		if (!invertCholeskyLDLT(A))
+			return false;
+		toSquareData(A, a);
+		return true;
+	}
+
+	/**
+	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
+	 * 
+	 * @param a
+	 *            the matrix a
+	 * @return False if the matrix is singular (no solution)
+	 */
+	public boolean invertPseudoInverse(double[][] a)
+	{
+		DenseMatrix64F A = toA(a);
+		if (!invertPseudoInverse(A))
+			return false;
+		toSquareData(A, a);
+		return true;
+	}
+
+	/**
+	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
+	 * 
+	 * @param a
+	 *            the matrix a
+	 * @return False if the matrix is singular (no solution)
+	 */
+	public boolean invertDirectInversion(double[][] a)
+	{
+		DenseMatrix64F A = toA(a);
+		if (!invertDirectInversion(A))
+			return false;
+		toSquareData(A, a);
+		return true;
+	}
+
+	/**
+	 * Invert symmetric positive definite matrix A and returns only the diagonal.
+	 * <p>
+	 * Only supports matrix size up to 5.
+	 * 
+	 * @param a
+	 *            the matrix a
+	 * @return The diagonal of A^-1 (or null if the matrix is singular (no solution) or too large)
+	 */
+	public double[] invertDiagonalDirectInversion(double[][] a)
+	{
+		if (a.length > UnrolledInverseFromMinorExt.MAX)
+			return null;
+		return UnrolledInverseFromMinorExt.inv(toA(a));
+	}
+	
+	/**
 	 * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the inverse of a.
 	 * <p>
 	 * Note: If the matrix is singular then a pseudo inverse will be computed.
@@ -900,10 +1124,10 @@ public class EJMLLinearSolver
 	 *            the matrix a
 	 * @return False if there is no solution
 	 */
-	public boolean invertSymmPosDef(double[][] a)
+	public boolean invert(double[][] a)
 	{
 		DenseMatrix64F A = toA(a);
-		if (!invertSymmPosDef(A))
+		if (!invert(A))
 			return false;
 		toSquareData(A, a);
 		return true;
@@ -918,9 +1142,9 @@ public class EJMLLinearSolver
 	 *            the matrix a
 	 * @return The diagonal of the inverted matrix (or null)
 	 */
-	public double[] invertSymmPosDefDiagonal(double[][] a)
+	public double[] invertDiagonal(double[][] a)
 	{
-		return invertSymmPosDefDiagonal(new DenseMatrix64F(a));
+		return invertDiagonal(new DenseMatrix64F(a));
 	}
 
 	/**
@@ -1008,7 +1232,7 @@ public class EJMLLinearSolver
 	 *            the matrix a
 	 * @return False if the last solve attempt failed, or inversion produces non finite values
 	 */
-	public boolean invert(double[] a)
+	public boolean invertLastA(double[] a)
 	{
 		if (lastSuccessfulSolver == null)
 			return false;
@@ -1040,9 +1264,9 @@ public class EJMLLinearSolver
 	 *            the number of columns/rows
 	 * @return False if there is no solution
 	 */
-	public boolean invertSymmPosDef(double[] a, int n)
+	public boolean invert(double[] a, int n)
 	{
-		return invertSymmPosDef(toA(a, n));
+		return invert(toA(a, n));
 	}
 
 	/**
@@ -1056,8 +1280,41 @@ public class EJMLLinearSolver
 	 *            the number of columns/rows
 	 * @return The diagonal of the inverted matrix (or null)
 	 */
-	public double[] invertSymmPosDefDiagonal(double[] a, int n)
+	public double[] invertDiagonal(double[] a, int n)
 	{
-		return invertSymmPosDefDiagonal(toA(a, n));
+		return invertDiagonal(toA(a, n));
+	}
+
+	/**
+	 * Gets the inversion tolerance. Inversions are checked by ensuring that the product matches the identity matrix: A
+	 * * A^-1 = I. Elements must be within the tolerance or else the inversion is rejected. Set to zero to disable.
+	 *
+	 * @return the inversion tolerance
+	 */
+	public double getInversionTolerance()
+	{
+		return inversionTolerance;
+	}
+
+	/**
+	 * Sets the inversion tolerance. Inversions are checked by ensuring that the product matches the identity matrix: A
+	 * * A^-1 = I. Elements must be within the tolerance or else the inversion is rejected. Set to zero to disable.
+	 *
+	 * @param inversionTolerance
+	 *            the new inversion tolerance
+	 */
+	public void setInversionTolerance(double inversionTolerance)
+	{
+		this.inversionTolerance = inversionTolerance;
+	}
+
+	/**
+	 * Checks if there is an inversion tolerance.
+	 *
+	 * @return true, if there is an inversion tolerance
+	 */
+	private boolean isInversionTolerance()
+	{
+		return inversionTolerance > 0;
 	}
 }

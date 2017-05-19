@@ -8,7 +8,6 @@ import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -137,11 +136,7 @@ public class FisherInformationMatrixTest
 		//	System.out.println(Arrays.toString(I[i]));
 
 		// Create matrix
-		FisherInformationMatrix m = new FisherInformationMatrix(I);
-		DoubleEquality eq = new DoubleEquality(1e-3, 1e-6);
-		m.setEqual(eq);
-
-		return m;
+		return new FisherInformationMatrix(I, 1e-3);
 	}
 
 	void log(String format, Object... args)

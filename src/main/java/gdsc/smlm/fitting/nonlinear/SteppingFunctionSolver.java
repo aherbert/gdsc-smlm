@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.core.utils.BitFlags;
+import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.function.Gradient1Function;
@@ -215,7 +216,28 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * @param a_dev
 	 *            the parameter deviations
 	 */
-	protected abstract void computeDeviations(double[] a_dev);
+	protected void computeDeviations(double[] a_dev)
+	{
+		// Use a dedicated solver optimised for inverting the matrix diagonal. 
+		// The last Hessian matrix should be stored in the working alpha.
+		final FisherInformationMatrix m = computeFisherInformationMatrix();
+
+		// This may fail if the matrix cannot be inverted
+		final double[] crlb = m.crlb();
+		if (crlb == null)
+			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
+		setDeviations(a_dev, crlb);
+
+		// Use this method for robustness, i.e. it will not fail
+		//setDeviations(a_dev, m.crlb(true));
+	}
+
+	/**
+	 * Compute the Fisher Information matrix. This can be used to set the covariances for each of the fitted parameters.
+	 *
+	 * @return the Fisher Information matrix
+	 */
+	protected abstract FisherInformationMatrix computeFisherInformationMatrix();
 
 	/**
 	 * Compute the function y-values using the y and parameters a from the last call to

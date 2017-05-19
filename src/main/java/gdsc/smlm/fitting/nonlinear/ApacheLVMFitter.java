@@ -1,7 +1,5 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
@@ -19,7 +17,6 @@ import org.apache.commons.math3.linear.SingularMatrixException;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.math3.util.Precision;
 
-import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
@@ -158,7 +155,6 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 					calculator.findLinearised(nparams, y, a, alpha, beta, (NonLinearFunction) f);
 
 					FisherInformationMatrix m = new FisherInformationMatrix(alpha);
-					m.setEqual(new DoubleEquality(1e-3, 1e-3));
 					setDeviations(a_dev, m.crlb(true));
 				}
 			}

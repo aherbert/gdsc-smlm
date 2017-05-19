@@ -185,7 +185,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		Arrays.fill(deviations, 0);
 		final int[] indices = f.gradientIndices();
 		for (int i = 0; i < indices.length; i++)
-			deviations[indices[i]] = covar[i][i];
+			deviations[indices[i]] = checkVariance(covar[i][i]);
 	}
 
 	public void setDeviationsFromLinearMatrix(double[] deviations, double[] covar)
@@ -194,7 +194,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		final int[] indices = f.gradientIndices();
 		final int n = indices.length;
 		for (int i = 0, j = 0; i < n; i++, j += (n + 1))
-			deviations[indices[i]] = covar[j];
+			deviations[indices[i]] = checkVariance(covar[j]);
 	}
 
 	public void setDeviations(double[] deviations, double[] covar)
@@ -203,7 +203,12 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		final int[] indices = f.gradientIndices();
 		final int n = indices.length;
 		for (int i = 0; i < n; i++)
-			deviations[indices[i]] = covar[i];
+			deviations[indices[i]] = checkVariance(covar[i]);
+	}
+
+	private static double checkVariance(double d)
+	{
+		return (d > 0) ? d : 0;
 	}
 
 	/*

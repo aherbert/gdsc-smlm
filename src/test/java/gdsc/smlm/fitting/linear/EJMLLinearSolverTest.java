@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,7 +43,7 @@ public class EJMLLinearSolverTest
 			new double[] { 0.25, 0.5, 0.75 } };
 
 		boolean result = solver.solve(a, b);
-		solver.invert(a);
+		solver.invertLastA(a);
 
 		Assert.assertTrue("Failed to solve", result);
 		Assert.assertArrayEquals("Bad solution", x, b, 1e-4f);
@@ -77,7 +78,7 @@ public class EJMLLinearSolverTest
 			new double[] { 0.25, 0.5, 0.75 } };
 
 		boolean result = solver.solve(a, b);
-		solver.invert(a);
+		solver.invertLastA(a);
 
 		Assert.assertTrue("Failed to solve", result);
 		Assert.assertArrayEquals("Bad solution", x, b, 1e-4f);
@@ -113,7 +114,7 @@ public class EJMLLinearSolverTest
 			new double[] { 0.25, 0, 0.5, 0.75 } };
 
 		boolean result = solver.solve(a, b);
-		solver.invert(a);
+		solver.invertLastA(a);
 
 		Assert.assertTrue("Failed to solve", result);
 		Assert.assertArrayEquals("Bad solution", x, b, 1e-4f);
@@ -155,7 +156,7 @@ public class EJMLLinearSolverTest
 			new double[] { 0.25, 0, 0.5, 0, 0, 0.75 } };
 
 		boolean result = solver.solve(a, b);
-		solver.invert(a);
+		solver.invertLastA(a);
 
 		Assert.assertTrue("Failed to solve", result);
 		Assert.assertArrayEquals("Bad solution", x, b, 1e-4f);
@@ -171,7 +172,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvert()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
+		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -187,7 +188,7 @@ public class EJMLLinearSolverTest
 			new double[] { 0.5, 1, 0.5 },
 			new double[] { 0.25, 0.5, 0.75 } };
 
-		boolean result = solver.invertSymmPosDef(a);
+		boolean result = solver.invert(a);
 
 		Assert.assertTrue("Failed to invert", result);
 
@@ -201,7 +202,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvertWithZeros()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
+		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -223,7 +224,7 @@ public class EJMLLinearSolverTest
 			new double[] { 0, 0, 0, 0, 0, 0 },
 			new double[] { 0.25, 0, 0.5, 0, 0, 0.75 } };
 
-		boolean result = solver.invertSymmPosDef(a);
+		boolean result = solver.invert(a);
 
 		Assert.assertTrue("Failed to invert", result);
 
@@ -237,7 +238,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvertDiagonal()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
+		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -250,7 +251,7 @@ public class EJMLLinearSolverTest
 		// Expected solution
 		double[] e = new double[] { 0.75, 1, 0.75 };
 
-		double[] o = solver.invertSymmPosDefDiagonal(a);
+		double[] o = solver.invertDiagonal(a);
 
 		Assert.assertNotNull("Failed to invert", o);
 
@@ -261,7 +262,7 @@ public class EJMLLinearSolverTest
 	@Test
 	public void canInvertDiagonalWithZeros()
 	{
-		EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
+		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
 
 		// Solves (one) linear equation, a x = b, for x[n]
 
@@ -277,7 +278,7 @@ public class EJMLLinearSolverTest
 		// Expected solution
 		double[] e = new double[] { 0.75, 0, 1, 0, 0, 0.75 };
 
-		double[] o = solver.invertSymmPosDefDiagonal(a);
+		double[] o = solver.invertDiagonal(a);
 
 		Assert.assertNotNull("Failed to invert", o);
 
@@ -288,14 +289,14 @@ public class EJMLLinearSolverTest
 
 	private abstract class SolverTimingTask extends BaseTimingTask
 	{
-		double[][][] a;
-		double[][] b;
+		DenseMatrix64F[] a;
+		DenseMatrix64F[] b;
 		// No validation for a pure speed test
 		EJMLLinearSolver solver = new EJMLLinearSolver();
 
-		public SolverTimingTask(String name, double[][][] a, double[][] b)
+		public SolverTimingTask(String name, DenseMatrix64F[] a, DenseMatrix64F[] b)
 		{
-			super(name + " " + b[0].length);
+			super(name + " " + a[0].numCols);
 			// Clone the data
 			this.a = a;
 			this.b = b;
@@ -303,8 +304,8 @@ public class EJMLLinearSolverTest
 			solver.setEqual(new DoubleEquality(5e-3, 1e-6));
 			Object data = getData(0);
 
-			a = (double[][][]) ((Object[]) data)[0];
-			b = (double[][]) ((Object[]) data)[1];
+			a = (DenseMatrix64F[]) ((Object[]) data)[0];
+			b = (DenseMatrix64F[]) ((Object[]) data)[1];
 			for (int i = 0; i < a.length; i++)
 			{
 				if (!solve(a[i], b[i]))
@@ -324,23 +325,20 @@ public class EJMLLinearSolverTest
 		{
 			// Clone
 			int n = b.length;
-			int m = b[0].length;
-			double[][][] a = new double[n][][];
-			double[][] b = new double[n][];
+			DenseMatrix64F[] a = new DenseMatrix64F[n];
+			DenseMatrix64F[] b = new DenseMatrix64F[n];
 			while (n-- > 0)
 			{
-				a[n] = new double[m][];
-				for (int j = m; j-- > 0;)
-					a[n][j] = this.a[n][j].clone();
-				b[n] = this.b[n].clone();
+				a[n] = this.a[n].copy();
+				b[n] = this.b[n].copy();
 			}
 			return new Object[] { a, b };
 		}
 
 		public Object run(Object data)
 		{
-			double[][][] a = (double[][][]) ((Object[]) data)[0];
-			double[][] b = (double[][]) ((Object[]) data)[1];
+			DenseMatrix64F[] a = (DenseMatrix64F[]) ((Object[]) data)[0];
+			DenseMatrix64F[] b = (DenseMatrix64F[]) ((Object[]) data)[1];
 			for (int i = 0; i < a.length; i++)
 			{
 				solve(a[i], b[i]);
@@ -348,17 +346,17 @@ public class EJMLLinearSolverTest
 			return null;
 		}
 
-		abstract boolean solve(double[][] a, double[] b);
+		abstract boolean solve(DenseMatrix64F a, DenseMatrix64F b);
 	}
 
 	private class LinearSolverTimingTask extends SolverTimingTask
 	{
-		public LinearSolverTimingTask(double[][][] a, double[][] b)
+		public LinearSolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b)
 		{
-			super("Linear", a, b);
+			super("Linear Solver", a, b);
 		}
 
-		boolean solve(double[][] a, double[] b)
+		boolean solve(DenseMatrix64F a, DenseMatrix64F b)
 		{
 			return solver.solveLinear(a, b);
 		}
@@ -366,12 +364,12 @@ public class EJMLLinearSolverTest
 
 	private class CholeskySolverTimingTask extends SolverTimingTask
 	{
-		public CholeskySolverTimingTask(double[][][] a, double[][] b)
+		public CholeskySolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b)
 		{
-			super("Cholesky", a, b);
+			super("Cholesky Solver", a, b);
 		}
 
-		boolean solve(double[][] a, double[] b)
+		boolean solve(DenseMatrix64F a, DenseMatrix64F b)
 		{
 			return solver.solveCholesky(a, b);
 		}
@@ -379,12 +377,12 @@ public class EJMLLinearSolverTest
 
 	private class CholeskyLDLTSolverTimingTask extends SolverTimingTask
 	{
-		public CholeskyLDLTSolverTimingTask(double[][][] a, double[][] b)
+		public CholeskyLDLTSolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b)
 		{
-			super("CholeskyLDLT", a, b);
+			super("CholeskyLDLT Solver", a, b);
 		}
 
-		boolean solve(double[][] a, double[] b)
+		boolean solve(DenseMatrix64F a, DenseMatrix64F b)
 		{
 			return solver.solveCholeskyLDLT(a, b);
 		}
@@ -392,12 +390,12 @@ public class EJMLLinearSolverTest
 
 	private class PseudoInverseSolverTimingTask extends SolverTimingTask
 	{
-		public PseudoInverseSolverTimingTask(double[][][] a, double[][] b)
+		public PseudoInverseSolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b)
 		{
-			super("PseudoInverse", a, b);
+			super("PseudoInverse Solver", a, b);
 		}
 
-		boolean solve(double[][] a, double[] b)
+		boolean solve(DenseMatrix64F a, DenseMatrix64F b)
 		{
 			return solver.solvePseudoInverse(a, b);
 		}
@@ -405,12 +403,12 @@ public class EJMLLinearSolverTest
 
 	private class DirectInversionSolverTimingTask extends SolverTimingTask
 	{
-		public DirectInversionSolverTimingTask(double[][][] a, double[][] b)
+		public DirectInversionSolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b)
 		{
-			super("DirectInversion", a, b);
+			super("DirectInversion Solver", a, b);
 		}
 
-		boolean solve(double[][] a, double[] b)
+		boolean solve(DenseMatrix64F a, DenseMatrix64F b)
 		{
 			return solver.solveDirectInversion(a, b);
 		}
@@ -446,8 +444,8 @@ public class EJMLLinearSolverTest
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		int n = f0.size();
 		final double[] y = new double[n];
-		final TurboList<double[][]> aList = new TurboList<double[][]>();
-		final TurboList<double[]> bList = new TurboList<double[]>();
+		final TurboList<DenseMatrix64F> aList = new TurboList<DenseMatrix64F>();
+		final TurboList<DenseMatrix64F> bList = new TurboList<DenseMatrix64F>();
 		double[] testbackground = new double[] { 0.2, 0.7 };
 		double[] testsignal1 = new double[] { 30, 100, 300 };
 		double[] testcx1 = new double[] { 4.9, 5.3 };
@@ -484,12 +482,12 @@ public class EJMLLinearSolverTest
 							// As per the LVM algorithm
 							//for (int i = 0; i < np; i++)
 							//	alpha[i][i] *= lambda;
-							aList.add(alpha);
-							bList.add(beta);
+							aList.add(EJMLLinearSolver.toA(alpha));
+							bList.add(EJMLLinearSolver.toB(beta));
 						}
 
-		double[][][] a = aList.toArray(new double[aList.size()][][]);
-		double[][] b = bList.toArray(new double[bList.size()][]);
+		DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[aList.size()]);
+		DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[bList.size()]);
 		int runs = 10000 / a.length;
 		TimingService ts = new TimingService(runs);
 		ts.execute(new LinearSolverTimingTask(a, b));

@@ -1,7 +1,5 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import java.util.Arrays;
-
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
@@ -321,8 +319,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	private FitStatus doFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, StoppingCriteria sc)
 	{
-		final int[] gradientIndices = f.gradientIndices();
-
 		sc.initialise(a);
 		if (!nonLinearModel(n, y, a, true))
 			return (calculator.isNaNGradients()) ? FitStatus.INVALID_GRADIENTS : FitStatus.SINGULAR_NON_LINEAR_MODEL;
@@ -346,21 +342,8 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 		if (a_dev != null)
 		{
-			// Copy the diagonal from the current solution alpha (so we do not 
-			// recompute it if inversion fails) 
-			final double[] I = new double[beta.length];
-			for (int i = I.length; i-- > 0;)
-				I[i] = alpha[i][i];
 			if (!computeDeviations(a_dev))
-			{
-				// Matrix inversion failed. In order to return a solution 
-				// return the reciprocal of the diagonal of the Fisher information 
-				// for a loose bound on the limit 
-				//final double[] I = calculator.fisherInformationDiagonal(n, a, f);
-				Arrays.fill(a_dev, 0);
-				for (int i = gradientIndices.length; i-- > 0;)
-					a_dev[gradientIndices[i]] = FisherInformationMatrix.reciprocal(I[i]);
-			}
+				return FitStatus.SINGULAR_NON_LINEAR_SOLUTION;
 		}
 
 		value = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
@@ -392,19 +375,16 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 			// Poisson process.
 			MLEGradientCalculator c = (MLEGradientCalculator) calculator;
 			double[][] I = c.fisherInformationMatrix(lastY.length, null, func);
-			
+
 			// Use a dedicated solver optimised for inverting the matrix diagonal 
 			FisherInformationMatrix m = new FisherInformationMatrix(I);
-			m.setEqual(solver.getEqual());
 			setDeviations(a_dev, m.crlb(true));
 		}
 		else
 		{
-			// Call the invert method directly on alpha 
-			if (!solver.invertSymmPosDef(alpha))
-				return false;
-
-			setDeviationsFromMatrix(a_dev, alpha);
+			// Use a dedicated solver optimised for inverting the matrix diagonal. 
+			FisherInformationMatrix m = new FisherInformationMatrix(alpha);
+			setDeviations(a_dev, m.crlb(true));
 		}
 		return true;
 	}

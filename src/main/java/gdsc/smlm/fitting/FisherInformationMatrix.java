@@ -2,7 +2,6 @@ package gdsc.smlm.fitting;
 
 import org.ejml.data.DenseMatrix64F;
 
-import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 
 /*----------------------------------------------------------------------------- 
@@ -24,6 +23,9 @@ import gdsc.smlm.fitting.linear.EJMLLinearSolver;
  */
 public class FisherInformationMatrix
 {
+	/** The default inversion tolerance. */
+	public static final double DEFAULT_INVERSION_TOLERANCE = 1e-2;
+	
 	private static final byte YES = 1;
 	private static final byte UNKNOWN = 0;
 	private static final byte NO = -1;
@@ -31,7 +33,42 @@ public class FisherInformationMatrix
 	private final DenseMatrix64F m;
 	private double[] crlb = null;
 	private byte inverted = UNKNOWN;
-	private DoubleEquality equal = null;
+	private double inversionTolerance = 0;
+
+	/**
+	 * Instantiates a new fisher information matrix.
+	 *
+	 * @param m            the fisher information matrix
+	 * @param inversionTolerance the inversion tolerance
+	 */
+	public FisherInformationMatrix(double[][] m, double inversionTolerance)
+	{
+		this(EJMLLinearSolver.toA(m), inversionTolerance);
+	}
+
+	/**
+	 * Instantiates a new fisher information matrix.
+	 *
+	 * @param m            the fisher information matrix
+	 * @param n            the number of columns/rows
+	 * @param inversionTolerance the inversion tolerance
+	 */
+	public FisherInformationMatrix(double[] m, int n, double inversionTolerance)
+	{
+		this(EJMLLinearSolver.toA(m, n), inversionTolerance);
+	}
+
+	/**
+	 * Instantiates a new fisher information matrix.
+	 *
+	 * @param m            the fisher information matrix
+	 * @param inversionTolerance the inversion tolerance
+	 */
+	public FisherInformationMatrix(DenseMatrix64F m, double inversionTolerance)
+	{
+		this.m = m;
+		setInversionTolerance(inversionTolerance);
+	}
 
 	/**
 	 * Instantiates a new fisher information matrix.
@@ -67,7 +104,7 @@ public class FisherInformationMatrix
 	 */
 	public FisherInformationMatrix(DenseMatrix64F m)
 	{
-		this.m = m;
+		this(m, DEFAULT_INVERSION_TOLERANCE);
 	}
 
 	private void invert()
@@ -86,24 +123,36 @@ public class FisherInformationMatrix
 		inverted = NO;
 
 		// Matrix inversion
-		EJMLLinearSolver solver = new EJMLLinearSolver(equal);
-		double[] crlb = solver.invertSymmPosDefDiagonal(m);
+		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(inversionTolerance);
+		double[] crlb = solver.invertDiagonal(m);
 		if (crlb != null)
 		{
 			// Check all diagonal values are zero or above
-			for (int i = m.numCols; i-- > 0;)
+			if (inversionTolerance > 0)
 			{
-				if (crlb[i] < 0)
-				{
-					// A small error is OK
-					if (crlb[i] > -1e-2)
-					{
+				// Already checked so just ignored values just below zero
+				for (int i = m.numCols; i-- > 0;)
+					if (crlb[i] < 0)
 						crlb[i] = 0;
-						continue;
+			}
+			else
+			{
+				// A small error is OK
+				for (int i = m.numCols; i-- > 0;)
+				{
+					if (crlb[i] < 0)
+					{
+						if (crlb[i] > -DEFAULT_INVERSION_TOLERANCE)
+						{
+							crlb[i] = 0;
+							continue;
+						}
+						return;
 					}
-					return;
 				}
 			}
+
+			// Check all diagonal values are zero or above
 
 			inverted = YES;
 			this.crlb = crlb;
@@ -310,20 +359,26 @@ public class FisherInformationMatrix
 	}
 
 	/**
-	 * @param equal
-	 *            the equality class to compare that the solution inversion is correct (A*A_inv = I)
+	 * Gets the inversion tolerance. Inversions are checked by ensuring that the product matches the identity matrix: A
+	 * * A^-1 = I. Elements must be within the tolerance or else the inversion is rejected. Set to zero to disable.
+	 *
+	 * @return the inversion tolerance
 	 */
-	public void setEqual(DoubleEquality equal)
+	public double getInversionTolerance()
 	{
-		this.equal = equal;
+		return inversionTolerance;
 	}
 
 	/**
-	 * @return the equality class to compare that the solution inversion is correct (A*A_inv = I)
+	 * Sets the inversion tolerance. Inversions are checked by ensuring that the product matches the identity matrix: A
+	 * * A^-1 = I. Elements must be within the tolerance or else the inversion is rejected. Set to zero to disable.
+	 *
+	 * @param inversionTolerance
+	 *            the new inversion tolerance
 	 */
-	public DoubleEquality getEqual()
+	public void setInversionTolerance(double inversionTolerance)
 	{
-		return equal;
+		this.inversionTolerance = inversionTolerance;
 	}
 
 	/**

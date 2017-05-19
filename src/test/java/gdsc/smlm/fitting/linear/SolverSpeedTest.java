@@ -57,7 +57,7 @@ public class SolverSpeedTest
 			double[] b2 = B2.get(i);
 			boolean r1 = solver.solve(a, b);
 			boolean r2 = solver2.solveLinear(a2, b2);
-			solver2.invert(a2);
+			solver2.invertLastA(a2);
 			Assert.assertSame("Different solve result @ " + i, r1, r2);
 			for (int j = 0; j < b.length; j++)
 			{
@@ -478,7 +478,7 @@ public class SolverSpeedTest
 		{
 			double[][]a = A.get(i);
 			solver.solveLinear(a, B.get(i));
-			solver.invert(a);
+			solver.invertLastA(a);
 		}
 	}
 

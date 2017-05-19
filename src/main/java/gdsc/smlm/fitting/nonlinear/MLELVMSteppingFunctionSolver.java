@@ -171,10 +171,10 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeDeviations(double[])
+	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
 	 */
 	@Override
-	protected void computeDeviations(double[] a_dev)
+	protected FisherInformationMatrix computeFisherInformationMatrix()
 	{
 		// The Hessian matrix refers to the log-likelihood ratio.
 		// Compute and invert a matrix related to the Poisson log-likelihood.
@@ -183,11 +183,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create((Gradient1Function) f);
 		p.computeFisherInformation(lastA);
 		p.getLinear(walpha);
-
-		// Use a dedicated solver optimised for inverting the matrix diagonal 
-		FisherInformationMatrix m = new FisherInformationMatrix(walpha, beta.length);
-		m.setEqual(solver.getEqual());
-		setDeviations(a_dev, m.crlb(true));
+		return new FisherInformationMatrix(walpha, beta.length);
 	}
 
 	/*

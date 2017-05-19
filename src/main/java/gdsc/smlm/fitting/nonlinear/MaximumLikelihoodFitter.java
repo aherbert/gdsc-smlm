@@ -1,16 +1,5 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import gdsc.core.utils.DoubleEquality;
-import gdsc.smlm.fitting.FisherInformationMatrix;
-import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.function.FixedNonLinearFunction;
-import gdsc.smlm.function.LikelihoodWrapper;
-import gdsc.smlm.function.NonLinearFunction;
-import gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
-import gdsc.smlm.function.PoissonGaussianLikelihoodWrapper;
-import gdsc.smlm.function.PoissonLikelihoodWrapper;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
@@ -39,6 +28,16 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptim
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.smlm.fitting.FisherInformationMatrix;
+import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.function.FixedNonLinearFunction;
+import gdsc.smlm.function.LikelihoodWrapper;
+import gdsc.smlm.function.NonLinearFunction;
+import gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
+import gdsc.smlm.function.PoissonGaussianLikelihoodWrapper;
+import gdsc.smlm.function.PoissonLikelihoodWrapper;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -674,7 +673,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
 				// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix.
 				FisherInformationMatrix m = new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
-				m.setEqual(new DoubleEquality(1e-3, 1e-3));
 				setDeviations(a_dev, m.crlb(true));
 			}
 
