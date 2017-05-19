@@ -45,7 +45,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 			y_fit[i++] = value;
 		}
 	}
-	
+
 	protected int[] gradientIndices;
 	protected final ToleranceChecker tc;
 	protected ParameterBounds bounds;
@@ -114,8 +114,9 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		final double[] newA = a.clone();
 
 		// Initialise for fitting
-		if (bounds != null)
-			bounds.initialise();
+		if (bounds == null)
+			bounds = new ParameterBounds(f);
+		bounds.initialise();
 
 		try
 		{
@@ -131,8 +132,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 				computeStep(step);
 
 				// Apply bounds to the step
-				if (bounds != null)
-					bounds.applyBounds(a, step, newA);
+				bounds.applyBounds(a, step, newA);
 
 				// Evaluate
 				double newValue = computeFitValue(newA);
@@ -151,8 +151,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 				{
 					currentValue = newValue;
 					System.arraycopy(newA, 0, a, 0, a.length);
-					if (bounds != null)
-						bounds.accepted(a, newA);
+					bounds.accepted(a, newA);
 				}
 			}
 
@@ -263,9 +262,9 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	/**
 	 * Compute the function y-values using the y and parameters a from the last call to
 	 * {@link #computeFitValue(double[], double[])}.
-	 *<p>
+	 * <p>
 	 * Utility method to compute the function values using the preinitialised function.
-	 * Sub-classes may override this if they have cached the function values from the 
+	 * Sub-classes may override this if they have cached the function values from the
 	 * last execution of a forEach procedure.
 	 * 
 	 * @param y_fit
@@ -314,7 +313,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * @return the function value
 	 */
 	protected abstract double computeFunctionValue(double[] y_fit, double[] a);
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
