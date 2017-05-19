@@ -171,7 +171,7 @@ public abstract class Gaussian2DFunctionTest
 		double[] a;
 
 		boolean record = true;
-		
+
 		for (double background : testbackground)
 			// Peak 1
 			for (double amplitude1 : testamplitude1)
@@ -192,7 +192,8 @@ public abstract class Gaussian2DFunctionTest
 								if (record)
 								{
 									record = false;
-									log("%s frozen to %s\n", f1.getClass().getSimpleName(), f.getClass().getSimpleName());
+									log("%s %d frozen to %s\n", f1.getClass().getSimpleName(), 1,
+											f.getClass().getSimpleName());
 								}
 
 								for (int x : testx)
@@ -338,7 +339,7 @@ public abstract class Gaussian2DFunctionTest
 		double[] a;
 
 		boolean record = true;
-		
+
 		for (double background : testbackground)
 			// Peak 1
 			for (double amplitude1 : testamplitude1)
@@ -367,7 +368,8 @@ public abstract class Gaussian2DFunctionTest
 													if (record)
 													{
 														record = false;
-														log("%s frozen to %s\n", f2.getClass().getSimpleName(), f.getClass().getSimpleName());
+														log("%s %d frozen to %s\n", f2.getClass().getSimpleName(), 2,
+																f.getClass().getSimpleName());
 													}
 
 													for (int x : testx)
