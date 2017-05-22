@@ -31,6 +31,7 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 {
 	protected final double[] x;
 	protected final Gradient2Function func;
+	protected PoissonCalculator poissonCalculator = null;
 
 	/**
 	 * The number of gradients
@@ -247,9 +248,21 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	 */
 	public double computeLogLikelihood()
 	{
-		return PoissonCalculator.logLikelihood(u, x);
+		return getPoissonCalculator().logLikelihood(u);
 	}
-	
+
+	/**
+	 * Gets the poisson calculator, creating using the values x if necessary.
+	 *
+	 * @return the poisson calculator
+	 */
+	private PoissonCalculator getPoissonCalculator()
+	{
+		if (poissonCalculator == null)
+			poissonCalculator = new PoissonCalculator(x);
+		return poissonCalculator;
+	}
+
 	/**
 	 * Calculates the Poisson log likelihood ratio.
 	 *
@@ -270,7 +283,7 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	 */
 	public double computeLogLikelihoodRatio()
 	{
-		return PoissonCalculator.logLikelihoodRatio(u, x);
+		return getPoissonCalculator().getLogLikelihoodRatio(computeLogLikelihood());
 	}
 
 	/**
@@ -278,7 +291,7 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	 */
 	public boolean isNaNGradients()
 	{
-		for (int i = n; i-->0;)
+		for (int i = n; i-- > 0;)
 		{
 			if (Double.isNaN(d1[i]))
 				return true;
