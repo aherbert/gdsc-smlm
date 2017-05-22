@@ -21,6 +21,209 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class PoissonCalculator
 {
+	/** Avoid repeated computation of log of 2 PI */
+	private static final double HALF_LOG_2_PI = 0.5 * FastMath.log(2.0 * FastMath.PI);
+
+	/** The value of x where the instance method computes x! using an approximation. */
+	public static final double APPROXIMATION_X = 1.5;
+
+	// For computation of Stirling series
+	private static final double ONE_OVER_12 = 1.0 / 12.0;
+	private static final double ONE_OVER_360 = 1.0 / 360;
+	private static final double ONE_OVER_1260 = 1.0 / 1260;
+	private static final double ONE_OVER_1680 = 1.0 / 1680;
+
+	private double mll, sumLogXFactorial;
+	private final double[] x;
+
+	/**
+	 * Instantiates a new poisson calculator. This pre-computes factors for the log-likelihood and log-likelihood ratio.
+	 * It should be used for repeat calls to determine the log-likelihood (ratio) when the mean value is different but
+	 * the data x is the same.
+	 *
+	 * @param x
+	 *            the values x (must be positive)
+	 * @throws IllegalArgumentException
+	 *             if the values are not positive
+	 */
+	public PoissonCalculator(double[] x)
+	{
+		this.x = x;
+
+		// The maximum log-likelihood (mll) is:
+		// mll = (x==0) ? 0 : x * Math.log(x) - x - logFactorial(x)
+
+		// Note that the logFactorial can be approximated as using Stirling's approximation:
+		// https://en.m.wikipedia.org/wiki/Stirling%27s_approximation
+		// log(x!) = x * log(x) - x + O(ln(x))
+		// O(ln(x)) is a final term that can be computed using a series expansion.
+
+		// This makes:
+		// mll = x * Math.log(x) - x - x * log(x) + x - O(ln(x))
+		// mll = -O(ln(x))
+
+		// The series can be written as:
+		// O(ln(x)) = 0.5 * log(2*pi*x) + 
+		//            + 1/12x 
+		//            - 1/360x^3 
+		//            + 1/1260x^5 
+		//            - 1/1680x^7 
+		//            + ...
+		// The error in truncating the series is always of the opposite sign and at most 
+		// the same magnitude as the first omitted term.
+
+		for (int i = 0, n = x.length; i < n; i++)
+		{
+			// Note: When x==0:
+			// log(n!) = 0
+			// mll = 0
+			if (x[i] > 0)
+			{
+				final double logx = Math.log(x[i]);
+				if (x[i] <= 1)
+				{
+					// When x is below 1 then the factorial can be omitted, i.e. log(x!) = 0
+					// Compute the actual maximum log likelihood
+					mll += x[i] * logx - x[i];
+				}
+				else if (x[i] <= APPROXIMATION_X)
+				{
+					// At low values of log(n!) we use the gamma function as the relative error of the 
+					// approximation is high. 
+					// Note that the logGamma function uses only 1 Math.log() call when the input is 
+					// below 2.5. Above that it uses 2 calls. So the cost for this accuracy is an extra 
+					// Math.log() call.
+					//final double logXFactorial = Gamma.logGamma(x[i] + 1);
+					final double logXFactorial = -FastMath.log1p(Gamma.invGamma1pm1(x[i]));
+					sumLogXFactorial += logXFactorial;
+					mll += x[i] * logx - x[i] - logXFactorial;
+				}
+				else
+				{
+					// Approximate log(n!) using Stirling's approximation using the first 3 terms.
+					// This will have a maximum relative error of approximately 2.87e-4 
+					final double ologx = HALF_LOG_2_PI + 0.5 * logx + ONE_OVER_12 / x[i] - ONE_OVER_360 / pow3(x[i]);
+					sumLogXFactorial += x[i] * logx - x[i] + ologx;
+					mll -= ologx;
+				}
+			}
+			else if (x[i] != 0)
+			{
+				throw new IllegalArgumentException("Input values x must be positive");
+			}
+		}
+	}
+
+	private double pow3(double n)
+	{
+		return n * n * n;
+	}
+
+	/**
+	 * Compute log(x!) using the Sterling series approximation with the first n terms of the following series.
+	 *
+	 * <pre>
+	 * ln(x!) = x * log(x) - x
+	 *  + 0.5 * log(2*pi*x)   // term 1
+	 *  + 1/12x               // term 2 ...
+	 *  - 1/360x^3
+	 *  + 1/1260x^5
+	 *  - 1/1680x^7
+	 * </pre>
+	 * 
+	 * @param x
+	 *            the value x
+	 * @param n
+	 *            the number of terms
+	 * @return x!
+	 */
+	public static double logFactorialApproximation(double x, int n)
+	{
+		if (x <= 1)
+			return 0;
+		final double logx = Math.log(x);
+		double value = x * logx - x;
+		if (n <= 0)
+			return value;
+		// First term
+		// 0.5 * log(2*pi*n) = 0.5 * log(2*pi) + 0.5 * log(n)
+		value += HALF_LOG_2_PI + 0.5 * logx;
+		if (n <= 1)
+			return value;
+		// Second term
+		value += ONE_OVER_12 / x;
+		if (n <= 2)
+			return value;
+		// Third term
+		final double x2 = x * x;
+		x *= x2;
+		value -= ONE_OVER_360 / x;
+		if (n <= 3)
+			return value;
+		// Fourth term
+		x *= x2;
+		value += ONE_OVER_1260 / x;
+		if (n <= 4)
+			return value;
+		// Fifth term
+		x *= x2;
+		value -= ONE_OVER_1680 / x;
+		return value;
+	}
+
+	/**
+	 * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive.
+	 *
+	 * @param u
+	 *            the mean
+	 * @return the log likelihood
+	 */
+	public double logLikelihood(double[] u)
+	{
+		double ll = 0.0;
+		for (int i = u.length; i-- > 0;)
+		{
+			if (x[i] == 0)
+				ll -= u[i];
+			else
+				ll += x[i] * Math.log(u[i]) - u[i];
+		}
+		return ll - sumLogXFactorial;
+	}
+
+	/**
+	 * Gets the values x
+	 *
+	 * @return the values x
+	 */
+	public double[] getX()
+	{
+		return x.clone();
+	}
+
+	/**
+	 * Get the Poisson maximum log likelihood of values x.
+	 *
+	 * @return the maximum log likelihood
+	 */
+	public double getMaximumLogLikelihood()
+	{
+		return mll;
+	}
+
+	/**
+	 * Get the Poisson log likelihood ratio of the log likelihood.
+	 *
+	 * @param logLikelihood
+	 *            the log likelihood
+	 * @return the log likelihood ratio
+	 */
+	public double getLogLikelihoodRatio(double logLikelihood)
+	{
+		// The log likelihood should be below the maximum log likelihood
+		return (logLikelihood > mll) ? 0 : -2.0 * (logLikelihood - mll);
+	}
+
 	/**
 	 * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
 	 *
@@ -32,17 +235,9 @@ public class PoissonCalculator
 	 */
 	public static double logLikelihood(double u, double x)
 	{
-		// Unlikely so skip this ...
-		//if (x == 0)
-		//	return -u;
+		if (x == 0)
+			return -u;
 		return x * Math.log(u) - u - logFactorial(x);
-	}
-
-	private static double logFactorial(double k)
-	{
-		if (k <= 1)
-			return 0.0;
-		return Gamma.logGamma(k + 1);
 	}
 
 	/**
@@ -58,10 +253,31 @@ public class PoissonCalculator
 	{
 		double ll = 0.0;
 		for (int i = u.length; i-- > 0;)
-			ll += logLikelihood(u[i], x[i]);
+		{
+			if (x[i] == 0)
+				ll -= u[i];
+			else
+				ll += x[i] * Math.log(u[i]) - u[i] - logFactorial(x[i]);
+		}
 		return ll;
 	}
 
+	/**
+	 * Compute log(x!) using logGamma(x+1)
+	 *
+	 * @param x
+	 *            the value x
+	 * @param n
+	 *            the number of terms
+	 * @return x!
+	 */
+	public static double logFactorial(double x)
+	{
+		if (x <= 1)
+			return 0.0;
+		return Gamma.logGamma(x + 1);
+	}
+	
 	/**
 	 * Get the Poisson likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
 	 *
@@ -73,6 +289,7 @@ public class PoissonCalculator
 	 */
 	public static double likelihood(double u, double x)
 	{
+		// This has a smaller range being computation fails:
 		//return Math.pow(u, x) * FastMath.exp(-u) / factorial(x);
 		return FastMath.exp(logLikelihood(u, x));
 	}
@@ -96,7 +313,7 @@ public class PoissonCalculator
 	 *
 	 * @param x
 	 *            the x
-	 * @return the log likelihood
+	 * @return the maximum log likelihood
 	 */
 	public static double maximumLogLikelihood(double x)
 	{
@@ -108,7 +325,7 @@ public class PoissonCalculator
 	 *
 	 * @param x
 	 *            the x
-	 * @return the log likelihood
+	 * @return the maximum log likelihood
 	 */
 	public static double maximumLogLikelihood(double[] x)
 	{
@@ -123,7 +340,7 @@ public class PoissonCalculator
 	 *
 	 * @param x
 	 *            the x
-	 * @return the likelihood
+	 * @return the maximum likelihood
 	 */
 	public static double maximumLikelihood(double x)
 	{
@@ -135,7 +352,7 @@ public class PoissonCalculator
 	 *
 	 * @param x
 	 *            the x
-	 * @return the likelihood
+	 * @return the maximum likelihood
 	 */
 	public static double maximumLikelihood(double[] x)
 	{

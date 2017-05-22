@@ -2,18 +2,24 @@ package gdsc.smlm.function;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.test.BaseTimingTask;
+import gdsc.core.test.TimingService;
+import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.Maths;
 import gdsc.smlm.TestSettings;
 
 public class PoissonCalculatorTest
@@ -325,6 +331,181 @@ public class PoissonCalculatorTest
 		//		PoissonCalculator.computePValue(llrb, 1));
 		Assert.assertNotEquals("Log-likelihood ratio", llra, llrb, llra * 1e-10);
 
+	}
+
+	//@Test
+	public void showRelativeErrorOfLogFactorialApproximation()
+	{
+		double d = 1.0;
+		for (int i = 1; i <= 100; i++)
+		{
+			d = Math.nextUp(d);
+			showRelativeErrorOfLogFactorialApproximation(d);
+		}
+		for (int i = 1; i <= 300; i++)
+			showRelativeErrorOfLogFactorialApproximation(1 + i / 100.0);
+
+		for (int i = 4; i <= 100; i++)
+			showRelativeErrorOfLogFactorialApproximation(i);
+	}
+
+	private void showRelativeErrorOfLogFactorialApproximation(double x)
+	{
+		double e = PoissonCalculator.logFactorial(x);
+		double[] o = new double[6];
+		double[] error = new double[o.length];
+		for (int i = 0; i < o.length; i++)
+		{
+			o[i] = PoissonCalculator.logFactorialApproximation(x, i);
+			error[i] = DoubleEquality.relativeError(e, o[i]);
+		}
+		System.out.printf("%s! = %s : %s\n", Double.toString(x), Utils.rounded(e), Arrays.toString(error));
+	}
+
+	@Test
+	public void instanceMethodIsApproximatelyEqualToStaticMethod()
+	{
+		DoubleEquality eq = new DoubleEquality(3e-4, 0);
+		RandomGenerator rg = new Well19937c(30051977);
+		// Test for different x. The calculator approximation begins
+		int n = 100;
+		double[] u = new double[n];
+		double[] x = new double[n];
+		double e, o;
+		for (double testx : new double[] { Math.nextAfter(PoissonCalculator.APPROXIMATION_X, -1),
+				PoissonCalculator.APPROXIMATION_X, Math.nextUp(PoissonCalculator.APPROXIMATION_X),
+				PoissonCalculator.APPROXIMATION_X * 1.1, PoissonCalculator.APPROXIMATION_X * 2,
+				PoissonCalculator.APPROXIMATION_X * 10 })
+		{
+			String X = Double.toString(testx);
+			Arrays.fill(x, testx);
+			PoissonCalculator pc = new PoissonCalculator(x);
+			e = PoissonCalculator.maximumLogLikelihood(x);
+			o = pc.getMaximumLogLikelihood();
+			System.out.printf("[%s] MaxLL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
+			Assert.assertTrue("Max LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+
+			// Generate data around the value
+			for (int i = 0; i < n; i++)
+				u[i] = x[i] + rg.nextDouble() - 0.5;
+
+			e = PoissonCalculator.logLikelihood(u, x);
+			o = pc.logLikelihood(u);
+			System.out.printf("[%s] LL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
+			Assert.assertTrue("LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+
+			e = PoissonCalculator.logLikelihoodRatio(u, x);
+			o = pc.getLogLikelihoodRatio(o);
+
+			System.out.printf("[%s] LLR = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
+			Assert.assertTrue("LLR not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+		}
+	}
+
+	private abstract class PCTimingTask extends BaseTimingTask
+	{
+		double[] x, u;
+		int n;
+		boolean llr;
+
+		public PCTimingTask(String name, double[] x, double[] u, int n, boolean llr)
+		{
+			super(String.format("%s ll=%d llr=%b", name, n, llr));
+			this.x = x;
+			this.u = u;
+			this.n = n;
+			this.llr = llr;
+		}
+
+		public int getSize()
+		{
+			return 1;
+		}
+
+		public Object getData(int i)
+		{
+			return null;
+		}
+	}
+
+	private class StaticPCTimingTask extends PCTimingTask
+	{
+		public StaticPCTimingTask(double[] x, double[] u, int n, boolean llr)
+		{
+			super("static", x, u, n, llr);
+		}
+
+		public Object run(Object data)
+		{
+			double ll = 0;
+			if (llr)
+				ll += PoissonCalculator.logLikelihoodRatio(u, x);
+			for (int i = 0; i < n; i++)
+				ll += PoissonCalculator.logLikelihood(u, x);
+			return ll;
+		}
+	}
+
+	private class InstancePCTimingTask extends PCTimingTask
+	{
+		public InstancePCTimingTask(double[] x, double[] u, int n, boolean llr)
+		{
+			super("instance", x, u, n, llr);
+		}
+
+		public Object run(Object data)
+		{
+			PoissonCalculator pc = new PoissonCalculator(x);
+			double ll = pc.logLikelihood(u);
+			if (llr)
+				ll += pc.getLogLikelihoodRatio(ll);
+			for (int i = 1; i < n; i++)
+				ll += pc.logLikelihood(u);
+			return ll;
+		}
+	}
+
+	@Test
+	public void instanceMethodIsFaster()
+	{
+		int n = 1000;
+		int m = 10;
+		double[] x = new double[n * m];
+		double[] u = new double[x.length];
+		for (int i = 1, k = 0; i <= n; i++)
+		{
+			double testx = 0.1 * i;
+			// +/- 3SD of the expected
+			double sd = 3 * Math.sqrt(testx);
+			double min = Math.max(0.1, testx - sd);
+			double max = testx + sd;
+			double inc = (max - min) / (m - 1);
+			for (int j = 0; j < m; j++, k++)
+			{
+				x[k] = testx;
+				u[k] = min + j * inc;
+			}
+		}
+		double[] limits = Maths.limits(x);
+		System.out.printf("Speed test x-range: %f - %f\n", limits[0], limits[1]);
+
+		TimingService ts = new TimingService(5);
+		ts.execute(new StaticPCTimingTask(x, u, 0, true));
+		ts.execute(new InstancePCTimingTask(x, u, 0, true));
+		for (int l : new int[] { 1, 10 })
+		{
+			ts.execute(new StaticPCTimingTask(x, u, l, false));
+			ts.execute(new InstancePCTimingTask(x, u, l, false));
+			ts.execute(new StaticPCTimingTask(x, u, l, true));
+			ts.execute(new InstancePCTimingTask(x, u, l, true));
+		}
+
+		int size = ts.getSize();
+		ts.repeat(size);
+		ts.report();
+
+		int index = ts.getSize() - 1;
+		Assert.assertTrue(ts.get(index).getMean() < ts.get(index - 1).getMean());
 	}
 
 	private double[] add(double[] a, double[] b)
