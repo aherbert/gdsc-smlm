@@ -418,7 +418,7 @@ public class EJMLLinearSolver
 		// CholeskyLDLT solver as the size increases. Note: The EJML factory 
 		// returns a Cholesky solver for symmetric positive definite matrices 
 		// so we use this.
-		
+
 		// Note: Use solveSafe as we need the A and B matrix for the subsequent 
 		// solve attempt if failure
 
@@ -450,6 +450,8 @@ public class EJMLLinearSolver
 	 * Checks if a solve may modify A.
 	 *
 	 * @return true, if a solve may modify A
+	 * @see #solve(DenseMatrix64F, DenseMatrix64F)
+	 * @see #solve(double[], double[])
 	 */
 	public boolean solveModifiesA()
 	{
@@ -681,13 +683,26 @@ public class EJMLLinearSolver
 		// The DirectInversion solver is faster when the size < 5.		
 		// Note: The EJML factory returns a Cholesky solver for symmetric 
 		// positive definite matrices so we use this in preference to a CholeskyLDLT.
-		
-		LinearSolver<DenseMatrix64F> primarySolver = (A.numCols < 5) ? getInversionSolver()
-				: getCholeskySolver();
+
+		LinearSolver<DenseMatrix64F> primarySolver = (A.numCols < 5) ? getInversionSolver() : getCholeskySolver();
 		if (invertSafe(primarySolver, A, false))
 			return true;
 
 		return invertUnsafe(getPseudoInverseSolver(), A, true);
+	}
+
+	/**
+	 * Checks if an inversion may modify A.
+	 *
+	 * @return true, if an inversion may modify A
+	 * @see #invert(DenseMatrix64F)
+	 * @see #invert(double[], int)
+	 */
+	public boolean invertModifiesA()
+	{
+		if (isInversionTolerance())
+			return false;
+		return getPseudoInverseSolver().modifiesA();
 	}
 
 	private boolean invertSafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, boolean pseudoInverse)
@@ -785,6 +800,51 @@ public class EJMLLinearSolver
 		//			DoubleEquality.complement(e, o));
 		return (Math.abs(e - o) > inversionTolerance);
 	}
+	
+	/**
+	 * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal. Will not modify the
+	 * matrix.
+	 * <p>
+	 * Note: If the matrix is singular then a pseudo inverse will be computed.
+	 *
+	 * @param A
+	 *            the matrix a
+	 * @return The diagonal of the inverted matrix (or null)
+	 */
+	public double[] invertDiagonal(DenseMatrix64F A)
+	{
+		// Try a fast inversion of the diagonal
+		if (A.numCols <= UnrolledInverseFromMinorExt.MAX)
+		{
+			double[] d = UnrolledInverseFromMinorExt.inv(A);
+			if (d != null)
+				return d;
+		}
+
+		createSolver(A.numCols);
+
+		if (A.numCols <= UnrolledInverseFromMinorExt.MAX)
+		{
+			// The fast inversion failed so try a pseudo-inverse
+			if (!invertSafe(getPseudoInverseSolver(), A, true))
+				return null;
+		}
+		else
+		{
+			// The matrix was too big for fast inversion so try linear algebra
+			if (!invertSafe(getCholeskyLDLTSolver(), A, false))
+			{
+				if (!invertSafe(getPseudoInverseSolver(), A, true))
+					return null;
+			}
+		}
+
+		// We reach here when 'a' has been inverted
+		double[] d = new double[A.numCols];
+		for (int i = 0, j = 0; i < d.length; i++, j += A.numCols + 1)
+			d[i] = A.get(j);
+		return d;
+	}
 
 	/**
 	 * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal. May modify the
@@ -796,7 +856,7 @@ public class EJMLLinearSolver
 	 *            the matrix a
 	 * @return The diagonal of the inverted matrix (or null)
 	 */
-	public double[] invertDiagonal(DenseMatrix64F A)
+	private double[] invertDiagonalUnsafe(DenseMatrix64F A)
 	{
 		// Try a fast inversion of the diagonal
 		if (A.numCols <= UnrolledInverseFromMinorExt.MAX)
@@ -829,18 +889,6 @@ public class EJMLLinearSolver
 		for (int i = 0, j = 0; i < d.length; i++, j += A.numCols + 1)
 			d[i] = A.get(j);
 		return d;
-	}
-
-	/**
-	 * Checks if an inversion may modify A.
-	 *
-	 * @return true, if an inversion may modify A
-	 */
-	public boolean invertModifiesA()
-	{
-		if (isInversionTolerance())
-			return false;
-		return getPseudoInverseSolver().modifiesA();
 	}
 
 	/**
@@ -1158,7 +1206,8 @@ public class EJMLLinearSolver
 	 */
 	public double[] invertDiagonal(double[][] a)
 	{
-		return invertDiagonal(new DenseMatrix64F(a));
+		// Use the unsafe method as the matrix has been converted so can be modified
+		return invertDiagonalUnsafe(new DenseMatrix64F(a));
 	}
 
 	/**

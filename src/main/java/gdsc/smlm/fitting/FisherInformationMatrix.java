@@ -34,7 +34,6 @@ public class FisherInformationMatrix
 	private double[] crlb = null;
 	private byte inverted = UNKNOWN;
 	private double inversionTolerance = 0;
-	private boolean preserve = false;
 
 	/**
 	 * Instantiates a new fisher information matrix.
@@ -132,8 +131,7 @@ public class FisherInformationMatrix
 
 		// Matrix inversion
 		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(inversionTolerance);
-		DenseMatrix64F a = (preserve && solver.invertModifiesA()) ? m.copy() : m;
-		double[] crlb = solver.invertDiagonal(a);
+		double[] crlb = solver.invertDiagonal(m); // Does not modify the matrix
 		if (crlb != null)
 		{
 			// Check all diagonal values are zero or above
@@ -173,8 +171,6 @@ public class FisherInformationMatrix
 	 * inverted Fisher information matrix.
 	 * <p>
 	 * The information matrix is inverted and the square root of the central diagonal returned.
-	 * <p>
-	 * Warning: The matrix may be destroyed unless the preserve flag is set.
 	 * 
 	 * @return CRLB (or null if inversion failed)
 	 */
@@ -190,8 +186,6 @@ public class FisherInformationMatrix
 	 * The information matrix is inverted and the square root of the central diagonal returned. If the inversion fails
 	 * then the routine optionally returns the square root of the reciprocal of the diagonal element to find a (possibly
 	 * loose) lower bound.
-	 * <p>
-	 * Warning: The matrix may be destroyed unless the preserve flag is set, or the reciprocal flag is true.
 	 *
 	 * @param allowReciprocal
 	 *            the allow reciprocal flag
@@ -199,9 +193,6 @@ public class FisherInformationMatrix
 	 */
 	public double[] crlb(boolean allowReciprocal)
 	{
-		// We must preserve the matrix if we are computing the reciprocal upon failure
-		preserve |= allowReciprocal;
-		
 		invert();
 
 		if (inverted == YES)
@@ -239,8 +230,6 @@ public class FisherInformationMatrix
 	 * Fisher information matrix.
 	 * <p>
 	 * The information matrix is inverted and the square root of the central diagonal returned.
-	 * <p>
-	 * Warning: The matrix may be destroyed unless the preserve flag is set.
 	 * 
 	 * @return CRLB (or null if inversion failed)
 	 */
@@ -256,8 +245,6 @@ public class FisherInformationMatrix
 	 * The information matrix is inverted and the square root of the central diagonal returned. If the inversion fails
 	 * then the routine optionally returns the square root of the reciprocal of the diagonal element to find a (possibly
 	 * loose) lower bound.
-	 * <p>
-	 * Warning: The matrix may be destroyed unless the preserve flag is set, or the reciprocal flag is true.
 	 *
 	 * @param allowReciprocal
 	 *            the allow reciprocal flag
@@ -265,9 +252,6 @@ public class FisherInformationMatrix
 	 */
 	public double[] crlbSqrt(boolean allowReciprocal)
 	{
-		// We must preserve the matrix if we are computing the reciprocal upon failure
-		preserve |= allowReciprocal;
-		
 		invert();
 
 		if (inverted == YES)
@@ -421,26 +405,5 @@ public class FisherInformationMatrix
 	public DenseMatrix64F getMatrix()
 	{
 		return m;
-	}
-
-	/**
-	 * Checks if the matrix will be preserved following inversion.
-	 *
-	 * @return true, if is preserve
-	 */
-	public boolean isPreserve()
-	{
-		return preserve;
-	}
-
-	/**
-	 * Sets if the matrix will be preserved following inversion.
-	 *
-	 * @param preserve
-	 *            the new preserve
-	 */
-	public void setPreserve(boolean preserve)
-	{
-		this.preserve = preserve;
 	}
 }
