@@ -107,7 +107,7 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 	}
 
 	/**
-	 * Prepare Y for the gradient procedure, e.g. ensure positive values.
+	 * Prepare Y for the gradient procedure by ensuring positive values.
 	 *
 	 * @param y
 	 *            the y
@@ -147,7 +147,7 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 		// is testing the value
 		if (tc.checkValue)
 			ll = gradientProcedure.computeLogLikelihood();
-		
+
 		return ll;
 	}
 
@@ -173,7 +173,7 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 		// TODO - Extend the method to implement back-tracking (see Numerical Recipes)
 
 		// Always accept the step. The Smith, et al (2010) paper used 10 steps until
-		// converge, with no apparent checking of the log-likelihood value or parameters.
+		// convergence, with no apparent checking of the log-likelihood value or parameters.
 		// The Newton-Raphson method converges fast but does require a good initial
 		// estimate for the parameters.
 		return true;
@@ -230,6 +230,19 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create((Gradient1Function) f);
 		p.computeFisherInformation(null);
 		return new FisherInformationMatrix(p.getLinear(), gradientProcedure.n);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#getValue()
+	 */
+	@Override
+	public double getValue()
+	{
+		// Override this to return the log likelihood since the value may not 
+		// actually be computed during computeFitValue(double[])
+		return getLogLikelihood();
 	}
 
 	/*
