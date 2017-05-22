@@ -603,7 +603,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 		double[] y = new double[n];
 		for (int i = 0; i < y.length; i++)
 		{
-			y[i] = r.nextDouble();
+			y[i] = r.nextDouble() * 10;
 		}
 
 		return y;

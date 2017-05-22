@@ -6,7 +6,7 @@ import org.apache.commons.math3.random.Well19937c;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
-import gdsc.core.utils.PseudoRandomGenerator;
+import gdsc.core.utils.PseudoRandomSequence;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.Gradient2Procedure;
@@ -17,20 +17,25 @@ import gdsc.smlm.function.ValueProcedure;
 class FakeGradientFunction implements Gradient2Function, Gradient1Function, NonLinearFunction
 {
 	private final int maxx, n, nparams;
-	private final PseudoRandomGenerator r;
+	private final PseudoRandomSequence r;
 	private final double[] dy_da;
 
 	FakeGradientFunction(int maxx, int nparams)
 	{
-		this(maxx, nparams, 1000, 30051977);
+		this(maxx, nparams, 1000, 30051977, 10.0);
 	}
 
-	FakeGradientFunction(int maxx, int nparams, int randomSize, int randomSeed)
+	FakeGradientFunction(int maxx, int nparams, double scale)
+	{
+		this(maxx, nparams, 1000, 30051977, scale);
+	}
+
+	FakeGradientFunction(int maxx, int nparams, int randomSize, int randomSeed, double scale)
 	{
 		this.maxx = maxx;
 		this.n = maxx * maxx;
 		this.nparams = nparams;
-		this.r = new PseudoRandomGenerator(randomSize, new Well19937c(randomSeed));
+		this.r = new PseudoRandomSequence(randomSize, new Well19937c(randomSeed), scale);
 		this.dy_da = new double[nparams];
 	}
 
