@@ -29,7 +29,7 @@ import gdsc.smlm.function.Gradient1Function;
 public class LSQLVMGradientProcedure extends BaseLSQLVMGradientProcedure
 {
 	/**
-	 * Working space for the scaled Hessian curvature matrix (size n*n)
+	 * Working space for the scaled Hessian curvature matrix (size n * (n + 1) / 2)
 	 */
 	protected final double[] alpha;
 

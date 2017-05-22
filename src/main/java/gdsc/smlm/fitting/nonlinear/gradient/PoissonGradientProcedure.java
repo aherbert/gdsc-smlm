@@ -34,7 +34,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	public final int n;
 
 	/**
-	 * Working space for the Fisher information matrix (size n*n)
+	 * Working space for the Fisher information matrix (size n * (n + 1) / 2)
 	 */
 	protected double[] data;
 
@@ -59,11 +59,11 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 * E = expected value
 	 * </pre>
 	 * 
-	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
+	 * Note that this is only a true Fisher information matrix if the function returns the expected value for a
 	 * Poisson process. In this case the equation reduces to:
 	 * 
 	 * <pre>
-	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
+	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
 	 * </pre>
 	 * 
 	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
