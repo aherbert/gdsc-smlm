@@ -221,16 +221,19 @@ public class ResultsManager implements PlugIn, MouseListener
 		boolean showId = canShowId(results);
 
 		// Display the configured output
-		PeakResultsList output = new PeakResultsList();
+		PeakResultsList outputList = new PeakResultsList();
 
-		output.copySettings(results);
+		outputList.copySettings(results);
 		//String title = results.getSource();
 		//if (title == null || title.length() == 0)
 		//	output.setSource(TITLE);
 
-		addTableResults(results, output, showDeviations, showEndFrame);
-		addImageResults(output, results.getName(), bounds, results.getNmPerPixel(), results.getGain());
-		addFileResults(output, showDeviations, showEndFrame, showId);
+		addTableResults(results, outputList, showDeviations, showEndFrame);
+		addImageResults(outputList, results.getName(), bounds, results.getNmPerPixel(), results.getGain());
+		addFileResults(outputList, showDeviations, showEndFrame, showId);
+
+		// Reduce to single object for speed
+		PeakResults output = (outputList.numberOfOutputs() == 1) ? outputList.toArray()[0] : outputList;
 
 		output.begin();
 
