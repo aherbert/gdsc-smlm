@@ -41,6 +41,9 @@ import gdsc.smlm.utils.XmlUtils;
  */
 public class PeakResultsReader
 {
+	/** The columns to recognise in the ImageJ table results header */
+	private static String IMAGEJ_TABLE_RESULTS_HEADER = "origX\torigY\torigValue\tError\tNoise\tS";
+
 	/** The space patterm */
 	private static Pattern spacePattern = Pattern.compile(" ");
 	/** The tab patterm */
@@ -99,7 +102,7 @@ public class PeakResultsReader
 							break;
 						}
 						// User may try and load the text saved directly from the ImageJ Table Results
-						if (line.contains("origX\torigY\torigValue\tError\tNoise\tSignal\tSNR\tBackground"))
+						if (line.contains(IMAGEJ_TABLE_RESULTS_HEADER))
 						{
 							sb.append(line).append("\n");
 							break;
@@ -161,7 +164,7 @@ public class PeakResultsReader
 		{
 			format = FileFormat.NSTORM;
 		}
-		else if (header.contains("origX\torigY\torigValue\tError\tNoise\tSignal\tSNR\tBackground"))
+		else if (header.contains(IMAGEJ_TABLE_RESULTS_HEADER))
 		{
 			format = FileFormat.SMLM_TABLE;
 			// Header contains:
@@ -174,11 +177,10 @@ public class PeakResultsReader
 			// origValue
 			// Error
 			// Noise
-			// Signal
 			// SNR
 			// Background
 			// [+/-]
-			// Amplitude
+			// Signal
 			// [+/-]
 			// Angle
 			// [+/-]
