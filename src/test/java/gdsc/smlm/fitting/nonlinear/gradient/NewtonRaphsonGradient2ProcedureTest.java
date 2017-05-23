@@ -102,7 +102,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 			double s = p.computeLogLikelihood(paramsList.get(i));
 			double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
 			// Virtually the same ...
-			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, 1e-10);
+			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, Math.abs(s) * 1e-5);
 		}
 	}
 
@@ -458,8 +458,8 @@ public class NewtonRaphsonGradient2ProcedureTest
 
 		createData(1, iter, paramsList, yList, true);
 
-		double delta = 1e-3;
-		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
+		double delta = 1e-5;
+		DoubleEquality eq = new DoubleEquality(1e-4, 1e-3);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -474,7 +474,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 			for (int j = 0; j < nparams; j++)
 			{
 				int k = indices[j];
-				double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
+				double d = Precision.representableDelta(a[k], (a[k] == 0) ? delta : a[k] * delta);
 				a2[k] = a[k] + d;
 				double llh = p.computeLogLikelihood(a2);
 				p.computeFirstDerivative(a2);
