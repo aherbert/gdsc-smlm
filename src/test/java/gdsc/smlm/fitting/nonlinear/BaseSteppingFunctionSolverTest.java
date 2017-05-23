@@ -37,7 +37,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 	static final SteppingFunctionSolverClamp DYNAMIC_CLAMP = SteppingFunctionSolverClamp.DYNAMIC_CLAMP;
 	static final SteppingFunctionSolverType MLELVM = SteppingFunctionSolverType.MLELVM;
 	static final SteppingFunctionSolverType LSELVM = SteppingFunctionSolverType.LSELVM;
-	static final SteppingFunctionSolverType WlSELVM = SteppingFunctionSolverType.WLSELVM;
+	static final SteppingFunctionSolverType WLSELVM = SteppingFunctionSolverType.WLSELVM;
 	static final SteppingFunctionSolverType MLENR = SteppingFunctionSolverType.MLENR;
 	static final boolean BOUNDED = true;
 	static final boolean NO_BOUND = false;
@@ -66,12 +66,16 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 				break;
 			case MLELVM:
 				solver = new MLELVMSteppingFunctionSolver(f, tc, bounds);
+				// MLE requires a positive function value so use a lower bound
+				solver.setBounds(new double[7], null);
 				break;
 			case WLSELVM:
 				solver = new WLSELVMSteppingFunctionSolver(f, tc, bounds);
 				break;
 			case MLENR:
 				solver = new NewtonRaphsonSteppingFunctionSolver(f, tc, bounds);
+				// MLE requires a positive function value so use a lower bound
+				solver.setBounds(new double[7], null);
 				break;
 			default:
 				throw new NotImplementedException();
