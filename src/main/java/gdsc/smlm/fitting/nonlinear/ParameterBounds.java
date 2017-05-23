@@ -405,4 +405,14 @@ public class ParameterBounds
 		this.f = f;
 		gradientIndices = f.gradientIndices();
 	}
+
+	/**
+	 * Gets the gradient function.
+	 *
+	 * @return the gradient function
+	 */
+	public GradientFunction getGradientFunction()
+	{
+		return f;
+	}
 }

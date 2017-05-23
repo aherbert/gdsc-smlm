@@ -78,6 +78,8 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 *            the bounds
 	 * @throws NullPointerException
 	 *             if the function or tolerance checker is null
+	 * @throws IllegalArgumentException
+	 *             if the bounds are not constructed with the same gradient function
 	 */
 	public SteppingFunctionSolver(FunctionSolverType type, Gradient1Function f, ToleranceChecker tc,
 			ParameterBounds bounds)
@@ -88,6 +90,8 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		this.tc = tc;
 		if (bounds == null)
 			bounds = new ParameterBounds(f);
+		else if (bounds.getGradientFunction() != f)
+			throw new IllegalArgumentException("Bounds must be constructed with the same gradient function");
 		this.bounds = bounds;
 	}
 
@@ -117,6 +121,8 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 		// Initialise for fitting
 		bounds.initialise();
+		tc.reset();
+		//String name = this.getClass().getSimpleName();
 
 		try
 		{
@@ -124,21 +130,25 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 			// First evaluation
 			double currentValue = computeFitValue(a);
+			//System.out.printf("%s Value [%d] = %f : %s\n", name, tc.getIterations(), currentValue, Arrays.toString(a));
 
 			int status = 0;
 			while (true)
 			{
 				// Compute next step
 				computeStep(step);
+				//System.out.printf("%s Step [%d] = %s\n", name, tc.getIterations(), Arrays.toString(step));
 
 				// Apply bounds to the step
 				bounds.applyBounds(a, step, newA);
 
 				// Evaluate
 				double newValue = computeFitValue(newA);
+				//System.out.printf("%s Value [%d] = %f : %s\n", name, tc.getIterations(), newValue, Arrays.toString(newA));
 
 				// Check stopping criteria
 				status = tc.converged(currentValue, a, newValue, newA);
+				//System.out.printf("%s Status [%d] = %d\n", name, tc.getIterations(), status);
 				if (status != 0)
 				{
 					value = newValue;
@@ -149,14 +159,18 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 				// Check if the step was an improvement
 				if (accept(currentValue, a, newValue, newA))
 				{
+					//System.out.printf("%s Accepted [%d]\n", name, tc.getIterations());
 					currentValue = newValue;
 					System.arraycopy(newA, 0, a, 0, a.length);
 					bounds.accepted(a, newA);
 				}
 			}
 
+			//System.out.printf("%s End [%d] = %d\n", name, tc.getIterations(), status);
+
 			if (BitFlags.anySet(status, ToleranceChecker.STATUS_CONVERGED))
 			{
+				//System.out.printf("%s Converged [%d]\n", name, tc.getIterations());
 				if (a_dev != null)
 					computeDeviations(a_dev);
 				if (y_fit != null)
@@ -176,6 +190,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 			// XXX - debugging
 			System.out.printf("%s failed: %s\n", getClass().getSimpleName(), e.fitStatus.getName());
 			return e.fitStatus;
+		}
+		finally
+		{
+			iterations = evaluations = tc.getIterations();
 		}
 	}
 

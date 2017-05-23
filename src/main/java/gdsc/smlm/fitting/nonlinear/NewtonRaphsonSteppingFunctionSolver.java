@@ -47,8 +47,6 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 	/**
 	 * Create a new stepping function solver.
 	 *
-	 * @param type
-	 *            the type
 	 * @param f
 	 *            the function
 	 * @param maxRelativeError
@@ -58,10 +56,9 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 	 * @throws NullPointerException
 	 *             if the function is null
 	 */
-	public NewtonRaphsonSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f, double maxRelativeError,
-			double maxAbsoluteError)
+	public NewtonRaphsonSteppingFunctionSolver(Gradient2Function f, double maxRelativeError, double maxAbsoluteError)
 	{
-		super(FunctionSolverType.MLE, f);
+		this(f, new ToleranceChecker(maxRelativeError, maxAbsoluteError), null);
 	}
 
 	/**
@@ -233,7 +230,7 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 		p.computeFisherInformation(null);
 		return new FisherInformationMatrix(p.getLinear(), gradientProcedure.n);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

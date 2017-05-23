@@ -285,4 +285,12 @@ public class ToleranceChecker
 	{
 		this.minimiseValue = minimiseValue;
 	}
+
+	/**
+	 * Reset the iterations allowing the checker to be reused.
+	 */
+	public void reset()
+	{
+		iterations = 0;
+	}
 }

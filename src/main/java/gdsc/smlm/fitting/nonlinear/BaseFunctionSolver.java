@@ -51,7 +51,9 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 */
 	public BaseFunctionSolver(FunctionSolverType type, GradientFunction f)
 	{
-		setGradientFunction(f);
+		if (f == null)
+			throw new NullPointerException("Function must not be null");
+		this.f = f;
 		this.type = type;
 	}
 

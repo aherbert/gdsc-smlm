@@ -4,15 +4,18 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 /**
- * Test that a bounded fitter can return the same results with and without bounds.
+ * Test that an LVM stepping solver can return the same results with and without bounds.
  */
-public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
+public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 {
+	// This test is a copy of the BoundedFunctionSolverTest for the LVMSteppingFunctionSolver.
+	// The class allows comparison between the old and new FunctionSolver implementations.
+	// The tests in this class can be skipped since they are a subset of the tests performed
+	// in the SteppingFunctionSolverTest.
+	boolean runTests = false;
+	
 	// The following tests ensure that the LVM can fit data without 
 	// requiring a bias (i.e. an offset to the background).
 	// In a previous version the LVM fitter was stable only if a bias existed.
@@ -59,10 +62,12 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 
 	private void fitSingleGaussianLVMWithoutBias(boolean applyBounds, int clamping)
 	{
+		org.junit.Assume.assumeTrue(runTests);
+		
 		double bias = 100;
 
-		NonLinearFit solver = getLVM((applyBounds) ? 2 : 1, clamping, false);
-		NonLinearFit solver2 = getLVM((applyBounds) ? 2 : 1, clamping, false);
+		SteppingFunctionSolver solver = getSolver(clamping, LSELVM);
+		SteppingFunctionSolver solver2 = getSolver(clamping, LSELVM);
 
 		String name = getLVMName(applyBounds, clamping, false);
 
@@ -190,7 +195,8 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 
 	private void fitSingleGaussianLVM(int bounded, int clamping, boolean mle)
 	{
-		canFitSingleGaussian(getLVM(bounded, clamping, mle), bounded == 2);
+		org.junit.Assume.assumeTrue(runTests);
+		canFitSingleGaussian(getSolver(clamping, (mle) ? MLELVM : LSELVM), bounded == 2);
 	}
 
 	// Is Bounded/Clamped LVM better?
@@ -306,31 +312,12 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 	private void fitSingleGaussianBetterLVM(boolean bounded2, int clamping2, boolean mle2, boolean bounded,
 			int clamping, boolean mle)
 	{
-		NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
-		NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
+		org.junit.Assume.assumeTrue(runTests);
+		
+		SteppingFunctionSolver solver = getSolver(clamping, (mle) ? MLELVM : LSELVM);
+		SteppingFunctionSolver solver2 = getSolver(clamping2, (mle2) ? MLELVM : LSELVM);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getLVMName(bounded, clamping, mle),
 				getLVMName(bounded2, clamping2, mle2));
-	}
-
-	private NonLinearFit getLVM(int bounded, int clamping, boolean mle)
-	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_CIRCLE,
-				null);
-		StoppingCriteria sc = new ErrorStoppingCriteria(5);
-		sc.setMaximumIterations(100);
-		NonLinearFit solver = (bounded != 0 || clamping != 0) ? new BoundedNonLinearFit(f, sc, null)
-				: new NonLinearFit(f, sc);
-		if (clamping != 0)
-		{
-			BoundedNonLinearFit bsolver = (BoundedNonLinearFit) solver;
-			ParameterBounds bounds = new ParameterBounds(f);
-			bounds.setClampValues(defaultClampValues);
-			bounds.setDynamicClamp(clamping == 2);
-			bsolver.setBounds(bounds);
-		}
-		solver.setMLE(mle);
-		solver.setInitialLambda(1);
-		return solver;
 	}
 
 	private String getLVMName(boolean bounded, int clamping, boolean mle)
