@@ -48,7 +48,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	protected int[] gradientIndices;
 	protected final ToleranceChecker tc;
-	protected ParameterBounds bounds;
+	protected final ParameterBounds bounds;
 
 	/**
 	 * Create a new stepping function solver
@@ -86,6 +86,8 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		if (tc == null)
 			throw new NullPointerException("Null tolerance checker");
 		this.tc = tc;
+		if (bounds == null)
+			bounds = new ParameterBounds(f);
 		this.bounds = bounds;
 	}
 
@@ -114,8 +116,6 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		final double[] newA = a.clone();
 
 		// Initialise for fitting
-		if (bounds == null)
-			bounds = new ParameterBounds(f);
 		bounds.initialise();
 
 		try
@@ -332,12 +332,6 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 */
 	public void setBounds(double[] lower, double[] upper)
 	{
-		if (bounds == null)
-		{
-			if (lower == null && upper == null)
-				return;
-			bounds = new ParameterBounds(f);
-		}
 		bounds.setBounds(lower, upper);
 	}
 
@@ -356,7 +350,6 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	public void setGradientFunction(GradientFunction f)
 	{
 		super.setGradientFunction(f);
-		if (bounds != null)
-			bounds.setGradientFunction(f);
+		bounds.setGradientFunction(f);
 	}
 }

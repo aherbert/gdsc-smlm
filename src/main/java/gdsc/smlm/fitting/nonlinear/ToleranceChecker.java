@@ -27,7 +27,7 @@ public class ToleranceChecker
 	public static final double IGNORE_TOLERANCE = -1.0;
 	/** The constant to use for a max iterations that is ignored */
 	public static final int IGNORE_MAX_ITERATIONS = 0;
-	
+
 	/** Flag to indicate the max iterations have been reached. This is a failure to converge. */
 	public static final int STATUS_MAX_ITERATIONS = 0x00000001;
 	/** Flag to indicate convergence on the value. */
@@ -62,7 +62,7 @@ public class ToleranceChecker
 	 * improvement in the value with the direction being either minimal or maximal, i.e. if the value becomes worse but
 	 * the change is within the tolerance then convergence will not be signalled.
 	 */
-	public final boolean minimiseValue;
+	private boolean minimiseValue;
 	/**
 	 * The maximum number of allowed iterations.
 	 * Set above zero to limit the iterations. Set below zero to define a specific number of iterations until
@@ -91,6 +91,36 @@ public class ToleranceChecker
 	public ToleranceChecker(double relativeParameters, double absoluteParameters)
 	{
 		this(false, IGNORE_TOLERANCE, IGNORE_TOLERANCE, relativeParameters, absoluteParameters, IGNORE_MAX_ITERATIONS);
+	}
+
+	/**
+	 * Build an instance with specified thresholds.
+	 * <p>
+	 * In order to perform only relative checks, the absolute tolerance must be set to a negative value. In order to
+	 * perform only absolute checks, the relative tolerance must be set to a negative value.
+	 * <p>
+	 * Note: If a tolerance is set to zero then an exact match will achieve equality. Only negative values disable the
+	 * tolerance.
+	 *
+	 * @param relativeValue
+	 *            relative tolerance threshold on the value. Set to negative to disable.
+	 * @param absoluteValue
+	 *            absolute tolerance threshold on the value. Set to negative to disable.
+	 * @param relativeParameters
+	 *            relative tolerance threshold on the parameters. Set to negative to disable.
+	 * @param absoluteParameters
+	 *            absolute tolerance threshold on the parameters. Set to negative to disable.
+	 * @param maxIterations
+	 *            The maximum number of allowed iterations.
+	 *            Set above zero to limit the iterations. Set below zero to define a specific number of iterations until
+	 *            convergence is signalled. Set to zero to disable.
+	 * @throws IllegalArgumentException
+	 *             if none of the convergence criteria are valid (i.e. convergence is not possible)
+	 */
+	public ToleranceChecker(double relativeValue, double absoluteValue, double relativeParameters,
+			double absoluteParameters, int maxIterations)
+	{
+		this(true, relativeValue, absoluteValue, relativeParameters, absoluteParameters, maxIterations);
 	}
 
 	/**
@@ -231,5 +261,28 @@ public class ToleranceChecker
 	public int getIterations()
 	{
 		return iterations;
+	}
+
+	/**
+	 * Checks if the value must be minimised.
+	 *
+	 * @return true, if the value must be minimised
+	 */
+	public boolean isMinimiseValue()
+	{
+		return minimiseValue;
+	}
+
+	/**
+	 * Sets the flag indicating that the value must be minimised. Convergence is only signalled on the value with a
+	 * marginal improvement in the value with the direction being either minimal or maximal, i.e. if the value becomes
+	 * worse but the change is within the tolerance then convergence will not be signalled.
+	 *
+	 * @param minimiseValue
+	 *            true, if the value must be minimised
+	 */
+	public void setMinimiseValue(boolean minimiseValue)
+	{
+		this.minimiseValue = minimiseValue;
 	}
 }

@@ -133,6 +133,9 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 		// Ensure the gradient procedure is created
 		y = prepareY(y);
 		gradientProcedure = createGradientProcedure(y);
+		
+		// Ensure minimisation
+		tc.setMinimiseValue(true);
 
 		// Set up the current best Hessian matrix and gradient parameter
 		lambda = initialLambda;

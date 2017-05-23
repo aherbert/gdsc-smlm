@@ -103,6 +103,8 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 		// Ensure the gradient procedure is created
 		y = prepareY(y);
 		gradientProcedure = createGradientProcedure(y);
+		// Ensure maximisation
+		tc.setMinimiseValue(false);
 		return y;
 	}
 
