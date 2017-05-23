@@ -51,7 +51,7 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 
 	/**
 	 * The value of the function. This is updated by calls to {@link #computeValue(double[])},
-	 * {@link #computeFirstDerivative(double[])}, {@link #computeUpdate(double[])}
+	 * {@link #computeFirstDerivative(double[])}, {@link #computeSecondDerivative(double[])}
 	 */
 	public final double[] u;
 
@@ -72,36 +72,17 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 	}
 
 	/**
-	 * Calculates the Newton-Raphson update vector for a Poisson process as the first derivative divided by the second
-	 * derivative.
+	 * Calculates the first and second derivative of the Poisson log likelihood with respect to each parameter.
 	 *
 	 * @param a
 	 *            Set of coefficients for the function
 	 */
-	public void computeUpdate(final double[] a)
+	public void computeSecondDerivative(final double[] a)
 	{
 		k = 0;
 		reset2();
 		func.initialise2(a);
 		func.forEach((Gradient2Procedure) this);
-	}
-
-	/**
-	 * Calculates the Newton-Raphson update vector for a Poisson process as the first derivative divided by the second
-	 * derivative. The update is written to the provided storage.
-	 *
-	 * @param a
-	 *            Set of coefficients for the function
-	 * @param update
-	 *            the update
-	 * @return the update vector of the function's parameters
-	 */
-	public double[] computeUpdate(final double[] a, double[] update)
-	{
-		computeUpdate(a);
-		if (update == null || update.length < n)
-			update = new double[n];
-		return getUpdate(update);
 	}
 
 	/**
@@ -132,36 +113,6 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 			d1[i] += duk_dt[i] * xk_uk_minus1;
 			d2[i] += d2uk_dt2[i] * xk_uk_minus1 - duk_dt[i] * duk_dt[i] * xk_uk2;
 		}
-	}
-
-	/**
-	 * Gets the update vector of the function's parameters (size n).
-	 *
-	 * @return the update vector
-	 */
-	public double[] getUpdate()
-	{
-		double[] update = new double[n];
-		return getUpdate(update);
-	}
-
-	/**
-	 * Gets the update vector of the function's parameters (size n). The update is written to the provided storage.
-	 *
-	 * @param update
-	 *            the update
-	 * @return the update vector
-	 */
-	public double[] getUpdate(double[] update)
-	{
-		// Smith et al, (2010), SI Eq. 13 has:
-		// parameter -> new parameter + delta
-		// => new parameter = parameter - delta  
-		// Numerical recipes in C++, 2nd Ed, p.366, Eq 9.4.2 has delta as a negative.
-		// Using the negative works.
-		for (int i = 0; i < n; i++)
-			update[i] = -d1[i] / d2[i];
-		return update;
 	}
 
 	/**

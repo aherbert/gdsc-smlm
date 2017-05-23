@@ -70,18 +70,6 @@ public class FastMLEGradient2Procedure5 extends FastMLEGradient2Procedure
 		d2[4] += d2uk_dt2[4] * xk_uk_minus1 - duk_dt[4] * duk_dt[4] * xk_uk2;
 	}
 
-	@Override
-	public double[] getUpdate()
-	{
-		double[] update = new double[n];
-		update[0] = -d1[0] / d2[0];
-		update[1] = -d1[1] / d2[1];
-		update[2] = -d1[2] / d2[2];
-		update[3] = -d1[3] / d2[3];
-		update[4] = -d1[4] / d2[4];
-		return update;
-	}
-
 	/**
 	 * Reset the first derivative vector
 	 */

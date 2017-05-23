@@ -170,16 +170,19 @@ public class FastMLEGradient2ProcedureTest
 
 			// Compute peak 1+2
 			FastMLEGradient2Procedure p12 = FastMLEGradient2ProcedureFactory.create(x, f2);
-			p12.computeUpdate(a2);
-			double[] up1 = Arrays.copyOf(p12.getUpdate(), f1.getNumberOfGradients());
+			p12.computeSecondDerivative(a2);
+			double[] d11 = Arrays.copyOf(p12.d1, f1.getNumberOfGradients());
+			double[] d21 = Arrays.copyOf(p12.d2, f1.getNumberOfGradients());
 
 			// Compute peak 1+(precomputed 2)
 			FastMLEGradient2Procedure p1b2 = FastMLEGradient2ProcedureFactory.create(x, b, f1);
-			p1b2.computeUpdate(a1);
-			double[] up2 = p1b2.getUpdate();
+			p1b2.computeSecondDerivative(a1);
+			double[] d12 = p1b2.d1;
+			double[] d22 = p1b2.d2;
 
 			Assert.assertArrayEquals(" Result: Not same @ " + i, p12.u, p1b2.u, 1e-10);
-			Assert.assertArrayEquals(" Update: Not same @ " + i, up1, up2, 1e-10);
+			Assert.assertArrayEquals(" D1: Not same @ " + i, d11, d12, 1e-10);
+			Assert.assertArrayEquals(" D2: Not same @ " + i, d21, d22, 1e-10);
 
 			double[] v1 = p12.computeValue(a2);
 			double[] v2 = p1b2.computeValue(a1);
@@ -342,12 +345,11 @@ public class FastMLEGradient2ProcedureTest
 
 			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 			p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
-			p1.computeUpdate(a);
-			p2.computeUpdate(a);
+			p1.computeSecondDerivative(a);
+			p2.computeSecondDerivative(a);
 			Assert.assertArrayEquals(name + " update value: Not same @ " + i, p1.u, p2.u, 0);
 			Assert.assertArrayEquals(name + " update: Not same d1 @ " + i, p1.d1, p2.d1, 0);
 			Assert.assertArrayEquals(name + " update: Not same d2 @ " + i, p1.d2, p2.d2, 0);
-			Assert.assertArrayEquals(name + " update: Not same update @ " + i, p1.getUpdate(), p2.getUpdate(), 0);
 		}
 	}
 
@@ -377,16 +379,17 @@ public class FastMLEGradient2ProcedureTest
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			FastMLEGradient2Procedure p1 = new FastMLEGradient2Procedure(yList.get(i), func);
-			p1.computeUpdate(paramsList.get(i));
-			p1.computeUpdate(paramsList.get(i));
+			p1.computeSecondDerivative(paramsList.get(i));
+			p1.computeSecondDerivative(paramsList.get(i));
 
 			FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i),
 					func);
-			p2.computeUpdate(paramsList.get(i));
-			p2.computeUpdate(paramsList.get(i));
+			p2.computeSecondDerivative(paramsList.get(i));
+			p2.computeSecondDerivative(paramsList.get(i));
 
 			// Check they are the same
-			Assert.assertArrayEquals("Update " + i, p1.getUpdate(), p2.getUpdate(), 0);
+			Assert.assertArrayEquals("D1 " + i, p1.d1, p2.d1, 0);
+			Assert.assertArrayEquals("D2 " + i, p1.d2, p2.d2, 0);
 		}
 
 		// Realistic loops for an optimisation
@@ -402,7 +405,7 @@ public class FastMLEGradient2ProcedureTest
 				{
 					FastMLEGradient2Procedure p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
-						p1.computeUpdate(paramsList.get(k++ % iter));
+						p1.computeSecondDerivative(paramsList.get(k++ % iter));
 				}
 			}
 		};
@@ -418,7 +421,7 @@ public class FastMLEGradient2ProcedureTest
 					FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory
 							.createUnrolled(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
-						p2.computeUpdate(paramsList.get(k++ % iter));
+						p2.computeSecondDerivative(paramsList.get(k++ % iter));
 				}
 			}
 		};
@@ -468,7 +471,7 @@ public class FastMLEGradient2ProcedureTest
 			double[] a2 = a.clone();
 			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.create(y, func);
 			//double ll = p.computeLogLikelihood(a);
-			p.computeUpdate(a);
+			p.computeSecondDerivative(a);
 			double[] d1 = p.d1.clone();
 			double[] d2 = p.d2.clone();
 			for (int j = 0; j < nparams; j++)
