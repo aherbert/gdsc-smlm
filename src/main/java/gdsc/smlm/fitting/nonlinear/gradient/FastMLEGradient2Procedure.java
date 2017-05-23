@@ -27,7 +27,7 @@ import gdsc.smlm.function.ValueProcedure;
  * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
  * Nature Methods 7, 373-375 (supplementary note), Eq. 12.
  */
-public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient1Procedure, Gradient2Procedure
+public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Procedure, Gradient2Procedure
 {
 	protected final double[] x;
 	protected final Gradient2Function func;
@@ -61,7 +61,7 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	 * @param func
 	 *            Gradient function (must produce a strictly positive value, i.e. the mean of a Poisson process)
 	 */
-	public NewtonRaphsonGradient2Procedure(final double[] x, final Gradient2Function func)
+	public FastMLEGradient2Procedure(final double[] x, final Gradient2Function func)
 	{
 		this.x = x;
 		this.u = new double[x.length];

@@ -16,9 +16,9 @@ import gdsc.smlm.function.Gradient2Function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Create a Newton-Raphson gradient procedure
+ * Create a Fast MLE gradient procedure
  */
-public class NewtonRaphsonGradient2ProcedureFactory
+public class FastMLEGradient2ProcedureFactory
 {
 	/**
 	 * Create a new gradient procedure.
@@ -29,9 +29,9 @@ public class NewtonRaphsonGradient2ProcedureFactory
 	 *            Gradient function
 	 * @return the gradient procedure
 	 */
-	public static NewtonRaphsonGradient2Procedure create(final double[] x, final Gradient2Function func)
+	public static FastMLEGradient2Procedure create(final double[] x, final Gradient2Function func)
 	{
-		return new NewtonRaphsonGradient2Procedure(x, func);
+		return new FastMLEGradient2Procedure(x, func);
 		// Note:
 		// JUnit speed tests show the unrolled version are slower, i.e. the JVM is able to 
 		// efficiently optimise the single for loops in the procedure. So just return the 
@@ -50,7 +50,7 @@ public class NewtonRaphsonGradient2ProcedureFactory
 	 *            Gradient function
 	 * @return the gradient procedure
 	 */
-	public static NewtonRaphsonGradient2Procedure create(final double[] x, final double[] b,
+	public static FastMLEGradient2Procedure create(final double[] x, final double[] b,
 			final Gradient2Function func)
 	{
 		return create(x, GradientProcedureHelper.wrapGradient2Function(func, b));
@@ -63,18 +63,18 @@ public class NewtonRaphsonGradient2ProcedureFactory
 	 *            Gradient function
 	 * @return the gradient procedure
 	 */
-	static NewtonRaphsonGradient2Procedure createUnrolled(final double[] x, final Gradient2Function func)
+	static FastMLEGradient2Procedure createUnrolled(final double[] x, final Gradient2Function func)
 	{
 		switch (func.getNumberOfGradients())
 		{
 			case 5:
-				return new NewtonRaphsonGradient2Procedure5(x, func);
+				return new FastMLEGradient2Procedure5(x, func);
 			case 4:
-				return new NewtonRaphsonGradient2Procedure4(x, func);
+				return new FastMLEGradient2Procedure4(x, func);
 			case 6:
-				return new NewtonRaphsonGradient2Procedure6(x, func);
+				return new FastMLEGradient2Procedure6(x, func);
 			default:
-				return new NewtonRaphsonGradient2Procedure(x, func);
+				return new FastMLEGradient2Procedure(x, func);
 		}
 	}
 }

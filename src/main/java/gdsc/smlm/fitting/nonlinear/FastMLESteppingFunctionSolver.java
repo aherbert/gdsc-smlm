@@ -4,15 +4,14 @@ import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.MLEFunctionSolver;
-import gdsc.smlm.fitting.nonlinear.gradient.NewtonRaphsonGradient2Procedure;
-import gdsc.smlm.fitting.nonlinear.gradient.NewtonRaphsonGradient2ProcedureFactory;
+import gdsc.smlm.fitting.nonlinear.gradient.FastMLEGradient2Procedure;
+import gdsc.smlm.fitting.nonlinear.gradient.FastMLEGradient2ProcedureFactory;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2Function;
 
-// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -27,14 +26,14 @@ import gdsc.smlm.function.Gradient2Function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Uses the Newton-Raphson method to fit a gradient function with coefficients (a).
+ * Uses the Fast MLE method to fit a gradient function with coefficients (a).
  * <p>
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second partial derivatives.
  * <p>
  * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
  * Nature Methods 7, 373-375 (supplementary note), Eq. 12.
  */
-public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver implements MLEFunctionSolver
+public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implements MLEFunctionSolver
 {
 	/** The log-likelihood. */
 	protected double ll = Double.NaN;
@@ -42,7 +41,7 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 	protected double llr = Double.NaN;
 
 	/** The gradient procedure. */
-	protected NewtonRaphsonGradient2Procedure gradientProcedure;
+	protected FastMLEGradient2Procedure gradientProcedure;
 
 	/**
 	 * Create a new stepping function solver.
@@ -56,7 +55,7 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 	 * @throws NullPointerException
 	 *             if the function is null
 	 */
-	public NewtonRaphsonSteppingFunctionSolver(Gradient2Function f, double maxRelativeError, double maxAbsoluteError)
+	public FastMLESteppingFunctionSolver(Gradient2Function f, double maxRelativeError, double maxAbsoluteError)
 	{
 		this(f, new ToleranceChecker(maxRelativeError, maxAbsoluteError), null);
 	}
@@ -73,7 +72,7 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 	 * @throws NullPointerException
 	 *             if the function or tolerance checker is null
 	 */
-	public NewtonRaphsonSteppingFunctionSolver(Gradient2Function f, ToleranceChecker tc, ParameterBounds bounds)
+	public FastMLESteppingFunctionSolver(Gradient2Function f, ToleranceChecker tc, ParameterBounds bounds)
 	{
 		super(FunctionSolverType.MLE, f, tc, bounds);
 	}
@@ -124,9 +123,9 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 	 *            the y
 	 * @return the newton raphson gradient 2 procedure
 	 */
-	protected NewtonRaphsonGradient2Procedure createGradientProcedure(double[] y)
+	protected FastMLEGradient2Procedure createGradientProcedure(double[] y)
 	{
-		return NewtonRaphsonGradient2ProcedureFactory.create(y, (Gradient2Function) f);
+		return FastMLEGradient2ProcedureFactory.create(y, (Gradient2Function) f);
 	}
 
 	/*
@@ -169,7 +168,8 @@ public class NewtonRaphsonSteppingFunctionSolver extends SteppingFunctionSolver 
 	@Override
 	protected boolean accept(double currentValue, double[] a, double newValue, double[] newA)
 	{
-		// TODO - Extend the method to implement back-tracking (see Numerical Recipes)
+		// TODO - Extend the method to implement a combination of Newton-Raphson and Bisection 
+		// (see Numerical Recipes in C++, 2nd Ed, page 370, function rtsafe)
 
 		// Always accept the step. The Smith, et al (2010) paper used 10 steps until
 		// convergence, with no apparent checking of the log-likelihood value or parameters.

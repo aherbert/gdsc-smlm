@@ -25,7 +25,7 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
  * for use in the LVM algorithm.
  */
-public class NewtonRaphsonGradient2ProcedureTest
+public class FastMLEGradient2ProcedureTest
 {
 	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
@@ -47,14 +47,14 @@ public class NewtonRaphsonGradient2ProcedureTest
 	{
 		double[] y = new double[0];
 		Assert.assertEquals(
-				NewtonRaphsonGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(4)).getClass(),
-				NewtonRaphsonGradient2Procedure4.class);
+				FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(4)).getClass(),
+				FastMLEGradient2Procedure4.class);
 		Assert.assertEquals(
-				NewtonRaphsonGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(5)).getClass(),
-				NewtonRaphsonGradient2Procedure5.class);
+				FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(5)).getClass(),
+				FastMLEGradient2Procedure5.class);
 		Assert.assertEquals(
-				NewtonRaphsonGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(6)).getClass(),
-				NewtonRaphsonGradient2Procedure6.class);
+				FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(6)).getClass(),
+				FastMLEGradient2Procedure6.class);
 	}
 
 	@Test
@@ -97,7 +97,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i),
+			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i),
 					func);
 			double s = p.computeLogLikelihood(paramsList.get(i));
 			double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
@@ -169,12 +169,12 @@ public class NewtonRaphsonGradient2ProcedureTest
 				a1[j] = a2[j];
 
 			// Compute peak 1+2
-			NewtonRaphsonGradient2Procedure p12 = NewtonRaphsonGradient2ProcedureFactory.create(x, f2);
+			FastMLEGradient2Procedure p12 = FastMLEGradient2ProcedureFactory.create(x, f2);
 			p12.computeUpdate(a2);
 			double[] up1 = Arrays.copyOf(p12.getUpdate(), f1.getNumberOfGradients());
 
 			// Compute peak 1+(precomputed 2)
-			NewtonRaphsonGradient2Procedure p1b2 = NewtonRaphsonGradient2ProcedureFactory.create(x, b, f1);
+			FastMLEGradient2Procedure p1b2 = FastMLEGradient2ProcedureFactory.create(x, b, f1);
 			p1b2.computeUpdate(a1);
 			double[] up2 = p1b2.getUpdate();
 
@@ -252,7 +252,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i),
+			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i),
 					func);
 			p.computeLogLikelihood(paramsList.get(i));
 		}
@@ -284,7 +284,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory
+					FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory
 							.createUnrolled(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p.computeLogLikelihood(paramsList.get(k++ % iter));
@@ -321,27 +321,27 @@ public class NewtonRaphsonGradient2ProcedureTest
 		createFakeData(nparams, iter, paramsList, yList);
 		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-		NewtonRaphsonGradient2Procedure p1, p2;
+		FastMLEGradient2Procedure p1, p2;
 		String name = String.format("[%d]", nparams);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			p1 = new NewtonRaphsonGradient2Procedure(yList.get(i), func);
-			p2 = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
+			p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			double[] a = paramsList.get(i);
 
 			double ll1 = p1.computeLogLikelihood(a);
 			double ll2 = p2.computeLogLikelihood(a);
 			Assert.assertEquals(name + " LL: Not same @ " + i, ll1, ll2, 0);
 
-			p1 = new NewtonRaphsonGradient2Procedure(yList.get(i), func);
-			p2 = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
+			p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p1.computeFirstDerivative(a);
 			p2.computeFirstDerivative(a);
 			Assert.assertArrayEquals(name + " first derivative value: Not same @ " + i, p1.u, p2.u, 0);
 			Assert.assertArrayEquals(name + " first derivative: Not same @ " + i, p1.d1, p2.d1, 0);
 
-			p1 = new NewtonRaphsonGradient2Procedure(yList.get(i), func);
-			p2 = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
+			p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p1.computeUpdate(a);
 			p2.computeUpdate(a);
 			Assert.assertArrayEquals(name + " update value: Not same @ " + i, p1.u, p2.u, 0);
@@ -376,11 +376,11 @@ public class NewtonRaphsonGradient2ProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			NewtonRaphsonGradient2Procedure p1 = new NewtonRaphsonGradient2Procedure(yList.get(i), func);
+			FastMLEGradient2Procedure p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 			p1.computeUpdate(paramsList.get(i));
 			p1.computeUpdate(paramsList.get(i));
 
-			NewtonRaphsonGradient2Procedure p2 = NewtonRaphsonGradient2ProcedureFactory.createUnrolled(yList.get(i),
+			FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i),
 					func);
 			p2.computeUpdate(paramsList.get(i));
 			p2.computeUpdate(paramsList.get(i));
@@ -400,7 +400,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					NewtonRaphsonGradient2Procedure p1 = new NewtonRaphsonGradient2Procedure(yList.get(i), func);
+					FastMLEGradient2Procedure p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p1.computeUpdate(paramsList.get(k++ % iter));
 				}
@@ -415,7 +415,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					NewtonRaphsonGradient2Procedure p2 = NewtonRaphsonGradient2ProcedureFactory
+					FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory
 							.createUnrolled(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p2.computeUpdate(paramsList.get(k++ % iter));
@@ -466,7 +466,7 @@ public class NewtonRaphsonGradient2ProcedureTest
 			double[] y = yList.get(i);
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
-			NewtonRaphsonGradient2Procedure p = NewtonRaphsonGradient2ProcedureFactory.create(y, func);
+			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.create(y, func);
 			//double ll = p.computeLogLikelihood(a);
 			p.computeUpdate(a);
 			double[] d1 = p.d1.clone();
