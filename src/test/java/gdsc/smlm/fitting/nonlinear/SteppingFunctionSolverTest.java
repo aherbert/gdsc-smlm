@@ -115,38 +115,40 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, MLELVM);
 	}
 
-	@Test
-	public void canFitSingleGaussianMLENR()
+	@Test(expected=AssertionError.class)
+	public void cannotFitSingleGaussianFastMLE()
 	{
+		// The raw FastMLE method is unstable as it takes large steps with 
+		// no checking of the step size or the effect on the MLE value
 		fitSingleGaussian(NO_BOUND, NO_CLAMP, FastMLE);
 	}
 
 	@Test
-	public void canFitSingleGaussianCMLENR()
+	public void canFitSingleGaussianCFastMLE()
 	{
 		fitSingleGaussian(NO_BOUND, CLAMP, FastMLE);
 	}
 
 	@Test
-	public void canFitSingleGaussianDCMLENR()
+	public void canFitSingleGaussianDCFastMLE()
 	{
 		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, FastMLE);
 	}
 
 	@Test
-	public void canFitSingleGaussianBMLENR()
+	public void canFitSingleGaussianBFastMLE()
 	{
 		fitSingleGaussian(BOUNDED, NO_CLAMP, FastMLE);
 	}
 
 	@Test
-	public void canFitSingleGaussianBCMLENR()
+	public void canFitSingleGaussianBCFastMLE()
 	{
 		fitSingleGaussian(BOUNDED, CLAMP, FastMLE);
 	}
 
 	@Test
-	public void canFitSingleGaussianBDCMLENR()
+	public void canFitSingleGaussianBDCFastMLE()
 	{
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, FastMLE);
 	}
