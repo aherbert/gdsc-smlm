@@ -203,7 +203,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 				super.computeValues(lastY_fit);
 			}
 
-			ll = PoissonCalculator.logLikelihood(lastY_fit, lastY);
+			ll = PoissonCalculator.fastLogLikelihood(lastY_fit, lastY);
 		}
 		return ll;
 	}

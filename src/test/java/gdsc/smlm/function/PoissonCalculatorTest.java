@@ -13,6 +13,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.ij.Utils;
@@ -333,9 +334,11 @@ public class PoissonCalculatorTest
 
 	}
 
-	//@Test
+	@Test
 	public void showRelativeErrorOfLogFactorialApproximation()
 	{
+		Assume.assumeTrue(false);
+
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
 		{
@@ -363,7 +366,38 @@ public class PoissonCalculatorTest
 	}
 
 	@Test
-	public void instanceMethodIsApproximatelyEqualToStaticMethod()
+	public void showRelativeErrorOfFastLogLikelihood()
+	{
+		Assume.assumeTrue(false);
+
+		double d = 1.0;
+		for (int i = 1; i <= 100; i++)
+		{
+			d = Math.nextUp(d);
+			showRelativeErrorOfFastLogLikelihood(d);
+		}
+		for (int i = 1; i <= 300; i++)
+			showRelativeErrorOfFastLogLikelihood(1 + i / 100.0);
+
+		for (int i = 4; i <= 100; i++)
+			showRelativeErrorOfFastLogLikelihood(i);
+	}
+
+	private void showRelativeErrorOfFastLogLikelihood(double x)
+	{
+		for (double factor : new double[] { 0.5, 1, 2 })
+		{
+			double u = x * factor;
+			double e = PoissonCalculator.logLikelihood(u, x);
+			double o = PoissonCalculator.fastLogLikelihood(u, x);
+			double error = DoubleEquality.relativeError(e, o);
+			System.out.printf("ll(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
+					Double.toString(error));
+		}
+	}
+
+	@Test
+	public void instanceAndFastMethodIsApproximatelyEqualToStaticMethod()
 	{
 		DoubleEquality eq = new DoubleEquality(3e-4, 0);
 		RandomGenerator rg = new Well19937c(30051977);
@@ -382,8 +416,13 @@ public class PoissonCalculatorTest
 			PoissonCalculator pc = new PoissonCalculator(x);
 			e = PoissonCalculator.maximumLogLikelihood(x);
 			o = pc.getMaximumLogLikelihood();
-			System.out.printf("[%s] MaxLL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
-			Assert.assertTrue("Max LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+			System.out.printf("[%s] Instance MaxLL = %g vs %g (error = %g)\n", X, e, o,
+					DoubleEquality.relativeError(e, o));
+			Assert.assertTrue("Instance Max LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+
+			o = PoissonCalculator.fastMaximumLogLikelihood(x);
+			System.out.printf("[%s] Fast MaxLL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
+			Assert.assertTrue("Fast Max LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
 
 			// Generate data around the value
 			for (int i = 0; i < n; i++)
@@ -391,29 +430,35 @@ public class PoissonCalculatorTest
 
 			e = PoissonCalculator.logLikelihood(u, x);
 			o = pc.logLikelihood(u);
-			System.out.printf("[%s] LL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
-			Assert.assertTrue("LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+			System.out.printf("[%s] Instance LL = %g vs %g (error = %g)\n", X, e, o,
+					DoubleEquality.relativeError(e, o));
+			Assert.assertTrue("Instance LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+
+			o = PoissonCalculator.fastLogLikelihood(u, x);
+			System.out.printf("[%s] Fast LL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
+			Assert.assertTrue("Fast LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
 
 			e = PoissonCalculator.logLikelihoodRatio(u, x);
 			o = pc.getLogLikelihoodRatio(o);
 
-			System.out.printf("[%s] LLR = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
-			Assert.assertTrue("LLR not equal", eq.almostEqualRelativeOrAbsolute(e, o));
+			System.out.printf("[%s] Instance LLR = %g vs %g (error = %g)\n", X, e, o,
+					DoubleEquality.relativeError(e, o));
+			Assert.assertTrue("Instance LLR not equal", eq.almostEqualRelativeOrAbsolute(e, o));
 		}
 	}
 
 	private abstract class PCTimingTask extends BaseTimingTask
 	{
 		double[] x, u;
-		int n;
-		boolean llr;
+		int ll;
+		int llr;
 
-		public PCTimingTask(String name, double[] x, double[] u, int n, boolean llr)
+		public PCTimingTask(String name, double[] x, double[] u, int ll, int llr)
 		{
-			super(String.format("%s ll=%d llr=%b", name, n, llr));
+			super(String.format("%s ll=%d llr=%d", name, ll, llr));
 			this.x = x;
 			this.u = u;
-			this.n = n;
+			this.ll = ll;
 			this.llr = llr;
 		}
 
@@ -430,38 +475,57 @@ public class PoissonCalculatorTest
 
 	private class StaticPCTimingTask extends PCTimingTask
 	{
-		public StaticPCTimingTask(double[] x, double[] u, int n, boolean llr)
+		public StaticPCTimingTask(double[] x, double[] u, int ll, int llr)
 		{
-			super("static", x, u, n, llr);
+			super("static", x, u, ll, llr);
 		}
 
 		public Object run(Object data)
 		{
-			double ll = 0;
-			if (llr)
-				ll += PoissonCalculator.logLikelihoodRatio(u, x);
-			for (int i = 0; i < n; i++)
-				ll += PoissonCalculator.logLikelihood(u, x);
-			return ll;
+			double value = 0;
+			for (int i = 0; i < llr; i++)
+				value += PoissonCalculator.logLikelihoodRatio(u, x);
+			for (int i = 0; i < ll; i++)
+				value += PoissonCalculator.logLikelihood(u, x);
+			return value;
+		}
+	}
+
+	private class FastPCTimingTask extends PCTimingTask
+	{
+		public FastPCTimingTask(double[] x, double[] u, int ll, int llr)
+		{
+			super("fast", x, u, ll, llr);
+		}
+
+		public Object run(Object data)
+		{
+			double value = 0;
+			for (int i = 0; i < llr; i++)
+				value += PoissonCalculator.logLikelihoodRatio(u, x);
+			for (int i = 0; i < ll; i++)
+				value += PoissonCalculator.fastLogLikelihood(u, x);
+			return value;
 		}
 	}
 
 	private class InstancePCTimingTask extends PCTimingTask
 	{
-		public InstancePCTimingTask(double[] x, double[] u, int n, boolean llr)
+		int max;
+		public InstancePCTimingTask(double[] x, double[] u, int ll, int llr)
 		{
-			super("instance", x, u, n, llr);
+			super("instance", x, u, ll, llr);
+			max = Math.max(llr, ll);
 		}
 
 		public Object run(Object data)
 		{
 			PoissonCalculator pc = new PoissonCalculator(x);
-			double ll = pc.logLikelihood(u);
-			if (llr)
-				ll += pc.getLogLikelihoodRatio(ll);
-			for (int i = 1; i < n; i++)
-				ll += pc.logLikelihood(u);
-			return ll;
+			double value = 0;
+			for (int i = 0; i < max; i++)
+				// Since the llr is "free" if the ll is known just compute the log-likelihood
+				value += pc.logLikelihood(u);
+			return value;
 		}
 	}
 
@@ -490,19 +554,20 @@ public class PoissonCalculatorTest
 		System.out.printf("Speed test x-range: %f - %f\n", limits[0], limits[1]);
 
 		TimingService ts = new TimingService(5);
-		ts.execute(new StaticPCTimingTask(x, u, 0, true));
-		ts.execute(new InstancePCTimingTask(x, u, 0, true));
-		for (int l : new int[] { 1, 10 })
-		{
-			ts.execute(new StaticPCTimingTask(x, u, l, false));
-			ts.execute(new InstancePCTimingTask(x, u, l, false));
-			ts.execute(new StaticPCTimingTask(x, u, l, true));
-			ts.execute(new InstancePCTimingTask(x, u, l, true));
-		}
+		int[] loops = new int[] { 0, 1, 10 };
+		for (int ll : loops)
+			for (int llr : loops)
+			{
+				if (ll + llr == 0)
+					continue;
+				ts.execute(new StaticPCTimingTask(x, u, ll, llr));
+				ts.execute(new FastPCTimingTask(x, u, ll, llr));
+				ts.execute(new InstancePCTimingTask(x, u, ll, llr));
+			}
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report();
+		ts.report(size);
 
 		int index = ts.getSize() - 1;
 		Assert.assertTrue(ts.get(index).getMean() < ts.get(index - 1).getMean());

@@ -59,7 +59,7 @@ public class PoissonCalculator
 		// O(ln(x)) is a final term that can be computed using a series expansion.
 
 		// This makes:
-		// mll = x * Math.log(x) - x - x * log(x) + x - O(ln(x))
+		// mll = x * log(x) - x - x * log(x) + x - O(ln(x))
 		// mll = -O(ln(x))
 
 		// The series can be written as:
@@ -114,7 +114,7 @@ public class PoissonCalculator
 		}
 	}
 
-	private double pow3(double n)
+	private static double pow3(double n)
 	{
 		return n * n * n;
 	}
@@ -277,7 +277,104 @@ public class PoissonCalculator
 			return 0.0;
 		return Gamma.logGamma(x + 1);
 	}
-	
+
+	/**
+	 * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
+	 *
+	 * @param u
+	 *            the mean
+	 * @param x
+	 *            the x
+	 * @return the log likelihood
+	 */
+	public static double fastLogLikelihood(double u, double x)
+	{
+		// The log-likelihood (ll) is:
+		// ll = (x==0) ? -u : x * Math.log(u) - u - logFactorial(x)
+		if (x > 0)
+			return fastLogLikelihoodX(u, x);
+		else
+			return -u;
+	}
+
+	/**
+	 * Get the Poisson log likelihood of value x given the mean. The mean and x must be strictly positive.
+	 * <p>
+	 * Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}. The number of calls to
+	 * Math.log() is 2 for all x over 1.
+	 *
+	 * @param u
+	 *            the mean
+	 * @param x
+	 *            the x
+	 * @return the log likelihood
+	 */
+	private static double fastLogLikelihoodX(double u, double x)
+	{
+		// The log-likelihood (ll) is:
+		// ll = x * Math.log(u) - u - logFactorial(x)
+
+		// Note that the logFactorial can be approximated as using Stirling's approximation:
+		// https://en.m.wikipedia.org/wiki/Stirling%27s_approximation
+		// log(x!) = x * log(x) - x + O(ln(x))
+		// O(ln(x)) is a final term that can be computed using a series expansion.
+
+		// This makes:
+		// ll = x * log(u) - u - x * log(x) + x - O(ln(x))
+
+		// Use the Stirling approximation when appropriate
+		if (x <= 1)
+		{
+			// When x is below 1 then the factorial can be omitted, i.e. log(x!) = 0
+			// Compute the actual log likelihood
+			return x * Math.log(u) - u;
+		}
+		else if (x <= APPROXIMATION_X)
+		{
+			// At low values of log(n!) we use the gamma function as the relative error of the 
+			// approximation is high. 
+			// Note that the logGamma function uses only 1 Math.log() call when the input is 
+			// below 2.5. Above that it uses 2 calls so we switch to the approximation.
+			//return x * Math.log(u) - u - Gamma.logGamma(x[i] + 1);
+			return x * Math.log(u) - u + FastMath.log1p(Gamma.invGamma1pm1(x));
+		}
+		else
+		{
+			// Approximate log(n!) using Stirling's approximation using the first 3 terms.
+			// This will have a maximum relative error of approximately 6.7e-5
+			// ll = x * log(u) - u - x * log(x) + x - O(ln(x))
+			// O(ln(x)) = 0.5 * log(2*pi) + 0.5 * log(x) + 1/12x - 1/360x^3
+			final double logx = Math.log(x);
+			return x * Math.log(u) - u - HALF_LOG_2_PI - (x + 0.5) * logx + x - ONE_OVER_12 / x +
+					ONE_OVER_360 / pow3(x);
+		}
+	}
+
+	/**
+	 * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
+	 * <p>
+	 * Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}. The number of calls to
+	 * Math.log() is 2 for all x over 1.
+	 *
+	 * @param u
+	 *            the mean
+	 * @param x
+	 *            the x
+	 * @return the log likelihood
+	 */
+	public static double fastLogLikelihood(double[] u, double[] x)
+	{
+		double ll = 0.0;
+		for (int i = u.length; i-- > 0;)
+		{
+			if (x[i] == 0)
+				ll -= u[i];
+			else
+				ll += fastLogLikelihoodX(u[i], x[i]);
+		}
+		return ll;
+	}
+
 	/**
 	 * Get the Poisson likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
 	 *
@@ -309,7 +406,41 @@ public class PoissonCalculator
 	}
 
 	/**
+	 * Get the Poisson likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
+	 *
+	 * @param u
+	 *            the mean
+	 * @param x
+	 *            the x
+	 * @return the likelihood
+	 */
+	public static double fastLikelihood(double u, double x)
+	{
+		return FastMath.exp(fastLogLikelihood(u, x));
+	}
+
+	/**
+	 * Get the Poisson likelihood of value x given the mean. The mean must be strictly positive. x must be positive.
+	 * <p>
+	 * Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}. The number of calls to
+	 * Math.log() is 2 for all x over 1.
+	 *
+	 * @param u
+	 *            the mean
+	 * @param x
+	 *            the x
+	 * @return the likelihood
+	 */
+	public static double fastLikelihood(double[] u, double[] x)
+	{
+		return FastMath.exp(fastLogLikelihood(u, x));
+	}
+
+	/**
 	 * Get the Poisson maximum log likelihood of value x given the mean is value x. x must be positive.
+	 * <p>
+	 * Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}. The number of calls to
+	 * Math.log() is 2 for all x over 1.
 	 *
 	 * @param x
 	 *            the x
@@ -336,6 +467,40 @@ public class PoissonCalculator
 	}
 
 	/**
+	 * Get the Poisson maximum log likelihood of value x given the mean is value x. x must be positive.
+	 * <p>
+	 * Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}. The number of calls to
+	 * Math.log() is 2 for all x over 1.
+	 *
+	 * @param x
+	 *            the x
+	 * @return the maximum log likelihood
+	 */
+	public static double fastMaximumLogLikelihood(double x)
+	{
+		return (x > 0.0) ? fastLogLikelihoodX(x, x) : 0.0;
+	}
+
+	/**
+	 * Get the Poisson maximum log likelihood of value x given the mean is value x. x must be positive.
+	 * <p>
+	 * Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}. The number of calls to
+	 * Math.log() is 2 for all x over 1.
+	 *
+	 * @param x
+	 *            the x
+	 * @return the maximum log likelihood
+	 */
+	public static double fastMaximumLogLikelihood(double[] x)
+	{
+		double ll = 0.0;
+		for (int i = x.length; i-- > 0;)
+			if (x[i] > 0)
+				ll += fastLogLikelihoodX(x[i], x[i]);
+		return ll;
+	}
+
+	/**
 	 * Get the Poisson maximum likelihood of value x given the mean is value x. x must be positive.
 	 *
 	 * @param x
@@ -357,6 +522,30 @@ public class PoissonCalculator
 	public static double maximumLikelihood(double[] x)
 	{
 		return FastMath.exp(maximumLogLikelihood(x));
+	}
+
+	/**
+	 * Get the Poisson maximum likelihood of value x given the mean is value x. x must be positive.
+	 *
+	 * @param x
+	 *            the x
+	 * @return the maximum likelihood
+	 */
+	public static double fastMaximumLikelihood(double x)
+	{
+		return (x > 0.0) ? FastMath.exp(fastLogLikelihoodX(x, x)) : 1;
+	}
+
+	/**
+	 * Get the Poisson maximum likelihood of value x given the mean is value x. x must be positive.
+	 *
+	 * @param x
+	 *            the x
+	 * @return the maximum likelihood
+	 */
+	public static double fastMaximumLikelihood(double[] x)
+	{
+		return FastMath.exp(fastMaximumLogLikelihood(x));
 	}
 
 	/**
