@@ -136,7 +136,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	@Override
 	protected double computeFitValue(double[] a)
 	{
-		gradientProcedure.computeUpdate(a);
+		gradientProcedure.computeSecondDerivative(a);
 
 		if (gradientProcedure.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
@@ -157,7 +157,18 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	@Override
 	protected void computeStep(double[] step)
 	{
-		gradientProcedure.getUpdate(step);
+		// TODO - Extend the method to implement correct multi-dimensional Newton-Raphson
+		// root finding (see Numerical Recipes in C++, 2nd Ed, page 385, function mnewt).
+		// This involves computing the Jacobian matrix from the vector of gradient functions.
+
+		final double[] d1 = gradientProcedure.d1;
+		final double[] d2 = gradientProcedure.d2;
+
+		// Simple Newton-Raphson update step as per Smith et al, (2010), SI Eq. 13:
+		// parameter -> new parameter + delta
+		// => new parameter = parameter - delta  
+		for (int i = 0; i < step.length; i++)
+			step[i] = -d1[i] / d2[i];
 	}
 
 	/*
@@ -168,9 +179,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	@Override
 	protected boolean accept(double currentValue, double[] a, double newValue, double[] newA)
 	{
-		// TODO - Extend the method to implement a combination of Newton-Raphson and Bisection 
-		// (see Numerical Recipes in C++, 2nd Ed, page 370, function rtsafe)
-
 		// Always accept the step. The Smith, et al (2010) paper used 10 steps until
 		// convergence, with no apparent checking of the log-likelihood value or parameters.
 		// The Newton-Raphson method converges fast but does require a good initial
