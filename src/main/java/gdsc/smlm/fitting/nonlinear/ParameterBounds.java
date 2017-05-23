@@ -318,7 +318,8 @@ public class ParameterBounds
 	}
 
 	/**
-	 * Sets the parameter specific clamp values. This is the maximum permissible update to the parameter.
+	 * Sets the parameter specific clamp values. This is the maximum permissible update to the parameter. Note that an
+	 * update equal to the clamp value will clamped to half its magnitude.
 	 * <p>
 	 * See Stetson PB (1987) DAOPHOT: A compute program for crowded-field stellar photometry. Publ Astrom Soc Pac
 	 * 99:191-222.

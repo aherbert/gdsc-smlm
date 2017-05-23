@@ -314,6 +314,7 @@ public abstract class BaseFunctionSolverTest
 
 	double[] fitGaussian(FunctionSolver solver, double[] data, double[] params, double[] expected)
 	{
+		//System.out.printf("%s : Expected %s\n", solver.getClass().getSimpleName(), Arrays.toString(expected));
 		params = params.clone();
 		FitStatus status = solver.fit(data, null, params, null);
 		if (status != FitStatus.OK)
