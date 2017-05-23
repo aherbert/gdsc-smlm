@@ -11,11 +11,6 @@ package gdsc.smlm.fitting.nonlinear;
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
- * 
- * This code is based on the ideas expressed in Numerical Recipes in C++, 
- * The Art of Scientific Computing, Second Edition, W.H. Press, 
- * S.A. Teukolsky, W.T. Vetterling, B.P. Flannery (Cambridge University Press, 
- * Cambridge, 2002).
  *---------------------------------------------------------------------------*/
 
 /**
