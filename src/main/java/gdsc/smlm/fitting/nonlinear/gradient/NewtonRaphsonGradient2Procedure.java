@@ -154,8 +154,11 @@ public class NewtonRaphsonGradient2Procedure implements ValueProcedure, Gradient
 	 */
 	public double[] getUpdate(double[] update)
 	{
+		// Smith et al, (2010), SI Eq. 13 has delta as a positive.
+		// Numerical recipes in C++, 2nd Ed, p.366, Eq 9.4.2 has delta as a negative.
+		// Using the negative works.
 		for (int i = 0; i < n; i++)
-			update[i] = d1[i] / d2[i];
+			update[i] = -d1[i] / d2[i];
 		return update;
 	}
 

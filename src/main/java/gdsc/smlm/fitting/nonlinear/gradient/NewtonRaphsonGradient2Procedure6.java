@@ -78,12 +78,12 @@ public class NewtonRaphsonGradient2Procedure6 extends NewtonRaphsonGradient2Proc
 	public double[] getUpdate()
 	{
 		double[] update = new double[n];
-		update[0] = d1[0] / d2[0];
-		update[1] = d1[1] / d2[1];
-		update[2] = d1[2] / d2[2];
-		update[3] = d1[3] / d2[3];
-		update[4] = d1[4] / d2[4];
-		update[5] = d1[5] / d2[5];
+		update[0] = -d1[0] / d2[0];
+		update[1] = -d1[1] / d2[1];
+		update[2] = -d1[2] / d2[2];
+		update[3] = -d1[3] / d2[3];
+		update[4] = -d1[4] / d2[4];
+		update[5] = -d1[5] / d2[5];
 		return update;
 	}
 
