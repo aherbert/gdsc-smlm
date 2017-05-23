@@ -293,7 +293,7 @@ public class FastMLEGradient2ProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("GradientCalculator = %d : NewtonRaphsonGradient2Procedure %d = %d : %fx\n", time1, nparams, time2,
+		log("GradientCalculator = %d : FastMLEGradient2Procedure %d = %d : %fx\n", time1, nparams, time2,
 				(1.0 * time1) / time2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
 		{
