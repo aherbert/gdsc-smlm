@@ -15,7 +15,7 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 	// The tests in this class can be skipped since they are a subset of the tests performed
 	// in the SteppingFunctionSolverTest.
 	boolean runTests = false;
-	
+
 	// The following tests ensure that the LVM can fit data without 
 	// requiring a bias (i.e. an offset to the background).
 	// In a previous version the LVM fitter was stable only if a bias existed.
@@ -63,11 +63,11 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 	private void fitSingleGaussianLVMWithoutBias(boolean applyBounds, int clamping)
 	{
 		org.junit.Assume.assumeTrue(runTests);
-		
+
 		double bias = 100;
 
-		SteppingFunctionSolver solver = getSolver(clamping, LSELVM);
-		SteppingFunctionSolver solver2 = getSolver(clamping, LSELVM);
+		SteppingFunctionSolver solver = getSolver(clamping, false);
+		SteppingFunctionSolver solver2 = getSolver(clamping, false);
 
 		String name = getLVMName(applyBounds, clamping, false);
 
@@ -196,7 +196,7 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 	private void fitSingleGaussianLVM(int bounded, int clamping, boolean mle)
 	{
 		org.junit.Assume.assumeTrue(runTests);
-		canFitSingleGaussian(getSolver(clamping, (mle) ? MLELVM : LSELVM), bounded == 2);
+		canFitSingleGaussian(getSolver(clamping, mle), bounded == 2);
 	}
 
 	// Is Bounded/Clamped LVM better?
@@ -313,11 +313,19 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 			int clamping, boolean mle)
 	{
 		org.junit.Assume.assumeTrue(runTests);
-		
-		SteppingFunctionSolver solver = getSolver(clamping, (mle) ? MLELVM : LSELVM);
-		SteppingFunctionSolver solver2 = getSolver(clamping2, (mle2) ? MLELVM : LSELVM);
+
+		SteppingFunctionSolver solver = getSolver(clamping, mle);
+		SteppingFunctionSolver solver2 = getSolver(clamping2, mle2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getLVMName(bounded, clamping, mle),
 				getLVMName(bounded2, clamping2, mle2));
+	}
+
+	SteppingFunctionSolver getSolver(int clamping, boolean mle)
+	{
+		SteppingFunctionSolverClamp clamp = (clamping == 0) ? NO_CLAMP : (clamping == 1) ? CLAMP : DYNAMIC_CLAMP;
+		SteppingFunctionSolverType type = (mle) ? MLELVM : LSELVM;
+		return getSolver(clamp, type);
+
 	}
 
 	private String getLVMName(boolean bounded, int clamping, boolean mle)

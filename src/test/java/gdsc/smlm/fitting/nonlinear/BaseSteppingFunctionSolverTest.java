@@ -9,27 +9,54 @@ import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
  */
 public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverTest
 {
+	enum SteppingFunctionSolverClamp
+	{
+		NO_CLAMP("x"), CLAMP("C"), DYNAMIC_CLAMP("DC");
+		final String name;
+
+		SteppingFunctionSolverClamp(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+	}
+
 	enum SteppingFunctionSolverType
 	{
 		MLELVM, LSELVM, WLSELVM, MLENR
 	}
 
-	// For convenience declare vairable of the enum type
-	SteppingFunctionSolverType MLELVM = SteppingFunctionSolverType.MLELVM;
-	SteppingFunctionSolverType LSELVM = SteppingFunctionSolverType.LSELVM;
-	SteppingFunctionSolverType WlSELVM = SteppingFunctionSolverType.WLSELVM;
-	SteppingFunctionSolverType MLENR = SteppingFunctionSolverType.MLENR;
+	// For convenience declare variables of the enum type
+	static final SteppingFunctionSolverClamp NO_CLAMP = SteppingFunctionSolverClamp.NO_CLAMP;
+	static final SteppingFunctionSolverClamp CLAMP = SteppingFunctionSolverClamp.CLAMP;
+	static final SteppingFunctionSolverClamp DYNAMIC_CLAMP = SteppingFunctionSolverClamp.DYNAMIC_CLAMP;
+	static final SteppingFunctionSolverType MLELVM = SteppingFunctionSolverType.MLELVM;
+	static final SteppingFunctionSolverType LSELVM = SteppingFunctionSolverType.LSELVM;
+	static final SteppingFunctionSolverType WlSELVM = SteppingFunctionSolverType.WLSELVM;
+	static final SteppingFunctionSolverType MLENR = SteppingFunctionSolverType.MLENR;
+	static final boolean BOUNDED = true;
+	static final boolean NO_BOUND = false;
 
-	SteppingFunctionSolver getSolver(int clamping, SteppingFunctionSolverType type)
+	SteppingFunctionSolver getSolver(SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type)
 	{
 		ErfGaussian2DFunction f = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size,
 				GaussianFunctionFactory.FIT_ERF_CIRCLE, null);
 		ToleranceChecker tc = new ToleranceChecker(1e-5, 1e-5, 0, 0, 100);
 		ParameterBounds bounds = new ParameterBounds(f);
-		if (clamping != 0)
+		switch (clamp)
 		{
-			bounds.setClampValues(defaultClampValues);
-			bounds.setDynamicClamp(clamping == 2);
+			case DYNAMIC_CLAMP:
+				bounds.setDynamicClamp(true);
+			case CLAMP:
+				bounds.setClampValues(defaultClampValues);
+			case NO_CLAMP:
+			default:
+				break;
 		}
 		SteppingFunctionSolver solver;
 		switch (type)
@@ -54,8 +81,8 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 		return solver;
 	}
 
-	String getName(boolean bounded, int clamping, SteppingFunctionSolverType type)
+	String getName(boolean bounded, SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type)
 	{
-		return ((bounded) ? "B" : "") + ((clamping == 0) ? "" : ((clamping == 1) ? "C" : "DC")) + type;
+		return String.format("%s %-2s %s", (bounded) ? "B" : "x", clamp, type);
 	}
 }
