@@ -1,7 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient1Function;
-import gdsc.smlm.function.PrecomputedGradient1Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -21,22 +20,6 @@ import gdsc.smlm.function.PrecomputedGradient1Function;
  */
 public class MLELVMGradientProcedureFactory
 {
-	/**
-	 * Create a new gradient procedure
-	 * 
-	 * @param y
-	 *            Data to fit
-	 * @param b
-	 *            Baseline pre-computed y-values
-	 * @param func
-	 *            Gradient function
-	 * @return the gradient procedure
-	 */
-	public static MLELVMGradientProcedure create(final double[] y, final double[] b, final Gradient1Function func)
-	{
-		return create(y, PrecomputedGradient1Function.wrapGradient1Function(func, b));
-	}
-
 	/**
 	 * Create a new gradient procedure
 	 * 

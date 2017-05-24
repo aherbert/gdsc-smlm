@@ -16,6 +16,7 @@ import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.PrecomputedGradient1Function;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
@@ -46,23 +47,6 @@ public class PoissonGradientProcedureTest
 				PoissonGradientProcedure5.class);
 		Assert.assertEquals(PoissonGradientProcedureFactory.create(new DummyGradientFunction(4)).getClass(),
 				PoissonGradientProcedure4.class);
-		double[] b = null;
-		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(6)).getClass(),
-				PoissonGradientProcedure6.class);
-		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(5)).getClass(),
-				PoissonGradientProcedure5.class);
-		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(4)).getClass(),
-				PoissonGradientProcedure4.class);
-		b = new double[new DummyGradientFunction(4).size()];
-		// No longer have dedicated procedures since we used a wrapped function
-		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(6)).getClass(),
-				PoissonGradientProcedure6.class);
-		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(5)).getClass(),
-				PoissonGradientProcedure5.class);
-		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(4)).getClass(),
-				PoissonGradientProcedure4.class);
-		Assert.assertEquals(PoissonGradientProcedureFactory.create(b, new DummyGradientFunction(1)).getClass(),
-				PoissonGradientProcedure.class);
 	}
 
 	@Test
@@ -249,18 +233,18 @@ public class PoissonGradientProcedureTest
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
 		createFakeParams(nparams, iter, paramsList);
-		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
-		double[] b = (precomputed) ? Utils.newArray(func.size(), 0.1, 1.3) : null;
+		if (precomputed)
+			func = PrecomputedGradient1Function.wrapGradient1Function(func, Utils.newArray(func.size(), 0.1, 1.3));
 
 		String name = String.format("[%d]", nparams);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			PoissonGradientProcedure p1 = (precomputed) ? new PoissonGradientProcedureB(b, func)
-					: new PoissonGradientProcedure(func);
+			PoissonGradientProcedure p1 = new PoissonGradientProcedure(func);
 			p1.computeFisherInformation(paramsList.get(i));
 
-			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(b, func);
+			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(func);
 			p2.computeFisherInformation(paramsList.get(i));
 
 			// Exactly the same ...
@@ -301,17 +285,17 @@ public class PoissonGradientProcedureTest
 		createFakeParams(nparams, iter, paramsList);
 
 		// Remove the timing of the function call by creating a dummy function
-		final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
-		final double[] b = (precomputed) ? Utils.newArray(func.size(), 0.1, 1.3) : null;
+		FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
+		final Gradient1Function func = (precomputed)
+				? PrecomputedGradient1Function.wrapGradient1Function(f, Utils.newArray(f.size(), 0.1, 1.3)) : f;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			PoissonGradientProcedure p1 = (precomputed) ? new PoissonGradientProcedureB(b, func)
-					: new PoissonGradientProcedure(func);
+			PoissonGradientProcedure p1 = new PoissonGradientProcedure(func);
 			p1.computeFisherInformation(paramsList.get(i));
 			p1.computeFisherInformation(paramsList.get(i));
 
-			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(b, func);
+			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(func);
 			p2.computeFisherInformation(paramsList.get(i));
 			p2.computeFisherInformation(paramsList.get(i));
 
@@ -330,8 +314,7 @@ public class PoissonGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					PoissonGradientProcedure p1 = (precomputed) ? new PoissonGradientProcedureB(b, func)
-							: new PoissonGradientProcedure(func);
+					PoissonGradientProcedure p1 = new PoissonGradientProcedure(func);
 					for (int j = loops; j-- > 0;)
 						p1.computeFisherInformation(paramsList.get(k++ % iter));
 				}
@@ -346,7 +329,7 @@ public class PoissonGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(b, func);
+					PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(func);
 					for (int j = loops; j-- > 0;)
 						p2.computeFisherInformation(paramsList.get(k++ % iter));
 				}
@@ -388,7 +371,8 @@ public class PoissonGradientProcedureTest
 			PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(func);
 			p1.computeFisherInformation(a);
 
-			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(b, func);
+			PoissonGradientProcedure p2 = PoissonGradientProcedureFactory
+					.create(PrecomputedGradient1Function.wrapGradient1Function(func, b));
 			p2.computeFisherInformation(a);
 
 			FisherInformationMatrix m1 = new FisherInformationMatrix(p1.getLinear(), n);

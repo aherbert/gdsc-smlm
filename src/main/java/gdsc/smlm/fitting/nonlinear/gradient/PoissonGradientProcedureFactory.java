@@ -1,7 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient1Function;
-import gdsc.smlm.function.PrecomputedGradient1Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -42,37 +41,5 @@ public class PoissonGradientProcedureFactory
 			default:
 				return new PoissonGradientProcedure(func);
 		}
-	}
-
-	/**
-	 * Create a new gradient procedure.
-	 *
-	 * @param b
-	 *            Baseline pre-computed y-values
-	 * @param func
-	 *            Gradient function
-	 * @return the gradient procedure
-	 */
-	public static PoissonGradientProcedure create(final double[] b, final Gradient1Function func)
-	{
-		//if (b != null && b.length == func.size())
-		//{
-		//	func = new PrecomputedGradient1Function(func, b);
-		//	switch (func.getNumberOfGradients())
-		//	{
-		//		case 5:
-		//			return new PoissonGradientProcedureB5(b, func);
-		//		case 4:
-		//			return new PoissonGradientProcedureB4(b, func);
-		//		case 6:
-		//			return new PoissonGradientProcedureB6(b, func);
-		//	
-		//		default:
-		//			return new PoissonGradientProcedureB(b, func);
-		//	}
-		//}
-
-		// Use baseline version if appropriate
-		return create(PrecomputedGradient1Function.wrapGradient1Function(func, b));
 	}
 }

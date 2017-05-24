@@ -23,7 +23,7 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
- * for use in the LVM algorithm. 
+ * for use in the LVM algorithm.
  * <p>
  * Note: This class is a test-bed for implementation strategies. The fastest strategy can then be used for other
  * gradient procedures.
@@ -49,26 +49,25 @@ public class LSQLVMGradientProcedureTest
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		double[] y = new double[0];
-		Assert.assertEquals(LSQLVMGradientProcedureMatrixFactory.create(y, null, new DummyGradientFunction(6)).getClass(),
+		Assert.assertEquals(
+				LSQLVMGradientProcedureMatrixFactory.create(y, null, new DummyGradientFunction(6)).getClass(),
 				LSQLVMGradientProcedureMatrix6.class);
-		Assert.assertEquals(LSQLVMGradientProcedureMatrixFactory.create(y, null, new DummyGradientFunction(5)).getClass(),
+		Assert.assertEquals(
+				LSQLVMGradientProcedureMatrixFactory.create(y, null, new DummyGradientFunction(5)).getClass(),
 				LSQLVMGradientProcedureMatrix5.class);
-		Assert.assertEquals(LSQLVMGradientProcedureMatrixFactory.create(y, null, new DummyGradientFunction(4)).getClass(),
+		Assert.assertEquals(
+				LSQLVMGradientProcedureMatrixFactory.create(y, null, new DummyGradientFunction(4)).getClass(),
 				LSQLVMGradientProcedureMatrix4.class);
 
-		Assert.assertEquals(LSQLVMGradientProcedureLinearFactory.create(y, null, new DummyGradientFunction(6)).getClass(),
+		Assert.assertEquals(
+				LSQLVMGradientProcedureLinearFactory.create(y, null, new DummyGradientFunction(6)).getClass(),
 				LSQLVMGradientProcedureLinear6.class);
-		Assert.assertEquals(LSQLVMGradientProcedureLinearFactory.create(y, null, new DummyGradientFunction(5)).getClass(),
+		Assert.assertEquals(
+				LSQLVMGradientProcedureLinearFactory.create(y, null, new DummyGradientFunction(5)).getClass(),
 				LSQLVMGradientProcedureLinear5.class);
-		Assert.assertEquals(LSQLVMGradientProcedureLinearFactory.create(y, null, new DummyGradientFunction(4)).getClass(),
+		Assert.assertEquals(
+				LSQLVMGradientProcedureLinearFactory.create(y, null, new DummyGradientFunction(4)).getClass(),
 				LSQLVMGradientProcedureLinear4.class);
-
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, null, new DummyGradientFunction(6)).getClass(),
-				LSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, null, new DummyGradientFunction(5)).getClass(),
-				LSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, null, new DummyGradientFunction(4)).getClass(),
-				LSQLVMGradientProcedure4.class);
 	}
 
 	@Test
@@ -127,7 +126,8 @@ public class LSQLVMGradientProcedureTest
 		gradientProcedureIsNotSlowerThanGradientCalculator(21, factory);
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(int nparams, BaseLSQLVMGradientProcedureFactory factory)
+	private void gradientProcedureComputesSameAsGradientCalculator(int nparams,
+			BaseLSQLVMGradientProcedureFactory factory)
 	{
 		int iter = 10;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
@@ -301,7 +301,7 @@ public class LSQLVMGradientProcedureTest
 		String name = GradientCalculator.class.getSimpleName();
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			BaseLSQLVMGradientProcedure p1 = LSQLVMGradientProcedureFactory.create(yList.get(i), null, func);
+			BaseLSQLVMGradientProcedure p1 = LSQLVMGradientProcedureFactory.create(yList.get(i), func);
 			p1.gradient(paramsList.get(i));
 
 			BaseLSQLVMGradientProcedure p2 = new LSQLVMGradientProcedure(yList.get(i), func);
@@ -445,7 +445,7 @@ public class LSQLVMGradientProcedureTest
 			double[] y = yList.get(i);
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
-			BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, null, func);
+			BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
 			p.gradient(a);
 			//double s = p.ssx;
 			double[] beta = p.beta.clone();
@@ -502,7 +502,7 @@ public class LSQLVMGradientProcedureTest
 			{
 				double[] y = yList.get(i);
 				double[] a = paramsList.get(i);
-				BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, null, func);
+				BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
 				p.gradient(a);
 				double[] beta = p.beta;
 				alphaList.add(p.getAlphaLinear());
@@ -535,7 +535,7 @@ public class LSQLVMGradientProcedureTest
 					double[] y = add(yList.get(i), b);
 					double[] a = paramsList.get(i).clone();
 					a[0] += b;
-					BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, null, func);
+					BaseLSQLVMGradientProcedure p = LSQLVMGradientProcedureFactory.create(y, func);
 					p.gradient(a);
 					double[] beta = p.beta;
 					double[] alpha2 = alphaList.get(i);

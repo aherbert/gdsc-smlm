@@ -1,7 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient2Function;
-import gdsc.smlm.function.PrecomputedGradient2Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -38,23 +37,6 @@ public class FastMLEGradient2ProcedureFactory
 		// efficiently optimise the single for loops in the procedure. So just return the 
 		// default implementation.
 		//return createUnrolled(x, func);
-	}
-
-	/**
-	 * Create a new gradient procedure.
-	 *
-	 * @param x
-	 *            Data to fit (must be positive, i.e. the value of a Poisson process)
-	 * @param b
-	 *            Baseline pre-computed y-values
-	 * @param func
-	 *            Gradient function
-	 * @return the gradient procedure
-	 */
-	public static FastMLEGradient2Procedure create(final double[] x, final double[] b,
-			final Gradient2Function func)
-	{
-		return create(x, PrecomputedGradient2Function.wrapGradient2Function(func, b));
 	}
 
 	/**

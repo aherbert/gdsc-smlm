@@ -63,7 +63,6 @@ public class LVMGradientProcedureTest
 		
 		// Generic factory
 		double[] y = new double[0];
-		double[] b = null;
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], LSQ).getClass(), LSQLVMGradientProcedure6.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], LSQ).getClass(), LSQLVMGradientProcedure5.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], LSQ).getClass(), LSQLVMGradientProcedure4.class);
@@ -77,36 +76,6 @@ public class LVMGradientProcedureTest
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], WLSQ).getClass(), WLSQLVMGradientProcedure4.class);
 		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], WLSQ).getClass(), WLSQLVMGradientProcedure.class);
 		
-		// Handle null background
-		b = null;
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], LSQ).getClass(), LSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], LSQ).getClass(), LSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], LSQ).getClass(), LSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], LSQ).getClass(), LSQLVMGradientProcedure.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], MLE).getClass(), MLELVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], MLE).getClass(), MLELVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], MLE).getClass(), MLELVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], MLE).getClass(), MLELVMGradientProcedure.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], WLSQ).getClass(), WLSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], WLSQ).getClass(), WLSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], WLSQ).getClass(), WLSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], WLSQ).getClass(), WLSQLVMGradientProcedure.class);
-		
-		// Handle the pre-computed background
-		b = new double[f[6].size()];
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], LSQ).getClass(), LSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], LSQ).getClass(), LSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], LSQ).getClass(), LSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], LSQ).getClass(), LSQLVMGradientProcedure.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], MLE).getClass(), MLELVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], MLE).getClass(), MLELVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], MLE).getClass(), MLELVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], MLE).getClass(), MLELVMGradientProcedure.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[6], WLSQ).getClass(), WLSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[5], WLSQ).getClass(), WLSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[4], WLSQ).getClass(), WLSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, b, f[1], WLSQ).getClass(), WLSQLVMGradientProcedure.class);
-
 		// Dedicated factories
 		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[6]).getClass(), LSQLVMGradientProcedure6.class);
 		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[5]).getClass(), LSQLVMGradientProcedure5.class);
@@ -120,36 +89,6 @@ public class LVMGradientProcedureTest
 		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[5]).getClass(), WLSQLVMGradientProcedure5.class);
 		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[4]).getClass(), WLSQLVMGradientProcedure4.class);
 		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[1]).getClass(), WLSQLVMGradientProcedure.class);
-
-		// Handle null background
-		b = null;
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[6]).getClass(), LSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[5]).getClass(), LSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[4]).getClass(), LSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[1]).getClass(), LSQLVMGradientProcedure.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[6]).getClass(), MLELVMGradientProcedure6.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[5]).getClass(), MLELVMGradientProcedure5.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[4]).getClass(), MLELVMGradientProcedure4.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[1]).getClass(), MLELVMGradientProcedure.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[6]).getClass(), WLSQLVMGradientProcedure6.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[5]).getClass(), WLSQLVMGradientProcedure5.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[4]).getClass(), WLSQLVMGradientProcedure4.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[1]).getClass(), WLSQLVMGradientProcedure.class);
-
-		// Handle the pre-computed background
-		b = new double[f[6].size()];
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[6]).getClass(), LSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[5]).getClass(), LSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[4]).getClass(), LSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, b, f[1]).getClass(), LSQLVMGradientProcedure.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[6]).getClass(), MLELVMGradientProcedure6.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[5]).getClass(), MLELVMGradientProcedure5.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[4]).getClass(), MLELVMGradientProcedure4.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, b, f[1]).getClass(), MLELVMGradientProcedure.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[6]).getClass(), WLSQLVMGradientProcedure6.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[5]).getClass(), WLSQLVMGradientProcedure5.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[4]).getClass(), WLSQLVMGradientProcedure4.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, b, null, f[1]).getClass(), WLSQLVMGradientProcedure.class);
 		
 		//@formatter:on
 	}
@@ -635,6 +574,7 @@ public class LVMGradientProcedureTest
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
 
+			LVMGradientProcedure p;
 			if (precomputed)
 			{
 				// Mock fitting part of the function already
@@ -642,9 +582,11 @@ public class LVMGradientProcedureTest
 				{
 					b[j] = y[j] * 0.5;
 				}
+				p = LVMGradientProcedureFactory.create(y, PrecomputedGradient1Function.wrapGradient1Function(func, b),
+						type);
 			}
-
-			LVMGradientProcedure p = LVMGradientProcedureFactory.create(y, b, func, type);
+			else
+				p = LVMGradientProcedureFactory.create(y, func, type);
 			p.gradient(a);
 			//double s = p.value;
 			double[] beta = p.beta.clone();
@@ -767,7 +709,8 @@ public class LVMGradientProcedureTest
 
 			// These should be the same
 			LVMGradientProcedure p123 = LVMGradientProcedureFactory.create(y, f123, type);
-			LVMGradientProcedure p12b3 = LVMGradientProcedureFactory.create(y, b, f12, type);
+			LVMGradientProcedure p12b3 = LVMGradientProcedureFactory.create(y,
+					PrecomputedGradient1Function.wrapGradient1Function(f12, b), type);
 			// This may be different
 			LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, type);
 
