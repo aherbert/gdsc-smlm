@@ -1,4 +1,4 @@
-package gdsc.smlm.fitting.nonlinear.gradient;
+package gdsc.smlm.function;
 
 //import java.util.Arrays;
 
@@ -14,23 +14,23 @@ import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.ValueProcedure;
 
-class FakeGradientFunction implements Gradient2Function, Gradient1Function, NonLinearFunction
+public class FakeGradientFunction implements Gradient2Function, Gradient1Function, NonLinearFunction
 {
 	private final int maxx, n, nparams;
 	private final PseudoRandomSequence r;
 	private final double[] dy_da;
 
-	FakeGradientFunction(int maxx, int nparams)
+	public FakeGradientFunction(int maxx, int nparams)
 	{
 		this(maxx, nparams, 1000, 30051977, 10.0);
 	}
 
-	FakeGradientFunction(int maxx, int nparams, double scale)
+	public FakeGradientFunction(int maxx, int nparams, double scale)
 	{
 		this(maxx, nparams, 1000, 30051977, scale);
 	}
 
-	FakeGradientFunction(int maxx, int nparams, int randomSize, int randomSeed, double scale)
+	public FakeGradientFunction(int maxx, int nparams, int randomSize, int randomSeed, double scale)
 	{
 		this.maxx = maxx;
 		this.n = maxx * maxx;

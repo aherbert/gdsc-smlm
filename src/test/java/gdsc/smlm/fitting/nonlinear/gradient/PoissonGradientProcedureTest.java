@@ -13,6 +13,8 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.FisherInformationMatrix;
+import gdsc.smlm.function.DummyGradientFunction;
+import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;

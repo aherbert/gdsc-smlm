@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
+import gdsc.smlm.function.DummyGradientFunction;
+import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;

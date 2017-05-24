@@ -1,4 +1,4 @@
-package gdsc.smlm.fitting.nonlinear.gradient;
+package gdsc.smlm.function;
 
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Function;
@@ -6,11 +6,11 @@ import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.ValueProcedure;
 
-class DummyGradientFunction implements Gradient1Function, Gradient2Function
+public class DummyGradientFunction implements Gradient1Function, Gradient2Function
 {
 	int n;
 
-	DummyGradientFunction(int n)
+	public DummyGradientFunction(int n)
 	{
 		this.n = n;
 	}

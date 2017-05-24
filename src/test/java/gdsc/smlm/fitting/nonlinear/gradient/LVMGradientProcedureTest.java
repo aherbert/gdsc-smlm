@@ -16,6 +16,8 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory.Type;
+import gdsc.smlm.function.DummyGradientFunction;
+import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.PrecomputedGradient1Function;
 import gdsc.smlm.function.ValueProcedure;
