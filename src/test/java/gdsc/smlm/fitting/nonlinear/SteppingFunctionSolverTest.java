@@ -155,7 +155,10 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 
 	private void fitSingleGaussian(boolean bounded, SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type)
 	{
-		canFitSingleGaussian(getSolver(clamp, type), bounded);
+		SteppingFunctionSolver solver = getSolver(clamp, type);
+		canFitSingleGaussian(solver, bounded);
+		if (solver.isWeighted())
+			canFitSingleGaussian(solver, bounded, true);
 	}
 
 	// Is Bounded/Clamped better?

@@ -98,7 +98,7 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 			{
 				for (int loop = LOOPS; loop-- > 0;)
 				{
-					double[] data = drawGaussian(expected, n);
+					double[] data = drawGaussian(expected, n, null);
 					double[] data2 = data.clone();
 					for (int i = 0; i < data.length; i++)
 						data2[i] += bias;

@@ -2,6 +2,7 @@ package gdsc.smlm.fitting.nonlinear;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -70,10 +71,49 @@ public abstract class BaseFunctionSolverTest
 
 	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds)
 	{
+		canFitSingleGaussian(solver, applyBounds, false);
+	}
+
+	// Variance = Exponential (equivalent to chi-squared with k=1, i.e. 
+	// sum of the squares of 1 normal distribution). 
+	// We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b 
+	// cumul = 1 - e^-lx (with l = 1/mean)
+	// => e^-lx = 1 - cumul
+	// => -lx = log(1-0.999)
+	// => l = -log(0.001) / 400  (since x==400)
+	// => 1/l = 57.9
+	private static double variance = 57.9; // SD = 7.6
+
+	// Gain = Approximately Normal
+	private static double gain = 2.2;
+	private static double gainSD = 0.2;
+
+	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds, boolean weighted)
+	{
 		// Allow reporting the fit deviations
 		boolean report = false;
 		double[] crlb = null;
 		SimpleArrayMoment m = null;
+
+		double[] weights = null;
+		if (weighted && solver.isWeighted())
+		{
+			// Per observation read noise.
+			weights = new double[size * size];
+			randomGenerator.setSeed(seed);
+			ExponentialDistribution ed = new ExponentialDistribution(randomGenerator, variance,
+					ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+			for (int i = 0; i < weights.length; i++)
+			{
+				double pixelVariance = ed.sample();
+				double pixelGain = Math.max(0.1, gain + randomGenerator.nextGaussian() * gainSD);
+				weights[i] = pixelVariance / pixelGain;
+			}
+			solver.setWeights(weights);
+			// Convert to standard deviation for simulation
+			for (int i = 0; i < weights.length; i++)
+				weights[i] = Math.sqrt(weights[i]);
+		}
 
 		randomGenerator.setSeed(seed);
 		for (double s : signal)
@@ -96,7 +136,7 @@ public abstract class BaseFunctionSolverTest
 			}
 			for (double n : noise)
 			{
-				double[] data = drawGaussian(expected, n);
+				double[] data = drawGaussian(expected, n, weights);
 				for (double db : base)
 					for (double dx : shift)
 						for (double dy : shift)
@@ -163,7 +203,7 @@ public abstract class BaseFunctionSolverTest
 			{
 				for (int loop = LOOPS; loop-- > 0;)
 				{
-					double[] data = drawGaussian(expected, n);
+					double[] data = drawGaussian(expected, n, null);
 
 					for (int i = 0; i < stats.length; i++)
 						stats[i] = new StoredDataStatistics();
@@ -360,19 +400,23 @@ public abstract class BaseFunctionSolverTest
 	 *            The Gaussian parameters
 	 * @param noise
 	 *            The read noise
+	 * @param weights
 	 * @param withBias
 	 * @return The data
 	 */
-	double[] drawGaussian(double[] params, double noise)
+	double[] drawGaussian(double[] params, double noise, double[] pixelSD)
 	{
 		double[] data = new double[size * size];
 		int n = params.length / 6;
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, GaussianFunctionFactory.FIT_CIRCLE,
 				null);
 		f.initialise(params);
+
 		for (int i = 0; i < data.length; i++)
 		{
 			data[i] = dataGenerator.nextPoisson(f.eval(i));
+			if (pixelSD != null)
+				data[i] += randomGenerator.nextGaussian() * pixelSD[i];
 		}
 		if (noise != 0)
 			for (int i = 0; i < data.length; i++)
