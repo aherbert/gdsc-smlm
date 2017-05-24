@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.PrecomputedGradient2Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -53,7 +54,7 @@ public class FastMLEGradient2ProcedureFactory
 	public static FastMLEGradient2Procedure create(final double[] x, final double[] b,
 			final Gradient2Function func)
 	{
-		return create(x, GradientProcedureHelper.wrapGradient2Function(func, b));
+		return create(x, PrecomputedGradient2Function.wrapGradient2Function(func, b));
 	}
 
 	/**

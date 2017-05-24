@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.PrecomputedGradient1Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -72,6 +73,6 @@ public class PoissonGradientProcedureFactory
 		//}
 
 		// Use baseline version if appropriate
-		return create(GradientProcedureHelper.wrapGradient1Function(func, b));
+		return create(PrecomputedGradient1Function.wrapGradient1Function(func, b));
 	}
 }

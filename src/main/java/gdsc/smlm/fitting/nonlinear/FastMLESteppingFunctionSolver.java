@@ -9,8 +9,8 @@ import gdsc.smlm.fitting.nonlinear.gradient.FastMLEGradient2ProcedureFactory;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
-import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.PrecomputedGradient2Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -32,6 +32,9 @@ import gdsc.smlm.function.Gradient2Function;
  * <p>
  * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
  * Nature Methods 7, 373-375 (supplementary note), Eq. 12.
+ * <p>
+ * Ref: Huang et al, (2015). Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms.
+ * Nature Methods 10, 653–658.
  */
 public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implements MLEFunctionSolver
 {
@@ -42,6 +45,13 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	/** The log-likelihood ratio. */
 	protected double llr = Double.NaN;
 
+	/** The per observation variances. This is not null if fitting using the method of Huang, et al (2015). */
+	protected double[] w;
+	/**
+	 * The gradient function used by the procedure. This may be wrapped to add the per observation variances if fitting
+	 * using the method of Huang, et al (2015).
+	 */
+	protected Gradient2Function f2;
 	/** The gradient procedure. */
 	protected FastMLEGradient2Procedure gradientProcedure;
 
@@ -116,7 +126,23 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	 */
 	protected double[] prepareY(double[] y)
 	{
-		return ensurePositive(y);
+		// We can handle per-observation variances as detailed in
+		// Huang, et al. (2015) by simply adding the variances to the target data. 
+
+		final int n = y.length;
+		w = getWeights(n);
+		if (w != null)
+		{
+			final double[] x = new double[n];
+			for (int i = 0; i < n; i++)
+			{
+				// Also ensure the input y is positive
+				x[i] = (y[i] > 0) ? y[i] + w[i] : w[i];
+			}
+			return x;
+		}
+		else
+			return ensurePositive(y);
 	}
 
 	/**
@@ -128,7 +154,14 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	 */
 	protected FastMLEGradient2Procedure createGradientProcedure(double[] y)
 	{
-		return FastMLEGradient2ProcedureFactory.create(y, (Gradient2Function) f);
+		// We can handle per-observation variances as detailed in
+		// Huang, et al. (2015) by simply adding the variances to the computed value.
+		f2 = (Gradient2Function) f;
+		if (w != null)
+		{
+			f2 = PrecomputedGradient2Function.wrapGradient2Function(f2, w);
+		}
+		return FastMLEGradient2ProcedureFactory.create(y, f2);
 	}
 
 	/*
@@ -216,8 +249,30 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		ll = gradientProcedure.computeLogLikelihood(a);
 		isPseudoLogLikelihood = false;
 		if (y_fit != null)
-			System.arraycopy(gradientProcedure.u, 0, y_fit, 0, gradientProcedure.u.length);
+			copyFunctionValue(y_fit);
 		return ll;
+	}
+
+	/**
+	 * Copy the function value into the y_fit array.
+	 *
+	 * @param y_fit
+	 *            the function values
+	 */
+	private void copyFunctionValue(double[] y_fit)
+	{
+		final double[] u = gradientProcedure.u;
+		if (w != null)
+		{
+			// The function was wrapped to add the per-observation variances
+			// to the computed value, these must be subtracted to get the actual value
+			for (int i = 0, n = u.length; i < n; i++)
+			{
+				y_fit[i] = u[i] - w[i];
+			}
+		}
+		else
+			System.arraycopy(u, 0, y_fit, 0, u.length);
 	}
 
 	/*
@@ -228,8 +283,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	@Override
 	protected void computeValues(double[] y_fit)
 	{
-		// Used the cached values
-		System.arraycopy(gradientProcedure.u, 0, y_fit, 0, gradientProcedure.u.length);
+		copyFunctionValue(y_fit);
 	}
 
 	/*
@@ -241,7 +295,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	protected FisherInformationMatrix computeFisherInformationMatrix()
 	{
 		// The fisher information is that for a Poisson process
-		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create((Gradient1Function) f);
+		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f2);
 		p.computeFisherInformation(null); // Assume preinitialised function
 		return new FisherInformationMatrix(p.getLinear(), gradientProcedure.n);
 	}

@@ -41,6 +41,16 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 		this.values = values;
 	}
 
+	private PrecomputedValueFunction(PrecomputedValueFunction pre, double[] values2)
+	{
+		this.f = pre.f;
+		final int n = f.size();
+		final double[] values1 = pre.values;
+		values = new double[n];
+		for (int i = 0; i < n; i++)
+			values[i] = values1[i] + values2[i];
+	}
+
 	public int size()
 	{
 		return f.size();
@@ -61,5 +71,28 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 	public void execute(double value)
 	{
 		procedure.execute(value + values[i++]);
+	}
+
+	/**
+	 * Wrap a function with pre-computed values.
+	 *
+	 * @param func
+	 *            the function
+	 * @param b
+	 *            Baseline pre-computed y-values
+	 * @return the wrapped function (or the original if pre-computed values are null or wrong length)
+	 */
+	public static ValueFunction wrapValueFunction(final ValueFunction func, final double[] b)
+	{
+		if (b != null && b.length == func.size())
+		{
+			// Avoid multiple wrapping
+			if (func instanceof PrecomputedValueFunction)
+			{
+				return new PrecomputedValueFunction((PrecomputedValueFunction)func, b);
+			}
+			return new PrecomputedValueFunction(func, b);
+		}
+		return func;
 	}
 }

@@ -38,6 +38,12 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 		f1 = f;
 	}
 
+	private PrecomputedGradient1Function(PrecomputedGradient1Function pre, double[] values2)
+	{
+		super(pre, values2);
+		f1 = (Gradient1Function) f;
+	}
+	
 	public void initialise(double[] a)
 	{
 		f1.initialise(a);
@@ -69,5 +75,28 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 	public void execute(double value, double[] dy_da)
 	{
 		procedure.execute(value + values[i++], dy_da);
+	}
+
+	/**
+	 * Wrap a function with pre-computed values.
+	 *
+	 * @param func
+	 *            the function
+	 * @param b
+	 *            Baseline pre-computed y-values
+	 * @return the wrapped function (or the original if pre-computed values are null or wrong length)
+	 */
+	public static Gradient1Function wrapGradient1Function(final Gradient1Function func, final double[] b)
+	{
+		if (b != null && b.length == func.size())
+		{
+			// Avoid multiple wrapping
+			if (func instanceof PrecomputedGradient1Function)
+			{
+				return new PrecomputedGradient1Function((PrecomputedGradient1Function)func, b);
+			}
+			return new PrecomputedGradient1Function(func, b);
+		}
+		return func;
 	}
 }

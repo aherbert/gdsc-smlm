@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.PrecomputedGradient1Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -36,7 +37,7 @@ public class WLSQLVMGradientProcedureFactory
 	public static WLSQLVMGradientProcedure create(final double[] y, final double[] var, final double[] b,
 			final Gradient1Function func)
 	{
-		return create(y, var, GradientProcedureHelper.wrapGradient1Function(func, b));
+		return create(y, var, PrecomputedGradient1Function.wrapGradient1Function(func, b));
 	}
 
 	/**
