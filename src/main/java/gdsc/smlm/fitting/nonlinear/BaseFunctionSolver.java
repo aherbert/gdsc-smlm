@@ -293,6 +293,16 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.fitting.FunctionSolver#isWeighted()
+	 */
+	public boolean isWeighted()
+	{
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#setBounds(double[], double[])
 	 */
 	public void setBounds(double[] lower, double[] upper)
@@ -305,6 +315,15 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * @see gdsc.smlm.fitting.FunctionSolver#setConstraints(double[], double[])
 	 */
 	public void setConstraints(double[] lower, double[] upper)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.FunctionSolver#setWeights(double[])
+	 */
+	public void setWeights(double[] weights)
 	{
 	}
 
@@ -350,7 +369,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	{
 		if (f instanceof Gaussian2DFunction)
 		{
-			((Gaussian2DFunction) f).getName(i);
+			return ((Gaussian2DFunction) f).getName(i);
 		}
 		return "Unknown";
 	}

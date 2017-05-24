@@ -186,4 +186,16 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	{
 		return value / (getNumberOfFittedPoints() - getNumberOfFittedParameters());
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#isWeighted()
+	 */
+	@Override
+	public boolean isWeighted()
+	{
+		// This is a stepping solver that is not weighted
+		return false;
+	}
 }

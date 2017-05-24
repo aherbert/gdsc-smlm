@@ -49,6 +49,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	protected int[] gradientIndices;
 	protected final ToleranceChecker tc;
 	protected final ParameterBounds bounds;
+	private double[] weights = null;
 
 	/**
 	 * Create a new stepping function solver
@@ -386,5 +387,39 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	{
 		super.setGradientFunction(f);
 		bounds.setGradientFunction(f);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isWeighted()
+	 */
+	@Override
+	public boolean isWeighted()
+	{
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setWeights(double[])
+	 */
+	@Override
+	public void setWeights(double[] weights)
+	{
+		this.weights = weights;
+	}
+
+	/**
+	 * Gets the weights for observations of size n.
+	 *
+	 * @param n
+	 *            the size
+	 * @return the weights
+	 */
+	public double[] getWeights(int n)
+	{
+		return (weights != null && weights.length == n) ? weights : null;
 	}
 }

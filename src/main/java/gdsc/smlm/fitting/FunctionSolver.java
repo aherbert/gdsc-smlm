@@ -89,6 +89,13 @@ public interface FunctionSolver
 	public boolean isConstrained();
 
 	/**
+	 * Specifies if the function solver supports per observation weights.
+	 *
+	 * @return True if the function solver supports per observation weights
+	 */
+	public boolean isWeighted();
+
+	/**
 	 * Set the bounds for each of the parameters. If a subset of the parameters are fitted then the bounds can be
 	 * ignored for the fixed parameters.
 	 * <p>
@@ -107,6 +114,17 @@ public interface FunctionSolver
 	 * @param upper
 	 */
 	public void setConstraints(double[] lower, double[] upper);
+
+	/**
+	 * Sets the weights for each of the observations. The weights must match the length of the observations passed to
+	 * {@link #fit(double[], double[], double[], double[])}.
+	 * <p>
+	 * The weights are the variances of each observation.
+	 *
+	 * @param weights
+	 *            the new weights
+	 */
+	public void setWeights(double[] weights);
 
 	/**
 	 * The optimised function value for the solution.
