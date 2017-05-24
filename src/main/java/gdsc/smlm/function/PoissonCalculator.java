@@ -33,7 +33,7 @@ public class PoissonCalculator
 	private static final double ONE_OVER_1260 = 1.0 / 1260;
 	private static final double ONE_OVER_1680 = 1.0 / 1680;
 
-	private double mll, sumLogXFactorial;
+	private double mll = Double.NaN, sumLogXFactorial;
 	private final double[] x;
 
 	/**
@@ -49,7 +49,15 @@ public class PoissonCalculator
 	public PoissonCalculator(double[] x)
 	{
 		this.x = x;
+	}
 
+	/**
+	 * Compute the maximum log-likelihood and the log(x!) term prefactors.
+	 */
+	private void computePrefactors()
+	{
+		mll = 0;
+		
 		// The maximum log-likelihood (mll) is:
 		// mll = (x==0) ? 0 : x * Math.log(x) - x - logFactorial(x)
 
@@ -114,9 +122,15 @@ public class PoissonCalculator
 		}
 	}
 
-	private static double pow3(double n)
+	/**
+	 * Raise the value to the power 3
+	 *
+	 * @param value the value
+	 * @return value^3
+	 */
+	private static double pow3(double value)
 	{
-		return n * n * n;
+		return value * value * value;
 	}
 
 	/**
@@ -172,13 +186,22 @@ public class PoissonCalculator
 	}
 
 	/**
-	 * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive.
+	 * Get the pseudo Poisson log likelihood of value x given the mean. The mean must be strictly positive.
+	 * <p>
+	 * The pseudo log-likelihood is equivalent to the log-likelihood without subtracting the log(x!) term. It can be
+	 * converted to the log-likelihood by subtracting {@link #getLogXFactorialTerm()}.
+	 * <p>
+	 * This term is suitable for use in maximum likelihood routines.
+	 * 
+	 * <pre>
+	 * pseudo ll = x * log(u) - u
+	 * </pre>
 	 *
 	 * @param u
 	 *            the mean
-	 * @return the log likelihood
+	 * @return the pseudo log likelihood
 	 */
-	public double logLikelihood(double[] u)
+	public double pseudoLogLikelihood(double[] u)
 	{
 		double ll = 0.0;
 		for (int i = u.length; i-- > 0;)
@@ -188,7 +211,35 @@ public class PoissonCalculator
 			else
 				ll += x[i] * Math.log(u[i]) - u[i];
 		}
-		return ll - sumLogXFactorial;
+		return ll;
+	}
+
+	/**
+	 * Gets the log X factorial term to convert the pseudo log-likelihood to the log-likelihood.
+	 *
+	 * <pre>
+	 * ll = pseudo ll - log(x!)
+	 * </pre>
+	 * 
+	 * @return the log X factorial term
+	 */
+	public double getLogXFactorialTerm()
+	{
+		if (Double.isNaN(mll))
+			computePrefactors();
+		return sumLogXFactorial;
+	}
+
+	/**
+	 * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive.
+	 *
+	 * @param u
+	 *            the mean
+	 * @return the log likelihood
+	 */
+	public double logLikelihood(double[] u)
+	{
+		return pseudoLogLikelihood(u) - getLogXFactorialTerm();
 	}
 
 	/**
@@ -208,11 +259,13 @@ public class PoissonCalculator
 	 */
 	public double getMaximumLogLikelihood()
 	{
+		if (Double.isNaN(mll))
+			computePrefactors();
 		return mll;
 	}
 
 	/**
-	 * Get the Poisson log likelihood ratio of the log likelihood.
+	 * Get the Poisson log likelihood ratio of the log likelihood. Note that the input must not be the pseudo log-likelihood
 	 *
 	 * @param logLikelihood
 	 *            the log likelihood
@@ -220,6 +273,8 @@ public class PoissonCalculator
 	 */
 	public double getLogLikelihoodRatio(double logLikelihood)
 	{
+		if (Double.isNaN(mll))
+			computePrefactors();
 		// The log likelihood should be below the maximum log likelihood
 		return (logLikelihood > mll) ? 0 : -2.0 * (logLikelihood - mll);
 	}

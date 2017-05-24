@@ -37,6 +37,8 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 {
 	/** The log-likelihood. */
 	protected double ll = Double.NaN;
+	/** Flag if the log-likelihood is the pseudo log-likelihood. */
+	protected boolean isPseudoLogLikelihood = false;
 	/** The log-likelihood ratio. */
 	protected double llr = Double.NaN;
 
@@ -86,6 +88,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	protected void preProcess()
 	{
 		ll = llr = Double.NaN;
+		isPseudoLogLikelihood = false;
 	}
 
 	/*
@@ -142,9 +145,12 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 
 		// Log-likelihood only needs to be computed if the tolerance checker 
-		// is testing the value
+		// is testing the value. Use the Pseudo log-likelihood for speed.
 		if (tc.checkValue)
-			ll = gradientProcedure.computeLogLikelihood();
+		{
+			ll = gradientProcedure.computePseudoLogLikelihood();
+			isPseudoLogLikelihood = true;
+		}
 
 		return ll;
 	}
@@ -208,6 +214,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	protected double computeFunctionValue(double[] y_fit, double[] a)
 	{
 		ll = gradientProcedure.computeLogLikelihood(a);
+		isPseudoLogLikelihood = false;
 		if (y_fit != null)
 			System.arraycopy(gradientProcedure.u, 0, y_fit, 0, gradientProcedure.u.length);
 		return ll;
@@ -235,7 +242,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	{
 		// The fisher information is that for a Poisson process
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create((Gradient1Function) f);
-		p.computeFisherInformation(null);
+		p.computeFisherInformation(null); // Assume preinitialised function
 		return new FisherInformationMatrix(p.getLinear(), gradientProcedure.n);
 	}
 
@@ -262,6 +269,12 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		if (Double.isNaN(ll))
 		{
 			ll = gradientProcedure.computeLogLikelihood();
+			isPseudoLogLikelihood = false;
+		}
+		else if (isPseudoLogLikelihood)
+		{
+			isPseudoLogLikelihood = false;
+			ll -= gradientProcedure.computeLogXFactorialTerm();
 		}
 		return ll;
 	}
@@ -275,7 +288,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	{
 		if (Double.isNaN(llr))
 		{
-			llr = gradientProcedure.computeLogLikelihoodRatio();
+			llr = gradientProcedure.computeLogLikelihoodRatio(getLogLikelihood());
 		}
 		return llr;
 	}

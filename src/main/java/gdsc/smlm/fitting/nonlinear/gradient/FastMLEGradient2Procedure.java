@@ -208,6 +208,39 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 	}
 
 	/**
+	 * Calculates the pseudo Poisson log likelihood using the last value of the function.
+	 * <p>
+	 * The pseudo log-likelihood is equivalent to the log-likelihood without subtracting the log(x!) term. It can be
+	 * converted to the log-likelihood by subtracting {@link #computeLogXFactorialTerm()}.
+	 * <p>
+	 * This term is suitable for use in maximum likelihood routines.
+	 * 
+	 * <pre>
+	 * pseudo ll = x * log(u) - u
+	 * </pre>
+	 *
+	 * @return the pseudo Poisson log likelihood
+	 */
+	public double computePseudoLogLikelihood()
+	{
+		return getPoissonCalculator().pseudoLogLikelihood(u);
+	}
+
+	/**
+	 * Computes the log X factorial term to convert the pseudo log-likelihood to the log-likelihood.
+	 *
+	 * <pre>
+	 * ll = pseudo ll - log(x!)
+	 * </pre>
+	 * 
+	 * @return the log X factorial term
+	 */
+	public double computeLogXFactorialTerm()
+	{
+		return getPoissonCalculator().getLogXFactorialTerm();
+	}
+
+	/**
 	 * Gets the poisson calculator, creating using the values x if necessary.
 	 *
 	 * @return the poisson calculator
@@ -239,7 +272,19 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 	 */
 	public double computeLogLikelihoodRatio()
 	{
-		return getPoissonCalculator().getLogLikelihoodRatio(computeLogLikelihood());
+		return computeLogLikelihoodRatio(computeLogLikelihood());
+	}
+
+	/**
+	 * Calculates the Poisson log likelihood ratio using the given log-likelihood.
+	 *
+	 * @param logLikelihood
+	 *            the log likelihood
+	 * @return the Poisson log likelihood ratio
+	 */
+	public double computeLogLikelihoodRatio(double logLikelihood)
+	{
+		return getPoissonCalculator().getLogLikelihoodRatio(logLikelihood);
 	}
 
 	/**

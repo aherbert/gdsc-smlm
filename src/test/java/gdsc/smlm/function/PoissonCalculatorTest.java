@@ -512,6 +512,7 @@ public class PoissonCalculatorTest
 	private class InstancePCTimingTask extends PCTimingTask
 	{
 		int max;
+
 		public InstancePCTimingTask(double[] x, double[] u, int ll, int llr)
 		{
 			super("instance", x, u, ll, llr);
@@ -522,9 +523,11 @@ public class PoissonCalculatorTest
 		{
 			PoissonCalculator pc = new PoissonCalculator(x);
 			double value = 0;
+			// Use the fastest execution possible
 			for (int i = 0; i < max; i++)
-				// Since the llr is "free" if the ll is known just compute the log-likelihood
-				value += pc.logLikelihood(u);
+				value += pc.pseudoLogLikelihood(u);
+			if (llr > 0)
+				value += pc.getMaximumLogLikelihood();
 			return value;
 		}
 	}
