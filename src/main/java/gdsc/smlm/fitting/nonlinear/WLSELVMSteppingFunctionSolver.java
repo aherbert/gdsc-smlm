@@ -33,9 +33,6 @@ import gdsc.smlm.function.Gradient1Function;
  */
 public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver implements WLSEFunctionSolver
 {
-	/** The per observation variance term. */
-	private double[] var;
-
 	/**
 	 * Create a new stepping function solver.
 	 *
@@ -113,7 +110,7 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 	@Override
 	protected LVMGradientProcedure createGradientProcedure(double[] y)
 	{
-		return WLSQLVMGradientProcedureFactory.create(y, var, (Gradient1Function) f);
+		return WLSQLVMGradientProcedureFactory.create(y, getWeights(y.length), (Gradient1Function) f);
 	}
 
 	/*
@@ -127,29 +124,6 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 		// TODO. Check if these deviations are correct.
 		// The last Hessian matrix should be stored in the working alpha.
 		return new FisherInformationMatrix(walpha, beta.length);
-	}
-
-	/**
-	 * Gets the per observation read noise. This must match the length of the fitted observations or it is ignored (i.e.
-	 * set to zero for all observations).
-	 *
-	 * @return the read noise
-	 */
-	protected double[] getVariance()
-	{
-		return var;
-	}
-
-	/**
-	 * Sets the per observation read noise. This must match the length of the fitted observations or it is ignored (i.e.
-	 * set to zero for all observations).
-	 *
-	 * @param variance
-	 *            the new read noise
-	 */
-	protected void setVariance(double[] variance)
-	{
-		this.var = variance;
 	}
 
 	/*

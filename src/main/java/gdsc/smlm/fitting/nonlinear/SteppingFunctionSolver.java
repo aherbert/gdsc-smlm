@@ -412,7 +412,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	}
 
 	/**
-	 * Gets the weights for observations of size n.
+	 * Gets the weights for observations of size n, e.g. the per observation variance term.
 	 *
 	 * @param n
 	 *            the size
@@ -420,6 +420,6 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 */
 	public double[] getWeights(int n)
 	{
-		return (weights != null && weights.length == n) ? weights : null;
+		return (weights == null || weights.length != n) ? null : weights;
 	}
 }
