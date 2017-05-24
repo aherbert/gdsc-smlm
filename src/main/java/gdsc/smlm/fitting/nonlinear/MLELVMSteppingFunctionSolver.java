@@ -10,6 +10,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.PoissonCalculator;
+import gdsc.smlm.function.PrecomputedGradient1Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -31,6 +32,11 @@ import gdsc.smlm.function.PoissonCalculator;
  * This solver computes a modified Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson
  * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
+ * <p>
+ * Per observation variances can be added to both the target x data and the function value to optimise the LLR sCMOS
+ * function for Poisson data. See Huang et al, (2015). Video-rate nanoscopy using sCMOS camera–specific single-molecule
+ * localization algorithms.
+ * Nature Methods 10, 653–658.
  */
 public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver implements MLEFunctionSolver
 {
@@ -39,6 +45,14 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 
 	/** The ll. */
 	protected double ll = Double.NaN;
+
+	/** The per observation variances. This is not null if fitting using the method of Huang, et al (2015). */
+	protected double[] w;
+	/**
+	 * The gradient function used by the procedure. This may be wrapped to add the per observation variances if fitting
+	 * using the LLR sCMOS method of Huang, et al (2015).
+	 */
+	protected Gradient1Function f1;
 
 	/**
 	 * Create a new stepping function solver.
@@ -124,23 +138,46 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#createGradientProcedure(double[])
-	 */
-	@Override
-	protected LVMGradientProcedure createGradientProcedure(double[] y)
-	{
-		return MLELVMGradientProcedureFactory.create(y, (Gradient1Function) f);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#prepareY(double[])
 	 */
 	@Override
 	protected double[] prepareY(double[] y)
 	{
-		return ensurePositive(y);
+		// We can handle per-observation variances as detailed in
+		// Huang, et al. (2015) by simply adding the variances to the target data.
+
+		final int n = y.length;
+		w = getWeights(n);
+		if (w != null)
+		{
+			final double[] x = new double[n];
+			for (int i = 0; i < n; i++)
+			{
+				// Also ensure the input y is positive
+				x[i] = (y[i] > 0) ? y[i] + w[i] : w[i];
+			}
+			return x;
+		}
+		else
+			return ensurePositive(y);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#createGradientProcedure(double[])
+	 */
+	@Override
+	protected LVMGradientProcedure createGradientProcedure(double[] y)
+	{
+		// We can handle per-observation variances as detailed in
+		// Huang, et al. (2015) by simply adding the variances to the computed value.
+		f1 = (Gradient1Function) f;
+		if (w != null)
+		{
+			f1 = PrecomputedGradient1Function.wrapGradient1Function(f1, w);
+		}
+		return MLELVMGradientProcedureFactory.create(y, f1);
 	}
 
 	@Override
@@ -161,11 +198,21 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	{
 		super.computeValues(y_fit);
 
-		// Cache the values
-		int size = ((Gradient1Function) f).size();
+		// Cache the values to compute the log-likelihood
+		int size = f1.size();
 		if (lastY_fit == null)
 			lastY_fit = new double[size];
 		System.arraycopy(y_fit, 0, lastY_fit, 0, size);
+		
+		if (w != null)
+		{
+			// The function was wrapped to add the per-observation variances
+			// to the computed value, these must be subtracted to get the actual value
+			for (int i = 0, n = w.length; i < n; i++)
+			{
+				y_fit[i] -= w[i];
+			}
+		}
 	}
 
 	/*
@@ -180,7 +227,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		// Compute and invert a matrix related to the Poisson log-likelihood.
 		// This assumes this does achieve the maximum likelihood estimate for a 
 		// Poisson process.
-		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create((Gradient1Function) f);
+		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(lastA);
 		p.getLinear(walpha);
 		return new FisherInformationMatrix(walpha, beta.length);
@@ -198,7 +245,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 			if (lastY_fit == null)
 			{
 				// Evaluate the function values if necessary
-				int size = ((Gradient1Function) f).size();
+				int size = f1.size();
 				lastY_fit = new double[size];
 				super.computeValues(lastY_fit);
 			}
