@@ -63,7 +63,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 */
 	public MLELVMSteppingFunctionSolver(Gradient1Function f)
 	{
-		super(FunctionSolverType.LSE, f);
+		super(FunctionSolverType.MLE, f);
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 */
 	public MLELVMSteppingFunctionSolver(Gradient1Function f, double maxRelativeError, double maxAbsoluteError)
 	{
-		super(FunctionSolverType.LSE, f, maxRelativeError, maxAbsoluteError);
+		super(FunctionSolverType.MLE, f, maxRelativeError, maxAbsoluteError);
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 */
 	public MLELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc, ParameterBounds bounds)
 	{
-		super(FunctionSolverType.LSE, f, tc, bounds);
+		super(FunctionSolverType.MLE, f, tc, bounds);
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	public MLELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc, ParameterBounds bounds,
 			double maxRelativeError, double maxAbsoluteError)
 	{
-		super(FunctionSolverType.LSE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
+		super(FunctionSolverType.MLE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
 	}
 
 	/*
