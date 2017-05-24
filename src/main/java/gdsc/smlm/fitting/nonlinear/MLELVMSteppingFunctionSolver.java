@@ -35,8 +35,7 @@ import gdsc.smlm.function.PrecomputedGradient1Function;
  * <p>
  * Per observation variances can be added to both the target x data and the function value to optimise the LLR sCMOS
  * function for Poisson data. See Huang et al, (2015). Video-rate nanoscopy using sCMOS camera–specific single-molecule
- * localization algorithms.
- * Nature Methods 10, 653–658.
+ * localization algorithms. Nature Methods 10, 653–658.
  */
 public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver implements MLEFunctionSolver
 {
