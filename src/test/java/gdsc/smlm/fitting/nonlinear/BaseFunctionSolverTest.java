@@ -8,11 +8,16 @@ import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.junit.Assert;
 
+import gdsc.core.math.SimpleArrayMoment;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
+import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
+import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
+import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
@@ -65,6 +70,11 @@ public abstract class BaseFunctionSolverTest
 
 	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds)
 	{
+		// Allow reporting the fit deviations
+		boolean report = false;
+		double[] crlb = null;
+		SimpleArrayMoment m = null;
+
 		randomGenerator.setSeed(seed);
 		for (double s : signal)
 		{
@@ -73,6 +83,17 @@ public abstract class BaseFunctionSolverTest
 			double[] upper = createParams(3, s * 2, 0.2, 0.2, 1.2);
 			if (applyBounds)
 				solver.setBounds(lower, upper);
+			if (report)
+			{
+				// Compute the CRLB for a Poisson process
+				PoissonGradientProcedure gp = PoissonGradientProcedureFactory
+						.create((Gradient1Function) ((BaseFunctionSolver) solver).getGradientFunction());
+				gp.computeFisherInformation(expected);
+				FisherInformationMatrix f = new FisherInformationMatrix(gp.getLinear(), gp.n);
+				crlb = f.crlbSqrt();
+				// Compute the deviations
+				m = new SimpleArrayMoment();
+			}
 			for (double n : noise)
 			{
 				double[] data = drawGaussian(expected, n);
@@ -95,9 +116,18 @@ public abstract class BaseFunctionSolverTest
 												String.format("Fit Failed: [%d] %.2f > %.2f: %s != %s", i, fp[i],
 														upper[i], Arrays.toString(fp), Arrays.toString(expected)),
 												false);
+									if (report)
+										fp[i] = expected[i] - fp[i];
 								}
+								// Store the deviations
+								if (report)
+									m.add(fp);
 							}
 			}
+			// Report
+			if (report)
+				System.out.printf("%s %f : CRLB = %s, Devaitions = %s\n", solver.getClass().getSimpleName(), s,
+						Arrays.toString(crlb), Arrays.toString(m.getStandardDeviation()));
 		}
 	}
 
