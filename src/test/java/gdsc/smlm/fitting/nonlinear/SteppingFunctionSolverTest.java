@@ -157,6 +157,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	{
 		SteppingFunctionSolver solver = getSolver(clamp, type);
 		canFitSingleGaussian(solver, bounded);
+		// TODO - separate this to a different test
 		if (solver.isWeighted())
 			canFitSingleGaussian(solver, bounded, true);
 	}

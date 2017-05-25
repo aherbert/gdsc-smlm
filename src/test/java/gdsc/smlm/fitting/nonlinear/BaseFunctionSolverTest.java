@@ -87,6 +87,41 @@ public abstract class BaseFunctionSolverTest
 	// Gain = Approximately Normal
 	private static double gain = 2.2;
 	private static double gainSD = 0.2;
+	private static double[] weights = null, pixelSD = null;
+
+	private static double[] getWeights()
+	{
+		if (weights == null)
+			computeWeights();
+		return weights;
+	}
+
+	private static double[] getPixelSD()
+	{
+		if (pixelSD == null)
+			computeWeights();
+		return pixelSD;
+	}
+
+	private static void computeWeights()
+	{
+		// Per observation read noise.
+		weights = new double[size * size];
+		RandomGenerator randomGenerator = new Well19937c(42);
+		ExponentialDistribution ed = new ExponentialDistribution(randomGenerator, variance,
+				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+		for (int i = 0; i < weights.length; i++)
+		{
+			double pixelVariance = ed.sample();
+			double pixelGain = Math.max(0.1, gain + randomGenerator.nextGaussian() * gainSD);
+			// weights = var / g^2
+			weights[i] = pixelVariance / (pixelGain * pixelGain);
+		}
+		// Convert to standard deviation for simulation
+		pixelSD = new double[weights.length];
+		for (int i = 0; i < weights.length; i++)
+			pixelSD[i] = Math.sqrt(weights[i]);
+	}
 
 	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds, boolean weighted)
 	{
@@ -95,25 +130,10 @@ public abstract class BaseFunctionSolverTest
 		double[] crlb = null;
 		SimpleArrayMoment m = null;
 
-		double[] weights = null;
 		if (weighted && solver.isWeighted())
-		{
-			// Per observation read noise.
-			weights = new double[size * size];
-			randomGenerator.setSeed(seed);
-			ExponentialDistribution ed = new ExponentialDistribution(randomGenerator, variance,
-					ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
-			for (int i = 0; i < weights.length; i++)
-			{
-				double pixelVariance = ed.sample();
-				double pixelGain = Math.max(0.1, gain + randomGenerator.nextGaussian() * gainSD);
-				weights[i] = pixelVariance / pixelGain;
-			}
-			solver.setWeights(weights);
-			// Convert to standard deviation for simulation
-			for (int i = 0; i < weights.length; i++)
-				weights[i] = Math.sqrt(weights[i]);
-		}
+			solver.setWeights(getWeights());
+		else
+			weighted = false;
 
 		randomGenerator.setSeed(seed);
 		for (double s : signal)
@@ -136,7 +156,7 @@ public abstract class BaseFunctionSolverTest
 			}
 			for (double n : noise)
 			{
-				double[] data = drawGaussian(expected, n, weights);
+				double[] data = drawGaussian(expected, n, (weighted) ? getPixelSD() : null);
 				for (double db : base)
 					for (double dx : shift)
 						for (double dy : shift)
