@@ -33,7 +33,7 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 	 * @throws IllegalArgumentException
 	 *             if the values length does not match the function size
 	 */
-	public PrecomputedValueFunction(ValueFunction f, double[] values)
+	protected PrecomputedValueFunction(ValueFunction f, double[] values)
 	{
 		if (f.size() != values.length)
 			throw new IllegalArgumentException("Length of precomputed values must match function size");

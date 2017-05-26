@@ -1,5 +1,6 @@
 package gdsc.smlm.function.gaussian.erf;
 
+import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -294,6 +295,61 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 					        du_dtsx[x] * two_du_dtsy_tI;
 				//@formatter:on
 				procedure.execute(tB + tI * duda[1], duda, d2uda2);
+			}
+		}
+	}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
+	 */
+	public void forEach(ExtendedGradient2Procedure procedure)
+	{
+		final int n = getNumberOfGradients();
+		final double[] duda = new double[n];
+		final double[] d2udadb = new double[n * n];
+		duda[0] = 1.0;
+		for (int y = 0; y < maxy; y++)
+		{
+			final double du_dty = this.du_dty[y];
+			final double deltaEy = this.deltaEy[y];
+			final double du_dtsy = this.du_dtsy[y];
+			final double two_du_dtsy_tI = 2 * this.du_dtsy[y] / tI;
+			final double d2u_dty2 = this.d2u_dty2[y];
+			final double d2u_dtsy2 = this.d2u_dtsy2[y];
+			for (int x = 0; x < maxx; x++)
+			{
+				duda[1] = deltaEx[x] * deltaEy;
+				duda[2] = du_dtx[x] * deltaEy;
+				duda[3] = du_dty * deltaEx[x];
+				duda[4] = du_dtsx[x] * deltaEy + du_dtsy * deltaEx[x];
+
+				// TODO:
+				// Compute all the partial second order derivatives
+
+				// Background are all 0
+
+				int k = n;
+				// Signal,X
+				// Signal,Y
+
+				// X,X
+				k += n;
+				d2udadb[k + 2] = d2u_dtx2[x] * deltaEy;
+
+				// Y,Y
+				k += n;
+				d2udadb[k + 3] = d2u_dty2 * deltaEx[x];
+
+				// X SD,X SD
+				k += n;
+				//@formatter:off
+				d2udadb[k + 4] = d2u_dtsx2[x] * deltaEy + 
+         				         d2u_dtsy2 * deltaEx[x] + 
+         				         du_dtsx[x] * two_du_dtsy_tI;
+				//@formatter:on
+
+				procedure.executeExtended(tB + tI * duda[1], duda, d2udadb);
 			}
 		}
 	}

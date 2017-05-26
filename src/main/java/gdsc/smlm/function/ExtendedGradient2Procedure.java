@@ -16,7 +16,7 @@ package gdsc.smlm.function;
 /**
  * Interface for functions to produce a value, first and second partial derivatives
  */
-public interface Gradient2Procedure
+public interface ExtendedGradient2Procedure
 {
 	/**
 	 * Executes this procedure.
@@ -24,11 +24,10 @@ public interface Gradient2Procedure
 	 * @param value
 	 *            the value of the function
 	 * @param dy_da
-	 *            Partial first derivative of function with respect to each coefficient identified by
-	 *            {@link #gradientIndices()}
-	 * @param d2y_da2
-	 *            Partial second derivative of function with respect to each coefficient identified by
-	 *            {@link #gradientIndices()}
+	 *            Partial first derivative of function with respect to each coefficient (a)
+	 * @param d2y_dadb
+	 *            Partial second derivative of function with respect to each coefficient pair (a,b). Packed linearly
+	 *            with size n*n with n the number of coefficients.
 	 */
-	void execute(double value, double[] dy_da, double[] d2y_da2);
+	void executeExtended(double value, double[] dy_da, double[] d2y_dadb);
 }

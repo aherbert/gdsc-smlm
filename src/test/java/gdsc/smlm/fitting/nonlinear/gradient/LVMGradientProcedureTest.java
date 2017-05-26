@@ -347,7 +347,7 @@ public class LVMGradientProcedureTest
 		if (precomputed)
 		{
 			double[] b = Utils.newArray(func.size(), 0.1, 1.3);
-			func = new PrecomputedGradient1Function(func, b);
+			func = PrecomputedGradient1Function.wrapGradient1Function(func, b);
 		}
 
 		String name = String.format("[%d] %b", nparams, type);
@@ -448,7 +448,7 @@ public class LVMGradientProcedureTest
 		if (precomputed)
 		{
 			final double[] b = Utils.newArray(fgf.size(), 0.1, 1.3);
-			func = new PrecomputedGradient1Function(fgf, b);
+			func = PrecomputedGradient1Function.wrapGradient1Function(fgf, b);
 		}
 		else
 		{

@@ -14,7 +14,8 @@ import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.ValueProcedure;
 
-public class FakeGradientFunction implements Gradient2Function, Gradient1Function, NonLinearFunction
+public class FakeGradientFunction
+		implements ExtendedGradient2Function, Gradient2Function, Gradient1Function, NonLinearFunction
 {
 	private final int maxx, n, nparams;
 	private final PseudoRandomSequence r;
@@ -64,6 +65,11 @@ public class FakeGradientFunction implements Gradient2Function, Gradient1Functio
 	}
 
 	public void initialise2(double[] a)
+	{
+		initialise(a);
+	}
+
+	public void initialiseExtended2(double[] a)
 	{
 		initialise(a);
 	}
@@ -123,6 +129,26 @@ public class FakeGradientFunction implements Gradient2Function, Gradient1Functio
 				}
 				//System.out.println(Arrays.toString(dy_da));
 				procedure.execute(r.nextDouble(), dy_da, d2y_da2);
+			}
+		}
+	}
+
+	public void forEach(ExtendedGradient2Procedure procedure)
+	{
+		final double[] d2y_dadb = new double[nparams * nparams];
+
+		// Simulate a 2D forEach
+		for (int y = 0; y < maxx; y++)
+		{
+			for (int x = 0; x < maxx; x++)
+			{
+				for (int j = nparams; j-- > 0;)
+					dy_da[j] = r.nextDouble() * x + y;
+				for (int j = d2y_dadb.length; j-- > 0;)
+					d2y_dadb[j] = r.nextDouble() * x + y;
+
+				//System.out.println(Arrays.toString(dy_da));
+				procedure.executeExtended(r.nextDouble(), dy_da, d2y_dadb);
 			}
 		}
 	}

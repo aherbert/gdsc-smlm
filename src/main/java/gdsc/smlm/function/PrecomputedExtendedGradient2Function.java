@@ -16,14 +16,14 @@ package gdsc.smlm.function;
 /**
  * Wraps a value function to add pre-computed values to the forEach procedure
  */
-public class PrecomputedGradient1Function extends PrecomputedValueFunction
-		implements Gradient1Function, Gradient1Procedure
+public class PrecomputedExtendedGradient2Function extends PrecomputedGradient2Function
+		implements ExtendedGradient2Function, ExtendedGradient2Procedure
 {
-	protected final Gradient1Function f1;
-	protected Gradient1Procedure procedure;
+	protected final ExtendedGradient2Function ef2;
+	protected ExtendedGradient2Procedure procedure;
 
 	/**
-	 * Instantiates a new precomputed gradient1 function.
+	 * Instantiates a new precomputed extended gradient2 function.
 	 *
 	 * @param f
 	 *            the function
@@ -32,49 +32,33 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 	 * @throws IllegalArgumentException
 	 *             if the values length does not match the function size
 	 */
-	protected PrecomputedGradient1Function(Gradient1Function f, double[] values)
+	protected PrecomputedExtendedGradient2Function(ExtendedGradient2Function f, double[] values)
 	{
 		super(f, values);
-		f1 = f;
-	}
-
-	private PrecomputedGradient1Function(PrecomputedGradient1Function pre, double[] values2)
-	{
-		super(pre, values2);
-		f1 = (Gradient1Function) f;
+		ef2 = f;
 	}
 	
-	public void initialise(double[] a)
+	private PrecomputedExtendedGradient2Function(PrecomputedExtendedGradient2Function pre, double[] values2)
 	{
-		f1.initialise(a);
+		super(pre, values2);
+		ef2 = (ExtendedGradient2Function) f;
+	}
+
+	public void initialiseExtended2(double[] a)
+	{
+		ef2.initialiseExtended2(a);
 		i = 0;
 	}
 
-	public int[] gradientIndices()
-	{
-		return f1.gradientIndices();
-	}
-
-	public int getNumberOfGradients()
-	{
-		return f1.getNumberOfGradients();
-	}
-
-	public void initialise1(double[] a)
-	{
-		f1.initialise1(a);
-		i = 0;
-	}
-
-	public void forEach(Gradient1Procedure procedure)
+	public void forEach(ExtendedGradient2Procedure procedure)
 	{
 		this.procedure = procedure;
-		f1.forEach((Gradient1Procedure) this);
+		ef2.forEach((ExtendedGradient2Procedure) this);
 	}
 
-	public void execute(double value, double[] dy_da)
+	public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
 	{
-		procedure.execute(value + values[i++], dy_da);
+		procedure.executeExtended(value + values[i++], dy_da, d2y_dadb);
 	}
 
 	/**
@@ -86,16 +70,16 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 	 *            Baseline pre-computed y-values
 	 * @return the wrapped function (or the original if pre-computed values are null or wrong length)
 	 */
-	public static Gradient1Function wrapGradient1Function(final Gradient1Function func, final double[] b)
+	public static ExtendedGradient2Function wrapExtendedGradient2Function(final ExtendedGradient2Function func, final double[] b)
 	{
 		if (b != null && b.length == func.size())
 		{
 			// Avoid multiple wrapping
-			if (func instanceof PrecomputedGradient1Function)
+			if (func instanceof PrecomputedExtendedGradient2Function)
 			{
-				return new PrecomputedGradient1Function((PrecomputedGradient1Function)func, b);
+				return new PrecomputedExtendedGradient2Function((PrecomputedExtendedGradient2Function)func, b);
 			}
-			return new PrecomputedGradient1Function(func, b);
+			return new PrecomputedExtendedGradient2Function(func, b);
 		}
 		return func;
 	}

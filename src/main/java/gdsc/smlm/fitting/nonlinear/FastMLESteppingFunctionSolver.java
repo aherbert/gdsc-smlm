@@ -1,14 +1,19 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import java.util.Arrays;
+
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.MLEFunctionSolver;
+import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.FastMLEGradient2Procedure;
 import gdsc.smlm.fitting.nonlinear.gradient.FastMLEGradient2ProcedureFactory;
+import gdsc.smlm.fitting.nonlinear.gradient.FastMLEJacobianGradient2Procedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
+import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.PrecomputedGradient2Function;
 
@@ -54,6 +59,13 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	protected Gradient2Function f2;
 	/** The gradient procedure. */
 	protected FastMLEGradient2Procedure gradientProcedure;
+	/** The Jacobian gradient procedure. */
+	protected FastMLEJacobianGradient2Procedure jacobianGradientProcedure;
+
+	protected EJMLLinearSolver solver = null;
+
+	public static final double DEFAULT_MAX_RELATIVE_ERROR = LVMSteppingFunctionSolver.DEFAULT_MAX_RELATIVE_ERROR;
+	public static final double DEFAULT_MAX_ABSOLUTE_ERROR = LVMSteppingFunctionSolver.DEFAULT_MAX_ABSOLUTE_ERROR;
 
 	/**
 	 * Create a new stepping function solver.
@@ -87,6 +99,36 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	public FastMLESteppingFunctionSolver(Gradient2Function f, ToleranceChecker tc, ParameterBounds bounds)
 	{
 		super(FunctionSolverType.MLE, f, tc, bounds);
+	}
+
+	/**
+	 * Enable computing the Newton-Raphson step using a full Jacobian solution. This requires computation of the
+	 * Jacobian of second order partial derivatives with respect to parameters [i,j] and inversion using LU
+	 * decomposition.
+	 *
+	 * @param enable
+	 *            Set to true to enable
+	 */
+	public void enableJacobianSolution(boolean enable)
+	{
+		enableJacobianSolution(enable, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
+	}
+
+	/**
+	 * Enable computing the Newton-Raphson step using a full Jacobian solution. This requires computation of the
+	 * Jacobian of second order partial derivatives with respect to parameters [i,j] and inversion using LU
+	 * decomposition.
+	 *
+	 * @param enable
+	 *            Set to true to enable
+	 * @param maxRelativeError
+	 *            Validate the Jacobian solution using the specified maximum relative error
+	 * @param maxAbsoluteError
+	 *            Validate the Jacobian solution using the specified maximum absolute error
+	 */
+	public void enableJacobianSolution(boolean enable, double maxRelativeError, double maxAbsoluteError)
+	{
+		solver = (enable) ? new EJMLLinearSolver(maxRelativeError, maxAbsoluteError) : null;
 	}
 
 	/*
@@ -161,7 +203,8 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		{
 			f2 = PrecomputedGradient2Function.wrapGradient2Function(f2, w);
 		}
-		return FastMLEGradient2ProcedureFactory.create(y, f2);
+		return (solver != null) ? jacobianGradientProcedure = new FastMLEJacobianGradient2Procedure(y, (ExtendedGradient2Function) f2)
+				: FastMLEGradient2ProcedureFactory.create(y, f2);
 	}
 
 	/*
@@ -172,7 +215,10 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	@Override
 	protected double computeFitValue(double[] a)
 	{
-		gradientProcedure.computeSecondDerivative(a);
+		if (solver != null)
+			jacobianGradientProcedure.computeJacobian(a);
+		else
+			gradientProcedure.computeSecondDerivative(a);
 
 		if (gradientProcedure.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
@@ -198,6 +244,22 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	{
 		final double[] d1 = gradientProcedure.d1;
 		final double[] d2 = gradientProcedure.d2;
+
+		if (solver != null)
+		{
+			// Solve the Jacobian
+			for (int i = 0; i < step.length; i++)
+				step[i] = -d1[i];
+			if (solver.solveLinear(jacobianGradientProcedure.J, step))
+			{
+				// XXX - debug the difference
+				double[] step2 = new double[d1.length];
+				for (int i = 0; i < step.length; i++)
+					step2[i] = -d1[i] / d2[i];
+				System.out.printf("Jacobian Step %s vs %s\n", Arrays.toString(step), Arrays.toString(step2));
+				return;
+			}
+		}
 
 		// Simple Newton-Raphson update step as per Smith et al, (2010), SI Eq. 13:
 		// parameter -> new parameter + delta

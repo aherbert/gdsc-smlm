@@ -32,7 +32,7 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function
 	 * @throws IllegalArgumentException
 	 *             if the values length does not match the function size
 	 */
-	public PrecomputedGradient2Function(Gradient2Function f, double[] values)
+	protected PrecomputedGradient2Function(Gradient2Function f, double[] values)
 	{
 		super(f, values);
 		f2 = f;
@@ -42,16 +42,6 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function
 	{
 		super(pre, values2);
 		f2 = (Gradient2Function) f;
-	}
-
-	public int[] gradientIndices()
-	{
-		return f2.gradientIndices();
-	}
-
-	public int getNumberOfGradients()
-	{
-		return f2.getNumberOfGradients();
 	}
 
 	public void initialise2(double[] a)

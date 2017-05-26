@@ -1,6 +1,5 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer.LineSearchRoundoffException;
 import org.apache.commons.math3.util.FastMath;
 

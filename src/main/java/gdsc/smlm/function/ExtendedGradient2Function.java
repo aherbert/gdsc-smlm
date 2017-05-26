@@ -14,21 +14,24 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Interface for functions to produce a value, first and second partial derivatives
+ * Defines function that can produce second order gradients
  */
-public interface Gradient2Procedure
+public interface ExtendedGradient2Function extends Gradient2Function
 {
 	/**
-	 * Executes this procedure.
-	 *
-	 * @param value
-	 *            the value of the function
-	 * @param dy_da
-	 *            Partial first derivative of function with respect to each coefficient identified by
-	 *            {@link #gradientIndices()}
-	 * @param d2y_da2
-	 *            Partial second derivative of function with respect to each coefficient identified by
-	 *            {@link #gradientIndices()}
+	 * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
+	 * initialisation.
+	 * 
+	 * @param a
+	 *            An array of coefficients
 	 */
-	void execute(double value, double[] dy_da, double[] d2y_da2);
+	void initialiseExtended2(final double[] a);
+	
+	/**
+	 * Applies the procedure for the valid range of the function.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forEach(ExtendedGradient2Procedure procedure);
 }
