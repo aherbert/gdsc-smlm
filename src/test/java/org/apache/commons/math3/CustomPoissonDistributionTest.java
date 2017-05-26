@@ -10,7 +10,7 @@ import org.junit.Test;
 import gdsc.core.test.BaseTimingTask;
 import gdsc.core.test.TimingService;
 
-public class CustomPoissonDistirbutionTest
+public class CustomPoissonDistributionTest
 {
 	private abstract class MyTimingTask extends BaseTimingTask
 	{
@@ -112,11 +112,25 @@ public class CustomPoissonDistirbutionTest
 	}
 
 	@Test
+	public void customDistributionIsFasterWithTinyMean()
+	{
+		TimingService ts = new TimingService(5);
+		ts.execute(new StaticTimingTask(0.5, 10));
+		ts.execute(new InstanceTimingTask(0.5, 10));
+
+		int size = ts.getSize();
+		ts.repeat(size);
+		ts.report(size);
+		
+		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+	}
+
+	@Test
 	public void customDistributionIsFasterWithSmallMean()
 	{
 		TimingService ts = new TimingService(5);
-		ts.execute(new StaticTimingTask(0.5, 38));
-		ts.execute(new InstanceTimingTask(0.5, 38));
+		ts.execute(new StaticTimingTask(10, 38));
+		ts.execute(new InstanceTimingTask(10, 38));
 
 		int size = ts.getSize();
 		ts.repeat(size);
@@ -130,7 +144,9 @@ public class CustomPoissonDistirbutionTest
 	{
 		// When the mean is above 40 the PoissonDistribution switches to a different
 		// sampling method and this is so slow that the speed increase from using 
-		// the instance class is negligible. However it is still faster.
+		// the instance class is negligible. However test it is still faster. If this fails
+		// then Apache commons may have changed their implementation and the custom
+		// class should be updated.
 		
 		TimingService ts = new TimingService(5);
 		ts.execute(new StaticTimingTask(40.5, 60));
