@@ -194,7 +194,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		}
 		finally
 		{
-			iterations = evaluations = tc.getIterations();
+			iterations = tc.getIterations();
+			// Allow subclasses to increment this
+			if (evaluations == 0)
+				evaluations = iterations;
 		}
 	}
 

@@ -196,10 +196,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	@Override
 	protected void computeStep(double[] step)
 	{
-		// TODO - Extend the method to implement correct multi-dimensional Newton-Raphson
-		// root finding (see Numerical Recipes in C++, 2nd Ed, page 385, function mnewt).
-		// This involves computing the Jacobian matrix from the vector of gradient functions.
-
 		final double[] d1 = gradientProcedure.d1;
 		final double[] d2 = gradientProcedure.d2;
 
@@ -208,6 +204,20 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		// => new parameter = parameter - delta  
 		for (int i = 0; i < step.length; i++)
 			step[i] = -d1[i] / d2[i];
+		
+		// TODO - Extend this method by implementing Line Search and Backtracking
+		// (see Numerical Recipes in C++, 2nd Ed, page 388-389, function lnsrch).
+		// This can still be done in the context of the stepping function solver.
+		// Adjustments:
+		// - Always ensure we compute the function value. This is needed to determine
+		// if the step computed a better value.
+		// - The first call to computeFitValue() computes derivatives. The value is obtained from 
+		// computePseudoLogLikelihood() 
+		// - All subsequent calls to computeFitValue() only call computeValue() and implement
+		// backtracking if the value does not improve with the full Newton step.
+		// - When a suitable value is achieved then this should be returned from computeFitValue()
+		// - The next call to compute step must evaluate the derivatives.
+		// - The function evaluations counter should be appropriately incremented
 	}
 
 	/*
