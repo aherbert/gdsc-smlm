@@ -89,36 +89,33 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 				solver2.setBounds(lower2, upper2);
 			}
 
-			for (double n : noise)
+			for (int loop = LOOPS; loop-- > 0;)
 			{
-				for (int loop = LOOPS; loop-- > 0;)
-				{
-					double[] data = drawGaussian(expected, n, null);
-					double[] data2 = data.clone();
-					for (int i = 0; i < data.length; i++)
-						data2[i] += bias;
+				double[] data = drawGaussian(expected);
+				double[] data2 = data.clone();
+				for (int i = 0; i < data.length; i++)
+					data2[i] += bias;
 
-					for (int i = 0; i < stats.length; i++)
-						stats[i] = new StoredDataStatistics();
+				for (int i = 0; i < stats.length; i++)
+					stats[i] = new StoredDataStatistics();
 
-					for (double db : base)
-						for (double dx : shift)
-							for (double dy : shift)
-								for (double dsx : factor)
-								{
-									double[] p = createParams(db, s, dx, dy, dsx);
-									double[] p2 = addBiasToParams(p, bias);
+				for (double db : base)
+					for (double dx : shift)
+						for (double dy : shift)
+							for (double dsx : factor)
+							{
+								double[] p = createParams(db, s, dx, dy, dsx);
+								double[] p2 = addBiasToParams(p, bias);
 
-									double[] fp = fitGaussian(solver, data, p, expected);
-									double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
+								double[] fp = fitGaussian(solver, data, p, expected);
+								double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
 
-									// The result should be the same without a bias
-									Assert.assertEquals(name + " Iterations", solver.getEvaluations(),
-											solver2.getEvaluations());
-									fp2[0] -= bias;
-									Assert.assertArrayEquals(name + " Solution", fp, fp2, 1e-6);
-								}
-				}
+								// The result should be the same without a bias
+								Assert.assertEquals(name + " Iterations", solver.getEvaluations(),
+										solver2.getEvaluations());
+								fp2[0] -= bias;
+								Assert.assertArrayEquals(name + " Solution", fp, fp2, 1e-6);
+							}
 			}
 		}
 	}
@@ -314,8 +311,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 
 	private NonLinearFit getLVM(int bounded, int clamping, boolean mle)
 	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_CIRCLE,
-				null);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, flags, null);
 		StoppingCriteria sc = new ErrorStoppingCriteria(5);
 		sc.setMaximumIterations(100);
 		NonLinearFit solver = (bounded != 0 || clamping != 0) ? new BoundedNonLinearFit(f, sc, null)

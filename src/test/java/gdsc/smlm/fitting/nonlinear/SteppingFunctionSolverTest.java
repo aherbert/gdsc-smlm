@@ -8,279 +8,388 @@ import org.junit.Test;
 public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 {
 	@Test
-	public void canFitSingleGaussianLSELSELVM()
+	public void canFitSingleGaussianEMCCD_x_x__LSELVM()
 	{
-		fitSingleGaussian(NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussian(NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianCLSELSELVM()
+	public void canFitSingleGaussianEMCCD_x_C__LSELVM()
 	{
-		fitSingleGaussian(NO_BOUND, CLAMP, LSELVM);
+		fitSingleGaussian(NO_BOUND, CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianDCLSELSELVM()
+	public void canFitSingleGaussianEMCCD_x_DC_LSELVM()
 	{
-		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, LSELVM);
+		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBLSELSELVM()
+	public void canFitSingleGaussianEMCCD_B_x__LSELVM()
 	{
-		fitSingleGaussian(BOUNDED, NO_CLAMP, LSELVM);
+		fitSingleGaussian(BOUNDED, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBCLSELSELVM()
+	public void canFitSingleGaussianEMCCD_B_C__LSELVM()
 	{
-		fitSingleGaussian(BOUNDED, CLAMP, LSELVM);
+		fitSingleGaussian(BOUNDED, CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBDCLSELSELVM()
+	public void canFitSingleGaussianEMCCD_B_DC_LSELVM()
 	{
-		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, LSELVM);
+		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianLSEWLSELVM()
+	public void canFitSingleGaussianEMCCD_x_x__WLSELVM()
 	{
-		fitSingleGaussian(NO_BOUND, NO_CLAMP, WLSELVM);
+		fitSingleGaussian(NO_BOUND, NO_CLAMP, WLSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianCLSEWLSELVM()
+	public void canFitSingleGaussianEMCCD_x_C__WLSELVM()
 	{
-		fitSingleGaussian(NO_BOUND, CLAMP, WLSELVM);
+		fitSingleGaussian(NO_BOUND, CLAMP, WLSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianDCLSEWLSELVM()
+	public void canFitSingleGaussianEMCCD_x_DC_WLSELVM()
 	{
-		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, WLSELVM);
+		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, WLSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBLSEWLSELVM()
+	public void canFitSingleGaussianEMCCD_B_x__WLSELVM()
 	{
-		fitSingleGaussian(BOUNDED, NO_CLAMP, WLSELVM);
+		fitSingleGaussian(BOUNDED, NO_CLAMP, WLSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBCLSEWLSELVM()
+	public void canFitSingleGaussianEMCCD_B_C__WLSELVM()
 	{
-		fitSingleGaussian(BOUNDED, CLAMP, WLSELVM);
+		fitSingleGaussian(BOUNDED, CLAMP, WLSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBDCLSEWLSELVM()
+	public void canFitSingleGaussianEMCCD_B_DC_WLSELVM()
 	{
-		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, WLSELVM);
+		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, WLSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianLSEMLELVM()
+	public void canFitSingleGaussianEMCCD_x_x__MLELVM()
 	{
-		fitSingleGaussian(NO_BOUND, NO_CLAMP, MLELVM);
+		fitSingleGaussian(NO_BOUND, NO_CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianCLSEMLELVM()
+	public void canFitSingleGaussianEMCCD_x_C__MLELVM()
 	{
-		fitSingleGaussian(NO_BOUND, CLAMP, MLELVM);
+		fitSingleGaussian(NO_BOUND, CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianDCLSEMLELVM()
+	public void canFitSingleGaussianEMCCD_x_DC_MLELVM()
 	{
-		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, MLELVM);
+		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBLSEMLELVM()
+	public void canFitSingleGaussianEMCCD_B_x__MLELVM()
 	{
-		fitSingleGaussian(BOUNDED, NO_CLAMP, MLELVM);
+		fitSingleGaussian(BOUNDED, NO_CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBCLSEMLELVM()
+	public void canFitSingleGaussianEMCCD_B_C__MLELVM()
 	{
-		fitSingleGaussian(BOUNDED, CLAMP, MLELVM);
+		fitSingleGaussian(BOUNDED, CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBDCLSEMLELVM()
+	public void canFitSingleGaussianEMCCD_B_DC_MLELVM()
 	{
-		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, MLELVM);
+		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
 	@Test(expected=AssertionError.class)
-	public void cannotFitSingleGaussianFastMLE()
+	public void cannotFitSingleGaussianEMCCD_x_x__FastMLE()
 	{
-		// The raw FastMLE method is unstable as it takes large steps with 
-		// no checking of the step size or the effect on the MLE value
-		fitSingleGaussian(NO_BOUND, NO_CLAMP, FastMLE);
+		// The FastMLE method can generate very big steps that make the method unstable
+		fitSingleGaussian(NO_BOUND, NO_CLAMP, FastMLE, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianCFastMLE()
+	public void canFitSingleGaussianEMCCD_x_C__FastMLE()
 	{
-		fitSingleGaussian(NO_BOUND, CLAMP, FastMLE);
+		fitSingleGaussian(NO_BOUND, CLAMP, FastMLE, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianDCFastMLE()
+	public void canFitSingleGaussianEMCCD_x_DC_FastMLE()
 	{
-		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, FastMLE);
+		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, FastMLE, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBFastMLE()
+	public void canFitSingleGaussianEMCCD_B_x__FastMLE()
 	{
-		fitSingleGaussian(BOUNDED, NO_CLAMP, FastMLE);
+		fitSingleGaussian(BOUNDED, NO_CLAMP, FastMLE, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBCFastMLE()
+	public void canFitSingleGaussianEMCCD_B_C__FastMLE()
 	{
-		fitSingleGaussian(BOUNDED, CLAMP, FastMLE);
+		fitSingleGaussian(BOUNDED, CLAMP, FastMLE, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void canFitSingleGaussianBDCFastMLE()
+	public void canFitSingleGaussianEMCCD_B_DC_FastMLE()
 	{
-		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, FastMLE);
+		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, FastMLE, NoiseModel.EMCCD);
 	}
 
-	private void fitSingleGaussian(boolean bounded, SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type)
+	// Weighted solvers for sCMOS
+
+	@Test
+	public void canFitSingleGaussianSCMOS_x_x__WLSELVM()
+	{
+		fitSingleGaussian(NO_BOUND, NO_CLAMP, WLSELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_x_C__WLSELVM()
+	{
+		fitSingleGaussian(NO_BOUND, CLAMP, WLSELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_x_DC_WLSELVM()
+	{
+		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, WLSELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_B_x__WLSELVM()
+	{
+		fitSingleGaussian(BOUNDED, NO_CLAMP, WLSELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_B_C__WLSELVM()
+	{
+		fitSingleGaussian(BOUNDED, CLAMP, WLSELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_B_DC_WLSELVM()
+	{
+		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, WLSELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_x_x__MLELVM()
+	{
+		fitSingleGaussian(NO_BOUND, NO_CLAMP, MLELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_x_C__MLELVM()
+	{
+		fitSingleGaussian(NO_BOUND, CLAMP, MLELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_x_DC_MLELVM()
+	{
+		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, MLELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_B_x__MLELVM()
+	{
+		fitSingleGaussian(BOUNDED, NO_CLAMP, MLELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_B_C__MLELVM()
+	{
+		fitSingleGaussian(BOUNDED, CLAMP, MLELVM, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_B_DC_MLELVM()
+	{
+		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, MLELVM, NoiseModel.SCMOS);
+	}
+
+	@Test(expected=AssertionError.class)
+	public void cannotFitSingleGaussianSCMOS_x_x__FastMLE()
+	{
+		// The FastMLE method can generate very big steps that make the method unstable
+		fitSingleGaussian(NO_BOUND, NO_CLAMP, FastMLE, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_x_C__FastMLE()
+	{
+		fitSingleGaussian(NO_BOUND, CLAMP, FastMLE, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_x_DC_FastMLE()
+	{
+		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, FastMLE, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_B_x__FastMLE()
+	{
+		fitSingleGaussian(BOUNDED, NO_CLAMP, FastMLE, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_B_C__FastMLE()
+	{
+		fitSingleGaussian(BOUNDED, CLAMP, FastMLE, NoiseModel.SCMOS);
+	}
+
+	@Test
+	public void canFitSingleGaussianSCMOS_B_DC_FastMLE()
+	{
+		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, FastMLE, NoiseModel.SCMOS);
+	}
+
+
+	private void fitSingleGaussian(boolean bounded, SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type,
+			NoiseModel noiseModel)
 	{
 		SteppingFunctionSolver solver = getSolver(clamp, type);
-		canFitSingleGaussian(solver, bounded);
-		// TODO - separate this to a different test
-		if (solver.isWeighted())
-			canFitSingleGaussian(solver, bounded, true);
+		canFitSingleGaussian(solver, bounded, noiseModel);
 	}
 
 	// Is Bounded/Clamped better?
 
 	@Test
-	public void fitSingleGaussianBLSELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_B_LSELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, NO_CLAMP, LSELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(BOUNDED, NO_CLAMP, LSELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianCLSELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_C__LSELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(NO_BOUND, CLAMP, LSELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(NO_BOUND, CLAMP, LSELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianBCLSELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_B_CLSELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, CLAMP, LSELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(BOUNDED, CLAMP, LSELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianDCLSELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_DC_LSELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(NO_BOUND, DYNAMIC_CLAMP, LSELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(NO_BOUND, DYNAMIC_CLAMP, LSELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianBDCLSELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_B_DC_LSELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, DYNAMIC_CLAMP, LSELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(BOUNDED, DYNAMIC_CLAMP, LSELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianMLELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_MLELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(NO_BOUND, NO_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(NO_BOUND, NO_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianBMLELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_B_MLELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, NO_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(BOUNDED, NO_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianCMLELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_C__MLELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(NO_BOUND, CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(NO_BOUND, CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianBCMLELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_B_CMLELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(BOUNDED, CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianDCMLELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_DC_MLELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(NO_BOUND, DYNAMIC_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(NO_BOUND, DYNAMIC_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianBDCMLELVMBetterThanLSELVM()
+	public void fitSingleGaussianEMCCD_B_DC_MLELVMBetterThanLSELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, DYNAMIC_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(BOUNDED, DYNAMIC_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianBMLELVMBetterThanMLELVM()
+	public void fitSingleGaussianEMCCD_B_MLELVMBetterThanMLELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, NO_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, MLELVM);
+		fitSingleGaussianBetter(BOUNDED, NO_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianCMLELVMBetterThanMLELVM()
+	public void fitSingleGaussianEMCCD_C__MLELVMBetterThanMLELVM()
 	{
-		fitSingleGaussianBetter(NO_BOUND, CLAMP, MLELVM, NO_BOUND, NO_CLAMP, MLELVM);
+		fitSingleGaussianBetter(NO_BOUND, CLAMP, MLELVM, NO_BOUND, NO_CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianDCMLELVMBetterThanMLELVM()
+	public void fitSingleGaussianEMCCD_DC_MLELVMBetterThanMLELVM()
 	{
-		fitSingleGaussianBetter(NO_BOUND, DYNAMIC_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, MLELVM);
+		fitSingleGaussianBetter(NO_BOUND, DYNAMIC_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianBDCMLELVMBetterThanMLELVM()
+	public void fitSingleGaussianEMCCD_B_DC_MLELVMBetterThanMLELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, DYNAMIC_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, MLELVM);
+		fitSingleGaussianBetter(BOUNDED, DYNAMIC_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianBMLELVMBetterThanBLSELVM()
+	public void fitSingleGaussianEMCCD_B_MLELVMBetterThanBLSELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, NO_CLAMP, MLELVM, BOUNDED, NO_CLAMP, LSELVM);
+		fitSingleGaussianBetter(BOUNDED, NO_CLAMP, MLELVM, BOUNDED, NO_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianBCMLELVMBetterThanBCLSELVM()
+	public void fitSingleGaussianEMCCD_B_CMLELVMBetterThanBCLSELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, CLAMP, MLELVM, BOUNDED, CLAMP, LSELVM);
+		fitSingleGaussianBetter(BOUNDED, CLAMP, MLELVM, BOUNDED, CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	@Test
-	public void fitSingleGaussianBDCMLELVMBetterThanBDCLSELVM()
+	public void fitSingleGaussianEMCCD_B_DC_MLELVMBetterThanBDCLSELVM()
 	{
-		fitSingleGaussianBetter(BOUNDED, DYNAMIC_CLAMP, MLELVM, BOUNDED, DYNAMIC_CLAMP, LSELVM);
+		fitSingleGaussianBetter(BOUNDED, DYNAMIC_CLAMP, MLELVM, BOUNDED, DYNAMIC_CLAMP, LSELVM, NoiseModel.EMCCD);
 	}
 
 	private void fitSingleGaussianBetter(boolean bounded2, SteppingFunctionSolverClamp clamp2,
 			SteppingFunctionSolverType type2, boolean bounded, SteppingFunctionSolverClamp clamp,
-			SteppingFunctionSolverType type)
+			SteppingFunctionSolverType type, NoiseModel noiseModel)
 	{
-		org.junit.Assume.assumeTrue(false);
-		
+		//org.junit.Assume.assumeTrue(false);
+
 		SteppingFunctionSolver solver = getSolver(clamp, type);
 		SteppingFunctionSolver solver2 = getSolver(clamp2, type2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getName(bounded, clamp, type),
-				getName(bounded2, clamp2, type2));
+				getName(bounded2, clamp2, type2), noiseModel);
 	}
 }

@@ -2,7 +2,9 @@ package gdsc.smlm.fitting.nonlinear;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.distribution.CustomGammaDistribution;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -34,15 +36,22 @@ public abstract class BaseFunctionSolverTest
 
 	// Basic Gaussian
 	static double[] params = new double[7];
-	static double[] base = { 0.8, 1, 1.2 };
-	static double[] signal = { 1000, 2000, 5000, 10000 }; // 100, 200, 400, 800 };
-	static double[] noise = { 0.1, 0.5, 1 };
-	static double[] shift = { -1, 0, 1 };
-	static double[] factor = { 0.7, 1, 1.3 };
+	static double[] base = { 0.8, 1, 1.2 }; // Applied (*) to the background
+	//@formatter:off
+	static double[] signal = {
+			1000, 2000, 5000, 10000 
+			//100, 200, 400, 800 
+		};
+	//@formatter:on
+	static double[] shift = { -1, 0, 1 }; // Applied (+/-) to the x/y position
+	static double[] factor = { 0.7, 1, 1.3 }; // Applied (*) to the width
 	static int size = 11;
 	static
 	{
-		params[Gaussian2DFunction.BACKGROUND] = 5;
+		// Keep SNR reasonable. This should be an "easy" test since the bounds 
+		// for a correct answer are strict
+		double minSNR = 100;
+		params[Gaussian2DFunction.BACKGROUND] = signal[0] / minSNR;
 		params[Gaussian2DFunction.X_POSITION] = size / 2;
 		params[Gaussian2DFunction.Y_POSITION] = size / 2;
 		params[Gaussian2DFunction.X_SD] = 1.4;
@@ -57,23 +66,38 @@ public abstract class BaseFunctionSolverTest
 		// DOI: 10.1186/2192-2853-1-6
 		// Page 3
 		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
+		// Note: The clamp value is the maximum permitted single step.
+		// If the desired step is equal to the maximum step then the clamped step will be half. 
 
 		// This seems big for background in photons
 		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
 		//defaultClampValues[Gaussian2DFunction.BACKGROUND] = 20;
 		defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
+		// TODO - set this specifically for angle or z-depth fitting
 		defaultClampValues[Gaussian2DFunction.SHAPE] = Math.PI;
 		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
 		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
+		// This seems big for width changes
 		defaultClampValues[Gaussian2DFunction.X_SD] = 3;
 		defaultClampValues[Gaussian2DFunction.Y_SD] = 3;
+
+		
+		// More restrictive ...
+		
+		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 5;
+		//defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
+		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
+		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
+		defaultClampValues[Gaussian2DFunction.X_SD] = 1;
+		defaultClampValues[Gaussian2DFunction.Y_SD] = 1;
 	}
 
-	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds)
+	enum NoiseModel
 	{
-		canFitSingleGaussian(solver, applyBounds, false);
+		NONE, CCD, EMCCD, SCMOS
 	}
 
+	// Based on Huang et al (2015) sCMOS per pixel noise.
 	// Variance = Exponential (equivalent to chi-squared with k=1, i.e. 
 	// sum of the squares of 1 normal distribution). 
 	// We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b 
@@ -87,23 +111,67 @@ public abstract class BaseFunctionSolverTest
 	// Gain = Approximately Normal
 	private static double gain = 2.2;
 	private static double gainSD = 0.2;
-	private static double[] weights = null, pixelSD = null;
 
-	private static double[] getWeights()
+	// Other noise models
+	private static double noiseCCD = Math.sqrt(variance / gain); // Same as sCMOS
+	private static double emGain = 300;
+	private static double noiseEMCCD = 0.02;
+
+	private static double[][] weights = new double[NoiseModel.values().length][], noise = new double[weights.length][];
+
+	private static double[] getWeights(NoiseModel noiseModel)
 	{
-		if (weights == null)
-			computeWeights();
-		return weights;
+		int index = noiseModel.ordinal();
+		if (weights[index] == null)
+			computeWeights(noiseModel, index);
+		return weights[index];
 	}
 
-	private static double[] getPixelSD()
+	private static double[] getNoise(NoiseModel noiseModel)
 	{
-		if (pixelSD == null)
-			computeWeights();
-		return pixelSD;
+		int index = noiseModel.ordinal();
+		if (noise[index] == null)
+			computeWeights(noiseModel, index);
+		return noise[index];
 	}
 
-	private static void computeWeights()
+	private static void computeWeights(NoiseModel noiseModel, int index)
+	{
+		double[] w = new double[size * size];
+		double[] n = new double[size * size];
+		if (noiseModel == NoiseModel.SCMOS)
+		{
+			// Special case of per-pixel noise
+			computeSCMOSWeights(w, n);
+		}
+		else
+		{
+			// The rest are fixed for all pixels 
+			switch (noiseModel)
+			{
+				case CCD:
+					computeWeights(w, n, noiseCCD);
+					break;
+				case EMCCD:
+					computeWeights(w, n, noiseEMCCD);
+					break;
+				case NONE:
+				default:
+					// Nothing to do
+					break;
+			}
+		}
+		noise[index] = n;
+		weights[index] = w;
+	}
+
+	private static void computeWeights(double[] weights, double[] noise, double sd)
+	{
+		Arrays.fill(weights, sd * sd);
+		Arrays.fill(noise, sd);
+	}
+
+	private static void computeSCMOSWeights(double[] weights, double[] noise)
 	{
 		// Per observation read noise.
 		weights = new double[size * size];
@@ -118,22 +186,32 @@ public abstract class BaseFunctionSolverTest
 			weights[i] = pixelVariance / (pixelGain * pixelGain);
 		}
 		// Convert to standard deviation for simulation
-		pixelSD = new double[weights.length];
+		noise = new double[weights.length];
 		for (int i = 0; i < weights.length; i++)
-			pixelSD[i] = Math.sqrt(weights[i]);
+			noise[i] = Math.sqrt(weights[i]);
 	}
 
-	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds, boolean weighted)
+	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds)
+	{
+		// This is here to support the old solver tests which used to have fixed noise of 0.1, 0.5, 1.
+		// Those levels are irrelevant for modern EM-CCD cameras which have effectively very low noise.
+		// The test has been changed to better simulate the cameras encountered.
+		canFitSingleGaussian(solver, applyBounds, NoiseModel.NONE);
+		// We are not interested in high noise CCD so this is commented out
+		//canFitSingleGaussian(solver, applyBounds, NoiseModel.CCD);
+		canFitSingleGaussian(solver, applyBounds, NoiseModel.EMCCD);
+	}
+
+	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds, NoiseModel noiseModel)
 	{
 		// Allow reporting the fit deviations
 		boolean report = false;
 		double[] crlb = null;
 		SimpleArrayMoment m = null;
 
-		if (weighted && solver.isWeighted())
-			solver.setWeights(getWeights());
-		else
-			weighted = false;
+		double[] noise = getNoise(noiseModel);
+		if (solver.isWeighted())
+			solver.setWeights(getWeights(noiseModel));
 
 		randomGenerator.setSeed(seed);
 		for (double s : signal)
@@ -154,46 +232,55 @@ public abstract class BaseFunctionSolverTest
 				// Compute the deviations
 				m = new SimpleArrayMoment();
 			}
-			for (double n : noise)
-			{
-				double[] data = drawGaussian(expected, n, (weighted) ? getPixelSD() : null);
-				for (double db : base)
-					for (double dx : shift)
-						for (double dy : shift)
-							for (double dsx : factor)
+			double[] data = drawGaussian(expected, noise, noiseModel);
+			for (double db : base)
+				for (double dx : shift)
+					for (double dy : shift)
+						for (double dsx : factor)
+						{
+							double[] p = createParams(db, s, dx, dy, dsx);
+							double[] fp = fitGaussian(solver, data, p, expected);
+							for (int i = 0; i < expected.length; i++)
 							{
-								double[] p = createParams(db, s, dx, dy, dsx);
-								double[] fp = fitGaussian(solver, data, p, expected);
-								for (int i = 0; i < expected.length; i++)
-								{
-									if (fp[i] < lower[i])
-										Assert.assertTrue(
-												String.format("Fit Failed: [%d] %.2f < %.2f: %s != %s", i, fp[i],
-														lower[i], Arrays.toString(fp), Arrays.toString(expected)),
-												false);
-									if (fp[i] > upper[i])
-										Assert.assertTrue(
-												String.format("Fit Failed: [%d] %.2f > %.2f: %s != %s", i, fp[i],
-														upper[i], Arrays.toString(fp), Arrays.toString(expected)),
-												false);
-									if (report)
-										fp[i] = expected[i] - fp[i];
-								}
-								// Store the deviations
+								if (fp[i] < lower[i])
+									Assert.assertTrue(String.format("Fit Failed: [%d] %.2f < %.2f: %s != %s", i, fp[i],
+											lower[i], Arrays.toString(fp), Arrays.toString(expected)), false);
+								if (fp[i] > upper[i])
+									Assert.assertTrue(String.format("Fit Failed: [%d] %.2f > %.2f: %s != %s", i, fp[i],
+											upper[i], Arrays.toString(fp), Arrays.toString(expected)), false);
 								if (report)
-									m.add(fp);
+									fp[i] = expected[i] - fp[i];
 							}
-			}
+							// Store the deviations
+							if (report)
+								m.add(fp);
+						}
 			// Report
 			if (report)
-				System.out.printf("%s %f : CRLB = %s, Devaitions = %s\n", solver.getClass().getSimpleName(), s,
-						Arrays.toString(crlb), Arrays.toString(m.getStandardDeviation()));
+				System.out.printf("%s %s %f : CRLB = %s, Devaitions = %s\n", solver.getClass().getSimpleName(),
+						noiseModel, s, Arrays.toString(crlb), Arrays.toString(m.getStandardDeviation()));
 		}
 	}
 
 	void canFitSingleGaussianBetter(FunctionSolver solver, boolean applyBounds, FunctionSolver solver2,
 			boolean applyBounds2, String name, String name2)
 	{
+		// This is here to support the old solver tests which used to have fixed noise of 0.1, 0.5, 1.
+		// Those levels are irrelevant for modern EM-CCD cameras which have effectively very low noise.
+		// The test has been changed to better simulate the cameras encountered.
+		canFitSingleGaussianBetter(solver, applyBounds, solver2, applyBounds2, name, name2, NoiseModel.NONE);
+		// We are not interested in high noise CCD so this is commented out
+		//canFitSingleGaussianBetter(solver, applyBounds, solver2, applyBounds2, name, name2, NoiseModel.CCD);
+		canFitSingleGaussianBetter(solver, applyBounds, solver2, applyBounds2, name, name2, NoiseModel.EMCCD);
+	}
+
+	void canFitSingleGaussianBetter(FunctionSolver solver, boolean applyBounds, FunctionSolver solver2,
+			boolean applyBounds2, String name, String name2, NoiseModel noiseModel)
+	{
+		double[] noise = getNoise(noiseModel);
+		if (solver.isWeighted())
+			solver.setWeights(getWeights(noiseModel));
+
 		int LOOPS = 5;
 		randomGenerator.setSeed(seed);
 		StoredDataStatistics[] stats = new StoredDataStatistics[6];
@@ -219,90 +306,56 @@ public abstract class BaseFunctionSolverTest
 			if (applyBounds2)
 				solver2.setBounds(lower, upper);
 
-			for (double n : noise)
+			for (int loop = LOOPS; loop-- > 0;)
 			{
-				for (int loop = LOOPS; loop-- > 0;)
+				double[] data = drawGaussian(expected, noise, noiseModel);
+
+				for (int i = 0; i < stats.length; i++)
+					stats[i] = new StoredDataStatistics();
+
+				for (double db : base)
+					for (double dx : shift)
+						for (double dy : shift)
+							for (double dsx : factor)
+							{
+								double[] p = createParams(db, s, dx, dy, dsx);
+								double[] fp = fitGaussian(solver, data, p, expected);
+								i1 += solver.getEvaluations();
+
+								double[] fp2 = fitGaussian(solver2, data, p, expected);
+								i2 += solver2.getEvaluations();
+
+								// Get the mean and sd (the fit precision)
+								compare(fp, expected, fp2, expected, Gaussian2DFunction.SIGNAL, stats[0], stats[1]);
+
+								compare(fp, expected, fp2, expected, Gaussian2DFunction.X_POSITION, stats[2], stats[3]);
+								compare(fp, expected, fp2, expected, Gaussian2DFunction.Y_POSITION, stats[4], stats[5]);
+
+								// Use the distance
+								//stats[2].add(distance(fp, expected));
+								//stats[3].add(distance(fp2, expected2));
+							}
+
+				double alpha = 0.05; // two sided
+				for (int i = 0; i < stats.length; i += 2)
 				{
-					double[] data = drawGaussian(expected, n, null);
+					double u1 = stats[i].getMean();
+					double u2 = stats[i + 1].getMean();
+					double sd1 = stats[i].getStandardDeviation();
+					double sd2 = stats[i + 1].getStandardDeviation();
 
-					for (int i = 0; i < stats.length; i++)
-						stats[i] = new StoredDataStatistics();
+					TTest tt = new TTest();
+					boolean diff = tt.tTest(stats[i].getValues(), stats[i + 1].getValues(), alpha);
 
-					for (double db : base)
-						for (double dx : shift)
-							for (double dy : shift)
-								for (double dsx : factor)
-								{
-									double[] p = createParams(db, s, dx, dy, dsx);
-									double[] fp = fitGaussian(solver, data, p, expected);
-									i1 += solver.getEvaluations();
-
-									double[] fp2 = fitGaussian(solver2, data, p, expected);
-									i2 += solver2.getEvaluations();
-
-									// Get the mean and sd (the fit precision)
-									compare(fp, expected, fp2, expected, Gaussian2DFunction.SIGNAL, stats[0], stats[1]);
-
-									compare(fp, expected, fp2, expected, Gaussian2DFunction.X_POSITION, stats[2],
-											stats[3]);
-									compare(fp, expected, fp2, expected, Gaussian2DFunction.Y_POSITION, stats[4],
-											stats[5]);
-
-									// Use the distance
-									//stats[2].add(distance(fp, expected));
-									//stats[3].add(distance(fp2, expected2));
-								}
-
-					double alpha = 0.05; // two sided
-					for (int i = 0; i < stats.length; i += 2)
+					int index = i / 2;
+					String msg = String.format("%s vs %s : %.1f (%s) %s %f +/- %f vs %f +/- %f  (N=%d) %b", name2, name,
+							s, noiseModel, statName[index], u2, sd2, u1, sd1, stats[i].getN(), diff);
+					if (diff)
 					{
-						double u1 = stats[i].getMean();
-						double u2 = stats[i + 1].getMean();
-						double sd1 = stats[i].getStandardDeviation();
-						double sd2 = stats[i + 1].getStandardDeviation();
-
-						TTest tt = new TTest();
-						boolean diff = tt.tTest(stats[i].getValues(), stats[i + 1].getValues(), alpha);
-
-						int index = i / 2;
-						String msg = String.format("%s vs %s : %.1f (%.1f) %s %f +/- %f vs %f +/- %f  (N=%d) %b", name2,
-								name, s, n, statName[index], u2, sd2, u1, sd1, stats[i].getN(), diff);
-						if (diff)
+						// Different means. Check they are roughly the same
+						if (DoubleEquality.almostEqualRelativeOrAbsolute(u1, u2, 0.1, 0))
 						{
-							// Different means. Check they are roughly the same
-							if (DoubleEquality.almostEqualRelativeOrAbsolute(u1, u2, 0.1, 0))
-							{
-								// Basically the same. Check which is more precise
-								if (!DoubleEquality.almostEqualRelativeOrAbsolute(sd1, sd2, 0.05, 0))
-								{
-									if (sd2 < sd1)
-									{
-										betterPrecision[index]++;
-										println(msg + " P*");
-									}
-									else
-										println(msg + " P");
-									totalPrecision[index]++;
-								}
-							}
-							else
-							{
-								// Check which is more accurate (closer to zero)
-								u1 = Math.abs(u1);
-								u2 = Math.abs(u2);
-								if (u2 < u1)
-								{
-									betterAccuracy[index]++;
-									println(msg + " A*");
-								}
-								else
-									println(msg + " A");
-								totalAccuracy[index]++;
-							}
-						}
-						else
-						{
-							// The same means. Check that it is more precise
+							// Basically the same. Check which is more precise
 							if (!DoubleEquality.almostEqualRelativeOrAbsolute(sd1, sd2, 0.05, 0))
 							{
 								if (sd2 < sd1)
@@ -314,6 +367,35 @@ public abstract class BaseFunctionSolverTest
 									println(msg + " P");
 								totalPrecision[index]++;
 							}
+						}
+						else
+						{
+							// Check which is more accurate (closer to zero)
+							u1 = Math.abs(u1);
+							u2 = Math.abs(u2);
+							if (u2 < u1)
+							{
+								betterAccuracy[index]++;
+								println(msg + " A*");
+							}
+							else
+								println(msg + " A");
+							totalAccuracy[index]++;
+						}
+					}
+					else
+					{
+						// The same means. Check that it is more precise
+						if (!DoubleEquality.almostEqualRelativeOrAbsolute(sd1, sd2, 0.05, 0))
+						{
+							if (sd2 < sd1)
+							{
+								betterPrecision[index]++;
+								println(msg + " P*");
+							}
+							else
+								println(msg + " P");
+							totalPrecision[index]++;
 						}
 					}
 				}
@@ -414,33 +496,89 @@ public abstract class BaseFunctionSolverTest
 	}
 
 	/**
-	 * Draw a Gaussian with Poisson shot noise and Gaussian read noise
-	 * 
+	 * Draw a Gaussian with Poisson shot noise and Gaussian read noise.
+	 *
+	 * @param params
+	 *            The Gaussian parameters
+	 * @return The data
+	 */
+	double[] drawGaussian(double[] params)
+	{
+		return drawGaussian(params, null, NoiseModel.NONE);
+	}
+
+	/**
+	 * Draw a Gaussian with Poisson shot noise and Gaussian read noise.
+	 *
 	 * @param params
 	 *            The Gaussian parameters
 	 * @param noise
 	 *            The read noise
-	 * @param weights
-	 * @param withBias
 	 * @return The data
 	 */
-	double[] drawGaussian(double[] params, double noise, double[] pixelSD)
+	double[] drawGaussian(double[] params, double[] noise)
+	{
+		return drawGaussian(params, noise, NoiseModel.NONE);
+	}
+
+	static int flags = GaussianFunctionFactory.FIT_ERF_CIRCLE;
+
+	/**
+	 * Draw a Gaussian with Poisson shot noise and Gaussian read noise.
+	 *
+	 * @param params
+	 *            The Gaussian parameters
+	 * @param noise
+	 *            The read noise
+	 * @param noiseModel
+	 *            the noise model
+	 * @return The data
+	 */
+	double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel)
 	{
 		double[] data = new double[size * size];
 		int n = params.length / 6;
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, GaussianFunctionFactory.FIT_CIRCLE,
-				null);
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, flags, null);
 		f.initialise(params);
 
+		// Poisson noise
 		for (int i = 0; i < data.length; i++)
 		{
-			data[i] = dataGenerator.nextPoisson(f.eval(i));
-			if (pixelSD != null)
-				data[i] += randomGenerator.nextGaussian() * pixelSD[i];
+			double e = f.eval(i);
+			if (e > 0)
+				data[i] = dataGenerator.nextPoisson(e);
 		}
-		if (noise != 0)
+
+		// Simulate EM-gain
+		if (noiseModel == NoiseModel.EMCCD)
+		{
+			// Use a gamma distribution
+			// Since the call random.nextGamma(...) creates a Gamma distribution 
+			// which pre-calculates factors only using the scale parameter we 
+			// create a custom gamma distribution where the shape can be set as a property.
+			CustomGammaDistribution dist = new CustomGammaDistribution(randomGenerator, 1, emGain,
+					GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+
 			for (int i = 0; i < data.length; i++)
-				data[i] += dataGenerator.nextGaussian(0, noise);
+			{
+				if (data[i] > 0)
+				{
+					dist.setShapeUnsafe(data[i]);
+					// The sample will amplify the signal so we remap to the original scale
+					data[i] = dist.sample() / emGain;
+				}
+			}
+		}
+
+		// Read-noise
+		if (noise != null)
+		{
+			for (int i = 0; i < data.length; i++)
+			{
+				data[i] += randomGenerator.nextGaussian() * noise[i];
+			}
+		}
+
 		//gdsc.core.ij.Utils.display("Spot", data, size, size);
 		return data;
 	}

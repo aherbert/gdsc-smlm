@@ -44,8 +44,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 
 	SteppingFunctionSolver getSolver(SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type)
 	{
-		ErfGaussian2DFunction f = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size,
-				GaussianFunctionFactory.FIT_ERF_CIRCLE, null);
+		ErfGaussian2DFunction f = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags, null);
 		ToleranceChecker tc = new ToleranceChecker(1e-5, 1e-5, 0, 0, 100);
 		ParameterBounds bounds = new ParameterBounds(f);
 		switch (clamp)
