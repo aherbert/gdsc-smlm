@@ -24,8 +24,8 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 * @since 2.1
 	 */
 	public static final double DEFAULT_INVERSE_ABSOLUTE_ACCURACY = 1e-9;
-	/** Serializable version identifier. */
-	private static final long serialVersionUID = 20120524L;
+	/** Serializable version identifier. Different from GammaDistribution. */
+	private static final long serialVersionUID = 6520774824964116838L;
 	/** The shape parameter. */
 	private double shape;
 	/** The scale parameter. */
@@ -95,9 +95,27 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 *             if {@code shape <= 0} or {@code scale <= 0}.
 	 * @since 2.1
 	 */
-	public CustomGammaDistribution(double shape, double scale, double inverseCumAccuracy) throws NotStrictlyPositiveException
+	public CustomGammaDistribution(double shape, double scale, double inverseCumAccuracy)
+			throws NotStrictlyPositiveException
 	{
 		this(new Well19937c(), shape, scale, inverseCumAccuracy);
+	}
+
+	/**
+	 * Creates a Gamma distribution.
+	 *
+	 * @param rng
+	 *            Random number generator.
+	 * @param shape
+	 *            the shape parameter
+	 * @param scale
+	 *            the scale parameter
+	 * @throws NotStrictlyPositiveException
+	 *             if {@code shape <= 0} or {@code scale <= 0}.
+	 */
+	public CustomGammaDistribution(RandomGenerator rng, double shape, double scale) throws NotStrictlyPositiveException
+	{
+		this(rng, shape, scale, DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 	}
 
 	/**
@@ -165,7 +183,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	{
 		return shape;
 	}
-	
+
 	/**
 	 * Set the shape parameter
 	 * 
@@ -181,7 +199,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 		}
 		this.shape = shape;
 	}
-	
+
 	/**
 	 * Set the shape parameter
 	 * <p>
@@ -287,7 +305,8 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 * The implementation of this method is based on:
 	 * <ul>
 	 * <li>
-	 * <a href="http://mathworld.wolfram.com/Chi-SquaredDistribution.html"> Chi-Squared Distribution</a>, equation (9).</li>
+	 * <a href="http://mathworld.wolfram.com/Chi-SquaredDistribution.html"> Chi-Squared Distribution</a>, equation
+	 * (9).</li>
 	 * <li>Casella, G., & Berger, R. (1990). <i>Statistical Inference</i>. Belmont, CA: Duxbury Press.</li>
 	 * </ul>
 	 */

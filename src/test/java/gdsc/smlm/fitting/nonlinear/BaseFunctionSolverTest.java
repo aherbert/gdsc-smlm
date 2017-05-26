@@ -3,8 +3,8 @@ package gdsc.smlm.fitting.nonlinear;
 import java.util.Arrays;
 
 import org.apache.commons.math3.distribution.CustomGammaDistribution;
+import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -544,9 +544,13 @@ public abstract class BaseFunctionSolverTest
 		// Poisson noise
 		for (int i = 0; i < data.length; i++)
 		{
+			CustomPoissonDistribution dist = new CustomPoissonDistribution(randomGenerator, 1);
 			double e = f.eval(i);
 			if (e > 0)
-				data[i] = dataGenerator.nextPoisson(e);
+			{
+				dist.setMeanUnsafe(e);
+				data[i] = dist.sample();
+			}
 		}
 
 		// Simulate EM-gain
@@ -556,8 +560,7 @@ public abstract class BaseFunctionSolverTest
 			// Since the call random.nextGamma(...) creates a Gamma distribution 
 			// which pre-calculates factors only using the scale parameter we 
 			// create a custom gamma distribution where the shape can be set as a property.
-			CustomGammaDistribution dist = new CustomGammaDistribution(randomGenerator, 1, emGain,
-					GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+			CustomGammaDistribution dist = new CustomGammaDistribution(randomGenerator, 1, emGain);
 
 			for (int i = 0; i < data.length; i++)
 			{
