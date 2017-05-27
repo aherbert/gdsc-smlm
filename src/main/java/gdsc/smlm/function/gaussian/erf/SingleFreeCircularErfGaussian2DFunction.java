@@ -377,11 +377,10 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 		final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
 		final double one_ssSqrt2pi = ONE_OVER_ROOT2PI / ss;
 		final double one_sssSqrt2pi = one_sSqrt2pi / ss;
-		final double one_ssssSqrt2pi = one_ssSqrt2pi / ss;
 		final double one_sssssSqrt2pi = one_sssSqrt2pi / ss;
 		createExSecondOrderTables(tI, ONE_OVER_ROOT2 / s, 0.5 / ss, tI * one_sSqrt2pi, tI * one_ssSqrt2pi,
-				tI * one_sssSqrt2pi, tI * one_ssssSqrt2pi, ss, one_sssSqrt2pi, one_sssssSqrt2pi, deltaE, du_dx, du_ds,
-				d2u_dx2, d2u_ds2, d2deltaE_dsdx, u);
+				tI * one_sssSqrt2pi, ss, one_sssSqrt2pi, one_sssssSqrt2pi, deltaE, du_dx, du_ds, d2u_dx2, d2u_ds2,
+				d2deltaE_dsdx, u);
 	}
 
 	/**
@@ -399,8 +398,6 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 	 *            the intensity over (s^2 * sqrt(2*pi))
 	 * @param I_sssSqrt2pi
 	 *            the intensity over (s^3 * sqrt(2*pi))
-	 * @param I_ssssSqrt2pi
-	 *            the intensity over (s^4 * sqrt(2*pi))
 	 * @param ss
 	 *            the standard deviation squared
 	 * @param one_sssSqrt2pi
@@ -423,9 +420,9 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 	 *            the mean of the Gaussian for dimension 0
 	 */
 	protected static void createExSecondOrderTables(double tI, double one_sSqrt2, double one_2ss, double I_sSqrt2pi,
-			double I_ssSqrt2pi, double I_sssSqrt2pi, double I_ssssSqrt2pi, double ss, double one_sssSqrt2pi,
-			double one_sssssSqrt2pi, double[] deltaE, double[] du_dx, double[] du_ds, double[] d2u_dx2,
-			double[] d2u_ds2, double[] d2deltaE_dsdx, double u)
+			double I_ssSqrt2pi, double I_sssSqrt2pi, double ss, double one_sssSqrt2pi, double one_sssssSqrt2pi,
+			double[] deltaE, double[] du_dx, double[] du_ds, double[] d2u_dx2, double[] d2u_ds2, double[] d2deltaE_dsdx,
+			double u)
 	{
 		// Note: The paper by Smith, et al computes the integral for the kth pixel centred at (x,y)
 		// If x=u then the Erf will be evaluated at x-u+0.5 - x-u-0.5 => integral from -0.5 to 0.5.
@@ -464,15 +461,15 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 			// Compute G31(xk)
 			final double G31 = one_sssSqrt2pi * pre2;
 
-			// XXX Fix this
-			d2deltaE_dsdx[i] = I_ssssSqrt2pi * (x_u_p12 * x_u_p12  * exp_x_plus - x_u_m12 * x_u_m12 * exp_x_minus);
+			d2deltaE_dsdx[i] = I_ssSqrt2pi * (x_u_m12 * x_u_m12 * exp_x_minus / ss - exp_x_minus + exp_x_plus -
+					x_u_p12 * x_u_p12 * exp_x_plus / ss);
 
 			// Compute G53(xk)
 			x_u_m12 = x_u_m12 * x_u_m12 * x_u_m12;
 			final double ux = x_u_p12 * x_u_p12 * x_u_p12;
 			final double G53 = one_sssssSqrt2pi * (x_u_m12 * exp_x_minus - ux * exp_x_plus);
 			d2u_ds2[i] = tI * (G53 - 2 * G31);
-			
+
 			exp_x_minus = exp_x_plus;
 		}
 	}
