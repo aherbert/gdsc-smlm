@@ -603,9 +603,10 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 											for (int k = 0; k < nparams; k++)
 											{
 												double gradient = (du_da[k] - du_db[k]) / delta[j];
-												System.out.printf("%d [%d,%d] %f ?= %f\n", i, j, k, gradient,
-														m.get(j, k));
 												boolean ok = eq.almostEqualRelativeOrAbsolute(gradient, m.get(j, k));
+												if (!ok)
+													System.out.printf("%d [%d,%d] %f ?= %f\n", i, j, k, gradient,
+														m.get(j, k));
 												if (!ok)
 												{
 													//Assert.fail(String.format("%d [%d,%d] %f != %f", i, j, k, gradient,

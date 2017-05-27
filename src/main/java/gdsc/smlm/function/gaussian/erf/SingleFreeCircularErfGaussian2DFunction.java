@@ -558,38 +558,51 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 
 				k += n;
 				// X,Signal
-				d2udadb[k + 1] = duda[2] / tI;
+				d2udadb[k + 1] = d2udadb[k - n + 2];
 				// X,X
 				d2udadb[k + 2] = d2u_dtx2[x] * deltaEy;
 				// X,Y
 				d2udadb[k + 3] = du_dtx[x] * du_dty / tI;
 				// X,X SD
 				// XXX Fix this ...
-				d2udadb[k + 4] = du_dtx[x] * du_dtsx[x] / tI;
+				d2udadb[k + 4] = tI * deltaEy * 1;
 				// X,Y SD
 				d2udadb[k + 5] = du_dtx[x] * du_dtsy / tI;
 
 				k += n;
 				// Y,Signal
+				d2udadb[k + 1] = d2udadb[k - 2 * n + 3];
 				// Y,X
+				d2udadb[k + 2] = d2udadb[k - n + 3];
 				// Y,Y
 				d2udadb[k + 3] = d2u_dty2 * deltaEx[x];
 				// Y,X SD
+				d2udadb[k + 4] = du_dty * du_dtsx[x] / tI;
 				// Y,Y SD
+				// XXX Fix this ...
+				d2udadb[k + 5] = 0;
 
 				k += n;
 				// X SD,Signal
+				d2udadb[k + 1] = d2udadb[k - 3 * n + 4];
 				// X SD,X
+				d2udadb[k + 2] = d2udadb[k - 2 * n + 4];
 				// X SD,Y
+				d2udadb[k + 3] = d2udadb[k - n + 4];
 				// X SD,X SD
 				d2udadb[k + 4] = d2u_dtsx2[x] * deltaEy;
 				// X SD,Y SD
+				d2udadb[k + 5] = du_dtsy * du_dtsx[x] / tI;
 
 				k += n;
 				// Y SD,Signal
+				d2udadb[k + 1] = d2udadb[k - 4 * n + 5];
 				// Y SD,X
+				d2udadb[k + 2] = d2udadb[k - 3 * n + 5];
 				// Y SD,Y
-				// Y SD,Y SD
+				d2udadb[k + 3] = d2udadb[k - 2 * n + 5];
+				// Y SD,X SD
+				d2udadb[k + 4] = d2udadb[k - 1 * n + 5];
 				// Y SD,Y SD
 				d2udadb[k + 5] = d2u_dtsy2 * deltaEx[x];
 
