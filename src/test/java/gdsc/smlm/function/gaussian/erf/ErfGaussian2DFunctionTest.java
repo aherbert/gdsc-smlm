@@ -2,7 +2,6 @@ package gdsc.smlm.function.gaussian.erf;
 
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.Matrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -589,10 +588,6 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
 									{
 										i++;
-
-										if (i != f1.size() / 2)
-											return;
-
 										DenseMatrix64F m = DenseMatrix64F.wrap(nparams, nparams, d2y_dadb);
 										for (int j = 0; j < nparams; j++)
 										{
@@ -605,21 +600,16 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 												double gradient = (du_da[k] - du_db[k]) / delta[j];
 												boolean ok = eq.almostEqualRelativeOrAbsolute(gradient, m.get(j, k));
 												if (!ok)
-													System.out.printf("%d [%d,%d] %f ?= %f\n", i, j, k, gradient,
-														m.get(j, k));
-												if (!ok)
 												{
-													//Assert.fail(String.format("%d [%d,%d] %f != %f", i, j, k, gradient,
-													//		m.get(j, k)));
+													System.out.printf("%d [%d,%d] %f ?= %f\n", i, j, k, gradient,
+															m.get(j, k));
+													Assert.fail(String.format("%d [%d,%d] %f != %f", i, j, k, gradient,
+															m.get(j, k)));
 												}
 											}
 										}
-										return;
 									}
 								});
-								
-								// XXX
-								return;
 							}
 	}
 
@@ -780,11 +770,12 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 													f2.forEach(new ExtendedGradient2Procedure()
 													{
-														int i = 0;
+														int i = -1;
 
 														public void executeExtended(double value, double[] dy_da,
 																double[] d2y_dadb)
 														{
+															i++;
 															DenseMatrix64F m = DenseMatrix64F.wrap(nparams, nparams,
 																	d2y_dadb);
 															for (int j = 0; j < nparams; j++)
@@ -796,17 +787,17 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																for (int k = 0; k < nparams; k++)
 																{
 																	double gradient = (du_da[k] - du_db[k]) / delta[j];
-																	System.out.printf("%d [%d,%d] %f ?= %f\n", i, j, k,
-																			gradient, m.get(j, k));
 																	boolean ok = eq.almostEqualRelativeOrAbsolute(
 																			gradient, m.get(j, k));
 																	if (!ok)
+																	{
+																		System.out.printf("%d [%d,%d] %f ?= %f\n", i, j,
+																				k, gradient, m.get(j, k));
 																		Assert.fail(String.format("%d [%d,%d] %f != %f",
 																				i, j, k, gradient, m.get(j, k)));
+																	}
 																}
 															}
-
-															i++;
 														}
 													});
 												}
