@@ -122,7 +122,19 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 	 */
 	public void initialiseExtended2(double[] a)
 	{
-		initialise2(a);
+		createEx2Arrays();
+		tB = a[Gaussian2DFunction.BACKGROUND];
+		tI = a[Gaussian2DFunction.SIGNAL];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double tsx = a[Gaussian2DFunction.X_SD];
+		final double tsy = a[Gaussian2DFunction.Y_SD];
+
+		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// since the Gaussian is XY separable
+		createExSecondOrderTables(tI, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, d2deltaEx_dtsxdx, tx, tsx);
+		createExSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, d2deltaEy_dtsydy, ty, tsy);
 	}
 
 	/**
@@ -337,6 +349,135 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 	}
 
 	/**
+	 * Creates the first and extended second order derivatives.
+	 *
+	 * @param tI
+	 *            the target intensity
+	 * @param deltaE
+	 *            the delta E for dimension 0 (difference between the error function at the start and end of each pixel)
+	 * @param du_dx
+	 *            the first order x derivative for dimension 0
+	 * @param du_ds
+	 *            the first order s derivative for dimension 0
+	 * @param d2u_dx2
+	 *            the second order x derivative for dimension 0
+	 * @param d2u_ds2
+	 *            the second order s derivative for dimension 0
+	 * @param d2deltaE_dsdx
+	 *            the second order deltaE s,x derivative for dimension 0
+	 * @param u
+	 *            the mean of the Gaussian for dimension 0
+	 * @param s
+	 *            the standard deviation of the Gaussian for dimension 0
+	 */
+	private void createExSecondOrderTables(double tI, double[] deltaE, double[] du_dx, double[] du_ds, double[] d2u_dx2,
+			double[] d2u_ds2, double[] d2deltaE_dsdx, double u, double s)
+	{
+		final double ss = s * s;
+		final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
+		final double one_ssSqrt2pi = ONE_OVER_ROOT2PI / ss;
+		final double one_sssSqrt2pi = one_sSqrt2pi / ss;
+		final double one_ssssSqrt2pi = one_ssSqrt2pi / ss;
+		final double one_sssssSqrt2pi = one_sssSqrt2pi / ss;
+		createExSecondOrderTables(tI, ONE_OVER_ROOT2 / s, 0.5 / ss, tI * one_sSqrt2pi, tI * one_ssSqrt2pi,
+				tI * one_sssSqrt2pi, tI * one_ssssSqrt2pi, ss, one_sssSqrt2pi, one_sssssSqrt2pi, deltaE, du_dx, du_ds,
+				d2u_dx2, d2u_ds2, d2deltaE_dsdx, u);
+	}
+
+	/**
+	 * Creates the first and second order derivatives.
+	 *
+	 * @param tI
+	 *            the target intensity
+	 * @param one_sSqrt2
+	 *            one over (s times sqrt(2))
+	 * @param one_2ss
+	 *            one over (2 * s^2)
+	 * @param I_sSqrt2pi
+	 *            the intensity over (s * sqrt(2*pi))
+	 * @param I_ssSqrt2pi
+	 *            the intensity over (s^2 * sqrt(2*pi))
+	 * @param I_sssSqrt2pi
+	 *            the intensity over (s^3 * sqrt(2*pi))
+	 * @param I_ssssSqrt2pi
+	 *            the intensity over (s^4 * sqrt(2*pi))
+	 * @param ss
+	 *            the standard deviation squared
+	 * @param one_sssSqrt2pi
+	 *            one over (s^3 * sqrt(2*pi))
+	 * @param one_sssssSqrt2pi
+	 *            one over (s^5 * sqrt(2*pi))
+	 * @param deltaE
+	 *            the delta E for dimension 0 (difference between the error function at the start and end of each pixel)
+	 * @param du_dx
+	 *            the first order x derivative for dimension 0
+	 * @param du_ds
+	 *            the first order s derivative for dimension 0
+	 * @param d2u_dx2
+	 *            the second order x derivative for dimension 0
+	 * @param d2u_ds2
+	 *            the second order s derivative for dimension 0
+	 * @param d2deltaE_dsdx
+	 *            the second order deltaE s,x derivative for dimension 0
+	 * @param u
+	 *            the mean of the Gaussian for dimension 0
+	 */
+	protected static void createExSecondOrderTables(double tI, double one_sSqrt2, double one_2ss, double I_sSqrt2pi,
+			double I_ssSqrt2pi, double I_sssSqrt2pi, double I_ssssSqrt2pi, double ss, double one_sssSqrt2pi,
+			double one_sssssSqrt2pi, double[] deltaE, double[] du_dx, double[] du_ds, double[] d2u_dx2,
+			double[] d2u_ds2, double[] d2deltaE_dsdx, double u)
+	{
+		// Note: The paper by Smith, et al computes the integral for the kth pixel centred at (x,y)
+		// If x=u then the Erf will be evaluated at x-u+0.5 - x-u-0.5 => integral from -0.5 to 0.5.
+		// This code sets the first pixel at (0,0).
+
+		// All computations for pixel k (=(x,y)) that require the exponential can use x,y indices for the 
+		// lower boundary value and x+1,y+1 indices for the upper value.
+
+		// Working example of this in GraspJ source code:
+		// https://github.com/isman7/graspj/blob/master/graspj/src/main/java/eu/brede/graspj/opencl/src/functions/
+		// I have used the same notation for clarity
+
+		// The first position:
+		// Offset x by the position and get the pixel lower bound.
+		// (x - u - 0.5) with x=0 and u offset by +0.5
+		double x_u_p12 = -u;
+		double erf_x_minus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+		double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
+		for (int i = 0, n = deltaE.length; i < n; i++)
+		{
+			double x_u_m12 = x_u_p12;
+			x_u_p12 += 1.0;
+			final double erf_x_plus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+			deltaE[i] = erf_x_plus - erf_x_minus;
+			erf_x_minus = erf_x_plus;
+
+			final double exp_x_plus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
+			du_dx[i] = I_sSqrt2pi * (exp_x_minus - exp_x_plus);
+			// Compute: I0 * G21(xk)
+			final double pre2 = (x_u_m12 * exp_x_minus - x_u_p12 * exp_x_plus);
+			du_ds[i] = I_ssSqrt2pi * pre2;
+
+			// Second derivatives
+			d2u_dx2[i] = I_sssSqrt2pi * pre2;
+
+			// Compute G31(xk)
+			final double G31 = one_sssSqrt2pi * pre2;
+
+			// XXX Fix this
+			d2deltaE_dsdx[i] = I_ssssSqrt2pi * (x_u_p12 * x_u_p12  * exp_x_plus - x_u_m12 * x_u_m12 * exp_x_minus);
+
+			// Compute G53(xk)
+			x_u_m12 = x_u_m12 * x_u_m12 * x_u_m12;
+			final double ux = x_u_p12 * x_u_p12 * x_u_p12;
+			final double G53 = one_sssssSqrt2pi * (x_u_m12 * exp_x_minus - ux * exp_x_plus);
+			d2u_ds2[i] = tI * (G53 - 2 * G31);
+			
+			exp_x_minus = exp_x_plus;
+		}
+	}
+
+	/**
 	 * Evaluates an 2-dimensional Gaussian function for a single peak.
 	 * 
 	 * @param i
@@ -533,6 +674,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 			final double du_dtsy = this.du_dtsy[y];
 			final double d2u_dty2 = this.d2u_dty2[y];
 			final double d2u_dtsy2 = this.d2u_dtsy2[y];
+			final double d2deltaEy_dtsydy = this.d2deltaEy_dtsydy[y];
 			for (int x = 0; x < maxx; x++)
 			{
 				duda[1] = deltaEx[x] * deltaEy;
@@ -564,8 +706,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 				// X,Y
 				d2udadb[k + 3] = du_dtx[x] * du_dty / tI;
 				// X,X SD
-				// XXX Fix this ...
-				d2udadb[k + 4] = tI * deltaEy * 1;
+				d2udadb[k + 4] = deltaEy * d2deltaEx_dtsxdx[x];
 				// X,Y SD
 				d2udadb[k + 5] = du_dtx[x] * du_dtsy / tI;
 
@@ -579,8 +720,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 				// Y,X SD
 				d2udadb[k + 4] = du_dty * du_dtsx[x] / tI;
 				// Y,Y SD
-				// XXX Fix this ...
-				d2udadb[k + 5] = 0;
+				d2udadb[k + 5] = deltaEx[x] * d2deltaEy_dtsydy;
 
 				k += n;
 				// X SD,Signal

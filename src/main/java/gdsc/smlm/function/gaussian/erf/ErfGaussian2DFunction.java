@@ -44,6 +44,9 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 
 	// Required for the second gradients
 	protected double[] d2u_dtx2, d2u_dty2, d2u_dtsx2, d2u_dtsy2;
+	
+	// Required for the extended second gradients
+	protected double[] d2deltaEx_dtsxdx, d2deltaEy_dtsydy;
 
 	/**
 	 * Instantiates a new erf gaussian 2D function.
@@ -87,6 +90,18 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 		d2u_dtsx2 = new double[deltaEx.length];
 		d2u_dtsy2 = new double[deltaEy.length];
 		create1Arrays();
+	}
+
+	/**
+	 * Creates the arrays needed to compute the first and extended second order partial derivatives.
+	 */
+	protected void createEx2Arrays()
+	{
+		if (d2deltaEx_dtsxdx != null)
+			return;
+		d2deltaEx_dtsxdx = new double[deltaEx.length];
+		d2deltaEy_dtsydy = new double[deltaEy.length];
+		create2Arrays();
 	}
 
 	/**
