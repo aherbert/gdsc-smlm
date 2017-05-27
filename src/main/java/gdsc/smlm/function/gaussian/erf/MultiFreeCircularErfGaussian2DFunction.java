@@ -4,6 +4,7 @@ package gdsc.smlm.function.gaussian.erf;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.smlm.function.Erf;
+import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -552,5 +553,15 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 				procedure.execute(I, duda, d2uda2);
 			}
 		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
+	 */
+	public void forEach(ExtendedGradient2Procedure procedure)
+	{
+		// TODO
 	}
 }

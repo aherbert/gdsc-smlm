@@ -1,5 +1,6 @@
 package gdsc.smlm.function.gaussian.erf;
 
+import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -26,7 +27,8 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */
-public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implements Gradient2Function
+public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
+		implements Gradient2Function, ExtendedGradient2Function
 {
 	public static final int Z_POSITION = 2;
 
@@ -135,12 +137,22 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction implement
 		// The ERF Gaussian2DFunction does all the work in Gradient1Function.initialise1(double[])  
 		initialise1(a);
 	}
-	
+
 	// Force new implementation from the base Gaussian2DFunction
 	@Override
-	public abstract void initialise0(double[] a);	
-	
+	public abstract void initialise0(double[] a);
+
 	// Force new implementation from the base Gaussian2DFunction
 	@Override
-	public abstract void initialise1(double[] a);	
+	public abstract void initialise1(double[] a);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ExtendedGradient2Function#initialiseExtended2(double[])
+	 */
+	public void initialiseExtended2(double[] a)
+	{
+		initialise2(a);
+	}
 }

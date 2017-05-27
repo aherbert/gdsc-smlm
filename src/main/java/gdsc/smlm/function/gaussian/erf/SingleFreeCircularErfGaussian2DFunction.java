@@ -548,17 +548,26 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 
 				int k = n;
 				// Signal,X
+				d2udadb[k + 2] = duda[2] / tI;
 				// Signal,Y
+				d2udadb[k + 3] = duda[3] / tI;
 				// Signal,X SD
+				d2udadb[k + 4] = duda[4] / tI;
 				// Signal,Y SD
+				d2udadb[k + 5] = duda[5] / tI;
 
 				k += n;
 				// X,Signal
+				d2udadb[k + 1] = duda[2] / tI;
 				// X,X
 				d2udadb[k + 2] = d2u_dtx2[x] * deltaEy;
 				// X,Y
+				d2udadb[k + 3] = du_dtx[x] * du_dty / tI;
 				// X,X SD
+				// XXX Fix this ...
+				d2udadb[k + 4] = du_dtx[x] * du_dtsx[x] / tI;
 				// X,Y SD
+				d2udadb[k + 5] = du_dtx[x] * du_dtsy / tI;
 
 				k += n;
 				// Y,Signal

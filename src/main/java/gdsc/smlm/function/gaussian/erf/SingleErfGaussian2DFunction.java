@@ -1,6 +1,5 @@
 package gdsc.smlm.function.gaussian.erf;
 
-import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.ValueProcedure;
 
 /*----------------------------------------------------------------------------- 
@@ -25,7 +24,7 @@ import gdsc.smlm.function.ValueProcedure;
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */
-public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction implements ExtendedGradient2Function
+public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 {
 	// Required for the PSF
 	protected double tI;
