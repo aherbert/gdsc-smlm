@@ -28,7 +28,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 
 	enum SteppingFunctionSolverType
 	{
-		MLELVM, LSELVM, WLSELVM, FastMLE
+		MLELVM, LSELVM, WLSELVM, FastMLE, JFastMLE, BTFastMLE
 	}
 
 	// For convenience declare variables of the enum type
@@ -39,6 +39,8 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 	static final SteppingFunctionSolverType LSELVM = SteppingFunctionSolverType.LSELVM;
 	static final SteppingFunctionSolverType WLSELVM = SteppingFunctionSolverType.WLSELVM;
 	static final SteppingFunctionSolverType FastMLE = SteppingFunctionSolverType.FastMLE;
+	static final SteppingFunctionSolverType JFastMLE = SteppingFunctionSolverType.JFastMLE;
+	static final SteppingFunctionSolverType BTFastMLE = SteppingFunctionSolverType.BTFastMLE;
 	static final boolean BOUNDED = true;
 	static final boolean NO_BOUND = false;
 
@@ -74,6 +76,18 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 			case FastMLE:
 				solver = new FastMLESteppingFunctionSolver(f, tc, bounds);
 				// MLE requires a positive function value so use a lower bound
+				solver.setBounds(new double[7], null);
+				break;
+			case BTFastMLE:
+				solver = new BacktrackingFastMLESteppingFunctionSolver(f, tc, bounds);
+				// MLE requires a positive function value so use a lower bound
+				solver.setBounds(new double[7], null);
+				break;
+			case JFastMLE:
+				FastMLESteppingFunctionSolver s = new FastMLESteppingFunctionSolver(f, tc, bounds);
+				s.enableJacobianSolution(true);
+				// MLE requires a positive function value so use a lower bound
+				solver = s;
 				solver.setBounds(new double[7], null);
 				break;
 			default:

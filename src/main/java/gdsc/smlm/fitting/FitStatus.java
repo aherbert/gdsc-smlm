@@ -39,6 +39,7 @@ public enum FitStatus
 	DRIFT_TO_ANOTHER_RESULT{ public String getName() { return "Drift to another result"; }},
 	FAILED_VALIDATION{ public String getName() { return "Failed validation"; }},
 	NO_MODEL_IMPROVEMENT{ public String getName() { return "No model improvement"; }},
+	LINE_SEARCH_ERROR{ public String getName() { return "Line search error"; }},
 	UNKNOWN{ public String getName() { return "Unknown"; }};
 	//@formatter:on
 

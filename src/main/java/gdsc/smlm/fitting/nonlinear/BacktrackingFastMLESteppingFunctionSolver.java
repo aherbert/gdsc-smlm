@@ -3,6 +3,8 @@ package gdsc.smlm.fitting.nonlinear;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer.LineSearchRoundoffException;
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.utils.Maths;
+import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.Gradient2Function;
 
 /*----------------------------------------------------------------------------- 
@@ -31,8 +33,10 @@ import gdsc.smlm.function.Gradient2Function;
  */
 public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFunctionSolver
 {
-	/** Maximum step length used in line search. */
-	private double[] maximumStepLength = null;
+	private LineStepSearch lineSearch = new LineStepSearch();
+
+	private double[] aOld, searchDirection;
+	private double fOld;
 
 	/**
 	 * The minimum value between two doubles.
@@ -76,7 +80,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		super(f, tc, bounds);
 	}
 
-	// TODO - Extend this method by implementing Line Search and Backtracking
+	// Extend the Newton-Raphson method by implementing Line Search and Backtracking
 	// (see Numerical Recipes in C++, 2nd Ed, page 388-389, function lnsrch).
 	// This can still be done in the context of the stepping function solver.
 	// Adjustments:
@@ -90,9 +94,70 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	// - The next call to compute step must evaluate the derivatives.
 	// - The function evaluations counter should be appropriately incremented
 
-	// LineSearch is implemented in BFGSOptimizer.LineStepSearch.
-	// This supports maximum steps for each dimension that are set in the MaximumLikelihoodFitter
-	// using the bounds.
+	@Override
+	protected double[] prepareFitValue(double[] y, double[] a)
+	{
+		y = super.prepareFitValue(y, a);
+		// We always compute the pseudolikelihood
+		isPseudoLogLikelihood = true;
+		return y;
+	}
+
+	@Override
+	protected double computeFitValue(double[] a)
+	{
+		if (tc.getIterations() == 0)
+		{
+			// The first call to computeFitValue() computes derivatives. The value is obtained from 
+			// computePseudoLogLikelihood() 
+			if (solver != null)
+				jacobianGradientProcedure.computeJacobian(a);
+			else
+				gradientProcedure.computeSecondDerivative(a);
+
+			if (gradientProcedure.isNaNGradients())
+				throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+
+			evaluations++;
+			fOld = ll = gradientProcedure.computePseudoLogLikelihood();
+
+			searchDirection = new double[a.length];
+			aOld = a.clone();
+
+			return ll;
+		}
+
+		// All subsequent calls to computeFitValue() only evaluate the value and implement
+		// backtracking if the value does not improve with the full Newton step.
+		for (int i = 0; i < searchDirection.length; i++)
+			// Configure the search direction with the full Newton step
+			searchDirection[i] = a[i] - aOld[i];
+
+		aOld = lineSearch.lineSearch(aOld, fOld, gradientProcedure.d1, searchDirection);
+		fOld = ll = lineSearch.f;
+		
+		// Update the parameters to reflect any backtracking
+		System.arraycopy(aOld, 0, a, 0, a.length);
+		
+		return ll;
+	}
+
+	@Override
+	protected void computeStep(double[] step)
+	{
+		if (tc.getIterations() > 0)
+		{
+			// After backtracking we must compute the derivatives
+			if (solver != null)
+				jacobianGradientProcedure.computeJacobian(aOld);
+			else
+				gradientProcedure.computeSecondDerivative(aOld);
+
+			if (gradientProcedure.isNaNGradients())
+				throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+		}
+		super.computeStep(step);
+	}
 
 	/**
 	 * Internal class for a line search with backtracking
@@ -123,7 +188,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		 * @param fOld
 		 *            The old point function value
 		 * @param gradient
-		 *            The old point function gradient
+		 *            The old point function gradient (only for the gradient indices)
 		 * @param searchDirection
 		 *            The search direction
 		 * @return The new point
@@ -142,29 +207,13 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 			final int n = xOld.length;
 			check = false;
 
-			// Limit the search step size for each dimension
-			if (maximumStepLength != null)
-			{
-				double scale = 1;
-				for (int i = 0; i < n; i++)
-				{
-					if (Math.abs(searchDirection[i]) * scale > maximumStepLength[i])
-						scale = maximumStepLength[i] / Math.abs(searchDirection[i]);
-				}
-				if (scale < 1)
-				{
-					// Scale the entire search direction
-					for (int i = 0; i < n; i++)
-						searchDirection[i] *= scale;
-				}
-			}
-
 			double slope = 0.0;
-			for (int i = 0; i < n; i++)
-				slope += gradient[i] * searchDirection[i];
-			if (slope >= 0.0)
+			final int[] gradientIndices = BacktrackingFastMLESteppingFunctionSolver.this.f.gradientIndices();
+			for (int i = 0; i < gradient.length; i++)
+				slope += gradient[i] * searchDirection[gradientIndices[i]];
+			if (slope <= 0.0)
 			{
-				throw new LineSearchRoundoffException(slope);
+				throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "Slope is positive: " + slope);
 			}
 
 			// Compute lambda min
@@ -196,6 +245,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				for (int i = 0; i < n; i++)
 					x[i] = xOld[i] + alam * searchDirection[i];
 				// Compute the pseudoLikelihood
+				evaluations++;
 				gradientProcedure.computeValue(x);
 				f = gradientProcedure.computePseudoLogLikelihood();
 				//System.out.printf("f=%f @ %f : %s\n", f, alam, java.util.Arrays.toString(x));
@@ -208,7 +258,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				else
 				{
 					// Check for bad function evaluation
-					if (f == Double.POSITIVE_INFINITY)
+					if (!Maths.isFinite(f))
 					{
 						// Reset backtracking
 						backtracking = 0;

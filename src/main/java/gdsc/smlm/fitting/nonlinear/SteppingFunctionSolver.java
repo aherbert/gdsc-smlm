@@ -211,11 +211,11 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 */
 	private void log(String format, Object... args)
 	{
-		//		// Convert arrays to a single string
-		//		for (int i=0; i<args.length; i++)
-		//			if (args[i] instanceof double[])
-		//				args[i] = java.util.Arrays.toString((double[])args[i]);		
-		//		System.out.printf(format, args);
+				// Convert arrays to a single string
+				for (int i=0; i<args.length; i++)
+					if (args[i] instanceof double[])
+						args[i] = java.util.Arrays.toString((double[])args[i]);		
+				System.out.printf(format, args);
 	}
 
 	/**

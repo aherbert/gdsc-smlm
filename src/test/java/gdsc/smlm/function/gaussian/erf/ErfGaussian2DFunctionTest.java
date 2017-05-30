@@ -523,10 +523,10 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 												1e-10);
 										Assert.assertArrayEquals("du_da ExtendedGradient2Procedure", jacobian[i], dy_da,
 												1e-10);
-										for (int j=0, k=0; j<d2u_da2.length; j++, k+= d2u_da2.length+1)
+										for (int j = 0, k = 0; j < d2u_da2.length; j++, k += d2u_da2.length + 1)
 											d2u_da2[j] = d2y_dadb[k];
-										Assert.assertArrayEquals("d2u_da2 Gradient2Procedure",
-												jacobian2[i], d2u_da2, 1e-10);
+										Assert.assertArrayEquals("d2u_da2 Gradient2Procedure", jacobian2[i], d2u_da2,
+												1e-10);
 										i++;
 									}
 								});
@@ -707,7 +707,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															i++;
 														}
 													});
-													
+
 													f2.forEach(new ExtendedGradient2Procedure()
 													{
 														int i = 0;
@@ -719,7 +719,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																	values[i], value, 1e-10);
 															Assert.assertArrayEquals("du_da ExtendedGradient2Procedure",
 																	jacobian[i], dy_da, 1e-10);
-															for (int j=0, k=0; j<d2u_da2.length; j++, k+= d2u_da2.length+1)
+															for (int j = 0, k = 0; j < d2u_da2.length; j++, k += d2u_da2.length +
+																	1)
 																d2u_da2[j] = d2y_dadb[k];
 															Assert.assertArrayEquals("d2u_da2 Gradient2Procedure",
 																	jacobian2[i], d2u_da2, 1e-10);

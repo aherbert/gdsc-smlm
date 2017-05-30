@@ -15,6 +15,7 @@ import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.gaussian.HoltzerAstimatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 
@@ -98,7 +99,8 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 	@Test
 	public void gradientCalculatorComputesGradient()
 	{
-		gradientCalculatorComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
+		gradientCalculatorComputesGradient(1, new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
+		gradientCalculatorComputesGradient(2, new MultiFreeCircularErfGaussian2DFunction(2, blockWidth, blockWidth));
 
 		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
 		double gamma = 0.389;
@@ -108,12 +110,11 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 		double Ay = 0.164;
 		double By = 0.0417;
 		HoltzerAstimatismZModel zModel = HoltzerAstimatismZModel.create(gamma, d, Ax, Bx, Ay, By);
-		
-		// XXX - Add this back
-		//gradientCalculatorComputesGradient(new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
+
+		gradientCalculatorComputesGradient(1, new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
 	}
 
-	private void gradientCalculatorComputesGradient(ErfGaussian2DFunction func)
+	private void gradientCalculatorComputesGradient(int nPeaks, ErfGaussian2DFunction func)
 	{
 		// Check the first and second derivatives
 		int nparams = func.getNumberOfGradients();
@@ -125,10 +126,10 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
 
-		createData(1, iter, paramsList, yList, true);
+		createData(nPeaks, iter, paramsList, yList, true);
 
 		double delta = 1e-5;
-		DoubleEquality eq = new DoubleEquality(1e-4, 1e-3);
+		DoubleEquality eq = new DoubleEquality(1e-2, 1e-3);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -141,7 +142,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 			p.computeJacobian(a);
 			double[] d1 = p.d1.clone();
 			double[] d2 = p.d2.clone();
-			DenseMatrix64F J = DenseMatrix64F.wrap(nparams, nparams, p.J.clone());
+			DenseMatrix64F J = DenseMatrix64F.wrap(nparams, nparams, p.getJacobianLinear());
 			for (int j = 0; j < nparams; j++)
 			{
 				int k = indices[j];
@@ -187,16 +188,14 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 					// Use index j even though we adjusted index jj
 					gradient2 = (d1h[j] - d1l[j]) / (2 * dd);
 					boolean ok = eq.almostEqualRelativeOrAbsolute(gradient2, J.get(j, jj));
-					System.out.printf("[%d,%d,%d] (%s %f  %s %f+/-%f) J %f ?= %f  %b\n", i, k, kk, func.getName(k), a[k],
-							func.getName(kk), a[kk], dd, gradient2, J.get(j, jj), ok);
+					//System.out.printf("[%d,%d,%d] (%s %f  %s %f+/-%f) J %f ?= %f  %b\n", i, k, kk, func.getName(k),
+					//		a[k], func.getName(kk), a[kk], dd, gradient2, J.get(j, jj), ok);
 					if (!ok)
 					{
-						//Assert.fail(String.format("Not same gradientJ @ [%d,%d]", j, jj));
+						Assert.fail(String.format("Not same gradientJ @ [%d,%d]", j, jj));
 					}
 				}
 			}
-			
-			break;
 		}
 	}
 }

@@ -109,7 +109,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 				one_sssssSqrt2pi, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty);
 	}
 
-	public void initialiseEx2(double[] a)
+	public void initialiseExtended2(double[] a)
 	{
 		createEx2Arrays();
 		tB = a[Gaussian2DFunction.BACKGROUND];

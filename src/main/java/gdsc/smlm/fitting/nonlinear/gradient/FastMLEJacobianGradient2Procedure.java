@@ -2,10 +2,10 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.Arrays;
 
+import org.ejml.data.DenseMatrix64F;
+
 import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.ExtendedGradient2Procedure;
-import gdsc.smlm.function.Gradient2Function;
-import gdsc.smlm.function.Gradient2Procedure;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -39,7 +39,7 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 	 * derivative of the log likelihood function with respect to parameter i. dFi/dxj is the first partial derivative of
 	 * dFi with respect to parameter j.
 	 */
-	public final double[] J;
+	private final double[] J;
 
 	/**
 	 * @param x
@@ -50,7 +50,7 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 	public FastMLEJacobianGradient2Procedure(final double[] x, final ExtendedGradient2Function func)
 	{
 		super(x, func);
-		J = new double[n * n];
+		J = new double[n * (n + 1) / 2];
 		this.func = func;
 	}
 
@@ -66,8 +66,8 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 		resetExtended2();
 		func.initialiseExtended2(a);
 		func.forEach((ExtendedGradient2Procedure) this);
-		for (int i = 0, j = 0; i < n; i++, j += n + 1)
-			d2[i] = J[j];
+		for (int i = 0, index = 0; i < n; i++, index += i+1)
+			d2[i] = J[index];
 	}
 
 	protected void resetExtended2()
@@ -83,18 +83,24 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 
 		final double xk_uk_minus1 = xk / uk - 1.0;
 		final double xk_uk2 = xk / (uk * uk);
+		//		DenseMatrix64F m = DenseMatrix64F.wrap(d1.length,  d1.length, d2uk_dtds);
+		//		for (int i=d2uk_dtds.length; i-->0; )
+		//			if (Double.isNaN(d2uk_dtds[i]))
+		//			{
+		//				System.out.println(m.toString());
+		//			}
 		for (int i = 0, index = 0; i < n; i++)
 		{
 			d1[i] += duk_dt[i] * xk_uk_minus1;
 
-			for (int j = 0; j < n; j++, index++)
+			for (int j = 0, k = i * n; j <= i; j++, index++, k++)
 			{
 				// This requires the partial second derivative with respect to i and j
-				J[index] += d2uk_dtds[index] * xk_uk_minus1 - duk_dt[i] * duk_dt[j] * xk_uk2;
+				J[index] += d2uk_dtds[k] * xk_uk_minus1 - duk_dt[i] * duk_dt[j] * xk_uk2;
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean isNaNGradients()
 	{
@@ -109,5 +115,28 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Gets the Jacobian (size n*n).
+	 *
+	 * @return the Jacobian
+	 */
+	public double[] getJacobianLinear()
+	{
+		double[] jacobian = new double[n * n];
+		GradientProcedureHelper.getMatrix(J, jacobian, n);
+		return jacobian;
+	}
+
+	/**
+	 * Gets the Jacobian (size n*n) into the provided storage.
+	 *
+	 * @param jacobian
+	 *            the Jacobian
+	 */
+	public void getJacobianLinear(double[] jacobian)
+	{
+		GradientProcedureHelper.getMatrix(J, jacobian, n);
 	}
 }

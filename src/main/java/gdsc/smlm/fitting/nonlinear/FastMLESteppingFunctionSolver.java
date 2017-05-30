@@ -2,6 +2,8 @@ package gdsc.smlm.fitting.nonlinear;
 
 import java.util.Arrays;
 
+import org.ejml.data.DenseMatrix64F;
+
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
@@ -15,6 +17,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.PrecomputedExtendedGradient2Function;
 import gdsc.smlm.function.PrecomputedGradient2Function;
 
 /*----------------------------------------------------------------------------- 
@@ -61,6 +64,8 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	protected FastMLEGradient2Procedure gradientProcedure;
 	/** The Jacobian gradient procedure. */
 	protected FastMLEJacobianGradient2Procedure jacobianGradientProcedure;
+	/** The jacobian. */
+	protected double[] jacobian = null;
 
 	protected EJMLLinearSolver solver = null;
 
@@ -128,7 +133,14 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	 */
 	public void enableJacobianSolution(boolean enable, double maxRelativeError, double maxAbsoluteError)
 	{
-		solver = (enable) ? new EJMLLinearSolver(maxRelativeError, maxAbsoluteError) : null;
+		if (enable)
+		{
+			if (!(f instanceof ExtendedGradient2Function))
+				throw new IllegalStateException("Jacobian requires an " + ExtendedGradient2Function.class.getName());
+			solver = new EJMLLinearSolver(maxRelativeError, maxAbsoluteError);
+		}
+		else
+			solver = null;
 	}
 
 	/*
@@ -199,12 +211,24 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		// We can handle per-observation variances as detailed in
 		// Huang, et al. (2015) by simply adding the variances to the computed value.
 		f2 = (Gradient2Function) f;
-		if (w != null)
+		if (solver != null)
 		{
-			f2 = PrecomputedGradient2Function.wrapGradient2Function(f2, w);
+			if (w != null)
+			{
+				f2 = PrecomputedExtendedGradient2Function.wrapExtendedGradient2Function((ExtendedGradient2Function) f,
+						w);
+			}
+			jacobian = new double[f2.size()];
+			return jacobianGradientProcedure = new FastMLEJacobianGradient2Procedure(y, (ExtendedGradient2Function) f2);
 		}
-		return (solver != null) ? jacobianGradientProcedure = new FastMLEJacobianGradient2Procedure(y, (ExtendedGradient2Function) f2)
-				: FastMLEGradient2ProcedureFactory.create(y, f2);
+		else
+		{
+			if (w != null)
+			{
+				f2 = PrecomputedGradient2Function.wrapGradient2Function(f2, w);
+			}
+			return FastMLEGradient2ProcedureFactory.create(y, f2);
+		}
 	}
 
 	/*
@@ -248,15 +272,20 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		if (solver != null)
 		{
 			// Solve the Jacobian
+			// XXX This does not work.
+			// Should the target for A x = b be created differently?
 			for (int i = 0; i < step.length; i++)
 				step[i] = -d1[i];
-			if (solver.solveLinear(jacobianGradientProcedure.J, step))
+			jacobianGradientProcedure.getJacobianLinear(jacobian);
+			DenseMatrix64F m = DenseMatrix64F.wrap(d1.length, d1.length, jacobian);
+			System.out.println(m.toString());
+			if (solver.solve(jacobian, step))
 			{
 				// XXX - debug the difference
 				double[] step2 = new double[d1.length];
 				for (int i = 0; i < step.length; i++)
 					step2[i] = -d1[i] / d2[i];
-				System.out.printf("Jacobian Step %s vs %s\n", Arrays.toString(step), Arrays.toString(step2));
+				System.out.printf("[%d] Jacobian Step %s vs %s\n", tc.getIterations(), Arrays.toString(step), Arrays.toString(step2));
 				return;
 			}
 		}

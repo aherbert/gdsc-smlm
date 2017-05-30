@@ -115,7 +115,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, MLELVM, NoiseModel.EMCCD);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void cannotFitSingleGaussianEMCCD_x_x__FastMLE()
 	{
 		// The FastMLE method can generate very big steps that make the method unstable
@@ -151,6 +151,80 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	{
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, FastMLE, NoiseModel.EMCCD);
 	}
+
+	@Test //(expected = AssertionError.class)
+	public void canFitSingleGaussianEMCCD_x_x__BTFastMLE()
+	{
+		// The BTFastMLE method can generate very big steps that make the method unstable
+		fitSingleGaussian(NO_BOUND, NO_CLAMP, BTFastMLE, NoiseModel.EMCCD);
+	}
+
+	@Test
+	public void canFitSingleGaussianEMCCD_x_C__BTFastMLE()
+	{
+		fitSingleGaussian(NO_BOUND, CLAMP, BTFastMLE, NoiseModel.EMCCD);
+	}
+
+	@Test
+	public void canFitSingleGaussianEMCCD_x_DC_BTFastMLE()
+	{
+		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, BTFastMLE, NoiseModel.EMCCD);
+	}
+
+	@Test
+	public void canFitSingleGaussianEMCCD_B_x__BTFastMLE()
+	{
+		fitSingleGaussian(BOUNDED, NO_CLAMP, BTFastMLE, NoiseModel.EMCCD);
+	}
+
+	@Test
+	public void canFitSingleGaussianEMCCD_B_C__BTFastMLE()
+	{
+		fitSingleGaussian(BOUNDED, CLAMP, BTFastMLE, NoiseModel.EMCCD);
+	}
+
+	@Test
+	public void canFitSingleGaussianEMCCD_B_DC_BTFastMLE()
+	{
+		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, BTFastMLE, NoiseModel.EMCCD);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void cannotFitSingleGaussianEMCCD_x_x__JFastMLE()
+	{
+		// The JFastMLE method does not work
+		fitSingleGaussian(NO_BOUND, NO_CLAMP, JFastMLE, NoiseModel.EMCCD);
+	}
+
+	//	@Test
+	//	public void canFitSingleGaussianEMCCD_x_C__JFastMLE()
+	//	{
+	//		fitSingleGaussian(NO_BOUND, CLAMP, JFastMLE, NoiseModel.EMCCD);
+	//	}
+	//
+	//	@Test
+	//	public void canFitSingleGaussianEMCCD_x_DC_JFastMLE()
+	//	{
+	//		fitSingleGaussian(NO_BOUND, DYNAMIC_CLAMP, JFastMLE, NoiseModel.EMCCD);
+	//	}
+	//
+	//	@Test
+	//	public void canFitSingleGaussianEMCCD_B_x__JFastMLE()
+	//	{
+	//		fitSingleGaussian(BOUNDED, NO_CLAMP, JFastMLE, NoiseModel.EMCCD);
+	//	}
+	//
+	//	@Test
+	//	public void canFitSingleGaussianEMCCD_B_C__JFastMLE()
+	//	{
+	//		fitSingleGaussian(BOUNDED, CLAMP, JFastMLE, NoiseModel.EMCCD);
+	//	}
+	//
+	//	@Test
+	//	public void canFitSingleGaussianEMCCD_B_DC_JFastMLE()
+	//	{
+	//		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, JFastMLE, NoiseModel.EMCCD);
+	//	}
 
 	// Weighted solvers for sCMOS
 
@@ -226,7 +300,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, MLELVM, NoiseModel.SCMOS);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void cannotFitSingleGaussianSCMOS_x_x__FastMLE()
 	{
 		// The FastMLE method can generate very big steps that make the method unstable
@@ -262,7 +336,6 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	{
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, FastMLE, NoiseModel.SCMOS);
 	}
-
 
 	private void fitSingleGaussian(boolean bounded, SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type,
 			NoiseModel noiseModel)
