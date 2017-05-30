@@ -446,7 +446,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		final int n = f1.size();
 		double[] du_da = new double[f1.getNumberOfGradients()];
 		double[] du_db = new double[f1.getNumberOfGradients()];
-		double[] d2u_da2 = new double[f1.getNumberOfGradients()];
+		final double[] d2u_da2 = new double[f1.getNumberOfGradients()];
 
 		final double[] values = new double[n];
 		final double[][] jacobian = new double[n][];
@@ -461,7 +461,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 							for (double[] w1 : testw1)
 							{
 								double[] a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
-								f1.initialise2(a);
+								f1.initialiseExtended2(a);
 
 								// Compute single
 								for (int i = 0; i < n; i++)
@@ -523,6 +523,10 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 												1e-10);
 										Assert.assertArrayEquals("du_da ExtendedGradient2Procedure", jacobian[i], dy_da,
 												1e-10);
+										for (int j=0, k=0; j<d2u_da2.length; j++, k+= d2u_da2.length+1)
+											d2u_da2[j] = d2y_dadb[k];
+										Assert.assertArrayEquals("d2u_da2 Gradient2Procedure",
+												jacobian2[i], d2u_da2, 1e-10);
 										i++;
 									}
 								});
@@ -622,7 +626,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		final int n = f2.size();
 		double[] du_da = new double[f2.getNumberOfGradients()];
 		double[] du_db = new double[f2.getNumberOfGradients()];
-		double[] d2u_da2 = new double[f2.getNumberOfGradients()];
+		final double[] d2u_da2 = new double[f2.getNumberOfGradients()];
 
 		final double[] values = new double[n];
 		final double[][] jacobian = new double[n][];
@@ -645,7 +649,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 													double[] a = createParameters(background, amplitude1, shape1, cx1,
 															cy1, w1[0], w1[1], amplitude2, shape2, cx2, cy2, w2[0],
 															w2[1]);
-													f2.initialise2(a);
+													f2.initialiseExtended2(a);
 
 													// Compute single
 													for (int i = 0; i < n; i++)
@@ -700,6 +704,25 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																	jacobian[i], dy_da, 1e-10);
 															Assert.assertArrayEquals("d2u_da2 Gradient2Procedure",
 																	jacobian2[i], d2y_da2, 1e-10);
+															i++;
+														}
+													});
+													
+													f2.forEach(new ExtendedGradient2Procedure()
+													{
+														int i = 0;
+
+														public void executeExtended(double value, double[] dy_da,
+																double[] d2y_dadb)
+														{
+															Assert.assertEquals("Value ExtendedGradient2Procedure",
+																	values[i], value, 1e-10);
+															Assert.assertArrayEquals("du_da ExtendedGradient2Procedure",
+																	jacobian[i], dy_da, 1e-10);
+															for (int j=0, k=0; j<d2u_da2.length; j++, k+= d2u_da2.length+1)
+																d2u_da2[j] = d2y_dadb[k];
+															Assert.assertArrayEquals("d2u_da2 Gradient2Procedure",
+																	jacobian2[i], d2u_da2, 1e-10);
 															i++;
 														}
 													});

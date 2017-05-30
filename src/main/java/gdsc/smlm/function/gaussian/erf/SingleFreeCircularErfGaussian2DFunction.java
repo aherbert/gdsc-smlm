@@ -680,68 +680,62 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 				duda[4] = du_dtsx[x] * deltaEy;
 				duda[5] = du_dtsy * deltaEx[x];
 
-				// TODO:
 				// Compute all the partial second order derivatives
 
 				// Background are all 0
 
-				int k = n;
 				// Signal,X
-				d2udadb[k + 2] = duda[2] / tI;
+				d2udadb[8] = duda[2] / tI;
 				// Signal,Y
-				d2udadb[k + 3] = duda[3] / tI;
+				d2udadb[9] = duda[3] / tI;
 				// Signal,X SD
-				d2udadb[k + 4] = duda[4] / tI;
+				d2udadb[10] = duda[4] / tI;
 				// Signal,Y SD
-				d2udadb[k + 5] = duda[5] / tI;
+				d2udadb[11] = duda[5] / tI;
 
-				k += n;
 				// X,Signal
-				d2udadb[k + 1] = d2udadb[k - n + 2];
+				d2udadb[13] = d2udadb[8];
 				// X,X
-				d2udadb[k + 2] = d2u_dtx2[x] * deltaEy;
+				d2udadb[14] = d2u_dtx2[x] * deltaEy;
 				// X,Y
-				d2udadb[k + 3] = du_dtx[x] * du_dty / tI;
+				d2udadb[15] = du_dtx[x] * du_dty / tI;
 				// X,X SD
-				d2udadb[k + 4] = deltaEy * d2deltaEx_dtsxdx[x];
+				d2udadb[16] = deltaEy * d2deltaEx_dtsxdx[x];
 				// X,Y SD
-				d2udadb[k + 5] = du_dtx[x] * du_dtsy / tI;
+				d2udadb[17] = du_dtx[x] * du_dtsy / tI;
 
-				k += n;
 				// Y,Signal
-				d2udadb[k + 1] = d2udadb[k - 2 * n + 3];
+				d2udadb[19] = d2udadb[9];
 				// Y,X
-				d2udadb[k + 2] = d2udadb[k - n + 3];
+				d2udadb[20] = d2udadb[15];
 				// Y,Y
-				d2udadb[k + 3] = d2u_dty2 * deltaEx[x];
+				d2udadb[21] = d2u_dty2 * deltaEx[x];
 				// Y,X SD
-				d2udadb[k + 4] = du_dty * du_dtsx[x] / tI;
+				d2udadb[22] = du_dty * du_dtsx[x] / tI;
 				// Y,Y SD
-				d2udadb[k + 5] = deltaEx[x] * d2deltaEy_dtsydy;
+				d2udadb[23] = deltaEx[x] * d2deltaEy_dtsydy;
 
-				k += n;
 				// X SD,Signal
-				d2udadb[k + 1] = d2udadb[k - 3 * n + 4];
+				d2udadb[25] = d2udadb[10];
 				// X SD,X
-				d2udadb[k + 2] = d2udadb[k - 2 * n + 4];
+				d2udadb[26] = d2udadb[16];
 				// X SD,Y
-				d2udadb[k + 3] = d2udadb[k - n + 4];
+				d2udadb[27] = d2udadb[22];
 				// X SD,X SD
-				d2udadb[k + 4] = d2u_dtsx2[x] * deltaEy;
+				d2udadb[28] = d2u_dtsx2[x] * deltaEy;
 				// X SD,Y SD
-				d2udadb[k + 5] = du_dtsy * du_dtsx[x] / tI;
+				d2udadb[29] = du_dtsy * du_dtsx[x] / tI;
 
-				k += n;
 				// Y SD,Signal
-				d2udadb[k + 1] = d2udadb[k - 4 * n + 5];
+				d2udadb[31] = d2udadb[11];
 				// Y SD,X
-				d2udadb[k + 2] = d2udadb[k - 3 * n + 5];
+				d2udadb[32] = d2udadb[17];
 				// Y SD,Y
-				d2udadb[k + 3] = d2udadb[k - 2 * n + 5];
+				d2udadb[33] = d2udadb[23];
 				// Y SD,X SD
-				d2udadb[k + 4] = d2udadb[k - 1 * n + 5];
+				d2udadb[34] = d2udadb[29];
 				// Y SD,Y SD
-				d2udadb[k + 5] = d2u_dtsy2 * deltaEx[x];
+				d2udadb[35] = d2u_dtsy2 * deltaEx[x];
 
 				procedure.executeExtended(tB + tI * duda[1], duda, d2udadb);
 			}
