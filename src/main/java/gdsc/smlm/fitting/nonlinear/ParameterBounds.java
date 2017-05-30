@@ -412,4 +412,24 @@ public class ParameterBounds
 	{
 		return f;
 	}
+
+	/**
+	 * Gets the lower limit of the bounds
+	 *
+	 * @return the lower limit (or null).
+	 */
+	public double[] getLower()
+	{
+		return lower;
+	}
+
+	/**
+	 * Gets the upper limit of the bounds
+	 *
+	 * @return the upper limit (or null).
+	 */
+	public double[] getUpper()
+	{
+		return upper;
+	}
 }

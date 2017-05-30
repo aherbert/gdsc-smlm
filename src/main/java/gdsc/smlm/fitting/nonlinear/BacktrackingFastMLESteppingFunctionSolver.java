@@ -33,6 +33,9 @@ import gdsc.smlm.function.Gradient2Function;
 public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFunctionSolver
 {
 	private LineStepSearch lineSearch = new LineStepSearch();
+	/** Maximum step length used in line search. */
+	private double[] maximumStepLength = null;
+	private double maximumStepSize = 0;
 
 	private double[] aOld, searchDirection;
 	private boolean firstEvaluation;
@@ -100,6 +103,27 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		// We always compute the pseudolikelihood
 		isPseudoLogLikelihood = true;
 		firstEvaluation = true;
+
+		// Configure maximum step length for each dimension using the bounds.
+		// This is a simple check that can prevent wild Newton Raphson steps 
+		// that require a lot of backtracking.
+		maximumStepLength = null;
+		if (maximumStepSize > 0)
+		{
+			double[] lower = bounds.getLower();
+			double[] upper = bounds.getUpper();
+			if (lower != null && upper != null)
+			{
+				maximumStepLength = new double[lower.length];
+				for (int i = 0; i < maximumStepLength.length; i++)
+				{
+					maximumStepLength[i] = (upper[i] - lower[i]) * maximumStepSize;
+					if (maximumStepLength[i] <= 0)
+						maximumStepLength[i] = Double.POSITIVE_INFINITY;
+				}
+			}
+		}
+
 		return y;
 	}
 
@@ -155,8 +179,8 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	 * Internal class for a line search with backtracking
 	 * <p>
 	 * Adapted from NR::lnsrch, as discussed in Numerical Recipes section 9.7. The algorithm
-	 * has been changed to find the maximum and check for bad function evaluations
-	 * when backtracking.
+	 * has been changed to find the maximum, support limits on the search direction in all
+	 * dimensions and check for bad function evaluations when backtracking.
 	 */
 	private class LineStepSearch
 	{
@@ -198,6 +222,23 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 
 			final int n = xOld.length;
 			check = false;
+
+			// Limit the search step size for each dimension
+			if (maximumStepLength != null)
+			{
+				double scale = 1;
+				for (int i = 0; i < n; i++)
+				{
+					if (Math.abs(searchDirection[i]) * scale > maximumStepLength[i])
+						scale = maximumStepLength[i] / Math.abs(searchDirection[i]);
+				}
+				if (scale < 1)
+				{
+					// Scale the entire search direction
+					for (int i = 0; i < n; i++)
+						searchDirection[i] *= scale;
+				}
+			}
 
 			double slope = 0.0;
 			final int[] gradientIndices = BacktrackingFastMLESteppingFunctionSolver.this.f.gradientIndices();
@@ -306,6 +347,30 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	private static double max(double a, double b)
 	{
 		return (a > b) ? a : b;
+	}
+
+	/**
+	 * Gets the maximum step size.
+	 *
+	 * @return the maximum step size
+	 */
+	public double getMaximumStepSize()
+	{
+		return maximumStepSize;
+	}
+
+	/**
+	 * Sets the maximum step size. This is expressed as a factor of the upper-lower bound. Steps beyond this will cause
+	 * the step to be truncated. Ignored if above 1. Set to below 1 to disable.
+	 * <p>
+	 * Note: Restriction of the steps is better controlled using the ParaneterBounds object.
+	 *
+	 * @param maximumStepSize
+	 *            the new maximum step size
+	 */
+	public void setMaximumStepSize(double maximumStepSize)
+	{
+		this.maximumStepSize = (maximumStepSize >= 1) ? 0 : maximumStepSize;
 	}
 
 }
