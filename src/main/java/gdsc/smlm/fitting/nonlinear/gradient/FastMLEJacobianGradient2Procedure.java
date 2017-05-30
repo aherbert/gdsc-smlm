@@ -2,8 +2,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.Arrays;
 
-import org.ejml.data.DenseMatrix64F;
-
 import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.ExtendedGradient2Procedure;
 
@@ -83,12 +81,6 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 
 		final double xk_uk_minus1 = xk / uk - 1.0;
 		final double xk_uk2 = xk / (uk * uk);
-		//		DenseMatrix64F m = DenseMatrix64F.wrap(d1.length,  d1.length, d2uk_dtds);
-		//		for (int i=d2uk_dtds.length; i-->0; )
-		//			if (Double.isNaN(d2uk_dtds[i]))
-		//			{
-		//				System.out.println(m.toString());
-		//			}
 		for (int i = 0, index = 0; i < n; i++)
 		{
 			d1[i] += duk_dt[i] * xk_uk_minus1;
