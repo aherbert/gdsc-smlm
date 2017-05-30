@@ -370,8 +370,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 	 * @param s
 	 *            the standard deviation of the Gaussian for dimension 0
 	 */
-	private void createExSecondOrderTables(double tI, double[] deltaE, double[] du_dx, double[] du_ds, double[] d2u_dx2,
-			double[] d2u_ds2, double[] d2deltaE_dsdx, double u, double s)
+	protected static void createExSecondOrderTables(double tI, double[] deltaE, double[] du_dx, double[] du_ds,
+			double[] d2u_dx2, double[] d2u_ds2, double[] d2deltaE_dsdx, double u, double s)
 	{
 		final double ss = s * s;
 		final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
@@ -664,11 +664,16 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 		final double[] duda = new double[n];
 		final double[] d2udadb = new double[n * n];
 		duda[0] = 1.0;
+		final double[] du_dtsx_tI = new double[maxx];
+		for (int x = 0; x < maxx; x++)
+			du_dtsx_tI[x] = du_dtsx[x] / tI;
 		for (int y = 0; y < maxy; y++)
 		{
 			final double du_dty = this.du_dty[y];
+			final double du_dty_tI = du_dty / tI;
 			final double deltaEy = this.deltaEy[y];
 			final double du_dtsy = this.du_dtsy[y];
+			final double du_dtsy_tI = du_dtsy / tI;
 			final double d2u_dty2 = this.d2u_dty2[y];
 			final double d2u_dtsy2 = this.d2u_dtsy2[y];
 			final double d2deltaEy_dtsydy = this.d2deltaEy_dtsydy[y];
@@ -698,11 +703,11 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 				// X,X
 				d2udadb[14] = d2u_dtx2[x] * deltaEy;
 				// X,Y
-				d2udadb[15] = du_dtx[x] * du_dty / tI;
+				d2udadb[15] = du_dtx[x] * du_dty_tI;
 				// X,X SD
 				d2udadb[16] = deltaEy * d2deltaEx_dtsxdx[x];
 				// X,Y SD
-				d2udadb[17] = du_dtx[x] * du_dtsy / tI;
+				d2udadb[17] = du_dtx[x] * du_dtsy_tI;
 
 				// Y,Signal
 				d2udadb[19] = d2udadb[9];
@@ -711,7 +716,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 				// Y,Y
 				d2udadb[21] = d2u_dty2 * deltaEx[x];
 				// Y,X SD
-				d2udadb[22] = du_dty * du_dtsx[x] / tI;
+				d2udadb[22] = du_dty * du_dtsx_tI[x];
 				// Y,Y SD
 				d2udadb[23] = deltaEx[x] * d2deltaEy_dtsydy;
 
@@ -724,7 +729,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 				// X SD,X SD
 				d2udadb[28] = d2u_dtsx2[x] * deltaEy;
 				// X SD,Y SD
-				d2udadb[29] = du_dtsy * du_dtsx[x] / tI;
+				d2udadb[29] = du_dtsy * du_dtsx_tI[x];
 
 				// Y SD,Signal
 				d2udadb[31] = d2udadb[11];

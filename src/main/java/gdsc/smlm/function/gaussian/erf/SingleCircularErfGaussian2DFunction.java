@@ -109,6 +109,34 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 				one_sssssSqrt2pi, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty);
 	}
 
+	public void initialiseEx2(double[] a)
+	{
+		createEx2Arrays();
+		tB = a[Gaussian2DFunction.BACKGROUND];
+		tI = a[Gaussian2DFunction.SIGNAL];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double s = a[Gaussian2DFunction.X_SD];
+
+		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// since the Gaussian is XY separable
+		final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
+		final double ss = s * s;
+		final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
+		final double one_2ss = 0.5 / ss;
+		final double I_sSqrt2pi = tI * ONE_OVER_ROOT2PI / s;
+		final double I_ssSqrt2pi = tI * ONE_OVER_ROOT2PI / ss;
+		final double I_sssSqrt2pi = I_sSqrt2pi / ss;
+		final double one_sssSqrt2pi = one_sSqrt2pi / ss;
+		final double one_sssssSqrt2pi = one_sssSqrt2pi / ss;
+		createExSecondOrderTables(tI, one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, I_sssSqrt2pi, ss, one_sssSqrt2pi,
+				one_sssssSqrt2pi, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, d2deltaEx_dtsxdx, tx);
+		createExSecondOrderTables(tI, one_sSqrt2, one_2ss, I_sSqrt2pi, I_ssSqrt2pi, I_sssSqrt2pi, ss, one_sssSqrt2pi,
+				one_sssssSqrt2pi, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, d2deltaEy_dtsydy, ty);
+	}
+
+
 	/**
 	 * Evaluates an 2-dimensional Gaussian function for a single peak.
 	 * 
@@ -317,6 +345,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 			final double two_du_dtsy_tI = 2 * this.du_dtsy[y] / tI;
 			final double d2u_dty2 = this.d2u_dty2[y];
 			final double d2u_dtsy2 = this.d2u_dtsy2[y];
+			final double d2deltaEy_dtsydy = this.d2deltaEy_dtsydy[y];
 			for (int x = 0; x < maxx; x++)
 			{
 				duda[1] = deltaEx[x] * deltaEy;
@@ -324,32 +353,49 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 				duda[3] = du_dty * deltaEx[x];
 				duda[4] = du_dtsx[x] * deltaEy + du_dtsy * deltaEx[x];
 
-				// TODO:
 				// Compute all the partial second order derivatives
 
 				// Background are all 0
 
-				int k = n;
 				// Signal,X
+				d2udadb[7] = duda[2] / tI;
 				// Signal,Y
+				d2udadb[8] = duda[3] / tI;
+				// Signal,X SD
+				d2udadb[9] = duda[4] / tI;
 
+				// X,Signal
+				d2udadb[11] = d2udadb[7];
 				// X,X
-				k += n;
-				d2udadb[k + 2] = d2u_dtx2[x] * deltaEy;
+				d2udadb[12] = d2u_dtx2[x] * deltaEy;
+				// X,Y
+				d2udadb[13] = du_dtx[x] * du_dty / tI;
+				// X,X SD
+				d2udadb[14] = deltaEy * d2deltaEx_dtsxdx[x] + du_dtx[x] * du_dtsy / tI;
 
+				// Y,Signal
+				d2udadb[16] = d2udadb[8];
+				// Y,X
+				d2udadb[17] = d2udadb[13];
 				// Y,Y
-				k += n;
-				d2udadb[k + 3] = d2u_dty2 * deltaEx[x];
+				d2udadb[18] = d2u_dty2 * deltaEx[x];
+				// Y,X SD
+				d2udadb[19] = du_dty * du_dtsx[x] / tI + deltaEx[x] * d2deltaEy_dtsydy;
 
+				// X SD,Signal
+				d2udadb[21] = d2udadb[9];
+				// X SD,X
+				d2udadb[22] = d2udadb[14];
+				// X SD,Y
+				d2udadb[23] = d2udadb[19];
 				// X SD,X SD
-				k += n;
 				//@formatter:off
-				d2udadb[k + 4] = d2u_dtsx2[x] * deltaEy + 
-         				         d2u_dtsy2 * deltaEx[x] + 
-         				         du_dtsx[x] * two_du_dtsy_tI;
+				d2udadb[24] = d2u_dtsx2[x] * deltaEy + 
+         				      d2u_dtsy2 * deltaEx[x] + 
+         				      du_dtsx[x] * two_du_dtsy_tI;
 				//@formatter:on
 
-				procedure.executeExtended(tB + tI * duda[1], duda, d2udadb);
+				procedure.executeExtended(tB + tI * duda[1], duda, d2udadb);				
 			}
 		}
 	}

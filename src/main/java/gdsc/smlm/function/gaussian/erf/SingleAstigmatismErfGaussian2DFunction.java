@@ -1,5 +1,6 @@
 package gdsc.smlm.function.gaussian.erf;
 
+import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.gaussian.AstimatismZModel;
@@ -134,6 +135,36 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		d2tsy_dtz2 = tsy * ds_dz[1];
 		createSecondOrderTables(tI, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx, sx);
 		createSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, sy);
+	}
+
+	public void initialiseExtended2(double[] a)
+	{
+		createEx2Arrays();
+		tB = a[Gaussian2DFunction.BACKGROUND];
+		tI = a[Gaussian2DFunction.SIGNAL];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double tsx = a[Gaussian2DFunction.X_SD];
+		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
+
+		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// since the Gaussian is XY separable
+		final double[] ds_dz = new double[2];
+		final double sx = tsx * zModel.getSx2(tz, ds_dz);
+		dtsx_dtz = tsx * ds_dz[0];
+		d2tsx_dtz2 = tsx * ds_dz[1];
+		final double sy = tsy * zModel.getSy2(tz, ds_dz);
+		dtsy_dtz = tsy * ds_dz[0];
+		d2tsy_dtz2 = tsy * ds_dz[1];
+		createExSecondOrderTables(tI, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, d2deltaEx_dtsxdx, tx, sx);
+		createExSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, d2deltaEy_dtsydy, ty, sy);
+		// Pre-apply the gradient mapping from width to z
+		for (int i = 0; i < d2deltaEx_dtsxdx.length; i++)
+			d2deltaEx_dtsxdx[i] *= dtsx_dtz;
+		for (int i = 0; i < d2deltaEy_dtsydy.length; i++)
+			d2deltaEy_dtsydy[i] *= dtsy_dtz;
 	}
 
 	/**
@@ -346,6 +377,100 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 				d2uda2[4] = d2u_dty2 * deltaEx[x];
 
 				procedure.execute(tB + tI * duda[1], duda, d2uda2);
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
+	 */
+	public void forEach(ExtendedGradient2Procedure procedure)
+	{
+		final int n = getNumberOfGradients();
+		final double[] duda = new double[n];
+		final double[] d2udadb = new double[n * n];
+		duda[0] = 1.0;
+		final double dtsx_dtz_2 = dtsx_dtz * dtsx_dtz;
+		final double dtsy_dtz_2 = dtsy_dtz * dtsy_dtz;
+		final double two_dtsx_dtz_by_dtsy_dtz_tI = 2 * dtsx_dtz * dtsy_dtz / tI;
+		final double dtsx_dtz_tI = dtsx_dtz / tI;
+		final double dtsy_dtz_tI = dtsy_dtz / tI;
+		for (int y = 0; y < maxy; y++)
+		{
+			final double du_dty = this.du_dty[y];
+			final double du_dty_tI = du_dty / tI;
+			final double deltaEy = this.deltaEy[y];
+			final double du_dtsy = this.du_dtsy[y];
+			final double d2u_dty2 = this.d2u_dty2[y];
+			final double du_dtsy_by_dtsy_dtz_tI = du_dtsy * dtsy_dtz_tI;
+			final double du_dty_by_dtsx_dtz_tI = du_dty * dtsx_dtz_tI;
+			final double d2deltaEy_dtsydy = this.d2deltaEy_dtsydy[y];
+			final double deltaEy_by_dtsx_dtz_2 = deltaEy * dtsx_dtz_2;
+			final double d2u_dtsy2_by_dtsy_dtz_2 = this.d2u_dtsy2[y] * dtsy_dtz_2;
+			final double two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI = two_dtsx_dtz_by_dtsy_dtz_tI * du_dtsy;
+			for (int x = 0; x < maxx; x++)
+			{
+				final double du_dsx = du_dtsx[x] * deltaEy;
+				final double du_dsy = du_dtsy * deltaEx[x];
+
+				duda[1] = deltaEx[x] * deltaEy;
+				duda[2] = du_dsx * dtsx_dtz + du_dsy * dtsy_dtz;
+				duda[3] = du_dtx[x] * deltaEy;
+				duda[4] = du_dty * deltaEx[x];
+
+				// Compute all the partial second order derivatives
+
+				// Background are all 0
+
+				// Signal,Z
+				d2udadb[7] = duda[2] / tI;
+				// Signal,X
+				d2udadb[8] = duda[3] / tI;
+				// Signal,Y
+				d2udadb[9] = duda[4] / tI;
+
+				// Z,Signal
+				d2udadb[11] = d2udadb[7];
+				// Z,Z
+				//@formatter:off
+				d2udadb[12] =
+						d2u_dtsx2[x] * deltaEy_by_dtsx_dtz_2 +
+						du_dsx * d2tsx_dtz2 +
+						//d2u_dtsy2[y] * deltaEx[x] * dtsy_dtz_2 +
+						d2u_dtsy2_by_dtsy_dtz_2 * deltaEx[x] +
+						du_dsy * d2tsy_dtz2 +
+						// Add the equivalent term we add in the circular version.
+						// Note: this is not in the Smith, et al (2010) paper but is 
+						// in the GraspJ source code and it works in JUnit tests.
+						//2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
+						two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x]; 
+				//@formatter:on
+				// Z,X
+				d2udadb[13] = deltaEy * d2deltaEx_dtsxdx[x] + du_dtx[x] * du_dtsy_by_dtsy_dtz_tI;
+				// Z,Y
+				d2udadb[14] = du_dtsx[x] * du_dty_by_dtsx_dtz_tI + deltaEx[x] * d2deltaEy_dtsydy;
+
+				// X,Signal
+				d2udadb[16] = d2udadb[8];
+				// X,Z
+				d2udadb[17] = d2udadb[13];
+				// X,X
+				d2udadb[18] = d2u_dtx2[x] * deltaEy;
+				// X,Y
+				d2udadb[19] = du_dtx[x] * du_dty_tI;
+
+				// Y,Signal
+				d2udadb[21] = d2udadb[9];
+				// Y,Z
+				d2udadb[22] = d2udadb[14];
+				// Y,X
+				d2udadb[23] = d2udadb[19];
+				// Y,Y
+				d2udadb[24] = d2u_dty2 * deltaEx[x];
+
+				procedure.executeExtended(tB + tI * duda[1], duda, d2udadb);
 			}
 		}
 	}
