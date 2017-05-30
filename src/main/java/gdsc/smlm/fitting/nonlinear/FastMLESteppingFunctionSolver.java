@@ -239,13 +239,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	@Override
 	protected double computeFitValue(double[] a)
 	{
-		if (solver != null)
-			jacobianGradientProcedure.computeJacobian(a);
-		else
-			gradientProcedure.computeSecondDerivative(a);
-
-		if (gradientProcedure.isNaNGradients())
-			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+		computeGradients(a);
 
 		// Log-likelihood only needs to be computed if the tolerance checker 
 		// is testing the value. Use the Pseudo log-likelihood for speed.
@@ -256,6 +250,23 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		}
 
 		return ll;
+	}
+
+	/**
+	 * Compute the gradients for the Newton step using the gradient procedure.
+	 *
+	 * @param a
+	 *            the funtion parameters
+	 */
+	protected void computeGradients(double[] a)
+	{
+		if (solver != null)
+			jacobianGradientProcedure.computeJacobian(a);
+		else
+			gradientProcedure.computeSecondDerivative(a);
+
+		if (gradientProcedure.isNaNGradients())
+			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 	}
 
 	/*
@@ -285,7 +296,8 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 				double[] step2 = new double[d1.length];
 				for (int i = 0; i < step.length; i++)
 					step2[i] = -d1[i] / d2[i];
-				System.out.printf("[%d] Jacobian Step %s vs %s\n", tc.getIterations(), Arrays.toString(step), Arrays.toString(step2));
+				System.out.printf("[%d] Jacobian Step %s vs %s\n", tc.getIterations(), Arrays.toString(step),
+						Arrays.toString(step2));
 				return;
 			}
 		}

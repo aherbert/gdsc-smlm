@@ -36,7 +36,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	private LineStepSearch lineSearch = new LineStepSearch();
 
 	private double[] aOld, searchDirection;
-	private double fOld;
+	private boolean firstEvaluation;
 
 	/**
 	 * The minimum value between two doubles.
@@ -100,26 +100,23 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		y = super.prepareFitValue(y, a);
 		// We always compute the pseudolikelihood
 		isPseudoLogLikelihood = true;
+		firstEvaluation = true;
 		return y;
 	}
 
 	@Override
 	protected double computeFitValue(double[] a)
 	{
-		if (tc.getIterations() == 0)
+		if (firstEvaluation)
 		{
+			firstEvaluation = false;
+
 			// The first call to computeFitValue() computes derivatives. The value is obtained from 
 			// computePseudoLogLikelihood() 
-			if (solver != null)
-				jacobianGradientProcedure.computeJacobian(a);
-			else
-				gradientProcedure.computeSecondDerivative(a);
-
-			if (gradientProcedure.isNaNGradients())
-				throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+			computeGradients(a);
 
 			evaluations++;
-			fOld = ll = gradientProcedure.computePseudoLogLikelihood();
+			ll = gradientProcedure.computePseudoLogLikelihood();
 
 			searchDirection = new double[a.length];
 			aOld = a.clone();
@@ -133,12 +130,12 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 			// Configure the search direction with the full Newton step
 			searchDirection[i] = a[i] - aOld[i];
 
-		aOld = lineSearch.lineSearch(aOld, fOld, gradientProcedure.d1, searchDirection);
-		fOld = ll = lineSearch.f;
-		
+		aOld = lineSearch.lineSearch(aOld, ll, gradientProcedure.d1, searchDirection);
+		ll = lineSearch.f;
+
 		// Update the parameters to reflect any backtracking
 		System.arraycopy(aOld, 0, a, 0, a.length);
-		
+
 		return ll;
 	}
 
@@ -147,14 +144,10 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	{
 		if (tc.getIterations() > 0)
 		{
-			// After backtracking we must compute the derivatives
-			if (solver != null)
-				jacobianGradientProcedure.computeJacobian(aOld);
-			else
-				gradientProcedure.computeSecondDerivative(aOld);
-
-			if (gradientProcedure.isNaNGradients())
-				throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+			// After backtracking we must compute the derivatives.
+			// Note we leave it to here (and not after the line search) so it 
+			// can be skipped if convergence is achieved.
+			computeGradients(aOld);
 		}
 		super.computeStep(step);
 	}
@@ -162,8 +155,8 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	/**
 	 * Internal class for a line search with backtracking
 	 * <p>
-	 * Adapted from NR::lnsrch, as discussed in Numerical Recipes section 9.7. The algorithm has been changed to support
-	 * bounds on the point, limits on the search direction in all dimensions and checking for bad function evaluations
+	 * Adapted from NR::lnsrch, as discussed in Numerical Recipes section 9.7. The algorithm 
+	 * has been changed to find the maximum and check for bad function evaluations
 	 * when backtracking.
 	 */
 	private class LineStepSearch
@@ -213,7 +206,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				slope += gradient[i] * searchDirection[gradientIndices[i]];
 			if (slope <= 0.0)
 			{
-				throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "Slope is positive: " + slope);
+				throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "Slope is negative: " + slope);
 			}
 
 			// Compute lambda min
@@ -249,10 +242,10 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				gradientProcedure.computeValue(x);
 				f = gradientProcedure.computePseudoLogLikelihood();
 				//System.out.printf("f=%f @ %f : %s\n", f, alam, java.util.Arrays.toString(x));
-				if (f <= fOld + ALF * alam * slope)
+				if (f >= fOld + ALF * alam * slope)
 				{
 					// Sufficient function decrease
-					//System.out.printf("f=%f < %f\n", f, fOld + ALF * alam * slope);
+					//System.out.printf("f=%f > %f\n", f, fOld + ALF * alam * slope);
 					return x;
 				}
 				else
