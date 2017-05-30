@@ -337,11 +337,16 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		final double[] duda = new double[n];
 		final double[] d2udadb = new double[n * n];
 		duda[0] = 1.0;
+		final double[] du_dtsx_tI = new double[maxx];
+		for (int x = 0; x < maxx; x++)
+			du_dtsx_tI[x] = du_dtsx[x] / tI;
 		for (int y = 0; y < maxy; y++)
 		{
 			final double du_dty = this.du_dty[y];
+			final double du_dty_tI = du_dty / tI;
 			final double deltaEy = this.deltaEy[y];
 			final double du_dtsy = this.du_dtsy[y];
+			final double du_dtsy_tI = du_dtsy / tI;
 			final double two_du_dtsy_tI = 2 * this.du_dtsy[y] / tI;
 			final double d2u_dty2 = this.d2u_dty2[y];
 			final double d2u_dtsy2 = this.d2u_dtsy2[y];
@@ -369,9 +374,9 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 				// X,X
 				d2udadb[12] = d2u_dtx2[x] * deltaEy;
 				// X,Y
-				d2udadb[13] = du_dtx[x] * du_dty / tI;
+				d2udadb[13] = du_dtx[x] * du_dty_tI;
 				// X,X SD
-				d2udadb[14] = deltaEy * d2deltaEx_dtsxdx[x] + du_dtx[x] * du_dtsy / tI;
+				d2udadb[14] = deltaEy * d2deltaEx_dtsxdx[x] + du_dtx[x] * du_dtsy_tI;
 
 				// Y,Signal
 				d2udadb[16] = d2udadb[8];
@@ -380,7 +385,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 				// Y,Y
 				d2udadb[18] = d2u_dty2 * deltaEx[x];
 				// Y,X SD
-				d2udadb[19] = du_dty * du_dtsx[x] / tI + deltaEx[x] * d2deltaEy_dtsydy;
+				d2udadb[19] = du_dty * du_dtsx_tI[x] + deltaEx[x] * d2deltaEy_dtsydy;
 
 				// X SD,Signal
 				d2udadb[21] = d2udadb[9];

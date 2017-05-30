@@ -799,6 +799,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																double[] d2y_dadb)
 														{
 															i++;
+															//if (i!=f2.size()/2) return;
 															DenseMatrix64F m = DenseMatrix64F.wrap(nparams, nparams,
 																	d2y_dadb);
 															for (int j = 0; j < nparams; j++)
@@ -823,6 +824,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															}
 														}
 													});
+													//return;
 												}
 	}
 

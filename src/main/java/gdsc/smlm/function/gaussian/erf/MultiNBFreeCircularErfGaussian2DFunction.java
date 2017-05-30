@@ -1,5 +1,6 @@
 package gdsc.smlm.function.gaussian.erf;
 
+import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.ValueProcedure;
@@ -235,6 +236,112 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					d2uda2[a++] = d2u_dtsy2[yy] * deltaEx[xx];
 				}
 				procedure.execute(I, duda, d2uda2);
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
+	 */
+	public void forEach(ExtendedGradient2Procedure procedure)
+	{
+		final int ng = getNumberOfGradients();
+		final double[] duda = new double[ng];
+		final double[] d2udadb = new double[ng * ng];
+		final double[] du_dtsx_tI = new double[du_dtsx.length];
+		for (int x = 0; x < maxx; x++)
+			for (int n = 0, xx = x; n < nPeaks; n++, xx += maxx)
+				du_dtsx_tI[xx] = du_dtsx[xx] / tI[n];
+		final double[] du_dty_tI = new double[nPeaks];
+		final double[] du_dtsy_tI = new double[nPeaks];
+		for (int y = 0; y < maxy; y++)
+		{
+			for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy)
+			{
+				du_dty_tI[n] = du_dty[yy] / tI[n];
+				du_dtsy_tI[n] = du_dtsy[yy] / tI[n];
+			}
+			for (int x = 0; x < maxx; x++)
+			{
+				double I = tB;
+				for (int n = 0, xx = x, yy = y, a = 0; n < nPeaks; n++, xx += maxx, yy += maxy)
+				{
+					duda[a] = deltaEx[xx] * deltaEy[yy];
+					I += tI[n] * duda[a];
+					duda[a + 1] = du_dtx[xx] * deltaEy[yy];
+					duda[a + 2] = du_dty[yy] * deltaEx[xx];
+					duda[a + 3] = du_dtsx[xx] * deltaEy[yy];
+					duda[a + 4] = du_dtsy[yy] * deltaEx[xx];
+
+					// Compute all the partial second order derivatives
+					final double tI = this.tI[n];
+
+					// Background are all 0
+
+					int k = a * ng + a;
+					// Signal,X
+					d2udadb[k + 1] = duda[a + 1] / tI;
+					// Signal,Y
+					d2udadb[k + 2] = duda[a + 2] / tI;
+					// Signal,X SD
+					d2udadb[k + 3] = duda[a + 3] / tI;
+					// Signal,Y SD
+					d2udadb[k + 4] = duda[a + 4] / tI;
+
+					a += 5;
+
+					int kk = k + ng;
+					// X,Signal
+					d2udadb[kk] = d2udadb[k + 1];
+					// X,X
+					d2udadb[kk + 1] = d2u_dtx2[xx] * deltaEy[yy];
+					// X,Y
+					d2udadb[kk + 2] = du_dtx[xx] * du_dty_tI[n];
+					// X,X SD
+					d2udadb[kk + 3] = deltaEy[yy] * d2deltaEx_dtsxdx[xx];
+					// X,Y SD
+					d2udadb[kk + 4] = du_dtx[xx] * du_dtsy_tI[n];
+
+					int kkk = kk + ng;
+					// Y,Signal
+					d2udadb[kkk] = d2udadb[k + 2];
+					// Y,X
+					d2udadb[kkk + 1] = d2udadb[kk + 2];
+					// Y,Y
+					d2udadb[kkk + 2] = d2u_dty2[yy] * deltaEx[xx];
+					// Y,X SD
+					d2udadb[kkk + 3] = du_dty[yy] * du_dtsx_tI[xx];
+					// Y,Y SD
+					d2udadb[kkk + 4] = deltaEx[xx] * d2deltaEy_dtsydy[yy];
+
+					int kkkk = kkk + ng;
+					// X SD,Signal
+					d2udadb[kkkk] = d2udadb[k + 3];
+					// X SD,X
+					d2udadb[kkkk + 1] = d2udadb[kk + 3];
+					// X SD,Y
+					d2udadb[kkkk + 2] = d2udadb[kkk + 3];
+					// X SD,X SD
+					d2udadb[kkkk + 3] = d2u_dtsx2[xx] * deltaEy[yy];
+					// X SD,Y SD
+					d2udadb[kkkk + 4] = du_dtsy[yy] * du_dtsx_tI[xx];
+
+					int kkkkk = kkkk + ng;
+					// Y SD,Signal
+					d2udadb[kkkkk] = d2udadb[k + 4];
+					// Y SD,X
+					d2udadb[kkkkk + 1] = d2udadb[kk + 4];
+					// Y SD,Y
+					d2udadb[kkkkk + 2] = d2udadb[kkk + 4];
+					// Y SD,X SD
+					d2udadb[kkkkk + 3] = d2udadb[kkkk + 4];
+					// Y SD,Y SD
+					d2udadb[kkkkk + 4] = d2u_dtsy2[yy] * deltaEx[xx];
+
+				}
+				procedure.executeExtended(I, duda, d2udadb);
 			}
 		}
 	}

@@ -160,14 +160,4 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	// Force new implementation from the base Gaussian2DFunction
 	@Override
 	public abstract void initialise1(double[] a);
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.ExtendedGradient2Function#initialiseExtended2(double[])
-	 */
-	public void initialiseExtended2(double[] a)
-	{
-		initialise2(a);
-	}
 }
