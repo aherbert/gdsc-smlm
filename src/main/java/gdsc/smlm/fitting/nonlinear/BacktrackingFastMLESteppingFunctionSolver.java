@@ -1,7 +1,6 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer.LineSearchRoundoffException;
-import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Maths;
 import gdsc.smlm.fitting.FitStatus;
@@ -155,7 +154,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	/**
 	 * Internal class for a line search with backtracking
 	 * <p>
-	 * Adapted from NR::lnsrch, as discussed in Numerical Recipes section 9.7. The algorithm 
+	 * Adapted from NR::lnsrch, as discussed in Numerical Recipes section 9.7. The algorithm
 	 * has been changed to find the maximum and check for bad function evaluations
 	 * when backtracking.
 	 */
@@ -213,7 +212,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 			double test = 0.0;
 			for (int i = 0; i < n; i++)
 			{
-				final double temp = Math.abs(searchDirection[i]) / FastMath.max(Math.abs(xOld[i]), 1.0);
+				final double temp = Math.abs(searchDirection[i]) / max(Math.abs(xOld[i]), 1.0);
 				if (temp > test)
 					test = temp;
 			}
@@ -298,9 +297,15 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 					alam2 = alam;
 					f2 = f;
 					// Ensure the lambda is >= 0.1 lamda1, i.e. we take reasonable step
-					alam = FastMath.max(tmplam, 0.1 * alam);
+					alam = max(tmplam, 0.1 * alam);
 				}
 			}
 		}
 	}
+
+	private static double max(double a, double b)
+	{
+		return (a > b) ? a : b;
+	}
+
 }

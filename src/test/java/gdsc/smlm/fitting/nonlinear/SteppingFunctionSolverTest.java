@@ -118,7 +118,8 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	@Test(expected = AssertionError.class)
 	public void cannotFitSingleGaussianEMCCD_x_x__FastMLE()
 	{
-		// The FastMLE method can generate very big steps that make the method unstable
+		// The FastMLE method can generate very big steps that make the method unstable.
+		// Currently we expect this test to fail.
 		fitSingleGaussian(NO_BOUND, NO_CLAMP, FastMLE, NoiseModel.EMCCD);
 	}
 
@@ -152,7 +153,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, FastMLE, NoiseModel.EMCCD);
 	}
 
-	@Test //(expected = AssertionError.class)
+	@Test
 	public void canFitSingleGaussianEMCCD_x_x__BTFastMLE()
 	{
 		// The BTFastMLE method can generate very big steps that make the method unstable
@@ -189,7 +190,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, BTFastMLE, NoiseModel.EMCCD);
 	}
 
-	@Test(expected = AssertionError.class)
+	//@Test(expected = AssertionError.class)
 	public void cannotFitSingleGaussianEMCCD_x_x__JFastMLE()
 	{
 		// The JFastMLE method does not work
