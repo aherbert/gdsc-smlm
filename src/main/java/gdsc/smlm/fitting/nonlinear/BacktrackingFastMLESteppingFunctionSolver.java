@@ -1,7 +1,5 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer.LineSearchRoundoffException;
-
 import gdsc.core.utils.Maths;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.Gradient2Function;
@@ -208,11 +206,11 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		 * @param searchDirection
 		 *            The search direction
 		 * @return The new point
-		 * @throws LineSearchRoundoffException
+		 * @throws FunctionSolverException
 		 *             if the slope of the line search is positive
 		 */
 		double[] lineSearch(double[] xOld, final double fOld, double[] gradient, double[] searchDirection)
-				throws LineSearchRoundoffException
+				throws FunctionSolverException
 		{
 			final double ALF = 1.0e-4, TOLX = epsilon;
 			double alam2 = 0.0, f2 = 0.0;
