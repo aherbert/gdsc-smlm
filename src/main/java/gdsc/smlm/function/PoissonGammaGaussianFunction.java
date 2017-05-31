@@ -17,7 +17,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.special.Erf;
+//import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
 /**
