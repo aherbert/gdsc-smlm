@@ -1,7 +1,9 @@
 package gdsc.smlm.function;
 
-import org.apache.commons.math3.special.Erf;
+//import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.utils.Maths;
 
 /**
  * Calculate the value of the Skew Normal distribution
@@ -58,7 +60,7 @@ public class SkewNormalFunction
 	{
 		final double sigma = getSigma();
 		return ((4.0 - Math.PI) / 2.0) *
-				(Math.pow((sigma * Math.sqrt(2.0 / Math.PI)), 3) / Math.pow(1 - 2 * sigma * sigma / Math.PI, 1.5));
+				(Maths.pow3((sigma * Math.sqrt(2.0 / Math.PI))) / Math.pow(1 - 2 * sigma * sigma / Math.PI, 1.5));
 	}
 
 	private double getSigma()
