@@ -45,7 +45,7 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariateOptimizer;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.random.Well19937c;
-import org.apache.commons.math3.special.Erf;
+//import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
@@ -61,6 +61,7 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.function.Erf;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -2393,7 +2394,7 @@ public class FIRE implements PlugIn
 				plot.addPoints(x, y, Plot.LINE);
 				plot.addLabel(0, 0, String.format("Precision = %.3f +/- %.3f", mean, sigma));
 				// Add the Gaussian line
-				// Compute the intergal of the standard gaussian between the min and max
+				// Compute the integral of the standard gaussian between the min and max
 				final double denom0 = 1.0 / (Math.sqrt(2.0) * sigma);
 				double integral = 0.5 * Erf.erf((x2[0] - mean) * denom0, (x2[x2.length - 1] - mean) * denom0);
 				// Normalise so the integral has the same volume as the histogram

@@ -4,10 +4,11 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.special.Erf;
+//import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Sort;
+import gdsc.smlm.function.Erf;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
