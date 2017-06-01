@@ -46,6 +46,7 @@ public class Test_Plugin implements PlugIn
 			}
 		});
 		gd.addFilenameField("File", "", 30);
+		gd.addDirectoryField("Dir", "", 30);
 		gd.addChoice("Select", new String[] { "Five", "Six" }, "", new OptionListener<Choice>()
 		{
 			@Override
