@@ -1,4 +1,4 @@
-package gdsc.smlm.ij.plugins;
+
 
 import java.awt.Choice;
 import java.awt.TextField;
@@ -13,7 +13,7 @@ import ij.plugin.PlugIn;
 /**
  * A simple class used to test plugin functionality
  */
-public class TestPlugin implements PlugIn
+public class Test_Plugin implements PlugIn
 {
 	/*
 	 * (non-Javadoc)
