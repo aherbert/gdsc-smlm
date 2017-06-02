@@ -39,7 +39,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
@@ -542,7 +542,7 @@ public class DensityImage implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
@@ -625,7 +625,7 @@ public class DensityImage implements PlugIn
 			else
 			{
 				String[] items = titles.toArray(new String[titles.size()]);
-				gd = new GenericDialog(TITLE);
+				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Select the source image for the ROI");
 				gd.addChoice("Image", items, roiImage);
 				gd.showDialog();
@@ -654,7 +654,7 @@ public class DensityImage implements PlugIn
 	 */
 	private void computeRipleysPlot(MemoryPeakResults results)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Compute Ripley's L(r) - r plot");
 		gd.addNumericField("Min_radius", minR, 2);
 		gd.addNumericField("Max_radius", maxR, 2);

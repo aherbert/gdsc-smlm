@@ -37,7 +37,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
@@ -103,7 +103,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
 		ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.MEMORY);

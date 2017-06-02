@@ -61,8 +61,9 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
-import ij.gui.NonBlockingGenericDialog;
+import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
@@ -434,7 +435,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	{
 		TITLE = ((crosstalkMode) ? "Crosstalk " : "Pulse ") + TITLE;
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		if (crosstalkMode)
 			gd.addMessage("Analyse crosstalk activation rate");
@@ -463,7 +464,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 	private boolean showPulseCycleDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		gd.addMessage("Specify the pulse cycle");
 
@@ -699,7 +700,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 	private boolean showCrossTalkAnalysisDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		gd.addMessage(TextUtils.wrap(
 				"Crosstalk analysis requires a sample singly labelled with only one photo-switchable probe and imaged with the full pulse lifecycle. The probe should be activated by the pulse in the target channel. Activations from the pulse in other channels is crosstalk.",
@@ -994,7 +995,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 	private boolean showPulseAnalysisDialog()
 	{
-		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 
 		gd.addMessage("Plot molecules activated after a pulse");
 		String[] correctionNames = null;
@@ -1095,7 +1096,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	 */
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
-		// The event is null when the NonBlockingGenericDialog is first shown
+		// The event is null when the NonBlockingExtendedGenericDialog is first shown
 		if (e == null)
 		{
 			// Do not ignore this if a macro
@@ -1790,7 +1791,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	{
 		if (Utils.isExtraOptions())
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Perform a crosstalk simulation?");
 			gd.enableYesNoCancel();
 			gd.showDialog();
@@ -2094,7 +2095,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 	private boolean showSimulationDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		SimulationDistribution[] distributionValues = SimulationDistribution.values();
 		String[] distribution = SettingsManager.getNames((Object[]) distributionValues);

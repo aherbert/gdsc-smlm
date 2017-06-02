@@ -100,8 +100,9 @@ import ij.Macro;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
-import ij.gui.NonBlockingGenericDialog;
+import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
@@ -610,7 +611,7 @@ public class FIRE implements PlugIn
 
 	private boolean showInputDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Compute the resolution using Fourier Ring Correlation");
 		gd.addHelp(About.HELP_URL);
 
@@ -653,7 +654,7 @@ public class FIRE implements PlugIn
 			else
 			{
 				String[] items = titles.toArray(new String[titles.size()]);
-				gd = new GenericDialog(TITLE);
+				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Select the source image for the ROI");
 				gd.addChoice("Image", items, roiImage);
 				gd.showDialog();
@@ -677,7 +678,7 @@ public class FIRE implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Compute the resolution using Fourier Ring Correlation");
 		gd.addHelp(About.HELP_URL);
 
@@ -1992,7 +1993,7 @@ public class FIRE implements PlugIn
 
 	private boolean showQEstimationInputDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
@@ -2102,7 +2103,7 @@ public class FIRE implements PlugIn
 			else
 			{
 				String[] items = titles.toArray(new String[titles.size()]);
-				gd = new GenericDialog(TITLE);
+				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Select the source image for the ROI");
 				gd.addChoice("Image", items, roiImage);
 				gd.showDialog();
@@ -2884,7 +2885,7 @@ public class FIRE implements PlugIn
 			workflow.run(new WorkSettings(histogram.mean, histogram.sigma, qplot.qValue));
 
 			// Build the dialog
-			NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+			NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
 			double mu = histogram.mean / nmPerPixel;
@@ -2967,7 +2968,7 @@ public class FIRE implements PlugIn
 		Checkbox cb;
 		final boolean isMacro;
 
-		FIREDialogListener(GenericDialog gd, PrecisionHistogram histogram, QPlot qplot,
+		FIREDialogListener(ExtendedGenericDialog gd, PrecisionHistogram histogram, QPlot qplot,
 				Workflow<WorkSettings, Object> workflow)
 		{
 			time = System.currentTimeMillis() + 1000;

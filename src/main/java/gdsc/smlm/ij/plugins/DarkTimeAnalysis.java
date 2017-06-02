@@ -27,7 +27,7 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.Prefs;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 
@@ -106,7 +106,7 @@ public class DarkTimeAnalysis implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Compute the cumulative dark-time histogram");

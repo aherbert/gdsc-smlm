@@ -71,7 +71,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.PolygonRoi;
 import ij.measure.Calibration;
 import ij.plugin.LutLoader;
@@ -661,7 +661,7 @@ public class TraceMolecules implements PlugIn
 	private boolean showDialog()
 	{
 		TITLE = outputName + " Molecules";
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
@@ -712,7 +712,7 @@ public class TraceMolecules implements PlugIn
 		return true;
 	}
 
-	private boolean readDialog(GenericDialog gd)
+	private boolean readDialog(ExtendedGenericDialog gd)
 	{
 		inputOption = ResultsManager.getInputSource(gd);
 		settings.distanceThreshold = gd.getNextNumber();
@@ -738,7 +738,7 @@ public class TraceMolecules implements PlugIn
 
 		if (settings.showHistograms)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Select the histograms to display");
 			gd.addCheckbox("Remove_outliers", settings.removeOutliers);
 			gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
@@ -774,7 +774,7 @@ public class TraceMolecules implements PlugIn
 	private boolean showClusterDialog()
 	{
 		TITLE = outputName + " Molecules";
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
@@ -822,7 +822,7 @@ public class TraceMolecules implements PlugIn
 		return true;
 	}
 
-	private boolean readClusterDialog(GenericDialog gd)
+	private boolean readClusterDialog(ExtendedGenericDialog gd)
 	{
 		inputOption = ResultsManager.getInputSource(gd);
 		settings.distanceThreshold = gd.getNextNumber();
@@ -845,7 +845,7 @@ public class TraceMolecules implements PlugIn
 
 		if (settings.showHistograms)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Select the histograms to display");
 			gd.addCheckbox("Remove_outliers", settings.removeOutliers);
 			gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
@@ -964,7 +964,7 @@ public class TraceMolecules implements PlugIn
 
 	private boolean getParameters(int n, double d)
 	{
-		GenericDialog gd = new GenericDialog(TITLE + " Optimiser");
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE + " Optimiser");
 
 		String msg = String.format("Estimate %d molecules at d=%f, t=1", n, d);
 		IJ.log(msg);
@@ -1618,7 +1618,7 @@ public class TraceMolecules implements PlugIn
 			return;
 
 		// Show a dialog asking if the traces should be refit
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Do you want to fit the traces as a single peak using a combined image?");
 
 		gd.addCheckbox("Fit_closest_to_centroid", !fitOnlyCentroid);

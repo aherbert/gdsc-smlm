@@ -77,6 +77,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.WindowManager;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.measure.Calibration;
@@ -271,7 +272,7 @@ public class PCPALMMolecules implements PlugIn
 
 	private boolean getRunMode(boolean resultsAvailable)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
@@ -388,7 +389,7 @@ public class PCPALMMolecules implements PlugIn
 			else
 			{
 				String[] items = titles.toArray(new String[titles.size()]);
-				gd = new GenericDialog(TITLE);
+				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Select the source image for the ROI");
 				gd.addChoice("Image", items, roiImage);
 				gd.showDialog();

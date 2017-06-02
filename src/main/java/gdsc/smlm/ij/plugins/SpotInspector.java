@@ -29,7 +29,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.Plot2;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
@@ -141,7 +141,7 @@ public class SpotInspector implements PlugIn, MouseListener
 			Calibration calibration = results.getCalibration();
 			if (calibration.getBias() == 0)
 			{
-				GenericDialog gd = new GenericDialog(TITLE);
+				ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Calibrated results requires a camera bias");
 				gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
 				gd.showDialog();
@@ -451,7 +451,7 @@ public class SpotInspector implements PlugIn, MouseListener
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);

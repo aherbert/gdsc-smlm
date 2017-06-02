@@ -21,7 +21,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 
@@ -106,7 +106,7 @@ public class NeighbourAnalysis implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
@@ -131,7 +131,7 @@ public class NeighbourAnalysis implements PlugIn
 		return true;
 	}
 
-	private boolean readDialog(GenericDialog gd)
+	private boolean readDialog(ExtendedGenericDialog gd)
 	{
 		inputOption = ResultsManager.getInputSource(gd);
 		distanceThreshold = gd.getNextNumber();

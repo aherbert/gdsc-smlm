@@ -17,6 +17,7 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import ij.IJ;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
@@ -64,7 +65,7 @@ public class CalibrateResults implements PlugIn
 			return false;
 		}
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Select results to calibrate");
 

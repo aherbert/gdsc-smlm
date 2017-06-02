@@ -21,7 +21,7 @@ import gdsc.smlm.results.PeakResult;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
@@ -60,7 +60,7 @@ public class SplitResults implements PlugIn
 		}
 
 		// Show a dialog allowing the results set to be filtered
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select a dataset to split");
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		gd.addChoice("Object_mask", items, objectMask);

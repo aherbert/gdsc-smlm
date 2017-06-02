@@ -1,5 +1,18 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Choice;
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
+import gdsc.core.ij.IJTrackProgress;
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.TurboList;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,7 +28,6 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
-import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
@@ -27,8 +39,6 @@ import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.TurboList;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
@@ -46,27 +56,17 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.WindowManager;
+import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
 import ij.gui.YesNoCancelDialog;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
-
-import java.awt.Rectangle;
-import java.awt.TextField;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Opens peaks results and displays/converts them
  */
-public class ResultsManager implements PlugIn, MouseListener
+public class ResultsManager implements PlugIn
 {
 	public enum InputSource
 	{
@@ -109,10 +109,6 @@ public class ResultsManager implements PlugIn, MouseListener
 	private ResultsSettings resultsSettings = new ResultsSettings();
 
 	private boolean fileInput = false;
-
-	private GenericDialog gd;
-	private TextField text1;
-	private TextField text2;
 
 	private static double input_nmPerPixel = Prefs.get(Constants.inputNmPerPixel, 0);
 	private static double input_gain = Prefs.get(Constants.inputGain, 1);
@@ -407,7 +403,7 @@ public class ResultsManager implements PlugIn, MouseListener
 
 	private boolean showDialog()
 	{
-		gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
@@ -435,8 +431,26 @@ public class ResultsManager implements PlugIn, MouseListener
 
 		gd.addMessage("--- Table output ---");
 		String[] tableNames = SettingsManager.getNames((Object[]) ResultsTable.values());
-		gd.addChoice("Results_table", tableNames, tableNames[resultsSettings.getResultsTable().ordinal()]);
-		gd.addCheckbox("Show_deviations", resultsSettings.showDeviations);
+		gd.addChoice("Results_table", tableNames, tableNames[resultsSettings.getResultsTable().ordinal()],
+				new OptionListener<Choice>()
+				{
+					@Override
+					public void collectOptions(Choice field)
+					{
+						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						egd.addCheckbox("Show_deviations", resultsSettings.showDeviations);
+						egd.showDialog(true);
+						if (egd.wasCanceled())
+							return;
+						resultsSettings.showDeviations = egd.getNextBoolean();
+					}
+
+					@Override
+					public void collectOptions()
+					{
+						collectOptions(null);
+					}
+				});
 
 		gd.addMessage("--- Image output ---");
 		String[] imageNames = SettingsManager.getNames((Object[]) ResultsImage.values());
@@ -449,22 +463,11 @@ public class ResultsManager implements PlugIn, MouseListener
 
 		gd.addMessage("--- File output ---");
 		// Do not add a results file to prevent constant overwrite messages
-		gd.addStringField("Results_file", "");
+		gd.addFilenameField("Results_file", "");
 		String[] formatNames = SettingsManager.getNames((Object[]) ResultsFileFormat.values());
 		gd.addChoice("Results_format", formatNames, formatNames[resultsSettings.getResultsFileFormat().ordinal()]);
 		gd.addMessage(" ");
 		gd.addCheckbox("Results_in_memory (file input only)", resultsSettings.resultsInMemory);
-
-		// Dialog to allow double click to select files using a file chooser
-		if (Utils.isShowGenericDialog())
-		{
-			text1 = (TextField) gd.getStringFields().get(0); // Input file
-			text2 = (TextField) gd.getStringFields().get(1); // Results file
-			text1.addMouseListener(this);
-			text2.addMouseListener(this);
-			text1.setColumns(30);
-			text2.setColumns(30);
-		}
 
 		gd.showDialog();
 
@@ -516,7 +519,7 @@ public class ResultsManager implements PlugIn, MouseListener
 			else
 			{
 				String[] items = titles.toArray(new String[titles.size()]);
-				gd = new GenericDialog(TITLE);
+				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Select the source image for the ROI");
 				gd.addChoice("Image", items, roiImage);
 				gd.showDialog();
@@ -551,7 +554,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	 * @param inputOption
 	 * @param inputs
 	 */
-	public static void addInput(GenericDialog gd, String inputOption, InputSource... inputs)
+	public static void addInput(ExtendedGenericDialog gd, String inputOption, InputSource... inputs)
 	{
 		addInput(gd, "Input", inputOption, inputs);
 	}
@@ -569,7 +572,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	 * @param inputOption
 	 * @param inputs
 	 */
-	public static void addInput(GenericDialog gd, String inputName, String inputOption, InputSource... inputs)
+	public static void addInput(ExtendedGenericDialog gd, String inputName, String inputOption, InputSource... inputs)
 	{
 		ArrayList<String> source = new ArrayList<String>(3);
 		boolean fileInput = false;
@@ -597,7 +600,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	 * @param source
 	 * @param fileInput
 	 */
-	public static void addInputSourceToDialog(GenericDialog gd, String inputName, String inputOption,
+	public static void addInputSourceToDialog(ExtendedGenericDialog gd, String inputName, String inputOption,
 			ArrayList<String> source, boolean fileInput)
 	{
 		String[] options = source.toArray(new String[source.size()]);
@@ -616,7 +619,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		}
 		gd.addChoice(inputName, options, options[optionIndex]);
 		if (fileInput)
-			gd.addStringField("Input_file", inputFilename, 30);
+			gd.addFilenameField("Input_file", inputFilename);
 	}
 
 	/**
@@ -1088,47 +1091,6 @@ public class ResultsManager implements PlugIn, MouseListener
 			fileInput = true;
 		}
 		return loadInputResults(inputOption, true);
-	}
-
-	public void mouseClicked(MouseEvent e)
-	{
-		if (e.getClickCount() > 1) // Double-click
-		{
-			TextField text = (e.getSource() == text1) ? text1 : text2;
-			String filename = text.getText();
-			// We initialised the result filename input box to empty.
-			// We can use the last filename if the input box is still empty. 
-			if (Utils.isNullOrEmpty(filename) && text == text2)
-			{
-				filename = resultsSettings.resultsFilename;
-			}
-			String[] path = Utils.decodePath(filename);
-			OpenDialog chooser = new OpenDialog("Coordinate file", path[0], path[1]);
-			if (chooser.getFileName() != null)
-			{
-				text.setText(chooser.getDirectory() + chooser.getFileName());
-			}
-		}
-	}
-
-	public void mousePressed(MouseEvent e)
-	{
-
-	}
-
-	public void mouseReleased(MouseEvent e)
-	{
-
-	}
-
-	public void mouseEntered(MouseEvent e)
-	{
-
-	}
-
-	public void mouseExited(MouseEvent e)
-	{
-
 	}
 
 	private MemoryPeakResults cropToRoi(MemoryPeakResults results)

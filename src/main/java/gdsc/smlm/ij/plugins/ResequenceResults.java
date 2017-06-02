@@ -19,7 +19,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.core.logging.TrackProgress;
 import ij.IJ;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 
 /**
@@ -65,7 +65,7 @@ public class ResequenceResults implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Resequence the results in memory (assumed to be continuous from 1).\n"

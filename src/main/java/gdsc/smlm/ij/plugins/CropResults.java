@@ -23,7 +23,7 @@ import gdsc.smlm.results.PeakResult;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 
 /**
@@ -57,7 +57,7 @@ public class CropResults implements PlugIn
 		}
 
 		// Show a dialog allowing the results set to be filtered
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select a dataset to crop");
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		gd.showDialog();
@@ -80,7 +80,7 @@ public class CropResults implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		// TODO - add option to crop using the bounding rectangle of an ROI on an open image.

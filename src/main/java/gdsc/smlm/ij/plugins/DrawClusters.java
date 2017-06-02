@@ -29,7 +29,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
@@ -291,7 +291,7 @@ public class DrawClusters implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		ArrayList<String> titles = new ArrayList<String>(WindowManager.getImageCount());
 		titles.add("[None]");

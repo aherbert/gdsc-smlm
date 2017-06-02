@@ -62,9 +62,10 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.Line;
-import ij.gui.NonBlockingGenericDialog;
+import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.Plot2;
@@ -1693,7 +1694,7 @@ public class OPTICS implements PlugIn
 	{
 		logReferences(isDBSCAN);
 
-		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		ResultsManager.addInput(gd, inputSettings.inputOption, InputSource.MEMORY);

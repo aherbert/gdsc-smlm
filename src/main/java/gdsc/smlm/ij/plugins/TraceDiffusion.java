@@ -51,7 +51,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
@@ -520,7 +520,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		if (precision > 100)
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("The average precision of the traced results is " + Utils.rounded(precision, 4) +
 					" nm.\nPlease verify the precision.");
 			gd.addSlider("Precision (nm)", 5, 100, precision);
@@ -937,7 +937,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	private boolean showTraceDialog(ArrayList<MemoryPeakResults> allResults)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		if (!multiMode)
@@ -996,7 +996,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			if (cal == null)
 				cal = new Calibration();
 
-			GenericDialog gd = new GenericDialog(TITLE);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Uncalibrated results! Please enter the calibration:");
 			gd.addNumericField("Exposure_time (ms)", cal.getExposureTime(), 2);
 			gd.addNumericField("Pixel_pitch (nm)", cal.getNmPerPixel(), 2);
@@ -1011,7 +1011,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		return true;
 	}
 
-	private boolean readTraceDialog(GenericDialog gd)
+	private boolean readTraceDialog(ExtendedGenericDialog gd)
 	{
 		if (!multiMode)
 			inputOption = ResultsManager.getInputSource(gd);
@@ -1109,7 +1109,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		globalSettings = SettingsManager.loadSettings();
@@ -1146,7 +1146,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		return true;
 	}
 
-	private boolean readDialog(GenericDialog gd)
+	private boolean readDialog(ExtendedGenericDialog gd)
 	{
 		settings.truncate = gd.getNextBoolean();
 		settings.internalDistances = gd.getNextBoolean();
@@ -1173,7 +1173,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		if (settings.showHistograms)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Select the histograms to display");
 			gd.addCheckbox("Remove_outliers", settings.removeOutliers);
 			gd.addNumericField("Histogram_bins", settings.histogramBins, 0);

@@ -1,5 +1,4 @@
 
-
 import java.awt.Choice;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
@@ -23,9 +22,13 @@ public class Test_Plugin implements PlugIn
 	@Override
 	public void run(String arg)
 	{
+		// The parameters that have options must be available statically for the OptionListener
+		final String[] textFields = { "Some text", "More text" };
+		final String[] optionFields = { "", "", "" };
+
 		ExtendedGenericDialog gd = new ExtendedGenericDialog("Test");
-		gd.addChoice("Select", new String[] { "One", "Two" }, "");
-		final Choice c2 = gd.addAndGetChoice("Select", new String[] { "Three", "Four" }, "");
+		gd.addChoice("Select1", new String[] { "One", "Two" }, optionFields[0]);
+		final Choice c2 = gd.addAndGetChoice("Select2", new String[] { "Three", "Four" }, optionFields[1]);
 		gd.addAndGetButton("Options", new ActionListener()
 		{
 			@Override
@@ -33,28 +36,47 @@ public class Test_Plugin implements PlugIn
 			{
 				ExtendedGenericDialog gd2 = new ExtendedGenericDialog("Test2", null); // This makes it model
 				gd2.addMessage(c2.getSelectedItem());
-				gd2.showDialog();
+				gd2.showDialog(true);
+				gd2.getNextChoice();
 			}
 		});
-		gd.addStringField("Another", "field");
-		gd.addStringField("Testing", "Some text", 15, new OptionListener<TextField>()
+		gd.addStringField("Another", textFields[0]);
+		gd.addStringField("Testing", textFields[1], 15, new OptionListener<TextField>()
 		{
 			@Override
 			public void collectOptions(TextField field)
 			{
 				IJ.log(field.getText());
 			}
+
+			@Override
+			public void collectOptions()
+			{
+				IJ.log(textFields[1]);
+			}
 		});
 		gd.addFilenameField("File", "", 30);
 		gd.addDirectoryField("Dir", "", 30);
-		gd.addChoice("Select", new String[] { "Five", "Six" }, "", new OptionListener<Choice>()
+		gd.addChoice("Select3", new String[] { "Five", "Six" }, optionFields[2], new OptionListener<Choice>()
 		{
 			@Override
 			public void collectOptions(Choice field)
 			{
 				IJ.log(field.getSelectedItem());
 			}
+
+			@Override
+			public void collectOptions()
+			{
+				IJ.log(optionFields[2]);
+			}
 		});
 		gd.showDialog();
+		optionFields[0] = gd.getNextChoice();
+		optionFields[1] = gd.getNextChoice();
+		textFields[0] = gd.getNextString();
+		textFields[1] = gd.getNextString();
+		optionFields[2] = gd.getNextChoice();
+		gd.collectOptions();
 	}
 }

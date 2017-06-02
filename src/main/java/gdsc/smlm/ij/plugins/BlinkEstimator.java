@@ -37,6 +37,7 @@ import gdsc.smlm.ij.utils.LoggingOptimiserFunction;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
@@ -119,7 +120,7 @@ public class BlinkEstimator implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage(

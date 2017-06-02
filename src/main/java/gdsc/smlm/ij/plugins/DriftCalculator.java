@@ -34,7 +34,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.gui.Roi;
@@ -372,7 +372,7 @@ public class DriftCalculator implements PlugIn
 
 	private boolean showDialog(Roi[] rois, String[] stackTitles)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Correct the drift in localisation results");
@@ -439,7 +439,7 @@ public class DriftCalculator implements PlugIn
 
 	private boolean showSubImageDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Compute the drift using localisation sub-image alignment");
@@ -477,7 +477,7 @@ public class DriftCalculator implements PlugIn
 
 	private ImageStack showStackDialog(String[] stackTitles)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Compute the drift using a reference stack alignment");
@@ -547,7 +547,7 @@ public class DriftCalculator implements PlugIn
 
 	private void applyDriftCorrection(MemoryPeakResults results, double[][] drift)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Apply drift correction to in-memory results?");
 		gd.addChoice("Update_method", UPDATE_METHODS, UPDATE_METHODS[updateMethod]);
 		// Option to save the drift unless it was loaded from file

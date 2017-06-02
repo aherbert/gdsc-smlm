@@ -101,7 +101,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
@@ -682,7 +682,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			return false;
 		}
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Select identified maxima for fitting");
 
@@ -730,7 +730,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			showProcessedFrames = false;
 		}
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage((maximaIdentification) ? "Identify candidate maxima" : "Fit 2D Gaussian to identified maxima");
 
@@ -1051,7 +1051,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Ask if the user wants to log progress on multiple frame images
 		if (resultsSettings.logProgress && source.getFrames() > 1)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Warning: Log progress on multiple-frame image will be slow");
 			gd.addCheckbox("Log_progress", resultsSettings.logProgress);
 			gd.showDialog();
@@ -1065,7 +1065,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Get a bias if required
 		if (resultsSettings.getResultsTable() == ResultsTable.CALIBRATED && calibration.getBias() == 0)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Calibrated results requires a camera bias");
 			gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
 			gd.showDialog();
@@ -1103,7 +1103,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		// Present dialog with simple output options: Image, Table
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Fit single-molecule localisations");
 
@@ -1206,7 +1206,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		if (showIntroduction)
 		{
-			GenericDialog gd = newWizardDialog("No configuration file could be loaded.",
+			ExtendedGenericDialog gd = newWizardDialog("No configuration file could be loaded.",
 					"Please follow the configuration wizard to calibrate.");
 			gd.showDialog();
 			if (gd.wasCanceled())
@@ -1245,9 +1245,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		return true;
 	}
 
-	private GenericDialog newWizardDialog(String... messages)
+	private ExtendedGenericDialog newWizardDialog(String... messages)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		final String header = "-=-";
 		gd.addMessage(header + " " + TITLE + " Configuration Wizard " + header);
@@ -1258,7 +1258,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 	private boolean getPixelPitch()
 	{
-		GenericDialog gd = newWizardDialog(
+		ExtendedGenericDialog gd = newWizardDialog(
 				"Enter the size of each pixel. This is required to ensure the dimensions of the image are calibrated.",
 				"E.g. a camera with a 6.45um pixel size and a 60x objective will have a pitch of 6450/60 = 107.5nm.");
 		// TODO - Add a pop-up calculator...
@@ -1272,7 +1272,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 	private boolean getGain()
 	{
-		GenericDialog gd = newWizardDialog("Enter the total gain.",
+		ExtendedGenericDialog gd = newWizardDialog("Enter the total gain.",
 				"This is usually supplied with your camera certificate. The gain indicates how many Analogue-to-Digital-Units (ADUs) are recorded at the pixel for each photon registered on the sensor.",
 				"The gain is usually expressed using the product of the EM-gain (if applicable), the camera gain and the sensor quantum efficiency.",
 				"A value of 1 means no conversion to photons will occur.");
@@ -1289,7 +1289,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 	private boolean getExposureTime()
 	{
-		GenericDialog gd = newWizardDialog(
+		ExtendedGenericDialog gd = newWizardDialog(
 				"Enter the exposure time. Calibration of the exposure time allows correct reporting of on and off times.",
 				"This is the length of time for each frame in the image.");
 		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
@@ -1302,7 +1302,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 	private boolean getPeakWidth()
 	{
-		GenericDialog gd = newWizardDialog("Enter the expected peak width in pixels.",
+		ExtendedGenericDialog gd = newWizardDialog("Enter the expected peak width in pixels.",
 				"A point source of light will not be focussed perfectly by the microscope but will appear as a spread out peak. This Point Spread Function (PSF) can be modelled using a 2D Gaussian curve.",
 				"An optimised optical system (lens and camera sensor) should have a peak standard deviation of approximately 1 pixel when in focus. This allows the fitting routine to have enough data to identify the centre of the peak without spreading the light over too many pixels (which increases noise).",
 				"The peak width can be estimated using the wavelength of light emitted by the single molecules and the parameters of the microscope. Use a PSF calculator by clicking the checkbox below:");
@@ -1422,7 +1422,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		textField.setBackground(SystemColor.white);
 	}
 
-	private boolean readDialog(GlobalSettings settings, GenericDialog gd, boolean isCrop)
+	private boolean readDialog(GlobalSettings settings, ExtendedGenericDialog gd, boolean isCrop)
 	{
 		// Ignore the template
 		gd.getNextChoice();
@@ -1574,7 +1574,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			if (!fitConfig.isSmartFilter() && fitConfig.getPrecisionThreshold() > 0)
 			{
-				gd = new GenericDialog(TITLE);
+				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage(
 						"Precision filtering can use global noise estimate or local background level.\n \nLocal background requires the camera bias:");
 				gd.addCheckbox("Local_background", fitConfig.isPrecisionUsingBackground());
@@ -1600,7 +1600,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Extra parameters are needed for interlaced data
 		if (interlacedData)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n" +
 					"Describe the regular repeat of the data:\n \n" + "Start = The first frame that contains data\n" +
 					"Block = The number of continuous frames containing data\n" +
@@ -1666,7 +1666,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (!fitConfig.isSmartFilter())
 			return true;
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		String xml = fitConfig.getSmartFilterXML();
 		if (Utils.isNullOrEmpty(xml))
@@ -1732,7 +1732,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		for (int i = 1; i < n; i++)
 		{
 			int filter = i + 1;
-			GenericDialog gd = new GenericDialog(TITLE);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.enableYesNoCancel("Add", "Continue");
 			gd.addMessage(
 					String.format("Configure the %s filter.\nClick continue to proceed with the current set of %d.",
@@ -1825,7 +1825,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		if (fitConfig.getFitSolver() == FitSolver.MLE)
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
 			if (!ignoreCalibration)
 			{
@@ -1903,7 +1903,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			boolean requireBias = isWeightedLVM || requireGain;
 
 			// Collect options for LVM fitting
-			GenericDialog gd = new GenericDialog(TITLE);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage(fitConfig.getFitSolver().getShortName() + " requires additional parameters");
 			String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
 			gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
@@ -2183,7 +2183,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (results == null || results.size() == 0)
 				return;
 
-			GenericDialog gd = new GenericDialog(TITLE);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
 			gd.addMessage("Add the fitted localisations as an overlay?");
@@ -2710,7 +2710,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		if (newFilename != null && new File(newFilename).exists())
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
 			gd.addMessage("Reload settings from file");

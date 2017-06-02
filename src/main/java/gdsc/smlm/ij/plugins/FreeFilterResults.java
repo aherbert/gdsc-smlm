@@ -31,7 +31,7 @@ import gdsc.smlm.results.filter.WidthFilter;
 import gdsc.smlm.results.filter.WidthFilter2;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 
 import java.awt.Checkbox;
@@ -74,7 +74,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			// Ask user if they want to show the demo filters
-			GenericDialog gd = new GenericDialog(TITLE);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
 			gd.addMessage("No results in memory. Show the demo filters?");
@@ -115,7 +115,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Select a dataset to filter");
