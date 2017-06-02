@@ -455,6 +455,7 @@ public class ResultsManager implements PlugIn
 		gd.addMessage("--- Image output ---");
 		String[] imageNames = SettingsManager.getNames((Object[]) ResultsImage.values());
 		gd.addChoice("Image", imageNames, imageNames[resultsSettings.getResultsImage().ordinal()]);
+		// TODO - move these to an options pop-uo
 		gd.addCheckbox("Weighted", resultsSettings.weightedImage);
 		gd.addCheckbox("Equalised", resultsSettings.equalisedImage);
 		gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
@@ -464,6 +465,7 @@ public class ResultsManager implements PlugIn
 		gd.addMessage("--- File output ---");
 		// Do not add a results file to prevent constant overwrite messages
 		gd.addFilenameField("Results_file", "");
+		// TODO - move these to an options pop-uo
 		String[] formatNames = SettingsManager.getNames((Object[]) ResultsFileFormat.values());
 		gd.addChoice("Results_format", formatNames, formatNames[resultsSettings.getResultsFileFormat().ordinal()]);
 		gd.addMessage(" ");
