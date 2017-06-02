@@ -62,7 +62,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.DialogListener;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.Line;
 import ij.gui.NonBlockingExtendedGenericDialog;
