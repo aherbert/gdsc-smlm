@@ -434,7 +434,6 @@ public class ResultsManager implements PlugIn
 		gd.addChoice("Results_table", tableNames, tableNames[resultsSettings.getResultsTable().ordinal()],
 				new OptionListener<Choice>()
 				{
-					@Override
 					public void collectOptions(Choice field)
 					{
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
@@ -445,7 +444,6 @@ public class ResultsManager implements PlugIn
 						resultsSettings.showDeviations = egd.getNextBoolean();
 					}
 
-					@Override
 					public void collectOptions()
 					{
 						collectOptions(null);

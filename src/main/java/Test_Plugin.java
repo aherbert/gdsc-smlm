@@ -19,7 +19,6 @@ public class Test_Plugin implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
-	@Override
 	public void run(String arg)
 	{
 		// The parameters that have options must be available statically for the OptionListener
@@ -31,7 +30,6 @@ public class Test_Plugin implements PlugIn
 		final Choice c2 = gd.addAndGetChoice("Select2", new String[] { "Three", "Four" }, optionFields[1]);
 		gd.addAndGetButton("Options", new ActionListener()
 		{
-			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				ExtendedGenericDialog gd2 = new ExtendedGenericDialog("Test2", null); // This makes it model
@@ -43,13 +41,11 @@ public class Test_Plugin implements PlugIn
 		gd.addStringField("Another", textFields[0]);
 		gd.addStringField("Testing", textFields[1], 15, new OptionListener<TextField>()
 		{
-			@Override
 			public void collectOptions(TextField field)
 			{
 				IJ.log(field.getText());
 			}
 
-			@Override
 			public void collectOptions()
 			{
 				IJ.log(textFields[1]);
@@ -59,13 +55,11 @@ public class Test_Plugin implements PlugIn
 		gd.addDirectoryField("Dir", "", 30);
 		gd.addChoice("Select3", new String[] { "Five", "Six" }, optionFields[2], new OptionListener<Choice>()
 		{
-			@Override
 			public void collectOptions(Choice field)
 			{
 				IJ.log(field.getSelectedItem());
 			}
 
-			@Override
 			public void collectOptions()
 			{
 				IJ.log(optionFields[2]);
