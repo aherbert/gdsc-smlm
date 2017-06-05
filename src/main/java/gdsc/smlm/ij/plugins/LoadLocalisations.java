@@ -195,8 +195,8 @@ public class LoadLocalisations implements PlugIn
 		if (myLimitZ)
 		{
 			MemoryPeakResults results2 = new MemoryPeakResults(results.size());
-			results.setName(name);
-			results.copySettings(results);
+			results2.setName(name);
+			results2.copySettings(results);
 
 			for (PeakResult peak : results.getResults())
 			{
