@@ -293,7 +293,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		names[c++] = "(None)";
 		for (MemoryPeakResults results : MemoryPeakResults.getAllResults())
 		{
-			if (results.getSource().getOriginal() instanceof IJImageSource)
+			if (results.getSource() != null && results.getSource().getOriginal() instanceof IJImageSource)
 			{
 				IJImageSource source = (IJImageSource) (results.getSource().getOriginal());
 				ImagePlus imp = WindowManager.getImage(source.getName());
