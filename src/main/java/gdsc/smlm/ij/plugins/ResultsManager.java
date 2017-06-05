@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Choice;
+import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -9,6 +10,8 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.swing.JFileChooser;
 
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
@@ -61,8 +64,10 @@ import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
 import ij.gui.YesNoCancelDialog;
+import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
+import ij.util.Java2;
 
 /**
  * Opens peaks results and displays/converts them
@@ -127,6 +132,12 @@ public class ResultsManager implements PlugIn
 	{
 		extraOptions = Utils.isExtraOptions();
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+
+		if ("load".equals(arg))
+		{
+			batchLoad();
+			return;
+		}
 
 		if (arg != null && arg.startsWith("clear"))
 		{
@@ -1199,5 +1210,81 @@ public class ResultsManager implements PlugIn
 	static void setInputFilename(String inputFilename)
 	{
 		ResultsManager.inputFilename = inputFilename;
+	}
+
+	private String omDirectory;
+	private File[] omFiles;
+
+	/**
+	 * Batch load a set of results files.
+	 */
+	private void batchLoad()
+	{
+		// Adapted from ij.io.Opener.openMultiple
+
+		Java2.setSystemLookAndFeel();
+		// run JFileChooser in a separate thread to avoid possible thread deadlocks
+		try
+		{
+			EventQueue.invokeAndWait(new Runnable()
+			{
+				public void run()
+				{
+					JFileChooser fc = new JFileChooser();
+					fc.setMultiSelectionEnabled(true);
+					File dir = null;
+					String sdir = OpenDialog.getDefaultDirectory();
+					if (sdir != null)
+						dir = new File(sdir);
+					if (dir != null)
+						fc.setCurrentDirectory(dir);
+					int returnVal = fc.showOpenDialog(IJ.getInstance());
+					if (returnVal != JFileChooser.APPROVE_OPTION)
+						return;
+					omFiles = fc.getSelectedFiles();
+					if (omFiles.length == 0)
+					{ // getSelectedFiles does not work on some JVMs
+						omFiles = new File[1];
+						omFiles[0] = fc.getSelectedFile();
+					}
+					omDirectory = fc.getCurrentDirectory().getPath() + File.separator;
+				}
+			});
+		}
+		catch (Exception e)
+		{
+		}
+		if (omDirectory == null)
+			return;
+		OpenDialog.setDefaultDirectory(omDirectory);
+		for (int i = 0; i < omFiles.length; i++)
+		{
+			String path = omDirectory + omFiles[i].getName();
+			load(path);
+		}
+		// Ensure the 'Batch Load Results' does not get saved to the recorder
+		Recorder.setCommand(null);
+	}
+
+	private void load(String path)
+	{
+		inputFilename = path;
+		MemoryPeakResults results = loadInputResults(INPUT_FILE, true);
+		if (results == null || results.size() == 0)
+		{
+			IJ.error(TITLE, "No results could be loaded from " + path);
+		}
+		else
+		{
+			// Record this as a single load of the results manager
+			if (Recorder.record)
+			{
+				Recorder.record("run", "Results Manager",
+						String.format(
+								"input=%s filename=[%s] results_table=None image=None results_file=[] save_to_memory",
+								INPUT_FILE, path));
+			}
+			MemoryPeakResults.addResults(results);
+		}
 	}
 }
