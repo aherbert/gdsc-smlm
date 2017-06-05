@@ -1269,6 +1269,19 @@ public class ResultsManager implements PlugIn
 	private void load(String path)
 	{
 		inputFilename = path;
+		// Record this as a single load of the results manager.
+		// This should support any dialogs that are presented in loadInputResults(...)
+		// to get the calibration.
+		if (Recorder.record)
+		{
+			Recorder.setCommand("Results Manager");
+			Recorder.recordOption("input", INPUT_FILE);
+			Recorder.recordOption("input_file", path);
+			Recorder.recordOption("results_table", ResultsTable.NONE.getName());
+			Recorder.recordOption("image", ResultsImage.NONE.getName());
+			Recorder.recordOption("results_file", "[]");
+			Recorder.recordOption("save_to_memory");
+		}
 		MemoryPeakResults results = loadInputResults(INPUT_FILE, true);
 		if (results == null || results.size() == 0)
 		{
@@ -1276,14 +1289,8 @@ public class ResultsManager implements PlugIn
 		}
 		else
 		{
-			// Record this as a single load of the results manager
 			if (Recorder.record)
-			{
-				Recorder.record("run", "Results Manager",
-						String.format(
-								"input=%s filename=[%s] results_table=None image=None results_file=[] save_to_memory",
-								INPUT_FILE, path));
-			}
+				Recorder.saveCommand();
 			MemoryPeakResults.addResults(results);
 		}
 	}
