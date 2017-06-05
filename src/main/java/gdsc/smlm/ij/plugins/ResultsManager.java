@@ -1222,6 +1222,8 @@ public class ResultsManager implements PlugIn
 	{
 		// Adapted from ij.io.Opener.openMultiple
 
+		String resetInputFilename = inputFilename;
+		
 		Java2.setSystemLookAndFeel();
 		// run JFileChooser in a separate thread to avoid possible thread deadlocks
 		try
@@ -1262,8 +1264,8 @@ public class ResultsManager implements PlugIn
 			String path = omDirectory + omFiles[i].getName();
 			load(path);
 		}
-		// Ensure the 'Batch Load Results' does not get saved to the recorder
-		Recorder.setCommand(null);
+
+		inputFilename = resetInputFilename;
 	}
 
 	private void load(String path)
