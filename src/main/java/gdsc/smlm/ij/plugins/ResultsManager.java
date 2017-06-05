@@ -212,8 +212,6 @@ public class ResultsManager implements PlugIn
 		if (resultsSettings.resultsInMemory && fileInput)
 			MemoryPeakResults.addResults(results);
 
-		IJ.showStatus("Processing outputs ...");
-
 		Rectangle bounds = results.getBounds(true);
 		boolean showDeviations = resultsSettings.showDeviations && canShowDeviations(results);
 		boolean showEndFrame = canShowEndFrame(results);
@@ -231,36 +229,50 @@ public class ResultsManager implements PlugIn
 		addImageResults(outputList, results.getName(), bounds, results.getNmPerPixel(), results.getGain());
 		addFileResults(outputList, showDeviations, showEndFrame, showId);
 
-		// Reduce to single object for speed
-		PeakResults output = (outputList.numberOfOutputs() == 1) ? outputList.toArray()[0] : outputList;
-
-		output.begin();
-
-		// Process in batches to provide progress
-		List<PeakResult> list = results.getResults();
-		int progress = 0;
-		int totalProgress = list.size();
-		int stepProgress = Utils.getProgressInterval(totalProgress);
-		TurboList<PeakResult> batch = new TurboList<PeakResult>(stepProgress);
-		for (PeakResult result : list)
+		if (outputList.numberOfOutputs() == 0)
 		{
-			if (progress % stepProgress == 0)
+			// Error if results were loaded since we have no outputs
+			if (!(resultsSettings.resultsInMemory && fileInput))
 			{
-				IJ.showProgress(progress, totalProgress);
-			}
-			progress++;
-			batch.addf(result);
-
-			if (batch.size() == stepProgress)
-			{
-				output.addAll(batch);
-				batch.clearf();
-				if (isInterrupted())
-					break;
+				IJ.error(TITLE, "No output selected");
+				return;
 			}
 		}
-		IJ.showProgress(1);
-		output.end();
+		else
+		{
+			IJ.showStatus("Processing outputs ...");
+
+			// Reduce to single object for speed
+			PeakResults output = (outputList.numberOfOutputs() == 1) ? outputList.toArray()[0] : outputList;
+
+			output.begin();
+
+			// Process in batches to provide progress
+			List<PeakResult> list = results.getResults();
+			int progress = 0;
+			int totalProgress = list.size();
+			int stepProgress = Utils.getProgressInterval(totalProgress);
+			TurboList<PeakResult> batch = new TurboList<PeakResult>(stepProgress);
+			for (PeakResult result : list)
+			{
+				if (progress % stepProgress == 0)
+				{
+					IJ.showProgress(progress, totalProgress);
+				}
+				progress++;
+				batch.addf(result);
+
+				if (batch.size() == stepProgress)
+				{
+					output.addAll(batch);
+					batch.clearf();
+					if (isInterrupted())
+						break;
+				}
+			}
+			IJ.showProgress(1);
+			output.end();
+		}
 
 		IJ.showStatus(String.format("Processed %d result%s", results.size(), (results.size() > 1) ? "s" : ""));
 	}
