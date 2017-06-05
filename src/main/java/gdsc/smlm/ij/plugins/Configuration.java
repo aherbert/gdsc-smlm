@@ -1,5 +1,22 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.SystemColor;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
+import java.io.File;
+import java.util.Vector;
+
+import gdsc.core.ij.Utils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -21,36 +38,17 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
 import gdsc.smlm.results.Calibration;
 import ij.IJ;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.YesNoCancelDialog;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
-
-import java.awt.Checkbox;
-import java.awt.Choice;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.SystemColor;
-import java.awt.TextField;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.TextEvent;
-import java.awt.event.TextListener;
-import java.io.File;
-import java.util.Vector;
 
 /**
  * Adjust the configuration used for fitting.
  */
 // TODO - This could be incorporated into the PeakFit plugin as another run mode.
-public class Configuration implements PlugIn, MouseListener, TextListener, ItemListener
+public class Configuration implements PlugIn, TextListener, ItemListener
 {
 	private static final String TITLE = "Fit Configuration";
 
@@ -116,11 +114,11 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		Calibration calibration = settings.getCalibration();
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 
-		gd.addStringField("Config_file", filename, 40);
+		gd.addFilenameField("Config_file", filename, 40);
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 		gd.addNumericField("Gain", calibration.getGain(), 2);
 		gd.addCheckbox("EM-CCD", calibration.isEmCCD());
@@ -183,7 +181,6 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 			int ch = 0;
 
 			textConfigFile = texts.get(t++);
-			textConfigFile.addMouseListener(this);
 			textConfigFile.addTextListener(this);
 
 			// TODO: add a value changed listener to detect when typing a new file
@@ -337,68 +334,6 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 	public boolean isConfigurationChanged()
 	{
 		return configurationChanged;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
-	public void mouseClicked(MouseEvent e)
-	{
-		if (e.getClickCount() > 1) // Double-click
-		{
-			if (e.getSource() == textConfigFile)
-			{
-				String[] path = Utils.decodePath(textConfigFile.getText());
-				OpenDialog chooser = new OpenDialog("Configuration_File", path[0], path[1]);
-				if (chooser.getFileName() != null)
-				{
-					String newFilename = chooser.getDirectory() + chooser.getFileName();
-					textConfigFile.setText(newFilename);
-				}
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 */
-	public void mousePressed(MouseEvent e)
-	{
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 */
-	public void mouseReleased(MouseEvent e)
-	{
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 */
-	public void mouseEntered(MouseEvent e)
-	{
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 */
-	public void mouseExited(MouseEvent e)
-	{
-
 	}
 
 	/*

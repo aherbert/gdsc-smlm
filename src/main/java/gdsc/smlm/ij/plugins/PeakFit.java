@@ -11,8 +11,6 @@ import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
 import java.io.File;
@@ -118,7 +116,7 @@ import ij.process.LUTHelper.LutColour;
  * Fits local maxima using a 2D Gaussian. Process each frame until a successive number of fits
  * fail to meet the fit criteria.
  */
-public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemListener
+public class PeakFit implements PlugInFilter, TextListener, ItemListener
 {
 	private static final String TITLE = "PeakFit";
 
@@ -737,7 +735,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 
-		gd.addStringField("Config_file", filename, 40);
+		gd.addFilenameField("Config_file", filename, 40);
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 		gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
 		gd.addCheckbox("EM-CCD", calibration.isEmCCD());
@@ -829,7 +827,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			gd.addCheckbox("Show_processed_frames", optionShowProcessedFrames);
 		}
 		gd.addMessage("--- File output ---");
-		gd.addStringField("Results_dir", resultsSettings.resultsDirectory);
+		gd.addDirectoryField("Results_dir", resultsSettings.resultsDirectory);
 		String[] formatNames = SettingsManager.getNames((Object[]) ResultsFileFormat.values());
 		gd.addChoice("Results_format", formatNames, formatNames[resultsSettings.getResultsFileFormat().ordinal()]);
 		gd.addMessage(" ");
@@ -892,7 +890,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			textTemplate.addItemListener(this);
 
 			textConfigFile = texts.get(t++);
-			textConfigFile.addMouseListener(this);
 			textConfigFile.addTextListener(this);
 
 			// TODO: add a value changed listener to detect when typing a new file
@@ -962,7 +959,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				b++; // Skip over show processed frames option
 			}
 			textResultsDirectory = texts.get(t++);
-			textResultsDirectory.addMouseListener(this);
 
 			textBinaryResults = choices.get(ch++);
 			textResultsInMemory = checkboxes.get(b++);
@@ -2625,72 +2621,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	public void setSilent(boolean silent)
 	{
 		this.silent = silent;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
-	public void mouseClicked(MouseEvent e)
-	{
-		if (e.getClickCount() > 1) // Double-click
-		{
-			if (e.getSource() == textConfigFile)
-			{
-				String newFilename = Utils.getFilename("Config_File", textConfigFile.getText());
-				if (newFilename != null)
-				{
-					textConfigFile.setText(newFilename);
-				}
-			}
-			else if (e.getSource() == textResultsDirectory)
-			{
-				String directory = Utils.getDirectory("Results_dir", textResultsDirectory.getText());
-				if (directory != null)
-					textResultsDirectory.setText(directory);
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 */
-	public void mousePressed(MouseEvent e)
-	{
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 */
-	public void mouseReleased(MouseEvent e)
-	{
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 */
-	public void mouseEntered(MouseEvent e)
-	{
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 */
-	public void mouseExited(MouseEvent e)
-	{
-
 	}
 
 	/*

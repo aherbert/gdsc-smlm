@@ -1,40 +1,8 @@
 package gdsc.smlm.ij.plugins;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.ij.results.ResultsFileFormat;
-import gdsc.smlm.ij.results.ResultsImage;
-import gdsc.smlm.ij.results.ResultsTable;
-import gdsc.smlm.ij.settings.BatchRun;
-import gdsc.smlm.ij.settings.BatchSettings;
-import gdsc.smlm.ij.settings.ParameterSettings;
-import gdsc.smlm.ij.settings.ResultsSettings;
-import gdsc.core.ij.Utils;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.gui.GenericDialog;
-import ij.io.OpenDialog;
-import ij.plugin.PlugIn;
-
-import java.awt.Checkbox;
 import java.awt.TextField;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,6 +34,36 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
+import gdsc.core.ij.Utils;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.ij.results.ResultsFileFormat;
+import gdsc.smlm.ij.results.ResultsImage;
+import gdsc.smlm.ij.results.ResultsTable;
+import gdsc.smlm.ij.settings.BatchRun;
+import gdsc.smlm.ij.settings.BatchSettings;
+import gdsc.smlm.ij.settings.ParameterSettings;
+import gdsc.smlm.ij.settings.ResultsSettings;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.ExtendedGenericDialog;
+import ij.io.OpenDialog;
+import ij.plugin.PlugIn;
+
 /**
  * Runs the Peak Fit plugin in a batch.
  * <p>
@@ -73,7 +71,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
  * the fitting parameters. The Peak Fit plugin is then run for each combination of parameters and the results of each
  * run saved to file.
  */
-public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
+public class BatchPeakFit implements PlugIn
 {
 	private static final String TITLE = "Batch Peak Fit";
 
@@ -98,7 +96,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (!showDialog())
 			return;
 
@@ -405,19 +403,78 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 	 */
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addStringField("Config_filename", configFilename);
-		gd.addCheckbox("Create_config_file", false);
-
+		gd.addFilenameField("Config_filename", configFilename);
 		if (Utils.isShowGenericDialog())
 		{
 			configFilenameText = (TextField) gd.getStringFields().get(0);
-			configFilenameText.setColumns(30);
-			configFilenameText.addMouseListener(this);
-			Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
-			cb.addItemListener(this);
+
+			// Add a button to create a configuration file
+			gd.addAndGetButton("Create config file", new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					Document doc = getDefaultSettingsXmlDocument();
+					if (doc == null)
+						return;
+
+					try
+					{
+						// Look for nodes that are part of the fit configuration
+						XPathFactory factory = XPathFactory.newInstance();
+						XPath xpath = factory.newXPath();
+						XPathExpression expr = xpath.compile("//gdsc.smlm.engine.FitEngineConfiguration//*");
+
+						// For each node, add the name and value to the BatchParameters
+						BatchSettings batchSettings = new BatchSettings();
+						batchSettings.resultsDirectory = System.getProperty("java.io.tmpdir");
+						batchSettings.images.add("/path/to/image.tif");
+
+						Object result = expr.evaluate(doc, XPathConstants.NODESET);
+						NodeList nodes = (NodeList) result;
+						for (int i = 0; i < nodes.getLength(); i++)
+						{
+							Node node = nodes.item(i);
+							if (node.getChildNodes().getLength() == 1) // Only nodes with a single text entry
+							{
+								batchSettings.parameters
+										.add(new ParameterSettings(node.getNodeName(), node.getTextContent()));
+							}
+						}
+
+						// Save the settings file
+						String[] path = Utils.decodePath(configFilenameText.getText());
+						OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
+						if (chooser.getFileName() != null)
+						{
+							String newFilename = chooser.getDirectory() + chooser.getFileName();
+							newFilename = Utils.replaceExtension(newFilename, ".xml");
+							FileOutputStream fs = null;
+							try
+							{
+								fs = new FileOutputStream(newFilename);
+								xs.toXML(batchSettings, fs);
+							}
+							finally
+							{
+								if (fs != null)
+								{
+									fs.close();
+								}
+							}
+
+							// Update dialog filename
+							configFilenameText.setText(newFilename);
+						}
+					}
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+					}
+				}
+			});
 		}
 
 		gd.showDialog();
@@ -427,81 +484,6 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 		configFilename = gd.getNextString().trim();
 
 		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-	 */
-	public void itemStateChanged(ItemEvent e)
-	{
-		// When the checkbox is clicked, create a default configuration file and update the
-		// GenericDialog with the file location.		
-
-		Checkbox cb = (Checkbox) e.getSource();
-		if (cb.getState())
-		{
-			cb.setState(false);
-
-			Document doc = getDefaultSettingsXmlDocument();
-			if (doc == null)
-				return;
-
-			try
-			{
-				// Look for nodes that are part of the fit configuration
-				XPathFactory factory = XPathFactory.newInstance();
-				XPath xpath = factory.newXPath();
-				XPathExpression expr = xpath.compile("//gdsc.smlm.engine.FitEngineConfiguration//*");
-
-				// For each node, add the name and value to the BatchParameters
-				BatchSettings batchSettings = new BatchSettings();
-				batchSettings.resultsDirectory = System.getProperty("java.io.tmpdir");
-				batchSettings.images.add("/path/to/image.tif");
-
-				Object result = expr.evaluate(doc, XPathConstants.NODESET);
-				NodeList nodes = (NodeList) result;
-				for (int i = 0; i < nodes.getLength(); i++)
-				{
-					Node node = nodes.item(i);
-					if (node.getChildNodes().getLength() == 1) // Only nodes with a single text entry
-					{
-						batchSettings.parameters.add(new ParameterSettings(node.getNodeName(), node.getTextContent()));
-					}
-				}
-
-				// Save the settings file
-				String[] path = Utils.decodePath(configFilenameText.getText());
-				OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
-				if (chooser.getFileName() != null)
-				{
-					String newFilename = chooser.getDirectory() + chooser.getFileName();
-					if (!newFilename.endsWith(".xml"))
-						newFilename += ".xml";
-					FileOutputStream fs = null;
-					try
-					{
-						fs = new FileOutputStream(newFilename);
-						xs.toXML(batchSettings, fs);
-					}
-					finally
-					{
-						if (fs != null)
-						{
-							fs.close();
-						}
-					}
-
-					// Update dialog filename
-					configFilenameText.setText(newFilename);
-				}
-			}
-			catch (Exception ex)
-			{
-				ex.printStackTrace();
-			}
-		}
 	}
 
 	private XStream createXStream()
@@ -517,63 +499,5 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 		xs.omitField(FitConfiguration.class, "enableValidation");
 
 		return xs;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
-	public void mouseClicked(MouseEvent e)
-	{
-		if (e.getClickCount() > 1) // Double-click
-		{
-			if (e.getSource() == configFilenameText)
-			{
-				String[] path = Utils.decodePath(configFilenameText.getText());
-				OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
-				if (chooser.getFileName() != null)
-				{
-					String newFilename = chooser.getDirectory() + chooser.getFileName();
-					configFilenameText.setText(newFilename);
-				}
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 */
-	public void mousePressed(MouseEvent e)
-	{
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 */
-	public void mouseReleased(MouseEvent e)
-	{
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 */
-	public void mouseEntered(MouseEvent e)
-	{
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 */
-	public void mouseExited(MouseEvent e)
-	{
 	}
 }

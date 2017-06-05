@@ -1,30 +1,23 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.settings.Constants;
 import gdsc.core.ij.Utils;
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.results.PeakResultsReader;
+import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.Prefs;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 
-import java.awt.TextField;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
 /**
- * This plugin is extracted from ij.plugins.OverlayCommands to allow an image to be added with a transparent
- * background.
+ * This plugin allows the header to be displayed from a PeakFit results file.
  */
-public class ShowResultsHeader implements PlugIn, MouseListener
+public class ShowResultsHeader implements PlugIn
 {
 	private static String TITLE = "Show Results Header";
 
 	private static String inputFilename = Prefs.get(Constants.inputFilename, "");
 	private static boolean raw = false;
-
-	private TextField textConfigFile;
 
 	/*
 	 * (non-Javadoc)
@@ -35,14 +28,10 @@ public class ShowResultsHeader implements PlugIn, MouseListener
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage(
-				"Show the results header in the ImageJ log.\n(Double-click the string field to open a file chooser.)");
-		gd.addStringField("Filename", inputFilename, 30);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addMessage("Show the results header in the ImageJ log");
+		gd.addFilenameField("Filename", inputFilename, 30);
 		gd.addCheckbox("Raw", raw);
-
-		textConfigFile = (TextField) gd.getStringFields().get(0);
-		textConfigFile.addMouseListener(this);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -94,58 +83,5 @@ public class ShowResultsHeader implements PlugIn, MouseListener
 			text = XmlUtils.prettyPrintXml(text);
 		Utils.log("%s: %s", title, text);
 		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
-	public void mouseClicked(MouseEvent e)
-	{
-		if (e.getClickCount() > 1) // Double-click
-		{
-			String newFilename = Utils.getFilename("Config_File", textConfigFile.getText());
-			if (newFilename != null)
-			{
-				textConfigFile.setText(newFilename);
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 */
-	public void mouseEntered(MouseEvent e)
-	{
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 */
-	public void mouseExited(MouseEvent e)
-	{
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 */
-	public void mousePressed(MouseEvent e)
-	{
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 */
-	public void mouseReleased(MouseEvent e)
-	{
 	}
 }

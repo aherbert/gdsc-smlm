@@ -6,11 +6,8 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
-import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -124,6 +121,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.io.FileSaver;
 import ij.io.OpenDialog;
@@ -137,7 +135,7 @@ import ij.text.TextWindow;
 /**
  * Creates data using a simulated PSF
  */
-public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory, MouseListener
+public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 {
 	public static final String TITLE = "Create Data";
 	private static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
@@ -5183,21 +5181,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 	 */
 	private boolean showLoadDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		String[] images = Utils.getImageList(Utils.GREY_SCALE);
 		gd.addChoice("Image", images, benchmarkImage);
-		gd.addStringField("Results_file", benchmarkFile);
+		gd.addFilenameField("Results_file", benchmarkFile);
 		gd.addCheckbox("Preprocessed_results", benchmarkAuto);
-
-		if (Utils.isShowGenericDialog())
-		{
-			// Add a listener to allow selection of the file
-			@SuppressWarnings("unchecked")
-			Vector<TextField> texts = (Vector<TextField>) gd.getStringFields();
-			TextField textFile = texts.get(0);
-			textFile.addMouseListener(this);
-		}
 
 		gd.showDialog();
 
@@ -5209,41 +5198,5 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		benchmarkAuto = gd.getNextBoolean();
 
 		return true;
-	}
-
-	public void mouseClicked(MouseEvent e)
-	{
-		if (e.getClickCount() > 1) // Double-click
-		{
-			if (e.getSource() instanceof TextField)
-			{
-				TextField textFile = (TextField) e.getSource();
-				String newFilename = Utils.getFilename("Config_File", textFile.getText());
-				if (newFilename != null)
-				{
-					textFile.setText(newFilename);
-				}
-			}
-		}
-	}
-
-	public void mousePressed(MouseEvent e)
-	{
-
-	}
-
-	public void mouseReleased(MouseEvent e)
-	{
-
-	}
-
-	public void mouseEntered(MouseEvent e)
-	{
-
-	}
-
-	public void mouseExited(MouseEvent e)
-	{
-
 	}
 }
