@@ -6,6 +6,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -107,6 +108,7 @@ public class ResultsManager implements PlugIn
 	private int roiImageWidth, roiImageHeight;
 
 	private ResultsSettings resultsSettings = new ResultsSettings();
+	private boolean extraOptions;
 
 	private boolean fileInput = false;
 
@@ -123,6 +125,7 @@ public class ResultsManager implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		extraOptions = Utils.isExtraOptions();
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		if (arg != null && arg.startsWith("clear"))
@@ -337,7 +340,8 @@ public class ResultsManager implements PlugIn
 			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getResultsImage(),
 					resultsSettings.weightedImage, resultsSettings.equalisedImage, title, bounds, nmPerPixel, gain,
 					resultsSettings.imageScale, resultsSettings.precision, ResultsMode.ADD);
-			image.setRollingWindowSize(resultsSettings.imageRollingWindow);
+			if (extraOptions)
+				image.setRollingWindowSize(resultsSettings.imageRollingWindow);
 			image.setRepaintDelay(2000);
 			resultsList.addOutput(image);
 		}
@@ -436,6 +440,17 @@ public class ResultsManager implements PlugIn
 				{
 					public void collectOptions(Choice field)
 					{
+						resultsSettings.setResultsTable(field.getSelectedIndex());
+						collectOptions();
+					}
+
+					public void collectOptions()
+					{
+						ResultsTable resultsTable = resultsSettings.getResultsTable();
+						if (resultsTable == ResultsTable.NONE)
+						{
+							return;
+						}
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						egd.addCheckbox("Show_deviations", resultsSettings.showDeviations);
 						egd.showDialog(true);
@@ -443,22 +458,52 @@ public class ResultsManager implements PlugIn
 							return;
 						resultsSettings.showDeviations = egd.getNextBoolean();
 					}
-
-					public void collectOptions()
-					{
-						collectOptions(null);
-					}
 				});
 
 		gd.addMessage("--- Image output ---");
 		String[] imageNames = SettingsManager.getNames((Object[]) ResultsImage.values());
-		gd.addChoice("Image", imageNames, imageNames[resultsSettings.getResultsImage().ordinal()]);
-		// TODO - move these to an options pop-uo
-		gd.addCheckbox("Weighted", resultsSettings.weightedImage);
-		gd.addCheckbox("Equalised", resultsSettings.equalisedImage);
-		gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
-		gd.addSlider("Image_Scale", 1, 15, resultsSettings.imageScale);
-		gd.addNumericField("Image_Window", resultsSettings.imageRollingWindow, 0);
+		final EnumSet<ResultsImage> requirePrecision = EnumSet.of(ResultsImage.LOCALISATIONS_AV_PRECISION,
+				ResultsImage.SIGNAL_AV_PRECISION);
+		final EnumSet<ResultsImage> requireWeighted = EnumSet.of(ResultsImage.LOCALISATIONS,
+				ResultsImage.SIGNAL_INTENSITY, ResultsImage.FRAME_NUMBER, ResultsImage.ERROR);
+		gd.addChoice("Image", imageNames, imageNames[resultsSettings.getResultsImage().ordinal()],
+				new OptionListener<Choice>()
+				{
+					public void collectOptions(Choice field)
+					{
+						resultsSettings.setResultsImage(field.getSelectedIndex());
+						collectOptions();
+					}
+
+					public void collectOptions()
+					{
+						ResultsImage resultsImage = resultsSettings.getResultsImage();
+						if (resultsImage == ResultsImage.NONE)
+						{
+							return;
+						}
+						ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE, null);
+						if (requireWeighted.contains(resultsImage))
+							gd.addCheckbox("Weighted", resultsSettings.weightedImage);
+						gd.addCheckbox("Equalised", resultsSettings.equalisedImage);
+						if (requirePrecision.contains(resultsImage))
+							gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
+						gd.addSlider("Image_Scale", 1, 15, resultsSettings.imageScale);
+						if (extraOptions)
+							gd.addNumericField("Image_Window", resultsSettings.imageRollingWindow, 0);
+						gd.showDialog(true);
+						if (gd.wasCanceled())
+							return;
+						if (requireWeighted.contains(resultsImage))
+							resultsSettings.weightedImage = gd.getNextBoolean();
+						resultsSettings.equalisedImage = gd.getNextBoolean();
+						if (requirePrecision.contains(resultsImage))
+							resultsSettings.precision = gd.getNextNumber();
+						resultsSettings.imageScale = gd.getNextNumber();
+						if (extraOptions)
+							resultsSettings.imageRollingWindow = (int) gd.getNextNumber();
+					}
+				});
 
 		gd.addMessage("--- File output ---");
 		// Do not add a results file to prevent constant overwrite messages
@@ -467,7 +512,7 @@ public class ResultsManager implements PlugIn
 		String[] formatNames = SettingsManager.getNames((Object[]) ResultsFileFormat.values());
 		gd.addChoice("Results_format", formatNames, formatNames[resultsSettings.getResultsFileFormat().ordinal()]);
 		gd.addMessage(" ");
-		gd.addCheckbox("Results_in_memory (file input only)", resultsSettings.resultsInMemory);
+		gd.addCheckbox("Save_to_memory (file input only)", resultsSettings.resultsInMemory);
 
 		gd.showDialog();
 
@@ -479,13 +524,7 @@ public class ResultsManager implements PlugIn
 		if (!titles.isEmpty())
 			chooseRoi = gd.getNextBoolean();
 		resultsSettings.setResultsTable(gd.getNextChoiceIndex());
-		resultsSettings.showDeviations = gd.getNextBoolean();
 		resultsSettings.setResultsImage(gd.getNextChoiceIndex());
-		resultsSettings.weightedImage = gd.getNextBoolean();
-		resultsSettings.equalisedImage = gd.getNextBoolean();
-		resultsSettings.precision = gd.getNextNumber();
-		resultsSettings.imageScale = gd.getNextNumber();
-		resultsSettings.imageRollingWindow = (int) gd.getNextNumber();
 		resultsSettings.resultsFilename = gd.getNextString();
 		resultsSettings.setResultsFileFormat(gd.getNextChoiceIndex());
 		resultsSettings.resultsInMemory = gd.getNextBoolean();
@@ -499,7 +538,8 @@ public class ResultsManager implements PlugIn
 				Parameters.isAboveZero("Image precision", resultsSettings.precision);
 			}
 			Parameters.isAboveZero("Image scale", resultsSettings.imageScale);
-			Parameters.isPositive("Image rolling window", resultsSettings.imageRollingWindow);
+			if (extraOptions)
+				Parameters.isPositive("Image rolling window", resultsSettings.imageRollingWindow);
 		}
 		catch (IllegalArgumentException e)
 		{
