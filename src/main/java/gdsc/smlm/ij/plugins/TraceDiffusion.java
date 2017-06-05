@@ -97,6 +97,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private static String rawDataDirectory = "";
 	private boolean directoryChosen = false;
 	private static String distancesFilename = "";
+	private static double significanceLevel = 0.05;
 	private static double minFraction = 0.1;
 	private static double minDifference = 2;
 	private static int minN = 1;
@@ -117,7 +118,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	// Store exposure time in seconds
 	private double exposureTime = 0;
 	private double precision, beta;
-	private double ic = Double.NaN;
+	private double fitValue = Double.NaN;
 
 	// Used to tile new plot windows
 	private int[] idList = new int[20];
@@ -851,7 +852,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		{
 			sb.append(format(jdParams[0])).append("\t");
 			sb.append(format(jdParams[1])).append("\t");
-			sb.append(Utils.rounded(ic)).append("\t");
+			sb.append(Utils.rounded(fitValue)).append("\t");
 		}
 
 		for (int i = 0; i < stats.length; i++)
@@ -927,7 +928,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append("\tEx-threshold (nm)\t");
 		sb.append("Min.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length");
 		sb.append("\tMSD corr.\ts corr.\tMLE\tTraces\ts (nm)\tD (um^2/s)\tfit s (nm)");
-		sb.append("\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions\tIC");
+		sb.append("\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions\tFit Score");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
@@ -1122,6 +1123,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addCheckbox("MSD_correction", settings.msdCorrection);
 		gd.addCheckbox("Precision_correction", settings.precisionCorrection);
 		gd.addCheckbox("Maximum_likelihood", settings.mle);
+		gd.addSlider("MLE_significance_level", 0, 0.5, significanceLevel);
 		gd.addSlider("Fit_restarts", 0, 10, settings.fitRestarts);
 		gd.addSlider("Jump_distance", 1, 20, settings.jumpDistance);
 		gd.addSlider("Minimum_difference", 0, 10, minDifference);
@@ -1155,6 +1157,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		settings.msdCorrection = gd.getNextBoolean();
 		settings.precisionCorrection = gd.getNextBoolean();
 		settings.mle = gd.getNextBoolean();
+		significanceLevel = Math.abs(gd.getNextNumber());
 		settings.fitRestarts = (int) Math.abs(gd.getNextNumber());
 		settings.jumpDistance = (int) Math.abs(gd.getNextNumber());
 		minDifference = Math.abs(gd.getNextNumber());
@@ -1203,6 +1206,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			Parameters.isAbove("Fit length", settings.fitLength, 1);
 			Parameters.isAboveZero("Jump distance", settings.jumpDistance);
 			Parameters.isEqualOrAbove("Maximum N", maxN, myMinN);
+			if (settings.mle)
+				Parameters.isAboveZero("Significance level", significanceLevel);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -1765,11 +1770,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Q. Should it be normalised to the frame length. If not then the beta will be invariant on 
 		// jump distance length
 		beta = meanDistance / precision;
+		double minD = Maths.pow2(precision / 1e3); // Convert nm to um^2
 		Utils.log(
-				"Jump Distance analysis : N = %d, Time = %d frames (%s seconds). MSD = %s um^2/jump, Mean Distance = %s nm/jump, Precision = %s nm, Beta = %s",
+				"Jump Distance analysis : N = %d, Time = %d frames (%s seconds). MSD = %s um^2/jump, Mean Distance = %s nm/jump, Precision = %s nm, Beta = %s, minD = %s um^2/jump",
 				jumpDistances.getN(), settings.jumpDistance, Utils.rounded(settings.jumpDistance * exposureTime, 4),
 				Utils.rounded(msd, 4), Utils.rounded(meanDistance, 4), Utils.rounded(precision, 4),
-				Utils.rounded(beta, 4));
+				Utils.rounded(beta, 4), Utils.rounded(minD, 4));
 
 		IJLogger logger = new IJLogger(debugFitting, debugFitting);
 		JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
@@ -1778,6 +1784,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		jd.setMinDifference(minDifference);
 		jd.setMinN(myMinN);
 		jd.setMaxN(maxN);
+		jd.setMinD(minD);
+		jd.setSignificanceLevel(significanceLevel);
 		// Update the plot with the fit
 		jd.setCurveLogger(this);
 
@@ -1800,7 +1808,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			fit[0] = jd.calculateApparentDiffusionCoefficient(fit[0]);
 			// Check the largest D
 			checkTraceDistance(fit[0][0]);
-			ic = jd.getInformationCriterion();
+			fitValue = jd.getFitValue();
 		}
 
 		return fit;

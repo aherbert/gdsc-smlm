@@ -28,6 +28,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.logging.NullLogger;
 
@@ -46,6 +47,7 @@ import gdsc.core.logging.NullLogger;
 
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Sort;
+import gdsc.smlm.function.ChiSquaredDistributionTable;
 
 /**
  * Perform curve fitting on a cumulative histogram of the mean-squared displacement (MSD) per second to calculate the
@@ -96,13 +98,14 @@ public class JumpDistanceAnalysis
 	private int fitRestarts = 3;
 	private double minFraction = 0.1;
 	private double minDifference = 2;
-	private double minD = 1e-6;
+	private double minD = 0;
 	private int minN = 1, maxN = 10;
+	private double significanceLevel = 0.05;
 
 	// Set by the last call to the doFit functions
-	private double ss, ll, ic;
+	private double ss, ll, fitValue;
 	// Set by any public fit call
-	private double lastIC;
+	private double lastFitValue;
 
 	public JumpDistanceAnalysis()
 	{
@@ -123,16 +126,17 @@ public class JumpDistanceAnalysis
 
 	private void resetFitResult()
 	{
-		lastIC = Double.NaN;
+		lastFitValue = Double.NaN;
 	}
 
 	/**
 	 * Fit the jump distances using a fit to a cumulative histogram.
 	 * <p>
 	 * The histogram is fit repeatedly using a mixed population model with increasing number of different molecules.
-	 * Results are sorted by the diffusion coefficient ascending. This process is stopped when: the information
-	 * criterion does not improve; the fraction of one of the populations is below the min fraction; the difference
-	 * between two consecutive diffusion coefficients is below the min difference.
+	 * Results are sorted by the diffusion coefficient ascending. This process is stopped when: the Adjusted
+	 * R^2 does not improve; the fraction of one of the populations is below the min fraction; the difference
+	 * between two consecutive diffusion coefficients is below the min difference; more than one population is below min
+	 * D.
 	 * <p>
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
 	 * 
@@ -156,9 +160,10 @@ public class JumpDistanceAnalysis
 	 * Fit the jump distance histogram using a cumulative sum.
 	 * <p>
 	 * The histogram is fit repeatedly using a mixed population model with increasing number of different molecules.
-	 * Results are sorted by the diffusion coefficient ascending. This process is stopped when: the information
-	 * criterion does not improve; the fraction of one of the populations is below the min fraction; the difference
-	 * between two consecutive diffusion coefficients is below the min difference.
+	 * Results are sorted by the diffusion coefficient ascending. This process is stopped when: the Adjusted
+	 * R^2 does not improve; the fraction of one of the populations is below the min fraction; the difference
+	 * between two consecutive diffusion coefficients is below the min difference; more than one population is below min
+	 * D.
 	 * <p>
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
 	 * 
@@ -178,11 +183,11 @@ public class JumpDistanceAnalysis
 			return null;
 		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
 
-		double[] ic = new double[maxN];
-		Arrays.fill(ic, Double.POSITIVE_INFINITY);
+		// We use the adjusted R^2 to pick the best model.
+
+		double[] fitValue = new double[maxN];
 		double[][] coefficients = new double[maxN][];
 		double[][] fractions = new double[maxN][];
-		double bestIC = Double.POSITIVE_INFINITY;
 		int best = -1;
 
 		if (minN == 1)
@@ -192,9 +197,8 @@ public class JumpDistanceAnalysis
 			{
 				coefficients[0] = fit[0];
 				fractions[0] = fit[1];
-				ic[0] = this.ic;
+				fitValue[0] = this.fitValue;
 				saveFitCurve(fit, jdHistogram);
-				bestIC = ic[0];
 				best = 0;
 			}
 		}
@@ -202,7 +206,6 @@ public class JumpDistanceAnalysis
 		// Fit using a mixed population model. 
 		// Vary n from 2 to N. Stop when the fit fails or the fit is worse.
 		int bestMulti = -1;
-		double bestMultiIC = Double.POSITIVE_INFINITY;
 		for (int n = Math.max(1, minN - 1); n < maxN; n++)
 		{
 			double[][] fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, n + 1);
@@ -211,21 +214,29 @@ public class JumpDistanceAnalysis
 
 			coefficients[n] = fit[0];
 			fractions[n] = fit[1];
-			ic[n] = this.ic;
+			fitValue[n] = this.fitValue;
 
-			// Store the best model
-			if (bestIC > ic[n])
+			// Store the best multi-model (if none exists)
+			if (bestMulti == -1)
 			{
-				bestIC = ic[n];
-				best = n;
+				bestMulti = n;
 			}
 
+			// Store the best model (if none exists)
+			if (best == -1)
+			{
+				best = n;
+				continue;
+			}
+
+			// Test this model is better using the adjusted R^2 (should be higher)
+			double diff = fitValue[n] - fitValue[best];
+
 			// Stop if not improving
-			if (bestMultiIC < ic[n])
+			if (diff < 0)
 				break;
 
-			bestMultiIC = ic[n];
-			bestMulti = n;
+			best = bestMulti = n;
 		}
 
 		// Add the best fit to the plot
@@ -234,9 +245,9 @@ public class JumpDistanceAnalysis
 
 		if (best > -1)
 		{
-			logger.info("Best fit achieved using %d population%s: %s, Fractions = %s", best + 1, (best == 0) ? "" : "s",
-					formatD(coefficients[best]), format(fractions[best]));
-			lastIC = bestIC;
+			logger.info("Best fit achieved using %s: %s, %s = %s", Utils.pleural(best + 1, "population"),
+					formatD(coefficients[best]), Utils.pleural(best + 1, "Fraction"), format(fractions[best]));
+			lastFitValue = fitValue[best];
 			return new double[][] { coefficients[best], fractions[best] };
 		}
 		return null;
@@ -342,12 +353,14 @@ public class JumpDistanceAnalysis
 				// True for an unweighted fit
 				ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
 				//ss = calculateSumOfSquares(function.getY(), function.value(fitParams));
-				lastIC = ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.x.length, 1);
+				lastFitValue = fitValue = Maths.getAdjustedCoefficientOfDetermination(ss,
+						Maths.getTotalSumOfSquares(function.getY()), function.x.length, 1);
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
-				logger.info("Fit Jump distance (N=1) : %s, SS = %s, IC = %s (%d evaluations)", formatD(fitParams[0]),
-						Maths.rounded(ss, 4), Maths.rounded(ic, 4), lvmSolution.getEvaluations());
+				logger.info("Fit Jump distance (N=1) : %s, SS = %s, Adjusted R^2 = %s (%d evaluations)",
+						formatD(fitParams[0]), Maths.rounded(ss, 4), Maths.rounded(fitValue, 4),
+						lvmSolution.getEvaluations());
 
 				return new double[][] { coefficients, fractions };
 			}
@@ -551,7 +564,8 @@ public class JumpDistanceAnalysis
 		}
 
 		// Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
-		ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.x.length, fitParams.length - 1);
+		fitValue = Maths.getAdjustedCoefficientOfDetermination(ss, Maths.getTotalSumOfSquares(function.getY()),
+				function.x.length, fitParams.length - 1);
 
 		double[] d = new double[n];
 		double[] f = new double[n];
@@ -569,12 +583,12 @@ public class JumpDistanceAnalysis
 		double[] coefficients = d;
 		double[] fractions = f;
 
-		logger.info("Fit Jump distance (N=%d) : %s (%s), SS = %s, IC = %s (%d evaluations)", n, formatD(d), format(f),
-				Maths.rounded(ss, 4), Maths.rounded(ic, 4), evaluations);
+		logger.info("Fit Jump distance (N=%d) : %s (%s), SS = %s, Adjusted R^2 = %s (%d evaluations)", n, formatD(d),
+				format(f), Maths.rounded(ss, 4), Maths.rounded(fitValue, 4), evaluations);
 
 		if (isValid(d, f))
 		{
-			lastIC = ic;
+			lastFitValue = fitValue;
 			return new double[][] { coefficients, fractions };
 		}
 
@@ -583,31 +597,42 @@ public class JumpDistanceAnalysis
 
 	private boolean isValid(double[] d, double[] f)
 	{
+		int belowMinD = 0;
 		for (int i = 0; i < f.length; i++)
 		{
+			// Check only one population has a diffusion coefficient below the 
+			// precision of the experiment 
+			if (d[i] < minD)
+			{
+				if (++belowMinD > 1)
+				{
+					logger.info("  Invalid: Multiple populations below minimum D (%s um^2)", Maths.rounded(minD));
+					return false;
+				}
+			}
 			// Check the fractions and coefficients exist
 			if (f[i] <= 0)
 			{
-				logger.debug("Fraction is zero");
+				logger.info("  Invalid: Fraction is zero");
 				return false;
 			}
 			if (d[i] <= 0)
 			{
-				logger.debug("Coefficient is zero");
+				logger.info("  Invalid: Coefficient is zero");
 				return false;
 			}
 			// Check the fit has fractions above the minimum fraction
 			if (f[i] < minFraction)
 			{
-				logger.debug("Fraction is less than the minimum fraction: %s < %s", Maths.rounded(f[i]),
+				logger.info("  Invalid: Fraction is less than the minimum fraction: %s < %s", Maths.rounded(f[i]),
 						Maths.rounded(minFraction));
 				return false;
 			}
 			// Check the coefficients are different
-			if (i + 1 < f.length && d[i] / d[i + 1] < minDifference)
+			if (i > 0 && d[i - 1] / d[i] < minDifference)
 			{
-				logger.debug("Coefficients are not different: %s / %s = %s < %s", Maths.rounded(d[i]),
-						Maths.rounded(d[i + 1]), Maths.rounded(d[i] / d[i + 1]), Maths.rounded(minDifference));
+				logger.info("  Invalid: Coefficients are not different: %s / %s = %s < %s", Maths.rounded(d[i - 1]),
+						Maths.rounded(d[i]), Maths.rounded(d[i - 1] / d[i]), Maths.rounded(minDifference));
 				return false;
 			}
 		}
@@ -618,9 +643,9 @@ public class JumpDistanceAnalysis
 	 * Fit the jump distances using a maximum likelihood estimation.
 	 * <p>
 	 * The data is fit repeatedly using a mixed population model with increasing number of different molecules. Results
-	 * are sorted by the diffusion coefficient ascending. This process is stopped when: the likelihood does not improve;
-	 * the fraction of one of the populations is below the min fraction; the difference between two consecutive
-	 * diffusion coefficients is below the min difference.
+	 * are sorted by the diffusion coefficient ascending. This process is stopped when: the log-likelihood ratio does
+	 * not improve; the fraction of one of the populations is below the min fraction; the difference between two
+	 * consecutive diffusion coefficients is below the min difference; more than one population is below min D.
 	 * <p>
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
 	 * 
@@ -637,9 +662,9 @@ public class JumpDistanceAnalysis
 	 * Fit the jump distances using a maximum likelihood estimation.
 	 * <p>
 	 * The data is fit repeatedly using a mixed population model with increasing number of different molecules. Results
-	 * are sorted by the diffusion coefficient ascending. This process is stopped when: the likelihood does not improve;
-	 * the fraction of one of the populations is below the min fraction; the difference between two consecutive
-	 * diffusion coefficients is below the min difference.
+	 * are sorted by the diffusion coefficient ascending. This process is stopped when: the log-likelihood ratio does
+	 * not improve; the fraction of one of the populations is below the min fraction; the difference between two
+	 * consecutive diffusion coefficients is below the min difference; more than one population is below min D.
 	 * <p>
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
 	 * 
@@ -667,11 +692,14 @@ public class JumpDistanceAnalysis
 		if (curveLogger != null && jdHistogram == null)
 			jdHistogram = cumulativeHistogram(jumpDistances);
 
-		double[] ic = new double[maxN];
-		Arrays.fill(ic, Double.POSITIVE_INFINITY);
+		// When performing MLE we can use the Log-Likelihood Ratio (LLR) to do a significance
+		// test that the model has improved.
+
+		double[] fitValue = new double[maxN];
+		double[] ll = new double[maxN];
+		Arrays.fill(ll, Double.NaN);
 		double[][] coefficients = new double[maxN][];
 		double[][] fractions = new double[maxN][];
-		double bestIC = Double.POSITIVE_INFINITY;
 		int best = -1;
 
 		if (minN == 1)
@@ -681,9 +709,9 @@ public class JumpDistanceAnalysis
 			{
 				coefficients[0] = fit[0];
 				fractions[0] = fit[1];
-				ic[0] = this.ic;
+				fitValue[0] = this.fitValue;
+				ll[0] = this.ll;
 				saveFitCurve(fit, jdHistogram);
-				bestIC = ic[0];
 				best = 0;
 			}
 		}
@@ -691,7 +719,6 @@ public class JumpDistanceAnalysis
 		// Fit using a mixed population model. 
 		// Vary n from 2 to N. Stop when the fit fails or the fit is worse.
 		int bestMulti = -1;
-		double bestMultiIC = Double.POSITIVE_INFINITY;
 		for (int n = Math.max(1, minN - 1); n < maxN; n++)
 		{
 			double[][] fit = doFitJumpDistancesMLE(jumpDistances, estimatedD, n + 1);
@@ -700,21 +727,40 @@ public class JumpDistanceAnalysis
 
 			coefficients[n] = fit[0];
 			fractions[n] = fit[1];
-			ic[n] = this.ic;
+			fitValue[n] = this.fitValue;
+			ll[n] = this.ll;
 
-			// Store the best model
-			if (bestIC > ic[n])
+			// Store the best multi-model (if none exists)
+			if (bestMulti == -1)
 			{
-				bestIC = ic[n];
-				best = n;
+				bestMulti = n;
 			}
 
+			// Store the best model (if none exists)
+			if (best == -1)
+			{
+				best = n;
+				continue;
+			}
+
+			// Test this model is better using a log-likelihood ratio test
+			double llr = 2 * (ll[n] - ll[best]);
+
 			// Stop if not improving
-			if (bestMultiIC < ic[n])
+			if (llr < 0)
 				break;
 
-			bestMultiIC = ic[n];
-			bestMulti = n;
+			// The difference in the number of fitted parameters will be 2:
+			// i.e. 1 extra diffusion coefficient and population fraction
+			double q = ChiSquaredDistributionTable.computeQValue(llr, 2);
+			boolean reject = (q > significanceLevel);
+			logger.info("Fit Jump distance (N=%d -> %d) : MLE = %s -> %s, LLR = %s, q-value = %s (Reject=%b)", best + 1,
+					n + 1, Maths.rounded(ll[best], 4), Maths.rounded(ll[n], 4), Maths.rounded(llr, 4),
+					Maths.rounded(q, 4), reject);
+			if (reject)
+				break;
+
+			best = bestMulti = n;
 		}
 
 		// Add the best fit to the plot
@@ -723,9 +769,9 @@ public class JumpDistanceAnalysis
 
 		if (best > -1)
 		{
-			logger.info("Best fit achieved using %d population%s: %s, Fractions = %s", best + 1, (best == 0) ? "" : "s",
-					formatD(coefficients[best]), format(fractions[best]));
-			lastIC = bestIC;
+			logger.info("Best fit achieved using %s: %s, %s = %s", Utils.pleural(best + 1, "population"),
+					formatD(coefficients[best]), Utils.pleural(best + 1, "Fraction"), format(fractions[best]));
+			lastFitValue = fitValue[best];
 			return new double[][] { coefficients[best], fractions[best] };
 		}
 
@@ -819,12 +865,13 @@ public class JumpDistanceAnalysis
 
 				double[] fitParams = solution.getPointRef();
 				ll = solution.getValue();
-				lastIC = ic = Maths.getAkaikeInformationCriterion(ll, jumpDistances.length, 1);
+				lastFitValue = fitValue = Maths.getAkaikeInformationCriterion(ll, jumpDistances.length, 1);
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
-				logger.info("Fit Jump distance (N=1) : %s, MLE = %s, IC = %s (%d evaluations)", formatD(fitParams[0]),
-						Maths.rounded(ll, 4), Maths.rounded(ic, 4), powellOptimizer.getEvaluations());
+				logger.info("Fit Jump distance (N=1) : %s, MLE = %s, Akaike IC = %s (%d evaluations)",
+						formatD(fitParams[0]), Maths.rounded(ll, 4), Maths.rounded(fitValue, 4),
+						powellOptimizer.getEvaluations());
 
 				return new double[][] { coefficients, fractions };
 			}
@@ -983,7 +1030,7 @@ public class JumpDistanceAnalysis
 		ll = constrainedSolution.getValue();
 
 		// Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
-		ic = Maths.getAkaikeInformationCriterion(ll, jumpDistances.length, fitParams.length - 1);
+		fitValue = Maths.getAkaikeInformationCriterion(ll, jumpDistances.length, fitParams.length - 1);
 
 		double[] d = new double[n];
 		double[] f = new double[n];
@@ -1001,12 +1048,12 @@ public class JumpDistanceAnalysis
 		double[] coefficients = d;
 		double[] fractions = f;
 
-		logger.info("Fit Jump distance (N=%d) : %s (%s), MLE = %s, IC = %s (%d evaluations)", n, formatD(d), format(f),
-				Maths.rounded(ll, 4), Maths.rounded(ic, 4), evaluations);
+		logger.info("Fit Jump distance (N=%d) : %s (%s), MLE = %s, Akaike IC = %s (%d evaluations)", n, formatD(d),
+				format(f), Maths.rounded(ll, 4), Maths.rounded(fitValue, 4), evaluations);
 
 		if (isValid(d, f))
 		{
-			lastIC = ic;
+			lastFitValue = fitValue;
 			return new double[][] { coefficients, fractions };
 		}
 
@@ -1961,6 +2008,8 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
+	 * Gets the minimum diffusion coefficient
+	 * 
 	 * @return the minimum diffusion coefficient
 	 */
 	public double getMinD()
@@ -1969,6 +2018,14 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
+	 * Sets the minimum diffusion coefficient. Only one population is allowed to have a diffusion coefficient below
+	 * this.
+	 * <p>
+	 * This value should be set using an understanding of the localisation precision of the results. Any population with
+	 * a diffusion coefficient that creates average jumps below the localisation precision is effectively static since
+	 * the system could not accurately measure the jumps. It is impossible to distinguish populations that move below
+	 * the localisation precision and so only one population is allowed below this level.
+	 *
 	 * @param minD
 	 *            the minimum diffusion coefficient
 	 */
@@ -2186,6 +2243,28 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
+	 * Gets the significance level for testing the log-likelihood ratio.
+	 *
+	 * @return the significance level
+	 */
+	public double getSignificanceLevel()
+	{
+		return significanceLevel;
+	}
+
+	/**
+	 * Sets the significance level. This is used when testing the log-likelihood ratio during maximum likelihood fitting
+	 * that an increase in model parameters improves the model.
+	 *
+	 * @param significanceLevel
+	 *            the new significance level
+	 */
+	public void setSignificanceLevel(double significanceLevel)
+	{
+		this.significanceLevel = significanceLevel;
+	}
+
+	/**
 	 * @return The time difference between each frame
 	 */
 	public double getDeltaT()
@@ -2241,10 +2320,13 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
-	 * @return The information criterion from the last successful fit
+	 * Get the fit value. This will be the Adjusted R^2 for least squares estimation or the information criterion from
+	 * maximum likelihood estimation.
+	 * 
+	 * @return The fit value from the last successful fit
 	 */
-	public double getInformationCriterion()
+	public double getFitValue()
 	{
-		return lastIC;
+		return lastFitValue;
 	}
 }
