@@ -108,20 +108,24 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	/**
 	 * Enable computing the Newton-Raphson step using a full Jacobian solution. This requires computation of the
-	 * Jacobian of second order partial derivatives with respect to parameters [i,j] and inversion using LU
+	 * Jacobian of second order partial derivatives with respect to parameters [i,j] and inversion using matrix
 	 * decomposition.
 	 *
 	 * @param enable
 	 *            Set to true to enable
+	 * @deprecated The computation of the step using the full Jacobian is invalid
 	 */
-	public void enableJacobianSolution(boolean enable)
+	@Deprecated
+	void enableJacobianSolution(boolean enable)
 	{
+		// This method is defined at the package level for JUnit testing. It is not public
+		// as the method does not work.		
 		enableJacobianSolution(enable, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
 	}
 
 	/**
 	 * Enable computing the Newton-Raphson step using a full Jacobian solution. This requires computation of the
-	 * Jacobian of second order partial derivatives with respect to parameters [i,j] and inversion using LU
+	 * Jacobian of second order partial derivatives with respect to parameters [i,j] and inversion using matrix
 	 * decomposition.
 	 *
 	 * @param enable
@@ -130,9 +134,13 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	 *            Validate the Jacobian solution using the specified maximum relative error
 	 * @param maxAbsoluteError
 	 *            Validate the Jacobian solution using the specified maximum absolute error
+	 * @deprecated The computation of the step using the full Jacobian is invalid
 	 */
-	public void enableJacobianSolution(boolean enable, double maxRelativeError, double maxAbsoluteError)
+	@Deprecated
+	void enableJacobianSolution(boolean enable, double maxRelativeError, double maxAbsoluteError)
 	{
+		// This method is defined at the package level for JUnit testing. It is not public
+		// as the method does not work.		
 		if (enable)
 		{
 			if (!(f instanceof ExtendedGradient2Function))
@@ -282,14 +290,18 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 		if (solver != null)
 		{
-			// Solve the Jacobian
+			// Solve the Jacobian. This is an implementation of the Newton-Raphson method
+			// for systems of non-linear equations (see Numerical Recipes in C++, 2nd Ed, section 9.6)
 			// XXX This does not work.
-			// Should the target for A x = b be created differently?
+			// The the first order derivatives "are not n independent, arbitrary functions,
+			// rather they obey so-called integrability conditions that are highly restrictive".
+			// This code is deprecated and may be removed.
 			for (int i = 0; i < step.length; i++)
 				step[i] = -d1[i];
 			jacobianGradientProcedure.getJacobianLinear(jacobian);
 			DenseMatrix64F m = DenseMatrix64F.wrap(d1.length, d1.length, jacobian);
 			System.out.println(m.toString());
+			System.out.println(Arrays.toString(d2));
 			if (solver.solve(jacobian, step))
 			{
 				// XXX - debug the difference

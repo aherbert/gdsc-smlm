@@ -44,6 +44,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 	static final boolean BOUNDED = true;
 	static final boolean NO_BOUND = false;
 
+	@SuppressWarnings("deprecation")
 	SteppingFunctionSolver getSolver(SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type)
 	{
 		ErfGaussian2DFunction f = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags, null);

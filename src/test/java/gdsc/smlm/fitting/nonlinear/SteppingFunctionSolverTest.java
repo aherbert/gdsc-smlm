@@ -190,7 +190,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, BTFastMLE, NoiseModel.EMCCD);
 	}
 
-	//@Test(expected = AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void cannotFitSingleGaussianEMCCD_x_x__JFastMLE()
 	{
 		// The JFastMLE method does not work

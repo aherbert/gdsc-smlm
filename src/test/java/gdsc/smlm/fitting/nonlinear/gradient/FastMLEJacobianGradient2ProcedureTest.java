@@ -188,8 +188,8 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 					// Use index j even though we adjusted index jj
 					gradient2 = (d1h[j] - d1l[j]) / (2 * dd);
 					boolean ok = eq.almostEqualRelativeOrAbsolute(gradient2, J.get(j, jj));
-					//System.out.printf("[%d,%d,%d] (%s %f  %s %f+/-%f) J %f ?= %f  %b\n", i, k, kk, func.getName(k),
-					//		a[k], func.getName(kk), a[kk], dd, gradient2, J.get(j, jj), ok);
+					System.out.printf("[%d,%d,%d] (%s %f  %s %f+/-%f) J %f ?= %f  %b\n", i, k, kk, func.getName(k),
+							a[k], func.getName(kk), a[kk], dd, gradient2, J.get(j, jj), ok);
 					if (!ok)
 					{
 						Assert.fail(String.format("Not same gradientJ @ [%d,%d]", j, jj));
