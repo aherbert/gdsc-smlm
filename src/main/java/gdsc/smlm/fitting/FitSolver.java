@@ -80,7 +80,7 @@ public enum FitSolver
 	/**
 	 * Maximum Likelihood Estimator
 	 * <p>
-	 * Uses a Poisson noise model for the probability density function of the data.
+	 * Uses a configurable noise model for the probability density function of the data.
 	 */
 	MLE{ 
 		public String getName() { return "Maximum Likelihood Estimator"; } 
