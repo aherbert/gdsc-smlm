@@ -4,8 +4,6 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.smlm.fitting.nonlinear.LSEBaseFunctionSolver;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -32,7 +30,7 @@ public class Gaussian2DFitter
 	private FunctionSolver solver;
 
 	// The last successful fit. Used to compute the residuals.
-	private double[] y_fit = null;
+	private double[] residuals = null;
 	// Allow calculation of residuals to be turned off (overwrite constructor fit configuration)
 	private boolean computeResiduals = true;
 	private double[] lower, upper;
@@ -354,7 +352,7 @@ public class Gaussian2DFitter
 		// Fitting variables
 		final int ySize = cumul_region[2];
 		double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize); // Value at index
-		y_fit = (computeResiduals || fitConfiguration.isApplyGainBeforeFitting()) ? new double[ySize] : null; // Predicted points
+		residuals = (computeResiduals) ? new double[ySize] : null;
 		solver = null;
 		double[] params_dev = null; // standard deviations for parameters for the fitting function
 
@@ -561,62 +559,6 @@ public class Gaussian2DFitter
 		double[] lower = this.lower;
 		double[] upper = this.upper;
 
-		// Subtract the bias
-		double bias = 0;
-		boolean doClone = true;
-		if (fitConfiguration.isRemoveBiasBeforeFitting())
-		{
-			// Some methods can fit negative data, e.g. PoissonGaussian or PoissonGammaGaussian.
-			if (background < fitConfiguration.getBias())
-			{
-				// Debugging: remove this
-				//System.out.printf("Background %f < Bias %f\n", background, fitConfiguration.getBias());
-			}
-
-			// No negative data
-			//bias = FastMath.min(background, fitConfiguration.getBias());
-
-			// Subtract the full bias. Leave it to the solver to handle negative data.
-			bias = fitConfiguration.getBias();
-
-			// Ensure the original input data is unchanged
-			y = Arrays.copyOf(y, ySize);
-			for (int i = 0; i < ySize; i++)
-				y[i] -= bias;
-
-			// Update parameters
-			doClone = false;
-			params = params.clone();
-			params[0] -= bias;
-			if (lower != null)
-			{
-				lower = lower.clone();
-				lower[0] -= bias;
-			}
-			if (upper != null)
-			{
-				upper = upper.clone();
-				upper[0] -= bias;
-			}
-		}
-
-		if (fitConfiguration.isApplyGainBeforeFitting())
-		{
-			if (y == data)
-				y = Arrays.copyOf(y, ySize);
-
-			final double gain = 1.0 / fitConfiguration.getGain();
-			for (int i = 0; i < ySize; i++)
-			{
-				y[i] *= gain;
-			}
-
-			// Update all the parameters affected by gain
-			params = applyGain(params, gain, doClone);
-			lower = applyGain(lower, gain, doClone);
-			upper = applyGain(upper, gain, doClone);
-		}
-
 		// Re-copy the parameters now they have all been set
 		initialParams = params.clone();
 
@@ -639,7 +581,7 @@ public class Gaussian2DFitter
 			setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
 		}
 
-		FitStatus result = solver.fit(y, y_fit, params, params_dev);
+		FitStatus result = solver.fit(y, residuals, params, params_dev);
 
 		// -----------------------
 
@@ -648,19 +590,6 @@ public class Gaussian2DFitter
 			// For debugging
 			//double[] initialParams2 = initialParams.clone();
 			//double[] params2 = params.clone();
-
-			if (fitConfiguration.isApplyGainBeforeFitting())
-			{
-				// Update all the output parameters
-				final double gain = fitConfiguration.getGain();
-				applyGain(initialParams, gain);
-				applyGain(params, gain);
-				applyGain(params_dev, gain);
-			}
-
-			// Add the bias back to the background
-			params[0] += bias;
-			initialParams[0] += bias;
 
 			// Re-assemble all the parameters
 			if (!fitConfiguration.isWidth1Fitting() && fitConfiguration.isWidth0Fitting())
@@ -695,23 +624,10 @@ public class Gaussian2DFitter
 				statusData = fitConfiguration.getValidationData();
 			}
 
-			if (y_fit != null)
+			if (residuals != null)
 			{
-				for (int i = 0; i < y_fit.length; i++)
-					y_fit[i] = y[i] - y_fit[i];
-				if (fitConfiguration.isApplyGainBeforeFitting())
-				{
-					// The data (y) and the predicted data (y_fit) will be without gain 
-					final double gain = fitConfiguration.getGain();
-					for (int i = 0; i < y_fit.length; i++)
-						y_fit[i] *= gain;
-
-					// The sum-of-squares will be incorrect so fix this
-					if (solver.getType() == FunctionSolverType.LSE && solver instanceof LSEBaseFunctionSolver)
-					{
-						((LSEBaseFunctionSolver) solver).updateSumOfSquares(Arrays.copyOf(data, ySize), y_fit);
-					}
-				}
+				for (int i = 0; i < residuals.length; i++)
+					residuals[i] = y[i] - residuals[i];
 			}
 
 			fitResult = new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0),
@@ -720,45 +636,12 @@ public class Gaussian2DFitter
 		}
 		else
 		{
-			if (fitConfiguration.isApplyGainBeforeFitting())
-			{
-				// Update all the output parameters
-				final double gain = fitConfiguration.getGain();
-				applyGain(initialParams, gain);
-			}
-
-			// Add the bias back to the background
-			initialParams[0] += bias;
-
-			y_fit = null;
+			residuals = null;
 			fitResult = new FitResult(result, 0, Double.NaN, initialParams, null, null, npeaks,
 					solver.getNumberOfFittedParameters(), null, solver.getIterations(), solver.getEvaluations());
 		}
 
 		return fitResult;
-	}
-
-	private static double[] applyGain(double[] params, double gain, boolean doClone)
-	{
-		if (params != null)
-		{
-			if (doClone)
-				params = params.clone();
-			params[Gaussian2DFunction.BACKGROUND] *= gain;
-			for (int i = Gaussian2DFunction.SIGNAL; i < params.length; i += 6)
-				params[i] *= gain;
-		}
-		return params;
-	}
-
-	private static void applyGain(double[] params, double gain)
-	{
-		if (params != null)
-		{
-			params[Gaussian2DFunction.BACKGROUND] *= gain;
-			for (int i = Gaussian2DFunction.SIGNAL; i < params.length; i += 6)
-				params[i] *= gain;
-		}
 	}
 
 	/**
@@ -853,7 +736,7 @@ public class Gaussian2DFitter
 			if (lower[0] < 0)
 			{
 				// This is a problem for MLE fitting
-				if (fitConfiguration.isMaximumLikelihoodFitting())
+				if (fitConfiguration.requireStrictlyPositiveFunction())
 					lower[0] = 0;
 			}
 		}
@@ -900,7 +783,7 @@ public class Gaussian2DFitter
 			if (lower[j + Gaussian2DFunction.SIGNAL] < 0)
 			{
 				// This is a problem for MLE fitting
-				if (fitConfiguration.isMaximumLikelihoodFitting())
+				if (fitConfiguration.requireStrictlyPositiveFunction())
 					lower[j + Gaussian2DFunction.SIGNAL] = 0;
 			}
 			if (params[j + Gaussian2DFunction.SIGNAL] > upper[j + Gaussian2DFunction.SIGNAL])
@@ -1138,7 +1021,7 @@ public class Gaussian2DFitter
 	 */
 	public double[] getResiduals()
 	{
-		return y_fit;
+		return residuals;
 	}
 
 	/**
@@ -1248,54 +1131,9 @@ public class Gaussian2DFitter
 	public boolean evaluate(double[] data, int maxx, int maxy, int npeaks, double[] params)
 	{
 		final int ySize = maxx * maxy;
+		// The solvers require y to be the correct length
 		double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize);
-		y_fit = (computeResiduals || fitConfiguration.isApplyGainBeforeFitting()) ? new double[ySize] : null; // Predicted points
-
-		// Subtract the bias
-		double bias = 0;
-		boolean doClone = true;
-		if (fitConfiguration.isRemoveBiasBeforeFitting())
-		{
-			// Subtract the full bias. Leave it to the solver to handle negative data.
-			bias = fitConfiguration.getBias();
-
-			// Ensure the original input data is unchanged
-			y = Arrays.copyOf(y, ySize);
-			for (int i = 0; i < ySize; i++)
-				y[i] -= bias;
-
-			// Update parameters
-			doClone = false;
-			params = params.clone();
-			params[0] -= bias;
-			if (lower != null)
-			{
-				lower = lower.clone();
-				lower[0] -= bias;
-			}
-			if (upper != null)
-			{
-				upper = upper.clone();
-				upper[0] -= bias;
-			}
-		}
-
-		if (fitConfiguration.isApplyGainBeforeFitting())
-		{
-			if (y == data)
-				y = Arrays.copyOf(y, ySize);
-
-			final double gain = 1.0 / fitConfiguration.getGain();
-			for (int i = 0; i < ySize; i++)
-			{
-				y[i] *= gain;
-			}
-
-			// Update all the parameters affected by gain
-			params = applyGain(params, gain, doClone);
-			lower = applyGain(lower, gain, doClone);
-			upper = applyGain(upper, gain, doClone);
-		}
+		residuals = (computeResiduals) ? new double[ySize] : null;
 
 		// -----------------------
 		// Use alternative fitters
@@ -1304,39 +1142,16 @@ public class Gaussian2DFitter
 		fitConfiguration.initialise(npeaks, maxx, maxy, params);
 		solver = fitConfiguration.getFunctionSolver();
 
-		// Do not apply bounds and constraints as it is assumed the input parameters are good
+		// Note: Do not apply bounds and constraints as it is assumed the input parameters are good
 
-		//// Bounds are more restrictive than constraints
-		//if (solver.isBounded())
-		//{
-		//	setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak, lower, upper);
-		//}
-		//else if (solver.isConstrained())
-		//{
-		//	setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
-		//}
-
-		final boolean result = solver.evaluate(y, y_fit, params);
+		final boolean result = solver.evaluate(y, residuals, params);
 
 		if (result)
 		{
-			if (y_fit != null)
+			if (residuals != null)
 			{
-				for (int i = 0; i < y_fit.length; i++)
-					y_fit[i] = y[i] - y_fit[i];
-				if (fitConfiguration.isApplyGainBeforeFitting())
-				{
-					// The data (y) and the predicted data (y_fit) will be without gain 
-					final double gain = fitConfiguration.getGain();
-					for (int i = 0; i < y_fit.length; i++)
-						y_fit[i] *= gain;
-
-					// The sum-of-squares will be incorrect so fix this
-					if (solver.getType() == FunctionSolverType.LSE && solver instanceof LSEBaseFunctionSolver)
-					{
-						((LSEBaseFunctionSolver) solver).updateSumOfSquares(Arrays.copyOf(data, ySize), y_fit);
-					}
-				}
+				for (int i = 0; i < residuals.length; i++)
+					residuals[i] = y[i] - residuals[i];
 			}
 		}
 
