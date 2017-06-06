@@ -86,13 +86,12 @@ public class PSFDrift implements PlugIn
 	private PSFSettings psfSettings;
 	private static FitConfiguration fitConfig;
 
-	private static final double bias = 500;
 	static
 	{
 		// Initialise for fitting
 		fitConfig = new FitConfiguration();
 		// Set defaults for the MLE method
-		fitConfig.setBias(bias);
+		fitConfig.setBias(0);
 		fitConfig.setEmCCD(false);
 		fitConfig.setGain(1);
 		fitConfig.setReadNoise(0);
@@ -212,8 +211,6 @@ public class PSFDrift implements PlugIn
 
 			// Draw the PSF
 			double[] data = new double[w2];
-			// Fitting is done when there is a bias
-			Arrays.fill(data, bias);
 			if (useSampling)
 			{
 				int p = (int) random.nextPoisson(photons);
@@ -227,7 +224,7 @@ public class PSFDrift implements PlugIn
 			// Fit the PSF. Do this from different start positions.
 
 			// Get the background and signal estimate
-			final double b = (backgroundFitting) ? Gaussian2DFitter.getBackground(data, w, w, 1) : bias;
+			final double b = (backgroundFitting) ? Gaussian2DFitter.getBackground(data, w, w, 1) : 0;
 			final double signal = BenchmarkFit.getSignal(data, b);
 
 			if (comFitting)
@@ -243,15 +240,6 @@ public class PSFDrift implements PlugIn
 			initialParams[Gaussian2DFunction.SIGNAL] = signal;
 			initialParams[Gaussian2DFunction.X_SD] = initialParams[Gaussian2DFunction.Y_SD] = s;
 
-			// Subtract the bias
-			if (fitConfig.isRemoveBiasBeforeFitting())
-			{
-				initialParams[Gaussian2DFunction.BACKGROUND] = Math.max(0,
-						initialParams[Gaussian2DFunction.BACKGROUND] - bias);
-				for (int i = 0; i < data.length; i++)
-					data[i] -= bias;
-			}
-
 			int resultPosition = job.index;
 			for (double[] centre : xy)
 			{
@@ -266,9 +254,6 @@ public class PSFDrift implements PlugIn
 				else if (solver.isConstrained())
 					setConstraints(solver);
 				final FitStatus status = solver.fit(data, null, params, null);
-				// Subtract the fitted bias from the background
-				if (!fitConfig.isRemoveBiasBeforeFitting())
-					params[Gaussian2DFunction.BACKGROUND] -= bias;
 				// Account for 0.5 pixel offset during fitting
 				params[Gaussian2DFunction.X_POSITION] += 0.5;
 				params[Gaussian2DFunction.Y_POSITION] += 0.5;
