@@ -928,7 +928,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * Provide functionality to fit spots in a region using different methods. Decisions about what to accept are not
 	 * performed. The fit results are just converted to PreprocessedPeakResult objects for validation.
 	 */
-	private class SpotFitter
+	private class CandidateSpotFitter
 	{
 		final Gaussian2DFitter gf;
 		final ResultFactory resultFactory;
@@ -957,7 +957,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean computedDoublet = false;
 		QuadrantAnalysis singleQA = null;
 
-		public SpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
+		public CandidateSpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
 				Rectangle regionBounds, int n)
 		{
 			this.gf = gf;
@@ -3372,7 +3372,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean dynamic;
 		Rectangle regionBounds;
 		double[] region, region2;
-		SpotFitter spotFitter;
+		CandidateSpotFitter spotFitter;
 		FitType fitType;
 		boolean isValid;
 		@SuppressWarnings("unused")
@@ -3435,7 +3435,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				final ResultFactory factory = (dynamic) ? new DynamicResultFactory(offsetx, offsety)
 						: new FixedResultFactory(offsetx, offsety);
-				spotFitter = new SpotFitter(gf, factory, region, region2, regionBounds, candidateId);
+				spotFitter = new CandidateSpotFitter(gf, factory, region, region2, regionBounds, candidateId);
 			}
 		}
 
