@@ -38,7 +38,7 @@ import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.FunctionSolverType;
-import gdsc.smlm.fitting.Gaussian2DFitter;
+import gdsc.smlm.fitting.FastGaussian2DFitter;
 import gdsc.smlm.fitting.LSEFunctionSolver;
 import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.fitting.WLSEFunctionSolver;
@@ -101,7 +101,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	private PeakResults results;
 	private BlockingQueue<FitJob> jobs;
-	private Gaussian2DFitter gf;
+	private FastGaussian2DFitter gf;
 
 	// Used for fitting methods
 	private ArrayList<PeakResult> sliceResults;
@@ -299,7 +299,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		this.results = results;
 		this.jobs = jobs;
 		this.logger = fitConfig.getLog();
-		gf = new Gaussian2DFitter(fitConfig);
+		gf = new FastGaussian2DFitter(fitConfig);
 		//duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		// Used for duplicate checking
 		coordinateStore = CoordinateStoreFactory.create(0, 0, fitConfig.getDuplicateDistance());
@@ -361,6 +361,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		cc = new CoordinateConverter(job.bounds);
 		final int width = cc.dataBounds.width;
 		final int height = cc.dataBounds.height;
+		final int size = width * height;
 		borderLimitX = width - border;
 		borderLimitY = height - border;
 		data = job.data;
@@ -378,13 +379,31 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		fittedBackground = 0;
 
+		// 06-Jun-2017
+		// The data model was changed to store the signal in photoelectrons.
+		// This allows support for per-pixel bias and gain (sCMOS cameras).
+
+		// Remove the bias
+		final double bias = fitConfig.getBias();
+		for (int i = 0; i < size; i++)
+			data[i] -= bias;
+
+		// Remove the gain. This is done for all solvers except the legacy MLE solvers which 
+		// model camera amplification.
+		if (!fitConfig.isFitCameraCounts())
+		{
+			final double f = 1.0 / fitConfig.getGainSafe();
+			for (int i = 0; i < size; i++)
+				data[i] *= f;
+		}
+
 		// TODO - Better estimate of the background and the noise. Using all the image pixels
 		// results in an estimate that is too high when there are many spots in the image.
 		// Create a method that thresholds the image and finds the mean/sd of the thresholded image.
 
 		// Note: Other code calls the static estimateNoise method.
 		// So add a private instance method to estimate the noise and background using a static helper
-		// class. This can also be called from the static estiamteNoise method.
+		// class. This can also be called from the static estimateNoise method.
 
 		// Always get the noise and store it with the results.
 		if (params != null && !Float.isNaN(params.noise))
@@ -419,7 +438,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				final int y = candidate.y;
 				final Rectangle regionBounds = ie.getBoxRegionBounds(x, y, fitting);
 				region = ie.crop(regionBounds, region);
-				final float b = (float) Gaussian2DFitter.getBackground(region, regionBounds.width, regionBounds.height,
+				final float b = (float) FastGaussian2DFitter.getBackground(region, regionBounds.width, regionBounds.height,
 						1);
 
 				// Offset the coords to the centre of the pixel. Note the bounds will be added later.
@@ -930,7 +949,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	private class CandidateSpotFitter
 	{
-		final Gaussian2DFitter gf;
+		final FastGaussian2DFitter gf;
 		final ResultFactory resultFactory;
 		final double[] region, region2;
 		final Rectangle regionBounds;
@@ -957,7 +976,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean computedDoublet = false;
 		QuadrantAnalysis singleQA = null;
 
-		public CandidateSpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
+		public CandidateSpotFitter(FastGaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
 				Rectangle regionBounds, int n)
 		{
 			this.gf = gf;
@@ -1033,7 +1052,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			// Use the minimum in the data.
 			// This is what is done in the in the fitter if the background is zero.
-			return limitBackground(Gaussian2DFitter.getBackground(region, width, height, 2));
+			return limitBackground(FastGaussian2DFitter.getBackground(region, width, height, 2));
 		}
 
 		private double limitBackground(double b)
@@ -2483,7 +2502,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// MLE - AIC, BIC, LLR
 				// WLSE - AIC, BIC, q-values of each chi-square
 				// LSE - Adjusted coefficient of determination 
-				
+
 				// Note: Numerical recipes pp 669 uses 0.1 for q-value for weighted least squares fitting
 				// This is 0.9 for p!
 

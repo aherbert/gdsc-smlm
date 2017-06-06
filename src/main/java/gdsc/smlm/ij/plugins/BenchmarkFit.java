@@ -246,16 +246,13 @@ public class BenchmarkFit implements PlugIn
 
 			// Subtract the bias
 			final double bias = benchmarkParameters.bias;
-			if (fitConfig.isRemoveBiasBeforeFitting())
+			initialParams[Gaussian2DFunction.BACKGROUND] -= bias;
+			for (int i = 0; i < data.length; i++)
+				data[i] -= bias;
+			// Remove the gain
+			if (!fitConfig.isFitCameraCounts())
 			{
-				// MLE can handle negative data 
-				initialParams[Gaussian2DFunction.BACKGROUND] -= bias;
-				for (int i = 0; i < data.length; i++)
-					data[i] -= bias;
-			}
-			if (fitConfig.isApplyGainBeforeFitting())
-			{
-				final double gain = 1.0 / fitConfig.getGain();
+				final double gain = 1.0 / fitConfig.getGainSafe();
 				for (int i = 0; i < data.length; i++)
 					data[i] *= gain;
 
@@ -287,13 +284,12 @@ public class BenchmarkFit implements PlugIn
 				final FitStatus status = solver.fit(data, null, params, null);
 				if (isValid(status, params, size))
 				{
-					// Subtract the fitted bias from the background
-					if (!fitConfig.isRemoveBiasBeforeFitting())
-						params[Gaussian2DFunction.BACKGROUND] -= bias;
-					if (fitConfig.isApplyGainBeforeFitting())
+					// TODO - Check this is OK for the MLE camera model
+					// That estimates counts. We require an estimate of photons.
+					if (fitConfig.isFitCameraCounts())
 					{
-						final double gain = fitConfig.getGain();
-						// Update all the parameters affected by gain
+						// Update all the parameters to be in photons
+						final double gain = 1.0 / fitConfig.getGainSafe();
 						params[Gaussian2DFunction.BACKGROUND] *= gain;
 						params[Gaussian2DFunction.SIGNAL] *= gain;
 					}
@@ -339,7 +335,7 @@ public class BenchmarkFit implements PlugIn
 					lower = lb.clone();
 					lower[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND] -
 							Math.abs(lb[Gaussian2DFunction.BACKGROUND] - params[Gaussian2DFunction.BACKGROUND]);
-					if (fitConfig.isMaximumLikelihoodFitting() && lower[Gaussian2DFunction.BACKGROUND] < 0)
+					if (fitConfig.requireStrictlyPositiveFunction() && lower[Gaussian2DFunction.BACKGROUND] < 0)
 						lower[Gaussian2DFunction.BACKGROUND] = 0;
 				}
 				if (params[Gaussian2DFunction.BACKGROUND] > ub[Gaussian2DFunction.BACKGROUND])
@@ -354,7 +350,7 @@ public class BenchmarkFit implements PlugIn
 						lower = lb.clone();
 					lower[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] -
 							Math.abs(lb[Gaussian2DFunction.SIGNAL] - params[Gaussian2DFunction.SIGNAL]);
-					if (fitConfig.isMaximumLikelihoodFitting() && lower[Gaussian2DFunction.SIGNAL] < 0)
+					if (fitConfig.requireStrictlyPositiveFunction() && lower[Gaussian2DFunction.SIGNAL] < 0)
 						lower[Gaussian2DFunction.SIGNAL] = 0;
 				}
 				if (params[Gaussian2DFunction.SIGNAL] > ub[Gaussian2DFunction.SIGNAL])
@@ -384,11 +380,6 @@ public class BenchmarkFit implements PlugIn
 				// Background could be zero so always have an upper limit
 				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0,
 						2 * benchmarkParameters.getBackground() * benchmarkParameters.gain);
-				if (!fitConfig.isRemoveBiasBeforeFitting())
-				{
-					lb[Gaussian2DFunction.BACKGROUND] += benchmarkParameters.bias;
-					ub[Gaussian2DFunction.BACKGROUND] += benchmarkParameters.bias;
-				}
 				double signal = benchmarkParameters.getSignal() * benchmarkParameters.gain;
 				lb[Gaussian2DFunction.SIGNAL] = signal * 0.5;
 				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
@@ -402,9 +393,9 @@ public class BenchmarkFit implements PlugIn
 				ub[Gaussian2DFunction.X_SD] = s * wf;
 				lb[Gaussian2DFunction.Y_SD] = s / wf;
 				ub[Gaussian2DFunction.Y_SD] = s * wf;
-				if (fitConfig.isApplyGainBeforeFitting())
+				if (!fitConfig.isFitCameraCounts())
 				{
-					final double gain = 1.0 / fitConfig.getGain();
+					final double gain = 1.0 / fitConfig.getGainSafe();
 					// Update all the parameters affected by gain
 					lb[Gaussian2DFunction.BACKGROUND] *= gain;
 					lb[Gaussian2DFunction.SIGNAL] *= gain;
@@ -681,6 +672,8 @@ public class BenchmarkFit implements PlugIn
 
 	private void run()
 	{
+		// TODO - This needs to be updated for the answer in photons.
+		
 		// Initialise the answer. Convert to units of the image (ADUs and pixels)
 		answer[Gaussian2DFunction.BACKGROUND] = benchmarkParameters.getBackground() * benchmarkParameters.gain;
 		answer[Gaussian2DFunction.SIGNAL] = benchmarkParameters.getSignal() * benchmarkParameters.gain;

@@ -265,11 +265,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	{
 		int flags = this.flags;
 
-		if (isBackgroundFitting())
-			flags |= GaussianFunctionFactory.FIT_BACKGROUND;
+		if (!isBackgroundFitting())
+		{
+			// Remove background fitting (on by default)
+			flags &= ~GaussianFunctionFactory.FIT_BACKGROUND;
+		}
 		if (isNotSignalFitting())
+		{
 			// Remove signal fitting (on by default)
 			flags &= ~GaussianFunctionFactory.FIT_SIGNAL;
+			flags |= GaussianFunctionFactory.FIT_SIMPLE;
+		}
 		return flags;
 	}
 
@@ -614,16 +620,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		switch (fitFunction)
 		{
 			case CIRCULAR:
-				flags = GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE;
+				flags = GaussianFunctionFactory.FIT_CIRCLE;
 				break;
 			case FIXED:
-				flags = GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED;
+				flags = GaussianFunctionFactory.FIT_FIXED;
 				break;
 			case FREE_CIRCULAR:
-				flags = GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE;
+				flags = GaussianFunctionFactory.FIT_FREE_CIRCLE;
 				break;
 			case FREE:
-				flags = GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL;
+				flags = GaussianFunctionFactory.FIT_ELLIPTICAL;
 				break;
 			default:
 				throw new RuntimeException("Unknown fitting function");
@@ -1788,6 +1794,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
+	 * @return the gain (or 1 if the gain is invalid)
+	 */
+	public double getGainSafe()
+	{
+		return (gain <= 0) ? 1 : gain;
+	}
+
+	/**
 	 * @param gain
 	 *            the gain to use when evaluating a fitted peak's localisation precision. Also used to determine the
 	 *            signal threshold (signalThreshold = max(gain x minPhotons, noise x signalStrength)
@@ -1915,31 +1929,68 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
-	 * @return Set to true if the bias should be removed from the data before fitting, e.g. for maximum likelihood
-	 *         estimation.
+	 * @return Set to true if the bias should be removed from the data before fitting
+	 * @deprecated The bias is always removed before fitting
 	 */
+	@Deprecated
 	public boolean isRemoveBiasBeforeFitting()
 	{
-		return fitSolver == FitSolver.MLE || isApplyGainBeforeFitting();
+		return true;
 	}
 
 	/**
-	 * @return Set to true if the gain should be removed from the data and parameter estimate before fiting, e.g. for
-	 *         the LVM implementation of maximum likelihood estimation of Poisson data.
+	 * @return Set to true if the gain should be removed from the data before fitting.
+	 * @deprecated The gain should always be removed before fitting as the system should produce estimates in
+	 *             photo-electrons. Only the legacy MLE solvers that explicitly model the camera noise require the data
+	 *             and estimate to be in ADUs.
 	 */
+	@Deprecated
 	public boolean isApplyGainBeforeFitting()
 	{
-		return fitSolver == FitSolver.LVM_MLE;
+		// Only the legacy MLE solvers that explicitly model the camera noise require the data
+		// and estimate to be in ADUs.
+		if (fitSolver == FitSolver.MLE)
+			return false;
+		return getGain() != 0;
 	}
 
 	/**
-	 * Checks if is maximum likelihood fitting.
-	 *
-	 * @return true, if is maximum likelihood fitting
+	 * @return Set to true if fitting requires the camera counts, i.e. amplification is explicitly modelled during
+	 *         fitting.
 	 */
-	public boolean isMaximumLikelihoodFitting()
+	public boolean isFitCameraCounts()
 	{
-		return isRemoveBiasBeforeFitting();
+		// Only the legacy MLE solvers that explicitly model the camera noise require the data
+		// and estimate to be in ADUs.
+		if (fitSolver == FitSolver.MLE)
+			return true;
+		return false;
+	}
+
+	/**
+	 * The function solver requires a strictly positive function.
+	 *
+	 * @return true if requires a strictly positive function.
+	 */
+	public boolean requireStrictlyPositiveFunction()
+	{
+		// Only the LSE variants can fit negatives. The MLE variants all require a positive function. 
+		switch (fitSolver)
+		{
+			case BOUNDED_LVM:
+			case BOUNDED_LVM_WEIGHTED:
+			case LVM:
+			case LVM_QUASI_NEWTON:
+			case LVM_WEIGHTED:
+				return false;
+
+			case LVM_MLE:
+			case MLE:
+				return true;
+
+			default:
+				throw new NotImplementedException("Unknown strictly positive requirement: " + fitSolver.getName());
+		}
 	}
 
 	/**

@@ -26,14 +26,14 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class Gaussian2DFitter
 {
-	private FitConfiguration fitConfiguration;
-	private FunctionSolver solver;
+	protected FitConfiguration fitConfiguration;
+	protected FunctionSolver solver;
 
 	// The last successful fit. Used to compute the residuals.
-	private double[] residuals = null;
+	protected double[] residuals = null;
 	// Allow calculation of residuals to be turned off (overwrite constructor fit configuration)
-	private boolean computeResiduals = true;
-	private double[] lower, upper;
+	protected boolean computeResiduals = true;
+	protected double[] lower, upper;
 
 	/**
 	 * Constructor
@@ -342,21 +342,16 @@ public class Gaussian2DFitter
 	public FitResult fit(final double[] data, final int maxx, final int maxy, final int npeaks, double[] params,
 			final boolean[] amplitudeEstimate, final boolean zeroBackground)
 	{
-		FitResult fitResult = null;
-		final int[] dim = new int[] { maxx, maxy };
-
-		// Working variables
-		final int[] cumul_region = new int[] { 1, maxx, maxx * maxy };
-		final int[] position = new int[2];
+		// Reset
+		residuals = null;
+		solver = null;
 
 		// Fitting variables
-		final int ySize = cumul_region[2];
-		double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize); // Value at index
-		residuals = (computeResiduals) ? new double[ySize] : null;
-		solver = null;
-		double[] params_dev = null; // standard deviations for parameters for the fitting function
+		final int ySize = maxx * maxy;
+		// Y must be the correct size
+		final double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize); // Value at index
 
-		final int paramsPerPeak = 6;
+		final int paramsPerPeak = 6; // Fixed for a Gaussian2DFunction
 
 		double background = params[0];
 		if (background == 0 && !zeroBackground)
@@ -455,104 +450,11 @@ public class Gaussian2DFitter
 			}
 		}
 
-		int parameter = 1;
-		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
+		if (!checkParameters(maxx, maxy, npeaks, params, amplitudeEstimate, ySize, y, paramsPerPeak, background,
+				initialParams))
 		{
-			// Get the parameters
-			double signal = params[j + Gaussian2DFunction.SIGNAL];
-			double angle = params[j + Gaussian2DFunction.SHAPE];
-			double xpos = params[j + Gaussian2DFunction.X_POSITION];
-			double ypos = params[j + Gaussian2DFunction.Y_POSITION];
-			double sx = params[j + Gaussian2DFunction.X_SD];
-			double sy = params[j + Gaussian2DFunction.Y_SD];
-
-			// ----
-			// Check all input parameters and estimate them if necessary
-			// ----
-
-			// Set-up for estimating peak width at half maximum 
-			position[0] = (int) Math.round(xpos);
-			position[1] = (int) Math.round(ypos);
-			int index = position[1] * maxx + position[0];
-
-			if (sx == 0)
-			{
-				if (fitConfiguration.getInitialPeakStdDev0() > 0)
-				{
-					sx = fitConfiguration.getInitialPeakStdDev0();
-				}
-				else
-				{
-					// Fail if the width cannot be estimated due to out of bounds
-					if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
-						return new FitResult(FitStatus.FAILED_TO_ESTIMATE_WIDTH, 0, Double.NaN, initialParams, null,
-								null, npeaks, 0, null, 0, 0);
-
-					sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
-				}
-			}
-
-			if (sy == 0)
-			{
-				if (fitConfiguration.isWidth1Fitting())
-				{
-					if (fitConfiguration.getInitialPeakStdDev1() > 0)
-					{
-						sy = fitConfiguration.getInitialPeakStdDev1();
-					}
-					else
-					{
-						// Fail if the width cannot be estimated
-						if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
-							return new FitResult(FitStatus.FAILED_TO_ESTIMATE_WIDTH, 0, Double.NaN, initialParams, null,
-									null, npeaks, 0, null, 0, 0);
-
-						sy = fwhm2sd(half_max_linewidth(y, index, position, dim, 1, cumul_region, background));
-					}
-				}
-				else
-				{
-					sy = sx;
-				}
-			}
-
-			// Guess the initial angle if input angle is out-of-bounds
-			if (angle == 0)
-			{
-				if (fitConfiguration.isAngleFitting() && fitConfiguration.getInitialAngle() >= -Math.PI &&
-						fitConfiguration.getInitialAngle() <= -Math.PI)
-				{
-					if (sx != sy)
-					{
-						// There is no angle gradient information if the widths are equal. Zero and it will be ignored
-						angle = fitConfiguration.getInitialAngle();
-					}
-				}
-			}
-
-			// If the position is on the integer grid then use a centre-of-mass approximation
-			if (xpos == position[0] && ypos == position[1])
-			{
-				// Estimate using centre of mass around peak index 
-				// Use 2 * SD estimate to calculate the range around the index that should be considered.
-				// SD = (sx+sy)/2 => Range = sx+sy
-				final int range = Math.max(1, (int) Math.ceil(sx + sy));
-				final double[] com = findCentreOfMass(y, dim, range, position);
-				xpos = (double) com[0];
-				ypos = (double) com[1];
-			}
-
-			// Convert amplitudes to signal
-			if (amplitudeEstimate[i])
-				signal *= 2 * Math.PI * sx * sy;
-
-			// Set all the parameters
-			params[parameter++] = signal;
-			params[parameter++] = angle;
-			params[parameter++] = xpos;
-			params[parameter++] = ypos;
-			params[parameter++] = sx;
-			params[parameter++] = sy;
+			return new FitResult(FitStatus.FAILED_TO_ESTIMATE_WIDTH, 0, Double.NaN, initialParams, null, null, npeaks,
+					0, null, 0, 0);
 		}
 
 		// Input configured bounds
@@ -568,8 +470,6 @@ public class Gaussian2DFitter
 
 		fitConfiguration.initialise(npeaks, maxx, maxy, initialParams);
 		solver = fitConfiguration.getFunctionSolver();
-		if (fitConfiguration.isComputeDeviations())
-			params_dev = new double[params.length];
 
 		// Bounds are more restrictive than constraints
 		if (solver.isBounded())
@@ -581,6 +481,9 @@ public class Gaussian2DFitter
 			setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
 		}
 
+		double[] params_dev = (fitConfiguration.isComputeDeviations()) ? new double[params.length] : null;
+		if (computeResiduals)
+			residuals = new double[ySize];
 		FitStatus result = solver.fit(y, residuals, params, params_dev);
 
 		// -----------------------
@@ -630,24 +533,130 @@ public class Gaussian2DFitter
 					residuals[i] = y[i] - residuals[i];
 			}
 
-			fitResult = new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0),
+			return new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0),
 					solver.getValue(), initialParams, params, params_dev, npeaks, solver.getNumberOfFittedParameters(),
 					statusData, solver.getIterations(), solver.getEvaluations());
 		}
 		else
 		{
 			residuals = null;
-			fitResult = new FitResult(result, 0, Double.NaN, initialParams, null, null, npeaks,
+			return new FitResult(result, 0, Double.NaN, initialParams, null, null, npeaks,
 					solver.getNumberOfFittedParameters(), null, solver.getIterations(), solver.getEvaluations());
 		}
+	}
 
-		return fitResult;
+	protected boolean checkParameters(final int maxx, final int maxy, final int npeaks, double[] params,
+			final boolean[] amplitudeEstimate, final int ySize, final double[] y, final int paramsPerPeak,
+			double background, double[] initialParams)
+	{
+		int parameter = 1;
+		final int[] dim = new int[] { maxx, maxy };
+		final int[] position = new int[2];
+		final int[] cumul_region = new int[] { 1, maxx, ySize };
+		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
+		{
+			// Get the parameters
+			double signal = params[j + Gaussian2DFunction.SIGNAL];
+			double angle = params[j + Gaussian2DFunction.SHAPE];
+			double xpos = params[j + Gaussian2DFunction.X_POSITION];
+			double ypos = params[j + Gaussian2DFunction.Y_POSITION];
+			double sx = params[j + Gaussian2DFunction.X_SD];
+			double sy = params[j + Gaussian2DFunction.Y_SD];
+
+			// ----
+			// Check all input parameters and estimate them if necessary
+			// ----
+
+			// Set-up for estimating peak width at half maximum 
+			position[0] = (int) Math.round(xpos);
+			position[1] = (int) Math.round(ypos);
+			int index = position[1] * maxx + position[0];
+
+			if (sx == 0)
+			{
+				if (fitConfiguration.getInitialPeakStdDev0() > 0)
+				{
+					sx = fitConfiguration.getInitialPeakStdDev0();
+				}
+				else
+				{
+					// Fail if the width cannot be estimated due to out of bounds
+					if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
+						return false;
+
+					sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
+				}
+			}
+
+			if (sy == 0)
+			{
+				if (fitConfiguration.isWidth1Fitting())
+				{
+					if (fitConfiguration.getInitialPeakStdDev1() > 0)
+					{
+						sy = fitConfiguration.getInitialPeakStdDev1();
+					}
+					else
+					{
+						// Fail if the width cannot be estimated
+						if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
+							return false;
+
+						sy = fwhm2sd(half_max_linewidth(y, index, position, dim, 1, cumul_region, background));
+					}
+				}
+				else
+				{
+					sy = sx;
+				}
+			}
+
+			// Guess the initial angle if input angle is out-of-bounds
+			if (angle == 0)
+			{
+				if (fitConfiguration.isAngleFitting() && fitConfiguration.getInitialAngle() >= -Math.PI &&
+						fitConfiguration.getInitialAngle() <= -Math.PI)
+				{
+					if (sx != sy)
+					{
+						// There is no angle gradient information if the widths are equal. Zero and it will be ignored
+						angle = fitConfiguration.getInitialAngle();
+					}
+				}
+			}
+
+			// If the position is on the integer grid then use a centre-of-mass approximation
+			if (npeaks == 1 && xpos == position[0] && ypos == position[1])
+			{
+				// Estimate using centre of mass around peak index 
+				// Use 2 * SD estimate to calculate the range around the index that should be considered.
+				// SD = (sx+sy)/2 => Range = sx+sy
+				final int range = Math.max(1, (int) Math.ceil(sx + sy));
+				final double[] com = findCentreOfMass(y, dim, range, position);
+				xpos = (double) com[0];
+				ypos = (double) com[1];
+			}
+
+			// Convert amplitudes to signal
+			if (amplitudeEstimate[i])
+				signal *= 2 * Math.PI * sx * sy;
+
+			// Set all the parameters
+			params[parameter++] = signal;
+			params[parameter++] = angle;
+			params[parameter++] = xpos;
+			params[parameter++] = ypos;
+			params[parameter++] = sx;
+			params[parameter++] = sy;
+		}
+
+		return true;
 	}
 
 	/**
 	 * Finds the centre of the image using the centre of mass within the given range of the specified centre-of-mass.
 	 */
-	private double[] findCentreOfMass(final double[] subImage, final int[] dimensions, final int range,
+	static double[] findCentreOfMass(final double[] subImage, final int[] dimensions, final int range,
 			final int[] centre)
 	{
 		int[] min = new int[2];
@@ -706,7 +715,7 @@ public class Gaussian2DFitter
 	 * @param upper2
 	 *            the input upper bounds
 	 */
-	private void setBounds(final int maxx, final int maxy, final int npeaks, final double[] params, final double[] y,
+	protected void setBounds(final int maxx, final int maxy, final int npeaks, final double[] params, final double[] y,
 			final int ySize, final int paramsPerPeak, double[] lower2, double[] upper2)
 	{
 		// Create appropriate bounds for the parameters
@@ -903,7 +912,7 @@ public class Gaussian2DFitter
 	 * @param paramsPerPeak
 	 *            The number of parameters per peak
 	 */
-	private void setConstraints(final int maxx, final int maxy, final int npeaks, final double[] params,
+	protected void setConstraints(final int maxx, final int maxy, final int npeaks, final double[] params,
 			final double[] y, final int ySize, final int paramsPerPeak)
 	{
 		// Create appropriate bounds for the parameters
@@ -944,7 +953,7 @@ public class Gaussian2DFitter
 	 * @param params
 	 * @param params_dev
 	 */
-	private void correctAngle(final int i, final double[] params, final double[] params_dev)
+	protected void correctAngle(final int i, final double[] params, final double[] params_dev)
 	{
 		double angle = params[i];
 

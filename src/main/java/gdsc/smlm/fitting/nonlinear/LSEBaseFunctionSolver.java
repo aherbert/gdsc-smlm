@@ -93,24 +93,6 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 		return error;
 	}
 
-	/**
-	 * Update the total and residual sum-of-squares using the given data.
-	 *
-	 * @param y
-	 *            The data
-	 * @param residuals
-	 *            The fit residuals
-	 */
-	public void updateSumOfSquares(double[] y, double[] residuals)
-	{
-		totalSumOfSquares = getTotalSumOfSquares(y);
-		value = 0;
-		for (int i = y.length; i-- > 0;)
-		{
-			value += residuals[i] * residuals[i];
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
