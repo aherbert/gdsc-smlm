@@ -2208,7 +2208,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			case BOUNDED_LVM:
 			case LVM_MLE:
 
-				if (gain <= 0)
+				if (fitSolver == FitSolver.LVM_MLE && gain <= 0)
 				{
 					throw new IllegalArgumentException("The gain is required for the " + fitSolver.getName());
 				}
@@ -2224,10 +2224,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				break;
 
 			case LVM_QUASI_NEWTON:
-				if (gain <= 0)
-				{
-					throw new IllegalArgumentException("The gain is required for the " + fitSolver.getName());
-				}
 				// This only works with a Gaussian2DFunction
 				if (gaussianFunction instanceof Gaussian2DFunction)
 				{
@@ -2241,10 +2237,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			case LVM_WEIGHTED:
 			case LVM:
 			default:
-				if (gain <= 0)
-				{
-					throw new IllegalArgumentException("The gain is required for the " + fitSolver.getName());
-				}
 				// Only set the weighting function if necessary
 				if (fitSolver == FitSolver.LVM_WEIGHTED)
 					gaussianFunction.setNoiseModel(getNoiseModel());
