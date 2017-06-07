@@ -1770,7 +1770,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Q. Should it be normalised to the frame length. If not then the beta will be invariant on 
 		// jump distance length
 		beta = meanDistance / precision;
-		double minD = Maths.pow2(precision / 1e3); // Convert nm to um^2
+		// Set the minimum diffusion coefficient using the precision:
+		// Note: 4D = MSD
+		//       4D = precision^2
+		//        D = precision^2 / 4
+		//        D = (precision/2)^2
+		double minD = Maths.pow2(precision / 2000.0); // Extra 1000 factor to convert nm to um
 		Utils.log(
 				"Jump Distance analysis : N = %d, Time = %d frames (%s seconds). MSD = %s um^2/jump, Mean Distance = %s nm/jump, Precision = %s nm, Beta = %s, minD = %s um^2/jump",
 				jumpDistances.getN(), settings.jumpDistance, Utils.rounded(settings.jumpDistance * exposureTime, 4),
