@@ -1,9 +1,11 @@
 package gdsc.smlm.results;
 
+import gdsc.core.utils.NotImplementedException;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2017 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -21,15 +23,140 @@ package gdsc.smlm.results;
  */
 public class Calibration implements Cloneable
 {
+	/**
+	 * The camera type.
+	 */
+	public enum CameraType
+	{
+
+		/** The ccd. */
+		//@formatter:off
+		CCD { String getName() {return "CCD"; } }, 
+		
+		/** The em ccd. */
+		EM_CCD { String getName() {return "EM-CCD"; } },
+		
+		/** The scmos. */
+		SCMOS { String getName() {return "sCMOS"; } },
+		;
+		//@formatter:on
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract String getName();
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Enum#toString()
+		 */
+		public String toString()
+		{
+			return getName();
+		}
+	}
+
+	/**
+	 * The distance unit.
+	 */
+	public enum DistanceUnit
+	{
+
+		/** The pixel. */
+		//@formatter:off
+		PIXEL { String getName() {return "pixel"; } }, 
+		
+		/** The nm. */
+		NM { String getName() {return "nm"; } },
+		;
+		//@formatter:on
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract String getName();
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Enum#toString()
+		 */
+		public String toString()
+		{
+			return getName();
+		}
+	}
+
+	/**
+	 * The intensity unit.
+	 */
+	public enum IntensityUnit
+	{
+
+		/** The count. */
+		//@formatter:off
+		COUNT { String getName() {return "count"; } }, 
+		
+		/** The photon. */
+		PHOTON { String getName() {return "photon"; } },
+		;
+		//@formatter:on
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract String getName();
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Enum#toString()
+		 */
+		public String toString()
+		{
+			return getName();
+		}
+	}
+
+	/** The field missing exception. */
 	// State flags
 	private static int FIELD_MISSING_EXCEPTION = 0x00000001;
+
+	/** The field nm per pixel. */
 	private static int FIELD_NM_PER_PIXEL = 0x00000002;
+
+	/** The field gain. */
 	private static int FIELD_GAIN = 0x00000004;
+
+	/** The field exposure time. */
 	private static int FIELD_EXPOSURE_TIME = 0x00000008;
+
+	/** The field read noise. */
 	private static int FIELD_READ_NOISE = 0x00000010;
+
+	/** The field bias. */
 	private static int FIELD_BIAS = 0x00000020;
-	private static int FIELD_EM_CCD = 0x00000040;
+
+	/** The field camera type. */
+	private static int FIELD_CAMERA_TYPE = 0x00000040;
+
+	/** The field amplification. */
 	private static int FIELD_AMPLIFICATION = 0x00000080;
+
+	/** The field distance unit. */
+	private static int FIELD_DISTANCE_UNIT = 0x00000100;
+
+	/** The field intensity unit. */
+	private static int FIELD_INTENSITY_UNIT = 0x00000200;
+
+	/** The fields. */
 	private int fields = 0;
 
 	/**
@@ -57,136 +184,296 @@ public class Calibration implements Cloneable
 			fields = fields & ~FIELD_MISSING_EXCEPTION;
 	}
 
+	/**
+	 * Checks for nm per pixel.
+	 *
+	 * @return true, if successful
+	 */
 	public boolean hasNmPerPixel()
 	{
 		return ((fields & FIELD_NM_PER_PIXEL) == FIELD_NM_PER_PIXEL);
 	}
 
+	/**
+	 * Checks for gain.
+	 *
+	 * @return true, if successful
+	 */
 	public boolean hasGain()
 	{
 		return ((fields & FIELD_GAIN) == FIELD_GAIN);
 	}
 
+	/**
+	 * Checks for exposure time.
+	 *
+	 * @return true, if successful
+	 */
 	public boolean hasExposureTime()
 	{
 		return ((fields & FIELD_EXPOSURE_TIME) == FIELD_EXPOSURE_TIME);
 	}
 
+	/**
+	 * Checks for read noise.
+	 *
+	 * @return true, if successful
+	 */
 	public boolean hasReadNoise()
 	{
 		return ((fields & FIELD_READ_NOISE) == FIELD_READ_NOISE);
 	}
 
+	/**
+	 * Checks for bias.
+	 *
+	 * @return true, if successful
+	 */
 	public boolean hasBias()
 	{
 		return ((fields & FIELD_BIAS) == FIELD_BIAS);
 	}
 
-	public boolean hasEMCCD()
+	/**
+	 * Checks for camera type.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasCameraType()
 	{
-		return ((fields & FIELD_EM_CCD) == FIELD_EM_CCD);
+		return ((fields & FIELD_CAMERA_TYPE) == FIELD_CAMERA_TYPE);
 	}
 
+	/**
+	 * Checks for EMCCD.
+	 *
+	 * @return true, if successful
+	 */
+	@Deprecated
+	public boolean hasEMCCD()
+	{
+		return hasCameraType();
+	}
+
+	/**
+	 * Checks for amplification.
+	 *
+	 * @return true, if successful
+	 */
 	public boolean hasAmplification()
 	{
 		return ((fields & FIELD_AMPLIFICATION) == FIELD_AMPLIFICATION);
 	}
 
+	/**
+	 * Checks for distance unit.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasDistanceUnit()
+	{
+		return ((fields & FIELD_DISTANCE_UNIT) == FIELD_DISTANCE_UNIT);
+	}
+
+	/**
+	 * Checks for intensity unit.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasIntensityUnit()
+	{
+		return ((fields & FIELD_INTENSITY_UNIT) == FIELD_INTENSITY_UNIT);
+	}
+
+	/**
+	 * Sets the has nm per pixel.
+	 */
 	private void setHasNmPerPixel()
 	{
 		fields |= FIELD_NM_PER_PIXEL;
 	}
 
+	/**
+	 * Sets the has gain.
+	 */
 	private void setHasGain()
 	{
 		fields |= FIELD_GAIN;
 	}
 
+	/**
+	 * Sets the has exposure time.
+	 */
 	private void setHasExposureTime()
 	{
 		fields |= FIELD_EXPOSURE_TIME;
 	}
 
+	/**
+	 * Sets the has read noise.
+	 */
 	private void setHasReadNoise()
 	{
 		fields |= FIELD_READ_NOISE;
 	}
 
+	/**
+	 * Sets the has bias.
+	 */
 	private void setHasBias()
 	{
 		fields |= FIELD_BIAS;
 	}
 
-	private void setHasEMCCD()
+	/**
+	 * Sets the has camera type.
+	 */
+	private void setHasCameraType()
 	{
-		fields |= FIELD_EM_CCD;
+		fields |= FIELD_CAMERA_TYPE;
 	}
 
+	/**
+	 * Sets the has amplification.
+	 */
 	private void setHasAmplification()
 	{
 		fields |= FIELD_AMPLIFICATION;
 	}
 
-	public void clearHasNmPerPixel()
+	/**
+	 * Sets the has distance unit.
+	 */
+	private void setHasDistanceUnit()
 	{
-		fields = fields & ~FIELD_NM_PER_PIXEL;
-	}
-
-	public void clearHasGain()
-	{
-		fields = fields & ~FIELD_GAIN;
-	}
-
-	public void clearHasExposureTime()
-	{
-		fields = fields & ~FIELD_EXPOSURE_TIME;
-	}
-
-	public void clearHasReadNoise()
-	{
-		fields = fields & ~FIELD_READ_NOISE;
-	}
-
-	public void clearHasBias()
-	{
-		fields = fields & ~FIELD_BIAS;
-	}
-
-	public void clearHasEMCCD()
-	{
-		fields = fields & ~FIELD_EM_CCD;
-	}
-
-	public void clearHasAmplification()
-	{
-		fields = fields & ~FIELD_AMPLIFICATION;
+		fields |= FIELD_DISTANCE_UNIT;
 	}
 
 	/**
-	 * The image pixel size in nanometers
+	 * Sets the has intensity unit.
 	 */
-	private double nmPerPixel = 107;
+	private void setHasIntensityUnit()
+	{
+		fields |= FIELD_INTENSITY_UNIT;
+	}
+
+	/**
+	 * Clear has nm per pixel.
+	 */
+	public void clearHasNmPerPixel()
+	{
+		fields = fields & ~FIELD_NM_PER_PIXEL;
+		nmPerPixel = 0;
+	}
+
+	/**
+	 * Clear has gain.
+	 */
+	public void clearHasGain()
+	{
+		fields = fields & ~FIELD_GAIN;
+		gain = 0;
+	}
+
+	/**
+	 * Clear has exposure time.
+	 */
+	public void clearHasExposureTime()
+	{
+		fields = fields & ~FIELD_EXPOSURE_TIME;
+		exposureTime = 0;
+	}
+
+	/**
+	 * Clear has read noise.
+	 */
+	public void clearHasReadNoise()
+	{
+		fields = fields & ~FIELD_READ_NOISE;
+		readNoise = -1;
+	}
+
+	/**
+	 * Clear has bias.
+	 */
+	public void clearHasBias()
+	{
+		fields = fields & ~FIELD_BIAS;
+		bias = -1;
+	}
+
+	/**
+	 * Clear has camera type.
+	 */
+	public void clearHasCameraType()
+	{
+		fields = fields & ~FIELD_CAMERA_TYPE;
+		cameraType = null;
+	}
+
+	/**
+	 * Clear has EMCCD.
+	 */
+	@Deprecated
+	public void clearHasEMCCD()
+	{
+		clearHasCameraType();
+	}
+
+	/**
+	 * Clear has amplification.
+	 */
+	public void clearHasAmplification()
+	{
+		fields = fields & ~FIELD_AMPLIFICATION;
+		amplification = 0;
+	}
+
+	/**
+	 * Clear has distance unit.
+	 */
+	public void clearHasDistanceUnit()
+	{
+		fields = fields & ~FIELD_DISTANCE_UNIT;
+		distanceUnit = null;
+	}
+
+	/**
+	 * Clear has intensity unit.
+	 */
+	public void clearHasIntensityUnit()
+	{
+		fields = fields & ~FIELD_INTENSITY_UNIT;
+		intensityUnit = null;
+	}
+
+	/** The image pixel size in nanometers. */
+	private double nmPerPixel = 0;
 	/**
 	 * The gain (ADUs/photon). Can be used to convert the signal in Analogue-to-Digital units
 	 * (ADUs) to photons.
 	 */
-	private double gain = 37.7;
-	/**
-	 * The exposure time in milliseconds per frame
-	 */
-	private double exposureTime;
+	private double gain = 0;
+
+	/** The exposure time in milliseconds per frame. */
+	private double exposureTime = 0;
+
+	/** The camera Gaussian read noise (in ADUs). */
+	private double readNoise = -1;
+
+	/** The camera bias (in ADUs). */
+	private double bias = -1;
+
+	/** The camera type. */
+	private CameraType cameraType = null;
 
 	/**
-	 * The CCD camera Gaussian read noise (in ADUs)
+	 * True if the camera was run in Electron Multiplying (EM) mode.
+	 *
+	 * @deprecated This has been replaced by camaraType. It is left to enable XStream deserialisation of old
+	 *             configuration.
 	 */
-	private double readNoise;
-	/**
-	 * The CCD camera bias (in ADUs)
-	 */
-	private double bias;
-	/**
-	 * True if the CCD camera was run in Electron Multiplying (EM) mode
-	 */
+	@Deprecated
 	private boolean emCCD;
 	/**
 	 * The camera amplification (ADUs/e-) used when modelling a microscope camera.
@@ -195,7 +482,13 @@ public class Calibration implements Cloneable
 	 * perfect (i.e. it has noise). The amplification is equal to the gain (ADUs/photon) divided by the quantum
 	 * efficiency (e-/photon).
 	 */
-	private double amplification;
+	private double amplification = 0;
+
+	/** The distance unit. */
+	private DistanceUnit distanceUnit = null;
+
+	/** The intensity unit. */
+	private IntensityUnit intensityUnit = null;
 
 	/**
 	 * Default constructor. All properties are set to be invalid but field missing exceptions are disabled.
@@ -271,15 +564,18 @@ public class Calibration implements Cloneable
 		setExposureTime(exposureTime);
 		setReadNoise(readNoise);
 		setBias(bias);
-		setEmCCD(emCCD);
+		setCameraType(cameraType);
 		setAmplification(amplification);
+		setDistanceUnit(distanceUnit);
+		setIntensityUnit(intensityUnit);
 	}
 
 	/**
 	 * Gets image pixel size in nanometers.
 	 *
 	 * @return image pixel size in nanometers
-	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set to a valid value
 	 */
 	public double getNmPerPixel()
 	{
@@ -310,7 +606,8 @@ public class Calibration implements Cloneable
 	 * (ADUs) to photons.
 	 *
 	 * @return the gain
-	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set to a valid value
 	 */
 	public double getGain()
 	{
@@ -341,7 +638,8 @@ public class Calibration implements Cloneable
 	 * Gets the exposure time in milliseconds per frame.
 	 *
 	 * @return the exposure time
-	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set to a valid value
 	 */
 	public double getExposureTime()
 	{
@@ -351,7 +649,7 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Sets the exposure time in milliseconds per frame
+	 * Sets the exposure time in milliseconds per frame.
 	 *
 	 * @param exposureTime
 	 *            the new exposure time
@@ -368,10 +666,11 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Gets the CCD camera Gaussian read noise (in ADUs).
+	 * Gets the camera Gaussian read noise (in ADUs).
 	 *
-	 * @return the CCD camera Gaussian read noise (in ADUs)
-	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 * @return the camera Gaussian read noise (in ADUs)
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set to a valid value
 	 */
 	public double getReadNoise()
 	{
@@ -381,7 +680,7 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Sets CCD camera Gaussian read noise (in ADUs).
+	 * Sets camera Gaussian read noise (in ADUs).
 	 *
 	 * @param readNoise
 	 *            the new read noise
@@ -398,10 +697,11 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Gets CCD camera bias (in ADUs).
+	 * Gets camera bias (in ADUs).
 	 *
-	 * @return CCD camera bias (in ADUs)
-	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 * @return camera bias (in ADUs)
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set to a valid value
 	 */
 	public double getBias()
 	{
@@ -411,7 +711,7 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Sets CCD camera bias (in ADUs).
+	 * Sets camera bias (in ADUs).
 	 *
 	 * @param bias
 	 *            the new bias
@@ -428,28 +728,69 @@ public class Calibration implements Cloneable
 	}
 
 	/**
+	 * Get the camera type.
+	 *
+	 * @return the camera type
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set to a valid value
+	 */
+	public CameraType getCameraType()
+	{
+		if (isFieldMissingException() && !hasCameraType())
+			throw new IllegalStateException();
+		return cameraType;
+	}
+
+	/**
+	 * Set the camera type.
+	 *
+	 * @param cameraType
+	 *            the new camera type
+	 */
+	public void setCameraType(CameraType cameraType)
+	{
+		if (cameraType != null)
+		{
+			setHasCameraType();
+			this.cameraType = cameraType;
+		}
+		else
+			clearHasCameraType();
+	}
+
+	/**
 	 * Checks if the CCD camera was run in Electron Multiplying (EM) mode.
 	 *
 	 * @return true, if the CCD camera was run in Electron Multiplying (EM) mode.
-	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set
+	 * @deprecated Replaced by camera type
 	 */
+	@Deprecated
 	public boolean isEmCCD()
 	{
-		if (isFieldMissingException() && !hasEMCCD())
-			throw new IllegalStateException();
-		return emCCD;
+		return getCameraType() == CameraType.EM_CCD;
 	}
 
 	/**
 	 * Set if the CCD camera was run in Electron Multiplying (EM) mode.
 	 *
 	 * @param emCCD
-	 *            true, if the CCD camera was run in Electron Multiplying (EM) mode.
+	 *            true, if the CCD camera was run in Electron Multiplying (EM) mode, otherwise set to CCD
+	 * @deprecated Replaced by camera type
 	 */
+	@Deprecated
 	public void setEmCCD(boolean emCCD)
 	{
-		setHasEMCCD();
-		this.emCCD = emCCD;
+		setCameraType((emCCD) ? CameraType.EM_CCD : CameraType.CCD);
+	}
+
+	/**
+	 * Sets the camera type from the deprecated EM CCD field.
+	 */
+	void setCameraTypeFromEmCCDField()
+	{
+		setCameraType((emCCD) ? CameraType.EM_CCD : CameraType.CCD);
 	}
 
 	/**
@@ -460,7 +801,8 @@ public class Calibration implements Cloneable
 	 * efficiency (e-/photon).
 	 *
 	 * @return the amplification
-	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set to a valid value
 	 */
 	public double getAmplification()
 	{
@@ -488,5 +830,201 @@ public class Calibration implements Cloneable
 		}
 		else
 			clearHasAmplification();
+	}
+
+	/**
+	 * Get the distance unit used for the results.
+	 *
+	 * @return the distanceUnit
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set to a valid value
+	 */
+	public DistanceUnit getDistanceUnit()
+	{
+		if (isFieldMissingException() && !hasDistanceUnit())
+			throw new IllegalStateException();
+		return distanceUnit;
+	}
+
+	/**
+	 * Set the distance unit used for the results.
+	 *
+	 * @param distanceUnit
+	 *            the new distanceUnit
+	 */
+	public void setDistanceUnit(DistanceUnit distanceUnit)
+	{
+		if (distanceUnit != null)
+		{
+			setHasDistanceUnit();
+			this.distanceUnit = distanceUnit;
+		}
+		else
+			clearHasDistanceUnit();
+	}
+
+	/**
+	 * Get the intensity unit used for the results.
+	 *
+	 * @return the intensityUnit
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set to a valid value
+	 */
+	public IntensityUnit getIntensityUnit()
+	{
+		if (isFieldMissingException() && !hasIntensityUnit())
+			throw new IllegalStateException();
+		return intensityUnit;
+	}
+
+	/**
+	 * Set the intensity unit used for the results.
+	 *
+	 * @param intensityUnit
+	 *            the new intensityUnit
+	 */
+	public void setIntensityUnit(IntensityUnit intensityUnit)
+	{
+		if (intensityUnit != null)
+		{
+			setHasIntensityUnit();
+			this.intensityUnit = intensityUnit;
+		}
+		else
+			clearHasIntensityUnit();
+	}
+
+	/**
+	 * Gets the distance conversion to convert the current units to the given units
+	 *
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @return the distance conversion
+	 * @throws IllegalStateException
+	 *             if the current distance units and distance scale are not known
+	 * @throws NotImplementedException
+	 *             If the required conversion is unknown
+	 * @see Calibration#hasNmPerPixel()
+	 * @see Calibration#hasDistanceUnit()
+	 */
+	public double getDistanceConversion(DistanceUnit distanceUnit)
+	{
+		if (!hasNmPerPixel() || !hasDistanceUnit())
+			throw new IllegalStateException();
+		if (distanceUnit == null)
+			throw new NullPointerException();
+
+		if (distanceUnit == this.distanceUnit)
+		{
+			return 1.0; // no conversion
+		}
+
+		// We only have 2 distance units to support. 
+		// Check anyway in case another is added in the future.
+		if (this.distanceUnit == DistanceUnit.PIXEL && distanceUnit == DistanceUnit.NM)
+			return nmPerPixel;
+		if (this.distanceUnit == DistanceUnit.NM && distanceUnit == DistanceUnit.PIXEL)
+			return 1.0 / nmPerPixel;
+
+		throw new NotImplementedException("Unknown conversion from " + this.distanceUnit + " to " + distanceUnit);
+	}
+
+	/**
+	 * Gets the distance conversion to convert the current units to nm.
+	 *
+	 * @return the distance conversion
+	 * @throws IllegalStateException
+	 *             if the current distance units and distance scale are not known
+	 * @throws NotImplementedException
+	 *             If the required conversion is unknown
+	 * @see Calibration#hasNmPerPixel()
+	 * @see Calibration#hasDistanceUnit()
+	 */
+	public double getDistanceConversionToNM()
+	{
+		return getDistanceConversion(DistanceUnit.NM);
+	}
+
+	/**
+	 * Gets the distance conversion to convert the current units to pixel.
+	 *
+	 * @return the distance conversion
+	 * @throws IllegalStateException
+	 *             if the current distance units and distance scale are not known
+	 * @throws NotImplementedException
+	 *             If the required conversion is unknown
+	 * @see Calibration#hasNmPerPixel()
+	 * @see Calibration#hasDistanceUnit()
+	 */
+	public double getDistanceConversionToPixel()
+	{
+		return getDistanceConversion(DistanceUnit.PIXEL);
+	}
+
+	/**
+	 * Gets the intensity conversion to convert the current units to the given units
+	 *
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @return the intensity conversion
+	 * @throws IllegalStateException
+	 *             if the current intensity units and gain are not known
+	 * @throws NotImplementedException
+	 *             If the required conversion is unknown
+	 * @see Calibration#hasGain()
+	 * @see Calibration#hasIntensityUnit()
+	 */
+	public double getIntensityConversion(IntensityUnit intensityUnit)
+	{
+		if (!hasGain() || !hasIntensityUnit())
+			throw new IllegalStateException();
+		if (intensityUnit == null)
+			throw new NullPointerException();
+
+		if (intensityUnit == this.intensityUnit)
+		{
+			return 1.0; // no conversion
+		}
+
+		// We only have 2 intensity units to support. 
+		// Check anyway in case another is added in the future.
+		if (this.intensityUnit == IntensityUnit.PHOTON && intensityUnit == IntensityUnit.COUNT)
+			return gain;
+		if (this.intensityUnit == IntensityUnit.COUNT && intensityUnit == IntensityUnit.PHOTON)
+			return 1.0 / gain;
+
+		throw new NotImplementedException("Unknown conversion from " + this.intensityUnit + " to " + intensityUnit);
+	}
+
+	/**
+	 * Gets the intensity conversion to convert the current units to count.
+	 *
+	 * @return the intensity conversion
+	 * @throws IllegalStateException
+	 *             if the current intensity units and gain are not known
+	 * @throws NotImplementedException
+	 *             If the required conversion is unknown
+	 * @see Calibration#hasGain()
+	 * @see Calibration#hasIntensityUnit()
+	 */
+	public double getIntensityConversionToCount()
+	{
+		return getIntensityConversion(IntensityUnit.COUNT);
+	}
+
+	/**
+	 * Gets the intensity conversion to convert the current units to photon.
+	 *
+	 * @return the intensity conversion
+	 * @throws IllegalStateException
+	 *             if the current intensity units and gain are not known
+	 * @throws NotImplementedException
+	 *             If the required conversion is unknown
+	 * @see Calibration#hasGain()
+	 * @see Calibration#hasIntensityUnit()
+	 */
+	public double getIntensityConversionToPhoton()
+	{
+		return getIntensityConversion(IntensityUnit.PHOTON);
 	}
 }
