@@ -1,22 +1,5 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.utils.XmlUtils;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -30,6 +13,26 @@ import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
+import com.thoughtworks.xstream.io.xml.DomDriver;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2017 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.Calibration.CameraType;
 
 /**
  * Saves the fit results to file
@@ -46,7 +49,18 @@ public class FilePeakResults extends AbstractPeakResults
 	protected boolean sortAfterEnd = false;
 	protected String peakIdColumnName = "Peak";
 
+	private boolean canComputePrecision, emCCD;;
+	private double nmPerPixel, convertToPhotons, convertToNM;
+
 	protected int size = 0;
+
+	// TODO - Change the hierarchy:
+	// FilePeakResults
+	// - MALKFilePeakResults
+	// - SMLMFilePeakResults
+	// -- TextFilePeakResults
+	// -- BinaryFilePeakResults
+	// Only methods that change the output, e.g. different headers etc, should be in TextFilePeakResults 
 
 	public FilePeakResults(String filename)
 	{
@@ -88,6 +102,40 @@ public class FilePeakResults extends AbstractPeakResults
 			FileOutputStream fos = new FileOutputStream(filename);
 			out = new OutputStreamWriter(fos, "UTF-8");
 			out.write(createResultsHeader());
+
+			// TODO - make this optional
+			canComputePrecision = false;
+			if (this.calibration != null && isCCD() && calibration.hasNmPerPixel())
+			{
+				nmPerPixel = calibration.getNmPerPixel();
+				try
+				{
+					// Just try to get the conversion and ignore the conversion exception
+					convertToPhotons = calibration.getIntensityConversionToPhoton();
+					convertToNM = calibration.getDistanceConversionToNM();
+					emCCD = calibration.getCameraType() == CameraType.EM_CCD;
+					canComputePrecision = true;
+				}
+				catch (IllegalStateException e)
+				{
+					// Conversion not possible
+				}
+			}
+
+			// TODO - Add ability to write output in selected units
+			if (this.calibration != null)
+			{
+				// Clone the calibration as we may change it
+				this.calibration = calibration.clone();
+				
+				// Check the units. If not correct then set-up a conversion and change the units
+				// in the calibration
+				// This will require a conversion multiplier for distance
+				// It will require a conversion for signal 
+				// It will require a conversion plus bias for background:
+				// (b-bias1)*conversion + bias2
+
+			}
 		}
 		catch (Exception e)
 		{
@@ -95,6 +143,22 @@ public class FilePeakResults extends AbstractPeakResults
 			e.printStackTrace();
 			closeOutput();
 		}
+	}
+
+	private boolean isCCD()
+	{
+		if (calibration.hasCameraType())
+		{
+			switch (calibration.getCameraType())
+			{
+				case CCD:
+				case EM_CCD:
+					return true;
+				default:
+					break;
+			}
+		}
+		return false;
 	}
 
 	protected String createResultsHeader()
@@ -112,7 +176,7 @@ public class FilePeakResults extends AbstractPeakResults
 		if (bounds != null)
 			sb.append(String.format("#Bounds x%d y%d w%d h%d\n", bounds.x, bounds.y, bounds.width, bounds.height));
 		if (calibration != null)
-			sb.append(String.format("#Calibration %s\n", singleLine(XmlUtils.toXML(calibration))));
+			sb.append(String.format("#Calibration %s\n", singleLine(toXML(calibration))));
 		if (configuration != null && configuration.length() > 0)
 			sb.append(String.format("#Configuration %s\n", singleLine(configuration)));
 
@@ -141,6 +205,43 @@ public class FilePeakResults extends AbstractPeakResults
 		addComment(sb, getHeaderEnd());
 
 		return sb.toString();
+	}
+
+	private static XStream xs = null;
+
+	/**
+	 * Convert the calibration to XML.
+	 * <p>
+	 * This method was added in version 3 to support an update to the calibration
+	 *
+	 * @param calibration
+	 *            the calibration
+	 * @return the string
+	 */
+	private static String toXML(Calibration calibration)
+	{
+		if (xs == null)
+		{
+			xs = new XStream(new DomDriver());
+			// Control what is serialised
+			xs.omitField(Calibration.class, "fields");
+			// This field is deprecated
+			xs.omitField(Calibration.class, "emCCD");
+			// Do not ignore missing fields. This is so XStream deserialisation
+			// will read the invalid values that are set in the object.
+		}
+		if (xs != null)
+		{
+			try
+			{
+				return xs.toXML(calibration);
+			}
+			catch (XStreamException ex)
+			{
+				//ex.printStackTrace();
+			}
+		}
+		return null;
 	}
 
 	private void addComment(StringBuilder sb, String comment)
@@ -178,9 +279,10 @@ public class FilePeakResults extends AbstractPeakResults
 		int extended = isShowEndFrame() ? 1 : 0;
 		extended += isShowId() ? 2 : 0;
 		sb.append(extended);
-		// Version 1 had signal and amplitude in the results
-		// Version 2 has only signal in the results
-		sb.append(".V2");
+		// Version 1 had signal and amplitude in the results. It did not have the version string.
+		// .V2 = Version 2 has only signal in the results
+		// .V3 = Version 3 has an improved calibration header
+		sb.append(".V3");
 		return sb.toString();
 	}
 
@@ -208,14 +310,33 @@ public class FilePeakResults extends AbstractPeakResults
 		names.add("origValue");
 		names.add("Error");
 		names.add("Noise");
-		for (String field : new String[] { "Background", "Signal", "Angle", "X", "Y", "X SD", "Y SD" })
+		String[] fields = new String[] { "Background", "Signal", "Angle", "X", "Y", "X SD", "Y SD" };
+		// Add units
+		if (calibration != null)
+		{
+			if (calibration.hasIntensityUnit())
+			{
+				String unit = String.format(" (%s)", calibration.getIntensityUnit());
+				fields[0] += unit;
+				fields[1] += unit;
+			}
+			if (calibration.hasDistanceUnit())
+			{
+				String unit = String.format(" (%s)", calibration.getDistanceUnit());
+				fields[3] += unit;
+				fields[4] += unit;
+				fields[5] += unit;
+				fields[6] += unit;
+			}
+		}
+		for (String field : fields)
 		{
 			names.add(field);
 			if (showDeviations)
 				names.add("+/-");
 		}
-		if (this.calibration != null)
-			names.add("Precision");
+		if (canComputePrecision)
+			names.add("Precision (nm)");
 		return names.toArray(new String[names.size()]);
 	}
 
@@ -263,8 +384,8 @@ public class FilePeakResults extends AbstractPeakResults
 		{
 			if (paramsStdDev != null)
 				paramsStdDev = new float[7];
-			addResult(sb, params[0], paramsStdDev[0], params[1], paramsStdDev[1], params[2], paramsStdDev[2],
-					params[3], paramsStdDev[3], params[4], paramsStdDev[4], params[5], paramsStdDev[5], params[6],
+			addResult(sb, params[0], paramsStdDev[0], params[1], paramsStdDev[1], params[2], paramsStdDev[2], params[3],
+					paramsStdDev[3], params[4], paramsStdDev[4], params[5], paramsStdDev[5], params[6],
 					paramsStdDev[6]);
 		}
 		else
@@ -272,12 +393,11 @@ public class FilePeakResults extends AbstractPeakResults
 			addResult(sb, params[0], params[1], params[2], params[3], params[4], params[5], params[6]);
 		}
 
-		if (this.calibration != null)
+		if (canComputePrecision)
 		{
-			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
-					calibration.getNmPerPixel();
-			float precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
-					params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), noise / calibration.getGain(), calibration.isEmCCD());
+			double s = PeakResult.getSD(params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD]) * convertToNM;
+			float precision = (float) PeakResult.getPrecision(nmPerPixel, s,
+					params[Gaussian2DFunction.SIGNAL] * convertToPhotons, noise * convertToPhotons, emCCD);
 			addResult(sb, precision);
 		}
 
@@ -346,12 +466,12 @@ public class FilePeakResults extends AbstractPeakResults
 						result.params[5], result.params[6]);
 			}
 
-			if (this.calibration != null)
+			if (canComputePrecision)
 			{
-				double s = result.getSD() * calibration.getNmPerPixel();
-				float precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
-						result.params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), result.noise / calibration.getGain(),
-						calibration.isEmCCD());
+				double s = result.getSD() * convertToNM;
+				float precision = (float) PeakResult.getPrecision(nmPerPixel, s,
+						result.params[Gaussian2DFunction.SIGNAL] * convertToPhotons, result.noise * convertToPhotons,
+						emCCD);
 				addResult(sb, precision);
 			}
 			sb.append('\n');
@@ -383,10 +503,8 @@ public class FilePeakResults extends AbstractPeakResults
 		if (cluster.size() > 0)
 		{
 			float[] centroid = cluster.getCentroid();
-			writeResult(
-					0,
-					String.format("#Cluster %f %f (+/-%f) n=%d\n", centroid[0], centroid[1],
-							cluster.getStandardDeviation(), cluster.size()));
+			writeResult(0, String.format("#Cluster %f %f (+/-%f) n=%d\n", centroid[0], centroid[1],
+					cluster.getStandardDeviation(), cluster.size()));
 			addAll(cluster);
 		}
 	}
@@ -431,9 +549,10 @@ public class FilePeakResults extends AbstractPeakResults
 		if (trace.size() > 0)
 		{
 			float[] centroid = trace.getCentroid();
-			writeResult(0, String.format("#Trace %f %f (+/-%f) n=%d, b=%d, on=%f, off=%f, signal= %f\n", centroid[0],
-					centroid[1], trace.getStandardDeviation(), trace.size(), trace.getNBlinks(), trace.getOnTime(),
-					trace.getOffTime(), trace.getSignal()));
+			writeResult(0,
+					String.format("#Trace %f %f (+/-%f) n=%d, b=%d, on=%f, off=%f, signal= %f\n", centroid[0],
+							centroid[1], trace.getStandardDeviation(), trace.size(), trace.getNBlinks(),
+							trace.getOnTime(), trace.getOffTime(), trace.getSignal()));
 			addAll(trace);
 		}
 	}

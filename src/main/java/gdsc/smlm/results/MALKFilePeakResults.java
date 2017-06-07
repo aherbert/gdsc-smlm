@@ -14,12 +14,11 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import gdsc.core.ij.Utils;
-import gdsc.core.utils.Maths;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2016 Alex Herbert
+ * Copyright (C) 2017 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -30,6 +29,8 @@ import gdsc.core.utils.Maths;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.Calibration.DistanceUnit;
+import gdsc.smlm.results.Calibration.IntensityUnit;
 
 /**
  * Saves the fit results to file using the simple MALK file format (Molecular Accuracy Localisation Keep). This consists
@@ -37,7 +38,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class MALKFilePeakResults extends FilePeakResults
 {
-	private float nmPerPixel;
+	private float convertToNM, convertToPhotons;
 
 	public MALKFilePeakResults(String filename)
 	{
@@ -59,7 +60,36 @@ public class MALKFilePeakResults extends FilePeakResults
 	{
 		return "MALK";
 	}
-	
+
+	@Override
+	protected String createResultsHeader()
+	{
+		// We can convert the calibration to the MALK format of nm and photons so it is correctly serialised
+		convertToNM = convertToPhotons = 1f;
+		if (calibration != null)
+		{
+			// Copy it so it can be modified
+			setCalibration(calibration.clone());
+			if (calibration.hasNmPerPixel())
+			{
+				if (calibration.hasDistanceUnit())
+				{
+					convertToNM = (float) calibration.getDistanceConversionToNM();
+					calibration.setDistanceUnit(DistanceUnit.NM);
+				}
+			}
+			if (calibration.hasGain())
+			{
+				if (calibration.hasIntensityUnit())
+				{
+					convertToPhotons = (float) calibration.getIntensityConversionToPhoton();
+					calibration.setIntensityUnit(IntensityUnit.PHOTON);
+				}
+			}
+		}
+		return super.createResultsHeader();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -69,21 +99,20 @@ public class MALKFilePeakResults extends FilePeakResults
 	{
 		String[] comments = new String[3];
 		int count = 0;
-		nmPerPixel = 1;
 		if (calibration != null)
 		{
-			if (Maths.isFinite(calibration.getNmPerPixel()) && calibration.getNmPerPixel() > 0)
+			if (calibration.hasNmPerPixel())
 			{
-				nmPerPixel = (float) calibration.getNmPerPixel();
 				comments[count++] = String.format("Pixel pitch %s (nm)", Utils.rounded(calibration.getNmPerPixel()));
 			}
-			if (Maths.isFinite(calibration.getGain()) && calibration.getGain() > 0)
+			if (calibration.hasGain())
 			{
 				comments[count++] = String.format("Gain %s (Count/photon)", Utils.rounded(calibration.getGain()));
 			}
-			if (Maths.isFinite(calibration.getExposureTime()) && calibration.getExposureTime() > 0)
+			if (calibration.hasExposureTime())
 			{
-				comments[count++] = String.format("Exposure time %s (seconds)", Utils.rounded(calibration.getExposureTime()*1e-3));
+				comments[count++] = String.format("Exposure time %s (seconds)",
+						Utils.rounded(calibration.getExposureTime() * 1e-3));
 			}
 		}
 		return Arrays.copyOf(comments, count);
@@ -96,7 +125,20 @@ public class MALKFilePeakResults extends FilePeakResults
 	 */
 	protected String[] getFieldNames()
 	{
-		return new String[] { "X", "Y", peakIdColumnName, "Signal" };
+		String[] names = new String[] { "X", "Y", peakIdColumnName, "Signal" };
+		if (calibration != null)
+		{
+			if (calibration.hasNmPerPixel() && calibration.hasDistanceUnit())
+			{
+				names[0] += " (nm)";
+				names[1] += " (nm)";
+			}
+			if (calibration.hasGain() && calibration.hasIntensityUnit())
+			{
+				names[3] += " (photon)";
+			}
+		}
+		return names;
 	}
 
 	/*
@@ -120,13 +162,13 @@ public class MALKFilePeakResults extends FilePeakResults
 
 	private void addStandardData(StringBuilder sb, final float x, final float y, final int frame, final float signal)
 	{
-		sb.append(x * nmPerPixel);
+		sb.append(x * convertToNM);
 		sb.append('\t');
-		sb.append(y * nmPerPixel);
+		sb.append(y * convertToNM);
 		sb.append('\t');
 		sb.append(frame);
 		sb.append('\t');
-		sb.append(signal);
+		sb.append(signal * convertToPhotons);
 		sb.append('\n');
 	}
 

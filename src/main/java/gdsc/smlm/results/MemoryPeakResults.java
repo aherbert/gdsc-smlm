@@ -12,6 +12,8 @@ import java.util.ListIterator;
 import java.util.Set;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.Calibration.DistanceUnit;
+import gdsc.smlm.results.Calibration.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -700,6 +702,158 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			if (e != null)
 				list.add(e);
 		}
-		this.results = list;		
+		this.results = list;
+	}
+
+	/**
+	 * Checks if distance is in pixel units.
+	 *
+	 * @return true, if distance is in pixels
+	 */
+	public boolean isDistanceInPixelUnits()
+	{
+		if (calibration != null && calibration.hasDistanceUnit())
+		{
+			if (calibration.getDistanceUnit() == DistanceUnit.PIXEL)
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Convert the distance units to pixels. Requires the calibration to have distance units and nm/pixel.
+	 *
+	 * @return true, if the distance units are now in pixels
+	 */
+	public boolean convertDistanceToPixelUnits()
+	{
+		if (calibration != null && calibration.hasDistanceUnit())
+		{
+			if (calibration.getDistanceUnit() == DistanceUnit.PIXEL)
+				return true;
+
+			if (calibration.hasNmPerPixel())
+			{
+				try
+				{
+					final double convert = calibration.getDistanceConversionToPixel();
+					if (convert != 1.0)
+					{
+						// Convert data
+						for (PeakResult p : results)
+						{
+							// Leave the original value
+							//p.origX *= convert;
+							//p.origY *= convert;
+							convertDistance(p.params, convert);
+							if (p.paramsStdDev != null)
+								convertDistance(p.paramsStdDev, convert);
+						}
+					}
+					calibration.setDistanceUnit(DistanceUnit.PIXEL);
+					return true;
+				}
+				catch (IllegalStateException e)
+				{
+					// Gracefully fail so ignore this
+				}
+			}
+		}
+		return false;
+	}
+
+	private final static int offsetY, offsetXSD, offsetYSD;
+	static
+	{
+		offsetY = Gaussian2DFunction.Y_POSITION - Gaussian2DFunction.X_POSITION;
+		offsetXSD = Gaussian2DFunction.X_SD - Gaussian2DFunction.X_POSITION;
+		offsetYSD = Gaussian2DFunction.Y_SD - Gaussian2DFunction.X_POSITION;
+	}
+
+	private void convertDistance(float[] params, double convert)
+	{
+		for (int i = Gaussian2DFunction.X_POSITION; i < params.length; i += 6)
+		{
+			params[i] *= convert;
+			params[i + offsetY] *= convert;
+			params[i + offsetXSD] *= convert;
+			params[i + offsetYSD] *= convert;
+		}
+	}
+
+	/**
+	 * Checks if intensity is in photons units.
+	 *
+	 * @return true, if intensity is in photons
+	 */
+	public boolean isIntensityInPhotonUnits()
+	{
+		if (calibration != null && calibration.hasIntensityUnit())
+		{
+			if (calibration.getIntensityUnit() == IntensityUnit.PHOTON)
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Convert the intensity units to photons. Requires the calibration to have intensity units, gain and bias.
+	 *
+	 * @return true, if the intensity units are now in photons
+	 */
+	public boolean convertIntensityToPhotonUnits()
+	{
+		if (calibration != null && calibration.hasIntensityUnit())
+		{
+			if (calibration.getIntensityUnit() == IntensityUnit.PHOTON)
+				return true;
+
+			if (calibration.hasGain() && calibration.hasBias())
+			{
+				try
+				{
+					final double convert = calibration.getIntensityConversionToPhoton();
+					final double bias = calibration.getBias();
+					if (convert != 1.0)
+					{
+						// Convert data
+						for (PeakResult p : results)
+						{
+							// Leave the original value
+							//p.origValue *= convert;
+							p.noise *= convert;
+							convertIntensity(p.params, bias, convert);
+							if (p.paramsStdDev != null)
+								convertIntensity(p.paramsStdDev, convert);
+						}
+					}
+					calibration.setIntensityUnit(IntensityUnit.PHOTON);
+					return true;
+				}
+				catch (IllegalStateException e)
+				{
+					// Gracefully fail so ignore this
+				}
+			}
+		}
+		return false;
+	}
+
+	private void convertIntensity(float[] params, double bias, double convert)
+	{
+		params[Gaussian2DFunction.BACKGROUND] = (float) ((params[Gaussian2DFunction.BACKGROUND] - bias) * convert);
+		for (int i = Gaussian2DFunction.SIGNAL; i < params.length; i += 6)
+		{
+			params[Gaussian2DFunction.SIGNAL] *= convert;
+		}
+	}
+
+	private void convertIntensity(float[] paramsStdDev, double convert)
+	{
+		paramsStdDev[Gaussian2DFunction.BACKGROUND] *= convert;
+		for (int i = Gaussian2DFunction.SIGNAL; i < paramsStdDev.length; i += 6)
+		{
+			paramsStdDev[Gaussian2DFunction.SIGNAL] *= convert;
+		}
 	}
 }

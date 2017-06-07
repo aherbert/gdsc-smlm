@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import gdsc.core.utils.NotImplementedException;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -555,7 +553,7 @@ public class Calibration implements Cloneable
 
 	/**
 	 * Validate the calibration by calling each property setter with the current value. This will set the valid flags to
-	 * false if the current value is not valid.
+	 * false If the current value is not valid.
 	 */
 	public void validate()
 	{
@@ -881,7 +879,7 @@ public class Calibration implements Cloneable
 	 * Set the intensity unit used for the results.
 	 *
 	 * @param intensityUnit
-	 *            the new intensityUnit
+	 *            The new intensityUnit
 	 */
 	public void setIntensityUnit(IntensityUnit intensityUnit)
 	{
@@ -899,10 +897,10 @@ public class Calibration implements Cloneable
 	 *
 	 * @param distanceUnit
 	 *            the distance unit
-	 * @return the distance conversion
+	 * @return The distance conversion
 	 * @throws IllegalStateException
-	 *             if the current distance units and distance scale are not known
-	 * @throws NotImplementedException
+	 *             If the current distance units and distance scale are not known
+	 * @throws IllegalStateException
 	 *             If the required conversion is unknown
 	 * @see Calibration#hasNmPerPixel()
 	 * @see Calibration#hasDistanceUnit()
@@ -926,16 +924,16 @@ public class Calibration implements Cloneable
 		if (this.distanceUnit == DistanceUnit.NM && distanceUnit == DistanceUnit.PIXEL)
 			return 1.0 / nmPerPixel;
 
-		throw new NotImplementedException("Unknown conversion from " + this.distanceUnit + " to " + distanceUnit);
+		throw new IllegalStateException("Unknown conversion from " + this.distanceUnit + " to " + distanceUnit);
 	}
 
 	/**
 	 * Gets the distance conversion to convert the current units to nm.
 	 *
-	 * @return the distance conversion
+	 * @return The distance conversion
 	 * @throws IllegalStateException
-	 *             if the current distance units and distance scale are not known
-	 * @throws NotImplementedException
+	 *             If the current distance units and distance scale are not known
+	 * @throws IllegalStateException
 	 *             If the required conversion is unknown
 	 * @see Calibration#hasNmPerPixel()
 	 * @see Calibration#hasDistanceUnit()
@@ -948,10 +946,10 @@ public class Calibration implements Cloneable
 	/**
 	 * Gets the distance conversion to convert the current units to pixel.
 	 *
-	 * @return the distance conversion
+	 * @return The distance conversion
 	 * @throws IllegalStateException
-	 *             if the current distance units and distance scale are not known
-	 * @throws NotImplementedException
+	 *             If the current distance units and distance scale are not known
+	 * @throws IllegalStateException
 	 *             If the required conversion is unknown
 	 * @see Calibration#hasNmPerPixel()
 	 * @see Calibration#hasDistanceUnit()
@@ -965,11 +963,11 @@ public class Calibration implements Cloneable
 	 * Gets the intensity conversion to convert the current units to the given units
 	 *
 	 * @param intensityUnit
-	 *            the intensity unit
-	 * @return the intensity conversion
+	 *            The intensity unit
+	 * @return The intensity conversion
 	 * @throws IllegalStateException
-	 *             if the current intensity units and gain are not known
-	 * @throws NotImplementedException
+	 *             If the current intensity units and gain are not known
+	 * @throws IllegalStateException
 	 *             If the required conversion is unknown
 	 * @see Calibration#hasGain()
 	 * @see Calibration#hasIntensityUnit()
@@ -993,16 +991,16 @@ public class Calibration implements Cloneable
 		if (this.intensityUnit == IntensityUnit.COUNT && intensityUnit == IntensityUnit.PHOTON)
 			return 1.0 / gain;
 
-		throw new NotImplementedException("Unknown conversion from " + this.intensityUnit + " to " + intensityUnit);
+		throw new IllegalStateException("Unknown conversion from " + this.intensityUnit + " to " + intensityUnit);
 	}
 
 	/**
 	 * Gets the intensity conversion to convert the current units to count.
 	 *
-	 * @return the intensity conversion
+	 * @return The intensity conversion
 	 * @throws IllegalStateException
-	 *             if the current intensity units and gain are not known
-	 * @throws NotImplementedException
+	 *             If the current intensity units and gain are not known
+	 * @throws IllegalStateException
 	 *             If the required conversion is unknown
 	 * @see Calibration#hasGain()
 	 * @see Calibration#hasIntensityUnit()
@@ -1015,10 +1013,10 @@ public class Calibration implements Cloneable
 	/**
 	 * Gets the intensity conversion to convert the current units to photon.
 	 *
-	 * @return the intensity conversion
+	 * @return The intensity conversion
 	 * @throws IllegalStateException
-	 *             if the current intensity units and gain are not known
-	 * @throws NotImplementedException
+	 *             If the current intensity units and gain are not known
+	 * @throws IllegalStateException
 	 *             If the required conversion is unknown
 	 * @see Calibration#hasGain()
 	 * @see Calibration#hasIntensityUnit()

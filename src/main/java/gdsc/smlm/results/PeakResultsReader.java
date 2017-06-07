@@ -34,6 +34,8 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.Calibration.DistanceUnit;
+import gdsc.smlm.results.Calibration.IntensityUnit;
 import gdsc.smlm.utils.XmlUtils;
 
 /**
@@ -66,8 +68,7 @@ public class PeakResultsReader
 	private ResultOption[] options = null;
 
 	private boolean deviations, readEndFrame, readId, readSource;
-	// Original file data contains signal and amplitude
-	private boolean readAmplitude = true;
+	private int smlmVersion = 1; // Assume the oldest
 
 	public PeakResultsReader(String filename)
 	{
@@ -119,7 +120,10 @@ public class PeakResultsReader
 
 				version = getField("FileVersion");
 
-				guessFormat(line);
+				format = FileFormat.UNKNOWN;
+				guessFormatFromVersion();
+				if (format == FileFormat.UNKNOWN)
+					guessFormat(line);
 			}
 			catch (IOException e)
 			{
@@ -141,10 +145,54 @@ public class PeakResultsReader
 		return header;
 	}
 
+	private void guessFormatFromVersion()
+	{
+		// Extract information about the file format
+		if (version.length() > 0)
+		{
+			if (version.startsWith("Binary"))
+				format = FileFormat.SMLM_BINARY;
+			else if (version.startsWith("Text"))
+				format = FileFormat.SMLM_TEXT;
+			else
+				return;
+			
+			if (version.contains(".V3"))
+			{
+				smlmVersion = 3;
+			}
+			else if (version.contains(".V2"))
+			{
+				smlmVersion = 2;
+			}
+
+			if (smlmVersion == 1)
+			{
+				// The original files did not have the version tag
+				deviations = header.contains((format == FileFormat.SMLM_BINARY) ? "iiiifdfffffffffffffff" : "+/-");
+				readEndFrame = readId = false;
+			}
+			else
+			{
+				deviations = version.contains(".D1");
+				// Extended marker has a bit flag:
+				// 1 = showEndFrame
+				// 2 = showId
+				if (version.contains(".E3"))
+				{
+					readEndFrame = readId = true;
+				}
+				else
+				{
+					readEndFrame = version.contains(".E1");
+					readId = version.contains(".E2");
+				}
+			}
+		}
+	}
+
 	private void guessFormat(String firstLine)
 	{
-		format = FileFormat.UNKNOWN;
-
 		if (header.length() == 0)
 		{
 			// No header. Check non-text formats.
@@ -220,36 +268,7 @@ public class PeakResultsReader
 		else
 		{
 			// Assume SMLM format
-
-			// Extract information about the file format
-			if (version.length() > 0)
-			{
-				format = (version.contains("Binary")) ? FileFormat.SMLM_BINARY : FileFormat.SMLM_TEXT;
-				deviations = version.contains(".D1");
-				// Extended marker has a bit flag:
-				// 1 = showEndFrame
-				// 2 = showId
-				if (version.contains(".E3"))
-				{
-					readEndFrame = readId = true;
-				}
-				else
-				{
-					readEndFrame = version.contains(".E1");
-					readId = version.contains(".E2");
-				}
-				if (version.contains(".V2"))
-				{
-					readAmplitude = false;
-				}
-			}
-			else
-			{
-				// The original files did not have the version tag
-				format = (version.contains("Binary")) ? FileFormat.SMLM_BINARY : FileFormat.SMLM_TEXT;
-				deviations = header.contains((format == FileFormat.SMLM_BINARY) ? "iiiifdfffffffffffffff" : "+/-");
-				readEndFrame = readId = false;
-			}
+			guessFormatFromVersion();
 		}
 	}
 
@@ -353,9 +372,14 @@ public class PeakResultsReader
 						try
 						{
 							final float resolution = Float.parseFloat(match.group(1));
-							final double nmPerPixel = (float) (1e9 / resolution);
-							calibration = new Calibration();
-							calibration.setNmPerPixel(nmPerPixel);
+							if (Maths.isFinite(resolution) && resolution > 0)
+							{
+								final double nmPerPixel = (float) (1e9 / resolution);
+								calibration = new Calibration();
+								calibration.setNmPerPixel(nmPerPixel);
+								// We will convert the units to pixels
+								calibration.setDistanceUnit(DistanceUnit.PIXEL);
+							}
 						}
 						catch (NumberFormatException e)
 						{
@@ -373,6 +397,14 @@ public class PeakResultsReader
 						{
 							calibration = (Calibration) XmlUtils.fromXML(xml);
 							calibration.validate();
+							if (smlmVersion < 3)
+							{
+								// Support reading old objects that had an emCCD boolean
+								calibration.setCameraTypeFromEmCCDField();
+								// Previous version were always in pixels and counts
+								calibration.setDistanceUnit(DistanceUnit.PIXEL);
+								calibration.setIntensityUnit(IntensityUnit.COUNT);
+							}
 						}
 						catch (ClassCastException ex)
 						{
@@ -478,7 +510,13 @@ public class PeakResultsReader
 				break;
 		}
 		if (results != null)
+		{
 			results.trimToSize();
+
+			// Convert to the preferred units if possible
+			results.convertDistanceToPixelUnits();
+			results.convertIntensityToPhotonUnits();
+		}
 		return results;
 	}
 
@@ -505,6 +543,7 @@ public class PeakResultsReader
 			byte[] buffer = new byte[length];
 
 			int c = 0;
+			final boolean convert = smlmVersion == 1;
 			while (true) // Halted by the EOFException
 			{
 				// Note: Reading single strips seems fast enough at the moment.
@@ -527,7 +566,7 @@ public class PeakResultsReader
 				float[] paramsStdDev = (deviations) ? readData(buffer, new float[7]) : null;
 
 				// Convert old binary format with the amplitude to signal
-				if (readAmplitude)
+				if (convert)
 					params[Gaussian2DFunction.SIGNAL] *= 2 * Math.PI * params[Gaussian2DFunction.X_SD] *
 							params[Gaussian2DFunction.Y_SD];
 
@@ -548,6 +587,7 @@ public class PeakResultsReader
 		catch (IOException e)
 		{
 			// ignore
+			e.printStackTrace();
 		}
 		finally
 		{
@@ -637,9 +677,6 @@ public class PeakResultsReader
 			String line;
 			int errors = 0;
 
-			// Read different versions
-			int version = (readAmplitude) ? 1 : 2;
-
 			// Skip the header
 			while ((line = input.readLine()) != null)
 			{
@@ -649,7 +686,7 @@ public class PeakResultsReader
 				if (line.charAt(0) != '#')
 				{
 					// This is the first record
-					if (!addPeakResult(results, line, version))
+					if (!addPeakResult(results, line, smlmVersion))
 						errors = 1;
 					break;
 				}
@@ -663,7 +700,7 @@ public class PeakResultsReader
 				if (line.charAt(0) == '#')
 					continue;
 
-				if (!addPeakResult(results, line, version))
+				if (!addPeakResult(results, line, smlmVersion))
 				{
 					if (++errors >= 10)
 					{
@@ -699,6 +736,8 @@ public class PeakResultsReader
 		PeakResult result;
 		switch (version)
 		{
+			case 3:
+				// Version 3 has an improved calibration header. The fields are the same.
 			case 2:
 				result = (deviations) ? createPeakResultDeviationsV2(line) : createPeakResultV2(line);
 				break;
@@ -1409,10 +1448,11 @@ public class PeakResultsReader
 			// If calibration was found convert to pixels
 			if (calibration != null)
 			{
-				x /= calibration.getNmPerPixel();
-				y /= calibration.getNmPerPixel();
-				sx /= calibration.getNmPerPixel();
-				sy /= calibration.getNmPerPixel();
+				final double nmPerPixel = calibration.getNmPerPixel();
+				x /= nmPerPixel;
+				y /= nmPerPixel;
+				sx /= nmPerPixel;
+				sy /= nmPerPixel;
 			}
 
 			float[] params = new float[7];
@@ -1505,15 +1545,20 @@ public class PeakResultsReader
 			}
 		}
 
+		// Create a calibration
+		calibration = new Calibration();
+		results.setCalibration(calibration);
+
+		// Q. Is NSTORM in photons?
+		calibration.setIntensityUnit(IntensityUnit.PHOTON);
+
 		if (pixelPitch.getN() > 0)
 		{
 			final double nmPerPixel = pixelPitch.getMean();
 			final double widthConversion = 1.0 / (2 * nmPerPixel);
 
-			// Create a calibration
-			calibration = new Calibration();
 			calibration.setNmPerPixel(nmPerPixel);
-			results.setCalibration(calibration);
+			calibration.setDistanceUnit(DistanceUnit.PIXEL);
 
 			// Convert data
 			for (PeakResult p : results.getResults())
@@ -1720,21 +1765,31 @@ public class PeakResultsReader
 		}
 
 		// MALK stores the data in nm. 
-		// The GDSC SMLM code still adds a calibration to the MALK file when saving so we may be able to convert back
-		if (getCalibration() != null)
+		// The GDSC SMLM code still adds a calibration to the MALK file when 
+		// saving so we may be able to convert back to pixels since this is the 
+		// preferred unit.
+		if (calibration != null && calibration.hasNmPerPixel())
 		{
-			if (Maths.isFinite(calibration.getNmPerPixel()) && calibration.getNmPerPixel() > 0)
+			final double nmPerPixel = calibration.getNmPerPixel();
+			for (PeakResult p : results.getResults())
 			{
-				double nmPerPixel = calibration.getNmPerPixel();
-				for (PeakResult p : results.getResults())
-				{
-					p.params[Gaussian2DFunction.X_POSITION] /= nmPerPixel;
-					p.params[Gaussian2DFunction.Y_POSITION] /= nmPerPixel;
-					p.origX = (int) p.params[Gaussian2DFunction.X_POSITION];
-					p.origY = (int) p.params[Gaussian2DFunction.Y_POSITION];
-				}
+				p.params[Gaussian2DFunction.X_POSITION] /= nmPerPixel;
+				p.params[Gaussian2DFunction.Y_POSITION] /= nmPerPixel;
+				p.origX = (int) p.params[Gaussian2DFunction.X_POSITION];
+				p.origY = (int) p.params[Gaussian2DFunction.Y_POSITION];
 			}
+			calibration.setDistanceUnit(DistanceUnit.PIXEL);
 		}
+		else
+		{
+			calibration = new Calibration();
+			// Default assumption is nm
+			calibration.setDistanceUnit(DistanceUnit.NM);
+		}
+
+		// MALK uses photons
+		if (!calibration.hasIntensityUnit())
+			calibration.setIntensityUnit(IntensityUnit.PHOTON);
 
 		return results;
 	}
