@@ -436,7 +436,7 @@ public class ResultsManager implements PlugIn
 
 	private boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
@@ -482,7 +482,7 @@ public class ResultsManager implements PlugIn
 						}
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						egd.addCheckbox("Show_deviations", resultsSettings.showDeviations);
-						egd.showDialog(true);
+						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return;
 						resultsSettings.showDeviations = egd.getNextBoolean();
@@ -511,26 +511,26 @@ public class ResultsManager implements PlugIn
 						{
 							return;
 						}
-						ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE, null);
+						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (requireWeighted.contains(resultsImage))
-							gd.addCheckbox("Weighted", resultsSettings.weightedImage);
-						gd.addCheckbox("Equalised", resultsSettings.equalisedImage);
+							egd.addCheckbox("Weighted", resultsSettings.weightedImage);
+						egd.addCheckbox("Equalised", resultsSettings.equalisedImage);
 						if (requirePrecision.contains(resultsImage))
-							gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
-						gd.addSlider("Image_Scale", 1, 15, resultsSettings.imageScale);
+							egd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
+						egd.addSlider("Image_Scale", 1, 15, resultsSettings.imageScale);
 						if (extraOptions)
-							gd.addNumericField("Image_Window", resultsSettings.imageRollingWindow, 0);
-						gd.showDialog(true);
-						if (gd.wasCanceled())
+							egd.addNumericField("Image_Window", resultsSettings.imageRollingWindow, 0);
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
 							return;
 						if (requireWeighted.contains(resultsImage))
-							resultsSettings.weightedImage = gd.getNextBoolean();
-						resultsSettings.equalisedImage = gd.getNextBoolean();
+							resultsSettings.weightedImage = egd.getNextBoolean();
+						resultsSettings.equalisedImage = egd.getNextBoolean();
 						if (requirePrecision.contains(resultsImage))
-							resultsSettings.precision = gd.getNextNumber();
-						resultsSettings.imageScale = gd.getNextNumber();
+							resultsSettings.precision = egd.getNextNumber();
+						resultsSettings.imageScale = egd.getNextNumber();
 						if (extraOptions)
-							resultsSettings.imageRollingWindow = (int) gd.getNextNumber();
+							resultsSettings.imageRollingWindow = (int) egd.getNextNumber();
 					}
 				});
 
@@ -588,13 +588,13 @@ public class ResultsManager implements PlugIn
 			else
 			{
 				String[] items = titles.toArray(new String[titles.size()]);
-				gd = new ExtendedGenericDialog(TITLE);
-				gd.addMessage("Select the source image for the ROI");
-				gd.addChoice("Image", items, roiImage);
-				gd.showDialog();
-				if (gd.wasCanceled())
+				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+				egd.addMessage("Select the source image for the ROI");
+				egd.addChoice("Image", items, roiImage);
+				egd.showDialog();
+				if (egd.wasCanceled())
 					return false;
-				roiImage = gd.getNextChoice();
+				roiImage = egd.getNextChoice();
 			}
 			ImagePlus imp = WindowManager.getImage(roiImage);
 
