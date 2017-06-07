@@ -2,7 +2,12 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Choice;
 import java.awt.EventQueue;
+import java.awt.Label;
+import java.awt.Panel;
 import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
@@ -11,6 +16,7 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 
 import gdsc.core.ij.IJTrackProgress;
@@ -663,7 +669,8 @@ public class ResultsManager implements PlugIn
 	 * @param source
 	 * @param fileInput
 	 */
-	public static void addInputSourceToDialog(ExtendedGenericDialog gd, String inputName, String inputOption,
+	@SuppressWarnings("unused")
+	public static void addInputSourceToDialog(final ExtendedGenericDialog gd, String inputName, String inputOption,
 			ArrayList<String> source, boolean fileInput)
 	{
 		String[] options = source.toArray(new String[source.size()]);
@@ -680,9 +687,42 @@ public class ResultsManager implements PlugIn
 				break;
 			}
 		}
-		gd.addChoice(inputName, options, options[optionIndex]);
+		final Choice c = gd.addAndGetChoice(inputName, options, options[optionIndex]);
 		if (fileInput)
-			gd.addFilenameField("Input_file", inputFilename);
+		{
+			final TextField tf = gd.addFilenameField("Input_file", inputFilename);
+			final JButton b = gd.getLastOptionButton();
+
+			// Add a listener to the choice to enable the file input field.
+			// Currently we hide the filename field and pack the dialog. 
+			// We may wish to just disable the fields and leave them there.
+			// This could be a user configured option in a global GDSC settings class.
+			if (Utils.isShowGenericDialog())
+			{
+				final Label l = gd.getLastLabel();
+				final Panel p = gd.getLastPanel();
+				ItemListener listener = new ItemListener()
+				{
+					public void itemStateChanged(ItemEvent e)
+					{
+						boolean enable = INPUT_FILE.equals(c.getSelectedItem());
+						if (enable != l.isVisible())
+						{
+							l.setVisible(enable);
+							p.setVisible(enable);
+							//tf.setVisible(enable);
+							//b.setVisible(enable);
+							gd.pack();
+						}
+					}
+				};
+
+				// Run once to set up
+				listener.itemStateChanged(null);
+
+				c.addItemListener(listener);
+			}
+		}
 	}
 
 	/**
@@ -1223,7 +1263,7 @@ public class ResultsManager implements PlugIn
 		// Adapted from ij.io.Opener.openMultiple
 
 		String resetInputFilename = inputFilename;
-		
+
 		Java2.setSystemLookAndFeel();
 		// run JFileChooser in a separate thread to avoid possible thread deadlocks
 		try
