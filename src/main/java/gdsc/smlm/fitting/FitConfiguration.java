@@ -1091,14 +1091,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 
 		// Check signal threshold
-		final double signal = params[Gaussian2DFunction.SIGNAL + offset];
+		final double signal = params[Gaussian2DFunction.SIGNAL + offset] * gain;
 		// Compare the signal to the desired signal strength
 		if (signal < signalThreshold)
 		{
 			if (log != null)
 			{
-				log.info("Bad peak %d: Insufficient signal %g (SNR=%g)\n", n, signal / ((gain > 0) ? gain : 1),
-						signal / noise);
+				log.info("Bad peak %d: Insufficient signal %g (SNR=%g)\n", n, signal, signal / noise);
 			}
 			//if (params.length == 7) // Single peak
 			//	System.out.printf("Bad peak %d: Insufficient signal (%gx)\n", n, signal / noise);
@@ -1140,8 +1139,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		{
 			final double sd = (params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) *
 					0.5;
-			final double variance = getVariance(params[Gaussian2DFunction.BACKGROUND], signal, sd,
-					this.precisionUsingBackground);
+			final double variance = getVariance(params[Gaussian2DFunction.BACKGROUND],
+					params[Gaussian2DFunction.SIGNAL + offset], sd, this.precisionUsingBackground);
 
 			if (variance > precisionThreshold)
 			{
@@ -1165,9 +1164,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 * of background photons at the location.
 	 *
 	 * @param localBackground
-	 *            The background
+	 *            The background (in photons)
 	 * @param signal
-	 *            The signal (in ADUs)
+	 *            The signal (in photons)
 	 * @param sd
 	 *            The spot standard deviation
 	 * @param precisionUsingBackground
@@ -1187,21 +1186,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				try
 				{
 					// This may be slow due to the integration required within the formula.
-					variance = PeakResult.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-							Math.max(0, localBackground - bias) / gain, emCCD);
+					variance = PeakResult.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal,
+							Math.max(0, localBackground), emCCD);
 				}
 				catch (Exception e)
 				{
 					// Catch all exceptions. They are likely to be a TooManyIterationsException and other
 					// problems with the integration
-					variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-							Math.max(0, localBackground - bias) / gain, emCCD);
+					variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal,
+							Math.max(0, localBackground), emCCD);
 				}
 			}
 			else
 			{
-				variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-						Math.max(0, localBackground - bias) / gain, emCCD);
+				variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal, Math.max(0, localBackground),
+						emCCD);
 			}
 		}
 		else
@@ -1211,19 +1210,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				try
 				{
 					// This may be slow due to the integration required within the formula.
-					variance = PeakResult.getMLVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain,
-							emCCD);
+					variance = PeakResult.getMLVariance(nmPerPixel, nmPerPixel * sd, signal, noise, emCCD);
 				}
 				catch (Exception e)
 				{
 					// Catch all exceptions. They are likely to be a TooManyIterationsException and other
 					// problems with the integration
-					variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
+					variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal, noise, emCCD);
 				}
 			}
 			else
 			{
-				variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
+				variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal, noise, emCCD);
 			}
 		}
 		return variance;
@@ -1316,12 +1314,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public float getSignal()
 		{
-			return (float) params[Gaussian2DFunction.SIGNAL + offset];
+			return (float) (params[Gaussian2DFunction.SIGNAL + offset] * FitConfiguration.this.gain);
 		}
 
 		public float getPhotons()
 		{
-			return (float) (params[Gaussian2DFunction.SIGNAL + offset] / FitConfiguration.this.gain);
+			return (float) (params[Gaussian2DFunction.SIGNAL + offset]);
 		}
 
 		public float getSNR()
@@ -1335,8 +1333,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			// If uncommented then the background will be either the local background or the fitted background.
 			final double localBackground = getLocalBackground();
 
-			return (float) ((localBackground > bias)
-					? PeakResult.localBackgroundToNoise(localBackground - bias, gain, emCCD)
+			return (float) ((localBackground > 0) ? PeakResult.localBackgroundToNoise(localBackground, gain, emCCD)
 					: FitConfiguration.this.noise);
 		}
 
@@ -1347,7 +1344,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public double getLocationVariance()
 		{
-			// We do not use the local background to set as zero
+			// We do not use the local background so set as zero
 			if (var == -1)
 				var = FitConfiguration.this.getVariance(0, params[Gaussian2DFunction.SIGNAL + offset], getSD(), false);
 			return var;
@@ -1628,8 +1625,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			float offsetx, float offsety)
 	{
 		final int offset = n * 6;
-		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL];
-		final double photons = (parameters[offset + Gaussian2DFunction.SIGNAL] / getGain());
+		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL] * gain;
+		final double photons = parameters[offset + Gaussian2DFunction.SIGNAL];
 		final double b = (localBackground > 0) ? localBackground : parameters[Gaussian2DFunction.BACKGROUND];
 		final double angle = parameters[offset + Gaussian2DFunction.SHAPE];
 		final double x = parameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
@@ -1649,8 +1646,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		//		? PeakResult.localBackgroundToNoise(localBackground - bias, this.gain, this.emCCD) : this.noise;
 
 		// This uses the local fitted background to estimate the noise
-		final double noise = (b > bias) ? PeakResult.localBackgroundToNoise(b - bias, this.gain, this.emCCD)
-				: this.noise;
+		final double noise = (b > 0) ? PeakResult.localBackgroundToNoise(b, 1.0, this.emCCD) : this.noise;
 		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, noise, b, angle, x, y, x0, y0,
 				xsd, ysd, xsd0, ysd0, variance, variance2, resultType);
 	}
@@ -2212,7 +2208,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			case BOUNDED_LVM:
 			case LVM_MLE:
 
-				if (fitSolver == FitSolver.LVM_MLE && gain <= 0)
+				if (gain <= 0)
 				{
 					throw new IllegalArgumentException("The gain is required for the " + fitSolver.getName());
 				}
@@ -2228,6 +2224,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				break;
 
 			case LVM_QUASI_NEWTON:
+				if (gain <= 0)
+				{
+					throw new IllegalArgumentException("The gain is required for the " + fitSolver.getName());
+				}
 				// This only works with a Gaussian2DFunction
 				if (gaussianFunction instanceof Gaussian2DFunction)
 				{
@@ -2241,6 +2241,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			case LVM_WEIGHTED:
 			case LVM:
 			default:
+				if (gain <= 0)
+				{
+					throw new IllegalArgumentException("The gain is required for the " + fitSolver.getName());
+				}
 				// Only set the weighting function if necessary
 				if (fitSolver == FitSolver.LVM_WEIGHTED)
 					gaussianFunction.setNoiseModel(getNoiseModel());
@@ -2258,19 +2262,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private void setClampValues(ParameterBounds bounds)
 	{
 		double[] clamp = getClampValues();
-		// The units are photons. This is OK for the LVM MLE but not for the LVM.
-		if (fitSolver != FitSolver.LVM_MLE)
-		{
-			if (gain <= 0)
-			{
-				throw new IllegalArgumentException(
-						"When using clamping the gain is required for the " + fitSolver.getName());
-			}
-
-			clamp = clamp.clone();
-			clamp[Gaussian2DFunction.BACKGROUND] *= gain;
-			clamp[Gaussian2DFunction.SIGNAL] *= gain;
-		}
+		// Note: The units are photons. This is OK as all solvers except the legacy MLE fit in photons.
 		nClampPeaks = gaussianFunction.getNPeaks();
 		double[] clampValues = new double[1 + 6 * nClampPeaks];
 		clampValues[Gaussian2DFunction.BACKGROUND] = clamp[Gaussian2DFunction.BACKGROUND];

@@ -140,6 +140,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private static byte FILTER_RANK_MINIMAL = (byte) 0;
 	private static byte FILTER_RANK_PRIMARY = (byte) 1;
 
+	private final double gain;
+	private final boolean isFitCameraCounts;
+
 	/**
 	 * Encapsulate all conversion of coordinates between the frame of data (data bounds) and the sub-section currently
 	 * used in fitting (region bounds) and the global coordinate system.
@@ -316,6 +319,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		fitConfig.setSmartFilter(false);
 
 		workerId = WORKER_ID++;
+
+		// The FitWorker should compute results in photons. All downstream code expects it to be in
+		// ADU count.
+		// A quick fix while the code is updated is to apply the gain back to fit results.
+		gain = fitConfig.getGainSafe();
+		isFitCameraCounts = fitConfig.isFitCameraCounts();
 	}
 
 	/**
@@ -390,9 +399,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		// Remove the gain. This is done for all solvers except the legacy MLE solvers which 
 		// model camera amplification.
-		if (!fitConfig.isFitCameraCounts())
+		if (!isFitCameraCounts)
 		{
-			final double f = 1.0 / fitConfig.getGainSafe();
+			final double f = 1.0 / gain;
 			for (int i = 0; i < size; i++)
 				data[i] *= f;
 		}
@@ -438,8 +447,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				final int y = candidate.y;
 				final Rectangle regionBounds = ie.getBoxRegionBounds(x, y, fitting);
 				region = ie.crop(regionBounds, region);
-				final float b = (float) FastGaussian2DFitter.getBackground(region, regionBounds.width, regionBounds.height,
-						1);
+				final float b = (float) FastGaussian2DFitter.getBackground(region, regionBounds.width,
+						regionBounds.height, 1);
 
 				// Offset the coords to the centre of the pixel. Note the bounds will be added later.
 				// Subtract the background to get the amplitude estimate then convert to signal.
@@ -578,6 +587,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			result.params[Gaussian2DFunction.X_POSITION] += offsetx;
 			result.params[Gaussian2DFunction.Y_POSITION] += offsety;
 		}
+
+		// Change this so results are stored in photons
+		if (!isFitCameraCounts)
+		{
+			for (int i = 0; i < sliceResults.size(); i++)
+			{
+				final PeakResult result = sliceResults.get(i);
+				// Fix the results so they are in ADU counts
+				result.params[Gaussian2DFunction.BACKGROUND] *= gain;
+				result.params[Gaussian2DFunction.SIGNAL] *= gain;
+			}
+		}		
 
 		this.results.addAll(sliceResults);
 
@@ -976,8 +997,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean computedDoublet = false;
 		QuadrantAnalysis singleQA = null;
 
-		public CandidateSpotFitter(FastGaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
-				Rectangle regionBounds, int n)
+		public CandidateSpotFitter(FastGaussian2DFitter gf, ResultFactory resultFactory, double[] region,
+				double[] region2, Rectangle regionBounds, int n)
 		{
 			this.gf = gf;
 			this.resultFactory = resultFactory;
@@ -1058,10 +1079,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		private double limitBackground(double b)
 		{
 			// Ensure we do not get a negative background
-			final double limit = (fitConfig.isRemoveBiasBeforeFitting()) ? fitConfig.getBias() : 0;
-			if (b < limit)
-				b = limit;
-			return b;
+			return (b < 0) ? 0 : b;
 		}
 
 		private double getMax(double[] region, int width, int height)
