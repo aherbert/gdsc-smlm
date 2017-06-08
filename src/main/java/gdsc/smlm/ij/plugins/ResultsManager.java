@@ -460,6 +460,8 @@ public class ResultsManager implements PlugIn
 		gd.addMessage("Select the Peak Results");
 		addInput(gd, inputOption, InputSource.MEMORY, InputSource.FILE);
 
+		final Choice inputChoice = gd.getLastChoice();
+
 		if (!titles.isEmpty())
 			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
 
@@ -576,8 +578,35 @@ public class ResultsManager implements PlugIn
 					}
 				});
 
-		gd.addMessage(" ");
-		gd.addCheckbox("Save_to_memory (file input only)", resultsSettings.resultsInMemory);
+		// Hide these if the input is not a file
+
+		gd.addMessage("--- Memory output ---");
+		final Label messageLabel = (Label) gd.getMessage();
+		final Checkbox saveCheckbox = gd.addAndGetCheckbox("Save_to_memory (file input only)",
+				resultsSettings.resultsInMemory);
+		if (Utils.isShowGenericDialog())
+		{
+			final Label saveLabel = gd.getLastLabel();
+			ItemListener listener = new ItemListener()
+			{
+				public void itemStateChanged(ItemEvent e)
+				{
+					boolean enable = INPUT_FILE.equals(inputChoice.getSelectedItem());
+					if (enable != messageLabel.isVisible())
+					{
+						messageLabel.setVisible(enable);
+						saveCheckbox.setVisible(enable);
+						saveLabel.setVisible(enable);
+						gd.pack();
+					}
+				}
+			};
+
+			// Run once to set up
+			listener.itemStateChanged(null);
+
+			inputChoice.addItemListener(listener);
+		}
 
 		gd.showDialog();
 
