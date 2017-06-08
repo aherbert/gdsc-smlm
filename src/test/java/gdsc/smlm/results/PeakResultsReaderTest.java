@@ -679,7 +679,7 @@ public class PeakResultsReaderTest
 				out = new BinaryFilePeakResults(filename, showDeviations, showEndFrame, showId);
 				break;
 			case GDSC_TEXT:
-				out = new FilePeakResults(filename, showDeviations, showEndFrame, showId);
+				out = new TextFilePeakResults(filename, showDeviations, showEndFrame, showId);
 				break;
 			case TSF:
 				out = new TSFPeakResultsWriter(filename);

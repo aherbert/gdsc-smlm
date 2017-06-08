@@ -103,7 +103,7 @@ public enum TimeUnit implements Unit
 	public UnitConverter<TimeUnit> createConverter(TimeUnit to, double msPerFrame) throws UnitConversionException
 	{
 		if (this == to)
-			return new IdentityUnitConverter<TimeUnit>(this, this);
+			return new IdentityUnitConverter<TimeUnit>(this);
 
 		if (!(msPerFrame > 0 && msPerFrame <= java.lang.Double.MAX_VALUE))
 			throw new UnitConversionException("ms/frame must be positive");
@@ -136,7 +136,7 @@ public enum TimeUnit implements Unit
 	public UnitConverter<TimeUnit> createConverter(TimeUnit to) throws UnitConversionException
 	{
 		if (this == to)
-			return new IdentityUnitConverter<TimeUnit>(this, this);
+			return new IdentityUnitConverter<TimeUnit>(this);
 		if (to == TimeUnit.FRAME)
 			throw new UnitConversionException(this + " to " + to + " requires ms/frame");
 		return buildConverter(to, 1.0);

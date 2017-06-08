@@ -91,6 +91,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.results.TSFPeakResultsWriter;
+import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.utils.XmlUtils;
@@ -2072,7 +2073,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 					r = new BinaryFilePeakResults(filename, resultsSettings.showDeviations);
 					break;
 				case GDSC_TEXT:
-					r = new FilePeakResults(filename, resultsSettings.showDeviations);
+					r = new TextFilePeakResults(filename, resultsSettings.showDeviations);
 					break;
 				case MALK:
 					r = new MALKFilePeakResults(resultsSettings.resultsFilename);
@@ -2087,7 +2088,6 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			{
 				FilePeakResults fr = (FilePeakResults) r;
 				fr.setSortAfterEnd(Prefs.getThreads() > 1);
-				fr.setPeakIdColumnName("Frame");
 			}
 			resultsList.addOutput(r);
 		}

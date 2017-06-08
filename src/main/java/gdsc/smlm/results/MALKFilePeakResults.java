@@ -5,6 +5,8 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +32,7 @@ import gdsc.core.ij.Utils;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IdentityUnitConverter;
 import gdsc.smlm.units.IntensityUnit;
 
 /**
@@ -38,7 +41,7 @@ import gdsc.smlm.units.IntensityUnit;
  */
 public class MALKFilePeakResults extends FilePeakResults
 {
-	private float convertToNM, convertToPhotons;
+	private OutputStreamWriter out;
 
 	public MALKFilePeakResults(String filename)
 	{
@@ -62,32 +65,72 @@ public class MALKFilePeakResults extends FilePeakResults
 	}
 
 	@Override
-	protected String createResultsHeader()
+	protected void openOutput()
 	{
-		// We can convert the calibration to the MALK format of nm and photons so it is correctly serialised
-		convertToNM = convertToPhotons = 1f;
-		if (calibration != null)
+		try
 		{
-			// Copy it so it can be modified
-			setCalibration(calibration.clone());
-			if (calibration.hasNmPerPixel())
-			{
-				if (calibration.hasDistanceUnit())
-				{
-					convertToNM = (float) calibration.getDistanceConversionToNM();
-					calibration.setDistanceUnit(DistanceUnit.NM);
-				}
-			}
-			if (calibration.hasGain())
-			{
-				if (calibration.hasIntensityUnit())
-				{
-					convertToPhotons = (float) calibration.getIntensityConversionToPhoton();
-					calibration.setIntensityUnit(IntensityUnit.PHOTON);
-				}
-			}
+			out = new OutputStreamWriter(fos, "UTF-8");
 		}
-		return super.createResultsHeader();
+		catch (UnsupportedEncodingException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	protected void write(String data)
+	{
+		try
+		{
+			out.write(data);
+		}
+		catch (IOException e)
+		{
+			closeOutput();
+		}
+	}
+
+	@Override
+	protected void closeOutput()
+	{
+		if (fos == null)
+			return;
+
+		try
+		{
+			// Make sure we close the writer since it may be buffered
+			out.close();
+		}
+		catch (Exception e)
+		{
+			// Ignore exception
+		}
+		finally
+		{
+			fos = null;
+		}
+	}
+
+	@Override
+	public void begin()
+	{
+		super.begin();
+
+		// Ensure we write out in nm and photons if possible.
+		// If converters were not created then use dummy converters.
+
+		// Copy it so it can be modified
+		setCalibration(calibration.clone());
+
+		if (toNMConverter == null)
+			toNMConverter = new IdentityUnitConverter<DistanceUnit>(DistanceUnit.NM);
+		else
+			calibration.setDistanceUnit(DistanceUnit.NM);
+
+		if (toPhotonConverter == null)
+			toPhotonConverter = new IdentityUnitConverter<IntensityUnit>(IntensityUnit.PHOTON);
+		else
+			calibration.setIntensityUnit(IntensityUnit.PHOTON);
 	}
 
 	/*
@@ -125,18 +168,15 @@ public class MALKFilePeakResults extends FilePeakResults
 	 */
 	protected String[] getFieldNames()
 	{
-		String[] names = new String[] { "X", "Y", peakIdColumnName, "Signal" };
-		if (calibration != null)
+		String[] names = new String[] { "X", "Y", "Frame", "Signal" };
+		if (toNMConverter != null)
 		{
-			if (calibration.hasNmPerPixel() && calibration.hasDistanceUnit())
-			{
-				names[0] += " (nm)";
-				names[1] += " (nm)";
-			}
-			if (calibration.hasGain() && calibration.hasIntensityUnit())
-			{
-				names[3] += " (photon)";
-			}
+			names[0] += " (nm)";
+			names[1] += " (nm)";
+		}
+		if (toPhotonConverter != null)
+		{
+			names[3] += " (photon)";
 		}
 		return names;
 	}
@@ -162,13 +202,13 @@ public class MALKFilePeakResults extends FilePeakResults
 
 	private void addStandardData(StringBuilder sb, final float x, final float y, final int frame, final float signal)
 	{
-		sb.append(x * convertToNM);
+		sb.append(toNMConverter.convert(x));
 		sb.append('\t');
-		sb.append(y * convertToNM);
+		sb.append(toNMConverter.convert(y));
 		sb.append('\t');
 		sb.append(frame);
 		sb.append('\t');
-		sb.append(signal * convertToPhotons);
+		sb.append(toPhotonConverter.convert(signal));
 		sb.append('\n');
 	}
 
@@ -198,71 +238,20 @@ public class MALKFilePeakResults extends FilePeakResults
 		writeResult(count, sb.toString());
 	}
 
-	/**
-	 * Output a cluster to the results file.
-	 * <p>
-	 * Note: This is not synchronised
-	 * 
-	 * @param cluster
-	 */
-	public void addCluster(Cluster cluster)
-	{
-		if (out == null)
-			return;
-		if (cluster.size() > 0)
-		{
-			float[] centroid = cluster.getCentroid();
-			writeResult(0, String.format("#Cluster %f %f (+/-%f) n=%d\n", centroid[0], centroid[1],
-					cluster.getStandardDeviation(), cluster.size()));
-			addAll(cluster);
-		}
-	}
-
-	private void addAll(Cluster cluster)
+	protected void addAll(Cluster cluster)
 	{
 		addAll(cluster.getPoints());
-	}
-
-	/**
-	 * Output a trace to the results file.
-	 * <p>
-	 * Note: This is not synchronised
-	 * 
-	 * @param trace
-	 */
-	public void addTrace(Trace trace)
-	{
-		if (out == null)
-			return;
-		if (trace.size() > 0)
-		{
-			float[] centroid = trace.getCentroid();
-			writeResult(0,
-					String.format("#Trace %f %f (+/-%f) n=%d, b=%d, on=%f, off=%f, signal= %f\n", centroid[0],
-							centroid[1], trace.getStandardDeviation(), trace.size(), trace.getNBlinks(),
-							trace.getOnTime(), trace.getOffTime(), trace.getSignal()));
-			addAll(trace);
-		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.utils.fitting.PeakResults#end()
+	 * @see gdsc.smlm.results.FilePeakResults#sort()
 	 */
-	public void end()
+	protected void sort() throws IOException
 	{
-		if (out == null)
-			return;
-
-		// Close the file.
 		try
 		{
-			closeOutput();
-
-			if (!isSortAfterEnd())
-				return;
-
 			ArrayList<Result> results = new ArrayList<Result>(size);
 
 			StringBuffer header = new StringBuffer();
@@ -312,7 +301,7 @@ public class MALKFilePeakResults extends FilePeakResults
 		}
 		catch (IOException e)
 		{
-			// ignore
+			throw e;
 		}
 		finally
 		{

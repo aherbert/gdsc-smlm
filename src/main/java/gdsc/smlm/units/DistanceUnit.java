@@ -104,7 +104,7 @@ public enum DistanceUnit implements Unit
 			throws UnitConversionException
 	{
 		if (this == to)
-			return new IdentityUnitConverter<DistanceUnit>(this, this);
+			return new IdentityUnitConverter<DistanceUnit>(this);
 
 		if (!(nmPerPixel > 0 && nmPerPixel <= java.lang.Double.MAX_VALUE))
 			throw new UnitConversionException("nm/pixel must be positive");
@@ -138,7 +138,7 @@ public enum DistanceUnit implements Unit
 	public UnitConverter<DistanceUnit> createConverter(DistanceUnit to) throws UnitConversionException
 	{
 		if (this == to)
-			return new IdentityUnitConverter<DistanceUnit>(this, this);
+			return new IdentityUnitConverter<DistanceUnit>(this);
 		if (to == DistanceUnit.PIXEL)
 			throw new UnitConversionException(this + " to " + to + " requires nm/pixel");
 		return buildConverter(to, 1.0);

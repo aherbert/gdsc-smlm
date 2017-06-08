@@ -53,7 +53,6 @@ import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FileFormat;
-import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MALKFilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -62,6 +61,7 @@ import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.results.PeakResultsReader;
 import gdsc.smlm.results.ResultOption;
 import gdsc.smlm.results.TSFPeakResultsWriter;
+import gdsc.smlm.results.TextFilePeakResults;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -412,7 +412,7 @@ public class ResultsManager implements PlugIn
 								showId);
 						break;
 					case GDSC_TEXT:
-						r = new FilePeakResults(resultsSettings.resultsFilename, showDeviations, showEndFrame, showId);
+						r = new TextFilePeakResults(resultsSettings.resultsFilename, showDeviations, showEndFrame, showId);
 						break;
 					case MALK:
 						r = new MALKFilePeakResults(resultsSettings.resultsFilename);
@@ -423,11 +423,6 @@ public class ResultsManager implements PlugIn
 					default:
 						throw new RuntimeException(
 								"Unsupported file format: " + resultsSettings.getResultsFileFormat());
-				}
-				if (r instanceof FilePeakResults)
-				{
-					FilePeakResults fr = (FilePeakResults) r;
-					fr.setPeakIdColumnName("Frame");
 				}
 				resultsList.addOutput(r);
 			}

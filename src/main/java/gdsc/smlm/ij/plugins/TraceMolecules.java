@@ -58,7 +58,7 @@ import gdsc.smlm.ij.settings.ClusteringSettings.TimeUnit;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Cluster.CentroidMethod;
-import gdsc.smlm.results.FilePeakResults;
+import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -442,7 +442,7 @@ public class TraceMolecules implements PlugIn
 
 			boolean showDeviations = (traces.length > 0 && traces[0].getHead().paramsStdDev != null);
 			// Assume that are results are from a single frame but store the trace ID
-			FilePeakResults traceResults = new FilePeakResults(filename, showDeviations, false, true);
+			TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations, false, true);
 			traceResults.copySettings(sourceResults);
 			traceResults.begin();
 			if (!traceResults.isActive())

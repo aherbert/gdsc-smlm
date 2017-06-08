@@ -109,11 +109,11 @@ import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
-import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultsReader;
+import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.utils.XmlUtils;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
@@ -3327,9 +3327,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			settings.imageResultsFilename = chooser.getDirectory() + chooser.getFileName();
 			settings.imageResultsFilename = Utils.replaceExtension(settings.imageResultsFilename, "xls");
 
-			FilePeakResults r = new FilePeakResults(settings.imageResultsFilename, false);
+			TextFilePeakResults r = new TextFilePeakResults(settings.imageResultsFilename, false);
 			r.copySettings(results);
-			r.setPeakIdColumnName("Frame");
 			r.begin();
 			r.addAll(results.getResults());
 			r.end();

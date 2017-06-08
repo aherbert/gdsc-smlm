@@ -14,6 +14,8 @@ import java.util.Set;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.units.DistanceUnit;
 import gdsc.smlm.units.IntensityUnit;
+import gdsc.smlm.units.UnitConversionException;
+import gdsc.smlm.units.UnitConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -736,19 +738,17 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			{
 				try
 				{
-					final double convert = calibration.getDistanceConversionToPixel();
-					if (convert != 1.0)
+					UnitConverter<DistanceUnit> c = calibration.getDistanceUnit().createConverter(DistanceUnit.PIXEL,
+							calibration.getNmPerPixel());
+					// Convert data
+					for (PeakResult p : results)
 					{
-						// Convert data
-						for (PeakResult p : results)
-						{
-							// Leave the original value
-							//p.origX *= convert;
-							//p.origY *= convert;
-							convertDistance(p.params, convert);
-							if (p.paramsStdDev != null)
-								convertDistance(p.paramsStdDev, convert);
-						}
+						// Leave the original positions
+						//p.origX
+						//p.origY
+						convertDistance(p.params, c);
+						if (p.paramsStdDev != null)
+							convertDistance(p.paramsStdDev, c);
 					}
 					calibration.setDistanceUnit(DistanceUnit.PIXEL);
 					return true;
@@ -770,14 +770,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		offsetYSD = Gaussian2DFunction.Y_SD - Gaussian2DFunction.X_POSITION;
 	}
 
-	private void convertDistance(float[] params, double convert)
+	private void convertDistance(float[] params, UnitConverter<DistanceUnit> c)
 	{
 		for (int i = Gaussian2DFunction.X_POSITION; i < params.length; i += 6)
 		{
-			params[i] *= convert;
-			params[i + offsetY] *= convert;
-			params[i + offsetXSD] *= convert;
-			params[i + offsetYSD] *= convert;
+			params[i] = (float) c.convert(params[i]);
+			params[i + offsetY] = (float) c.convert(params[i + offsetY]);
+			params[i + offsetXSD] = (float) c.convert(params[i + offsetXSD]);
+			params[i + offsetYSD] = (float) c.convert(params[i + offsetYSD]);
 		}
 	}
 
@@ -812,25 +812,32 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			{
 				try
 				{
-					final double convert = calibration.getIntensityConversionToPhoton();
-					final double bias = calibration.getBias();
-					if (convert != 1.0)
+					UnitConverter<IntensityUnit> bc = calibration.getIntensityUnit()
+							.createConverter(IntensityUnit.PHOTON, calibration.getBias(), calibration.getGain());
+					UnitConverter<IntensityUnit> c = calibration.getIntensityUnit()
+							.createConverter(IntensityUnit.PHOTON, calibration.getGain());
+					// Convert data
+					for (PeakResult p : results)
 					{
-						// Convert data
-						for (PeakResult p : results)
+						// Leave the original value
+						//p.origValue
+						p.noise = (float) c.convert(p.noise);
+						// Background must account for the bias
+						p.params[Gaussian2DFunction.BACKGROUND] = (float) bc
+								.convert(p.params[Gaussian2DFunction.BACKGROUND]);
+						convertIntensity(p.params, c);
+						if (p.paramsStdDev != null)
 						{
-							// Leave the original value
-							//p.origValue *= convert;
-							p.noise *= convert;
-							convertIntensity(p.params, bias, convert);
-							if (p.paramsStdDev != null)
-								convertIntensity(p.paramsStdDev, convert);
+							// Standard deviations so do not subtract the bias from the background
+							p.paramsStdDev[Gaussian2DFunction.BACKGROUND] = (float) c
+									.convert(p.paramsStdDev[Gaussian2DFunction.BACKGROUND]);
+							convertIntensity(p.paramsStdDev, c);
 						}
 					}
 					calibration.setIntensityUnit(IntensityUnit.PHOTON);
 					return true;
 				}
-				catch (IllegalStateException e)
+				catch (UnitConversionException e)
 				{
 					// Gracefully fail so ignore this
 				}
@@ -839,21 +846,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		return false;
 	}
 
-	private void convertIntensity(float[] params, double bias, double convert)
+	private void convertIntensity(float[] params, UnitConverter<IntensityUnit> c)
 	{
-		params[Gaussian2DFunction.BACKGROUND] = (float) ((params[Gaussian2DFunction.BACKGROUND] - bias) * convert);
 		for (int i = Gaussian2DFunction.SIGNAL; i < params.length; i += 6)
 		{
-			params[Gaussian2DFunction.SIGNAL] *= convert;
-		}
-	}
-
-	private void convertIntensity(float[] paramsStdDev, double convert)
-	{
-		paramsStdDev[Gaussian2DFunction.BACKGROUND] *= convert;
-		for (int i = Gaussian2DFunction.SIGNAL; i < paramsStdDev.length; i += 6)
-		{
-			paramsStdDev[Gaussian2DFunction.SIGNAL] *= convert;
+			params[Gaussian2DFunction.SIGNAL] = (float) c.convert(params[Gaussian2DFunction.SIGNAL]);
 		}
 	}
 }

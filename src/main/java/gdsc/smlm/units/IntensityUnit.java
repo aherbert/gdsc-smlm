@@ -104,7 +104,7 @@ public enum IntensityUnit implements Unit
 			throws UnitConversionException
 	{
 		if (this == to)
-			return new IdentityUnitConverter<IntensityUnit>(this, this);
+			return new IdentityUnitConverter<IntensityUnit>(this);
 
 		if (!Maths.isFinite(offset))
 			throw new UnitConversionException("offset must be finite");
@@ -145,7 +145,7 @@ public enum IntensityUnit implements Unit
 			throws UnitConversionException
 	{
 		if (this == to)
-			return new IdentityUnitConverter<IntensityUnit>(this, this);
+			return new IdentityUnitConverter<IntensityUnit>(this);
 
 		if (!(countPerPhoton > 0 && countPerPhoton <= java.lang.Double.MAX_VALUE))
 			throw new UnitConversionException("count/photon must be positive");

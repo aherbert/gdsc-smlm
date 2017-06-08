@@ -30,7 +30,7 @@ import gdsc.core.match.PointPair;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
-import gdsc.smlm.results.FilePeakResults;
+import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -162,7 +162,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		boolean requirePairs = showPairs || saveClassifications;
 
-		FilePeakResults fileResults = createFilePeakResults(results2);
+		TextFilePeakResults fileResults = createFilePeakResults(results2);
 
 		List<PointPair> allMatches = new LinkedList<PointPair>();
 		List<PointPair> pairs = (requirePairs) ? new LinkedList<PointPair>() : null;
@@ -419,7 +419,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		return false;
 	}
 
-	private FilePeakResults createFilePeakResults(MemoryPeakResults results2)
+	private TextFilePeakResults createFilePeakResults(MemoryPeakResults results2)
 	{
 		if (!saveClassifications)
 			return null;
@@ -428,9 +428,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		if (chooser.getFileName() != null)
 		{
 			classificationsFile = chooser.getDirectory() + chooser.getFileName();
-			FilePeakResults r = new FilePeakResults(classificationsFile, false, false);
+			TextFilePeakResults r = new TextFilePeakResults(classificationsFile, false, false);
 			r.copySettings(results2);
-			r.setPeakIdColumnName("Frame");
 			r.begin();
 			return r;
 		}

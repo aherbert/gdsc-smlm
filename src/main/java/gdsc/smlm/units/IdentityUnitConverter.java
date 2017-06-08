@@ -21,20 +21,14 @@ public class IdentityUnitConverter<T extends Unit> extends AbstractUnitConverter
 	/**
 	 * Instantiates a new identity unit converter.
 	 *
-	 * @param from
-	 *            unit to convert from
-	 * @param to
-	 *            unit to convert to
+	 * @param units
+	 *            the units
 	 * @throws UnitConversionException
 	 *             If the input units are null
-	 * @throws UnitConversionException
-	 *             If the input units are not the same
 	 */
-	public IdentityUnitConverter(T from, T to)
+	public IdentityUnitConverter(T units)
 	{
-		super(from, to);
-		if (from != to)
-			throw new UnitConversionException("From and To units are not identical");
+		super(units, units);
 	}
 
 	/*

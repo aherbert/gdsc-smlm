@@ -19,7 +19,6 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,13 +27,9 @@ import java.util.Collections;
 /**
  * Saves the fit results to a binary file format
  */
-public class BinaryFilePeakResults extends FilePeakResults
+public class BinaryFilePeakResults extends SMLMFilePeakResults
 {
 	public static final String END_HEADER = "END_HEADER";
-
-	// Only write to a single results file
-	// This uses a separate output from the inherited FilePeakResults
-	private OutputStream out = null;
 
 	public BinaryFilePeakResults(String filename)
 	{
@@ -56,24 +51,21 @@ public class BinaryFilePeakResults extends FilePeakResults
 		super(resultsFilename, showDeviations, showEndFrame, showId);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.PeakResults#begin()
-	 */
-	public void begin()
+	@Override
+	protected void openOutput()
 	{
-		out = null;
-		size = 0;
+		// Nothing to do as we write direct to the file output stream
+	}
+	
+	@Override
+	protected void write(String data)
+	{
 		try
 		{
-			out = new FileOutputStream(filename);
-			out.write(createResultsHeader().getBytes());
+			fos.write(data.getBytes());
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
-			// TODO - Add better handling of errors
-			e.printStackTrace();
 			closeOutput();
 		}
 	}
@@ -145,13 +137,13 @@ public class BinaryFilePeakResults extends FilePeakResults
 	protected void closeOutput()
 	{
 		super.closeOutput();
-		
-		if (out == null)
+
+		if (fos == null)
 			return;
 
 		try
 		{
-			out.close();
+			fos.close();
 		}
 		catch (Exception e)
 		{
@@ -159,7 +151,7 @@ public class BinaryFilePeakResults extends FilePeakResults
 		}
 		finally
 		{
-			out = null;
+			fos = null;
 		}
 	}
 
@@ -171,7 +163,7 @@ public class BinaryFilePeakResults extends FilePeakResults
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
 	{
-		if (out == null)
+		if (fos == null)
 			return;
 
 		// Buffer the output for the synchronized write method
@@ -220,7 +212,7 @@ public class BinaryFilePeakResults extends FilePeakResults
 
 	public void addAll(Collection<PeakResult> results)
 	{
-		if (out == null)
+		if (fos == null)
 			return;
 
 		int count = 0;
@@ -274,33 +266,15 @@ public class BinaryFilePeakResults extends FilePeakResults
 		writeResult(count, bytes.toByteArray());
 	}
 
-	@Override
-	public void addCluster(Cluster cluster)
-	{
-		throw new NoSuchMethodError("Binary results do not support clusters");
-	}
-
-	@Override
-	public void addComment(String text)
-	{
-		throw new NoSuchMethodError("Binary results do not support comments");
-	}
-	
-	@Override
-	public void addTrace(Trace trace)
-	{
-		throw new NoSuchMethodError("Binary results do not support traces");
-	}
-
 	private synchronized void writeResult(int count, byte[] bytes)
 	{
 		// In case another thread caused the output to close
-		if (out == null)
+		if (fos == null)
 			return;
 		size += count;
 		try
 		{
-			out.write(bytes);
+			fos.write(bytes);
 		}
 		catch (IOException ioe)
 		{
@@ -311,31 +285,12 @@ public class BinaryFilePeakResults extends FilePeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.utils.fitting.PeakResults#size()
+	 * @see gdsc.smlm.results.FilePeakResults#sort()
 	 */
-	public int size()
+	protected void sort() throws IOException
 	{
-		return size;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.PeakResults#end()
-	 */
-	public void end()
-	{
-		if (out == null)
-			return;
-
-		// Close the file.
 		try
 		{
-			closeOutput();
-
-			if (!isSortAfterEnd())
-				return;
-
 			ArrayList<Result> results = new ArrayList<Result>(size);
 
 			DataInputStream input = new DataInputStream(new FileInputStream(filename));
@@ -375,11 +330,11 @@ public class BinaryFilePeakResults extends FilePeakResults
 		}
 		catch (IOException e)
 		{
-			// ignore
+			throw e;
 		}
 		finally
 		{
-			out = null;
+			fos = null;
 		}
 	}
 
@@ -469,16 +424,6 @@ public class BinaryFilePeakResults extends FilePeakResults
 			// (Note: peak height is already done in the run(...) method)
 			return slice - o.slice;
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
-	 */
-	public boolean isActive()
-	{
-		return out != null;
 	}
 
 	/*

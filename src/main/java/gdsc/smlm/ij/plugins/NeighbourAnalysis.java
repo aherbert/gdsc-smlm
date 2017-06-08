@@ -16,7 +16,7 @@ package gdsc.smlm.ij.plugins;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.core.ij.Utils;
-import gdsc.smlm.results.FilePeakResults;
+import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
@@ -83,7 +83,7 @@ public class NeighbourAnalysis implements PlugIn
 			filename += ".xls";
 
 			boolean showDeviations = (!results.getResults().isEmpty() && results.getHead().paramsStdDev != null);
-			FilePeakResults traceResults = new FilePeakResults(filename, showDeviations);
+			TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations);
 			traceResults.copySettings(results);
 			traceResults.begin();
 			if (!traceResults.isActive())
