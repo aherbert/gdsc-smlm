@@ -115,6 +115,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	@Override
 	protected void createStandardConverters()
 	{
+		super.createStandardConverters();
+		
 		// TODO - make this optional
 		canComputePrecision = false;
 
