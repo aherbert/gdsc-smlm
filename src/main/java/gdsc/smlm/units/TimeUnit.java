@@ -28,16 +28,16 @@ public enum TimeUnit implements Unit
 
 		UnitConverter<TimeUnit> buildConverter(TimeUnit to, double msPerFrame) throws UnitConversionException
 		{
-			if (to == TimeUnit.MILLISECONDS)
+			if (to == TimeUnit.MILLISECOND)
 				return new MultiplyUnitConverter<TimeUnit>(this, to, msPerFrame);
-			if (to == TimeUnit.SECONDS)
+			if (to == TimeUnit.SECOND)
 				return new MultiplyUnitConverter<TimeUnit>(this, to, msPerFrame / 1e3);
 			throw new UnitConversionException(this + " to " + to);
 		}
 	},
 
-	/** Seconds units */
-	SECONDS
+	/** Second units */
+	SECOND
 	{
 		public String getName()
 		{
@@ -48,14 +48,14 @@ public enum TimeUnit implements Unit
 		{
 			if (to == TimeUnit.FRAME)
 				return new MultiplyUnitConverter<TimeUnit>(this, to, 1e3 / msPerFrame);
-			if (to == TimeUnit.MILLISECONDS)
+			if (to == TimeUnit.MILLISECOND)
 				return new MultiplyUnitConverter<TimeUnit>(this, to, 1e3);
 			throw new UnitConversionException(this + " to " + to);
 		}
 	},
 
-	/** Milleseconds units */
-	MILLISECONDS
+	/** Millesecond units */
+	MILLISECOND
 	{
 		public String getName()
 		{
@@ -66,7 +66,7 @@ public enum TimeUnit implements Unit
 		{
 			if (to == TimeUnit.FRAME)
 				return new MultiplyUnitConverter<TimeUnit>(this, to, 1.0 / msPerFrame);
-			if (to == TimeUnit.SECONDS)
+			if (to == TimeUnit.SECOND)
 				return new MultiplyUnitConverter<TimeUnit>(this, to, 1e-3);
 			throw new UnitConversionException(this + " to " + to);
 		}

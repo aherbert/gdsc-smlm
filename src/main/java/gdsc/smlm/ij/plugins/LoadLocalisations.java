@@ -87,7 +87,7 @@ public class LoadLocalisations implements PlugIn
 
 		public MemoryPeakResults toPeakResults()
 		{
-			UnitConverter<TimeUnit> timeConverter = timeUnit.createConverter(TimeUnit.MILLISECONDS);
+			UnitConverter<TimeUnit> timeConverter = timeUnit.createConverter(TimeUnit.MILLISECOND);
 			UnitConverter<DistanceUnit> distanceConverter = distanceUnit.createConverter(DistanceUnit.NM, pixelPitch);
 
 			MemoryPeakResults results = new MemoryPeakResults();

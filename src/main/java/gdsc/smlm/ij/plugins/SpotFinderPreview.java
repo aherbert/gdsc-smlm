@@ -121,10 +121,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		gd.addStringField("Config_file", filename, 40);
 
 		gd.addNumericField("Initial_StdDev0", fitConfig.getInitialPeakStdDev0(), 3);
-		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
-		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
-		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
+				SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
+		gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
+				SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
@@ -319,7 +319,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		// Add as a circle
 		addRoi(frame, o, x, y, n, colour, 3);
 	}
-	
+
 	public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour, int pointType)
 	{
 		if (n == 0)

@@ -580,8 +580,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		if (extraOptions)
 		{
-			String[] noiseMethodNames = SettingsManager.getNames((Object[]) Method.values());
-			gd.addChoice("Noise_method", noiseMethodNames, noiseMethodNames[config.getNoiseMethod().ordinal()]);
+			gd.addChoice("Noise_method", SettingsManager.noiseEstimatorMethodNames,
+					SettingsManager.noiseEstimatorMethodNames[config.getNoiseMethod().ordinal()]);
 		}
 
 		gd.showDialog();

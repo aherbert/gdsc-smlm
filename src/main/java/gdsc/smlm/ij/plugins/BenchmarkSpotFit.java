@@ -1028,10 +1028,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final double sa = getSa();
 		gd.addNumericField("Initial_StdDev", Maths.round(sa / simulationParameters.a), 3);
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
-		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
-		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
-		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
-		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
+				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
+		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
+				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
 
 		gd.addMessage("Multi-path filter (used to pick optimum results during fitting)");
 
@@ -1627,7 +1627,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		multiStatus = new int[singleStatus.length];
 		doubletStatus = new int[singleStatus.length];
 		multiDoubletStatus = new int[singleStatus.length];
-		
+
 		// Easier to materialise the values since we have a lot of non final variables to manipulate
 		final int[] frames = new int[filterCandidates.size()];
 		final FilterCandidates[] candidates = new FilterCandidates[filterCandidates.size()];
@@ -1642,7 +1642,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				return true;
 			}
 		});
-		
+
 		for (FilterCandidates result : candidates)
 		{
 			// Count the number of fit results that matched (tp) and did not match (fp)
@@ -1724,7 +1724,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		// Filter the results using the multi-path filter
 		ArrayList<MultiPathFitResults> multiPathResults = new ArrayList<MultiPathFitResults>(filterCandidates.size());
-		for (int i=0; i<frames.length; i++)
+		for (int i = 0; i < frames.length; i++)
 		{
 			int frame = frames[i];
 			MultiPathFitResult[] multiPathFitResults = candidates[i].fitResult;

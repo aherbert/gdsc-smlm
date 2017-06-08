@@ -410,10 +410,10 @@ public class PSFDrift implements PlugIn
 
 		gd.addSlider("Region_size", 2, 20, regionSize);
 		gd.addCheckbox("Background_fitting", backgroundFitting);
-		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
-		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
-		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
-		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
+				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
+		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
+				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
 		// We need these to set bounds for any bounded fitters
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());

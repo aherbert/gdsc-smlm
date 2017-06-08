@@ -102,8 +102,8 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 
 			gd.addSlider("Percential", 0, 100, percentile);
 
-			String[] noiseMethods = SettingsManager.getNames((Object[]) NoiseEstimator.Method.values());
-			gd.addChoice("Noise_method", noiseMethods, noiseMethods[noiseMethod.ordinal()]);
+			gd.addChoice("Noise_method", SettingsManager.noiseEstimatorMethodNames,
+					SettingsManager.noiseEstimatorMethodNames[noiseMethod.ordinal()]);
 
 			// For background based on pixel below a threshold
 			String[] thresholdMethods = AutoThreshold.getMethods(true);

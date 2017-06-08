@@ -1412,10 +1412,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		else
 		{
-			String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
-			gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
-			String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-			gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+			gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
+					SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
+			gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
+					SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
 
 			gd.addCheckbox("Filter_relative_distances (to HWHM)", filterRelativeDistances);
 			gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));

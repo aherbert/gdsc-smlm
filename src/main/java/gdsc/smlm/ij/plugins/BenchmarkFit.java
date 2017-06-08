@@ -569,10 +569,10 @@ public class BenchmarkFit implements PlugIn
 
 		gd.addSlider("Region_size", 2, 20, regionSize);
 		gd.addNumericField("PSF_width", psfWidth, 3);
-		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
-		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
-		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
-		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
+				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
+		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
+				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
 		gd.addCheckbox("Offset_fit", offsetFitting);
 		gd.addNumericField("Start_offset", startOffset, 3);
 		gd.addCheckbox("Include_CoM_fit", comFitting);
@@ -673,7 +673,7 @@ public class BenchmarkFit implements PlugIn
 	private void run()
 	{
 		// TODO - This needs to be updated for the answer in photons.
-		
+
 		// Initialise the answer. Convert to units of the image (ADUs and pixels)
 		answer[Gaussian2DFunction.BACKGROUND] = benchmarkParameters.getBackground() * benchmarkParameters.gain;
 		answer[Gaussian2DFunction.SIGNAL] = benchmarkParameters.getSignal() * benchmarkParameters.gain;

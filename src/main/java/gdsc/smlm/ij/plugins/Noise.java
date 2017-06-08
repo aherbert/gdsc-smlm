@@ -86,7 +86,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			gd = new GenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
-			String[] methodNames = SettingsManager.getNames((Object[]) NoiseEstimator.Method.values());
+			String[] methodNames = SettingsManager.noiseEstimatorMethodNames;
 
 			gd.addChoice("Method1 (blue)", methodNames, methodNames[algorithm]);
 			gd.addChoice("Method2 (red)", methodNames, methodNames[algorithm2]);

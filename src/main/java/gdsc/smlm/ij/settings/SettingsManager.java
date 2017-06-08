@@ -10,6 +10,7 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
+import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.DataFilterType;
@@ -29,6 +30,7 @@ import gdsc.smlm.engine.DataFilterType;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.fitting.FitCriteria;
 import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.results.ResultsFileFormat;
@@ -51,7 +53,7 @@ public class SettingsManager
 
 	public static String[] resultsImageNames, resultsFileFormatNames, distanceUnitNames, intensityUnitNames,
 			timeUnitNames, dataFilterTypeNames, dataFilterNames, fitSolverNames, fitFunctionNames,
-			noiseEstimatorMethodNames;
+			noiseEstimatorMethodNames, fitCriteriaNames, clusteringAlgorithmNames;
 	static
 	{
 		resultsImageNames = getNames((Object[]) ResultsImage.values());
@@ -64,6 +66,8 @@ public class SettingsManager
 		fitSolverNames = getNames((Object[]) FitSolver.values());
 		fitFunctionNames = getNames((Object[]) FitFunction.values());
 		noiseEstimatorMethodNames = getNames((Object[]) Method.values());
+		fitCriteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());		
+		clusteringAlgorithmNames = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
 	}
 
 	/**

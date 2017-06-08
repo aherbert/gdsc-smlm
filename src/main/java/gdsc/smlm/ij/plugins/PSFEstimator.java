@@ -188,10 +188,10 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		gd.addCheckbox("Show_histograms", settings.showHistograms);
 		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
 
-		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
-		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
-		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
+				SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
+		gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
+				SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
@@ -206,10 +206,10 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		gd.addMessage("--- Gaussian fitting ---");
 		Component splitLabel = gd.getMessage();
 
-		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
-		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
-		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
-		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
+				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
+		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
+				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
 
 		// Parameters specific to each Fit solver are collected in a second dialog 
 
@@ -874,8 +874,8 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	public synchronized void addAll(Collection<PeakResult> results)
 	{
 		for (PeakResult result : results)
-			add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise, result.params,
-					result.paramsStdDev);
+			add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
+					result.params, result.paramsStdDev);
 	}
 
 	public int size()

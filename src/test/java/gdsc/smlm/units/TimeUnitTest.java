@@ -15,8 +15,8 @@ public class TimeUnitTest
     		//@formatter:off
     		check(msPerFrame, 
     			new ExpectedUnit<TimeUnit>(TimeUnit.FRAME, frame), 
-    			new ExpectedUnit<TimeUnit>(TimeUnit.SECONDS, frame * msPerFrame / 1e3),
-    			new ExpectedUnit<TimeUnit>(TimeUnit.MILLISECONDS, frame * msPerFrame)
+    			new ExpectedUnit<TimeUnit>(TimeUnit.SECOND, frame * msPerFrame / 1e3),
+    			new ExpectedUnit<TimeUnit>(TimeUnit.MILLISECOND, frame * msPerFrame)
     			);
     		//@formatter:on
 		}

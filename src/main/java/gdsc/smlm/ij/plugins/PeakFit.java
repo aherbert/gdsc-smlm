@@ -1740,7 +1740,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				n = 1;
 		}
 
-		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
+		String[] filterNames = SettingsManager.dataFilterNames;
 
 		for (int i = 1; i < n; i++)
 		{
@@ -1918,8 +1918,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			// Collect options for LVM fitting
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage(fitConfig.getFitSolver().getShortName() + " requires additional parameters");
-			String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
-			gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
+			gd.addChoice("Fit_criteria", SettingsManager.fitCriteriaNames,
+					SettingsManager.fitCriteriaNames[fitConfig.getFitCriteria().ordinal()]);
 			gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
 			gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
 			gd.addNumericField("Lambda", fitConfig.getLambda(), 4);

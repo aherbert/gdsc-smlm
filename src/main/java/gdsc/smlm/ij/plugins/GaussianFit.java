@@ -163,11 +163,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		gd.addMessage("--- Gaussian fitting ---");
 		Component splitLabel = gd.getMessage();
-		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
-		gd.addChoice("Fit_function", functionNames, functionNames[fitFunction]);
+		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames, SettingsManager.fitFunctionNames[fitFunction]);
 		gd.addCheckbox("Fit_background", fitBackground);
-		String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
-		gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitCriteria]);
+		gd.addChoice("Fit_criteria", SettingsManager.fitCriteriaNames, SettingsManager.fitCriteriaNames[fitCriteria]);
 		gd.addNumericField("Max_iterations", maxIterations, 0);
 		gd.addNumericField("Significant_digits", significantDigits, 0);
 		gd.addNumericField("Coord_delta", delta, 4);

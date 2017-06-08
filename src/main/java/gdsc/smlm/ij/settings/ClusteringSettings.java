@@ -3,6 +3,7 @@ package gdsc.smlm.ij.settings;
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.results.TraceManager.TraceMode;
+import gdsc.smlm.units.TimeUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -28,27 +29,6 @@ public class ClusteringSettings
 		NONE{ public String getName() { return "None"; }}, 
 		NEAREST_NEIGHBOUR{ public String getName() { return "Nearest neighbour"; }}, 
 		BILINEAR{ public String getName() { return "Bi-linear"; }};
-		//@formatter:on
-
-		@Override
-		public String toString()
-		{
-			return getName();
-		}
-
-		/**
-		 * Gets the name.
-		 *
-		 * @return the name
-		 */
-		abstract public String getName();
-	}
-
-	public enum TimeUnit
-	{
-		//@formatter:off
-		SECOND{ public String getName() { return "Second"; }}, 
-		FRAME{ public String getName() { return "Frame"; }};
 		//@formatter:on
 
 		@Override

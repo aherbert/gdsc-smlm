@@ -140,7 +140,7 @@ public class PCPALMClusters implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (!showDialog())
 			return;
 
@@ -648,7 +648,8 @@ public class PCPALMClusters implements PlugIn
 			GenericDialog gd = new GenericDialog(TITLE);
 			String[] items = { "Clustering", "File" };
 
-			gd.addMessage("Fit a Binomial distribution to a histogram of cluster sizes.\n \nSelect the method to generate the histogram:");
+			gd.addMessage(
+					"Fit a Binomial distribution to a histogram of cluster sizes.\n \nSelect the method to generate the histogram:");
 			gd.addChoice("Method", items, items[runMode]);
 			gd.showDialog();
 			if (gd.wasCanceled())
@@ -675,8 +676,8 @@ public class PCPALMClusters implements PlugIn
 			gd.addMessage("Find clusters using centroid-linkage clustering.");
 
 			gd.addNumericField("Distance (nm)", distance, 0);
-			String[] names = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
-			gd.addChoice("Algorithm", names, names[sClusteringAlgorithm.ordinal()]);
+			gd.addChoice("Algorithm", SettingsManager.clusteringAlgorithmNames,
+					SettingsManager.clusteringAlgorithmNames[sClusteringAlgorithm.ordinal()]);
 			gd.addCheckbox("Multi_thread", multiThread);
 			if (haveWeights)
 				gd.addCheckbox("Weighted_clustering", sWeightedClustering);

@@ -44,7 +44,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	static
 	{
 		filters = DataFilter.values();
-		filterNames = SettingsManager.getNames((Object[]) filters);
+		filterNames = SettingsManager.dataFilterNames;
 	}
 
 	private static int filter1 = 0;

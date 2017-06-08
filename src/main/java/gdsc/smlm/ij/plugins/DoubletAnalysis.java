@@ -1597,18 +1597,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		// Collect options for fitting
 		gd.addNumericField("Initial_StdDev", fitConfig.getInitialPeakStdDev0(), 3);
-		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
-		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
-		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
+				SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
+		gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
+				SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
-		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
-		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
-		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
-		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
+				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
+		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
+				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
 
 		gd.addSlider("Iteration_increase", 1, 4.5, iterationIncrease);
 		gd.addCheckbox("Ignore_with_neighbours", ignoreWithNeighbours);

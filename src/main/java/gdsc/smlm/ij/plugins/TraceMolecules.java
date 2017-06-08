@@ -54,7 +54,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
-import gdsc.smlm.ij.settings.ClusteringSettings.TimeUnit;
+import gdsc.smlm.units.TimeUnit;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Cluster.CentroidMethod;
@@ -315,8 +315,8 @@ public class TraceMolecules implements PlugIn
 		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(peakResults.size());
 		int id = 0;
 		for (PeakResult p : peakResults)
-			points.add(ClusterPoint.newTimeClusterPoint(id++, p.getXPosition(), p.getYPosition(), p.getSignal(), p.getFrame(),
-					p.getEndFrame()));
+			points.add(ClusterPoint.newTimeClusterPoint(id++, p.getXPosition(), p.getYPosition(), p.getSignal(),
+					p.getFrame(), p.getEndFrame()));
 		return points;
 	}
 
@@ -672,8 +672,8 @@ public class TraceMolecules implements PlugIn
 		gd.addNumericField("Distance_Threshold (nm)", settings.distanceThreshold, 2);
 		gd.addNumericField("Distance_Exclusion (nm)", settings.distanceExclusion, 2);
 		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
-		String[] timeUnits = SettingsManager.getNames((Object[]) ClusteringSettings.TimeUnit.values());
-		gd.addChoice("Time_unit", timeUnits, timeUnits[settings.getTimeUnit().ordinal()]);
+		gd.addChoice("Time_unit", SettingsManager.timeUnitNames,
+				SettingsManager.timeUnitNames[settings.getTimeUnit().ordinal()]);
 		String[] traceModes = SettingsManager.getNames((Object[]) TraceManager.TraceMode.values());
 		gd.addChoice("Trace_mode", traceModes, traceModes[settings.getTraceMode().ordinal()]);
 		gd.addNumericField("Pulse_interval (frames)", settings.pulseInterval, 0);
@@ -784,8 +784,8 @@ public class TraceMolecules implements PlugIn
 
 		gd.addNumericField("Distance_Threshold (nm)", settings.distanceThreshold, 2);
 		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
-		String[] timeUnits = SettingsManager.getNames((Object[]) ClusteringSettings.TimeUnit.values());
-		gd.addChoice("Time_unit", timeUnits, timeUnits[settings.getTimeUnit().ordinal()]);
+		gd.addChoice("Time_unit", SettingsManager.timeUnitNames,
+				SettingsManager.timeUnitNames[settings.getTimeUnit().ordinal()]);
 		String[] algorithm = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
 		gd.addChoice("Clustering_algorithm", algorithm, algorithm[settings.getClusteringAlgorithm().ordinal()]);
 		gd.addNumericField("Pulse_interval (frames)", settings.pulseInterval, 0);
@@ -950,7 +950,7 @@ public class TraceMolecules implements PlugIn
 		for (double[] result : results)
 			if (best[2] > result[2])
 				best = result;
-		
+
 		settings.distanceThreshold = best[0];
 
 		// The optimiser works using frames so convert back to the correct units
@@ -1237,7 +1237,7 @@ public class TraceMolecules implements PlugIn
 		final double maxTimeThresholdInFrames = settings.maxTimeThreshold;
 		// The optimiser works using frames so convert back to the correct units
 		double convert = (settings.getTimeUnit() == TimeUnit.SECOND) ? exposureTime : 1;
-		
+
 		for (double[] point : zeroCrossingPoints)
 		{
 			double dx = point[0] / maxTimeThresholdInFrames;
@@ -1628,22 +1628,22 @@ public class TraceMolecules implements PlugIn
 		// Allow fitting settings to be adjusted
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		gd.addMessage("--- Gaussian fitting ---");
-		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
-		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
-		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
+				SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
+		gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
+				SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
-		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
-		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
-		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
-		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
+				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
+		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
+				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
 
-		String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
-		gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
+		gd.addChoice("Fit_criteria", SettingsManager.fitCriteriaNames,
+				SettingsManager.fitCriteriaNames[fitConfig.getFitCriteria().ordinal()]);
 		gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
 		gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
 		gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
