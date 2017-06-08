@@ -387,7 +387,7 @@ public class BatchPeakFit implements PlugIn
 		ResultsSettings resultsSettings = new ResultsSettings();
 		resultsSettings.setResultsImage(ResultsImage.NONE);
 		resultsSettings.resultsInMemory = false;
-		resultsSettings.setResultsTable(ResultsTable.NONE);
+		resultsSettings.showResultsTable = false;
 		resultsSettings.logProgress = false;
 		resultsSettings.resultsDirectory = null;
 		resultsSettings.showDeviations = fitConfig.getFitConfiguration().isComputeDeviations();

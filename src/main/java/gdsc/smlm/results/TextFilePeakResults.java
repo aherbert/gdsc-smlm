@@ -29,14 +29,28 @@ import java.util.Scanner;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.Calibration.CameraType;
+import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IntensityUnit;
+import gdsc.smlm.units.UnitConverter;
 
 /**
  * Saves the fit results to file
  */
 public class TextFilePeakResults extends SMLMFilePeakResults
 {
+	/** Converter to change the distances. */
+	private UnitConverter<DistanceUnit> distanceConverter;
+	/** Converter to change the intensity. */
+	private UnitConverter<IntensityUnit> intensityConverter;
+	/** Converter to change the background intensity. */
+	private UnitConverter<IntensityUnit> backgroundConverter;
+
+	private DistanceUnit distanceUnit = null;
+	private IntensityUnit intensityUnit = null;
+	private boolean computePrecision = false;
+
 	private OutputStreamWriter out;
-	
+
 	private boolean canComputePrecision, emCCD;
 
 	public TextFilePeakResults(String filename)
@@ -58,7 +72,6 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		super(filename, showDeviations, showEndFrame, showId);
 	}
-
 
 	@Override
 	protected void openOutput()
@@ -85,7 +98,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			closeOutput();
 		}
 	}
-	
+
 	@Override
 	protected void closeOutput()
 	{
@@ -106,40 +119,37 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			fos = null;
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.FilePeakResults#createStandardConverters()
+	 * @see gdsc.smlm.results.FilePeakResults#createPrecisionConverters()
 	 */
 	@Override
-	protected void createStandardConverters()
+	protected void createPrecisionConverters()
 	{
-		super.createStandardConverters();
-		
-		// TODO - make this optional
+		if (computePrecision)
+			super.createPrecisionConverters();
+
 		canComputePrecision = false;
 
 		if (calibration != null)
 		{
-			if (isCCD() && toNMConverter != null && toPhotonConverter != null)
+			if (computePrecision && isCCD() && toNMConverter != null && toPhotonConverter != null)
 			{
 				emCCD = calibration.getCameraType() == CameraType.EM_CCD;
 				canComputePrecision = true;
 			}
 
-			// TODO - Add ability to write output in selected units
+			// Add ability to write output in selected units
 
-			// Clone the calibration as we may change it
-			//this.calibration = calibration.clone();
+			// Clone the calibration as it may change
+			this.calibration = calibration.clone();
 
-			// Check the units. If not correct then set-up a conversion and change the units
-			// in the calibration
-			// This will require a conversion multiplier for distance
-			// It will require a conversion for signal 
-			// It will require a conversion plus bias for background:
-			// (b-bias1)*conversion + bias2
-
+			distanceConverter = calibration.getDistanceConverter(distanceUnit);
+			ArrayList<UnitConverter<IntensityUnit>> converters = calibration.getIntensityConverter(intensityUnit);
+			intensityConverter = (UnitConverter<IntensityUnit>) converters.get(0);
+			backgroundConverter = (UnitConverter<IntensityUnit>) converters.get(1);
 		}
 	}
 
@@ -221,18 +231,32 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		addStandardData(sb, 0, peak, peak, origX, origY, origValue, error, noise);
 
 		// Add the parameters		
+		//@formatter:off
 		if (isShowDeviations())
 		{
 			if (paramsStdDev != null)
 				paramsStdDev = new float[7];
-			addResult(sb, params[0], paramsStdDev[0], params[1], paramsStdDev[1], params[2], paramsStdDev[2], params[3],
-					paramsStdDev[3], params[4], paramsStdDev[4], params[5], paramsStdDev[5], params[6],
-					paramsStdDev[6]);
+			addResult(sb, 
+					mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
+					mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
+					params[Gaussian2DFunction.SHAPE], paramsStdDev[Gaussian2DFunction.SHAPE], 
+					mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
+					mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
+					mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
+					mapD(params[Gaussian2DFunction.Y_SD]), mapD(paramsStdDev[Gaussian2DFunction.Y_SD]));
 		}
 		else
 		{
-			addResult(sb, params[0], params[1], params[2], params[3], params[4], params[5], params[6]);
+			addResult(sb, 
+					mapB(params[Gaussian2DFunction.BACKGROUND]),
+					mapI(params[Gaussian2DFunction.SIGNAL]),  
+					params[Gaussian2DFunction.SHAPE],  
+					mapD(params[Gaussian2DFunction.X_POSITION]), 
+					mapD(params[Gaussian2DFunction.Y_POSITION]), 
+					mapD(params[Gaussian2DFunction.X_SD]), 
+					mapD(params[Gaussian2DFunction.Y_SD]));
 		}
+		//@formatter:on
 
 		if (canComputePrecision)
 		{
@@ -246,6 +270,21 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 		sb.append('\n');
 		writeResult(1, sb.toString());
+	}
+
+	private float mapD(float f)
+	{
+		return (float) distanceConverter.convert(f);
+	}
+
+	private float mapB(float f)
+	{
+		return (float) backgroundConverter.convert(f);
+	}
+
+	private float mapI(float f)
+	{
+		return (float) intensityConverter.convert(f);
 	}
 
 	private void addStandardData(StringBuilder sb, final int id, final int peak, final int endPeak, final int origX,
@@ -271,7 +310,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		sb.append('\t');
 		sb.append(chiSquared);
 		sb.append('\t');
-		sb.append(noise);
+		sb.append(mapI(noise));
 	}
 
 	private void addResult(StringBuilder sb, float... args)
@@ -296,18 +335,32 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 					result.origValue, result.error, result.noise);
 
 			// Add the parameters		
+			//@formatter:off
+			final float[] params = result.params;
 			if (isShowDeviations())
 			{
 				final float[] paramsStdDev = (result.paramsStdDev != null) ? result.paramsStdDev : new float[7];
-				addResult(sb, result.params[0], paramsStdDev[0], result.params[1], paramsStdDev[1], result.params[2],
-						paramsStdDev[2], result.params[3], paramsStdDev[3], result.params[4], paramsStdDev[4],
-						result.params[5], paramsStdDev[5], result.params[6], paramsStdDev[6]);
+				addResult(sb, 
+						mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
+						mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
+						params[Gaussian2DFunction.SHAPE], paramsStdDev[Gaussian2DFunction.SHAPE], 
+						mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
+						mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
+						mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
+						mapD(params[Gaussian2DFunction.Y_SD]), mapD(paramsStdDev[Gaussian2DFunction.Y_SD]));
 			}
 			else
 			{
-				addResult(sb, result.params[0], result.params[1], result.params[2], result.params[3], result.params[4],
-						result.params[5], result.params[6]);
+				addResult(sb, 
+						mapB(params[Gaussian2DFunction.BACKGROUND]),
+						mapI(params[Gaussian2DFunction.SIGNAL]),  
+						params[Gaussian2DFunction.SHAPE],  
+						mapD(params[Gaussian2DFunction.X_POSITION]), 
+						mapD(params[Gaussian2DFunction.Y_POSITION]), 
+						mapD(params[Gaussian2DFunction.X_SD]), 
+						mapD(params[Gaussian2DFunction.Y_SD]));
 			}
+			//@formatter:on
 
 			if (canComputePrecision)
 			{
@@ -346,8 +399,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		if (cluster.size() > 0)
 		{
 			float[] centroid = cluster.getCentroid();
-			writeResult(0, String.format("#Cluster %f %f (+/-%f) n=%d\n", centroid[0], centroid[1],
-					cluster.getStandardDeviation(), cluster.size()));
+			writeResult(0, String.format("#Cluster %f %f (+/-%f) n=%d\n", mapD(centroid[0]), mapD(centroid[1]),
+					mapD(cluster.getStandardDeviation()), cluster.size()));
 			addAll(cluster);
 		}
 	}
@@ -393,9 +446,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			float[] centroid = trace.getCentroid();
 			writeResult(0,
-					String.format("#Trace %f %f (+/-%f) n=%d, b=%d, on=%f, off=%f, signal= %f\n", centroid[0],
-							centroid[1], trace.getStandardDeviation(), trace.size(), trace.getNBlinks(),
-							trace.getOnTime(), trace.getOffTime(), trace.getSignal()));
+					String.format("#Trace %f %f (+/-%f) n=%d, b=%d, on=%f, off=%f, signal= %f\n", mapD(centroid[0]),
+							mapD(centroid[1]), mapD(trace.getStandardDeviation()), trace.size(), trace.getNBlinks(),
+							trace.getOnTime(), trace.getOffTime(), intensityConverter.convert(trace.getSignal())));
 			addAll(trace);
 		}
 	}
@@ -541,5 +594,68 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			// (Note: peak height is already done in the run(...) method)
 			return slice - o.slice;
 		}
+	}
+
+	/**
+	 * Gets the distance unit.
+	 *
+	 * @return the distance unit
+	 */
+	public DistanceUnit getDistanceUnit()
+	{
+		return distanceUnit;
+	}
+
+	/**
+	 * Sets the distance unit.
+	 *
+	 * @param distanceUnit
+	 *            the new distance unit
+	 */
+	public void setDistanceUnit(DistanceUnit distanceUnit)
+	{
+		this.distanceUnit = distanceUnit;
+	}
+
+	/**
+	 * Gets the intensity unit.
+	 *
+	 * @return the intensity unit
+	 */
+	public IntensityUnit getIntensityUnit()
+	{
+		return intensityUnit;
+	}
+
+	/**
+	 * Sets the intensity unit.
+	 *
+	 * @param intensityUnit
+	 *            the new intensity unit
+	 */
+	public void setIntensityUnit(IntensityUnit intensityUnit)
+	{
+		this.intensityUnit = intensityUnit;
+	}
+
+	/**
+	 * Checks if the precision will be computed.
+	 *
+	 * @return true, if the precision will be computed
+	 */
+	public boolean isComputePrecision()
+	{
+		return computePrecision;
+	}
+
+	/**
+	 * Sets the compute precision flag.
+	 *
+	 * @param computePrecision
+	 *            set to true to compute the precision and write to the output
+	 */
+	public void setComputePrecision(boolean computePrecision)
+	{
+		this.computePrecision = computePrecision;
 	}
 }

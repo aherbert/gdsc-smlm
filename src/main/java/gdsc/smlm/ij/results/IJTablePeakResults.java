@@ -16,14 +16,19 @@ package gdsc.smlm.ij.results;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.Calibration.CameraType;
+import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IdentityUnitConverter;
+import gdsc.smlm.units.IntensityUnit;
+import gdsc.smlm.units.UnitConversionException;
+import gdsc.smlm.units.UnitConverter;
 import ij.WindowManager;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
 
 import java.awt.Frame;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -35,6 +40,30 @@ import java.util.HashMap;
  */
 public class IJTablePeakResults extends IJAbstractPeakResults implements CoordinateProvider
 {
+	/** Converter to change the distances to nm. It is created in {@link #begin()} but may be null. */
+	protected UnitConverter<DistanceUnit> toNMConverter;
+	/**
+	 * Converter to change the distances to pixels. It is created in {@link #begin()} and may be an identity converter.
+	 */
+	protected UnitConverter<DistanceUnit> toPixelConverter;
+	/** The nm per pixel if calibrated. */
+	protected double nmPerPixel;
+	/** Converter to change the intensity to photons. It is created in {@link #begin()} but may be null. */
+	protected UnitConverter<IntensityUnit> toPhotonConverter;
+
+	private boolean canComputePrecision, emCCD;
+
+	/** Converter to change the distances. */
+	private UnitConverter<DistanceUnit> distanceConverter;
+	/** Converter to change the intensity. */
+	private UnitConverter<IntensityUnit> intensityConverter;
+	/** Converter to change the background intensity. */
+	private UnitConverter<IntensityUnit> backgroundConverter;
+
+	private DistanceUnit distanceUnit = null;
+	private IntensityUnit intensityUnit = null;
+	private boolean computePrecision = false;
+
 	// Store the ROI painters that have been attached to TextPanels so they can be updated
 	// with a new image source
 	private static HashMap<TextPanel, ImageROIPainter> map = new HashMap<TextPanel, ImageROIPainter>();
@@ -42,7 +71,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private boolean showDeviations = true;
 	private boolean showEndFrame = false;
 	private boolean clearAtStart = false;
-	private boolean showCalibratedValues = false;
 	private boolean hideSourceText = false;
 	private String peakIdColumnName = "Peak";
 	private String source = null;
@@ -50,8 +78,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private String tableTitle = "Fit Results";
 	private TextWindow resultsWindow;
 	private TextPanel tp;
-	private double gain = 1;
-	private double nmPerPixel = 1;
 	private boolean addCounter = false;
 	protected boolean tableActive = false;
 	private int nextRepaintSize = 0;
@@ -87,31 +113,94 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void begin()
 	{
 		tableActive = false;
+		
+		// Set-up unit processing that requires the calibration 
+		toNMConverter = null;
+		toPixelConverter = new IdentityUnitConverter<DistanceUnit>(null);
+		nmPerPixel = 0;
+		toPhotonConverter = null;
+		canComputePrecision = false;
+
+		if (calibration != null)
+		{
+			// Create converters 
+			if (calibration.hasNmPerPixel())
+			{
+				nmPerPixel = calibration.getNmPerPixel();
+				if (calibration.hasDistanceUnit())
+				{
+					try
+					{
+						toNMConverter = calibration.getDistanceUnit().createConverter(DistanceUnit.NM, nmPerPixel);
+						toPixelConverter = calibration.getDistanceUnit().createConverter(DistanceUnit.PIXEL,
+								nmPerPixel);
+					}
+					catch (UnitConversionException e)
+					{
+						// Gracefully fail so ignore this
+					}
+				}
+			}
+			if (calibration.hasIntensityUnit())
+			{
+				if (calibration.hasGain())
+				{
+					try
+					{
+						toPhotonConverter = calibration.getIntensityUnit().createConverter(IntensityUnit.PHOTON,
+								calibration.getGain());
+					}
+					catch (UnitConversionException e)
+					{
+						// Gracefully fail so ignore this
+					}
+				}
+			}
+
+			if (computePrecision && isCCD() && toNMConverter != null && toPhotonConverter != null)
+			{
+				emCCD = calibration.getCameraType() == CameraType.EM_CCD;
+				canComputePrecision = true;
+			}
+
+			// Add ability to write output in selected units
+
+			// Clone the calibration as it may change
+			this.calibration = calibration.clone();
+
+			distanceConverter = calibration.getDistanceConverter(distanceUnit);
+			ArrayList<UnitConverter<IntensityUnit>> converters = calibration.getIntensityConverter(intensityUnit);
+			intensityConverter = (UnitConverter<IntensityUnit>) converters.get(0);
+			backgroundConverter = (UnitConverter<IntensityUnit>) converters.get(1);
+		}
+		
 		createSourceText();
 		createResultsWindow();
 		if (clearAtStart)
 		{
 			tp.clear();
 		}
-		if (showCalibratedValues)
-		{
-			Calibration cal = getCalibration();
-			if (cal != null)
-			{
-				gain = cal.getGain();
-				nmPerPixel = cal.getNmPerPixel();
-			}
-			else
-			{
-				gain = 1;
-				nmPerPixel = 1;
-			}
-		}
 		size = 0;
 		// Let some results appear before drawing.
 		// ImageJ will auto-layout columns if it has less than 10 rows
 		nextRepaintSize = 9;
 		tableActive = true;
+	}
+
+	private boolean isCCD()
+	{
+		if (calibration.hasCameraType())
+		{
+			switch (calibration.getCameraType())
+			{
+				case CCD:
+				case EM_CCD:
+					return true;
+				default:
+					break;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -186,6 +275,19 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private String createResultsHeader()
 	{
+		String iUnit = "", dUnit = "";
+		if (calibration != null)
+		{
+			if (calibration.hasIntensityUnit())
+			{
+				iUnit = String.format(" (%s)", calibration.getIntensityUnit());
+			}
+			if (calibration.hasDistanceUnit())
+			{
+				dUnit = String.format(" (%s)", calibration.getDistanceUnit());
+			}
+		}
+		
 		StringBuilder sb = new StringBuilder();
 		if (addCounter)
 			sb.append("#\t");
@@ -199,22 +301,29 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		sb.append("\torigValue");
 		sb.append("\tError");
 		sb.append("\tNoise");
+		sb.append(iUnit);
 		sb.append("\tSNR");
 		sb.append("\tBackground");
+		sb.append(iUnit);
 		addDeviation(sb);
 		sb.append("\tSignal");
+		sb.append(iUnit);
 		addDeviation(sb);
 		sb.append("\tAngle");
 		addDeviation(sb);
 		sb.append("\tX");
+		sb.append(dUnit);
 		addDeviation(sb);
 		sb.append("\tY");
+		sb.append(dUnit);
 		addDeviation(sb);
 		sb.append("\tX SD");
+		sb.append(dUnit);
 		addDeviation(sb);
 		sb.append("\tY SD");
+		sb.append(dUnit);
 		addDeviation(sb);
-		if (this.calibration != null)
+		if (canComputePrecision)
 		{
 			sb.append("\tPrecision (nm)");
 		}
@@ -264,60 +373,65 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	}
 
 	private void addPeak(int peak, int endFrame, int origX, int origY, float origValue, double error, float noise,
-			float[] params, float[] paramsDev)
+			float[] params, float[] paramsStdDev)
 	{
 		if (!tableActive)
 			return;
 
 		float precision = 0;
-		if (this.calibration != null)
+		if (canComputePrecision)
 		{
-			final double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
-					calibration.getNmPerPixel();
-			precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
-					params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), noise / calibration.getGain(),
-					calibration.isEmCCD());
+			double s = toNMConverter
+					.convert(PeakResult.getSD(params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD]));
+			precision = (float) PeakResult.getPrecision(nmPerPixel, s,
+					toPhotonConverter.convert(params[Gaussian2DFunction.SIGNAL]), toPhotonConverter.convert(noise),
+					emCCD);
 		}
 		final float snr = (noise > 0) ? params[Gaussian2DFunction.SIGNAL] / noise : 0;
-		if (showCalibratedValues)
+		//@formatter:off
+		if (isShowDeviations())
 		{
-			// Do not calibrate the original values
-			//origX *= nmPerPixel;
-			//origY *= nmPerPixel;
-			//origValue /= gain;
-			noise /= gain;
-			params = Arrays.copyOf(params, params.length);
-			params[Gaussian2DFunction.SIGNAL] /= gain;
-			params[Gaussian2DFunction.BACKGROUND] = (float) ((params[Gaussian2DFunction.BACKGROUND] -
-					calibration.getBias()) / gain);
-			params[Gaussian2DFunction.X_POSITION] *= nmPerPixel;
-			params[Gaussian2DFunction.X_SD] *= nmPerPixel;
-			params[Gaussian2DFunction.Y_POSITION] *= nmPerPixel;
-			params[Gaussian2DFunction.Y_SD] *= nmPerPixel;
-			if (paramsDev != null)
-			{
-				paramsDev = Arrays.copyOf(paramsDev, paramsDev.length);
-				paramsDev[Gaussian2DFunction.SIGNAL] /= gain;
-				paramsDev[Gaussian2DFunction.BACKGROUND] /= gain;
-				paramsDev[Gaussian2DFunction.X_POSITION] *= nmPerPixel;
-				paramsDev[Gaussian2DFunction.X_SD] *= nmPerPixel;
-				paramsDev[Gaussian2DFunction.Y_POSITION] *= nmPerPixel;
-				paramsDev[Gaussian2DFunction.Y_SD] *= nmPerPixel;
-			}
-		}
-		if (showDeviations)
-		{
-			if (paramsDev == null)
-				paramsDev = new float[7];
-			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr, params[0], paramsDev[0], params[1],
-					paramsDev[1], params[2], paramsDev[2], params[3], paramsDev[3], params[4], paramsDev[4], params[5],
-					paramsDev[5], params[6], paramsDev[6], precision);
+			if (paramsStdDev != null)
+				paramsStdDev = new float[7];
+			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr,
+					mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
+					mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
+					params[Gaussian2DFunction.SHAPE], paramsStdDev[Gaussian2DFunction.SHAPE], 
+					mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
+					mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
+					mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
+					mapD(params[Gaussian2DFunction.Y_SD]), mapD(paramsStdDev[Gaussian2DFunction.Y_SD]), 
+					precision);
 		}
 		else
 		{
-			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr, params[0], params[1], params[2],
-					params[3], params[4], params[5], params[6], precision);
+			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr,
+					mapB(params[Gaussian2DFunction.BACKGROUND]),
+					mapI(params[Gaussian2DFunction.SIGNAL]),  
+					params[Gaussian2DFunction.SHAPE],  
+					mapD(params[Gaussian2DFunction.X_POSITION]), 
+					mapD(params[Gaussian2DFunction.Y_POSITION]), 
+					mapD(params[Gaussian2DFunction.X_SD]), 
+					mapD(params[Gaussian2DFunction.Y_SD]), 
+					precision);
 		}
+		//@formatter:on
+
+	}
+
+	private float mapD(float f)
+	{
+		return (float) distanceConverter.convert(f);
+	}
+
+	private float mapB(float f)
+	{
+		return (float) backgroundConverter.convert(f);
+	}
+
+	private float mapI(float f)
+	{
+		return (float) intensityConverter.convert(f);
 	}
 
 	private void addResult(int peak, int endPeak, float origX, float origY, float origValue, double error,
@@ -507,23 +621,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	}
 
 	/**
-	 * @return True if the calibration shoudl be used to adjust the table values
-	 */
-	public boolean isShowCalibratedValues()
-	{
-		return showCalibratedValues;
-	}
-
-	/**
-	 * @param showCalibratedValues
-	 *            True if the calibration shoudl be used to adjust the table values
-	 */
-	public void setShowCalibratedValues(boolean showCalibratedValues)
-	{
-		this.showCalibratedValues = showCalibratedValues;
-	}
-
-	/**
 	 * @return the addCounter
 	 */
 	public boolean isAddCounter()
@@ -582,12 +679,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			int startT = Integer.valueOf(fields[indexT]);
 			double x = Double.valueOf(fields[indexX]);
 			double y = Double.valueOf(fields[indexY]);
-			if (showCalibratedValues)
-			{
-				x /= nmPerPixel;
-				y /= nmPerPixel;
-			}
-			return new double[] { startT, x, y };
+			return new double[] { startT, toPixelConverter.convert(x), toPixelConverter.convert(y) };
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
@@ -639,5 +731,68 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public double getRepaintInterval()
 	{
 		return repaintInterval;
+	}
+
+	/**
+	 * Gets the distance unit.
+	 *
+	 * @return the distance unit
+	 */
+	public DistanceUnit getDistanceUnit()
+	{
+		return distanceUnit;
+	}
+
+	/**
+	 * Sets the distance unit.
+	 *
+	 * @param distanceUnit
+	 *            the new distance unit
+	 */
+	public void setDistanceUnit(DistanceUnit distanceUnit)
+	{
+		this.distanceUnit = distanceUnit;
+	}
+
+	/**
+	 * Gets the intensity unit.
+	 *
+	 * @return the intensity unit
+	 */
+	public IntensityUnit getIntensityUnit()
+	{
+		return intensityUnit;
+	}
+
+	/**
+	 * Sets the intensity unit.
+	 *
+	 * @param intensityUnit
+	 *            the new intensity unit
+	 */
+	public void setIntensityUnit(IntensityUnit intensityUnit)
+	{
+		this.intensityUnit = intensityUnit;
+	}
+
+	/**
+	 * Checks if the precision will be computed.
+	 *
+	 * @return true, if the precision will be computed
+	 */
+	public boolean isComputePrecision()
+	{
+		return computePrecision;
+	}
+
+	/**
+	 * Sets the compute precision flag.
+	 *
+	 * @param computePrecision
+	 *            set to true to compute the precision and write to the output
+	 */
+	public void setComputePrecision(boolean computePrecision)
+	{
+		this.computePrecision = computePrecision;
 	}
 }

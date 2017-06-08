@@ -1,7 +1,12 @@
 package gdsc.smlm.results;
 
+import java.util.ArrayList;
+
 import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IdentityUnitConverter;
 import gdsc.smlm.units.IntensityUnit;
+import gdsc.smlm.units.UnitConversionException;
+import gdsc.smlm.units.UnitConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -827,5 +832,79 @@ public class Calibration implements Cloneable
 		}
 		else
 			clearHasIntensityUnit();
+	}
+
+	/**
+	 * Gets a distance converter to update values. If the converter can be created then the current distance unit in
+	 * this instance is updated.
+	 * <p>
+	 * If the calibration is already in the given units or conversion is not possible
+	 * then an identity converter will be returned.
+	 * <p>
+	 * It is recommended to clone the calibration before invoking this method as the state may change.
+	 *
+	 * @param toDistanceUnit
+	 *            the distance unit
+	 * @return the distance converter
+	 */
+	public UnitConverter<DistanceUnit> getDistanceConverter(DistanceUnit toDistanceUnit)
+	{
+		UnitConverter<DistanceUnit> c = null;
+		if (toDistanceUnit != null && hasDistanceUnit() && distanceUnit != toDistanceUnit && hasNmPerPixel())
+		{
+			try
+			{
+				c = distanceUnit.createConverter(toDistanceUnit, nmPerPixel);
+				setDistanceUnit(toDistanceUnit);
+			}
+			catch (UnitConversionException e)
+			{
+				// Ignore this
+			}
+		}
+		if (c == null)
+			c = new IdentityUnitConverter<DistanceUnit>(distanceUnit);
+		return c;
+	}
+
+	/**
+	 * Gets intensity converters to update values. If the converter can be created then the current intensity unit in
+	 * this instance is updated.
+	 * <p>
+	 * If the calibration is already in the given units or conversion is not possible
+	 * then an identity converter will be returned.
+	 * <p>
+	 * The returned list has a converter with only the gain, and a second converter with the gain and bias.
+	 * <p>
+	 * It is recommended to clone the calibration before invoking this method as the state may change.
+	 *
+	 * @param toIntensityUnit
+	 *            the intensity unit
+	 * @return the intensity converters (gain, gain + bias)
+	 */
+	public ArrayList<UnitConverter<IntensityUnit>> getIntensityConverter(IntensityUnit toIntensityUnit)
+	{
+		ArrayList<UnitConverter<IntensityUnit>> list = new ArrayList<UnitConverter<IntensityUnit>>(2);
+		if (toIntensityUnit != null && hasIntensityUnit() && intensityUnit != toIntensityUnit && hasGain() && hasBias())
+		{
+			try
+			{
+				list.add(intensityUnit.createConverter(toIntensityUnit, gain));
+				list.add(intensityUnit.createConverter(toIntensityUnit, bias, gain));
+				setIntensityUnit(toIntensityUnit);
+			}
+			catch (UnitConversionException e)
+			{
+				// Ignore this
+			}
+		}
+		if (list.size() != 2)
+		{
+			list.clear();
+			UnitConverter<IntensityUnit> c = new IdentityUnitConverter<IntensityUnit>(intensityUnit);
+			list.add(c);
+			list.add(c);
+		}
+		return list;
 	}
 }

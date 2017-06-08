@@ -770,7 +770,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	private PeakFit createFitter()
 	{
 		ResultsSettings resultsSettings = new ResultsSettings();
-		resultsSettings.setResultsTable(ResultsTable.NONE);
+		resultsSettings.showResultsTable = false;
 		resultsSettings.showDeviations = false;
 		resultsSettings.logProgress = false;
 		resultsSettings.setResultsImage(0);

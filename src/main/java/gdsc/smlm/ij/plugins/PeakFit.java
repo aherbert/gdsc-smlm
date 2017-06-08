@@ -94,6 +94,8 @@ import gdsc.smlm.results.TSFPeakResultsWriter;
 import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.Filter;
+import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IntensityUnit;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -105,6 +107,7 @@ import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.YesNoCancelDialog;
+import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
@@ -206,7 +209,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	private TextField textWidthFactor;
 	private Checkbox textLogProgress;
 	private Checkbox textShowDeviations;
-	private Choice textResultsTable;
+	private Checkbox textResultsTable;
 	private Choice textResultsImage;
 	private Checkbox textWeightedImage;
 	private Checkbox textEqualisedImage;
@@ -697,6 +700,16 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		return true;
 	}
 
+	static String[] filterTypes, filterNames, solverNames, functionNames, noiseMethodNames;
+	static
+	{
+		filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
+		filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
+		solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
+		functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
+		noiseMethodNames = SettingsManager.getNames((Object[]) Method.values());
+	}
+
 	@SuppressWarnings("unchecked")
 	private int showDialog(ImagePlus imp)
 	{
@@ -729,7 +742,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			showProcessedFrames = false;
 		}
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage((maximaIdentification) ? "Identify candidate maxima" : "Fit 2D Gaussian to identified maxima");
 
@@ -754,9 +767,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			gd.addNumericField("Initial_StdDev1", fitConfig.getInitialPeakStdDev1(), 3);
 			gd.addNumericField("Initial_Angle", fitConfig.getInitialAngle(), 3);
 		}
-		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
 		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
-		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
 		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
@@ -772,9 +783,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		if (!maximaIdentification)
 		{
 			gd.addMessage("--- Gaussian fitting ---");
-			String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
 			gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
-			String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 			gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
 			if (extraOptions)
 				gd.addCheckbox("Fit_background", fitConfig.isBackgroundFitting());
@@ -799,7 +808,6 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			if (extraOptions)
 			{
 				gd.addNumericField("Noise", fitConfig.getNoise(), 2);
-				String[] noiseMethodNames = SettingsManager.getNames((Object[]) Method.values());
 				gd.addChoice("Noise_method", noiseMethodNames, noiseMethodNames[config.getNoiseMethod().ordinal()]);
 			}
 			gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
@@ -813,11 +821,39 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		{
 			gd.addCheckbox("Show_deviations", resultsSettings.showDeviations);
 		}
-		String[] tableNames = SettingsManager.getNames((Object[]) ResultsTable.values());
-		gd.addChoice("Results_table", tableNames, tableNames[resultsSettings.getResultsTable().ordinal()]);
-		String[] imageNames = SettingsManager.getNames((Object[]) ResultsImage.values());
+
+		gd.addCheckbox("Show_results_table", resultsSettings.showResultsTable, new OptionListener<Checkbox>()
+		{
+			public void collectOptions(Checkbox field)
+			{
+				resultsSettings.showResultsTable = field.getState();
+				collectOptions();
+			}
+
+			public void collectOptions()
+			{
+				if (!resultsSettings.showResultsTable)
+				{
+					return;
+				}
+				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+				egd.addChoice("Table_distance_unit", ResultsManager.distanceNames,
+						ResultsManager.distanceNames[resultsSettings.getTableDistanceUnit().ordinal()]);
+				egd.addChoice("Table_intensity_unit", ResultsManager.intensityNames,
+						ResultsManager.intensityNames[resultsSettings.getTableIntensityUnit().ordinal()]);
+				egd.addCheckbox("Table_show_precision", resultsSettings.tableComputePrecision);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return;
+				resultsSettings.setTableDistanceUnit(egd.getNextChoiceIndex());
+				resultsSettings.setTableIntensityUnit(egd.getNextChoiceIndex());
+				resultsSettings.tableComputePrecision = egd.getNextBoolean();
+			}
+		});
+
 		gd.addMessage("--- Image output ---");
-		gd.addChoice("Image", imageNames, imageNames[resultsSettings.getResultsImage().ordinal()]);
+		gd.addChoice("Image", ResultsManager.imageNames,
+				ResultsManager.imageNames[resultsSettings.getResultsImage().ordinal()]);
 		gd.addCheckbox("Weighted", resultsSettings.weightedImage);
 		gd.addCheckbox("Equalised", resultsSettings.equalisedImage);
 		gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
@@ -829,8 +865,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		}
 		gd.addMessage("--- File output ---");
 		gd.addDirectoryField("Results_dir", resultsSettings.resultsDirectory);
-		String[] formatNames = SettingsManager.getNames((Object[]) ResultsFileFormat.values());
-		gd.addChoice("Results_format", formatNames, formatNames[resultsSettings.getResultsFileFormat().ordinal()]);
+		gd.addChoice("Results_format", ResultsManager.formatNames,
+				ResultsManager.formatNames[resultsSettings.getResultsFileFormat().ordinal()]);
 		gd.addMessage(" ");
 		gd.addCheckbox("Results_in_memory", resultsSettings.resultsInMemory);
 
@@ -948,7 +984,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			textLogProgress = checkboxes.get(b++);
 			if (!maximaIdentification)
 				textShowDeviations = checkboxes.get(b++);
-			textResultsTable = choices.get(ch++);
+			textResultsTable = checkboxes.get(ch++);
 			textResultsImage = choices.get(ch++);
 			textWeightedImage = checkboxes.get(b++);
 			textEqualisedImage = checkboxes.get(b++);
@@ -1048,30 +1084,15 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		// Ask if the user wants to log progress on multiple frame images
 		if (resultsSettings.logProgress && source.getFrames() > 1)
 		{
-			gd = new ExtendedGenericDialog(TITLE);
-			gd.addMessage("Warning: Log progress on multiple-frame image will be slow");
-			gd.addCheckbox("Log_progress", resultsSettings.logProgress);
-			gd.showDialog();
-			if (gd.wasCanceled())
+			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+			egd.addMessage("Warning: Log progress on multiple-frame image will be slow");
+			egd.addCheckbox("Log_progress", resultsSettings.logProgress);
+			egd.showDialog();
+			if (egd.wasCanceled())
 				return DONE;
-			resultsSettings.logProgress = gd.getNextBoolean();
+			resultsSettings.logProgress = egd.getNextBoolean();
 			if (!resultsSettings.logProgress)
 				SettingsManager.saveSettings(settings, filename);
-		}
-
-		// Get a bias if required
-		if (resultsSettings.getResultsTable() == ResultsTable.CALIBRATED && calibration.getBias() == 0)
-		{
-			gd = new ExtendedGenericDialog(TITLE);
-			gd.addMessage("Calibrated results requires a camera bias");
-			gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
-			gd.showDialog();
-			if (!gd.wasCanceled())
-			{
-				calibration.setBias(Math.abs(gd.getNextNumber()));
-				if (calibration.getBias() > 0)
-					SettingsManager.saveSettings(settings, filename);
-			}
 		}
 
 		// Return the plugin flags (without the DOES_STACKS flag).
@@ -1136,7 +1157,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 
 		// Do simple results output
 		resultsSettings.resultsInMemory = true;
-		resultsSettings.setResultsTable((showTable) ? ResultsTable.UNCALIBRATED : ResultsTable.NONE);
+		resultsSettings.showResultsTable = showTable;
 		if (showImage)
 		{
 			resultsSettings.setResultsImage(ResultsImage.SIGNAL_INTENSITY);
@@ -1486,7 +1507,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		if (!maximaIdentification)
 			resultsSettings.showDeviations = gd.getNextBoolean();
 
-		resultsSettings.setResultsTable(gd.getNextChoiceIndex());
+		resultsSettings.showResultsTable = gd.getNextBoolean();
 		resultsSettings.setResultsImage(gd.getNextChoiceIndex());
 		resultsSettings.weightedImage = gd.getNextBoolean();
 		resultsSettings.equalisedImage = gd.getNextBoolean();
@@ -1984,8 +2005,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 
 			if (isWeightedLVM && !ignoreCalibration)
 			{
-				fitConfig.setNoiseModel(
-						CameraNoiseModel.createNoiseModel(calibration.getReadNoise(), calibration.getBias(), calibration.isEmCCD()));
+				fitConfig.setNoiseModel(CameraNoiseModel.createNoiseModel(calibration.getReadNoise(),
+						calibration.getBias(), calibration.isEmCCD()));
 			}
 
 			if (filename != null)
@@ -2044,8 +2065,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		{
 			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getResultsImage(),
 					resultsSettings.weightedImage, resultsSettings.equalisedImage, resultsList.getName(), bounds,
-					calibration.getNmPerPixel(), calibration.getGain(), resultsSettings.imageScale, resultsSettings.precision,
-					ResultsMode.ADD);
+					calibration.getNmPerPixel(), calibration.getGain(), resultsSettings.imageScale,
+					resultsSettings.precision, ResultsMode.ADD);
 			if (extraOptions)
 				image.setRollingWindowSize(resultsSettings.imageRollingWindow);
 			resultsList.addOutput(image);
@@ -2106,12 +2127,14 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 
 	private void addTableResults(PeakResultsList resultsList)
 	{
-		if (resultsSettings.getResultsTable() != ResultsTable.NONE)
+		if (resultsSettings.showResultsTable)
 		{
 			String title = null; // imp.getTitle()
 			IJTablePeakResults r = new IJTablePeakResults(resultsSettings.showDeviations, title);
 			r.setPeakIdColumnName("Frame");
-			r.setShowCalibratedValues(resultsSettings.getResultsTable() == ResultsTable.CALIBRATED);
+			r.setDistanceUnit(resultsSettings.getTableDistanceUnit());
+			r.setIntensityUnit(resultsSettings.getTableIntensityUnit());
+			r.setComputePrecision(resultsSettings.tableComputePrecision);
 			r.setClearAtStart(simpleFit);
 			r.setShowEndFrame(integrateFrames > 1);
 			resultsList.addOutput(r);
@@ -2189,7 +2212,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 
 			LUT lut = LUTHelper.createLUT(LutColour.ICE);
 			Overlay o = new Overlay();
-			ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();			
+			ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
 			for (int i = 0, j = results.size() - 1; i < results.size(); i++, j--)
 			{
 				PeakResult r = list.get(i);
@@ -2750,7 +2773,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		textLogProgress.setState(resultsSettings.logProgress);
 		if (!maximaIdentification)
 			textShowDeviations.setState(resultsSettings.showDeviations);
-		textResultsTable.select(resultsSettings.getResultsTable().ordinal());
+		textResultsTable.setState(resultsSettings.showResultsTable);
 		textResultsImage.select(resultsSettings.getResultsImage().ordinal());
 		textWeightedImage.setState(resultsSettings.weightedImage);
 		textEqualisedImage.setState(resultsSettings.equalisedImage);

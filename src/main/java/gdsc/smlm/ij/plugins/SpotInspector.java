@@ -23,6 +23,8 @@ import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IntensityUnit;
 import gdsc.smlm.utils.XmlUtils;
 import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
@@ -81,7 +83,7 @@ public class SpotInspector implements PlugIn, MouseListener
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "No localisations in memory");
@@ -156,7 +158,16 @@ public class SpotInspector implements PlugIn, MouseListener
 		table.copySettings(results);
 		table.setTableTitle(TITLE);
 		table.setAddCounter(true);
-		table.setShowCalibratedValues(showCalibratedValues);
+		if (showCalibratedValues)
+		{
+			table.setDistanceUnit(DistanceUnit.NM);
+			table.setIntensityUnit(IntensityUnit.PHOTON);
+		}
+		else
+		{
+			table.setDistanceUnit(DistanceUnit.PIXEL);
+			table.setIntensityUnit(IntensityUnit.COUNT);
+		}
 		table.begin();
 
 		// Add a mouse listener to jump to the frame for the clicked line

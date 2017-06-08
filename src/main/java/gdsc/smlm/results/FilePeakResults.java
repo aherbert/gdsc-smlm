@@ -9,6 +9,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.smlm.units.DistanceUnit;
 import gdsc.smlm.units.IntensityUnit;
+import gdsc.smlm.units.UnitConversionException;
 import gdsc.smlm.units.UnitConverter;
 
 /**
@@ -43,7 +44,7 @@ public abstract class FilePeakResults extends AbstractPeakResults
 	 */
 	public void begin()
 	{
-		createStandardConverters();
+		createPrecisionConverters();
 
 		fos = null;
 		size = 0;
@@ -92,9 +93,10 @@ public abstract class FilePeakResults extends AbstractPeakResults
 	}
 
 	/**
-	 * Creates the standard converters.
+	 * Creates the standard converters for computing distance in nm and intensity in photons for use in a precision
+	 * computation.
 	 */
-	protected void createStandardConverters()
+	protected void createPrecisionConverters()
 	{
 		toNMConverter = null;
 		nmPerPixel = 0;
@@ -112,7 +114,7 @@ public abstract class FilePeakResults extends AbstractPeakResults
 					{
 						toNMConverter = calibration.getDistanceUnit().createConverter(DistanceUnit.NM, nmPerPixel);
 					}
-					catch (IllegalStateException e)
+					catch (UnitConversionException e)
 					{
 						// Gracefully fail so ignore this
 					}
@@ -127,7 +129,7 @@ public abstract class FilePeakResults extends AbstractPeakResults
 						toPhotonConverter = calibration.getIntensityUnit().createConverter(IntensityUnit.PHOTON,
 								calibration.getGain());
 					}
-					catch (IllegalStateException e)
+					catch (UnitConversionException e)
 					{
 						// Gracefully fail so ignore this
 					}

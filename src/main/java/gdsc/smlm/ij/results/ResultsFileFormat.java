@@ -17,20 +17,22 @@ public enum ResultsFileFormat
 {
 	//@formatter:off
 	GDSC_TEXT {
-		@Override public String getName()      { return "Text"; }
-		@Override public String getExtension() { return "xls"; }
+		@Override public String  getName()      { return "Text"; }
+		@Override public String  getExtension() { return "xls"; }
+		@Override public boolean isGDSC()       { return true; }
 	},
 	GDSC_BINARY{
-		@Override public String getName()      { return "Binary"; }
-		@Override public String getExtension() { return "bin"; }
+		@Override public String  getName()      { return "Binary"; }
+		@Override public String  getExtension() { return "bin"; }
+		@Override public boolean isGDSC()       { return true; }
 	}, 
 	TSF{
-		@Override public String getName()      { return "Tagged Spot File"; }
-		@Override public String getExtension() { return "tsf"; }
+		@Override public String  getName()      { return "Tagged Spot File"; }
+		@Override public String  getExtension() { return "tsf"; }
 	}, 
 	MALK{
-		@Override public String getName()      { return "Molecular Accuracy Localisation Keep"; }
-		@Override public String getExtension() { return "txt"; }
+		@Override public String  getName()      { return "Molecular Accuracy Localisation Keep"; }
+		@Override public String  getExtension() { return "txt"; }
 	};
 	//@formatter:on
 	
@@ -53,4 +55,14 @@ public enum ResultsFileFormat
 	 * @return the extension
 	 */
 	abstract public String getExtension();
+	
+	/**
+	 * Checks if is a GDSC format file.
+	 *
+	 * @return true, if is a GDSC format file.
+	 */
+	public boolean isGDSC()
+	{
+		return false;
+	}
 }

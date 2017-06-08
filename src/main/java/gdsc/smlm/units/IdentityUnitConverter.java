@@ -22,13 +22,11 @@ public class IdentityUnitConverter<T extends Unit> extends AbstractUnitConverter
 	 * Instantiates a new identity unit converter.
 	 *
 	 * @param units
-	 *            the units
-	 * @throws UnitConversionException
-	 *             If the input units are null
+	 *            the units (can be null)
 	 */
 	public IdentityUnitConverter(T units)
 	{
-		super(units, units);
+		super(units, units, true);
 	}
 
 	/*

@@ -2,7 +2,8 @@ package gdsc.smlm.ij.settings;
 
 import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.ij.results.ResultsImage;
-import gdsc.smlm.ij.results.ResultsTable;
+import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -31,10 +32,19 @@ public class ResultsSettings implements Cloneable
 	public double imageScale = 8;
 	public int imageRollingWindow = 0;
 	public String resultsDirectory = null;
+
 	public String resultsFilename = null;
 	private ResultsFileFormat resultsFileFormat;
+	private DistanceUnit fileDistanceUnit;
+	private IntensityUnit fileIntensityUnit;
+	public boolean fileComputePrecision = false;
+
 	public boolean resultsInMemory = true;
-	private ResultsTable resultsTable;
+
+	public boolean showResultsTable = false;
+	private DistanceUnit tableDistanceUnit;
+	private IntensityUnit tableIntensityUnit;
+	public boolean tableComputePrecision = false;
 
 	public ResultsSettings()
 	{
@@ -100,31 +110,118 @@ public class ResultsSettings implements Cloneable
 	}
 
 	/**
-	 * @return the resultsTable
+	 * @return the fileDistanceUnit
 	 */
-	public ResultsTable getResultsTable()
+	public DistanceUnit getFileDistanceUnit()
 	{
-		return resultsTable;
+		return fileDistanceUnit;
 	}
 
 	/**
-	 * @param resultsTable
-	 *            the resultsTable to set
+	 * @param fileDistanceUnit
+	 *            the fileDistanceUnit to set
 	 */
-	public void setResultsTable(ResultsTable resultsTable)
+	public void setFileDistanceUnit(DistanceUnit fileDistanceUnit)
 	{
-		this.resultsTable = resultsTable;
+		this.fileDistanceUnit = fileDistanceUnit;
 	}
 
 	/**
-	 * @param resultsTable
-	 *            the resultsImage to set
+	 * @param fileDistanceUnit
+	 *            the fileDistanceUnit to set
 	 */
-	public void setResultsTable(int resultsTable)
+	public void setFileDistanceUnit(int fileDistanceUnit)
 	{
-		if (resultsTable >= 0 && resultsTable < ResultsTable.values().length)
+		if (fileDistanceUnit >= 0 && fileDistanceUnit < DistanceUnit.values().length)
 		{
-			setResultsTable(ResultsTable.values()[resultsTable]);
+			setFileDistanceUnit(DistanceUnit.values()[fileDistanceUnit]);
+		}
+	}
+
+	/**
+	 * @return the fileIntensityUnit
+	 */
+	public IntensityUnit getFileIntensityUnit()
+	{
+		return fileIntensityUnit;
+	}
+
+	/**
+	 * @param fileIntensityUnit
+	 *            the fileIntensityUnit to set
+	 */
+	public void setFileIntensityUnit(IntensityUnit fileIntensityUnit)
+	{
+		this.fileIntensityUnit = fileIntensityUnit;
+	}
+
+	/**
+	 * @param fileIntensityUnit
+	 *            the fileIntensityUnit to set
+	 */
+	public void setFileIntensityUnit(int fileIntensityUnit)
+	{
+		if (fileIntensityUnit >= 0 && fileIntensityUnit < IntensityUnit.values().length)
+		{
+			setFileIntensityUnit(IntensityUnit.values()[fileIntensityUnit]);
+		}
+	}
+
+	/**
+	 * @return the tableDistanceUnit
+	 */
+	public DistanceUnit getTableDistanceUnit()
+	{
+		return tableDistanceUnit;
+	}
+
+	/**
+	 * @param tableDistanceUnit
+	 *            the tableDistanceUnit to set
+	 */
+	public void setTableDistanceUnit(DistanceUnit tableDistanceUnit)
+	{
+		this.tableDistanceUnit = tableDistanceUnit;
+	}
+
+	/**
+	 * @param tableDistanceUnit
+	 *            the tableDistanceUnit to set
+	 */
+	public void setTableDistanceUnit(int tableDistanceUnit)
+	{
+		if (tableDistanceUnit >= 0 && tableDistanceUnit < DistanceUnit.values().length)
+		{
+			setTableDistanceUnit(DistanceUnit.values()[tableDistanceUnit]);
+		}
+	}
+
+	/**
+	 * @return the tableIntensityUnit
+	 */
+	public IntensityUnit getTableIntensityUnit()
+	{
+		return tableIntensityUnit;
+	}
+
+	/**
+	 * @param tableIntensityUnit
+	 *            the tableIntensityUnit to set
+	 */
+	public void setTableIntensityUnit(IntensityUnit tableIntensityUnit)
+	{
+		this.tableIntensityUnit = tableIntensityUnit;
+	}
+
+	/**
+	 * @param tableIntensityUnit
+	 *            the tableIntensityUnit to set
+	 */
+	public void setTableIntensityUnit(int tableIntensityUnit)
+	{
+		if (tableIntensityUnit >= 0 && tableIntensityUnit < IntensityUnit.values().length)
+		{
+			setTableIntensityUnit(IntensityUnit.values()[tableIntensityUnit]);
 		}
 	}
 
@@ -138,8 +235,14 @@ public class ResultsSettings implements Cloneable
 			resultsImage = ResultsImage.LOCALISATIONS;
 		if (resultsFileFormat == null)
 			resultsFileFormat = ResultsFileFormat.GDSC_TEXT;
-		if (resultsTable == null)
-			resultsTable = ResultsTable.NONE;
+		if (fileDistanceUnit == null)
+			fileDistanceUnit = DistanceUnit.PIXEL; // Legacy default
+		if (fileIntensityUnit == null)
+			fileIntensityUnit = IntensityUnit.PHOTON;
+		if (tableDistanceUnit == null)
+			tableDistanceUnit = DistanceUnit.PIXEL; // Legacy default
+		if (tableIntensityUnit == null)
+			tableIntensityUnit = IntensityUnit.PHOTON;
 	}
 
 	/*
