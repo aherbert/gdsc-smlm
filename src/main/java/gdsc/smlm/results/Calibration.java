@@ -1,5 +1,8 @@
 package gdsc.smlm.results;
 
+import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IntensityUnit;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -36,72 +39,6 @@ public class Calibration implements Cloneable
 		
 		/** The scmos. */
 		SCMOS { String getName() {return "sCMOS"; } },
-		;
-		//@formatter:on
-
-		/**
-		 * Gets the name.
-		 *
-		 * @return the name
-		 */
-		abstract String getName();
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Enum#toString()
-		 */
-		public String toString()
-		{
-			return getName();
-		}
-	}
-
-	/**
-	 * The distance unit.
-	 */
-	public enum DistanceUnit
-	{
-
-		/** The pixel. */
-		//@formatter:off
-		PIXEL { String getName() {return "pixel"; } }, 
-		
-		/** The nm. */
-		NM { String getName() {return "nm"; } },
-		;
-		//@formatter:on
-
-		/**
-		 * Gets the name.
-		 *
-		 * @return the name
-		 */
-		abstract String getName();
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Enum#toString()
-		 */
-		public String toString()
-		{
-			return getName();
-		}
-	}
-
-	/**
-	 * The intensity unit.
-	 */
-	public enum IntensityUnit
-	{
-
-		/** The count. */
-		//@formatter:off
-		COUNT { String getName() {return "count"; } }, 
-		
-		/** The photon. */
-		PHOTON { String getName() {return "photon"; } },
 		;
 		//@formatter:on
 

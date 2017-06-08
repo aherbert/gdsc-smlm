@@ -29,8 +29,8 @@ import gdsc.core.ij.Utils;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.results.Calibration.DistanceUnit;
-import gdsc.smlm.results.Calibration.IntensityUnit;
+import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IntensityUnit;
 
 /**
  * Saves the fit results to file using the simple MALK file format (Molecular Accuracy Localisation Keep). This consists

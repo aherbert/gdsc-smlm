@@ -12,8 +12,8 @@ import java.util.ListIterator;
 import java.util.Set;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.results.Calibration.DistanceUnit;
-import gdsc.smlm.results.Calibration.IntensityUnit;
+import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
