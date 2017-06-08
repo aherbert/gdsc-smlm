@@ -374,8 +374,8 @@ public class LoadLocalisations implements PlugIn
 		gd.addMessage("Calibration:");
 		gd.addNumericField("Pixel_size", pixelPitch, 3, 8, "nm");
 		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
-		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "ms");
-		String[] tUnits = SettingsManager.distanceUnitNames;
+		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "");
+		String[] tUnits = SettingsManager.timeUnitNames;
 		gd.addChoice("Time_unit", tUnits, tUnits[timeUnit]);
 
 		gd.addMessage("Records:");
