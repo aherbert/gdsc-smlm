@@ -36,7 +36,6 @@ public enum DistanceUnit implements Unit
 		}
 	},
 
-
 	/** Micrometer units */
 	UM
 	{
@@ -54,7 +53,7 @@ public enum DistanceUnit implements Unit
 			throw new UnitConversionException(this + " to " + to);
 		}
 	},
-	
+
 	/** Nanometer units */
 	NM
 	{
@@ -126,4 +125,22 @@ public enum DistanceUnit implements Unit
 	 */
 	abstract UnitConverter<DistanceUnit> buildConverter(DistanceUnit to, double nmPerPixel)
 			throws UnitConversionException;
+
+	/**
+	 * Creates the converter.
+	 *
+	 * @param to
+	 *            the to
+	 * @return the unit converter
+	 * @throws UnitConversionException
+	 *             if a converter cannot be created
+	 */
+	public UnitConverter<DistanceUnit> createConverter(DistanceUnit to) throws UnitConversionException
+	{
+		if (this == to)
+			return new IdentityUnitConverter<DistanceUnit>(this, this);
+		if (to == DistanceUnit.PIXEL)
+			throw new UnitConversionException(this + " to " + to + " requires nm/pixel");
+		return buildConverter(to, 1.0);
+	}
 }
