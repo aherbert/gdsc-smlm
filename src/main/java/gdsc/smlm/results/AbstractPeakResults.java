@@ -228,7 +228,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public boolean isEMCCD()
 	{
-		return (calibration != null && calibration.hasEMCCD()) ? calibration.isEmCCD() : DEFAULT_EMCCD;
+		return (calibration != null && calibration.isCCDCamera()) ? calibration.isEmCCD() : DEFAULT_EMCCD;
 	}
 
 	/**
@@ -241,7 +241,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	{
 		if (calibration != null)
 		{
-			return calibration.hasNmPerPixel() && calibration.hasGain() && calibration.hasEMCCD();
+			return calibration.hasNmPerPixel() && calibration.hasGain() && calibration.isCCDCamera();
 		}
 		return false;
 	}

@@ -5041,7 +5041,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				cal.setAmplification(simulationParameters.amplification);
 			if (!cal.hasReadNoise())
 				cal.setReadNoise(simulationParameters.readNoise);
-			if (!cal.hasEMCCD())
+			if (!cal.isCCDCamera())
 				cal.setEmCCD(simulationParameters.emCCD);
 			if (!cal.hasNmPerPixel())
 				cal.setNmPerPixel(simulationParameters.a);

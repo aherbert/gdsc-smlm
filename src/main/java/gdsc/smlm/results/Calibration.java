@@ -185,17 +185,6 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Checks for EMCCD.
-	 *
-	 * @return true, if successful
-	 */
-	@Deprecated
-	public boolean hasEMCCD()
-	{
-		return hasCameraType();
-	}
-
-	/**
 	 * Checks for amplification.
 	 *
 	 * @return true, if successful
@@ -699,21 +688,41 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Checks if the CCD camera was run in Electron Multiplying (EM) mode.
+	 * Checks for a CCD camera.
 	 *
-	 * @return true, if the CCD camera was run in Electron Multiplying (EM) mode.
-	 * @throws IllegalStateException
-	 *             if the missing field exceptions is enabled and the field has not been set
-	 * @deprecated Replaced by camera type
+	 * @return true, if successful
 	 */
-	@Deprecated
+	public boolean isCCDCamera()
+	{
+		return hasCameraType() && (cameraType == CameraType.CCD || cameraType == CameraType.EM_CCD);
+	}
+	
+	/**
+	 * Checks if the camera type was an Electron Multiplying (EM) CCD.
+	 *
+	 * @return true, if the camera type was an Electron Multiplying (EM) CCD
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the camera type field has not been set
+	 */
 	public boolean isEmCCD()
 	{
 		return getCameraType() == CameraType.EM_CCD;
 	}
+	
+	/**
+	 * Checks if the camera type was a standard CCD.
+	 *
+	 * @return true, if the camera type was a standard CCD.
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the camera type field has not been set
+	 */
+	public boolean isCCD()
+	{
+		return getCameraType() == CameraType.CCD;
+	}
 
 	/**
-	 * Set if the CCD camera was run in Electron Multiplying (EM) mode.
+	 * Set if the CCD camera was run in Electron Multiplying (EM) mode, otherwise assume a standard CCD.
 	 *
 	 * @param emCCD
 	 *            true, if the CCD camera was run in Electron Multiplying (EM) mode, otherwise set to CCD

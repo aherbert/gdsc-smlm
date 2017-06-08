@@ -88,7 +88,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		{
 			if (calibration.hasBias())
 				bias = (float) calibration.getBias();
-			if (calibration.hasNmPerPixel() && calibration.hasGain() && calibration.hasEMCCD())
+			if (calibration.hasNmPerPixel() && calibration.hasGain() && calibration.isCCDCamera())
 			{
 				canComputePrecision = true;
 				nmPerPixel = calibration.getNmPerPixel();
@@ -513,7 +513,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				builder.setReadNoise(calibration.getReadNoise());
 			if (calibration.hasBias())
 				builder.setBias(calibration.getBias());
-			if (calibration.hasEMCCD())
+			if (calibration.isCCDCamera())
 				builder.setEmCCD(calibration.isEmCCD());
 			if (calibration.hasAmplification())
 				builder.setAmplification(calibration.getAmplification());

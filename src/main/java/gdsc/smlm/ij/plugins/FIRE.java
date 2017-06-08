@@ -2632,7 +2632,7 @@ public class FIRE implements PlugIn
 		Calibration cal = results.getCalibration();
 		if (cal == null)
 			return false;
-		if (!cal.hasNmPerPixel() || !cal.hasGain() || !cal.hasEMCCD())
+		if (!cal.hasNmPerPixel() || !cal.hasGain() || !cal.isCCDCamera())
 			return false;
 
 		// Check all have a width and signal

@@ -16,6 +16,7 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Rectangle;
 
 import gdsc.core.ij.Utils;
+import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
@@ -81,7 +82,9 @@ public class SummariseResults implements PlugIn
 	{
 		if (summary == null || !summary.isShowing())
 		{
-			StringBuilder sb = new StringBuilder("Dataset\tN\tFrames\tTime\tMemory\tBounds\tnm/pixel\tGain\tms/frame");
+			StringBuilder sb = new StringBuilder("Dataset\tN\tFrames\tTime\tMemory\tBounds");
+			// Calibration
+			sb.append("\tnm/pixel\tGain\tms/frame\tCamera\tDUnit\tIUnit");
 			for (String statName : new String[] { "Precision (nm)", "SNR" })
 			{
 				sb.append("\tAv ").append(statName);
@@ -98,7 +101,7 @@ public class SummariseResults implements PlugIn
 
 	private static int NO = -1, UNKNOWN = 0, YES = 1;
 	private int removeNullResults = UNKNOWN;
-	
+
 	private void addSummary(StringBuilder sb, MemoryPeakResults result)
 	{
 		DescriptiveStatistics[] stats = new DescriptiveStatistics[2];
@@ -160,12 +163,20 @@ public class SummariseResults implements PlugIn
 			}
 		}
 
+		Calibration calibration = result.getCalibration();
+
 		sb.append(result.getName());
 		sb.append("\t").append(result.size());
 		int maxT = getMaxT(result);
 		sb.append("\t").append(maxT);
-		final double exposureTime = (result.getCalibration() != null) ? result.getCalibration().getExposureTime() : 0;
-		sb.append("\t").append(Utils.timeToString(maxT * exposureTime));
+		if (calibration != null && calibration.hasExposureTime())
+		{
+			sb.append("\t").append(Utils.timeToString(maxT * calibration.getExposureTime()));
+		}
+		else
+		{
+			sb.append("\t-");
+		}
 		if (size > 0)
 		{
 			boolean includeDeviations = result.getHead().paramsStdDev != null;
@@ -178,9 +189,21 @@ public class SummariseResults implements PlugIn
 			sb.append("\t-");
 		}
 		Rectangle bounds = result.getBounds(true);
-		sb.append(String.format("\t%d,%d,%d,%d\t%s\t%s\t%s", bounds.x, bounds.y, bounds.x + bounds.width,
-				bounds.y + bounds.height, Utils.rounded(result.getNmPerPixel(), 4), Utils.rounded(result.getGain(), 4),
-				Utils.rounded(exposureTime, 4)));
+		sb.append(
+				String.format("\t%d,%d,%d,%d", bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height));
+		if (calibration != null)
+		{
+			sb.append('\t').append(calibration.hasNmPerPixel() ? Utils.rounded(calibration.getNmPerPixel()) : '-');
+			sb.append('\t').append(calibration.hasGain() ? Utils.rounded(calibration.getGain()) : '-');
+			sb.append('\t').append(calibration.hasExposureTime() ? Utils.rounded(calibration.getExposureTime()) : '-');
+			sb.append('\t').append(calibration.hasCameraType() ? calibration.getCameraType() : '-');
+			sb.append('\t').append(calibration.hasDistanceUnit() ? calibration.getDistanceUnit() : '-');
+			sb.append('\t').append(calibration.hasIntensityUnit() ? calibration.getIntensityUnit() : '-');
+		}
+		else
+		{
+			sb.append("\t\t\t\t\t\t");
+		}
 		for (int i = 0; i < stats.length; i++)
 		{
 			if (Double.isNaN(stats[i].getMean()))
@@ -191,7 +214,7 @@ public class SummariseResults implements PlugIn
 			{
 				sb.append("\t").append(IJ.d2s(stats[i].getMean(), 3));
 				if (suffix[i] != 0)
-					sb.append(suffix[i]);					
+					sb.append(suffix[i]);
 				sb.append("\t").append(IJ.d2s(stats[i].getPercentile(50), 3));
 				sb.append("\t").append(IJ.d2s(stats[i].getMin(), 3));
 				sb.append("\t").append(IJ.d2s(stats[i].getMax(), 3));
