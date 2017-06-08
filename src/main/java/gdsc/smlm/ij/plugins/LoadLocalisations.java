@@ -36,6 +36,10 @@ import gdsc.smlm.results.AttributePeakResult;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IntensityUnit;
+import gdsc.smlm.units.TimeUnit;
+import gdsc.smlm.units.UnitConverter;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
@@ -52,29 +56,21 @@ public class LoadLocalisations implements PlugIn
 		float x, y, z, intensity, sx = -1, sy = -1, precision = -1;
 	}
 
-	public enum DistanceUnit
-	{
-		PIXEL, NM
-	}
-
-	public enum IntensityUnit
-	{
-		PHOTON, COUNT
-	}
-
 	public static class LocalisationList extends ArrayList<Localisation>
 	{
 		private static final long serialVersionUID = 6616011992365324247L;
 
+		public final TimeUnit timeUnit;
 		public final DistanceUnit distanceUnit;
 		public final IntensityUnit intensityUnit;
 		public final double gain;
 		public final double pixelPitch;
 		public final double exposureTime;
 
-		public LocalisationList(DistanceUnit distanceUnit, IntensityUnit intensityUnit, double gain, double pixelPitch,
-				double exposureTime)
+		public LocalisationList(TimeUnit timeUnit, DistanceUnit distanceUnit, IntensityUnit intensityUnit, double gain,
+				double pixelPitch, double exposureTime)
 		{
+			this.timeUnit = timeUnit;
 			this.distanceUnit = distanceUnit;
 			this.intensityUnit = intensityUnit;
 			this.gain = gain;
@@ -82,23 +78,24 @@ public class LoadLocalisations implements PlugIn
 			this.exposureTime = exposureTime;
 		}
 
-		private LocalisationList(int distanceUnit, int intensityUnit, double gain, double pixelPitch,
+		private LocalisationList(int timeUnit, int distanceUnit, int intensityUnit, double gain, double pixelPitch,
 				double exposureTime)
 		{
-			this(DistanceUnit.values()[distanceUnit], IntensityUnit.values()[intensityUnit], gain, pixelPitch,
-					exposureTime);
+			this(TimeUnit.values()[timeUnit], DistanceUnit.values()[distanceUnit],
+					IntensityUnit.values()[intensityUnit], gain, pixelPitch, exposureTime);
 		}
 
 		public MemoryPeakResults toPeakResults()
 		{
+			UnitConverter<TimeUnit> timeConverter = timeUnit.createConverter(TimeUnit.MILLISECONDS);
+			UnitConverter<DistanceUnit> distanceConverter = distanceUnit.createConverter(DistanceUnit.NM, pixelPitch);
+
 			MemoryPeakResults results = new MemoryPeakResults();
 			results.setName(name);
-			results.setCalibration(new Calibration(pixelPitch, gain, exposureTime));
-
-			// Convert to ADU count and pixels
-			final double convertI = (intensityUnit == IntensityUnit.PHOTON) ? gain : 1;
-			final double convertDtoPx = (distanceUnit == DistanceUnit.NM) ? 1 / pixelPitch : 1;
-			final double convertDtoNm = (distanceUnit == DistanceUnit.NM) ? 1 : pixelPitch;
+			Calibration calibration = new Calibration(pixelPitch, gain, timeConverter.convert(exposureTime));
+			calibration.setDistanceUnit(distanceUnit);
+			calibration.setIntensityUnit(intensityUnit);
+			results.setCalibration(calibration);
 
 			for (int i = 0; i < size(); i++)
 			{
@@ -107,25 +104,33 @@ public class LoadLocalisations implements PlugIn
 				if (l.intensity <= 0)
 					params[Gaussian2DFunction.SIGNAL] = 1;
 				else
-					params[Gaussian2DFunction.SIGNAL] = (float) (l.intensity * convertI);
-				params[Gaussian2DFunction.X_POSITION] = (float) (l.x * convertDtoPx);
-				params[Gaussian2DFunction.Y_POSITION] = (float) (l.y * convertDtoPx);
+					params[Gaussian2DFunction.SIGNAL] = (float) (l.intensity);
+				params[Gaussian2DFunction.X_POSITION] = (float) (l.x);
+				params[Gaussian2DFunction.Y_POSITION] = (float) (l.y);
 				// We may not have read in the widths
 				if (l.sx == -1)
 					params[Gaussian2DFunction.X_SD] = 1;
 				else
-					params[Gaussian2DFunction.X_SD] = (float) (l.sx * convertDtoPx);
+					params[Gaussian2DFunction.X_SD] = (float) (l.sx);
 				if (l.sy == -1)
 					params[Gaussian2DFunction.Y_SD] = 1;
 				else
-					params[Gaussian2DFunction.Y_SD] = (float) (l.sy * convertDtoPx);
+					params[Gaussian2DFunction.Y_SD] = (float) (l.sy);
+				// Store the z-position in the error field.
+				// Q. Should this be converted?
 				AttributePeakResult peakResult = new AttributePeakResult(l.t,
 						(int) params[Gaussian2DFunction.X_POSITION], (int) params[Gaussian2DFunction.Y_POSITION], 0,
-						l.z * convertDtoPx, 0, params, null);
+						l.z, 0, params, null);
 				peakResult.setId(l.id);
-				peakResult.setPrecision(l.precision * convertDtoNm);
+				// Convert to nm
+				peakResult.setPrecision(distanceConverter.convert(l.precision));
 				results.add(peakResult);
 			}
+
+			// Convert to preferred units
+			results.convertDistanceToPixelUnits();
+			results.convertIntensityToPhotonUnits();
+
 			return results;
 		}
 	}
@@ -149,6 +154,7 @@ public class LoadLocalisations implements PlugIn
 	private static String comment = "#";
 	private static String delimiter = "\\s+";
 	private static String name = "Localisations";
+	private static int timeUnit = 0;
 	private static int distanceUnit = 0;
 	private static int intensityUnit = 0;
 	private static double gain;
@@ -271,7 +277,7 @@ public class LoadLocalisations implements PlugIn
 		if (!getFields())
 			return null;
 
-		LocalisationList localisations = new LocalisationList(distanceUnit, intensityUnit, gain, pixelPitch,
+		LocalisationList localisations = new LocalisationList(timeUnit, distanceUnit, intensityUnit, gain, pixelPitch,
 				exposureTime);
 
 		final boolean hasComment = !Utils.isNullOrEmpty(comment);
@@ -369,14 +375,16 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Pixel_size", pixelPitch, 3, 8, "nm");
 		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
 		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "ms");
+		String[] tUnits = SettingsManager.distanceUnitNames;
+		gd.addChoice("Time_unit", tUnits, tUnits[timeUnit]);
 
 		gd.addMessage("Records:");
 		gd.addNumericField("Header_lines", header, 0);
 		gd.addStringField("Comment", comment);
 		gd.addStringField("Delimiter", delimiter);
-		String[] dUnits = SettingsManager.getNames((Object[]) DistanceUnit.values());
+		String[] dUnits = SettingsManager.distanceUnitNames;
 		gd.addChoice("Distance_unit", dUnits, dUnits[distanceUnit]);
-		String[] iUnits = SettingsManager.getNames((Object[]) IntensityUnit.values());
+		String[] iUnits = SettingsManager.intensityUnitNames;
 		gd.addChoice("Intensity_unit", iUnits, iUnits[intensityUnit]);
 
 		gd.addMessage("Define the fields:");
@@ -433,6 +441,7 @@ public class LoadLocalisations implements PlugIn
 		pixelPitch = gd.getNextNumber();
 		gain = gd.getNextNumber();
 		exposureTime = gd.getNextNumber();
+		timeUnit = gd.getNextChoiceIndex();
 
 		header = (int) gd.getNextNumber();
 		comment = gd.getNextString();

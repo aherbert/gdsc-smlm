@@ -65,6 +65,7 @@ import gdsc.smlm.results.TSFPeakResultsWriter;
 import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.units.DistanceUnit;
 import gdsc.smlm.units.IntensityUnit;
+import gdsc.smlm.units.TimeUnit;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -426,15 +427,6 @@ public class ResultsManager implements PlugIn
 		}
 	}
 
-	static String[] imageNames, formatNames, distanceNames, intensityNames;
-	static
-	{
-		imageNames = SettingsManager.getNames((Object[]) ResultsImage.values());
-		formatNames = SettingsManager.getNames((Object[]) ResultsFileFormat.values());
-		distanceNames = SettingsManager.getNames((Object[]) DistanceUnit.values());
-		intensityNames = SettingsManager.getNames((Object[]) IntensityUnit.values());
-	}
-
 	private boolean showDialog()
 	{
 		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -481,10 +473,10 @@ public class ResultsManager implements PlugIn
 					return;
 				}
 				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
-				egd.addChoice("Table_distance_unit", distanceNames,
-						distanceNames[resultsSettings.getTableDistanceUnit().ordinal()]);
-				egd.addChoice("Table_intensity_unit", intensityNames,
-						intensityNames[resultsSettings.getTableIntensityUnit().ordinal()]);
+				egd.addChoice("Table_distance_unit", SettingsManager.distanceUnitNames,
+						SettingsManager.distanceUnitNames[resultsSettings.getTableDistanceUnit().ordinal()]);
+				egd.addChoice("Table_intensity_unit", SettingsManager.intensityUnitNames,
+						SettingsManager.intensityUnitNames[resultsSettings.getTableIntensityUnit().ordinal()]);
 				egd.addCheckbox("Table_show_precision", resultsSettings.tableComputePrecision);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
@@ -500,8 +492,8 @@ public class ResultsManager implements PlugIn
 				ResultsImage.SIGNAL_AV_PRECISION);
 		final EnumSet<ResultsImage> requireWeighted = EnumSet.of(ResultsImage.LOCALISATIONS,
 				ResultsImage.SIGNAL_INTENSITY, ResultsImage.FRAME_NUMBER, ResultsImage.ERROR);
-		gd.addChoice("Image", imageNames, imageNames[resultsSettings.getResultsImage().ordinal()],
-				new OptionListener<Choice>()
+		gd.addChoice("Image", SettingsManager.resultsImageNames,
+				SettingsManager.resultsImageNames[resultsSettings.getResultsImage().ordinal()], new OptionListener<Choice>()
 				{
 					public void collectOptions(Choice field)
 					{
@@ -542,7 +534,8 @@ public class ResultsManager implements PlugIn
 		gd.addMessage("--- File output ---");
 		// Do not add a results file to prevent constant overwrite messages
 		gd.addFilenameField("Results_file", "");
-		gd.addChoice("Results_format", formatNames, formatNames[resultsSettings.getResultsFileFormat().ordinal()],
+		gd.addChoice("Results_format", SettingsManager.resultsFileFormatNames,
+				SettingsManager.resultsFileFormatNames[resultsSettings.getResultsFileFormat().ordinal()],
 				new OptionListener<Choice>()
 				{
 					public void collectOptions(Choice field)
@@ -561,10 +554,10 @@ public class ResultsManager implements PlugIn
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (resultsFileFormat == ResultsFileFormat.GDSC_TEXT)
 						{
-							egd.addChoice("File_distance_unit", distanceNames,
-									distanceNames[resultsSettings.getFileDistanceUnit().ordinal()]);
-							egd.addChoice("File_intensity_unit", intensityNames,
-									intensityNames[resultsSettings.getFileIntensityUnit().ordinal()]);
+							egd.addChoice("File_distance_unit", SettingsManager.distanceUnitNames,
+									SettingsManager.distanceUnitNames[resultsSettings.getFileDistanceUnit().ordinal()]);
+							egd.addChoice("File_intensity_unit", SettingsManager.intensityUnitNames,
+									SettingsManager.intensityUnitNames[resultsSettings.getFileIntensityUnit().ordinal()]);
 							egd.addCheckbox("File_show_precision", resultsSettings.fileComputePrecision);
 						}
 						egd.addCheckbox("Show_deviations", resultsSettings.showDeviations);

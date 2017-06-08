@@ -10,6 +10,10 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
+import gdsc.core.utils.NoiseEstimator.Method;
+import gdsc.smlm.engine.DataFilter;
+import gdsc.smlm.engine.DataFilterType;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -25,6 +29,13 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.fitting.FitFunction;
+import gdsc.smlm.fitting.FitSolver;
+import gdsc.smlm.ij.results.ResultsFileFormat;
+import gdsc.smlm.ij.results.ResultsImage;
+import gdsc.smlm.units.DistanceUnit;
+import gdsc.smlm.units.IntensityUnit;
+import gdsc.smlm.units.TimeUnit;
 import ij.IJ;
 import ij.Prefs;
 
@@ -37,6 +48,23 @@ public class SettingsManager
 			System.getProperty("file.separator") + "gdsc.smlm.settings.xml";
 
 	private static XStream xs = null;
+
+	public static String[] resultsImageNames, resultsFileFormatNames, distanceUnitNames, intensityUnitNames,
+			timeUnitNames, dataFilterTypeNames, dataFilterNames, fitSolverNames, fitFunctionNames,
+			noiseEstimatorMethodNames;
+	static
+	{
+		resultsImageNames = getNames((Object[]) ResultsImage.values());
+		resultsFileFormatNames = getNames((Object[]) ResultsFileFormat.values());
+		distanceUnitNames = getNames((Object[]) DistanceUnit.values());
+		intensityUnitNames = getNames((Object[]) IntensityUnit.values());
+		timeUnitNames = getNames((Object[]) TimeUnit.values());
+		dataFilterTypeNames = getNames((Object[]) DataFilterType.values());
+		dataFilterNames = getNames((Object[]) DataFilter.values());
+		fitSolverNames = getNames((Object[]) FitSolver.values());
+		fitFunctionNames = getNames((Object[]) FitFunction.values());
+		noiseEstimatorMethodNames = getNames((Object[]) Method.values());
+	}
 
 	/**
 	 * @return The settings filename (from the ImageJ preferences or the default in the home directory)

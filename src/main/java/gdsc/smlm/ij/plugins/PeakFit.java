@@ -700,16 +700,6 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		return true;
 	}
 
-	static String[] filterTypes, filterNames, solverNames, functionNames, noiseMethodNames;
-	static
-	{
-		filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
-		filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-		solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
-		functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
-		noiseMethodNames = SettingsManager.getNames((Object[]) Method.values());
-	}
-
 	@SuppressWarnings("unchecked")
 	private int showDialog(ImagePlus imp)
 	{
@@ -767,8 +757,10 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			gd.addNumericField("Initial_StdDev1", fitConfig.getInitialPeakStdDev1(), 3);
 			gd.addNumericField("Initial_Angle", fitConfig.getInitialAngle(), 3);
 		}
-		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
+				SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
+		gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
+				SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
@@ -783,8 +775,10 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		if (!maximaIdentification)
 		{
 			gd.addMessage("--- Gaussian fitting ---");
-			gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
-			gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+			gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
+					SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
+			gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
+					SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
 			if (extraOptions)
 				gd.addCheckbox("Fit_background", fitConfig.isBackgroundFitting());
 
@@ -808,7 +802,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			if (extraOptions)
 			{
 				gd.addNumericField("Noise", fitConfig.getNoise(), 2);
-				gd.addChoice("Noise_method", noiseMethodNames, noiseMethodNames[config.getNoiseMethod().ordinal()]);
+				gd.addChoice("Noise_method", SettingsManager.noiseEstimatorMethodNames,
+						SettingsManager.noiseEstimatorMethodNames[config.getNoiseMethod().ordinal()]);
 			}
 			gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 			gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
@@ -837,10 +832,10 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 					return;
 				}
 				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
-				egd.addChoice("Table_distance_unit", ResultsManager.distanceNames,
-						ResultsManager.distanceNames[resultsSettings.getTableDistanceUnit().ordinal()]);
-				egd.addChoice("Table_intensity_unit", ResultsManager.intensityNames,
-						ResultsManager.intensityNames[resultsSettings.getTableIntensityUnit().ordinal()]);
+				egd.addChoice("Table_distance_unit", SettingsManager.distanceUnitNames,
+						SettingsManager.distanceUnitNames[resultsSettings.getTableDistanceUnit().ordinal()]);
+				egd.addChoice("Table_intensity_unit", SettingsManager.intensityUnitNames,
+						SettingsManager.intensityUnitNames[resultsSettings.getTableIntensityUnit().ordinal()]);
 				egd.addCheckbox("Table_show_precision", resultsSettings.tableComputePrecision);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
@@ -852,8 +847,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		});
 
 		gd.addMessage("--- Image output ---");
-		gd.addChoice("Image", ResultsManager.imageNames,
-				ResultsManager.imageNames[resultsSettings.getResultsImage().ordinal()]);
+		gd.addChoice("Image", SettingsManager.resultsImageNames,
+				SettingsManager.resultsImageNames[resultsSettings.getResultsImage().ordinal()]);
 		gd.addCheckbox("Weighted", resultsSettings.weightedImage);
 		gd.addCheckbox("Equalised", resultsSettings.equalisedImage);
 		gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
@@ -865,8 +860,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		}
 		gd.addMessage("--- File output ---");
 		gd.addDirectoryField("Results_dir", resultsSettings.resultsDirectory);
-		gd.addChoice("Results_format", ResultsManager.formatNames,
-				ResultsManager.formatNames[resultsSettings.getResultsFileFormat().ordinal()]);
+		gd.addChoice("Results_format", SettingsManager.resultsFileFormatNames,
+				SettingsManager.resultsFileFormatNames[resultsSettings.getResultsFileFormat().ordinal()]);
 		gd.addMessage(" ");
 		gd.addCheckbox("Results_in_memory", resultsSettings.resultsInMemory);
 
