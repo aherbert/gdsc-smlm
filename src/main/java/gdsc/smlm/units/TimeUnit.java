@@ -26,6 +26,12 @@ public enum TimeUnit implements Unit
 			return "frame";
 		}
 
+		@Override
+		public String getShortName()
+		{
+			return "t";
+		}
+
 		UnitConverter<TimeUnit> buildConverter(TimeUnit to, double msPerFrame) throws UnitConversionException
 		{
 			if (to == TimeUnit.MILLISECOND)
@@ -40,6 +46,11 @@ public enum TimeUnit implements Unit
 	SECOND
 	{
 		public String getName()
+		{
+			return "second";
+		}
+
+		public String getShortName()
 		{
 			return "s";
 		}
@@ -58,6 +69,11 @@ public enum TimeUnit implements Unit
 	MILLISECOND
 	{
 		public String getName()
+		{
+			return "millisecond";
+		}
+
+		public String getShortName()
 		{
 			return "ms";
 		}
@@ -78,6 +94,13 @@ public enum TimeUnit implements Unit
 	 * @return the name
 	 */
 	public abstract String getName();
+
+	/**
+	 * Gets the short name.
+	 *
+	 * @return the short name
+	 */
+	public abstract String getShortName();
 
 	/*
 	 * (non-Javadoc)

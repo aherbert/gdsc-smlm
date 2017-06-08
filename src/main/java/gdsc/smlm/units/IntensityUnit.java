@@ -28,6 +28,11 @@ public enum IntensityUnit implements Unit
 			return "count";
 		}
 
+		public String getShortName()
+		{
+			return "ADU";
+		}
+		
 		UnitConverter<IntensityUnit> buildConverter(IntensityUnit to, double offset, double countPerPhoton)
 				throws UnitConversionException
 		{
@@ -53,6 +58,11 @@ public enum IntensityUnit implements Unit
 			return "photon";
 		}
 
+		public String getShortName()
+		{
+			return "p";
+		}
+		
 		UnitConverter<IntensityUnit> buildConverter(IntensityUnit to, double offset, double countPerPhoton)
 				throws UnitConversionException
 		{
@@ -76,6 +86,13 @@ public enum IntensityUnit implements Unit
 	 * @return the name
 	 */
 	public abstract String getName();
+
+	/**
+	 * Gets the short name.
+	 *
+	 * @return the short name
+	 */
+	public abstract String getShortName();
 
 	/*
 	 * (non-Javadoc)

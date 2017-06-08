@@ -26,6 +26,11 @@ public enum DistanceUnit implements Unit
 			return "pixel";
 		}
 
+		public String getShortName()
+		{
+			return "px";
+		}
+		
 		UnitConverter<DistanceUnit> buildConverter(DistanceUnit to, double nmPerPixel) throws UnitConversionException
 		{
 			if (to == DistanceUnit.NM)
@@ -40,6 +45,11 @@ public enum DistanceUnit implements Unit
 	UM
 	{
 		public String getName()
+		{
+			return "micrometer";
+		}
+
+		public String getShortName()
 		{
 			return "um";
 		}
@@ -59,9 +69,14 @@ public enum DistanceUnit implements Unit
 	{
 		public String getName()
 		{
-			return "nm";
+			return "nanometer";
 		}
 
+		public String getShortName()
+		{
+			return "nm";
+		}
+		
 		UnitConverter<DistanceUnit> buildConverter(DistanceUnit to, double nmPerPixel) throws UnitConversionException
 		{
 			if (to == DistanceUnit.PIXEL)
@@ -79,6 +94,13 @@ public enum DistanceUnit implements Unit
 	 */
 	public abstract String getName();
 
+	/**
+	 * Gets the short name.
+	 *
+	 * @return the short name
+	 */
+	public abstract String getShortName();
+	
 	/*
 	 * (non-Javadoc)
 	 * 
