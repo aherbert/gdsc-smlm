@@ -12,6 +12,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.NoiseEstimator.Method;
+import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IntensityUnit;
 import gdsc.smlm.data.units.TimeUnit;
@@ -66,7 +67,7 @@ public class SettingsManager
 		fitSolverNames = getNames((Object[]) FitSolver.values());
 		fitFunctionNames = getNames((Object[]) FitFunction.values());
 		noiseEstimatorMethodNames = getNames((Object[]) Method.values());
-		fitCriteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());		
+		fitCriteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
 		clusteringAlgorithmNames = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
 	}
 
@@ -105,7 +106,18 @@ public class SettingsManager
 		String[] names = new String[objects.length];
 		for (int i = 0; i < names.length; i++)
 		{
-			String name = objects[i].toString();
+			String name;
+			if (objects[i] instanceof NamedObject)
+			{
+				NamedObject o = (NamedObject) objects[i];
+				name = o.getName();
+				if (!name.equals(o.getShortName()))
+					name += " (" + o.getShortName() + ")";
+			}
+			else
+			{
+				name = objects[i].toString();
+			}
 
 			if (name.length() > 0)
 			{
