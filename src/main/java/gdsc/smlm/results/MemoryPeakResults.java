@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
+import gdsc.smlm.data.units.AngleUnit;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IntensityUnit;
 import gdsc.smlm.data.units.UnitConversionException;
@@ -852,5 +853,74 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		{
 			params[Gaussian2DFunction.SIGNAL] = (float) c.convert(params[Gaussian2DFunction.SIGNAL]);
 		}
+	}
+
+	/**
+	 * Checks if angle is in radian units.
+	 *
+	 * @return true, if angle is in radians
+	 */
+	public boolean isAngleInRadianUnits()
+	{
+		if (calibration != null && calibration.hasAngleUnit())
+		{
+			if (calibration.getAngleUnit() == AngleUnit.RADIAN)
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Convert the angle units to radians. Requires the calibration to have angle units.
+	 *
+	 * @return true, if the angle units are now in radians
+	 */
+	public boolean convertAngleToRadianUnits()
+	{
+		if (calibration != null && calibration.hasAngleUnit())
+		{
+			if (calibration.getAngleUnit() == AngleUnit.RADIAN)
+				return true;
+
+			try
+			{
+				UnitConverter<AngleUnit> c = calibration.getAngleUnit().createConverter(AngleUnit.RADIAN);
+				// Convert data
+				for (PeakResult p : results)
+				{
+					convertAngle(p.params, c);
+					if (p.paramsStdDev != null)
+						convertAngle(p.paramsStdDev, c);
+				}
+				calibration.setAngleUnit(AngleUnit.RADIAN);
+				return true;
+			}
+			catch (IllegalStateException e)
+			{
+				// Gracefully fail so ignore this
+			}
+		}
+		return false;
+	}
+
+	private void convertAngle(float[] params, UnitConverter<AngleUnit> c)
+	{
+		for (int i = Gaussian2DFunction.SHAPE; i < params.length; i += 6)
+		{
+			params[i] = (float) c.convert(params[i]);
+		}
+	}
+
+	/**
+	 * Convert to preference units.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean convertToPreferenceUnits()
+	{
+		boolean success = convertDistanceToPixelUnits();
+		success &= convertIntensityToPhotonUnits();
+		success &= convertAngleToRadianUnits();
+		return success;
 	}
 }

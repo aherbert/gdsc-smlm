@@ -1588,8 +1588,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					}
 				}
 
-				convertParameters(fitParams);
-
 				results = new PreprocessedPeakResult[npeaks];
 
 				// We must compute a local background for all the spots
@@ -2277,8 +2275,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					}
 				}
 
-				convertParameters(fitParams);
-
 				results = new PreprocessedPeakResult[1];
 
 				results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams, fitParams, 0,
@@ -2310,19 +2306,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				return "Chi-Squared";
 			else
 				return "Adjusted R^2";
-		}
-
-		private double[] convertParameters(double[] params)
-		{
-			// Convert radians to degrees (if elliptical fitting)
-			if (fitConfig.isAngleFitting())
-			{
-				for (int i = 6; i < params.length; i += 6)
-				{
-					params[i - 4] *= 180.0 / Math.PI;
-				}
-			}
-			return params;
 		}
 
 		private MultiPathFitResult.FitResult createResult(FitResult fitResult, PreprocessedPeakResult[] results)
@@ -2772,8 +2755,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				}
 
 				// Return results for validation
-				convertParameters(fitParams);
-
 				final PreprocessedPeakResult[] results = new PreprocessedPeakResult[nPeaks];
 				for (int i = 0; i < nPeaks; i++)
 				{
@@ -3781,7 +3762,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					peakParams[i * 6 + Gaussian2DFunction.X_POSITION] += cc.fromFitRegionToGlobalX();
 					peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += cc.fromFitRegionToGlobalY();
-					peakParams[i * 6 + Gaussian2DFunction.SHAPE] *= 180.0 / Math.PI;
+					if (fitConfig.isAngleFitting())
+						peakParams[i * 6 + Gaussian2DFunction.SHAPE] *= 180.0 / Math.PI;
 				}
 			}
 			final int x = candidates.get(candidateId).x;

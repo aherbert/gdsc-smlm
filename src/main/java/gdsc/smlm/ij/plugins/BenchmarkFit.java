@@ -1085,6 +1085,8 @@ public class BenchmarkFit implements PlugIn
 	 */
 	private double[] getConversionFactors()
 	{
+		// TODO - Update this when the fitting is done in photons
+		
 		final double[] convert = new double[NAMES.length];
 		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / benchmarkParameters.gain : 0;
 		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() &&

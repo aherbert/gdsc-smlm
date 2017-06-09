@@ -2,6 +2,8 @@ package gdsc.smlm.results;
 
 import java.util.ArrayList;
 
+import gdsc.smlm.data.config.CameraType;
+import gdsc.smlm.data.units.AngleUnit;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IdentityUnitConverter;
 import gdsc.smlm.data.units.IntensityUnit;
@@ -29,42 +31,6 @@ import gdsc.smlm.data.units.UnitConverter;
  */
 public class Calibration implements Cloneable
 {
-	/**
-	 * The camera type.
-	 */
-	public enum CameraType
-	{
-
-		/** The ccd. */
-		//@formatter:off
-		CCD { String getName() {return "CCD"; } }, 
-		
-		/** The em ccd. */
-		EM_CCD { String getName() {return "EM-CCD"; } },
-		
-		/** The scmos. */
-		SCMOS { String getName() {return "sCMOS"; } },
-		;
-		//@formatter:on
-
-		/**
-		 * Gets the name.
-		 *
-		 * @return the name
-		 */
-		abstract String getName();
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Enum#toString()
-		 */
-		public String toString()
-		{
-			return getName();
-		}
-	}
-
 	/** The field missing exception. */
 	// State flags
 	private static int FIELD_MISSING_EXCEPTION = 0x00000001;
@@ -95,6 +61,9 @@ public class Calibration implements Cloneable
 
 	/** The field intensity unit. */
 	private static int FIELD_INTENSITY_UNIT = 0x00000200;
+
+	/** The field intensity unit. */
+	private static int FIELD_ANGLE_UNIT = 0x00000400;
 
 	/** The fields. */
 	private int fields = 0;
@@ -135,6 +104,23 @@ public class Calibration implements Cloneable
 	}
 
 	/**
+	 * Sets the has nm per pixel.
+	 */
+	private void setHasNmPerPixel()
+	{
+		fields |= FIELD_NM_PER_PIXEL;
+	}
+
+	/**
+	 * Clear has nm per pixel.
+	 */
+	public void clearHasNmPerPixel()
+	{
+		fields = fields & ~FIELD_NM_PER_PIXEL;
+		nmPerPixel = 0;
+	}
+
+	/**
 	 * Checks for gain.
 	 *
 	 * @return true, if successful
@@ -142,6 +128,23 @@ public class Calibration implements Cloneable
 	public boolean hasGain()
 	{
 		return ((fields & FIELD_GAIN) == FIELD_GAIN);
+	}
+
+	/**
+	 * Sets the has gain.
+	 */
+	private void setHasGain()
+	{
+		fields |= FIELD_GAIN;
+	}
+
+	/**
+	 * Clear has gain.
+	 */
+	public void clearHasGain()
+	{
+		fields = fields & ~FIELD_GAIN;
+		gain = 0;
 	}
 
 	/**
@@ -155,6 +158,23 @@ public class Calibration implements Cloneable
 	}
 
 	/**
+	 * Sets the has exposure time.
+	 */
+	private void setHasExposureTime()
+	{
+		fields |= FIELD_EXPOSURE_TIME;
+	}
+
+	/**
+	 * Clear has exposure time.
+	 */
+	public void clearHasExposureTime()
+	{
+		fields = fields & ~FIELD_EXPOSURE_TIME;
+		exposureTime = 0;
+	}
+
+	/**
 	 * Checks for read noise.
 	 *
 	 * @return true, if successful
@@ -162,6 +182,23 @@ public class Calibration implements Cloneable
 	public boolean hasReadNoise()
 	{
 		return ((fields & FIELD_READ_NOISE) == FIELD_READ_NOISE);
+	}
+
+	/**
+	 * Sets the has read noise.
+	 */
+	private void setHasReadNoise()
+	{
+		fields |= FIELD_READ_NOISE;
+	}
+
+	/**
+	 * Clear has read noise.
+	 */
+	public void clearHasReadNoise()
+	{
+		fields = fields & ~FIELD_READ_NOISE;
+		readNoise = -1;
 	}
 
 	/**
@@ -175,6 +212,23 @@ public class Calibration implements Cloneable
 	}
 
 	/**
+	 * Sets the has bias.
+	 */
+	private void setHasBias()
+	{
+		fields |= FIELD_BIAS;
+	}
+
+	/**
+	 * Clear has bias.
+	 */
+	public void clearHasBias()
+	{
+		fields = fields & ~FIELD_BIAS;
+		bias = -1;
+	}
+
+	/**
 	 * Checks for camera type.
 	 *
 	 * @return true, if successful
@@ -185,150 +239,11 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Checks for amplification.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean hasAmplification()
-	{
-		return ((fields & FIELD_AMPLIFICATION) == FIELD_AMPLIFICATION);
-	}
-
-	/**
-	 * Checks for distance unit.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean hasDistanceUnit()
-	{
-		return ((fields & FIELD_DISTANCE_UNIT) == FIELD_DISTANCE_UNIT);
-	}
-
-	/**
-	 * Checks for intensity unit.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean hasIntensityUnit()
-	{
-		return ((fields & FIELD_INTENSITY_UNIT) == FIELD_INTENSITY_UNIT);
-	}
-
-	/**
-	 * Sets the has nm per pixel.
-	 */
-	private void setHasNmPerPixel()
-	{
-		fields |= FIELD_NM_PER_PIXEL;
-	}
-
-	/**
-	 * Sets the has gain.
-	 */
-	private void setHasGain()
-	{
-		fields |= FIELD_GAIN;
-	}
-
-	/**
-	 * Sets the has exposure time.
-	 */
-	private void setHasExposureTime()
-	{
-		fields |= FIELD_EXPOSURE_TIME;
-	}
-
-	/**
-	 * Sets the has read noise.
-	 */
-	private void setHasReadNoise()
-	{
-		fields |= FIELD_READ_NOISE;
-	}
-
-	/**
-	 * Sets the has bias.
-	 */
-	private void setHasBias()
-	{
-		fields |= FIELD_BIAS;
-	}
-
-	/**
 	 * Sets the has camera type.
 	 */
 	private void setHasCameraType()
 	{
 		fields |= FIELD_CAMERA_TYPE;
-	}
-
-	/**
-	 * Sets the has amplification.
-	 */
-	private void setHasAmplification()
-	{
-		fields |= FIELD_AMPLIFICATION;
-	}
-
-	/**
-	 * Sets the has distance unit.
-	 */
-	private void setHasDistanceUnit()
-	{
-		fields |= FIELD_DISTANCE_UNIT;
-	}
-
-	/**
-	 * Sets the has intensity unit.
-	 */
-	private void setHasIntensityUnit()
-	{
-		fields |= FIELD_INTENSITY_UNIT;
-	}
-
-	/**
-	 * Clear has nm per pixel.
-	 */
-	public void clearHasNmPerPixel()
-	{
-		fields = fields & ~FIELD_NM_PER_PIXEL;
-		nmPerPixel = 0;
-	}
-
-	/**
-	 * Clear has gain.
-	 */
-	public void clearHasGain()
-	{
-		fields = fields & ~FIELD_GAIN;
-		gain = 0;
-	}
-
-	/**
-	 * Clear has exposure time.
-	 */
-	public void clearHasExposureTime()
-	{
-		fields = fields & ~FIELD_EXPOSURE_TIME;
-		exposureTime = 0;
-	}
-
-	/**
-	 * Clear has read noise.
-	 */
-	public void clearHasReadNoise()
-	{
-		fields = fields & ~FIELD_READ_NOISE;
-		readNoise = -1;
-	}
-
-	/**
-	 * Clear has bias.
-	 */
-	public void clearHasBias()
-	{
-		fields = fields & ~FIELD_BIAS;
-		bias = -1;
 	}
 
 	/**
@@ -350,12 +265,48 @@ public class Calibration implements Cloneable
 	}
 
 	/**
+	 * Checks for amplification.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasAmplification()
+	{
+		return ((fields & FIELD_AMPLIFICATION) == FIELD_AMPLIFICATION);
+	}
+
+	/**
+	 * Sets the has amplification.
+	 */
+	private void setHasAmplification()
+	{
+		fields |= FIELD_AMPLIFICATION;
+	}
+
+	/**
 	 * Clear has amplification.
 	 */
 	public void clearHasAmplification()
 	{
 		fields = fields & ~FIELD_AMPLIFICATION;
 		amplification = 0;
+	}
+
+	/**
+	 * Checks for distance unit.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasDistanceUnit()
+	{
+		return ((fields & FIELD_DISTANCE_UNIT) == FIELD_DISTANCE_UNIT);
+	}
+
+	/**
+	 * Sets the has distance unit.
+	 */
+	private void setHasDistanceUnit()
+	{
+		fields |= FIELD_DISTANCE_UNIT;
 	}
 
 	/**
@@ -368,12 +319,57 @@ public class Calibration implements Cloneable
 	}
 
 	/**
+	 * Checks for intensity unit.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasIntensityUnit()
+	{
+		return ((fields & FIELD_INTENSITY_UNIT) == FIELD_INTENSITY_UNIT);
+	}
+
+	/**
+	 * Sets the has intensity unit.
+	 */
+	private void setHasIntensityUnit()
+	{
+		fields |= FIELD_INTENSITY_UNIT;
+	}
+
+	/**
 	 * Clear has intensity unit.
 	 */
 	public void clearHasIntensityUnit()
 	{
 		fields = fields & ~FIELD_INTENSITY_UNIT;
 		intensityUnit = null;
+	}
+
+	/**
+	 * Checks for angle unit.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasAngleUnit()
+	{
+		return ((fields & FIELD_ANGLE_UNIT) == FIELD_ANGLE_UNIT);
+	}
+
+	/**
+	 * Sets the has angle unit.
+	 */
+	private void setHasAngleUnit()
+	{
+		fields |= FIELD_ANGLE_UNIT;
+	}
+
+	/**
+	 * Clear has angle unit.
+	 */
+	public void clearHasAngleUnit()
+	{
+		fields = fields & ~FIELD_ANGLE_UNIT;
+		angleUnit = null;
 	}
 
 	/** The image pixel size in nanometers. */
@@ -419,6 +415,9 @@ public class Calibration implements Cloneable
 	/** The intensity unit. */
 	private IntensityUnit intensityUnit = null;
 
+	/** The angle unit. */
+	private AngleUnit angleUnit = null;
+
 	/**
 	 * Default constructor. All properties are set to be invalid but field missing exceptions are disabled.
 	 */
@@ -449,9 +448,9 @@ public class Calibration implements Cloneable
 	 */
 	public Calibration(double nmPerPixel, double gain, double exposureTime)
 	{
-		this.setNmPerPixel(nmPerPixel);
-		this.setGain(gain);
-		this.setExposureTime(exposureTime);
+		setNmPerPixel(nmPerPixel);
+		setGain(gain);
+		setExposureTime(exposureTime);
 	}
 
 	/*
@@ -484,7 +483,7 @@ public class Calibration implements Cloneable
 
 	/**
 	 * Validate the calibration by calling each property setter with the current value. This will set the valid flags to
-	 * false If the current value is not valid.
+	 * false if the current value is not valid.
 	 */
 	public void validate()
 	{
@@ -497,6 +496,7 @@ public class Calibration implements Cloneable
 		setAmplification(amplification);
 		setDistanceUnit(distanceUnit);
 		setIntensityUnit(intensityUnit);
+		setAngleUnit(angleUnit);
 	}
 
 	/**
@@ -696,7 +696,7 @@ public class Calibration implements Cloneable
 	{
 		return hasCameraType() && (cameraType == CameraType.CCD || cameraType == CameraType.EM_CCD);
 	}
-	
+
 	/**
 	 * Checks if the camera type was an Electron Multiplying (EM) CCD.
 	 *
@@ -708,7 +708,7 @@ public class Calibration implements Cloneable
 	{
 		return getCameraType() == CameraType.EM_CCD;
 	}
-	
+
 	/**
 	 * Checks if the camera type was a standard CCD.
 	 *
@@ -844,6 +844,37 @@ public class Calibration implements Cloneable
 	}
 
 	/**
+	 * Get the angle unit used for the results.
+	 *
+	 * @return the angleUnit
+	 * @throws IllegalStateException
+	 *             if the missing field exceptions is enabled and the field has not been set to a valid value
+	 */
+	public AngleUnit getAngleUnit()
+	{
+		if (isFieldMissingException() && !hasAngleUnit())
+			throw new IllegalStateException();
+		return angleUnit;
+	}
+
+	/**
+	 * Set the angle unit used for the results.
+	 *
+	 * @param angleUnit
+	 *            The new angleUnit
+	 */
+	public void setAngleUnit(AngleUnit angleUnit)
+	{
+		if (angleUnit != null)
+		{
+			setHasAngleUnit();
+			this.angleUnit = angleUnit;
+		}
+		else
+			clearHasAngleUnit();
+	}
+
+	/**
 	 * Gets a distance converter to update values. If the converter can be created then the current distance unit in
 	 * this instance is updated.
 	 * <p>
@@ -915,5 +946,38 @@ public class Calibration implements Cloneable
 			list.add(c);
 		}
 		return list;
+	}
+
+	/**
+	 * Gets a angle converter to update values. If the converter can be created then the current angle unit in
+	 * this instance is updated.
+	 * <p>
+	 * If the calibration is already in the given units or conversion is not possible
+	 * then an identity converter will be returned.
+	 * <p>
+	 * It is recommended to clone the calibration before invoking this method as the state may change.
+	 *
+	 * @param toAngleUnit
+	 *            the angle unit
+	 * @return the angle converter
+	 */
+	public UnitConverter<AngleUnit> getAngleConverter(AngleUnit toAngleUnit)
+	{
+		UnitConverter<AngleUnit> c = null;
+		if (toAngleUnit != null && hasAngleUnit() && angleUnit != toAngleUnit)
+		{
+			try
+			{
+				c = angleUnit.createConverter(toAngleUnit);
+				setAngleUnit(toAngleUnit);
+			}
+			catch (UnitConversionException e)
+			{
+				// Ignore this
+			}
+		}
+		if (c == null)
+			c = new IdentityUnitConverter<AngleUnit>(angleUnit);
+		return c;
 	}
 }

@@ -274,9 +274,9 @@ public class TSFPeakResultsReader
 		switch (thetaUnits)
 		{
 			case DEGREES:
+				thetaConversion = (float) (Math.PI / 180.0);
 				break;
 			case RADIANS:
-				thetaConversion = (float) (180.0 / Math.PI);
 				break;
 			default:
 				System.err.println("Unsupported theta units conversion: " + thetaUnits);

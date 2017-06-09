@@ -128,8 +128,7 @@ public class LoadLocalisations implements PlugIn
 			}
 
 			// Convert to preferred units
-			results.convertDistanceToPixelUnits();
-			results.convertIntensityToPhotonUnits();
+			results.convertToPreferenceUnits();
 
 			return results;
 		}

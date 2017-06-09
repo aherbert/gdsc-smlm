@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.results;
 
+import gdsc.smlm.data.config.CameraType;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IdentityUnitConverter;
 import gdsc.smlm.data.units.IntensityUnit;
@@ -23,7 +24,6 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.Calibration.CameraType;
 import ij.WindowManager;
 import ij.text.TextPanel;
 import ij.text.TextWindow;

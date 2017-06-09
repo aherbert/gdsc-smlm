@@ -514,8 +514,7 @@ public class PeakResultsReader
 			results.trimToSize();
 
 			// Convert to the preferred units if possible
-			results.convertDistanceToPixelUnits();
-			results.convertIntensityToPhotonUnits();
+			results.convertToPreferenceUnits();
 		}
 		return results;
 	}
