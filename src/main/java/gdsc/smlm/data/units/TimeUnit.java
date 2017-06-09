@@ -29,7 +29,7 @@ public enum TimeUnit implements Unit
 		@Override
 		public String getShortName()
 		{
-			return "t";
+			return "t"; // Follow XYZCT conversion for 5D image stacks
 		}
 
 		UnitConverter<TimeUnit> buildConverter(TimeUnit to, double msPerFrame) throws UnitConversionException

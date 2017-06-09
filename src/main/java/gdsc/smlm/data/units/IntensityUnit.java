@@ -30,7 +30,7 @@ public enum IntensityUnit implements Unit
 
 		public String getShortName()
 		{
-			return "ADU";
+			return "count"; // Nothing suitable
 		}
 		
 		UnitConverter<IntensityUnit> buildConverter(IntensityUnit to, double offset, double countPerPhoton)
@@ -60,7 +60,7 @@ public enum IntensityUnit implements Unit
 
 		public String getShortName()
 		{
-			return "p";
+			return "photon"; // Nothing suitable
 		}
 		
 		UnitConverter<IntensityUnit> buildConverter(IntensityUnit to, double offset, double countPerPhoton)

@@ -192,13 +192,13 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			if (calibration.hasIntensityUnit())
 			{
-				String unit = String.format(" (%s)", calibration.getIntensityUnit());
+				String unit = " (" + calibration.getIntensityUnit().getShortName() + ")";
 				fields[0] += unit;
 				fields[1] += unit;
 			}
 			if (calibration.hasDistanceUnit())
 			{
-				String unit = String.format(" (%s)", calibration.getDistanceUnit());
+				String unit = " (" + calibration.getDistanceUnit().getShortName() + ")";
 				fields[3] += unit;
 				fields[4] += unit;
 				fields[5] += unit;

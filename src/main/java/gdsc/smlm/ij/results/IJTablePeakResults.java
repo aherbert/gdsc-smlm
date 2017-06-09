@@ -114,7 +114,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void begin()
 	{
 		tableActive = false;
-		
+
 		// Set-up unit processing that requires the calibration 
 		toNMConverter = null;
 		toPixelConverter = new IdentityUnitConverter<DistanceUnit>(null);
@@ -174,7 +174,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			intensityConverter = (UnitConverter<IntensityUnit>) converters.get(0);
 			backgroundConverter = (UnitConverter<IntensityUnit>) converters.get(1);
 		}
-		
+
 		createSourceText();
 		createResultsWindow();
 		if (clearAtStart)
@@ -281,14 +281,14 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		{
 			if (calibration.hasIntensityUnit())
 			{
-				iUnit = String.format(" (%s)", calibration.getIntensityUnit());
+				iUnit = " (" + calibration.getIntensityUnit().getShortName() + ")";
 			}
 			if (calibration.hasDistanceUnit())
 			{
-				dUnit = String.format(" (%s)", calibration.getDistanceUnit());
+				dUnit = " (" + calibration.getDistanceUnit().getShortName() + ")";
 			}
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
 		if (addCounter)
 			sb.append("#\t");
