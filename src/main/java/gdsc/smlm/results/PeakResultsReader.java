@@ -33,6 +33,7 @@ import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.units.AngleUnit;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IntensityUnit;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -156,7 +157,7 @@ public class PeakResultsReader
 				format = FileFormat.SMLM_TEXT;
 			else
 				return;
-			
+
 			if (version.contains(".V3"))
 			{
 				smlmVersion = 3;
@@ -417,6 +418,12 @@ public class PeakResultsReader
 					}
 				}
 			}
+			
+			// Calibration is a smart object so we can create an empty one
+			if (calibration == null)
+				calibration = new Calibration();
+			// For debugging we can ensure that the calibration is not used incorrectly 
+			calibration.setFieldMissingException(true);
 		}
 		return calibration;
 	}
@@ -524,6 +531,10 @@ public class PeakResultsReader
 	private MemoryPeakResults readBinary()
 	{
 		MemoryPeakResults results = createResults();
+
+		// Units were added in version 3
+		if (smlmVersion < 3)
+			calibration.setAngleUnit(AngleUnit.DEGREE);
 
 		DataInputStream input = null;
 		try
@@ -666,6 +677,10 @@ public class PeakResultsReader
 	{
 		MemoryPeakResults results = createResults();
 
+		// Units were added in version 3
+		if (smlmVersion < 3)
+			calibration.setAngleUnit(AngleUnit.DEGREE);
+		
 		BufferedReader input = null;
 		try
 		{
