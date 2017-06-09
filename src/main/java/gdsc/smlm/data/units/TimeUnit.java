@@ -26,7 +26,6 @@ public enum TimeUnit implements Unit
 			return "frame";
 		}
 
-		@Override
 		public String getShortName()
 		{
 			return "t"; // Follow XYZCT conversion for 5D image stacks
@@ -87,20 +86,6 @@ public enum TimeUnit implements Unit
 			throw new UnitConversionException(this + " to " + to);
 		}
 	},;
-
-	/**
-	 * Gets the name.
-	 *
-	 * @return the name
-	 */
-	public abstract String getName();
-
-	/**
-	 * Gets the short name.
-	 *
-	 * @return the short name
-	 */
-	public abstract String getShortName();
 
 	/*
 	 * (non-Javadoc)

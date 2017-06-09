@@ -80,20 +80,6 @@ public enum IntensityUnit implements Unit
 		}
 	},;
 
-	/**
-	 * Gets the name.
-	 *
-	 * @return the name
-	 */
-	public abstract String getName();
-
-	/**
-	 * Gets the short name.
-	 *
-	 * @return the short name
-	 */
-	public abstract String getShortName();
-
 	/*
 	 * (non-Javadoc)
 	 * 
