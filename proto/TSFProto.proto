@@ -44,6 +44,15 @@ enum LocationUnits {
    PIXELS = 2;
 }
 
+// The following enums are an extension added to support the units in the GDSC SMLM software
+
+// The camera type
+enum CameraType {
+   CCD = 0;
+   EMCCD = 1;
+   SCMOS = 2;
+}
+
 message FluorophoreType {
    required int32 id = 1; // Key for Spot.fluorophore_type.
    optional string description = 2;
@@ -128,13 +137,17 @@ message SpotList {
    optional double readNoise = 1505; // The camera read noise for a pixel 
       // (units=count)
    optional double bias = 1506; // The camera bias (units=counts)
-   optional bool emCCD = 1507; // Set to true if this was an EM-CCD camera
+   optional bool emCCD = 1507 [deprecated=true]; // Set to true if this was an EM-CCD camera
    optional double amplification = 1508; // The readout amplification applied 
       // when converting the pixel value to counts (units=count/electron). This 
       // is expected to be higher than the total system gain. The factor 
       // difference (gain/amplification) is the Quantum Efficiency (QE, 
       // units=electron/photon). The amplification is used in the noise model 
       // when fitting using Maximum Likelihood Estimation (MLE).
+   optional CameraType cameraType = 1509; // The camera type
+   optional LocationUnits distanceUnit = 1510; // The distance unit
+   optional IntensityUnits intensityUnit = 1511; // The intensity unit
+   optional ThetaUnits angleUnit = 1512; // The angle unit
 
    // These ids can be used in your own .proto derived from this one
    extensions 1700 to 2047;
