@@ -2657,57 +2657,6 @@ public final class TaggedSpotFile {
      * <code>optional .TSF.CameraType cameraType = 1509;</code>
      */
     gdsc.smlm.tsf.TaggedSpotFile.CameraType getCameraType();
-
-    /**
-     * <pre>
-     * The distance unit
-     * </pre>
-     *
-     * <code>optional .TSF.LocationUnits distanceUnit = 1510;</code>
-     */
-    boolean hasDistanceUnit();
-    /**
-     * <pre>
-     * The distance unit
-     * </pre>
-     *
-     * <code>optional .TSF.LocationUnits distanceUnit = 1510;</code>
-     */
-    gdsc.smlm.tsf.TaggedSpotFile.LocationUnits getDistanceUnit();
-
-    /**
-     * <pre>
-     * The intensity unit
-     * </pre>
-     *
-     * <code>optional .TSF.IntensityUnits intensityUnit = 1511;</code>
-     */
-    boolean hasIntensityUnit();
-    /**
-     * <pre>
-     * The intensity unit
-     * </pre>
-     *
-     * <code>optional .TSF.IntensityUnits intensityUnit = 1511;</code>
-     */
-    gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits getIntensityUnit();
-
-    /**
-     * <pre>
-     * The angle unit
-     * </pre>
-     *
-     * <code>optional .TSF.ThetaUnits angleUnit = 1512;</code>
-     */
-    boolean hasAngleUnit();
-    /**
-     * <pre>
-     * The angle unit
-     * </pre>
-     *
-     * <code>optional .TSF.ThetaUnits angleUnit = 1512;</code>
-     */
-    gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits getAngleUnit();
   }
   /**
    * Protobuf type {@code TSF.SpotList}
@@ -2752,9 +2701,6 @@ public final class TaggedSpotFile {
       emCCD_ = false;
       amplification_ = 0D;
       cameraType_ = 0;
-      distanceUnit_ = 0;
-      intensityUnit_ = 0;
-      angleUnit_ = 0;
     }
 
     @java.lang.Override
@@ -2768,7 +2714,6 @@ public final class TaggedSpotFile {
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
       int mutable_bitField0_ = 0;
-      int mutable_bitField1_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3016,39 +2961,6 @@ public final class TaggedSpotFile {
               } else {
                 bitField0_ |= 0x08000000;
                 cameraType_ = rawValue;
-              }
-              break;
-            }
-            case 12080: {
-              int rawValue = input.readEnum();
-              gdsc.smlm.tsf.TaggedSpotFile.LocationUnits value = gdsc.smlm.tsf.TaggedSpotFile.LocationUnits.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(1510, rawValue);
-              } else {
-                bitField0_ |= 0x10000000;
-                distanceUnit_ = rawValue;
-              }
-              break;
-            }
-            case 12088: {
-              int rawValue = input.readEnum();
-              gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits value = gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(1511, rawValue);
-              } else {
-                bitField0_ |= 0x20000000;
-                intensityUnit_ = rawValue;
-              }
-              break;
-            }
-            case 12096: {
-              int rawValue = input.readEnum();
-              gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits value = gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(1512, rawValue);
-              } else {
-                bitField0_ |= 0x40000000;
-                angleUnit_ = rawValue;
               }
               break;
             }
@@ -4014,78 +3926,6 @@ public final class TaggedSpotFile {
       return result == null ? gdsc.smlm.tsf.TaggedSpotFile.CameraType.CCD : result;
     }
 
-    public static final int DISTANCEUNIT_FIELD_NUMBER = 1510;
-    private int distanceUnit_;
-    /**
-     * <pre>
-     * The distance unit
-     * </pre>
-     *
-     * <code>optional .TSF.LocationUnits distanceUnit = 1510;</code>
-     */
-    public boolean hasDistanceUnit() {
-      return ((bitField0_ & 0x10000000) == 0x10000000);
-    }
-    /**
-     * <pre>
-     * The distance unit
-     * </pre>
-     *
-     * <code>optional .TSF.LocationUnits distanceUnit = 1510;</code>
-     */
-    public gdsc.smlm.tsf.TaggedSpotFile.LocationUnits getDistanceUnit() {
-      gdsc.smlm.tsf.TaggedSpotFile.LocationUnits result = gdsc.smlm.tsf.TaggedSpotFile.LocationUnits.valueOf(distanceUnit_);
-      return result == null ? gdsc.smlm.tsf.TaggedSpotFile.LocationUnits.NM : result;
-    }
-
-    public static final int INTENSITYUNIT_FIELD_NUMBER = 1511;
-    private int intensityUnit_;
-    /**
-     * <pre>
-     * The intensity unit
-     * </pre>
-     *
-     * <code>optional .TSF.IntensityUnits intensityUnit = 1511;</code>
-     */
-    public boolean hasIntensityUnit() {
-      return ((bitField0_ & 0x20000000) == 0x20000000);
-    }
-    /**
-     * <pre>
-     * The intensity unit
-     * </pre>
-     *
-     * <code>optional .TSF.IntensityUnits intensityUnit = 1511;</code>
-     */
-    public gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits getIntensityUnit() {
-      gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits result = gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits.valueOf(intensityUnit_);
-      return result == null ? gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits.COUNTS : result;
-    }
-
-    public static final int ANGLEUNIT_FIELD_NUMBER = 1512;
-    private int angleUnit_;
-    /**
-     * <pre>
-     * The angle unit
-     * </pre>
-     *
-     * <code>optional .TSF.ThetaUnits angleUnit = 1512;</code>
-     */
-    public boolean hasAngleUnit() {
-      return ((bitField0_ & 0x40000000) == 0x40000000);
-    }
-    /**
-     * <pre>
-     * The angle unit
-     * </pre>
-     *
-     * <code>optional .TSF.ThetaUnits angleUnit = 1512;</code>
-     */
-    public gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits getAngleUnit() {
-      gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits result = gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits.valueOf(angleUnit_);
-      return result == null ? gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits.DEGREES : result;
-    }
-
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -4213,15 +4053,6 @@ public final class TaggedSpotFile {
       }
       if (((bitField0_ & 0x08000000) == 0x08000000)) {
         output.writeEnum(1509, cameraType_);
-      }
-      if (((bitField0_ & 0x10000000) == 0x10000000)) {
-        output.writeEnum(1510, distanceUnit_);
-      }
-      if (((bitField0_ & 0x20000000) == 0x20000000)) {
-        output.writeEnum(1511, intensityUnit_);
-      }
-      if (((bitField0_ & 0x40000000) == 0x40000000)) {
-        output.writeEnum(1512, angleUnit_);
       }
       extensionWriter.writeUntil(2048, output);
       unknownFields.writeTo(output);
@@ -4355,18 +4186,6 @@ public final class TaggedSpotFile {
       if (((bitField0_ & 0x08000000) == 0x08000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1509, cameraType_);
-      }
-      if (((bitField0_ & 0x10000000) == 0x10000000)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1510, distanceUnit_);
-      }
-      if (((bitField0_ & 0x20000000) == 0x20000000)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1511, intensityUnit_);
-      }
-      if (((bitField0_ & 0x40000000) == 0x40000000)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1512, angleUnit_);
       }
       size += extensionsSerializedSize();
       size += unknownFields.getSerializedSize();
@@ -4539,18 +4358,6 @@ public final class TaggedSpotFile {
       if (hasCameraType()) {
         result = result && cameraType_ == other.cameraType_;
       }
-      result = result && (hasDistanceUnit() == other.hasDistanceUnit());
-      if (hasDistanceUnit()) {
-        result = result && distanceUnit_ == other.distanceUnit_;
-      }
-      result = result && (hasIntensityUnit() == other.hasIntensityUnit());
-      if (hasIntensityUnit()) {
-        result = result && intensityUnit_ == other.intensityUnit_;
-      }
-      result = result && (hasAngleUnit() == other.hasAngleUnit());
-      if (hasAngleUnit()) {
-        result = result && angleUnit_ == other.angleUnit_;
-      }
       result = result && unknownFields.equals(other.unknownFields);
       result = result &&
           getExtensionFields().equals(other.getExtensionFields());
@@ -4697,18 +4504,6 @@ public final class TaggedSpotFile {
       if (hasCameraType()) {
         hash = (37 * hash) + CAMERATYPE_FIELD_NUMBER;
         hash = (53 * hash) + cameraType_;
-      }
-      if (hasDistanceUnit()) {
-        hash = (37 * hash) + DISTANCEUNIT_FIELD_NUMBER;
-        hash = (53 * hash) + distanceUnit_;
-      }
-      if (hasIntensityUnit()) {
-        hash = (37 * hash) + INTENSITYUNIT_FIELD_NUMBER;
-        hash = (53 * hash) + intensityUnit_;
-      }
-      if (hasAngleUnit()) {
-        hash = (37 * hash) + ANGLEUNIT_FIELD_NUMBER;
-        hash = (53 * hash) + angleUnit_;
       }
       hash = hashFields(hash, getExtensionFields());
       hash = (29 * hash) + unknownFields.hashCode();
@@ -4902,12 +4697,6 @@ public final class TaggedSpotFile {
         bitField0_ = (bitField0_ & ~0x20000000);
         cameraType_ = 0;
         bitField0_ = (bitField0_ & ~0x40000000);
-        distanceUnit_ = 0;
-        bitField0_ = (bitField0_ & ~0x80000000);
-        intensityUnit_ = 0;
-        bitField1_ = (bitField1_ & ~0x00000001);
-        angleUnit_ = 0;
-        bitField1_ = (bitField1_ & ~0x00000002);
         return this;
       }
 
@@ -4931,7 +4720,6 @@ public final class TaggedSpotFile {
       public gdsc.smlm.tsf.TaggedSpotFile.SpotList buildPartial() {
         gdsc.smlm.tsf.TaggedSpotFile.SpotList result = new gdsc.smlm.tsf.TaggedSpotFile.SpotList(this);
         int from_bitField0_ = bitField0_;
-        int from_bitField1_ = bitField1_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
@@ -5068,18 +4856,6 @@ public final class TaggedSpotFile {
           to_bitField0_ |= 0x08000000;
         }
         result.cameraType_ = cameraType_;
-        if (((from_bitField0_ & 0x80000000) == 0x80000000)) {
-          to_bitField0_ |= 0x10000000;
-        }
-        result.distanceUnit_ = distanceUnit_;
-        if (((from_bitField1_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x20000000;
-        }
-        result.intensityUnit_ = intensityUnit_;
-        if (((from_bitField1_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x40000000;
-        }
-        result.angleUnit_ = angleUnit_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -5283,15 +5059,6 @@ public final class TaggedSpotFile {
         if (other.hasCameraType()) {
           setCameraType(other.getCameraType());
         }
-        if (other.hasDistanceUnit()) {
-          setDistanceUnit(other.getDistanceUnit());
-        }
-        if (other.hasIntensityUnit()) {
-          setIntensityUnit(other.getIntensityUnit());
-        }
-        if (other.hasAngleUnit()) {
-          setAngleUnit(other.getAngleUnit());
-        }
         this.mergeExtensionFields(other);
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -5336,7 +5103,6 @@ public final class TaggedSpotFile {
         return this;
       }
       private int bitField0_;
-      private int bitField1_;
 
       private int applicationId_ = 1;
       /**
@@ -7561,162 +7327,6 @@ public final class TaggedSpotFile {
       public Builder clearCameraType() {
         bitField0_ = (bitField0_ & ~0x40000000);
         cameraType_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int distanceUnit_ = 0;
-      /**
-       * <pre>
-       * The distance unit
-       * </pre>
-       *
-       * <code>optional .TSF.LocationUnits distanceUnit = 1510;</code>
-       */
-      public boolean hasDistanceUnit() {
-        return ((bitField0_ & 0x80000000) == 0x80000000);
-      }
-      /**
-       * <pre>
-       * The distance unit
-       * </pre>
-       *
-       * <code>optional .TSF.LocationUnits distanceUnit = 1510;</code>
-       */
-      public gdsc.smlm.tsf.TaggedSpotFile.LocationUnits getDistanceUnit() {
-        gdsc.smlm.tsf.TaggedSpotFile.LocationUnits result = gdsc.smlm.tsf.TaggedSpotFile.LocationUnits.valueOf(distanceUnit_);
-        return result == null ? gdsc.smlm.tsf.TaggedSpotFile.LocationUnits.NM : result;
-      }
-      /**
-       * <pre>
-       * The distance unit
-       * </pre>
-       *
-       * <code>optional .TSF.LocationUnits distanceUnit = 1510;</code>
-       */
-      public Builder setDistanceUnit(gdsc.smlm.tsf.TaggedSpotFile.LocationUnits value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x80000000;
-        distanceUnit_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The distance unit
-       * </pre>
-       *
-       * <code>optional .TSF.LocationUnits distanceUnit = 1510;</code>
-       */
-      public Builder clearDistanceUnit() {
-        bitField0_ = (bitField0_ & ~0x80000000);
-        distanceUnit_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int intensityUnit_ = 0;
-      /**
-       * <pre>
-       * The intensity unit
-       * </pre>
-       *
-       * <code>optional .TSF.IntensityUnits intensityUnit = 1511;</code>
-       */
-      public boolean hasIntensityUnit() {
-        return ((bitField1_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <pre>
-       * The intensity unit
-       * </pre>
-       *
-       * <code>optional .TSF.IntensityUnits intensityUnit = 1511;</code>
-       */
-      public gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits getIntensityUnit() {
-        gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits result = gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits.valueOf(intensityUnit_);
-        return result == null ? gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits.COUNTS : result;
-      }
-      /**
-       * <pre>
-       * The intensity unit
-       * </pre>
-       *
-       * <code>optional .TSF.IntensityUnits intensityUnit = 1511;</code>
-       */
-      public Builder setIntensityUnit(gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField1_ |= 0x00000001;
-        intensityUnit_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The intensity unit
-       * </pre>
-       *
-       * <code>optional .TSF.IntensityUnits intensityUnit = 1511;</code>
-       */
-      public Builder clearIntensityUnit() {
-        bitField1_ = (bitField1_ & ~0x00000001);
-        intensityUnit_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int angleUnit_ = 0;
-      /**
-       * <pre>
-       * The angle unit
-       * </pre>
-       *
-       * <code>optional .TSF.ThetaUnits angleUnit = 1512;</code>
-       */
-      public boolean hasAngleUnit() {
-        return ((bitField1_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <pre>
-       * The angle unit
-       * </pre>
-       *
-       * <code>optional .TSF.ThetaUnits angleUnit = 1512;</code>
-       */
-      public gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits getAngleUnit() {
-        gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits result = gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits.valueOf(angleUnit_);
-        return result == null ? gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits.DEGREES : result;
-      }
-      /**
-       * <pre>
-       * The angle unit
-       * </pre>
-       *
-       * <code>optional .TSF.ThetaUnits angleUnit = 1512;</code>
-       */
-      public Builder setAngleUnit(gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField1_ |= 0x00000002;
-        angleUnit_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The angle unit
-       * </pre>
-       *
-       * <code>optional .TSF.ThetaUnits angleUnit = 1512;</code>
-       */
-      public Builder clearAngleUnit() {
-        bitField1_ = (bitField1_ & ~0x00000002);
-        angleUnit_ = 0;
         onChanged();
         return this;
       }
@@ -12092,7 +11702,7 @@ public final class TaggedSpotFile {
       "\n\016TSFProto.proto\022\003TSF\"G\n\017FluorophoreType" +
       "\022\n\n\002id\030\001 \002(\005\022\023\n\013description\030\002 \001(\t\022\023\n\013is_" +
       "fiducial\030\003 \001(\010\"=\n\003ROI\022\t\n\001x\030\001 \002(\005\022\t\n\001y\030\002 " +
-      "\002(\005\022\017\n\007x_width\030\003 \002(\005\022\017\n\007y_width\030\004 \002(\005\"\342\006" +
+      "\002(\005\022\017\n\007x_width\030\003 \002(\005\022\017\n\007y_width\030\004 \002(\005\"\345\005" +
       "\n\010SpotList\022\031\n\016application_id\030\001 \002(\005:\0011\022\014\n" +
       "\004name\030\002 \001(\t\022\020\n\010filepath\030\003 \001(\t\022\013\n\003uid\030\004 \001" +
       "(\003\022\023\n\013nr_pixels_x\030\005 \001(\005\022\023\n\013nr_pixels_y\030\006" +
@@ -12111,32 +11721,29 @@ public final class TaggedSpotFile {
       "osureTime\030\340\013 \001(\001\022\022\n\treadNoise\030\341\013 \001(\001\022\r\n\004",
       "bias\030\342\013 \001(\001\022\022\n\005emCCD\030\343\013 \001(\010B\002\030\001\022\026\n\rampli" +
       "fication\030\344\013 \001(\001\022$\n\ncameraType\030\345\013 \001(\0162\017.T" +
-      "SF.CameraType\022)\n\014distanceUnit\030\346\013 \001(\0162\022.T" +
-      "SF.LocationUnits\022+\n\rintensityUnit\030\347\013 \001(\016" +
-      "2\023.TSF.IntensityUnits\022#\n\tangleUnit\030\350\013 \001(" +
-      "\0162\017.TSF.ThetaUnits*\006\010\244\r\020\200\020\"\333\004\n\004Spot\022\020\n\010m" +
-      "olecule\030\001 \002(\005\022\017\n\007channel\030\002 \002(\005\022\r\n\005frame\030" +
-      "\003 \002(\005\022\r\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005 \001(\005\022\030\n\020flu" +
-      "orophore_type\030\023 \001(\005\022\017\n\007cluster\030\024 \001(\005\022*\n\016" +
-      "location_units\030\021 \001(\0162\022.TSF.LocationUnits",
-      "\022\t\n\001x\030\007 \002(\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001(\002\022,\n\017int" +
-      "ensity_units\030\022 \001(\0162\023.TSF.IntensityUnits\022" +
-      "\021\n\tintensity\030\n \002(\002\022\022\n\nbackground\030\013 \001(\002\022\r" +
-      "\n\005width\030\014 \001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005theta\030\016 \001(\002\022" +
-      "\022\n\nx_original\030e \001(\002\022\022\n\ny_original\030f \001(\002\022" +
-      "\022\n\nz_original\030g \001(\002\022\023\n\013x_precision\030h \001(\002" +
-      "\022\023\n\013y_precision\030i \001(\002\022\023\n\013z_precision\030j \001" +
-      "(\002\022\022\n\nx_position\030k \001(\005\022\022\n\ny_position\030l \001" +
-      "(\005\022\016\n\005error\030\334\013 \001(\001\022\016\n\005noise\030\335\013 \001(\002\022\022\n\ten" +
-      "d_frame\030\337\013 \001(\005\022\027\n\016original_value\030\340\013 \001(\002\022",
-      "\027\n\016params_std_dev\030\341\013 \003(\002*\006\010\244\r\020\200\020*8\n\007FitM" +
-      "ode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023\n\017TWOAXIS" +
-      "ANDTHETA\020\002*&\n\nThetaUnits\022\013\n\007DEGREES\020\000\022\013\n" +
-      "\007RADIANS\020\001*)\n\016IntensityUnits\022\n\n\006COUNTS\020\000" +
-      "\022\013\n\007PHOTONS\020\001*+\n\rLocationUnits\022\006\n\002NM\020\000\022\006" +
-      "\n\002UM\020\001\022\n\n\006PIXELS\020\002*+\n\nCameraType\022\007\n\003CCD\020" +
-      "\000\022\t\n\005EMCCD\020\001\022\t\n\005SCMOS\020\002B\037\n\rgdsc.smlm.tsf" +
-      "B\016TaggedSpotFile"
+      "SF.CameraType*\006\010\244\r\020\200\020\"\333\004\n\004Spot\022\020\n\010molecu" +
+      "le\030\001 \002(\005\022\017\n\007channel\030\002 \002(\005\022\r\n\005frame\030\003 \002(\005" +
+      "\022\r\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005 \001(\005\022\030\n\020fluoroph" +
+      "ore_type\030\023 \001(\005\022\017\n\007cluster\030\024 \001(\005\022*\n\016locat" +
+      "ion_units\030\021 \001(\0162\022.TSF.LocationUnits\022\t\n\001x" +
+      "\030\007 \002(\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001(\002\022,\n\017intensit" +
+      "y_units\030\022 \001(\0162\023.TSF.IntensityUnits\022\021\n\tin" +
+      "tensity\030\n \002(\002\022\022\n\nbackground\030\013 \001(\002\022\r\n\005wid",
+      "th\030\014 \001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005theta\030\016 \001(\002\022\022\n\nx_" +
+      "original\030e \001(\002\022\022\n\ny_original\030f \001(\002\022\022\n\nz_" +
+      "original\030g \001(\002\022\023\n\013x_precision\030h \001(\002\022\023\n\013y" +
+      "_precision\030i \001(\002\022\023\n\013z_precision\030j \001(\002\022\022\n" +
+      "\nx_position\030k \001(\005\022\022\n\ny_position\030l \001(\005\022\016\n" +
+      "\005error\030\334\013 \001(\001\022\016\n\005noise\030\335\013 \001(\002\022\022\n\tend_fra" +
+      "me\030\337\013 \001(\005\022\027\n\016original_value\030\340\013 \001(\002\022\027\n\016pa" +
+      "rams_std_dev\030\341\013 \003(\002*\006\010\244\r\020\200\020*8\n\007FitMode\022\013" +
+      "\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023\n\017TWOAXISANDTH" +
+      "ETA\020\002*&\n\nThetaUnits\022\013\n\007DEGREES\020\000\022\013\n\007RADI",
+      "ANS\020\001*)\n\016IntensityUnits\022\n\n\006COUNTS\020\000\022\013\n\007P" +
+      "HOTONS\020\001*+\n\rLocationUnits\022\006\n\002NM\020\000\022\006\n\002UM\020" +
+      "\001\022\n\n\006PIXELS\020\002*+\n\nCameraType\022\007\n\003CCD\020\000\022\t\n\005" +
+      "EMCCD\020\001\022\t\n\005SCMOS\020\002B\037\n\rgdsc.smlm.tsfB\016Tag" +
+      "gedSpotFile"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -12167,7 +11774,7 @@ public final class TaggedSpotFile {
     internal_static_TSF_SpotList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_SpotList_descriptor,
-        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "ThetaUnits", "FitMode", "IsTrack", "Ecf", "Qe", "Roi", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "EmCCD", "Amplification", "CameraType", "DistanceUnit", "IntensityUnit", "AngleUnit", });
+        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "ThetaUnits", "FitMode", "IsTrack", "Ecf", "Qe", "Roi", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "EmCCD", "Amplification", "CameraType", });
     internal_static_TSF_Spot_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_TSF_Spot_fieldAccessorTable = new

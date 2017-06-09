@@ -145,9 +145,6 @@ message SpotList {
       // units=electron/photon). The amplification is used in the noise model 
       // when fitting using Maximum Likelihood Estimation (MLE).
    optional CameraType cameraType = 1509; // The camera type
-   optional LocationUnits distanceUnit = 1510; // The distance unit
-   optional IntensityUnits intensityUnit = 1511; // The intensity unit
-   optional ThetaUnits angleUnit = 1512; // The angle unit
 
    // These ids can be used in your own .proto derived from this one
    extensions 1700 to 2047;

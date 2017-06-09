@@ -8,6 +8,8 @@ import java.io.RandomAccessFile;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import gdsc.core.utils.NotImplementedException;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -22,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.tsf.TaggedSpotFile.CameraType;
 import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
 import gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType;
 import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
@@ -513,11 +516,73 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				builder.setReadNoise(calibration.getReadNoise());
 			if (calibration.hasBias())
 				builder.setBias(calibration.getBias());
-			if (calibration.isCCDCamera())
-				builder.setEmCCD(calibration.isEmCCD());
+			if (calibration.hasCameraType())
+			{
+				switch (calibration.getCameraType())
+				{
+					case CCD:
+						builder.setCameraType(CameraType.CCD);
+						break;
+					case EM_CCD:
+						builder.setCameraType(CameraType.EMCCD);
+						break;
+					case SCMOS:
+						builder.setCameraType(CameraType.SCMOS);
+						break;
+					default:
+						throw new NotImplementedException(calibration.getCameraType().toString());
+				}
+			}
 			if (calibration.hasAmplification())
 				builder.setAmplification(calibration.getAmplification());
 
+			if (calibration.hasDistanceUnit())
+			{
+				switch (calibration.getDistanceUnit())
+				{
+					case NM:
+						builder.setLocationUnits(LocationUnits.NM);
+						break;
+					case PIXEL:
+						builder.setLocationUnits(LocationUnits.PIXELS);
+						break;
+					case UM:
+						builder.setLocationUnits(LocationUnits.UM);
+						break;
+					default:
+						throw new NotImplementedException(calibration.getDistanceUnit().toString());
+				}
+			}
+			if (calibration.hasIntensityUnit())
+			{
+				switch (calibration.getIntensityUnit())
+				{
+					case COUNT:
+						builder.setIntensityUnits(IntensityUnits.COUNTS);
+						break;
+					case PHOTON:
+						builder.setIntensityUnits(IntensityUnits.PHOTONS);
+						break;
+					default:
+						throw new NotImplementedException(calibration.getIntensityUnit().toString());
+				}
+			}
+			if (calibration.hasAngleUnit())
+			{
+				switch (calibration.getAngleUnit())
+				{
+					case DEGREE:
+						builder.setThetaUnits(ThetaUnits.DEGREES);
+						break;
+					case RADIAN:
+						builder.setThetaUnits(ThetaUnits.RADIANS);
+						break;
+					default:
+						throw new NotImplementedException(calibration.getAngleUnit().toString());
+				}
+			}
+			
+			// We can use some logic here to get the QE
 			if (calibration.hasGain())
 			{
 				builder.setGain(calibration.getGain());
@@ -546,9 +611,6 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		if (boxSize > 0)
 			builder.setBoxSize(boxSize);
 
-		builder.setLocationUnits(LocationUnits.PIXELS);
-		builder.setIntensityUnits(IntensityUnits.COUNTS);
-		builder.setThetaUnits(ThetaUnits.DEGREES);
 		builder.setFitMode(fitMode);
 
 		FluorophoreType.Builder typeBuilder = FluorophoreType.newBuilder();
