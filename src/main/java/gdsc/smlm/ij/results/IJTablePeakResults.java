@@ -1,5 +1,11 @@
 package gdsc.smlm.ij.results;
 
+import gdsc.smlm.data.units.DistanceUnit;
+import gdsc.smlm.data.units.IdentityUnitConverter;
+import gdsc.smlm.data.units.IntensityUnit;
+import gdsc.smlm.data.units.UnitConversionException;
+import gdsc.smlm.data.units.UnitConverter;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -18,11 +24,6 @@ import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Calibration.CameraType;
-import gdsc.smlm.units.DistanceUnit;
-import gdsc.smlm.units.IdentityUnitConverter;
-import gdsc.smlm.units.IntensityUnit;
-import gdsc.smlm.units.UnitConversionException;
-import gdsc.smlm.units.UnitConverter;
 import ij.WindowManager;
 import ij.text.TextPanel;
 import ij.text.TextWindow;

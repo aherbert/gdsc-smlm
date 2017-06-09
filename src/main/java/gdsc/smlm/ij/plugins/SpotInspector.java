@@ -1,5 +1,8 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.data.units.DistanceUnit;
+import gdsc.smlm.data.units.IntensityUnit;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -23,8 +26,6 @@ import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.units.DistanceUnit;
-import gdsc.smlm.units.IntensityUnit;
 import gdsc.smlm.utils.XmlUtils;
 import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;

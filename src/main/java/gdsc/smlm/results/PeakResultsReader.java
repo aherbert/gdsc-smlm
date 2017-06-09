@@ -33,9 +33,9 @@ import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.units.DistanceUnit;
+import gdsc.smlm.data.units.IntensityUnit;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.units.DistanceUnit;
-import gdsc.smlm.units.IntensityUnit;
 import gdsc.smlm.utils.XmlUtils;
 
 /**

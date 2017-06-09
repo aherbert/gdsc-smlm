@@ -1,5 +1,7 @@
 package gdsc.smlm.units;
 
+import gdsc.smlm.data.units.Unit;
+
 public class ExpectedUnit<T extends Unit>
 {
 	final T u;

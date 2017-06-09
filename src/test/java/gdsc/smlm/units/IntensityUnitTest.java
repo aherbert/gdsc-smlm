@@ -3,6 +3,9 @@ package gdsc.smlm.units;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.smlm.data.units.IntensityUnit;
+import gdsc.smlm.data.units.UnitConverter;
+
 @SuppressWarnings("unchecked")
 public class IntensityUnitTest
 {

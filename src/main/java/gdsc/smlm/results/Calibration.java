@@ -2,11 +2,11 @@ package gdsc.smlm.results;
 
 import java.util.ArrayList;
 
-import gdsc.smlm.units.DistanceUnit;
-import gdsc.smlm.units.IdentityUnitConverter;
-import gdsc.smlm.units.IntensityUnit;
-import gdsc.smlm.units.UnitConversionException;
-import gdsc.smlm.units.UnitConverter;
+import gdsc.smlm.data.units.DistanceUnit;
+import gdsc.smlm.data.units.IdentityUnitConverter;
+import gdsc.smlm.data.units.IntensityUnit;
+import gdsc.smlm.data.units.UnitConversionException;
+import gdsc.smlm.data.units.UnitConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

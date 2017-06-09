@@ -14,6 +14,10 @@ import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import gdsc.smlm.data.units.DistanceUnit;
+import gdsc.smlm.data.units.IntensityUnit;
+import gdsc.smlm.data.units.UnitConverter;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -29,9 +33,6 @@ import java.util.Scanner;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.Calibration.CameraType;
-import gdsc.smlm.units.DistanceUnit;
-import gdsc.smlm.units.IntensityUnit;
-import gdsc.smlm.units.UnitConverter;
 
 /**
  * Saves the fit results to file

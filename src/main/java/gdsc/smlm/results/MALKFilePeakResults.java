@@ -16,6 +16,9 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.units.DistanceUnit;
+import gdsc.smlm.data.units.IdentityUnitConverter;
+import gdsc.smlm.data.units.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -31,9 +34,6 @@ import gdsc.core.ij.Utils;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.units.DistanceUnit;
-import gdsc.smlm.units.IdentityUnitConverter;
-import gdsc.smlm.units.IntensityUnit;
 
 /**
  * Saves the fit results to file using the simple MALK file format (Molecular Accuracy Localisation Keep). This consists

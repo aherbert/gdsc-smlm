@@ -12,6 +12,9 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.NoiseEstimator.Method;
+import gdsc.smlm.data.units.DistanceUnit;
+import gdsc.smlm.data.units.IntensityUnit;
+import gdsc.smlm.data.units.TimeUnit;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.DataFilterType;
 
@@ -35,9 +38,6 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.ij.results.ResultsImage;
-import gdsc.smlm.units.DistanceUnit;
-import gdsc.smlm.units.IntensityUnit;
-import gdsc.smlm.units.TimeUnit;
 import ij.IJ;
 import ij.Prefs;
 

@@ -1,4 +1,4 @@
-package gdsc.smlm.units;
+package gdsc.smlm.data.units;
 
 import gdsc.core.utils.Maths;
 

@@ -1,5 +1,3 @@
-package gdsc.smlm.units;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -12,31 +10,7 @@ package gdsc.smlm.units;
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
-
 /**
- * Define conversion of a unit
+ * Contains measurements units and converters
  */
-public interface UnitConverter<T extends Unit>
-{
-	/**
-	 * Convert the value.
-	 *
-	 * @param value the value
-	 * @return the new value
-	 */
-	public double convert(double value);
-	
-	/**
-	 * Specify the source unit to be converted from
-	 *
-	 * @return the source unit
-	 */
-	public T from();
-	
-	/**
-	 * Specify the destination unit to be converted to
-	 *
-	 * @return the destination unit
-	 */
-	public T to();
-}
+package gdsc.smlm.data.units;

@@ -1,4 +1,4 @@
-package gdsc.smlm.units;
+package gdsc.smlm.data.units;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
+import gdsc.smlm.data.units.DistanceUnit;
+import gdsc.smlm.data.units.IntensityUnit;
+import gdsc.smlm.data.units.UnitConversionException;
+import gdsc.smlm.data.units.UnitConverter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.units.DistanceUnit;
-import gdsc.smlm.units.IntensityUnit;
-import gdsc.smlm.units.UnitConversionException;
-import gdsc.smlm.units.UnitConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

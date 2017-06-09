@@ -23,6 +23,9 @@ import javax.swing.JFileChooser;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.units.DistanceUnit;
+import gdsc.smlm.data.units.IntensityUnit;
+import gdsc.smlm.data.units.TimeUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -63,9 +66,6 @@ import gdsc.smlm.results.PeakResultsReader;
 import gdsc.smlm.results.ResultOption;
 import gdsc.smlm.results.TSFPeakResultsWriter;
 import gdsc.smlm.results.TextFilePeakResults;
-import gdsc.smlm.units.DistanceUnit;
-import gdsc.smlm.units.IntensityUnit;
-import gdsc.smlm.units.TimeUnit;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;

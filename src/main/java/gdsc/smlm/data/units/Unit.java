@@ -1,3 +1,7 @@
+package gdsc.smlm.data.units;
+
+import gdsc.smlm.data.NamedObject;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -10,7 +14,10 @@
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
+
 /**
- * Contains measurements units and converters
+ * Marker interface for units that can be converted
  */
-package gdsc.smlm.units;
+public interface Unit extends NamedObject
+{
+}
