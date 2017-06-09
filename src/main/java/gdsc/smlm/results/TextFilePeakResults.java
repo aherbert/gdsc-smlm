@@ -15,6 +15,8 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import gdsc.smlm.data.config.CameraType;
+import gdsc.smlm.data.units.AngleUnit;
+import gdsc.smlm.data.units.Converter;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IntensityUnit;
 import gdsc.smlm.data.units.UnitConverter;
@@ -40,14 +42,17 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 public class TextFilePeakResults extends SMLMFilePeakResults
 {
 	/** Converter to change the distances. */
-	private UnitConverter<DistanceUnit> distanceConverter;
+	private Converter distanceConverter;
 	/** Converter to change the intensity. */
-	private UnitConverter<IntensityUnit> intensityConverter;
+	private Converter intensityConverter;
 	/** Converter to change the background intensity. */
-	private UnitConverter<IntensityUnit> backgroundConverter;
+	private Converter backgroundConverter;
+	/** Converter to change the shape. */
+	private Converter shapeConverter;
 
 	private DistanceUnit distanceUnit = null;
 	private IntensityUnit intensityUnit = null;
+	private AngleUnit angleUnit = null;
 	private boolean computePrecision = false;
 
 	private OutputStreamWriter out;
@@ -151,6 +156,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			ArrayList<UnitConverter<IntensityUnit>> converters = calibration.getIntensityConverter(intensityUnit);
 			intensityConverter = (UnitConverter<IntensityUnit>) converters.get(0);
 			backgroundConverter = (UnitConverter<IntensityUnit>) converters.get(1);
+			// TODO - better support for the shape
+			shapeConverter = calibration.getAngleConverter(angleUnit);
 		}
 	}
 
@@ -196,6 +203,11 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				fields[0] += unit;
 				fields[1] += unit;
 			}
+			if (calibration.hasAngleUnit())
+			{
+				String unit = " (" + calibration.getAngleUnit().getShortName() + ")";
+				fields[2] += unit;
+			}
 			if (calibration.hasDistanceUnit())
 			{
 				String unit = " (" + calibration.getDistanceUnit().getShortName() + ")";
@@ -240,7 +252,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			addResult(sb, 
 					mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
 					mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
-					params[Gaussian2DFunction.SHAPE], paramsStdDev[Gaussian2DFunction.SHAPE], 
+					mapS(params[Gaussian2DFunction.SHAPE]), mapS(paramsStdDev[Gaussian2DFunction.SHAPE]), 
 					mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
 					mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
 					mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
@@ -251,7 +263,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			addResult(sb, 
 					mapB(params[Gaussian2DFunction.BACKGROUND]),
 					mapI(params[Gaussian2DFunction.SIGNAL]),  
-					params[Gaussian2DFunction.SHAPE],  
+					mapS(params[Gaussian2DFunction.SHAPE]),  
 					mapD(params[Gaussian2DFunction.X_POSITION]), 
 					mapD(params[Gaussian2DFunction.Y_POSITION]), 
 					mapD(params[Gaussian2DFunction.X_SD]), 
@@ -273,19 +285,24 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		writeResult(1, sb.toString());
 	}
 
-	private float mapD(float f)
-	{
-		return (float) distanceConverter.convert(f);
-	}
-
 	private float mapB(float f)
 	{
 		return (float) backgroundConverter.convert(f);
 	}
 
+	private float mapS(float f)
+	{
+		return (float) shapeConverter.convert(f);
+	}
+
 	private float mapI(float f)
 	{
 		return (float) intensityConverter.convert(f);
+	}
+
+	private float mapD(float f)
+	{
+		return (float) distanceConverter.convert(f);
 	}
 
 	private void addStandardData(StringBuilder sb, final int id, final int peak, final int endPeak, final int origX,
@@ -344,7 +361,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				addResult(sb, 
 						mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
 						mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
-						params[Gaussian2DFunction.SHAPE], paramsStdDev[Gaussian2DFunction.SHAPE], 
+						mapS(params[Gaussian2DFunction.SHAPE]), mapS(paramsStdDev[Gaussian2DFunction.SHAPE]), 
 						mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
 						mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
 						mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
@@ -355,7 +372,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				addResult(sb, 
 						mapB(params[Gaussian2DFunction.BACKGROUND]),
 						mapI(params[Gaussian2DFunction.SIGNAL]),  
-						params[Gaussian2DFunction.SHAPE],  
+						mapS(params[Gaussian2DFunction.SHAPE]),  
 						mapD(params[Gaussian2DFunction.X_POSITION]), 
 						mapD(params[Gaussian2DFunction.Y_POSITION]), 
 						mapD(params[Gaussian2DFunction.X_SD]), 
@@ -637,6 +654,27 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	public void setIntensityUnit(IntensityUnit intensityUnit)
 	{
 		this.intensityUnit = intensityUnit;
+	}
+
+	/**
+	 * Gets the angle unit.
+	 *
+	 * @return the angle unit
+	 */
+	public AngleUnit getAngleUnit()
+	{
+		return angleUnit;
+	}
+
+	/**
+	 * Sets the angle unit.
+	 *
+	 * @param angleUnit
+	 *            the new angle unit
+	 */
+	public void setAngleUnit(AngleUnit angleUnit)
+	{
+		this.angleUnit = angleUnit;
 	}
 
 	/**

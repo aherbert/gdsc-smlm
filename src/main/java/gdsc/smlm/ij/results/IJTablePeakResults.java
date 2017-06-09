@@ -1,6 +1,8 @@
 package gdsc.smlm.ij.results;
 
 import gdsc.smlm.data.config.CameraType;
+import gdsc.smlm.data.units.AngleUnit;
+import gdsc.smlm.data.units.Converter;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IdentityUnitConverter;
 import gdsc.smlm.data.units.IntensityUnit;
@@ -55,14 +57,17 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private boolean canComputePrecision, emCCD;
 
 	/** Converter to change the distances. */
-	private UnitConverter<DistanceUnit> distanceConverter;
+	private Converter distanceConverter;
 	/** Converter to change the intensity. */
-	private UnitConverter<IntensityUnit> intensityConverter;
+	private Converter intensityConverter;
 	/** Converter to change the background intensity. */
-	private UnitConverter<IntensityUnit> backgroundConverter;
+	private Converter backgroundConverter;
+	/** Converter to change the shape. */
+	private Converter shapeConverter;
 
 	private DistanceUnit distanceUnit = null;
 	private IntensityUnit intensityUnit = null;
+	private AngleUnit angleUnit = null;
 	private boolean computePrecision = false;
 
 	// Store the ROI painters that have been attached to TextPanels so they can be updated
@@ -173,6 +178,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			ArrayList<UnitConverter<IntensityUnit>> converters = calibration.getIntensityConverter(intensityUnit);
 			intensityConverter = (UnitConverter<IntensityUnit>) converters.get(0);
 			backgroundConverter = (UnitConverter<IntensityUnit>) converters.get(1);
+			// TODO - better support for the shape
+			shapeConverter = calibration.getAngleConverter(angleUnit);
 		}
 
 		createSourceText();
@@ -276,7 +283,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private String createResultsHeader()
 	{
-		String iUnit = "", dUnit = "";
+		String iUnit = "", dUnit = "", sUnit = "";
 		if (calibration != null)
 		{
 			if (calibration.hasIntensityUnit())
@@ -286,6 +293,10 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			if (calibration.hasDistanceUnit())
 			{
 				dUnit = " (" + calibration.getDistanceUnit().getShortName() + ")";
+			}
+			if (calibration.hasAngleUnit())
+			{
+				sUnit = " (" + calibration.getAngleUnit().getShortName() + ")";
 			}
 		}
 
@@ -311,6 +322,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		sb.append(iUnit);
 		addDeviation(sb);
 		sb.append("\tAngle");
+		sb.append(sUnit);
 		addDeviation(sb);
 		sb.append("\tX");
 		sb.append(dUnit);
@@ -397,7 +409,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr,
 					mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
 					mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
-					params[Gaussian2DFunction.SHAPE], paramsStdDev[Gaussian2DFunction.SHAPE], 
+					mapS(params[Gaussian2DFunction.SHAPE]), mapS(paramsStdDev[Gaussian2DFunction.SHAPE]), 
 					mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
 					mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
 					mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
@@ -409,7 +421,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr,
 					mapB(params[Gaussian2DFunction.BACKGROUND]),
 					mapI(params[Gaussian2DFunction.SIGNAL]),  
-					params[Gaussian2DFunction.SHAPE],  
+					mapS(params[Gaussian2DFunction.SHAPE]),  
 					mapD(params[Gaussian2DFunction.X_POSITION]), 
 					mapD(params[Gaussian2DFunction.Y_POSITION]), 
 					mapD(params[Gaussian2DFunction.X_SD]), 
@@ -420,19 +432,24 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	}
 
-	private float mapD(float f)
-	{
-		return (float) distanceConverter.convert(f);
-	}
-
 	private float mapB(float f)
 	{
 		return (float) backgroundConverter.convert(f);
 	}
 
+	private float mapS(float f)
+	{
+		return (float) shapeConverter.convert(f);
+	}
+
 	private float mapI(float f)
 	{
 		return (float) intensityConverter.convert(f);
+	}
+
+	private float mapD(float f)
+	{
+		return (float) distanceConverter.convert(f);
 	}
 
 	private void addResult(int peak, int endPeak, float origX, float origY, float origValue, double error,
@@ -774,6 +791,27 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void setIntensityUnit(IntensityUnit intensityUnit)
 	{
 		this.intensityUnit = intensityUnit;
+	}
+
+	/**
+	 * Gets the angle unit.
+	 *
+	 * @return the angle unit
+	 */
+	public AngleUnit getAngleUnit()
+	{
+		return angleUnit;
+	}
+
+	/**
+	 * Sets the angle unit.
+	 *
+	 * @param angleUnit
+	 *            the new angle unit
+	 */
+	public void setAngleUnit(AngleUnit angleUnit)
+	{
+		this.angleUnit = angleUnit;
 	}
 
 	/**

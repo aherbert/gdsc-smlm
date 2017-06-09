@@ -348,6 +348,7 @@ public class ResultsManager implements PlugIn
 			r.setPeakIdColumnName("Frame");
 			r.setDistanceUnit(resultsSettings.getTableDistanceUnit());
 			r.setIntensityUnit(resultsSettings.getTableIntensityUnit());
+			r.setAngleUnit(resultsSettings.getTableAngleUnit());
 			r.setComputePrecision(resultsSettings.tableComputePrecision);
 			r.setShowEndFrame(showEndFrame);
 			resultsList.addOutput(r);
@@ -409,6 +410,7 @@ public class ResultsManager implements PlugIn
 								showEndFrame, showId);
 						f.setDistanceUnit(resultsSettings.getFileDistanceUnit());
 						f.setIntensityUnit(resultsSettings.getFileIntensityUnit());
+						f.setAngleUnit(resultsSettings.getFileAngleUnit());
 						f.setComputePrecision(resultsSettings.fileComputePrecision);
 						r = f;
 						break;
@@ -477,12 +479,15 @@ public class ResultsManager implements PlugIn
 						SettingsManager.distanceUnitNames[resultsSettings.getTableDistanceUnit().ordinal()]);
 				egd.addChoice("Table_intensity_unit", SettingsManager.intensityUnitNames,
 						SettingsManager.intensityUnitNames[resultsSettings.getTableIntensityUnit().ordinal()]);
+				egd.addChoice("Table_angle_unit", SettingsManager.angleUnitNames,
+						SettingsManager.angleUnitNames[resultsSettings.getTableAngleUnit().ordinal()]);
 				egd.addCheckbox("Table_show_precision", resultsSettings.tableComputePrecision);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return;
 				resultsSettings.setTableDistanceUnit(egd.getNextChoiceIndex());
 				resultsSettings.setTableIntensityUnit(egd.getNextChoiceIndex());
+				resultsSettings.setTableAngleUnit(egd.getNextChoiceIndex());
 				resultsSettings.tableComputePrecision = egd.getNextBoolean();
 			}
 		});
@@ -558,6 +563,8 @@ public class ResultsManager implements PlugIn
 									SettingsManager.distanceUnitNames[resultsSettings.getFileDistanceUnit().ordinal()]);
 							egd.addChoice("File_intensity_unit", SettingsManager.intensityUnitNames,
 									SettingsManager.intensityUnitNames[resultsSettings.getFileIntensityUnit().ordinal()]);
+							egd.addChoice("File_angle_unit", SettingsManager.angleUnitNames,
+									SettingsManager.angleUnitNames[resultsSettings.getFileAngleUnit().ordinal()]);
 							egd.addCheckbox("File_show_precision", resultsSettings.fileComputePrecision);
 						}
 						egd.addCheckbox("Show_deviations", resultsSettings.showDeviations);
@@ -566,6 +573,7 @@ public class ResultsManager implements PlugIn
 							return;
 						resultsSettings.setFileDistanceUnit(egd.getNextChoiceIndex());
 						resultsSettings.setFileIntensityUnit(egd.getNextChoiceIndex());
+						resultsSettings.setFileAngleUnit(egd.getNextChoiceIndex());
 						resultsSettings.fileComputePrecision = egd.getNextBoolean();
 						resultsSettings.showDeviations = egd.getNextBoolean();
 					}

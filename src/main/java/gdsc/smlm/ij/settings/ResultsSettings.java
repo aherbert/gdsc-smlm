@@ -2,6 +2,7 @@ package gdsc.smlm.ij.settings;
 
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IntensityUnit;
+import gdsc.smlm.data.units.AngleUnit;
 import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.ij.results.ResultsImage;
 
@@ -37,6 +38,7 @@ public class ResultsSettings implements Cloneable
 	private ResultsFileFormat resultsFileFormat;
 	private DistanceUnit fileDistanceUnit;
 	private IntensityUnit fileIntensityUnit;
+	private AngleUnit fileAngleUnit;
 	public boolean fileComputePrecision = false;
 
 	public boolean resultsInMemory = true;
@@ -44,6 +46,7 @@ public class ResultsSettings implements Cloneable
 	public boolean showResultsTable = false;
 	private DistanceUnit tableDistanceUnit;
 	private IntensityUnit tableIntensityUnit;
+	private AngleUnit tableAngleUnit;
 	public boolean tableComputePrecision = false;
 
 	public ResultsSettings()
@@ -168,6 +171,35 @@ public class ResultsSettings implements Cloneable
 	}
 
 	/**
+	 * @return the fileAngleUnit
+	 */
+	public AngleUnit getFileAngleUnit()
+	{
+		return fileAngleUnit;
+	}
+
+	/**
+	 * @param fileAngleUnit
+	 *            the fileAngleUnit to set
+	 */
+	public void setFileAngleUnit(AngleUnit fileAngleUnit)
+	{
+		this.fileAngleUnit = fileAngleUnit;
+	}
+
+	/**
+	 * @param fileAngleUnit
+	 *            the fileAngleUnit to set
+	 */
+	public void setFileAngleUnit(int fileAngleUnit)
+	{
+		if (fileAngleUnit >= 0 && fileAngleUnit < AngleUnit.values().length)
+		{
+			setFileAngleUnit(AngleUnit.values()[fileAngleUnit]);
+		}
+	}
+
+	/**
 	 * @return the tableDistanceUnit
 	 */
 	public DistanceUnit getTableDistanceUnit()
@@ -226,6 +258,35 @@ public class ResultsSettings implements Cloneable
 	}
 
 	/**
+	 * @return the tableAngleUnit
+	 */
+	public AngleUnit getTableAngleUnit()
+	{
+		return tableAngleUnit;
+	}
+
+	/**
+	 * @param tableAngleUnit
+	 *            the tableAngleUnit to set
+	 */
+	public void setTableAngleUnit(AngleUnit tableAngleUnit)
+	{
+		this.tableAngleUnit = tableAngleUnit;
+	}
+
+	/**
+	 * @param tableAngleUnit
+	 *            the tableAngleUnit to set
+	 */
+	public void setTableAngleUnit(int tableAngleUnit)
+	{
+		if (tableAngleUnit >= 0 && tableAngleUnit < AngleUnit.values().length)
+		{
+			setTableAngleUnit(AngleUnit.values()[tableAngleUnit]);
+		}
+	}
+
+	/**
 	 * Ensure that the internal state of the object is initialised. This is used after deserialisation since some state
 	 * is not saved but restored from other property values.
 	 */
@@ -239,10 +300,14 @@ public class ResultsSettings implements Cloneable
 			fileDistanceUnit = DistanceUnit.PIXEL; // Legacy default
 		if (fileIntensityUnit == null)
 			fileIntensityUnit = IntensityUnit.PHOTON;
+		if (fileAngleUnit == null)
+			fileAngleUnit = AngleUnit.RADIAN;
 		if (tableDistanceUnit == null)
 			tableDistanceUnit = DistanceUnit.PIXEL; // Legacy default
 		if (tableIntensityUnit == null)
 			tableIntensityUnit = IntensityUnit.PHOTON;
+		if (tableAngleUnit == null)
+			tableAngleUnit = AngleUnit.DEGREE;
 	}
 
 	/*

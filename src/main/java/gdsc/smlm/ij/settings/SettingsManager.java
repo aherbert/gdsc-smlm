@@ -13,6 +13,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.data.NamedObject;
+import gdsc.smlm.data.units.AngleUnit;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IntensityUnit;
 import gdsc.smlm.data.units.TimeUnit;
@@ -53,7 +54,7 @@ public class SettingsManager
 	private static XStream xs = null;
 
 	public static String[] resultsImageNames, resultsFileFormatNames, distanceUnitNames, intensityUnitNames,
-			timeUnitNames, dataFilterTypeNames, dataFilterNames, fitSolverNames, fitFunctionNames,
+			angleUnitNames, timeUnitNames, dataFilterTypeNames, dataFilterNames, fitSolverNames, fitFunctionNames,
 			noiseEstimatorMethodNames, fitCriteriaNames, clusteringAlgorithmNames;
 	static
 	{
@@ -61,6 +62,7 @@ public class SettingsManager
 		resultsFileFormatNames = getNames((Object[]) ResultsFileFormat.values());
 		distanceUnitNames = getNames((Object[]) DistanceUnit.values());
 		intensityUnitNames = getNames((Object[]) IntensityUnit.values());
+		angleUnitNames = getNames((Object[]) AngleUnit.values());
 		timeUnitNames = getNames((Object[]) TimeUnit.values());
 		dataFilterTypeNames = getNames((Object[]) DataFilterType.values());
 		dataFilterNames = getNames((Object[]) DataFilter.values());

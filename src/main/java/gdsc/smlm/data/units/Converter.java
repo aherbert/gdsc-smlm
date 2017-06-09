@@ -14,21 +14,15 @@ package gdsc.smlm.data.units;
  *---------------------------------------------------------------------------*/
 
 /**
- * Define conversion of a unit
+ * Define conversion of a value
  */
-public interface UnitConverter<T extends Unit> extends Converter
+public interface Converter
 {
 	/**
-	 * Specify the source unit to be converted from
+	 * Convert the value.
 	 *
-	 * @return the source unit
+	 * @param value the value
+	 * @return the new value
 	 */
-	public T from();
-	
-	/**
-	 * Specify the destination unit to be converted to
-	 *
-	 * @return the destination unit
-	 */
-	public T to();
+	public double convert(double value);
 }
