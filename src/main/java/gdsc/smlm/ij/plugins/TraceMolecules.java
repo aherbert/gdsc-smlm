@@ -23,6 +23,8 @@ import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.units.TimeUnit;
+import gdsc.smlm.data.units.UnitConverter;
 import gdsc.smlm.engine.DataFilter;
 
 /*----------------------------------------------------------------------------- 
@@ -54,7 +56,6 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
-import gdsc.smlm.units.TimeUnit;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Cluster.CentroidMethod;
@@ -188,20 +189,7 @@ public class TraceMolecules implements PlugIn
 			if (settings.splitPulses)
 			{
 				engine.setPulseInterval(settings.pulseInterval);
-				if (settings.getTimeUnit() == TimeUnit.FRAME)
-				{
-					if (settings.getTimeThreshold() > settings.pulseInterval)
-					{
-						settings.setTimeThreshold(settings.pulseInterval);
-					}
-				}
-				else
-				{
-					if (timeInFrames(settings) > settings.pulseInterval)
-					{
-						settings.setTimeThreshold(settings.pulseInterval * exposureTime);
-					}
-				}
+				limitTimeThreshold(settings, settings.pulseInterval);
 			}
 
 			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(),
@@ -240,20 +228,7 @@ public class TraceMolecules implements PlugIn
 			if (settings.splitPulses)
 			{
 				manager.setPulseInterval(settings.pulseInterval);
-				if (settings.getTimeUnit() == TimeUnit.FRAME)
-				{
-					if (settings.getTimeThreshold() > settings.pulseInterval)
-					{
-						settings.setTimeThreshold(settings.pulseInterval);
-					}
-				}
-				else
-				{
-					if (timeInFrames(settings) > settings.pulseInterval)
-					{
-						settings.setTimeThreshold(settings.pulseInterval * exposureTime);
-					}
-				}
+				limitTimeThreshold(settings, settings.pulseInterval);
 			}
 
 			manager.setTracker(new IJTrackProgress());
@@ -297,6 +272,36 @@ public class TraceMolecules implements PlugIn
 		// Provide option to refit the traces as single peaks and save to memory
 		if (settings.refitOption)
 			fitTraces(results, traces);
+	}
+
+	/**
+	 * Limit the time threshold to the pulse interval duration.
+	 *
+	 * @param settings
+	 *            the settings
+	 * @param pulseInterval
+	 *            the pulse interval
+	 */
+	private void limitTimeThreshold(ClusteringSettings settings, int pulseInterval)
+	{
+		// The pulse interval is in frames.
+		// Convert the interval to the correct units. 
+
+		double limit;
+		if (settings.getTimeUnit() == TimeUnit.FRAME)
+		{
+			limit = settings.pulseInterval;
+		}
+		else
+		{
+			UnitConverter<TimeUnit> convert = TimeUnit.FRAME.createConverter(settings.getTimeUnit(), exposureTime);
+			limit = convert.convert(pulseInterval);
+		}
+
+		if (settings.getTimeThreshold() > limit)
+		{
+			settings.setTimeThreshold(limit);
+		}
 	}
 
 	private List<ClusterPoint> convertToClusterPoints()
@@ -954,8 +959,8 @@ public class TraceMolecules implements PlugIn
 		settings.distanceThreshold = best[0];
 
 		// The optimiser works using frames so convert back to the correct units
-		double convert = (settings.getTimeUnit() == TimeUnit.SECOND) ? exposureTime : 1;
-		settings.setTimeThreshold(settings.getTimeThreshold() * convert);
+		UnitConverter<TimeUnit> convert = TimeUnit.FRAME.createConverter(settings.getTimeUnit(), exposureTime);
+		settings.setTimeThreshold(convert.convert(best[1]));
 
 		IJ.log(String.format("Optimal fractional difference @ D-threshold=%g, T-threshold=%f (%d frames)",
 				settings.distanceThreshold, timeInSeconds(settings), timeInFrames(settings)));
@@ -1035,16 +1040,19 @@ public class TraceMolecules implements PlugIn
 
 	private int timeInFrames(ClusteringSettings settings)
 	{
-		if (settings.getTimeUnit() == TimeUnit.FRAME)
-			return (int) settings.getTimeThreshold();
-		return (int) Math.round(settings.getTimeThreshold() / exposureTime);
+		return (int) Math.round(timeIn(settings, TimeUnit.FRAME));
 	}
 
 	private double timeInSeconds(ClusteringSettings settings)
 	{
-		if (settings.getTimeUnit() == TimeUnit.SECOND)
+		return timeIn(settings, TimeUnit.SECOND);
+	}
+
+	private double timeIn(ClusteringSettings settings, TimeUnit timeUnit)
+	{
+		if (settings.getTimeUnit() == timeUnit)
 			return settings.getTimeThreshold();
-		return settings.getTimeThreshold() * exposureTime;
+		return settings.getTimeUnit().createConverter(timeUnit, exposureTime).convert(settings.getTimeThreshold());
 	}
 
 	/**
@@ -1236,7 +1244,7 @@ public class TraceMolecules implements PlugIn
 		double minD = Double.MAX_VALUE;
 		final double maxTimeThresholdInFrames = settings.maxTimeThreshold;
 		// The optimiser works using frames so convert back to the correct units
-		double convert = (settings.getTimeUnit() == TimeUnit.SECOND) ? exposureTime : 1;
+		UnitConverter<TimeUnit> convert = TimeUnit.FRAME.createConverter(settings.getTimeUnit(), exposureTime);
 
 		for (double[] point : zeroCrossingPoints)
 		{
@@ -1247,7 +1255,7 @@ public class TraceMolecules implements PlugIn
 			{
 				minD = d;
 				settings.distanceThreshold = point[1];
-				settings.setTimeThreshold(point[0] * convert);
+				settings.setTimeThreshold(convert.convert(point[0]));
 			}
 		}
 
