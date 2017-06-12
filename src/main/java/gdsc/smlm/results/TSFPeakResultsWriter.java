@@ -8,8 +8,6 @@ import java.io.RandomAccessFile;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import gdsc.core.utils.NotImplementedException;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -451,6 +449,29 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		return size;
 	}
 
+	private static CameraType[] cameraTypeMap;
+	private static ThetaUnits[] thetaUnitsMap;
+	private static LocationUnits[] locationUnitsMap;
+	private static IntensityUnits[] intensityUnitsMap;
+	static
+	{
+		// These should have 1:1 mapping. We can extends the TSF proto if necessary.		
+		cameraTypeMap = new CameraType[3];
+		cameraTypeMap[gdsc.smlm.data.config.CameraType.CCD.ordinal()] = CameraType.CCD;
+		cameraTypeMap[gdsc.smlm.data.config.CameraType.EM_CCD.ordinal()] = CameraType.EMCCD;
+		cameraTypeMap[gdsc.smlm.data.config.CameraType.SCMOS.ordinal()] = CameraType.SCMOS;
+		thetaUnitsMap = new ThetaUnits[2];
+		thetaUnitsMap[gdsc.smlm.data.config.SMLMSettings.AngleUnit.RADIAN.ordinal()] = ThetaUnits.RADIANS;
+		thetaUnitsMap[gdsc.smlm.data.config.SMLMSettings.AngleUnit.DEGREE.ordinal()] = ThetaUnits.DEGREES;
+		locationUnitsMap = new LocationUnits[3];
+		locationUnitsMap[gdsc.smlm.data.config.SMLMSettings.DistanceUnit.NM.ordinal()] = LocationUnits.NM;
+		locationUnitsMap[gdsc.smlm.data.config.SMLMSettings.DistanceUnit.UM.ordinal()] = LocationUnits.UM;
+		locationUnitsMap[gdsc.smlm.data.config.SMLMSettings.DistanceUnit.PIXEL.ordinal()] = LocationUnits.PIXELS;
+		intensityUnitsMap = new IntensityUnits[2];
+		intensityUnitsMap[gdsc.smlm.data.config.SMLMSettings.IntensityUnit.COUNT.ordinal()] = IntensityUnits.COUNTS;
+		intensityUnitsMap[gdsc.smlm.data.config.SMLMSettings.IntensityUnit.PHOTON.ordinal()] = IntensityUnits.PHOTONS;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -518,68 +539,22 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				builder.setBias(calibration.getBias());
 			if (calibration.hasCameraType())
 			{
-				switch (calibration.getCameraType())
-				{
-					case CCD:
-						builder.setCameraType(CameraType.CCD);
-						break;
-					case EM_CCD:
-						builder.setCameraType(CameraType.EMCCD);
-						break;
-					case SCMOS:
-						builder.setCameraType(CameraType.SCMOS);
-						break;
-					default:
-						throw new NotImplementedException(calibration.getCameraType().toString());
-				}
+				builder.setCameraType(cameraTypeMap[calibration.getCameraType().ordinal()]);
 			}
 			if (calibration.hasAmplification())
 				builder.setAmplification(calibration.getAmplification());
 
 			if (calibration.hasDistanceUnit())
 			{
-				switch (calibration.getDistanceUnit())
-				{
-					case NM:
-						builder.setLocationUnits(LocationUnits.NM);
-						break;
-					case PIXEL:
-						builder.setLocationUnits(LocationUnits.PIXELS);
-						break;
-					case UM:
-						builder.setLocationUnits(LocationUnits.UM);
-						break;
-					default:
-						throw new NotImplementedException(calibration.getDistanceUnit().toString());
-				}
+				builder.setLocationUnits(locationUnitsMap[calibration.getDistanceUnit().ordinal()]);
 			}
 			if (calibration.hasIntensityUnit())
 			{
-				switch (calibration.getIntensityUnit())
-				{
-					case COUNT:
-						builder.setIntensityUnits(IntensityUnits.COUNTS);
-						break;
-					case PHOTON:
-						builder.setIntensityUnits(IntensityUnits.PHOTONS);
-						break;
-					default:
-						throw new NotImplementedException(calibration.getIntensityUnit().toString());
-				}
+				builder.setIntensityUnits(intensityUnitsMap[calibration.getIntensityUnit().ordinal()]);
 			}
 			if (calibration.hasAngleUnit())
 			{
-				switch (calibration.getAngleUnit())
-				{
-					case DEGREE:
-						builder.setThetaUnits(ThetaUnits.DEGREES);
-						break;
-					case RADIAN:
-						builder.setThetaUnits(ThetaUnits.RADIANS);
-						break;
-					default:
-						throw new NotImplementedException(calibration.getAngleUnit().toString());
-				}
+				builder.setThetaUnits(thetaUnitsMap[calibration.getAngleUnit().ordinal()]);
 			}
 			
 			// We can use some logic here to get the QE
@@ -601,70 +576,62 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 					builder.addQe(1);
 				}
 			}
-		}
-		if (configuration != null && configuration.length() > 0)
-		{
-			builder.setConfiguration(singleLine(configuration));
-		}
+		}if(configuration!=null&&configuration.length()>0)
 
-		// Have a property so the boxSize can be set
-		if (boxSize > 0)
-			builder.setBoxSize(boxSize);
+	{
+		builder.setConfiguration(singleLine(configuration));
+	}
 
-		builder.setFitMode(fitMode);
+	// Have a property so the boxSize can be set
+	if(boxSize>0)builder.setBoxSize(boxSize);
 
-		FluorophoreType.Builder typeBuilder = FluorophoreType.newBuilder();
-		typeBuilder.setId(1);
-		typeBuilder.setDescription("Default fluorophore");
-		typeBuilder.setIsFiducial(false);
-		builder.addFluorophoreTypes(typeBuilder.build());
+	builder.setFitMode(fitMode);
 
-		SpotList spotList = builder.build();
-		try
-		{
-			spotList.writeDelimitedTo(out);
-		}
-		catch (IOException e)
-		{
-			System.err.println("Failed to write SpotList message");
-			e.printStackTrace();
-			return;
-		}
-		finally
-		{
-			closeOutput();
-		}
+	FluorophoreType.Builder typeBuilder = FluorophoreType
+			.newBuilder();typeBuilder.setId(1);typeBuilder.setDescription("Default fluorophore");typeBuilder.setIsFiducial(false);builder.addFluorophoreTypes(typeBuilder.build());
 
-		// Note: it would be good to be able to use the ability to write to any output stream. However
-		// the TSF format requires a seek at the end of writing to record the offset. seek() is not
-		// supported by OutputStream. It is supported by: RandomAccessFile, RandomAccessStream (for input). 
+	SpotList spotList = builder.build();try
+	{
+		spotList.writeDelimitedTo(out);
+	}catch(
+	IOException e)
+	{
+		System.err.println("Failed to write SpotList message");
+		e.printStackTrace();
+		return;
+	}finally
+	{
+		closeOutput();
+	}
 
-		// Write the offset to the SpotList message into the offset position
-		RandomAccessFile f = null;
-		try
+	// Note: it would be good to be able to use the ability to write to any output stream. However
+	// the TSF format requires a seek at the end of writing to record the offset. seek() is not
+	// supported by OutputStream. It is supported by: RandomAccessFile, RandomAccessStream (for input). 
+
+	// Write the offset to the SpotList message into the offset position
+	RandomAccessFile f = null;try
+	{
+		f = new RandomAccessFile(new File(filename), "rw");
+		f.seek(4);
+		f.writeLong(offset);
+	}catch(
+	Exception e)
+	{
+		System.err.println("Failed to record offset for SpotList message");
+		e.printStackTrace();
+	}finally
+	{
+		if (f != null)
 		{
-			f = new RandomAccessFile(new File(filename), "rw");
-			f.seek(4);
-			f.writeLong(offset);
-		}
-		catch (Exception e)
-		{
-			System.err.println("Failed to record offset for SpotList message");
-			e.printStackTrace();
-		}
-		finally
-		{
-			if (f != null)
+			try
 			{
-				try
-				{
-					f.close();
-				}
-				catch (IOException e)
-				{
-				}
+				f.close();
+			}
+			catch (IOException e)
+			{
 			}
 		}
+	}
 	}
 
 	private String singleLine(String text)

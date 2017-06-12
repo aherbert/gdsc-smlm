@@ -16,9 +16,9 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import gdsc.core.ij.Utils;
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IdentityUnitConverter;
-import gdsc.smlm.data.units.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.utils.IdentityTypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -123,12 +123,12 @@ public class MALKFilePeakResults extends FilePeakResults
 		setCalibration(calibration.clone());
 
 		if (toNMConverter == null)
-			toNMConverter = new IdentityUnitConverter<DistanceUnit>(DistanceUnit.NM);
+			toNMConverter = new IdentityTypeConverter<DistanceUnit>(DistanceUnit.NM);
 		else
 			calibration.setDistanceUnit(DistanceUnit.NM);
 
 		if (toPhotonConverter == null)
-			toPhotonConverter = new IdentityUnitConverter<IntensityUnit>(IntensityUnit.PHOTON);
+			toPhotonConverter = new IdentityTypeConverter<IntensityUnit>(IntensityUnit.PHOTON);
 		else
 			calibration.setIntensityUnit(IntensityUnit.PHOTON);
 	}

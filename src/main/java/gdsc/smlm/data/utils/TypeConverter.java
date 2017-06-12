@@ -1,7 +1,4 @@
-/*
- * 
- */
-package gdsc.smlm.data.units;
+package gdsc.smlm.data.utils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -17,45 +14,21 @@ package gdsc.smlm.data.units;
  *---------------------------------------------------------------------------*/
 
 /**
- * Unit for measuring angle
+ * Define conversion of a type
  */
-public enum AngleUnit implements Unit
+public interface TypeConverter<T> extends Converter
 {
-	/** Radian units */
-	RADIAN
-	{
-		public String getName()
-		{
-			return "radian";
-		}
-
-		public String getShortName()
-		{
-			return "rad";
-		}
-	},
-
-	/** Degree units */
-	DEGREE
-	{
-		public String getName()
-		{
-			return "degree";
-		}
-
-		public String getShortName()
-		{
-			return "°";
-		}
-	},;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Enum#toString()
+	/**
+	 * Specify the source unit to be converted from
+	 *
+	 * @return the source unit
 	 */
-	public String toString()
-	{
-		return getName();
-	}
+	public T from();
+	
+	/**
+	 * Specify the destination unit to be converted to
+	 *
+	 * @return the destination unit
+	 */
+	public T to();
 }

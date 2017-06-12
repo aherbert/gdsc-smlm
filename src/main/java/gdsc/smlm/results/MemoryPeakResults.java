@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
-import gdsc.smlm.data.units.AngleUnit;
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.ConversionException;
-import gdsc.smlm.data.units.TypeConverter;
-import gdsc.smlm.data.units.UnitConverterFactory;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.utils.ConversionException;
+import gdsc.smlm.data.utils.TypeConverter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 

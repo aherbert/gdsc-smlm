@@ -13,10 +13,10 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.data.NamedObject;
-import gdsc.smlm.data.units.AngleUnit;
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.TimeUnit;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.DataFilterType;
 
@@ -58,12 +58,14 @@ public class SettingsManager
 			noiseEstimatorMethodNames, fitCriteriaNames, clusteringAlgorithmNames;
 	static
 	{
-		resultsImageNames = getNames((Object[]) ResultsImage.values());
-		resultsFileFormatNames = getNames((Object[]) ResultsFileFormat.values());
+		// TODO: These can be done with the CalibrationHelper
 		distanceUnitNames = getNames((Object[]) DistanceUnit.values());
 		intensityUnitNames = getNames((Object[]) IntensityUnit.values());
 		angleUnitNames = getNames((Object[]) AngleUnit.values());
 		timeUnitNames = getNames((Object[]) TimeUnit.values());
+		
+		resultsImageNames = getNames((Object[]) ResultsImage.values());
+		resultsFileFormatNames = getNames((Object[]) ResultsFileFormat.values());
 		dataFilterTypeNames = getNames((Object[]) DataFilterType.values());
 		dataFilterNames = getNames((Object[]) DataFilter.values());
 		fitSolverNames = getNames((Object[]) FitSolver.values());

@@ -1,4 +1,4 @@
-package gdsc.smlm.data.units;
+package gdsc.smlm.data.utils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -14,20 +14,15 @@ package gdsc.smlm.data.units;
  *---------------------------------------------------------------------------*/
 
 /**
- * Create a Rounder interface implementation
+ * Define conversion of a value
  */
-public class RounderFactory
+public interface Converter
 {
 	/**
-	 * Creates the rounder. If the precision is less than 1 then an instance will be created that does not perform
-	 * rounding.
+	 * Convert the value.
 	 *
-	 * @param precision
-	 *            the precision
-	 * @return the rounder
+	 * @param value the value
+	 * @return the new value
 	 */
-	public static Rounder create(int precision)
-	{
-		return (precision > 0) ? new MathContextRounder(precision) : new NonRounder();
-	}
+	public double convert(double value);
 }

@@ -1,8 +1,8 @@
 package gdsc.smlm.ij.settings;
 
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.ij.results.ResultsImage;
 

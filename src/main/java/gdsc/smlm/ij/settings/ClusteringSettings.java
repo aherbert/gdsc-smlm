@@ -1,7 +1,7 @@
 package gdsc.smlm.ij.settings;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
-import gdsc.smlm.data.units.TimeUnit;
+import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.results.TraceManager.TraceMode;
 

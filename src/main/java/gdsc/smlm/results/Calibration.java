@@ -3,13 +3,13 @@ package gdsc.smlm.results;
 import java.util.ArrayList;
 
 import gdsc.smlm.data.config.CameraType;
-import gdsc.smlm.data.units.AngleUnit;
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IdentityUnitConverter;
-import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.ConversionException;
-import gdsc.smlm.data.units.TypeConverter;
-import gdsc.smlm.data.units.UnitConverterFactory;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.utils.ConversionException;
+import gdsc.smlm.data.utils.IdentityTypeConverter;
+import gdsc.smlm.data.utils.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -904,7 +904,7 @@ public class Calibration implements Cloneable
 			}
 		}
 		if (c == null)
-			c = new IdentityUnitConverter<DistanceUnit>(distanceUnit);
+			c = new IdentityTypeConverter<DistanceUnit>(distanceUnit);
 		return c;
 	}
 
@@ -942,7 +942,7 @@ public class Calibration implements Cloneable
 		if (list.size() != 2)
 		{
 			list.clear();
-			TypeConverter<IntensityUnit> c = new IdentityUnitConverter<IntensityUnit>(intensityUnit);
+			TypeConverter<IntensityUnit> c = new IdentityTypeConverter<IntensityUnit>(intensityUnit);
 			list.add(c);
 			list.add(c);
 		}
@@ -978,7 +978,7 @@ public class Calibration implements Cloneable
 			}
 		}
 		if (c == null)
-			c = new IdentityUnitConverter<AngleUnit>(angleUnit);
+			c = new IdentityTypeConverter<AngleUnit>(angleUnit);
 		return c;
 	}
 }

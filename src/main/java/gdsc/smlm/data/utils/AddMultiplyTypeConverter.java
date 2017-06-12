@@ -1,4 +1,4 @@
-package gdsc.smlm.data.units;
+package gdsc.smlm.data.utils;
 
 import gdsc.core.utils.Maths;
 
@@ -18,7 +18,7 @@ import gdsc.core.utils.Maths;
 /**
  * Perform conversion by addition then multiplication
  */
-public class AddMultiplyUnitConverter<T extends Unit> extends MultiplyUnitConverter<T>
+public class AddMultiplyTypeConverter<T> extends MultiplyTypeConverter<T>
 {
 	private final double addition;
 
@@ -40,7 +40,7 @@ public class AddMultiplyUnitConverter<T extends Unit> extends MultiplyUnitConver
 	 * @throws ConversionException
 	 *             If the addition is not finite
 	 */
-	public AddMultiplyUnitConverter(T from, T to, double addition, double multiplication)
+	public AddMultiplyTypeConverter(T from, T to, double addition, double multiplication)
 	{
 		super(from, to, multiplication);
 		if (!Maths.isFinite(addition))

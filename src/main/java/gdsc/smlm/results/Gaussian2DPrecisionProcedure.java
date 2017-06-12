@@ -1,4 +1,4 @@
-package gdsc.smlm.data.units;
+package gdsc.smlm.results;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -14,29 +14,19 @@ package gdsc.smlm.data.units;
  *---------------------------------------------------------------------------*/
 
 /**
- * Exception to throw if conversion is not possible
+ * Interface for accessing the results of Gaussian 2D fitting required for computing the precision
  */
-public class ConversionException extends RuntimeException
+public interface Gaussian2DPrecisionProcedure
 {
-	private static final long serialVersionUID = 2470815639465684383L;
-
-	public ConversionException()
-	{
-		super();
-	}
-
-	public ConversionException(String message)
-	{
-		super(message);
-	}
-
-	public ConversionException(String message, Throwable cause)
-	{
-		super(message, cause);
-	}
-
-	public ConversionException(Throwable cause)
-	{
-		super(cause);
-	}
+	/**
+	 * Executes this procedure.
+	 *
+	 * @param background
+	 *            the background (in photons)
+	 * @param intensity
+	 *            the intensity (in photons)
+	 * @param s
+	 *            the Gaussian standard deviation (in nm)
+	 */
+	void execute(float background, float intensity, float s);
 }

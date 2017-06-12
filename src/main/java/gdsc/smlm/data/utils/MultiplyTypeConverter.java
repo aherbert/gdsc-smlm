@@ -1,4 +1,4 @@
-package gdsc.smlm.data.units;
+package gdsc.smlm.data.utils;
 
 import gdsc.core.utils.Maths;
 
@@ -16,14 +16,14 @@ import gdsc.core.utils.Maths;
  *---------------------------------------------------------------------------*/
 
 /**
- * Perform conversion by multiplication then addition
+ * Perform conversion by multiplication
  */
-public class MultiplyAddUnitConverter<T extends Unit> extends MultiplyUnitConverter<T>
+public class MultiplyTypeConverter<T> extends AbstractTypeConverter<T>
 {
-	private final double addition;
+	protected final double multiplication;
 
 	/**
-	 * Instantiates a new multiplication then add unit converter.
+	 * Instantiates a new multiplication unit converter.
 	 *
 	 * @param from
 	 *            unit to convert from
@@ -31,21 +31,17 @@ public class MultiplyAddUnitConverter<T extends Unit> extends MultiplyUnitConver
 	 *            unit to convert to
 	 * @param multiplication
 	 *            the multiplication
-	 * @param addition
-	 *            the value to add after multiplication
 	 * @throws ConversionException
 	 *             If the input units are null
 	 * @throws ConversionException
 	 *             If the multiplication is not finite
-	 * @throws ConversionException
-	 *             If the addition is not finite
 	 */
-	public MultiplyAddUnitConverter(T from, T to, double multiplication, double addition) throws ConversionException
+	public MultiplyTypeConverter(T from, T to, double multiplication)
 	{
-		super(from, to, multiplication);
-		if (!Maths.isFinite(addition))
-			throw new ConversionException("addition must be finite");
-		this.addition = addition;
+		super(from, to);
+		if (!Maths.isFinite(multiplication))
+			throw new ConversionException("multiplication must be finite");
+		this.multiplication = multiplication;
 	}
 
 	/*
@@ -55,6 +51,6 @@ public class MultiplyAddUnitConverter<T extends Unit> extends MultiplyUnitConver
 	 */
 	public double convert(double value)
 	{
-		return value * multiplication + addition;
+		return value * multiplication;
 	}
 }

@@ -1,4 +1,4 @@
-package gdsc.smlm.data.units;
+package gdsc.smlm.data.utils;
 
 import java.math.BigDecimal;
 import java.math.MathContext;

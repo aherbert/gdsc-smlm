@@ -1,8 +1,6 @@
-package gdsc.smlm.data.units;
+package gdsc.smlm.data.config;
 
-import gdsc.smlm.data.units.Unit;
-
-public class ExpectedUnit<T extends Unit>
+public class ExpectedUnit<T>
 {
 	final T u;
 	final double value;

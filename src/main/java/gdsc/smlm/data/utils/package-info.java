@@ -1,5 +1,3 @@
-package gdsc.smlm.data.units;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -14,28 +12,6 @@ package gdsc.smlm.data.units;
  *---------------------------------------------------------------------------*/
 
 /**
- * Perform no conversion
+ * Contains data utilities such as unit converters and rounding 
  */
-public class IdentityUnitConverter<T extends Unit> extends AbstractUnitConverter<T>
-{
-	/**
-	 * Instantiates a new identity unit converter.
-	 *
-	 * @param units
-	 *            the units (can be null)
-	 */
-	public IdentityUnitConverter(T units)
-	{
-		super(units, units, true);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.units.UnitConverter#convert(double)
-	 */
-	public double convert(double value)
-	{
-		return value;
-	}
-}
+package gdsc.smlm.data.utils;

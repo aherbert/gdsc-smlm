@@ -14,12 +14,13 @@ import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.CameraType;
-import gdsc.smlm.data.units.AngleUnit;
-import gdsc.smlm.data.units.Converter;
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.TypeConverter;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.utils.Converter;
+import gdsc.smlm.data.utils.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -199,18 +200,18 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			if (calibration.hasIntensityUnit())
 			{
-				String unit = " (" + calibration.getIntensityUnit().getShortName() + ")";
+				String unit = " (" + UnitHelper.getShortName(calibration.getIntensityUnit()) + ")";
 				fields[0] += unit;
 				fields[1] += unit;
 			}
 			if (calibration.hasAngleUnit())
 			{
-				String unit = " (" + calibration.getAngleUnit().getShortName() + ")";
+				String unit = " (" + UnitHelper.getShortName(calibration.getAngleUnit()) + ")";
 				fields[2] += unit;
 			}
 			if (calibration.hasDistanceUnit())
 			{
-				String unit = " (" + calibration.getDistanceUnit().getShortName() + ")";
+				String unit = " (" + UnitHelper.getShortName(calibration.getDistanceUnit()) + ")";
 				fields[3] += unit;
 				fields[4] += unit;
 				fields[5] += unit;

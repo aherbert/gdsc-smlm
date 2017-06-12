@@ -7,11 +7,11 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.ConversionException;
-import gdsc.smlm.data.units.TypeConverter;
-import gdsc.smlm.data.units.UnitConverterFactory;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.utils.ConversionException;
+import gdsc.smlm.data.utils.TypeConverter;
 
 /**
  * Saves the fit results to file

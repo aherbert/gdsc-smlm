@@ -1,6 +1,16 @@
-package gdsc.smlm.data.units;
+package gdsc.smlm.data.config;
 
 import gdsc.core.utils.Maths;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
+import gdsc.smlm.data.utils.AddMultiplyTypeConverter;
+import gdsc.smlm.data.utils.ConversionException;
+import gdsc.smlm.data.utils.IdentityTypeConverter;
+import gdsc.smlm.data.utils.MultiplyAddTypeConverter;
+import gdsc.smlm.data.utils.MultiplyTypeConverter;
+import gdsc.smlm.data.utils.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -37,7 +47,7 @@ public class UnitConverterFactory
 			throws ConversionException
 	{
 		if (from == to)
-			return new IdentityUnitConverter<DistanceUnit>(from);
+			return new IdentityTypeConverter<DistanceUnit>(from);
 		if (from == null)
 			throw new ConversionException("from must not be null");
 		if (to == null)
@@ -49,9 +59,9 @@ public class UnitConverterFactory
 				switch (to)
 				{
 					case PIXEL:
-						return new MultiplyUnitConverter<DistanceUnit>(from, to, 1.0 / checkNmPerPixel(nmPerPixel));
+						return new MultiplyTypeConverter<DistanceUnit>(from, to, 1.0 / checkNmPerPixel(nmPerPixel));
 					case UM:
-						return new MultiplyUnitConverter<DistanceUnit>(from, to, 1e-3);
+						return new MultiplyTypeConverter<DistanceUnit>(from, to, 1e-3);
 					default:
 						throw new ConversionException(from + " to " + to);
 				}
@@ -60,9 +70,9 @@ public class UnitConverterFactory
 				switch (to)
 				{
 					case NM:
-						return new MultiplyUnitConverter<DistanceUnit>(from, to, checkNmPerPixel(nmPerPixel));
+						return new MultiplyTypeConverter<DistanceUnit>(from, to, checkNmPerPixel(nmPerPixel));
 					case UM:
-						return new MultiplyUnitConverter<DistanceUnit>(from, to, checkNmPerPixel(nmPerPixel) / 1e3);
+						return new MultiplyTypeConverter<DistanceUnit>(from, to, checkNmPerPixel(nmPerPixel) / 1e3);
 					default:
 						throw new ConversionException(from + " to " + to);
 				}
@@ -71,9 +81,9 @@ public class UnitConverterFactory
 				switch (to)
 				{
 					case NM:
-						return new MultiplyUnitConverter<DistanceUnit>(from, to, 1e3);
+						return new MultiplyTypeConverter<DistanceUnit>(from, to, 1e3);
 					case PIXEL:
-						return new MultiplyUnitConverter<DistanceUnit>(from, to, 1e3 / checkNmPerPixel(nmPerPixel));
+						return new MultiplyTypeConverter<DistanceUnit>(from, to, 1e3 / checkNmPerPixel(nmPerPixel));
 					default:
 						throw new ConversionException(from + " to " + to);
 				}
@@ -107,7 +117,7 @@ public class UnitConverterFactory
 			throws ConversionException
 	{
 		if (from == to)
-			return new IdentityUnitConverter<TimeUnit>(from);
+			return new IdentityTypeConverter<TimeUnit>(from);
 		if (from == null)
 			throw new ConversionException("from must not be null");
 		if (to == null)
@@ -119,9 +129,9 @@ public class UnitConverterFactory
 				switch (to)
 				{
 					case FRAME:
-						return new MultiplyUnitConverter<TimeUnit>(from, to, 1.0 / checkMsPerFrame(msPerFrame));
+						return new MultiplyTypeConverter<TimeUnit>(from, to, 1.0 / checkMsPerFrame(msPerFrame));
 					case SECOND:
-						return new MultiplyUnitConverter<TimeUnit>(from, to, 1e-3);
+						return new MultiplyTypeConverter<TimeUnit>(from, to, 1e-3);
 					default:
 						throw new ConversionException(from + " to " + to);
 				}
@@ -130,9 +140,9 @@ public class UnitConverterFactory
 				switch (to)
 				{
 					case MILLISECOND:
-						return new MultiplyUnitConverter<TimeUnit>(from, to, checkMsPerFrame(msPerFrame));
+						return new MultiplyTypeConverter<TimeUnit>(from, to, checkMsPerFrame(msPerFrame));
 					case SECOND:
-						return new MultiplyUnitConverter<TimeUnit>(from, to, checkMsPerFrame(msPerFrame) / 1e3);
+						return new MultiplyTypeConverter<TimeUnit>(from, to, checkMsPerFrame(msPerFrame) / 1e3);
 					default:
 						throw new ConversionException(from + " to " + to);
 				}
@@ -141,9 +151,9 @@ public class UnitConverterFactory
 				switch (to)
 				{
 					case MILLISECOND:
-						return new MultiplyUnitConverter<TimeUnit>(from, to, 1e3);
+						return new MultiplyTypeConverter<TimeUnit>(from, to, 1e3);
 					case FRAME:
-						return new MultiplyUnitConverter<TimeUnit>(from, to, 1e3 / checkMsPerFrame(msPerFrame));
+						return new MultiplyTypeConverter<TimeUnit>(from, to, 1e3 / checkMsPerFrame(msPerFrame));
 					default:
 						throw new ConversionException(from + " to " + to);
 				}
@@ -174,7 +184,7 @@ public class UnitConverterFactory
 	public static TypeConverter<AngleUnit> createConverter(AngleUnit from, AngleUnit to) throws ConversionException
 	{
 		if (from == to)
-			return new IdentityUnitConverter<AngleUnit>(from);
+			return new IdentityTypeConverter<AngleUnit>(from);
 		if (from == null)
 			throw new ConversionException("from must not be null");
 		if (to == null)
@@ -183,10 +193,10 @@ public class UnitConverterFactory
 		switch (from)
 		{
 			case RADIAN:
-				return new MultiplyUnitConverter<AngleUnit>(from, to, 180.0 / Math.PI);
+				return new MultiplyTypeConverter<AngleUnit>(from, to, 180.0 / Math.PI);
 
 			case DEGREE:
-				return new MultiplyUnitConverter<AngleUnit>(from, to, Math.PI / 180.0);
+				return new MultiplyTypeConverter<AngleUnit>(from, to, Math.PI / 180.0);
 
 			default:
 				throw new ConversionException(from + " to " + to);
@@ -212,7 +222,7 @@ public class UnitConverterFactory
 			double countPerPhoton) throws ConversionException
 	{
 		if (from == to)
-			return new IdentityUnitConverter<IntensityUnit>(from);
+			return new IdentityTypeConverter<IntensityUnit>(from);
 		if (from == null)
 			throw new ConversionException("from must not be null");
 		if (to == null)
@@ -221,11 +231,11 @@ public class UnitConverterFactory
 		switch (from)
 		{
 			case COUNT:
-				return new AddMultiplyUnitConverter<IntensityUnit>(from, to, checkOffset(-offset),
+				return new AddMultiplyTypeConverter<IntensityUnit>(from, to, checkOffset(-offset),
 						1.0 / checkCountPerPhoton(countPerPhoton));
 
 			case PHOTON:
-				return new MultiplyAddUnitConverter<IntensityUnit>(from, to, checkCountPerPhoton(countPerPhoton),
+				return new MultiplyAddTypeConverter<IntensityUnit>(from, to, checkCountPerPhoton(countPerPhoton),
 						checkOffset(offset));
 
 			default:
@@ -264,7 +274,7 @@ public class UnitConverterFactory
 			double countPerPhoton) throws ConversionException
 	{
 		if (from == to)
-			return new IdentityUnitConverter<IntensityUnit>(from);
+			return new IdentityTypeConverter<IntensityUnit>(from);
 		if (from == null)
 			throw new ConversionException("from must not be null");
 		if (to == null)
@@ -273,10 +283,10 @@ public class UnitConverterFactory
 		switch (from)
 		{
 			case COUNT:
-				return new MultiplyUnitConverter<IntensityUnit>(from, to, 1.0 / checkCountPerPhoton(countPerPhoton));
+				return new MultiplyTypeConverter<IntensityUnit>(from, to, 1.0 / checkCountPerPhoton(countPerPhoton));
 
 			case PHOTON:
-				return new MultiplyUnitConverter<IntensityUnit>(from, to, checkCountPerPhoton(countPerPhoton));
+				return new MultiplyTypeConverter<IntensityUnit>(from, to, checkCountPerPhoton(countPerPhoton));
 
 			default:
 				throw new ConversionException(from + " to " + to);

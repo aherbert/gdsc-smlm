@@ -1,16 +1,22 @@
 package gdsc.smlm.ij.results;
 
+import java.awt.Frame;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.CameraType;
-import gdsc.smlm.data.units.AngleUnit;
-import gdsc.smlm.data.units.Converter;
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IdentityUnitConverter;
-import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.Rounder;
-import gdsc.smlm.data.units.RounderFactory;
-import gdsc.smlm.data.units.ConversionException;
-import gdsc.smlm.data.units.TypeConverter;
-import gdsc.smlm.data.units.UnitConverterFactory;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.utils.ConversionException;
+import gdsc.smlm.data.utils.Converter;
+import gdsc.smlm.data.utils.IdentityTypeConverter;
+import gdsc.smlm.data.utils.Rounder;
+import gdsc.smlm.data.utils.RounderFactory;
+import gdsc.smlm.data.utils.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -32,11 +38,6 @@ import gdsc.smlm.results.PeakResult;
 import ij.WindowManager;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
-
-import java.awt.Frame;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 
 /**
  * Saves the fit results to an ImageJ results table.
@@ -127,7 +128,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 		// Set-up unit processing that requires the calibration 
 		toNMConverter = null;
-		toPixelConverter = new IdentityUnitConverter<DistanceUnit>(null);
+		toPixelConverter = new IdentityTypeConverter<DistanceUnit>(null);
 		nmPerPixel = 0;
 		toPhotonConverter = null;
 		canComputePrecision = false;
@@ -295,15 +296,15 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		{
 			if (calibration.hasIntensityUnit())
 			{
-				iUnit = " (" + calibration.getIntensityUnit().getShortName() + ")";
+				iUnit = " (" + UnitHelper.getShortName(calibration.getIntensityUnit()) + ")";
 			}
 			if (calibration.hasDistanceUnit())
 			{
-				dUnit = " (" + calibration.getDistanceUnit().getShortName() + ")";
+				dUnit = " (" + UnitHelper.getShortName(calibration.getDistanceUnit()) + ")";
 			}
 			if (calibration.hasAngleUnit())
 			{
-				sUnit = " (" + calibration.getAngleUnit().getShortName() + ")";
+				sUnit = " (" + UnitHelper.getShortName(calibration.getAngleUnit()) + ")";
 			}
 		}
 

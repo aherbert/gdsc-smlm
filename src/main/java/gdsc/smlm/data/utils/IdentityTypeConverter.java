@@ -1,4 +1,4 @@
-package gdsc.smlm.data.units;
+package gdsc.smlm.data.utils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -14,45 +14,28 @@ package gdsc.smlm.data.units;
  *---------------------------------------------------------------------------*/
 
 /**
- * Unit for measuring intensity
+ * Perform no conversion
  */
-public enum IntensityUnit implements Unit
+public class IdentityTypeConverter<T> extends AbstractTypeConverter<T>
 {
-	/** Camera count units */
-	COUNT
+	/**
+	 * Instantiates a new identity unit converter.
+	 *
+	 * @param units
+	 *            the units (can be null)
+	 */
+	public IdentityTypeConverter(T units)
 	{
-		public String getName()
-		{
-			return "count";
-		}
-
-		public String getShortName()
-		{
-			return "count"; // Nothing suitable
-		}
-	},
-
-	/** Photon units */
-	PHOTON
-	{
-		public String getName()
-		{
-			return "photon";
-		}
-
-		public String getShortName()
-		{
-			return "photon"; // Nothing suitable
-		}
-	},;
+		super(units, units, true);
+	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.lang.Enum#toString()
+	 * @see gdsc.smlm.units.UnitConverter#convert(double)
 	 */
-	public String toString()
+	public double convert(double value)
 	{
-		return getName();
+		return value;
 	}
 }

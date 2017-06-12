@@ -1,4 +1,4 @@
-package gdsc.smlm.data.units;
+package gdsc.smlm.data.utils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -16,7 +16,7 @@ package gdsc.smlm.data.units;
 /**
  * Base class for converters
  */
-public abstract class AbstractUnitConverter<T extends Unit> implements TypeConverter<T>
+public abstract class AbstractTypeConverter<T> implements TypeConverter<T>
 {
 	private final T from, to;
 
@@ -30,7 +30,7 @@ public abstract class AbstractUnitConverter<T extends Unit> implements TypeConve
 	 * @throws ConversionException
 	 *             If the input units are null
 	 */
-	public AbstractUnitConverter(T from, T to)
+	public AbstractTypeConverter(T from, T to)
 	{
 		if (from == null)
 			throw new ConversionException("From unit is null");
@@ -52,7 +52,7 @@ public abstract class AbstractUnitConverter<T extends Unit> implements TypeConve
 	 * @throws ConversionException
 	 *             If the input units are null (and exception are not suppressed)
 	 */
-	AbstractUnitConverter(T from, T to, boolean suppressExceptions)
+	AbstractTypeConverter(T from, T to, boolean suppressExceptions)
 	{
 		if (from == null && !suppressExceptions)
 			throw new ConversionException("From unit is null");

@@ -1,3 +1,5 @@
+package gdsc.smlm.data.utils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -10,7 +12,22 @@
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
+
 /**
- * Contains measurements units and converters
+ * Create a Rounder interface implementation
  */
-package gdsc.smlm.data.units;
+public class RounderFactory
+{
+	/**
+	 * Creates the rounder. If the precision is less than 1 then an instance will be created that does not perform
+	 * rounding.
+	 *
+	 * @param precision
+	 *            the precision
+	 * @return the rounder
+	 */
+	public static Rounder create(int precision)
+	{
+		return (precision > 0) ? new MathContextRounder(precision) : new NonRounder();
+	}
+}

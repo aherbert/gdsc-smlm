@@ -1,0 +1,127 @@
+syntax = "proto3";
+
+// ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
+// Authors: Alex Herbert, 2017 
+// License: BSD 2-Clause License
+package SMLM;
+
+option java_package = "gdsc.smlm.data.config";
+option java_outer_classname = "SMLMSettings";
+
+// The type of Point Spread Function (PSF)
+enum PSFType {
+   OneAxisGaussian2D = 0; // A 2D Gaussian with the same standard deviation in X and Y dimensions
+   TwoAxisGaussian2D = 1; // A 2D Gaussian with standard deviations in X and Y dimensions
+   TwoAxisAndThetaGaussian2D = 2; // A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
+   AstigmaticGaussian2D = 3; // A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
+   Custom = 4; // A custom point spread function (PSF) 
+}
+
+// Define the type of units supported in the Point Spread Function (PSF)
+enum PSFParameterUnit {
+	DISTANCE = 0; // The parameter describes a distance
+	INTENSITY = 1; // The parameter describes an intensity
+	ANGLE = 2; // The parameter describes an angle
+}
+
+// Define the additional parameters of the Point Spread Function (PSF)
+message PSFParameter {
+	string name = 1;
+	PSFParameterUnit unit = 2;
+}
+
+// Define the Point Spread Function (PSF)
+message PSF {
+	PSFType psfType = 1; // The PSF type
+	
+	// The names of the PSF parameters. The results are stored using the standard parameters of 
+	// [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+	// parameters array. The names of the non-standard parameters, in order, can be defined here.
+	repeated PSFParameter parameter = 2;
+}
+
+// The camera type
+enum CameraType {
+   EMCCD = 0; // Electron Multiplying Charge Coupled Device (EM CCD)
+   CCD = 1; // Charge Coupled Device (CCD)
+   SCMOS = 2; // Scientific Complementary Metal-Oxide-Semiconductor (sCMOS)
+}
+
+// Unit for measuring distance
+enum DistanceUnit {
+	PIXEL = 0; // Camera pixel units
+	UM = 1; // Micrometer units
+	NM = 2; // Nanometer units
+}
+
+// Unit for measuring intensity
+enum IntensityUnit {
+	PHOTON = 0; // Photon units
+	COUNT = 1; // Camera count units
+}
+
+// Unit for measuring angle
+enum AngleUnit {
+	RADIAN = 0; // Radian units
+	DEGREE = 1; // Degree units
+}
+
+// Unit for measuring time
+enum TimeUnit {
+	FRAME = 0; // Frame units
+	SECOND = 1; // Second units
+	MILLISECOND = 2; // Millisecond units
+}
+
+// Define the calibration for distance
+message DistanceCalibration {
+	// The distance unit.
+	DistanceUnit unit = 1;
+	// The camera pixel size in nanometers.
+	double nmPerPixel = 2;
+}
+
+// Define the calibration for time
+message TimeCalibration {
+	// The time unit.
+	TimeUnit unit = 1;
+	// The exposure time in milliseconds per frame.
+	double exposureTime = 2;
+}
+
+// Define the camera calibration
+message CameraCalibration {
+	// The camera type.
+	CameraType cameraType = 1;
+	
+	// The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
+	// (Counts) to photons.	
+	double gain = 2;
+
+	// The camera Gaussian read noise (in Counts).
+	double readNoise = 3;
+
+	// The camera bias (in Counts) 
+	double bias = 4;
+
+	// The camera amplification (Count/electron) used when modelling a microscope camera.
+	// Note that the camera noise model assumes that electrons are converted to ADUs by 
+	// amplification that is not perfect (i.e. it has noise). The amplification is equal 
+	// to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
+	double amplification = 5;
+}
+
+// Define the calibration for the results. The calibration contains details of the 
+// results units and how to convert them. Note that data can be loaded without knowledge
+// of the camera used so the distance and time calibration are separate.
+message Calibration
+{
+	// The distance calibration.
+	DistanceCalibration distanceCalibration = 1;
+
+	// The time calibration.
+	TimeCalibration timeCalibration = 2;
+	
+	// The camera calibration.
+	CameraCalibration cameraCalibration = 3;
+}

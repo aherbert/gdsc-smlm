@@ -29,11 +29,11 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.UnicodeReader;
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.TimeUnit;
-import gdsc.smlm.data.units.TypeConverter;
-import gdsc.smlm.data.units.UnitConverterFactory;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
+import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.utils.TypeConverter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;

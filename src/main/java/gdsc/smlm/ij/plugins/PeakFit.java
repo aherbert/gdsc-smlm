@@ -31,24 +31,6 @@ import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.TextUtils;
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IntensityUnit;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.engine.DataFilter;
-import gdsc.smlm.engine.DataFilterType;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitJob;
@@ -59,8 +41,6 @@ import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.filters.SpotFilter;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitCriteria;
-import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import gdsc.smlm.function.CameraNoiseModel;
@@ -70,10 +50,8 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
-import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
-import gdsc.smlm.ij.results.ResultsTable;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
@@ -103,11 +81,11 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.YesNoCancelDialog;
-import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
@@ -115,6 +93,19 @@ import ij.process.LUTHelper;
 import ij.process.LUTHelper.LutColour;
 
 //import ij.io.OpenDialog;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
 
 /**
  * Fits local maxima using a 2D Gaussian. Process each frame until a successive number of fits

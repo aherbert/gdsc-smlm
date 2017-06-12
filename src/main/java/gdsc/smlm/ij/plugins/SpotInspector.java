@@ -1,7 +1,20 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IntensityUnit;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -21,13 +34,11 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
-import gdsc.core.ij.Utils;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.utils.XmlUtils;
-import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -39,17 +50,6 @@ import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.text.TextPanel;
-
-import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Extract the spots from the original image into a stack, ordering the spots by various rankings.

@@ -1,10 +1,10 @@
-package gdsc.smlm.data.units;
+package gdsc.smlm.data.config;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.TypeConverter;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.utils.TypeConverter;
 
 @SuppressWarnings("unchecked")
 public class IntensityUnitTest
