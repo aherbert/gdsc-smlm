@@ -33,13 +33,6 @@ public enum AngleUnit implements Unit
 		{
 			return "rad";
 		}
-
-		UnitConverter<AngleUnit> buildConverter(AngleUnit to) throws UnitConversionException
-		{
-			if (to == AngleUnit.DEGREE)
-				return new MultiplyUnitConverter<AngleUnit>(this, to, 180.0 / Math.PI);
-			throw new UnitConversionException(this + " to " + to);
-		}
 	},
 
 	/** Degree units */
@@ -54,13 +47,6 @@ public enum AngleUnit implements Unit
 		{
 			return "°";
 		}
-
-		UnitConverter<AngleUnit> buildConverter(AngleUnit to) throws UnitConversionException
-		{
-			if (to == AngleUnit.RADIAN)
-				return new MultiplyUnitConverter<AngleUnit>(this, to, Math.PI / 180.0);
-			throw new UnitConversionException(this + " to " + to);
-		}
 	},;
 
 	/*
@@ -72,34 +58,4 @@ public enum AngleUnit implements Unit
 	{
 		return getName();
 	}
-
-	/**
-	 * Creates the converter.
-	 *
-	 * @param to
-	 *            the to
-	 * @param nmPerPixel
-	 *            the nm per pixel
-	 * @return the unit converter
-	 * @throws UnitConversionException
-	 *             if a converter cannot be created
-	 */
-	public UnitConverter<AngleUnit> createConverter(AngleUnit to) throws UnitConversionException
-	{
-		if (this == to)
-			return new IdentityUnitConverter<AngleUnit>(this);
-
-		return buildConverter(to);
-	}
-
-	/**
-	 * Build the converter for the unit.
-	 *
-	 * @param to
-	 *            the to
-	 * @return the unit converter
-	 * @throws UnitConversionException
-	 *             if a converter cannot be created
-	 */
-	abstract UnitConverter<AngleUnit> buildConverter(AngleUnit to) throws UnitConversionException;
 }

@@ -8,8 +8,9 @@ import gdsc.smlm.data.units.IdentityUnitConverter;
 import gdsc.smlm.data.units.IntensityUnit;
 import gdsc.smlm.data.units.Rounder;
 import gdsc.smlm.data.units.RounderFactory;
-import gdsc.smlm.data.units.UnitConversionException;
-import gdsc.smlm.data.units.UnitConverter;
+import gdsc.smlm.data.units.ConversionException;
+import gdsc.smlm.data.units.TypeConverter;
+import gdsc.smlm.data.units.UnitConverterFactory;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -46,15 +47,15 @@ import java.util.HashMap;
 public class IJTablePeakResults extends IJAbstractPeakResults implements CoordinateProvider
 {
 	/** Converter to change the distances to nm. It is created in {@link #begin()} but may be null. */
-	protected UnitConverter<DistanceUnit> toNMConverter;
+	protected TypeConverter<DistanceUnit> toNMConverter;
 	/**
 	 * Converter to change the distances to pixels. It is created in {@link #begin()} and may be an identity converter.
 	 */
-	protected UnitConverter<DistanceUnit> toPixelConverter;
+	protected TypeConverter<DistanceUnit> toPixelConverter;
 	/** The nm per pixel if calibrated. */
 	protected double nmPerPixel;
 	/** Converter to change the intensity to photons. It is created in {@link #begin()} but may be null. */
-	protected UnitConverter<IntensityUnit> toPhotonConverter;
+	protected TypeConverter<IntensityUnit> toPhotonConverter;
 
 	private boolean canComputePrecision, emCCD;
 
@@ -142,11 +143,12 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 				{
 					try
 					{
-						toNMConverter = calibration.getDistanceUnit().createConverter(DistanceUnit.NM, nmPerPixel);
-						toPixelConverter = calibration.getDistanceUnit().createConverter(DistanceUnit.PIXEL,
-								nmPerPixel);
+						toNMConverter = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
+								DistanceUnit.NM, nmPerPixel);
+						toPixelConverter = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
+								DistanceUnit.PIXEL, nmPerPixel);
 					}
-					catch (UnitConversionException e)
+					catch (ConversionException e)
 					{
 						// Gracefully fail so ignore this
 					}
@@ -158,10 +160,10 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 				{
 					try
 					{
-						toPhotonConverter = calibration.getIntensityUnit().createConverter(IntensityUnit.PHOTON,
-								calibration.getGain());
+						toPhotonConverter = UnitConverterFactory.createConverter(calibration.getIntensityUnit(),
+								IntensityUnit.PHOTON, calibration.getGain());
 					}
-					catch (UnitConversionException e)
+					catch (ConversionException e)
 					{
 						// Gracefully fail so ignore this
 					}
@@ -180,9 +182,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			this.calibration = calibration.clone();
 
 			distanceConverter = calibration.getDistanceConverter(distanceUnit);
-			ArrayList<UnitConverter<IntensityUnit>> converters = calibration.getIntensityConverter(intensityUnit);
-			intensityConverter = (UnitConverter<IntensityUnit>) converters.get(0);
-			backgroundConverter = (UnitConverter<IntensityUnit>) converters.get(1);
+			ArrayList<TypeConverter<IntensityUnit>> converters = calibration.getIntensityConverter(intensityUnit);
+			intensityConverter = (TypeConverter<IntensityUnit>) converters.get(0);
+			backgroundConverter = (TypeConverter<IntensityUnit>) converters.get(1);
 			// TODO - better support for the shape
 			shapeConverter = calibration.getAngleConverter(angleUnit);
 		}
@@ -457,8 +459,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		return (float) distanceConverter.convert(f);
 	}
 
-	private void addResult(int peak, int endPeak, int origX, int origY, float origValue, double error,
-			float... args)
+	private void addResult(int peak, int endPeak, int origX, int origY, float origValue, double error, float... args)
 	{
 		StringBuilder sb = new StringBuilder();
 		if (addCounter)

@@ -16,26 +16,26 @@ package gdsc.smlm.data.units;
 /**
  * Exception to throw if conversion is not possible
  */
-public class UnitConversionException extends RuntimeException
+public class ConversionException extends RuntimeException
 {
 	private static final long serialVersionUID = 2470815639465684383L;
 
-	public UnitConversionException()
+	public ConversionException()
 	{
 		super();
 	}
 
-	public UnitConversionException(String message)
+	public ConversionException(String message)
 	{
 		super(message);
 	}
 
-	public UnitConversionException(String message, Throwable cause)
+	public ConversionException(String message, Throwable cause)
 	{
 		super(message, cause);
 	}
 
-	public UnitConversionException(Throwable cause)
+	public ConversionException(Throwable cause)
 	{
 		super(cause);
 	}

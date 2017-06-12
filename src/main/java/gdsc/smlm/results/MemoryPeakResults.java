@@ -14,8 +14,9 @@ import java.util.Set;
 import gdsc.smlm.data.units.AngleUnit;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.UnitConversionException;
-import gdsc.smlm.data.units.UnitConverter;
+import gdsc.smlm.data.units.ConversionException;
+import gdsc.smlm.data.units.TypeConverter;
+import gdsc.smlm.data.units.UnitConverterFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -739,8 +740,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			{
 				try
 				{
-					UnitConverter<DistanceUnit> c = calibration.getDistanceUnit().createConverter(DistanceUnit.PIXEL,
-							calibration.getNmPerPixel());
+					TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
+							DistanceUnit.PIXEL, calibration.getNmPerPixel());
 					// Convert data
 					for (PeakResult p : results)
 					{
@@ -771,7 +772,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		offsetYSD = Gaussian2DFunction.Y_SD - Gaussian2DFunction.X_POSITION;
 	}
 
-	private void convertDistance(float[] params, UnitConverter<DistanceUnit> c)
+	private void convertDistance(float[] params, TypeConverter<DistanceUnit> c)
 	{
 		for (int i = Gaussian2DFunction.X_POSITION; i < params.length; i += 6)
 		{
@@ -813,10 +814,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			{
 				try
 				{
-					UnitConverter<IntensityUnit> bc = calibration.getIntensityUnit()
-							.createConverter(IntensityUnit.PHOTON, calibration.getBias(), calibration.getGain());
-					UnitConverter<IntensityUnit> c = calibration.getIntensityUnit()
-							.createConverter(IntensityUnit.PHOTON, calibration.getGain());
+					TypeConverter<IntensityUnit> bc = UnitConverterFactory.createConverter(
+							calibration.getIntensityUnit(), IntensityUnit.PHOTON, calibration.getBias(),
+							calibration.getGain());
+					TypeConverter<IntensityUnit> c = UnitConverterFactory.createConverter(
+							calibration.getIntensityUnit(), IntensityUnit.PHOTON, calibration.getGain());
 					// Convert data
 					for (PeakResult p : results)
 					{
@@ -838,7 +840,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 					calibration.setIntensityUnit(IntensityUnit.PHOTON);
 					return true;
 				}
-				catch (UnitConversionException e)
+				catch (ConversionException e)
 				{
 					// Gracefully fail so ignore this
 				}
@@ -847,7 +849,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		return false;
 	}
 
-	private void convertIntensity(float[] params, UnitConverter<IntensityUnit> c)
+	private void convertIntensity(float[] params, TypeConverter<IntensityUnit> c)
 	{
 		for (int i = Gaussian2DFunction.SIGNAL; i < params.length; i += 6)
 		{
@@ -884,7 +886,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 
 			try
 			{
-				UnitConverter<AngleUnit> c = calibration.getAngleUnit().createConverter(AngleUnit.RADIAN);
+				TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(calibration.getAngleUnit(),
+						AngleUnit.RADIAN);
 				// Convert data
 				for (PeakResult p : results)
 				{
@@ -903,7 +906,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		return false;
 	}
 
-	private void convertAngle(float[] params, UnitConverter<AngleUnit> c)
+	private void convertAngle(float[] params, TypeConverter<AngleUnit> c)
 	{
 		for (int i = Gaussian2DFunction.SHAPE; i < params.length; i += 6)
 		{

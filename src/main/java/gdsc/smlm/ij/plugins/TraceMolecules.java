@@ -24,33 +24,15 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.units.TimeUnit;
-import gdsc.smlm.data.units.UnitConverter;
-import gdsc.smlm.engine.DataFilter;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.engine.DataFilterType;
+import gdsc.smlm.data.units.TypeConverter;
+import gdsc.smlm.data.units.UnitConverterFactory;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitCriteria;
-import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitResult;
-import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -59,10 +41,10 @@ import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Cluster.CentroidMethod;
-import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.utils.XmlUtils;
@@ -294,7 +276,8 @@ public class TraceMolecules implements PlugIn
 		}
 		else
 		{
-			UnitConverter<TimeUnit> convert = TimeUnit.FRAME.createConverter(settings.getTimeUnit(), exposureTime);
+			TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME,
+					settings.getTimeUnit(), exposureTime);
 			limit = convert.convert(pulseInterval);
 		}
 
@@ -959,7 +942,8 @@ public class TraceMolecules implements PlugIn
 		settings.distanceThreshold = best[0];
 
 		// The optimiser works using frames so convert back to the correct units
-		UnitConverter<TimeUnit> convert = TimeUnit.FRAME.createConverter(settings.getTimeUnit(), exposureTime);
+		TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME, settings.getTimeUnit(),
+				exposureTime);
 		settings.setTimeThreshold(convert.convert(best[1]));
 
 		IJ.log(String.format("Optimal fractional difference @ D-threshold=%g, T-threshold=%f (%d frames)",
@@ -1050,9 +1034,8 @@ public class TraceMolecules implements PlugIn
 
 	private double timeIn(ClusteringSettings settings, TimeUnit timeUnit)
 	{
-		if (settings.getTimeUnit() == timeUnit)
-			return settings.getTimeThreshold();
-		return settings.getTimeUnit().createConverter(timeUnit, exposureTime).convert(settings.getTimeThreshold());
+		return UnitConverterFactory.createConverter(settings.getTimeUnit(), timeUnit, exposureTime)
+				.convert(settings.getTimeThreshold());
 	}
 
 	/**
@@ -1244,7 +1227,8 @@ public class TraceMolecules implements PlugIn
 		double minD = Double.MAX_VALUE;
 		final double maxTimeThresholdInFrames = settings.maxTimeThreshold;
 		// The optimiser works using frames so convert back to the correct units
-		UnitConverter<TimeUnit> convert = TimeUnit.FRAME.createConverter(settings.getTimeUnit(), exposureTime);
+		TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME, settings.getTimeUnit(),
+				exposureTime);
 
 		for (double[] point : zeroCrossingPoints)
 		{

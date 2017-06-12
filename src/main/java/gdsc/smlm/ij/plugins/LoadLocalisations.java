@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.regex.Pattern;
 
 import org.apache.commons.math3.util.FastMath;
@@ -31,7 +32,8 @@ import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IntensityUnit;
 import gdsc.smlm.data.units.TimeUnit;
-import gdsc.smlm.data.units.UnitConverter;
+import gdsc.smlm.data.units.TypeConverter;
+import gdsc.smlm.data.units.UnitConverterFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -50,6 +52,13 @@ import ij.plugin.PlugIn;
  */
 public class LoadLocalisations implements PlugIn
 {
+	// Time units for the exposure time cannot be in frames as this makes no sense
+	private static EnumSet<TimeUnit> set = EnumSet.allOf(TimeUnit.class);
+	static
+	{
+		set.remove(TimeUnit.FRAME);
+	}
+
 	public static class Localisation
 	{
 		int t, id;
@@ -81,14 +90,18 @@ public class LoadLocalisations implements PlugIn
 		private LocalisationList(int timeUnit, int distanceUnit, int intensityUnit, double gain, double pixelPitch,
 				double exposureTime)
 		{
-			this(TimeUnit.values()[timeUnit], DistanceUnit.values()[distanceUnit],
+			this((TimeUnit) set.toArray()[timeUnit], DistanceUnit.values()[distanceUnit],
 					IntensityUnit.values()[intensityUnit], gain, pixelPitch, exposureTime);
 		}
 
 		public MemoryPeakResults toPeakResults()
 		{
-			UnitConverter<TimeUnit> timeConverter = timeUnit.createConverter(TimeUnit.MILLISECOND);
-			UnitConverter<DistanceUnit> distanceConverter = distanceUnit.createConverter(DistanceUnit.NM, pixelPitch);
+			// Convert exposure time to milliseconds
+			TypeConverter<TimeUnit> timeConverter = UnitConverterFactory.createConverter(timeUnit, TimeUnit.MILLISECOND,
+					1);
+			// Convert precision to nm
+			TypeConverter<DistanceUnit> distanceConverter = UnitConverterFactory.createConverter(distanceUnit,
+					DistanceUnit.NM, pixelPitch);
 
 			MemoryPeakResults results = new MemoryPeakResults();
 			results.setName(name);
@@ -374,7 +387,8 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Pixel_size", pixelPitch, 3, 8, "nm");
 		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
 		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "");
-		String[] tUnits = SettingsManager.timeUnitNames;
+
+		String[] tUnits = SettingsManager.getNames(set.toArray());
 		gd.addChoice("Time_unit", tUnits, tUnits[timeUnit]);
 
 		gd.addMessage("Records:");

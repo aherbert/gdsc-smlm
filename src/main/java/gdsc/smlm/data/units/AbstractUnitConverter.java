@@ -16,7 +16,7 @@ package gdsc.smlm.data.units;
 /**
  * Base class for converters
  */
-public abstract class AbstractUnitConverter<T extends Unit> implements UnitConverter<T>
+public abstract class AbstractUnitConverter<T extends Unit> implements TypeConverter<T>
 {
 	private final T from, to;
 
@@ -27,15 +27,15 @@ public abstract class AbstractUnitConverter<T extends Unit> implements UnitConve
 	 *            unit to convert from
 	 * @param to
 	 *            unit to convert to
-	 * @throws UnitConversionException
+	 * @throws ConversionException
 	 *             If the input units are null
 	 */
 	public AbstractUnitConverter(T from, T to)
 	{
 		if (from == null)
-			throw new UnitConversionException("From unit is null");
+			throw new ConversionException("From unit is null");
 		if (to == null)
-			throw new UnitConversionException("To unit is null");
+			throw new ConversionException("To unit is null");
 		this.from = from;
 		this.to = to;
 	}
@@ -49,15 +49,15 @@ public abstract class AbstractUnitConverter<T extends Unit> implements UnitConve
 	 *            unit to convert to
 	 * @param suppressExceptions
 	 *            the suppress exceptions flag
-	 * @throws UnitConversionException
+	 * @throws ConversionException
 	 *             If the input units are null (and exception are not suppressed)
 	 */
 	AbstractUnitConverter(T from, T to, boolean suppressExceptions)
 	{
 		if (from == null && !suppressExceptions)
-			throw new UnitConversionException("From unit is null");
+			throw new ConversionException("From unit is null");
 		if (to == null && !suppressExceptions)
-			throw new UnitConversionException("To unit is null");
+			throw new ConversionException("To unit is null");
 		this.from = from;
 		this.to = to;
 	}

@@ -9,8 +9,9 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.UnitConversionException;
-import gdsc.smlm.data.units.UnitConverter;
+import gdsc.smlm.data.units.ConversionException;
+import gdsc.smlm.data.units.TypeConverter;
+import gdsc.smlm.data.units.UnitConverterFactory;
 
 /**
  * Saves the fit results to file
@@ -18,11 +19,11 @@ import gdsc.smlm.data.units.UnitConverter;
 public abstract class FilePeakResults extends AbstractPeakResults
 {
 	/** Converter to change the distances to nm. It is created in {@link #begin()} but may be null. */
-	protected UnitConverter<DistanceUnit> toNMConverter;
+	protected TypeConverter<DistanceUnit> toNMConverter;
 	/** The nm per pixel if calibrated. */
 	protected double nmPerPixel;
 	/** Converter to change the intensity to photons. It is created in {@link #begin()} but may be null. */
-	protected UnitConverter<IntensityUnit> toPhotonConverter;
+	protected TypeConverter<IntensityUnit> toPhotonConverter;
 
 	// Only write to a single results file
 	protected FileOutputStream fos = null;
@@ -112,9 +113,10 @@ public abstract class FilePeakResults extends AbstractPeakResults
 				{
 					try
 					{
-						toNMConverter = calibration.getDistanceUnit().createConverter(DistanceUnit.NM, nmPerPixel);
+						toNMConverter = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
+								DistanceUnit.NM, nmPerPixel);
 					}
-					catch (UnitConversionException e)
+					catch (ConversionException e)
 					{
 						// Gracefully fail so ignore this
 					}
@@ -126,10 +128,10 @@ public abstract class FilePeakResults extends AbstractPeakResults
 				{
 					try
 					{
-						toPhotonConverter = calibration.getIntensityUnit().createConverter(IntensityUnit.PHOTON,
-								calibration.getGain());
+						toPhotonConverter = UnitConverterFactory.createConverter(calibration.getIntensityUnit(),
+								IntensityUnit.PHOTON, calibration.getGain());
 					}
-					catch (UnitConversionException e)
+					catch (ConversionException e)
 					{
 						// Gracefully fail so ignore this
 					}

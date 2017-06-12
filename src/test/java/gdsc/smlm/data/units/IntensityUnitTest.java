@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.UnitConverter;
+import gdsc.smlm.data.units.TypeConverter;
 
 @SuppressWarnings("unchecked")
 public class IntensityUnitTest
@@ -36,7 +36,7 @@ public class IntensityUnitTest
 	private void check(double offset, double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits)
 	{
 		int n = expectedUnits.length;
-		UnitConverter<IntensityUnit> c;
+		TypeConverter<IntensityUnit> c;
 		for (int i = 0; i < n; i++)
 		{
 			IntensityUnit u1 = expectedUnits[i].u;
@@ -44,7 +44,7 @@ public class IntensityUnitTest
 			for (int j = 0; j < n; j++)
 			{
 				IntensityUnit u2 = expectedUnits[j].u;
-				c = u1.createConverter(u2, offset, countPerPhoton);
+				c = UnitConverterFactory.createConverter(u1, u2, offset, countPerPhoton);
 				double o = c.convert(v1);
 				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
 			}
@@ -54,7 +54,7 @@ public class IntensityUnitTest
 	private void check(double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits)
 	{
 		int n = expectedUnits.length;
-		UnitConverter<IntensityUnit> c;
+		TypeConverter<IntensityUnit> c;
 		for (int i = 0; i < n; i++)
 		{
 			IntensityUnit u1 = expectedUnits[i].u;
@@ -62,7 +62,7 @@ public class IntensityUnitTest
 			for (int j = 0; j < n; j++)
 			{
 				IntensityUnit u2 = expectedUnits[j].u;
-				c = u1.createConverter(u2, countPerPhoton);
+				c = UnitConverterFactory.createConverter(u1, u2, countPerPhoton);
 				double o = c.convert(v1);
 				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
 			}

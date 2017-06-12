@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.smlm.data.units.AngleUnit;
-import gdsc.smlm.data.units.UnitConverter;
+import gdsc.smlm.data.units.TypeConverter;
 
 @SuppressWarnings("unchecked")
 public class AngleUnitTest
@@ -27,7 +27,7 @@ public class AngleUnitTest
 	private void check(double degToRad, ExpectedUnit<AngleUnit>... expectedUnits)
 	{
 		int n = expectedUnits.length;
-		UnitConverter<AngleUnit> c;
+		TypeConverter<AngleUnit> c;
 		for (int i = 0; i < n; i++)
 		{
 			AngleUnit u1 = expectedUnits[i].u;
@@ -35,7 +35,7 @@ public class AngleUnitTest
 			for (int j = 0; j < n; j++)
 			{
 				AngleUnit u2 = expectedUnits[j].u;
-				c = u1.createConverter(u2);
+				c =  UnitConverterFactory.createConverter(u1, u2);
 				double o = c.convert(v1);
 				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
 			}

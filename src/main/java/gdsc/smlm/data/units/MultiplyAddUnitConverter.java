@@ -33,18 +33,18 @@ public class MultiplyAddUnitConverter<T extends Unit> extends MultiplyUnitConver
 	 *            the multiplication
 	 * @param addition
 	 *            the value to add after multiplication
-	 * @throws UnitConversionException
+	 * @throws ConversionException
 	 *             If the input units are null
-	 * @throws UnitConversionException
+	 * @throws ConversionException
 	 *             If the multiplication is not finite
-	 * @throws UnitConversionException
+	 * @throws ConversionException
 	 *             If the addition is not finite
 	 */
-	public MultiplyAddUnitConverter(T from, T to, double multiplication, double addition) throws UnitConversionException
+	public MultiplyAddUnitConverter(T from, T to, double multiplication, double addition) throws ConversionException
 	{
 		super(from, to, multiplication);
 		if (!Maths.isFinite(addition))
-			throw new UnitConversionException("addition must be finite");
+			throw new ConversionException("addition must be finite");
 		this.addition = addition;
 	}
 

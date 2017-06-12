@@ -14,9 +14,9 @@ package gdsc.smlm.data.units;
  *---------------------------------------------------------------------------*/
 
 /**
- * Define conversion of a unit
+ * Define conversion of a type
  */
-public interface UnitConverter<T extends Unit> extends Converter
+public interface TypeConverter<T> extends Converter
 {
 	/**
 	 * Specify the source unit to be converted from

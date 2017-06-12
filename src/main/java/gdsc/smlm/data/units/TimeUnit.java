@@ -30,15 +30,6 @@ public enum TimeUnit implements Unit
 		{
 			return "t"; // Follow XYZCT conversion for 5D image stacks
 		}
-
-		UnitConverter<TimeUnit> buildConverter(TimeUnit to, double msPerFrame) throws UnitConversionException
-		{
-			if (to == TimeUnit.MILLISECOND)
-				return new MultiplyUnitConverter<TimeUnit>(this, to, msPerFrame);
-			if (to == TimeUnit.SECOND)
-				return new MultiplyUnitConverter<TimeUnit>(this, to, msPerFrame / 1e3);
-			throw new UnitConversionException(this + " to " + to);
-		}
 	},
 
 	/** Second units */
@@ -52,15 +43,6 @@ public enum TimeUnit implements Unit
 		public String getShortName()
 		{
 			return "s";
-		}
-
-		UnitConverter<TimeUnit> buildConverter(TimeUnit to, double msPerFrame) throws UnitConversionException
-		{
-			if (to == TimeUnit.FRAME)
-				return new MultiplyUnitConverter<TimeUnit>(this, to, 1e3 / msPerFrame);
-			if (to == TimeUnit.MILLISECOND)
-				return new MultiplyUnitConverter<TimeUnit>(this, to, 1e3);
-			throw new UnitConversionException(this + " to " + to);
 		}
 	},
 
@@ -76,15 +58,6 @@ public enum TimeUnit implements Unit
 		{
 			return "ms";
 		}
-
-		UnitConverter<TimeUnit> buildConverter(TimeUnit to, double msPerFrame) throws UnitConversionException
-		{
-			if (to == TimeUnit.FRAME)
-				return new MultiplyUnitConverter<TimeUnit>(this, to, 1.0 / msPerFrame);
-			if (to == TimeUnit.SECOND)
-				return new MultiplyUnitConverter<TimeUnit>(this, to, 1e-3);
-			throw new UnitConversionException(this + " to " + to);
-		}
 	},;
 
 	/*
@@ -95,58 +68,5 @@ public enum TimeUnit implements Unit
 	public String toString()
 	{
 		return getName();
-	}
-
-	/**
-	 * Creates the converter.
-	 *
-	 * @param to
-	 *            the to
-	 * @param msPerFrame
-	 *            the ms per frame
-	 * @return the unit converter
-	 * @throws UnitConversionException
-	 *             if a converter cannot be created
-	 */
-	public UnitConverter<TimeUnit> createConverter(TimeUnit to, double msPerFrame) throws UnitConversionException
-	{
-		if (this == to)
-			return new IdentityUnitConverter<TimeUnit>(this);
-
-		if (!(msPerFrame > 0 && msPerFrame <= java.lang.Double.MAX_VALUE))
-			throw new UnitConversionException("ms/frame must be positive");
-
-		return buildConverter(to, msPerFrame);
-	}
-
-	/**
-	 * Build the converter for the unit.
-	 *
-	 * @param to
-	 *            the to
-	 * @param msPerFrame
-	 *            the ms per frame
-	 * @return the unit converter
-	 * @throws UnitConversionException
-	 *             if a converter cannot be created
-	 */
-	abstract UnitConverter<TimeUnit> buildConverter(TimeUnit to, double msPerFrame) throws UnitConversionException;
-
-	/**
-	 * Creates the converter.
-	 *
-	 * @param to
-	 *            the to
-	 * @return the unit converter
-	 * @throws UnitConversionException
-	 *             if a converter cannot be created
-	 */
-	public UnitConverter<TimeUnit> createConverter(TimeUnit to) throws UnitConversionException
-	{
-		if (this == to)
-			return new IdentityUnitConverter<TimeUnit>(this);
-		if (to == TimeUnit.FRAME)
-			throw new UnitConversionException(this + " to " + to + " requires ms/frame");
-		return buildConverter(to, 1.0);
 	}
 }

@@ -31,16 +31,16 @@ public class MultiplyUnitConverter<T extends Unit> extends AbstractUnitConverter
 	 *            unit to convert to
 	 * @param multiplication
 	 *            the multiplication
-	 * @throws UnitConversionException
+	 * @throws ConversionException
 	 *             If the input units are null
-	 * @throws UnitConversionException
+	 * @throws ConversionException
 	 *             If the multiplication is not finite
 	 */
 	public MultiplyUnitConverter(T from, T to, double multiplication)
 	{
 		super(from, to);
 		if (!Maths.isFinite(multiplication))
-			throw new UnitConversionException("multiplication must be finite");
+			throw new ConversionException("multiplication must be finite");
 		this.multiplication = multiplication;
 	}
 

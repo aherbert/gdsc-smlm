@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.smlm.data.units.TimeUnit;
-import gdsc.smlm.data.units.UnitConverter;
+import gdsc.smlm.data.units.TypeConverter;
 
 @SuppressWarnings("unchecked")
 public class TimeUnitTest
@@ -15,7 +15,7 @@ public class TimeUnitTest
 		double msPerFrame = 35;
 		for (int frame = 1; frame < 10; frame++)
 		{
-    		//@formatter:off
+			//@formatter:off
     		check(msPerFrame, 
     			new ExpectedUnit<TimeUnit>(TimeUnit.FRAME, frame), 
     			new ExpectedUnit<TimeUnit>(TimeUnit.SECOND, frame * msPerFrame / 1e3),
@@ -28,7 +28,7 @@ public class TimeUnitTest
 	private void check(double msPerFrame, ExpectedUnit<TimeUnit>... expectedUnits)
 	{
 		int n = expectedUnits.length;
-		UnitConverter<TimeUnit> c;
+		TypeConverter<TimeUnit> c;
 		for (int i = 0; i < n; i++)
 		{
 			TimeUnit u1 = expectedUnits[i].u;
@@ -36,7 +36,7 @@ public class TimeUnitTest
 			for (int j = 0; j < n; j++)
 			{
 				TimeUnit u2 = expectedUnits[j].u;
-				c = u1.createConverter(u2, msPerFrame);
+				c = UnitConverterFactory.createConverter(u1, u2, msPerFrame);
 				double o = c.convert(v1);
 				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
 			}

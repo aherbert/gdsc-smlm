@@ -1,7 +1,5 @@
 package gdsc.smlm.data.units;
 
-import gdsc.core.utils.Maths;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -32,22 +30,6 @@ public enum IntensityUnit implements Unit
 		{
 			return "count"; // Nothing suitable
 		}
-		
-		UnitConverter<IntensityUnit> buildConverter(IntensityUnit to, double offset, double countPerPhoton)
-				throws UnitConversionException
-		{
-			if (to == IntensityUnit.PHOTON)
-				return new AddMultiplyUnitConverter<IntensityUnit>(this, to, -offset, 1.0 / countPerPhoton);
-			throw new UnitConversionException(this + " to " + to);
-		}
-
-		UnitConverter<IntensityUnit> buildConverter(IntensityUnit to, double countPerPhoton)
-				throws UnitConversionException
-		{
-			if (to == IntensityUnit.PHOTON)
-				return new MultiplyUnitConverter<IntensityUnit>(this, to, 1.0 / countPerPhoton);
-			throw new UnitConversionException(this + " to " + to);
-		}
 	},
 
 	/** Photon units */
@@ -62,22 +44,6 @@ public enum IntensityUnit implements Unit
 		{
 			return "photon"; // Nothing suitable
 		}
-		
-		UnitConverter<IntensityUnit> buildConverter(IntensityUnit to, double offset, double countPerPhoton)
-				throws UnitConversionException
-		{
-			if (to == IntensityUnit.COUNT)
-				return new MultiplyAddUnitConverter<IntensityUnit>(this, to, countPerPhoton, offset);
-			throw new UnitConversionException(this + " to " + to);
-		}
-
-		UnitConverter<IntensityUnit> buildConverter(IntensityUnit to, double countPerPhoton)
-				throws UnitConversionException
-		{
-			if (to == IntensityUnit.COUNT)
-				return new MultiplyUnitConverter<IntensityUnit>(this, to, countPerPhoton);
-			throw new UnitConversionException(this + " to " + to);
-		}
 	},;
 
 	/*
@@ -89,84 +55,4 @@ public enum IntensityUnit implements Unit
 	{
 		return getName();
 	}
-
-	/**
-	 * Creates the converter.
-	 *
-	 * @param to
-	 *            the to
-	 * @param offset
-	 *            the camera offset (in count units)
-	 * @param countPerPhoton
-	 *            the count per photon
-	 * @return the unit converter
-	 * @throws UnitConversionException
-	 *             if a converter cannot be created
-	 */
-	public UnitConverter<IntensityUnit> createConverter(IntensityUnit to, double offset, double countPerPhoton)
-			throws UnitConversionException
-	{
-		if (this == to)
-			return new IdentityUnitConverter<IntensityUnit>(this);
-
-		if (!Maths.isFinite(offset))
-			throw new UnitConversionException("offset must be finite");
-		if (!(countPerPhoton > 0 && countPerPhoton <= java.lang.Double.MAX_VALUE))
-			throw new UnitConversionException("count/photon must be positive");
-
-		return buildConverter(to, offset, countPerPhoton);
-	}
-
-	/**
-	 * Build the converter for the unit.
-	 *
-	 * @param to
-	 *            the to
-	 * @param offset
-	 *            the camera offset (in count units)
-	 * @param countPerPhoton
-	 *            the count per photon
-	 * @return the unit converter
-	 * @throws UnitConversionException
-	 *             if a converter cannot be created
-	 */
-	abstract UnitConverter<IntensityUnit> buildConverter(IntensityUnit to, double offset, double countPerPhoton)
-			throws UnitConversionException;
-
-	/**
-	 * Creates the converter.
-	 *
-	 * @param to
-	 *            the to
-	 * @param countPerPhoton
-	 *            the count per photon
-	 * @return the unit converter
-	 * @throws UnitConversionException
-	 *             if a converter cannot be created
-	 */
-	public UnitConverter<IntensityUnit> createConverter(IntensityUnit to, double countPerPhoton)
-			throws UnitConversionException
-	{
-		if (this == to)
-			return new IdentityUnitConverter<IntensityUnit>(this);
-
-		if (!(countPerPhoton > 0 && countPerPhoton <= java.lang.Double.MAX_VALUE))
-			throw new UnitConversionException("count/photon must be positive");
-
-		return buildConverter(to, countPerPhoton);
-	}
-
-	/**
-	 * Build the converter for the unit.
-	 *
-	 * @param to
-	 *            the to
-	 * @param countPerPhoton
-	 *            the count per photon
-	 * @return the unit converter
-	 * @throws UnitConversionException
-	 *             if a converter cannot be created
-	 */
-	abstract UnitConverter<IntensityUnit> buildConverter(IntensityUnit to, double countPerPhoton)
-			throws UnitConversionException;
 }

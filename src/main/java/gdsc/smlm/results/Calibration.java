@@ -7,8 +7,9 @@ import gdsc.smlm.data.units.AngleUnit;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IdentityUnitConverter;
 import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.UnitConversionException;
-import gdsc.smlm.data.units.UnitConverter;
+import gdsc.smlm.data.units.ConversionException;
+import gdsc.smlm.data.units.TypeConverter;
+import gdsc.smlm.data.units.UnitConverterFactory;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -887,17 +888,17 @@ public class Calibration implements Cloneable
 	 *            the distance unit
 	 * @return the distance converter
 	 */
-	public UnitConverter<DistanceUnit> getDistanceConverter(DistanceUnit toDistanceUnit)
+	public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit toDistanceUnit)
 	{
-		UnitConverter<DistanceUnit> c = null;
+		TypeConverter<DistanceUnit> c = null;
 		if (toDistanceUnit != null && hasDistanceUnit() && distanceUnit != toDistanceUnit && hasNmPerPixel())
 		{
 			try
 			{
-				c = distanceUnit.createConverter(toDistanceUnit, nmPerPixel);
+				c = UnitConverterFactory.createConverter(distanceUnit, toDistanceUnit, nmPerPixel);
 				setDistanceUnit(toDistanceUnit);
 			}
-			catch (UnitConversionException e)
+			catch (ConversionException e)
 			{
 				// Ignore this
 			}
@@ -922,18 +923,18 @@ public class Calibration implements Cloneable
 	 *            the intensity unit
 	 * @return the intensity converters (gain, gain + bias)
 	 */
-	public ArrayList<UnitConverter<IntensityUnit>> getIntensityConverter(IntensityUnit toIntensityUnit)
+	public ArrayList<TypeConverter<IntensityUnit>> getIntensityConverter(IntensityUnit toIntensityUnit)
 	{
-		ArrayList<UnitConverter<IntensityUnit>> list = new ArrayList<UnitConverter<IntensityUnit>>(2);
+		ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
 		if (toIntensityUnit != null && hasIntensityUnit() && intensityUnit != toIntensityUnit && hasGain() && hasBias())
 		{
 			try
 			{
-				list.add(intensityUnit.createConverter(toIntensityUnit, gain));
-				list.add(intensityUnit.createConverter(toIntensityUnit, bias, gain));
+				list.add(UnitConverterFactory.createConverter(intensityUnit, toIntensityUnit, gain));
+				list.add(UnitConverterFactory.createConverter(intensityUnit, toIntensityUnit, bias, gain));
 				setIntensityUnit(toIntensityUnit);
 			}
-			catch (UnitConversionException e)
+			catch (ConversionException e)
 			{
 				// Ignore this
 			}
@@ -941,7 +942,7 @@ public class Calibration implements Cloneable
 		if (list.size() != 2)
 		{
 			list.clear();
-			UnitConverter<IntensityUnit> c = new IdentityUnitConverter<IntensityUnit>(intensityUnit);
+			TypeConverter<IntensityUnit> c = new IdentityUnitConverter<IntensityUnit>(intensityUnit);
 			list.add(c);
 			list.add(c);
 		}
@@ -961,17 +962,17 @@ public class Calibration implements Cloneable
 	 *            the angle unit
 	 * @return the angle converter
 	 */
-	public UnitConverter<AngleUnit> getAngleConverter(AngleUnit toAngleUnit)
+	public TypeConverter<AngleUnit> getAngleConverter(AngleUnit toAngleUnit)
 	{
-		UnitConverter<AngleUnit> c = null;
+		TypeConverter<AngleUnit> c = null;
 		if (toAngleUnit != null && hasAngleUnit() && angleUnit != toAngleUnit)
 		{
 			try
 			{
-				c = angleUnit.createConverter(toAngleUnit);
+				c = UnitConverterFactory.createConverter(angleUnit, toAngleUnit);
 				setAngleUnit(toAngleUnit);
 			}
-			catch (UnitConversionException e)
+			catch (ConversionException e)
 			{
 				// Ignore this
 			}

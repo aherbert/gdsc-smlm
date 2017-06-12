@@ -19,7 +19,7 @@ import gdsc.smlm.data.units.AngleUnit;
 import gdsc.smlm.data.units.Converter;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.UnitConverter;
+import gdsc.smlm.data.units.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -153,9 +153,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			this.calibration = calibration.clone();
 
 			distanceConverter = calibration.getDistanceConverter(distanceUnit);
-			ArrayList<UnitConverter<IntensityUnit>> converters = calibration.getIntensityConverter(intensityUnit);
-			intensityConverter = (UnitConverter<IntensityUnit>) converters.get(0);
-			backgroundConverter = (UnitConverter<IntensityUnit>) converters.get(1);
+			ArrayList<TypeConverter<IntensityUnit>> converters = calibration.getIntensityConverter(intensityUnit);
+			intensityConverter = (TypeConverter<IntensityUnit>) converters.get(0);
+			backgroundConverter = (TypeConverter<IntensityUnit>) converters.get(1);
 			// TODO - better support for the shape
 			shapeConverter = calibration.getAngleConverter(angleUnit);
 		}
