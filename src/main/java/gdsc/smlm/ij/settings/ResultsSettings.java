@@ -48,6 +48,7 @@ public class ResultsSettings implements Cloneable
 	private IntensityUnit tableIntensityUnit;
 	private AngleUnit tableAngleUnit;
 	public boolean tableComputePrecision = false;
+	public int tableRoundingPrecision = 4;
 
 	public ResultsSettings()
 	{

@@ -1,4 +1,4 @@
-package gdsc.smlm.data;
+package gdsc.smlm.data.units;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -14,21 +14,20 @@ package gdsc.smlm.data;
  *---------------------------------------------------------------------------*/
 
 /**
- * Interface for any object that has a name
+ * Create a Rounder interface implementation
  */
-public interface NamedObject
+public class RounderFactory
 {
 	/**
-	 * Gets the name.
+	 * Creates the rounder. If the precision is less than 1 then an instance will be created that does not perform
+	 * rounding.
 	 *
-	 * @return the name
+	 * @param precision
+	 *            the precision
+	 * @return the rounder
 	 */
-	public String getName();
-
-	/**
-	 * Gets the short name. This may be the same as {@link #getName()}.
-	 *
-	 * @return the short name
-	 */
-	public String getShortName();
+	public static Rounder create(int precision)
+	{
+		return (precision > 0) ? new MathContextRounder(precision) : new NonRounder();
+	}
 }

@@ -6,6 +6,8 @@ import gdsc.smlm.data.units.Converter;
 import gdsc.smlm.data.units.DistanceUnit;
 import gdsc.smlm.data.units.IdentityUnitConverter;
 import gdsc.smlm.data.units.IntensityUnit;
+import gdsc.smlm.data.units.Rounder;
+import gdsc.smlm.data.units.RounderFactory;
 import gdsc.smlm.data.units.UnitConversionException;
 import gdsc.smlm.data.units.UnitConverter;
 
@@ -69,6 +71,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private IntensityUnit intensityUnit = null;
 	private AngleUnit angleUnit = null;
 	private boolean computePrecision = false;
+	private int roundingPrecision = 0;
 
 	// Store the ROI painters that have been attached to TextPanels so they can be updated
 	// with a new image source
@@ -88,6 +91,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	protected boolean tableActive = false;
 	private int nextRepaintSize = 0;
 	private double repaintInterval = 0.1;
+	private Rounder rounder;
 
 	private int indexT = -1, indexX = -1, indexY = -1;
 
@@ -126,6 +130,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		nmPerPixel = 0;
 		toPhotonConverter = null;
 		canComputePrecision = false;
+		rounder = RounderFactory.create(roundingPrecision);
 
 		if (calibration != null)
 		{
@@ -452,12 +457,12 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		return (float) distanceConverter.convert(f);
 	}
 
-	private void addResult(int peak, int endPeak, float origX, float origY, float origValue, double error,
+	private void addResult(int peak, int endPeak, int origX, int origY, float origValue, double error,
 			float... args)
 	{
 		StringBuilder sb = new StringBuilder();
 		if (addCounter)
-			sb.append(size + 1).append("\t");
+			sb.append(size + 1).append('\t');
 		if (sourceText != null)
 			sb.append(sourceText);
 		// Do not calibrate the original values		
@@ -466,12 +471,12 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		//else
 		sb.append(peak);
 		if (showEndFrame)
-			sb.append("\t").append(endPeak);
-		sb.append(String.format("\t%.0f", origX)).append(String.format("\t%.0f", origY));
-		sb.append(String.format("\t%g", origValue));
-		sb.append(String.format("\t%g", error));
+			sb.append('\t').append(endPeak);
+		sb.append('\t').append(origX).append('\t').append(origY);
+		sb.append('\t').append(rounder.round(origValue));
+		sb.append('\t').append(rounder.round(error));
 		for (float f : args)
-			sb.append(String.format("\t%g", f));
+			sb.append('\t').append(rounder.round(f));
 
 		append(sb.toString());
 	}
@@ -833,5 +838,26 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void setComputePrecision(boolean computePrecision)
 	{
 		this.computePrecision = computePrecision;
+	}
+
+	/**
+	 * Gets the rounding precision.
+	 *
+	 * @return the rounding precision
+	 */
+	public int getRoundingPrecision()
+	{
+		return roundingPrecision;
+	}
+
+	/**
+	 * Sets the rounding precision.
+	 *
+	 * @param roundingPrecision
+	 *            the new rounding precision
+	 */
+	public void setRoundingPrecision(int roundingPrecision)
+	{
+		this.roundingPrecision = roundingPrecision;
 	}
 }

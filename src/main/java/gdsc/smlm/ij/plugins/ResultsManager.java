@@ -23,9 +23,6 @@ import javax.swing.JFileChooser;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TurboList;
-import gdsc.smlm.data.units.DistanceUnit;
-import gdsc.smlm.data.units.IntensityUnit;
-import gdsc.smlm.data.units.TimeUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -351,6 +348,7 @@ public class ResultsManager implements PlugIn
 			r.setAngleUnit(resultsSettings.getTableAngleUnit());
 			r.setComputePrecision(resultsSettings.tableComputePrecision);
 			r.setShowEndFrame(showEndFrame);
+			r.setRoundingPrecision(resultsSettings.tableRoundingPrecision);
 			resultsList.addOutput(r);
 		}
 	}
@@ -482,6 +480,7 @@ public class ResultsManager implements PlugIn
 				egd.addChoice("Table_angle_unit", SettingsManager.angleUnitNames,
 						SettingsManager.angleUnitNames[resultsSettings.getTableAngleUnit().ordinal()]);
 				egd.addCheckbox("Table_show_precision", resultsSettings.tableComputePrecision);
+				egd.addSlider("Table_precision", 0, 10, resultsSettings.tableRoundingPrecision);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return;
@@ -489,6 +488,7 @@ public class ResultsManager implements PlugIn
 				resultsSettings.setTableIntensityUnit(egd.getNextChoiceIndex());
 				resultsSettings.setTableAngleUnit(egd.getNextChoiceIndex());
 				resultsSettings.tableComputePrecision = egd.getNextBoolean();
+				resultsSettings.tableRoundingPrecision = (int) egd.getNextNumber();
 			}
 		});
 
@@ -498,7 +498,8 @@ public class ResultsManager implements PlugIn
 		final EnumSet<ResultsImage> requireWeighted = EnumSet.of(ResultsImage.LOCALISATIONS,
 				ResultsImage.SIGNAL_INTENSITY, ResultsImage.FRAME_NUMBER, ResultsImage.ERROR);
 		gd.addChoice("Image", SettingsManager.resultsImageNames,
-				SettingsManager.resultsImageNames[resultsSettings.getResultsImage().ordinal()], new OptionListener<Choice>()
+				SettingsManager.resultsImageNames[resultsSettings.getResultsImage().ordinal()],
+				new OptionListener<Choice>()
 				{
 					public void collectOptions(Choice field)
 					{
@@ -562,7 +563,8 @@ public class ResultsManager implements PlugIn
 							egd.addChoice("File_distance_unit", SettingsManager.distanceUnitNames,
 									SettingsManager.distanceUnitNames[resultsSettings.getFileDistanceUnit().ordinal()]);
 							egd.addChoice("File_intensity_unit", SettingsManager.intensityUnitNames,
-									SettingsManager.intensityUnitNames[resultsSettings.getFileIntensityUnit().ordinal()]);
+									SettingsManager.intensityUnitNames[resultsSettings.getFileIntensityUnit()
+											.ordinal()]);
 							egd.addChoice("File_angle_unit", SettingsManager.angleUnitNames,
 									SettingsManager.angleUnitNames[resultsSettings.getFileAngleUnit().ordinal()]);
 							egd.addCheckbox("File_show_precision", resultsSettings.fileComputePrecision);
