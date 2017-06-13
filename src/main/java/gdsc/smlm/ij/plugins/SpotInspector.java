@@ -95,7 +95,7 @@ public class SpotInspector implements PlugIn, MouseListener
 			return;
 
 		// Load the results
-		results = ResultsManager.loadInputResults(inputOption, false);
+		results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -183,8 +183,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		for (PeakResultRank rank : rankedResults)
 		{
 			rank.rank = n++;
-			PeakResult r = rank.peakResult;
-			table.add(r.getFrame(), r.origX, r.origY, r.origValue, r.error, r.noise, r.params, r.paramsStdDev);
+			table.add(rank.peakResult);
 		}
 		table.end();
 
@@ -258,8 +257,8 @@ public class SpotInspector implements PlugIn, MouseListener
 			// Extract image
 			// Note that the coordinates are relative to the middle of the pixel (0.5 offset)
 			// so do not round but simply convert to int
-			final int x = (int) (r.params[Gaussian2DFunction.X_POSITION]);
-			final int y = (int) (r.params[Gaussian2DFunction.Y_POSITION]);
+			final int x = (int) (r.getXPosition());
+			final int y = (int) (r.getYPosition());
 
 			// Extract a region but crop to the image bounds
 			int minX = x - radius;
@@ -525,8 +524,8 @@ public class SpotInspector implements PlugIn, MouseListener
 				// Add an ROI to to the image containing all the spots in that part of the frame
 				PeakResult r = rankedResults.get(rank - 1).peakResult;
 
-				final int x = (int) (r.params[Gaussian2DFunction.X_POSITION]);
-				final int y = (int) (r.params[Gaussian2DFunction.Y_POSITION]);
+				final int x = (int) (r.getXPosition());
+				final int y = (int) (r.getYPosition());
 
 				// Find bounds
 				int minX = x - radius;

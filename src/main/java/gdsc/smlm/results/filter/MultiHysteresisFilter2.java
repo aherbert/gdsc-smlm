@@ -16,7 +16,6 @@ package gdsc.smlm.results.filter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -208,7 +207,7 @@ public class MultiHysteresisFilter2 extends HysteresisFilter
 			final double s = nmPerPixel * result.getSD();
 			final double N = result.getSignal();
 			variance = PeakResult.getVarianceX(nmPerPixel, s, N / gain,
-					Math.max(0, result.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+					Math.max(0, result.getBackground() - bias) / gain, emCCD);
 		}
 		else
 		{
