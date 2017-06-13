@@ -3017,7 +3017,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final float radius = (float) (settings.densityRadius * getHWHM());
 				final Rectangle bounds = results.getBounds();
 				currentIndex = 0;
-				finalIndex = results.getTail().getFrame();
+				finalIndex = results.getLastFrame();
 				// Store the density for each result.
 				int[] allDensity = new int[results.size()];
 				int allIndex = 0;
