@@ -148,7 +148,7 @@ public class DarkTimeAnalysis implements PlugIn
 	{
 		// Find min and max time frames
 		results.sort();
-		int min = results.getHead().getFrame();
+		int min = results.getFirstFrame();
 		int max = results.getLastFrame();
 
 		// Trace results

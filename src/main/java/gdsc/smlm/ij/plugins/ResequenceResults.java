@@ -130,7 +130,7 @@ public class ResequenceResults implements PlugIn
 		results.sort();
 
 		// Assume the results start from frame 1 (or above)
-		if (results.getHead().getFrame() < 1)
+		if (results.getFirstFrame() < 1)
 		{
 			return false;
 		}

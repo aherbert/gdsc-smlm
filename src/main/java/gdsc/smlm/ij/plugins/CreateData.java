@@ -3012,7 +3012,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
 				List<Future<?>> futures = new LinkedList<Future<?>>();
 				final ArrayList<float[]> coords = new ArrayList<float[]>();
-				int t = results.getHead().getFrame();
+				int t = results.getFirstFrame();
 				final Statistics densityStats = stats[DENSITY];
 				final float radius = (float) (settings.densityRadius * getHWHM());
 				final Rectangle bounds = results.getBounds();

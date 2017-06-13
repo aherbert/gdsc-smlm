@@ -351,7 +351,7 @@ public class TraceMolecules implements PlugIn
 		{
 			public int compare(Trace o1, Trace o2)
 			{
-				return o1.getHead().getFrame() - o2.getHead().getFrame();
+				return o1.getFirstFrame() - o2.getFirstFrame();
 			}
 		});
 	}
@@ -1803,7 +1803,7 @@ public class TraceMolecules implements PlugIn
 
 			// This is not needed since the bounds are passed using the FitJob
 			//params.setOffset(new float[] { bounds.x, bounds.y });
-			int startT = trace.getHead().getFrame();
+			int startT = trace.getFirstFrame();
 			params.endT = trace.getTail().getFrame();
 
 			ParameterisedFitJob job = new ParameterisedFitJob(n, params, startT, data, bounds);

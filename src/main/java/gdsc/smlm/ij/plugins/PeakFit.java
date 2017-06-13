@@ -272,7 +272,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			}
 
 			// Check for single frame
-			singleFrame = results.getHead().getFrame();
+			singleFrame = results.getFirstFrame();
 			for (PeakResult result : results.getResults())
 			{
 				if (singleFrame != result.getFrame())
