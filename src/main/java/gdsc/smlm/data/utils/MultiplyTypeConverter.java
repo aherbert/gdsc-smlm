@@ -53,4 +53,14 @@ public class MultiplyTypeConverter<T> extends AbstractTypeConverter<T>
 	{
 		return value * multiplication;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.data.utils.Converter#getFunction()
+	 */
+	public String getFunction()
+	{
+		return "x * " + multiplication;
+	}
 }

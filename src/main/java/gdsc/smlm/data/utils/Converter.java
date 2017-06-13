@@ -21,8 +21,17 @@ public interface Converter
 	/**
 	 * Convert the value.
 	 *
-	 * @param value the value
+	 * @param value
+	 *            the value
 	 * @return the new value
 	 */
 	public double convert(double value);
+
+	/**
+	 * Gets the conversion function, f(x). The function should represent what conversion is performed on the function
+	 * input value x.
+	 *
+	 * @return the function
+	 */
+	public String getFunction();
 }

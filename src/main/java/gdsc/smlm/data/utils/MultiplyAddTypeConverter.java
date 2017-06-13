@@ -57,4 +57,14 @@ public class MultiplyAddTypeConverter<T> extends MultiplyTypeConverter<T>
 	{
 		return value * multiplication + addition;
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.data.utils.Converter#getFunction()
+	 */
+	public String getFunction()
+	{
+		return "x * " + multiplication + " + " + addition;
+	}
 }

@@ -38,4 +38,14 @@ public class IdentityTypeConverter<T> extends AbstractTypeConverter<T>
 	{
 		return value;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.data.utils.Converter#getFunction()
+	 */
+	public String getFunction()
+	{
+		return "x";
+	}
 }
