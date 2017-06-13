@@ -1153,7 +1153,7 @@ public class SpotAnalysis extends PlugInFrame
 
 				int[] on = traceResult.trace.getOnTimes();
 				int[] off = traceResult.trace.getOffTimes();
-				int t = traceResult.trace.getFirstFrame();
+				int t = traceResult.trace.getHead().getFrame();
 				for (int i = 0; i < on.length; i++)
 				{
 					writeLine(files[1], Double.toString(msPerFrame * on[i]));

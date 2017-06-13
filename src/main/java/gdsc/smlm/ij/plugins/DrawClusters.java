@@ -224,7 +224,7 @@ public class DrawClusters implements PlugIn
 					values[i] = traces[i].getId();
 					break;
 				case 2: // Sort by time
-					values[i] = traces[i].getFirstFrame();
+					values[i] = traces[i].getHead().getFrame();
 					break;
 				case 3: // Sort by size descending
 					values[i] = -traces[i].size();
