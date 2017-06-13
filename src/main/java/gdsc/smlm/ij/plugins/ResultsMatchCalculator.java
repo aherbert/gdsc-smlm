@@ -412,11 +412,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	private boolean haveIds(MemoryPeakResults results)
 	{
-		final int id = results.getHead().getId();
-		for (PeakResult r : results.getResults())
-			if (id != r.getId())
-				return true;
-		return false;
+		return results.hasId();
 	}
 
 	private TextFilePeakResults createFilePeakResults(MemoryPeakResults results2)

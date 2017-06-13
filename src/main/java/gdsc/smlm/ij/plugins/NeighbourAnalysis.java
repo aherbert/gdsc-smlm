@@ -82,7 +82,7 @@ public class NeighbourAnalysis implements PlugIn
 			}
 			filename += ".xls";
 
-			boolean showDeviations = (!results.getResults().isEmpty() && results.getHead().paramsStdDev != null);
+			boolean showDeviations = (!results.getResults().isEmpty() && results.hasDeviations());
 			TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations);
 			traceResults.copySettings(results);
 			traceResults.begin();

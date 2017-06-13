@@ -313,27 +313,17 @@ public class ResultsManager implements PlugIn
 
 	private boolean canShowDeviations(MemoryPeakResults results)
 	{
-		for (PeakResult r : results)
-			if (r.paramsStdDev != null)
-				return true;
-		return false;
+		return results.hasDeviations();
 	}
 
 	private boolean canShowEndFrame(MemoryPeakResults results)
 	{
-		for (PeakResult r : results.getResults())
-			if (r.getFrame() != r.getEndFrame())
-				return true;
-		return false;
+		return results.hasEndFrame();
 	}
 
 	private boolean canShowId(MemoryPeakResults results)
 	{
-		final int id = results.getHead().getId();
-		for (PeakResult r : results.getResults())
-			if (id != r.getId())
-				return true;
-		return false;
+		return results.hasId();
 	}
 
 	private void addTableResults(MemoryPeakResults results, PeakResultsList resultsList, boolean showDeviations,

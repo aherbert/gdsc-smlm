@@ -973,7 +973,7 @@ public class FIRE implements PlugIn
 		if (results == null)
 			return null;
 
-		final SignalProvider signalProvider = (useSignal && (results.getHead().getSignal() > 0))
+		final SignalProvider signalProvider = (useSignal && (results.hasIntensity()))
 				? new PeakSignalProvider() : new FixedSignalProvider();
 
 		// Draw images using the existing IJ routines.

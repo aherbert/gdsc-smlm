@@ -46,8 +46,22 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	private static final int DEFAULT_SIZE = 96;
 	private static final int DEFAULT_SIZE_WITH_DEVIATIONS = 144;
 
-	private ArrayList<PeakResult> results;
 	private boolean sortAfterEnd;
+
+	// Allow changing the data structure used to store the results
+	private ArrayList<PeakResult> results;
+
+	/**
+	 * Gets the result.
+	 *
+	 * @param index
+	 *            the index
+	 * @return the peak result
+	 */
+	private PeakResult get(int index)
+	{
+		return results.get(index);
+	}
 
 	public MemoryPeakResults()
 	{
@@ -641,15 +655,97 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	}
 
 	/**
-	 * Gets the head position in the set of results.
+	 * Checks for background. At least one result must have a non-zero background.
 	 *
-	 * @return the head
+	 * @return true, if successful
 	 */
-	public PeakResult getHead()
+	public boolean hasBackground()
+	{
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			if (get(i).getBackground() != 0)
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks for noise. At least one result must have a positive noise.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasNoise()
+	{
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			if (get(i).noise > 0)
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks for intensity. At least one result must have a positive intensity.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasIntensity()
+	{
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			if (get(i).getSignal() > 0)
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks for deviations. All results must have deviations.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasDeviations()
+	{
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			if (get(i).paramsStdDev == null)
+				return false;
+		}
+		return !isEmpty();
+	}
+
+	/**
+	 * Checks for end frame. At least one result must have an end frame.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasEndFrame()
+	{
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			if (get(i).getFrame() != get(i).getEndFrame())
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks for id. At least two results must have different Ids. If the number of results is 1 then the id must not
+	 * be zero.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasId()
 	{
 		if (isEmpty())
-			return null;
-		return results.get(0);
+			return false;
+		int id = get(0).getId();
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			if (get(i).getId() != id)
+				return true;
+		}
+		return id != 0;
 	}
 
 	/**
@@ -663,7 +759,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		if (isEmpty())
 			throw new IllegalStateException("Empty");
-		return results.get(0).getFrame();
+		return get(0).getFrame();
 	}
 
 	/**
@@ -677,7 +773,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		if (isEmpty())
 			throw new IllegalStateException("Empty");
-		return results.get(size() - 1).getEndFrame();
+		return get(size() - 1).getEndFrame();
 	}
 
 	/**
@@ -689,7 +785,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		for (int i = 0; i < results.size(); i++)
 		{
-			if (!results.get(i).hasPrecision())
+			if (!get(i).hasPrecision())
 				return false;
 		}
 		return true;
@@ -704,7 +800,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		for (int i = 0; i < results.size(); i++)
 		{
-			if (results.get(i) == null)
+			if (get(i) == null)
 				return true;
 		}
 		return false;
@@ -957,7 +1053,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		for (int i = 0, size = results.size(); i < size; i++)
 		{
-			final PeakResult r = results.get(i);
+			final PeakResult r = get(i);
 			procedure.execute(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
 		}
 	}
@@ -988,7 +1084,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 
 		for (int i = 0, size = results.size(); i < size; i++)
 		{
-			final PeakResult r = results.get(i);
+			final PeakResult r = get(i);
 			//@formatter:off
 			procedure.execute(
 					bic.convert(r.getBackground()), 
@@ -1033,7 +1129,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 
 		for (int i = 0, size = results.size(); i < size; i++)
 		{
-			final PeakResult r = results.get(i);
+			final PeakResult r = get(i);
 			float s = r.getSD();
 			procedure.execute(PeakResult.getPrecision(nmPerPixel, dc.convert(s), ic.convert(r.getSignal()),
 					bic.convert(r.getBackground()), emCCD));

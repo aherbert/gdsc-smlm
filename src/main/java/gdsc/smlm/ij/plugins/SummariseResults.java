@@ -154,7 +154,7 @@ public class SummariseResults implements PlugIn
 			}
 
 			// SNR requires noise
-			if (result.getHead().noise > 0)
+			if (result.hasNoise())
 			{
 				for (PeakResult peakResult : result.getResults())
 				{
@@ -179,7 +179,7 @@ public class SummariseResults implements PlugIn
 		}
 		if (size > 0)
 		{
-			boolean includeDeviations = result.getHead().paramsStdDev != null;
+			boolean includeDeviations = result.hasDeviations();
 			long memorySize = MemoryPeakResults.estimateMemorySize(size, includeDeviations);
 			String memory = MemoryPeakResults.memorySizeString(memorySize);
 			sb.append('\t').append(memory);
