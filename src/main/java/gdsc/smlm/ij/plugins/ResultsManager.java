@@ -14,7 +14,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -23,21 +22,8 @@ import javax.swing.JFileChooser;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TurboList;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
@@ -53,7 +39,6 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
-import gdsc.smlm.results.FileFormat;
 import gdsc.smlm.results.MALKFilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -64,9 +49,7 @@ import gdsc.smlm.results.ResultOption;
 import gdsc.smlm.results.TSFPeakResultsWriter;
 import gdsc.smlm.results.TextFilePeakResults;
 import ij.IJ;
-import ij.ImagePlus;
 import ij.Prefs;
-import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
@@ -114,10 +97,6 @@ public class ResultsManager implements PlugIn
 
 	private static String inputOption = "";
 	private static String inputFilename = Prefs.get(Constants.inputFilename, "");
-	private static boolean chooseRoi = false;
-	private static String roiImage = "";
-	private Rectangle roiBounds;
-	private int roiImageWidth, roiImageHeight;
 
 	private ResultsSettings resultsSettings = new ResultsSettings();
 	private boolean extraOptions;
@@ -217,13 +196,6 @@ public class ResultsManager implements PlugIn
 		{
 			IJ.error(TITLE, "No results could be loaded");
 			IJ.showStatus("");
-			return;
-		}
-
-		results = cropToRoi(results);
-		if (results.size() == 0)
-		{
-			IJ.error(TITLE, "No results within the crop region");
 			return;
 		}
 
@@ -422,18 +394,6 @@ public class ResultsManager implements PlugIn
 		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		// Build a list of all images with a region ROI
-		List<String> titles = new LinkedList<String>();
-		if (WindowManager.getWindowCount() > 0)
-		{
-			for (int imageID : WindowManager.getIDList())
-			{
-				ImagePlus imp = WindowManager.getImage(imageID);
-				if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
-					titles.add(imp.getTitle());
-			}
-		}
-
 		GlobalSettings settings = SettingsManager.loadSettings();
 		resultsSettings = settings.getResultsSettings();
 
@@ -443,9 +403,6 @@ public class ResultsManager implements PlugIn
 		addInput(gd, inputOption, InputSource.MEMORY, InputSource.FILE);
 
 		final Choice inputChoice = gd.getLastChoice();
-
-		if (!titles.isEmpty())
-			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
 
 		gd.addMessage("--- Table output ---");
 		gd.addCheckbox("Show_results_table", resultsSettings.showResultsTable, new OptionListener<Checkbox>()
@@ -608,8 +565,6 @@ public class ResultsManager implements PlugIn
 
 		inputOption = ResultsManager.getInputSource(gd);
 		inputFilename = gd.getNextString();
-		if (!titles.isEmpty())
-			chooseRoi = gd.getNextBoolean();
 		resultsSettings.showResultsTable = gd.getNextBoolean();
 		resultsSettings.setResultsImage(gd.getNextChoiceIndex());
 		resultsSettings.resultsFilename = gd.getNextString();
@@ -635,35 +590,6 @@ public class ResultsManager implements PlugIn
 		}
 
 		Prefs.set(Constants.inputFilename, inputFilename);
-
-		if (!titles.isEmpty() && chooseRoi)
-		{
-			if (titles.size() == 1)
-			{
-				roiImage = titles.get(0);
-				Recorder.recordOption("Image", roiImage);
-			}
-			else
-			{
-				String[] items = titles.toArray(new String[titles.size()]);
-				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-				egd.addMessage("Select the source image for the ROI");
-				egd.addChoice("Image", items, roiImage);
-				egd.showDialog();
-				if (egd.wasCanceled())
-					return false;
-				roiImage = egd.getNextChoice();
-			}
-			ImagePlus imp = WindowManager.getImage(roiImage);
-
-			roiBounds = imp.getRoi().getBounds();
-			roiImageWidth = imp.getWidth();
-			roiImageHeight = imp.getHeight();
-		}
-		else
-		{
-			roiBounds = null;
-		}
 
 		SettingsManager.saveSettings(settings);
 
@@ -953,14 +879,39 @@ public class ResultsManager implements PlugIn
 	}
 
 	/**
-	 * Load the results from the named input option
-	 * 
+	 * Load the results from the named input option. If the results are not empty then a check can be made for
+	 * calibration, and data using the legacy standard units (distance in Pixel and intensity in Count).
+	 * <p>
+	 * If the calibration cannot be obtained or the units are incorrect then the null will be returned.
+	 *
 	 * @param inputOption
+	 *            the input option
 	 * @param checkCalibration
 	 *            Set to true to ensure the results have a valid calibration
-	 * @return
+	 * @return the results
 	 */
 	public static MemoryPeakResults loadInputResults(String inputOption, boolean checkCalibration)
+	{
+		return loadInputResults(inputOption, checkCalibration, DistanceUnit.PIXEL, IntensityUnit.COUNT);
+	}
+	
+	/**
+	 * Load the results from the named input option. If the results are not empty then a check can be made for
+	 * calibration, and data using the specified units. If the calibration cannot be obtained or the units are incorrect
+	 * then the null will be returned.
+	 *
+	 * @param inputOption
+	 *            the input option
+	 * @param checkCalibration
+	 *            Set to true to ensure the results have a valid calibration
+	 * @param distanceUnit
+	 *            the required distance unit for the results
+	 * @param intensityUnit
+	 *            the required intensity unit for the results
+	 * @return the results
+	 */
+	public static MemoryPeakResults loadInputResults(String inputOption, boolean checkCalibration,
+			DistanceUnit distanceUnit, IntensityUnit intensityUnit)
 	{
 		MemoryPeakResults results = null;
 		PeakResultsReader reader = null;
@@ -995,12 +946,27 @@ public class ResultsManager implements PlugIn
 			results = loadMemoryResults(inputOption);
 		}
 
-		if (results != null && results.size() > 0 && checkCalibration)
+		try
 		{
-			if (!checkCalibration(results, reader))
-				results = null;
+			if (results == null)
+				return null;
+			if (results.isEmpty())
+				return results;
+
+			if (checkCalibration)
+			{
+				if (!checkCalibration(results, reader))
+					return null;
+			}
+			if (distanceUnit != null && results.getDistanceUnit() != distanceUnit)
+				return null;
+			if (intensityUnit != null && results.getIntensityUnit() != intensityUnit)
+				return null;
 		}
-		IJ.showStatus("");
+		finally
+		{
+			IJ.showStatus("");
+		}
 		return results;
 	}
 
@@ -1142,24 +1108,6 @@ public class ResultsManager implements PlugIn
 		// Only check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification)
 		if (!calibration.hasNmPerPixel() || !calibration.hasGain() || !calibration.hasExposureTime() || noise <= 0)
 		{
-			boolean convert = false;
-
-			// We may have results that are within configured bounds. If so we do not need the conversion
-			boolean showConvert = true;
-			if (results.getBounds(false) != null)
-			{
-				final Rectangle bounds = results.getBounds(false);
-				showConvert = false;
-				for (PeakResult r : results.getResults())
-				{
-					if (!bounds.contains(r.getXPosition(), r.getYPosition()))
-					{
-						showConvert = true;
-						break;
-					}
-				}
-			}
-
 			if (!calibration.hasNmPerPixel())
 				calibration.setNmPerPixel(input_nmPerPixel);
 			if (!calibration.hasGain())
@@ -1179,8 +1127,6 @@ public class ResultsManager implements PlugIn
 			gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 			if (noise <= 0)
 				gd.addNumericField("Noise (ADU)", input_noise, 2);
-			if (showConvert)
-				gd.addCheckbox("Convert_nm_to_pixels", convert);
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
@@ -1189,8 +1135,6 @@ public class ResultsManager implements PlugIn
 			input_exposureTime = Math.abs(gd.getNextNumber());
 			if (noise == 0)
 				input_noise = Math.abs((float) gd.getNextNumber());
-			if (showConvert)
-				convert = gd.getNextBoolean();
 
 			Prefs.set(Constants.inputNmPerPixel, input_nmPerPixel);
 			Prefs.set(Constants.inputGain, input_gain);
@@ -1199,19 +1143,6 @@ public class ResultsManager implements PlugIn
 
 			results.setCalibration(new Calibration(input_nmPerPixel, input_gain, input_exposureTime));
 
-			if (convert && input_nmPerPixel > 0)
-			{
-				// Note: NSTORM stores 2xSD
-				final double widthConversion = (reader != null && reader.getFormat() == FileFormat.NSTORM)
-						? 1.0 / (2 * input_nmPerPixel) : 1.0 / input_nmPerPixel;
-				for (PeakResult p : results.getResults())
-				{
-					p.params[Gaussian2DFunction.X_POSITION] /= input_nmPerPixel;
-					p.params[Gaussian2DFunction.Y_POSITION] /= input_nmPerPixel;
-					p.params[Gaussian2DFunction.X_SD] *= widthConversion;
-					p.params[Gaussian2DFunction.Y_SD] *= widthConversion;
-				}
-			}
 			if (noise == 0)
 			{
 				for (PeakResult p : results.getResults())
@@ -1251,42 +1182,7 @@ public class ResultsManager implements PlugIn
 		{
 			fileInput = true;
 		}
-		return loadInputResults(inputOption, true);
-	}
-
-	private MemoryPeakResults cropToRoi(MemoryPeakResults results)
-	{
-		if (roiBounds == null)
-			return results;
-
-		// Adjust bounds relative to input results image
-		double xscale = roiImageWidth / results.getBounds().width;
-		double yscale = roiImageHeight / results.getBounds().height;
-		roiBounds.x /= xscale;
-		roiBounds.width /= xscale;
-		roiBounds.y /= yscale;
-		roiBounds.height /= yscale;
-
-		float minX = (int) (roiBounds.x);
-		float maxX = (int) Math.ceil(roiBounds.x + roiBounds.width);
-		float minY = (int) (roiBounds.y);
-		float maxY = (int) Math.ceil(roiBounds.y + roiBounds.height);
-
-		// Create a new set of results within the bounds
-		MemoryPeakResults newResults = new MemoryPeakResults();
-		newResults.begin();
-		for (PeakResult peakResult : results.getResults())
-		{
-			float x = peakResult.params[Gaussian2DFunction.X_POSITION];
-			float y = peakResult.params[Gaussian2DFunction.Y_POSITION];
-			if (x < minX || x > maxX || y < minY || y > maxY)
-				continue;
-			newResults.add(peakResult);
-		}
-		newResults.end();
-		newResults.copySettings(results);
-		newResults.setBounds(new Rectangle((int) minX, (int) minY, (int) (maxX - minX), (int) (maxY - minY)));
-		return newResults;
+		return loadInputResults(inputOption, true, null, null);
 	}
 
 	/**
@@ -1382,7 +1278,7 @@ public class ResultsManager implements PlugIn
 			Recorder.recordOption("results_file", "[]");
 			Recorder.recordOption("save_to_memory");
 		}
-		MemoryPeakResults results = loadInputResults(INPUT_FILE, true);
+		MemoryPeakResults results = loadInputResults(INPUT_FILE, true, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded from " + path);
