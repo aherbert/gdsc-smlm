@@ -21,6 +21,7 @@ import java.util.Arrays;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.tsf.TaggedSpotFile.CameraType;
 import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
 import gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType;
 import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
@@ -459,6 +460,29 @@ public class TSFPeakResultsReader
 		return 0;
 	}
 
+	private static gdsc.smlm.data.config.SMLMSettings.CameraType[] cameraTypeMap;
+	private static gdsc.smlm.data.config.SMLMSettings.AngleUnit[] thetaUnitsMap;
+	private static gdsc.smlm.data.config.SMLMSettings.DistanceUnit[] locationUnitsMap;
+	private static gdsc.smlm.data.config.SMLMSettings.IntensityUnit[] intensityUnitsMap;
+	static
+	{
+		// These should have 1:1 mapping. We can extends the TSF proto if necessary.		
+		cameraTypeMap = new gdsc.smlm.data.config.SMLMSettings.CameraType[3];
+		cameraTypeMap[CameraType.CCD.ordinal()] = gdsc.smlm.data.config.SMLMSettings.CameraType.CCD;
+		cameraTypeMap[CameraType.EMCCD.ordinal()] = gdsc.smlm.data.config.SMLMSettings.CameraType.EMCCD;
+		cameraTypeMap[CameraType.SCMOS.ordinal()] = gdsc.smlm.data.config.SMLMSettings.CameraType.SCMOS;
+		thetaUnitsMap = new gdsc.smlm.data.config.SMLMSettings.AngleUnit[2];
+		thetaUnitsMap[ThetaUnits.RADIANS.ordinal()] = gdsc.smlm.data.config.SMLMSettings.AngleUnit.RADIAN;
+		thetaUnitsMap[ThetaUnits.DEGREES.ordinal()] = gdsc.smlm.data.config.SMLMSettings.AngleUnit.DEGREE;
+		locationUnitsMap = new gdsc.smlm.data.config.SMLMSettings.DistanceUnit[3];
+		locationUnitsMap[LocationUnits.NM.ordinal()] = gdsc.smlm.data.config.SMLMSettings.DistanceUnit.NM;
+		locationUnitsMap[LocationUnits.UM.ordinal()] = gdsc.smlm.data.config.SMLMSettings.DistanceUnit.UM;
+		locationUnitsMap[LocationUnits.PIXELS.ordinal()] = gdsc.smlm.data.config.SMLMSettings.DistanceUnit.PIXEL;
+		intensityUnitsMap = new gdsc.smlm.data.config.SMLMSettings.IntensityUnit[2];
+		intensityUnitsMap[IntensityUnits.COUNTS.ordinal()] = gdsc.smlm.data.config.SMLMSettings.IntensityUnit.COUNT;
+		intensityUnitsMap[IntensityUnits.PHOTONS.ordinal()] = gdsc.smlm.data.config.SMLMSettings.IntensityUnit.PHOTON;
+	}
+
 	private MemoryPeakResults createResults()
 	{
 		// Limit the capacity since we may not need all the spots
@@ -534,8 +558,10 @@ public class TSFPeakResultsReader
 				cal.setReadNoise(spotList.getReadNoise());
 			if (spotList.hasBias())
 				cal.setBias(spotList.getBias());
-			if (spotList.hasEmCCD())
-				cal.setEmCCD(spotList.getEmCCD());
+			if (spotList.hasCameraType())
+			{
+				cal.setCameraType(cameraTypeMap[spotList.getCameraType().ordinal()]);
+			}
 			if (spotList.hasAmplification())
 				cal.setAmplification(spotList.getAmplification());
 
@@ -545,19 +571,27 @@ public class TSFPeakResultsReader
 			}
 		}
 
-		if (spotList.getLocationUnits() != LocationUnits.PIXELS)
+		if (spotList.hasLocationUnits())
 		{
-			if (!cal.hasNmPerPixel())
+			cal.setDistanceUnit(locationUnitsMap[spotList.getLocationUnits().ordinal()]);
+			if (!spotList.hasPixelSize() && spotList.getLocationUnits() != LocationUnits.PIXELS)
 				System.err.println(
-						"TSF location units are not pixels and no calibration is available. The dataset will be constructed in the native units: " +
+						"TSF location units are not pixels and no pixel size calibration is available. The dataset will be constructed in the native units: " +
 								spotList.getLocationUnits());
 		}
-		if (spotList.getIntensityUnits() != IntensityUnits.COUNTS)
+		if (spotList.hasIntensityUnits())
 		{
-			if (!cal.hasGain())
+			cal.setIntensityUnit(intensityUnitsMap[spotList.getIntensityUnits().ordinal()]);
+			if (!spotList.hasGain() && spotList.getIntensityUnits() != IntensityUnits.COUNTS)
+			{
 				System.err.println(
-						"TSF intensity units are not counts and no calibration is available. The dataset will be constructed in the native units: " +
+						"TSF intensity units are not counts and no gain calibration is available. The dataset will be constructed in the native units: " +
 								spotList.getIntensityUnits());
+			}
+		}
+		if (spotList.hasThetaUnits())
+		{
+			cal.setAngleUnit(thetaUnitsMap[spotList.getThetaUnits().ordinal()]);
 		}
 
 		return results;
