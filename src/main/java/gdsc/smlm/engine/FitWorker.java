@@ -128,6 +128,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private Candidate[] candidateNeighbours = null;
 	// Contains the index in the list of fitted results for any neighbours 
 	private int fittedNeighbourCount = 0;
+	// TODO - Change this so that fitted neighbours use the same parameters and result 
+	// as output from fitting the function. They should be converted to PeakResults
+	// at the end of fitting. This allows using different representations of the PSF.
 	private PeakResult[] fittedNeighbours = null;
 	//private final float duplicateDistance2;
 	private CoordinateStore coordinateStore;
@@ -584,8 +587,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		for (int i = 0; i < sliceResults.size(); i++)
 		{
 			final PeakResult result = sliceResults.get(i);
-			result.params[Gaussian2DFunction.X_POSITION] += offsetx;
-			result.params[Gaussian2DFunction.Y_POSITION] += offsety;
+			float[] p = result.getParameters();
+			p[Gaussian2DFunction.X_POSITION] += offsetx;
+			p[Gaussian2DFunction.Y_POSITION] += offsety;
 		}
 
 		// Change this so results are stored in photons
@@ -595,10 +599,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			{
 				final PeakResult result = sliceResults.get(i);
 				// Fix the results so they are in ADU counts
-				result.params[Gaussian2DFunction.BACKGROUND] *= gain;
-				result.params[Gaussian2DFunction.SIGNAL] *= gain;
+				float[] p = result.getParameters();
+				p[Gaussian2DFunction.BACKGROUND] *= gain;
+				p[Gaussian2DFunction.SIGNAL] *= gain;
 			}
-		}		
+		}
 
 		this.results.addAll(sliceResults);
 
@@ -1233,7 +1238,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						PeakResult result = fittedNeighbours[i];
 						// Copy Signal,Angle,Xpos,Ypos,Xwidth,Ywidth
 						for (int k = 1; k <= parametersPerPeak; k++)
-							funcParams[j + k] = result.params[k];
+							funcParams[j + k] = result.getParameters()[k];
 						// Adjust position relative to extracted region
 						funcParams[j + Gaussian2DFunction.X_POSITION] -= xOffset;
 						funcParams[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
@@ -1265,7 +1270,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 					// Copy Signal,Angle,Xpos,Ypos,Xwidth,Ywidth
 					for (int k = 1; k <= parametersPerPeak; k++)
-						params[j + k] = result.params[k];
+						params[j + k] = result.getParameters()[k];
 
 					// Adjust position relative to extracted region
 					params[j + Gaussian2DFunction.X_POSITION] -= xOffset;
@@ -1505,7 +1510,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					int ii = -1;
 					for (int i = 0; i < peakNeighbours.length; i++)
 					{
-						final float d2 = distance2(fcx2, fcy2, peakNeighbours[i].params);
+						final float d2 = distance2(fcx2, fcy2, peakNeighbours[i].getXPosition(),
+								peakNeighbours[i].getYPosition());
 						if (mind2 > d2)
 						{
 							// There is another fitted result that is closer.
@@ -2007,7 +2013,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					final PeakResult result = fittedNeighbours[i];
 					// Copy Signal,Angle,Xpos,Ypos,Xwidth,Ywidth
 					for (int k = 1; k <= parametersPerPeak; k++)
-						funcParams[j + k] = result.params[k];
+						funcParams[j + k] = result.getParameters()[k];
 					// Adjust position relative to extracted region
 					funcParams[j + Gaussian2DFunction.X_POSITION] -= xOffset;
 					funcParams[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
@@ -2192,7 +2198,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					int ii = -1;
 					for (int i = 0; i < peakNeighbours.length; i++)
 					{
-						final float d2 = distance2(fcx2, fcy2, peakNeighbours[i].params);
+						final float d2 = distance2(fcx2, fcy2, peakNeighbours[i].getXPosition(),
+								peakNeighbours[i].getYPosition());
 						if (mind2 > d2)
 						{
 							// There is another fitted result that is closer.
@@ -2677,7 +2684,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						final float d2 = (float) distanceToSingleFit2;
 						for (int i = 0; i < peakNeighbours.length; i++)
 						{
-							if (d2 > distance2(fcx2, fcy2, peakNeighbours[i].params))
+							if (d2 > distance2(fcx2, fcy2, peakNeighbours[i].getXPosition(),
+									peakNeighbours[i].getYPosition()))
 							{
 								if (logger != null)
 								{
@@ -2804,10 +2812,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return dx * dx + dy * dy;
 		}
 
-		private float distance2(float cx, float cy, float[] params)
+		private float distance2(float cx, float cy, float x, float y)
 		{
-			final float dx = cx - params[Gaussian2DFunction.X_POSITION];
-			final float dy = cy - params[Gaussian2DFunction.Y_POSITION];
+			final float dx = cx - x;
+			final float dy = cy - y;
 			return dx * dx + dy * dy;
 		}
 	}
@@ -3150,7 +3158,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Compute average background of the fitted peaks
 			double sum = 0;
 			for (PeakResult result : peakResults)
-				sum += result.params[Gaussian2DFunction.BACKGROUND];
+				sum += result.getBackground();
 			float av = (float) sum / peakResults.size();
 			if (logger != null)
 				logger.info("Average background %f", av);
