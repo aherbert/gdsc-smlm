@@ -43,6 +43,7 @@ import gdsc.smlm.results.AttributePeakResult;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.ResultProcedure;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
@@ -132,6 +133,7 @@ public class LoadLocalisations implements PlugIn
 					params[Gaussian2DFunction.Y_SD] = (float) (l.sy);
 				// Store the z-position in the error field.
 				// Q. Should this be converted?
+				// TODO - fix this to store the z explicitly				
 				AttributePeakResult peakResult = new AttributePeakResult(l.t,
 						(int) params[Gaussian2DFunction.X_POSITION], (int) params[Gaussian2DFunction.Y_POSITION], 0,
 						l.z, 0, params, null);
@@ -239,18 +241,35 @@ public class LoadLocalisations implements PlugIn
 			Utils.log("Loaded %d localisations", results.size());
 	}
 
+	private class ZResultProcedure implements ResultProcedure
+	{
+		float min, max;
+
+		public void execute(float background, float intensity, float x, float y, float z)
+		{
+			if (min > z)
+				min = z;
+			else if (max < z)
+				max = z;
+		}
+	}
+
 	private boolean getZDepth(MemoryPeakResults results)
 	{
 		// The z-depth is stored in pixels in the error field
-		double min = results.getHead().error;
-		double max = min;
-		for (PeakResult peak : results.getResults())
+		final ZResultProcedure p = new ZResultProcedure();
+		// Initialise with the first result
+		results.forFirst(new ResultProcedure()
 		{
-			if (min > peak.error)
-				min = peak.error;
-			else if (max < peak.error)
-				max = peak.error;
-		}
+			public void execute(float background, float intensity, float x, float y, float z)
+			{
+				p.min = p.max = z;
+			}
+		});
+		results.forEach(p);
+
+		double min = p.min;
+		double max = p.max;
 
 		// No z-depth
 		if (min == max && min == 0)

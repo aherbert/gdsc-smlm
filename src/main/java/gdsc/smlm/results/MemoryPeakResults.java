@@ -1059,6 +1059,20 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	}
 
 	/**
+	 * For the first result execute the procedure.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forFirst(ResultProcedure procedure)
+	{
+		if (isEmpty())
+			return;
+		final PeakResult r = get(0);
+		procedure.execute(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
+	}
+
+	/**
 	 * For each result execute the procedure using the specified units.
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
