@@ -280,7 +280,7 @@ public class ResultsManagerTest
 			Assert.assertEquals("Orig value mismatch @ " + i, p1.origValue, p2.origValue, delta);
 			Assert.assertEquals("Error mismatch @ " + i, p1.error, p2.error, 1e-6);
 			Assert.assertEquals("Noise mismatch @ " + i, p1.noise, p2.noise, delta);
-			Assert.assertNotNull("Params is null @ " + i, p2.params);
+			Assert.assertNotNull("Params is null @ " + i, p2.getParameters());
 
 			Assert.assertEquals("Background mismatch @ " + i, p1.getBackground(), p2.getBackground(), delta);
 			Assert.assertEquals("Signal mismatch @ " + i, p1.getSignal(), p2.getSignal(), delta);
