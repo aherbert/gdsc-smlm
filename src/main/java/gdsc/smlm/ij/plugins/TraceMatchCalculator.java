@@ -316,20 +316,20 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	private void addResult(String i1, String i2, double dThrehsold, MatchResult result)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(i1).append("\t");
-		sb.append(i2).append("\t");
-		sb.append(IJ.d2s(dThrehsold, 2)).append("\t");
-		sb.append(result.getNumberPredicted()).append("\t");
-		sb.append(result.getTruePositives()).append("\t");
-		sb.append(result.getFalsePositives()).append("\t");
-		sb.append(result.getFalseNegatives()).append("\t");
-		sb.append(IJ.d2s(result.getJaccard(), 4)).append("\t");
-		sb.append(IJ.d2s(result.getRMSD(), 4)).append("\t");
-		sb.append(IJ.d2s(result.getPrecision(), 4)).append("\t");
-		sb.append(IJ.d2s(result.getRecall(), 4)).append("\t");
-		sb.append(IJ.d2s(result.getFScore(0.5), 4)).append("\t");
-		sb.append(IJ.d2s(result.getFScore(1.0), 4)).append("\t");
-		sb.append(IJ.d2s(result.getFScore(2.0), 4)).append("\t");
+		sb.append(i1).append('\t');
+		sb.append(i2).append('\t');
+		sb.append(IJ.d2s(dThrehsold, 2)).append('\t');
+		sb.append(result.getNumberPredicted()).append('\t');
+		sb.append(result.getTruePositives()).append('\t');
+		sb.append(result.getFalsePositives()).append('\t');
+		sb.append(result.getFalseNegatives()).append('\t');
+		sb.append(IJ.d2s(result.getJaccard(), 4)).append('\t');
+		sb.append(IJ.d2s(result.getRMSD(), 4)).append('\t');
+		sb.append(IJ.d2s(result.getPrecision(), 4)).append('\t');
+		sb.append(IJ.d2s(result.getRecall(), 4)).append('\t');
+		sb.append(IJ.d2s(result.getFScore(0.5), 4)).append('\t');
+		sb.append(IJ.d2s(result.getFScore(1.0), 4)).append('\t');
+		sb.append(IJ.d2s(result.getFScore(2.0), 4)).append('\t');
 		sb.append(IJ.d2s(result.getFScore(beta), 4));
 
 		if (java.awt.GraphicsEnvironment.isHeadless())
@@ -378,11 +378,11 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		}
 		else
 		{
-			sb.append(p.getStart()).append("\t");
-			sb.append(p.getEnd()).append("\t");
-			sb.append(IJ.d2s(p.getX())).append("\t");
-			sb.append(IJ.d2s(p.getY())).append("\t");
-			sb.append(IJ.d2s(p.getZ())).append("\t");
+			sb.append(p.getStart()).append('\t');
+			sb.append(p.getEnd()).append('\t');
+			sb.append(IJ.d2s(p.getX())).append('\t');
+			sb.append(IJ.d2s(p.getY())).append('\t');
+			sb.append(IJ.d2s(p.getZ())).append('\t');
 		}
 	}
 
@@ -454,11 +454,11 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		PointPair pair = new PointPair(p1, p2);
 		double d = pair.getXYDistance();
 		if (d >= 0)
-			sb.append(Utils.rounded(d, 4)).append("\t");
+			sb.append(Utils.rounded(d, 4)).append('\t');
 		else
 			sb.append("-\t");
 		if (p1 != null && p2 != null)
-			sb.append(Utils.rounded(p1.score(p2, d * d, dThreshold), 4)).append("\t");
+			sb.append(Utils.rounded(p1.score(p2, d * d, dThreshold), 4)).append('\t');
 		else
 			sb.append("-\t");
 	}

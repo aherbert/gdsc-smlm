@@ -336,7 +336,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		for (float f : args)
 			//sb.append(String.format("\t%g", f));
-			sb.append("\t").append(f);
+			sb.append('\t').append(f);
 	}
 
 	public void addAll(Collection<PeakResult> results)

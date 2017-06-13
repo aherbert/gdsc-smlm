@@ -2242,16 +2242,16 @@ public class PCPALMFitting implements PlugIn
 			double domainRadius, double domainDensity, double nCluster, double coherence, double ic)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(model).append("\t");
-		sb.append(resultColour.toString()).append("\t");
-		sb.append(valid).append("\t");
-		sb.append(Utils.rounded(precision, 4)).append("\t");
-		sb.append(Utils.rounded(density * 1e6, 4)).append("\t");
-		sb.append(getString(domainRadius)).append("\t");
-		sb.append(getString(domainDensity)).append("\t");
-		sb.append(getString(nCluster)).append("\t");
-		sb.append(getString(coherence)).append("\t");
-		sb.append(Utils.rounded(ic, 4)).append("\t");
+		sb.append(model).append('\t');
+		sb.append(resultColour.toString()).append('\t');
+		sb.append(valid).append('\t');
+		sb.append(Utils.rounded(precision, 4)).append('\t');
+		sb.append(Utils.rounded(density * 1e6, 4)).append('\t');
+		sb.append(getString(domainRadius)).append('\t');
+		sb.append(getString(domainDensity)).append('\t');
+		sb.append(getString(nCluster)).append('\t');
+		sb.append(getString(coherence)).append('\t');
+		sb.append(Utils.rounded(ic, 4)).append('\t');
 		resultsTable.append(sb.toString());
 	}
 

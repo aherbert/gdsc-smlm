@@ -1219,20 +1219,20 @@ public class PCPALMAnalysis implements PlugInFilter
 		final double pch = (PCPALMMolecules.maxy - PCPALMMolecules.miny) / 100.0;
 
 		StringBuilder sb = new StringBuilder();
-		sb.append(id).append("\t");
-		sb.append(PCPALMMolecules.results.getName()).append("\t");
-		sb.append(IJ.d2s(minx)).append("\t");
-		sb.append(IJ.d2s((minx) / pcw)).append("\t");
-		sb.append(IJ.d2s(miny)).append("\t");
-		sb.append(IJ.d2s((miny) / pch)).append("\t");
-		sb.append(IJ.d2s(maxx - minx)).append("\t");
-		sb.append(IJ.d2s((maxx - minx) / pcw)).append("\t");
-		sb.append(IJ.d2s(maxy - miny)).append("\t");
-		sb.append(IJ.d2s((maxy - miny) / pch)).append("\t");
-		sb.append(Utils.rounded(uniquePoints, 4)).append("\t");
-		sb.append(Utils.rounded(peakDensity, 4)).append("\t");
-		sb.append(Utils.rounded(nmPerPixel, 4)).append("\t");
-		sb.append(binaryImage).append("\t");
+		sb.append(id).append('\t');
+		sb.append(PCPALMMolecules.results.getName()).append('\t');
+		sb.append(IJ.d2s(minx)).append('\t');
+		sb.append(IJ.d2s((minx) / pcw)).append('\t');
+		sb.append(IJ.d2s(miny)).append('\t');
+		sb.append(IJ.d2s((miny) / pch)).append('\t');
+		sb.append(IJ.d2s(maxx - minx)).append('\t');
+		sb.append(IJ.d2s((maxx - minx) / pcw)).append('\t');
+		sb.append(IJ.d2s(maxy - miny)).append('\t');
+		sb.append(IJ.d2s((maxy - miny) / pch)).append('\t');
+		sb.append(Utils.rounded(uniquePoints, 4)).append('\t');
+		sb.append(Utils.rounded(peakDensity, 4)).append('\t');
+		sb.append(Utils.rounded(nmPerPixel, 4)).append('\t');
+		sb.append(binaryImage).append('\t');
 		resultsTable.append(sb.toString());
 	}
 

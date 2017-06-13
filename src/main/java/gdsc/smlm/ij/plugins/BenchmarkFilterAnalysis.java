@@ -2853,8 +2853,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					sLower = getOriginalScore(sLower);
 
 					StringBuilder sb = new StringBuilder();
-					sb.append("\t").append(filter.getParameterName(index)).append("\t");
-					sb.append(Utils.rounded(filter.getParameterValue(index), 4)).append("\t");
+					sb.append('\t').append(filter.getParameterName(index)).append('\t');
+					sb.append(Utils.rounded(filter.getParameterValue(index), 4)).append('\t');
 
 					double dx1 = higher.getParameterValue(index) - filter.getParameterValue(index);
 					double dx2 = filter.getParameterValue(index) - lower.getParameterValue(index);
@@ -2918,8 +2918,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			sensitivity = dydx / count;
 		}
 
-		sb.append(Utils.rounded(relativeSensitivity, 4)).append("\t");
-		sb.append(Utils.rounded(sensitivity, 4)).append("\t");
+		sb.append(Utils.rounded(relativeSensitivity, 4)).append('\t');
+		sb.append(Utils.rounded(sensitivity, 4)).append('\t');
 	}
 
 	private void createResultsWindow()
@@ -3061,7 +3061,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		for (int i = 0; i < COLUMNS.length; i++)
 			if (showColumns[i])
-				sb.append("\t").append(COLUMNS[i]);
+				sb.append('\t').append(COLUMNS[i]);
 
 		if (summary)
 			sb.append("\tDepth Recall\tDistance\tSignal Factor\tRMSD\tSlope\tAt limit\tEvolve\tTime\tSearch\tTime");

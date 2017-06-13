@@ -3055,26 +3055,26 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		StringBuilder sb = new StringBuilder();
-		sb.append(datasetNumber).append("\t");
-		sb.append((fluorophores == null) ? localisations.size() : fluorophores.size()).append("\t");
-		sb.append(stats[SAMPLED_BLINKS].getN() + (int) stats[SAMPLED_BLINKS].getSum()).append("\t");
-		sb.append(localisations.size()).append("\t");
-		sb.append(nFrames).append("\t");
-		sb.append(Utils.rounded(areaInUm)).append("\t");
-		sb.append(Utils.rounded(localisations.size() / (areaInUm * nFrames), 4)).append("\t");
-		sb.append(Utils.rounded(getHWHM(), 4)).append("\t");
+		sb.append(datasetNumber).append('\t');
+		sb.append((fluorophores == null) ? localisations.size() : fluorophores.size()).append('\t');
+		sb.append(stats[SAMPLED_BLINKS].getN() + (int) stats[SAMPLED_BLINKS].getSum()).append('\t');
+		sb.append(localisations.size()).append('\t');
+		sb.append(nFrames).append('\t');
+		sb.append(Utils.rounded(areaInUm)).append('\t');
+		sb.append(Utils.rounded(localisations.size() / (areaInUm * nFrames), 4)).append('\t');
+		sb.append(Utils.rounded(getHWHM(), 4)).append('\t');
 		double s = getPsfSD();
-		sb.append(Utils.rounded(s, 4)).append("\t");
+		sb.append(Utils.rounded(s, 4)).append('\t');
 		s *= settings.pixelPitch;
 		final double sa = PSFCalculator.squarePixelAdjustment(s, settings.pixelPitch) / settings.pixelPitch;
-		sb.append(Utils.rounded(sa, 4)).append("\t");
+		sb.append(Utils.rounded(sa, 4)).append('\t');
 		// Width not valid for the Image PSF
 		int nStats = (imagePSF) ? stats.length - 1 : stats.length;
 		for (int i = 0; i < nStats; i++)
 		{
 			double centre = (alwaysRemoveOutliers[i])
 					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50) : stats[i].getMean();
-			sb.append(Utils.rounded(centre, 4)).append("\t");
+			sb.append(Utils.rounded(centre, 4)).append('\t');
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
 		{
@@ -3279,7 +3279,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				"Dataset\tMolecules\tPulses\tLocalisations\tnFrames\tArea (um^2)\tDensity (mol/um^2)\tHWHM\tS\tSa");
 		for (int i = 0; i < NAMES.length; i++)
 		{
-			sb.append("\t").append(NAMES[i]);
+			sb.append('\t').append(NAMES[i]);
 			//if (alwaysRemoveOutliers[i])
 			//	sb.append("*");
 		}
@@ -3498,12 +3498,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				{
 					FluorophoreSequenceModel f = fluorophores.get(id - 1);
 					StringBuffer sb = new StringBuffer();
-					sb.append(f.getId()).append("\t");
-					sb.append(f.getNumberOfBlinks()).append("\t");
+					sb.append(f.getId()).append('\t');
+					sb.append(f.getNumberOfBlinks()).append('\t');
 					for (double[] burst : f.getBurstSequence())
 					{
-						sb.append(Utils.rounded(burst[0], 3)).append("\t").append(Utils.rounded(burst[1], 3))
-								.append("\t");
+						sb.append(Utils.rounded(burst[0], 3)).append('\t').append(Utils.rounded(burst[1], 3))
+								.append('\t');
 					}
 					output.write(sb.toString());
 					output.newLine();
@@ -3578,11 +3578,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				for (LocalisationModel l : localisations)
 				{
 					StringBuffer sb = new StringBuffer();
-					sb.append(l.getTime()).append("\t");
-					sb.append(l.getId()).append("\t");
-					sb.append(IJ.d2s(l.getX(), 6)).append("\t");
-					sb.append(IJ.d2s(l.getY(), 6)).append("\t");
-					sb.append(IJ.d2s(l.getZ(), 6)).append("\t");
+					sb.append(l.getTime()).append('\t');
+					sb.append(l.getId()).append('\t');
+					sb.append(IJ.d2s(l.getX(), 6)).append('\t');
+					sb.append(IJ.d2s(l.getY(), 6)).append('\t');
+					sb.append(IJ.d2s(l.getZ(), 6)).append('\t');
 					sb.append(l.getIntensity());
 					output.write(sb.toString());
 					output.newLine();

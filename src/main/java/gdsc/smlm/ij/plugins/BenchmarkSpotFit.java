@@ -1834,24 +1834,24 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Add information about the simulation
 		final double signal = simulationParameters.signalPerFrame; //(simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
 		final int n = results.size();
-		sb.append(imp.getStackSize()).append("\t");
+		sb.append(imp.getStackSize()).append('\t');
 		final int w = imp.getWidth();
 		final int h = imp.getHeight();
-		sb.append(w).append("\t");
-		sb.append(h).append("\t");
-		sb.append(n).append("\t");
+		sb.append(w).append('\t');
+		sb.append(h).append('\t');
+		sb.append(n).append('\t');
 		double density = ((double) n / imp.getStackSize()) / (w * h) /
 				(simulationParameters.a * simulationParameters.a / 1e6);
-		sb.append(Utils.rounded(density)).append("\t");
-		sb.append(Utils.rounded(signal)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.s)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.a)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.depth)).append("\t");
-		sb.append(simulationParameters.fixedDepth).append("\t");
-		sb.append(Utils.rounded(simulationParameters.gain)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.readNoise)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
+		sb.append(Utils.rounded(density)).append('\t');
+		sb.append(Utils.rounded(signal)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.s)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.a)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.depth)).append('\t');
+		sb.append(simulationParameters.fixedDepth).append('\t');
+		sb.append(Utils.rounded(simulationParameters.gain)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.readNoise)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.b)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.b2)).append('\t');
 
 		// Compute the noise
 		double noise = simulationParameters.b2;
@@ -1870,8 +1870,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			// The total signal is spread over frames
 		}
 
-		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append("\t");
-		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
+		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append('\t');
+		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append('\t');
 
 		sb.append(spotFilter.getDescription());
 
@@ -2100,7 +2100,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			min[i] = Maths.round(min[i]);
 			max[i] = Maths.round(max[i]);
 			increment[i] = Maths.round(increment[i]);
-			sb.append("\t").append(min[i]).append(':').append(lower[i]).append('-').append(upper[i]).append(':')
+			sb.append('\t').append(min[i]).append(':').append(lower[i]).append('-').append(upper[i]).append(':')
 					.append(max[i]);
 		}
 
@@ -2111,7 +2111,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		wo.tile();
 
-		sb.append("\t").append(Utils.timeToString(runTime / 1000000.0));
+		sb.append('\t').append(Utils.timeToString(runTime / 1000000.0));
 
 		summaryTable.append(sb.toString());
 
@@ -2689,12 +2689,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	private static void add(StringBuilder sb, String value)
 	{
-		sb.append("\t").append(value);
+		sb.append('\t').append(value);
 	}
 
 	private static void add(StringBuilder sb, int value)
 	{
-		sb.append("\t").append(value);
+		sb.append('\t').append(value);
 	}
 
 	private static void add(StringBuilder sb, double value)
@@ -2707,13 +2707,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Check if the double holds an integer count
 		if ((int) value == value)
 		{
-			sb.append("\t").append((int) value);
+			sb.append('\t').append((int) value);
 		}
 		else
 		{
 			// Otherwise add the counts using at least 2 dp
 			if (value > 100)
-				sb.append("\t").append(IJ.d2s(value));
+				sb.append('\t').append(IJ.d2s(value));
 			else
 				add(sb, Utils.rounded(value));
 		}
@@ -2743,7 +2743,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		tablePrefix = sb.toString();
 
-		sb.append("\t");
+		sb.append('\t');
 		sb.append("% nP\t");
 		sb.append("% nN\t");
 		sb.append("Total\t");

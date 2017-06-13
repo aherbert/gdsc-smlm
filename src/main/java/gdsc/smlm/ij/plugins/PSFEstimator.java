@@ -811,14 +811,14 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	private boolean addToResultTable(int iteration, int n, double[] params, double[] params_dev, double[] p)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(iteration).append("\t").append(n).append("\t");
+		sb.append(iteration).append('\t').append(n).append('\t');
 		for (int i = 0; i < 3; i++)
 		{
-			sb.append(params[i]).append("\t");
-			sb.append(params_dev[i]).append("\t");
-			sb.append(p[i]).append("\t");
+			sb.append(params[i]).append('\t');
+			sb.append(params_dev[i]).append('\t');
+			sb.append(p[i]).append('\t');
 		}
-		sb.append(p[XY]).append("\t");
+		sb.append(p[XY]).append('\t');
 		resultsWindow.append(sb.toString());
 
 		if (params[X] > imp.getWidth() || params[Y] > imp.getWidth())

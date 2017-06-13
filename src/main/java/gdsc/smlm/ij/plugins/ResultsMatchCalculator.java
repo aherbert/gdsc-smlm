@@ -608,26 +608,26 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			MatchResult idResult2)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(i1).append("\t");
-		sb.append(i2).append("\t");
-		sb.append(IJ.d2s(dThrehsold, 2)).append("\t");
-		sb.append(result.getNumberPredicted()).append("\t");
-		sb.append(result.getTruePositives()).append("\t");
-		sb.append(result.getFalsePositives()).append("\t");
-		sb.append(result.getFalseNegatives()).append("\t");
-		sb.append(IJ.d2s(result.getJaccard(), 4)).append("\t");
-		sb.append(IJ.d2s(result.getRMSD(), 4)).append("\t");
-		sb.append(IJ.d2s(result.getPrecision(), 4)).append("\t");
-		sb.append(IJ.d2s(result.getRecall(), 4)).append("\t");
-		sb.append(IJ.d2s(result.getFScore(0.5), 4)).append("\t");
-		sb.append(IJ.d2s(result.getFScore(1.0), 4)).append("\t");
-		sb.append(IJ.d2s(result.getFScore(2.0), 4)).append("\t");
+		sb.append(i1).append('\t');
+		sb.append(i2).append('\t');
+		sb.append(IJ.d2s(dThrehsold, 2)).append('\t');
+		sb.append(result.getNumberPredicted()).append('\t');
+		sb.append(result.getTruePositives()).append('\t');
+		sb.append(result.getFalsePositives()).append('\t');
+		sb.append(result.getFalseNegatives()).append('\t');
+		sb.append(IJ.d2s(result.getJaccard(), 4)).append('\t');
+		sb.append(IJ.d2s(result.getRMSD(), 4)).append('\t');
+		sb.append(IJ.d2s(result.getPrecision(), 4)).append('\t');
+		sb.append(IJ.d2s(result.getRecall(), 4)).append('\t');
+		sb.append(IJ.d2s(result.getFScore(0.5), 4)).append('\t');
+		sb.append(IJ.d2s(result.getFScore(1.0), 4)).append('\t');
+		sb.append(IJ.d2s(result.getFScore(2.0), 4)).append('\t');
 		sb.append(IJ.d2s(result.getFScore(beta), 4));
 		if (idResult1 != null)
 		{
-			sb.append("\t").append(idResult1.getNumberPredicted());
-			sb.append("\t").append(idResult1.getTruePositives());
-			sb.append("\t").append(IJ.d2s(idResult1.getRecall(), 4));
+			sb.append('\t').append(idResult1.getNumberPredicted());
+			sb.append('\t').append(idResult1.getTruePositives());
+			sb.append('\t').append(IJ.d2s(idResult1.getRecall(), 4));
 		}
 		else if (idResult2 != null)
 		{
@@ -635,9 +635,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		}
 		if (idResult2 != null)
 		{
-			sb.append("\t").append(idResult2.getNumberPredicted());
-			sb.append("\t").append(idResult2.getTruePositives());
-			sb.append("\t").append(IJ.d2s(idResult2.getRecall(), 4));
+			sb.append('\t').append(idResult2.getNumberPredicted());
+			sb.append('\t').append(idResult2.getTruePositives());
+			sb.append('\t').append(IJ.d2s(idResult2.getRecall(), 4));
 		}
 		else if (idResult1 != null)
 		{
@@ -699,12 +699,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
 		PeakResultPoint p2 = (PeakResultPoint) pair.getPoint2();
 		int t = (p1 != null) ? p1.getTime() : p2.getTime();
-		sb.append(t).append("\t");
+		sb.append(t).append('\t');
 		addPoint(sb, p1);
 		addPoint(sb, p2);
 		double d = pair.getXYDistance();
 		if (d >= 0)
-			sb.append(Utils.rounded(d, 4)).append("\t");
+			sb.append(Utils.rounded(d, 4)).append('\t');
 		else
 			sb.append("-\t");
 		return sb.toString();
@@ -718,9 +718,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		}
 		else
 		{
-			sb.append(IJ.d2s(p.getX())).append("\t");
-			sb.append(IJ.d2s(p.getY())).append("\t");
-			sb.append(IJ.d2s(p.getZ())).append("\t");
+			sb.append(IJ.d2s(p.getX())).append('\t');
+			sb.append(IJ.d2s(p.getY())).append('\t');
+			sb.append(IJ.d2s(p.getZ())).append('\t');
 		}
 	}
 

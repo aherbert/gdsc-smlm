@@ -1913,23 +1913,23 @@ public class BenchmarkSpotFilter implements PlugIn
 		double signal = (simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
 
 		// Create the benchmark settings and the fitting settings
-		sb.append(imp.getStackSize()).append("\t");
+		sb.append(imp.getStackSize()).append('\t');
 		final int w = lastAnalysisBorder.width;
 		final int h = lastAnalysisBorder.height;
-		sb.append(w).append("\t");
-		sb.append(h).append("\t");
-		sb.append(Utils.rounded(n)).append("\t");
+		sb.append(w).append('\t');
+		sb.append(h).append('\t');
+		sb.append(Utils.rounded(n)).append('\t');
 		double density = (n / imp.getStackSize()) / (w * h) / (simulationParameters.a * simulationParameters.a / 1e6);
-		sb.append(Utils.rounded(density)).append("\t");
-		sb.append(Utils.rounded(signal)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.s)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.a)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.depth)).append("\t");
-		sb.append(simulationParameters.fixedDepth).append("\t");
-		sb.append(Utils.rounded(simulationParameters.gain)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.readNoise)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
+		sb.append(Utils.rounded(density)).append('\t');
+		sb.append(Utils.rounded(signal)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.s)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.a)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.depth)).append('\t');
+		sb.append(simulationParameters.fixedDepth).append('\t');
+		sb.append(Utils.rounded(simulationParameters.gain)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.readNoise)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.b)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.b2)).append('\t');
 
 		// Compute the noise
 		double noise = simulationParameters.b2;
@@ -1943,38 +1943,38 @@ public class BenchmarkSpotFilter implements PlugIn
 			noise = simulationParameters.b * 2 + readVariance;
 		}
 
-		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append("\t");
-		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
-		sb.append(config.getDataFilterType()).append("\t");
-		//sb.append(spotFilter.getName()).append("\t");
-		sb.append(spotFilter.getSearch()).append("\t");
-		sb.append(spotFilter.getBorder()).append("\t");
-		sb.append(Utils.rounded(spotFilter.getSpread())).append("\t");
-		sb.append(config.getDataFilter(0)).append("\t");
+		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append('\t');
+		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append('\t');
+		sb.append(config.getDataFilterType()).append('\t');
+		//sb.append(spotFilter.getName()).append('\t');
+		sb.append(spotFilter.getSearch()).append('\t');
+		sb.append(spotFilter.getBorder()).append('\t');
+		sb.append(Utils.rounded(spotFilter.getSpread())).append('\t');
+		sb.append(config.getDataFilter(0)).append('\t');
 		final double param = config.getSmooth(0);
 		final double hwhmMin = config.getHWHMMin();
 		if (relativeDistances)
 		{
-			sb.append(Utils.rounded(param * hwhmMin)).append("\t");
-			sb.append(Utils.rounded(param)).append("\t");
+			sb.append(Utils.rounded(param * hwhmMin)).append('\t');
+			sb.append(Utils.rounded(param)).append('\t');
 		}
 		else
 		{
-			sb.append(Utils.rounded(param)).append("\t");
-			sb.append(Utils.rounded(param / hwhmMin)).append("\t");
+			sb.append(Utils.rounded(param)).append('\t');
+			sb.append(Utils.rounded(param / hwhmMin)).append('\t');
 		}
-		sb.append(spotFilter.getDescription()).append("\t");
-		sb.append(lastAnalysisBorder.x).append("\t");
-		sb.append(MATCHING_METHOD[matchingMethod]).append("\t");
-		sb.append(Utils.rounded(lowerMatchDistance)).append("\t");
-		sb.append(Utils.rounded(matchDistance)).append("\t");
-		sb.append(Utils.rounded(lowerSignalFactor)).append("\t");
+		sb.append(spotFilter.getDescription()).append('\t');
+		sb.append(lastAnalysisBorder.x).append('\t');
+		sb.append(MATCHING_METHOD[matchingMethod]).append('\t');
+		sb.append(Utils.rounded(lowerMatchDistance)).append('\t');
+		sb.append(Utils.rounded(matchDistance)).append('\t');
+		sb.append(Utils.rounded(lowerSignalFactor)).append('\t');
 		sb.append(Utils.rounded(upperSignalFactor));
 
 		resultPrefix = sb.toString();
 
 		// Add the results
-		sb.append("\t");
+		sb.append('\t');
 
 		// Rank the scored spots by intensity
 		Collections.sort(allSpots);
@@ -2031,7 +2031,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		i2 = Arrays.copyOf(i2, ci);
 
 		final double slope = regression.getSlope();
-		sb.append(Utils.rounded(slope)).append("\t");
+		sb.append(Utils.rounded(slope)).append('\t');
 		addResult(sb, allResult, c[c.length - 1]);
 
 		// Output the match results when the recall achieves the fraction of the maximum.
@@ -2074,17 +2074,17 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		final double auc2 = AUCCalculator.auc(maxp, r);
 
-		sb.append("\t").append(Utils.rounded(auc));
-		sb.append("\t").append(Utils.rounded(auc2));
+		sb.append('\t').append(Utils.rounded(auc));
+		sb.append('\t').append(Utils.rounded(auc2));
 
 		// Output the number of fit failures that must be processed to capture fractions of the true positives
 		if (cumul[0].length != 0)
 		{
-			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.80)));
-			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.90)));
-			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.95)));
-			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.99)));
-			sb.append("\t").append(Utils.rounded(cumul[0][cumul[0].length - 1]));
+			sb.append('\t').append(Utils.rounded(getFailures(cumul, 0.80)));
+			sb.append('\t').append(Utils.rounded(getFailures(cumul, 0.90)));
+			sb.append('\t').append(Utils.rounded(getFailures(cumul, 0.95)));
+			sb.append('\t').append(Utils.rounded(getFailures(cumul, 0.99)));
+			sb.append('\t').append(Utils.rounded(cumul[0][cumul[0].length - 1]));
 		}
 		else
 			sb.append("\t\t\t\t\t");
@@ -2288,10 +2288,10 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		addCount(sb, matchResult.getTP());
 		addCount(sb, matchResult.getFP());
-		sb.append(Utils.rounded(matchResult.getRecall())).append("\t");
-		sb.append(Utils.rounded(matchResult.getPrecision())).append("\t");
-		sb.append(Utils.rounded(matchResult.getJaccard())).append("\t");
-		sb.append(Utils.rounded(c)).append("\t");
+		sb.append(Utils.rounded(matchResult.getRecall())).append('\t');
+		sb.append(Utils.rounded(matchResult.getPrecision())).append('\t');
+		sb.append(Utils.rounded(matchResult.getJaccard())).append('\t');
+		sb.append(Utils.rounded(c)).append('\t');
 	}
 
 	private static void addCount(StringBuilder sb, double value)
@@ -2309,7 +2309,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			else
 				sb.append(Utils.rounded(value));
 		}
-		sb.append("\t");
+		sb.append('\t');
 	}
 
 	private BufferedTextWindow getTable(boolean batchSummary)

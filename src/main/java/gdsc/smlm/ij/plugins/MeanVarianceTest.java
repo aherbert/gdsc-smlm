@@ -392,14 +392,14 @@ public class MeanVarianceTest implements PlugIn
 
 				if (showTable)
 				{
-					sb.append(sample.title).append("\t");
-					sb.append(sample.exposure).append("\t");
-					sb.append(pair.slice1).append("\t");
-					sb.append(pair.slice2).append("\t");
-					sb.append(IJ.d2s(pair.mean1, 2)).append("\t");
-					sb.append(IJ.d2s(pair.mean2, 2)).append("\t");
-					sb.append(IJ.d2s(mean[j], 2)).append("\t");
-					sb.append(IJ.d2s(variance[j], 2)).append("\t");
+					sb.append(sample.title).append('\t');
+					sb.append(sample.exposure).append('\t');
+					sb.append(pair.slice1).append('\t');
+					sb.append(pair.slice2).append('\t');
+					sb.append(IJ.d2s(pair.mean1, 2)).append('\t');
+					sb.append(IJ.d2s(pair.mean2, 2)).append('\t');
+					sb.append(IJ.d2s(mean[j], 2)).append('\t');
+					sb.append(IJ.d2s(variance[j], 2)).append('\t');
 					sb.append(Utils.rounded(gain, 4)).append("\n");
 				}
 				j++;

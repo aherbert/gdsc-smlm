@@ -2033,9 +2033,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		// Store details we want in the analysis table
 		StringBuilder sb = new StringBuilder();
-		sb.append(Utils.rounded(density)).append("\t");
-		sb.append(Utils.rounded(getSa())).append("\t");
-		sb.append(config.getRelativeFitting()).append("\t");
+		sb.append(Utils.rounded(density)).append('\t');
+		sb.append(Utils.rounded(getSa())).append('\t');
+		sb.append(config.getRelativeFitting()).append('\t');
 		sb.append(fitConfig.getFitFunction().toString());
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
 		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
@@ -2046,7 +2046,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			sb.append("EM=").append(fitConfig.isEmCCD());
 			sb.append(":A=").append(Utils.rounded(fitConfig.getAmplification()));
 			sb.append(":N=").append(Utils.rounded(fitConfig.getReadNoise()));
-			sb.append("\t");
+			sb.append('\t');
 		}
 		else
 			sb.append("\t\t");
@@ -2063,26 +2063,26 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		final int n = countN(results);
 
 		// Create the benchmark settings and the fitting settings
-		sb.append(numberOfMolecules).append("\t");
-		sb.append(n).append("\t");
-		sb.append(Utils.rounded(density)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.minSignal)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.maxSignal)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.signalPerFrame)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.s)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.a)).append("\t");
-		sb.append(Utils.rounded(getSa() * simulationParameters.a)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.gain)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.readNoise)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
+		sb.append(numberOfMolecules).append('\t');
+		sb.append(n).append('\t');
+		sb.append(Utils.rounded(density)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.minSignal)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.maxSignal)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.signalPerFrame)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.s)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.a)).append('\t');
+		sb.append(Utils.rounded(getSa() * simulationParameters.a)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.gain)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.readNoise)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.b)).append('\t');
 
 		// Compute the noise
 		double noise = Math
 				.sqrt((simulationParameters.b * ((simulationParameters.emCCD) ? 2 : 1)) / simulationParameters.gain +
 						simulationParameters.readNoise * simulationParameters.readNoise);
-		sb.append(Utils.rounded(noise)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.signalPerFrame / noise)).append("\t");
-		sb.append(config.getRelativeFitting()).append("\t");
+		sb.append(Utils.rounded(noise)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.signalPerFrame / noise)).append('\t');
+		sb.append(config.getRelativeFitting()).append('\t');
 		sb.append(fitConfig.getFitFunction().toString());
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
 		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
@@ -2093,7 +2093,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			sb.append("EM=").append(fitConfig.isEmCCD());
 			sb.append(":A=").append(Utils.rounded(fitConfig.getAmplification()));
 			sb.append(":N=").append(Utils.rounded(fitConfig.getReadNoise()));
-			sb.append("\t");
+			sb.append('\t');
 		}
 		else
 			sb.append("\t\t");
@@ -2242,7 +2242,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append(bestJaccard);
 		addJaccardScores(sb);
 
-		sb.append("\t").append(Utils.timeToString(runTime / 1000000.0));
+		sb.append('\t').append(Utils.timeToString(runTime / 1000000.0));
 
 		summaryTable.append(sb.toString());
 	}
@@ -2486,12 +2486,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			sb.append(Utils.rounded(result.score2)).append('\t');
 			add(sb, result.fitResult1);
 			add(sb, result.fitResult2);
-			sb.append(IJ.d2s(result.sumOfSquares1, 1)).append("\t");
-			sb.append(IJ.d2s(result.sumOfSquares2, 1)).append("\t");
-			sb.append(IJ.d2s(result.value1, 1)).append("\t");
-			sb.append(IJ.d2s(result.value2, 1)).append("\t");
-			sb.append(Utils.rounded(result.r1)).append("\t");
-			sb.append(Utils.rounded(result.r2)).append("\t");
+			sb.append(IJ.d2s(result.sumOfSquares1, 1)).append('\t');
+			sb.append(IJ.d2s(result.sumOfSquares2, 1)).append('\t');
+			sb.append(IJ.d2s(result.value1, 1)).append('\t');
+			sb.append(IJ.d2s(result.value2, 1)).append('\t');
+			sb.append(Utils.rounded(result.r1)).append('\t');
+			sb.append(Utils.rounded(result.r2)).append('\t');
 			sb.append(Utils.rounded(result.aic1)).append('\t');
 			sb.append(Utils.rounded(result.aic2)).append('\t');
 			sb.append(Utils.rounded(result.bic1)).append('\t');
@@ -2539,11 +2539,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	{
 		if (fitResult != null)
 		{
-			sb.append(fitResult.getStatus()).append("\t");
+			sb.append(fitResult.getStatus()).append('\t');
 		}
 		else
 		{
-			sb.append("\t");
+			sb.append('\t');
 		}
 	}
 
@@ -2559,11 +2559,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	{
 		if (fitResult != null)
 		{
-			sb.append(Arrays.toString(fitResult.getParameters())).append("\t");
+			sb.append(Arrays.toString(fitResult.getParameters())).append('\t');
 		}
 		else
 		{
-			sb.append("\t");
+			sb.append('\t');
 		}
 	}
 

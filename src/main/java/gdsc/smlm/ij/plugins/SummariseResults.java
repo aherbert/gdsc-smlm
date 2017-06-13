@@ -166,12 +166,12 @@ public class SummariseResults implements PlugIn
 		Calibration calibration = result.getCalibration();
 
 		sb.append(result.getName());
-		sb.append("\t").append(result.size());
+		sb.append('\t').append(result.size());
 		int maxT = getMaxT(result);
-		sb.append("\t").append(maxT);
+		sb.append('\t').append(maxT);
 		if (calibration != null && calibration.hasExposureTime())
 		{
-			sb.append("\t").append(Utils.timeToString(maxT * calibration.getExposureTime()));
+			sb.append('\t').append(Utils.timeToString(maxT * calibration.getExposureTime()));
 		}
 		else
 		{
@@ -182,7 +182,7 @@ public class SummariseResults implements PlugIn
 			boolean includeDeviations = result.getHead().paramsStdDev != null;
 			long memorySize = MemoryPeakResults.estimateMemorySize(size, includeDeviations);
 			String memory = MemoryPeakResults.memorySizeString(memorySize);
-			sb.append("\t").append(memory);
+			sb.append('\t').append(memory);
 		}
 		else
 		{
@@ -212,12 +212,12 @@ public class SummariseResults implements PlugIn
 			}
 			else
 			{
-				sb.append("\t").append(IJ.d2s(stats[i].getMean(), 3));
+				sb.append('\t').append(IJ.d2s(stats[i].getMean(), 3));
 				if (suffix[i] != 0)
 					sb.append(suffix[i]);
-				sb.append("\t").append(IJ.d2s(stats[i].getPercentile(50), 3));
-				sb.append("\t").append(IJ.d2s(stats[i].getMin(), 3));
-				sb.append("\t").append(IJ.d2s(stats[i].getMax(), 3));
+				sb.append('\t').append(IJ.d2s(stats[i].getPercentile(50), 3));
+				sb.append('\t').append(IJ.d2s(stats[i].getMin(), 3));
+				sb.append('\t').append(IJ.d2s(stats[i].getMax(), 3));
 			}
 		}
 		sb.append("\n");

@@ -1144,10 +1144,10 @@ public class SpotAnalysis extends PlugInFrame
 			for (TraceResult traceResult : traceResults)
 			{
 				StringBuffer sb = new StringBuffer();
-				sb.append(traceResult.spot.frame).append("\t");
-				sb.append(traceResult.trace.getHead().getXPosition()).append("\t");
-				sb.append(traceResult.trace.getHead().getYPosition()).append("\t");
-				sb.append(traceResult.spot.signal).append("\t");
+				sb.append(traceResult.spot.frame).append('\t');
+				sb.append(traceResult.trace.getHead().getXPosition()).append('\t');
+				sb.append(traceResult.trace.getHead().getYPosition()).append('\t');
+				sb.append(traceResult.spot.signal).append('\t');
 				int nBlinks = traceResult.trace.getNBlinks() - 1;
 				sb.append(nBlinks);
 
@@ -1158,7 +1158,7 @@ public class SpotAnalysis extends PlugInFrame
 				{
 					writeLine(files[1], Double.toString(msPerFrame * on[i]));
 
-					sb.append("\t").append(t).append("\t").append(t + on[i] - 1);
+					sb.append('\t').append(t).append('\t').append(t + on[i] - 1);
 					if (off != null && i < off.length)
 					{
 						writeLine(files[2], Double.toString(msPerFrame * off[i]));

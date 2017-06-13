@@ -706,8 +706,8 @@ public class FilterAnalysis implements PlugIn
 					ClassificationResult sLower = lower.score(resultsList);
 
 					StringBuilder sb = new StringBuilder();
-					sb.append("\t").append(filter.getParameterName(index)).append("\t");
-					sb.append(Utils.rounded(filter.getParameterValue(index), 4)).append("\t");
+					sb.append('\t').append(filter.getParameterName(index)).append('\t');
+					sb.append(Utils.rounded(filter.getParameterValue(index), 4)).append('\t');
 
 					double dx1 = higher.getParameterValue(index) - filter.getParameterValue(index);
 					double dx2 = filter.getParameterValue(index) - lower.getParameterValue(index);
@@ -752,8 +752,8 @@ public class FilterAnalysis implements PlugIn
 		double relativeSensitivity = (abs1 + abs2) * 0.5;
 		double sensitivity = (dydx1 + dydx2) * 0.5;
 
-		sb.append(Utils.rounded(relativeSensitivity, 4)).append("\t");
-		sb.append(Utils.rounded(sensitivity, 4)).append("\t");
+		sb.append(Utils.rounded(relativeSensitivity, 4)).append('\t');
+		sb.append(Utils.rounded(sensitivity, 4)).append('\t');
 	}
 
 	private void createResultsWindow()
@@ -967,15 +967,15 @@ public class FilterAnalysis implements PlugIn
 		if (showResultsTable)
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.append(filter.getName()).append("\t");
-			sb.append(s.getTP()+s.getFP()).append("\t");
-			sb.append(s.getTP()).append("\t");
-			sb.append(s.getFP()).append("\t");
-			sb.append(s.getTN()).append("\t");
-			sb.append(s.getFN()).append("\t");
-			sb.append(s.getJaccard()).append("\t");
-			sb.append(s.getPrecision()).append("\t");
-			sb.append(s.getRecall()).append("\t");
+			sb.append(filter.getName()).append('\t');
+			sb.append(s.getTP()+s.getFP()).append('\t');
+			sb.append(s.getTP()).append('\t');
+			sb.append(s.getFP()).append('\t');
+			sb.append(s.getTN()).append('\t');
+			sb.append(s.getFN()).append('\t');
+			sb.append(s.getJaccard()).append('\t');
+			sb.append(s.getPrecision()).append('\t');
+			sb.append(s.getRecall()).append('\t');
 			sb.append(s.getF1Score());
 			if (isHeadless)
 			{

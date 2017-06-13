@@ -175,7 +175,7 @@ public abstract class FilePeakResults extends AbstractPeakResults
 			for (int i = 0; i < fields.length; i++)
 			{
 				if (i != 0)
-					sb.append("\t");
+					sb.append('\t');
 				sb.append(fields[i]);
 			}
 			sb.append('\n');

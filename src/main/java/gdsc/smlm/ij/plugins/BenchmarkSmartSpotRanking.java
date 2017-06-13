@@ -1100,7 +1100,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			sb.append(resultPrefix);
 			add(sb, methodNames[i]);
 			if (methodNames[i].startsWith("SNR"))
-				sb.append("\t");
+				sb.append('\t');
 			else
 				add(sb, compactBins);
 			add(sb, s.getMean());
@@ -1207,12 +1207,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 	private static void add(StringBuilder sb, String value)
 	{
-		sb.append("\t").append(value);
+		sb.append('\t').append(value);
 	}
 
 	private static void add(StringBuilder sb, int value)
 	{
-		sb.append("\t").append(value);
+		sb.append('\t').append(value);
 	}
 
 	private static void add(StringBuilder sb, double value)
@@ -1225,13 +1225,13 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		// Check if the double holds an integer count
 		if ((int) value == value)
 		{
-			sb.append("\t").append((int) value);
+			sb.append('\t').append((int) value);
 		}
 		else
 		{
 			// Otherwise add the counts using at least 2 dp
 			if (value > 100)
-				sb.append("\t").append(IJ.d2s(value));
+				sb.append('\t').append(IJ.d2s(value));
 			else
 				add(sb, Utils.rounded(value));
 		}
@@ -1249,7 +1249,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	private String createHeader(boolean extraRecall)
 	{
 		StringBuilder sb = new StringBuilder(BenchmarkSpotFilter.tablePrefix);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append("Spots\t");
 		sb.append("nP\t");
 		sb.append("nN\t");
@@ -1317,7 +1317,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		if (prefix != null)
 			sb.append(prefix);
 		sb.append(name);
-		sb.append("\t");
+		sb.append('\t');
 	}
 
 	private double getSa()

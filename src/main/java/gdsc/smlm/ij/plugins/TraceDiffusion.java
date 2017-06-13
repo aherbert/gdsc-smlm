@@ -819,45 +819,45 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Add to the summary table
 		StringBuilder sb = new StringBuilder(title);
 		sb.append('\t').append(createCombinedName());
-		sb.append("\t");
-		sb.append(Utils.rounded(exposureTime * 1000, 3)).append("\t");
-		sb.append(Utils.rounded(settings.distanceThreshold, 3)).append("\t");
-		sb.append(Utils.rounded(settings.distanceExclusion, 3)).append("\t");
-		sb.append(settings.minimumTraceLength).append("\t");
-		sb.append(settings.ignoreEnds).append("\t");
-		sb.append(settings.truncate).append("\t");
-		sb.append(settings.internalDistances).append("\t");
-		sb.append(settings.fitLength).append("\t");
-		sb.append(settings.msdCorrection).append("\t");
-		sb.append(settings.precisionCorrection).append("\t");
-		sb.append(settings.mle).append("\t");
-		sb.append(traces.length).append("\t");
-		sb.append(Utils.rounded(precision, 4)).append("\t");
+		sb.append('\t');
+		sb.append(Utils.rounded(exposureTime * 1000, 3)).append('\t');
+		sb.append(Utils.rounded(settings.distanceThreshold, 3)).append('\t');
+		sb.append(Utils.rounded(settings.distanceExclusion, 3)).append('\t');
+		sb.append(settings.minimumTraceLength).append('\t');
+		sb.append(settings.ignoreEnds).append('\t');
+		sb.append(settings.truncate).append('\t');
+		sb.append(settings.internalDistances).append('\t');
+		sb.append(settings.fitLength).append('\t');
+		sb.append(settings.msdCorrection).append('\t');
+		sb.append(settings.precisionCorrection).append('\t');
+		sb.append(settings.mle).append('\t');
+		sb.append(traces.length).append('\t');
+		sb.append(Utils.rounded(precision, 4)).append('\t');
 		double D = 0, s = 0;
 		if (fitMSDResult != null)
 		{
 			D = fitMSDResult[0];
 			s = fitMSDResult[1];
 		}
-		sb.append(Utils.rounded(D, 4)).append("\t");
-		sb.append(Utils.rounded(s * 1000, 4)).append("\t");
-		sb.append(Utils.rounded(settings.jumpDistance * exposureTime)).append("\t");
-		sb.append(n).append("\t");
-		sb.append(Utils.rounded(beta, 4)).append("\t");
+		sb.append(Utils.rounded(D, 4)).append('\t');
+		sb.append(Utils.rounded(s * 1000, 4)).append('\t');
+		sb.append(Utils.rounded(settings.jumpDistance * exposureTime)).append('\t');
+		sb.append(n).append('\t');
+		sb.append(Utils.rounded(beta, 4)).append('\t');
 		if (jdParams == null)
 		{
 			sb.append("\t\t\t");
 		}
 		else
 		{
-			sb.append(format(jdParams[0])).append("\t");
-			sb.append(format(jdParams[1])).append("\t");
-			sb.append(Utils.rounded(fitValue)).append("\t");
+			sb.append(format(jdParams[0])).append('\t');
+			sb.append(format(jdParams[1])).append('\t');
+			sb.append(Utils.rounded(fitValue)).append('\t');
 		}
 
 		for (int i = 0; i < stats.length; i++)
 		{
-			sb.append(Utils.rounded(stats[i].getMean(), 3)).append("\t");
+			sb.append(Utils.rounded(stats[i].getMean(), 3)).append('\t');
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
 		{
@@ -931,7 +931,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append("\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions\tFit Score");
 		for (int i = 0; i < NAMES.length; i++)
 		{
-			sb.append("\t").append(NAMES[i]);
+			sb.append('\t').append(NAMES[i]);
 		}
 		return sb.toString();
 	}

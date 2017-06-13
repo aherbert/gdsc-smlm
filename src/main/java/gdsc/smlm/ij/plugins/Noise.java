@@ -256,7 +256,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		StringBuilder sb = new StringBuilder("Slice");
 		for (NoiseEstimator.Method m : NoiseEstimator.Method.values())
 		{
-			sb.append("\t").append(m);
+			sb.append('\t').append(m);
 		}
 		return sb.toString();
 	}
@@ -266,7 +266,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		StringBuilder sb = new StringBuilder("" + (int) result[0]);
 		for (int i = 1; i < result.length; i++)
 		{
-			sb.append("\t").append(result[i]);
+			sb.append('\t').append(result[i]);
 		}
 		return sb.toString();
 	}

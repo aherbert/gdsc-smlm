@@ -371,7 +371,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		}
 		if (sb.length() > 0)
 		{
-			sb.append("\t");
+			sb.append('\t');
 			sourceText = sb.toString();
 		}
 	}

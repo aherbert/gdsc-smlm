@@ -991,19 +991,19 @@ public class BenchmarkFit implements PlugIn
 		StringBuilder sb = new StringBuilder();
 
 		// Create the benchmark settings and the fitting settings
-		sb.append(benchmarkParameters.getMolecules()).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.getSignal())).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.s)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.a)).append("\t");
-		sb.append(Utils.rounded(getSa() * benchmarkParameters.a)).append("\t");
+		sb.append(benchmarkParameters.getMolecules()).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.getSignal())).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.s)).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.a)).append('\t');
+		sb.append(Utils.rounded(getSa() * benchmarkParameters.a)).append('\t');
 		// Report XY in nm from the pixel centre
-		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.x))).append("\t");
-		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.y))).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.a * benchmarkParameters.z)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.gain)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.readNoise)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.getBackground())).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.b2)).append("\t");
+		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.x))).append('\t');
+		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.y))).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.a * benchmarkParameters.z)).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.gain)).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.readNoise)).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.getBackground())).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.b2)).append('\t');
 
 		// Compute the noise
 		double noise = benchmarkParameters.b2;
@@ -1017,13 +1017,13 @@ public class BenchmarkFit implements PlugIn
 			noise = benchmarkParameters.getBackground() * 2 + readVariance;
 		}
 
-		sb.append(Utils.rounded(benchmarkParameters.getSignal() / Math.sqrt(noise))).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.precisionN)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.precisionX)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.precisionXML)).append("\t");
+		sb.append(Utils.rounded(benchmarkParameters.getSignal() / Math.sqrt(noise))).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.precisionN)).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.precisionX)).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.precisionXML)).append('\t');
 		sb.append(region.width).append("x");
-		sb.append(region.height).append("\t");
-		sb.append(Utils.rounded(psfWidth * benchmarkParameters.a)).append("\t");
+		sb.append(region.height).append('\t');
+		sb.append(Utils.rounded(psfWidth * benchmarkParameters.a)).append('\t');
 		sb.append(fitConfig.getFitFunction().toString());
 		if (fitConfig.getFitFunction() == FitFunction.FIXED)
 		{
@@ -1044,7 +1044,7 @@ public class BenchmarkFit implements PlugIn
 			sb.append(":N=").append(fitConfig.getReadNoise());
 		}
 		else
-			sb.append("\t");
+			sb.append('\t');
 
 		// Convert to units of the image (ADUs and pixels)		
 		double[] convert = getConversionFactors();
@@ -1061,7 +1061,7 @@ public class BenchmarkFit implements PlugIn
 		benchmarkResults.add(benchmarkResult);
 
 		// Now output the actual results ...		
-		sb.append("\t");
+		sb.append('\t');
 		final double recall = (stats[0].getN() / (double) getNumberOfStartPoints()) /
 				benchmarkParameters.getMolecules();
 		sb.append(Utils.rounded(recall));
@@ -1069,7 +1069,7 @@ public class BenchmarkFit implements PlugIn
 		for (int i = 0; i < stats.length; i++)
 		{
 			if (convert[i] != 0)
-				sb.append("\t").append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append("\t")
+				sb.append('\t').append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append('\t')
 						.append(Utils.rounded(stats[i].getStandardDeviation() * convert[i]));
 			else
 				sb.append("\t0\t0");
@@ -1136,7 +1136,7 @@ public class BenchmarkFit implements PlugIn
 			sb.append("\tOrigRecall");
 		for (int i = 0; i < NAMES.length; i++)
 		{
-			sb.append("\t").append(NAMES[i]).append("\t+/-");
+			sb.append('\t').append(NAMES[i]).append("\t+/-");
 		}
 		return sb.toString();
 	}
@@ -1211,11 +1211,11 @@ public class BenchmarkFit implements PlugIn
 			StringBuilder sb = new StringBuilder(benchmarkResult.parameters);
 
 			// Now output the actual results ...		
-			sb.append("\t");
+			sb.append('\t');
 			final double recall = (stats[0].getN() / numberOfStartPoints) / benchmarkParameters.getMolecules();
 			sb.append(Utils.rounded(recall));
 			// Add the original recall
-			sb.append("\t");
+			sb.append('\t');
 			final double recall2 = (count[j++] / numberOfStartPoints) / benchmarkParameters.getMolecules();
 			sb.append(Utils.rounded(recall2));
 
@@ -1225,7 +1225,7 @@ public class BenchmarkFit implements PlugIn
 			for (int i = 0; i < stats.length; i++)
 			{
 				if (convert[i] != 0)
-					sb.append("\t").append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append("\t")
+					sb.append('\t').append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append('\t')
 							.append(Utils.rounded(stats[i].getStandardDeviation() * convert[i]));
 				else
 					sb.append("\t0\t0");

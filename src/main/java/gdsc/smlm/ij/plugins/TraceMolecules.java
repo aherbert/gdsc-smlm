@@ -501,23 +501,23 @@ public class TraceMolecules implements PlugIn
 
 		// Add to the summary table
 		StringBuilder sb = new StringBuilder();
-		sb.append(results.getName()).append("\t");
+		sb.append(results.getName()).append('\t');
 		sb.append(outputName.equals("Cluster") ? settings.getClusteringAlgorithm() : settings.getTraceMode())
-				.append("\t");
-		sb.append(Utils.rounded(exposureTime * 1000, 3)).append("\t");
-		sb.append(Utils.rounded(dThreshold, 3)).append("\t");
+				.append('\t');
+		sb.append(Utils.rounded(exposureTime * 1000, 3)).append('\t');
+		sb.append(Utils.rounded(dThreshold, 3)).append('\t');
 		sb.append(Utils.rounded(tThreshold, 3));
 		if (settings.splitPulses)
 			sb.append(" *");
-		sb.append("\t");
-		sb.append(timeInFrames2(tThreshold)).append("\t");
-		sb.append(traces.length).append("\t");
-		sb.append(filtered).append("\t");
-		sb.append(singles).append("\t");
-		sb.append(traces.length - singles).append("\t");
+		sb.append('\t');
+		sb.append(timeInFrames2(tThreshold)).append('\t');
+		sb.append(traces.length).append('\t');
+		sb.append(filtered).append('\t');
+		sb.append(singles).append('\t');
+		sb.append(traces.length - singles).append('\t');
 		for (int i = 0; i < stats.length; i++)
 		{
-			sb.append(Utils.rounded(stats[i].getMean(), 3)).append("\t");
+			sb.append(Utils.rounded(stats[i].getMean(), 3)).append('\t');
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
 		{
@@ -589,7 +589,7 @@ public class TraceMolecules implements PlugIn
 				"Dataset\tAlgorithm\tExposure time (ms)\tD-threshold (nm)\tT-threshold (s)\t(Frames)\tMolecules\tFiltered\tSingles\tClusters");
 		for (int i = 0; i < NAMES.length; i++)
 		{
-			sb.append("\t").append(NAMES[i]);
+			sb.append('\t').append(NAMES[i]);
 		}
 		return sb.toString();
 	}

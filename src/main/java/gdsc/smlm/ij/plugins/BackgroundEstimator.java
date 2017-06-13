@@ -301,11 +301,11 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(imp.getTitle());
-		sb.append("\t").append(Utils.rounded(percentile));
-		sb.append("\t").append(noiseMethod.toString());
-		sb.append("\t").append(thresholdMethod.toString());
-		sb.append("\t").append(Utils.rounded(fraction));
-		sb.append("\t").append(histogramSize).append("\t");
+		sb.append('\t').append(Utils.rounded(percentile));
+		sb.append('\t').append(noiseMethod.toString());
+		sb.append('\t').append(thresholdMethod.toString());
+		sb.append('\t').append(Utils.rounded(fraction));
+		sb.append('\t').append(histogramSize).append('\t');
 		prefix = sb.toString();
 
 		sb = new StringBuilder("Image");
@@ -333,7 +333,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 		sb.append((int) result[0]);
 		for (int i = 1; i < result.length; i++)
 		{
-			sb.append("\t").append(Utils.rounded(result[i]));
+			sb.append('\t').append(Utils.rounded(result[i]));
 		}
 		return sb.toString();
 	}
