@@ -34,7 +34,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
  * Stores peak results in memory. The PeakResults interface add methods are thread safe as they are synchronized. There
- * are equivalent non-.synchronized methods.
+ * are equivalent non-synchronized methods.
  */
 public class MemoryPeakResults extends AbstractPeakResults implements Cloneable, Iterable<PeakResult>
 {
@@ -62,12 +62,127 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		return results.get(index);
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.utils.fitting.results.PeakResults#size()
+	 */
+	public int size()
+	{
+		return results.size();
+	}
+	
+	/**
+	 * Add a result. Not synchronized.
+	 *
+	 * @param result
+	 *            the result
+	 */
+	@Override
+	public void add(PeakResult result)
+	{
+		add(result);
+	}	
+	
+	/**
+	 * Add all results. Not synchronized.
+	 * 
+	 */
+	public void addAllf(Collection<PeakResult> results)
+	{
+		this.results.addAll(results);
+	}
+	
+	/**
+	 * Clear the results.
+	 */
+	private void clear()
+	{
+		results.clear();
+	}
 
+
+	/**
+	 * Trims the capacity of this instance to be the current size. An application can use this operation to minimize
+	 * the storage of an instance.
+	 */
+	public void trimToSize()
+	{
+		results.trimToSize();
+	}
+	
+	/**
+	 * Sort the results
+	 */
+	public void sort()
+	{
+		Collections.sort(results);
+	}	
+	
+
+	/**
+	 * Convert to an array.
+	 *
+	 * @return the peak result array
+	 */
+	public PeakResult[] toArray()
+	{
+		return results.toArray(new PeakResult[size()]);
+	}
+
+	/**
+	 * Convert to an array reusing the space if provided.
+	 *
+	 * @param array
+	 *            the array (can be null)
+	 * @return the peak result array
+	 */
+	public PeakResult[] toArray(PeakResult[] array)
+	{
+		if (array == null || array.length < size())
+			return toArray();
+		return results.toArray(array);
+	}
+	
+	/**
+	 * Copy results the the copy instance.
+	 *
+	 * @param copy the copy
+	 */
+	private void copyResults(MemoryPeakResults copy)
+	{
+		copy.results = new ArrayList<PeakResult>(results);
+	}
+	
+	/**
+	 * Removes the null results from the store.
+	 */
+	public void removeNullResults()
+	{
+		ArrayList<PeakResult> list = new ArrayList<PeakResult>(size());
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			PeakResult p = get(i);
+			if (p != null)
+				list.add(p);
+		}
+		this.results = list;
+	}
+	
+	/**
+	 * Instantiates a new memory peak results.
+	 */
 	public MemoryPeakResults()
 	{
 		results = new ArrayList<PeakResult>(1000);
 	}
 
+	/**
+	 * Instantiates a new memory peak results.
+	 *
+	 * @param capacity the capacity
+	 */
 	public MemoryPeakResults(int capacity)
 	{
 		results = new ArrayList<PeakResult>(capacity);
@@ -177,18 +292,17 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		resultsMap.clear();
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This clears the current results but does not reduce storage allocation. This can be done with
+	 * {@link #trimToSize()}.
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#begin()
 	 */
 	public void begin()
 	{
-		// Q. Should a new array be allocated if the previous one was very large?
-		if (results.size() > 10000)
-			results = new ArrayList<PeakResult>(1000);
-		else
-			results.clear();
+		clear();
 	}
 
 	/**
@@ -201,7 +315,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	public synchronized void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
 			float[] params, float[] paramsStdDev)
 	{
-		results.add(new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev));
+		add(new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev));
 	}
 
 	/**
@@ -227,7 +341,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	public void addf(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
 	{
-		results.add(new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev));
+		add(new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev));
 	}
 
 	/**
@@ -239,28 +353,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public synchronized void addAll(Collection<PeakResult> results)
 	{
-		this.results.addAll(results);
-	}
-
-	/**
-	 * Add all results. Not synchronized.
-	 * 
-	 */
-	public void addAllf(Collection<PeakResult> results)
-	{
-		this.results.addAll(results);
-	}
-
-	/**
-	 * Add a result. Not synchronized.
-	 *
-	 * @param result
-	 *            the result
-	 */
-	@Override
-	public void add(PeakResult result)
-	{
-		results.add(result);
+		addAllf(results);
 	}
 
 	/**
@@ -270,26 +363,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public synchronized void addSync(PeakResult result)
 	{
-		results.add(result);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#size()
-	 */
-	public int size()
-	{
-		return results.size();
-	}
-
-	/**
-	 * Trims the capacity of this instance to be the current size. An application can use this operation to minimize
-	 * the storage of an instance.
-	 */
-	public void trimToSize()
-	{
-		results.trimToSize();
+		add(result);
 	}
 
 	/*
@@ -301,14 +375,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		if (isSortAfterEnd())
 			sort();
-	}
-
-	/**
-	 * Sort the results
-	 */
-	public void sort()
-	{
-		Collections.sort(results);
 	}
 
 	/**
@@ -365,8 +431,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 
 		float minX = Float.POSITIVE_INFINITY, minY = Float.POSITIVE_INFINITY;
 		float maxX = Float.NEGATIVE_INFINITY, maxY = Float.NEGATIVE_INFINITY;
-		for (PeakResult result : results)
+		for (int i = 0, size = size(); i < size; i++)
 		{
+			PeakResult result = get(i);
 			if (minX > result.params[Gaussian2DFunction.X_POSITION])
 				minX = result.params[Gaussian2DFunction.X_POSITION];
 			if (maxX < result.params[Gaussian2DFunction.X_POSITION])
@@ -617,8 +684,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 				copy.bounds = new Rectangle(bounds);
 			if (calibration != null)
 				copy.calibration = calibration.clone();
-			if (results != null)
-				copy.results = new ArrayList<PeakResult>(results);
+			copyResults(copy);
 		}
 		return copy;
 	}
@@ -632,37 +698,13 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	}
 
 	/**
-	 * Convert to an array.
-	 *
-	 * @return the peak result array
-	 */
-	public PeakResult[] toArray()
-	{
-		return results.toArray(new PeakResult[size()]);
-	}
-
-	/**
-	 * Convert to an array reusing the space if provided.
-	 *
-	 * @param array
-	 *            the array (can be null)
-	 * @return the peak result array
-	 */
-	public PeakResult[] toArray(PeakResult[] array)
-	{
-		if (array == null || array.length < size())
-			return toArray();
-		return results.toArray(array);
-	}
-
-	/**
 	 * Checks for background. At least one result must have a non-zero background.
 	 *
 	 * @return true, if successful
 	 */
 	public boolean hasBackground()
 	{
-		for (int i = 0, size = results.size(); i < size; i++)
+		for (int i = 0, size = size(); i < size; i++)
 		{
 			if (get(i).getBackground() != 0)
 				return true;
@@ -677,7 +719,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public boolean hasNoise()
 	{
-		for (int i = 0, size = results.size(); i < size; i++)
+		for (int i = 0, size = size(); i < size; i++)
 		{
 			if (get(i).noise > 0)
 				return true;
@@ -692,7 +734,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public boolean hasIntensity()
 	{
-		for (int i = 0, size = results.size(); i < size; i++)
+		for (int i = 0, size = size(); i < size; i++)
 		{
 			if (get(i).getSignal() > 0)
 				return true;
@@ -707,7 +749,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public boolean hasDeviations()
 	{
-		for (int i = 0, size = results.size(); i < size; i++)
+		for (int i = 0, size = size(); i < size; i++)
 		{
 			if (get(i).paramsStdDev == null)
 				return false;
@@ -722,7 +764,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public boolean hasEndFrame()
 	{
-		for (int i = 0, size = results.size(); i < size; i++)
+		for (int i = 0, size = size(); i < size; i++)
 		{
 			if (get(i).getFrame() != get(i).getEndFrame())
 				return true;
@@ -741,7 +783,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		if (isEmpty())
 			return false;
 		int id = get(0).getId();
-		for (int i = 0, size = results.size(); i < size; i++)
+		for (int i = 0, size = size(); i < size; i++)
 		{
 			if (get(i).getId() != id)
 				return true;
@@ -784,7 +826,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public boolean hasStoredPrecision()
 	{
-		for (int i = 0; i < results.size(); i++)
+		for (int i = 0; i < size(); i++)
 		{
 			if (!get(i).hasPrecision())
 				return false;
@@ -799,27 +841,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public boolean hasNullResults()
 	{
-		for (int i = 0; i < results.size(); i++)
+		for (int i = 0; i < size(); i++)
 		{
 			if (get(i) == null)
 				return true;
 		}
 		return false;
-	}
-
-	/**
-	 * Removes the null results from the store.
-	 */
-	public void removeNullResults()
-	{
-		ArrayList<PeakResult> list = new ArrayList<PeakResult>(size());
-		// Use an iterator to take advantage of the fail-fast thread safety
-		for (PeakResult e : results)
-		{
-			if (e != null)
-				list.add(e);
-		}
-		this.results = list;
 	}
 
 	/**
@@ -856,8 +883,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 					TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
 							DistanceUnit.PIXEL, calibration.getNmPerPixel());
 					// Convert data
-					for (PeakResult p : results)
+					for (int i = 0, size = size(); i < size; i++)
 					{
+						PeakResult p = get(i);
 						// Leave the original positions
 						//p.origX
 						//p.origY
@@ -933,8 +961,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 					TypeConverter<IntensityUnit> c = UnitConverterFactory.createConverter(
 							calibration.getIntensityUnit(), IntensityUnit.PHOTON, calibration.getGain());
 					// Convert data
-					for (PeakResult p : results)
+					for (int i = 0, size = size(); i < size; i++)
 					{
+						PeakResult p = get(i);
 						// Leave the original value
 						//p.origValue
 						p.noise = (float) c.convert(p.noise);
@@ -1002,8 +1031,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 				TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(calibration.getAngleUnit(),
 						AngleUnit.RADIAN);
 				// Convert data
-				for (PeakResult p : results)
+				for (int i = 0, size = size(); i < size; i++)
 				{
+					PeakResult p = get(i);
 					convertAngle(p.params, c);
 					if (p.paramsStdDev != null)
 						convertAngle(p.paramsStdDev, c);
@@ -1052,7 +1082,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public void forEach(ResultProcedure procedure)
 	{
-		for (int i = 0, size = results.size(); i < size; i++)
+		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = get(i);
 			procedure.execute(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
@@ -1097,7 +1127,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		TypeConverter<IntensityUnit> bic = list.get(1);
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
 
-		for (int i = 0, size = results.size(); i < size; i++)
+		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = get(i);
 			//@formatter:off
@@ -1142,7 +1172,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		// This will be fine if the intensity converter was created
 		final double nmPerPixel = getNmPerPixel();
 
-		for (int i = 0, size = results.size(); i < size; i++)
+		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = get(i);
 			float s = r.getSD();
