@@ -222,6 +222,16 @@ public abstract class AbstractPeakResults implements PeakResults
 	}
 
 	/**
+	 * Checks for a CCD camera.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean isCCDCamera()
+	{
+		return (calibration != null) ? calibration.isCCDCamera() : false;
+	}	
+	
+	/**
 	 * Get the EMCCD flag from the calibration, or if not available, return the {@link #DEFAULT_EMCCD}
 	 * 
 	 * @return the gain

@@ -38,9 +38,13 @@ public class CalibrationHelper
 	 *
 	 * @param calibration
 	 *            the calibration
+	 * @throws IllegalArgumentException
+	 *             if the calibration is null
 	 */
-	public CalibrationHelper(Calibration calibration)
+	public CalibrationHelper(Calibration calibration) throws IllegalArgumentException
 	{
+		if (calibration == null)
+			throw new IllegalArgumentException("Calibration is null");
 		calibrationBuilder = calibration.toBuilder();
 	}
 

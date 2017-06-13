@@ -635,7 +635,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public PeakResult[] toArray(PeakResult[] array)
 	{
-		if (array == null)
+		if (array == null || array.length < size())
 			return toArray();
 		return results.toArray(array);
 	}
@@ -776,10 +776,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		for (int i = Gaussian2DFunction.X_POSITION; i < params.length; i += 6)
 		{
-			params[i] = (float) c.convert(params[i]);
-			params[i + offsetY] = (float) c.convert(params[i + offsetY]);
-			params[i + offsetXSD] = (float) c.convert(params[i + offsetXSD]);
-			params[i + offsetYSD] = (float) c.convert(params[i + offsetYSD]);
+			params[i] = c.convert(params[i]);
+			params[i + offsetY] = c.convert(params[i + offsetY]);
+			params[i + offsetXSD] = c.convert(params[i + offsetXSD]);
+			params[i + offsetYSD] = c.convert(params[i + offsetYSD]);
 		}
 	}
 
@@ -853,7 +853,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		for (int i = Gaussian2DFunction.SIGNAL; i < params.length; i += 6)
 		{
-			params[Gaussian2DFunction.SIGNAL] = (float) c.convert(params[Gaussian2DFunction.SIGNAL]);
+			params[Gaussian2DFunction.SIGNAL] = c.convert(params[Gaussian2DFunction.SIGNAL]);
 		}
 	}
 
@@ -910,7 +910,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		for (int i = Gaussian2DFunction.SHAPE; i < params.length; i += 6)
 		{
-			params[i] = (float) c.convert(params[i]);
+			params[i] = c.convert(params[i]);
 		}
 	}
 
@@ -936,13 +936,15 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 *
 	 * @param procedure
 	 *            the procedure
+	 * @return true, if successful
 	 */
 	public void forEach(ResultProcedure procedure)
 	{
 		for (int i = 0, size = results.size(); i < size; i++)
 		{
 			final PeakResult r = results.get(i);
-			procedure.execute(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
+			procedure.execute(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(),
+					r.getXPosition());
 		}
 	}
 
@@ -957,6 +959,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 *            the intensity unit
 	 * @param distanceUnit
 	 *            the distance unit
+	 * @return true, if successful
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
@@ -983,7 +986,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			//@formatter:on
 		}
 	}
-	
+
 	/**
 	 * For each result execute the procedure.
 	 * <p>
@@ -991,37 +994,36 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 *
 	 * @param procedure
 	 *            the procedure
-	 * @param intensityUnit
-	 *            the intensity unit
-	 * @param distanceUnit
-	 *            the distance unit
+	 * @return true, if successful
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
-	public void forEach(Gaussian2DPrecisionProcedure procedure)
+	public void forEach(LSEPrecisionProcedure procedure)
 	{
 		if (calibration == null)
 			throw new ConversionException("No calibration");
 
+		// TODO - do the conversion using the calibration helper.
+		
 		// TODO - Check if this is a Gaussian2DFunction and throw an error if not
 		// Otherwise determine the PSF fields to obtain the distance
-		
-		
+		if (!isCCDCamera())
+			throw new ConversionException("Not a CCD camera");
+		final boolean emCCD = isEMCCD();
+
 		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getIntensityConverter(IntensityUnit.PHOTON);
 		TypeConverter<IntensityUnit> ic = list.get(0);
 		TypeConverter<IntensityUnit> bic = list.get(1);
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(DistanceUnit.NM);
 
+		// This will be fine if the intensity converter was created
+		final double nmPerPixel = getNmPerPixel();
+		
 		for (int i = 0, size = results.size(); i < size; i++)
 		{
 			final PeakResult r = results.get(i);
 			float s = r.getSD();
-			//@formatter:off
-			procedure.execute(
-					bic.convert(r.getBackground()), 
-					ic.convert(r.getSignal()), 
-					dc.convert(s));
-			//@formatter:on
+			procedure.execute(PeakResult.getPrecision(nmPerPixel, dc.convert(s), ic.convert(r.getSignal()), bic.convert(r.getBackground()), emCCD));
 		}
 	}
 }

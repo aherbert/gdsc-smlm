@@ -50,6 +50,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
 
+import gdsc.core.data.utils.ConversionException;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.NullTrackProgress;
@@ -90,7 +91,7 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.LSEPrecisionProcedure;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -2508,13 +2509,7 @@ public class FIRE implements PlugIn
 		}
 		else
 		{
-			final double nmPerPixel = results.getNmPerPixel();
-			final double gain = results.getGain();
-			final boolean emCCD = results.isEMCCD();
-			for (PeakResult r : results.getResults())
-			{
-				precision.add(r.getPrecision(nmPerPixel, gain, emCCD));
-			}
+			precision.add(computedPrecision);
 		}
 		//System.out.printf("Raw p = %f\n", precision.getMean());
 
@@ -2626,38 +2621,36 @@ public class FIRE implements PlugIn
 		return histogram;
 	}
 
+	private double[] computedPrecision;
+	private int precisionN = 0;
+
 	private boolean canCalculatePrecision(MemoryPeakResults results)
 	{
-		// Calibration is required to compute the precision
-		Calibration cal = results.getCalibration();
-		if (cal == null)
-			return false;
-		if (!cal.hasNmPerPixel() || !cal.hasGain() || !cal.isCCDCamera())
-			return false;
-
-		// Check all have a width and signal
-		PeakResult[] data = results.toArray();
-		for (int i = 0; i < data.length; i++)
+		try
 		{
-			PeakResult p = data[i];
-			if (p.getSD() <= 0 || p.getSignal() <= 0)
-				return true;
+			computedPrecision = new double[results.size()];
+			results.forEach(new LSEPrecisionProcedure()
+			{
+				public void execute(double precision)
+				{
+					FIRE.this.computedPrecision[precisionN++] = precision;
+				}
+			});
+		}
+		catch (ConversionException e)
+		{
+			return false;
 		}
 
-		// Check for variable width that is not 1 and a variable signal
-		for (int i = 0; i < data.length; i++)
+		// Check they are different
+		for (int i = 0; i < precisionN; i++)
 		{
-			PeakResult p = data[i];
 			// Check this is valid
-			if (p.getSD() != 1)
+			if (Maths.isFinite(computedPrecision[i]))
 			{
-				// Check the rest for a different value
-				float w1 = p.getSD();
-				float s1 = p.getSignal();
-				for (int j = i + 1; j < data.length; j++)
+				for (int j = i + 1; j < precisionN; j++)
 				{
-					PeakResult p2 = data[j];
-					if (p2.getSD() != 1 && p2.getSD() != w1 && p2.getSignal() != s1)
+					if (Maths.isFinite(computedPrecision[j]) && computedPrecision[j] != computedPrecision[i])
 						return true;
 				}
 				// All the results are the same, this is not valid
@@ -2992,7 +2985,7 @@ public class FIRE implements PlugIn
 			m = tf1.getText();
 			s = tf2.getText();
 			q = tf3.getText();
-			
+
 			// Implement a delay to allow typing.
 			// This is also applied to the sliders which we do not want. 
 			// Ideally we would have no delay for sliders (since they are in the correct place already
