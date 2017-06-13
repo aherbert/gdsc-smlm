@@ -284,7 +284,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	}
 
 	/**
-	 * @see {@link java.util.ArrayList#trimToSize() }
+	 * Trims the capacity of this instance to be the current size. An application can use this operation to minimize
+	 * the storage of an instance.
 	 */
 	public void trimToSize()
 	{
