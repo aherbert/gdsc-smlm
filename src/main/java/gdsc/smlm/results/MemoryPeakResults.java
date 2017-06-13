@@ -48,6 +48,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 
 	private boolean sortAfterEnd;
 
+	/**************************************************************************/
+	/* START OF RESULTS STORAGE METHODS */
+	/**************************************************************************/
+
 	// Allow changing the data structure used to store the results
 	private ArrayList<PeakResult> results;
 
@@ -62,7 +66,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		return results.get(index);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -72,7 +76,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		return results.size();
 	}
-	
+
 	/**
 	 * Add a result. Not synchronized.
 	 *
@@ -83,8 +87,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	public void add(PeakResult result)
 	{
 		add(result);
-	}	
-	
+	}
+
 	/**
 	 * Add all results. Not synchronized.
 	 * 
@@ -93,7 +97,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		this.results.addAll(results);
 	}
-	
+
 	/**
 	 * Clear the results.
 	 */
@@ -101,7 +105,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		results.clear();
 	}
-
 
 	/**
 	 * Trims the capacity of this instance to be the current size. An application can use this operation to minimize
@@ -111,15 +114,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	{
 		results.trimToSize();
 	}
-	
+
 	/**
 	 * Sort the results
 	 */
 	public void sort()
 	{
 		Collections.sort(results);
-	}	
-	
+	}
 
 	/**
 	 * Convert to an array.
@@ -144,17 +146,18 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			return toArray();
 		return results.toArray(array);
 	}
-	
+
 	/**
 	 * Copy results the the copy instance.
 	 *
-	 * @param copy the copy
+	 * @param copy
+	 *            the copy
 	 */
 	private void copyResults(MemoryPeakResults copy)
 	{
 		copy.results = new ArrayList<PeakResult>(results);
 	}
-	
+
 	/**
 	 * Removes the null results from the store.
 	 */
@@ -169,7 +172,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		}
 		this.results = list;
 	}
-	
+
+	/**************************************************************************/
+	/* END OF RESULTS STORAGE METHODS */
+	/**************************************************************************/
+
 	/**
 	 * Instantiates a new memory peak results.
 	 */
@@ -181,7 +188,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	/**
 	 * Instantiates a new memory peak results.
 	 *
-	 * @param capacity the capacity
+	 * @param capacity
+	 *            the capacity
 	 */
 	public MemoryPeakResults(int capacity)
 	{
@@ -1080,6 +1088,33 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 * @param procedure
 	 *            the procedure
 	 */
+	public void forEach(PeakResultProcedure procedure)
+	{
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			procedure.execute(get(i));
+		}
+	}
+
+	/**
+	 * For the first result execute the procedure.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forFirst(PeakResultProcedure procedure)
+	{
+		if (isEmpty())
+			return;
+		procedure.execute(get(0));
+	}
+
+	/**
+	 * For each result execute the procedure.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
 	public void forEach(ResultProcedure procedure)
 	{
 		for (int i = 0, size = size(); i < size; i++)
@@ -1179,5 +1214,35 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			procedure.execute(PeakResult.getPrecision(nmPerPixel, dc.convert(s), ic.convert(r.getSignal()),
 					bic.convert(r.getBackground()), emCCD));
 		}
+	}
+
+	/**
+	 * Gets the distance unit.
+	 *
+	 * @return the distance unit
+	 */
+	public DistanceUnit getDistanceUnit()
+	{
+		if (calibration != null)
+		{
+			if (calibration.hasDistanceUnit())
+				return calibration.getDistanceUnit();
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the intensity unit.
+	 *
+	 * @return the intensity unit
+	 */
+	public IntensityUnit getIntensityUnit()
+	{
+		if (calibration != null)
+		{
+			if (calibration.hasIntensityUnit())
+				return calibration.getIntensityUnit();
+		}
+		return null;
 	}
 }
