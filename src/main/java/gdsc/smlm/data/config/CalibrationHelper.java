@@ -57,6 +57,192 @@ public class CalibrationHelper
 	/**
 	 * Gets a distance converter to update values.
 	 * <p>
+	 * If the conversion is not possible then an exception is thrown.
+	 * <p>
+	 * If a converter if successfully created then the instance calibration will be updated.
+	 *
+	 * @param toDistanceUnit
+	 *            the distance unit
+	 * @return the distance converter
+	 * @throws ConversionException
+	 *             if a converter cannot be created
+	 */
+	public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit toDistanceUnit)
+	{
+		if (toDistanceUnit != null && calibrationBuilder.hasDistanceCalibration())
+		{
+			DistanceCalibration.Builder distanceCalibration = calibrationBuilder.getDistanceCalibrationBuilder();
+			TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(distanceCalibration.getUnit(),
+					toDistanceUnit, distanceCalibration.getNmPerPixel());
+			distanceCalibration.setUnit(toDistanceUnit);
+			return c;
+		}
+		throw new ConversionException();
+	}
+
+	/**
+	 * Gets intensity converters to update values.
+	 * <p>
+	 * If the conversion is not possible then an exception is thrown.
+	 * <p>
+	 * The returned list calibration has a converter with only the gain, and a second converter with the gain and bias.
+	 * If the bias is not available then the second converter is the same as the first.
+	 * <p>
+	 * If a converter if successfully created then the instance calibration will be updated.
+	 *
+	 * @param toIntensityUnit
+	 *            the intensity unit
+	 * @return the intensity converters (gain, gain + bias)
+	 * @throws ConversionException
+	 *             if a converter cannot be created
+	 */
+	public ArrayList<TypeConverter<IntensityUnit>> getIntensityConverter(IntensityUnit toIntensityUnit)
+	{
+		if (toIntensityUnit != null && calibrationBuilder.hasIntensityCalibration())
+		{
+			IntensityCalibration.Builder intensityCalibration = calibrationBuilder.getIntensityCalibrationBuilder();
+			IntensityUnit fromUnit = intensityCalibration.getUnit();
+			double gain = intensityCalibration.getGain();
+			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
+			list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit, gain));
+			// Add a second converter with the camera bias
+			if (calibrationBuilder.hasCameraCalibration() && calibrationBuilder.getCameraCalibration().getBias() != 0)
+			{
+				list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit,
+						calibrationBuilder.getCameraCalibration().getBias(), gain));
+			}
+			else
+			{
+				// No bias so just duplicate the converter
+				list.add(list.get(0));
+			}
+			intensityCalibration.setUnit(toIntensityUnit);
+			return list;
+		}
+		throw new ConversionException();
+	}
+
+	/**
+	 * Gets a angle converter to update values.
+	 * <p>
+	 * If the conversion is not possible then an exception is thrown.
+	 * <p>
+	 * If a converter if successfully created then the instance calibration will be updated.
+	 *
+	 * @param toAngleUnit
+	 *            the angle unit
+	 * @return the angle converter
+	 * @throws ConversionException
+	 *             if a converter cannot be created
+	 */
+	public TypeConverter<AngleUnit> getAngleConverter(AngleUnit toAngleUnit)
+	{
+		if (toAngleUnit != null && calibrationBuilder.hasPsfCalibration())
+		{
+			PSFCalibration.Builder psfCalibration = calibrationBuilder.getPsfCalibrationBuilder();
+			TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(psfCalibration.getAngleUnit(),
+					toAngleUnit);
+			// Update the units
+			psfCalibration.setAngleUnit(toAngleUnit);
+			return c;
+		}
+		throw new ConversionException();
+	}
+
+	/**
+	 * Gets a distance converter to update values.
+	 * <p>
+	 * If the conversion is not possible then an exception is thrown.
+	 *
+	 * @param calibration
+	 *            the calibration
+	 * @param toDistanceUnit
+	 *            the distance unit
+	 * @return the distance converter
+	 * @throws ConversionException
+	 *             if a converter cannot be created
+	 */
+	public static TypeConverter<DistanceUnit> getDistanceConverter(Calibration calibration, DistanceUnit toDistanceUnit)
+	{
+		if (toDistanceUnit != null && calibration.hasDistanceCalibration())
+		{
+			DistanceCalibration distanceCalibration = calibration.getDistanceCalibration();
+			return UnitConverterFactory.createConverter(distanceCalibration.getUnit(), toDistanceUnit,
+					distanceCalibration.getNmPerPixel());
+		}
+		throw new ConversionException();
+	}
+
+	// Fix these
+
+	/**
+	 * Gets intensity converters to update values.
+	 * <p>
+	 * If the conversion is not possible then an exception is thrown.
+	 * <p>
+	 * The returned list calibration has a converter with only the gain, and a second converter with the gain and bias.
+	 * If the bias is not available then the second converter is the same as the first.
+	 *
+	 * @param calibration
+	 *            the calibration
+	 * @param toIntensityUnit
+	 *            the intensity unit
+	 * @return the intensity converters (gain, gain + bias)
+	 * @throws ConversionException
+	 *             if a converter cannot be created
+	 */
+	public static ArrayList<TypeConverter<IntensityUnit>> getIntensityConverter(Calibration calibration,
+			IntensityUnit toIntensityUnit)
+	{
+		if (toIntensityUnit != null && calibration.hasIntensityCalibration())
+		{
+			IntensityCalibration intensityCalibration = calibration.getIntensityCalibration();
+			IntensityUnit fromUnit = intensityCalibration.getUnit();
+			double gain = intensityCalibration.getGain();
+			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
+			list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit, gain));
+			// Add a second converter with the camera bias
+			if (calibration.hasCameraCalibration() && calibration.getCameraCalibration().getBias() != 0)
+			{
+				list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit,
+						calibration.getCameraCalibration().getBias(), gain));
+			}
+			else
+			{
+				// No bias so just duplicate the converter
+				list.add(list.get(0));
+			}
+			return list;
+		}
+		throw new ConversionException();
+	}
+
+	/**
+	 * Gets an angle converter to update values.
+	 * <p>
+	 * If the conversion is not possible then an exception is thrown.
+	 *
+	 * @param calibration
+	 *            the calibration
+	 * @param toAngleUnit
+	 *            the angle unit
+	 * @return the angle converter
+	 * @throws ConversionException
+	 *             if a converter cannot be created
+	 */
+	public static TypeConverter<AngleUnit> getAngleConverter(Calibration calibration, AngleUnit toAngleUnit)
+	{
+		if (toAngleUnit != null && calibration.hasPsfCalibration())
+		{
+			PSFCalibration psfCalibration = calibration.getPsfCalibration();
+			return UnitConverterFactory.createConverter(psfCalibration.getAngleUnit(), toAngleUnit);
+		}
+		throw new ConversionException();
+	}
+
+	/**
+	 * Gets a distance converter to update values.
+	 * <p>
 	 * If the calibration is already in the given units or conversion is not possible
 	 * then an identity converter will be returned.
 	 * <p>
@@ -66,29 +252,17 @@ public class CalibrationHelper
 	 *            the distance unit
 	 * @return the distance converter
 	 */
-	public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit toDistanceUnit)
+	public TypeConverter<DistanceUnit> getDistanceConverterSafe(DistanceUnit toDistanceUnit)
 	{
-		TypeConverter<DistanceUnit> c = null;
-		if (toDistanceUnit != null && calibrationBuilder.hasDistanceCalibration())
+		try
 		{
-			DistanceCalibration.Builder distanceCalibration = calibrationBuilder.getDistanceCalibrationBuilder();
-			try
-			{
-				c = UnitConverterFactory.createConverter(distanceCalibration.getUnit(), toDistanceUnit,
-						distanceCalibration.getNmPerPixel());
-				distanceCalibration.setUnit(toDistanceUnit);
-			}
-			catch (ConversionException e)
-			{
-				// Ignore this
-			}
+			return getDistanceConverter(toDistanceUnit);
 		}
-		if (c == null)
-			c = new IdentityTypeConverter<DistanceUnit>(null);
-		return c;
+		catch (ConversionException e)
+		{
+			return new IdentityTypeConverter<DistanceUnit>(null);
+		}
 	}
-
-	// Fix these
 
 	/**
 	 * Gets intensity converters to update values.
@@ -105,44 +279,20 @@ public class CalibrationHelper
 	 *            the intensity unit
 	 * @return the intensity converters (gain, gain + bias)
 	 */
-	public ArrayList<TypeConverter<IntensityUnit>> getIntensityConverter(IntensityUnit toIntensityUnit)
+	public ArrayList<TypeConverter<IntensityUnit>> getIntensityConverterSafe(IntensityUnit toIntensityUnit)
 	{
-		ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
-		if (toIntensityUnit != null && calibrationBuilder.hasIntensityCalibration())
+		try
 		{
-			IntensityCalibration.Builder intensityCalibration = calibrationBuilder.getIntensityCalibrationBuilder();
-			try
-			{
-				IntensityUnit fromUnit = intensityCalibration.getUnit();
-				double gain = intensityCalibration.getGain();
-				list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit, gain));
-				// Add a second converter with the camera bias
-				if (calibrationBuilder.hasCameraCalibration() &&
-						calibrationBuilder.getCameraCalibration().getBias() != 0)
-				{
-					list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit,
-							calibrationBuilder.getCameraCalibration().getBias(), gain));
-				}
-				else
-				{
-					// No bias so just duplicate the converter
-					list.add(list.get(0));
-				}
-				intensityCalibration.setUnit(toIntensityUnit);
-			}
-			catch (ConversionException e)
-			{
-				// Ignore this
-			}
+			return getIntensityConverter(toIntensityUnit);
 		}
-		if (list.size() != 2)
+		catch (ConversionException e)
 		{
-			list.clear();
+			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
 			TypeConverter<IntensityUnit> c = new IdentityTypeConverter<IntensityUnit>(null);
 			list.add(c);
 			list.add(c);
+			return list;
 		}
-		return list;
 	}
 
 	/**
@@ -157,26 +307,16 @@ public class CalibrationHelper
 	 *            the angle unit
 	 * @return the angle converter
 	 */
-	public TypeConverter<AngleUnit> getAngleConverter(AngleUnit toAngleUnit)
+	public TypeConverter<AngleUnit> getAngleConverterSafe(AngleUnit toAngleUnit)
 	{
-		TypeConverter<AngleUnit> c = null;
-		if (toAngleUnit != null && calibrationBuilder.hasPsfCalibration())
+		try
 		{
-			PSFCalibration.Builder psfCalibration = calibrationBuilder.getPsfCalibrationBuilder();
-			try
-			{
-				c = UnitConverterFactory.createConverter(psfCalibration.getAngleUnit(), toAngleUnit);
-				// Update the units
-				psfCalibration.setAngleUnit(toAngleUnit);
-			}
-			catch (ConversionException e)
-			{
-				// Ignore this
-			}
+			return getAngleConverter(toAngleUnit);
 		}
-		if (c == null)
-			c = new IdentityTypeConverter<AngleUnit>(null);
-		return c;
+		catch (ConversionException e)
+		{
+			return new IdentityTypeConverter<AngleUnit>(null);
+		}
 	}
 
 	/**
@@ -191,25 +331,17 @@ public class CalibrationHelper
 	 *            the distance unit
 	 * @return the distance converter
 	 */
-	public static TypeConverter<DistanceUnit> getDistanceConverter(Calibration calibration, DistanceUnit toDistanceUnit)
+	public static TypeConverter<DistanceUnit> getDistanceConverterSafe(Calibration calibration,
+			DistanceUnit toDistanceUnit)
 	{
-		TypeConverter<DistanceUnit> c = null;
-		if (toDistanceUnit != null && calibration.hasDistanceCalibration())
+		try
 		{
-			DistanceCalibration distanceCalibration = calibration.getDistanceCalibration();
-			try
-			{
-				c = UnitConverterFactory.createConverter(distanceCalibration.getUnit(), toDistanceUnit,
-						distanceCalibration.getNmPerPixel());
-			}
-			catch (ConversionException e)
-			{
-				// Ignore this
-			}
+			return getDistanceConverter(calibration, toDistanceUnit);
 		}
-		if (c == null)
-			c = new IdentityTypeConverter<DistanceUnit>(null);
-		return c;
+		catch (ConversionException e)
+		{
+			return new IdentityTypeConverter<DistanceUnit>(null);
+		}
 	}
 
 	// Fix these
@@ -229,43 +361,21 @@ public class CalibrationHelper
 	 *            the intensity unit
 	 * @return the intensity converters (gain, gain + bias)
 	 */
-	public static ArrayList<TypeConverter<IntensityUnit>> getIntensityConverter(Calibration calibration,
+	public static ArrayList<TypeConverter<IntensityUnit>> getIntensityConverterSafe(Calibration calibration,
 			IntensityUnit toIntensityUnit)
 	{
-		ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
-		if (toIntensityUnit != null && calibration.hasIntensityCalibration())
+		try
 		{
-			IntensityCalibration intensityCalibration = calibration.getIntensityCalibration();
-			try
-			{
-				IntensityUnit fromUnit = intensityCalibration.getUnit();
-				double gain = intensityCalibration.getGain();
-				list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit, gain));
-				// Add a second converter with the camera bias
-				if (calibration.hasCameraCalibration() && calibration.getCameraCalibration().getBias() != 0)
-				{
-					list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit,
-							calibration.getCameraCalibration().getBias(), gain));
-				}
-				else
-				{
-					// No bias so just duplicate the converter
-					list.add(list.get(0));
-				}
-			}
-			catch (ConversionException e)
-			{
-				// Ignore this
-			}
+			return getIntensityConverter(calibration, toIntensityUnit);
 		}
-		if (list.size() != 2)
+		catch (ConversionException e)
 		{
-			list.clear();
+			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
 			TypeConverter<IntensityUnit> c = new IdentityTypeConverter<IntensityUnit>(null);
 			list.add(c);
 			list.add(c);
+			return list;
 		}
-		return list;
 	}
 
 	/**
@@ -280,23 +390,16 @@ public class CalibrationHelper
 	 *            the angle unit
 	 * @return the angle converter
 	 */
-	public static TypeConverter<AngleUnit> getAngleConverter(Calibration calibration, AngleUnit toAngleUnit)
+	public static TypeConverter<AngleUnit> getAngleConverterSafe(Calibration calibration, AngleUnit toAngleUnit)
 	{
-		TypeConverter<AngleUnit> c = null;
-		if (toAngleUnit != null && calibration.hasPsfCalibration())
+		try
 		{
-			PSFCalibration psfCalibration = calibration.getPsfCalibration();
-			try
-			{
-				c = UnitConverterFactory.createConverter(psfCalibration.getAngleUnit(), toAngleUnit);
-			}
-			catch (ConversionException e)
-			{
-				// Ignore this
-			}
+			return getAngleConverter(calibration, toAngleUnit);
 		}
-		if (c == null)
-			c = new IdentityTypeConverter<AngleUnit>(null);
-		return c;
+		catch (ConversionException e)
+		{
+			return new IdentityTypeConverter<AngleUnit>(null);
+		}
 	}
+
 }

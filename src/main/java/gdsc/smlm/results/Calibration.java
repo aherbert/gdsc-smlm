@@ -879,41 +879,33 @@ public class Calibration implements Cloneable
 	 * Gets a distance converter to update values. If the converter can be created then the current distance unit in
 	 * this instance is updated.
 	 * <p>
-	 * If the calibration is already in the given units or conversion is not possible
-	 * then an identity converter will be returned.
+	 * If the conversion is not possible then an exception is thrown.
 	 * <p>
 	 * It is recommended to clone the calibration before invoking this method as the state may change.
 	 *
 	 * @param toDistanceUnit
 	 *            the distance unit
 	 * @return the distance converter
+	 * @throws ConversionException
+	 *             if a converter cannot be created
 	 */
 	public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit toDistanceUnit)
 	{
-		TypeConverter<DistanceUnit> c = null;
 		if (toDistanceUnit != null && hasDistanceUnit() && distanceUnit != toDistanceUnit && hasNmPerPixel())
 		{
-			try
-			{
-				c = UnitConverterFactory.createConverter(distanceUnit, toDistanceUnit, nmPerPixel);
-				setDistanceUnit(toDistanceUnit);
-			}
-			catch (ConversionException e)
-			{
-				// Ignore this
-			}
+			TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(distanceUnit, toDistanceUnit,
+					nmPerPixel);
+			setDistanceUnit(toDistanceUnit);
+			return c;
 		}
-		if (c == null)
-			c = new IdentityTypeConverter<DistanceUnit>(distanceUnit);
-		return c;
+		throw new ConversionException();
 	}
 
 	/**
 	 * Gets intensity converters to update values. If the converter can be created then the current intensity unit in
 	 * this instance is updated.
 	 * <p>
-	 * If the calibration is already in the given units or conversion is not possible
-	 * then an identity converter will be returned.
+	 * If the conversion is not possible then an exception is thrown.
 	 * <p>
 	 * The returned list has a converter with only the gain, and a second converter with the gain and bias.
 	 * <p>
@@ -922,63 +914,123 @@ public class Calibration implements Cloneable
 	 * @param toIntensityUnit
 	 *            the intensity unit
 	 * @return the intensity converters (gain, gain + bias)
+	 * @throws ConversionException
+	 *             if a converter cannot be created
 	 */
 	public ArrayList<TypeConverter<IntensityUnit>> getIntensityConverter(IntensityUnit toIntensityUnit)
 	{
-		ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
 		if (toIntensityUnit != null && hasIntensityUnit() && intensityUnit != toIntensityUnit && hasGain() && hasBias())
 		{
-			try
-			{
-				list.add(UnitConverterFactory.createConverter(intensityUnit, toIntensityUnit, gain));
-				list.add(UnitConverterFactory.createConverter(intensityUnit, toIntensityUnit, bias, gain));
-				setIntensityUnit(toIntensityUnit);
-			}
-			catch (ConversionException e)
-			{
-				// Ignore this
-			}
+			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
+			list.add(UnitConverterFactory.createConverter(intensityUnit, toIntensityUnit, gain));
+			list.add(UnitConverterFactory.createConverter(intensityUnit, toIntensityUnit, bias, gain));
+			setIntensityUnit(toIntensityUnit);
+			return list;
 		}
-		if (list.size() != 2)
-		{
-			list.clear();
-			TypeConverter<IntensityUnit> c = new IdentityTypeConverter<IntensityUnit>(intensityUnit);
-			list.add(c);
-			list.add(c);
-		}
-		return list;
+		throw new ConversionException();
 	}
 
 	/**
 	 * Gets a angle converter to update values. If the converter can be created then the current angle unit in
 	 * this instance is updated.
 	 * <p>
-	 * If the calibration is already in the given units or conversion is not possible
-	 * then an identity converter will be returned.
+	 * If the conversion is not possible then an exception is thrown.
 	 * <p>
 	 * It is recommended to clone the calibration before invoking this method as the state may change.
 	 *
 	 * @param toAngleUnit
 	 *            the angle unit
 	 * @return the angle converter
+	 * @throws ConversionException
+	 *             if a converter cannot be created
 	 */
 	public TypeConverter<AngleUnit> getAngleConverter(AngleUnit toAngleUnit)
 	{
-		TypeConverter<AngleUnit> c = null;
 		if (toAngleUnit != null && hasAngleUnit() && angleUnit != toAngleUnit)
 		{
-			try
-			{
-				c = UnitConverterFactory.createConverter(angleUnit, toAngleUnit);
-				setAngleUnit(toAngleUnit);
-			}
-			catch (ConversionException e)
-			{
-				// Ignore this
-			}
+			TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(angleUnit, toAngleUnit);
+			setAngleUnit(toAngleUnit);
+			return c;
 		}
-		if (c == null)
-			c = new IdentityTypeConverter<AngleUnit>(angleUnit);
-		return c;
+		throw new ConversionException();
+	}
+
+	/**
+	 * Gets a distance converter to update values.
+	 * <p>
+	 * If the calibration is already in the given units or conversion is not possible
+	 * then an identity converter will be returned.
+	 * <p>
+	 * If a converter if successfully created then the instance calibration will be updated.
+	 *
+	 * @param toDistanceUnit
+	 *            the distance unit
+	 * @return the distance converter
+	 */
+	public TypeConverter<DistanceUnit> getDistanceConverterSafe(DistanceUnit toDistanceUnit)
+	{
+		try
+		{
+			return getDistanceConverter(toDistanceUnit);
+		}
+		catch (ConversionException e)
+		{
+			return new IdentityTypeConverter<DistanceUnit>(null);
+		}
+	}
+
+	/**
+	 * Gets intensity converters to update values.
+	 * <p>
+	 * If the calibration is already in the given units or conversion is not possible
+	 * then an identity converter will be returned.
+	 * <p>
+	 * The returned list calibration has a converter with only the gain, and a second converter with the gain and bias.
+	 * If the bias is not available then the second converter is the same as the first.
+	 * <p>
+	 * If a converter if successfully created then the instance calibration will be updated.
+	 *
+	 * @param toIntensityUnit
+	 *            the intensity unit
+	 * @return the intensity converters (gain, gain + bias)
+	 */
+	public ArrayList<TypeConverter<IntensityUnit>> getIntensityConverterSafe(IntensityUnit toIntensityUnit)
+	{
+		try
+		{
+			return getIntensityConverter(toIntensityUnit);
+		}
+		catch (ConversionException e)
+		{
+			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
+			TypeConverter<IntensityUnit> c = new IdentityTypeConverter<IntensityUnit>(null);
+			list.add(c);
+			list.add(c);
+			return list;
+		}
+	}
+
+	/**
+	 * Gets a angle converter to update values.
+	 * <p>
+	 * If the calibration is already in the given units or conversion is not possible
+	 * then an identity converter will be returned.
+	 * <p>
+	 * If a converter if successfully created then the instance calibration will be updated.
+	 *
+	 * @param toAngleUnit
+	 *            the angle unit
+	 * @return the angle converter
+	 */
+	public TypeConverter<AngleUnit> getAngleConverterSafe(AngleUnit toAngleUnit)
+	{
+		try
+		{
+			return getAngleConverter(toAngleUnit);
+		}
+		catch (ConversionException e)
+		{
+			return new IdentityTypeConverter<AngleUnit>(null);
+		}
 	}
 }
