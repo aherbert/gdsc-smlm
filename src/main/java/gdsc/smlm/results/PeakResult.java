@@ -34,7 +34,12 @@ public class PeakResult implements Comparable<PeakResult>
 	public float origValue;
 	public double error;
 	public float noise;
+
+	// TODO - change the model to store B,I,X,Y,Z and then addition PSF parameters in the params array
+	
+	// TODO - make this private
 	public float[] params;
+	// TODO - make this private
 	public float[] paramsStdDev;
 
 	public PeakResult(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
@@ -802,6 +807,15 @@ public class PeakResult implements Comparable<PeakResult>
 	public float getYPosition()
 	{
 		return params[Gaussian2DFunction.Y_POSITION];
+	}
+
+	/**
+	 * @return The z position for the first peak
+	 */
+	public float getZPosition()
+	{
+		// TODO - support z-position
+		return 0;
 	}
 
 	/**
