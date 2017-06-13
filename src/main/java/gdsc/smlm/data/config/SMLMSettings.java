@@ -3825,6 +3825,602 @@ public final class SMLMSettings {
 
   }
 
+  public interface IntensityCalibrationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:SMLM.IntensityCalibration)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The intensity unit.
+     * </pre>
+     *
+     * <code>.SMLM.IntensityUnit unit = 1;</code>
+     */
+    int getUnitValue();
+    /**
+     * <pre>
+     * The intensity unit.
+     * </pre>
+     *
+     * <code>.SMLM.IntensityUnit unit = 1;</code>
+     */
+    gdsc.smlm.data.config.SMLMSettings.IntensityUnit getUnit();
+
+    /**
+     * <pre>
+     * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
+     * (Counts) to photons.
+     * </pre>
+     *
+     * <code>double gain = 2;</code>
+     */
+    double getGain();
+  }
+  /**
+   * Protobuf type {@code SMLM.IntensityCalibration}
+   */
+  public  static final class IntensityCalibration extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:SMLM.IntensityCalibration)
+      IntensityCalibrationOrBuilder {
+    // Use IntensityCalibration.newBuilder() to construct.
+    private IntensityCalibration(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private IntensityCalibration() {
+      unit_ = 0;
+      gain_ = 0D;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private IntensityCalibration(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              int rawValue = input.readEnum();
+
+              unit_ = rawValue;
+              break;
+            }
+            case 17: {
+
+              gain_ = input.readDouble();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.SMLMSettings.internal_static_SMLM_IntensityCalibration_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.SMLMSettings.internal_static_SMLM_IntensityCalibration_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.class, gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.Builder.class);
+    }
+
+    public static final int UNIT_FIELD_NUMBER = 1;
+    private int unit_;
+    /**
+     * <pre>
+     * The intensity unit.
+     * </pre>
+     *
+     * <code>.SMLM.IntensityUnit unit = 1;</code>
+     */
+    public int getUnitValue() {
+      return unit_;
+    }
+    /**
+     * <pre>
+     * The intensity unit.
+     * </pre>
+     *
+     * <code>.SMLM.IntensityUnit unit = 1;</code>
+     */
+    public gdsc.smlm.data.config.SMLMSettings.IntensityUnit getUnit() {
+      gdsc.smlm.data.config.SMLMSettings.IntensityUnit result = gdsc.smlm.data.config.SMLMSettings.IntensityUnit.valueOf(unit_);
+      return result == null ? gdsc.smlm.data.config.SMLMSettings.IntensityUnit.UNRECOGNIZED : result;
+    }
+
+    public static final int GAIN_FIELD_NUMBER = 2;
+    private double gain_;
+    /**
+     * <pre>
+     * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
+     * (Counts) to photons.
+     * </pre>
+     *
+     * <code>double gain = 2;</code>
+     */
+    public double getGain() {
+      return gain_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (unit_ != gdsc.smlm.data.config.SMLMSettings.IntensityUnit.PHOTON.getNumber()) {
+        output.writeEnum(1, unit_);
+      }
+      if (gain_ != 0D) {
+        output.writeDouble(2, gain_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (unit_ != gdsc.smlm.data.config.SMLMSettings.IntensityUnit.PHOTON.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, unit_);
+      }
+      if (gain_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, gain_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.SMLMSettings.IntensityCalibration)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.SMLMSettings.IntensityCalibration other = (gdsc.smlm.data.config.SMLMSettings.IntensityCalibration) obj;
+
+      boolean result = true;
+      result = result && unit_ == other.unit_;
+      result = result && (
+          java.lang.Double.doubleToLongBits(getGain())
+          == java.lang.Double.doubleToLongBits(
+              other.getGain()));
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + UNIT_FIELD_NUMBER;
+      hash = (53 * hash) + unit_;
+      hash = (37 * hash) + GAIN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getGain()));
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.SMLMSettings.IntensityCalibration prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code SMLM.IntensityCalibration}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:SMLM.IntensityCalibration)
+        gdsc.smlm.data.config.SMLMSettings.IntensityCalibrationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.SMLMSettings.internal_static_SMLM_IntensityCalibration_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.SMLMSettings.internal_static_SMLM_IntensityCalibration_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.class, gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        unit_ = 0;
+
+        gain_ = 0D;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.SMLMSettings.internal_static_SMLM_IntensityCalibration_descriptor;
+      }
+
+      public gdsc.smlm.data.config.SMLMSettings.IntensityCalibration getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.SMLMSettings.IntensityCalibration build() {
+        gdsc.smlm.data.config.SMLMSettings.IntensityCalibration result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.SMLMSettings.IntensityCalibration buildPartial() {
+        gdsc.smlm.data.config.SMLMSettings.IntensityCalibration result = new gdsc.smlm.data.config.SMLMSettings.IntensityCalibration(this);
+        result.unit_ = unit_;
+        result.gain_ = gain_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.SMLMSettings.IntensityCalibration) {
+          return mergeFrom((gdsc.smlm.data.config.SMLMSettings.IntensityCalibration)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.SMLMSettings.IntensityCalibration other) {
+        if (other == gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.getDefaultInstance()) return this;
+        if (other.unit_ != 0) {
+          setUnitValue(other.getUnitValue());
+        }
+        if (other.getGain() != 0D) {
+          setGain(other.getGain());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.SMLMSettings.IntensityCalibration parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.SMLMSettings.IntensityCalibration) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int unit_ = 0;
+      /**
+       * <pre>
+       * The intensity unit.
+       * </pre>
+       *
+       * <code>.SMLM.IntensityUnit unit = 1;</code>
+       */
+      public int getUnitValue() {
+        return unit_;
+      }
+      /**
+       * <pre>
+       * The intensity unit.
+       * </pre>
+       *
+       * <code>.SMLM.IntensityUnit unit = 1;</code>
+       */
+      public Builder setUnitValue(int value) {
+        unit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The intensity unit.
+       * </pre>
+       *
+       * <code>.SMLM.IntensityUnit unit = 1;</code>
+       */
+      public gdsc.smlm.data.config.SMLMSettings.IntensityUnit getUnit() {
+        gdsc.smlm.data.config.SMLMSettings.IntensityUnit result = gdsc.smlm.data.config.SMLMSettings.IntensityUnit.valueOf(unit_);
+        return result == null ? gdsc.smlm.data.config.SMLMSettings.IntensityUnit.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The intensity unit.
+       * </pre>
+       *
+       * <code>.SMLM.IntensityUnit unit = 1;</code>
+       */
+      public Builder setUnit(gdsc.smlm.data.config.SMLMSettings.IntensityUnit value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        unit_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The intensity unit.
+       * </pre>
+       *
+       * <code>.SMLM.IntensityUnit unit = 1;</code>
+       */
+      public Builder clearUnit() {
+        
+        unit_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double gain_ ;
+      /**
+       * <pre>
+       * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
+       * (Counts) to photons.
+       * </pre>
+       *
+       * <code>double gain = 2;</code>
+       */
+      public double getGain() {
+        return gain_;
+      }
+      /**
+       * <pre>
+       * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
+       * (Counts) to photons.
+       * </pre>
+       *
+       * <code>double gain = 2;</code>
+       */
+      public Builder setGain(double value) {
+        
+        gain_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
+       * (Counts) to photons.
+       * </pre>
+       *
+       * <code>double gain = 2;</code>
+       */
+      public Builder clearGain() {
+        
+        gain_ = 0D;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:SMLM.IntensityCalibration)
+    }
+
+    // @@protoc_insertion_point(class_scope:SMLM.IntensityCalibration)
+    private static final gdsc.smlm.data.config.SMLMSettings.IntensityCalibration DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.SMLMSettings.IntensityCalibration();
+    }
+
+    public static gdsc.smlm.data.config.SMLMSettings.IntensityCalibration getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<IntensityCalibration>
+        PARSER = new com.google.protobuf.AbstractParser<IntensityCalibration>() {
+      public IntensityCalibration parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new IntensityCalibration(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<IntensityCalibration> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<IntensityCalibration> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.SMLMSettings.IntensityCalibration getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface CameraCalibrationOrBuilder extends
       // @@protoc_insertion_point(interface_extends:SMLM.CameraCalibration)
       com.google.protobuf.MessageOrBuilder {
@@ -3848,20 +4444,10 @@ public final class SMLMSettings {
 
     /**
      * <pre>
-     * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
-     * (Counts) to photons.	
-     * </pre>
-     *
-     * <code>double gain = 2;</code>
-     */
-    double getGain();
-
-    /**
-     * <pre>
      * The camera Gaussian read noise (in Counts).
      * </pre>
      *
-     * <code>double readNoise = 3;</code>
+     * <code>double readNoise = 2;</code>
      */
     double getReadNoise();
 
@@ -3870,7 +4456,7 @@ public final class SMLMSettings {
      * The camera bias (in Counts) 
      * </pre>
      *
-     * <code>double bias = 4;</code>
+     * <code>double bias = 3;</code>
      */
     double getBias();
 
@@ -3882,7 +4468,7 @@ public final class SMLMSettings {
      * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
      * </pre>
      *
-     * <code>double amplification = 5;</code>
+     * <code>double amplification = 4;</code>
      */
     double getAmplification();
   }
@@ -3903,7 +4489,6 @@ public final class SMLMSettings {
     }
     private CameraCalibration() {
       cameraType_ = 0;
-      gain_ = 0D;
       readNoise_ = 0D;
       bias_ = 0D;
       amplification_ = 0D;
@@ -3942,20 +4527,15 @@ public final class SMLMSettings {
             }
             case 17: {
 
-              gain_ = input.readDouble();
+              readNoise_ = input.readDouble();
               break;
             }
             case 25: {
 
-              readNoise_ = input.readDouble();
-              break;
-            }
-            case 33: {
-
               bias_ = input.readDouble();
               break;
             }
-            case 41: {
+            case 33: {
 
               amplification_ = input.readDouble();
               break;
@@ -4007,47 +4587,33 @@ public final class SMLMSettings {
       return result == null ? gdsc.smlm.data.config.SMLMSettings.CameraType.UNRECOGNIZED : result;
     }
 
-    public static final int GAIN_FIELD_NUMBER = 2;
-    private double gain_;
-    /**
-     * <pre>
-     * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
-     * (Counts) to photons.	
-     * </pre>
-     *
-     * <code>double gain = 2;</code>
-     */
-    public double getGain() {
-      return gain_;
-    }
-
-    public static final int READNOISE_FIELD_NUMBER = 3;
+    public static final int READNOISE_FIELD_NUMBER = 2;
     private double readNoise_;
     /**
      * <pre>
      * The camera Gaussian read noise (in Counts).
      * </pre>
      *
-     * <code>double readNoise = 3;</code>
+     * <code>double readNoise = 2;</code>
      */
     public double getReadNoise() {
       return readNoise_;
     }
 
-    public static final int BIAS_FIELD_NUMBER = 4;
+    public static final int BIAS_FIELD_NUMBER = 3;
     private double bias_;
     /**
      * <pre>
      * The camera bias (in Counts) 
      * </pre>
      *
-     * <code>double bias = 4;</code>
+     * <code>double bias = 3;</code>
      */
     public double getBias() {
       return bias_;
     }
 
-    public static final int AMPLIFICATION_FIELD_NUMBER = 5;
+    public static final int AMPLIFICATION_FIELD_NUMBER = 4;
     private double amplification_;
     /**
      * <pre>
@@ -4057,7 +4623,7 @@ public final class SMLMSettings {
      * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
      * </pre>
      *
-     * <code>double amplification = 5;</code>
+     * <code>double amplification = 4;</code>
      */
     public double getAmplification() {
       return amplification_;
@@ -4078,17 +4644,14 @@ public final class SMLMSettings {
       if (cameraType_ != gdsc.smlm.data.config.SMLMSettings.CameraType.EMCCD.getNumber()) {
         output.writeEnum(1, cameraType_);
       }
-      if (gain_ != 0D) {
-        output.writeDouble(2, gain_);
-      }
       if (readNoise_ != 0D) {
-        output.writeDouble(3, readNoise_);
+        output.writeDouble(2, readNoise_);
       }
       if (bias_ != 0D) {
-        output.writeDouble(4, bias_);
+        output.writeDouble(3, bias_);
       }
       if (amplification_ != 0D) {
-        output.writeDouble(5, amplification_);
+        output.writeDouble(4, amplification_);
       }
     }
 
@@ -4101,21 +4664,17 @@ public final class SMLMSettings {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, cameraType_);
       }
-      if (gain_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(2, gain_);
-      }
       if (readNoise_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(3, readNoise_);
+          .computeDoubleSize(2, readNoise_);
       }
       if (bias_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(4, bias_);
+          .computeDoubleSize(3, bias_);
       }
       if (amplification_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(5, amplification_);
+          .computeDoubleSize(4, amplification_);
       }
       memoizedSize = size;
       return size;
@@ -4134,10 +4693,6 @@ public final class SMLMSettings {
 
       boolean result = true;
       result = result && cameraType_ == other.cameraType_;
-      result = result && (
-          java.lang.Double.doubleToLongBits(getGain())
-          == java.lang.Double.doubleToLongBits(
-              other.getGain()));
       result = result && (
           java.lang.Double.doubleToLongBits(getReadNoise())
           == java.lang.Double.doubleToLongBits(
@@ -4162,9 +4717,6 @@ public final class SMLMSettings {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + CAMERATYPE_FIELD_NUMBER;
       hash = (53 * hash) + cameraType_;
-      hash = (37 * hash) + GAIN_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getGain()));
       hash = (37 * hash) + READNOISE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getReadNoise()));
@@ -4309,8 +4861,6 @@ public final class SMLMSettings {
         super.clear();
         cameraType_ = 0;
 
-        gain_ = 0D;
-
         readNoise_ = 0D;
 
         bias_ = 0D;
@@ -4340,7 +4890,6 @@ public final class SMLMSettings {
       public gdsc.smlm.data.config.SMLMSettings.CameraCalibration buildPartial() {
         gdsc.smlm.data.config.SMLMSettings.CameraCalibration result = new gdsc.smlm.data.config.SMLMSettings.CameraCalibration(this);
         result.cameraType_ = cameraType_;
-        result.gain_ = gain_;
         result.readNoise_ = readNoise_;
         result.bias_ = bias_;
         result.amplification_ = amplification_;
@@ -4387,9 +4936,6 @@ public final class SMLMSettings {
         if (other == gdsc.smlm.data.config.SMLMSettings.CameraCalibration.getDefaultInstance()) return this;
         if (other.cameraType_ != 0) {
           setCameraTypeValue(other.getCameraTypeValue());
-        }
-        if (other.getGain() != 0D) {
-          setGain(other.getGain());
         }
         if (other.getReadNoise() != 0D) {
           setReadNoise(other.getReadNoise());
@@ -4490,54 +5036,13 @@ public final class SMLMSettings {
         return this;
       }
 
-      private double gain_ ;
-      /**
-       * <pre>
-       * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
-       * (Counts) to photons.	
-       * </pre>
-       *
-       * <code>double gain = 2;</code>
-       */
-      public double getGain() {
-        return gain_;
-      }
-      /**
-       * <pre>
-       * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
-       * (Counts) to photons.	
-       * </pre>
-       *
-       * <code>double gain = 2;</code>
-       */
-      public Builder setGain(double value) {
-        
-        gain_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
-       * (Counts) to photons.	
-       * </pre>
-       *
-       * <code>double gain = 2;</code>
-       */
-      public Builder clearGain() {
-        
-        gain_ = 0D;
-        onChanged();
-        return this;
-      }
-
       private double readNoise_ ;
       /**
        * <pre>
        * The camera Gaussian read noise (in Counts).
        * </pre>
        *
-       * <code>double readNoise = 3;</code>
+       * <code>double readNoise = 2;</code>
        */
       public double getReadNoise() {
         return readNoise_;
@@ -4547,7 +5052,7 @@ public final class SMLMSettings {
        * The camera Gaussian read noise (in Counts).
        * </pre>
        *
-       * <code>double readNoise = 3;</code>
+       * <code>double readNoise = 2;</code>
        */
       public Builder setReadNoise(double value) {
         
@@ -4560,7 +5065,7 @@ public final class SMLMSettings {
        * The camera Gaussian read noise (in Counts).
        * </pre>
        *
-       * <code>double readNoise = 3;</code>
+       * <code>double readNoise = 2;</code>
        */
       public Builder clearReadNoise() {
         
@@ -4575,7 +5080,7 @@ public final class SMLMSettings {
        * The camera bias (in Counts) 
        * </pre>
        *
-       * <code>double bias = 4;</code>
+       * <code>double bias = 3;</code>
        */
       public double getBias() {
         return bias_;
@@ -4585,7 +5090,7 @@ public final class SMLMSettings {
        * The camera bias (in Counts) 
        * </pre>
        *
-       * <code>double bias = 4;</code>
+       * <code>double bias = 3;</code>
        */
       public Builder setBias(double value) {
         
@@ -4598,7 +5103,7 @@ public final class SMLMSettings {
        * The camera bias (in Counts) 
        * </pre>
        *
-       * <code>double bias = 4;</code>
+       * <code>double bias = 3;</code>
        */
       public Builder clearBias() {
         
@@ -4616,7 +5121,7 @@ public final class SMLMSettings {
        * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
        * </pre>
        *
-       * <code>double amplification = 5;</code>
+       * <code>double amplification = 4;</code>
        */
       public double getAmplification() {
         return amplification_;
@@ -4629,7 +5134,7 @@ public final class SMLMSettings {
        * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
        * </pre>
        *
-       * <code>double amplification = 5;</code>
+       * <code>double amplification = 4;</code>
        */
       public Builder setAmplification(double value) {
         
@@ -4645,7 +5150,7 @@ public final class SMLMSettings {
        * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
        * </pre>
        *
-       * <code>double amplification = 5;</code>
+       * <code>double amplification = 4;</code>
        */
       public Builder clearAmplification() {
         
@@ -4697,6 +5202,519 @@ public final class SMLMSettings {
     }
 
     public gdsc.smlm.data.config.SMLMSettings.CameraCalibration getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface PSFCalibrationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:SMLM.PSFCalibration)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The angle units, e.g. for a rotated point spread function
+     * </pre>
+     *
+     * <code>.SMLM.AngleUnit angleUnit = 1;</code>
+     */
+    int getAngleUnitValue();
+    /**
+     * <pre>
+     * The angle units, e.g. for a rotated point spread function
+     * </pre>
+     *
+     * <code>.SMLM.AngleUnit angleUnit = 1;</code>
+     */
+    gdsc.smlm.data.config.SMLMSettings.AngleUnit getAngleUnit();
+  }
+  /**
+   * <pre>
+   * Define additional calibration required for the Point Spread Function (PSF) parameters
+   * </pre>
+   *
+   * Protobuf type {@code SMLM.PSFCalibration}
+   */
+  public  static final class PSFCalibration extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:SMLM.PSFCalibration)
+      PSFCalibrationOrBuilder {
+    // Use PSFCalibration.newBuilder() to construct.
+    private PSFCalibration(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private PSFCalibration() {
+      angleUnit_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private PSFCalibration(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              int rawValue = input.readEnum();
+
+              angleUnit_ = rawValue;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.SMLMSettings.internal_static_SMLM_PSFCalibration_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.SMLMSettings.internal_static_SMLM_PSFCalibration_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.SMLMSettings.PSFCalibration.class, gdsc.smlm.data.config.SMLMSettings.PSFCalibration.Builder.class);
+    }
+
+    public static final int ANGLEUNIT_FIELD_NUMBER = 1;
+    private int angleUnit_;
+    /**
+     * <pre>
+     * The angle units, e.g. for a rotated point spread function
+     * </pre>
+     *
+     * <code>.SMLM.AngleUnit angleUnit = 1;</code>
+     */
+    public int getAngleUnitValue() {
+      return angleUnit_;
+    }
+    /**
+     * <pre>
+     * The angle units, e.g. for a rotated point spread function
+     * </pre>
+     *
+     * <code>.SMLM.AngleUnit angleUnit = 1;</code>
+     */
+    public gdsc.smlm.data.config.SMLMSettings.AngleUnit getAngleUnit() {
+      gdsc.smlm.data.config.SMLMSettings.AngleUnit result = gdsc.smlm.data.config.SMLMSettings.AngleUnit.valueOf(angleUnit_);
+      return result == null ? gdsc.smlm.data.config.SMLMSettings.AngleUnit.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (angleUnit_ != gdsc.smlm.data.config.SMLMSettings.AngleUnit.RADIAN.getNumber()) {
+        output.writeEnum(1, angleUnit_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (angleUnit_ != gdsc.smlm.data.config.SMLMSettings.AngleUnit.RADIAN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, angleUnit_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.SMLMSettings.PSFCalibration)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.SMLMSettings.PSFCalibration other = (gdsc.smlm.data.config.SMLMSettings.PSFCalibration) obj;
+
+      boolean result = true;
+      result = result && angleUnit_ == other.angleUnit_;
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ANGLEUNIT_FIELD_NUMBER;
+      hash = (53 * hash) + angleUnit_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.SMLMSettings.PSFCalibration prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define additional calibration required for the Point Spread Function (PSF) parameters
+     * </pre>
+     *
+     * Protobuf type {@code SMLM.PSFCalibration}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:SMLM.PSFCalibration)
+        gdsc.smlm.data.config.SMLMSettings.PSFCalibrationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.SMLMSettings.internal_static_SMLM_PSFCalibration_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.SMLMSettings.internal_static_SMLM_PSFCalibration_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.SMLMSettings.PSFCalibration.class, gdsc.smlm.data.config.SMLMSettings.PSFCalibration.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.SMLMSettings.PSFCalibration.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        angleUnit_ = 0;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.SMLMSettings.internal_static_SMLM_PSFCalibration_descriptor;
+      }
+
+      public gdsc.smlm.data.config.SMLMSettings.PSFCalibration getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.SMLMSettings.PSFCalibration.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.SMLMSettings.PSFCalibration build() {
+        gdsc.smlm.data.config.SMLMSettings.PSFCalibration result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.SMLMSettings.PSFCalibration buildPartial() {
+        gdsc.smlm.data.config.SMLMSettings.PSFCalibration result = new gdsc.smlm.data.config.SMLMSettings.PSFCalibration(this);
+        result.angleUnit_ = angleUnit_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.SMLMSettings.PSFCalibration) {
+          return mergeFrom((gdsc.smlm.data.config.SMLMSettings.PSFCalibration)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.SMLMSettings.PSFCalibration other) {
+        if (other == gdsc.smlm.data.config.SMLMSettings.PSFCalibration.getDefaultInstance()) return this;
+        if (other.angleUnit_ != 0) {
+          setAngleUnitValue(other.getAngleUnitValue());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.SMLMSettings.PSFCalibration parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.SMLMSettings.PSFCalibration) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int angleUnit_ = 0;
+      /**
+       * <pre>
+       * The angle units, e.g. for a rotated point spread function
+       * </pre>
+       *
+       * <code>.SMLM.AngleUnit angleUnit = 1;</code>
+       */
+      public int getAngleUnitValue() {
+        return angleUnit_;
+      }
+      /**
+       * <pre>
+       * The angle units, e.g. for a rotated point spread function
+       * </pre>
+       *
+       * <code>.SMLM.AngleUnit angleUnit = 1;</code>
+       */
+      public Builder setAngleUnitValue(int value) {
+        angleUnit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The angle units, e.g. for a rotated point spread function
+       * </pre>
+       *
+       * <code>.SMLM.AngleUnit angleUnit = 1;</code>
+       */
+      public gdsc.smlm.data.config.SMLMSettings.AngleUnit getAngleUnit() {
+        gdsc.smlm.data.config.SMLMSettings.AngleUnit result = gdsc.smlm.data.config.SMLMSettings.AngleUnit.valueOf(angleUnit_);
+        return result == null ? gdsc.smlm.data.config.SMLMSettings.AngleUnit.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The angle units, e.g. for a rotated point spread function
+       * </pre>
+       *
+       * <code>.SMLM.AngleUnit angleUnit = 1;</code>
+       */
+      public Builder setAngleUnit(gdsc.smlm.data.config.SMLMSettings.AngleUnit value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        angleUnit_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The angle units, e.g. for a rotated point spread function
+       * </pre>
+       *
+       * <code>.SMLM.AngleUnit angleUnit = 1;</code>
+       */
+      public Builder clearAngleUnit() {
+        
+        angleUnit_ = 0;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:SMLM.PSFCalibration)
+    }
+
+    // @@protoc_insertion_point(class_scope:SMLM.PSFCalibration)
+    private static final gdsc.smlm.data.config.SMLMSettings.PSFCalibration DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.SMLMSettings.PSFCalibration();
+    }
+
+    public static gdsc.smlm.data.config.SMLMSettings.PSFCalibration getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<PSFCalibration>
+        PARSER = new com.google.protobuf.AbstractParser<PSFCalibration>() {
+      public PSFCalibration parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new PSFCalibration(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<PSFCalibration> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PSFCalibration> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.SMLMSettings.PSFCalibration getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -4758,10 +5776,35 @@ public final class SMLMSettings {
 
     /**
      * <pre>
+     * The intensity calibration
+     * </pre>
+     *
+     * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+     */
+    boolean hasIntensityCalibration();
+    /**
+     * <pre>
+     * The intensity calibration
+     * </pre>
+     *
+     * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+     */
+    gdsc.smlm.data.config.SMLMSettings.IntensityCalibration getIntensityCalibration();
+    /**
+     * <pre>
+     * The intensity calibration
+     * </pre>
+     *
+     * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+     */
+    gdsc.smlm.data.config.SMLMSettings.IntensityCalibrationOrBuilder getIntensityCalibrationOrBuilder();
+
+    /**
+     * <pre>
      * The camera calibration.
      * </pre>
      *
-     * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+     * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
      */
     boolean hasCameraCalibration();
     /**
@@ -4769,7 +5812,7 @@ public final class SMLMSettings {
      * The camera calibration.
      * </pre>
      *
-     * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+     * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
      */
     gdsc.smlm.data.config.SMLMSettings.CameraCalibration getCameraCalibration();
     /**
@@ -4777,15 +5820,40 @@ public final class SMLMSettings {
      * The camera calibration.
      * </pre>
      *
-     * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+     * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
      */
     gdsc.smlm.data.config.SMLMSettings.CameraCalibrationOrBuilder getCameraCalibrationOrBuilder();
+
+    /**
+     * <pre>
+     * The PSF calibration.
+     * </pre>
+     *
+     * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+     */
+    boolean hasPsfCalibration();
+    /**
+     * <pre>
+     * The PSF calibration.
+     * </pre>
+     *
+     * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+     */
+    gdsc.smlm.data.config.SMLMSettings.PSFCalibration getPsfCalibration();
+    /**
+     * <pre>
+     * The PSF calibration.
+     * </pre>
+     *
+     * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+     */
+    gdsc.smlm.data.config.SMLMSettings.PSFCalibrationOrBuilder getPsfCalibrationOrBuilder();
   }
   /**
    * <pre>
    * Define the calibration for the results. The calibration contains details of the 
    * results units and how to convert them. Note that data can be loaded without knowledge
-   * of the camera used so the distance and time calibration are separate.
+   * of the camera used so the distance, time and intensity calibration are separate.
    * </pre>
    *
    * Protobuf type {@code SMLM.Calibration}
@@ -4853,6 +5921,19 @@ public final class SMLMSettings {
               break;
             }
             case 26: {
+              gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.Builder subBuilder = null;
+              if (intensityCalibration_ != null) {
+                subBuilder = intensityCalibration_.toBuilder();
+              }
+              intensityCalibration_ = input.readMessage(gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(intensityCalibration_);
+                intensityCalibration_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 34: {
               gdsc.smlm.data.config.SMLMSettings.CameraCalibration.Builder subBuilder = null;
               if (cameraCalibration_ != null) {
                 subBuilder = cameraCalibration_.toBuilder();
@@ -4861,6 +5942,19 @@ public final class SMLMSettings {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(cameraCalibration_);
                 cameraCalibration_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 42: {
+              gdsc.smlm.data.config.SMLMSettings.PSFCalibration.Builder subBuilder = null;
+              if (psfCalibration_ != null) {
+                subBuilder = psfCalibration_.toBuilder();
+              }
+              psfCalibration_ = input.readMessage(gdsc.smlm.data.config.SMLMSettings.PSFCalibration.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(psfCalibration_);
+                psfCalibration_ = subBuilder.buildPartial();
               }
 
               break;
@@ -4954,14 +6048,47 @@ public final class SMLMSettings {
       return getTimeCalibration();
     }
 
-    public static final int CAMERACALIBRATION_FIELD_NUMBER = 3;
+    public static final int INTENSITYCALIBRATION_FIELD_NUMBER = 3;
+    private gdsc.smlm.data.config.SMLMSettings.IntensityCalibration intensityCalibration_;
+    /**
+     * <pre>
+     * The intensity calibration
+     * </pre>
+     *
+     * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+     */
+    public boolean hasIntensityCalibration() {
+      return intensityCalibration_ != null;
+    }
+    /**
+     * <pre>
+     * The intensity calibration
+     * </pre>
+     *
+     * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+     */
+    public gdsc.smlm.data.config.SMLMSettings.IntensityCalibration getIntensityCalibration() {
+      return intensityCalibration_ == null ? gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.getDefaultInstance() : intensityCalibration_;
+    }
+    /**
+     * <pre>
+     * The intensity calibration
+     * </pre>
+     *
+     * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+     */
+    public gdsc.smlm.data.config.SMLMSettings.IntensityCalibrationOrBuilder getIntensityCalibrationOrBuilder() {
+      return getIntensityCalibration();
+    }
+
+    public static final int CAMERACALIBRATION_FIELD_NUMBER = 4;
     private gdsc.smlm.data.config.SMLMSettings.CameraCalibration cameraCalibration_;
     /**
      * <pre>
      * The camera calibration.
      * </pre>
      *
-     * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+     * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
      */
     public boolean hasCameraCalibration() {
       return cameraCalibration_ != null;
@@ -4971,7 +6098,7 @@ public final class SMLMSettings {
      * The camera calibration.
      * </pre>
      *
-     * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+     * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
      */
     public gdsc.smlm.data.config.SMLMSettings.CameraCalibration getCameraCalibration() {
       return cameraCalibration_ == null ? gdsc.smlm.data.config.SMLMSettings.CameraCalibration.getDefaultInstance() : cameraCalibration_;
@@ -4981,10 +6108,43 @@ public final class SMLMSettings {
      * The camera calibration.
      * </pre>
      *
-     * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+     * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
      */
     public gdsc.smlm.data.config.SMLMSettings.CameraCalibrationOrBuilder getCameraCalibrationOrBuilder() {
       return getCameraCalibration();
+    }
+
+    public static final int PSFCALIBRATION_FIELD_NUMBER = 5;
+    private gdsc.smlm.data.config.SMLMSettings.PSFCalibration psfCalibration_;
+    /**
+     * <pre>
+     * The PSF calibration.
+     * </pre>
+     *
+     * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+     */
+    public boolean hasPsfCalibration() {
+      return psfCalibration_ != null;
+    }
+    /**
+     * <pre>
+     * The PSF calibration.
+     * </pre>
+     *
+     * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+     */
+    public gdsc.smlm.data.config.SMLMSettings.PSFCalibration getPsfCalibration() {
+      return psfCalibration_ == null ? gdsc.smlm.data.config.SMLMSettings.PSFCalibration.getDefaultInstance() : psfCalibration_;
+    }
+    /**
+     * <pre>
+     * The PSF calibration.
+     * </pre>
+     *
+     * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+     */
+    public gdsc.smlm.data.config.SMLMSettings.PSFCalibrationOrBuilder getPsfCalibrationOrBuilder() {
+      return getPsfCalibration();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -5005,8 +6165,14 @@ public final class SMLMSettings {
       if (timeCalibration_ != null) {
         output.writeMessage(2, getTimeCalibration());
       }
+      if (intensityCalibration_ != null) {
+        output.writeMessage(3, getIntensityCalibration());
+      }
       if (cameraCalibration_ != null) {
-        output.writeMessage(3, getCameraCalibration());
+        output.writeMessage(4, getCameraCalibration());
+      }
+      if (psfCalibration_ != null) {
+        output.writeMessage(5, getPsfCalibration());
       }
     }
 
@@ -5023,9 +6189,17 @@ public final class SMLMSettings {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getTimeCalibration());
       }
+      if (intensityCalibration_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getIntensityCalibration());
+      }
       if (cameraCalibration_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, getCameraCalibration());
+          .computeMessageSize(4, getCameraCalibration());
+      }
+      if (psfCalibration_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, getPsfCalibration());
       }
       memoizedSize = size;
       return size;
@@ -5053,10 +6227,20 @@ public final class SMLMSettings {
         result = result && getTimeCalibration()
             .equals(other.getTimeCalibration());
       }
+      result = result && (hasIntensityCalibration() == other.hasIntensityCalibration());
+      if (hasIntensityCalibration()) {
+        result = result && getIntensityCalibration()
+            .equals(other.getIntensityCalibration());
+      }
       result = result && (hasCameraCalibration() == other.hasCameraCalibration());
       if (hasCameraCalibration()) {
         result = result && getCameraCalibration()
             .equals(other.getCameraCalibration());
+      }
+      result = result && (hasPsfCalibration() == other.hasPsfCalibration());
+      if (hasPsfCalibration()) {
+        result = result && getPsfCalibration()
+            .equals(other.getPsfCalibration());
       }
       return result;
     }
@@ -5076,9 +6260,17 @@ public final class SMLMSettings {
         hash = (37 * hash) + TIMECALIBRATION_FIELD_NUMBER;
         hash = (53 * hash) + getTimeCalibration().hashCode();
       }
+      if (hasIntensityCalibration()) {
+        hash = (37 * hash) + INTENSITYCALIBRATION_FIELD_NUMBER;
+        hash = (53 * hash) + getIntensityCalibration().hashCode();
+      }
       if (hasCameraCalibration()) {
         hash = (37 * hash) + CAMERACALIBRATION_FIELD_NUMBER;
         hash = (53 * hash) + getCameraCalibration().hashCode();
+      }
+      if (hasPsfCalibration()) {
+        hash = (37 * hash) + PSFCALIBRATION_FIELD_NUMBER;
+        hash = (53 * hash) + getPsfCalibration().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -5177,7 +6369,7 @@ public final class SMLMSettings {
      * <pre>
      * Define the calibration for the results. The calibration contains details of the 
      * results units and how to convert them. Note that data can be loaded without knowledge
-     * of the camera used so the distance and time calibration are separate.
+     * of the camera used so the distance, time and intensity calibration are separate.
      * </pre>
      *
      * Protobuf type {@code SMLM.Calibration}
@@ -5227,11 +6419,23 @@ public final class SMLMSettings {
           timeCalibration_ = null;
           timeCalibrationBuilder_ = null;
         }
+        if (intensityCalibrationBuilder_ == null) {
+          intensityCalibration_ = null;
+        } else {
+          intensityCalibration_ = null;
+          intensityCalibrationBuilder_ = null;
+        }
         if (cameraCalibrationBuilder_ == null) {
           cameraCalibration_ = null;
         } else {
           cameraCalibration_ = null;
           cameraCalibrationBuilder_ = null;
+        }
+        if (psfCalibrationBuilder_ == null) {
+          psfCalibration_ = null;
+        } else {
+          psfCalibration_ = null;
+          psfCalibrationBuilder_ = null;
         }
         return this;
       }
@@ -5265,10 +6469,20 @@ public final class SMLMSettings {
         } else {
           result.timeCalibration_ = timeCalibrationBuilder_.build();
         }
+        if (intensityCalibrationBuilder_ == null) {
+          result.intensityCalibration_ = intensityCalibration_;
+        } else {
+          result.intensityCalibration_ = intensityCalibrationBuilder_.build();
+        }
         if (cameraCalibrationBuilder_ == null) {
           result.cameraCalibration_ = cameraCalibration_;
         } else {
           result.cameraCalibration_ = cameraCalibrationBuilder_.build();
+        }
+        if (psfCalibrationBuilder_ == null) {
+          result.psfCalibration_ = psfCalibration_;
+        } else {
+          result.psfCalibration_ = psfCalibrationBuilder_.build();
         }
         onBuilt();
         return result;
@@ -5317,8 +6531,14 @@ public final class SMLMSettings {
         if (other.hasTimeCalibration()) {
           mergeTimeCalibration(other.getTimeCalibration());
         }
+        if (other.hasIntensityCalibration()) {
+          mergeIntensityCalibration(other.getIntensityCalibration());
+        }
         if (other.hasCameraCalibration()) {
           mergeCameraCalibration(other.getCameraCalibration());
+        }
+        if (other.hasPsfCalibration()) {
+          mergePsfCalibration(other.getPsfCalibration());
         }
         onChanged();
         return this;
@@ -5652,6 +6872,159 @@ public final class SMLMSettings {
         return timeCalibrationBuilder_;
       }
 
+      private gdsc.smlm.data.config.SMLMSettings.IntensityCalibration intensityCalibration_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.SMLMSettings.IntensityCalibration, gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.Builder, gdsc.smlm.data.config.SMLMSettings.IntensityCalibrationOrBuilder> intensityCalibrationBuilder_;
+      /**
+       * <pre>
+       * The intensity calibration
+       * </pre>
+       *
+       * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+       */
+      public boolean hasIntensityCalibration() {
+        return intensityCalibrationBuilder_ != null || intensityCalibration_ != null;
+      }
+      /**
+       * <pre>
+       * The intensity calibration
+       * </pre>
+       *
+       * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+       */
+      public gdsc.smlm.data.config.SMLMSettings.IntensityCalibration getIntensityCalibration() {
+        if (intensityCalibrationBuilder_ == null) {
+          return intensityCalibration_ == null ? gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.getDefaultInstance() : intensityCalibration_;
+        } else {
+          return intensityCalibrationBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The intensity calibration
+       * </pre>
+       *
+       * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+       */
+      public Builder setIntensityCalibration(gdsc.smlm.data.config.SMLMSettings.IntensityCalibration value) {
+        if (intensityCalibrationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          intensityCalibration_ = value;
+          onChanged();
+        } else {
+          intensityCalibrationBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The intensity calibration
+       * </pre>
+       *
+       * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+       */
+      public Builder setIntensityCalibration(
+          gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.Builder builderForValue) {
+        if (intensityCalibrationBuilder_ == null) {
+          intensityCalibration_ = builderForValue.build();
+          onChanged();
+        } else {
+          intensityCalibrationBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The intensity calibration
+       * </pre>
+       *
+       * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+       */
+      public Builder mergeIntensityCalibration(gdsc.smlm.data.config.SMLMSettings.IntensityCalibration value) {
+        if (intensityCalibrationBuilder_ == null) {
+          if (intensityCalibration_ != null) {
+            intensityCalibration_ =
+              gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.newBuilder(intensityCalibration_).mergeFrom(value).buildPartial();
+          } else {
+            intensityCalibration_ = value;
+          }
+          onChanged();
+        } else {
+          intensityCalibrationBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The intensity calibration
+       * </pre>
+       *
+       * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+       */
+      public Builder clearIntensityCalibration() {
+        if (intensityCalibrationBuilder_ == null) {
+          intensityCalibration_ = null;
+          onChanged();
+        } else {
+          intensityCalibration_ = null;
+          intensityCalibrationBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The intensity calibration
+       * </pre>
+       *
+       * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+       */
+      public gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.Builder getIntensityCalibrationBuilder() {
+        
+        onChanged();
+        return getIntensityCalibrationFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The intensity calibration
+       * </pre>
+       *
+       * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+       */
+      public gdsc.smlm.data.config.SMLMSettings.IntensityCalibrationOrBuilder getIntensityCalibrationOrBuilder() {
+        if (intensityCalibrationBuilder_ != null) {
+          return intensityCalibrationBuilder_.getMessageOrBuilder();
+        } else {
+          return intensityCalibration_ == null ?
+              gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.getDefaultInstance() : intensityCalibration_;
+        }
+      }
+      /**
+       * <pre>
+       * The intensity calibration
+       * </pre>
+       *
+       * <code>.SMLM.IntensityCalibration intensityCalibration = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.SMLMSettings.IntensityCalibration, gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.Builder, gdsc.smlm.data.config.SMLMSettings.IntensityCalibrationOrBuilder> 
+          getIntensityCalibrationFieldBuilder() {
+        if (intensityCalibrationBuilder_ == null) {
+          intensityCalibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              gdsc.smlm.data.config.SMLMSettings.IntensityCalibration, gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.Builder, gdsc.smlm.data.config.SMLMSettings.IntensityCalibrationOrBuilder>(
+                  getIntensityCalibration(),
+                  getParentForChildren(),
+                  isClean());
+          intensityCalibration_ = null;
+        }
+        return intensityCalibrationBuilder_;
+      }
+
       private gdsc.smlm.data.config.SMLMSettings.CameraCalibration cameraCalibration_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.SMLMSettings.CameraCalibration, gdsc.smlm.data.config.SMLMSettings.CameraCalibration.Builder, gdsc.smlm.data.config.SMLMSettings.CameraCalibrationOrBuilder> cameraCalibrationBuilder_;
@@ -5660,7 +7033,7 @@ public final class SMLMSettings {
        * The camera calibration.
        * </pre>
        *
-       * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+       * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
        */
       public boolean hasCameraCalibration() {
         return cameraCalibrationBuilder_ != null || cameraCalibration_ != null;
@@ -5670,7 +7043,7 @@ public final class SMLMSettings {
        * The camera calibration.
        * </pre>
        *
-       * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+       * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
        */
       public gdsc.smlm.data.config.SMLMSettings.CameraCalibration getCameraCalibration() {
         if (cameraCalibrationBuilder_ == null) {
@@ -5684,7 +7057,7 @@ public final class SMLMSettings {
        * The camera calibration.
        * </pre>
        *
-       * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+       * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
        */
       public Builder setCameraCalibration(gdsc.smlm.data.config.SMLMSettings.CameraCalibration value) {
         if (cameraCalibrationBuilder_ == null) {
@@ -5704,7 +7077,7 @@ public final class SMLMSettings {
        * The camera calibration.
        * </pre>
        *
-       * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+       * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
        */
       public Builder setCameraCalibration(
           gdsc.smlm.data.config.SMLMSettings.CameraCalibration.Builder builderForValue) {
@@ -5722,7 +7095,7 @@ public final class SMLMSettings {
        * The camera calibration.
        * </pre>
        *
-       * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+       * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
        */
       public Builder mergeCameraCalibration(gdsc.smlm.data.config.SMLMSettings.CameraCalibration value) {
         if (cameraCalibrationBuilder_ == null) {
@@ -5744,7 +7117,7 @@ public final class SMLMSettings {
        * The camera calibration.
        * </pre>
        *
-       * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+       * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
        */
       public Builder clearCameraCalibration() {
         if (cameraCalibrationBuilder_ == null) {
@@ -5762,7 +7135,7 @@ public final class SMLMSettings {
        * The camera calibration.
        * </pre>
        *
-       * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+       * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
        */
       public gdsc.smlm.data.config.SMLMSettings.CameraCalibration.Builder getCameraCalibrationBuilder() {
         
@@ -5774,7 +7147,7 @@ public final class SMLMSettings {
        * The camera calibration.
        * </pre>
        *
-       * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+       * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
        */
       public gdsc.smlm.data.config.SMLMSettings.CameraCalibrationOrBuilder getCameraCalibrationOrBuilder() {
         if (cameraCalibrationBuilder_ != null) {
@@ -5789,7 +7162,7 @@ public final class SMLMSettings {
        * The camera calibration.
        * </pre>
        *
-       * <code>.SMLM.CameraCalibration cameraCalibration = 3;</code>
+       * <code>.SMLM.CameraCalibration cameraCalibration = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.SMLMSettings.CameraCalibration, gdsc.smlm.data.config.SMLMSettings.CameraCalibration.Builder, gdsc.smlm.data.config.SMLMSettings.CameraCalibrationOrBuilder> 
@@ -5803,6 +7176,159 @@ public final class SMLMSettings {
           cameraCalibration_ = null;
         }
         return cameraCalibrationBuilder_;
+      }
+
+      private gdsc.smlm.data.config.SMLMSettings.PSFCalibration psfCalibration_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.SMLMSettings.PSFCalibration, gdsc.smlm.data.config.SMLMSettings.PSFCalibration.Builder, gdsc.smlm.data.config.SMLMSettings.PSFCalibrationOrBuilder> psfCalibrationBuilder_;
+      /**
+       * <pre>
+       * The PSF calibration.
+       * </pre>
+       *
+       * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+       */
+      public boolean hasPsfCalibration() {
+        return psfCalibrationBuilder_ != null || psfCalibration_ != null;
+      }
+      /**
+       * <pre>
+       * The PSF calibration.
+       * </pre>
+       *
+       * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+       */
+      public gdsc.smlm.data.config.SMLMSettings.PSFCalibration getPsfCalibration() {
+        if (psfCalibrationBuilder_ == null) {
+          return psfCalibration_ == null ? gdsc.smlm.data.config.SMLMSettings.PSFCalibration.getDefaultInstance() : psfCalibration_;
+        } else {
+          return psfCalibrationBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The PSF calibration.
+       * </pre>
+       *
+       * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+       */
+      public Builder setPsfCalibration(gdsc.smlm.data.config.SMLMSettings.PSFCalibration value) {
+        if (psfCalibrationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          psfCalibration_ = value;
+          onChanged();
+        } else {
+          psfCalibrationBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The PSF calibration.
+       * </pre>
+       *
+       * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+       */
+      public Builder setPsfCalibration(
+          gdsc.smlm.data.config.SMLMSettings.PSFCalibration.Builder builderForValue) {
+        if (psfCalibrationBuilder_ == null) {
+          psfCalibration_ = builderForValue.build();
+          onChanged();
+        } else {
+          psfCalibrationBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The PSF calibration.
+       * </pre>
+       *
+       * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+       */
+      public Builder mergePsfCalibration(gdsc.smlm.data.config.SMLMSettings.PSFCalibration value) {
+        if (psfCalibrationBuilder_ == null) {
+          if (psfCalibration_ != null) {
+            psfCalibration_ =
+              gdsc.smlm.data.config.SMLMSettings.PSFCalibration.newBuilder(psfCalibration_).mergeFrom(value).buildPartial();
+          } else {
+            psfCalibration_ = value;
+          }
+          onChanged();
+        } else {
+          psfCalibrationBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The PSF calibration.
+       * </pre>
+       *
+       * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+       */
+      public Builder clearPsfCalibration() {
+        if (psfCalibrationBuilder_ == null) {
+          psfCalibration_ = null;
+          onChanged();
+        } else {
+          psfCalibration_ = null;
+          psfCalibrationBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The PSF calibration.
+       * </pre>
+       *
+       * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+       */
+      public gdsc.smlm.data.config.SMLMSettings.PSFCalibration.Builder getPsfCalibrationBuilder() {
+        
+        onChanged();
+        return getPsfCalibrationFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The PSF calibration.
+       * </pre>
+       *
+       * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+       */
+      public gdsc.smlm.data.config.SMLMSettings.PSFCalibrationOrBuilder getPsfCalibrationOrBuilder() {
+        if (psfCalibrationBuilder_ != null) {
+          return psfCalibrationBuilder_.getMessageOrBuilder();
+        } else {
+          return psfCalibration_ == null ?
+              gdsc.smlm.data.config.SMLMSettings.PSFCalibration.getDefaultInstance() : psfCalibration_;
+        }
+      }
+      /**
+       * <pre>
+       * The PSF calibration.
+       * </pre>
+       *
+       * <code>.SMLM.PSFCalibration psfCalibration = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.SMLMSettings.PSFCalibration, gdsc.smlm.data.config.SMLMSettings.PSFCalibration.Builder, gdsc.smlm.data.config.SMLMSettings.PSFCalibrationOrBuilder> 
+          getPsfCalibrationFieldBuilder() {
+        if (psfCalibrationBuilder_ == null) {
+          psfCalibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              gdsc.smlm.data.config.SMLMSettings.PSFCalibration, gdsc.smlm.data.config.SMLMSettings.PSFCalibration.Builder, gdsc.smlm.data.config.SMLMSettings.PSFCalibrationOrBuilder>(
+                  getPsfCalibration(),
+                  getParentForChildren(),
+                  isClean());
+          psfCalibration_ = null;
+        }
+        return psfCalibrationBuilder_;
       }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -5874,10 +7400,20 @@ public final class SMLMSettings {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_SMLM_TimeCalibration_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_SMLM_IntensityCalibration_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_SMLM_IntensityCalibration_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_SMLM_CameraCalibration_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_SMLM_CameraCalibration_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_SMLM_PSFCalibration_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_SMLM_PSFCalibration_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_SMLM_Calibration_descriptor;
   private static final 
@@ -5899,26 +7435,32 @@ public final class SMLMSettings {
       "Parameter\"K\n\023DistanceCalibration\022 \n\004unit" +
       "\030\001 \001(\0162\022.SMLM.DistanceUnit\022\022\n\nnmPerPixel" +
       "\030\002 \001(\001\"E\n\017TimeCalibration\022\034\n\004unit\030\001 \001(\0162" +
-      "\016.SMLM.TimeUnit\022\024\n\014exposureTime\030\002 \001(\001\"\177\n" +
-      "\021CameraCalibration\022$\n\ncameraType\030\001 \001(\0162\020" +
-      ".SMLM.CameraType\022\014\n\004gain\030\002 \001(\001\022\021\n\treadNo",
-      "ise\030\003 \001(\001\022\014\n\004bias\030\004 \001(\001\022\025\n\ramplification" +
-      "\030\005 \001(\001\"\251\001\n\013Calibration\0226\n\023distanceCalibr" +
-      "ation\030\001 \001(\0132\031.SMLM.DistanceCalibration\022." +
-      "\n\017timeCalibration\030\002 \001(\0132\025.SMLM.TimeCalib" +
-      "ration\0222\n\021cameraCalibration\030\003 \001(\0132\027.SMLM" +
-      ".CameraCalibration*|\n\007PSFType\022\025\n\021OneAxis" +
-      "Gaussian2D\020\000\022\025\n\021TwoAxisGaussian2D\020\001\022\035\n\031T" +
-      "woAxisAndThetaGaussian2D\020\002\022\030\n\024Astigmatic" +
-      "Gaussian2D\020\003\022\n\n\006Custom\020\004*:\n\020PSFParameter" +
-      "Unit\022\014\n\010DISTANCE\020\000\022\r\n\tINTENSITY\020\001\022\t\n\005ANG",
-      "LE\020\002*+\n\nCameraType\022\t\n\005EMCCD\020\000\022\007\n\003CCD\020\001\022\t" +
-      "\n\005SCMOS\020\002*)\n\014DistanceUnit\022\t\n\005PIXEL\020\000\022\006\n\002" +
-      "UM\020\001\022\006\n\002NM\020\002*&\n\rIntensityUnit\022\n\n\006PHOTON\020" +
-      "\000\022\t\n\005COUNT\020\001*#\n\tAngleUnit\022\n\n\006RADIAN\020\000\022\n\n" +
-      "\006DEGREE\020\001*2\n\010TimeUnit\022\t\n\005FRAME\020\000\022\n\n\006SECO" +
-      "ND\020\001\022\017\n\013MILLISECOND\020\002B%\n\025gdsc.smlm.data." +
-      "configB\014SMLMSettingsb\006proto3"
+      "\016.SMLM.TimeUnit\022\024\n\014exposureTime\030\002 \001(\001\"G\n" +
+      "\024IntensityCalibration\022!\n\004unit\030\001 \001(\0162\023.SM" +
+      "LM.IntensityUnit\022\014\n\004gain\030\002 \001(\001\"q\n\021Camera",
+      "Calibration\022$\n\ncameraType\030\001 \001(\0162\020.SMLM.C" +
+      "ameraType\022\021\n\treadNoise\030\002 \001(\001\022\014\n\004bias\030\003 \001" +
+      "(\001\022\025\n\ramplification\030\004 \001(\001\"4\n\016PSFCalibrat" +
+      "ion\022\"\n\tangleUnit\030\001 \001(\0162\017.SMLM.AngleUnit\"" +
+      "\221\002\n\013Calibration\0226\n\023distanceCalibration\030\001" +
+      " \001(\0132\031.SMLM.DistanceCalibration\022.\n\017timeC" +
+      "alibration\030\002 \001(\0132\025.SMLM.TimeCalibration\022" +
+      "8\n\024intensityCalibration\030\003 \001(\0132\032.SMLM.Int" +
+      "ensityCalibration\0222\n\021cameraCalibration\030\004" +
+      " \001(\0132\027.SMLM.CameraCalibration\022,\n\016psfCali",
+      "bration\030\005 \001(\0132\024.SMLM.PSFCalibration*|\n\007P" +
+      "SFType\022\025\n\021OneAxisGaussian2D\020\000\022\025\n\021TwoAxis" +
+      "Gaussian2D\020\001\022\035\n\031TwoAxisAndThetaGaussian2" +
+      "D\020\002\022\030\n\024AstigmaticGaussian2D\020\003\022\n\n\006Custom\020" +
+      "\004*:\n\020PSFParameterUnit\022\014\n\010DISTANCE\020\000\022\r\n\tI" +
+      "NTENSITY\020\001\022\t\n\005ANGLE\020\002*+\n\nCameraType\022\t\n\005E" +
+      "MCCD\020\000\022\007\n\003CCD\020\001\022\t\n\005SCMOS\020\002*)\n\014DistanceUn" +
+      "it\022\t\n\005PIXEL\020\000\022\006\n\002UM\020\001\022\006\n\002NM\020\002*&\n\rIntensi" +
+      "tyUnit\022\n\n\006PHOTON\020\000\022\t\n\005COUNT\020\001*#\n\tAngleUn" +
+      "it\022\n\n\006RADIAN\020\000\022\n\n\006DEGREE\020\001*2\n\010TimeUnit\022\t",
+      "\n\005FRAME\020\000\022\n\n\006SECOND\020\001\022\017\n\013MILLISECOND\020\002B%" +
+      "\n\025gdsc.smlm.data.configB\014SMLMSettingsb\006p" +
+      "roto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5956,18 +7498,30 @@ public final class SMLMSettings {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_SMLM_TimeCalibration_descriptor,
         new java.lang.String[] { "Unit", "ExposureTime", });
-    internal_static_SMLM_CameraCalibration_descriptor =
+    internal_static_SMLM_IntensityCalibration_descriptor =
       getDescriptor().getMessageTypes().get(4);
+    internal_static_SMLM_IntensityCalibration_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_SMLM_IntensityCalibration_descriptor,
+        new java.lang.String[] { "Unit", "Gain", });
+    internal_static_SMLM_CameraCalibration_descriptor =
+      getDescriptor().getMessageTypes().get(5);
     internal_static_SMLM_CameraCalibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_SMLM_CameraCalibration_descriptor,
-        new java.lang.String[] { "CameraType", "Gain", "ReadNoise", "Bias", "Amplification", });
+        new java.lang.String[] { "CameraType", "ReadNoise", "Bias", "Amplification", });
+    internal_static_SMLM_PSFCalibration_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_SMLM_PSFCalibration_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_SMLM_PSFCalibration_descriptor,
+        new java.lang.String[] { "AngleUnit", });
     internal_static_SMLM_Calibration_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_SMLM_Calibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_SMLM_Calibration_descriptor,
-        new java.lang.String[] { "DistanceCalibration", "TimeCalibration", "CameraCalibration", });
+        new java.lang.String[] { "DistanceCalibration", "TimeCalibration", "IntensityCalibration", "CameraCalibration", "PsfCalibration", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

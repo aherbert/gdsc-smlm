@@ -193,10 +193,22 @@ public class UnitConverterFactory
 		switch (from)
 		{
 			case RADIAN:
-				return new MultiplyTypeConverter<AngleUnit>(from, to, 180.0 / Math.PI);
+				switch (to)
+				{
+					case DEGREE:
+						return new MultiplyTypeConverter<AngleUnit>(from, to, 180.0 / Math.PI);
+					default:
+						throw new ConversionException(from + " to " + to);
+				}
 
 			case DEGREE:
-				return new MultiplyTypeConverter<AngleUnit>(from, to, Math.PI / 180.0);
+				switch (to)
+				{
+					case RADIAN:
+						return new MultiplyTypeConverter<AngleUnit>(from, to, Math.PI / 180.0);
+					default:
+						throw new ConversionException(from + " to " + to);
+				}
 
 			default:
 				throw new ConversionException(from + " to " + to);
@@ -231,12 +243,24 @@ public class UnitConverterFactory
 		switch (from)
 		{
 			case COUNT:
-				return new AddMultiplyTypeConverter<IntensityUnit>(from, to, checkOffset(-offset),
-						1.0 / checkCountPerPhoton(countPerPhoton));
+				switch (to)
+				{
+					case PHOTON:
+						return new AddMultiplyTypeConverter<IntensityUnit>(from, to, checkOffset(-offset),
+								1.0 / checkCountPerPhoton(countPerPhoton));
+					default:
+						throw new ConversionException(from + " to " + to);
+				}
 
 			case PHOTON:
-				return new MultiplyAddTypeConverter<IntensityUnit>(from, to, checkCountPerPhoton(countPerPhoton),
-						checkOffset(offset));
+				switch (to)
+				{
+					case COUNT:
+						return new MultiplyAddTypeConverter<IntensityUnit>(from, to,
+								checkCountPerPhoton(countPerPhoton), checkOffset(offset));
+					default:
+						throw new ConversionException(from + " to " + to);
+				}
 
 			default:
 				throw new ConversionException(from + " to " + to);
@@ -283,10 +307,23 @@ public class UnitConverterFactory
 		switch (from)
 		{
 			case COUNT:
-				return new MultiplyTypeConverter<IntensityUnit>(from, to, 1.0 / checkCountPerPhoton(countPerPhoton));
+				switch (to)
+				{
+					case PHOTON:
+						return new MultiplyTypeConverter<IntensityUnit>(from, to,
+								1.0 / checkCountPerPhoton(countPerPhoton));
+					default:
+						throw new ConversionException(from + " to " + to);
+				}
 
 			case PHOTON:
-				return new MultiplyTypeConverter<IntensityUnit>(from, to, checkCountPerPhoton(countPerPhoton));
+				switch (to)
+				{
+					case COUNT:
+						return new MultiplyTypeConverter<IntensityUnit>(from, to, checkCountPerPhoton(countPerPhoton));
+					default:
+						throw new ConversionException(from + " to " + to);
+				}
 
 			default:
 				throw new ConversionException(from + " to " + to);

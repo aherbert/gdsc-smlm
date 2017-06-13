@@ -457,9 +457,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	{
 		// These should have 1:1 mapping. We can extends the TSF proto if necessary.		
 		cameraTypeMap = new CameraType[3];
-		cameraTypeMap[gdsc.smlm.data.config.CameraType.CCD.ordinal()] = CameraType.CCD;
-		cameraTypeMap[gdsc.smlm.data.config.CameraType.EM_CCD.ordinal()] = CameraType.EMCCD;
-		cameraTypeMap[gdsc.smlm.data.config.CameraType.SCMOS.ordinal()] = CameraType.SCMOS;
+		cameraTypeMap[gdsc.smlm.data.config.SMLMSettings.CameraType.CCD.ordinal()] = CameraType.CCD;
+		cameraTypeMap[gdsc.smlm.data.config.SMLMSettings.CameraType.EMCCD.ordinal()] = CameraType.EMCCD;
+		cameraTypeMap[gdsc.smlm.data.config.SMLMSettings.CameraType.SCMOS.ordinal()] = CameraType.SCMOS;
 		thetaUnitsMap = new ThetaUnits[2];
 		thetaUnitsMap[gdsc.smlm.data.config.SMLMSettings.AngleUnit.RADIAN.ordinal()] = ThetaUnits.RADIANS;
 		thetaUnitsMap[gdsc.smlm.data.config.SMLMSettings.AngleUnit.DEGREE.ordinal()] = ThetaUnits.DEGREES;

@@ -1,15 +1,8 @@
 package gdsc.smlm.data.config;
 
-import java.util.ArrayList;
-
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.Calibration;
-import gdsc.smlm.data.config.SMLMSettings.DistanceCalibration;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.utils.ConversionException;
-import gdsc.smlm.data.utils.IdentityTypeConverter;
-import gdsc.smlm.data.utils.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -25,7 +18,7 @@ import gdsc.smlm.data.utils.TypeConverter;
  *---------------------------------------------------------------------------*/
 
 /**
- * Contains helper functions for the units.
+ * Contains helper functions for the units. Adds functionality to the protocol buffer unit enums.
  */
 public class UnitHelper
 {

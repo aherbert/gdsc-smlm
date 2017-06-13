@@ -2,7 +2,7 @@ package gdsc.smlm.results;
 
 import java.util.ArrayList;
 
-import gdsc.smlm.data.config.CameraType;
+import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
@@ -695,7 +695,7 @@ public class Calibration implements Cloneable
 	 */
 	public boolean isCCDCamera()
 	{
-		return hasCameraType() && (cameraType == CameraType.CCD || cameraType == CameraType.EM_CCD);
+		return hasCameraType() && (cameraType == CameraType.CCD || cameraType == CameraType.EMCCD);
 	}
 
 	/**
@@ -707,7 +707,7 @@ public class Calibration implements Cloneable
 	 */
 	public boolean isEmCCD()
 	{
-		return getCameraType() == CameraType.EM_CCD;
+		return getCameraType() == CameraType.EMCCD;
 	}
 
 	/**
@@ -732,7 +732,7 @@ public class Calibration implements Cloneable
 	@Deprecated
 	public void setEmCCD(boolean emCCD)
 	{
-		setCameraType((emCCD) ? CameraType.EM_CCD : CameraType.CCD);
+		setCameraType((emCCD) ? CameraType.EMCCD : CameraType.CCD);
 	}
 
 	/**
@@ -740,7 +740,7 @@ public class Calibration implements Cloneable
 	 */
 	void setCameraTypeFromEmCCDField()
 	{
-		setCameraType((emCCD) ? CameraType.EM_CCD : CameraType.CCD);
+		setCameraType((emCCD) ? CameraType.EMCCD : CameraType.CCD);
 	}
 
 	/**

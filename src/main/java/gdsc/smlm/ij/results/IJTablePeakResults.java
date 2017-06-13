@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import gdsc.smlm.data.config.UnitHelper;
-import gdsc.smlm.data.config.CameraType;
+import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
@@ -173,7 +173,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 			if (computePrecision && isCCD() && toNMConverter != null && toPhotonConverter != null)
 			{
-				emCCD = calibration.getCameraType() == CameraType.EM_CCD;
+				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				canComputePrecision = true;
 			}
 
@@ -210,7 +210,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			switch (calibration.getCameraType())
 			{
 				case CCD:
-				case EM_CCD:
+				case EMCCD:
 					return true;
 				default:
 					break;
