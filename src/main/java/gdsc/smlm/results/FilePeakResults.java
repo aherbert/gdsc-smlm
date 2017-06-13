@@ -9,9 +9,9 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.UnitConverterFactory;
-import gdsc.smlm.data.utils.ConversionException;
-import gdsc.smlm.data.utils.TypeConverter;
 
 /**
  * Saves the fit results to file

@@ -14,9 +14,9 @@ import java.util.Set;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.UnitConverterFactory;
-import gdsc.smlm.data.utils.ConversionException;
-import gdsc.smlm.data.utils.TypeConverter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 

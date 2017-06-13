@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.Calibration;
 import gdsc.smlm.data.config.SMLMSettings.CameraCalibration;
@@ -13,7 +14,6 @@ import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityCalibration;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.PSFCalibration;
-import gdsc.smlm.data.utils.TypeConverter;
 
 public class CalibrationHelperTest
 {

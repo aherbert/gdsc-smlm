@@ -1,16 +1,16 @@
 package gdsc.smlm.data.config;
 
+import gdsc.core.data.utils.AddMultiplyTypeConverter;
+import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.IdentityTypeConverter;
+import gdsc.core.data.utils.MultiplyAddTypeConverter;
+import gdsc.core.data.utils.MultiplyTypeConverter;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
-import gdsc.smlm.data.utils.AddMultiplyTypeConverter;
-import gdsc.smlm.data.utils.ConversionException;
-import gdsc.smlm.data.utils.IdentityTypeConverter;
-import gdsc.smlm.data.utils.MultiplyAddTypeConverter;
-import gdsc.smlm.data.utils.MultiplyTypeConverter;
-import gdsc.smlm.data.utils.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

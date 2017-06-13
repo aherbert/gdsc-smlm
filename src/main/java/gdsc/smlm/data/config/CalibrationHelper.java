@@ -2,6 +2,9 @@ package gdsc.smlm.data.config;
 
 import java.util.ArrayList;
 
+import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.IdentityTypeConverter;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.Calibration;
 import gdsc.smlm.data.config.SMLMSettings.DistanceCalibration;
@@ -9,9 +12,6 @@ import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityCalibration;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.PSFCalibration;
-import gdsc.smlm.data.utils.ConversionException;
-import gdsc.smlm.data.utils.IdentityTypeConverter;
-import gdsc.smlm.data.utils.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

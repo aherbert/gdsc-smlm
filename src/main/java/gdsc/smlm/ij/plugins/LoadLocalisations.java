@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.data.utils.TypeConverter;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -33,7 +35,6 @@ import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
-import gdsc.smlm.data.utils.TypeConverter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;

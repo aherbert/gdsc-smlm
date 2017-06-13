@@ -15,10 +15,10 @@ import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.utils.IdentityTypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

@@ -14,13 +14,13 @@ import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import gdsc.core.data.utils.Converter;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.utils.Converter;
-import gdsc.smlm.data.utils.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
