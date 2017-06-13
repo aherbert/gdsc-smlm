@@ -26,6 +26,15 @@ public interface Converter
 	 * @return the new value
 	 */
 	public double convert(double value);
+	
+	/**
+	 * Convert the value.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the new value
+	 */
+	public float convert(float value);
 
 	/**
 	 * Gets the conversion function, f(x). The function should represent what conversion is performed on the function

@@ -42,6 +42,16 @@ public class IdentityTypeConverter<T> extends AbstractTypeConverter<T>
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.data.utils.Converter#convert(float)
+	 */
+	public float convert(float value)
+	{
+		return value;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.data.utils.Converter#getFunction()
 	 */
 	public String getFunction()
