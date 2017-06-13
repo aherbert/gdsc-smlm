@@ -936,7 +936,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 *
 	 * @param procedure
 	 *            the procedure
-	 * @return true, if successful
 	 */
 	public void forEach(ResultProcedure procedure)
 	{
@@ -959,7 +958,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 *            the intensity unit
 	 * @param distanceUnit
 	 *            the distance unit
-	 * @return true, if successful
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
@@ -994,7 +992,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 *
 	 * @param procedure
 	 *            the procedure
-	 * @return true, if successful
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
