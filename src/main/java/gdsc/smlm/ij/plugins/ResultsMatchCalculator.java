@@ -222,12 +222,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				for (PointPair pair : matches)
 				{
 					PeakResult p = ((PeakResultPoint) pair.getPoint2()).peakResult;
-					fileResults.add(p.getFrame(), p.origX, p.origY, 1, p.error, p.noise, p.params, null);
+					fileResults.add(p);
 				}
 				for (Coordinate c : FP)
 				{
 					PeakResult p = ((PeakResultPoint) c).peakResult;
-					fileResults.add(p.getFrame(), p.origX, p.origY, 0, p.error, p.noise, p.params, null);
+					fileResults.add(p);
 				}
 			}
 		}

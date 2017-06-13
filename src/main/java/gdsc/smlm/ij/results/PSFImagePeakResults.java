@@ -289,7 +289,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		for (PeakResult result : results)
 		{
 			addPeak(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
-					result.params, result.paramsStdDev);
+					result.getParameters(), result.getParameterDeviations());
 			if (++i % 64 == 0)
 			{
 				updateImage();

@@ -1245,4 +1245,19 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		}
 		return null;
 	}
+
+	/**
+	 * Fix zero background to the given background.
+	 *
+	 * @param newBackground the  new background
+	 */
+	public void setZeroBackground(float newBackground)
+	{
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			if (r.params[0] == 0)
+				r.params[0] = newBackground;
+		}		
+	}
 }

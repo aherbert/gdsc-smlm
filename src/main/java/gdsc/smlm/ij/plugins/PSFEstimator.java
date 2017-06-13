@@ -1,53 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.engine.DataFilter;
-import gdsc.smlm.engine.DataFilterType;
-import gdsc.smlm.engine.FitEngine;
-import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.engine.FitJob;
-import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitFunction;
-import gdsc.smlm.fitting.FitSolver;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.IJImageSource;
-import gdsc.smlm.ij.results.ResultsTable;
-import gdsc.smlm.ij.settings.GlobalSettings;
-import gdsc.smlm.ij.settings.PSFEstimatorSettings;
-import gdsc.smlm.ij.settings.ResultsSettings;
-import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.core.ij.Utils;
-import gdsc.smlm.results.AggregatedImageSource;
-import gdsc.smlm.results.Calibration;
-import gdsc.smlm.results.ImageSource;
-import gdsc.smlm.results.InterlacedImageSource;
-import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResults;
-import gdsc.core.utils.Random;
-import gdsc.core.utils.StoredDataStatistics;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.GenericDialog;
-import ij.gui.Roi;
-import ij.plugin.WindowOrganiser;
-import ij.plugin.filter.PlugInFilter;
-import ij.process.ImageProcessor;
-import ij.text.TextWindow;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -60,6 +12,37 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.inference.TestUtils;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Random;
+import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.engine.FitEngine;
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.FitJob;
+import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.fitting.FitFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.IJImageSource;
+import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.PSFEstimatorSettings;
+import gdsc.smlm.ij.settings.ResultsSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.results.AggregatedImageSource;
+import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.ImageSource;
+import gdsc.smlm.results.InterlacedImageSource;
+import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResults;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.GenericDialog;
+import ij.gui.Roi;
+import ij.plugin.WindowOrganiser;
+import ij.plugin.filter.PlugInFilter;
+import ij.process.ImageProcessor;
+import ij.text.TextWindow;
 
 /**
  * Iteratively fits local maxima using a 2D Gaussian until the PSF converges.
@@ -875,7 +858,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	{
 		for (PeakResult result : results)
 			add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
-					result.params, result.paramsStdDev);
+					result.getParameters(), result.getParameterDeviations());
 	}
 
 	public int size()

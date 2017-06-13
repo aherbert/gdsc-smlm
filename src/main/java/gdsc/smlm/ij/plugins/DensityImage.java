@@ -27,7 +27,6 @@ import gdsc.core.ij.Utils;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
@@ -399,8 +398,8 @@ public class DensityImage implements PlugIn
 		newResults.begin();
 		for (PeakResult peakResult : results.getResults())
 		{
-			float x = peakResult.params[Gaussian2DFunction.X_POSITION];
-			float y = peakResult.params[Gaussian2DFunction.Y_POSITION];
+			float x = peakResult.getXPosition();
+			float y = peakResult.getYPosition();
 			if (x < minX || x > maxX || y < minY || y > maxY)
 				continue;
 			newResults.add(peakResult);
@@ -436,8 +435,8 @@ public class DensityImage implements PlugIn
 		for (int i = 0; i < peakResults.length; i++)
 		{
 			PeakResult peakResult = peakResults[i];
-			float x = peakResult.params[Gaussian2DFunction.X_POSITION];
-			float y = peakResult.params[Gaussian2DFunction.Y_POSITION];
+			float x = peakResult.getXPosition();
+			float y = peakResult.getYPosition();
 			if (x < minX || x > maxX || y < minY || y > maxY)
 				continue;
 			results.add(peakResult);
@@ -527,7 +526,7 @@ public class DensityImage implements PlugIn
 			if (density[i] < densityThreshold)
 				continue;
 			PeakResult r = peakResults.get(i);
-			image.add(0, 0, 0, 0, density[i], 0, r.params, null);
+			image.add(0, 0, 0, 0, density[i], 0, r.getParameters(), null);
 			if (newResults != null)
 				newResults.add(r);
 		}

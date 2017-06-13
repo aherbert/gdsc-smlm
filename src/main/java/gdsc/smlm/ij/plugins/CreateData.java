@@ -4932,8 +4932,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Note this requires knowing the PSF width. If this is a loaded ground truth dataset then 
 		// it probably will not have Gaussian widths.
 		final float b = (float) (simulationParameters.bias + simulationParameters.gain * simulationParameters.b);
-		for (PeakResult p : results.getResults())
-			p.params[Gaussian2DFunction.BACKGROUND] = b;
+		results.setZeroBackground(b);
 	}
 
 	/**

@@ -77,7 +77,6 @@ import gdsc.smlm.function.Erf;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.frc.FRC;
 import gdsc.smlm.ij.frc.FRC.FIREResult;
 import gdsc.smlm.ij.frc.FRC.FRCCurve;
@@ -598,8 +597,8 @@ public class FIRE implements PlugIn
 		newResults.begin();
 		for (PeakResult peakResult : results.getResults())
 		{
-			float x = peakResult.params[Gaussian2DFunction.X_POSITION];
-			float y = peakResult.params[Gaussian2DFunction.Y_POSITION];
+			float x = peakResult.getXPosition();
+			float y = peakResult.getYPosition();
 			if (x < minX || x > maxX || y < minY || y > maxY)
 				continue;
 			newResults.add(peakResult);

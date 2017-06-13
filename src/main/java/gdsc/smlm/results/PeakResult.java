@@ -36,11 +36,11 @@ public class PeakResult implements Comparable<PeakResult>
 	public float noise;
 
 	// TODO - change the model to store B,I,X,Y,Z and then addition PSF parameters in the params array
-	
+
 	// TODO - make this private
-	public float[] params;
+	float[] params;
 	// TODO - make this private
-	public float[] paramsStdDev;
+	float[] paramsStdDev;
 
 	public PeakResult(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
@@ -1039,5 +1039,25 @@ public class PeakResult implements Comparable<PeakResult>
 	public float getNoise()
 	{
 		return noise;
+	}
+
+	/**
+	 * Gets the parameters. This is a direct reference to the instance parameter array so use with caution.
+	 *
+	 * @return the parameters
+	 */
+	public float[] getParameters()
+	{
+		return params;
+	}
+
+	/**
+	 * Gets the parameter deviations. This is a direct reference to the instance parameter array so use with caution.
+	 *
+	 * @return the parameter deviations
+	 */
+	public float[] getParameterDeviations()
+	{
+		return paramsStdDev;
 	}
 }

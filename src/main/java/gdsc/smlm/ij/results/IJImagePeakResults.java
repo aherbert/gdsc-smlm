@@ -1029,7 +1029,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 				updateToFrame(result.getFrame());
 			}
 
-			getValue(result.getFrame(), result.params, result.error, x, y, indices, values);
+			getValue(result.getFrame(), result.getParameters(), result.error, x, y, indices, values);
 
 			for (int i = indices[4]; i-- > 0;)
 			{

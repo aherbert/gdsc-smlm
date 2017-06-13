@@ -454,8 +454,8 @@ public class PCPALMMolecules implements PlugIn
 		newResults.begin();
 		for (PeakResult peakResult : results.getResults())
 		{
-			float x = peakResult.params[Gaussian2DFunction.X_POSITION];
-			float y = peakResult.params[Gaussian2DFunction.Y_POSITION];
+			float x = peakResult.getXPosition();
+			float y = peakResult.getYPosition();
 			if (x < minX || x > maxX || y < minY || y > maxY)
 				continue;
 			newResults.add(peakResult);

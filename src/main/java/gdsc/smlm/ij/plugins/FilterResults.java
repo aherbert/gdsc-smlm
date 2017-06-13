@@ -13,7 +13,6 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -163,8 +162,8 @@ public class FilterResults implements PlugIn
 
 	private float getDrift(PeakResult result)
 	{
-		float drift = FastMath.max(Math.abs(result.origX - result.params[Gaussian2DFunction.X_POSITION]),
-				Math.abs(result.origY - result.params[Gaussian2DFunction.Y_POSITION]));
+		float drift = FastMath.max(Math.abs(result.origX - result.getXPosition()),
+				Math.abs(result.origY - result.getYPosition()));
 		return drift;
 	}
 
@@ -185,7 +184,7 @@ public class FilterResults implements PlugIn
 	{
 		// The X-width should be the largest (major axis)
 		// Q. Should a filter be used for the Y-width too?
-		return result.params[Gaussian2DFunction.X_SD];
+		return result.getSD();
 	}
 
 	/**

@@ -532,7 +532,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		for (PeakResult result : results)
 		{
 			addPeak(result.getFrame(), result.getEndFrame(), result.origX, result.origY, result.origValue, result.error,
-					result.noise, result.params, result.paramsStdDev);
+					result.noise, result.getParameters(), result.getParameterDeviations());
 			if (n++ > 31)
 			{
 				if (!tableActive)

@@ -428,7 +428,7 @@ public class TraceMolecules implements PlugIn
 		{
 			filename = Utils.replaceExtension(filename, "xls");
 
-			boolean showDeviations = (traces.length > 0 && traces[0].getHead().paramsStdDev != null);
+			boolean showDeviations = sourceResults.hasDeviations();
 			// Assume that are results are from a single frame but store the trace ID
 			TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations, false, true);
 			traceResults.copySettings(sourceResults);
