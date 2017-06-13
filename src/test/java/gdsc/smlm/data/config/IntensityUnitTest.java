@@ -45,7 +45,6 @@ public class IntensityUnitTest
 			{
 				IntensityUnit u2 = expectedUnits[j].u;
 				c = UnitConverterFactory.createConverter(u1, u2, offset, countPerPhoton);
-				System.out.println(c);
 				double o = c.convert(v1);
 				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
 			}
