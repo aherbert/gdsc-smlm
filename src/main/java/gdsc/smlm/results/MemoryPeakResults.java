@@ -755,7 +755,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 					calibration.setDistanceUnit(DistanceUnit.PIXEL);
 					return true;
 				}
-				catch (IllegalStateException e)
+				catch (ConversionException e)
 				{
 					// Gracefully fail so ignore this
 				}
@@ -898,7 +898,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 				calibration.setAngleUnit(AngleUnit.RADIAN);
 				return true;
 			}
-			catch (IllegalStateException e)
+			catch (ConversionException e)
 			{
 				// Gracefully fail so ignore this
 			}
@@ -921,9 +921,107 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 */
 	public boolean convertToPreferenceUnits()
 	{
+		// TODO - do the conversion using the calibration helper.
+		// Remove the conversion methods from this class.
+		// CalibrationHelper helper = new CalibrationHelper(null);
+
 		boolean success = convertDistanceToPixelUnits();
 		success &= convertIntensityToPhotonUnits();
 		success &= convertAngleToRadianUnits();
 		return success;
+	}
+
+	/**
+	 * For each result execute the procedure.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forEach(ResultProcedure procedure)
+	{
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			final PeakResult r = results.get(i);
+			procedure.execute(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 */
+	public void forEach(ResultProcedure procedure, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
+	{
+		if (calibration == null)
+			throw new ConversionException("No calibration");
+
+		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getIntensityConverter(intensityUnit);
+		TypeConverter<IntensityUnit> ic = list.get(0);
+		TypeConverter<IntensityUnit> bic = list.get(1);
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			final PeakResult r = results.get(i);
+			//@formatter:off
+			procedure.execute(
+					bic.convert(r.getBackground()), 
+					ic.convert(r.getSignal()), 
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()), 
+					dc.convert(r.getZPosition()));
+			//@formatter:on
+		}
+	}
+	
+	/**
+	 * For each result execute the procedure.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 */
+	public void forEach(Gaussian2DPrecisionProcedure procedure)
+	{
+		if (calibration == null)
+			throw new ConversionException("No calibration");
+
+		// TODO - Check if this is a Gaussian2DFunction and throw an error if not
+		// Otherwise determine the PSF fields to obtain the distance
+		
+		
+		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getIntensityConverter(IntensityUnit.PHOTON);
+		TypeConverter<IntensityUnit> ic = list.get(0);
+		TypeConverter<IntensityUnit> bic = list.get(1);
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(DistanceUnit.NM);
+
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			final PeakResult r = results.get(i);
+			float s = r.getSD();
+			//@formatter:off
+			procedure.execute(
+					bic.convert(r.getBackground()), 
+					ic.convert(r.getSignal()), 
+					dc.convert(s));
+			//@formatter:on
+		}
 	}
 }
