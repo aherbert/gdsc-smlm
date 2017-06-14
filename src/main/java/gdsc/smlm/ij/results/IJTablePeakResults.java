@@ -5,18 +5,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import gdsc.smlm.data.config.UnitHelper;
-import gdsc.smlm.data.config.SMLMSettings.CameraType;
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.core.data.utils.ConversionException;
-import gdsc.core.data.utils.Converter;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.CameraType;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.config.UnitHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -61,13 +60,13 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private boolean canComputePrecision, emCCD;
 
 	/** Converter to change the distances. */
-	private Converter distanceConverter;
+	private TypeConverter<DistanceUnit> distanceConverter;
 	/** Converter to change the intensity. */
-	private Converter intensityConverter;
+	private TypeConverter<IntensityUnit> intensityConverter;
 	/** Converter to change the background intensity. */
-	private Converter backgroundConverter;
+	private TypeConverter<IntensityUnit> backgroundConverter;
 	/** Converter to change the shape. */
-	private Converter shapeConverter;
+	private TypeConverter<AngleUnit> shapeConverter;
 
 	private DistanceUnit distanceUnit = null;
 	private IntensityUnit intensityUnit = null;
@@ -182,12 +181,18 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			// Clone the calibration as it may change
 			this.calibration = calibration.clone();
 
-			distanceConverter = calibration.getDistanceConverter(distanceUnit);
-			ArrayList<TypeConverter<IntensityUnit>> converters = calibration.getIntensityConverter(intensityUnit);
+			distanceConverter = calibration.getDistanceConverterSafe(distanceUnit);
+			if (distanceConverter.to() != null)
+				calibration.setDistanceUnit(distanceConverter.to());
+			ArrayList<TypeConverter<IntensityUnit>> converters = calibration.getDualIntensityConverter(intensityUnit);
 			intensityConverter = (TypeConverter<IntensityUnit>) converters.get(0);
 			backgroundConverter = (TypeConverter<IntensityUnit>) converters.get(1);
+			if (intensityConverter.to() != null)
+				calibration.setIntensityUnit(intensityConverter.to());
 			// TODO - better support for the shape
 			shapeConverter = calibration.getAngleConverter(angleUnit);
+			if (shapeConverter.to() != null)
+				calibration.setAngleUnit(shapeConverter.to());
 		}
 
 		createSourceText();

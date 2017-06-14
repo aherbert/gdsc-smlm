@@ -90,9 +90,9 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.results.LSEPrecisionProcedure;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.LSEPrecisionProcedure;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
@@ -2630,7 +2630,7 @@ public class FIRE implements PlugIn
 			computedPrecision = new double[results.size()];
 			results.forEach(new LSEPrecisionProcedure()
 			{
-				public void execute(double precision)
+				public void executeLSEPrecision(double precision)
 				{
 					FIRE.this.computedPrecision[precisionN++] = precision;
 				}

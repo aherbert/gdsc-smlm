@@ -6,7 +6,6 @@ import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.MultiplyAddTypeConverter;
 import gdsc.core.data.utils.MultiplyTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.core.utils.Maths;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
@@ -246,7 +245,7 @@ public class UnitConverterFactory
 				switch (to)
 				{
 					case PHOTON:
-						return new AddMultiplyTypeConverter<IntensityUnit>(from, to, checkOffset(-offset),
+						return new AddMultiplyTypeConverter<IntensityUnit>(from, to, checkOffset(offset, -1),
 								1.0 / checkCountPerPhoton(countPerPhoton));
 					default:
 						throw new ConversionException(from + " to " + to);
@@ -257,7 +256,7 @@ public class UnitConverterFactory
 				{
 					case COUNT:
 						return new MultiplyAddTypeConverter<IntensityUnit>(from, to,
-								checkCountPerPhoton(countPerPhoton), checkOffset(offset));
+								checkCountPerPhoton(countPerPhoton), checkOffset(offset, 1));
 					default:
 						throw new ConversionException(from + " to " + to);
 				}
@@ -267,11 +266,11 @@ public class UnitConverterFactory
 		}
 	}
 
-	private static double checkOffset(double offset)
+	private static double checkOffset(double offset, int sign)
 	{
-		if (!Maths.isFinite(offset))
-			throw new ConversionException("offset must be finite");
-		return offset;
+		if (!(offset >= 0 && offset <= java.lang.Double.MAX_VALUE))
+			throw new ConversionException("count/photon must be positive");
+		return offset * sign;
 	}
 
 	private static double checkCountPerPhoton(double countPerPhoton)

@@ -11,9 +11,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
+import gdsc.core.ij.SeriesOpener;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.ij.utils.SeriesOpener;
 import gdsc.smlm.results.ImageSource;
 import ij.IJ;
 import ij.ImagePlus;
@@ -309,7 +309,7 @@ public class SeriesImageSource extends ImageSource
 	/**
 	 * Create a new image source using the directory containing the images.
 	 * <p>
-	 * The directory is opened using {@link gdsc.smlm.ij.utils.SeriesOpener }
+	 * The directory is opened using {@link gdsc.core.ij.SeriesOpener }
 	 * 
 	 * @param name
 	 * @param path

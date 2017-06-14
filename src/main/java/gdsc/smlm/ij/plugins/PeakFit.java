@@ -27,6 +27,7 @@ import javax.swing.JFileChooser;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.IJLogger;
+import gdsc.core.ij.SeriesOpener;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.NoiseEstimator.Method;
@@ -57,7 +58,6 @@ import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.ij.utils.SeriesOpener;
 import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;

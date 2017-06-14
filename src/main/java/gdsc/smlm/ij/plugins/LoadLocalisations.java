@@ -43,7 +43,7 @@ import gdsc.smlm.results.AttributePeakResult;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.ResultProcedure;
+import gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
@@ -241,11 +241,11 @@ public class LoadLocalisations implements PlugIn
 			Utils.log("Loaded %d localisations", results.size());
 	}
 
-	private class ZResultProcedure implements ResultProcedure
+	private class ZResultProcedure implements BIXYZResultProcedure
 	{
 		float min, max;
 
-		public void execute(float background, float intensity, float x, float y, float z)
+		public void executeBIXYZ(float background, float intensity, float x, float y, float z)
 		{
 			if (min > z)
 				min = z;
@@ -259,9 +259,9 @@ public class LoadLocalisations implements PlugIn
 		// The z-depth is stored in pixels in the error field
 		final ZResultProcedure p = new ZResultProcedure();
 		// Initialise with the first result
-		results.forFirst(new ResultProcedure()
+		results.forFirst(new BIXYZResultProcedure()
 		{
-			public void execute(float background, float intensity, float x, float y, float z)
+			public void executeBIXYZ(float background, float intensity, float x, float y, float z)
 			{
 				p.min = p.max = z;
 			}

@@ -18,6 +18,13 @@ import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.procedures.IResultProcedure;
+import gdsc.smlm.results.procedures.IXYResultProcedure;
+import gdsc.smlm.results.procedures.IXYZResultProcedure;
+import gdsc.smlm.results.procedures.LSEPrecisionProcedure;
+import gdsc.smlm.results.procedures.BIXYZResultProcedure;
+import gdsc.smlm.results.procedures.XYResultProcedure;
+import gdsc.smlm.results.procedures.XYZResultProcedure;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -1075,12 +1082,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 * @param procedure
 	 *            the procedure
 	 */
-	public void forEach(ResultProcedure procedure)
+	public void forEach(BIXYZResultProcedure procedure)
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = get(i);
-			procedure.execute(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
+			procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
 		}
 	}
 
@@ -1090,12 +1097,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 * @param procedure
 	 *            the procedure
 	 */
-	public void forFirst(ResultProcedure procedure)
+	public void forFirst(BIXYZResultProcedure procedure)
 	{
 		if (isEmpty())
 			return;
 		final PeakResult r = get(0);
-		procedure.execute(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
+		procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
 	}
 
 	/**
@@ -1112,12 +1119,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
-	public void forEach(ResultProcedure procedure, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
+	public void forEach(BIXYZResultProcedure procedure, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
 	{
 		if (calibration == null)
 			throw new ConversionException("No calibration");
 
-		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getIntensityConverter(intensityUnit);
+		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getDualIntensityConverter(intensityUnit);
 		TypeConverter<IntensityUnit> ic = list.get(0);
 		TypeConverter<IntensityUnit> bic = list.get(1);
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
@@ -1126,7 +1133,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		{
 			final PeakResult r = get(i);
 			//@formatter:off
-			procedure.execute(
+			procedure.executeBIXYZ(
 					bic.convert(r.getBackground()), 
 					ic.convert(r.getSignal()), 
 					dc.convert(r.getXPosition()),
@@ -1136,6 +1143,162 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		}
 	}
 
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 */
+	public void forEach(IResultProcedure procedure, IntensityUnit intensityUnit)
+	{
+		if (calibration == null)
+			throw new ConversionException("No calibration");
+
+		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(intensityUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			//@formatter:off
+			procedure.executeI(
+					ic.convert(r.getSignal()));
+			//@formatter:on
+		}
+	}
+	
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 */
+	public void forEach(IXYResultProcedure procedure, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
+	{
+		if (calibration == null)
+			throw new ConversionException("No calibration");
+
+		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(intensityUnit);
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			//@formatter:off
+			procedure.executeIXY(
+					ic.convert(r.getSignal()), 
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()));
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 */
+	public void forEach(IXYZResultProcedure procedure, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
+	{
+		if (calibration == null)
+			throw new ConversionException("No calibration");
+
+		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(intensityUnit);
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			//@formatter:off
+			procedure.executeIXYZ(
+					ic.convert(r.getSignal()), 
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()),
+					dc.convert(r.getZPosition())
+					);
+			//@formatter:on
+		}
+	}
+	
+	
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure            the procedure
+	 * @param distanceUnit            the distance unit
+	 * @throws ConversionException             if the conversion is not possible
+	 */
+	public void forEach(XYResultProcedure procedure, DistanceUnit distanceUnit)
+	{
+		if (calibration == null)
+			throw new ConversionException("No calibration");
+
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			//@formatter:off
+			procedure.executeXY(
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()));
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure            the procedure
+	 * @param distanceUnit            the distance unit
+	 * @throws ConversionException             if the conversion is not possible
+	 */
+	public void forEach(XYZResultProcedure procedure, DistanceUnit distanceUnit)
+	{
+		if (calibration == null)
+			throw new ConversionException("No calibration");
+
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			//@formatter:off
+			procedure.executeXYZ(
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()),
+					dc.convert(r.getZPosition())
+					);
+			//@formatter:on
+		}
+	}
+	
 	/**
 	 * For each result execute the procedure.
 	 * <p>
@@ -1159,7 +1322,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			throw new ConversionException("Not a CCD camera");
 		final boolean emCCD = isEMCCD();
 
-		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getIntensityConverter(IntensityUnit.PHOTON);
+		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getDualIntensityConverter(IntensityUnit.PHOTON);
 		TypeConverter<IntensityUnit> ic = list.get(0);
 		TypeConverter<IntensityUnit> bic = list.get(1);
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(DistanceUnit.NM);
@@ -1171,7 +1334,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		{
 			final PeakResult r = get(i);
 			float s = r.getSD();
-			procedure.execute(PeakResult.getPrecision(nmPerPixel, dc.convert(s), ic.convert(r.getSignal()),
+			procedure.executeLSEPrecision(PeakResult.getPrecision(nmPerPixel, dc.convert(s), ic.convert(r.getSignal()),
 					bic.convert(r.getBackground()), emCCD));
 		}
 	}

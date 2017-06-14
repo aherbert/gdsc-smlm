@@ -1,4 +1,4 @@
-package gdsc.smlm.results;
+package gdsc.smlm.results.procedures;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -14,23 +14,19 @@ package gdsc.smlm.results;
  *---------------------------------------------------------------------------*/
 
 /**
- * Interface for accessing the results
+ * Interface for accessing the localisation precision of Gaussian 2D fitting computed using the Mortensen formula for
+ * Least Squares Estimation.
+ * <p>
+ * See Mortensen, et al (2010) Nature Methods 7, 377-383, equation 6.
  */
-public interface ResultProcedure
+public interface LSEPrecisionProcedure
 {
 	/**
 	 * Executes this procedure.
 	 *
-	 * @param background
-	 *            the background
-	 * @param intensity
-	 *            the intensity
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param z
-	 *            the z
+	 * @param precision
+	 *            the precision
+	 * @return false if further execution should be stopped
 	 */
-	void execute(float background, float intensity, float x, float y, float z);
+	void executeLSEPrecision(double precision);
 }
