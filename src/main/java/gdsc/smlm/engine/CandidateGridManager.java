@@ -1,120 +1,77 @@
 package gdsc.smlm.engine;
 
-import gdsc.core.utils.Maths;
-import gdsc.smlm.results.PeakResult;
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2016 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
 
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows listing neighbours of a given
  * position.
  */
-public class ResultGridManager
+class CandidateGridManager
 {
-	private class PeakList
-	{
-		int size = 0;
-		PeakResult[] list = null;
-
-		void add(PeakResult peak)
-		{
-			if (list == null)
-				list = new PeakResult[4];
-			else if (list.length == size)
-			{
-				final PeakResult[] list2 = new PeakResult[size * 2];
-				System.arraycopy(list, 0, list2, 0, size);
-				list = list2;
-			}
-			list[size++] = peak;
-		}
-	}
-
 	private CandidateList[][] candidateGrid;
-	private PeakList[][] peakGrid;
+	private CandidateList[][] fittedCandidateGrid;
 	private final int resolution, xBlocks, yBlocks;
 
-	private PeakResult[] peakCache = null;
-	private int peakCacheX = -1, peakCacheY = -1;
+	private CandidateList fittedCandidateCache = null;
+	private int fittedCandidateCacheX = -1, fittedCandidateCacheY = -1;
 	private CandidateList neighbourCache = null;
 	private Candidate neighbourCacheCandidate = null;
+	
+	private CandidateList fitted = new CandidateList();
 
 	/**
 	 * Clear the cache. This should be called when more data has been added to the grid.
 	 */
 	public void clearCache()
 	{
-		peakCache = null;
-		peakCacheX = -1;
-		peakCacheY = -1;
+		fittedCandidateCache = null;
+		fittedCandidateCacheX = -1;
+		fittedCandidateCacheY = -1;
 		neighbourCache = null;
 		neighbourCacheCandidate = null;
 	}
 
 	/**
-	 * Create a grid for candidates or peak results
+	 * Create a grid for candidates or fittedCandidate results
 	 * 
 	 * @param maxx
 	 * @param maxy
 	 * @param resolution
 	 */
-	public ResultGridManager(int maxx, int maxy, int resolution)
+	public CandidateGridManager(int maxx, int maxy, int resolution)
 	{
 		this.resolution = resolution;
 		xBlocks = getBlock(maxx) + 1;
 		yBlocks = getBlock(maxy) + 1;
 
-		createCandidateGrid();
-		createPeakGrid();
+		createGrids();
 	}
 
-	private void createPeakGrid()
-	{
-		peakGrid = new PeakList[xBlocks][yBlocks];
-		for (int x = 0; x < xBlocks; x++)
-		{
-			final PeakList[] list = peakGrid[x];
-			for (int y = 0; y < yBlocks; y++)
-			{
-				list[y] = new PeakList();
-			}
-		}
-	}
-
-	private void createCandidateGrid()
+	private void createGrids()
 	{
 		candidateGrid = new CandidateList[xBlocks][yBlocks];
+		fittedCandidateGrid = new CandidateList[xBlocks][yBlocks];
 		for (int x = 0; x < xBlocks; x++)
 		{
 			final CandidateList[] list = candidateGrid[x];
+			final CandidateList[] list2 = fittedCandidateGrid[x];
 			for (int y = 0; y < yBlocks; y++)
 			{
 				list[y] = new CandidateList();
+				list2[y] = new CandidateList();
 			}
 		}
-	}
-
-	/**
-	 * Create a grid only of peak results. No candidates can be added to the grid.
-	 * 
-	 * @param results
-	 * @param resolution
-	 */
-	public ResultGridManager(PeakResult[] results, double resolution)
-	{
-		this.resolution = Maths.max(1, (int) Math.ceil(resolution));
-		double maxx = 0, maxy = 0;
-		for (PeakResult p : results)
-		{
-			if (maxx < p.getXPosition())
-				maxx = p.getXPosition();
-			if (maxy < p.getYPosition())
-				maxy = p.getYPosition();
-		}
-		xBlocks = getBlock((int) maxx) + 1;
-		yBlocks = getBlock((int) maxy) + 1;
-
-		createPeakGrid();
-		for (PeakResult p : results)
-			putOnGrid(p);
 	}
 
 	private int getBlock(final int x)
@@ -123,31 +80,60 @@ public class ResultGridManager
 	}
 
 	/**
-	 * Add a peak to the grid. Assumes that the coordinates are within the size of the grid.
-	 * 
-	 * @param peak
+	 * Add a fittedCandidate to the grid. Assumes that the coordinates are within the size of the grid.
+	 *
+	 * @param candidate
+	 *            the candidate
 	 */
-	public void addToGrid(PeakResult peak)
+	public void addFittedToGrid(Candidate candidate)
 	{
-		final int xBlock = getBlock((int) peak.getXPosition());
-		final int yBlock = getBlock((int) peak.getYPosition());
-		peakGrid[xBlock][yBlock].add(peak);
+		putFittedOnGrid(candidate);
 		clearCache();
 	}
 
 	/**
-	 * Add a peak to the grid. Assumes that the coordinates are within the size of the grid.
+	 * Add a fittedCandidate to the grid. Does not assume that the coordinates are within the size of the grid.
 	 * <p>
 	 * This method does not clear the cache and should be called only when initialising the grid.
 	 *
-	 * @param peak
-	 *            the peak
+	 * @param candidate
+	 *            the candidate
 	 */
-	public void putOnGrid(PeakResult peak)
+	public void putFittedOnGrid(Candidate candidate)
 	{
-		final int xBlock = getBlock((int) peak.getXPosition());
-		final int yBlock = getBlock((int) peak.getYPosition());
-		peakGrid[xBlock][yBlock].add(peak);
+		int xBlock = getBlock(candidate.x);
+		int yBlock = getBlock(candidate.y);
+		// The fitted position may be off the grid
+		if (xBlock < 0)
+			xBlock = 0;
+		else if (xBlock >= xBlocks)
+			xBlock = xBlocks - 1;
+		if (yBlock < 0)
+			yBlock = 0;
+		else if (yBlock >= yBlocks)
+			yBlock = yBlocks - 1;
+		fittedCandidateGrid[xBlock][yBlock].add(candidate);
+		fitted.add(candidate);
+	}
+	
+	/**
+	 * Gets the fitted candidates.
+	 *
+	 * @return the fitted candidates
+	 */
+	public CandidateList getFittedCandidates()
+	{
+		return fitted;
+	}
+	
+	/**
+	 * Gets the fitted candidates size.
+	 *
+	 * @return the fitted candidates size
+	 */
+	public int getFittedCandidatesSize()
+	{
+		return fitted.size;
 	}
 
 	/**
@@ -155,11 +141,9 @@ public class ResultGridManager
 	 * 
 	 * @param candidate
 	 */
-	public void addToGrid(Candidate candidate)
+	public void addCandidateToGrid(Candidate candidate)
 	{
-		final int xBlock = getBlock(candidate.x);
-		final int yBlock = getBlock(candidate.y);
-		candidateGrid[xBlock][yBlock].add(candidate);
+		putCandidateOnGrid(candidate);
 		clearCache();
 	}
 
@@ -171,7 +155,7 @@ public class ResultGridManager
 	 * @param candidate
 	 *            the candidate
 	 */
-	public void putOnGrid(Candidate candidate)
+	public void putCandidateOnGrid(Candidate candidate)
 	{
 		final int xBlock = getBlock(candidate.x);
 		final int yBlock = getBlock(candidate.y);
@@ -187,49 +171,21 @@ public class ResultGridManager
 	 * @param y
 	 * @return the neighbours
 	 */
-	public PeakResult[] getPeakResultNeighbours(final int x, final int y)
+	public CandidateList getFittedNeighbours(final int x, final int y)
 	{
 		final int xBlock = getBlock(x);
 		final int yBlock = getBlock(y);
 
-		if (peakCache != null && peakCacheX == xBlock && peakCacheY == yBlock)
-			return peakCache;
+		if (fittedCandidateCache != null && fittedCandidateCacheX == xBlock && fittedCandidateCacheY == yBlock)
+			return fittedCandidateCache;
 
-		int size = 0;
-		
-		final int xmin = Math.max(0, xBlock - 1);
-		final int ymin = Math.max(0, yBlock - 1);
-		final int xmax = Math.min(xBlocks, xBlock + 2);
-		final int ymax = Math.min(yBlocks, yBlock + 2);
-		
-		for (int xx = xmin; xx < xmax; xx++)
-		{
-			for (int yy = ymin; yy < ymax; yy++)
-			{
-				size += peakGrid[xx][yy].size;
-			}
-		}
-		final PeakResult[] list = new PeakResult[size];
-		if (size != 0)
-		{
-			size = 0;
-			for (int xx = xmin; xx < xmax; xx++)
-			{
-				for (int yy = ymin; yy < ymax; yy++)
-				{
-					if (peakGrid[xx][yy].size == 0)
-						continue;
-					System.arraycopy(peakGrid[xx][yy].list, 0, list, size, peakGrid[xx][yy].size);
-					size += peakGrid[xx][yy].size;
-				}
-			}
-		}
+		final Candidate[] list = getCandidates(fittedCandidateGrid, x, y);
 
-		peakCache = list;
-		peakCacheX = xBlock;
-		peakCacheY = yBlock;
+		fittedCandidateCache = new CandidateList(list);
+		fittedCandidateCacheX = xBlock;
+		fittedCandidateCacheY = yBlock;
 
-		return list;
+		return fittedCandidateCache;
 	}
 
 	/**
@@ -242,9 +198,9 @@ public class ResultGridManager
 	 *            the candidate
 	 * @return the neighbours
 	 */
-	public CandidateList getNeighbours(final Candidate candidate)
+	public CandidateList getCandidateNeighbours(final Candidate candidate)
 	{
-		return getNeighbours(candidate, false);
+		return getCandidateNeighbours(candidate, false);
 	}
 
 	/**
@@ -257,14 +213,14 @@ public class ResultGridManager
 	 *            True if candidate indices are not unique
 	 * @return the neighbours
 	 */
-	public CandidateList getNeighbours(final Candidate candidate, boolean nonUnique)
+	public CandidateList getCandidateNeighbours(final Candidate candidate, boolean nonUnique)
 	{
 		if (neighbourCache != null && neighbourCacheCandidate != null &&
 				neighbourCacheCandidate.index == candidate.index)
 			return neighbourCache;
 
 		// Get all
-		final Candidate[] list = getCandidates(candidate.x, candidate.y);
+		final Candidate[] list = getCandidates(candidateGrid, candidate.x, candidate.y);
 
 		// Remove the candidate.
 		int size;
@@ -306,28 +262,32 @@ public class ResultGridManager
 	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the
 	 * resolution
 	 * distance will be returned, plus there may be others and so distances should be checked.
-	 * 
+	 *
+	 * @param grid
+	 *            the candidate grid
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @return the neighbours
 	 */
-	private Candidate[] getCandidates(final int x, final int y)
+	private Candidate[] getCandidates(CandidateList[][] grid, final int x, final int y)
 	{
 		final int xBlock = getBlock(x);
 		final int yBlock = getBlock(y);
 
 		int size = 0;
-		
+
 		final int xmin = Math.max(0, xBlock - 1);
 		final int ymin = Math.max(0, yBlock - 1);
 		final int xmax = Math.min(xBlocks, xBlock + 2);
 		final int ymax = Math.min(yBlocks, yBlock + 2);
-		
+
 		for (int xx = xmin; xx < xmax; xx++)
 		{
 			for (int yy = ymin; yy < ymax; yy++)
 			{
-				size += candidateGrid[xx][yy].size;
+				size += grid[xx][yy].size;
 			}
 		}
 		final Candidate[] list = new Candidate[size];
@@ -338,10 +298,10 @@ public class ResultGridManager
 			{
 				for (int yy = ymin; yy < ymax; yy++)
 				{
-					if (candidateGrid[xx][yy].size == 0)
+					if (grid[xx][yy].size == 0)
 						continue;
-					System.arraycopy(candidateGrid[xx][yy].list, 0, list, size, candidateGrid[xx][yy].size);
-					size += candidateGrid[xx][yy].size;
+					System.arraycopy(grid[xx][yy].list, 0, list, size, grid[xx][yy].size);
+					size += grid[xx][yy].size;
 				}
 			}
 		}

@@ -19,7 +19,7 @@ import java.util.Comparator;
 /**
  * Stores a list of candidates
  */
-public class CandidateList
+class CandidateList
 {
 	private static class CandidateComparator implements Comparator<Candidate>
 	{
@@ -61,6 +61,18 @@ public class CandidateList
 	CandidateList(int size, Candidate[] list)
 	{
 		this.size = size;
+		this.list = list;
+	}
+
+	/**
+	 * Instantiates a new candidate list.
+	 *
+	 * @param list
+	 *            the list
+	 */
+	CandidateList(Candidate[] list)
+	{
+		this.size = list.length;
 		this.list = list;
 	}
 
