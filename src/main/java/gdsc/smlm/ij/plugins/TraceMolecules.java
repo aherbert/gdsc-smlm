@@ -77,8 +77,8 @@ public class TraceMolecules implements PlugIn
 	private static boolean inputDebugMode = true;
 	private static boolean inputOptimiseBlinkingRate = false;
 
-	private static boolean fitOnlyCentroid = false;
-	private static float distanceThreshold = 1;
+	//private static boolean fitOnlyCentroid = false;
+	//private static float distanceThreshold = 1;
 	private static float expansionFactor = 2;
 	private static boolean debugFailures = false;
 
@@ -1615,8 +1615,8 @@ public class TraceMolecules implements PlugIn
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Do you want to fit the traces as a single peak using a combined image?");
 
-		gd.addCheckbox("Fit_closest_to_centroid", !fitOnlyCentroid);
-		gd.addSlider("Distance_threshold", 0.01, 3, distanceThreshold);
+		//gd.addCheckbox("Fit_closest_to_centroid", !fitOnlyCentroid);
+		//gd.addSlider("Distance_threshold", 0.01, 3, distanceThreshold);
 		gd.addSlider("Expansion_factor", 1, 4.5, expansionFactor);
 
 		// Allow fitting settings to be adjusted
@@ -1669,8 +1669,8 @@ public class TraceMolecules implements PlugIn
 		}
 
 		// Get parameters for the fit
-		fitOnlyCentroid = !gd.getNextBoolean();
-		distanceThreshold = (float) gd.getNextNumber();
+		//fitOnlyCentroid = !gd.getNextBoolean();
+		//distanceThreshold = (float) gd.getNextNumber();
 		expansionFactor = (float) gd.getNextNumber();
 
 		config.setDataFilterType(gd.getNextChoiceIndex());
@@ -1703,7 +1703,7 @@ public class TraceMolecules implements PlugIn
 		// Check arguments
 		try
 		{
-			Parameters.isAboveZero("Distance threshold", distanceThreshold);
+			//Parameters.isAboveZero("Distance threshold", distanceThreshold);
 			Parameters.isAbove("Expansion factor", expansionFactor, 1);
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
@@ -1758,7 +1758,7 @@ public class TraceMolecules implements PlugIn
 
 		// Set up the limits
 		final double stdDev = FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
-		float fitWidth = (float) (stdDev * config.getFitting() * ((fitOnlyCentroid) ? 1 : expansionFactor));
+		float fitWidth = (float) (stdDev * config.getFitting() * expansionFactor);
 
 		IJ.showStatus("Refitting traces ...");
 
@@ -1792,18 +1792,18 @@ public class TraceMolecules implements PlugIn
 			params.noise = (float) combinedNoise[0];
 			float[] centre = trace.getCentroid();
 
-			if (fitOnlyCentroid)
-			{
-				int newX = (int) Math.round(centre[0]) - bounds.x;
-				int newY = (int) Math.round(centre[1]) - bounds.y;
-				params.maxIndices = new int[] { newY * bounds.width + newX };
-			}
-			else
-			{
-				params.filter = new ArrayList<float[]>();
-				params.filter.add(new float[] { centre[0] - bounds.x, centre[1] - bounds.y });
-				params.distanceThreshold = distanceThreshold;
-			}
+			//if (fitOnlyCentroid)
+			//{
+			int newX = (int) Math.round(centre[0]) - bounds.x;
+			int newY = (int) Math.round(centre[1]) - bounds.y;
+			params.maxIndices = new int[] { newY * bounds.width + newX };
+			//}
+			//else
+			//{
+			//	params.filter = new ArrayList<float[]>();
+			//	params.filter.add(new float[] { centre[0] - bounds.x, centre[1] - bounds.y });
+			//	params.distanceThreshold = distanceThreshold;
+			//}
 
 			// This is not needed since the bounds are passed using the FitJob
 			//params.setOffset(new float[] { bounds.x, bounds.y });
@@ -1825,7 +1825,7 @@ public class TraceMolecules implements PlugIn
 		FitStatus[] values = FitStatus.values();
 		int[] statusCount = new int[values.length + 1];
 		ArrayList<String> names = new ArrayList<String>(Arrays.asList(SettingsManager.getNames((Object[]) values)));
-		names.add(String.format("No maxima within %.2f of centroid", distanceThreshold));
+		//names.add(String.format("No maxima within %.2f of centroid", distanceThreshold));
 		int separated = 0;
 		int success = 0;
 		final int debugLimit = 3;

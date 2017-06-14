@@ -23,6 +23,7 @@ import java.util.List;
 /**
  * Filter the results using the distance to a set of coordinates. Any fitted position within the distance to the
  * target coordinates is accepted.
+ * @deprecated Filtering of the results is no longer supported
  */
 public class DistanceResultFilter extends ResultFilter
 {

@@ -22,6 +22,7 @@ import java.util.List;
  * Provides a system for filtering the fitted results using distance to a set of target coordinates.
  * <p>
  * Note that the target coordinates should be relative to the fitting region bounds, not the bounds of the data frame.
+ * @deprecated Filtering of the results is no longer supported
  */
 public abstract class ResultFilter
 {
