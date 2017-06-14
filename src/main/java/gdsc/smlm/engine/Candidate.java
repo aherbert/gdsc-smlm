@@ -58,6 +58,39 @@ class Candidate extends Spot
 	/**
 	 * Instantiates a new candidate.
 	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param index
+	 *            the index
+	 * @param params
+	 *            the params
+	 * @param paramsDev
+	 *            the params dev
+	 * @param error
+	 *            the error
+	 * @param noise
+	 *            the noise
+	 * @param valid
+	 *            the valid
+	 */
+	public Candidate(int x, int y, int index, float[] params, float[] paramsDev, 
+			double error, float noise,
+			boolean valid)
+	{
+		super(x, y, 0, 0);
+		this.index = index;
+		this.params = params;
+		this.paramsDev = paramsDev;
+		this.error = error;
+		this.noise = noise;
+		this.fit = valid;
+	}
+
+	/**
+	 * Instantiates a new candidate.
+	 *
 	 * @param spot
 	 *            the spot
 	 * @param index
@@ -94,11 +127,11 @@ class Candidate extends Spot
 			boolean valid)
 	{
 		Candidate c = new Candidate(x, y, intensity, getScore(), index);
-		c.fit = valid;
 		c.params = params;
 		c.paramsDev = paramsDev;
 		c.error = error;
 		c.noise = noise;
+		c.fit = valid;
 		return c;
 	}
 }
