@@ -34,6 +34,7 @@ import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.InterlacedImageSource;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
+import gdsc.smlm.results.ThreadSafePeakResults;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -47,7 +48,7 @@ import ij.text.TextWindow;
 /**
  * Iteratively fits local maxima using a 2D Gaussian until the PSF converges.
  */
-public class PSFEstimator implements PlugInFilter, PeakResults
+public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 {
 	private static final String TITLE = "PSF Estimator";
 	private static TextWindow resultsWindow = null;
