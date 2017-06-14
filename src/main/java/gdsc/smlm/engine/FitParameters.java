@@ -70,10 +70,12 @@ public class FitParameters
 	public float background = Float.NaN;
 	/**
 	 * Only maxima within the distance threshold to these coordinates will be included in the results.
+	 * @deprecated Filtering is no longer supported
 	 */
 	public List<float[]> filter = null;
 	/**
 	 * The distance threshold to use when checking if fitted peaks match the desired results.
+	 * @deprecated Filtering is no longer supported
 	 */
 	public float distanceThreshold = 1;
 	/**
