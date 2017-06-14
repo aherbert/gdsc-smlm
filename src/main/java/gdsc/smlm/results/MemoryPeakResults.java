@@ -22,6 +22,7 @@ import gdsc.smlm.results.procedures.IResultProcedure;
 import gdsc.smlm.results.procedures.IXYResultProcedure;
 import gdsc.smlm.results.procedures.IXYZResultProcedure;
 import gdsc.smlm.results.procedures.LSEPrecisionProcedure;
+import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
@@ -1075,7 +1076,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			return;
 		procedure.execute(get(0));
 	}
-
+	
 	/**
 	 * For each result execute the procedure.
 	 *
@@ -1087,7 +1088,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = get(i);
-			procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
+			procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getZPosition());
 		}
 	}
 
@@ -1102,9 +1103,46 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		if (isEmpty())
 			return;
 		final PeakResult r = get(0);
-		procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getXPosition());
+		procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getZPosition());
 	}
 
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 */
+	public void forEach(BIXYResultProcedure procedure, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
+	{
+		if (calibration == null)
+			throw new ConversionException("No calibration");
+
+		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getDualIntensityConverter(intensityUnit);
+		TypeConverter<IntensityUnit> ic = list.get(0);
+		TypeConverter<IntensityUnit> bic = list.get(1);
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			//@formatter:off
+			procedure.executeBIXY(
+					bic.convert(r.getBackground()), 
+					ic.convert(r.getSignal()), 
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()));
+			//@formatter:on
+		}
+	}
+	
 	/**
 	 * For each result execute the procedure using the specified units.
 	 * <p>

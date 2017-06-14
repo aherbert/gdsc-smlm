@@ -20,8 +20,16 @@ import gdsc.smlm.results.MemoryPeakResults;
 /**
  * Contains functionality to obtain the standard calibrated data for results.
  */
-public class StandardResultProcedure extends AbstractResultProcedure implements BIXYZResultProcedure, IResultProcedure,
-		IXYResultProcedure, IXYZResultProcedure, XYResultProcedure, XYZResultProcedure
+//@formatter:off
+public class StandardResultProcedure extends AbstractResultProcedure implements 
+        BIXYResultProcedure, 
+        BIXYZResultProcedure, 
+        IResultProcedure, 
+        IXYResultProcedure, 
+        IXYZResultProcedure,
+		XYResultProcedure, 
+		XYZResultProcedure
+//@formatter:on
 {
 	/** The background. */
 	public float[] background;
@@ -91,7 +99,33 @@ public class StandardResultProcedure extends AbstractResultProcedure implements 
 	}
 
 	/**
+	 * Gets the BIXY data in the configured units.
+	 * 
+	 * @throws ConversionException
+	 *             if conversion to the required units is not possible
+	 */
+	public void getBIXY()
+	{
+		i = 0;
+		this.background = allocate(this.background);
+		this.intensity = allocate(this.intensity);
+		this.x = allocate(this.x);
+		this.y = allocate(this.y);
+		results.forEach((BIXYResultProcedure) this, getIntensityUnit(), getDistanceUnit());
+	}
+
+	public void executeBIXY(float background, float intensity, float x, float y)
+	{
+		this.background[i] = background;
+		this.intensity[i] = intensity;
+		this.x[i] = x;
+		this.y[i] = y;
+		i++;
+	}
+	
+	/**
 	 * Gets the BIXYZ data in the configured units.
+	 * 
 	 * @throws ConversionException
 	 *             if conversion to the required units is not possible
 	 */
@@ -118,6 +152,7 @@ public class StandardResultProcedure extends AbstractResultProcedure implements 
 
 	/**
 	 * Gets the I data in the configured units.
+	 * 
 	 * @throws ConversionException
 	 *             if conversion to the required units is not possible
 	 */
@@ -136,6 +171,7 @@ public class StandardResultProcedure extends AbstractResultProcedure implements 
 
 	/**
 	 * Gets the IXY data in the configured units.
+	 * 
 	 * @throws ConversionException
 	 *             if conversion to the required units is not possible
 	 */
@@ -155,9 +191,10 @@ public class StandardResultProcedure extends AbstractResultProcedure implements 
 		this.y[i] = y;
 		i++;
 	}
-	
+
 	/**
 	 * Gets the IXYZ data in the configured units.
+	 * 
 	 * @throws ConversionException
 	 *             if conversion to the required units is not possible
 	 */
@@ -182,6 +219,7 @@ public class StandardResultProcedure extends AbstractResultProcedure implements 
 
 	/**
 	 * Gets the XY data in the configured units.
+	 * 
 	 * @throws ConversionException
 	 *             if conversion to the required units is not possible
 	 */
@@ -199,9 +237,10 @@ public class StandardResultProcedure extends AbstractResultProcedure implements 
 		this.y[i] = y;
 		i++;
 	}
-	
+
 	/**
 	 * Gets the XYZ data in the configured units.
+	 * 
 	 * @throws ConversionException
 	 *             if conversion to the required units is not possible
 	 */

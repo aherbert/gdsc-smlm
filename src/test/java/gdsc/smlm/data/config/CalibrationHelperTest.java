@@ -17,27 +17,18 @@ import gdsc.smlm.data.config.SMLMSettings.PSFCalibration;
 
 public class CalibrationHelperTest
 {
+	double nmPerPixel = 104.5;
+	double gain = 45;
+	double bias = 100;
+
 	@Test
-	public void canUpdateCalibration()
+	public void canUpdateDistanceCalibration()
 	{
 		Calibration.Builder builder = Calibration.newBuilder();
 		DistanceCalibration.Builder distanceBuilder = builder.getDistanceCalibrationBuilder();
-		IntensityCalibration.Builder intensityBuilder = builder.getIntensityCalibrationBuilder();
-		PSFCalibration.Builder psfBuilder = builder.getPsfCalibrationBuilder();
-		CameraCalibration.Builder cameraBuilder = builder.getCameraCalibrationBuilder();
-
-		double nmPerPixel = 104.5;
-		double gain = 45;
-		double bias = 100;
 
 		distanceBuilder.setNmPerPixel(nmPerPixel);
 		distanceBuilder.setUnit(DistanceUnit.PIXEL);
-
-		intensityBuilder.setUnit(IntensityUnit.PHOTON);
-		intensityBuilder.setGain(gain);
-
-		psfBuilder.setAngleUnit(AngleUnit.RADIAN);
-		cameraBuilder.setBias(bias);
 
 		Calibration c = builder.build();
 
@@ -51,17 +42,60 @@ public class CalibrationHelperTest
 		TypeConverter<DistanceUnit> distanceConverter2 = CalibrationHelper.getDistanceConverter(c, DistanceUnit.NM);
 		Assert.assertEquals(distanceConverter2.from(), DistanceUnit.PIXEL);
 		Assert.assertEquals(distanceConverter2.to(), DistanceUnit.NM);
-		
-		Assert.assertEquals(distanceConverter.getFunction(), distanceConverter2.getFunction());
 
-		ArrayList<TypeConverter<IntensityUnit>> list = helper.getIntensityConverter(IntensityUnit.COUNT);
+		Assert.assertEquals(distanceConverter.getFunction(), distanceConverter2.getFunction());
+	}
+
+	@Test
+	public void canUpdateIntensityCalibration()
+	{
+		Calibration.Builder builder = Calibration.newBuilder();
+		IntensityCalibration.Builder intensityBuilder = builder.getIntensityCalibrationBuilder();
+
+		intensityBuilder.setUnit(IntensityUnit.PHOTON);
+		intensityBuilder.setGain(gain);
+
+		Calibration c = builder.build();
+
+		CalibrationHelper helper = new CalibrationHelper(c);
+
+		TypeConverter<IntensityUnit> intensityConverter = helper.getIntensityConverter(IntensityUnit.COUNT);
+		Assert.assertEquals(intensityConverter.from(), IntensityUnit.PHOTON);
+		Assert.assertEquals(intensityConverter.to(), IntensityUnit.COUNT);
+		Assert.assertEquals(helper.getCalibration().getIntensityCalibration().getUnit(), IntensityUnit.COUNT);
+
+		TypeConverter<IntensityUnit> intensityConverter2 = CalibrationHelper.getIntensityConverter(c,
+				IntensityUnit.COUNT);
+		Assert.assertEquals(intensityConverter2.from(), IntensityUnit.PHOTON);
+		Assert.assertEquals(intensityConverter2.to(), IntensityUnit.COUNT);
+
+		Assert.assertEquals(intensityConverter.getFunction(), intensityConverter2.getFunction());
+	}
+
+	@Test
+	public void canUpdateDualIntensityCalibration()
+	{
+		Calibration.Builder builder = Calibration.newBuilder();
+		IntensityCalibration.Builder intensityBuilder = builder.getIntensityCalibrationBuilder();
+		CameraCalibration.Builder cameraBuilder = builder.getCameraCalibrationBuilder();
+
+		intensityBuilder.setUnit(IntensityUnit.PHOTON);
+		intensityBuilder.setGain(gain);
+		cameraBuilder.setBias(bias);
+
+		Calibration c = builder.build();
+
+		CalibrationHelper helper = new CalibrationHelper(c);
+
+		ArrayList<TypeConverter<IntensityUnit>> list = helper.getDualIntensityConverter(IntensityUnit.COUNT);
 		Assert.assertEquals(list.get(0).from(), IntensityUnit.PHOTON);
 		Assert.assertEquals(list.get(0).to(), IntensityUnit.COUNT);
 		Assert.assertEquals(list.get(1).from(), IntensityUnit.PHOTON);
 		Assert.assertEquals(list.get(1).to(), IntensityUnit.COUNT);
 		Assert.assertEquals(helper.getCalibration().getIntensityCalibration().getUnit(), IntensityUnit.COUNT);
 
-		ArrayList<TypeConverter<IntensityUnit>> list2 = CalibrationHelper.getIntensityConverter(c, IntensityUnit.COUNT);
+		ArrayList<TypeConverter<IntensityUnit>> list2 = CalibrationHelper.getDualIntensityConverter(c,
+				IntensityUnit.COUNT);
 		Assert.assertEquals(list2.get(0).from(), IntensityUnit.PHOTON);
 		Assert.assertEquals(list2.get(0).to(), IntensityUnit.COUNT);
 		Assert.assertEquals(list2.get(1).from(), IntensityUnit.PHOTON);
@@ -69,6 +103,19 @@ public class CalibrationHelperTest
 
 		Assert.assertEquals(list.get(0).getFunction(), list2.get(0).getFunction());
 		Assert.assertEquals(list.get(1).getFunction(), list2.get(1).getFunction());
+	}
+
+	@Test
+	public void canUpdateAngleCalibration()
+	{
+		Calibration.Builder builder = Calibration.newBuilder();
+		PSFCalibration.Builder psfBuilder = builder.getPsfCalibrationBuilder();
+
+		psfBuilder.setAngleUnit(AngleUnit.RADIAN);
+
+		Calibration c = builder.build();
+
+		CalibrationHelper helper = new CalibrationHelper(c);
 
 		TypeConverter<AngleUnit> angleConverter = helper.getAngleConverter(AngleUnit.DEGREE);
 		Assert.assertEquals(angleConverter.from(), AngleUnit.RADIAN);
@@ -78,7 +125,7 @@ public class CalibrationHelperTest
 		TypeConverter<AngleUnit> angleConverter2 = CalibrationHelper.getAngleConverter(c, AngleUnit.DEGREE);
 		Assert.assertEquals(angleConverter2.from(), AngleUnit.RADIAN);
 		Assert.assertEquals(angleConverter2.to(), AngleUnit.DEGREE);
-		
+
 		Assert.assertEquals(angleConverter.getFunction(), angleConverter2.getFunction());
 	}
 }

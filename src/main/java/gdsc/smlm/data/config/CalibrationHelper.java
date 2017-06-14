@@ -85,6 +85,32 @@ public class CalibrationHelper
 	}
 
 	/**
+	 * Gets an intensity converters to update values.
+	 * <p>
+	 * If the conversion is not possible then an exception is thrown.
+	 * <p>
+	 * If a converter if successfully created then the instance calibration will be updated.
+	 *
+	 * @param toIntensityUnit
+	 *            the intensity unit
+	 * @return the intensity converter
+	 * @throws ConversionException
+	 *             if a converter cannot be created
+	 */
+	public TypeConverter<IntensityUnit> getIntensityConverter(IntensityUnit toIntensityUnit)
+	{
+		if (toIntensityUnit != null && calibrationBuilder.hasIntensityCalibration())
+		{
+			IntensityCalibration.Builder intensityCalibration = calibrationBuilder.getIntensityCalibrationBuilder();
+			TypeConverter<IntensityUnit> c = UnitConverterFactory.createConverter(intensityCalibration.getUnit(),
+					toIntensityUnit, intensityCalibration.getGain());
+			intensityCalibration.setUnit(toIntensityUnit);
+			return c;
+		}
+		throw new ConversionException();
+	}
+
+	/**
 	 * Gets intensity converters to update values.
 	 * <p>
 	 * If the conversion is not possible then an exception is thrown.
@@ -100,7 +126,7 @@ public class CalibrationHelper
 	 * @throws ConversionException
 	 *             if a converter cannot be created
 	 */
-	public ArrayList<TypeConverter<IntensityUnit>> getIntensityConverter(IntensityUnit toIntensityUnit)
+	public ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverter(IntensityUnit toIntensityUnit)
 	{
 		if (toIntensityUnit != null && calibrationBuilder.hasIntensityCalibration())
 		{
@@ -177,7 +203,30 @@ public class CalibrationHelper
 		throw new ConversionException();
 	}
 
-	// Fix these
+	/**
+	 * Gets an intensity converters to update values.
+	 * <p>
+	 * If the conversion is not possible then an exception is thrown.
+	 *
+	 * @param calibration
+	 *            the calibration
+	 * @param toIntensityUnit
+	 *            the intensity unit
+	 * @return the intensity converter
+	 * @throws ConversionException
+	 *             if a converter cannot be created
+	 */
+	public static TypeConverter<IntensityUnit> getIntensityConverter(Calibration calibration,
+			IntensityUnit toIntensityUnit)
+	{
+		if (toIntensityUnit != null && calibration.hasIntensityCalibration())
+		{
+			IntensityCalibration intensityCalibration = calibration.getIntensityCalibration();
+			return UnitConverterFactory.createConverter(intensityCalibration.getUnit(), toIntensityUnit,
+					intensityCalibration.getGain());
+		}
+		throw new ConversionException();
+	}
 
 	/**
 	 * Gets intensity converters to update values.
@@ -195,7 +244,7 @@ public class CalibrationHelper
 	 * @throws ConversionException
 	 *             if a converter cannot be created
 	 */
-	public static ArrayList<TypeConverter<IntensityUnit>> getIntensityConverter(Calibration calibration,
+	public static ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverter(Calibration calibration,
 			IntensityUnit toIntensityUnit)
 	{
 		if (toIntensityUnit != null && calibration.hasIntensityCalibration())
@@ -269,6 +318,30 @@ public class CalibrationHelper
 	}
 
 	/**
+	 * Gets an intensity converter to update values.
+	 * <p>
+	 * If the calibration is already in the given units or conversion is not possible
+	 * then an identity converter will be returned.
+	 * <p>
+	 * If a converter if successfully created then the instance calibration will be updated.
+	 *
+	 * @param toIntensityUnit
+	 *            the intensity unit
+	 * @return the intensity converter
+	 */
+	public TypeConverter<IntensityUnit> getIntensityConverterSafe(IntensityUnit toIntensityUnit)
+	{
+		try
+		{
+			return getIntensityConverter(toIntensityUnit);
+		}
+		catch (ConversionException e)
+		{
+			return new IdentityTypeConverter<IntensityUnit>(null);
+		}
+	}
+
+	/**
 	 * Gets intensity converters to update values.
 	 * <p>
 	 * If the calibration is already in the given units or conversion is not possible
@@ -283,11 +356,11 @@ public class CalibrationHelper
 	 *            the intensity unit
 	 * @return the intensity converters (gain, gain + bias)
 	 */
-	public ArrayList<TypeConverter<IntensityUnit>> getIntensityConverterSafe(IntensityUnit toIntensityUnit)
+	public ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverterSafe(IntensityUnit toIntensityUnit)
 	{
 		try
 		{
-			return getIntensityConverter(toIntensityUnit);
+			return getDualIntensityConverter(toIntensityUnit);
 		}
 		catch (ConversionException e)
 		{
@@ -348,7 +421,30 @@ public class CalibrationHelper
 		}
 	}
 
-	// Fix these
+	/**
+	 * Gets an intensity converter to update values.
+	 * <p>
+	 * If the calibration is already in the given units or conversion is not possible
+	 * then an identity converter will be returned.
+	 *
+	 * @param calibration
+	 *            the calibration
+	 * @param toIntensityUnit
+	 *            the intensity unit
+	 * @return the intensity converter
+	 */
+	public static TypeConverter<IntensityUnit> getIntensityConverterSafe(Calibration calibration,
+			IntensityUnit toIntensityUnit)
+	{
+		try
+		{
+			return getIntensityConverter(calibration, toIntensityUnit);
+		}
+		catch (ConversionException e)
+		{
+			return new IdentityTypeConverter<IntensityUnit>(null);
+		}
+	}
 
 	/**
 	 * Gets intensity converters to update values.
@@ -365,12 +461,12 @@ public class CalibrationHelper
 	 *            the intensity unit
 	 * @return the intensity converters (gain, gain + bias)
 	 */
-	public static ArrayList<TypeConverter<IntensityUnit>> getIntensityConverterSafe(Calibration calibration,
+	public static ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverterSafe(Calibration calibration,
 			IntensityUnit toIntensityUnit)
 	{
 		try
 		{
-			return getIntensityConverter(calibration, toIntensityUnit);
+			return getDualIntensityConverter(calibration, toIntensityUnit);
 		}
 		catch (ConversionException e)
 		{
