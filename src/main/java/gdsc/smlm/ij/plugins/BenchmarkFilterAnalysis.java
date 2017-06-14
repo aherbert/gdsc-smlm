@@ -71,7 +71,6 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.engine.ResultGridManager;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -92,6 +91,7 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResultGridManager;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.CoordinateStore;
 import gdsc.smlm.results.filter.CoordinateStoreFactory;
@@ -469,9 +469,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			final boolean[] matched = new boolean[nActual];
 			actual = filterUsingBorder(actual);
 			// We could use distanceInPixels for the resolution. Using a bigger size may allow the 
-			// different fit locations to be inthe same cell and so the grid manager can use it's cache.
+			// different fit locations to be in the same cell and so the grid manager can use it's cache.
 			final double resolution = 2 * distanceInPixels;
-			final ResultGridManager resultGrid = new ResultGridManager(actual, resolution);
+			final PeakResultGridManager resultGrid = new PeakResultGridManager(actual, resolution);
 
 			final MultiPathFitResult[] multiPathFitResults = new MultiPathFitResult[result.fitResult.length];
 			int size = 0;
@@ -529,7 +529,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		 * @return true, if the fit status was ok
 		 */
 		private boolean score(int n, int set, final gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult,
-				final ResultGridManager resultGrid, final boolean[] matched)
+				final PeakResultGridManager resultGrid, final boolean[] matched)
 		{
 			if (fitResult != null && fitResult.status == 0)
 			{
@@ -565,7 +565,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					coordinateStore.addToQueue(peak.getX(), peak.getY());
 
 					// Compare to actual results
-					// We do this using the ResultGridManager to generate a sublist to score against
+					// We do this using the PeakResultGridManager to generate a sublist to score against
 					final PeakResult[] actual = resultGrid.getPeakResultNeighbours((int) peak.getX(),
 							(int) peak.getY());
 					if (actual.length == 0)
