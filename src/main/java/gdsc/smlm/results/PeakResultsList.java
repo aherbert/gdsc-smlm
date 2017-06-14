@@ -27,18 +27,19 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	private List<PeakResults> results = new LinkedList<PeakResults>();
 
 	/**
-	 * Add a result format to the output. If a PeakResultsList is passed then it will be 
-	 * separated into the child PeakResults instances. This will break the size() function 
+	 * Add a result format to the output. If a PeakResultsList is passed then it will be
+	 * separated into the child PeakResults instances. This will break the size() function
 	 * of any input PeakResultsList since only the children will remain within this list.
 	 * <p>
-	 * Sets the settings (source and configuration) of the child to the same as this list 
+	 * Sets the settings (source and configuration) of the child to the same as this list
+	 * 
 	 * @param peakResults
 	 */
 	public void addOutput(PeakResults peakResults)
 	{
 		if (peakResults instanceof PeakResultsList)
 		{
-			for (PeakResults r : ((PeakResultsList)peakResults).results)
+			for (PeakResults r : ((PeakResultsList) peakResults).results)
 				addOutput(r);
 		}
 		else
@@ -46,8 +47,8 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 			peakResults.copySettings(this);
 			results.add(peakResults);
 		}
-	}	
-	
+	}
+
 	/**
 	 * @return The number of outputs contained in the list
 	 */
@@ -55,7 +56,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	{
 		return results.size();
 	}
-	
+
 	/**
 	 * @return The outputs
 	 */
@@ -63,8 +64,10 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	{
 		return results.toArray(new PeakResults[results.size()]);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#begin()
 	 */
 	public void begin()
@@ -74,7 +77,9 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 			peakResults.begin();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
 	 */
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
@@ -82,7 +87,14 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	{
 		size.incrementAndGet();
 		for (PeakResults peakResults : results)
-			peakResults.add(peak, origX, origY, origValue, error, noise, params, paramsStdDev);		
+			peakResults.add(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
+	}
+
+	public void add(PeakResult result)
+	{
+		size.incrementAndGet();
+		for (PeakResults peakResults : results)
+			peakResults.add(result);
 	}
 
 	public void addAll(Collection<PeakResult> results)
@@ -91,8 +103,10 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 		for (PeakResults peakResults : this.results)
 			peakResults.addAll(results);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#size()
 	 */
 	public int size()
@@ -100,7 +114,9 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 		return size.intValue();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#end()
 	 */
 	public void end()
@@ -109,7 +125,9 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 			peakResults.end();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
 	public boolean isActive()
@@ -118,5 +136,25 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 			if (peakResults.isActive())
 				return true;
 		return false;
+	}
+
+	/**
+	 * Checks all the results in the list. If any are not thread safe then they are wrapped with a
+	 * SynchronizedPeakResults container.
+	 *
+	 * @return the thread safe list
+	 */
+	public PeakResultsList getThreadSafeList()
+	{
+		PeakResultsList newList = new PeakResultsList();
+		for (PeakResults peakResults : this.results)
+		{
+			if (!(peakResults instanceof ThreadSafePeakResults))
+			{
+				peakResults = new SynchronizedPeakResults(peakResults);
+			}
+			newList.addOutput(peakResults);
+		}
+		return newList;
 	}
 }

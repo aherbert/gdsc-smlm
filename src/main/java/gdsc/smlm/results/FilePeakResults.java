@@ -16,7 +16,7 @@ import gdsc.smlm.data.config.UnitConverterFactory;
 /**
  * Saves the fit results to file
  */
-public abstract class FilePeakResults extends AbstractPeakResults
+public abstract class FilePeakResults extends AbstractPeakResults implements ThreadSafePeakResults
 {
 	/** Converter to change the distances to nm. It is created in {@link #begin()} but may be null. */
 	protected TypeConverter<DistanceUnit> toNMConverter;
@@ -78,6 +78,8 @@ public abstract class FilePeakResults extends AbstractPeakResults
 
 	/**
 	 * Write the result and increment the size by the count.
+	 * <p>
+	 * This method is synchronised to ensure that the change to the size or the output file are thread safe.
 	 *
 	 * @param count
 	 *            the count

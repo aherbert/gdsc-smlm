@@ -199,7 +199,6 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		writeResult(1, spot);
 	}
 
-	@Override
 	public void add(PeakResult result)
 	{
 		final float[] params = result.params;

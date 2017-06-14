@@ -33,8 +33,10 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  *---------------------------------------------------------------------------*/
 
 /**
- * Stores peak results in memory. The PeakResults interface add methods are thread safe as they are synchronized. There
- * are equivalent non-synchronized methods.
+ * Stores peak results in memory.
+ * <p>
+ * The PeakResults interface add methods are not-thread safe. The results should be wrapped in a SynchronizedPeakResults
+ * object if using on multiple threads.
  */
 public class MemoryPeakResults extends AbstractPeakResults implements Cloneable, Iterable<PeakResult>
 {
@@ -83,17 +85,21 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 * @param result
 	 *            the result
 	 */
-	@Override
 	public void add(PeakResult result)
 	{
 		add(result);
 	}
 
 	/**
-	 * Add all results. Not synchronized.
+	 * Add all results.
+	 * <p>
+	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
 	 * 
+	 * {@inheritDoc}
+	 * 
+	 * @see gdsc.utils.fitting.results.PeakResults#addAll(java.util.Collection)
 	 */
-	public void addAllf(Collection<PeakResult> results)
+	public void addAll(Collection<PeakResult> results)
 	{
 		this.results.addAll(results);
 	}
@@ -314,64 +320,18 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	}
 
 	/**
-	 * Add a result. Synchronized.
+	 * Add a result. 
+	 * <p>
+	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
 	 * 
 	 * {@inheritDoc}
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
 	 */
-	public synchronized void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
+	public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
 			float[] params, float[] paramsStdDev)
 	{
 		add(new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev));
-	}
-
-	/**
-	 * Add a result. Not synchronized.
-	 *
-	 * @param peak
-	 *            the peak (e.g. frame number)
-	 * @param origX
-	 *            the original X position
-	 * @param origY
-	 *            the original Y position
-	 * @param origValue
-	 *            the original value
-	 * @param error
-	 *            the error
-	 * @param noise
-	 *            the noise
-	 * @param params
-	 *            the parameters
-	 * @param paramsStdDev
-	 *            the parameters standard deviation (or null)
-	 */
-	public void addf(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev)
-	{
-		add(new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev));
-	}
-
-	/**
-	 * Add all results. Synchronized.
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#addAll(java.util.Collection)
-	 */
-	public synchronized void addAll(Collection<PeakResult> results)
-	{
-		addAllf(results);
-	}
-
-	/**
-	 * Add a result. Synchronized.
-	 * 
-	 * @param result
-	 */
-	public synchronized void addSync(PeakResult result)
-	{
-		add(result);
 	}
 
 	/*
@@ -1249,7 +1209,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	/**
 	 * Fix zero background to the given background.
 	 *
-	 * @param newBackground the  new background
+	 * @param newBackground
+	 *            the new background
 	 */
 	public void setZeroBackground(float newBackground)
 	{
@@ -1258,6 +1219,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			final PeakResult r = get(i);
 			if (r.params[0] == 0)
 				r.params[0] = newBackground;
-		}		
+		}
 	}
 }

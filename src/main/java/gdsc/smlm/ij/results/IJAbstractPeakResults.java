@@ -2,6 +2,7 @@ package gdsc.smlm.ij.results;
 
 import gdsc.smlm.results.AbstractPeakResults;
 import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.ThreadSafePeakResults;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -19,7 +20,7 @@ import gdsc.smlm.results.Calibration;
 /**
  * Wrap the fit results to provide convenience methods
  */
-public abstract class IJAbstractPeakResults extends AbstractPeakResults
+public abstract class IJAbstractPeakResults extends AbstractPeakResults implements ThreadSafePeakResults
 {
 	public void setCalibration(double nmPerPixel, double gain)
 	{

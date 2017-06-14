@@ -112,7 +112,9 @@ import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsReader;
+import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.utils.XmlUtils;
 import gnu.trove.set.hash.TIntHashSet;
@@ -1791,7 +1793,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setCalibration(c);
 		results.setSortAfterEnd(true);
 		results.begin();
-
+		
 		maxT = localisationSets.get(localisationSets.size() - 1).getTime();
 
 		// Display image
@@ -1818,7 +1820,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// blocking queue.
 		// http://stackoverflow.com/questions/1800317/impossible-to-make-a-cached-thread-pool-with-a-size-limit
 		// ExecutorService threadPool = Executors.newCachedThreadPool();
-		ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+		int threadCount = Prefs.getThreads();
+		PeakResults syncResults = SynchronizedPeakResults.create(results, threadCount);
+		ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
 		List<Future<?>> futures = new LinkedList<Future<?>>();
 
 		// Count all the frames to process
@@ -1839,7 +1843,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				lastT = l.getTime();
 				futures.add(threadPool.submit(
 						new ImageGenerator(localisationSets, newLocalisations, i, lastT, createPSFModel(imagePSFModel),
-								results, stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
+								syncResults, stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
 			}
 			i++;
 		}
@@ -1860,7 +1864,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (stack.getPixels(t) == null)
 			{
 				futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, maxT, t, null,
-						results, stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
+						syncResults, stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
 			}
 		}
 
@@ -2161,14 +2165,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final int startIndex;
 		final int t;
 		final PSFModel psfModel;
-		final MemoryPeakResults results;
+		final PeakResults results;
 		final ImageStack stack;
 		final boolean poissonNoise;
 		final RandomDataGenerator random;
 
 		public ImageGenerator(final List<LocalisationModelSet> localisationSets,
 				List<LocalisationModelSet> newLocalisations, int startIndex, int t, PSFModel psfModel,
-				MemoryPeakResults results, ImageStack stack, boolean poissonNoise, RandomDataGenerator random)
+				PeakResults results, ImageStack stack, boolean poissonNoise, RandomDataGenerator random)
 		{
 			this.localisations = localisationSets;
 			this.newLocalisations = newLocalisations;
@@ -2390,7 +2394,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					newLocalisations.add(localisationSet);
 					// Use extended result to store the ID.
 					// Store the z position in the error.
-					results.addSync(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoise,
+					results.add(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoise,
 							params, null, localisationSet.getId()));
 				}
 

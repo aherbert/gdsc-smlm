@@ -2427,7 +2427,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	 */
 	public FitEngine createFitEngine(int numberOfThreads, FitQueue queue, int queueSize)
 	{
-		PeakResults r = results;
+		// Ensure thread safety
+		PeakResults r = (numberOfThreads > 1) ? results.getThreadSafeList() : results;
 		if (results.numberOfOutputs() == 1)
 			// Reduce to single object for speed
 			r = results.toArray()[0];

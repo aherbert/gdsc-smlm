@@ -56,7 +56,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	{
 		// Nothing to do as we write direct to the file output stream
 	}
-	
+
 	@Override
 	protected void write(String data)
 	{
@@ -208,6 +208,30 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			for (int i = 0; i < 7; i++)
 				buffer.writeFloat(paramsStdDev[i]);
 		}
+	}
+
+	public void add(PeakResult result)
+	{
+		if (fos == null)
+			return;
+
+		// Buffer the output for the synchronized write method
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		DataOutputStream buffer = new DataOutputStream(bytes);
+
+		try
+		{
+			addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.origX, result.origY,
+					result.origValue, result.error, result.noise, result.params, result.paramsStdDev);
+			buffer.flush();
+		}
+		catch (IOException e)
+		{
+			// Do nothing - This result will not be added to the file
+			return;
+		}
+
+		writeResult(1, bytes.toByteArray());
 	}
 
 	public void addAll(Collection<PeakResult> results)

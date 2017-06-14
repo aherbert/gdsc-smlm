@@ -853,6 +853,12 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	{
 		return size() >= settings.numberOfPeaks;
 	}
+	
+	public void add(PeakResult result)
+	{
+		add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
+				result.getParameters(), result.getParameterDeviations());
+	}
 
 	public synchronized void addAll(Collection<PeakResult> results)
 	{

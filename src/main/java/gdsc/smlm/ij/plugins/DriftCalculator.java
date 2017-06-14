@@ -13,7 +13,6 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.core.ij.AlignImagesFFT;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -574,9 +573,8 @@ public class DriftCalculator implements PlugIn
 			Utils.log("Applying drift correction to the results set: " + results.getName());
 			for (PeakResult r : results)
 			{
-				float[] params = r.getParameters();
-				params[Gaussian2DFunction.X_POSITION] += dx[r.getFrame()];
-				params[Gaussian2DFunction.Y_POSITION] += dy[r.getFrame()];
+				r.setXPosition((float) (r.getXPosition() + dx[r.getFrame()]));
+				r.setYPosition((float) (r.getYPosition() + dy[r.getFrame()]));
 			}
 		}
 		else
@@ -595,10 +593,9 @@ public class DriftCalculator implements PlugIn
 					if (r.getFrame() < interpolationStart || r.getFrame() > interpolationEnd)
 						continue;
 				}
-				float[] params = r.getParameters().clone();
-				params[Gaussian2DFunction.X_POSITION] += dx[r.getFrame()];
-				params[Gaussian2DFunction.Y_POSITION] += dy[r.getFrame()];
-				newResults.addf(r.getFrame(), r.origX, r.origY, r.origValue, r.error, r.noise, params, r.getParameterDeviations());
+				r.setXPosition((float) (r.getXPosition() + dx[r.getFrame()]));
+				r.setYPosition((float) (r.getYPosition() + dy[r.getFrame()]));
+				newResults.add(r);
 			}
 		}
 	}

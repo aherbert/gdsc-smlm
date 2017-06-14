@@ -237,7 +237,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
 	{
-		if (out == null)
+		if (fos == null)
 			return;
 
 		StringBuilder sb = new StringBuilder();
@@ -339,9 +339,63 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			sb.append('\t').append(f);
 	}
 
+	public void add(PeakResult result)
+	{
+		if (fos == null)
+			return;
+		
+		StringBuilder sb = new StringBuilder();
+		add(sb, result);
+		writeResult(1, sb.toString());
+	}
+	
+	private void add(StringBuilder sb, PeakResult result)
+	{
+		addStandardData(sb, result.getId(), result.getFrame(), result.getEndFrame(), result.origX, result.origY,
+				result.origValue, result.error, result.noise);
+		
+		// Add the parameters		
+		//@formatter:off
+		final float[] params = result.params;
+		if (isShowDeviations())
+		{
+			final float[] paramsStdDev = (result.paramsStdDev != null) ? result.paramsStdDev : new float[7];
+			addResult(sb, 
+					mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
+					mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
+					mapS(params[Gaussian2DFunction.SHAPE]), mapS(paramsStdDev[Gaussian2DFunction.SHAPE]), 
+					mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
+					mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
+					mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
+					mapD(params[Gaussian2DFunction.Y_SD]), mapD(paramsStdDev[Gaussian2DFunction.Y_SD]));
+		}
+		else
+		{
+			addResult(sb, 
+					mapB(params[Gaussian2DFunction.BACKGROUND]),
+					mapI(params[Gaussian2DFunction.SIGNAL]),  
+					mapS(params[Gaussian2DFunction.SHAPE]),  
+					mapD(params[Gaussian2DFunction.X_POSITION]), 
+					mapD(params[Gaussian2DFunction.Y_POSITION]), 
+					mapD(params[Gaussian2DFunction.X_SD]), 
+					mapD(params[Gaussian2DFunction.Y_SD]));
+		}
+		//@formatter:on
+
+		if (canComputePrecision)
+		{
+			double s = toNMConverter.convert(result.getSD());
+			float precision = (float) PeakResult.getPrecision(nmPerPixel, s,
+					toPhotonConverter.convert(result.params[Gaussian2DFunction.SIGNAL]),
+					toPhotonConverter.convert(result.noise), emCCD);
+			addResult(sb, precision);
+		}
+		sb.append('\n');
+	}
+	
 	public void addAll(Collection<PeakResult> results)
 	{
-		if (out == null)
+		if (fos == null)
 			return;
 
 		int count = 0;
@@ -349,47 +403,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		StringBuilder sb = new StringBuilder();
 		for (PeakResult result : results)
 		{
-			// Add the standard data
-			addStandardData(sb, result.getId(), result.getFrame(), result.getEndFrame(), result.origX, result.origY,
-					result.origValue, result.error, result.noise);
-
-			// Add the parameters		
-			//@formatter:off
-			final float[] params = result.params;
-			if (isShowDeviations())
-			{
-				final float[] paramsStdDev = (result.paramsStdDev != null) ? result.paramsStdDev : new float[7];
-				addResult(sb, 
-						mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
-						mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
-						mapS(params[Gaussian2DFunction.SHAPE]), mapS(paramsStdDev[Gaussian2DFunction.SHAPE]), 
-						mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
-						mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
-						mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
-						mapD(params[Gaussian2DFunction.Y_SD]), mapD(paramsStdDev[Gaussian2DFunction.Y_SD]));
-			}
-			else
-			{
-				addResult(sb, 
-						mapB(params[Gaussian2DFunction.BACKGROUND]),
-						mapI(params[Gaussian2DFunction.SIGNAL]),  
-						mapS(params[Gaussian2DFunction.SHAPE]),  
-						mapD(params[Gaussian2DFunction.X_POSITION]), 
-						mapD(params[Gaussian2DFunction.Y_POSITION]), 
-						mapD(params[Gaussian2DFunction.X_SD]), 
-						mapD(params[Gaussian2DFunction.Y_SD]));
-			}
-			//@formatter:on
-
-			if (canComputePrecision)
-			{
-				double s = toNMConverter.convert(result.getSD());
-				float precision = (float) PeakResult.getPrecision(nmPerPixel, s,
-						toPhotonConverter.convert(result.params[Gaussian2DFunction.SIGNAL]),
-						toPhotonConverter.convert(result.noise), emCCD);
-				addResult(sb, precision);
-			}
-			sb.append('\n');
+			add(sb, result);
 
 			// Flush the output to allow for very large input lists
 			if (++count >= 20)
@@ -413,7 +427,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 */
 	public void addCluster(Cluster cluster)
 	{
-		if (out == null)
+		if (fos == null)
 			return;
 		if (cluster.size() > 0)
 		{
@@ -459,7 +473,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 */
 	public void addTrace(Trace trace)
 	{
-		if (out == null)
+		if (fos == null)
 			return;
 		if (trace.size() > 0)
 		{
@@ -481,7 +495,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 */
 	public void addComment(String text)
 	{
-		if (out == null)
+		if (fos == null)
 			return;
 		// Ensure comments are preceded by the comment character
 		if (!text.startsWith("#"))
@@ -496,7 +510,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	protected synchronized void writeResult(int count, String result)
 	{
 		// In case another thread caused the output to close
-		if (out == null)
+		if (fos == null)
 			return;
 		size += count;
 		try

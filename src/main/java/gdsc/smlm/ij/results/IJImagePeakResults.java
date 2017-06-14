@@ -292,7 +292,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			displayFlags &= ~DISPLAY_WEIGHTED;
 			displayFlags |= DISPLAY_REPLACE;
 		}
-		
+
 		// Mapped values (above zero) cannot use equalisation or be negative
 		if ((displayFlags & DISPLAY_MAPPED) != 0)
 		{
@@ -985,6 +985,17 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	private void resetData()
 	{
 		Arrays.fill(data, EMPTY);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResults#add(gdsc.smlm.results.PeakResult)
+	 */
+	public void add(PeakResult result)
+	{
+		add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
+				result.getParameters(), null);
 	}
 
 	/*

@@ -44,6 +44,8 @@ import gdsc.smlm.results.Cluster.CentroidMethod;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResults;
+import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
@@ -1745,8 +1747,10 @@ public class TraceMolecules implements PlugIn
 		refitResults.setName(results.getName() + " Trace Fit");
 		refitResults.setSortAfterEnd(true);
 		refitResults.begin();
+		int threadCount = Prefs.getThreads();
+		PeakResults syncResults = SynchronizedPeakResults.create(refitResults, threadCount);
 		// No border since we know where the peaks are and we must not miss them due to truncated searching 
-		FitEngine engine = new FitEngine(config, refitResults, Prefs.getThreads(), FitQueue.BLOCKING);
+		FitEngine engine = new FitEngine(config, syncResults, threadCount, FitQueue.BLOCKING);
 
 		// Either : Only fit the centroid
 		// or     : Extract a bigger region, allowing all fits to run as normal and then 
@@ -1773,7 +1777,7 @@ public class TraceMolecules implements PlugIn
 			{
 				singles++;
 				// Use the synchronized method to avoid thread clashes with the FitEngine
-				refitResults.addSync(trace.getHead());
+				syncResults.add(trace.getHead());
 				continue;
 			}
 

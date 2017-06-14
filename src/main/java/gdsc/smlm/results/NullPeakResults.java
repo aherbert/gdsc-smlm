@@ -16,38 +16,36 @@ import java.util.Collection;
  *---------------------------------------------------------------------------*/
 
 /**
- * Does nothing for any of the inherited abstract methods
+ * Does nothing for any of the PeakResults methods
  */
-public class NullPeakResults extends AbstractPeakResults
+public class NullPeakResults extends AbstractPeakResults implements ThreadSafePeakResults
 {
-	@Override
 	public void begin()
 	{
 	}
 
-	@Override
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
 	{
 	}
+	
+	public void add(PeakResult result)
+	{
+	}
 
-	@Override
 	public void addAll(Collection<PeakResult> results)
 	{
 	}
 
-	@Override
 	public int size()
 	{
 		return 0;
 	}
 
-	@Override
 	public void end()
 	{
 	}
 
-	@Override
 	public boolean isActive()
 	{
 		return true;

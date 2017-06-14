@@ -14,7 +14,6 @@ package gdsc.smlm.results;
  *---------------------------------------------------------------------------*/
 
 import java.awt.Rectangle;
-import java.util.Collection;
 
 /**
  * Abstract base class for peak results.
@@ -30,64 +29,6 @@ public abstract class AbstractPeakResults implements PeakResults
 	protected Calibration calibration = null;
 	protected String configuration = "";
 	protected String name = "";
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#begin()
-	 */
-	public abstract void begin();
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
-	 */
-	public abstract void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
-			float[] params, float[] paramsStdDev);
-
-	/**
-	 * Adds the result.
-	 * <p>
-	 * Convenience method that just calls {@link #add(int, int, int, float, double, float, float[], float[])} passing
-	 * the properties from the PeakResult. Any other properties in derived classes of PeakResult will be lost.
-	 *
-	 * @param result
-	 *            the result
-	 */
-	public void add(PeakResult result)
-	{
-		add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise, result.params,
-				result.paramsStdDev);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#addAll(java.util.Collection)
-	 */
-	public abstract void addAll(Collection<PeakResult> results);
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#size()
-	 */
-	public abstract int size();
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#end()
-	 */
-	public abstract void end();
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
-	 */
-	abstract public boolean isActive();
 
 	/*
 	 * (non-Javadoc)

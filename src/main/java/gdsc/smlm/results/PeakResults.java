@@ -50,9 +50,16 @@ public interface PeakResults
 			float[] paramsStdDev);
 
 	/**
-	 * Add a series of fitted peak results
-	 * 
-	 * @param results
+	 * Add a fitted peak result
+	 *
+	 * @param result the result
+	 */
+	public void add(PeakResult result);
+	
+	/**
+	 * Add a series of fitted peak results.
+	 *
+	 * @param results the results
 	 */
 	public void addAll(Collection<PeakResult> results);
 

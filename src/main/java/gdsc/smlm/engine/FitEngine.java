@@ -62,7 +62,7 @@ public class FitEngine
 	 * @param config
 	 *            The fit configuration
 	 * @param results
-	 *            Output results
+	 *            Output results (must be thread safe if using multiple threads)
 	 * @param threads
 	 *            The number of threads to use (set to 1 if less than 1)
 	 * @param queueType
@@ -79,7 +79,7 @@ public class FitEngine
 	 * @param config
 	 *            The fit configuration
 	 * @param results
-	 *            Output results
+	 *            Output results (must be thread safe if using multiple threads)
 	 * @param threads
 	 *            The number of threads to use (set to 1 if less than 1)
 	 * @param queueType

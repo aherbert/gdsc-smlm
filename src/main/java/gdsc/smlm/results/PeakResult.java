@@ -109,16 +109,14 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Get the signal strength for the nth peak (i.e. the volume under the Gaussian peak, amplitude * 2 * pi * sx * sy)
-	 * 
-	 * @param peakId
-	 *            The peak number
-	 * @return The signal of the nth peak
+	 * Sets the signal.
+	 *
+	 * @param s
+	 *            the new signal
 	 */
-	public float getSignal(int peakId)
+	public void setSignal(float s)
 	{
-		final int index = peakId * 6 + Gaussian2DFunction.SIGNAL;
-		return (index < params.length) ? params[index] : 0;
+		params[Gaussian2DFunction.SIGNAL] = s;
 	}
 
 	/**
@@ -765,6 +763,17 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
+	 * Sets the background.
+	 *
+	 * @param b
+	 *            the new background
+	 */
+	public void setBackground(float b)
+	{
+		params[Gaussian2DFunction.BACKGROUND] = b;
+	}
+
+	/**
 	 * Get the amplitude for the first peak. Amplitude = Signal / (2*pi*sd0*sd1).
 	 * 
 	 * @return The amplitude for the first peak
@@ -802,11 +811,33 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
+	 * Sets the x position.
+	 *
+	 * @param x
+	 *            the new x position
+	 */
+	public void setXPosition(float x)
+	{
+		params[Gaussian2DFunction.X_POSITION] = x;
+	}
+
+	/**
 	 * @return The y position for the first peak
 	 */
 	public float getYPosition()
 	{
 		return params[Gaussian2DFunction.Y_POSITION];
+	}
+
+	/**
+	 * Sets the y position.
+	 *
+	 * @param y
+	 *            the new y position
+	 */
+	public void setYPosition(float y)
+	{
+		params[Gaussian2DFunction.Y_POSITION] = y;
 	}
 
 	/**
@@ -816,6 +847,17 @@ public class PeakResult implements Comparable<PeakResult>
 	{
 		// TODO - support z-position
 		return 0;
+	}
+
+	/**
+	 * Sets the z position.
+	 *
+	 * @param z
+	 *            the new z position
+	 */
+	public void setZPosition(float z)
+	{
+		// TODO - support z-position
 	}
 
 	/**

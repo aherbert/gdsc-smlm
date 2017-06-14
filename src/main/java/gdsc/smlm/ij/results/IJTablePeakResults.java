@@ -523,6 +523,12 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			tp.updateDisplay();
 		}
 	}
+	
+	public void add(PeakResult result)
+	{
+		addPeak(result.getFrame(), result.getEndFrame(), result.origX, result.origY, result.origValue, result.error,
+				result.noise, result.getParameters(), result.getParameterDeviations());
+	}
 
 	public void addAll(Collection<PeakResult> results)
 	{

@@ -60,6 +60,7 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -300,7 +301,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			final int y = (int) spot.getY();
 
 			MemoryPeakResults results = fitSpot(stack, width, height, x, y);
-			allResults.addAllf(results.getResults());
+			allResults.addAll(results.getResults());
 
 			if (results.size() < 5)
 			{
@@ -599,7 +600,9 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		MemoryPeakResults results = new MemoryPeakResults();
 		results.setSortAfterEnd(true);
 		results.begin();
-		FitEngine engine = new FitEngine(config, results, Prefs.getThreads(), FitQueue.BLOCKING);
+		int threadCount = Prefs.getThreads();
+		FitEngine engine = new FitEngine(config, SynchronizedPeakResults.create(results, threadCount), threadCount,
+				FitQueue.BLOCKING);
 
 		List<ParameterisedFitJob> jobItems = new ArrayList<ParameterisedFitJob>(stack.getSize());
 
@@ -1503,7 +1506,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	private double fitPSF(ImageStack psf, LoessInterpolator loess, int cz, double averageRange, double[][] fitCom)
 	{
 		IJ.showStatus("Fitting final PSF");
-		
+
 		// Note: Fitting the final PSF does not really work using MLE. This is because the noise model
 		// is not appropriate for a normalised PSF. 
 		if (fitConfig.getFitSolver() == FitSolver.MLE)
@@ -1517,8 +1520,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 				settings.setFitEngineConfiguration(config);
 				PeakFit.configureFitSolver(settings, null, false, false);
 			}
-		}			
-		
+		}
+
 		// Update the box radius since this is used in the fitSpot method.
 		boxRadius = psf.getWidth() / 2;
 		int x = boxRadius, y = boxRadius;

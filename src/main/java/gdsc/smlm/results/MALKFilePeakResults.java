@@ -189,7 +189,7 @@ public class MALKFilePeakResults extends FilePeakResults
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
 	{
-		if (out == null)
+		if (fos == null)
 			return;
 
 		StringBuilder sb = new StringBuilder(100);
@@ -211,10 +211,22 @@ public class MALKFilePeakResults extends FilePeakResults
 		sb.append(toPhotonConverter.convert(signal));
 		sb.append('\n');
 	}
+	
+	public void add(PeakResult result)
+	{
+		if (fos == null)
+			return;
+
+		StringBuilder sb = new StringBuilder(100);
+
+		addStandardData(sb, result.getXPosition(), result.getYPosition(), result.getFrame(), result.getSignal());
+
+		writeResult(1, sb.toString());
+	}
 
 	public void addAll(Collection<PeakResult> results)
 	{
-		if (out == null)
+		if (fos == null)
 			return;
 
 		int count = 0;
