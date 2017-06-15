@@ -5,6 +5,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.match.ClassificationResult;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.MemoryPeakResults;
 
 import java.util.List;
@@ -66,16 +67,86 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 */
 	public MemoryPeakResults filter(MemoryPeakResults results)
 	{
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
 		newResults.copySettings(results);
 		setup(results);
-		for (PeakResult peak : results.getResults())
+		results.forEach(new PeakResultProcedure()
 		{
-			if (accept(peak))
-				newResults.add(peak);
-		}
+			public void execute(PeakResult peak)
+			{
+				if (accept(peak))
+					newResults.add(peak);
+			}
+		});
 		end();
 		return newResults;
+	}
+
+	/**
+	 * Class to count filtering failures per frame.
+	 */
+	private static class Counter
+	{
+		private int count = 0;
+
+		/**
+		 * Reset the count
+		 */
+		void reset()
+		{
+			count = 0;
+		}
+
+		/**
+		 * Increment the count
+		 */
+		void increment()
+		{
+			count++;
+		}
+
+		/**
+		 * Increment the count by the value.
+		 *
+		 * @param value the value
+		 */
+		void increment(int value)
+		{
+			count += value;
+		}
+
+		/**
+		 * Get the value.
+		 *
+		 * @return the value
+		 */
+		public int value()
+		{
+			return count;
+		}
+	}
+
+	/**
+	 * Class to count filtering failures per frame.
+	 */
+	private static class FailCounter extends Counter
+	{
+		int frame = -1;
+
+		/**
+		 * Advance the frame. If this is a new frame then the fail count is reset.
+		 *
+		 * @param frame
+		 *            the frame
+		 */
+		void advance(int frame)
+		{
+			if (this.frame != frame)
+			{
+				this.frame = frame;
+				reset();
+			}
+		}
 	}
 
 	/**
@@ -89,43 +160,41 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @return the filtered results
 	 */
-	public MemoryPeakResults filter(MemoryPeakResults results, int failures)
+	public MemoryPeakResults filter(MemoryPeakResults results, final int failures)
 	{
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
+		final FailCounter counter = new FailCounter();
 		newResults.copySettings(results);
 		setup(results);
-		int frame = -1;
-		int failCount = 0;
-		for (PeakResult peak : results.getResults())
+		results.forEach(new PeakResultProcedure()
 		{
-			if (frame != peak.getFrame())
+			public void execute(PeakResult peak)
 			{
-				frame = peak.getFrame();
-				failCount = 0;
-			}
+				counter.advance(peak.getFrame());
 
-			// Reject all peaks if we have exceeded the fail count
-			final boolean isPositive;
-			if (failCount > failures)
-			{
-				isPositive = false;
-			}
-			else
-			{
-				// Otherwise assess the peak
-				isPositive = accept(peak);
-			}
+				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive;
+				if (counter.value() > failures)
+				{
+					isPositive = false;
+				}
+				else
+				{
+					// Otherwise assess the peak
+					isPositive = accept(peak);
+				}
 
-			if (isPositive)
-			{
-				failCount = 0;
-				newResults.add(peak);
+				if (isPositive)
+				{
+					counter.reset();
+					newResults.add(peak);
+				}
+				else
+				{
+					counter.increment();
+				}
 			}
-			else
-			{
-				failCount++;
-			}
-		}
+		});
 		end();
 		return newResults;
 	}
@@ -145,48 +214,51 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @return the filtered results
 	 */
-	public MemoryPeakResults filter2(MemoryPeakResults results, int failures)
+	public MemoryPeakResults filter2(MemoryPeakResults results, final int failures)
 	{
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
+		final FailCounter counter = new FailCounter();
 		newResults.copySettings(results);
 		setup(results);
-		int frame = -1;
-		int failCount = 0;
-		for (PeakResult peak : results.getResults())
+		results.forEach(new PeakResultProcedure()
 		{
-			if (frame != peak.getFrame())
+			public void execute(PeakResult peak)
 			{
-				frame = peak.getFrame();
-				failCount = 0;
-			}
+				counter.advance(peak.getFrame());
 
-			failCount += peak.origY;
+				counter.increment(peak.origY);
 
-			// Reject all peaks if we have exceeded the fail count
-			final boolean isPositive;
-			if (failCount > failures)
-			{
-				isPositive = false;
-			}
-			else
-			{
-				// Otherwise assess the peak
-				isPositive = accept(peak);
-			}
+				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive;
+				if (counter.value() > failures)
+				{
+					isPositive = false;
+				}
+				else
+				{
+					// Otherwise assess the peak
+					isPositive = accept(peak);
+				}
 
-			if (isPositive)
-			{
-				failCount = 0;
-				newResults.add(peak);
+				if (isPositive)
+				{
+					counter.reset();
+					newResults.add(peak);
+				}
+				else
+				{
+					counter.increment();
+				}
 			}
-			else
-			{
-				failCount++;
-			}
-		}
+		});
 		end();
 		return newResults;
 	}
+
+	private final static int FP = 0;
+	private final static int FN = 1;
+	private final static int TP = 2;
+	private final static int TN = 3;
 
 	/**
 	 * Filter the results
@@ -195,9 +267,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * (accessed via the object property get methods). The filter is run and results that pass accumulate scores for
 	 * true positive and false positive, otherwise the scores are accumulated for true negative and false negative. The
 	 * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
-	 * <p>
-	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
-	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
 	 * <p>
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
 	 * 
@@ -208,58 +277,55 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 */
 	public MemoryPeakResults filterSubset(MemoryPeakResults results, double[] score)
 	{
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
+		final FailCounter counter = new FailCounter();
 		newResults.copySettings(results);
 		setup(results);
-		int frame = -1;
-		int failCount = 0;
-		double fp = 0, fn = 0;
-		double tp = 0, tn = 0;
-		int p = 0;
-		for (PeakResult peak : results.getResults())
+		final double[] s = new double[4];
+		final Counter p = new Counter();
+		results.forEach(new PeakResultProcedure()
 		{
-			if (frame != peak.getFrame())
+			public void execute(PeakResult peak)
 			{
-				frame = peak.getFrame();
-				failCount = 0;
-			}
+				counter.advance(peak.getFrame());
 
-			// Reject all peaks if we have exceeded the fail count
-			final boolean isPositive = accept(peak);
+				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive = accept(peak);
 
-			if (isPositive)
-			{
-				peak.origX = failCount;
-				failCount = 0;
-				newResults.add(peak);
-			}
-			else
-			{
-				failCount++;
-			}
+				if (isPositive)
+				{
+					peak.origX = counter.value();
+					counter.reset();
+					newResults.add(peak);
+				}
+				else
+				{
+					counter.increment();
+				}
 
-			if (isPositive)
-			{
-				p++;
-				tp += peak.getTruePositiveScore();
-				fp += peak.getFalsePositiveScore();
+				if (isPositive)
+				{
+					p.increment();
+					s[TP] += peak.getTruePositiveScore();
+					s[FP] += peak.getFalsePositiveScore();
+				}
+				else
+				{
+					s[FN] += peak.getFalseNegativeScore();
+					s[TN] += peak.getTrueNegativeScore();
+				}
 			}
-			else
-			{
-				fn += peak.getFalseNegativeScore();
-				tn += peak.getTrueNegativeScore();
-			}
-		}
+		});
 		end();
 
 		if (score != null && score.length > 5)
 		{
-			score[0] = tp;
-			score[1] = fp;
-			score[2] = tn;
-			score[3] = fn;
-			score[4] = p;
-			score[5] = results.size() - p;
+			score[0] = s[TP];
+			score[1] = s[FP];
+			score[2] = s[TN];
+			score[3] = s[FN];
+			score[4] = p.value();
+			score[5] = results.size() - p.value();
 		}
 
 		return newResults;
@@ -289,60 +355,57 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 */
 	public MemoryPeakResults filterSubset2(MemoryPeakResults results, double[] score)
 	{
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
+		final FailCounter counter = new FailCounter();
 		newResults.copySettings(results);
 		setup(results);
-		int frame = -1;
-		int failCount = 0;
-		double fp = 0, fn = 0;
-		double tp = 0, tn = 0;
-		int p = 0;
-		for (PeakResult peak : results.getResults())
+		final double[] s = new double[4];
+		final Counter p = new Counter();
+		results.forEach(new PeakResultProcedure()
 		{
-			if (frame != peak.getFrame())
+			public void execute(PeakResult peak)
 			{
-				frame = peak.getFrame();
-				failCount = 0;
-			}
+				counter.advance(peak.getFrame());
 
-			failCount += peak.origY;
+				counter.increment(peak.origY);
 
-			// Reject all peaks if we have exceeded the fail count
-			final boolean isPositive = accept(peak);
+				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive = accept(peak);
 
-			if (isPositive)
-			{
-				peak.origX = failCount;
-				failCount = 0;
-				newResults.add(peak);
-			}
-			else
-			{
-				failCount++;
-			}
+				if (isPositive)
+				{
+					peak.origX = counter.value();
+					counter.reset();
+					newResults.add(peak);
+				}
+				else
+				{
+					counter.increment();
+				}
 
-			if (isPositive)
-			{
-				p++;
-				tp += peak.getTruePositiveScore();
-				fp += peak.getFalsePositiveScore();
+				if (isPositive)
+				{
+					p.increment();
+					s[TP] += peak.getTruePositiveScore();
+					s[FP] += peak.getFalsePositiveScore();
+				}
+				else
+				{
+					s[FN] += peak.getFalseNegativeScore();
+					s[TN] += peak.getTrueNegativeScore();
+				}
 			}
-			else
-			{
-				fn += peak.getFalseNegativeScore();
-				tn += peak.getTrueNegativeScore();
-			}
-		}
+		});
 		end();
 
 		if (score != null && score.length > 5)
 		{
-			score[0] = tp;
-			score[1] = fp;
-			score[2] = tn;
-			score[3] = fn;
-			score[4] = p;
-			score[5] = results.size() - p;
+			score[0] = s[TP];
+			score[1] = s[FP];
+			score[2] = s[TN];
+			score[3] = s[FN];
+			score[4] = p.value();
+			score[5] = results.size() - p.value();
 		}
 
 		return newResults;
@@ -368,65 +431,62 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
 	 * @return the filtered results
 	 */
-	public MemoryPeakResults filterSubset(MemoryPeakResults results, int failures, double[] score)
+	public MemoryPeakResults filterSubset(MemoryPeakResults results, final int failures, double[] score)
 	{
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
+		final FailCounter counter = new FailCounter();
 		newResults.copySettings(results);
 		setup(results);
-		int frame = -1;
-		int failCount = 0;
-		double fp = 0, fn = 0;
-		double tp = 0, tn = 0;
-		for (PeakResult peak : results.getResults())
+		final double[] s = new double[4];
+		results.forEach(new PeakResultProcedure()
 		{
-			if (frame != peak.getFrame())
+			public void execute(PeakResult peak)
 			{
-				frame = peak.getFrame();
-				failCount = 0;
-			}
+				counter.advance(peak.getFrame());
 
-			// Reject all peaks if we have exceeded the fail count
-			final boolean isPositive;
-			if (failCount > failures)
-			{
-				isPositive = false;
-			}
-			else
-			{
-				// Otherwise assess the peak
-				isPositive = accept(peak);
-			}
+				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive;
+				if (counter.value() > failures)
+				{
+					isPositive = false;
+				}
+				else
+				{
+					// Otherwise assess the peak
+					isPositive = accept(peak);
+				}
 
-			if (isPositive)
-			{
-				peak.origX = failCount;
-				failCount = 0;
-				newResults.add(peak);
-			}
-			else
-			{
-				failCount++;
-			}
+				if (isPositive)
+				{
+					peak.origX = counter.value();
+					counter.reset();
+					newResults.add(peak);
+				}
+				else
+				{
+					counter.increment();
+				}
 
-			if (isPositive)
-			{
-				tp += peak.getTruePositiveScore();
-				fp += peak.getFalsePositiveScore();
+				if (isPositive)
+				{
+					s[TP] += peak.getTruePositiveScore();
+					s[FP] += peak.getFalsePositiveScore();
+				}
+				else
+				{
+					s[FN] += peak.getFalseNegativeScore();
+					s[TN] += peak.getTrueNegativeScore();
+				}
 			}
-			else
-			{
-				fn += peak.getFalseNegativeScore();
-				tn += peak.getTrueNegativeScore();
-			}
-		}
+		});
 		end();
 
 		if (score != null && score.length > 5)
 		{
-			score[0] = tp;
-			score[1] = fp;
-			score[2] = tn;
-			score[3] = fn;
+			score[0] = s[TP];
+			score[1] = s[FP];
+			score[2] = s[TN];
+			score[3] = s[FN];
 			score[4] = newResults.size();
 			score[5] = results.size() - newResults.size();
 		}
@@ -458,67 +518,64 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
 	 * @return the filtered results
 	 */
-	public MemoryPeakResults filterSubset2(MemoryPeakResults results, int failures, double[] score)
+	public MemoryPeakResults filterSubset2(MemoryPeakResults results, final int failures, double[] score)
 	{
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
+		final FailCounter counter = new FailCounter();
 		newResults.copySettings(results);
 		setup(results);
-		int frame = -1;
-		int failCount = 0;
-		double fp = 0, fn = 0;
-		double tp = 0, tn = 0;
-		for (PeakResult peak : results.getResults())
+		final double[] s = new double[4];
+		results.forEach(new PeakResultProcedure()
 		{
-			if (frame != peak.getFrame())
+			public void execute(PeakResult peak)
 			{
-				frame = peak.getFrame();
-				failCount = 0;
-			}
+				counter.advance(peak.getFrame());
 
-			failCount += peak.origY;
+				counter.increment(peak.origY);
 
-			// Reject all peaks if we have exceeded the fail count
-			final boolean isPositive;
-			if (failCount > failures)
-			{
-				isPositive = false;
-			}
-			else
-			{
-				// Otherwise assess the peak
-				isPositive = accept(peak);
-			}
+				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive;
+				if (counter.value() > failures)
+				{
+					isPositive = false;
+				}
+				else
+				{
+					// Otherwise assess the peak
+					isPositive = accept(peak);
+				}
 
-			if (isPositive)
-			{
-				peak.origX = failCount;
-				failCount = 0;
-				newResults.add(peak);
-			}
-			else
-			{
-				failCount++;
-			}
+				if (isPositive)
+				{
+					peak.origX = counter.value();
+					counter.reset();
+					newResults.add(peak);
+				}
+				else
+				{
+					counter.increment();
+				}
 
-			if (isPositive)
-			{
-				tp += peak.getTruePositiveScore();
-				fp += peak.getFalsePositiveScore();
+				if (isPositive)
+				{
+					s[TP] += peak.getTruePositiveScore();
+					s[FP] += peak.getFalsePositiveScore();
+				}
+				else
+				{
+					s[FN] += peak.getFalseNegativeScore();
+					s[TN] += peak.getTrueNegativeScore();
+				}
 			}
-			else
-			{
-				fn += peak.getFalseNegativeScore();
-				tn += peak.getTrueNegativeScore();
-			}
-		}
+		});
 		end();
 
 		if (score != null && score.length > 5)
 		{
-			score[0] = tp;
-			score[1] = fp;
-			score[2] = tn;
-			score[3] = fn;
+			score[0] = s[TP];
+			score[1] = s[FP];
+			score[2] = s[TN];
+			score[3] = s[FN];
 			score[4] = newResults.size();
 			score[5] = results.size() - newResults.size();
 		}
@@ -539,32 +596,35 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 */
 	public ClassificationResult score(List<MemoryPeakResults> resultsList)
 	{
-		int tp = 0, fp = 0, tn = 0, fn = 0;
+		final int[] s = new int[4];
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
-			for (PeakResult peak : peakResults.getResults())
+			peakResults.forEach(new PeakResultProcedure()
 			{
-				final boolean isTrue = peak.origValue != 0;
-				boolean isPositive = accept(peak);
-				if (isTrue)
+				public void execute(PeakResult peak)
 				{
-					if (isPositive)
-						tp++; // true positive
+					final boolean isTrue = peak.origValue != 0;
+					boolean isPositive = accept(peak);
+					if (isTrue)
+					{
+						if (isPositive)
+							s[TP]++; // true positive
+						else
+							s[FN]++; // false negative
+					}
 					else
-						fn++; // false negative
+					{
+						if (isPositive)
+							s[FP]++; // false positive
+						else
+							s[TN]++; // true negative
+					}
 				}
-				else
-				{
-					if (isPositive)
-						fp++; // false positive
-					else
-						tn++; // true negative
-				}
-			}
+			});
 			end();
 		}
-		return new ClassificationResult(tp, fp, tn, fn);
+		return new ClassificationResult(s[TP], s[FP], s[TN], s[FN]);
 	}
 
 	/**
@@ -584,32 +644,37 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 */
 	public ClassificationResult score(List<MemoryPeakResults> resultsList, int tn, int fn)
 	{
-		int tp = 0, fp = 0;
+		final int[] s = new int[4];
+		s[TN] = tn;
+		s[FN] = fn;
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
-			for (PeakResult peak : peakResults.getResults())
+			peakResults.forEach(new PeakResultProcedure()
 			{
-				final boolean isTrue = peak.origValue != 0;
-				boolean isPositive = accept(peak);
-				if (isTrue)
+				public void execute(PeakResult peak)
 				{
-					if (isPositive)
-						tp++; // true positive
+					final boolean isTrue = peak.origValue != 0;
+					boolean isPositive = accept(peak);
+					if (isTrue)
+					{
+						if (isPositive)
+							s[TP]++; // true positive
+						else
+							s[FN]++; // false negative
+					}
 					else
-						fn++; // false negative
+					{
+						if (isPositive)
+							s[FP]++; // false positive
+						else
+							s[TN]++; // true negative
+					}
 				}
-				else
-				{
-					if (isPositive)
-						fp++; // false positive
-					else
-						tn++; // true negative
-				}
-			}
+			});
 			end();
 		}
-		return new ClassificationResult(tp, fp, tn, fn);
+		return new ClassificationResult(s[TP], s[FP], s[TN], s[FN]);
 	}
 
 	/**
@@ -628,65 +693,62 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @return the score
 	 */
-	public ClassificationResult score(List<MemoryPeakResults> resultsList, int failures)
+	public ClassificationResult score(List<MemoryPeakResults> resultsList, final int failures)
 	{
-		int tp = 0, fp = 0, tn = 0, fn = 0;
+		final int[] s = new int[4];
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
 
-			int frame = -1;
-			int failCount = 0;
-			for (PeakResult peak : peakResults.getResults())
+			final FailCounter counter = new FailCounter();
+			peakResults.forEach(new PeakResultProcedure()
 			{
-				final boolean isTrue = peak.origValue != 0;
+				public void execute(PeakResult peak)
+				{
+					counter.advance(peak.getFrame());
 
-				// Reset fail count for new frames
-				if (frame != peak.getFrame())
-				{
-					frame = peak.getFrame();
-					failCount = 0;
-				}
+					final boolean isTrue = peak.origValue != 0;
 
-				// Reject all peaks if we have exceeded the fail count
-				final boolean isPositive;
-				if (failCount > failures)
-				{
-					isPositive = false;
-				}
-				else
-				{
-					// Otherwise assess the peak
-					isPositive = accept(peak);
-				}
-
-				if (isPositive)
-				{
-					failCount = 0;
-				}
-				else
-				{
-					failCount++;
-				}
-
-				if (isTrue)
-				{
-					if (isPositive)
-						tp++; // true positive
+					// Reject all peaks if we have exceeded the fail count
+					final boolean isPositive;
+					if (counter.value() > failures)
+					{
+						isPositive = false;
+					}
 					else
-						fn++; // false negative
-				}
-				else
-				{
+					{
+						// Otherwise assess the peak
+						isPositive = accept(peak);
+					}
+
 					if (isPositive)
-						fp++; // false positive
+					{
+						counter.reset();
+					}
 					else
-						tn++; // true negative
+					{
+						counter.increment();
+					}
+
+					if (isTrue)
+					{
+						if (isPositive)
+							s[TP]++; // true positive
+						else
+							s[FN]++; // false negative
+					}
+					else
+					{
+						if (isPositive)
+							s[FP]++; // false positive
+						else
+							s[TN]++; // true negative
+					}
 				}
-			}
+			});
 			end();
 		}
-		return new ClassificationResult(tp, fp, tn, fn);
+		return new ClassificationResult(s[TP], s[FP], s[TN], s[FN]);
 	}
 
 	/**
@@ -713,67 +775,66 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 *            The initial false negatives (used when the results have been pre-filtered)
 	 * @return the score
 	 */
-	public ClassificationResult scoreSubset(List<MemoryPeakResults> resultsList, int failures, int tn, int fn)
+	public ClassificationResult scoreSubset(List<MemoryPeakResults> resultsList, final int failures, int tn, int fn)
 	{
-		int tp = 0, fp = 0;
+		final int[] s = new int[4];
+		s[TN] = tn;
+		s[FN] = fn;
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
 
-			int frame = -1;
-			int failCount = 0;
-			for (PeakResult peak : peakResults.getResults())
+			final FailCounter counter = new FailCounter();
+			peakResults.forEach(new PeakResultProcedure()
 			{
-				final boolean isTrue = peak.origValue != 0;
+				public void execute(PeakResult peak)
+				{
+					counter.advance(peak.getFrame());
 
-				// Reset fail count for new frames
-				if (frame != peak.getFrame())
-				{
-					frame = peak.getFrame();
-					failCount = 0;
-				}
+					final boolean isTrue = peak.origValue != 0;
 
-				failCount += peak.origX;
+					counter.increment(peak.origX);
 
-				// Reject all peaks if we have exceeded the fail count
-				final boolean isPositive;
-				if (failCount > failures)
-				{
-					isPositive = false;
-				}
-				else
-				{
-					// Otherwise assess the peak
-					isPositive = accept(peak);
-				}
-
-				if (isPositive)
-				{
-					failCount = 0;
-				}
-				else
-				{
-					failCount++;
-				}
-
-				if (isTrue)
-				{
-					if (isPositive)
-						tp++; // true positive
+					// Reject all peaks if we have exceeded the fail count
+					final boolean isPositive;
+					if (counter.value() > failures)
+					{
+						isPositive = false;
+					}
 					else
-						fn++; // false negative
-				}
-				else
-				{
+					{
+						// Otherwise assess the peak
+						isPositive = accept(peak);
+					}
+
 					if (isPositive)
-						fp++; // false positive
+					{
+						counter.reset();
+					}
 					else
-						tn++; // true negative
+					{
+						counter.increment();
+					}
+
+					if (isTrue)
+					{
+						if (isPositive)
+							s[TP]++; // true positive
+						else
+							s[FN]++; // false negative
+					}
+					else
+					{
+						if (isPositive)
+							s[FP]++; // false positive
+						else
+							s[TN]++; // true negative
+					}
 				}
-			}
+			});
 			end();
 		}
-		return new ClassificationResult(tp, fp, tn, fn);
+		return new ClassificationResult(s[TP], s[FP], s[TN], s[FN]);
 	}
 
 	/**
@@ -794,64 +855,61 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @return the score
 	 */
-	public FractionClassificationResult fractionScore(List<MemoryPeakResults> resultsList, int failures)
+	public FractionClassificationResult fractionScore(List<MemoryPeakResults> resultsList, final int failures)
 	{
-		int p = 0, n = 0;
-		double fp = 0, fn = 0;
-		double tp = 0, tn = 0;
+		final double[] s = new double[4];
+		final Counter p = new Counter();
+		int n = 0;
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
 
-			int frame = -1;
-			int failCount = 0;
-			for (PeakResult peak : peakResults.getResults())
+			final FailCounter counter = new FailCounter();
+			peakResults.forEach(new PeakResultProcedure()
 			{
-				// Reset fail count for new frames
-				if (frame != peak.getFrame())
+				public void execute(PeakResult peak)
 				{
-					frame = peak.getFrame();
-					failCount = 0;
-				}
+					counter.advance(peak.getFrame());
 
-				// Reject all peaks if we have exceeded the fail count
-				final boolean isPositive;
-				if (failCount > failures)
-				{
-					isPositive = false;
-				}
-				else
-				{
-					// Otherwise assess the peak
-					isPositive = accept(peak);
-				}
+					// Reject all peaks if we have exceeded the fail count
+					final boolean isPositive;
+					if (counter.value() > failures)
+					{
+						isPositive = false;
+					}
+					else
+					{
+						// Otherwise assess the peak
+						isPositive = accept(peak);
+					}
 
-				if (isPositive)
-				{
-					failCount = 0;
-				}
-				else
-				{
-					failCount++;
-				}
+					if (isPositive)
+					{
+						counter.reset();
+					}
+					else
+					{
+						counter.increment();
+					}
 
-				if (isPositive)
-				{
-					p++;
-					tp += peak.getTruePositiveScore();
-					fp += peak.getFalsePositiveScore();
+					if (isPositive)
+					{
+						p.increment();
+						s[TP] += peak.getTruePositiveScore();
+						s[FP] += peak.getFalsePositiveScore();
+					}
+					else
+					{
+						s[FN] += peak.getFalseNegativeScore();
+						s[TN] += peak.getTrueNegativeScore();
+					}
 				}
-				else
-				{
-					fn += peak.getFalseNegativeScore();
-					tn += peak.getTrueNegativeScore();
-				}
-			}
+			});
 			n += peakResults.size();
 			end();
 		}
-		n -= p;
-		return new FractionClassificationResult(tp, fp, tn, fn, p, n);
+		n -= p.value();
+		return new FractionClassificationResult(s[TP], s[FP], s[TN], s[FN], p.value(), n);
 	}
 
 	/**
@@ -876,66 +934,63 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @return the score
 	 */
-	public FractionClassificationResult fractionScore2(List<MemoryPeakResults> resultsList, int failures)
+	public FractionClassificationResult fractionScore2(List<MemoryPeakResults> resultsList, final int failures)
 	{
-		int p = 0, n = 0;
-		double fp = 0, fn = 0;
-		double tp = 0, tn = 0;
+		final double[] s = new double[4];
+		final Counter p = new Counter();
+		int n = 0;
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
 
-			int frame = -1;
-			int failCount = 0;
-			for (PeakResult peak : peakResults.getResults())
+			final FailCounter counter = new FailCounter();
+			peakResults.forEach(new PeakResultProcedure()
 			{
-				// Reset fail count for new frames
-				if (frame != peak.getFrame())
+				public void execute(PeakResult peak)
 				{
-					frame = peak.getFrame();
-					failCount = 0;
-				}
+					counter.advance(peak.getFrame());
 
-				failCount += peak.origY;
+					counter.increment(peak.origY);
 
-				// Reject all peaks if we have exceeded the fail count
-				final boolean isPositive;
-				if (failCount > failures)
-				{
-					isPositive = false;
-				}
-				else
-				{
-					// Otherwise assess the peak
-					isPositive = accept(peak);
-				}
+					// Reject all peaks if we have exceeded the fail count
+					final boolean isPositive;
+					if (counter.value() > failures)
+					{
+						isPositive = false;
+					}
+					else
+					{
+						// Otherwise assess the peak
+						isPositive = accept(peak);
+					}
 
-				if (isPositive)
-				{
-					failCount = 0;
-				}
-				else
-				{
-					failCount++;
-				}
+					if (isPositive)
+					{
+						counter.reset();
+					}
+					else
+					{
+						counter.increment();
+					}
 
-				if (isPositive)
-				{
-					p++;
-					tp += peak.getTruePositiveScore();
-					fp += peak.getFalsePositiveScore();
+					if (isPositive)
+					{
+						p.increment();
+						s[TP] += peak.getTruePositiveScore();
+						s[FP] += peak.getFalsePositiveScore();
+					}
+					else
+					{
+						s[FN] += peak.getFalseNegativeScore();
+						s[TN] += peak.getTrueNegativeScore();
+					}
 				}
-				else
-				{
-					fn += peak.getFalseNegativeScore();
-					tn += peak.getTrueNegativeScore();
-				}
-			}
+			});
 			n += peakResults.size();
 			end();
 		}
-		n -= p;
-		return new FractionClassificationResult(tp, fp, tn, fn, p, n);
+		n -= p.value();
+		return new FractionClassificationResult(s[TP], s[FP], s[TN], s[FN], p.value(), n);
 	}
 
 	/**
@@ -966,68 +1021,66 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 *            The initial negatives (used when the results have been pre-filtered)
 	 * @return the score
 	 */
-	public FractionClassificationResult fractionScoreSubset(List<MemoryPeakResults> resultsList, int failures,
+	public FractionClassificationResult fractionScoreSubset(List<MemoryPeakResults> resultsList, final int failures,
 			double tn, double fn, int n)
 	{
-		int p = 0;
-		double fp = 0;
-		double tp = 0;
+		final double[] s = new double[4];
+		s[TN] = tn;
+		s[FN] = fn;
+		final Counter p = new Counter();
 
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
 
-			int frame = -1;
-			int failCount = 0;
-			for (PeakResult peak : peakResults.getResults())
+			final FailCounter counter = new FailCounter();
+			peakResults.forEach(new PeakResultProcedure()
 			{
-				// Reset fail count for new frames
-				if (frame != peak.getFrame())
+				public void execute(PeakResult peak)
 				{
-					frame = peak.getFrame();
-					failCount = 0;
-				}
+					counter.advance(peak.getFrame());
 
-				failCount += peak.origX;
+					counter.increment(peak.origX);
 
-				// Reject all peaks if we have exceeded the fail count
-				final boolean isPositive;
-				if (failCount > failures)
-				{
-					isPositive = false;
-				}
-				else
-				{
-					// Otherwise assess the peak
-					isPositive = accept(peak);
-				}
+					// Reject all peaks if we have exceeded the fail count
+					final boolean isPositive;
+					if (counter.value() > failures)
+					{
+						isPositive = false;
+					}
+					else
+					{
+						// Otherwise assess the peak
+						isPositive = accept(peak);
+					}
 
-				if (isPositive)
-				{
-					failCount = 0;
-				}
-				else
-				{
-					failCount++;
-				}
+					if (isPositive)
+					{
+						counter.reset();
+					}
+					else
+					{
+						counter.increment();
+					}
 
-				if (isPositive)
-				{
-					p++;
-					tp += peak.getTruePositiveScore();
-					fp += peak.getFalsePositiveScore();
+					if (isPositive)
+					{
+						p.increment();
+						s[TP] += peak.getTruePositiveScore();
+						s[FP] += peak.getFalsePositiveScore();
+					}
+					else
+					{
+						s[FN] += peak.getFalseNegativeScore();
+						s[TN] += peak.getTrueNegativeScore();
+					}
 				}
-				else
-				{
-					fn += peak.getFalseNegativeScore();
-					tn += peak.getTrueNegativeScore();
-				}
-			}
+			});
 			n += peakResults.size();
 			end();
 		}
-		n -= p;
-		return new FractionClassificationResult(tp, fp, tn, fn, p, n);
+		n -= p.value();
+		return new FractionClassificationResult(s[TP], s[FP], s[TN], s[FN], p.value(), n);
 	}
 
 	/**

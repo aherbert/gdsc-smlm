@@ -1,4 +1,6 @@
-package gdsc.smlm.results;
+package gdsc.smlm.results.procedures;
+
+import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -14,14 +16,17 @@ package gdsc.smlm.results;
  *---------------------------------------------------------------------------*/
 
 /**
- * Interface for accessing the results
+ * Interface for accessing the results with fast exit
  */
-public interface PeakResultProcedure
+public interface PeakResultProcedureX
 {
 	/**
-	 * Executes this procedure.
+	 * Executes this procedure. A true return value indicates that
+     * the application executing this procedure should not invoke this
+     * procedure again.
 	 *
 	 * @param peakResult the peak result
+	 * @return true, if the execution should stop
 	 */
-	void execute(PeakResult peakResult);
+	boolean execute(PeakResult peakResult);
 }

@@ -37,6 +37,7 @@ import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.utils.XmlUtils;
 
 /**
@@ -418,7 +419,7 @@ public class PeakResultsReader
 					}
 				}
 			}
-			
+
 			// Calibration is a smart object so we can create an empty one
 			if (calibration == null)
 				calibration = new Calibration();
@@ -680,7 +681,7 @@ public class PeakResultsReader
 		// Units were added in version 3
 		if (smlmVersion < 3)
 			calibration.setAngleUnit(AngleUnit.DEGREE);
-		
+
 		BufferedReader input = null;
 		try
 		{
@@ -1542,58 +1543,51 @@ public class PeakResultsReader
 		}
 
 		// The following relationship holds when length == 1:
-		// Area = Height * 2 * pi * (Width / (pixel_pitch*2) )^2
-		// => Pixel_pitch = 0.5 * Width / sqrt(Area / (Height * 2 * pi))
+		// intensity = height * 2 * pi * sd0 * sd1 / pixel_pitch^2
+		// => Pixel_pitch = sqrt(height * 2 * pi * sd0 * sd1 / intensity)
 		// Try and create a calibration
-		Statistics pixelPitch = new Statistics();
-		for (PeakResult p : results.getResults())
+		final Statistics pixelPitch = new Statistics();
+		results.forEach(new PeakResultProcedureX()
 		{
-			if (p.getFrame() == p.getEndFrame())
-			{
-				float width = p.params[Gaussian2DFunction.X_SD];
-				float height = p.params[Gaussian2DFunction.SIGNAL];
-				float area = p.origValue;
-				pixelPitch.add(0.5 * width / Math.sqrt(area / (height * 2 * Math.PI)));
-				if (pixelPitch.getN() > 100)
-					break;
-			}
-		}
+			final double twoPi = 2 * Math.PI;
 
+			public boolean execute(PeakResult p)
+			{
+				if (p.getFrame() == p.getEndFrame())
+				{
+					float height = p.origValue;
+					float intensity = p.params[Gaussian2DFunction.SIGNAL];
+					float sd0 = p.params[Gaussian2DFunction.X_SD];
+					float sd1 = p.params[Gaussian2DFunction.Y_SD];
+					pixelPitch.add(Math.sqrt(height * twoPi * sd0 * sd1 / intensity));
+					// Stop when we have enough for a good guess
+					return (pixelPitch.getN() > 100);
+				}
+				return false;
+			}
+		});
+
+		// TODO - Support all the NSTORM formats: one-axis, two-axis, rotated, 3D.
+		// Is this information in the header?
+		// We could support setting the PSF as a Gaussian2D with one/two axis SD.
+		// This would mean updating all the result params if it is a one axis PSF.
+		// For now just record it as a 2 axis PSF.
+		
 		// Create a calibration
 		calibration = new Calibration();
-		results.setCalibration(calibration);
-
+		
 		// Q. Is NSTORM in photons?
-		calibration.setIntensityUnit(IntensityUnit.PHOTON);
+		calibration.setIntensityUnit(IntensityUnit.COUNT);
+		calibration.setDistanceUnit(DistanceUnit.NM);
 
 		if (pixelPitch.getN() > 0)
 		{
 			final double nmPerPixel = pixelPitch.getMean();
-			final double widthConversion = 1.0 / (2 * nmPerPixel);
-
 			calibration.setNmPerPixel(nmPerPixel);
-			calibration.setDistanceUnit(DistanceUnit.PIXEL);
-
-			// Convert data
-			for (PeakResult p : results.getResults())
-			{
-				p.params[Gaussian2DFunction.X_POSITION] /= nmPerPixel;
-				p.params[Gaussian2DFunction.Y_POSITION] /= nmPerPixel;
-				// Since the width is 2*pixel pitch
-				p.params[Gaussian2DFunction.X_SD] *= widthConversion;
-				p.params[Gaussian2DFunction.Y_SD] *= widthConversion;
-			}
 		}
 
-		// We initially stored the height of the peak in the signal field. 
-		// Swap to the intensity stored in the origValue field.
-		for (PeakResult p : results.getResults())
-		{
-			final float origValue = p.params[Gaussian2DFunction.SIGNAL];
-			p.params[Gaussian2DFunction.SIGNAL] = p.origValue;
-			p.origValue = origValue;
-		}
-
+		results.setCalibration(calibration);
+		
 		return results;
 	}
 
@@ -1689,15 +1683,33 @@ public class PeakResultsReader
 			float[] params = new float[7];
 			params[Gaussian2DFunction.BACKGROUND] = bg;
 			//params[Gaussian2DFunction.ANGLE] = ax;
-			params[Gaussian2DFunction.SIGNAL] = height;
+			params[Gaussian2DFunction.SIGNAL] = area;
 			params[Gaussian2DFunction.X_POSITION] = xc;
 			params[Gaussian2DFunction.Y_POSITION] = yc;
-			params[Gaussian2DFunction.X_SD] = width;
-			params[Gaussian2DFunction.Y_SD] = width;
+
+			// Convert width (2*SD) to SD
+			width /= 2f;
+
+			// Convert to separate XY widths using the axial ratio
+			if (ax == 1)
+			{
+				params[Gaussian2DFunction.X_SD] = width;
+				params[Gaussian2DFunction.Y_SD] = width;
+			}
+			else
+			{
+				// Ensure the axial ratio is long/short
+				if (ax < 1)
+					ax = 1.0f / ax;
+				double a = Math.sqrt(ax);
+
+				params[Gaussian2DFunction.X_SD] = (float) (width * a);
+				params[Gaussian2DFunction.Y_SD] = (float) (width / a);
+			}
 
 			// Store the signal as the original value
-			return new ExtendedPeakResult(frame, (int) xc, (int) yc, area, 0.0, 0.0f, params, null, frame + length - 1,
-					0);
+			return new ExtendedPeakResult(frame, (int) xc, (int) yc, height, 0.0, 0.0f, params, null,
+					frame + length - 1, 0);
 		}
 		catch (InputMismatchException e)
 		{
@@ -1778,32 +1790,16 @@ public class PeakResultsReader
 			}
 		}
 
-		// MALK stores the data in nm. 
-		// The GDSC SMLM code still adds a calibration to the MALK file when 
-		// saving so we may be able to convert back to pixels since this is the 
-		// preferred unit.
-		if (calibration != null && calibration.hasNmPerPixel())
-		{
-			final double nmPerPixel = calibration.getNmPerPixel();
-			for (PeakResult p : results.getResults())
-			{
-				p.params[Gaussian2DFunction.X_POSITION] /= nmPerPixel;
-				p.params[Gaussian2DFunction.Y_POSITION] /= nmPerPixel;
-				p.origX = (int) p.params[Gaussian2DFunction.X_POSITION];
-				p.origY = (int) p.params[Gaussian2DFunction.Y_POSITION];
-			}
-			calibration.setDistanceUnit(DistanceUnit.PIXEL);
-		}
-		else
+		// Set default calibration for MALK format.
+		// The calibration may not be null if this was a GDSC MALK file since that has a header.
+		if (calibration == null)
 		{
 			calibration = new Calibration();
 			// Default assumption is nm
 			calibration.setDistanceUnit(DistanceUnit.NM);
-		}
-
-		// MALK uses photons
-		if (!calibration.hasIntensityUnit())
+			// MALK uses photons
 			calibration.setIntensityUnit(IntensityUnit.PHOTON);
+		}
 
 		return results;
 	}

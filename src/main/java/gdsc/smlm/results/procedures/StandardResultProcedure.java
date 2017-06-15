@@ -27,10 +27,14 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
         IResultProcedure, 
         IXYResultProcedure, 
         IXYZResultProcedure,
+		TXYResultProcedure, 
 		XYResultProcedure, 
 		XYZResultProcedure
 //@formatter:on
 {
+	/** The frame. */
+	public int[] frame;
+	
 	/** The background. */
 	public float[] background;
 
@@ -214,6 +218,29 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 		this.x[i] = x;
 		this.y[i] = y;
 		this.z[i] = z;
+		i++;
+	}
+
+	/**
+	 * Gets the TXY data in the configured units.
+	 * 
+	 * @throws ConversionException
+	 *             if conversion to the required units is not possible
+	 */
+	public void getTXY()
+	{
+		i = 0;
+		this.frame = allocate(this.frame);
+		this.x = allocate(this.x);
+		this.y = allocate(this.y);
+		results.forEach((TXYResultProcedure) this, getDistanceUnit());
+	}
+
+	public void executeTXY(int frame, float x, float y)
+	{
+		this.frame[i]=frame;
+		this.x[i] = x;
+		this.y[i] = y;
 		i++;
 	}
 

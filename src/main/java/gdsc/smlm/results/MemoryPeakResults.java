@@ -5,10 +5,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
@@ -22,6 +19,10 @@ import gdsc.smlm.results.procedures.IResultProcedure;
 import gdsc.smlm.results.procedures.IXYResultProcedure;
 import gdsc.smlm.results.procedures.IXYZResultProcedure;
 import gdsc.smlm.results.procedures.LSEPrecisionProcedure;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.PeakResultProcedureX;
+import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gdsc.smlm.results.procedures.TXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
@@ -46,7 +47,7 @@ import gdsc.smlm.results.procedures.XYZResultProcedure;
  * The PeakResults interface add methods are not-thread safe. The results should be wrapped in a SynchronizedPeakResults
  * object if using on multiple threads.
  */
-public class MemoryPeakResults extends AbstractPeakResults implements Cloneable, Iterable<PeakResult>
+public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 {
 	private static LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<String, MemoryPeakResults>();
 	private static final Runtime s_runtime = Runtime.getRuntime();
@@ -58,9 +59,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 
 	private boolean sortAfterEnd;
 
-	/**************************************************************************/
-	/* START OF RESULTS STORAGE METHODS */
-	/**************************************************************************/
+	/////////////////////////////////////////////////////////////////
+	// START OF RESULTS STORAGE METHODS 
+	/////////////////////////////////////////////////////////////////
 
 	// Allow changing the data structure used to store the results
 	private ArrayList<PeakResult> results;
@@ -187,9 +188,13 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		this.results = list;
 	}
 
-	/**************************************************************************/
-	/* END OF RESULTS STORAGE METHODS */
-	/**************************************************************************/
+	/////////////////////////////////////////////////////////////////
+	// END OF RESULTS STORAGE METHODS 
+	/////////////////////////////////////////////////////////////////
+
+	/////////////////////////////////////////////////////////////////
+	// START OF STATIC MEMORY STORAGE METHODS 
+	/////////////////////////////////////////////////////////////////
 
 	/**
 	 * Instantiates a new memory peak results.
@@ -294,19 +299,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	}
 
 	/**
-	 * Estimate the total size of results in memory
-	 */
-	public static long estimateMemorySize()
-	{
-		long memorySize = 0;
-		for (MemoryPeakResults r : resultsMap.values())
-		{
-			memorySize += estimateMemorySize(r.getResults());
-		}
-		return memorySize;
-	}
-
-	/**
 	 * Clear the results from memory
 	 */
 	public static void clearMemory()
@@ -315,166 +307,16 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This clears the current results but does not reduce storage allocation. This can be done with
-	 * {@link #trimToSize()}.
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#begin()
+	 * Estimate the total size of results in memory
 	 */
-	public void begin()
+	public static long estimateMemorySize()
 	{
-		clear();
-	}
-
-	/**
-	 * Add a result. 
-	 * <p>
-	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
-	 */
-	public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
-			float[] params, float[] paramsStdDev)
-	{
-		add(new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#end()
-	 */
-	public void end()
-	{
-		if (isSortAfterEnd())
-			sort();
-	}
-
-	/**
-	 * @return The peak results
-	 */
-	public List<PeakResult> getResults()
-	{
-		return results;
-	}
-
-	/**
-	 * Gets the bounds.
-	 *
-	 * @param calculate
-	 *            Set to true to calculate the bounds if they are null or zero width/height
-	 * @return the bounds of the result coordinates
-	 */
-	public Rectangle getBounds(boolean calculate)
-	{
-		if ((bounds == null || bounds.width == 0 || bounds.height == 0) && calculate)
+		long memorySize = 0;
+		for (MemoryPeakResults r : resultsMap.values())
 		{
-			bounds = new Rectangle();
-			Rectangle2D.Float b = getDataBounds();
-
-			// Round to integer
-			bounds.x = (int) Math.floor(b.x);
-			bounds.y = (int) Math.floor(b.y);
-
-			int maxX = (int) Math.ceil(b.x + b.width);
-			int maxY = (int) Math.ceil(b.y + b.height);
-
-			// For compatibility with drawing images add one to the limits if they are integers
-			// Q. Is this still necessary since drawing images has been re-written to handle edge cases?
-			//if (maxX == b.x + b.width)
-			//	maxX += 1;
-			//if (maxY == b.y + b.height)
-			//	maxY += 1;
-
-			bounds.width = maxX - bounds.x;
-			bounds.height = maxY - bounds.y;
+			memorySize += estimateMemorySize(r);
 		}
-		return bounds;
-	}
-
-	/**
-	 * Gets the data bounds.
-	 *
-	 * @return the bounds of the result coordinates
-	 */
-	public Rectangle2D.Float getDataBounds()
-	{
-		if (isEmpty())
-			return new Rectangle2D.Float();
-
-		float minX = Float.POSITIVE_INFINITY, minY = Float.POSITIVE_INFINITY;
-		float maxX = Float.NEGATIVE_INFINITY, maxY = Float.NEGATIVE_INFINITY;
-		for (int i = 0, size = size(); i < size; i++)
-		{
-			PeakResult result = get(i);
-			if (minX > result.params[Gaussian2DFunction.X_POSITION])
-				minX = result.params[Gaussian2DFunction.X_POSITION];
-			if (maxX < result.params[Gaussian2DFunction.X_POSITION])
-				maxX = result.params[Gaussian2DFunction.X_POSITION];
-			if (minY > result.params[Gaussian2DFunction.Y_POSITION])
-				minY = result.params[Gaussian2DFunction.Y_POSITION];
-			if (maxY < result.params[Gaussian2DFunction.Y_POSITION])
-				maxY = result.params[Gaussian2DFunction.Y_POSITION];
-		}
-		return new Rectangle2D.Float(minX, minY, maxX - minX, maxY - minY);
-	}
-
-	/**
-	 * Returns a list iterator over the elements in this list (in proper
-	 * sequence).
-	 * 
-	 * <p>
-	 * The returned list iterator is <a href="#fail-fast"><i>fail-fast</i></a>.
-	 * 
-	 * @see java.util.List#listIterator()
-	 */
-	public ListIterator<PeakResult> listIterator()
-	{
-		return results.listIterator();
-	}
-
-	/**
-	 * Returns an iterator over the elements in this list in proper sequence.
-	 * 
-	 * <p>
-	 * The returned iterator is <a href="#fail-fast"><i>fail-fast</i></a>.
-	 * 
-	 * @see java.util.List#iterator()
-	 * @return an iterator over the elements in this list in proper sequence
-	 */
-	public Iterator<PeakResult> iterator()
-	{
-		return results.iterator();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
-	 */
-	public boolean isActive()
-	{
-		return true;
-	}
-
-	/**
-	 * @param sortAfterEnd
-	 *            True if the results should be sorted after the {@link #end()} method
-	 */
-	public void setSortAfterEnd(boolean sortAfterEnd)
-	{
-		this.sortAfterEnd = sortAfterEnd;
-	}
-
-	/**
-	 * @return True if the results should be sorted after the {@link #end()} method
-	 */
-	public boolean isSortAfterEnd()
-	{
-		return sortAfterEnd;
+		return memorySize;
 	}
 
 	/**
@@ -497,13 +339,13 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 * @param includeDeviations
 	 * @return The memory size
 	 */
-	public static long estimateMemorySize(List<PeakResult> results)
+	public static long estimateMemorySize(MemoryPeakResults r)
 	{
 		long memorySize = 0;
-		if (results != null && results.size() > 0)
+		if (r != null && r.size() > 0)
 		{
-			boolean includeDeviations = results.get(0).paramsStdDev != null;
-			memorySize = MemoryPeakResults.estimateMemorySize(results.size(), includeDeviations);
+			boolean includeDeviations = r.get(0).paramsStdDev != null;
+			memorySize = MemoryPeakResults.estimateMemorySize(r.size(), includeDeviations);
 		}
 		return memorySize;
 	}
@@ -625,6 +467,159 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	public static long freeMemory()
 	{
 		return s_runtime.freeMemory();
+	}
+
+	/////////////////////////////////////////////////////////////////
+	// END OF STATIC MEMORY STORAGE METHODS 
+	/////////////////////////////////////////////////////////////////
+
+	/////////////////////////////////////////////////////////////////
+	// START OF PeakResults interface METHODS
+	// Note: Most of the methods are in the section for 
+	// storage of peak results
+	/////////////////////////////////////////////////////////////////
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This clears the current results but does not reduce storage allocation. This can be done with
+	 * {@link #trimToSize()}.
+	 * 
+	 * @see gdsc.utils.fitting.results.PeakResults#begin()
+	 */
+	public void begin()
+	{
+		clear();
+	}
+
+	/**
+	 * Add a result.
+	 * <p>
+	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
+	 * 
+	 * {@inheritDoc}
+	 * 
+	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
+	 */
+	public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise, float[] params,
+			float[] paramsStdDev)
+	{
+		add(new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.utils.fitting.results.PeakResults#end()
+	 */
+	public void end()
+	{
+		if (isSortAfterEnd())
+			sort();
+	}
+
+	/////////////////////////////////////////////////////////////////
+	// END OF PeakResults interface METHODS 
+	/////////////////////////////////////////////////////////////////
+
+	/**
+	 * Gets the bounds. These are returned in Pixel units as the bounds are defined in the PeakResults interface as the
+	 * bounds used to create the resuls.
+	 *
+	 * @param calculate
+	 *            Set to true to calculate the bounds if they are null or zero width/height
+	 * @return the bounds of the result coordinates
+	 * @throws ConversionException
+	 *             if conversion to pixel units is not possible
+	 */
+	public Rectangle getBounds(boolean calculate)
+	{
+		if ((bounds == null || bounds.width == 0 || bounds.height == 0) && calculate)
+		{
+			bounds = new Rectangle();
+			// Note: The bounds should be in pixels
+			Rectangle2D.Float b = getDataBounds(DistanceUnit.PIXEL);
+
+			// Round to integer
+			bounds.x = (int) Math.floor(b.x);
+			bounds.y = (int) Math.floor(b.y);
+
+			int maxX = (int) Math.ceil(b.x + b.width);
+			int maxY = (int) Math.ceil(b.y + b.height);
+
+			// For compatibility with drawing images add one to the limits if they are integers
+			// Q. Is this still necessary since drawing images has been re-written to handle edge cases?
+			//if (maxX == b.x + b.width)
+			//	maxX += 1;
+			//if (maxY == b.y + b.height)
+			//	maxY += 1;
+
+			bounds.width = maxX - bounds.x;
+			bounds.height = maxY - bounds.y;
+		}
+		return bounds;
+	}
+
+	/**
+	 * Gets the data bounds.
+	 *
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @return the bounds of the result coordinates
+	 * @throws ConversionException
+	 *             if conversion to the required units is not possible
+	 */
+	public Rectangle2D.Float getDataBounds(DistanceUnit distanceUnit)
+	{
+		if (isEmpty())
+			return new Rectangle2D.Float();
+
+		StandardResultProcedure p = new StandardResultProcedure(this, distanceUnit);
+		p.getXY();
+
+		float minX = p.x[0], maxX = minX;
+		float minY = p.y[0], maxY = minY;
+		for (int i = 1, size = size(); i < size; i++)
+		{
+			float x = p.x[i];
+			float y = p.y[i];
+			if (minX > x)
+				minX = x;
+			else if (maxX < x)
+				maxX = x;
+			if (minY > y)
+				minY = y;
+			else if (maxY < y)
+				maxY = y;
+		}
+		return new Rectangle2D.Float(minX, minY, maxX - minX, maxY - minY);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
+	 */
+	public boolean isActive()
+	{
+		return true;
+	}
+
+	/**
+	 * @param sortAfterEnd
+	 *            True if the results should be sorted after the {@link #end()} method
+	 */
+	public void setSortAfterEnd(boolean sortAfterEnd)
+	{
+		this.sortAfterEnd = sortAfterEnd;
+	}
+
+	/**
+	 * @return True if the results should be sorted after the {@link #end()} method
+	 */
+	public boolean isSortAfterEnd()
+	{
+		return sortAfterEnd;
 	}
 
 	/**
@@ -749,22 +744,47 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	}
 
 	/**
-	 * Checks for id. At least two results must have different Ids. If the number of results is 1 then the id must not
-	 * be zero.
+	 * Checks for id. At least one result must have a non-zero ID.
 	 *
 	 * @return true, if successful
 	 */
 	public boolean hasId()
 	{
-		if (isEmpty())
-			return false;
-		int id = get(0).getId();
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (get(i).getId() != id)
+			if (get(i).getId() != 0)
 				return true;
 		}
-		return id != 0;
+		return false;
+	}
+
+	/**
+	 * Checks for id. At least two results must have different non-zero Ids. If the number of results is 1 then the id
+	 * must not be zero.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasMultipleId()
+	{
+		if (isEmpty())
+			return false;
+		if (size() == 1)
+			return get(0).getId() != 0;
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			int id = get(i).getId();
+			if (id != 0)
+			{
+				while (++i < size)
+				{
+					int id2 = get(i).getId();
+					if (id2 != 0 && id2 != id)
+						return true;
+				}
+				break;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -1076,6 +1096,21 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			return;
 		procedure.execute(get(0));
 	}
+
+	/**
+	 * For each result execute the procedure.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forEach(PeakResultProcedureX procedure)
+	{
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			if (procedure.execute(get(i)))
+				return;
+		}
+	}
 	
 	/**
 	 * For each result execute the procedure.
@@ -1088,7 +1123,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = get(i);
-			procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getZPosition());
+			procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(),
+					r.getZPosition());
 		}
 	}
 
@@ -1142,7 +1178,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			//@formatter:on
 		}
 	}
-	
+
 	/**
 	 * For each result execute the procedure using the specified units.
 	 * <p>
@@ -1209,7 +1245,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			//@formatter:on
 		}
 	}
-	
+
 	/**
 	 * For each result execute the procedure using the specified units.
 	 * <p>
@@ -1274,21 +1310,53 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 					ic.convert(r.getSignal()), 
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()),
-					dc.convert(r.getZPosition())
-					);
+					dc.convert(r.getZPosition()));
 			//@formatter:on
 		}
 	}
-	
-	
+
 	/**
 	 * For each result execute the procedure using the specified units.
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
-	 * @param procedure            the procedure
-	 * @param distanceUnit            the distance unit
-	 * @throws ConversionException             if the conversion is not possible
+	 * @param procedure
+	 *            the procedure
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 */
+	public void forEach(TXYResultProcedure procedure, DistanceUnit distanceUnit)
+	{
+		if (calibration == null)
+			throw new ConversionException("No calibration");
+
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			//@formatter:off
+			procedure.executeTXY(
+					r.getFrame(),
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()));
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @throws ConversionException
+	 *             if the conversion is not possible
 	 */
 	public void forEach(XYResultProcedure procedure, DistanceUnit distanceUnit)
 	{
@@ -1313,9 +1381,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
-	 * @param procedure            the procedure
-	 * @param distanceUnit            the distance unit
-	 * @throws ConversionException             if the conversion is not possible
+	 * @param procedure
+	 *            the procedure
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @throws ConversionException
+	 *             if the conversion is not possible
 	 */
 	public void forEach(XYZResultProcedure procedure, DistanceUnit distanceUnit)
 	{
@@ -1331,12 +1402,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable,
 			procedure.executeXYZ(
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()),
-					dc.convert(r.getZPosition())
-					);
+					dc.convert(r.getZPosition()));
 			//@formatter:on
 		}
 	}
-	
+
 	/**
 	 * For each result execute the procedure.
 	 * <p>

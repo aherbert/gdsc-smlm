@@ -16,12 +16,11 @@ package gdsc.smlm.results;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.logging.TrackProgress;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -140,21 +139,26 @@ public class TraceManager
 		initialise(results);
 	}
 
+	private class LocalisationProcedure implements PeakResultProcedure
+	{
+		int id = 0;
+
+		public void execute(PeakResult result)
+		{
+			localisations[id] = new Localisation(id, result.getFrame(), result.getEndFrame(), result.getXPosition(),
+					result.getYPosition());
+		}
+	}
+
 	private void initialise(final MemoryPeakResults results)
 	{
 		if (results == null || results.size() == 0)
 			throw new IllegalArgumentException("Results are null or empty");
 		this.results = results;
 
-		// Assign localisations
+		// Assign localisations. We use the native result units to avoid conversion exceptions. 
 		localisations = new Localisation[results.size()];
-		int id = 0;
-		for (PeakResult result : results.getResults())
-		{
-			localisations[id] = new Localisation(id, result.getFrame(), result.getEndFrame(),
-					result.params[Gaussian2DFunction.X_POSITION], result.params[Gaussian2DFunction.Y_POSITION]);
-			id++;
-		}
+		results.forEach(new LocalisationProcedure());
 
 		totalTraces = localisations.length;
 
@@ -222,7 +226,9 @@ public class TraceManager
 	 * Note: The actual traces representing molecules can be obtained by calling {@link #getTraces()}
 	 * 
 	 * @param distanceThreshold
+	 *            In the native units of the results
 	 * @param timeThreshold
+	 *            In frames
 	 * @return The number of traces
 	 */
 	public int traceMolecules(final double distanceThreshold, final int timeThreshold)
@@ -551,8 +557,8 @@ public class TraceManager
 				final float signal = (float) traces[i].getSignal();
 				final float[] params = new float[] { background, signal, 0, centroid[0], centroid[1], sd, sd };
 				final int endFrame = traces[i].getTail().getEndFrame();
-				results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue, 0, 0,
-						params, null, endFrame, i + 1));
+				results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue, 0,
+						0, params, null, endFrame, i + 1));
 			}
 		}
 		return results;
@@ -600,8 +606,8 @@ public class TraceManager
 				PeakResult result = traces[i].getHead();
 				if (traces[i].size() == 1)
 				{
-					results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue, 0,
-							result.noise, result.params, null, 0, traces[i].getId()));
+					results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue,
+							0, result.noise, result.params, null, 0, traces[i].getId()));
 					continue;
 				}
 
@@ -673,8 +679,8 @@ public class TraceManager
 				final int traceId = (newId) ? ++id : trace.getId();
 				for (PeakResult result : trace.getPoints())
 				{
-					results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue, 0,
-							result.noise, result.params, null, 0, traceId));
+					results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue,
+							0, result.noise, result.params, null, 0, traceId));
 				}
 			}
 		}
@@ -1724,7 +1730,7 @@ public class TraceManager
 		if (results == null || results.size() == 0)
 			return new Trace[0];
 
-		List<PeakResult> list = results.getResults();
+		PeakResult[] list = results.toArray();
 		// Find the max trace ID
 		int max = 0;
 		for (PeakResult result : list)
@@ -1735,6 +1741,7 @@ public class TraceManager
 
 		if (max < 10000)
 		{
+			// Small set of IDs so just use an array look-up table			
 			Trace[] traces = new Trace[max + 1];
 			for (PeakResult result : list)
 			{
@@ -1761,17 +1768,20 @@ public class TraceManager
 		{
 			// Use a map when the size is potentially large
 			TIntObjectHashMap<Trace> map = new TIntObjectHashMap<Trace>();
+			Trace next = new Trace();
 			for (PeakResult result : list)
 			{
 				final int id = result.getId();
 				if (id > 0)
 				{
-					Trace trace = map.get(id);
+					Trace trace = map.putIfAbsent(id, next);
 					if (trace == null)
 					{
-						trace = new Trace();
+						// This was a new key
+						trace = next;
 						trace.setId(id);
-						map.put(id, trace);
+						// Prepare for next absent key
+						next = new Trace();
 					}
 					trace.add(result);
 				}

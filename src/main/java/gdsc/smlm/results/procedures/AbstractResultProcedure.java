@@ -151,7 +151,19 @@ public abstract class AbstractResultProcedure
 	 *
 	 * @param data
 	 *            the data
-	 * @return the float[]
+	 * @return the (new) data
+	 */
+	protected int[] allocate(int[] data)
+	{
+		return (data == null || data.length < size()) ? new int[size()] : data;
+	}
+
+	/**
+	 * Allocate the array to store the data based on the current results size.
+	 *
+	 * @param data
+	 *            the data
+	 * @return the (new) data
 	 */
 	protected float[] allocate(float[] data)
 	{
@@ -163,7 +175,7 @@ public abstract class AbstractResultProcedure
 	 *
 	 * @param data
 	 *            the data
-	 * @return the float[]
+	 * @return the (new) data
 	 */
 	protected double[] allocate(double[] data)
 	{

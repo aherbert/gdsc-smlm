@@ -10,6 +10,7 @@ import org.apache.commons.math3.random.Well19937c;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -166,7 +167,7 @@ public class ResultsImageSampler
 	 * Instantiates a new results image sampler.
 	 *
 	 * @param results
-	 *            the results
+	 *            the results (must be in pixel units)
 	 * @param stack
 	 *            the source stack for the results
 	 * @param size
@@ -174,6 +175,9 @@ public class ResultsImageSampler
 	 */
 	public ResultsImageSampler(MemoryPeakResults results, ImageStack stack, int size)
 	{
+		if (results.getDistanceUnit() != DistanceUnit.PIXEL)
+			throw new IllegalArgumentException("Results must be in pixel units");
+		
 		this.results = results;
 		this.stack = stack;
 		this.size = size;
@@ -323,7 +327,7 @@ public class ResultsImageSampler
 	{
 		TLongObjectHashMap<ResultsSample> map = new TLongObjectHashMap<ResultsSample>(results.size());
 		ResultsSample next = ResultsSample.create(-1);
-		for (PeakResult p : results)
+		for (PeakResult p : results.toArray())
 		{
 			// Avoid invalid slices
 			if (p.getFrame() < 1 || p.getFrame() > stack.getSize())

@@ -30,6 +30,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.results.TraceManager.TraceMode;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
  * Filter results using a precision threshold. Any results below the lower
@@ -249,26 +250,29 @@ public abstract class HysteresisFilter extends Filter
 		ok = new HashSet<PeakResult>();
 
 		// Create a set of candidates and valid peaks
-		MemoryPeakResults traceResults = new MemoryPeakResults();
+		final MemoryPeakResults traceResults = new MemoryPeakResults();
 
 		// Initialise peaks to check
-		LinkedList<PeakResult> candidates = new LinkedList<PeakResult>();
-		for (PeakResult result : peakResults.getResults())
+		final LinkedList<PeakResult> candidates = new LinkedList<PeakResult>();
+		peakResults.forEach(new PeakResultProcedure()
 		{
-			switch (getStatus(result))
+			public void execute(PeakResult result)
 			{
-				case OK:
-					ok.add(result);
-					traceResults.add(result);
-					break;
-				case CANDIDATE:
-					candidates.add(result);
-					traceResults.add(result);
-					break;
-				default:
-					break;
+				switch (getStatus(result))
+				{
+					case OK:
+						ok.add(result);
+						traceResults.add(result);
+						break;
+					case CANDIDATE:
+						candidates.add(result);
+						traceResults.add(result);
+						break;
+					default:
+						break;
+				}
 			}
-		}
+		});
 
 		if (candidates.isEmpty())
 		{
