@@ -522,7 +522,7 @@ public class PeakResultsReader
 			results.trimToSize();
 
 			// Convert to the preferred units if possible
-			results.convertToPreferenceUnits();
+			results.convertToPreferredUnits();
 		}
 		return results;
 	}
