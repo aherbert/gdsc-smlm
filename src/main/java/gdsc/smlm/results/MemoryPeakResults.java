@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
@@ -858,56 +859,68 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Convert to preferred units.
+	 *
+	 * @return true, if the data is now stored in the preferred units.
+	 */
+	public boolean convertToPreferredUnits()
+	{
+		if (calibration == null)
+			return false;
+		// TODO - use the helper
+		CalibrationHelper helper = null; //new CalibrationHelper(calibration);
+		boolean success = convertDistanceToPixelUnits(helper);
+		success &= convertIntensityToPhotonUnits(helper);
+		success &= convertAngleToRadianUnits(helper);
+		//setCalibration(helper.getCalibration());
+		return success;
+	}
+
+	/**
 	 * Checks if distance is in pixel units.
 	 *
 	 * @return true, if distance is in pixels
 	 */
 	public boolean isDistanceInPixelUnits()
 	{
-		if (calibration != null && calibration.hasDistanceUnit())
-		{
-			if (calibration.getDistanceUnit() == DistanceUnit.PIXEL)
-				return true;
-		}
-		return false;
+		return getDistanceUnit() == DistanceUnit.PIXEL;
 	}
 
 	/**
 	 * Convert the distance units to pixels. Requires the calibration to have distance units and nm/pixel.
+	 * 
+	 * @param helper
 	 *
 	 * @return true, if the distance units are now in pixels
 	 */
-	public boolean convertDistanceToPixelUnits()
+	private boolean convertDistanceToPixelUnits(CalibrationHelper helper)
 	{
-		if (calibration != null && calibration.hasDistanceUnit())
-		{
-			if (calibration.getDistanceUnit() == DistanceUnit.PIXEL)
-				return true;
+		if (isDistanceInPixelUnits())
+			return true;
 
-			if (calibration.hasNmPerPixel())
+		if (calibration.hasNmPerPixel())
+		{
+			try
 			{
-				try
+				TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(getDistanceUnit(),
+						DistanceUnit.PIXEL, calibration.getNmPerPixel());
+				// Convert data
+				for (int i = 0, size = size(); i < size; i++)
 				{
-					TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
-							DistanceUnit.PIXEL, calibration.getNmPerPixel());
-					// Convert data
-					for (int i = 0, size = size(); i < size; i++)
-					{
-						PeakResult p = get(i);
-						// Leave the original positions
-						//p.origX
-						//p.origY
-						convertDistance(p.params, c);
-						if (p.paramsStdDev != null)
-							convertDistance(p.paramsStdDev, c);
-					}
-					calibration.setDistanceUnit(DistanceUnit.PIXEL);
-					return true;
+					PeakResult p = get(i);
+					// Leave the original positions
+					//p.origX
+					//p.origY
+					convertDistance(p.params, c);
+					if (p.paramsStdDev != null)
+						convertDistance(p.paramsStdDev, c);
 				}
-				catch (ConversionException e)
-				{
-					// Gracefully fail so ignore this
-				}
+				calibration.setDistanceUnit(DistanceUnit.PIXEL);
+				return true;
+			}
+			catch (ConversionException e)
+			{
+				// Gracefully fail so ignore this
 			}
 		}
 		return false;
@@ -939,61 +952,54 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public boolean isIntensityInPhotonUnits()
 	{
-		if (calibration != null && calibration.hasIntensityUnit())
-		{
-			if (calibration.getIntensityUnit() == IntensityUnit.PHOTON)
-				return true;
-		}
-		return false;
+		return (getIntensityUnit() == IntensityUnit.PHOTON);
 	}
 
 	/**
 	 * Convert the intensity units to photons. Requires the calibration to have intensity units, gain and bias.
+	 * 
+	 * @param helper
 	 *
 	 * @return true, if the intensity units are now in photons
 	 */
-	public boolean convertIntensityToPhotonUnits()
+	private boolean convertIntensityToPhotonUnits(CalibrationHelper helper)
 	{
-		if (calibration != null && calibration.hasIntensityUnit())
-		{
-			if (calibration.getIntensityUnit() == IntensityUnit.PHOTON)
-				return true;
+		if (isIntensityInPhotonUnits())
+			return true;
 
-			if (calibration.hasGain() && calibration.hasBias())
+		if (calibration.hasGain() && calibration.hasBias())
+		{
+			try
 			{
-				try
+				TypeConverter<IntensityUnit> bc = UnitConverterFactory.createConverter(getIntensityUnit(),
+						IntensityUnit.PHOTON, calibration.getBias(), calibration.getGain());
+				TypeConverter<IntensityUnit> c = UnitConverterFactory.createConverter(getIntensityUnit(),
+						IntensityUnit.PHOTON, calibration.getGain());
+				// Convert data
+				for (int i = 0, size = size(); i < size; i++)
 				{
-					TypeConverter<IntensityUnit> bc = UnitConverterFactory.createConverter(
-							calibration.getIntensityUnit(), IntensityUnit.PHOTON, calibration.getBias(),
-							calibration.getGain());
-					TypeConverter<IntensityUnit> c = UnitConverterFactory.createConverter(
-							calibration.getIntensityUnit(), IntensityUnit.PHOTON, calibration.getGain());
-					// Convert data
-					for (int i = 0, size = size(); i < size; i++)
+					PeakResult p = get(i);
+					// Leave the original value
+					//p.origValue
+					p.noise = (float) c.convert(p.noise);
+					// Background must account for the bias
+					p.params[Gaussian2DFunction.BACKGROUND] = (float) bc
+							.convert(p.params[Gaussian2DFunction.BACKGROUND]);
+					convertIntensity(p.params, c);
+					if (p.paramsStdDev != null)
 					{
-						PeakResult p = get(i);
-						// Leave the original value
-						//p.origValue
-						p.noise = (float) c.convert(p.noise);
-						// Background must account for the bias
-						p.params[Gaussian2DFunction.BACKGROUND] = (float) bc
-								.convert(p.params[Gaussian2DFunction.BACKGROUND]);
-						convertIntensity(p.params, c);
-						if (p.paramsStdDev != null)
-						{
-							// Standard deviations so do not subtract the bias from the background
-							p.paramsStdDev[Gaussian2DFunction.BACKGROUND] = (float) c
-									.convert(p.paramsStdDev[Gaussian2DFunction.BACKGROUND]);
-							convertIntensity(p.paramsStdDev, c);
-						}
+						// Standard deviations so do not subtract the bias from the background
+						p.paramsStdDev[Gaussian2DFunction.BACKGROUND] = (float) c
+								.convert(p.paramsStdDev[Gaussian2DFunction.BACKGROUND]);
+						convertIntensity(p.paramsStdDev, c);
 					}
-					calibration.setIntensityUnit(IntensityUnit.PHOTON);
-					return true;
 				}
-				catch (ConversionException e)
-				{
-					// Gracefully fail so ignore this
-				}
+				calibration.setIntensityUnit(IntensityUnit.PHOTON);
+				return true;
+			}
+			catch (ConversionException e)
+			{
+				// Gracefully fail so ignore this
 			}
 		}
 		return false;
@@ -1014,45 +1020,39 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public boolean isAngleInRadianUnits()
 	{
-		if (calibration != null && calibration.hasAngleUnit())
-		{
-			if (calibration.getAngleUnit() == AngleUnit.RADIAN)
-				return true;
-		}
-		return false;
+		return getAngleUnit() == AngleUnit.RADIAN;
 	}
 
 	/**
 	 * Convert the angle units to radians. Requires the calibration to have angle units.
+	 * 
+	 * @param helper
 	 *
 	 * @return true, if the angle units are now in radians
 	 */
-	public boolean convertAngleToRadianUnits()
+	private boolean convertAngleToRadianUnits(CalibrationHelper helper)
 	{
-		if (calibration != null && calibration.hasAngleUnit())
-		{
-			if (calibration.getAngleUnit() == AngleUnit.RADIAN)
-				return true;
+		if (isAngleInRadianUnits())
+			return true;
 
-			try
+		try
+		{
+			TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(getAngleUnit(),
+					AngleUnit.RADIAN);
+			// Convert data
+			for (int i = 0, size = size(); i < size; i++)
 			{
-				TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(calibration.getAngleUnit(),
-						AngleUnit.RADIAN);
-				// Convert data
-				for (int i = 0, size = size(); i < size; i++)
-				{
-					PeakResult p = get(i);
-					convertAngle(p.params, c);
-					if (p.paramsStdDev != null)
-						convertAngle(p.paramsStdDev, c);
-				}
-				calibration.setAngleUnit(AngleUnit.RADIAN);
-				return true;
+				PeakResult p = get(i);
+				convertAngle(p.params, c);
+				if (p.paramsStdDev != null)
+					convertAngle(p.paramsStdDev, c);
 			}
-			catch (ConversionException e)
-			{
-				// Gracefully fail so ignore this
-			}
+			calibration.setAngleUnit(AngleUnit.RADIAN);
+			return true;
+		}
+		catch (ConversionException e)
+		{
+			// Gracefully fail so ignore this
 		}
 		return false;
 	}
@@ -1065,22 +1065,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		}
 	}
 
-	/**
-	 * Convert to preference units.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean convertToPreferenceUnits()
-	{
-		// TODO - do the conversion using the calibration helper.
-		// Remove the conversion methods from this class.
-		// CalibrationHelper helper = new CalibrationHelper(null);
-
-		boolean success = convertDistanceToPixelUnits();
-		success &= convertIntensityToPhotonUnits();
-		success &= convertAngleToRadianUnits();
-		return success;
-	}
+	/////////////////////////////////////////////////////////////////
+	// START OF PROCEDURE METHODS
+	// Note the converters are always created (and not cached) to 
+	// support thread safety, i.e. accessing the results in different
+	// units across threads.
+	/////////////////////////////////////////////////////////////////
 
 	/**
 	 * For each result execute the procedure.
@@ -1496,6 +1486,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		}
 	}
 
+	/////////////////////////////////////////////////////////////////
+	// END OF PROCEDURE METHODS 
+	/////////////////////////////////////////////////////////////////
+
 	/**
 	 * Gets the distance unit.
 	 *
@@ -1522,6 +1516,21 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		{
 			if (calibration.hasIntensityUnit())
 				return calibration.getIntensityUnit();
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the angle unit.
+	 *
+	 * @return the angle unit
+	 */
+	public AngleUnit getAngleUnit()
+	{
+		if (calibration != null)
+		{
+			if (calibration.hasAngleUnit())
+				return calibration.getAngleUnit();
 		}
 		return null;
 	}
