@@ -1,10 +1,11 @@
 package gdsc.smlm.model;
 
 import java.awt.Rectangle;
+import java.util.Arrays;
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -89,21 +90,21 @@ public class SphericalDistributionTest
 		dist.setUseRejectionMethod(useRejctionMethod);
 		float scale = 10;
 		results.begin();
+		float sd = 1, intensity = 1;
 		for (int i = 100000; i-- > 0;)
 		{
 			double[] xyz = dist.next();
-			int peak = (int) (1 + scale*radius + Math.round(scale * xyz[2]));
-			float[] params = new float[7];
-			params[Gaussian2DFunction.X_POSITION] = radius + (float) xyz[0];
-			params[Gaussian2DFunction.Y_POSITION] = radius + (float) xyz[1];
-			results.add(peak, 0, 0, 0, 0, 0, params, null);
+			int frame = (int) (1 + scale * radius + Math.round(scale * xyz[2]));
+			float x = radius + (float) xyz[0];
+			float y = radius + (float) xyz[1];
+			results.add(new PeakResult(frame, x, y, sd, intensity));
 		}
 		results.end();
-		IJImagePeakResults image = new IJImagePeakResults((useRejctionMethod) ? "Rejection Method"
-				: "Transformation Method", bounds, scale);
+		IJImagePeakResults image = new IJImagePeakResults(
+				(useRejctionMethod) ? "Rejection Method" : "Transformation Method", bounds, scale);
 		image.setRollingWindowSize(1);
 		image.begin();
-		image.addAll(results.getResults());
+		image.addAll(Arrays.asList(results.toArray()));
 		// Place breakpoint here in debug mode to view the image. 
 		// It should have an even colour through the stack.
 		image.end();

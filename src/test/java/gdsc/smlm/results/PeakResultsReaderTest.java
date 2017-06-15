@@ -3,9 +3,8 @@ package gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,6 +14,7 @@ import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.results.ResultsFileFormat;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 
 public class PeakResultsReaderTest
 {
@@ -514,12 +514,12 @@ public class PeakResultsReaderTest
 
 		final float delta = (binary) ? 0 : 1e-6f;
 
-		List<PeakResult> expected = expectedResults.getResults();
-		List<PeakResult> actual = actualResults.getResults();
+		PeakResult[] expected = expectedResults.toArray();
+		PeakResult[] actual = actualResults.toArray();
 		if (sort)
 		{
 			// Results should be sorted by time
-			Collections.sort(expected, new Comparator<PeakResult>()
+			Arrays.sort(expected, new Comparator<PeakResult>()
 			{
 				public int compare(PeakResult o1, PeakResult o2)
 				{
@@ -529,12 +529,12 @@ public class PeakResultsReaderTest
 		}
 
 		// TSF requires the bias be subtracted
-//		double bias = expectedResults.getCalibration().getBias();
+		//		double bias = expectedResults.getCalibration().getBias();
 
 		for (int i = 0; i < actualResults.size(); i++)
 		{
-			PeakResult p1 = expected.get(i);
-			PeakResult p2 = actual.get(i);
+			PeakResult p1 = expected[i];
+			PeakResult p2 = actual[i];
 
 			Assert.assertEquals("Peak mismatch @ " + i, p1.getFrame(), p2.getFrame());
 
@@ -672,7 +672,7 @@ public class PeakResultsReaderTest
 	private void writeFile(boolean sequential, ResultsFileFormat fileFormat, boolean showDeviations,
 			boolean showEndFrame, boolean showId, boolean sort, MemoryPeakResults results, String filename)
 	{
-		PeakResults out;
+		final PeakResults out;
 		switch (fileFormat)
 		{
 			case GDSC_BINARY:
@@ -698,19 +698,22 @@ public class PeakResultsReaderTest
 		out.begin();
 
 		// TODO - option to test adding using:
-		// add(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev);
+		// add(peak);
 
 		if (sequential)
 		{
-			for (PeakResult peak : results)
+			results.forEach(new PeakResultProcedure()
 			{
-				out.add(peak.getFrame(), peak.origX, peak.origY, peak.origValue, peak.error, peak.noise, peak.params,
-						peak.paramsStdDev);
-			}
+				public void execute(PeakResult peak)
+				{
+					out.add(peak.getFrame(), peak.origX, peak.origY, peak.origValue, peak.error, peak.noise,
+							peak.params, peak.paramsStdDev);
+				}
+			});
 		}
 		else
 		{
-			out.addAll(results.getResults());
+			out.addAll(Arrays.asList(results.toArray()));
 		}
 		out.end();
 	}

@@ -162,13 +162,13 @@ public class TraceManagerTest
 
 	private MemoryPeakResults toPeakResults(Trace... traces)
 	{
-		MemoryPeakResults results = new MemoryPeakResults();
+		ArrayList<PeakResult> results= new ArrayList<PeakResult>();
 		for (Trace t : traces)
 		{
 			results.addAll(t.getPoints());
 		}
-		Collections.shuffle(results.getResults());
-		return results;
+		Collections.shuffle(results);
+		return new MemoryPeakResults(results);
 	}
 
 	private void areEqual(Trace[] expected, Trace[] actual)

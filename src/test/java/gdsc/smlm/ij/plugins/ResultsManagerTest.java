@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -266,12 +265,12 @@ public class ResultsManagerTest
 
 		final float delta = 0;
 
-		List<PeakResult> expected = expectedResults.getResults();
-		List<PeakResult> actual = actualResults.getResults();
+		PeakResult[] expected = expectedResults.toArray();
+		PeakResult[] actual = actualResults.toArray();
 		for (int i = 0; i < actualResults.size(); i++)
 		{
-			PeakResult p1 = expected.get(i);
-			PeakResult p2 = actual.get(i);
+			PeakResult p1 = expected[i];
+			PeakResult p2 = actual[i];
 
 			Assert.assertEquals("Peak mismatch @ " + i, p1.getFrame(), p2.getFrame());
 

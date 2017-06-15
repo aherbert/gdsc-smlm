@@ -214,6 +214,16 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		results = new ArrayList<PeakResult>(capacity);
 	}
+	
+	/**
+	 * Instantiates a new memory peak results.
+	 *
+	 * @param results the results
+	 */
+	public MemoryPeakResults(Collection<PeakResult> results)
+	{
+		addAll(results);
+	}
 
 	/**
 	 * @param name
