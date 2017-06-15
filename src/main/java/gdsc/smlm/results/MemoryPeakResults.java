@@ -23,6 +23,7 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.TXYResultProcedure;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
@@ -214,11 +215,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		results = new ArrayList<PeakResult>(capacity);
 	}
-	
+
 	/**
 	 * Instantiates a new memory peak results.
 	 *
-	 * @param results the results
+	 * @param results
+	 *            the results
 	 */
 	public MemoryPeakResults(Collection<PeakResult> results)
 	{
@@ -1082,6 +1084,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * For each result execute the procedure.
+	 * <p>
+	 * Warning: Results with be in their native units since no unit conversion is performed.
 	 *
 	 * @param procedure
 	 *            the procedure
@@ -1121,9 +1125,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 				return;
 		}
 	}
-	
+
 	/**
 	 * For each result execute the procedure.
+	 * <p>
+	 * Warning: Results with be in their native units since no unit conversion is performed.
 	 *
 	 * @param procedure
 	 *            the procedure
@@ -1140,6 +1146,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * For the first result execute the procedure.
+	 * <p>
+	 * Warning: Results with be in their native units since no unit conversion is performed.
 	 *
 	 * @param procedure
 	 *            the procedure
@@ -1166,7 +1174,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
-	public void forEach(BIXYResultProcedure procedure, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
+	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, BIXYResultProcedure procedure)
 	{
 		if (calibration == null)
 			throw new ConversionException("No calibration");
@@ -1203,7 +1211,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
-	public void forEach(BIXYZResultProcedure procedure, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
+	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, BIXYZResultProcedure procedure)
 	{
 		if (calibration == null)
 			throw new ConversionException("No calibration");
@@ -1239,7 +1247,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
-	public void forEach(IResultProcedure procedure, IntensityUnit intensityUnit)
+	public void forEach(IntensityUnit intensityUnit, IResultProcedure procedure)
 	{
 		if (calibration == null)
 			throw new ConversionException("No calibration");
@@ -1270,7 +1278,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
-	public void forEach(IXYResultProcedure procedure, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
+	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYResultProcedure procedure)
 	{
 		if (calibration == null)
 			throw new ConversionException("No calibration");
@@ -1304,7 +1312,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
-	public void forEach(IXYZResultProcedure procedure, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
+	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYZResultProcedure procedure)
 	{
 		if (calibration == null)
 			throw new ConversionException("No calibration");
@@ -1337,7 +1345,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
-	public void forEach(TXYResultProcedure procedure, DistanceUnit distanceUnit)
+	public void forEach(DistanceUnit distanceUnit, TXYResultProcedure procedure)
 	{
 		if (calibration == null)
 			throw new ConversionException("No calibration");
@@ -1368,7 +1376,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
-	public void forEach(XYResultProcedure procedure, DistanceUnit distanceUnit)
+	public void forEach(DistanceUnit distanceUnit, XYResultProcedure procedure)
 	{
 		if (calibration == null)
 			throw new ConversionException("No calibration");
@@ -1391,6 +1399,37 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 */
+	public void forEach(DistanceUnit distanceUnit, XYRResultProcedure procedure)
+	{
+		if (calibration == null)
+			throw new ConversionException("No calibration");
+
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			//@formatter:off
+			procedure.executeXYR(
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()),
+					r);
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
 	 * @param procedure
 	 *            the procedure
 	 * @param distanceUnit
@@ -1398,7 +1437,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
-	public void forEach(XYZResultProcedure procedure, DistanceUnit distanceUnit)
+	public void forEach(DistanceUnit distanceUnit, XYZResultProcedure procedure)
 	{
 		if (calibration == null)
 			throw new ConversionException("No calibration");

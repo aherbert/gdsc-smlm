@@ -57,6 +57,8 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.function.SkewNormalFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.About;
@@ -72,6 +74,10 @@ import gdsc.smlm.results.NullSource;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.PrecisionResultProcedure;
+import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
@@ -440,26 +446,26 @@ public class PCPALMMolecules implements PlugIn
 		roiBounds.y /= yscale;
 		roiBounds.height /= yscale;
 
-		float minX = (int) (roiBounds.x);
-		float maxX = (int) Math.ceil(roiBounds.x + roiBounds.width);
-		float minY = (int) (roiBounds.y);
-		float maxY = (int) Math.ceil(roiBounds.y + roiBounds.height);
+		final float minX = (int) (roiBounds.x);
+		final float maxX = (int) Math.ceil(roiBounds.x + roiBounds.width);
+		final float minY = (int) (roiBounds.y);
+		final float maxY = (int) Math.ceil(roiBounds.y + roiBounds.height);
 
 		// Update the area with the cropped region
 		area *= (maxX - minX) / bounds.width;
 		area *= (maxY - minY) / bounds.height;
 
 		// Create a new set of results within the bounds
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
 		newResults.begin();
-		for (PeakResult peakResult : results.getResults())
+		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
-			float x = peakResult.getXPosition();
-			float y = peakResult.getYPosition();
-			if (x < minX || x > maxX || y < minY || y > maxY)
-				continue;
-			newResults.add(peakResult);
-		}
+			public void executeXYR(float x, float y, PeakResult result)
+			{
+				if (x >= minX || x <= maxX || y >= minY || y <= maxY)
+					newResults.add(result);
+			}
+		});
 		newResults.end();
 		newResults.copySettings(results);
 		newResults.setBounds(new Rectangle((int) minX, (int) minY, (int) (maxX - minX), (int) (maxY - minY)));
@@ -556,16 +562,16 @@ public class PCPALMMolecules implements PlugIn
 	public ArrayList<Molecule> extractLocalisations(MemoryPeakResults results)
 	{
 		ArrayList<Molecule> molecules = new ArrayList<Molecule>(results.size());
-		final double nmPerPixel = results.getNmPerPixel();
-		final double gain = results.getGain();
-		final boolean emCCD = results.isEMCCD();
-		for (PeakResult r : results.getResults())
+
+		// Access calibrated data
+		StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.NM, IntensityUnit.PHOTON);
+		sp.getXY();
+		PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
+		pp.getPrecision();
+
+		for (int i = 0, size = pp.size(); i < size; i++)
 		{
-			double p = r.getPrecision(nmPerPixel, gain, emCCD);
-			// Remove EMCCD adjustment
-			//p /= Math.sqrt(PeakResult.F);
-			molecules.add(new Molecule(r.getXPosition() * nmPerPixel, r.getYPosition() * nmPerPixel, p,
-					r.getSignal() / gain));
+			molecules.add(new Molecule(sp.x[i], sp.y[i], pp.precision[i], sp.intensity[i]));
 		}
 		return molecules;
 	}
@@ -1731,27 +1737,40 @@ public class PCPALMMolecules implements PlugIn
 		return true;
 	}
 
-	/**
-	 * Get the lifetime of the results using the earliest and latest frames and the calibrated exposure time.
-	 */
-	private void getLifetime()
+	private class FrameProcedure implements PeakResultProcedure
 	{
-		int start;
-		int end;
-		List<PeakResult> peakResults = results.getResults();
-		if (peakResults.isEmpty())
+		int start, end;
+
+		public FrameProcedure(int start, int end)
 		{
-			seconds = 0;
-			return;
+			this.start = start;
+			this.end = end;
 		}
-		start = end = peakResults.get(0).getFrame();
-		for (PeakResult r : peakResults)
+
+		public void execute(PeakResult r)
 		{
 			if (start > r.getFrame())
 				start = r.getFrame();
 			if (end < r.getEndFrame())
 				end = r.getEndFrame();
 		}
+	}
+
+	/**
+	 * Get the lifetime of the results using the earliest and latest frames and the calibrated exposure time.
+	 */
+	private void getLifetime()
+	{
+		if (results.isEmpty())
+		{
+			seconds = 0;
+			return;
+		}
+		int start = results.getFirstFrame(), end = start;
+		FrameProcedure p = new FrameProcedure(start, end);
+		results.forEach(p);
+		start = p.start;
+		end = p.end;
 		seconds = (end - start + 1) * results.getCalibration().getExposureTime() / 1000;
 	}
 

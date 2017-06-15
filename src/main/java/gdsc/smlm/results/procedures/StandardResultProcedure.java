@@ -3,6 +3,7 @@ package gdsc.smlm.results.procedures;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -21,7 +22,7 @@ import gdsc.smlm.results.MemoryPeakResults;
  * Contains functionality to obtain the standard calibrated data for results.
  */
 //@formatter:off
-public class StandardResultProcedure extends AbstractResultProcedure implements 
+public class StandardResultProcedure extends UnitResultProcedure implements 
         BIXYResultProcedure, 
         BIXYZResultProcedure, 
         IResultProcedure, 
@@ -29,12 +30,13 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
         IXYZResultProcedure,
 		TXYResultProcedure, 
 		XYResultProcedure, 
+		XYRResultProcedure, 
 		XYZResultProcedure
 //@formatter:on
 {
 	/** The frame. */
 	public int[] frame;
-	
+
 	/** The background. */
 	public float[] background;
 
@@ -50,6 +52,9 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 	/** The z. */
 	public float[] z;
 
+	/** The peak results. */
+	public PeakResult[] peakResults;
+
 	/**
 	 * Instantiates a new standard result procedure.
 	 *
@@ -61,6 +66,21 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 	 *            the intensity unit
 	 */
 	public StandardResultProcedure(MemoryPeakResults results, DistanceUnit distanceUnit, IntensityUnit intensityUnit)
+	{
+		super(results, distanceUnit, intensityUnit);
+	}
+
+	/**
+	 * Instantiates a new standard result procedure.
+	 *
+	 * @param results
+	 *            the results
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @param intensityUnit
+	 *            the intensity unit
+	 */
+	public StandardResultProcedure(MemoryPeakResults results, IntensityUnit intensityUnit, DistanceUnit distanceUnit)
 	{
 		super(results, distanceUnit, intensityUnit);
 	}
@@ -111,11 +131,11 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 	public void getBIXY()
 	{
 		i = 0;
-		this.background = allocate(this.background);
-		this.intensity = allocate(this.intensity);
-		this.x = allocate(this.x);
-		this.y = allocate(this.y);
-		results.forEach((BIXYResultProcedure) this, getIntensityUnit(), getDistanceUnit());
+		allocateB();
+		allocateI();
+		allocateX();
+		allocateY();
+		results.forEach(getIntensityUnit(), getDistanceUnit(), (BIXYResultProcedure) this);
 	}
 
 	public void executeBIXY(float background, float intensity, float x, float y)
@@ -126,7 +146,7 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 		this.y[i] = y;
 		i++;
 	}
-	
+
 	/**
 	 * Gets the BIXYZ data in the configured units.
 	 * 
@@ -136,12 +156,12 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 	public void getBIXYZ()
 	{
 		i = 0;
-		this.background = allocate(this.background);
-		this.intensity = allocate(this.intensity);
-		this.x = allocate(this.x);
-		this.y = allocate(this.y);
-		this.z = allocate(this.z);
-		results.forEach((BIXYZResultProcedure) this, getIntensityUnit(), getDistanceUnit());
+		allocateB();
+		allocateI();
+		allocateX();
+		allocateY();
+		allocateZ();
+		results.forEach(getIntensityUnit(), getDistanceUnit(), (BIXYZResultProcedure) this);
 	}
 
 	public void executeBIXYZ(float background, float intensity, float x, float y, float z)
@@ -163,8 +183,8 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 	public void getI()
 	{
 		i = 0;
-		this.intensity = allocate(this.intensity);
-		results.forEach((IResultProcedure) this, getIntensityUnit());
+		allocateI();
+		results.forEach(getIntensityUnit(), (IResultProcedure) this);
 	}
 
 	public void executeI(float intensity)
@@ -182,10 +202,10 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 	public void getIXY()
 	{
 		i = 0;
-		this.intensity = allocate(this.intensity);
-		this.x = allocate(this.x);
-		this.y = allocate(this.y);
-		results.forEach((IXYResultProcedure) this, getIntensityUnit(), getDistanceUnit());
+		allocateI();
+		allocateX();
+		allocateY();
+		results.forEach(getIntensityUnit(), getDistanceUnit(), (IXYResultProcedure) this);
 	}
 
 	public void executeIXY(float intensity, float x, float y)
@@ -205,11 +225,11 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 	public void getIXYZ()
 	{
 		i = 0;
-		this.intensity = allocate(this.intensity);
-		this.x = allocate(this.x);
-		this.y = allocate(this.y);
-		this.z = allocate(this.z);
-		results.forEach((IXYZResultProcedure) this, getIntensityUnit(), getDistanceUnit());
+		allocateI();
+		allocateX();
+		allocateY();
+		allocateZ();
+		results.forEach(getIntensityUnit(), getDistanceUnit(), (IXYZResultProcedure) this);
 	}
 
 	public void executeIXYZ(float intensity, float x, float y, float z)
@@ -231,14 +251,14 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 	{
 		i = 0;
 		this.frame = allocate(this.frame);
-		this.x = allocate(this.x);
-		this.y = allocate(this.y);
-		results.forEach((TXYResultProcedure) this, getDistanceUnit());
+		allocateX();
+		allocateY();
+		results.forEach(getDistanceUnit(), (TXYResultProcedure) this);
 	}
 
 	public void executeTXY(int frame, float x, float y)
 	{
-		this.frame[i]=frame;
+		this.frame[i] = frame;
 		this.x[i] = x;
 		this.y[i] = y;
 		i++;
@@ -253,15 +273,38 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 	public void getXY()
 	{
 		i = 0;
-		this.x = allocate(this.x);
-		this.y = allocate(this.y);
-		results.forEach((XYResultProcedure) this, getDistanceUnit());
+		allocateX();
+		allocateY();
+		results.forEach(getDistanceUnit(), (XYResultProcedure) this);
 	}
 
 	public void executeXY(float x, float y)
 	{
 		this.x[i] = x;
 		this.y[i] = y;
+		i++;
+	}
+
+	/**
+	 * Gets the XYR data in the configured units.
+	 * 
+	 * @throws ConversionException
+	 *             if conversion to the required units is not possible
+	 */
+	public void getXYR()
+	{
+		i = 0;
+		allocateX();
+		allocateY();
+		allocateR();
+		results.forEach(getDistanceUnit(), (XYRResultProcedure) this);
+	}
+
+	public void executeXYR(float x, float y, PeakResult result)
+	{
+		this.x[i] = x;
+		this.y[i] = y;
+		peakResults[i] = result;
 		i++;
 	}
 
@@ -274,10 +317,10 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 	public void getXYZ()
 	{
 		i = 0;
-		this.x = allocate(this.x);
-		this.y = allocate(this.y);
-		this.z = allocate(this.z);
-		results.forEach((XYZResultProcedure) this, getDistanceUnit());
+		allocateX();
+		allocateY();
+		allocateZ();
+		results.forEach(getDistanceUnit(), (XYZResultProcedure) this);
 	}
 
 	public void executeXYZ(float x, float y, float z)
@@ -286,5 +329,35 @@ public class StandardResultProcedure extends AbstractResultProcedure implements
 		this.y[i] = y;
 		this.z[i] = z;
 		i++;
+	}
+
+	private void allocateB()
+	{
+		this.background = allocate(this.background);
+	}
+
+	private void allocateI()
+	{
+		this.intensity = allocate(this.intensity);
+	}
+
+	private void allocateX()
+	{
+		this.x = allocate(this.x);
+	}
+
+	private void allocateY()
+	{
+		this.y = allocate(this.y);
+	}
+
+	private void allocateZ()
+	{
+		this.z = allocate(this.z);
+	}
+
+	private void allocateR()
+	{
+		this.peakResults = allocate(this.peakResults);
 	}
 }

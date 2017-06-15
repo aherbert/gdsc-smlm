@@ -21,19 +21,13 @@ import gdsc.smlm.results.PeakResult;
 /**
  * Contains core functionality to for result procedures.
  */
-public abstract class AbstractResultProcedure
+public abstract class UnitResultProcedure extends AbstractResultProcedure
 {
-	/** The results. */
-	final MemoryPeakResults results;
-
 	/** The distance unit. */
 	private DistanceUnit distanceUnit;
 
 	/** The intensity unit. */
 	private IntensityUnit intensityUnit;
-
-	/** The counter for procedures */
-	protected int i;
 
 	/**
 	 * Instantiates a new abstract result procedure.
@@ -45,11 +39,9 @@ public abstract class AbstractResultProcedure
 	 * @param intensityUnit
 	 *            the intensity unit
 	 */
-	public AbstractResultProcedure(MemoryPeakResults results, DistanceUnit distanceUnit, IntensityUnit intensityUnit)
+	public UnitResultProcedure(MemoryPeakResults results, DistanceUnit distanceUnit, IntensityUnit intensityUnit)
 	{
-		if (results == null)
-			throw new IllegalArgumentException("results must not be null");
-		this.results = results;
+		super(results);
 		this.setDistanceUnit(distanceUnit);
 		this.setIntensityUnit(intensityUnit);
 	}
@@ -62,7 +54,7 @@ public abstract class AbstractResultProcedure
 	 * @param distanceUnit
 	 *            the distance unit
 	 */
-	public AbstractResultProcedure(MemoryPeakResults results, DistanceUnit distanceUnit)
+	public UnitResultProcedure(MemoryPeakResults results, DistanceUnit distanceUnit)
 	{
 		this(results, distanceUnit, IntensityUnit.PHOTON);
 	}
@@ -75,7 +67,7 @@ public abstract class AbstractResultProcedure
 	 * @param intensityUnit
 	 *            the intensity unit
 	 */
-	public AbstractResultProcedure(MemoryPeakResults results, IntensityUnit intensityUnit)
+	public UnitResultProcedure(MemoryPeakResults results, IntensityUnit intensityUnit)
 	{
 		this(results, DistanceUnit.PIXEL, intensityUnit);
 	}
@@ -86,7 +78,7 @@ public abstract class AbstractResultProcedure
 	 * @param results
 	 *            the results
 	 */
-	public AbstractResultProcedure(MemoryPeakResults results)
+	public UnitResultProcedure(MemoryPeakResults results)
 	{
 		this(results, DistanceUnit.PIXEL, IntensityUnit.PHOTON);
 	}
@@ -99,16 +91,6 @@ public abstract class AbstractResultProcedure
 	public DistanceUnit getDistanceUnit()
 	{
 		return distanceUnit;
-	}
-
-	/**
-	 * Get the size of the results.
-	 *
-	 * @return the size
-	 */
-	public int size()
-	{
-		return results.size();
 	}
 
 	/**
@@ -145,53 +127,5 @@ public abstract class AbstractResultProcedure
 		if (intensityUnit == null)
 			throw new IllegalArgumentException("unit must not be null");
 		this.intensityUnit = intensityUnit;
-	}
-
-	/**
-	 * Allocate the array to store the data based on the current results size.
-	 *
-	 * @param data
-	 *            the data
-	 * @return the (new) data
-	 */
-	protected int[] allocate(int[] data)
-	{
-		return (data == null || data.length < size()) ? new int[size()] : data;
-	}
-
-	/**
-	 * Allocate the array to store the data based on the current results size.
-	 *
-	 * @param data
-	 *            the data
-	 * @return the (new) data
-	 */
-	protected float[] allocate(float[] data)
-	{
-		return (data == null || data.length < size()) ? new float[size()] : data;
-	}
-
-	/**
-	 * Allocate the array to store the data based on the current results size.
-	 *
-	 * @param data
-	 *            the data
-	 * @return the (new) data
-	 */
-	protected double[] allocate(double[] data)
-	{
-		return (data == null || data.length < size()) ? new double[size()] : data;
-	}
-
-	/**
-	 * Allocate the array to store the data based on the current results size.
-	 *
-	 * @param data
-	 *            the data
-	 * @return the (new) data
-	 */
-	protected PeakResult[] allocate(PeakResult[] data)
-	{
-		return (data == null || data.length < size()) ? new PeakResult[size()] : data;
 	}
 }
