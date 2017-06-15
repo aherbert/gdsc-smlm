@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
@@ -31,10 +33,12 @@ import gdsc.core.data.utils.TypeConverter;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -44,6 +48,7 @@ import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
@@ -144,7 +149,7 @@ public class LoadLocalisations implements PlugIn
 			}
 
 			// Convert to preferred units
-			results.convertToPreferenceUnits();
+			results.convertToPreferredUnits();
 
 			return results;
 		}
@@ -215,16 +220,18 @@ public class LoadLocalisations implements PlugIn
 			return;
 		if (myLimitZ)
 		{
-			MemoryPeakResults results2 = new MemoryPeakResults(results.size());
+			final MemoryPeakResults results2 = new MemoryPeakResults(results.size());
 			results2.setName(name);
 			results2.copySettings(results);
 
-			for (PeakResult peak : results.getResults())
+			results.forEach(new PeakResultProcedure()
 			{
-				if (peak.error < minz || peak.error > maxz)
-					continue;
-				results2.add(peak);
-			}
+				public void execute(PeakResult peak)
+				{
+					if (peak.error >= minz && peak.error <= maxz)
+						results2.add(peak);
+				}
+			});
 			results = results2;
 		}
 
@@ -249,23 +256,14 @@ public class LoadLocalisations implements PlugIn
 		{
 			if (min > z)
 				min = z;
-			else if (max < z)
+			if (max < z)
 				max = z;
 		}
 	}
 
 	private boolean getZDepth(MemoryPeakResults results)
 	{
-		// The z-depth is stored in pixels in the error field
 		final ZResultProcedure p = new ZResultProcedure();
-		// Initialise with the first result
-		results.forFirst(new BIXYZResultProcedure()
-		{
-			public void executeBIXYZ(float background, float intensity, float x, float y, float z)
-			{
-				p.min = p.max = z;
-			}
-		});
 		results.forEach(p);
 
 		double min = p.min;
@@ -279,11 +277,29 @@ public class LoadLocalisations implements PlugIn
 		minz = FastMath.max(minz, min);
 
 		// Display in nm
-		final double pp = results.getNmPerPixel();
-		min *= pp;
-		max *= pp;
+		TypeConverter<DistanceUnit> c = new IdentityTypeConverter<DistanceUnit>(null);
+		String unit = "";
 
-		String msg = String.format("%d localisations with %.2f <= z <= %.2f", results.size(), min, max);
+		DistanceUnit nativeUnit = results.getDistanceUnit();
+		if (nativeUnit != null)
+		{
+			unit = UnitHelper.getShortName(nativeUnit);
+			try
+			{
+				// XXX - Fix this to get the calibration
+				c = CalibrationHelper.getDistanceConverter(null, //results.getCalibration(), 
+						DistanceUnit.NM);
+				unit = UnitHelper.getShortName(DistanceUnit.NM);
+			}
+			catch (ConversionException e)
+			{
+
+			}
+		}
+		min = c.convert(min);
+		max = c.convert(max);
+
+		String msg = String.format("%d localisations with %.2f <= z <= %.2f (%s)", results.size(), min, max, unit);
 
 		min = Math.floor(min);
 		max = Math.ceil(max);
@@ -291,16 +307,16 @@ public class LoadLocalisations implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage(msg);
 		gd.addCheckbox("Limit Z-depth", limitZ);
-		gd.addSlider("minZ", min, max, minz * pp);
-		gd.addSlider("maxZ", min, max, maxz * pp);
+		gd.addSlider("minZ", min, max, c.convert(minz));
+		gd.addSlider("maxZ", min, max, c.convert(maxz));
 		gd.showDialog();
 		if (gd.wasCanceled() || gd.invalidNumber())
 		{
 			return false;
 		}
 		myLimitZ = limitZ = gd.getNextBoolean();
-		minz = gd.getNextNumber() / pp;
-		maxz = gd.getNextNumber() / pp;
+		minz = c.convertBack(gd.getNextNumber());
+		maxz = c.convertBack(gd.getNextNumber());
 		return true;
 	}
 
