@@ -462,7 +462,7 @@ public class PCPALMMolecules implements PlugIn
 		{
 			public void executeXYR(float x, float y, PeakResult result)
 			{
-				if (x >= minX || x <= maxX || y >= minY || y <= maxY)
+				if (x >= minX && x <= maxX && y >= minY && y <= maxY)
 					newResults.add(result);
 			}
 		});
