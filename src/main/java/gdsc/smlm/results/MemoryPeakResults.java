@@ -65,7 +65,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	// START OF RESULTS STORAGE METHODS 
 	/////////////////////////////////////////////////////////////////
 
-	// Allow changing the data structure used to store the results
+	/**
+	 * The results.
+	 * This is encapsulated to allow changing the data structure used to store the results.
+	 */
 	private ArrayList<PeakResult> results;
 
 	/**
@@ -133,7 +136,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Sort the results
+	 * Sort the results.
 	 */
 	public void sort()
 	{
@@ -229,6 +232,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Gets the results.
+	 *
 	 * @param name
 	 *            The name of the results
 	 * @return Get the named results (or null if they do not exist)
@@ -239,6 +244,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Removes the results.
+	 *
 	 * @param name
 	 *            The name of the results
 	 * @return The removed results (or null if they do not exist)
@@ -250,8 +257,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * Add the results to memory. The name is taken from the results.
-	 * 
+	 *
 	 * @param results
+	 *            the results
 	 */
 	public static void addResults(MemoryPeakResults results)
 	{
@@ -262,6 +270,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Gets the result names.
+	 *
 	 * @return A set of the available named results held in memory
 	 */
 	public static Set<String> getResultNames()
@@ -270,6 +280,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Gets the all results.
+	 *
 	 * @return A collection of the results held in memory
 	 */
 	public static Collection<MemoryPeakResults> getAllResults()
@@ -278,7 +290,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Count the number of result sets in memory
+	 * Count the number of result sets in memory.
+	 *
+	 * @return the results memory size
 	 */
 	public static int getResultsMemorySize()
 	{
@@ -286,7 +300,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Return true if there are no non-empty results in memory
+	 * Return true if there are no non-empty results in memory.
+	 *
+	 * @return true, if is memory empty
 	 */
 	public static boolean isMemoryEmpty()
 	{
@@ -299,7 +315,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Count the total number of results in memory
+	 * Count the total number of results in memory.
+	 *
+	 * @return the int
 	 */
 	public static int countMemorySize()
 	{
@@ -312,7 +330,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Clear the results from memory
+	 * Clear the results from memory.
 	 */
 	public static void clearMemory()
 	{
@@ -320,7 +338,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Estimate the total size of results in memory
+	 * Estimate the total size of results in memory.
+	 *
+	 * @return the long
 	 */
 	public static long estimateMemorySize()
 	{
@@ -333,9 +353,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Convert the size in bytes into a string
-	 * 
+	 * Convert the size in bytes into a string.
+	 *
 	 * @param memorySize
+	 *            the memory size
 	 * @return The memory size string
 	 */
 	public static String memorySizeString(long memorySize)
@@ -347,9 +368,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * Return an estimate of the memory size taken by PeakResult objects.
 	 * <p>
 	 * Note: This is just a guess based on measured sizes for the objects in memory.
-	 * 
-	 * @param size
-	 * @param includeDeviations
+	 *
+	 * @param r
+	 *            the r
 	 * @return The memory size
 	 */
 	public static long estimateMemorySize(MemoryPeakResults r)
@@ -367,9 +388,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * Return an estimate of the memory size taken by PeakResult objects.
 	 * <p>
 	 * Note: This is just a guess based on measured sizes for the objects in memory.
-	 * 
+	 *
 	 * @param size
+	 *            the size
 	 * @param includeDeviations
+	 *            the include deviations
 	 * @return The memory size
 	 */
 	public static long estimateMemorySize(int size, boolean includeDeviations)
@@ -393,6 +416,15 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	// The following code can be used to determine the memory size of an object.
 	// Taken from: http://www.javaworld.com/javaworld/javatips/jw-javatip130.html?page=1
 
+	/**
+	 * Measure size.
+	 *
+	 * @param size
+	 *            the size
+	 * @param includeDeviations
+	 *            the include deviations
+	 * @return the long
+	 */
 	public static long measureSize(int size, boolean includeDeviations)
 	{
 		// Warm up all classes/methods we will use
@@ -437,7 +469,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Run the garbage collector multiple times to free memory
+	 * Run the garbage collector multiple times to free memory.
 	 */
 	public static void runGC()
 	{
@@ -447,6 +479,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			_runGC();
 	}
 
+	/**
+	 * Run GC.
+	 */
 	private static void _runGC()
 	{
 		long usedMem1 = usedMemory(), usedMem2 = Long.MAX_VALUE;
@@ -461,22 +496,40 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		}
 	}
 
+	/**
+	 * Run GC once.
+	 */
 	public static void runGCOnce()
 	{
 		s_runtime.runFinalization();
 		s_runtime.gc();
 	}
 
+	/**
+	 * Used memory.
+	 *
+	 * @return the long
+	 */
 	public static long usedMemory()
 	{
 		return s_runtime.totalMemory() - s_runtime.freeMemory();
 	}
 
+	/**
+	 * Total memory.
+	 *
+	 * @return the long
+	 */
 	public static long totalMemory()
 	{
 		return s_runtime.totalMemory();
 	}
 
+	/**
+	 * Free memory.
+	 *
+	 * @return the long
+	 */
 	public static long freeMemory()
 	{
 		return s_runtime.freeMemory();
@@ -619,6 +672,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Sets the sort after end.
+	 *
 	 * @param sortAfterEnd
 	 *            True if the results should be sorted after the {@link #end()} method
 	 */
@@ -628,6 +683,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Checks if is sort after end.
+	 *
 	 * @return True if the results should be sorted after the {@link #end()} method
 	 */
 	public boolean isSortAfterEnd()
@@ -637,7 +694,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * Shallow copy this set of results. To create new object references use {@link #copy()}.
-	 * 
+	 *
+	 * @return the memory peak results
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -657,6 +715,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	/**
 	 * Copy the results. Create new objects for the properties (avoiding a shallow copy) but does not
 	 * deep copy all of the peak results. Allows results to be resorted but not modified.
+	 *
+	 * @return the memory peak results
 	 */
 	public MemoryPeakResults copy()
 	{
@@ -674,6 +734,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Checks if is empty.
+	 *
 	 * @return True if empty
 	 */
 	public boolean isEmpty()
@@ -888,9 +950,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * Convert the distance units to pixels. Requires the calibration to have distance units and nm/pixel.
-	 * 
-	 * @param helper
 	 *
+	 * @param helper
+	 *            the helper
 	 * @return true, if the distance units are now in pixels
 	 */
 	private boolean convertDistanceToPixelUnits(CalibrationHelper helper)
@@ -926,6 +988,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		return false;
 	}
 
+	/** The Constant offsetYSD. */
 	private final static int offsetY, offsetXSD, offsetYSD;
 	static
 	{
@@ -934,6 +997,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		offsetYSD = Gaussian2DFunction.Y_SD - Gaussian2DFunction.X_POSITION;
 	}
 
+	/**
+	 * Convert distance.
+	 *
+	 * @param params
+	 *            the params
+	 * @param c
+	 *            the c
+	 */
 	private void convertDistance(float[] params, TypeConverter<DistanceUnit> c)
 	{
 		for (int i = Gaussian2DFunction.X_POSITION; i < params.length; i += 6)
@@ -957,9 +1028,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * Convert the intensity units to photons. Requires the calibration to have intensity units, gain and bias.
-	 * 
-	 * @param helper
 	 *
+	 * @param helper
+	 *            the helper
 	 * @return true, if the intensity units are now in photons
 	 */
 	private boolean convertIntensityToPhotonUnits(CalibrationHelper helper)
@@ -1005,6 +1076,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		return false;
 	}
 
+	/**
+	 * Convert intensity.
+	 *
+	 * @param params
+	 *            the params
+	 * @param c
+	 *            the c
+	 */
 	private void convertIntensity(float[] params, TypeConverter<IntensityUnit> c)
 	{
 		for (int i = Gaussian2DFunction.SIGNAL; i < params.length; i += 6)
@@ -1025,9 +1104,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * Convert the angle units to radians. Requires the calibration to have angle units.
-	 * 
-	 * @param helper
 	 *
+	 * @param helper
+	 *            the helper
 	 * @return true, if the angle units are now in radians
 	 */
 	private boolean convertAngleToRadianUnits(CalibrationHelper helper)
@@ -1037,8 +1116,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		try
 		{
-			TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(getAngleUnit(),
-					AngleUnit.RADIAN);
+			TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(getAngleUnit(), AngleUnit.RADIAN);
 			// Convert data
 			for (int i = 0, size = size(); i < size; i++)
 			{
@@ -1057,6 +1135,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		return false;
 	}
 
+	/**
+	 * Convert angle.
+	 *
+	 * @param params
+	 *            the params
+	 * @param c
+	 *            the c
+	 */
 	private void convertAngle(float[] params, TypeConverter<AngleUnit> c)
 	{
 		for (int i = Gaussian2DFunction.SHAPE; i < params.length; i += 6)
@@ -1124,7 +1210,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @param procedure
 	 *            the procedure
 	 */
-	public void forEach(BIXYZResultProcedure procedure)
+	public void forEachNative(BIXYZResultProcedure procedure)
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1142,7 +1228,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @param procedure
 	 *            the procedure
 	 */
-	public void forFirst(BIXYZResultProcedure procedure)
+	public void forFirstNative(BIXYZResultProcedure procedure)
 	{
 		if (isEmpty())
 			return;
@@ -1155,12 +1241,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
-	 * @param procedure
-	 *            the procedure
 	 * @param intensityUnit
 	 *            the intensity unit
 	 * @param distanceUnit
 	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
@@ -1192,12 +1278,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
-	 * @param procedure
-	 *            the procedure
 	 * @param intensityUnit
 	 *            the intensity unit
 	 * @param distanceUnit
 	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
@@ -1230,10 +1316,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
-	 * @param procedure
-	 *            the procedure
 	 * @param intensityUnit
 	 *            the intensity unit
+	 * @param procedure
+	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
@@ -1259,12 +1345,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
-	 * @param procedure
-	 *            the procedure
 	 * @param intensityUnit
 	 *            the intensity unit
 	 * @param distanceUnit
 	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
@@ -1293,12 +1379,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
-	 * @param procedure
-	 *            the procedure
 	 * @param intensityUnit
 	 *            the intensity unit
 	 * @param distanceUnit
 	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
@@ -1328,10 +1414,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
-	 * @param procedure
-	 *            the procedure
 	 * @param distanceUnit
 	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
@@ -1359,10 +1445,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
-	 * @param procedure
-	 *            the procedure
 	 * @param distanceUnit
 	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */
@@ -1388,6 +1474,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * For each result execute the procedure using the specified units.
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
+	 * <p>
+	 * Warning: The peak result with be in native units.
 	 *
 	 * @param distanceUnit
 	 *            the distance unit
@@ -1420,10 +1508,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
-	 * @param procedure
-	 *            the procedure
 	 * @param distanceUnit
 	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
 	 */

@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -19,6 +20,8 @@ import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
+import gnu.trove.list.array.TFloatArrayList;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
@@ -103,6 +106,9 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		private boolean[] error = new boolean[ids.length];
 		// The results text window (so we can close it)
 		private TextWindow tw = null;
+
+		TFloatArrayList ox = new TFloatArrayList(100);
+		TFloatArrayList oy = new TFloatArrayList(100);
 
 		public void run()
 		{
@@ -200,7 +206,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			}
 			clearError();
 
-			IJTablePeakResults table = null;
+			final IJTablePeakResults table;
 			if (showTable)
 			{
 				table = new IJTablePeakResults(false);
@@ -220,28 +226,26 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			}
 			else
 			{
+				table = null;
 				closeTextWindow();
 			}
 
-			float[] ox = new float[100];
-			float[] oy = new float[100];
-			int points = 0;
-			for (PeakResult r : results.getResults())
+			ox.resetQuick();
+			oy.resetQuick();
+			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 			{
-				if (r.getFrame() != currentSlice)
-					continue;
-				if (points == ox.length)
+				public void executeXYR(float x, float y, PeakResult r)
 				{
-					ox = Arrays.copyOf(ox, (int) (points * 1.5));
-					oy = Arrays.copyOf(oy, ox.length);
+					if (r.getFrame() != currentSlice)
+					{
+						ox.add(x);
+						oy.add(y);
+						if (table != null)
+							table.add(r);
+					}
 				}
-				ox[points] = r.getXPosition();
-				oy[points] = r.getYPosition();
-				points++;
-				if (table != null)
-					table.add(r);
-			}
-			PointRoi roi = new PointRoi(ox, oy, points);
+			});
+			PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
 			roi.setPointType(3);
 			imp.getWindow().toFront();
 			imp.setOverlay(new Overlay(roi));

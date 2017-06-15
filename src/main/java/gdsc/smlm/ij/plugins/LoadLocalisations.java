@@ -264,7 +264,7 @@ public class LoadLocalisations implements PlugIn
 	private boolean getZDepth(MemoryPeakResults results)
 	{
 		final ZResultProcedure p = new ZResultProcedure();
-		results.forEach(p);
+		results.forEachNative(p);
 
 		double min = p.min;
 		double max = p.max;

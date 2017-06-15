@@ -701,16 +701,16 @@ public class PeakResult implements Comparable<PeakResult>
 	public int compareTo(PeakResult o)
 	{
 		// Sort by peak number: Ascending
-		if (frame == o.frame)
-		{
-			// Sort by peak height: Descending
-			if (params[Gaussian2DFunction.SIGNAL] > o.params[Gaussian2DFunction.SIGNAL])
-				return -1;
-			if (params[Gaussian2DFunction.SIGNAL] < o.params[Gaussian2DFunction.SIGNAL])
-				return 1;
-			return 0;
-		}
-		return frame - o.frame;
+		if (frame < o.frame)
+			return -1;
+		if (frame > o.frame)
+			return 1;
+		// Sort by peak height: Descending
+		if (params[Gaussian2DFunction.SIGNAL] > o.params[Gaussian2DFunction.SIGNAL])
+			return -1;
+		if (params[Gaussian2DFunction.SIGNAL] < o.params[Gaussian2DFunction.SIGNAL])
+			return 1;
+		return 0;
 	}
 
 	/**
