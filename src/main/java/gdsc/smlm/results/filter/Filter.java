@@ -6,6 +6,8 @@ import gdsc.core.match.ClassificationResult;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.Counter;
+import gdsc.smlm.results.FrameCounter;
 import gdsc.smlm.results.MemoryPeakResults;
 
 import java.util.List;
@@ -83,73 +85,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
-	 * Class to count filtering failures per frame.
-	 */
-	private static class Counter
-	{
-		private int count = 0;
-
-		/**
-		 * Reset the count
-		 */
-		void reset()
-		{
-			count = 0;
-		}
-
-		/**
-		 * Increment the count
-		 */
-		void increment()
-		{
-			count++;
-		}
-
-		/**
-		 * Increment the count by the value.
-		 *
-		 * @param value the value
-		 */
-		void increment(int value)
-		{
-			count += value;
-		}
-
-		/**
-		 * Get the value.
-		 *
-		 * @return the value
-		 */
-		public int value()
-		{
-			return count;
-		}
-	}
-
-	/**
-	 * Class to count filtering failures per frame.
-	 */
-	private static class FailCounter extends Counter
-	{
-		int frame = -1;
-
-		/**
-		 * Advance the frame. If this is a new frame then the fail count is reset.
-		 *
-		 * @param frame
-		 *            the frame
-		 */
-		void advance(int frame)
-		{
-			if (this.frame != frame)
-			{
-				this.frame = frame;
-				reset();
-			}
-		}
-	}
-
-	/**
 	 * Filter the results
 	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
@@ -163,7 +98,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	public MemoryPeakResults filter(MemoryPeakResults results, final int failures)
 	{
 		final MemoryPeakResults newResults = new MemoryPeakResults();
-		final FailCounter counter = new FailCounter();
+		final FrameCounter counter = new FrameCounter();
 		newResults.copySettings(results);
 		setup(results);
 		results.forEach(new PeakResultProcedure()
@@ -174,7 +109,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 				// Reject all peaks if we have exceeded the fail count
 				final boolean isPositive;
-				if (counter.value() > failures)
+				if (counter.getCount() > failures)
 				{
 					isPositive = false;
 				}
@@ -191,7 +126,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				}
 				else
 				{
-					counter.increment();
+					counter.incrementAndGet();
 				}
 			}
 		});
@@ -217,7 +152,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	public MemoryPeakResults filter2(MemoryPeakResults results, final int failures)
 	{
 		final MemoryPeakResults newResults = new MemoryPeakResults();
-		final FailCounter counter = new FailCounter();
+		final FrameCounter counter = new FrameCounter();
 		newResults.copySettings(results);
 		setup(results);
 		results.forEach(new PeakResultProcedure()
@@ -226,11 +161,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			{
 				counter.advance(peak.getFrame());
 
-				counter.increment(peak.origY);
+				counter.incrementAndGet(peak.origY);
 
 				// Reject all peaks if we have exceeded the fail count
 				final boolean isPositive;
-				if (counter.value() > failures)
+				if (counter.getCount() > failures)
 				{
 					isPositive = false;
 				}
@@ -247,7 +182,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				}
 				else
 				{
-					counter.increment();
+					counter.incrementAndGet();
 				}
 			}
 		});
@@ -278,7 +213,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	public MemoryPeakResults filterSubset(MemoryPeakResults results, double[] score)
 	{
 		final MemoryPeakResults newResults = new MemoryPeakResults();
-		final FailCounter counter = new FailCounter();
+		final FrameCounter counter = new FrameCounter();
 		newResults.copySettings(results);
 		setup(results);
 		final double[] s = new double[4];
@@ -294,18 +229,18 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 				if (isPositive)
 				{
-					peak.origX = counter.value();
+					peak.origX = counter.getCount();
 					counter.reset();
 					newResults.add(peak);
 				}
 				else
 				{
-					counter.increment();
+					counter.incrementAndGet();
 				}
 
 				if (isPositive)
 				{
-					p.increment();
+					p.incrementAndGet();
 					s[TP] += peak.getTruePositiveScore();
 					s[FP] += peak.getFalsePositiveScore();
 				}
@@ -324,8 +259,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			score[1] = s[FP];
 			score[2] = s[TN];
 			score[3] = s[FN];
-			score[4] = p.value();
-			score[5] = results.size() - p.value();
+			score[4] = p.getCount();
+			score[5] = results.size() - p.getCount();
 		}
 
 		return newResults;
@@ -356,7 +291,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	public MemoryPeakResults filterSubset2(MemoryPeakResults results, double[] score)
 	{
 		final MemoryPeakResults newResults = new MemoryPeakResults();
-		final FailCounter counter = new FailCounter();
+		final FrameCounter counter = new FrameCounter();
 		newResults.copySettings(results);
 		setup(results);
 		final double[] s = new double[4];
@@ -367,25 +302,25 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			{
 				counter.advance(peak.getFrame());
 
-				counter.increment(peak.origY);
+				counter.incrementAndGet(peak.origY);
 
 				// Reject all peaks if we have exceeded the fail count
 				final boolean isPositive = accept(peak);
 
 				if (isPositive)
 				{
-					peak.origX = counter.value();
+					peak.origX = counter.getCount();
 					counter.reset();
 					newResults.add(peak);
 				}
 				else
 				{
-					counter.increment();
+					counter.incrementAndGet();
 				}
 
 				if (isPositive)
 				{
-					p.increment();
+					p.incrementAndGet();
 					s[TP] += peak.getTruePositiveScore();
 					s[FP] += peak.getFalsePositiveScore();
 				}
@@ -404,8 +339,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			score[1] = s[FP];
 			score[2] = s[TN];
 			score[3] = s[FN];
-			score[4] = p.value();
-			score[5] = results.size() - p.value();
+			score[4] = p.getCount();
+			score[5] = results.size() - p.getCount();
 		}
 
 		return newResults;
@@ -434,7 +369,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	public MemoryPeakResults filterSubset(MemoryPeakResults results, final int failures, double[] score)
 	{
 		final MemoryPeakResults newResults = new MemoryPeakResults();
-		final FailCounter counter = new FailCounter();
+		final FrameCounter counter = new FrameCounter();
 		newResults.copySettings(results);
 		setup(results);
 		final double[] s = new double[4];
@@ -446,7 +381,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 				// Reject all peaks if we have exceeded the fail count
 				final boolean isPositive;
-				if (counter.value() > failures)
+				if (counter.getCount() > failures)
 				{
 					isPositive = false;
 				}
@@ -458,13 +393,13 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 				if (isPositive)
 				{
-					peak.origX = counter.value();
+					peak.origX = counter.getCount();
 					counter.reset();
 					newResults.add(peak);
 				}
 				else
 				{
-					counter.increment();
+					counter.incrementAndGet();
 				}
 
 				if (isPositive)
@@ -521,7 +456,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	public MemoryPeakResults filterSubset2(MemoryPeakResults results, final int failures, double[] score)
 	{
 		final MemoryPeakResults newResults = new MemoryPeakResults();
-		final FailCounter counter = new FailCounter();
+		final FrameCounter counter = new FrameCounter();
 		newResults.copySettings(results);
 		setup(results);
 		final double[] s = new double[4];
@@ -531,11 +466,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			{
 				counter.advance(peak.getFrame());
 
-				counter.increment(peak.origY);
+				counter.incrementAndGet(peak.origY);
 
 				// Reject all peaks if we have exceeded the fail count
 				final boolean isPositive;
-				if (counter.value() > failures)
+				if (counter.getCount() > failures)
 				{
 					isPositive = false;
 				}
@@ -547,13 +482,13 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 				if (isPositive)
 				{
-					peak.origX = counter.value();
+					peak.origX = counter.getCount();
 					counter.reset();
 					newResults.add(peak);
 				}
 				else
 				{
-					counter.increment();
+					counter.incrementAndGet();
 				}
 
 				if (isPositive)
@@ -700,7 +635,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		{
 			setup(peakResults);
 
-			final FailCounter counter = new FailCounter();
+			final FrameCounter counter = new FrameCounter();
 			peakResults.forEach(new PeakResultProcedure()
 			{
 				public void execute(PeakResult peak)
@@ -711,7 +646,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 					// Reject all peaks if we have exceeded the fail count
 					final boolean isPositive;
-					if (counter.value() > failures)
+					if (counter.getCount() > failures)
 					{
 						isPositive = false;
 					}
@@ -727,7 +662,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 					}
 					else
 					{
-						counter.increment();
+						counter.incrementAndGet();
 					}
 
 					if (isTrue)
@@ -784,7 +719,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		{
 			setup(peakResults);
 
-			final FailCounter counter = new FailCounter();
+			final FrameCounter counter = new FrameCounter();
 			peakResults.forEach(new PeakResultProcedure()
 			{
 				public void execute(PeakResult peak)
@@ -793,11 +728,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 					final boolean isTrue = peak.origValue != 0;
 
-					counter.increment(peak.origX);
+					counter.incrementAndGet(peak.origX);
 
 					// Reject all peaks if we have exceeded the fail count
 					final boolean isPositive;
-					if (counter.value() > failures)
+					if (counter.getCount() > failures)
 					{
 						isPositive = false;
 					}
@@ -813,7 +748,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 					}
 					else
 					{
-						counter.increment();
+						counter.incrementAndGet();
 					}
 
 					if (isTrue)
@@ -864,7 +799,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		{
 			setup(peakResults);
 
-			final FailCounter counter = new FailCounter();
+			final FrameCounter counter = new FrameCounter();
 			peakResults.forEach(new PeakResultProcedure()
 			{
 				public void execute(PeakResult peak)
@@ -873,7 +808,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 					// Reject all peaks if we have exceeded the fail count
 					final boolean isPositive;
-					if (counter.value() > failures)
+					if (counter.getCount() > failures)
 					{
 						isPositive = false;
 					}
@@ -889,12 +824,12 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 					}
 					else
 					{
-						counter.increment();
+						counter.incrementAndGet();
 					}
 
 					if (isPositive)
 					{
-						p.increment();
+						p.incrementAndGet();
 						s[TP] += peak.getTruePositiveScore();
 						s[FP] += peak.getFalsePositiveScore();
 					}
@@ -908,8 +843,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			n += peakResults.size();
 			end();
 		}
-		n -= p.value();
-		return new FractionClassificationResult(s[TP], s[FP], s[TN], s[FN], p.value(), n);
+		n -= p.getCount();
+		return new FractionClassificationResult(s[TP], s[FP], s[TN], s[FN], p.getCount(), n);
 	}
 
 	/**
@@ -943,18 +878,18 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		{
 			setup(peakResults);
 
-			final FailCounter counter = new FailCounter();
+			final FrameCounter counter = new FrameCounter();
 			peakResults.forEach(new PeakResultProcedure()
 			{
 				public void execute(PeakResult peak)
 				{
 					counter.advance(peak.getFrame());
 
-					counter.increment(peak.origY);
+					counter.incrementAndGet(peak.origY);
 
 					// Reject all peaks if we have exceeded the fail count
 					final boolean isPositive;
-					if (counter.value() > failures)
+					if (counter.getCount() > failures)
 					{
 						isPositive = false;
 					}
@@ -970,12 +905,12 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 					}
 					else
 					{
-						counter.increment();
+						counter.incrementAndGet();
 					}
 
 					if (isPositive)
 					{
-						p.increment();
+						p.incrementAndGet();
 						s[TP] += peak.getTruePositiveScore();
 						s[FP] += peak.getFalsePositiveScore();
 					}
@@ -989,8 +924,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			n += peakResults.size();
 			end();
 		}
-		n -= p.value();
-		return new FractionClassificationResult(s[TP], s[FP], s[TN], s[FN], p.value(), n);
+		n -= p.getCount();
+		return new FractionClassificationResult(s[TP], s[FP], s[TN], s[FN], p.getCount(), n);
 	}
 
 	/**
@@ -1033,18 +968,18 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		{
 			setup(peakResults);
 
-			final FailCounter counter = new FailCounter();
+			final FrameCounter counter = new FrameCounter();
 			peakResults.forEach(new PeakResultProcedure()
 			{
 				public void execute(PeakResult peak)
 				{
 					counter.advance(peak.getFrame());
 
-					counter.increment(peak.origX);
+					counter.incrementAndGet(peak.origX);
 
 					// Reject all peaks if we have exceeded the fail count
 					final boolean isPositive;
-					if (counter.value() > failures)
+					if (counter.getCount() > failures)
 					{
 						isPositive = false;
 					}
@@ -1060,12 +995,12 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 					}
 					else
 					{
-						counter.increment();
+						counter.incrementAndGet();
 					}
 
 					if (isPositive)
 					{
-						p.increment();
+						p.incrementAndGet();
 						s[TP] += peak.getTruePositiveScore();
 						s[FP] += peak.getFalsePositiveScore();
 					}
@@ -1079,8 +1014,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			n += peakResults.size();
 			end();
 		}
-		n -= p.value();
-		return new FractionClassificationResult(s[TP], s[FP], s[TN], s[FN], p.value(), n);
+		n -= p.getCount();
+		return new FractionClassificationResult(s[TP], s[FP], s[TN], s[FN], p.getCount(), n);
 	}
 
 	/**
