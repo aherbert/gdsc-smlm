@@ -226,9 +226,9 @@ public class TraceManager
 	 * Note: The actual traces representing molecules can be obtained by calling {@link #getTraces()}
 	 * 
 	 * @param distanceThreshold
-	 *            In the native units of the results
+	 *            The distance threshold in the native units of the results
 	 * @param timeThreshold
-	 *            In frames
+	 *            The time threshold in frames
 	 * @return The number of traces
 	 */
 	public int traceMolecules(final double distanceThreshold, final int timeThreshold)
@@ -1629,7 +1629,9 @@ public class TraceManager
 	 * strongest signal is selected.
 	 * 
 	 * @param distanceThreshold
+	 *            The distance threshold in the native units of the results
 	 * @param timeThreshold
+	 *            The time threshold in frames
 	 * @return A list of traces containing the molecule and neighbour. If no neighbour is found then the trace will
 	 *         contain a single result
 	 */
