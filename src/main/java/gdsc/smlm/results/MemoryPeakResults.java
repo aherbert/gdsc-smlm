@@ -3,9 +3,7 @@ package gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -76,7 +74,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * The results.
 	 * This is encapsulated to allow changing the data structure used to store the results.
 	 */
-	private ArrayList<PeakResult> results;
+	private PeakResultStore results;
 
 	/**
 	 * Gets the result.
@@ -85,9 +83,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the index
 	 * @return the peak result
 	 */
-	private PeakResult get(int index)
+	public PeakResult get(int index)
 	{
-		return results.get(index);
+		return this.results.get(index);
 	}
 
 	/*
@@ -97,7 +95,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public int size()
 	{
-		return results.size();
+		return this.results.size();
 	}
 
 	/**
@@ -108,7 +106,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void add(PeakResult result)
 	{
-		add(result);
+		this.results.add(result);
 	}
 
 	/**
@@ -134,7 +132,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void addAll(PeakResult[] results)
 	{
-		addAll(Arrays.asList(results));
+		this.results.addAll(results);
 	}
 
 	/**
@@ -145,7 +143,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void add(MemoryPeakResults results)
 	{
-		this.results.addAll(results.results);
+		this.results.add(results.results);
 	}
 
 	/**
@@ -153,7 +151,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	private void clear()
 	{
-		results.clear();
+		this.results.clear();
 	}
 
 	/**
@@ -162,7 +160,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void trimToSize()
 	{
-		results.trimToSize();
+		this.results.trimToSize();
 	}
 
 	/**
@@ -170,7 +168,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void sort()
 	{
-		Collections.sort(results);
+		this.results.sort();
 	}
 
 	/**
@@ -181,7 +179,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void sort(Comparator<PeakResult> comparator)
 	{
-		Collections.sort(results, comparator);
+		this.results.sort(comparator);
 	}
 
 	/**
@@ -191,7 +189,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public PeakResult[] toArray()
 	{
-		return results.toArray(new PeakResult[size()]);
+		return this.results.toArray(new PeakResult[size()]);
 	}
 
 	/**
@@ -203,20 +201,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public PeakResult[] toArray(PeakResult[] array)
 	{
-		if (array == null || array.length < size())
-			return toArray();
-		return results.toArray(array);
-	}
-
-	/**
-	 * Copy results the the copy instance.
-	 *
-	 * @param copy
-	 *            the copy
-	 */
-	private void copyResults(MemoryPeakResults copy)
-	{
-		copy.results = new ArrayList<PeakResult>(results);
+		return this.results.toArray(array);
 	}
 
 	/**
@@ -224,14 +209,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void removeNullResults()
 	{
-		ArrayList<PeakResult> list = new ArrayList<PeakResult>(size());
-		for (int i = 0, size = size(); i < size; i++)
-		{
-			PeakResult p = get(i);
-			if (p != null)
-				list.add(p);
-		}
-		this.results = list;
+		this.results.removeNullResults();
 	}
 
 	/////////////////////////////////////////////////////////////////
@@ -244,10 +222,25 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * Instantiates a new memory peak results.
+	 *
+	 * @param store
+	 *            the backing storage implementation
+	 * @throws IllegalArgumentException
+	 *             If the store is null
+	 */
+	public MemoryPeakResults(PeakResultStore store) throws IllegalArgumentException
+	{
+		if (store == null)
+			throw new IllegalArgumentException("Store must not be null");
+		results = store;
+	}
+
+	/**
+	 * Instantiates a new memory peak results.
 	 */
 	public MemoryPeakResults()
 	{
-		results = new ArrayList<PeakResult>(1000);
+		this(1000);
 	}
 
 	/**
@@ -258,7 +251,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public MemoryPeakResults(int capacity)
 	{
-		results = new ArrayList<PeakResult>(capacity);
+		results = new ArrayListPeakResultStore(capacity);
 	}
 
 	/**
@@ -769,7 +762,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 				copy.bounds = new Rectangle(bounds);
 			if (calibration != null)
 				copy.calibration = calibration.clone();
-			copyResults(copy);
+			copy.results = results.copy();
 		}
 		return copy;
 	}
