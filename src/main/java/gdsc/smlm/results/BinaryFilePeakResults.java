@@ -21,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 /**
@@ -234,7 +233,10 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		writeResult(1, bytes.toByteArray());
 	}
 
-	public void addAll(Collection<PeakResult> results)
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
+	 */
+	public void addAll(PeakResult[] results)
 	{
 		if (fos == null)
 			return;

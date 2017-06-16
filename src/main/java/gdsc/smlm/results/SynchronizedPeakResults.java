@@ -80,6 +80,11 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults
 	{
 		synchronized (lock)	{ r.addAll(results); }
 	}
+	
+	public void addAll(PeakResult[] results)
+	{
+		synchronized (lock)	{ r.addAll(results); }
+	}
 
 	public int size()
 	{

@@ -20,7 +20,11 @@ import gdsc.smlm.results.MemoryPeakResults;
 /**
  * Contains functionality to obtain the standard calibrated data for results.
  */
-public class WidthResultProcedure extends UnitResultProcedure implements WxWyResultProcedure
+//@formatter:off
+public class WidthResultProcedure extends UnitResultProcedure implements 
+	WResultProcedure,
+	WxWyResultProcedure
+//@formatter:on
 {
 	/** The x width. */
 	public float[] wx;
@@ -53,6 +57,24 @@ public class WidthResultProcedure extends UnitResultProcedure implements WxWyRes
 	}
 
 	/**
+	 * Gets the W data in the configured units.
+	 * 
+	 * @throws DataException
+	 *             if conversion to the required units is not possible
+	 */
+	public void getW() throws DataException
+	{
+		i = 0;
+		this.wx = allocate(this.wx);
+		results.forEach(getDistanceUnit(), (WResultProcedure) this);
+	}
+
+	public void executeW(float w)
+	{
+		this.wx[i++] = w;
+	}
+
+	/**
 	 * Gets the WxWy data in the configured units.
 	 * 
 	 * @throws DataException
@@ -63,7 +85,7 @@ public class WidthResultProcedure extends UnitResultProcedure implements WxWyRes
 		i = 0;
 		this.wx = allocate(this.wx);
 		this.wy = allocate(this.wy);
-		results.forEach(getDistanceUnit(), this);
+		results.forEach(getDistanceUnit(), (WxWyResultProcedure) this);
 	}
 
 	public void executeWxWy(float wx, float wy)

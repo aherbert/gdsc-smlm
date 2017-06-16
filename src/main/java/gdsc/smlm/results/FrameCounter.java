@@ -46,13 +46,31 @@ public class FrameCounter extends Counter
 	 *            the frame
 	 * @return true if the frame has changed
 	 */
-	public boolean advance(int frame)
+	public boolean advanceAndReset(int frame)
 	{
 		if (current != frame)
 		{
 			previous = current;
 			current = frame;
 			reset();
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Advance the frame.
+	 *
+	 * @param frame
+	 *            the frame
+	 * @return true if the frame has changed
+	 */
+	public boolean advance(int frame)
+	{
+		if (current != frame)
+		{
+			previous = current;
+			current = frame;
 			return true;
 		}
 		return false;

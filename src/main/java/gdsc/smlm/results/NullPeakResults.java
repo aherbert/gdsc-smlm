@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import java.util.Collection;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -33,7 +31,7 @@ public class NullPeakResults extends AbstractPeakResults implements ThreadSafePe
 	{
 	}
 
-	public void addAll(Collection<PeakResult> results)
+	public void addAll(PeakResult[] results)
 	{
 	}
 

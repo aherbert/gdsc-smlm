@@ -13,7 +13,6 @@ package gdsc.smlm.results;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -97,9 +96,9 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 			peakResults.add(result);
 	}
 
-	public void addAll(Collection<PeakResult> results)
+	public void addAll(PeakResult[] results)
 	{
-		size.addAndGet(results.size());
+		size.getAndAdd(results.length);
 		for (PeakResults peakResults : this.results)
 			peakResults.addAll(results);
 	}

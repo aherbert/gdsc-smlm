@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*----------------------------------------------------------------------------- 
@@ -317,7 +316,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			builder.addParamsStdDev(paramsStdDev[i]);
 	}
 
-	public void addAll(Collection<PeakResult> results)
+	public void addAll(PeakResult[] results)
 	{
 		if (out == null)
 			return;

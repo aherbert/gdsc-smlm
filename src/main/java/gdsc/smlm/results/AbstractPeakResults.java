@@ -14,6 +14,7 @@ package gdsc.smlm.results;
  *---------------------------------------------------------------------------*/
 
 import java.awt.Rectangle;
+import java.util.Collection;
 
 import gdsc.smlm.data.config.SMLMSettings.PSF;
 
@@ -32,6 +33,17 @@ public abstract class AbstractPeakResults implements PeakResults
 	protected PSF psf = null;
 	protected String configuration = "";
 	protected String name = "";
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResults#addAll(java.util.Collection)
+	 */
+	public void addAll(Collection<PeakResult> results)
+	{
+		// Utility function 
+		addAll(results.toArray(new PeakResult[results.size()]));
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -111,7 +123,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	{
 		this.psf = psf;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -183,8 +195,8 @@ public abstract class AbstractPeakResults implements PeakResults
 	public boolean isCCDCamera()
 	{
 		return (calibration != null) ? calibration.isCCDCamera() : false;
-	}	
-	
+	}
+
 	/**
 	 * Get the EMCCD flag from the calibration, or if not available, return the {@link #DEFAULT_EMCCD}
 	 * 

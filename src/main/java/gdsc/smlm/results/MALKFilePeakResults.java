@@ -9,7 +9,6 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
@@ -211,7 +210,12 @@ public class MALKFilePeakResults extends FilePeakResults
 		sb.append(toPhotonConverter.convert(signal));
 		sb.append('\n');
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResults#add(gdsc.smlm.results.PeakResult)
+	 */
 	public void add(PeakResult result)
 	{
 		if (fos == null)
@@ -224,7 +228,12 @@ public class MALKFilePeakResults extends FilePeakResults
 		writeResult(1, sb.toString());
 	}
 
-	public void addAll(Collection<PeakResult> results)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
+	 */
+	public void addAll(PeakResult[] results)
 	{
 		if (fos == null)
 			return;

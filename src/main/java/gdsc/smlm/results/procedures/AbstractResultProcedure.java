@@ -1,7 +1,5 @@
 package gdsc.smlm.results.procedures;
 
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -26,12 +24,6 @@ public abstract class AbstractResultProcedure
 	/** The results. */
 	final MemoryPeakResults results;
 
-	/** The distance unit. */
-	private DistanceUnit distanceUnit;
-
-	/** The intensity unit. */
-	private IntensityUnit intensityUnit;
-
 	/** The counter for procedures */
 	protected int i;
 
@@ -45,60 +37,11 @@ public abstract class AbstractResultProcedure
 	 * @param intensityUnit
 	 *            the intensity unit
 	 */
-	public AbstractResultProcedure(MemoryPeakResults results, DistanceUnit distanceUnit, IntensityUnit intensityUnit)
+	public AbstractResultProcedure(MemoryPeakResults results)
 	{
 		if (results == null)
 			throw new IllegalArgumentException("results must not be null");
 		this.results = results;
-		this.setDistanceUnit(distanceUnit);
-		this.setIntensityUnit(intensityUnit);
-	}
-
-	/**
-	 * Instantiates a new abstract result procedure.
-	 *
-	 * @param results
-	 *            the results
-	 * @param distanceUnit
-	 *            the distance unit
-	 */
-	public AbstractResultProcedure(MemoryPeakResults results, DistanceUnit distanceUnit)
-	{
-		this(results, distanceUnit, IntensityUnit.PHOTON);
-	}
-
-	/**
-	 * Instantiates a new abstract result procedure.
-	 *
-	 * @param results
-	 *            the results
-	 * @param intensityUnit
-	 *            the intensity unit
-	 */
-	public AbstractResultProcedure(MemoryPeakResults results, IntensityUnit intensityUnit)
-	{
-		this(results, DistanceUnit.PIXEL, intensityUnit);
-	}
-
-	/**
-	 * Instantiates a new abstract result procedure.
-	 *
-	 * @param results
-	 *            the results
-	 */
-	public AbstractResultProcedure(MemoryPeakResults results)
-	{
-		this(results, DistanceUnit.PIXEL, IntensityUnit.PHOTON);
-	}
-
-	/**
-	 * Gets the distance unit.
-	 *
-	 * @return the distance unit
-	 */
-	public DistanceUnit getDistanceUnit()
-	{
-		return distanceUnit;
 	}
 
 	/**
@@ -109,42 +52,6 @@ public abstract class AbstractResultProcedure
 	public int size()
 	{
 		return results.size();
-	}
-
-	/**
-	 * Sets the distance unit.
-	 *
-	 * @param distanceUnit
-	 *            the new distance unit
-	 */
-	public void setDistanceUnit(DistanceUnit distanceUnit)
-	{
-		if (distanceUnit == null)
-			throw new IllegalArgumentException("unit must not be null");
-		this.distanceUnit = distanceUnit;
-	}
-
-	/**
-	 * Gets the intensity unit.
-	 *
-	 * @return the intensity unit
-	 */
-	public IntensityUnit getIntensityUnit()
-	{
-		return intensityUnit;
-	}
-
-	/**
-	 * Sets the intensity unit.
-	 *
-	 * @param intensityUnit
-	 *            the new intensity unit
-	 */
-	public void setIntensityUnit(IntensityUnit intensityUnit)
-	{
-		if (intensityUnit == null)
-			throw new IllegalArgumentException("unit must not be null");
-		this.intensityUnit = intensityUnit;
 	}
 
 	/**

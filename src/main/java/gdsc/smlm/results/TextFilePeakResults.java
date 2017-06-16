@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
@@ -398,7 +397,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		sb.append('\n');
 	}
 	
-	public void addAll(Collection<PeakResult> results)
+	public void addAll(PeakResult[] results)
 	{
 		if (fos == null)
 			return;

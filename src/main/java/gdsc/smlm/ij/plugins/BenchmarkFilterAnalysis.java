@@ -1766,7 +1766,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				public void execute(PeakResult p)
 				{
-					if (counter.advance(p.getFrame()))
+					if (counter.advanceAndReset(p.getFrame()))
 					{
 						if (!tmp.isEmpty())
 						{

@@ -46,6 +46,8 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.clustering.DensityManager;
+import gdsc.core.data.DataException;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.threshold.AutoThreshold;
 import gdsc.core.utils.Maths;
@@ -55,6 +57,9 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -109,6 +114,7 @@ import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.FrameCounter;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -116,7 +122,13 @@ import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsReader;
 import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.results.TextFilePeakResults;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.PrecisionResultProcedure;
+import gdsc.smlm.results.procedures.RawResultProcedure;
+import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gdsc.smlm.results.procedures.WidthResultProcedure;
 import gdsc.smlm.utils.XmlUtils;
+import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
@@ -464,26 +476,26 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		public void setPhotons(MemoryPeakResults results)
 		{
 			molecules = results.size();
-			double sum = 0, sum2 = 0;
-			for (PeakResult result : results)
+			results.forEach(new PeakResultProcedure()
 			{
-				int i = result.getFrame() - 1;
-				if (p[i] != 0)
-					throw new RuntimeException("Multiple peaks on the same frame: " + result.getFrame());
-				p[i] = result.getSignal();
-				background[i] = result.getBackground() - bias;
-				sum += p[i];
-				sum2 += background[i];
-			}
-			sum /= molecules;
-			sum2 /= molecules;
+				public void execute(PeakResult result)
+				{
+					int i = result.getFrame() - 1;
+					if (p[i] != 0)
+						throw new RuntimeException("Multiple peaks on the same frame: " + result.getFrame());
+					p[i] = result.getSignal();
+					background[i] = result.getBackground() - bias;
+				}
+			});
+			double av = Maths.sum(p) / molecules;
+			double av2 = Maths.sum(background) / molecules;
 			Utils.log(
 					"Created %d frames, %d molecules. Simulated signal %s : average %s. Simulated background %s : average %s",
-					frames, molecules, Utils.rounded(signal), Utils.rounded(sum / gain), Utils.rounded(b),
-					Utils.rounded(sum2 / gain));
+					frames, molecules, Utils.rounded(signal), Utils.rounded(av / gain), Utils.rounded(b),
+					Utils.rounded(av2 / gain));
 			// Reset the average signal and background (in photons)
-			signal = sum / gain;
-			b = sum2 / gain;
+			signal = av / gain;
+			b = av2 / gain;
 		}
 
 		/**
@@ -1793,7 +1805,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setCalibration(c);
 		results.setSortAfterEnd(true);
 		results.begin();
-		
+
 		maxT = localisationSets.get(localisationSets.size() - 1).getTime();
 
 		// Display image
@@ -2394,8 +2406,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					newLocalisations.add(localisationSet);
 					// Use extended result to store the ID.
 					// Store the z position in the error.
-					results.add(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoise,
-							params, null, localisationSet.getId()));
+					results.add(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoise, params,
+							null, localisationSet.getId()));
 				}
 
 				for (int i = 0; i < image.length; i++)
@@ -2997,64 +3009,92 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		if (results != null)
 		{
-			final boolean emCCD = (settings.getEmGain() > 1);
 			// Convert depth-of-field to pixels
 			final double depth = settings.depthOfField / settings.pixelPitch;
-			for (PeakResult r : results.getResults())
+
+			try
 			{
-				final double precision = r.getPrecision(settings.pixelPitch, gain, emCCD);
-				stats[PRECISION].add(precision);
-				// The error stores the z-depth in pixels
-				if (Math.abs(r.error) < depth)
-					stats[PRECISION_IN_FOCUS].add(precision);
-				stats[WIDTH].add(r.getSD());
+				// Get widths
+				WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
+				wp.getW();
+				stats[WIDTH].add(wp.wx);
 			}
+			catch (DataException e)
+			{
+			}
+
+			try
+			{
+				// Get z depth
+				StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
+				sp.getXYZ();
+
+				// Get precision
+				PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
+				pp.getPrecision();
+				stats[PRECISION].add(pp.precision);
+				for (int i = 0; i < pp.size(); i++)
+				{
+					if (Math.abs(sp.z[i]) < depth)
+						stats[PRECISION_IN_FOCUS].add(pp.precision[i]);
+				}
+			}
+			catch (DataException e)
+			{
+			}
+
 			// Compute density per frame. Multithread for speed
 			if (settings.densityRadius > 0)
 			{
 				IJ.showStatus("Calculating density ...");
-				ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
-				List<Future<?>> futures = new LinkedList<Future<?>>();
-				final ArrayList<float[]> coords = new ArrayList<float[]>();
-				int t = results.getFirstFrame();
+				final ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+				final List<Future<?>> futures = new LinkedList<Future<?>>();
+				final TFloatArrayList coordsX = new TFloatArrayList();
+				final TFloatArrayList coordsY = new TFloatArrayList();
 				final Statistics densityStats = stats[DENSITY];
 				final float radius = (float) (settings.densityRadius * getHWHM());
 				final Rectangle bounds = results.getBounds();
 				currentIndex = 0;
 				finalIndex = results.getLastFrame();
 				// Store the density for each result.
-				int[] allDensity = new int[results.size()];
-				int allIndex = 0;
-				for (PeakResult r : results.getResults())
+				final int[] allDensity = new int[results.size()];
+				final FrameCounter counter = results.newFrameCounter();
+				results.forEach(new PeakResultProcedure()
 				{
-					if (t != r.getFrame())
+					public void execute(PeakResult r)
 					{
-						allIndex += runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds,
-								allDensity, allIndex);
+						if (counter.advance(r.getFrame()))
+						{
+							counter.increment(runDensityCalculation(threadPool, futures, coordsX, coordsY, densityStats,
+									radius, bounds, allDensity, counter.getCount()));
+						}
+						coordsX.add(r.getXPosition());
+						coordsY.add(r.getYPosition());
 					}
-					coords.add(new float[] { r.getXPosition(), r.getYPosition() });
-					t = r.getFrame();
-				}
-				runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds, allDensity, allIndex);
+				});
+				runDensityCalculation(threadPool, futures, coordsX, coordsY, densityStats, radius, bounds, allDensity,
+						counter.getCount());
 				Utils.waitForCompletion(futures);
 				threadPool.shutdownNow();
-				threadPool = null;
 				IJ.showProgress(1);
 
 				// Split results into singles (density = 0) and clustered (density > 0)
-				MemoryPeakResults singles = copyMemoryPeakResults("No Density");
-				MemoryPeakResults clustered = copyMemoryPeakResults("Density");
+				final MemoryPeakResults singles = copyMemoryPeakResults("No Density");
+				final MemoryPeakResults clustered = copyMemoryPeakResults("Density");
 
-				int i = 0;
-				for (PeakResult r : results.getResults())
+				counter.reset();
+				results.forEach(new PeakResultProcedure()
 				{
-					// Store density in the original value field
-					r.origValue = allDensity[i];
-					if (allDensity[i++] == 0)
-						singles.add(r);
-					else
-						clustered.add(r);
-				}
+					public void execute(PeakResult r)
+					{
+						int density = allDensity[counter.getAndIncrement()];
+						r.origValue = density;
+						if (density == 0)
+							singles.add(r);
+						else
+							clustered.add(r);
+					}
+				});
 			}
 		}
 
@@ -3117,18 +3157,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	private int runDensityCalculation(ExecutorService threadPool, List<Future<?>> futures,
-			final ArrayList<float[]> coords, final Statistics densityStats, final float radius, final Rectangle bounds,
-			final int[] allDensity, final int allIndex)
+			final TFloatArrayList coordsX, final TFloatArrayList coordsY, final Statistics densityStats,
+			final float radius, final Rectangle bounds, final int[] allDensity, final int allIndex)
 	{
-		final int size = coords.size();
-		final float[] xCoords = new float[size];
-		final float[] yCoords = new float[size];
-		for (int i = 0; i < xCoords.length; i++)
-		{
-			float[] xy = coords.get(i);
-			xCoords[i] = xy[0];
-			yCoords[i] = xy[1];
-		}
+		final int size = coordsX.size();
+		final float[] xCoords = coordsX.toArray();
+		final float[] yCoords = coordsY.toArray();
+		coordsX.resetQuick();
+		coordsY.resetQuick();
 		futures.add(threadPool.submit(new Runnable()
 		{
 			public void run()
@@ -3144,7 +3180,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					allDensity[index] = density[i];
 			}
 		}));
-		coords.clear();
 		return size;
 	}
 
@@ -3334,7 +3369,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			TextFilePeakResults r = new TextFilePeakResults(settings.imageResultsFilename, false);
 			r.copySettings(results);
 			r.begin();
-			r.addAll(results.getResults());
+			r.addAll(results.toArray());
 			r.end();
 		}
 	}
@@ -3423,9 +3458,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		MemoryPeakResults fixedResults = copyMemoryPeakResults("Fixed");
 		MemoryPeakResults movingResults = copyMemoryPeakResults("Moving");
 
-		List<PeakResult> peakResults = results.getResults();
+		PeakResult[] peakResults = results.toArray();
 		// Sort using the ID
-		Collections.sort(peakResults, new Comparator<PeakResult>()
+		Arrays.sort(peakResults, new Comparator<PeakResult>()
 		{
 			public int compare(PeakResult o1, PeakResult o2)
 			{
@@ -3433,24 +3468,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 		});
 
-		int currentId = -1;
 		MemoryPeakResults currentResults = movingResults;
+		FrameCounter counter = new FrameCounter(-1);
 		for (PeakResult p : peakResults)
 		{
-			// The ID was stored in the result's parameter standard deviation array
-			if (currentId != p.getId())
+			if (counter.advance(p.getId()))
 			{
-				currentId = p.getId();
-				currentResults = (movingMolecules.contains(currentId)) ? movingResults : fixedResults;
+				currentResults = (movingMolecules.contains(p.getId())) ? movingResults : fixedResults;
 			}
 			currentResults.add(p);
 		}
 
 		movingResults.end();
 		fixedResults.end();
-
-		// Reset the input results
-		results.sort();
 	}
 
 	/**
@@ -4927,9 +4957,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void setBackground(MemoryPeakResults results)
 	{
 		// Loaded results do not have a local background.
-		for (PeakResult p : results.getResults())
-			if (p.getBackground() != 0)
-				return;
+		if (results.hasBackground())
+			return;
 
 		// Simple fix is to use the bias plus the global photon background.
 		// TODO - Subtract the spots from the local region and compute the true local background.
@@ -4948,9 +4977,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void setNoise(MemoryPeakResults results, ImagePlus imp)
 	{
 		// Loaded results do not have noise
-		for (PeakResult r : results.getResults())
-			if (r.noise != 0)
-				return;
+		if (results.hasNoise())
+			return;
 
 		// Compute noise per frame
 		ImageStack stack = imp.getImageStack();
@@ -4970,11 +4998,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		Statistics stats = new Statistics(Arrays.copyOfRange(noise, 1, noise.length));
 		System.out.printf("Noise = %.3f +/- %.3f (%d)\n", stats.getMean(), stats.getStandardDeviation(), stats.getN());
 
-		for (PeakResult p : results.getResults())
+		results.forEach(new PeakResultProcedure()
 		{
-			if (p.getFrame() < noise.length)
-				p.noise = noise[p.getFrame()];
-		}
+			public void execute(PeakResult p)
+			{
+				if (p.getFrame() < noise.length)
+					p.noise = noise[p.getFrame()];
+			}
+		});
 	}
 
 	private MemoryPeakResults getSimulationResults()
@@ -5009,22 +5040,32 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		boolean fullSimulation = false;
 		double s = -1;
 
+		if (!results.convertToPreferredUnits())
+		{
+			IJ.error(TITLE,
+					String.format("Results should be in the preferred units (%s,%s)",
+							UnitHelper.getName(MemoryPeakResults.PREFERRED_DISTANCE_UNIT),
+							UnitHelper.getName(MemoryPeakResults.PREFERRED_INTENSITY_UNIT)));
+			return null;
+		}
+
 		// Get these from the data
-		double[] signal = getSignal(results);
-		double[] limits = Maths.limits(signal);
+		RawResultProcedure sp = new RawResultProcedure(results);
+		sp.getBIXYZ();
+		float[] signal = sp.intensity;
+		float[] limits = Maths.limits(signal);
 		double minSignal = limits[0];
 		double maxSignal = limits[1];
 		double signalPerFrame = Maths.sum(signal) / molecules;
 
-		double[] depths = getDepth(results);
+		float[] depths = sp.z;
 		limits = Maths.limits(depths);
-		double depth = Math.max(Math.abs(limits[0]), Math.abs(limits[1]));
+		float depth = Math.max(Math.abs(limits[0]), Math.abs(limits[1]));
 		boolean fixedDepth = Double.compare(limits[0], limits[1]) == 0;
 
-		Calibration cal = new Calibration();
-		// Get any calibration we have
-		if (results.getCalibration() != null)
-			cal = results.getCalibration();
+		Calibration cal = results.getCalibration();
+		String iUnits = " " + UnitHelper.getName(cal.getIntensityUnit());
+		String zUnits = " " + UnitHelper.getName(cal.getDistanceUnit());
 
 		// Get this from the user
 		double b = -1;
@@ -5054,11 +5095,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		GenericDialog gd = new GenericDialog(TITLE);
 		StringBuilder sb = new StringBuilder();
 		sb.append("Results contain ").append(Utils.pleural(molecules, "molecule")).append('\n');
-		sb.append("Min signal = ").append(Utils.rounded(minSignal)).append(" ADU\n");
-		sb.append("Max signal = ").append(Utils.rounded(maxSignal)).append(" ADU\n");
-		sb.append("Av signal = ").append(Utils.rounded(signalPerFrame)).append(" ADU\n");
+		sb.append("Min signal = ").append(Utils.rounded(minSignal)).append(iUnits).append('\n');
+		sb.append("Max signal = ").append(Utils.rounded(maxSignal)).append(iUnits).append('\n');
+		sb.append("Av signal = ").append(Utils.rounded(signalPerFrame)).append(iUnits).append('\n');
 		if (fixedDepth)
-			sb.append("Fixed depth = ").append(Utils.rounded(depth)).append('\n');
+			sb.append("Fixed depth = ").append(Utils.rounded(depth)).append(zUnits).append('\n');
 		gd.addMessage(sb.toString());
 
 		gd.addCheckbox("Flourophore_simulation", fullSimulation);
@@ -5089,10 +5130,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		cal.setEmCCD(gd.getNextBoolean());
 		cal.setReadNoise(gd.getNextNumber());
 		cal.setBias(gd.getNextNumber());
-		double myDepth = depth;
+		float myDepth = depth;
 		if (!fixedDepth)
 		{
-			myDepth = gd.getNextNumber();
+			myDepth = (float) gd.getNextNumber();
 			if (myDepth < depth)
 			{
 				IJ.error(TITLE, String.format("Input depth is smaller than the depth guessed from the data: %f < %f",
@@ -5128,14 +5169,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		double readNoise = cal.getReadNoise();
 		double amplification = cal.getAmplification();
 		boolean emCCD = cal.isEmCCD();
-		
-		// Convert ADU values to photons
-		minSignal /= gain;
-		maxSignal /= gain;
-		signalPerFrame /= gain;
+
+		// Note: The calibration will throw an exception if the converter cannot be created.
+		// This is OK as the data will be invalid.
+
+		// Convert values to photons
+		TypeConverter<IntensityUnit> ic = cal.getIntensityConverter(IntensityUnit.PHOTON);
+		minSignal = ic.convert(minSignal);
+		maxSignal = ic.convert(maxSignal);
+		signalPerFrame = ic.convert(signalPerFrame);
 
 		// Convert +/- depth to total depth in nm
-		depth *= 2 * a;
+		depth = cal.getDistanceConverter(DistanceUnit.NM).convert(depth * 2);
 
 		// Compute total background variance in photons
 		double backgroundVariance = b;
@@ -5155,25 +5200,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				signalPerFrame, depth, fixedDepth, bias, emCCD, gain, amplification, readNoise, b, b2);
 		p.loaded = true;
 		return p;
-	}
-
-	private static double[] getSignal(MemoryPeakResults results)
-	{
-		double[] data = new double[results.size()];
-		int i = 0;
-		for (PeakResult p : results.getResults())
-			data[i++] = p.getSignal();
-		return data;
-	}
-
-	private static double[] getDepth(MemoryPeakResults results)
-	{
-		double[] data = new double[results.size()];
-		int i = 0;
-		for (PeakResult p : results.getResults())
-			// Results store the z-depth in the error field
-			data[i++] = p.error;
-		return data;
 	}
 
 	/**

@@ -3,8 +3,10 @@ package gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
@@ -124,6 +126,29 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Add all results.
+	 * <p>
+	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
+	 * 
+	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
+	 */
+	public void addAll(PeakResult[] results)
+	{
+		addAll(Arrays.asList(results));
+	}
+
+	/**
+	 * Adds the results.
+	 *
+	 * @param results
+	 *            the results
+	 */
+	public void add(MemoryPeakResults results)
+	{
+		this.results.addAll(results.results);
+	}
+
+	/**
 	 * Clear the results.
 	 */
 	private void clear()
@@ -149,7 +174,18 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Convert to an array.
+	 * Sort the results.
+	 *
+	 * @param comparator
+	 *            the comparator
+	 */
+	public void sort(Comparator<PeakResult> comparator)
+	{
+		Collections.sort(results, comparator);
+	}
+
+	/**
+	 * Convert to an array. This is a new allocation of storage space.
 	 *
 	 * @return the peak result array
 	 */
@@ -728,7 +764,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		MemoryPeakResults copy = clone();
 		if (copy != null)
 		{
-			// Deep copy the objects
+			// Deep copy the objects that are not immutable
 			if (bounds != null)
 				copy.bounds = new Rectangle(bounds);
 			if (calibration != null)
@@ -925,6 +961,13 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		return false;
 	}
 
+	/** The preferred distance unit */
+	public static final DistanceUnit PREFERRED_DISTANCE_UNIT = DistanceUnit.PIXEL;
+	/** The preferred intensity unit */
+	public static final IntensityUnit PREFERRED_INTENSITY_UNIT = IntensityUnit.PHOTON;
+	/** The preferred angle unit */
+	public static final AngleUnit PREFERRED_ANGLE_UNIT = AngleUnit.RADIAN;
+
 	/**
 	 * Convert to preferred units.
 	 *
@@ -936,21 +979,21 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			return false;
 		// TODO - use the helper
 		CalibrationHelper helper = null; //new CalibrationHelper(calibration);
-		boolean success = convertDistanceToPixelUnits(helper);
-		success &= convertIntensityToPhotonUnits(helper);
-		success &= convertAngleToRadianUnits(helper);
+		boolean success = convertDistance(helper);
+		success &= convertIntensity(helper);
+		success &= convertAngle(helper);
 		//setCalibration(helper.getCalibration());
 		return success;
 	}
 
 	/**
-	 * Checks if distance is in pixel units.
+	 * Checks if is distance in preferred units.
 	 *
-	 * @return true, if distance is in pixels
+	 * @return true, if is distance in preferred units
 	 */
-	public boolean isDistanceInPixelUnits()
+	public boolean isDistanceInPreferredUnits()
 	{
-		return getDistanceUnit() == DistanceUnit.PIXEL;
+		return getDistanceUnit() == PREFERRED_DISTANCE_UNIT;
 	}
 
 	/**
@@ -960,9 +1003,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the helper
 	 * @return true, if the distance units are now in pixels
 	 */
-	private boolean convertDistanceToPixelUnits(CalibrationHelper helper)
+	private boolean convertDistance(CalibrationHelper helper)
 	{
-		if (isDistanceInPixelUnits())
+		if (isDistanceInPreferredUnits())
 			return true;
 
 		if (calibration.hasNmPerPixel())
@@ -970,7 +1013,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			try
 			{
 				TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(getDistanceUnit(),
-						DistanceUnit.PIXEL, calibration.getNmPerPixel());
+						PREFERRED_DISTANCE_UNIT, calibration.getNmPerPixel());
 				// Convert data
 				for (int i = 0, size = size(); i < size; i++)
 				{
@@ -982,7 +1025,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 					if (p.paramsStdDev != null)
 						convertDistance(p.paramsStdDev, c);
 				}
-				calibration.setDistanceUnit(DistanceUnit.PIXEL);
+				calibration.setDistanceUnit(PREFERRED_DISTANCE_UNIT);
 				return true;
 			}
 			catch (ConversionException e)
@@ -1021,14 +1064,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		}
 	}
 
-	/**
-	 * Checks if intensity is in photons units.
-	 *
-	 * @return true, if intensity is in photons
-	 */
-	public boolean isIntensityInPhotonUnits()
+	public boolean isIntensityInPreferredUnits()
 	{
-		return (getIntensityUnit() == IntensityUnit.PHOTON);
+		return (getIntensityUnit() == PREFERRED_INTENSITY_UNIT);
 	}
 
 	/**
@@ -1038,9 +1076,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the helper
 	 * @return true, if the intensity units are now in photons
 	 */
-	private boolean convertIntensityToPhotonUnits(CalibrationHelper helper)
+	private boolean convertIntensity(CalibrationHelper helper)
 	{
-		if (isIntensityInPhotonUnits())
+		if (isIntensityInPreferredUnits())
 			return true;
 
 		if (calibration.hasGain() && calibration.hasBias())
@@ -1048,9 +1086,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			try
 			{
 				TypeConverter<IntensityUnit> bc = UnitConverterFactory.createConverter(getIntensityUnit(),
-						IntensityUnit.PHOTON, calibration.getBias(), calibration.getGain());
+						PREFERRED_INTENSITY_UNIT, calibration.getBias(), calibration.getGain());
 				TypeConverter<IntensityUnit> c = UnitConverterFactory.createConverter(getIntensityUnit(),
-						IntensityUnit.PHOTON, calibration.getGain());
+						PREFERRED_INTENSITY_UNIT, calibration.getGain());
 				// Convert data
 				for (int i = 0, size = size(); i < size; i++)
 				{
@@ -1070,7 +1108,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 						convertIntensity(p.paramsStdDev, c);
 					}
 				}
-				calibration.setIntensityUnit(IntensityUnit.PHOTON);
+				calibration.setIntensityUnit(PREFERRED_INTENSITY_UNIT);
 				return true;
 			}
 			catch (ConversionException e)
@@ -1097,14 +1135,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		}
 	}
 
-	/**
-	 * Checks if angle is in radian units.
-	 *
-	 * @return true, if angle is in radians
-	 */
-	public boolean isAngleInRadianUnits()
+	public boolean isAngleInPreferredUnits()
 	{
-		return getAngleUnit() == AngleUnit.RADIAN;
+		return getAngleUnit() == PREFERRED_ANGLE_UNIT;
 	}
 
 	/**
@@ -1114,14 +1147,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the helper
 	 * @return true, if the angle units are now in radians
 	 */
-	private boolean convertAngleToRadianUnits(CalibrationHelper helper)
+	private boolean convertAngle(CalibrationHelper helper)
 	{
-		if (isAngleInRadianUnits())
+		if (isAngleInPreferredUnits())
 			return true;
 
 		try
 		{
-			TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(getAngleUnit(), AngleUnit.RADIAN);
+			TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(getAngleUnit(), PREFERRED_ANGLE_UNIT);
 			// Convert data
 			for (int i = 0, size = size(); i < size; i++)
 			{
@@ -1130,7 +1163,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 				if (p.paramsStdDev != null)
 					convertAngle(p.paramsStdDev, c);
 			}
-			calibration.setAngleUnit(AngleUnit.RADIAN);
+			calibration.setAngleUnit(PREFERRED_ANGLE_UNIT);
 			return true;
 		}
 		catch (ConversionException e)
@@ -1532,7 +1565,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		// Note that in the future we may support more than just Gaussian2D PSF
 		// so this may have to change
-		
+
 		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 
 		final int ix = indices[0] + PeakResult.STANDARD_PARAMETERS;
@@ -1588,7 +1621,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		// Note that in the future we may support more than just Gaussian2D PSF
 		// so this may have to change
-		
+
 		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 
 		final int ix = indices[0] + PeakResult.STANDARD_PARAMETERS;
@@ -1815,5 +1848,16 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			if (r.params[0] == 0)
 				r.params[0] = newBackground;
 		}
+	}
+
+	/**
+	 * Creates the frame counter. It will be initialised with the value of {@link #getFirstFrame()} - 1. This ensures
+	 * that the frame from the first result will be recognised as a new frame.
+	 *
+	 * @return the frame counter
+	 */
+	public FrameCounter newFrameCounter()
+	{
+		return new FrameCounter((isEmpty()) ? 0 : getFirstFrame());
 	}
 }
