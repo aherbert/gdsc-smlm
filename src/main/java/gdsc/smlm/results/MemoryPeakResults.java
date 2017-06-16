@@ -116,11 +116,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * 
 	 * {@inheritDoc}
 	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#addAll(java.util.Collection)
+	 * @see gdsc.utils.fitting.results.PeakResults#addCollection(java.util.Collection)
 	 */
 	public void addAll(Collection<PeakResult> results)
 	{
-		this.results.addAll(results);
+		this.results.addCollection(results);
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void addAll(PeakResult[] results)
 	{
-		this.results.addAll(results);
+		this.results.addArray(results);
 	}
 
 	/**
@@ -143,7 +143,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void add(MemoryPeakResults results)
 	{
-		this.results.add(results.results);
+		this.results.addStore(results.results);
 	}
 
 	/**
@@ -189,19 +189,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public PeakResult[] toArray()
 	{
-		return this.results.toArray(new PeakResult[size()]);
-	}
-
-	/**
-	 * Convert to an array reusing the space if provided.
-	 *
-	 * @param array
-	 *            the array (can be null)
-	 * @return the peak result array
-	 */
-	public PeakResult[] toArray(PeakResult[] array)
-	{
-		return this.results.toArray(array);
+		return this.results.toArray();
 	}
 
 	/**

@@ -21,7 +21,7 @@ import gdsc.core.utils.TurboList;
  *---------------------------------------------------------------------------*/
 
 /**
- * Stores peak results using a TurboList.
+ * Stores peak results using a TurboList. This is similar to an TurboList but does not have concurrency checking.
  */
 public class TurboListPeakResultStore implements PeakResultStore
 {
@@ -39,6 +39,16 @@ public class TurboListPeakResultStore implements PeakResultStore
 		this.results = new TurboList<PeakResult>(capacity);
 	}
 
+	/**
+	 * Instantiates a new array list peak result store.
+	 *
+	 * @param store the store to copy
+	 */
+	public TurboListPeakResultStore(TurboListPeakResultStore store)
+	{
+		this.results = new TurboList<PeakResult>(store.results);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -66,15 +76,15 @@ public class TurboListPeakResultStore implements PeakResultStore
 	 */
 	public void add(PeakResult result)
 	{
-		add(result);
+		results.add(result);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#addAll(java.util.Collection)
+	 * @see gdsc.smlm.results.PeakResultStore#addCollection(java.util.Collection)
 	 */
-	public void addAll(Collection<PeakResult> results)
+	public void addCollection(Collection<PeakResult> results)
 	{
 		this.results.addAll(results);
 	}
@@ -82,9 +92,9 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#addAll(gdsc.smlm.results.PeakResult[])
+	 * @see gdsc.smlm.results.PeakResultStore#addArray(gdsc.smlm.results.PeakResult[])
 	 */
-	public void addAll(PeakResult[] results)
+	public void addArray(PeakResult[] results)
 	{
 		this.results.addAll(Arrays.asList(results));
 	}
@@ -92,9 +102,9 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#add(gdsc.smlm.results.PeakResultStore)
+	 * @see gdsc.smlm.results.PeakResultStore#addStore(gdsc.smlm.results.PeakResultStore)
 	 */
-	public void add(PeakResultStore results)
+	public void addStore(PeakResultStore results)
 	{
 		if (results instanceof TurboListPeakResultStore)
 		{
@@ -102,7 +112,7 @@ public class TurboListPeakResultStore implements PeakResultStore
 		}
 		else
 		{
-			addAll(results.toArray());
+			addArray(results.toArray());
 		}
 	}
 
@@ -159,23 +169,11 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#toArray(gdsc.smlm.results.PeakResult[])
-	 */
-	public PeakResult[] toArray(PeakResult[] array)
-	{
-		return results.toArray(array);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#copy()
 	 */
 	public PeakResultStore copy()
 	{
-		TurboListPeakResultStore copy = new TurboListPeakResultStore(size());
-		copy.add(this);
-		return copy;
+		return new TurboListPeakResultStore(this);
 	}
 
 	/*
