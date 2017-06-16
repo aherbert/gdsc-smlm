@@ -109,6 +109,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	private int rollingWindowSize = 0;
 	private boolean displayImage = true;
 	private boolean liveImage = true;
+	private boolean uncalibrated = false;
 
 	// Used to draw the image
 	private int lastPaintSize = 0;
@@ -187,8 +188,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		// Q. Should this be changed to handle the data in non-pixel distances.
 		// At the moment we hope that the results IO can work out the units and convert them during load. 
-		boolean validCalibration = (calibration.hasDistanceUnit() &&
-				calibration.getDistanceUnit() == DistanceUnit.PIXEL);
+		boolean validCalibration = uncalibrated ||
+				(calibration.hasDistanceUnit() && calibration.getDistanceUnit() == DistanceUnit.PIXEL);
 
 		size = 0;
 		lastPaintSize = 0;
@@ -1390,5 +1391,26 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	public void setLiveImage(boolean liveImage)
 	{
 		this.liveImage = liveImage;
+	}
+
+	/**
+	 * Checks if is uncalibrated flag. An uncalibrated image does not require the calibration to be in pixel units.
+	 *
+	 * @return true, if is uncalibrated
+	 */
+	public boolean isUncalibrated()
+	{
+		return uncalibrated;
+	}
+
+	/**
+	 * Sets the uncalibrated flag. An uncalibrated image does not require the calibration to be in pixel units.
+	 *
+	 * @param uncalibrated
+	 *            the new uncalibrated flag.
+	 */
+	public void setUncalibrated(boolean uncalibrated)
+	{
+		this.uncalibrated = uncalibrated;
 	}
 }

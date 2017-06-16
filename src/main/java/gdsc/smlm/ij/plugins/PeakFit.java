@@ -16,8 +16,6 @@ import java.awt.event.TextListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +30,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.TextUtils;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitJob;
@@ -61,8 +60,10 @@ import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FilePeakResults;
+import gdsc.smlm.results.FrameCounter;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.InterlacedImageSource;
 import gdsc.smlm.results.MALKFilePeakResults;
@@ -74,6 +75,8 @@ import gdsc.smlm.results.TSFPeakResultsWriter;
 import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.Filter;
+import gdsc.smlm.results.procedures.PeakResultProcedureX;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -273,14 +276,17 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 
 			// Check for single frame
 			singleFrame = results.getFirstFrame();
-			for (PeakResult result : results.getResults())
+			final FrameCounter counter = new FrameCounter(singleFrame);
+			results.forEach(new PeakResultProcedureX()
 			{
-				if (singleFrame != result.getFrame())
+				public boolean execute(PeakResult peakResult)
 				{
-					singleFrame = 0;
-					break;
+					// The counter will return true (stop execution) if a new frame
+					return counter.advance(peakResult.getFrame());
 				}
-			}
+			});
+			if (counter.currentFrame() != counter.previousFrame())
+				singleFrame = 0;
 
 			imageSource = results.getSource();
 			plugin_flags |= NO_IMAGE_REQUIRED;
@@ -2196,20 +2202,24 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			if (!gd.wasOKed())
 				return;
 
-			LUT lut = LUTHelper.createLUT(LutColour.ICE);
-			Overlay o = new Overlay();
-			ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
-			for (int i = 0, j = results.size() - 1; i < results.size(); i++, j--)
+			final LUT lut = LUTHelper.createLUT(LutColour.ICE);
+			final Overlay o = new Overlay();
+			final int size = results.size();
+			final Counter j = new Counter(size);
+			final ImagePlus finalImp = imp;
+			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 			{
-				PeakResult r = list.get(i);
-				PointRoi roi = new PointRoi(r.getXPosition(), r.getYPosition());
-				Color c = LUTHelper.getColour(lut, j, results.size());
-				roi.setStrokeColor(c);
-				roi.setFillColor(c);
-				if (imp.getStackSize() > 1)
-					roi.setPosition(singleFrame);
-				o.add(roi);
-			}
+				public void executeXYR(float x, float y, PeakResult r)
+				{
+					PointRoi roi = new PointRoi(x,y);
+					Color c = LUTHelper.getColour(lut, j.decrementAndGet(), size);
+					roi.setStrokeColor(c);
+					roi.setFillColor(c);
+					if (finalImp.getStackSize() > 1)
+						roi.setPosition(singleFrame);
+					o.add(roi);
+				}
+			});
 			imp.setOverlay(o);
 			imp.getWindow().toFront();
 		}
@@ -2504,51 +2514,50 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		}
 		// No check for imageSource since this has been check in the calling method
 
-		int totalFrames = source.getFrames();
+		final int totalFrames = source.getFrames();
 
 		// Store the indices of each new time-frame
 		results.sort();
-		List<PeakResult> candidateMaxima = results.getResults();
 
 		// Use the FitEngine to allow multi-threading.
-		FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
+		final FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
 
 		final int step = Utils.getProgressInterval(totalFrames);
 
 		runTime = System.nanoTime();
-		boolean shutdown = false;
-		int slice = candidateMaxima.get(0).getFrame();
-		ArrayList<PeakResult> sliceCandidates = new ArrayList<PeakResult>();
-		Iterator<PeakResult> iter = candidateMaxima.iterator();
-		while (iter.hasNext())
+		final ArrayList<PeakResult> sliceCandidates = new ArrayList<PeakResult>();
+		final FrameCounter counter = new FrameCounter(results.getFirstFrame());
+		results.forEach(new PeakResultProcedureX()
 		{
-			PeakResult r = iter.next();
-			if (slice != r.getFrame())
+			public boolean execute(PeakResult r)
 			{
-				if (escapePressed())
+				if (counter.advance(r.getFrame()))
 				{
-					shutdown = true;
-					break;
-				}
-				if (slice % step == 0)
-				{
-					if (Utils.showStatus("Slice: " + slice + " / " + totalFrames))
-						IJ.showProgress(slice, totalFrames);
-				}
+					if (escapePressed())
+						return true;
+					int slice = counter.previousFrame();
+					if (slice % step == 0)
+					{
+						if (Utils.showStatus("Slice: " + slice + " / " + totalFrames))
+							IJ.showProgress(slice, totalFrames);
+					}
 
-				// Process results
-				if (!processResults(engine, sliceCandidates, slice))
-					break;
+					// Process results
+					if (!processResults(engine, sliceCandidates, slice))
+						return true;
 
-				sliceCandidates.clear();
+					sliceCandidates.clear();
+				}
+				sliceCandidates.add(r);
+				
+				return false;
 			}
-			slice = r.getFrame();
-			sliceCandidates.add(r);
-		}
+		});
 
 		// Process final results
+		boolean shutdown = escapePressed();
 		if (!shutdown)
-			processResults(engine, sliceCandidates, slice);
+			processResults(engine, sliceCandidates, counter.currentFrame());
 
 		engine.end(shutdown);
 		time = engine.getTime();

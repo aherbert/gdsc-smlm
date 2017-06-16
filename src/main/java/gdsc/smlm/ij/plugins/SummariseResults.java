@@ -15,10 +15,13 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Rectangle;
 
+import gdsc.core.data.DataException;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -104,7 +107,7 @@ public class SummariseResults implements PlugIn
 
 	private void addSummary(StringBuilder sb, MemoryPeakResults result)
 	{
-		DescriptiveStatistics[] stats = new DescriptiveStatistics[2];
+		final DescriptiveStatistics[] stats = new DescriptiveStatistics[2];
 		char[] suffix = new char[2];
 		for (int i = 0; i < stats.length; i++)
 		{
@@ -137,29 +140,39 @@ public class SummariseResults implements PlugIn
 			if (result.hasStoredPrecision())
 			{
 				suffix[0] = '*';
-				for (PeakResult peakResult : result.getResults())
+				result.forEach(new PeakResultProcedure()
 				{
-					stats[0].addValue(peakResult.getPrecision());
-				}
+					public void execute(PeakResult peakResult)
+					{
+						stats[0].addValue(peakResult.getPrecision());
+					}
+				});
 			}
-			else if (result.isCalibratedForPrecision())
+			else
 			{
-				final double nmPerPixel = result.getNmPerPixel();
-				final double gain = result.getGain();
-				final boolean emCCD = result.isEMCCD();
-				for (PeakResult peakResult : result.getResults())
+				try
 				{
-					stats[0].addValue(peakResult.getPrecision(nmPerPixel, gain, emCCD));
+					PrecisionResultProcedure pp = new PrecisionResultProcedure(result);
+					pp.getPrecision();
+					for (double v : pp.precision)
+						stats[0].addValue(v);
+				}
+				catch (DataException e)
+				{
+					// Ignore
 				}
 			}
 
 			// SNR requires noise
 			if (result.hasNoise())
 			{
-				for (PeakResult peakResult : result.getResults())
+				result.forEach(new PeakResultProcedure()
 				{
-					stats[1].addValue(peakResult.getSignal() / peakResult.noise);
-				}
+					public void execute(PeakResult peakResult)
+					{
+						stats[1].addValue(peakResult.getSignal() / peakResult.noise);
+					}
+				});
 			}
 		}
 
@@ -167,7 +180,7 @@ public class SummariseResults implements PlugIn
 
 		sb.append(result.getName());
 		sb.append('\t').append(result.size());
-		int maxT = getMaxT(result);
+		int maxT = result.getMaxFrame();
 		sb.append('\t').append(maxT);
 		if (calibration != null && calibration.hasExposureTime())
 		{
@@ -221,14 +234,5 @@ public class SummariseResults implements PlugIn
 			}
 		}
 		sb.append("\n");
-	}
-
-	private int getMaxT(MemoryPeakResults result)
-	{
-		int maxT = 0;
-		for (PeakResult r : result.getResults())
-			if (maxT < r.getEndFrame())
-				maxT = r.getEndFrame();
-		return maxT;
 	}
 }

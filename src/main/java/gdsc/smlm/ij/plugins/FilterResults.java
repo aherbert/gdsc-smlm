@@ -1,5 +1,13 @@
 package gdsc.smlm.ij.plugins;
 
+import java.util.ArrayList;
+
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.data.DataException;
+import gdsc.core.utils.Maths;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -20,16 +28,15 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.MaskDistribution;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.PrecisionResultProcedure;
+import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gdsc.smlm.results.procedures.WidthResultProcedure;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
-
-import java.util.ArrayList;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Filters PeakFit results that are stored in memory using various fit criteria.
@@ -42,9 +49,6 @@ public class FilterResults implements PlugIn
 	private MemoryPeakResults results;
 
 	private FilterSettings filterSettings = new FilterSettings();
-
-	private double nmPerPixel, gain;
-	private boolean emCCD;
 
 	// Used to pass data from analyseResults() to checkLimits()
 	private float minDrift = Float.MAX_VALUE;
@@ -59,6 +63,10 @@ public class FilterResults implements PlugIn
 	private float minWidth = Float.MAX_VALUE;
 	private float maxWidth = 0;
 
+	private StandardResultProcedure sp;
+	private PrecisionResultProcedure pp;
+	private WidthResultProcedure wp;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -67,7 +75,7 @@ public class FilterResults implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
@@ -90,7 +98,8 @@ public class FilterResults implements PlugIn
 			return;
 		}
 
-		analyseResults();
+		if (!analyseResults())
+			return;
 
 		if (!showDialog())
 			return;
@@ -101,70 +110,108 @@ public class FilterResults implements PlugIn
 	/**
 	 * Analyse the results and determine the range for each filter
 	 */
-	private void analyseResults()
+	private boolean analyseResults()
 	{
 		IJ.showStatus("Analysing results ...");
 
-		nmPerPixel = results.getNmPerPixel();
-		gain = results.getGain();
-		emCCD = results.isEMCCD();
+		ArrayList<String> error = new ArrayList<String>();
 
-		double maxVariance = maxPrecision * maxPrecision;
-		double minVariance = minPrecision * minPrecision;
-
-		int size = results.size();
-		int i = 0;
-		for (PeakResult result : results.getResults())
+		try
 		{
-			if (i % 64 == 0)
-				IJ.showProgress(i, size);
-
-			final float drift = getDrift(result);
-			if (maxDrift < drift)
-				maxDrift = drift;
-			if (minDrift > drift)
-				minDrift = drift;
-
-			final float signal = result.getSignal();
-			if (maxSignal < signal)
-				maxSignal = signal;
-			if (minSignal > signal)
-				minSignal = signal;
-
-			final float snr = getSNR(result);
-			if (maxSNR < snr)
-				maxSNR = snr;
-			if (minSNR > snr)
-				minSNR = snr;
-
-			// Use variance to avoid sqrt()
-			final double variance = getVariance(result);
-			if (maxVariance < variance)
-				maxVariance = variance;
-			if (minVariance > variance)
-				minVariance = variance;
-
-			final float width = getWidth(result);
-			averageWidth += width;
-			if (maxWidth < width)
-				maxWidth = width;
-			if (minWidth > width)
-				minWidth = width;
+			wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
+			wp.getW();
+			float[] limits = Maths.limits(wp.wx);
+			maxWidth = limits[1];
+			minWidth = limits[0];
+			averageWidth = Maths.sum(wp.wx) / wp.size();
 		}
-		averageWidth /= results.size();
+		catch (DataException e)
+		{
+			error.add(e.getMessage());
+			wp = null;
+			maxWidth = minWidth = 0;
+		}
 
-		maxPrecision = Math.sqrt(maxVariance);
-		minPrecision = Math.sqrt(minVariance);
+		try
+		{
+			pp = new PrecisionResultProcedure(results);
+			pp.getPrecision();
+
+			double[] limits = Maths.limits(pp.precision);
+			maxPrecision = limits[1];
+			minPrecision = limits[0];
+		}
+		catch (DataException e)
+		{
+			error.add(e.getMessage());
+			pp = null;
+			maxPrecision = minPrecision = 0;
+		}
+
+		try
+		{
+			sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
+			sp.getXYR();
+
+			// Re-use for convenience
+			sp.intensity = new float[sp.x.length];
+			sp.background = new float[sp.x.length];
+			sp.z = new float[sp.x.length];
+
+			for (int i = 0; i < sp.size(); i++)
+			{
+				if (i % 64 == 0)
+					IJ.showProgress(i, sp.size());
+
+				PeakResult result = sp.peakResults[i];
+
+				final float drift = getDrift(result, sp.x[i], sp.y[i]);
+				if (maxDrift < drift)
+					maxDrift = drift;
+				if (minDrift > drift)
+					minDrift = drift;
+
+				final float signal = result.getSignal();
+				if (maxSignal < signal)
+					maxSignal = signal;
+				if (minSignal > signal)
+					minSignal = signal;
+
+				final float snr = getSNR(result);
+				if (maxSNR < snr)
+					maxSNR = snr;
+				if (minSNR > snr)
+					minSNR = snr;
+
+				// for convenience
+				sp.z[i] = drift;
+				sp.intensity[i] = signal;
+				sp.background[i] = snr;
+			}
+		}
+		catch (DataException e)
+		{
+			error.add(e.getMessage());
+			sp = null;
+		}
+
+		if (error.size() == 3 || sp == null)
+		{
+			StringBuilder sb = new StringBuilder("Unable to analyse the results:\n");
+			for (String s : error)
+				sb.append(s).append(".\n");
+			IJ.error(TITLE, sb.toString());
+			return true;
+		}
 
 		IJ.showProgress(1);
 		IJ.showStatus("");
+		return false;
 	}
 
-	private float getDrift(PeakResult result)
+	private float getDrift(PeakResult result, float x, float y)
 	{
-		float drift = FastMath.max(Math.abs(result.origX - result.getXPosition()),
-				Math.abs(result.origY - result.getYPosition()));
-		return drift;
+		return FastMath.max(Math.abs(result.origX - x), Math.abs(result.origY - y));
 	}
 
 	private float getSNR(PeakResult result)
@@ -172,19 +219,6 @@ public class FilterResults implements PlugIn
 		if (result.noise <= 0)
 			return 0;
 		return result.getSignal() / result.noise;
-	}
-
-	private double getVariance(PeakResult result)
-	{
-		return PeakResult.getVariance(nmPerPixel, result.getSD() * nmPerPixel, result.getSignal() / gain, result.noise /
-				gain, emCCD);
-	}
-
-	private float getWidth(PeakResult result)
-	{
-		// The X-width should be the largest (major axis)
-		// Q. Should a filter be used for the Y-width too?
-		return result.getSD();
 	}
 
 	/**
@@ -242,40 +276,44 @@ public class FilterResults implements PlugIn
 					scaleY);
 		}
 
-		int i = 0;
-		final int size = results.size();
-		final double maxVariance = filterSettings.maxPrecision * filterSettings.maxPrecision;
-		for (PeakResult result : results.getResults())
+		for (int i = 0, size = results.size(); i < size; i++)
 		{
 			if (i % 64 == 0)
 				IJ.showProgress(i, size);
 
-			if (getDrift(result) > filterSettings.maxDrift)
+			// sp will not be null
+
+			// We stored the drift=z, intensity=signal, background=snr 
+			if (sp.z[i] > filterSettings.maxDrift)
 				continue;
 
-			if (result.getSignal() < filterSettings.minSignal)
+			if (sp.intensity[i] < filterSettings.minSignal)
 				continue;
 
-			if (getSNR(result) < filterSettings.minSNR)
-				continue;
-
-			if (getVariance(result) > maxVariance)
-				continue;
-
-			final float width = getWidth(result);
-			if (width < filterSettings.minWidth || width > filterSettings.maxWidth)
+			if (sp.background[i] < filterSettings.minSNR)
 				continue;
 
 			if (maskFilter != null)
 			{
 				// Check the coordinates are inside the mask
-				double[] xy = new double[] { result.getXPosition() - centreX, result.getYPosition() - centreY };
+				double[] xy = new double[] { sp.x[i] - centreX, sp.y[i] - centreY };
 				if (!maskFilter.isWithinXY(xy))
 					continue;
 			}
 
+			if (pp != null)
+				if (pp.precision[i] > maxPrecision)
+					continue;
+
+			if (wp != null)
+			{
+				final float width = wp.wx[i];
+				if (width < filterSettings.minWidth || width > filterSettings.maxWidth)
+					continue;
+			}
+
 			// Passed all filters. Add to the results
-			newResults.add(result);
+			newResults.add(sp.peakResults[i]);
 		}
 
 		IJ.showProgress(1);

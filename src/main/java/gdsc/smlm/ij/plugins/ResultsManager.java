@@ -38,6 +38,7 @@ import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.MALKFilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -48,6 +49,8 @@ import gdsc.smlm.results.PeakResultsReader;
 import gdsc.smlm.results.ResultOption;
 import gdsc.smlm.results.TSFPeakResultsWriter;
 import gdsc.smlm.results.TextFilePeakResults;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.ExtendedGenericDialog;
@@ -159,7 +162,7 @@ public class ResultsManager implements PlugIn
 			int size = 0;
 			for (MemoryPeakResults results : allResults)
 			{
-				memorySize += MemoryPeakResults.estimateMemorySize(results.getResults());
+				memorySize += MemoryPeakResults.estimateMemorySize(results);
 				size += results.size();
 			}
 			String memory = MemoryPeakResults.memorySizeString(memorySize);
@@ -233,33 +236,44 @@ public class ResultsManager implements PlugIn
 			IJ.showStatus("Processing outputs ...");
 
 			// Reduce to single object for speed
-			PeakResults output = (outputList.numberOfOutputs() == 1) ? outputList.toArray()[0] : outputList;
+			final PeakResults output = (outputList.numberOfOutputs() == 1) ? outputList.toArray()[0] : outputList;
 
 			output.begin();
 
-			// Process in batches to provide progress
-			List<PeakResult> list = results.getResults();
-			int progress = 0;
-			int totalProgress = list.size();
-			int stepProgress = Utils.getProgressInterval(totalProgress);
-			TurboList<PeakResult> batch = new TurboList<PeakResult>(stepProgress);
-			for (PeakResult result : list)
-			{
-				if (progress % stepProgress == 0)
-				{
-					IJ.showProgress(progress, totalProgress);
-				}
-				progress++;
-				batch.addf(result);
+			// Note: We could add a batch iterator to the MemoryPeakResults.
+			// However the speed increase will be marginal as the main time
+			// taken is in processing the outputs.
 
-				if (batch.size() == stepProgress)
+			// Process in batches to provide progress
+			final Counter progress = new Counter();
+			final int totalProgress = results.size();
+			final int stepProgress = Utils.getProgressInterval(totalProgress);
+			final TurboList<PeakResult> batch = new TurboList<PeakResult>(stepProgress);
+			results.forEach(new PeakResultProcedureX()
+			{
+				public boolean execute(PeakResult result)
 				{
-					output.addAll(batch);
-					batch.clearf();
-					if (isInterrupted())
-						break;
+					if (progress.getAndIncrement() % stepProgress == 0)
+					{
+						IJ.showProgress(progress.getCount() - 1, totalProgress);
+					}
+					batch.addf(result);
+
+					if (batch.size() == stepProgress)
+					{
+						output.addAll(batch);
+						batch.clearf();
+						if (isInterrupted())
+							return true;
+					}
+					return false;
 				}
-			}
+			});
+
+			// Will be empty if interrupted
+			if (!batch.isEmpty())
+				output.addAll(batch);
+
 			IJ.showProgress(1);
 			output.end();
 		}
@@ -819,10 +833,13 @@ public class ResultsManager implements PlugIn
 	 */
 	public static boolean isMultiFrame(MemoryPeakResults memoryResults)
 	{
-		for (PeakResult r : memoryResults.getResults())
-			if (r.getFrame() < r.getEndFrame())
-				return true;
-		return false;
+		return memoryResults.forEach(new PeakResultProcedureX()
+		{
+			public boolean execute(PeakResult r)
+			{
+				return r.getFrame() < r.getEndFrame();
+			}
+		});
 	}
 
 	/**
@@ -833,10 +850,13 @@ public class ResultsManager implements PlugIn
 	 */
 	public static boolean hasID(MemoryPeakResults memoryResults)
 	{
-		for (PeakResult r : memoryResults.getResults())
-			if (r.getId() > 0)
-				return true;
-		return false;
+		return memoryResults.forEach(new PeakResultProcedureX()
+		{
+			public boolean execute(PeakResult r)
+			{
+				return r.getId() > 0;
+			}
+		});
 	}
 
 	/**
@@ -847,24 +867,30 @@ public class ResultsManager implements PlugIn
 	 */
 	public static boolean isID(MemoryPeakResults memoryResults)
 	{
-		for (PeakResult r : memoryResults.getResults())
-			if (r.getId() <= 0)
-				return false;
-		return true;
+		return !memoryResults.forEach(new PeakResultProcedureX()
+		{
+			public boolean execute(PeakResult r)
+			{
+				return r.getId() <= 0;
+			}
+		});
 	}
 
 	/**
 	 * All results must be an ExtendedPeakResult.
 	 * 
 	 * @param memoryResults
-	 * @return True if all ExtendedPeakResult
+	 * @return True if all are an ExtendedPeakResult
 	 */
 	public static boolean isExtended(MemoryPeakResults memoryResults)
 	{
-		for (PeakResult r : memoryResults.getResults())
-			if (!(r instanceof ExtendedPeakResult))
-				return false;
-		return true;
+		return !memoryResults.forEach(new PeakResultProcedureX()
+		{
+			public boolean execute(PeakResult r)
+			{
+				return !(r instanceof ExtendedPeakResult);
+			}
+		});
 	}
 
 	/**
@@ -894,7 +920,7 @@ public class ResultsManager implements PlugIn
 	{
 		return loadInputResults(inputOption, checkCalibration, DistanceUnit.PIXEL, IntensityUnit.COUNT);
 	}
-	
+
 	/**
 	 * Load the results from the named input option. If the results are not empty then a check can be made for
 	 * calibration, and data using the specified units. If the calibration cannot be obtained or the units are incorrect
@@ -1115,7 +1141,7 @@ public class ResultsManager implements PlugIn
 			if (!calibration.hasExposureTime())
 				calibration.setExposureTime(input_exposureTime);
 
-			Rectangle2D.Float dataBounds = results.getDataBounds();
+			Rectangle2D.Float dataBounds = results.getDataBounds(null);
 
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage(
@@ -1133,7 +1159,7 @@ public class ResultsManager implements PlugIn
 			input_nmPerPixel = Math.abs(gd.getNextNumber());
 			input_gain = Math.abs(gd.getNextNumber());
 			input_exposureTime = Math.abs(gd.getNextNumber());
-			if (noise == 0)
+			if (noise <= 0)
 				input_noise = Math.abs((float) gd.getNextNumber());
 
 			Prefs.set(Constants.inputNmPerPixel, input_nmPerPixel);
@@ -1145,10 +1171,13 @@ public class ResultsManager implements PlugIn
 
 			if (noise == 0)
 			{
-				for (PeakResult p : results.getResults())
+				results.forEach(new PeakResultProcedure()
 				{
-					p.noise = input_noise;
-				}
+					public void execute(PeakResult p)
+					{
+						p.noise = input_noise;
+					}
+				});
 			}
 		}
 		return true;
@@ -1162,12 +1191,20 @@ public class ResultsManager implements PlugIn
 	 */
 	private static float getNoise(MemoryPeakResults results)
 	{
-		for (PeakResult r : results.getResults())
+		final float[] noise = new float[1];
+		results.forEach(new PeakResultProcedureX()
 		{
-			if (r.noise != 0)
-				return r.noise;
-		}
-		return 0;
+			public boolean execute(PeakResult r)
+			{
+				if (r.noise != 0)
+				{
+					noise[0] = r.noise;
+					return true;
+				}
+				return false;
+			}
+		});
+		return noise[0];
 	}
 
 	/**

@@ -18,7 +18,26 @@ package gdsc.smlm.results;
  */
 public class Counter
 {
-	private int count = 0;
+	private int count;
+
+	/**
+	 * Instantiates a new counter.
+	 */
+	public Counter()
+	{
+		this.count = 0;
+	}
+
+	/**
+	 * Instantiates a new counter.
+	 *
+	 * @param count
+	 *            the count
+	 */
+	public Counter(int count)
+	{
+		this.count = count;
+	}
 
 	/**
 	 * Reset the count
@@ -77,9 +96,6 @@ public class Counter
 	public int getAndIncrement()
 	{
 		return count++;
-		//int old = count;
-		//count++;
-		//return old;
 	}
 
 	/**
@@ -96,6 +112,71 @@ public class Counter
 		return old;
 	}
 
+	/**
+	 * Decrement the count.
+	 */
+	public void decrement()
+	{
+		count--;
+	}
+
+	/**
+	 * Decrement the count by the value.
+	 *
+	 * @param value
+	 *            the value
+	 */
+	public void decrement(int value)
+	{
+		count -= value;
+	}
+
+	/**
+	 * Decrement the count.
+	 *
+	 * @return the new count
+	 */
+	public int decrementAndGet()
+	{
+		return --count;
+	}
+
+	/**
+	 * Decrement the count by the value.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the new count
+	 */
+	public int decrementAndGet(int value)
+	{
+		return count -= value;
+	}
+
+	/**
+	 * Decrement the count.
+	 *
+	 * @return the old count
+	 */
+	public int getAndDecrement()
+	{
+		return count--;
+	}
+
+	/**
+	 * Decrement the count by the value.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the old count
+	 */
+	public int getAndDecrement(int value)
+	{
+		int old = count;
+		count -= value;
+		return old;
+	}
+	
 	/**
 	 * Gets the count.
 	 *

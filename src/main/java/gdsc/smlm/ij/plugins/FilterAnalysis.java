@@ -1,47 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.ij.settings.FilterSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
-import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.ClassificationResult;
-import gdsc.core.utils.UnicodeReader;
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResultsReader;
-import gdsc.smlm.results.filter.AndFilter;
-import gdsc.smlm.results.filter.Filter;
-import gdsc.smlm.results.filter.FilterSet;
-import gdsc.smlm.results.filter.OrFilter;
-import gdsc.smlm.results.filter.PrecisionFilter;
-import gdsc.smlm.results.filter.PrecisionHysteresisFilter;
-import gdsc.smlm.results.filter.SNRFilter;
-import gdsc.smlm.results.filter.SNRHysteresisFilter;
-import gdsc.smlm.results.filter.TraceFilter;
-import gdsc.smlm.results.filter.WidthFilter;
-import gdsc.smlm.results.filter.XStreamWrapper;
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.gui.Plot2;
-import ij.gui.PlotWindow;
-import ij.io.OpenDialog;
-import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
-import ij.text.TextWindow;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -58,6 +16,51 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.match.ClassificationResult;
+import gdsc.core.utils.UnicodeReader;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.ij.settings.FilterSettings;
+import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.Counter;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResultsReader;
+import gdsc.smlm.results.filter.AndFilter;
+import gdsc.smlm.results.filter.Filter;
+import gdsc.smlm.results.filter.FilterSet;
+import gdsc.smlm.results.filter.OrFilter;
+import gdsc.smlm.results.filter.PrecisionFilter;
+import gdsc.smlm.results.filter.PrecisionHysteresisFilter;
+import gdsc.smlm.results.filter.SNRFilter;
+import gdsc.smlm.results.filter.SNRHysteresisFilter;
+import gdsc.smlm.results.filter.TraceFilter;
+import gdsc.smlm.results.filter.WidthFilter;
+import gdsc.smlm.results.filter.XStreamWrapper;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.gui.Plot2;
+import ij.gui.PlotWindow;
+import ij.io.OpenDialog;
+import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
+import ij.text.TextWindow;
 
 /**
  * Run different filtering methods on a set of labelled peak results outputting performance statistics on the success of
@@ -328,13 +331,18 @@ public class FilterAnalysis implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		int total = 0;
-		int tp = 0;
+		final Counter tp = new Counter();
 		for (MemoryPeakResults r : resultsList)
 		{
 			total += r.size();
-			for (PeakResult p : r.getResults())
-				if (p.origValue != 0)
-					tp++;
+			r.forEach(new PeakResultProcedure()
+			{
+				public void execute(PeakResult p)
+				{
+					if (p.origValue != 0)
+						tp.increment();
+				}
+			});
 		}
 		gd.addMessage(String.format("%d files, %d results, %d True-Positives", resultsList.size(), total, tp));
 

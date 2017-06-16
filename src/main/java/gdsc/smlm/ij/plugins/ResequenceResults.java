@@ -17,6 +17,7 @@ import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.core.logging.TrackProgress;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
@@ -42,7 +43,7 @@ public class ResequenceResults implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
@@ -68,12 +69,12 @@ public class ResequenceResults implements PlugIn
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Resequence the results in memory (assumed to be continuous from 1).\n"
-				+ "Describe the regular repeat of the original image:\n"
-				+ "Start = The first frame that contained the data\n"
-				+ "Block = The number of continuous frames containing data\n"
-				+ "Skip = The number of continuous frames to ignore before the next data\n \n"
-				+ "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
+		gd.addMessage("Resequence the results in memory (assumed to be continuous from 1).\n" +
+				"Describe the regular repeat of the original image:\n" +
+				"Start = The first frame that contained the data\n" +
+				"Block = The number of continuous frames containing data\n" +
+				"Skip = The number of continuous frames to ignore before the next data\n \n" +
+				"E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		gd.addNumericField("Start", start, 0);
@@ -107,41 +108,25 @@ public class ResequenceResults implements PlugIn
 		return true;
 	}
 
-	/**
-	 * Resequence the results for the original imaging sequence provided. Results are assumed to be continuous from 1.
-	 * 
-	 * @param results
-	 * @param start
-	 *            The first frame that contained the data
-	 * @param block
-	 *            The number of continuous frames containing data
-	 * @param skip
-	 *            The number of continuous frames to ignore before the next data
-	 * @param tracker
-	 *            Used to report the mapping
-	 * @return
-	 */
-	private static boolean resequenceResults(MemoryPeakResults results, int start, int block, int skip,
-			TrackProgress tracker)
+	private static class ResequencePeakResultProcedure implements PeakResultProcedure
 	{
-		if (results == null || results.size() == 0)
-			return false;
+		int start;
+		TrackProgress tracker;
 
-		results.sort();
-
-		// Assume the results start from frame 1 (or above)
-		if (results.getFirstFrame() < 1)
+		ResequencePeakResultProcedure(int start, TrackProgress tracker)
 		{
-			return false;
+			this.start = start;
+			this.tracker= tracker;
 		}
-
-		int t = 1; // The current frame in the results
-		int mapped = start; // The mapped frame in the results
-		int b = 1; // The current block size
-
-		boolean print = true;
-		for (PeakResult r : results.getResults())
+		
+		public void execute(PeakResult r)
 		{
+			int t = 1; // The current frame in the results
+			int mapped = start; // The mapped frame in the results
+			int b = 1; // The current block size
+			
+			boolean print = (tracker != null);
+			
 			if (t != r.getFrame())
 			{
 				// Update the mapped position
@@ -162,7 +147,7 @@ public class ResequenceResults implements PlugIn
 				}
 
 				t = r.getFrame();
-				print = true;
+				print = (tracker != null);
 			}
 
 			r.setFrame(mapped);
@@ -170,10 +155,40 @@ public class ResequenceResults implements PlugIn
 			if (print)
 			{
 				print = false;
-				if (tracker != null)
-					tracker.log("Map %d -> %d", t, mapped);
+				tracker.log("Map %d -> %d", t, mapped);
 			}
 		}
+	}
+	
+	/**
+	 * Resequence the results for the original imaging sequence provided. Results are assumed to be continuous from 1.
+	 * 
+	 * @param results
+	 * @param start
+	 *            The first frame that contained the data
+	 * @param block
+	 *            The number of continuous frames containing data
+	 * @param skip
+	 *            The number of continuous frames to ignore before the next data
+	 * @param tracker
+	 *            Used to report the mapping
+	 * @return
+	 */
+	private static boolean resequenceResults(MemoryPeakResults results, final int start, final int block,
+			final int skip, final TrackProgress tracker)
+	{
+		if (results == null || results.size() == 0)
+			return false;
+
+		results.sort();
+
+		// Assume the results start from frame 1 (or above)
+		if (results.getFirstFrame() < 1)
+		{
+			return false;
+		}
+
+		results.forEach(new ResequencePeakResultProcedure(start, tracker));
 
 		return true;
 	}

@@ -8,31 +8,32 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import gdsc.core.data.DataException;
+import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.IdentityTypeConverter;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.core.data.utils.ConversionException;
-import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.procedures.BIXYResultProcedure;
+import gdsc.smlm.results.procedures.BIXYZResultProcedure;
+import gdsc.smlm.results.procedures.HResultProcedure;
 import gdsc.smlm.results.procedures.IResultProcedure;
 import gdsc.smlm.results.procedures.IXYResultProcedure;
 import gdsc.smlm.results.procedures.IXYZResultProcedure;
 import gdsc.smlm.results.procedures.LSEPrecisionProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
-import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.TResultProcedure;
 import gdsc.smlm.results.procedures.TXYResultProcedure;
 import gdsc.smlm.results.procedures.WResultProcedure;
 import gdsc.smlm.results.procedures.WxWyResultProcedure;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
-import gdsc.smlm.results.procedures.BIXYResultProcedure;
-import gdsc.smlm.results.procedures.BIXYZResultProcedure;
-import gdsc.smlm.results.procedures.HResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
 
@@ -621,7 +622,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @throws DataException
 	 *             if conversion to pixel units is not possible
 	 */
-	public Rectangle getBounds(boolean calculate)
+	public Rectangle getBounds(boolean calculate) throws DataException
 	{
 		if ((bounds == null || bounds.width == 0 || bounds.height == 0) && calculate)
 		{
@@ -653,25 +654,35 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * Gets the data bounds.
 	 *
 	 * @param distanceUnit
-	 *            the distance unit
+	 *            the distance unit (if null then the data bounds will be in native units)
 	 * @return the bounds of the result coordinates
 	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
-	public Rectangle2D.Float getDataBounds(DistanceUnit distanceUnit)
+	public Rectangle2D.Float getDataBounds(DistanceUnit distanceUnit) throws DataException
 	{
 		if (isEmpty())
 			return new Rectangle2D.Float();
 
-		StandardResultProcedure p = new StandardResultProcedure(this, distanceUnit);
-		p.getXY();
+		// Create this first to throw an exception if invalid
+		final TypeConverter<DistanceUnit> c;
+		if (distanceUnit == null)
+		{
+			c = new IdentityTypeConverter<DistanceUnit>(null);
+		}
+		else
+		{
+			c = calibration.getDistanceConverter(distanceUnit);
+		}
 
-		float minX = p.x[0], maxX = minX;
-		float minY = p.y[0], maxY = minY;
+		// Get the native bounds
+		float minX = get(0).getXPosition(), maxX = minX;
+		float minY = get(0).getYPosition(), maxY = minY;
 		for (int i = 1, size = size(); i < size; i++)
 		{
-			float x = p.x[i];
-			float y = p.y[i];
+			PeakResult p = get(i);
+			float x = p.getXPosition();
+			float y = p.getYPosition();
 			if (minX > x)
 				minX = x;
 			else if (maxX < x)
@@ -681,7 +692,15 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			else if (maxY < y)
 				maxY = y;
 		}
-		return new Rectangle2D.Float(minX, minY, maxX - minX, maxY - minY);
+
+		// Convert the results
+		//@formatter:off
+		return new Rectangle2D.Float(
+				c.convert(minX), 
+				c.convert(minY), 
+				c.convert(maxX - minX), 
+				c.convert(maxY - minY));
+		//@formatter:on
 	}
 
 	/*
@@ -886,7 +905,22 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Checks for precision. All results must have a stored precision value.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasPrecision()
+	{
+		for (int i = 0, size = size(); i < size; i++)
+			if (!get(i).hasPrecision())
+				return false;
+		return true;
+	}
+
+	/**
 	 * Gets the first frame.
+	 * <p>
+	 * This may be different from {@link #getMinFrame()} if the results are not sorted by frame.
 	 *
 	 * @return the first frame
 	 * @throws IllegalStateException
@@ -901,6 +935,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * Gets the last frame.
+	 * <p>
+	 * This may be different from {@link #getMaxFrame()} if the results are not sorted by frame.
 	 *
 	 * @return the last frame
 	 * @throws IllegalStateException
@@ -911,6 +947,42 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (isEmpty())
 			throw new IllegalStateException("Empty");
 		return get(size() - 1).getEndFrame();
+	}
+
+	/**
+	 * Gets the minimum frame.
+	 *
+	 * @return the min frame
+	 * @throws IllegalStateException
+	 *             If the size is zero
+	 */
+	public int getMinFrame()
+	{
+		if (isEmpty())
+			throw new IllegalStateException("Empty");
+		int min = get(0).getFrame();
+		for (int i = 1, size = size(); i < size; i++)
+			if (min > get(i).getFrame())
+				min = get(i).getFrame();
+		return min;
+	}
+
+	/**
+	 * Gets the maximum frame.
+	 *
+	 * @return the max frame
+	 * @throws IllegalStateException
+	 *             If the size is zero
+	 */
+	public int getMaxFrame()
+	{
+		if (isEmpty())
+			throw new IllegalStateException("Empty");
+		int max = get(0).getEndFrame();
+		for (int i = 1, size = size(); i < size; i++)
+			if (max < get(i).getEndFrame())
+				max = get(i).getEndFrame();
+		return max;
 	}
 
 	/**
@@ -1208,18 +1280,20 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * For each result execute the procedure.
+	 * For each result execute the fast-exit procedure.
 	 *
 	 * @param procedure
 	 *            the procedure
+	 * @return true, if a fast exit occurred
 	 */
-	public void forEach(PeakResultProcedureX procedure)
+	public boolean forEach(PeakResultProcedureX procedure)
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			if (procedure.execute(get(i)))
-				return;
+				return true;
 		}
+		return false;
 	}
 
 	/**

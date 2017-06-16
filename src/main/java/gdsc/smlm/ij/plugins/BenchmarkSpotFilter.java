@@ -28,6 +28,7 @@ import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -56,7 +57,7 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
@@ -1620,8 +1621,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			// Always use float coordinates.
 			// The Worker adds a pixel offset for the spot coordinates.
-			TIntObjectHashMap<ArrayList<Coordinate>> coordinates = ResultsMatchCalculator
-					.getCoordinates(results.getResults(), false);
+			TIntObjectHashMap<ArrayList<Coordinate>> coordinates = ResultsMatchCalculator.getCoordinates(results,
+					false);
 			actualCoordinates = new TIntObjectHashMap<PSFSpot[]>();
 			lastId = simulationParameters.id;
 			//lastRelativeDistances = relativeDistances;
@@ -1696,10 +1697,9 @@ public class BenchmarkSpotFilter implements PlugIn
 			// To allow the signal factor to be computed we need to lower the image by the background so 
 			// that the intensities correspond to the results amplitude.
 			// Just assume the background is uniform.
-			double sum = 0;
-			for (PeakResult r : results)
-				sum += r.getBackground();
-			background = (float) (sum / results.size());
+			StandardResultProcedure s = new StandardResultProcedure(results, IntensityUnit.COUNT);
+			s.getBIXY();
+			background = (float) (Maths.sum(s.background) / results.size());
 		}
 
 		// Create a pool of workers

@@ -44,6 +44,7 @@ import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Settings;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -150,10 +151,9 @@ public class OPTICS implements PlugIn
 			int size = results.size();
 			x = new float[size];
 			y = new float[size];
-			ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
 			for (int i = 0; i < size; i++)
 			{
-				PeakResult p = list.get(i);
+				PeakResult p = results.get(i);
 				x[i] = p.getXPosition();
 				y[i] = p.getYPosition();
 			}
@@ -525,11 +525,9 @@ public class OPTICS implements PlugIn
 					traces[i] = new Trace();
 					traces[i].setId(i);
 				}
-				ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
 				for (int i = 0, size = results.size(); i < size; i++)
 				{
-					PeakResult r = list.get(i);
-					traces[clusters[i++]].add(r);
+					traces[clusters[i++]].add(results.get(i));
 				}
 				TraceMolecules.saveResults(results, traces, TITLE);
 			}
@@ -1057,11 +1055,10 @@ public class OPTICS implements PlugIn
 						x = new float[results.size()];
 						y = new float[x.length];
 						v = new float[x.length];
-						ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
 						OrderProvider op = (order == null) ? new OrderProvider() : new RealOrderProvider(order);
 						for (int i = 0, size = results.size(); i < size; i++)
 						{
-							PeakResult r = list.get(i);
+							PeakResult r = results.get(i);
 							x[i] = r.getXPosition();
 							y[i] = r.getYPosition();
 							v[i] = mapper.mapf(mode.getValue(r.getSignal(), clusters[i], op.getOrder(i)));
@@ -1230,10 +1227,9 @@ public class OPTICS implements PlugIn
 							int size = results.size();
 							x = new float[size];
 							y = new float[x.length];
-							ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
 							for (int i = 0; i < size; i++)
 							{
-								PeakResult r = list.get(i);
+								PeakResult r = results.get(i);
 								x[i] = r.getXPosition();
 								y[i] = r.getYPosition();
 							}
@@ -1944,8 +1940,9 @@ public class OPTICS implements PlugIn
 
 			inputSettings.inputOption = ResultsManager.getInputSource(gd);
 
-			// Load the results
-			MemoryPeakResults results = ResultsManager.loadInputResults(inputSettings.inputOption, true);
+			// Load the results. 
+			// TODO - update the plugin to handle any data, not just pixels 
+			MemoryPeakResults results = ResultsManager.loadInputResults(inputSettings.inputOption, true, DistanceUnit.PIXEL, null);
 			if (results == null || results.size() == 0)
 			{
 				IJ.error(TITLE, "No results could be loaded");

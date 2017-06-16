@@ -50,6 +50,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
 
+import gdsc.core.data.DataException;
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
@@ -62,6 +63,8 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.function.Erf;
 
 /*----------------------------------------------------------------------------- 
@@ -90,9 +93,13 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.procedures.LSEPrecisionProcedure;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.PrecisionResultProcedure;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
@@ -244,7 +251,7 @@ public class FIRE implements PlugIn
 	MemoryPeakResults results, results2;
 	Rectangle2D dataBounds;
 	String units;
-	double nmPerPixel = 1;
+	double nmPerUnit = 1;
 
 	// Stored in setCorrectionParameters
 	private double correctionQValue, correctionMean, correctionSigma;
@@ -550,7 +557,7 @@ public class FIRE implements PlugIn
 
 			// Only do this once
 			if (showFRCTimeEvolution && result != null && !Double.isNaN(result.fireNumber))
-				showFrcTimeEvolution(name, result.fireNumber, thresholdMethod, nmPerPixel / result.getNmPerPixel(),
+				showFrcTimeEvolution(name, result.fireNumber, thresholdMethod, nmPerUnit / result.getNmPerPixel(),
 						imageSize);
 		}
 
@@ -560,7 +567,7 @@ public class FIRE implements PlugIn
 	private void logResult(String name, FireResult result)
 	{
 		IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name, Utils.rounded(result.fireNumber, 4),
-				units, Utils.rounded(nmPerPixel / result.getNmPerPixel(), 3)));
+				units, Utils.rounded(nmPerUnit / result.getNmPerPixel(), 3)));
 		if (Double.isNaN(result.fireNumber))
 		{
 			Utils.log(
@@ -573,7 +580,7 @@ public class FIRE implements PlugIn
 	{
 		IJ.log(String.format("%s : FIRE number = %s +/- %s %s [95%% CI, n=%d] (Fourier scale = %s)", name,
 				Utils.rounded(mean, 4), Utils.rounded(stats.getConfidenceInterval(0.95), 4), units, stats.getN(),
-				Utils.rounded(nmPerPixel / result.getNmPerPixel(), 3)));
+				Utils.rounded(nmPerUnit / result.getNmPerPixel(), 3)));
 	}
 
 	private MemoryPeakResults cropToRoi(MemoryPeakResults results)
@@ -587,22 +594,23 @@ public class FIRE implements PlugIn
 		double xscale = roiImageWidth / bounds.width;
 		double yscale = roiImageHeight / bounds.height;
 
-		float minX = (float) (bounds.x + roiBounds.x / xscale);
-		float maxX = (float) (minX + roiBounds.width / xscale);
-		float minY = (float) (bounds.y + (roiBounds.y / yscale));
-		float maxY = (float) (minY + roiBounds.height / yscale);
+		final float minX = (float) (bounds.x + roiBounds.x / xscale);
+		final float maxX = (float) (minX + roiBounds.width / xscale);
+		final float minY = (float) (bounds.y + (roiBounds.y / yscale));
+		final float maxY = (float) (minY + roiBounds.height / yscale);
 
 		// Create a new set of results within the bounds
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
 		newResults.begin();
-		for (PeakResult peakResult : results.getResults())
+		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
-			float x = peakResult.getXPosition();
-			float y = peakResult.getYPosition();
-			if (x < minX || x > maxX || y < minY || y > maxY)
-				continue;
-			newResults.add(peakResult);
-		}
+			public void executeXYR(float x, float y, PeakResult result)
+			{
+				if (x < minX || x > maxX || y < minY || y > maxY)
+					return;
+				newResults.add(result);
+			}
+		});
 		newResults.end();
 		newResults.copySettings(results);
 		newResults.setBounds(new Rectangle((int) minX, (int) minY, (int) (maxX - minX), (int) (maxY - minY)));
@@ -825,36 +833,82 @@ public class FIRE implements PlugIn
 	{
 		this.results = verify(results);
 		this.results2 = verify(results2);
-		nmPerPixel = 1;
-		units = "px";
 
 		if (this.results == null)
 			return;
 
-		// Use the float data bounds. This prevents problems if the data is far from the origin.
-		dataBounds = results.getDataBounds();
+		nmPerUnit = 1;
+		DistanceUnit unit = null;
+		units = "unknown";
 
-		if (this.results2 != null)
+		Calibration cal = results.getCalibration();
+		if (cal != null)
 		{
-			Rectangle2D dataBounds2 = results.getDataBounds();
-			dataBounds = dataBounds.createUnion(dataBounds2);
+			try
+			{
+				nmPerUnit = cal.getDistanceConverter(DistanceUnit.NM).convert(1);
+				units = UnitHelper.getShortName(DistanceUnit.NM);
+				unit = DistanceUnit.NM;
+			}
+			catch (ConversionException e)
+			{
+				IJ.log(TITLE + " Warning: Ignoring invalid distance calibration for primary results");
+			}
+		}
+		else
+		{
+			IJ.log(TITLE + " Warning: No calibration exists for primary results");
 		}
 
-		if (results.getCalibration() != null)
+		// Calibration must match between datasets
+		if (this.results2 != null)
 		{
-			// Calibration must match between datasets
-			if (this.results2 != null)
+			Calibration cal2 = results.getCalibration();
+			if (unit == null)
 			{
-				if (results2.getNmPerPixel() != results.getNmPerPixel())
+				if (cal2 != null)
 				{
 					IJ.log(TITLE +
-							" Error: Calibration between the two input datasets does not match, defaulting to pixels");
-					return;
+							" Warning: Ignoring calibration for secondary results since no calibration exists for primary results");
 				}
 			}
+			else
+			{
+				// The calibration must match
+				try
+				{
+					// Try to create a converter and check it is the same conversion
+					if (cal2 != null && cal2.getDistanceConverter(DistanceUnit.NM).convert(1) != nmPerUnit)
+					{
+						// Set to null to mark invalid
+						cal2 = null;
+					}
+				}
+				catch (ConversionException e)
+				{
+					// Set to null to mark invalid
+					cal2 = null;
+				}
+				finally
+				{
+					if (cal2 == null)
+					{
+						this.results = null;
+						IJ.error(TITLE, "Error: Calibration between the two input datasets does not match");
+						return;
+					}
+				}
+			}
+		}
 
-			nmPerPixel = results.getNmPerPixel();
-			units = "nm";
+		// Use the float data bounds. This prevents problems if the data is far from the origin.
+		dataBounds = results.getDataBounds(null);
+
+		if (this.results2 != null)
+
+		{
+			Rectangle2D dataBounds2 = results.getDataBounds(null);
+			dataBounds = dataBounds.createUnion(dataBounds2);
 		}
 	}
 
@@ -893,7 +947,7 @@ public class FIRE implements PlugIn
 		FIRE f = new FIRE();
 		f.results = results;
 		f.results2 = results2;
-		f.nmPerPixel = nmPerPixel;
+		f.nmPerUnit = nmPerUnit;
 		f.units = units;
 		f.dataBounds = dataBounds;
 		f.correctionQValue = correctionQValue;
@@ -972,8 +1026,8 @@ public class FIRE implements PlugIn
 		if (results == null)
 			return null;
 
-		final SignalProvider signalProvider = (useSignal && (results.hasIntensity()))
-				? new PeakSignalProvider() : new FixedSignalProvider();
+		final SignalProvider signalProvider = (useSignal && (results.hasIntensity())) ? new PeakSignalProvider()
+				: new FixedSignalProvider();
 
 		// Draw images using the existing IJ routines.
 		Rectangle bounds = new Rectangle(0, 0, (int) Math.ceil(dataBounds.getWidth()),
@@ -995,31 +1049,41 @@ public class FIRE implements PlugIn
 		IJImagePeakResults image1 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.NONE, weighted,
 				equalised, "IP1", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
 		image1.setDisplayImage(false);
+		image1.setUncalibrated(true);
 		image1.begin();
 
 		IJImagePeakResults image2 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.NONE, weighted,
 				equalised, "IP2", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
 		image2.setDisplayImage(false);
+		image1.setUncalibrated(true);
 		image2.begin();
 
-		float minx = (float) dataBounds.getX();
-		float miny = (float) dataBounds.getY();
+		final float minx = (float) dataBounds.getX();
+		final float miny = (float) dataBounds.getY();
 
 		if (this.results2 != null)
 		{
 			// Two image comparison
-			for (PeakResult p : results)
+			final IJImagePeakResults i1 = image1;
+			results.forEach(new PeakResultProcedure()
 			{
-				float x = p.getXPosition() - minx;
-				float y = p.getYPosition() - miny;
-				image1.add(x, y, signalProvider.getSignal(p));
-			}
-			for (PeakResult p : results2)
+				public void execute(PeakResult p)
+				{
+					float x = p.getXPosition() - minx;
+					float y = p.getYPosition() - miny;
+					i1.add(x, y, signalProvider.getSignal(p));
+				}
+			});
+			final IJImagePeakResults i2 = image2;
+			results2.forEach(new PeakResultProcedure()
 			{
-				float x = p.getXPosition() - minx;
-				float y = p.getYPosition() - miny;
-				image2.add(x, y, signalProvider.getSignal(p));
-			}
+				public void execute(PeakResult p)
+				{
+					float x = p.getXPosition() - minx;
+					float y = p.getYPosition() - miny;
+					i2.add(x, y, signalProvider.getSignal(p));
+				}
+			});
 		}
 		else
 		{
@@ -1038,20 +1102,24 @@ public class FIRE implements PlugIn
 			if (blockSize != FIRE.blockSize)
 				IJ.log(TITLE + " Warning: Changed block size to " + blockSize);
 
-			int i = 0;
-			int block = 0;
-			PeakResult[][] blocks = new PeakResult[nBlocks][blockSize];
-			for (PeakResult p : results)
+			final Counter i = new Counter();
+			final Counter block = new Counter();
+			final int finalBlockSize = blockSize;
+			final PeakResult[][] blocks = new PeakResult[nBlocks][blockSize];
+			results.forEach(new PeakResultProcedure()
 			{
-				if (i == blockSize)
+				public void execute(PeakResult p)
 				{
-					block++;
-					i = 0;
+					if (i.getCount() == finalBlockSize)
+					{
+						block.increment();
+						i.reset();
+					}
+					blocks[block.getCount()][i.getAndIncrement()] = p;
 				}
-				blocks[block][i++] = p;
-			}
+			});
 			// Truncate last block
-			blocks[block] = Arrays.copyOf(blocks[block], i);
+			blocks[block.getCount()] = Arrays.copyOf(blocks[block.getCount()], i.getCount());
 
 			final int[] indices = Utils.newArray(nBlocks, 0, 1);
 			if (randomSplit)
@@ -1090,7 +1158,7 @@ public class FIRE implements PlugIn
 			}
 		}
 
-		return new FireImages(ip1, ip2, nmPerPixel / imageScale);
+		return new FireImages(ip1, ip2, nmPerUnit / imageScale);
 	}
 
 	/**
@@ -1220,12 +1288,13 @@ public class FIRE implements PlugIn
 	{
 		IJ.showStatus("Calculating FRC time evolution curve...");
 
-		List<PeakResult> list = results.getResults();
-
+		// Sort by time
+		results.sort();
+		
 		int nSteps = 10;
-		int maxT = list.get(list.size() - 1).getFrame();
+		int maxT = results.getLastFrame();
 		if (maxT == 0)
-			maxT = list.size();
+			maxT = results.size();
 		int step = maxT / nSteps;
 
 		TDoubleArrayList x = new TDoubleArrayList();
@@ -1240,11 +1309,11 @@ public class FIRE implements PlugIn
 
 		for (int t = step; t <= maxT - step; t += step)
 		{
-			while (i < list.size())
+			while (i < results.size())
 			{
-				if (list.get(i).getFrame() <= t)
+				if (results.get(i).getFrame() <= t)
 				{
-					newResults.add(list.get(i));
+					newResults.add(results.get(i));
 					i++;
 				}
 				else
@@ -1273,7 +1342,7 @@ public class FIRE implements PlugIn
 		String units = "px";
 		if (results.getCalibration() != null)
 		{
-			nmPerPixel = results.getNmPerPixel();
+			nmPerUnit = results.getNmPerPixel();
 			units = "nm";
 		}
 
@@ -2501,14 +2570,18 @@ public class FIRE implements PlugIn
 		StoredDataStatistics precision = new StoredDataStatistics(results.size());
 		if (m == PrecisionMethod.STORED)
 		{
-			for (PeakResult r : results.getResults())
+			final StoredDataStatistics p = precision;
+			results.forEach(new PeakResultProcedure()
 			{
-				precision.add(r.getPrecision());
-			}
+				public void execute(PeakResult r)
+				{
+					p.add(r.getPrecision());
+				}
+			});
 		}
 		else
 		{
-			precision.add(computedPrecision);
+			precision.add(pp.precision);
 		}
 		//System.out.printf("Raw p = %f\n", precision.getMean());
 
@@ -2620,36 +2693,30 @@ public class FIRE implements PlugIn
 		return histogram;
 	}
 
-	private double[] computedPrecision;
-	private int precisionN = 0;
+	private PrecisionResultProcedure pp;
 
 	private boolean canCalculatePrecision(MemoryPeakResults results)
 	{
 		try
 		{
-			computedPrecision = new double[results.size()];
-			results.forEach(new LSEPrecisionProcedure()
-			{
-				public void executeLSEPrecision(double precision)
-				{
-					FIRE.this.computedPrecision[precisionN++] = precision;
-				}
-			});
+			pp = new PrecisionResultProcedure(results);
+			pp.getPrecision();
 		}
-		catch (ConversionException e)
+		catch (DataException e)
 		{
 			return false;
 		}
 
 		// Check they are different
-		for (int i = 0; i < precisionN; i++)
+		for (int i = 0; i < pp.size(); i++)
 		{
 			// Check this is valid
-			if (Maths.isFinite(computedPrecision[i]))
+			if (Maths.isFinite(pp.precision[i]))
 			{
-				for (int j = i + 1; j < precisionN; j++)
+				final double p1 = pp.precision[i];
+				for (int j = i + 1; j < pp.size(); j++)
 				{
-					if (Maths.isFinite(computedPrecision[j]) && computedPrecision[j] != computedPrecision[i])
+					if (Maths.isFinite(pp.precision[j]) && pp.precision[j] != p1)
 						return true;
 				}
 				// All the results are the same, this is not valid
@@ -2662,10 +2729,7 @@ public class FIRE implements PlugIn
 
 	private boolean canUseStoredPrecision(MemoryPeakResults results)
 	{
-		for (PeakResult p : results)
-			if (!p.hasPrecision())
-				return false;
-		return true;
+		return results.hasPrecision();
 	}
 
 	/**

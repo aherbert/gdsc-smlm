@@ -688,7 +688,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			// Do not get integer coordinates
 			// The Coordinate objects will be PeakResultPoint objects that store the original PeakResult
 			// from the MemoryPeakResults
-			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), false);
+			actualCoordinates = ResultsMatchCalculator.getCoordinates(results, false);
 			lastId = simulationParameters.id;
 			refresh = true;
 		}
