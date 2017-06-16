@@ -27,8 +27,6 @@ import gdsc.core.match.PointPair;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.engine.DataFilter;
-import gdsc.smlm.engine.DataFilterType;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
@@ -53,7 +51,7 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 /**
- * Runs the candidate maxima identification of the image and provides a preview using an overlay
+ * Runs the candidate maxima identification on the image and provides a preview using an overlay
  */
 public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, ImageListener
 {
@@ -141,7 +139,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				gd.addMessage("");
 				label = (Label) gd.getMessage();
 				// Integer coords
-				actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), true);
+				actualCoordinates = ResultsMatchCalculator.getCoordinates(results, true);
 			}
 		}
 

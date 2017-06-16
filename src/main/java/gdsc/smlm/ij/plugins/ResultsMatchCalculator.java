@@ -3,7 +3,6 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +30,7 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
 import gdsc.smlm.results.TextFilePeakResults;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -166,21 +166,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 		List<PointPair> allMatches = new LinkedList<PointPair>();
 		List<PointPair> pairs = (requirePairs) ? new LinkedList<PointPair>() : null;
-		List<PeakResult> actualPoints = results1.getResults();
-		List<PeakResult> predictedPoints = results2.getResults();
 
 		double maxDistance = dThreshold + increments * delta;
 
-		// Old implementation
-		//// Process each time point
-		//for (Integer t : getTimepoints(actualPoints, predictedPoints))
-		//{
-		//	Coordinate[] actual = getCoordinates(actualPoints, t);
-		//	Coordinate[] predicted = getCoordinates(predictedPoints, t);
-
 		// Divide the results into time points
-		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(actualPoints);
-		TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(predictedPoints);
+		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(results1);
+		TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(results2);
 
 		int n1 = 0;
 		int n2 = 0;
@@ -438,7 +429,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * @param results
 	 * @return
 	 */
-	public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(List<PeakResult> results)
+	public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results)
 	{
 		return getCoordinates(results, false);
 	}
@@ -451,45 +442,46 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 *            True if the values should be rounded down to integers
 	 * @return
 	 */
-	public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(List<PeakResult> results,
-			boolean integerCoordinates)
+	public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results,
+			final boolean integerCoordinates)
 	{
 		TIntObjectHashMap<ArrayList<Coordinate>> coords = new TIntObjectHashMap<ArrayList<Coordinate>>();
 		if (results.size() > 0)
 		{
-			ResultsMatchCalculator instance = new ResultsMatchCalculator();
-
 			// Do not use HashMap directly to build the coords object since there 
 			// will be many calls to getEntry(). Instead sort the results and use 
 			// a new list for each time point
-			Collections.sort(results);
-			int minT = results.get(0).getFrame();
-			int maxT = results.get(results.size() - 1).getEndFrame();
+			results.sort();
+			final int minT = results.getFirstFrame();
+			final int maxT = results.getLastFrame();
 
 			// Create lists
-			ArrayList<ArrayList<Coordinate>> tmpCoords = new ArrayList<ArrayList<Coordinate>>(maxT - minT + 1);
+			final ArrayList<ArrayList<Coordinate>> tmpCoords = new ArrayList<ArrayList<Coordinate>>(maxT - minT + 1);
 			for (int t = minT; t <= maxT; t++)
 			{
 				tmpCoords.add(new ArrayList<Coordinate>());
 			}
 
 			// Add the results to the lists
-			for (PeakResult p : results)
+			results.forEach(new PeakResultProcedure()
 			{
-				final float x, y;
-				if (integerCoordinates)
+				public void execute(PeakResult p)
 				{
-					x = (int) p.getXPosition();
-					y = (int) p.getYPosition();
+					final float x, y;
+					if (integerCoordinates)
+					{
+						x = (int) p.getXPosition();
+						y = (int) p.getYPosition();
+					}
+					else
+					{
+						x = p.getXPosition();
+						y = p.getYPosition();
+					}
+					for (int t = p.getFrame() - minT, i = p.getEndFrame() - p.getFrame() + 1; i-- > 0; t++)
+						tmpCoords.get(t).add(new PeakResultPoint(t + minT, x, y, p));
 				}
-				else
-				{
-					x = p.getXPosition();
-					y = p.getYPosition();
-				}
-				for (int t = p.getFrame() - minT, i = p.getEndFrame() - p.getFrame() + 1; i-- > 0; t++)
-					tmpCoords.get(t).add(instance.new PeakResultPoint(t + minT, x, y, p));
-			}
+			});
 
 			// Put in the map
 			for (int t = minT, i = 0; t <= maxT; t++, i++)
@@ -722,9 +714,14 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	private TIntHashSet getIds(MemoryPeakResults results)
 	{
-		TIntHashSet ids = new TIntHashSet(results.size());
-		for (PeakResult p : results.getResults())
-			ids.add(p.getId());
+		final TIntHashSet ids = new TIntHashSet(results.size());
+		results.forEach(new PeakResultProcedure()
+		{
+			public void execute(PeakResult p)
+			{
+				ids.add(p.getId());
+			}
+		});
 		return ids;
 	}
 
@@ -747,7 +744,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		return d;
 	}
 
-	public class PeakResultPoint extends BasePoint
+	public static class PeakResultPoint extends BasePoint
 	{
 		int t;
 		PeakResult peakResult;
@@ -779,12 +776,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	public static MatchResult compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
 			double distance)
 	{
-		List<PeakResult> actualPoints = results1.getResults();
-		List<PeakResult> predictedPoints = results2.getResults();
-
 		// Divide the results into time points
-		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(actualPoints);
-		TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(predictedPoints);
+		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(results1);
+		TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(results2);
 
 		return compareCoordinates(actualCoordinates, predictedCoordinates, distance);
 	}

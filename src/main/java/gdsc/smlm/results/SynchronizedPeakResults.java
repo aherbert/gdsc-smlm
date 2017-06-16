@@ -3,6 +3,8 @@ package gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.util.Collection;
 
+import gdsc.smlm.data.config.SMLMSettings.PSF;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -122,6 +124,16 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults
 	public Calibration getCalibration()
 	{
 		synchronized (lock)	{ return r.getCalibration(); }
+	}
+
+	public void setPSF(PSF psf)
+	{
+		synchronized (lock)	{ r.setPSF(psf); }
+	}
+
+	public PSF getPSF()
+	{
+		synchronized (lock)	{ return r.getPSF(); }
 	}
 
 	public void setConfiguration(String configuration)

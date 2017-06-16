@@ -15,6 +15,8 @@ package gdsc.smlm.results;
 
 import java.awt.Rectangle;
 
+import gdsc.smlm.data.config.SMLMSettings.PSF;
+
 /**
  * Abstract base class for peak results.
  */
@@ -27,6 +29,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	protected ImageSource source = null;
 	protected Rectangle bounds = null;
 	protected Calibration calibration = null;
+	protected PSF psf = null;
 	protected String configuration = "";
 	protected String name = "";
 
@@ -99,6 +102,16 @@ public abstract class AbstractPeakResults implements PeakResults
 		return calibration;
 	}
 
+	public PSF getPSF()
+	{
+		return psf;
+	}
+
+	public void setPSF(PSF psf)
+	{
+		this.psf = psf;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -175,7 +188,8 @@ public abstract class AbstractPeakResults implements PeakResults
 	/**
 	 * Get the EMCCD flag from the calibration, or if not available, return the {@link #DEFAULT_EMCCD}
 	 * 
-	 * @return the gain
+	 * @return the EMCCD flag
+	 * @deprecated Replaced by the camera type
 	 */
 	public boolean isEMCCD()
 	{

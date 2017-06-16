@@ -1,7 +1,5 @@
 package gdsc.smlm.results.procedures;
 
-import gdsc.smlm.results.PeakResult;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -18,13 +16,15 @@ import gdsc.smlm.results.PeakResult;
 /**
  * Interface for accessing the results
  */
-public interface PeakResultProcedure
+public interface WxWyResultProcedure
 {
 	/**
 	 * Executes this procedure.
 	 *
-	 * @param peakResult
-	 *            the peak result
+	 * @param wx
+	 *            the x width
+	 * @param wy
+	 *            the y width
 	 */
-	void execute(PeakResult peakResult);
+	void executeWxWy(float wx, float wy);
 }

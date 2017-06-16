@@ -3,6 +3,8 @@ package gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.util.Collection;
 
+import gdsc.smlm.data.config.SMLMSettings.PSF;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -111,6 +113,20 @@ public interface PeakResults
 	 */
 	public Calibration getCalibration();
 
+	/**
+	 * Gets the Point Spread Function (PSF) used when fitting the results.
+	 *
+	 * @return the psf
+	 */
+	public PSF getPSF();
+
+	/**
+	 * Sets the Point Spread Function (PSF) used when fitting the results.
+	 *
+	 * @param psf the new psf
+	 */
+	public void setPSF(PSF psf);
+	
 	/**
 	 * @param configuration
 	 *            The configuration used to create the results

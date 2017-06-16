@@ -50,6 +50,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
@@ -75,6 +76,7 @@ import gdsc.smlm.ij.utils.ImageROIPainter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
@@ -799,19 +801,22 @@ public class SpotAnalysis extends PlugInFrame
 		{
 			if (r.getSource() instanceof IJImageSource && r.getSource().getName().equals(title))
 			{
-				float minx = areaBounds.x;
-				float maxx = minx + areaBounds.width;
-				float miny = areaBounds.y;
-				float maxy = miny + areaBounds.height;
+				final float minx = areaBounds.x;
+				final float maxx = minx + areaBounds.width;
+				final float miny = areaBounds.y;
+				final float maxy = miny + areaBounds.height;
 
-				for (PeakResult p : r.getResults())
+				r.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 				{
-					if (p.getXPosition() >= minx && p.getXPosition() <= maxx && p.getYPosition() >= miny &&
-							p.getYPosition() <= maxy)
+					public void executeXYR(float x, float y, PeakResult p)
 					{
-						candidateFrames.add(p.getFrame());
+						if (p.getXPosition() >= minx && p.getXPosition() <= maxx && p.getYPosition() >= miny &&
+								p.getYPosition() <= maxy)
+						{
+							candidateFrames.add(p.getFrame());
+						}
 					}
-				}
+				});
 			}
 		}
 	}

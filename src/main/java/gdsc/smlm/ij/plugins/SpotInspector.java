@@ -31,13 +31,19 @@ import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.HeightResultProcedure;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.PrecisionResultProcedure;
+import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gdsc.smlm.results.procedures.WidthResultProcedure;
+import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -126,15 +132,57 @@ public class SpotInspector implements PlugIn, MouseListener
 
 		// Rank spots
 		rankedResults = new ArrayList<PeakResultRank>(results.size());
-		final double a = results.getNmPerPixel();
-		final double gain = results.getGain();
-		final boolean emCCD = results.isEMCCD();
 
-		for (PeakResult r : results.getResults())
+		// Data for the sorting
+		final PrecisionResultProcedure pp;
+		if (sortOrderIndex == 1)
 		{
-			float[] score = getScore(r, a, gain, emCCD, stdDevMax);
-			rankedResults.add(new PeakResultRank(r, score[0], score[1]));
+			pp = new PrecisionResultProcedure(results);
+			pp.getPrecision();
 		}
+		else
+			pp = null;
+
+		// Build procedures to get:
+		// Shift = position in pixels - originXY
+		final StandardResultProcedure sp;
+		if (sortOrderIndex == 9)
+		{
+			sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
+			sp.getXYR();
+		}
+		else
+			sp = null;
+
+		// SD = gaussian widths only for Gaussian PSFs
+		final WidthResultProcedure wp;
+		if (sortOrderIndex >= 6 && sortOrderIndex <= 8)
+		{
+			wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
+			wp.getWxWy();
+		}
+		else
+			wp = null;
+
+		// Amplitude for Gaussian PSFs
+		final HeightResultProcedure hp;
+		if (sortOrderIndex == 2)
+		{
+			hp = new HeightResultProcedure(results, IntensityUnit.PHOTON);
+			hp.getH();
+		}
+		else
+			hp = null;
+
+		final Counter c = new Counter();
+		results.forEach(new PeakResultProcedure()
+		{
+			public void execute(PeakResult r)
+			{
+				float[] score = getScore(r, c.getAndIncrement(), pp, sp, wp, hp, stdDevMax);
+				rankedResults.add(new PeakResultRank(r, score[0], score[1]));
+			}
+		});
 		Collections.sort(rankedResults);
 
 		// Prepare results table. Get bias if necessary
@@ -313,6 +361,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		// Standard deviation is only needed for the width filtering
 		if (sortOrderIndex != 8)
 			return 0;
+		// XXX - This should be refactored out to the results configuration (i.e. store the PSF type)
 		FitEngineConfiguration config = (FitEngineConfiguration) XmlUtils.fromXML(results.getConfiguration());
 		if (config == null || config.getFitConfiguration() == null)
 		{
@@ -347,7 +396,8 @@ public class SpotInspector implements PlugIn, MouseListener
 		}
 	}
 
-	private float[] getScore(PeakResult r, double a, double gain, boolean emCCD, float stdDevMax)
+	private float[] getScore(PeakResult r, int i, PrecisionResultProcedure pp, StandardResultProcedure sp,
+			WidthResultProcedure wp, HeightResultProcedure hp, float stdDevMax)
 	{
 		// Return score so high is better
 		float score;
@@ -356,19 +406,19 @@ public class SpotInspector implements PlugIn, MouseListener
 		{
 			case 9: // Shift
 				// We do not have the original centroid so use the original X/Y
-				score = FastMath.max(r.getXPosition() - r.origX + 0.5f, r.getYPosition() - r.origY + 0.5f);
+				score = FastMath.max(sp.x[i] - r.origX + 0.5f, sp.y[i] - r.origY + 0.5f);
 				negative = true;
 				break;
 			case 8: // Width factor
-				score = getFactor(FastMath.max(r.getXSD(), r.getYSD()), stdDevMax);
+				score = getFactor(FastMath.max(wp.wx[i], wp.wy[i]), stdDevMax);
 				negative = true;
 				break;
 			case 7:
-				score = r.getYSD();
+				score = wp.wy[i];
 				negative = true;
 				break;
 			case 6:
-				score = r.getXSD();
+				score = wp.wx[i];
 				negative = true;
 				break;
 			case 5: // Original value
@@ -379,13 +429,13 @@ public class SpotInspector implements PlugIn, MouseListener
 				negative = true;
 				break;
 			case 3: // Signal
-				score = (float) (r.getSignal() / gain);
+				score = (float) (r.getSignal());
 				break;
 			case 2: // Amplitude
-				score = r.getAmplitude();
+				score = hp.h[i];
 				break;
 			case 1: // Precision
-				score = (float) r.getPrecision(a, gain, emCCD);
+				score = (float) pp.precision[i];
 				negative = true;
 				break;
 			default: // SNR
@@ -528,26 +578,27 @@ public class SpotInspector implements PlugIn, MouseListener
 				final int y = (int) (r.getYPosition());
 
 				// Find bounds
-				int minX = x - radius;
-				int minY = y - radius;
-				int maxX = x + radius + 1;
-				int maxY = y + radius + 1;
+				final int minX = x - radius;
+				final int minY = y - radius;
+				final int maxX = x + radius + 1;
+				final int maxY = y + radius + 1;
 
 				// Create ROIs
-				ArrayList<float[]> spots = new ArrayList<float[]>();
-				for (PeakResult peak : results.getResults())
+				final ArrayList<float[]> spots = new ArrayList<float[]>();
+				results.forEach(DistanceUnit.PIXEL, new XYResultProcedure()
 				{
-					if (peak.getXPosition() > minX && peak.getXPosition() < maxX && peak.getYPosition() > minY &&
-							peak.getYPosition() < maxY)
+					public void executeXY(float x, float y)
 					{
-						// Use only unique points
-						final float xPosition = peak.getXPosition() - minX;
-						final float yPosition = peak.getYPosition() - minY;
-						if (contains(spots, xPosition, yPosition))
-							continue;
-						spots.add(new float[] { xPosition, yPosition });
+						if (x > minX && x < maxX && y > minY && y < maxY)
+						{
+							// Use only unique points
+							final float xPosition = x - minX;
+							final float yPosition = y - minY;
+							if (!contains(spots, xPosition, yPosition))
+								spots.add(new float[] { xPosition, yPosition });
+						}
 					}
-				}
+				});
 
 				int points = spots.size();
 				float[] ox = new float[points];

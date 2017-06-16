@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -16,8 +18,10 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.ObjectAnalyzer;
 import gdsc.core.ij.Utils;
+import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -107,7 +111,7 @@ public class SplitResults implements PlugIn
 
 		// Create a results set for each object
 		final int maxObject = objectAnalyzer.getMaxObject();
-		MemoryPeakResults[] resultsSet = new MemoryPeakResults[maxObject + 1];
+		final MemoryPeakResults[] resultsSet = new MemoryPeakResults[maxObject + 1];
 		for (int object = 0; object <= maxObject; object++)
 		{
 			MemoryPeakResults newResults = new MemoryPeakResults();
@@ -130,45 +134,50 @@ public class SplitResults implements PlugIn
 		}
 
 		// Process the results mapping them to their objects
-		int i = 0;
+		final Counter i = new Counter();
 		final int size = results.size();
 		final int step = Utils.getProgressInterval(size);
-		for (PeakResult result : results.getResults())
+		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
-			if (++i % step == 0)
-				IJ.showProgress(i, size);
+			public void executeXYR(float xx, float yy, PeakResult result)
+			{
+				if (i.incrementAndGet() % step == 0)
+					IJ.showProgress(i.getCount(), size);
 
-			// Map to the mask objects
-			final int object;
-			int x = (int) (result.getXPosition() / scaleX);
-			int y = (int) (result.getYPosition() / scaleY);
-			if (x < 0 || x >= maxx || y < 0 || y >= maxy)
-			{
-				object = 0;
-			}
-			else
-			{
-				final int index = y * maxx + x;
-				if (index < 0 || index >= mask.length)
+				// Map to the mask objects
+				final int object;
+				int x = (int) (xx / scaleX);
+				int y = (int) (yy / scaleY);
+				if (x < 0 || x >= maxx || y < 0 || y >= maxy)
+				{
 					object = 0;
+				}
 				else
-					object = mask[index];
+				{
+					final int index = y * maxx + x;
+					// Q. Is this bounds check needed given the above check shows that x,y 
+					// is within the bounds of the image processor?
+					if (index < 0 || index >= mask.length)
+						object = 0;
+					else
+						object = mask[index];
+				}
+				resultsSet[object].add(result);
 			}
-			resultsSet[object].add(result);
-		}
+		});
 		IJ.showProgress(1);
 
 		// Add the new results sets to memory
-		i = 0;
+		i.reset();
 		for (int object = (nonMaskDataset) ? 0 : 1; object <= maxObject; object++)
 		{
 			if (!resultsSet[object].isEmpty())
 			{
 				MemoryPeakResults.addResults(resultsSet[object]);
-				i++;
+				i.increment();
 			}
 		}
 
-		IJ.showStatus("Split " + Utils.pleural(results.size(), "result") + " into " + Utils.pleural(i, "set"));
+		IJ.showStatus("Split " + Utils.pleural(results.size(), "result") + " into " + Utils.pleural(i.getCount(), "set"));
 	}
 }

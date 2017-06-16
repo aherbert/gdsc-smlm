@@ -1,6 +1,6 @@
-package gdsc.smlm.results.procedures;
+package gdsc.smlm.data.config;
 
-import gdsc.smlm.results.PeakResult;
+import gdsc.core.data.DataException;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -16,15 +16,29 @@ import gdsc.smlm.results.PeakResult;
  *---------------------------------------------------------------------------*/
 
 /**
- * Interface for accessing the results
+ * Exception to throw if configuration is invalid
  */
-public interface PeakResultProcedure
+public class ConfigurationException extends DataException
 {
-	/**
-	 * Executes this procedure.
-	 *
-	 * @param peakResult
-	 *            the peak result
-	 */
-	void execute(PeakResult peakResult);
+	private static final long serialVersionUID = 1048790767265799169L;
+
+	public ConfigurationException()
+	{
+		super();
+	}
+
+	public ConfigurationException(String message)
+	{
+		super(message);
+	}
+
+	public ConfigurationException(String message, Throwable cause)
+	{
+		super(message, cause);
+	}
+
+	public ConfigurationException(Throwable cause)
+	{
+		super(cause);
+	}
 }

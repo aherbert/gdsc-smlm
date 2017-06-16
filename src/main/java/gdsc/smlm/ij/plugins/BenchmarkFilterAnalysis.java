@@ -69,6 +69,7 @@ import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.TurboList;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
@@ -89,6 +90,8 @@ import gdsc.smlm.ij.results.ResultsImageSampler;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.Counter;
+import gdsc.smlm.results.FrameCounter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultGridManager;
@@ -104,6 +107,7 @@ import gdsc.smlm.results.filter.GridCoordinateStore;
 import gdsc.smlm.results.filter.IDirectFilter;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.MultiPathFitResults;
 import gdsc.smlm.results.filter.ParameterType;
@@ -1525,7 +1529,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 			lastId = BenchmarkSpotFit.fitResultsId;
 			update = true;
-			actualCoordinates = getCoordinates(results.getResults());
+			actualCoordinates = getCoordinates(results);
 		}
 
 		Settings settings = new Settings(partialMatchDistance, upperMatchDistance, partialSignalFactor,
@@ -1744,39 +1748,39 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return resultsList;
 	}
 
-	private TIntObjectHashMap<IdPeakResult[]> getCoordinates(List<PeakResult> list)
+	private TIntObjectHashMap<IdPeakResult[]> getCoordinates(MemoryPeakResults results)
 	{
 		final TIntObjectHashMap<IdPeakResult[]> coords = new TIntObjectHashMap<IdPeakResult[]>();
-		if (list.size() > 0)
+		if (results.size() > 0)
 		{
 			// Do not use HashMap directly to build the coords object since there 
 			// will be many calls to getEntry(). Instead sort the results and use 
 			// a new list for each time point
-			Collections.sort(list);
+			results.sort();
 
-			int last = -1;
-			int id = 0;
-			int uniqueId = 0;
-			ArrayList<PeakResult> tmp = new ArrayList<PeakResult>();
+			final Counter uniqueId = new Counter();
+			final FrameCounter counter = new FrameCounter();
+			final TurboList<PeakResult> tmp = new TurboList<PeakResult>();
 			// Add the results to the lists
-			for (PeakResult p : list)
+			results.forEach(new PeakResultProcedure()
 			{
-				if (last != p.getFrame())
+				public void execute(PeakResult p)
 				{
-					if (!tmp.isEmpty())
+					if (counter.advance(p.getFrame()))
 					{
-						coords.put(last, tmp.toArray(new IdPeakResult[tmp.size()]));
+						if (!tmp.isEmpty())
+						{
+							coords.put(counter.previousFrame(), tmp.toArray(new IdPeakResult[tmp.size()]));
+							tmp.clear();
+						}
 					}
-					id = 0;
-					tmp.clear();
+					tmp.add(new IdPeakResult(tmp.size(), uniqueId.getAndIncrement(), p));
 				}
-				last = p.getFrame();
-				tmp.add(new IdPeakResult(id++, uniqueId++, p));
-			}
+			});
 
 			if (!tmp.isEmpty())
 			{
-				coords.put(last, tmp.toArray(new IdPeakResult[tmp.size()]));
+				coords.put(counter.previousFrame(), tmp.toArray(new IdPeakResult[tmp.size()]));
 			}
 		}
 		return coords;
@@ -5229,7 +5233,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				// Show the template results
 				final ConfigurationTemplate configTemplate = new ConfigurationTemplate();
-				
+
 				// Interactively show the sample image data
 				final boolean[] close = new boolean[1];
 				final ImagePlus[] outImp = new ImagePlus[1];
@@ -5250,7 +5254,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 
 				// TODO - fix this when a second sample is made as the results are not updated.
-				
+
 				ImageListener listener = new ImageListener()
 				{
 					public void imageOpened(ImagePlus imp)
@@ -6313,7 +6317,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		private TIntObjectHashMap<ArrayList<Coordinate>> getResults(FilterScore current)
 		{
 			return ResultsMatchCalculator
-					.getCoordinates(createResults(null, (DirectFilter) current.filter, false).getResults());
+					.getCoordinates(createResults(null, (DirectFilter) current.filter, false));
 		}
 
 		public boolean converged(String prefix, FilterScore previous, FilterScore current, double[] previousParameters,

@@ -22,10 +22,11 @@ public interface PeakResultProcedureX
 {
 	/**
 	 * Executes this procedure. A true return value indicates that
-     * the application executing this procedure should not invoke this
-     * procedure again.
+	 * the application executing this procedure should not invoke this
+	 * procedure again.
 	 *
-	 * @param peakResult the peak result
+	 * @param peakResult
+	 *            the peak result
 	 * @return true, if the execution should stop
 	 */
 	boolean execute(PeakResult peakResult);

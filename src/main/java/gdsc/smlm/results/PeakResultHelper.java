@@ -1,9 +1,4 @@
-/*
- * 
- */
 package gdsc.smlm.results;
-
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
@@ -13,7 +8,7 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2017 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -24,206 +19,10 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
  *---------------------------------------------------------------------------*/
 
 /**
- * Specifies a peak fitting result
+ * Contains helper functions for working with peak results
  */
-public class PeakResult implements Comparable<PeakResult>
+public class PeakResultHelper
 {
-	/** Index of the background in the parameters array */
-	public static final int BACKGROUND = 0;
-	/** Index of the intensity in the parameters array */
-	public static final int INTENSITY = 1;
-	/** Index of the x-position in the parameters array */
-	public static final int X = 2;
-	/** Index of the y-position in the parameters array */
-	public static final int Y = 3;
-	/** Index of the z-position in the parameters array */
-	public static final int Z = 4;
-	/** Number of standard parameters */
-	public static final int STANDARD_PARAMETERS = 5;
-	
-	private int frame;
-	public int origX;
-	public int origY;
-	public float origValue;
-	public double error;
-	public float noise;
-
-	// TODO - change the model to store B,I,X,Y,Z and then addition PSF parameters in the params array
-
-	// TODO - make this private
-	float[] params;
-	// TODO - make this private
-	float[] paramsStdDev;
-
-	public PeakResult(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev)
-	{
-		this.frame = frame;
-		this.origX = origX;
-		this.origY = origY;
-		this.origValue = origValue;
-		this.error = error;
-		this.noise = noise;
-		this.params = params;
-		this.paramsStdDev = paramsStdDev;
-	}
-
-	/**
-	 * Simple constructor to create a result with frame, location, width and strength.
-	 *
-	 * @param frame
-	 *            the frame
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param sd
-	 *            the sd
-	 * @param signal
-	 *            the signal
-	 */
-	public PeakResult(int frame, float x, float y, float sd, float signal)
-	{
-		setFrame(frame);
-		origX = (int) x;
-		origY = (int) y;
-		params = new float[7];
-		params[Gaussian2DFunction.X_POSITION] = x;
-		params[Gaussian2DFunction.Y_POSITION] = y;
-		params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = sd;
-		params[Gaussian2DFunction.SIGNAL] = signal;
-	}
-
-	/**
-	 * Simple constructor to create a result with location, width and strength.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param sd
-	 *            the sd
-	 * @param signal
-	 *            the signal
-	 */
-	public PeakResult(float x, float y, float sd, float signal)
-	{
-		this(0, x, y, sd, signal);
-	}
-
-	/**
-	 * Get the signal strength (i.e. the volume under the Gaussian peak, amplitude * 2 * pi * sx * sy)
-	 * 
-	 * @return The signal of the first peak
-	 */
-	public float getSignal()
-	{
-		return params[Gaussian2DFunction.SIGNAL];
-	}
-
-	/**
-	 * Sets the signal.
-	 *
-	 * @param s
-	 *            the new signal
-	 */
-	public void setSignal(float s)
-	{
-		params[Gaussian2DFunction.SIGNAL] = s;
-	}
-
-	/**
-	 * Calculate the localisation precision. Uses the Mortensen formula for an EMCCD camera
-	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
-	 * <p>
-	 * This method will use the background noise of the peak to approximate the expected background value of each pixel.
-	 * 
-	 * @param a
-	 *            The size of the pixels in nm
-	 * @param gain
-	 *            The gain used to convert ADUs to photons
-	 * @param emCCD
-	 *            True if an emCCD camera
-	 * @return The location precision in nm of the first peak
-	 * @deprecated The PeakResult may not be a Gaussian2D function
-	 */
-	public double getPrecision(final double a, final double gain, boolean emCCD)
-	{
-		// Get peak standard deviation in nm. Just use the average of the X & Y.
-		final double s = a * getSD();
-		final double N = getSignal();
-		return getPrecision(a, s, N / gain, noise / gain, emCCD);
-	}
-
-	/**
-	 * Calculate the localisation variance. Uses the Mortensen formula for an EMCCD camera
-	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
-	 * <p>
-	 * This method will use the background noise of the peak to approximate the expected background value of each pixel.
-	 * 
-	 * @param a
-	 *            The size of the pixels in nm
-	 * @param gain
-	 *            The gain used to convert ADUs to photons
-	 * @param emCCD
-	 *            True if an emCCD camera
-	 * @return The location variance in nm of the first peak
-	 * @deprecated The PeakResult may not be a Gaussian2D function
-	 */
-	public double getVariance(final double a, final double gain, boolean emCCD)
-	{
-		// Get peak standard deviation in nm. Just use the average of the X & Y.
-		final double s = a * getSD();
-		final double N = getSignal();
-		return getVariance(a, s, N / gain, noise / gain, emCCD);
-	}
-
-	/**
-	 * Calculate the localisation precision for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
-	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
-	 * <p>
-	 * This method will use the background noise of the peak to approximate the expected background value of each pixel.
-	 * 
-	 * @param a
-	 *            The size of the pixels in nm
-	 * @param gain
-	 *            The gain used to convert ADUs to photons
-	 * @param emCCD
-	 *            True if an emCCD camera
-	 * @return The location precision in nm of the first peak
-	 * @deprecated The PeakResult may not be a Gaussian2D function
-	 */
-	public double getMLPrecision(final double a, final double gain, boolean emCCD)
-	{
-		// Get peak standard deviation in nm. Just use the average of the X & Y.
-		final double s = a * getSD();
-		final double N = getSignal();
-		return getMLPrecision(a, s, N / gain, noise / gain, emCCD);
-	}
-
-	/**
-	 * Calculate the localisation variance for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
-	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
-	 * <p>
-	 * This method will use the background noise of the peak to approximate the expected background value of each pixel.
-	 * 
-	 * @param a
-	 *            The size of the pixels in nm
-	 * @param gain
-	 *            The gain used to convert ADUs to photons
-	 * @param emCCD
-	 *            True if an emCCD camera
-	 * @return The location variance in nm of the first peak
-	 * @deprecated The PeakResult may not be a Gaussian2D function
-	 */
-	public double getMLVariance(final double a, final double gain, boolean emCCD)
-	{
-		// Get peak standard deviation in nm. Just use the average of the X & Y.
-		final double s = a * getSD();
-		final double N = getSignal();
-		return getMLVariance(a, s, N / gain, noise / gain, emCCD);
-	}
-
 	/**
 	 * Convert the local background to an estimate of noise. Local background and noise are in ADU count units.
 	 * <p>
@@ -277,7 +76,8 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation precision. Uses the Mortensen formula for an EMCCD camera
+	 * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is an
+	 * approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * <p>
 	 * This method will use the background noise to approximate the expected background value of each pixel.
@@ -313,7 +113,8 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation variance. Uses the Mortensen formula for an EMCCD camera
+	 * Calculate the localisation variance for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is an
+	 * approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * <p>
 	 * This method will use the background noise to approximate the expected background value of each pixel.
@@ -349,7 +150,8 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation precision for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
+	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
 	 * <p>
 	 * This method will use the background noise to approximate the expected background value of each pixel.
@@ -385,7 +187,8 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation variance for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
+	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
 	 * <p>
 	 * This method will use the background noise to approximate the expected background value of each pixel.
@@ -421,7 +224,9 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation precision for least squares estimation. Uses the Mortensen formula for an EMCCD camera
+	 * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is an
+	 * approximation of the precision of fitting to an optical PSF for least squares estimation. Uses the Mortensen
+	 * formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * <p>
 	 * If the expected photons per pixel is unknown then use the standard deviation across the image and the method
@@ -449,7 +254,9 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation precision for least squares estimation. Uses the Mortensen formula for an EMCCD camera
+	 * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is an
+	 * approximation of the precision of fitting to an optical PSF for least squares estimation. Uses the Mortensen
+	 * formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * 
 	 * @param a
@@ -472,7 +279,9 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation variance for least squares estimation. Uses the Mortensen formula for an EMCCD camera
+	 * Calculate the localisation variance for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is an
+	 * approximation of the precision of fitting to an optical PSF for least squares estimation. Uses the Mortensen
+	 * formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * <p>
 	 * If the expected photons per pixel is unknown then use the standard deviation across the image and the method
@@ -500,7 +309,9 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation variance for least squares estimation. Uses the Mortensen formula for an EMCCD camera
+	 * Calculate the localisation variance for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is an
+	 * approximation of the precision of fitting to an optical PSF for least squares estimation. Uses the Mortensen
+	 * formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * 
 	 * @param a
@@ -536,7 +347,8 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation precision for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
+	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
 	 * 
 	 * @param a
@@ -559,7 +371,8 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation precision for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
+	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
 	 * 
 	 * @param a
@@ -584,7 +397,8 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation variance for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
+	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
 	 * 
 	 * @param a
@@ -608,7 +422,8 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation variance for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
+	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
 	 * <p>
 	 * In the event of failure to integrate the formula the variance for Least Squares Estimation is returned.
@@ -715,446 +530,33 @@ public class PeakResult implements Comparable<PeakResult>
 		return i1;
 	}
 
-	public int compareTo(PeakResult o)
-	{
-		// Sort by peak number: Ascending
-		if (frame < o.frame)
-			return -1;
-		if (frame > o.frame)
-			return 1;
-		// Sort by peak height: Descending
-		if (params[Gaussian2DFunction.SIGNAL] > o.params[Gaussian2DFunction.SIGNAL])
-			return -1;
-		if (params[Gaussian2DFunction.SIGNAL] < o.params[Gaussian2DFunction.SIGNAL])
-			return 1;
-		return 0;
-	}
-
 	/**
-	 * Calculate the combined peak standard deviation. This is equal to the square root of the product of the width in X
-	 * and Y.
-	 * 
-	 * @return The combined peak standard deviation in the X and Y dimension
-	 */
-	public float getSD()
-	{
-		return getSD(params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD]);
-	}
-
-	/**
-	 * Calculate the combined peak standard deviation. This is equal to the square root of the product of the width in X
-	 * and Y.
-	 * 
-	 * @param xsd
-	 * @param ysd
-	 * @return The combined peak standard deviation in the X and Y dimension
-	 */
-	public static float getSD(float xsd, float ysd)
-	{
-		if (xsd == ysd)
-			return xsd;
-		return (float) Math.sqrt(Math.abs(xsd * ysd));
-	}
-
-	/**
-	 * Calculate the combined peak standard deviation. This is equal to the square root of the product of the width in X
-	 * and Y.
-	 * 
-	 * @param xsd
-	 * @param ysd
-	 * @return The combined peak standard deviation in the X and Y dimension
-	 */
-	public static double getSD(double xsd, double ysd)
-	{
-		if (xsd == ysd)
-			return xsd;
-		return Math.sqrt(Math.abs(xsd * ysd));
-	}
-
-	/**
-	 * @return The background for the first peak
-	 */
-	public float getBackground()
-	{
-		return params[Gaussian2DFunction.BACKGROUND];
-	}
-
-	/**
-	 * Sets the background.
+	 * Get the amplitude of a Gaussian 2D PSF. Amplitude = intensity / (2*pi*sx*sy).
 	 *
-	 * @param b
-	 *            the new background
+	 * @param intensity
+	 *            the intensity
+	 * @param sx
+	 *            the sx
+	 * @param sy
+	 *            the sy
 	 */
-	public void setBackground(float b)
+	public static double getGaussian2DAmplitude(double intensity, double sx, double sy)
 	{
-		params[Gaussian2DFunction.BACKGROUND] = b;
+		return (intensity / (2 * Math.PI * sx * sy));
 	}
 
 	/**
-	 * Get the amplitude for the first peak. Amplitude = Signal / (2*pi*sd0*sd1).
-	 * 
-	 * @return The amplitude for the first peak
-	 * @deprecated The PeakResult may not be a Gaussian2D function
-	 */
-	public float getAmplitude()
-	{
-		return getAmplitude(params);
-	}
-
-	/**
-	 * Get the amplitude for the first peak. Amplitude = Signal / (2*pi*sd0*sd1).
-	 * 
-	 * @return The amplitude for the first peak
-	 * @deprecated The PeakResult may not be a Gaussian2D function
-	 */
-	public static float getAmplitude(float[] params)
-	{
-		return (float) (params[Gaussian2DFunction.SIGNAL] /
-				(2 * Math.PI * params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
-	}
-
-	/**
-	 * @return The angle for the first peak
-	 */
-	public float getAngle()
-	{
-		return params[Gaussian2DFunction.SHAPE];
-	}
-
-	/**
-	 * @return The x position for the first peak
-	 */
-	public float getXPosition()
-	{
-		return params[Gaussian2DFunction.X_POSITION];
-	}
-
-	/**
-	 * Sets the x position.
+	 * Gets the single Gaussian 2D standard deviation from independent x and y standard deviations. s =
+	 * sqrt(abs(sx*sy)).
 	 *
-	 * @param x
-	 *            the new x position
+	 * @param sx
+	 *            the sx
+	 * @param sy
+	 *            the sy
+	 * @return the single Gaussian 2D standard deviation
 	 */
-	public void setXPosition(float x)
+	public static double getGaussian2DStandardDeviation(double sx, double sy)
 	{
-		params[Gaussian2DFunction.X_POSITION] = x;
-	}
-
-	/**
-	 * @return The y position for the first peak
-	 */
-	public float getYPosition()
-	{
-		return params[Gaussian2DFunction.Y_POSITION];
-	}
-
-	/**
-	 * Sets the y position.
-	 *
-	 * @param y
-	 *            the new y position
-	 */
-	public void setYPosition(float y)
-	{
-		params[Gaussian2DFunction.Y_POSITION] = y;
-	}
-
-	/**
-	 * @return The z position for the first peak
-	 */
-	public float getZPosition()
-	{
-		// TODO - support z-position
-		return 0;
-	}
-
-	/**
-	 * Sets the z position.
-	 *
-	 * @param z
-	 *            the new z position
-	 */
-	public void setZPosition(float z)
-	{
-		// TODO - support z-position
-	}
-
-	/**
-	 * @return The x-dimension standard deviation for the first peak
-	 * @deprecated The PeakResult may not be a Gaussian2D function
-	 */
-	public float getXSD()
-	{
-		return params[Gaussian2DFunction.X_SD];
-	}
-
-	/**
-	 * @return The y-dimension standard deviation for the first peak
-	 * @deprecated The PeakResult may not be a Gaussian2D function
-	 */
-	public float getYSD()
-	{
-		return params[Gaussian2DFunction.Y_SD];
-	}
-
-	/**
-	 * Gets the frame.
-	 *
-	 * @return The time frame that this result corresponds to
-	 */
-	public int getFrame()
-	{
-		return frame;
-	}
-
-	/**
-	 * Sets the frame.
-	 *
-	 * @param frame
-	 *            The time frame that this result corresponds to
-	 */
-	public void setFrame(int frame)
-	{
-		this.frame = frame;
-	}
-
-	/**
-	 * Checks for end frame. Derived classes can override this.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean hasEndFrame()
-	{
-		return false;
-	}
-
-	/**
-	 * Gets the end frame. Default = {@link #getFrame()}. Derived classes can override this.
-	 *
-	 * @return The last time frame that this result corresponds to
-	 */
-	public int getEndFrame()
-	{
-		return frame;
-	}
-
-	/**
-	 * Checks for id. Derived classes can override this.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean hasId()
-	{
-		return false;
-	}
-
-	/**
-	 * Gets the id. Default = 0. Derived classes can override this.
-	 *
-	 * @return The results identifier
-	 */
-	public int getId()
-	{
-		return 0;
-	}
-
-	/**
-	 * Checks for precision. Derived classes can override this.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean hasPrecision()
-	{
-		return false;
-	}
-
-	/**
-	 * Gets the localisation precision. Default = Double.NaN. Derived classes can override this.
-	 * <p>
-	 * This is provided so that results can be loaded from external sources.
-	 *
-	 * @return the precision (in nm)
-	 */
-	public double getPrecision()
-	{
-		return Double.NaN;
-	}
-
-	/**
-	 * Return the true positive score for use in classification analysis
-	 * 
-	 * @return The true positive score
-	 */
-	public double getTruePositiveScore()
-	{
-		return (origValue != 0) ? 1 : 0;
-	}
-
-	/**
-	 * Return the false positive score for use in classification analysis
-	 * 
-	 * @return The false positive score
-	 */
-	public double getFalsePositiveScore()
-	{
-		return 1 - getTruePositiveScore();
-	}
-
-	/**
-	 * Return the true negative score for use in classification analysis
-	 * 
-	 * @return The true negative score
-	 */
-	public double getTrueNegativeScore()
-	{
-		return (origValue != 0) ? 0 : 1;
-	}
-
-	/**
-	 * Return the false negative score for use in classification analysis
-	 * 
-	 * @return The false negative score
-	 */
-	public double getFalseNegativeScore()
-	{
-		return 1 - getTrueNegativeScore();
-	}
-
-	/**
-	 * Return the squared distance to the other peak result
-	 * 
-	 * @param r
-	 *            The result
-	 * @return The squared distance
-	 */
-	public double distance2(PeakResult r)
-	{
-		final double dx = getXPosition() - r.getXPosition();
-		final double dy = getYPosition() - r.getYPosition();
-		return dx * dx + dy * dy;
-	}
-
-	/**
-	 * Return the distance to the other peak result
-	 * 
-	 * @param r
-	 *            The result
-	 * @return The distance
-	 */
-	public double distance(PeakResult r)
-	{
-		return Math.sqrt(distance2(r));
-	}
-
-	/**
-	 * Return the squared distance to the other coordinate.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @return The squared distance
-	 */
-	public double distance2(final double x, final double y)
-	{
-		final double dx = getXPosition() - x;
-		final double dy = getYPosition() - y;
-		return dx * dx + dy * dy;
-	}
-
-	/**
-	 * Return the distance to the other coordinate.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @return The distance
-	 */
-	public double distance(final double x, final double y)
-	{
-		return Math.sqrt(distance2(x, y));
-	}
-
-	/**
-	 * This methods return the x-position. To allow filters to use the actual shift requires either off-setting the
-	 * position with the initial fit position, or extending this class so the shift can be stored.
-	 */
-	public float getXShift()
-	{
-		return getXPosition();
-	}
-
-	/**
-	 * This methods return the y-position. To allow filters to use the actual shift requires either off-setting the
-	 * position with the initial fit position, or extending this class so the shift can be stored.
-	 */
-	public float getYShift()
-	{
-		return getYPosition();
-	}
-
-	/**
-	 * Gets the noise.
-	 *
-	 * @return the noise
-	 */
-	public float getNoise()
-	{
-		return noise;
-	}
-
-	/**
-	 * Gets the parameters. This is a direct reference to the instance parameter array so use with caution.
-	 *
-	 * @return the parameters
-	 */
-	public float[] getParameters()
-	{
-		return params;
-	}
-
-	/**
-	 * Gets the parameter deviations. This is a direct reference to the instance parameter array so use with caution.
-	 *
-	 * @return the parameter deviations
-	 */
-	public float[] getParameterDeviations()
-	{
-		return paramsStdDev;
-	}
-
-	/**
-	 * Gets the number of parameters.
-	 *
-	 * @return the number of parameters
-	 */
-	public int getNumberOfParameters()
-	{
-		return params.length;
-	}
-	
-	/**
-	 * Gets the parameter for the given index.
-	 *
-	 * @param i
-	 *            the index
-	 * @return the parameter
-	 */
-	public float getParameter(int i)
-	{
-		return params[i];
-	}
-
-	/**
-	 * Gets the parameter deviation for the given index.
-	 *
-	 * @param i
-	 *            the index
-	 * @return the parameter deviation
-	 */
-	public float getParameterDeviation(int i)
-	{
-		return paramsStdDev[i];
+		return Math.sqrt(Math.abs(sx * sy));
 	}
 }

@@ -30,6 +30,25 @@ public class Counter
 
 	/**
 	 * Increment the count.
+	 */
+	public void increment()
+	{
+		count++;
+	}
+
+	/**
+	 * Increment the count by the value.
+	 *
+	 * @param value
+	 *            the value
+	 */
+	public void increment(int value)
+	{
+		count += value;
+	}
+
+	/**
+	 * Increment the count.
 	 *
 	 * @return the new count
 	 */

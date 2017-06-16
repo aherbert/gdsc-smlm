@@ -1,5 +1,6 @@
 package gdsc.smlm.results.procedures;
 
+import gdsc.core.data.DataException;
 import gdsc.smlm.results.MemoryPeakResults;
 
 /*----------------------------------------------------------------------------- 
@@ -38,10 +39,10 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	 * Gets the precision.
 	 *
 	 * @return the precision
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units for precision is not possible
 	 */
-	public void getPrecision()
+	public void getPrecision() throws DataException
 	{
 		i = 0;
 		precision = allocate(precision);

@@ -126,7 +126,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				}
 				else
 				{
-					counter.incrementAndGet();
+					counter.increment();
 				}
 			}
 		});
@@ -161,7 +161,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			{
 				counter.advance(peak.getFrame());
 
-				counter.incrementAndGet(peak.origY);
+				counter.increment(peak.origY);
 
 				// Reject all peaks if we have exceeded the fail count
 				final boolean isPositive;
@@ -182,7 +182,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				}
 				else
 				{
-					counter.incrementAndGet();
+					counter.increment();
 				}
 			}
 		});
@@ -235,12 +235,12 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				}
 				else
 				{
-					counter.incrementAndGet();
+					counter.increment();
 				}
 
 				if (isPositive)
 				{
-					p.incrementAndGet();
+					p.increment();
 					s[TP] += peak.getTruePositiveScore();
 					s[FP] += peak.getFalsePositiveScore();
 				}
@@ -302,7 +302,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			{
 				counter.advance(peak.getFrame());
 
-				counter.incrementAndGet(peak.origY);
+				counter.increment(peak.origY);
 
 				// Reject all peaks if we have exceeded the fail count
 				final boolean isPositive = accept(peak);
@@ -315,12 +315,12 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				}
 				else
 				{
-					counter.incrementAndGet();
+					counter.increment();
 				}
 
 				if (isPositive)
 				{
-					p.incrementAndGet();
+					p.increment();
 					s[TP] += peak.getTruePositiveScore();
 					s[FP] += peak.getFalsePositiveScore();
 				}
@@ -399,7 +399,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				}
 				else
 				{
-					counter.incrementAndGet();
+					counter.increment();
 				}
 
 				if (isPositive)
@@ -466,7 +466,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			{
 				counter.advance(peak.getFrame());
 
-				counter.incrementAndGet(peak.origY);
+				counter.increment(peak.origY);
 
 				// Reject all peaks if we have exceeded the fail count
 				final boolean isPositive;
@@ -488,7 +488,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				}
 				else
 				{
-					counter.incrementAndGet();
+					counter.increment();
 				}
 
 				if (isPositive)
@@ -662,7 +662,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 					}
 					else
 					{
-						counter.incrementAndGet();
+						counter.increment();
 					}
 
 					if (isTrue)
@@ -728,7 +728,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
 					final boolean isTrue = peak.origValue != 0;
 
-					counter.incrementAndGet(peak.origX);
+					counter.increment(peak.origX);
 
 					// Reject all peaks if we have exceeded the fail count
 					final boolean isPositive;
@@ -748,7 +748,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 					}
 					else
 					{
-						counter.incrementAndGet();
+						counter.increment();
 					}
 
 					if (isTrue)
@@ -824,12 +824,12 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 					}
 					else
 					{
-						counter.incrementAndGet();
+						counter.increment();
 					}
 
 					if (isPositive)
 					{
-						p.incrementAndGet();
+						p.increment();
 						s[TP] += peak.getTruePositiveScore();
 						s[FP] += peak.getFalsePositiveScore();
 					}
@@ -885,7 +885,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				{
 					counter.advance(peak.getFrame());
 
-					counter.incrementAndGet(peak.origY);
+					counter.increment(peak.origY);
 
 					// Reject all peaks if we have exceeded the fail count
 					final boolean isPositive;
@@ -905,12 +905,12 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 					}
 					else
 					{
-						counter.incrementAndGet();
+						counter.increment();
 					}
 
 					if (isPositive)
 					{
-						p.incrementAndGet();
+						p.increment();
 						s[TP] += peak.getTruePositiveScore();
 						s[FP] += peak.getFalsePositiveScore();
 					}
@@ -975,7 +975,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 				{
 					counter.advance(peak.getFrame());
 
-					counter.incrementAndGet(peak.origX);
+					counter.increment(peak.origX);
 
 					// Reject all peaks if we have exceeded the fail count
 					final boolean isPositive;
@@ -995,12 +995,12 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 					}
 					else
 					{
-						counter.incrementAndGet();
+						counter.increment();
 					}
 
 					if (isPositive)
 					{
-						p.incrementAndGet();
+						p.increment();
 						s[TP] += peak.getTruePositiveScore();
 						s[FP] += peak.getFalsePositiveScore();
 					}

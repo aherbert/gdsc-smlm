@@ -9,6 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
@@ -24,9 +26,12 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.TXYResultProcedure;
+import gdsc.smlm.results.procedures.WResultProcedure;
+import gdsc.smlm.results.procedures.WxWyResultProcedure;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
+import gdsc.smlm.results.procedures.HResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
 
@@ -595,7 +600,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @param calculate
 	 *            Set to true to calculate the bounds if they are null or zero width/height
 	 * @return the bounds of the result coordinates
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to pixel units is not possible
 	 */
 	public Rectangle getBounds(boolean calculate)
@@ -632,7 +637,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @param distanceUnit
 	 *            the distance unit
 	 * @return the bounds of the result coordinates
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
 	public Rectangle2D.Float getDataBounds(DistanceUnit distanceUnit)
@@ -1249,11 +1254,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, BIXYResultProcedure procedure)
+			throws ConversionException, ConfigurationException
 	{
 		if (calibration == null)
-			throw new ConversionException("No calibration");
+			throw new ConfigurationException("No calibration");
 
 		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getDualIntensityConverter(intensityUnit);
 		TypeConverter<IntensityUnit> ic = list.get(0);
@@ -1286,11 +1294,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, BIXYZResultProcedure procedure)
+			throws ConversionException, ConfigurationException
 	{
 		if (calibration == null)
-			throw new ConversionException("No calibration");
+			throw new ConfigurationException("No calibration");
 
 		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getDualIntensityConverter(intensityUnit);
 		TypeConverter<IntensityUnit> ic = list.get(0);
@@ -1314,6 +1325,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	/**
 	 * For each result execute the procedure using the specified units.
 	 * <p>
+	 * This procedure is exclusive to data fit with a Gaussian2D PSF as it computes the height of the Gaussian from the
+	 * integral (Intensity) and the widths.
+	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
 	 * @param intensityUnit
@@ -1322,11 +1336,58 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
-	public void forEach(IntensityUnit intensityUnit, IResultProcedure procedure)
+	public void forEach(IntensityUnit intensityUnit, HResultProcedure procedure)
+			throws ConversionException, ConfigurationException
 	{
 		if (calibration == null)
-			throw new ConversionException("No calibration");
+			throw new ConfigurationException("No calibration");
+
+		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+
+		final int ix = indices[0] + PeakResult.STANDARD_PARAMETERS;
+		final int iy = indices[1] + PeakResult.STANDARD_PARAMETERS;
+		final double twoPi = 2 * Math.PI;
+
+		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(intensityUnit);
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(DistanceUnit.PIXEL);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+
+			// Convert the widths to pixels
+			float sx = dc.convert(r.getParameter(ix));
+			float sy = dc.convert(r.getParameter(iy));
+
+			//@formatter:off
+			procedure.executeH(
+					(float)(ic.convert((double)r.getSignal()) / (twoPi * sx * sy)));
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(IntensityUnit intensityUnit, IResultProcedure procedure)
+			throws ConversionException, ConfigurationException
+	{
+		if (calibration == null)
+			throw new ConfigurationException("No calibration");
 
 		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(intensityUnit);
 
@@ -1353,11 +1414,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYResultProcedure procedure)
+			throws ConversionException, ConfigurationException
 	{
 		if (calibration == null)
-			throw new ConversionException("No calibration");
+			throw new ConfigurationException("No calibration");
 
 		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(intensityUnit);
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
@@ -1387,11 +1451,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYZResultProcedure procedure)
+			throws ConversionException, ConfigurationException
 	{
 		if (calibration == null)
-			throw new ConversionException("No calibration");
+			throw new ConfigurationException("No calibration");
 
 		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(intensityUnit);
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
@@ -1420,11 +1487,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
 	public void forEach(DistanceUnit distanceUnit, TXYResultProcedure procedure)
+			throws ConversionException, ConfigurationException
 	{
 		if (calibration == null)
-			throw new ConversionException("No calibration");
+			throw new ConfigurationException("No calibration");
 
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
 
@@ -1451,11 +1521,111 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
-	public void forEach(DistanceUnit distanceUnit, XYResultProcedure procedure)
+	public void forEach(DistanceUnit distanceUnit, WResultProcedure procedure)
+			throws ConversionException, ConfigurationException
 	{
 		if (calibration == null)
-			throw new ConversionException("No calibration");
+			throw new ConfigurationException("No calibration");
+
+		// Note that in the future we may support more than just Gaussian2D PSF
+		// so this may have to change
+		
+		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+
+		final int ix = indices[0] + PeakResult.STANDARD_PARAMETERS;
+		final int iy = indices[1] + PeakResult.STANDARD_PARAMETERS;
+
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
+
+		if (ix == iy)
+		{
+			for (int i = 0, size = size(); i < size; i++)
+			{
+				final PeakResult r = get(i);
+				//@formatter:off
+    			procedure.executeW(
+    					dc.convert(r.getParameter(ix)));
+    			//@formatter:on
+			}
+		}
+		else
+		{
+			for (int i = 0, size = size(); i < size; i++)
+			{
+				final PeakResult r = get(i);
+				// Convert the separate widths into a single width
+				double s = PeakResultHelper.getGaussian2DStandardDeviation(r.getParameter(ix), r.getParameter(iy));
+				//@formatter:off
+    			procedure.executeW(
+    					(float)dc.convert(s));
+    			//@formatter:on
+			}
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(DistanceUnit distanceUnit, WxWyResultProcedure procedure)
+			throws ConversionException, ConfigurationException
+	{
+		if (calibration == null)
+			throw new ConfigurationException("No calibration");
+
+		// Note that in the future we may support more than just Gaussian2D PSF
+		// so this may have to change
+		
+		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+
+		final int ix = indices[0] + PeakResult.STANDARD_PARAMETERS;
+		final int iy = indices[1] + PeakResult.STANDARD_PARAMETERS;
+
+		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			//@formatter:off
+			procedure.executeWxWy(
+					dc.convert(r.getParameter(ix)),
+					dc.convert(r.getParameter(iy)));
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(DistanceUnit distanceUnit, XYResultProcedure procedure)
+			throws ConversionException, ConfigurationException
+	{
+		if (calibration == null)
+			throw new ConfigurationException("No calibration");
 
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
 
@@ -1483,11 +1653,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
 	public void forEach(DistanceUnit distanceUnit, XYRResultProcedure procedure)
+			throws ConversionException, ConfigurationException
 	{
 		if (calibration == null)
-			throw new ConversionException("No calibration");
+			throw new ConfigurationException("No calibration");
 
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
 
@@ -1514,11 +1687,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
 	public void forEach(DistanceUnit distanceUnit, XYZResultProcedure procedure)
+			throws ConversionException, ConfigurationException
 	{
 		if (calibration == null)
-			throw new ConversionException("No calibration");
+			throw new ConfigurationException("No calibration");
 
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
 
@@ -1535,7 +1711,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * For each result execute the procedure.
+	 * For each result execute the procedure
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
@@ -1543,18 +1719,20 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *            the procedure
 	 * @throws ConversionException
 	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
-	public void forEach(LSEPrecisionProcedure procedure)
+	public void forEach(LSEPrecisionProcedure procedure) throws ConversionException, ConfigurationException
 	{
 		if (calibration == null)
-			throw new ConversionException("No calibration");
+			throw new ConfigurationException("No calibration");
 
 		// TODO - do the conversion using the calibration helper.
 
 		// TODO - Check if this is a Gaussian2DFunction and throw an error if not
 		// Otherwise determine the PSF fields to obtain the distance
 		if (!isCCDCamera())
-			throw new ConversionException("Not a CCD camera");
+			throw new ConfigurationException("Not a CCD camera");
 		final boolean emCCD = isEMCCD();
 
 		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getDualIntensityConverter(IntensityUnit.PHOTON);

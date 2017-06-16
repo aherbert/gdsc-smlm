@@ -1,5 +1,6 @@
 package gdsc.smlm.results.procedures;
 
+import gdsc.core.data.DataException;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -125,10 +126,10 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	/**
 	 * Gets the BIXY data in the configured units.
 	 * 
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
-	public void getBIXY()
+	public void getBIXY() throws DataException
 	{
 		i = 0;
 		allocateB();
@@ -150,10 +151,10 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	/**
 	 * Gets the BIXYZ data in the configured units.
 	 * 
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
-	public void getBIXYZ()
+	public void getBIXYZ() throws DataException
 	{
 		i = 0;
 		allocateB();
@@ -177,10 +178,10 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	/**
 	 * Gets the I data in the configured units.
 	 * 
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
-	public void getI()
+	public void getI() throws DataException
 	{
 		i = 0;
 		allocateI();
@@ -196,10 +197,10 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	/**
 	 * Gets the IXY data in the configured units.
 	 * 
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
-	public void getIXY()
+	public void getIXY() throws DataException
 	{
 		i = 0;
 		allocateI();
@@ -219,10 +220,10 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	/**
 	 * Gets the IXYZ data in the configured units.
 	 * 
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
-	public void getIXYZ()
+	public void getIXYZ() throws DataException
 	{
 		i = 0;
 		allocateI();
@@ -244,10 +245,10 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	/**
 	 * Gets the TXY data in the configured units.
 	 * 
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
-	public void getTXY()
+	public void getTXY() throws DataException
 	{
 		i = 0;
 		this.frame = allocate(this.frame);
@@ -267,10 +268,10 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	/**
 	 * Gets the XY data in the configured units.
 	 * 
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
-	public void getXY()
+	public void getXY() throws DataException
 	{
 		i = 0;
 		allocateX();
@@ -288,10 +289,10 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	/**
 	 * Gets the XYR data in the configured units.
 	 * 
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
-	public void getXYR()
+	public void getXYR() throws DataException
 	{
 		i = 0;
 		allocateX();
@@ -311,10 +312,10 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	/**
 	 * Gets the XYZ data in the configured units.
 	 * 
-	 * @throws ConversionException
+	 * @throws DataException
 	 *             if conversion to the required units is not possible
 	 */
-	public void getXYZ()
+	public void getXYZ() throws DataException
 	{
 		i = 0;
 		allocateX();
