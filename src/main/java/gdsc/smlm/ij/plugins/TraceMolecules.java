@@ -41,6 +41,9 @@ import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Cluster.CentroidMethod;
+import gdsc.smlm.results.Counter;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -291,38 +294,43 @@ public class TraceMolecules implements PlugIn
 
 	private List<ClusterPoint> convertToClusterPoints()
 	{
-		return convertToClusterPoints(results.getResults());
+		return convertToClusterPoints(results);
 	}
 
 	/**
 	 * Convert a list of peak results into points for the clustering engine
 	 * 
-	 * @param peakResults
+	 * @param results
 	 * @return
 	 */
-	public static List<ClusterPoint> convertToClusterPoints(List<PeakResult> peakResults)
+	public static List<ClusterPoint> convertToClusterPoints(MemoryPeakResults results)
 	{
-		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(peakResults.size());
-		int id = 0;
-		for (PeakResult p : peakResults)
-			points.add(ClusterPoint.newTimeClusterPoint(id++, p.getXPosition(), p.getYPosition(), p.getSignal(),
-					p.getFrame(), p.getEndFrame()));
+		final ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(results.size());
+		final Counter counter = new Counter();
+		results.forEach(new PeakResultProcedure()
+		{
+			public void execute(PeakResult p)
+			{
+				points.add(ClusterPoint.newTimeClusterPoint(counter.getAndIncrement(), p.getXPosition(),
+						p.getYPosition(), p.getSignal(), p.getFrame(), p.getEndFrame()));
+			}
+		});
 		return points;
 	}
 
 	private Trace[] convertToTraces(ArrayList<Cluster> clusters)
 	{
-		return convertToTraces(results.getResults(), clusters);
+		return convertToTraces(results, clusters);
 	}
 
 	/**
 	 * Convert the clusters from the clustering engine into traces composed of the original list of peak results
 	 * 
-	 * @param peakResults
+	 * @param results
 	 * @param clusters
 	 * @return
 	 */
-	public static Trace[] convertToTraces(List<PeakResult> peakResults, ArrayList<Cluster> clusters)
+	public static Trace[] convertToTraces(MemoryPeakResults results, ArrayList<Cluster> clusters)
 	{
 		Trace[] traces = new Trace[clusters.size()];
 		int i = 0;
@@ -333,7 +341,7 @@ public class TraceMolecules implements PlugIn
 			for (ClusterPoint point = cluster.head; point != null; point = point.next)
 			{
 				// The point Id was the position in the original results array
-				trace.add(peakResults.get(point.id));
+				trace.add(results.get(point.id));
 			}
 			traces[i++] = trace;
 		}
@@ -874,12 +882,11 @@ public class TraceMolecules implements PlugIn
 	private void runOptimiser(TraceManager manager)
 	{
 		// Get an estimate of the number of molecules without blinking
-		SummaryStatistics stats = new SummaryStatistics();
+		Statistics stats = new Statistics();
 		final double nmPerPixel = this.results.getNmPerPixel();
-		final double gain = this.results.getGain();
-		final boolean emCCD = this.results.isEMCCD();
-		for (PeakResult result : this.results.getResults())
-			stats.addValue(result.getPrecision(nmPerPixel, gain, emCCD));
+		PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
+		pp.getPrecision();
+		stats.add(pp.precision);
 		// Use twice the precision to get the initial distance threshold
 
 		// Use 2.5x sigma as per the PC-PALM protocol in Sengupta, et al (2013) Nature Protocols 8, 345

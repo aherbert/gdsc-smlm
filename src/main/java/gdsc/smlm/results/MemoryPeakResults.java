@@ -25,6 +25,7 @@ import gdsc.smlm.results.procedures.LSEPrecisionProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gdsc.smlm.results.procedures.TResultProcedure;
 import gdsc.smlm.results.procedures.TXYResultProcedure;
 import gdsc.smlm.results.procedures.WResultProcedure;
 import gdsc.smlm.results.procedures.WxWyResultProcedure;
@@ -1486,6 +1487,33 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()),
 					dc.convert(r.getZPosition()));
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(TResultProcedure procedure) throws ConfigurationException
+	{
+		if (calibration == null)
+			throw new ConfigurationException("No calibration");
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = get(i);
+			//@formatter:off
+			procedure.executeT(
+					r.getFrame());
 			//@formatter:on
 		}
 	}

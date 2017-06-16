@@ -1844,7 +1844,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		ImageProcessor[] images = new ImageProcessor[3];
 		for (int c = 0; c < 3; c++)
 		{
-			ArrayList<PeakResult> list = (ArrayList<PeakResult>) results[c].getResults();
+			PeakResult[] list = results[c].toArray();
 			r.addAll(list);
 
 			// Draw the unmixed activations

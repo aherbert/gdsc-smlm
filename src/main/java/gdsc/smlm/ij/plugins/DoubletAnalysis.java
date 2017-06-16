@@ -48,25 +48,22 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.engine.DataFilter;
-import gdsc.smlm.engine.DataFilterType;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.QuadrantAnalysis;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
-import gdsc.smlm.fitting.LSEFunctionSolver;
 // TODO - add support for using the chi-squared distribution to generate a q-value for the fit
 //import gdsc.smlm.fitting.WLSEFunctionSolver;
 //import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.Gaussian2DFitter;
+import gdsc.smlm.fitting.LSEFunctionSolver;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -1824,7 +1821,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		// Get the coordinates per frame
 		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator
-				.getCoordinates(results.getResults(), false);
+				.getCoordinates(results, false);
 
 		final long[] sumCount = new long[1];
 		actualCoordinates.forEachValue(new TObjectProcedure<ArrayList<Coordinate>>()

@@ -29,6 +29,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
         IResultProcedure, 
         IXYResultProcedure, 
         IXYZResultProcedure,
+		TResultProcedure, 
 		TXYResultProcedure, 
 		XYResultProcedure, 
 		XYRResultProcedure, 
@@ -243,6 +244,21 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	}
 
 	/**
+	 * Gets the T data in the configured units.
+	 */
+	public void getT() throws DataException
+	{
+		i = 0;
+		allocateT();
+		results.forEach((TResultProcedure) this);
+	}
+
+	public void executeT(int frame)
+	{
+		this.frame[i++] = frame;
+	}
+
+	/**
 	 * Gets the TXY data in the configured units.
 	 * 
 	 * @throws DataException
@@ -251,7 +267,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	public void getTXY() throws DataException
 	{
 		i = 0;
-		this.frame = allocate(this.frame);
+		allocateT();
 		allocateX();
 		allocateY();
 		results.forEach(getDistanceUnit(), (TXYResultProcedure) this);
@@ -332,6 +348,11 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		i++;
 	}
 
+	private void allocateT()
+	{
+		this.frame = allocate(this.frame);
+	}
+	
 	private void allocateB()
 	{
 		this.background = allocate(this.background);

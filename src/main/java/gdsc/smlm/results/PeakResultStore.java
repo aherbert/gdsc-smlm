@@ -50,14 +50,14 @@ public interface PeakResultStore
 	 *
 	 * @param results the results
 	 */
-	public void addAll(Collection<PeakResult> results);
+	public void addCollection(Collection<PeakResult> results);
 
 	/**
 	 * Add all results.
 	 *
 	 * @param results the results
 	 */
-	public void addAll(PeakResult[] results);
+	public void addArray(PeakResult[] results);
 
 	/**
 	 * Adds the results.
@@ -65,7 +65,7 @@ public interface PeakResultStore
 	 * @param results
 	 *            the results
 	 */
-	public void add(PeakResultStore results);
+	public void addStore(PeakResultStore results);
 
 	/**
 	 * Clear the results.
@@ -97,15 +97,6 @@ public interface PeakResultStore
 	 * @return the peak result array
 	 */
 	public PeakResult[] toArray();
-
-	/**
-	 * Convert to an array reusing the space if provided.
-	 *
-	 * @param array
-	 *            the array (can be null)
-	 * @return the peak result array
-	 */
-	public PeakResult[] toArray(PeakResult[] array);
 
 	/**
 	 * Copy the results

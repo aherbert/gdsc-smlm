@@ -535,7 +535,22 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 				result.noise, result.getParameters(), result.getParameterDeviations());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.AbstractPeakResults#addAll(java.util.Collection)
+	 */
 	public void addAll(Collection<PeakResult> results)
+	{
+		addAll(results.toArray(new PeakResult[results.size()]));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
+	 */
+	public void addAll(PeakResult[] results)
 	{
 		if (!tableActive)
 			return;

@@ -29,10 +29,13 @@ import gdsc.core.utils.DoubleData;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -58,9 +61,13 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.SynchronizedPeakResults;
+import gdsc.smlm.results.procedures.HeightResultProcedure;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.WidthResultProcedure;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -301,7 +308,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			final int y = (int) spot.getY();
 
 			MemoryPeakResults results = fitSpot(stack, width, height, x, y);
-			allResults.addAll(results.getResults());
+			allResults.add(results);
 
 			if (results.size() < 5)
 			{
@@ -310,21 +317,32 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			}
 
 			// Get the results for the spot centre and width
-			double[] z = new double[results.size()];
-			double[] xCoord = new double[z.length];
-			double[] yCoord = new double[z.length];
-			double[] sd = new double[z.length];
-			double[] a = new double[z.length];
-			int i = 0;
-			for (PeakResult peak : results.getResults())
+			final double[] z = new double[results.size()];
+			final double[] xCoord = new double[z.length];
+			final double[] yCoord = new double[z.length];
+			final double[] sd;
+			final double[] a;
+			final Counter counter = new Counter();
+
+			// We have fit the results so they will be in the preferred units 
+			results.forEach(new PeakResultProcedure()
 			{
-				z[i] = peak.getFrame();
-				xCoord[i] = peak.getXPosition() - x;
-				yCoord[i] = peak.getYPosition() - y;
-				sd[i] = FastMath.max(peak.getXSD(), peak.getYSD());
-				a[i] = peak.getAmplitude();
-				i++;
-			}
+				public void execute(PeakResult peak)
+				{
+					int i = counter.getAndIncrement();
+					z[i] = peak.getFrame();
+					xCoord[i] = peak.getXPosition() - x;
+					yCoord[i] = peak.getYPosition() - y;
+				}
+			});
+
+			WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
+			wp.getW();
+			sd = SimpleArrayUtils.toDouble(wp.wx);
+
+			HeightResultProcedure hp = new HeightResultProcedure(results, IntensityUnit.COUNT);
+			hp.getH();
+			a = SimpleArrayUtils.toDouble(hp.h);
 
 			// Smooth the amplitude plot
 			double[] smoothA = loess.smooth(z, a);
@@ -1503,7 +1521,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	 * @param fitCom
 	 * @return The width of the PSF in the z-centre
 	 */
-	private double fitPSF(ImageStack psf, LoessInterpolator loess, int cz, double averageRange, double[][] fitCom)
+	private double fitPSF(ImageStack psf, LoessInterpolator loess, int cz, double averageRange, final double[][] fitCom)
 	{
 		IJ.showStatus("Fitting final PSF");
 
@@ -1524,7 +1542,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		// Update the box radius since this is used in the fitSpot method.
 		boxRadius = psf.getWidth() / 2;
-		int x = boxRadius, y = boxRadius;
+		final int x = boxRadius;
+		final int y = boxRadius;
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		final double shift = fitConfig.getCoordinateShiftFactor();
 		fitConfig.setInitialPeakStdDev0(fitConfig.getInitialPeakStdDev0() * magnification);
@@ -1544,54 +1563,69 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		}
 
 		// Get the results for the spot centre and width
-		double[] z = new double[results.size()];
-		double[] xCoord = new double[z.length];
-		double[] yCoord = new double[z.length];
-		double[] sd = new double[z.length];
-		double[] a = new double[z.length];
-		int i = 0;
+		final double[] z = new double[results.size()];
+		final double[] xCoord = new double[z.length];
+		final double[] yCoord = new double[z.length];
+		final double[] sd = new double[z.length];
+		final double[] a = new double[z.length];
 
 		// Set limits for the fit
 		final float maxWidth = (float) (FastMath.max(fitConfig.getInitialPeakStdDev0(),
 				fitConfig.getInitialPeakStdDev1()) * magnification * 4);
 		final float maxSignal = 2; // PSF is normalised to 1  
 
-		for (PeakResult peak : results.getResults())
-		{
-			// Remove bad fits where the width/signal is above the expected
-			final float w = FastMath.max(peak.getXSD(), peak.getYSD());
-			if (peak.getSignal() > maxSignal || w > maxWidth)
-				continue;
+		final WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
+		wp.getWxWy();
 
-			z[i] = peak.getFrame();
-			fitCom[0][peak.getFrame() - 1] = xCoord[i] = peak.getXPosition() - x;
-			fitCom[1][peak.getFrame() - 1] = yCoord[i] = peak.getYPosition() - y;
-			sd[i] = w;
-			a[i] = peak.getAmplitude();
-			i++;
-		}
+		final HeightResultProcedure hp = new HeightResultProcedure(results, IntensityUnit.COUNT);
+		hp.getH();
+
+		final Counter counter = new Counter();
+		final Counter counterOK = new Counter();
+
+		// We have fit the results so they will be in the preferred units 
+		results.forEach(new PeakResultProcedure()
+		{
+
+			public void execute(PeakResult peak)
+			{
+				int i = counter.getAndIncrement();
+
+				// Remove bad fits where the width/signal is above the expected
+				final float w = FastMath.max(wp.wx[i], wp.wy[i]);
+				if (peak.getSignal() > maxSignal || w > maxWidth)
+					return;
+
+				i = counterOK.getAndIncrement();
+				z[i] = peak.getFrame();
+				fitCom[0][peak.getFrame() - 1] = xCoord[i] = peak.getXPosition() - x;
+				fitCom[1][peak.getFrame() - 1] = yCoord[i] = peak.getYPosition() - y;
+				sd[i] = w;
+				a[i] = hp.h[i];
+			}
+		});
 
 		// Truncate
-		z = Arrays.copyOf(z, i);
-		xCoord = Arrays.copyOf(xCoord, i);
-		yCoord = Arrays.copyOf(yCoord, i);
-		sd = Arrays.copyOf(sd, i);
-		a = Arrays.copyOf(a, i);
+		double[] z2 = Arrays.copyOf(z, counter.getCount());
+		double[] xCoord2 = Arrays.copyOf(xCoord, z2.length);
+		double[] yCoord2 = Arrays.copyOf(yCoord, z2.length);
+		double[] sd2 = Arrays.copyOf(sd, z2.length);
+		double[] a2 = Arrays.copyOf(a, z2.length);
 
 		// Extract the average smoothed range from the individual fits
 		int r = (int) Math.ceil(averageRange / 2);
-		int start = 0, stop = z.length - 1;
-		for (int j = 0; j < z.length; j++)
+		int start = 0, stop = z2.length - 1;
+		for (int j = 0; j < z2.length; j++)
 		{
-			if (z[j] > cz - r)
+			if (z2[j] > cz - r)
 			{
 				start = j;
 				break;
 			}
 		}
-		for (int j = z.length; j-- > 0;)
+		for (int j = z2.length; j-- > 0;)
 		{
-			if (z[j] < cz + r)
+			if (z2[j] < cz + r)
 			{
 				stop = j;
 				break;
@@ -1607,11 +1641,11 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		int smoothCzIndex = 0;
 		for (int j = start, k = 0; j <= stop; j++, k++)
 		{
-			smoothX[k] = xCoord[j];
-			smoothY[k] = yCoord[j];
-			smoothSd[k] = sd[j];
-			smoothA[k] = a[j];
-			newZ[k] = z[j];
+			smoothX[k] = xCoord2[j];
+			smoothY[k] = yCoord2[j];
+			smoothSd[k] = sd2[j];
+			smoothA[k] = a2[j];
+			newZ[k] = z2[j];
 			if (newZ[k] == cz)
 				smoothCzIndex = k;
 		}
@@ -1622,11 +1656,11 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		// Update the widths and positions using the magnification
 		final double scale = 1.0 / magnification;
-		for (int j = 0; j < xCoord.length; j++)
+		for (int j = 0; j < xCoord2.length; j++)
 		{
-			xCoord[j] *= scale;
-			yCoord[j] *= scale;
-			sd[j] *= scale;
+			xCoord2[j] *= scale;
+			yCoord2[j] *= scale;
+			sd2[j] *= scale;
 		}
 		for (int j = 0; j < smoothX.length; j++)
 		{
@@ -1635,16 +1669,16 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			smoothSd[j] *= scale;
 		}
 
-		showPlots(z, a, newZ, smoothA, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd, cz);
+		showPlots(z2, a2, newZ, smoothA, xCoord2, yCoord2, sd2, newZ, smoothX, smoothY, smoothSd, cz);
 
 		// Store the data for replotting
-		this.z = z;
-		this.a = a;
+		this.z = z2;
+		this.a = a2;
 		this.smoothAz = newZ;
 		this.smoothA = smoothA;
-		this.xCoord = xCoord;
-		this.yCoord = yCoord;
-		this.sd = sd;
+		this.xCoord = xCoord2;
+		this.yCoord = yCoord2;
+		this.sd = sd2;
 		this.newZ = newZ;
 		this.smoothX = smoothX;
 		this.smoothY = smoothY;

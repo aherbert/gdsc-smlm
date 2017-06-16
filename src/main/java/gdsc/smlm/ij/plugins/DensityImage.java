@@ -2,7 +2,6 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +12,7 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import gdsc.core.clustering.DensityManager;
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -34,6 +34,8 @@ import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
@@ -147,17 +149,9 @@ public class DensityImage implements PlugIn
 		if (results == null || results.size() == 0)
 			throw new IllegalArgumentException("Results are null or empty");
 
-		final float[] xcoord = new float[results.size()];
-		final float[] ycoord = new float[xcoord.length];
-		ArrayList<PeakResult> peakResults = (ArrayList<PeakResult>) results.getResults();
-		for (int i = 0; i < xcoord.length; i++)
-		{
-			PeakResult result = peakResults.get(i);
-			xcoord[i] = result.getXPosition();
-			ycoord[i] = result.getYPosition();
-		}
-
-		return new DensityManager(xcoord, ycoord, results.getBounds());
+		StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
+		sp.getXY();
+		return new DensityManager(sp.x, sp.y, results.getBounds());
 	}
 
 	private ScoreCalculator createCalculator(MemoryPeakResults results)
@@ -394,16 +388,16 @@ public class DensityImage implements PlugIn
 		final float maxY = (int) Math.ceil(scaledRoiMaxY + radius);
 
 		// Create a new set of results within the bounds
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
 		newResults.begin();
-		for (PeakResult peakResult : results.getResults())
+		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
-			float x = peakResult.getXPosition();
-			float y = peakResult.getYPosition();
-			if (x < minX || x > maxX || y < minY || y > maxY)
-				continue;
-			newResults.add(peakResult);
-		}
+			public void executeXYR(float x, float y, PeakResult result)
+			{
+				if (x >= minX && x <= maxX && y >= minY && y <= maxY)
+				newResults.add(result);
+			}
+		});
 		newResults.end();
 		newResults.copySettings(results);
 		newResults.setBounds(new Rectangle((int) minX, (int) minY, (int) (maxX - minX), (int) (maxY - minY)));
@@ -514,7 +508,6 @@ public class DensityImage implements PlugIn
 		}
 
 		// Draw an image - Use error so that a floating point value can be used on a single pixel
-		List<PeakResult> peakResults = results.getResults();
 		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.ERROR, false, false,
 				results.getName() + " Density", results.getBounds(), results.getNmPerPixel(), results.getGain(),
 				imageScale, 0, (cumulativeImage) ? ResultsMode.ADD : ResultsMode.MAX);
@@ -525,7 +518,7 @@ public class DensityImage implements PlugIn
 		{
 			if (density[i] < densityThreshold)
 				continue;
-			PeakResult r = peakResults.get(i);
+			PeakResult r = results.get(i);
 			image.add(0, 0, 0, 0, density[i], 0, r.getParameters(), null);
 			if (newResults != null)
 				newResults.add(r);

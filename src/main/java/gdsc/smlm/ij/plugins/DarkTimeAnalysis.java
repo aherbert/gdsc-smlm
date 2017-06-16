@@ -173,10 +173,9 @@ public class DarkTimeAnalysis implements PlugIn
 		else
 		{
 			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), algorithms[method - 1], tracker);
-			List<PeakResult> peakResults = results.getResults();
-			ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(peakResults), d,
+			ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(results), d,
 					range);
-			traces = TraceMolecules.convertToTraces(peakResults, clusters);
+			traces = TraceMolecules.convertToTraces(results, clusters);
 		}
 
 		tracker.status("Computing histogram ...");

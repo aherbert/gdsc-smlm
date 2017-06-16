@@ -16,6 +16,7 @@ import org.apache.commons.math3.stat.inference.TestUtils;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.SMLMSettings.PSF;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitJob;
@@ -861,6 +862,13 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 				result.getParameters(), result.getParameterDeviations());
 	}
 
+	public synchronized void addAll(PeakResult[] results)
+	{
+		for (PeakResult result : results)
+			add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
+					result.getParameters(), result.getParameterDeviations());
+	}
+	
 	public synchronized void addAll(Collection<PeakResult> results)
 	{
 		for (PeakResult result : results)
@@ -949,6 +957,17 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	}
 
 	public void setName(String name)
+	{
+		// Ignored
+	}
+
+	public PSF getPSF()
+	{
+		// Ignored
+		return null;
+	}
+
+	public void setPSF(PSF psf)
 	{
 		// Ignored
 	}

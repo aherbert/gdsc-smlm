@@ -17,9 +17,11 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -141,25 +143,25 @@ public class CropResults implements PlugIn
 	 */
 	private void cropResults()
 	{
-		MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = new MemoryPeakResults();
 
 		// These bounds are integer. But this is because the results are meant to come from an image.
-		Rectangle bounds = results.getBounds(true);
+		Rectangle intergerBounds = results.getBounds(true);
 
 		// The crop bounds can be floating point...
 
 		// Border
-		double xx = bounds.x + border;
-		double yy = bounds.y + border;
-		double w = Math.max(0, bounds.width - 2 * border);
-		double h = Math.max(0, bounds.height - 2 * border);
-		Rectangle2D borderBounds = new Rectangle2D.Double(xx, yy, w, h);
+		double xx = intergerBounds.x + border;
+		double yy = intergerBounds.y + border;
+		double w = Math.max(0, intergerBounds.width - 2 * border);
+		double h = Math.max(0, intergerBounds.height - 2 * border);
+		Rectangle2D pixelBounds = new Rectangle2D.Double(xx, yy, w, h);
 
 		// Bounding box
 		if (selectRegion)
 		{
 			Rectangle2D boxBounds = new Rectangle2D.Double(x, y, width, height);
-			borderBounds = borderBounds.createIntersection(boxBounds);
+			pixelBounds = pixelBounds.createIntersection(boxBounds);
 		}
 
 		// If an ROI was chosen from an image, scale the roi to the bounds of this dataset
@@ -173,27 +175,32 @@ public class CropResults implements PlugIn
 				int roiImageWidth = imp.getWidth();
 				int roiImageHeight = imp.getHeight();
 
-				double xscale = (double) roiImageWidth / bounds.width;
-				double yscale = (double) roiImageHeight / bounds.height;
+				double xscale = (double) roiImageWidth / intergerBounds.width;
+				double yscale = (double) roiImageHeight / intergerBounds.height;
 
 				Rectangle2D roiBounds = new Rectangle2D.Double(roi.x / xscale, roi.y / yscale, roi.width / xscale,
 						roi.height / yscale);
-				borderBounds = borderBounds.createIntersection(roiBounds);
+				pixelBounds = pixelBounds.createIntersection(roiBounds);
 			}
 		}
 
-		if (borderBounds.getWidth() > 0 && borderBounds.getHeight() > 0)
+		final Rectangle2D bounds = pixelBounds;
+		
+		if (bounds.getWidth() > 0 && bounds.getHeight() > 0)
 		{
-			for (PeakResult result : results.getResults())
+			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 			{
-				if (borderBounds.contains(result.getXPosition(), result.getYPosition()))
-					newResults.add(result);
-			}
+				public void executeXYR(float x, float y, PeakResult result)
+				{
+					if (bounds.contains(result.getXPosition(), result.getYPosition()))
+						newResults.add(result);
+				}
+			});
 		}
 
 		newResults.copySettings(results);
-		newResults.setBounds(new Rectangle((int) Math.floor(borderBounds.getX()), (int) Math.floor(borderBounds.getY()),
-				(int) Math.ceil(borderBounds.getWidth()), (int) Math.ceil(borderBounds.getHeight())));
+		newResults.setBounds(new Rectangle((int) Math.floor(bounds.getX()), (int) Math.floor(bounds.getY()),
+				(int) Math.ceil(bounds.getWidth()), (int) Math.ceil(bounds.getHeight())));
 		if (!overwrite)
 		{
 			newResults.setName(results.getName() + " Cropped");

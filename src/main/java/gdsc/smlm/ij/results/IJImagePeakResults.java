@@ -1,9 +1,14 @@
 package gdsc.smlm.ij.results;
 
-import gdsc.smlm.utils.XmlUtils;
+import java.awt.Rectangle;
+import java.util.Arrays;
+import java.util.Collection;
+
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.utils.XmlUtils;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.MappedImageStack;
@@ -15,10 +20,6 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.MappedFloatProcessor;
 import ij.process.ShortProcessor;
-
-import java.awt.Rectangle;
-import java.util.Arrays;
-import java.util.Collection;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -184,6 +185,11 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			w = h = 1;
 		}
 
+		// Q. Should this be changed to handle the data in non-pixel distances.
+		// At the moment we hope that the results IO can work out the units and convert them during load. 
+		boolean validCalibration = (calibration.hasDistanceUnit() &&
+				calibration.getDistanceUnit() == DistanceUnit.PIXEL);
+
 		size = 0;
 		lastPaintSize = 0;
 		nextRepaintSize = 20; // Let some results appear before drawing
@@ -250,8 +256,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			imp.setCalibration(cal);
 		}
 
-		// We cannot draw anything with no bounds
-		imageActive = validBounds;
+		// We cannot draw anything with no bounds or not in pixels
+		imageActive = validBounds && validCalibration;
 	}
 
 	private String createInfo()
@@ -1001,9 +1007,19 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#addAll(java.util.Collection)
+	 * @see gdsc.smlm.results.AbstractPeakResults#addAll(java.util.Collection)
 	 */
 	public void addAll(Collection<PeakResult> results)
+	{
+		addAll(results.toArray(new PeakResult[results.size()]));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
+	 */
+	public void addAll(PeakResult[] results)
 	{
 		if (!imageActive)
 			return;

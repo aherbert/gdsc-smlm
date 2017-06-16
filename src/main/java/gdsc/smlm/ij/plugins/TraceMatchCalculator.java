@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
  * 
@@ -22,8 +24,10 @@ import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.MatchResult;
 import gdsc.core.match.PointPair;
 import gdsc.core.match.Pulse;
+import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
@@ -283,12 +287,15 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		if (results == null)
 			return null;
-		Pulse[] pulses = new Pulse[results.size()];
-		int i = 0;
-		for (PeakResult p : results.getResults())
+		final Pulse[] pulses = new Pulse[results.size()];
+		final Counter i = new Counter();
+		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
-			pulses[i++] = new Pulse(p.getXPosition(), p.getYPosition(), p.getFrame(), p.getEndFrame());
-		}
+			public void executeXYR(float x, float y, PeakResult p)
+			{
+				pulses[i.getAndIncrement()] = new Pulse(x, y, p.getFrame(), p.getEndFrame());
+			}
+		});
 		return pulses;
 	}
 
