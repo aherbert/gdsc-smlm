@@ -14,6 +14,7 @@ import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitHelper;
 
@@ -33,6 +34,8 @@ import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
 import ij.WindowManager;
 import ij.text.TextPanel;
@@ -46,18 +49,15 @@ import ij.text.TextWindow;
  */
 public class IJTablePeakResults extends IJAbstractPeakResults implements CoordinateProvider
 {
-	/** Converter to change the distances to nm. It is created in {@link #begin()} but may be null. */
-	protected TypeConverter<DistanceUnit> toNMConverter;
 	/**
 	 * Converter to change the distances to pixels. It is created in {@link #begin()} and may be an identity converter.
 	 */
 	protected TypeConverter<DistanceUnit> toPixelConverter;
-	/** The nm per pixel if calibrated. */
-	protected double nmPerPixel;
-	/** Converter to change the intensity to photons. It is created in {@link #begin()} but may be null. */
-	protected TypeConverter<IntensityUnit> toPhotonConverter;
 
-	private boolean canComputePrecision, emCCD;
+	/** The calculator used to compute precision. */
+	private Gaussian2DPeakResultCalculator calculator;
+
+	private boolean canComputePrecision = false;
 
 	/** Converter to change the distances. */
 	private TypeConverter<DistanceUnit> distanceConverter;
@@ -126,54 +126,34 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		tableActive = false;
 
 		// Set-up unit processing that requires the calibration 
-		toNMConverter = null;
 		toPixelConverter = new IdentityTypeConverter<DistanceUnit>(null);
-		nmPerPixel = 0;
-		toPhotonConverter = null;
+		calculator = null;
 		canComputePrecision = false;
 		rounder = RounderFactory.create(roundingPrecision);
 
 		if (calibration != null)
 		{
-			// Create converters 
-			if (calibration.hasNmPerPixel())
+			if (computePrecision)
 			{
-				nmPerPixel = calibration.getNmPerPixel();
-				if (calibration.hasDistanceUnit())
+				try
 				{
-					try
-					{
-						toNMConverter = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
-								DistanceUnit.NM, nmPerPixel);
-						toPixelConverter = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
-								DistanceUnit.PIXEL, nmPerPixel);
-					}
-					catch (ConversionException e)
-					{
-						// Gracefully fail so ignore this
-					}
+					calculator = Gaussian2DPeakResultHelper.create(psf, calibration,
+							Gaussian2DPeakResultHelper.PRECISION);
+					canComputePrecision = true;
 				}
-			}
-			if (calibration.hasIntensityUnit())
-			{
-				if (calibration.hasGain())
+				catch (ConfigurationException e)
 				{
-					try
-					{
-						toPhotonConverter = UnitConverterFactory.createConverter(calibration.getIntensityUnit(),
-								IntensityUnit.PHOTON, calibration.getGain());
-					}
-					catch (ConversionException e)
-					{
-						// Gracefully fail so ignore this
-					}
+					// Not a Gaussian 2D function
 				}
 			}
 
-			if (computePrecision && isCCD() && toNMConverter != null && toPhotonConverter != null)
+			try
 			{
-				emCCD = calibration.getCameraType() == CameraType.EMCCD;
-				canComputePrecision = true;
+				toPixelConverter = calibration.getDistanceConverter(DistanceUnit.PIXEL);
+			}
+			catch (ConversionException e)
+			{
+				// Gracefully fail so ignore this
 			}
 
 			// Add ability to write output in selected units
@@ -407,11 +387,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		float precision = 0;
 		if (canComputePrecision)
 		{
-			double s = toNMConverter
-					.convert(PeakResult.getSD(params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD]));
-			precision = (float) PeakResult.getPrecision(nmPerPixel, s,
-					toPhotonConverter.convert(params[Gaussian2DFunction.SIGNAL]), toPhotonConverter.convert(noise),
-					emCCD);
+			precision = (float) calculator.getPrecision(params, noise);
 		}
 		final float snr = (noise > 0) ? params[Gaussian2DFunction.SIGNAL] / noise : 0;
 		//@formatter:off
@@ -528,7 +504,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			tp.updateDisplay();
 		}
 	}
-	
+
 	public void add(PeakResult result)
 	{
 		addPeak(result.getFrame(), result.getEndFrame(), result.origX, result.origY, result.origValue, result.error,

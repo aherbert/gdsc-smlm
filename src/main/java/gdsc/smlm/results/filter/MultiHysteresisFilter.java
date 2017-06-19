@@ -14,6 +14,8 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ga.Chromosome;
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -81,11 +83,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	double weakVariance;
 
 	@XStreamOmitField
-	double nmPerPixel = 100;
-	@XStreamOmitField
-	boolean emCCD = true;
-	@XStreamOmitField
-	double gain = 1;
+	private Gaussian2DPeakResultCalculator calculator;
 
 	/**
 	 * @param searchDistance
@@ -130,23 +128,21 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	@Override
 	protected String generateName()
 	{
-		return String
-				.format("Multi Hysteresis: Signal=%.1f-%.1f, SNR=%.1f-%.1f, MinWidth=%.2f-%.2f, MaxWidth=%.2f+%.2f, Shift=%.2f+%.2f, Precision=%.1f+%.1f (%s)",
-						strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth,
-						rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision, getTraceParameters());
+		return String.format(
+				"Multi Hysteresis: Signal=%.1f-%.1f, SNR=%.1f-%.1f, MinWidth=%.2f-%.2f, MaxWidth=%.2f+%.2f, Shift=%.2f+%.2f, Precision=%.1f+%.1f (%s)",
+				strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth,
+				rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision, getTraceParameters());
 	}
 
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		// Calibration
-		nmPerPixel = peakResults.getNmPerPixel();
-		gain = peakResults.getGain();
-		emCCD = peakResults.isEMCCD();
+		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+				Gaussian2DPeakResultHelper.PRECISION);
 
 		// Set the signal limit using the gain
-		strictSignalThreshold = (float) (strictSignal * gain);
-		weakSignalThreshold = (float) ((strictSignal - rangeSignal) * gain);
+		strictSignalThreshold = (float) (strictSignal);
+		weakSignalThreshold = (float) (strictSignal - rangeSignal);
 
 		weakSnr = strictSnr - rangeSnr;
 
@@ -186,12 +182,12 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		final float snr = SNRFilter.getSNR(result);
 		if (snr < weakSnr)
 			return PeakStatus.REJECT;
-		final float sd = result.getSD();
+		final float sd = calculator.getStandardDeviation(result.getParameters());
 		if (sd < weakMinSigmaThreshold || sd > weakMaxSigmaThreshold)
 			return PeakStatus.REJECT;
 		if (Math.abs(result.getXPosition()) > weakOffset || Math.abs(result.getYPosition()) > weakOffset)
 			return PeakStatus.REJECT;
-		final double variance = result.getVariance(nmPerPixel, gain, emCCD);
+		final double variance = calculator.getVariance(result.getParameters(), result.noise);
 		if (variance > weakVariance)
 			return PeakStatus.REJECT;
 
@@ -206,7 +202,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 			return PeakStatus.CANDIDATE;
 		if (variance > strictVariance)
 			return PeakStatus.CANDIDATE;
-		
+
 		return PeakStatus.OK;
 	}
 
@@ -282,7 +278,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 				return rangePrecision;
 		}
 	}
-	
+
 	@Override
 	public double getParameterIncrement(int index)
 	{
@@ -363,25 +359,12 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		}
 	}
 
-	static double[] defaultRange = new double[]{
-		0,
-		0,
-		0,
-		0,
-		SignalFilter.DEFAULT_RANGE,
-		SignalFilter.DEFAULT_RANGE,
-		SNRFilter.DEFAULT_RANGE,
-		SNRFilter.DEFAULT_RANGE,
-		WidthFilter2.DEFAULT_MIN_RANGE,
-		WidthFilter2.DEFAULT_MIN_RANGE,
-		WidthFilter.DEFAULT_RANGE,
-		WidthFilter.DEFAULT_RANGE,
-		ShiftFilter.DEFAULT_RANGE,
-		ShiftFilter.DEFAULT_RANGE,
-		PrecisionFilter.DEFAULT_RANGE,		
-		PrecisionFilter.DEFAULT_RANGE		
-	};
-	
+	static double[] defaultRange = new double[] { 0, 0, 0, 0, SignalFilter.DEFAULT_RANGE, SignalFilter.DEFAULT_RANGE,
+			SNRFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE, WidthFilter2.DEFAULT_MIN_RANGE,
+			WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, WidthFilter.DEFAULT_RANGE,
+			ShiftFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE,
+			PrecisionFilter.DEFAULT_RANGE };
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -429,7 +412,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	public void weakestParameters(double[] parameters)
 	{
 		super.weakestParameters(parameters);
-		
+
 		// Hysteresis filters require all the potential candidates, so disable hysteresis above the candidate threshold  
 		setMin(parameters, 4, strictSignal - rangeSignal);
 		parameters[5] = 0;
@@ -444,7 +427,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		setMax(parameters, 14, strictPrecision + rangePrecision);
 		parameters[15] = 0;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -455,10 +438,9 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	{
 		// Override the default Hysteresis filter implementation for speed since this is the filter we
 		// will most likely optimise using the genetic algorithm
-		return new MultiHysteresisFilter(sequence[0], searchDistanceMode, sequence[1], timeThresholdMode,
-				sequence[2], sequence[3], (float) sequence[4], (float) sequence[5], sequence[6],
-				sequence[7], sequence[8], sequence[9], sequence[10], sequence[11], sequence[12],
-				sequence[13]);
+		return new MultiHysteresisFilter(sequence[0], searchDistanceMode, sequence[1], timeThresholdMode, sequence[2],
+				sequence[3], (float) sequence[4], (float) sequence[5], sequence[6], sequence[7], sequence[8],
+				sequence[9], sequence[10], sequence[11], sequence[12], sequence[13]);
 	}
 
 	/*
@@ -469,15 +451,10 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	@Override
 	public double[] upperLimit()
 	{
-		return new double[] { 
-				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 
-				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
-				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
-				WidthFilter.UPPER_LIMIT, WidthFilter.UPPER_LIMIT,
-				WidthFilter.UPPER_LIMIT, WidthFilter.UPPER_LIMIT,
-				ShiftFilter.UPPER_LIMIT, ShiftFilter.UPPER_LIMIT,
-				PrecisionFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT 
-				};
+		return new double[] { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
+				Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, WidthFilter.UPPER_LIMIT,
+				WidthFilter.UPPER_LIMIT, WidthFilter.UPPER_LIMIT, WidthFilter.UPPER_LIMIT, ShiftFilter.UPPER_LIMIT,
+				ShiftFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT };
 	}
 
 	/*
@@ -487,21 +464,10 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	 */
 	public double[] mutationStepRange()
 	{
-		return new double[] {
-    		getDefaultSearchRange(),
-    		getDefaultTimeRange(),
-    		SignalFilter.DEFAULT_RANGE,
-    		SignalFilter.DEFAULT_RANGE,
-    		SNRFilter.DEFAULT_RANGE,
-    		SNRFilter.DEFAULT_RANGE,
-    		WidthFilter2.DEFAULT_MIN_RANGE,
-    		WidthFilter2.DEFAULT_MIN_RANGE,
-    		WidthFilter.DEFAULT_RANGE,
-    		WidthFilter.DEFAULT_RANGE,
-    		ShiftFilter.DEFAULT_RANGE,
-    		ShiftFilter.DEFAULT_RANGE,
-    		PrecisionFilter.DEFAULT_RANGE,		
-    		PrecisionFilter.DEFAULT_RANGE
-		};		
+		return new double[] { getDefaultSearchRange(), getDefaultTimeRange(), SignalFilter.DEFAULT_RANGE,
+				SignalFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE,
+				WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE,
+				WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
+				PrecisionFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE };
 	}
 }

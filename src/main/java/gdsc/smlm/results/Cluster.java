@@ -1,11 +1,13 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.utils.Maths;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -92,8 +94,8 @@ public class Cluster implements Comparable<Cluster>
 		{
 			final float w = weights[i++];
 			sum += w;
-			centroid[0] += result.params[Gaussian2DFunction.X_POSITION] * w;
-			centroid[1] += result.params[Gaussian2DFunction.Y_POSITION] * w;
+			centroid[0] += result.getXPosition() * w;
+			centroid[1] += result.getYPosition() * w;
 		}
 		centroid[0] /= sum;
 		centroid[1] /= sum;
@@ -107,8 +109,8 @@ public class Cluster implements Comparable<Cluster>
 			centroid = new float[2];
 			for (PeakResult result : results)
 			{
-				centroid[0] += result.params[Gaussian2DFunction.X_POSITION];
-				centroid[1] += result.params[Gaussian2DFunction.Y_POSITION];
+				centroid[0] += result.getXPosition();
+				centroid[1] += result.getYPosition();
 			}
 			centroid[0] /= results.size();
 			centroid[1] /= results.size();
@@ -135,8 +137,8 @@ public class Cluster implements Comparable<Cluster>
 		double ssx = 0;
 		for (PeakResult result : results)
 		{
-			final double dx = result.params[Gaussian2DFunction.X_POSITION] - centroid[0];
-			final double dy = result.params[Gaussian2DFunction.Y_POSITION] - centroid[1];
+			final double dx = result.getXPosition() - centroid[0];
+			final double dy = result.getYPosition() - centroid[1];
 			final double d2 = dx * dx + dy * dy;
 			ssx += d2;
 		}
@@ -148,15 +150,17 @@ public class Cluster implements Comparable<Cluster>
 	 * Protocols 8, 345.
 	 * <p>
 	 * Also sets the centroid if it has not been calculated using the signal weighted centre-of-mass
-	 * 
-	 * @param a
-	 *            The pixel size in nm
-	 * @param gain
-	 *            The gain (to convert ADUs back to photons)
+	 * <p>
+	 * Note that the PeakResult must have valid values in the precision field, otherwise a value of 1 is used.
+	 *
+	 * @param converter the converter to convert the distances to nm
 	 * @return The weighted localisation precision of the group peak (in nm)
 	 */
-	public double getLocalisationPrecision(double a, double gain, boolean emCCD)
+	public double getLocalisationPrecision(TypeConverter<DistanceUnit> converter)
 	{
+		if (converter == null || converter.to() != DistanceUnit.NM)
+			return 0;
+		
 		final int n = size();
 		if (n == 0)
 		{
@@ -169,10 +173,9 @@ public class Cluster implements Comparable<Cluster>
 			PeakResult result = results.get(0);
 			if (centroid == null)
 			{
-				centroid = new float[] { result.params[Gaussian2DFunction.X_POSITION],
-						result.params[Gaussian2DFunction.Y_POSITION] };
+				centroid = new float[] { result.getXPosition(), result.getYPosition() };
 			}
-			return result.getPrecision(a, gain, emCCD);
+			return checkPrecision(result.getPrecision());
 		}
 
 		float[] photons = new float[results.size()];
@@ -189,8 +192,8 @@ public class Cluster implements Comparable<Cluster>
 		{
 			final float Ni = photons[i++];
 			sumNi += Ni;
-			xm += result.params[Gaussian2DFunction.X_POSITION] * Ni;
-			ym += result.params[Gaussian2DFunction.Y_POSITION] * Ni;
+			xm += result.getXPosition() * Ni;
+			ym += result.getYPosition() * Ni;
 		}
 		xm /= sumNi;
 		ym /= sumNi;
@@ -206,12 +209,12 @@ public class Cluster implements Comparable<Cluster>
 		{
 			final float Ni = photons[i++];
 
-			double dx = (result.params[Gaussian2DFunction.X_POSITION] - xm) * a;
-			double dy = (result.params[Gaussian2DFunction.Y_POSITION] - ym) * a;
+			double dx = converter.convert(result.getXPosition() - xm);
+			double dy = converter.convert(result.getYPosition() - ym);
 
 			sumXi2Ni += dx * dx * Ni;
 			sumYi2Ni += dy * dy * Ni;
-			sumS2 += result.getVariance(a, gain, emCCD) * Ni;
+			sumS2 += Maths.pow2(checkPrecision(result.getPrecision())) * Ni;
 		}
 
 		double sumNin = sumNi * n;
@@ -222,6 +225,12 @@ public class Cluster implements Comparable<Cluster>
 		double sPeak = FastMath.max(sxm, sym);
 
 		return sPeak;
+	}
+
+	private static double checkPrecision(double p)
+	{
+		return (p > 0 && p < Double.MAX_VALUE) ? p : 1;
+
 	}
 
 	/**

@@ -188,7 +188,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		// Q. Should this be changed to handle the data in non-pixel distances.
 		// At the moment we hope that the results IO can work out the units and convert them during load. 
-		boolean validCalibration = uncalibrated ||
+		boolean validCalibration = isUncalibrated() ||
 				(calibration.hasDistanceUnit() && calibration.getDistanceUnit() == DistanceUnit.PIXEL);
 
 		size = 0;
@@ -245,6 +245,9 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		if (calibration != null)
 		{
 			Calibration cal = new Calibration();
+			
+			// This assumes the input data is in pixels
+			
 			String unit = "nm";
 			double unitPerPixel = calibration.getNmPerPixel() / scale;
 			if (unitPerPixel > 100)

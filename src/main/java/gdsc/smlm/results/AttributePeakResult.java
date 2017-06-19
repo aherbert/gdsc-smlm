@@ -180,25 +180,27 @@ public class AttributePeakResult extends PeakResult
 	/**
 	 * Instantiates a new attribute peak result.
 	 *
-	 * @param startFrame
-	 *            the start frame
+	 * @param frame
+	 *            the frame
 	 * @param origX
-	 *            the orig X
+	 *            the original X position
 	 * @param origY
-	 *            the orig Y
+	 *            the original Y position
 	 * @param origValue
-	 *            the orig value
+	 *            the original value
 	 * @param error
 	 *            the error
 	 * @param noise
 	 *            the noise
 	 * @param params
-	 *            the params
+	 *            the params (must not be null and must have at least {@value #STANDARD_PARAMETERS} parameters)
 	 * @param paramsStdDev
-	 *            the params std dev
+	 *            the params standard deviations (if not null must match the length of the {@link #params} array)
+	 * @throws IllegalArgumentException
+	 *             the illegal argument exception if the parameters are invalid
 	 */
 	public AttributePeakResult(int startFrame, int origX, int origY, float origValue, double error, float noise,
-			float[] params, float[] paramsStdDev)
+			float[] params, float[] paramsStdDev) throws IllegalArgumentException
 	{
 		super(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev);
 	}
@@ -209,35 +211,29 @@ public class AttributePeakResult extends PeakResult
 	 * @param frame
 	 *            the frame
 	 * @param x
-	 *            the x
+	 *            the x position
 	 * @param y
-	 *            the y
-	 * @param sd
-	 *            the sd
-	 * @param signal
-	 *            the signal
+	 *            the y position
+	 * @param intensity
+	 *            the intensity
 	 */
-	public AttributePeakResult(int frame, float x, float y, float sd, float signal)
+	public AttributePeakResult(int frame, float x, float y, float intensity)
 	{
-		super(frame, x, y, sd, signal);
+		super(frame, x, y, intensity);
 	}
 
 	/**
 	 * Instantiates a new attribute peak result.
 	 *
 	 * @param x
-	 *            the x
+	 *            the x position
 	 * @param y
-	 *            the y
-	 * @param sd
-	 *            the sd
-	 * @param signal
-	 *            the signal
-	 * @param id
-	 *            the id
+	 *            the y position
+	 * @param intensity
+	 *            the intensity
 	 */
-	public AttributePeakResult(float x, float y, float sd, float signal)
+	public AttributePeakResult(float x, float y, float intensity)
 	{
-		super(x, y, sd, signal);
+		super(x, y, intensity);
 	}
 }

@@ -340,20 +340,20 @@ public class TSFPeakResultsReader
 				// Support different Gaussian shapes
 				if (fitMode == FitMode.ONEAXIS)
 				{
-					params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = spot.getWidth() /
-							TSFPeakResultsWriter.SD_TO_FWHM_FACTOR;
+					params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) (spot.getWidth() /
+							Gaussian2DFunction.SD_TO_FWHM_FACTOR);
 				}
 				else
 				{
 					if (!spot.hasA())
 					{
-						params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = spot.getWidth() /
-								TSFPeakResultsWriter.SD_TO_FWHM_FACTOR;
+						params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) (spot.getWidth() /
+								Gaussian2DFunction.SD_TO_FWHM_FACTOR);
 					}
 					else
 					{
 						double a = Math.sqrt(spot.getA());
-						double sd = spot.getWidth() / TSFPeakResultsWriter.SD_TO_FWHM_FACTOR;
+						double sd = spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR;
 						params[Gaussian2DFunction.X_SD] = (float) (sd * a);
 						params[Gaussian2DFunction.Y_SD] = (float) (sd / a);
 					}

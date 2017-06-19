@@ -314,12 +314,10 @@ public class PCPALMClusters implements PlugIn
 		// Set an arbitrary calibration so that the lifetime of the results is stored in the exposure time
 		// The results will be handled as a single mega-frame containing all localisation. 
 		results.setCalibration(new Calibration(100, 1, PCPALMMolecules.seconds * 1000));
-		// Make the standard deviation such that the Gaussian volume will be 95% at the distance threshold
-		final float sd = (float) (distance / 1.959964);
 		int id = 0;
 		for (Cluster c : clusters)
 		{
-			results.add(new ExtendedPeakResult((float) c.x, (float) c.y, sd, c.n, ++id));
+			results.add(new ExtendedPeakResult((float) c.x, (float) c.y, c.n, ++id));
 		}
 		MemoryPeakResults.addResults(results);
 

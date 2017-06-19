@@ -1436,8 +1436,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 
-		final int ix = indices[0] + PeakResult.STANDARD_PARAMETERS;
-		final int iy = indices[1] + PeakResult.STANDARD_PARAMETERS;
+		final int isx = indices[0];
+		final int isy = indices[1];
 		final double twoPi = 2 * Math.PI;
 
 		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(intensityUnit);
@@ -1448,8 +1448,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = get(i);
 
 			// Convert the widths to pixels
-			float sx = dc.convert(r.getParameter(ix));
-			float sy = dc.convert(r.getParameter(iy));
+			float sx = dc.convert(r.getParameter(isx));
+			float sy = dc.convert(r.getParameter(isy));
 
 			//@formatter:off
 			procedure.executeH(
@@ -1651,19 +1651,19 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 
-		final int ix = indices[0] + PeakResult.STANDARD_PARAMETERS;
-		final int iy = indices[1] + PeakResult.STANDARD_PARAMETERS;
+		final int isx = indices[0];
+		final int isy = indices[1];
 
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
 
-		if (ix == iy)
+		if (isx == isy)
 		{
 			for (int i = 0, size = size(); i < size; i++)
 			{
 				final PeakResult r = get(i);
 				//@formatter:off
     			procedure.executeW(
-    					dc.convert(r.getParameter(ix)));
+    					dc.convert(r.getParameter(isx)));
     			//@formatter:on
 			}
 		}
@@ -1673,7 +1673,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			{
 				final PeakResult r = get(i);
 				// Convert the separate widths into a single width
-				double s = PeakResultHelper.getGaussian2DStandardDeviation(r.getParameter(ix), r.getParameter(iy));
+				double s = Gaussian2DPeakResultHelper.getStandardDeviation(r.getParameter(isx), r.getParameter(isy));
 				//@formatter:off
     			procedure.executeW(
     					(float)dc.convert(s));
@@ -1707,8 +1707,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 
-		final int ix = indices[0] + PeakResult.STANDARD_PARAMETERS;
-		final int iy = indices[1] + PeakResult.STANDARD_PARAMETERS;
+		final int isx = indices[0];
+		final int isy = indices[1];
 
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
 
@@ -1717,8 +1717,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = get(i);
 			//@formatter:off
 			procedure.executeWxWy(
-					dc.convert(r.getParameter(ix)),
-					dc.convert(r.getParameter(iy)));
+					dc.convert(r.getParameter(isx)),
+					dc.convert(r.getParameter(isy)));
 			//@formatter:on
 		}
 	}
@@ -1843,10 +1843,15 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (calibration == null)
 			throw new ConfigurationException("No calibration");
 
+		// Check if this is a Gaussian2DFunction and throw an error if not.
+		// Otherwise determine the PSF fields to obtain the distance
+		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+
+		final int ix = indices[0];
+		final int iy = indices[1];
+
 		// TODO - do the conversion using the calibration helper.
 
-		// TODO - Check if this is a Gaussian2DFunction and throw an error if not
-		// Otherwise determine the PSF fields to obtain the distance
 		if (!isCCDCamera())
 			throw new ConfigurationException("Not a CCD camera");
 		final boolean emCCD = isEMCCD();
@@ -1859,12 +1864,25 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		// This will be fine if the intensity converter was created
 		final double nmPerPixel = getNmPerPixel();
 
-		for (int i = 0, size = size(); i < size; i++)
+		if (ix == iy)
 		{
-			final PeakResult r = get(i);
-			float s = r.getSD();
-			procedure.executeLSEPrecision(PeakResult.getPrecision(nmPerPixel, dc.convert(s), ic.convert(r.getSignal()),
-					bic.convert(r.getBackground()), emCCD));
+			for (int i = 0, size = size(); i < size; i++)
+			{
+				final PeakResult r = get(i);
+				double s = r.getParameter(ix);
+				procedure.executeLSEPrecision(Gaussian2DPeakResultHelper.getPrecision(nmPerPixel, dc.convert(s),
+						ic.convert(r.getSignal()), bic.convert(r.getBackground()), emCCD));
+			}
+		}
+		else
+		{
+			for (int i = 0, size = size(); i < size; i++)
+			{
+				final PeakResult r = get(i);
+				double s = Gaussian2DPeakResultHelper.getStandardDeviation(r.getParameter(ix), r.getParameter(iy));
+				procedure.executeLSEPrecision(Gaussian2DPeakResultHelper.getPrecision(nmPerPixel, dc.convert(s),
+						ic.convert(r.getSignal()), bic.convert(r.getBackground()), emCCD));
+			}
 		}
 	}
 

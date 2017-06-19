@@ -7,6 +7,8 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -41,6 +43,9 @@ public class ANRFilter2 extends DirectFilter
 	@XStreamOmitField
 	boolean widthEnabled;
 
+	@XStreamOmitField
+	private Gaussian2DPeakResultCalculator calculator;
+
 	public ANRFilter2(float anr, double minWidth, double maxWidth)
 	{
 		this.anr = Math.max(0, anr);
@@ -64,6 +69,9 @@ public class ANRFilter2 extends DirectFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+				Gaussian2DPeakResultHelper.AMPLITUDE);
+
 		// Set the width limit
 		lowerSigmaThreshold = 0;
 		upperSigmaThreshold = Float.POSITIVE_INFINITY;
@@ -102,8 +110,10 @@ public class ANRFilter2 extends DirectFilter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return ANRFilter.getANR(peak) >= this.anr && peak.getSD() <= upperSigmaThreshold &&
-				peak.getSD() >= lowerSigmaThreshold;
+		float sd = calculator.getStandardDeviation(peak.getParameters());
+		return ANRFilter.getANR(calculator, peak) >= this.anr &&
+				sd <= upperSigmaThreshold &&
+				sd >= lowerSigmaThreshold;
 	}
 
 	@Override

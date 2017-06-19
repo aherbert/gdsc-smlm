@@ -116,7 +116,7 @@ public class ResultsManagerTest
 			builder.setIntensity(rand.next());
 			builder.setX(rand.next());
 			builder.setY(rand.next());
-			builder.setWidth(TSFPeakResultsWriter.SD_TO_FWHM_FACTOR * rand.next());
+			builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR * rand.next()));
 
 			Spot spot = builder.build();
 			spots[i - 1] = spot;
@@ -285,8 +285,11 @@ public class ResultsManagerTest
 			Assert.assertEquals("Signal mismatch @ " + i, p1.getSignal(), p2.getSignal(), delta);
 			Assert.assertEquals("XPosition mismatch @ " + i, p1.getXPosition(), p2.getXPosition(), delta);
 			Assert.assertEquals("YPosition mismatch @ " + i, p1.getYPosition(), p2.getYPosition(), delta);
-			Assert.assertEquals("XSD mismatch @ " + i, p1.getXSD(), p2.getXSD(), 1e-6);
-			Assert.assertEquals("YSD mismatch @ " + i, p1.getYSD(), p2.getYSD(), 1e-6);
+			Assert.assertEquals("ZPosition mismatch @ " + i, p1.getZPosition(), p2.getZPosition(), delta);
+			for (int j = PeakResult.STANDARD_PARAMETERS, size = p1.getNumberOfParameters(); j < size; j++)
+			{
+				Assert.assertEquals("Parameter mismatch @ " + i, p1.getParameter(j), p2.getParameter(j), 1e-6);
+			}
 
 			Assert.assertEquals("ID mismatch @ " + i, p1.getId(), p2.getId());
 		}
@@ -312,8 +315,8 @@ public class ResultsManagerTest
 				params[Gaussian2DFunction.SIGNAL] = spot.getIntensity();
 				params[Gaussian2DFunction.X_POSITION] = spot.getX();
 				params[Gaussian2DFunction.Y_POSITION] = spot.getY();
-				params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = spot.getWidth() /
-						TSFPeakResultsWriter.SD_TO_FWHM_FACTOR;
+				params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) (spot.getWidth() /
+						Gaussian2DFunction.SD_TO_FWHM_FACTOR);
 				float[] paramsStdDev = null;
 				IdPeakResult peak = new IdPeakResult(startFrame, origX, origY, origValue, error, noise, params,
 						paramsStdDev, id);

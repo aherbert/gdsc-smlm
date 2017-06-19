@@ -14,8 +14,8 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.UnitHelper;
@@ -40,6 +40,8 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class TextFilePeakResults extends SMLMFilePeakResults
 {
+	private Gaussian2DPeakResultCalculator calculator;
+
 	/** Converter to change the distances. */
 	private TypeConverter<DistanceUnit> distanceConverter;
 	/** Converter to change the intensity. */
@@ -53,10 +55,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	private IntensityUnit intensityUnit = null;
 	private AngleUnit angleUnit = null;
 	private boolean computePrecision = false;
+	private boolean canComputePrecision = false;
 
 	private OutputStreamWriter out;
-
-	private boolean canComputePrecision, emCCD;
 
 	public TextFilePeakResults(String filename)
 	{
@@ -128,22 +129,27 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.FilePeakResults#createPrecisionConverters()
+	 * @see gdsc.smlm.results.FilePeakResults#begin()
 	 */
 	@Override
-	protected void createPrecisionConverters()
+	public void begin()
 	{
-		if (computePrecision)
-			super.createPrecisionConverters();
-
+		calculator = null;
 		canComputePrecision = false;
 
 		if (calibration != null)
 		{
-			if (computePrecision && isCCD() && toNMConverter != null && toPhotonConverter != null)
+			if (computePrecision)
 			{
-				emCCD = calibration.getCameraType() == CameraType.EMCCD;
-				canComputePrecision = true;
+				try
+				{
+					calculator = Gaussian2DPeakResultHelper.create(psf, calibration, Gaussian2DPeakResultHelper.PRECISION);
+					canComputePrecision = true;
+				}
+				catch (ConfigurationException e)
+				{
+					// Not a Gaussian 2D function
+				}
 			}
 
 			// Add ability to write output in selected units
@@ -164,22 +170,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			if (shapeConverter.to() != null)
 				calibration.setAngleUnit(shapeConverter.to());
 		}
-	}
 
-	private boolean isCCD()
-	{
-		if (calibration.hasCameraType())
-		{
-			switch (calibration.getCameraType())
-			{
-				case CCD:
-				case EMCCD:
-					return true;
-				default:
-					break;
-			}
-		}
-		return false;
+		super.begin();
 	}
 
 	/**
@@ -278,12 +270,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 		if (canComputePrecision)
 		{
-			double s = toNMConverter
-					.convert(PeakResult.getSD(params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD]));
-			float precision = (float) PeakResult.getPrecision(nmPerPixel, s,
-					toPhotonConverter.convert(params[Gaussian2DFunction.SIGNAL]), toPhotonConverter.convert(noise),
-					emCCD);
-			addResult(sb, precision);
+			addResult(sb, (float) calculator.getPrecision(params, noise));
 		}
 
 		sb.append('\n');
@@ -347,17 +334,17 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		if (fos == null)
 			return;
-		
+
 		StringBuilder sb = new StringBuilder();
 		add(sb, result);
 		writeResult(1, sb.toString());
 	}
-	
+
 	private void add(StringBuilder sb, PeakResult result)
 	{
 		addStandardData(sb, result.getId(), result.getFrame(), result.getEndFrame(), result.origX, result.origY,
 				result.origValue, result.error, result.noise);
-		
+
 		// Add the parameters		
 		//@formatter:off
 		final float[] params = result.params;
@@ -388,15 +375,11 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 		if (canComputePrecision)
 		{
-			double s = toNMConverter.convert(result.getSD());
-			float precision = (float) PeakResult.getPrecision(nmPerPixel, s,
-					toPhotonConverter.convert(result.params[Gaussian2DFunction.SIGNAL]),
-					toPhotonConverter.convert(result.noise), emCCD);
-			addResult(sb, precision);
+			addResult(sb, (float) calculator.getPrecision(params, result.noise));
 		}
 		sb.append('\n');
 	}
-	
+
 	public void addAll(PeakResult[] results)
 	{
 		if (fos == null)

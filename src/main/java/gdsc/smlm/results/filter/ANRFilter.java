@@ -1,6 +1,7 @@
 package gdsc.smlm.results.filter;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -16,6 +17,8 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 
 /**
@@ -26,6 +29,9 @@ public class ANRFilter extends DirectFilter
 	@XStreamAsAttribute
 	final float anr;
 
+	@XStreamOmitField
+	private Gaussian2DPeakResultCalculator calculator;
+
 	public ANRFilter(float anr)
 	{
 		this.anr = Math.max(0, anr);
@@ -34,17 +40,20 @@ public class ANRFilter extends DirectFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+				Gaussian2DPeakResultHelper.AMPLITUDE);
 	}
 
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return getANR(peak) >= this.anr;
+		return getANR(calculator, peak) >= this.anr;
 	}
 
-	static float getANR(PeakResult peak)
+	static float getANR(Gaussian2DPeakResultCalculator calculator, PeakResult peak)
 	{
-		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
+		return (peak.getNoise() > 0) ? calculator.getAmplitude(peak.getParameters()) / peak.getNoise()
+				: Float.POSITIVE_INFINITY;
 	}
 
 	public int validate(final PreprocessedPeakResult peak)

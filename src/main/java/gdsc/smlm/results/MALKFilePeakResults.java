@@ -14,8 +14,11 @@ import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 
@@ -40,6 +43,11 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class MALKFilePeakResults extends FilePeakResults
 {
+	/** Converter to change the distances to nm. It is created in {@link #begin()} but may be null. */
+	protected TypeConverter<DistanceUnit> toNMConverter;
+	/** Converter to change the intensity to photons. It is created in {@link #begin()} but may be null. */
+	protected TypeConverter<IntensityUnit> toPhotonConverter;
+
 	private OutputStreamWriter out;
 
 	public MALKFilePeakResults(String filename)
@@ -113,23 +121,55 @@ public class MALKFilePeakResults extends FilePeakResults
 	@Override
 	public void begin()
 	{
+		// Ensure we write out in nm and photons if possible.
+		if (calibration != null)
+		{
+			// Copy it so it can be modified
+			setCalibration(calibration.clone());
+
+			// Create converters 
+			if (calibration.hasNmPerPixel())
+			{
+				double nmPerPixel = calibration.getNmPerPixel();
+				if (calibration.hasDistanceUnit())
+				{
+					try
+					{
+						toNMConverter = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
+								DistanceUnit.NM, nmPerPixel);
+						calibration.setDistanceUnit(DistanceUnit.NM);
+					}
+					catch (ConversionException e)
+					{
+						// Gracefully fail so ignore this
+					}
+				}
+			}
+			if (calibration.hasIntensityUnit())
+			{
+				if (calibration.hasGain())
+				{
+					try
+					{
+						toPhotonConverter = UnitConverterFactory.createConverter(calibration.getIntensityUnit(),
+								IntensityUnit.PHOTON, calibration.getGain());
+						calibration.setIntensityUnit(IntensityUnit.PHOTON);
+					}
+					catch (ConversionException e)
+					{
+						// Gracefully fail so ignore this
+					}
+				}
+			}
+		}
+
 		super.begin();
 
-		// Ensure we write out in nm and photons if possible.
-		// If converters were not created then use dummy converters.
-
-		// Copy it so it can be modified
-		setCalibration(calibration.clone());
-
+		// Create converters to avoid null pointers
 		if (toNMConverter == null)
 			toNMConverter = new IdentityTypeConverter<DistanceUnit>(DistanceUnit.NM);
-		else
-			calibration.setDistanceUnit(DistanceUnit.NM);
-
 		if (toPhotonConverter == null)
 			toPhotonConverter = new IdentityTypeConverter<IntensityUnit>(IntensityUnit.PHOTON);
-		else
-			calibration.setIntensityUnit(IntensityUnit.PHOTON);
 	}
 
 	/*

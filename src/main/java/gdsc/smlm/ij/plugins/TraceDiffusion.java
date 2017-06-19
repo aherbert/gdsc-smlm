@@ -25,6 +25,8 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -46,6 +48,8 @@ import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -504,19 +508,26 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 		else
 		{
-			// Get the average precision of the localisations
-			precision = 0;
-			final double nmPerPixel = results.getNmPerPixel();
-			final double gain = results.getGain();
-			final boolean emCCD = results.isEMCCD();
-			int n = 0;
-			for (Trace trace : traces)
+			precision = 999;
+			try
 			{
-				for (PeakResult r : trace.getPoints())
-					precision += r.getPrecision(nmPerPixel, gain, emCCD);
-				n += trace.size();
+				Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(results.getPSF(),
+						results.getCalibration(), Gaussian2DPeakResultHelper.PRECISION);
+				// Get the average precision of the localisations
+				precision = 0;
+				int n = 0;
+				for (Trace trace : traces)
+				{
+					for (PeakResult r : trace.getPoints())
+						precision += calculator.getPrecision(r.getParameters(), r.noise);
+					n += trace.size();
+				}
+				precision /= n;
 			}
-			precision /= n;
+			catch (ConfigurationException e)
+			{
+				// Ignore this and we will ask the user for the precision
+			}
 		}
 
 		if (precision > 100)
@@ -1981,12 +1992,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		Calibration cal = allResults.get(0).getCalibration();
 		final double nmPerPixel = cal.getNmPerPixel();
 		final double exposureTime = cal.getExposureTime();
+		final DistanceUnit distanceUnit = cal.getDistanceUnit();
 		for (int i = 1; i < allResults.size(); i++)
 		{
 			MemoryPeakResults results = allResults.get(1);
 
 			if (results.getCalibration() == null || results.getCalibration().getExposureTime() != exposureTime ||
-					results.getNmPerPixel() != nmPerPixel)
+					results.getNmPerPixel() != nmPerPixel || results.getDistanceUnit() != distanceUnit)
 			{
 				IJ.error(TITLE, "The exposure time and pixel pitch must match across all the results");
 				return false;

@@ -1,5 +1,8 @@
 package gdsc.smlm.results.filter;
 
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,6 +18,7 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.filter.HysteresisFilter.PeakStatus;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -35,11 +39,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@XStreamOmitField
 	double upperVariance;
 	@XStreamOmitField
-	double nmPerPixel;
-	@XStreamOmitField
-	double gain;
-	@XStreamOmitField
-	boolean emCCD = true;
+	private Gaussian2DPeakResultCalculator calculator;
 
 	/**
 	 * @param searchDistance
@@ -68,11 +68,10 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+				Gaussian2DPeakResultHelper.PRECISION);
 		lowerVariance = Filter.getDUpperSquaredLimit(strictPrecision);
 		upperVariance = Filter.getDUpperSquaredLimit(strictPrecision + range);
-		nmPerPixel = peakResults.getNmPerPixel();
-		gain = peakResults.getGain();
-		emCCD = peakResults.isEMCCD();
 		super.setup(peakResults);
 	}
 
@@ -80,7 +79,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	protected PeakStatus getStatus(PeakResult result)
 	{
 		// Use the background noise to estimate precision 
-		final double variance = result.getVariance(nmPerPixel, gain, emCCD);
+		final double variance = calculator.getVariance(result.getParameters(), result.noise);
 		if (variance <= lowerVariance)
 			return PeakStatus.OK;
 		else if (variance <= upperVariance)

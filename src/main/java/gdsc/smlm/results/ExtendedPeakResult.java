@@ -21,31 +21,29 @@ public class ExtendedPeakResult extends IdPeakResult
 	private int endFrame;
 
 	/**
-	 * Instantiates a new extended peak result.
+	 * Instantiates a new peak result.
 	 *
-	 * @param startFrame
-	 *            the start frame
+	 * @param frame
+	 *            the frame
 	 * @param origX
-	 *            the orig X
+	 *            the original X position
 	 * @param origY
-	 *            the orig Y
+	 *            the original Y position
 	 * @param origValue
-	 *            the orig value
+	 *            the original value
 	 * @param error
 	 *            the error
 	 * @param noise
 	 *            the noise
 	 * @param params
-	 *            the params
+	 *            the params (must not be null and must have at least {@value #STANDARD_PARAMETERS} parameters)
 	 * @param paramsStdDev
-	 *            the params std dev
-	 * @param endFrame
-	 *            the end frame
-	 * @param id
-	 *            the id
+	 *            the params standard deviations (if not null must match the length of the {@link #params} array)
+	 * @throws IllegalArgumentException
+	 *             the illegal argument exception if the parameters are invalid
 	 */
 	public ExtendedPeakResult(int startFrame, int origX, int origY, float origValue, double error, float noise,
-			float[] params, float[] paramsStdDev, int endFrame, int id)
+			float[] params, float[] paramsStdDev, int endFrame, int id) throws IllegalArgumentException
 	{
 		super(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev, id);
 		setEndFrame(endFrame);
@@ -57,38 +55,34 @@ public class ExtendedPeakResult extends IdPeakResult
 	 * @param frame
 	 *            the frame
 	 * @param x
-	 *            the x
+	 *            the x position
 	 * @param y
-	 *            the y
-	 * @param sd
-	 *            the sd
-	 * @param signal
-	 *            the signal
+	 *            the y position
+	 * @param intensity
+	 *            the intensity
 	 * @param id
 	 *            the id
 	 */
-	public ExtendedPeakResult(int frame, float x, float y, float sd, float signal, int id)
+	public ExtendedPeakResult(int frame, float x, float y, float intensity, int id)
 	{
-		super(frame, x, y, sd, signal, id);
+		super(frame, x, y, intensity, id);
 	}
 
 	/**
 	 * Simple constructor to create a result with location, width, strength, and id.
 	 *
 	 * @param x
-	 *            the x
+	 *            the x position
 	 * @param y
-	 *            the y
-	 * @param sd
-	 *            the sd
-	 * @param signal
-	 *            the signal
+	 *            the y position
+	 * @param intensity
+	 *            the intensity
 	 * @param id
 	 *            the id
 	 */
-	public ExtendedPeakResult(float x, float y, float sd, float signal, int id)
+	public ExtendedPeakResult(float x, float y, float intensity, int id)
 	{
-		super(x, y, sd, signal, id);
+		super(x, y, intensity, id);
 	}
 
 	/*
@@ -138,13 +132,13 @@ public class ExtendedPeakResult extends IdPeakResult
 		// Sort by peak number: Ascending
 		if (getFrame() == o.getFrame())
 		{
-			// Sort by peak end number: Descending
+			// Sort by peak end number: Ascending
 			if (endFrame == o.getEndFrame())
 			{
 				// Sort by peak height: Descending
-				if (params[1] > o.params[1])
+				if (getSignal() > o.getSignal())
 					return -1;
-				if (params[1] < o.params[1])
+				if (getSignal() < o.getSignal())
 					return 1;
 				// Finally by Id
 				return getId() - o.getId();

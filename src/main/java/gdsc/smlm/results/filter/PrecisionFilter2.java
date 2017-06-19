@@ -3,6 +3,9 @@ package gdsc.smlm.results.filter;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
+import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 
 /*----------------------------------------------------------------------------- 
@@ -31,13 +34,9 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 	@XStreamOmitField
 	double variance;
 	@XStreamOmitField
-	double nmPerPixel = 100;
+	boolean useBackground = false;
 	@XStreamOmitField
-	boolean emCCD = true;
-	@XStreamOmitField
-	double bias = -1;
-	@XStreamOmitField
-	double gain = 1;
+	private Gaussian2DPeakResultCalculator calculator;
 
 	public PrecisionFilter2(double precision)
 	{
@@ -47,30 +46,31 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		variance = Filter.getDUpperSquaredLimit(precision);
-		nmPerPixel = peakResults.getNmPerPixel();
-		gain = peakResults.getGain();
-		emCCD = peakResults.isEMCCD();
-		bias = -1;
-		if (peakResults.getCalibration() != null)
+		try
 		{
-			bias = peakResults.getCalibration().getBias();
+			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+					Gaussian2DPeakResultHelper.PRECISION_X);
+			useBackground = true;
 		}
+		catch (ConfigurationException e)
+		{
+			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+					Gaussian2DPeakResultHelper.PRECISION);
+			useBackground = false;
+		}
+		variance = Filter.getDUpperSquaredLimit(precision);
 	}
 
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		final double s = nmPerPixel * peak.getSD();
-		final double N = peak.getSignal();
-		if (bias != -1)
+		if (useBackground)
 		{
 			// Use the estimated background for the peak
-			return PeakResult.getVarianceX(nmPerPixel, s, N / gain,
-					Math.max(0, peak.getBackground() - bias) / gain, emCCD) <= variance;
+			return calculator.getPrecisionX(peak.getParameters()) <= variance;
 		}
 		// Use the background noise to estimate precision 
-		return PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) <= variance;
+		return calculator.getPrecision(peak.getParameters(), peak.noise) <= variance;
 	}
 
 	@Override

@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
@@ -25,6 +23,8 @@ import gdsc.core.utils.NotImplementedException;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ga.Chromosome;
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -359,15 +359,15 @@ public abstract class HysteresisFilter extends Filter
 	 */
 	private double getSearchDistanceUsingCandidates(MemoryPeakResults peakResults, LinkedList<PeakResult> candidates)
 	{
-		SummaryStatistics stats = new SummaryStatistics();
-		final double nmPerPixel = peakResults.getNmPerPixel();
-		final double gain = peakResults.getGain();
-		final boolean emCCD = peakResults.isEMCCD();
+		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
+				peakResults.getCalibration(), Gaussian2DPeakResultHelper.PRECISION);
+		double sum = 0;
 		for (PeakResult peakResult : candidates)
 		{
-			stats.addValue(peakResult.getPrecision(nmPerPixel, gain, emCCD));
+			sum += calculator.getPrecision(peakResult.getParameters(), peakResult.noise);
 		}
-		double distanceThreshold = stats.getMean() * searchDistance / nmPerPixel;
+		final double nmPerPixel = peakResults.getNmPerPixel();
+		double distanceThreshold = (sum / candidates.size()) * searchDistance / nmPerPixel;
 		return distanceThreshold;
 	}
 

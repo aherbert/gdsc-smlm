@@ -1,5 +1,8 @@
 package gdsc.smlm.results.filter;
 
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -41,6 +44,9 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 	@XStreamOmitField
 	boolean widthEnabled;
 
+	@XStreamOmitField
+	private Gaussian2DPeakResultCalculator calculator;
+
 	public WidthFilter2(double minWidth, double maxWidth)
 	{
 		// Only swap if max width is enabled
@@ -63,6 +69,8 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
+
 		// Set the width limit
 		lowerSigmaThreshold = 0;
 		upperSigmaThreshold = Float.POSITIVE_INFINITY;
@@ -101,7 +109,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		final float sd = peak.getSD();
+		final float sd = calculator.getStandardDeviation(peak.getParameters());
 		return sd <= upperSigmaThreshold && sd >= lowerSigmaThreshold;
 	}
 
@@ -172,7 +180,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 				return WidthFilter.DEFAULT_INCREMENT;
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -231,7 +239,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		setMin(parameters, 0, minWidth);
 		setMax(parameters, 1, maxWidth);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

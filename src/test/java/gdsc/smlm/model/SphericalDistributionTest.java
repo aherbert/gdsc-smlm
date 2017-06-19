@@ -90,14 +90,14 @@ public class SphericalDistributionTest
 		dist.setUseRejectionMethod(useRejctionMethod);
 		float scale = 10;
 		results.begin();
-		float sd = 1, intensity = 1;
+		float intensity = 1;
 		for (int i = 100000; i-- > 0;)
 		{
 			double[] xyz = dist.next();
 			int frame = (int) (1 + scale * radius + Math.round(scale * xyz[2]));
 			float x = radius + (float) xyz[0];
 			float y = radius + (float) xyz[1];
-			results.add(new PeakResult(frame, x, y, sd, intensity));
+			results.add(new PeakResult(frame, x, y, intensity));
 		}
 		results.end();
 		IJImagePeakResults image = new IJImagePeakResults(

@@ -95,6 +95,7 @@ import gdsc.smlm.results.FrameCounter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultGridManager;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.CoordinateStore;
 import gdsc.smlm.results.filter.CoordinateStoreFactory;
@@ -1931,9 +1932,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 		double pSignal = CreateData.getPrecisionN(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
-		double pLSE = PeakResult.getPrecisionX(simulationParameters.a, simulationParameters.s, signal,
+		double pLSE = Gaussian2DPeakResultHelper.getPrecisionX(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
-		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
+		double pMLE = Gaussian2DPeakResultHelper.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
 		String msg = String.format(
 				"Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)\nNot duplicates : %d / %d (%.2f%%)",

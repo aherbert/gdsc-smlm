@@ -32,7 +32,9 @@ import gdsc.smlm.fitting.nonlinear.stop.ParameterStoppingCriteria;
 import gdsc.smlm.function.NoiseModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResultHelper;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
 import gdsc.smlm.results.filter.DirectFilter;
@@ -1186,21 +1188,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				try
 				{
 					// This may be slow due to the integration required within the formula.
-					variance = PeakResult.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal,
+					variance = Gaussian2DPeakResultHelper.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal,
 							Math.max(0, localBackground), emCCD);
 				}
 				catch (Exception e)
 				{
 					// Catch all exceptions. They are likely to be a TooManyIterationsException and other
 					// problems with the integration
-					variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal,
+					variance = Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel, nmPerPixel * sd, signal,
 							Math.max(0, localBackground), emCCD);
 				}
 			}
 			else
 			{
-				variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal, Math.max(0, localBackground),
-						emCCD);
+				variance = Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel, nmPerPixel * sd, signal,
+						Math.max(0, localBackground), emCCD);
 			}
 		}
 		else
@@ -1210,18 +1212,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				try
 				{
 					// This may be slow due to the integration required within the formula.
-					variance = PeakResult.getMLVariance(nmPerPixel, nmPerPixel * sd, signal, noise, emCCD);
+					variance = Gaussian2DPeakResultHelper.getMLVariance(nmPerPixel, nmPerPixel * sd, signal, noise,
+							emCCD);
 				}
 				catch (Exception e)
 				{
 					// Catch all exceptions. They are likely to be a TooManyIterationsException and other
 					// problems with the integration
-					variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal, noise, emCCD);
+					variance = Gaussian2DPeakResultHelper.getVariance(nmPerPixel, nmPerPixel * sd, signal, noise,
+							emCCD);
 				}
 			}
 			else
 			{
-				variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal, noise, emCCD);
+				variance = Gaussian2DPeakResultHelper.getVariance(nmPerPixel, nmPerPixel * sd, signal, noise, emCCD);
 			}
 		}
 		return variance;
@@ -1333,7 +1337,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			// If uncommented then the background will be either the local background or the fitted background.
 			final double localBackground = getLocalBackground();
 
-			return (float) ((localBackground > 0) ? PeakResult.localBackgroundToNoise(localBackground, gain, emCCD)
+			return (float) ((localBackground > 0)
+					? PeakResultHelper.localBackgroundToNoise(localBackground, gain, emCCD)
 					: FitConfiguration.this.noise);
 		}
 
@@ -1360,7 +1365,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public float getSD()
 		{
-			return (float) PeakResult.getSD(params[Gaussian2DFunction.X_SD + offset],
+			return (float) Gaussian2DPeakResultHelper.getStandardDeviation(params[Gaussian2DFunction.X_SD + offset],
 					params[Gaussian2DFunction.Y_SD + offset]);
 		}
 
@@ -1637,8 +1642,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		final double ysd = parameters[offset + Gaussian2DFunction.Y_SD];
 		final double xsd0 = initialParameters[offset + Gaussian2DFunction.X_SD];
 		final double ysd0 = initialParameters[offset + Gaussian2DFunction.Y_SD];
-		final double variance = getVariance(0, signal, PeakResult.getSD(xsd, ysd), false);
-		final double variance2 = getVariance(b, signal, PeakResult.getSD(xsd, ysd), true);
+		final double variance = getVariance(0, signal, Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd),
+				false);
+		final double variance2 = getVariance(b, signal, Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd),
+				true);
 		// Q. Should noise be the local background or the estimate from the whole image?
 
 		// This uses the local background if specified or the estimate from the whole image 
@@ -1646,7 +1653,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		//		? PeakResult.localBackgroundToNoise(localBackground - bias, this.gain, this.emCCD) : this.noise;
 
 		// This uses the local fitted background to estimate the noise
-		final double noise = (b > 0) ? PeakResult.localBackgroundToNoise(b, 1.0, this.emCCD) : this.noise;
+		final double noise = (b > 0) ? PeakResultHelper.localBackgroundToNoise(b, 1.0, this.emCCD) : this.noise;
 		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, noise, b, angle, x, y, x0, y0,
 				xsd, ysd, xsd0, ysd0, variance, variance2, resultType);
 	}

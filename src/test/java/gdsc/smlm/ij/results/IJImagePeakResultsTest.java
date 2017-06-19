@@ -474,7 +474,7 @@ public class IJImagePeakResultsTest
 
 	private static void addPeakResult(IJImagePeakResults r, float x, float y, float v)
 	{
-		r.add(new PeakResult(x, y, 1, v));
+		r.add(new PeakResult(x, y, v));
 	}
 
 	private static void addPeakResult(IJImagePeakResults r, int t, float x, float y, float v)
@@ -495,7 +495,7 @@ public class IJImagePeakResultsTest
 	{
 		TurboList<PeakResult> results = new TurboList<PeakResult>(x.length);
 		for (int i = 0; i < x.length; i++)
-			results.add(new PeakResult(x[i], y[i], 1, v[i]));
+			results.add(new PeakResult(x[i], y[i], v[i]));
 		r.addAll(results);
 	}
 

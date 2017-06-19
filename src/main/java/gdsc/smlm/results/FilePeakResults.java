@@ -7,24 +7,24 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.core.data.utils.ConversionException;
-import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.UnitConverterFactory;
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2017 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
 
 /**
  * Saves the fit results to file
  */
 public abstract class FilePeakResults extends AbstractPeakResults implements ThreadSafePeakResults
 {
-	/** Converter to change the distances to nm. It is created in {@link #begin()} but may be null. */
-	protected TypeConverter<DistanceUnit> toNMConverter;
-	/** The nm per pixel if calibrated. */
-	protected double nmPerPixel;
-	/** Converter to change the intensity to photons. It is created in {@link #begin()} but may be null. */
-	protected TypeConverter<IntensityUnit> toPhotonConverter;
-
 	// Only write to a single results file
 	protected FileOutputStream fos = null;
 
@@ -45,8 +45,6 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 	 */
 	public void begin()
 	{
-		createPrecisionConverters();
-
 		fos = null;
 		size = 0;
 		try
@@ -62,7 +60,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 			closeOutput();
 		}
 	}
-
+	
 	/**
 	 * Open the required output from the open file output stream
 	 */
@@ -94,54 +92,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		size += count;
 		write(result);
 	}
-
-	/**
-	 * Creates the standard converters for computing distance in nm and intensity in photons for use in a precision
-	 * computation.
-	 */
-	protected void createPrecisionConverters()
-	{
-		toNMConverter = null;
-		nmPerPixel = 0;
-		toPhotonConverter = null;
-
-		if (calibration != null)
-		{
-			// Create converters 
-			if (calibration.hasNmPerPixel())
-			{
-				nmPerPixel = calibration.getNmPerPixel();
-				if (calibration.hasDistanceUnit())
-				{
-					try
-					{
-						toNMConverter = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
-								DistanceUnit.NM, nmPerPixel);
-					}
-					catch (ConversionException e)
-					{
-						// Gracefully fail so ignore this
-					}
-				}
-			}
-			if (calibration.hasIntensityUnit())
-			{
-				if (calibration.hasGain())
-				{
-					try
-					{
-						toPhotonConverter = UnitConverterFactory.createConverter(calibration.getIntensityUnit(),
-								IntensityUnit.PHOTON, calibration.getGain());
-					}
-					catch (ConversionException e)
-					{
-						// Gracefully fail so ignore this
-					}
-				}
-			}
-		}
-	}
-
+	
 	protected String createResultsHeader()
 	{
 		StringBuilder sb = new StringBuilder();

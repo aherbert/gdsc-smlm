@@ -118,6 +118,7 @@ import gdsc.smlm.results.FrameCounter;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsReader;
 import gdsc.smlm.results.SynchronizedPeakResults;
@@ -907,11 +908,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
 		// is the same as MLE with the caveat of numerical instability.
 
-		double lowerP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
-		double upperP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
-		double lowerMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2,
+		double lowerP = Gaussian2DPeakResultHelper.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
+		double upperP = Gaussian2DPeakResultHelper.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+		double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2,
 				emCCD);
-		double upperMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+		double upperMLP = Gaussian2DPeakResultHelper.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 		double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 		double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
 		//final double b = Math.sqrt(b2);

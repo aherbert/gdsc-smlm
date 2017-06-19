@@ -3,6 +3,9 @@ package gdsc.smlm.results.filter;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -33,11 +36,7 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 	@XStreamOmitField
 	double variance;
 	@XStreamOmitField
-	double nmPerPixel = 100;
-	@XStreamOmitField
-	boolean emCCD = true;
-	@XStreamOmitField
-	double gain = 1;
+	private Gaussian2DPeakResultCalculator calculator;
 
 	public PrecisionFilter(double precision)
 	{
@@ -47,19 +46,16 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+				Gaussian2DPeakResultHelper.PRECISION);
 		variance = Filter.getDUpperSquaredLimit(precision);
-		nmPerPixel = peakResults.getNmPerPixel();
-		gain = peakResults.getGain();
-		emCCD = peakResults.isEMCCD();
 	}
 
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		final double s = nmPerPixel * peak.getSD();
-		final double N = peak.getSignal();
 		// Use the background noise to estimate precision 
-		return PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) <= variance;
+		return calculator.getVariance(peak.getParameters(), peak.noise) <= variance;
 	}
 
 	@Override

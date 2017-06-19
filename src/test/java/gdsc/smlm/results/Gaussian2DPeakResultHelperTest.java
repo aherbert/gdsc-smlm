@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 
-public class PeakResultTest
+public class Gaussian2DPeakResultHelperTest
 {
 	double[] test_a = { 100, 130, 160 };
 	double[] test_s = { 80, 100, 140 };
@@ -22,7 +22,7 @@ public class PeakResultTest
 					for (double b2 : test_b2)
 						for (int points = 3; points <= 20; points++)
 						{
-							PeakResult.getMLVarianceX(a, s, N, b2, true, points);
+							Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
 						}
 	}
 
@@ -37,10 +37,10 @@ public class PeakResultTest
 					for (double b2 : test_b2)
 					{
 						count++;
-						double e = PeakResult.getMLVarianceX(a, s, N, b2, true, 30);
+						double e = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, 30);
 						for (int points = minPoints; points <= maxPoints; points++)
 						{
-							double o = PeakResult.getMLVarianceX(a, s, N, b2, true, points);
+							double o = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
 							double error = DoubleEquality.relativeError(e, o);
 							sum[points] += error;
 							if (error > 1e-2)
@@ -70,7 +70,7 @@ public class PeakResultTest
 					for (double b2 : new double[] { 0.5, 1, 2 })
 						for (int points = 3; points <= 20; points++)
 						{
-							PeakResult.getMLVarianceX(a, s, N, b2, true, points);
+							Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
 						}
 
 		// Get average performance
@@ -89,7 +89,7 @@ public class PeakResultTest
 						{
 							long t = System.nanoTime();
 							for (int i = 0; i < 1000; i++)
-								PeakResult.getMLVarianceX(a, s, N, b2, true, points);
+								Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
 							t = time[points] = System.nanoTime() - t;
 							if (min > t)
 								min = t;
@@ -113,51 +113,4 @@ public class PeakResultTest
 					sum[points] / count, sum2[points] / count2);
 		}
 	}
-
-	@Test
-	public void canConvertLocalBackgroundToNoise()
-	{
-		double gain = 6;
-
-		double[] photons = { 0, 1, 2, 4, 10, 50, 100 };
-
-		// CCD
-		for (double p : photons)
-		{
-			// Assuming a Poisson distribution N photons should have a noise of sqrt(N).
-			// However the input and output are in ADU counts so we apply the gain.
-			double n = PeakResult.localBackgroundToNoise(p * gain, gain, false);
-			Assert.assertEquals("CCD " + p, Math.sqrt(p) * gain, n, 0);
-		}
-
-		// EM-CCD
-		for (double p : photons)
-		{
-			// Assuming a Poisson distribution N photons should have a noise of sqrt(N * 2)
-			// (due to the EM-CCD noise factor of 2).
-			// However the input and output are in ADU counts so we apply the gain.
-			double n = PeakResult.localBackgroundToNoise(p * gain, gain, true);
-			Assert.assertEquals("EM-CCD " + p, Math.sqrt(2 * p) * gain, n, 0);
-		}
-	}
-
-	@Test
-	public void canConvertLocalBackgroundToNoiseAndBack()
-	{
-		double gain = 6;
-
-		double[] photons = { 0, 1, 2, 4, 10, 50, 100 };
-
-		for (boolean emCCD : new boolean[] { false, true })
-		{
-			for (double p : photons)
-			{
-				double b = p * gain;
-				double n = PeakResult.localBackgroundToNoise(b, gain, emCCD);
-				double b2 = PeakResult.noiseToLocalBackground(n, gain, emCCD);
-				Assert.assertEquals(emCCD + " " + p, b, b2, 1e-6);
-			}
-		}
-	}
-
 }

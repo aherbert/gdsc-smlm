@@ -45,8 +45,10 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResultHelper;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
 import gdsc.smlm.results.filter.CoordinateStore;
@@ -2920,7 +2922,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Initial guess using the noise (assuming all noise is from Poisson background).
 				// EMCCD will have increase noise by a factor of sqrt(2)
 				background = (float) (fitConfig.getBias() +
-						PeakResult.noiseToLocalBackground(noise, fitConfig.getGain(), fitConfig.isEmCCD()));
+						PeakResultHelper.noiseToLocalBackground(noise, fitConfig.getGain(), fitConfig.isEmCCD()));
 			}
 			else
 			{

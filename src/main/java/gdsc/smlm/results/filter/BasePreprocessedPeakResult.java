@@ -2,7 +2,7 @@ package gdsc.smlm.results.filter;
 
 import gdsc.core.match.FractionalAssignment;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -113,7 +113,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		this.photons = (float) (photons);
 		this.snr = (float) (signal / noise);
 		this.noise = (float) (noise);
-		this.sd = (float) (PeakResult.getSD(xsd, ysd));
+		this.sd = (float) (Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd));
 		this.b = (float) (b);
 		this.amp = (float) (signal / (2 * Math.PI * xsd * ysd));
 		this.angle = (float) (angle);

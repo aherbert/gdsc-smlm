@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -20,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.tsf.TaggedSpotFile.CameraType;
 import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
 import gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType;
@@ -46,8 +49,6 @@ import gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits;
  */
 public class TSFPeakResultsWriter extends AbstractPeakResults
 {
-	public static final float SD_TO_FWHM_FACTOR = (float) (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
-
 	/**
 	 * Application ID assigned to GDSC SMLM ImageJ plugins
 	 */
@@ -60,11 +61,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	private int size = 0;
 	private AtomicInteger id;
 
-	private FitMode fitMode = FitMode.ONEAXIS;
-
-	private boolean canComputePrecision, isEmCCD;
-	private double nmPerPixel, gain;
-	private float bias;
+	private int isx, isy, ia;
+	private FitMode fitMode;
 
 	private int boxSize = 0;
 
@@ -82,20 +80,28 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	{
 		out = null;
 		size = 0;
-		bias = 0;
-		canComputePrecision = false;
-		if (calibration != null)
+
+		// Only support Gaussian 2D data
+		if (psf == null || !PSFHelper.isGaussian2D(psf))
 		{
-			if (calibration.hasBias())
-				bias = (float) calibration.getBias();
-			if (calibration.hasNmPerPixel() && calibration.hasGain() && calibration.isCCDCamera())
-			{
-				canComputePrecision = true;
-				nmPerPixel = calibration.getNmPerPixel();
-				gain = calibration.getGain();
-				isEmCCD = calibration.isEmCCD();
-			}
+			System.err.println("TSF format requires a Gaussian 2D PSF");
+			closeOutput();
+			return;
 		}
+		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+		isx = indices[0];
+		isy = indices[1];
+		try
+		{
+			ia = PSFHelper.getGaussian2DAngleIndex(psf);
+			fitMode = FitMode.TWOAXISANDTHETA;
+		}
+		catch (ConfigurationException e)
+		{
+			// This is not an angled PSF. Revert to 1/2 axis:
+			fitMode = (isx == isy) ? FitMode.ONEAXIS : FitMode.TWOAXIS;
+		}
+
 		id = new AtomicInteger();
 		try
 		{
@@ -171,21 +177,12 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setFrame(peak);
 		builder.setXPosition(origX);
 		builder.setYPosition(origY);
-		setBackground(builder, params[Gaussian2DFunction.BACKGROUND]);
-		builder.setIntensity(params[Gaussian2DFunction.SIGNAL]);
-		builder.setX(params[Gaussian2DFunction.X_POSITION]);
-		builder.setY(params[Gaussian2DFunction.Y_POSITION]);
+		builder.setBackground(params[PeakResult.BACKGROUND]);
+		builder.setIntensity(params[PeakResult.INTENSITY]);
+		builder.setX(params[PeakResult.X]);
+		builder.setY(params[PeakResult.Y]);
 
 		setWidth(params, builder);
-
-		if (canComputePrecision)
-		{
-			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
-			float precision = (float) PeakResult.getPrecision(nmPerPixel, s, params[Gaussian2DFunction.SIGNAL] / gain,
-					noise / gain, isEmCCD);
-			builder.setXPrecision(precision);
-			builder.setYPrecision(precision);
-		}
 
 		builder.setError(error);
 		builder.setNoise(noise);
@@ -209,10 +206,10 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setFrame(result.getFrame());
 		builder.setXPosition(result.origX);
 		builder.setYPosition(result.origY);
-		setBackground(builder, params[Gaussian2DFunction.BACKGROUND]);
-		builder.setIntensity(params[Gaussian2DFunction.SIGNAL]);
-		builder.setX(params[Gaussian2DFunction.X_POSITION]);
-		builder.setY(params[Gaussian2DFunction.Y_POSITION]);
+		builder.setBackground(params[PeakResult.BACKGROUND]);
+		builder.setIntensity(params[PeakResult.INTENSITY]);
+		builder.setX(params[PeakResult.X]);
+		builder.setY(params[PeakResult.Y]);
 
 		setWidth(params, builder);
 
@@ -220,15 +217,6 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		{
 			// Use the actual precision
 			float precision = (float) result.getPrecision();
-			builder.setXPrecision(precision);
-			builder.setYPrecision(precision);
-		}
-		else if (canComputePrecision)
-		{
-			// Compute precision
-			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
-			float precision = (float) PeakResult.getPrecision(nmPerPixel, s, params[Gaussian2DFunction.SIGNAL] / gain,
-					result.noise / gain, isEmCCD);
 			builder.setXPrecision(precision);
 			builder.setYPrecision(precision);
 		}
@@ -250,25 +238,6 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	}
 
 	/**
-	 * Sets the background.
-	 *
-	 * @param builder
-	 *            the builder
-	 * @param background
-	 *            the background
-	 */
-	private void setBackground(Builder builder, float background)
-	{
-		// Q. Should we ensure this is always positive?
-		// Since it "should be linearly proportional to the number of photons in the background" 
-		// then we assume that it cannot be negative.
-		if (background > bias)
-			builder.setBackground(background - bias);
-		else
-			builder.setBackground(0f);
-	}
-
-	/**
 	 * Sets the width. Convert the X/Y widths used in GDSC SMLM to the single width and shape parameters used in TSF.
 	 *
 	 * @param params
@@ -278,26 +247,24 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 */
 	private void setWidth(float[] params, Spot.Builder builder)
 	{
-		if (params[Gaussian2DFunction.X_SD] == params[Gaussian2DFunction.Y_SD])
+		switch (fitMode)
 		{
-			builder.setWidth(SD_TO_FWHM_FACTOR * params[Gaussian2DFunction.X_SD]);
-		}
-		else
-		{
-			FitMode newFitMode = FitMode.TWOAXIS;
+			case ONEAXIS:
+				builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR * params[isx]));
+				break;
 
-			builder.setWidth(SD_TO_FWHM_FACTOR *
-					(float) Math.sqrt(Math.abs(params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD])));
-			builder.setA(params[Gaussian2DFunction.X_SD] / params[Gaussian2DFunction.Y_SD]);
+			case TWOAXIS:
+				builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR *
+						Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isx])));
+				builder.setA(params[isx] / params[isy]);
+				break;
 
-			if (params[Gaussian2DFunction.SHAPE] != 0)
-			{
-				newFitMode = FitMode.TWOAXISANDTHETA;
-				builder.setTheta(params[Gaussian2DFunction.SHAPE]);
-			}
-
-			if (fitMode.getNumber() < newFitMode.getNumber())
-				fitMode = newFitMode;
+			case TWOAXISANDTHETA:
+				builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR *
+						Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isx])));
+				builder.setA(params[isx] / params[isy]);
+				builder.setTheta(params[ia]);
+				break;
 		}
 	}
 
@@ -334,10 +301,10 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			builder.setFrame(result.getFrame());
 			builder.setXPosition(result.origX);
 			builder.setYPosition(result.origY);
-			setBackground(builder, params[Gaussian2DFunction.BACKGROUND]);
-			builder.setIntensity(params[Gaussian2DFunction.SIGNAL]);
-			builder.setX(params[Gaussian2DFunction.X_POSITION]);
-			builder.setY(params[Gaussian2DFunction.Y_POSITION]);
+			builder.setBackground(params[PeakResult.BACKGROUND]);
+			builder.setIntensity(params[PeakResult.INTENSITY]);
+			builder.setX(params[PeakResult.X]);
+			builder.setY(params[PeakResult.Y]);
 
 			setWidth(params, builder);
 
@@ -345,15 +312,6 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			{
 				// Use the actual precision
 				float precision = (float) result.getPrecision();
-				builder.setXPrecision(precision);
-				builder.setYPrecision(precision);
-			}
-			else if (canComputePrecision)
-			{
-				// Compute precision
-				double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
-				float precision = (float) PeakResult.getPrecision(nmPerPixel, s,
-						params[Gaussian2DFunction.SIGNAL] / gain, result.noise / gain, isEmCCD);
 				builder.setXPrecision(precision);
 				builder.setYPrecision(precision);
 			}
@@ -554,7 +512,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			{
 				builder.setThetaUnits(thetaUnitsMap[calibration.getAngleUnit().ordinal()]);
 			}
-			
+
 			// We can use some logic here to get the QE
 			if (calibration.hasGain())
 			{
@@ -574,62 +532,71 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 					builder.addQe(1);
 				}
 			}
-		}if(configuration!=null&&configuration.length()>0)
+		}
+		if (configuration != null && configuration.length() > 0)
 
-	{
-		builder.setConfiguration(singleLine(configuration));
-	}
-
-	// Have a property so the boxSize can be set
-	if(boxSize>0)builder.setBoxSize(boxSize);
-
-	builder.setFitMode(fitMode);
-
-	FluorophoreType.Builder typeBuilder = FluorophoreType
-			.newBuilder();typeBuilder.setId(1);typeBuilder.setDescription("Default fluorophore");typeBuilder.setIsFiducial(false);builder.addFluorophoreTypes(typeBuilder.build());
-
-	SpotList spotList = builder.build();try
-	{
-		spotList.writeDelimitedTo(out);
-	}catch(
-	IOException e)
-	{
-		System.err.println("Failed to write SpotList message");
-		e.printStackTrace();
-		return;
-	}finally
-	{
-		closeOutput();
-	}
-
-	// Note: it would be good to be able to use the ability to write to any output stream. However
-	// the TSF format requires a seek at the end of writing to record the offset. seek() is not
-	// supported by OutputStream. It is supported by: RandomAccessFile, RandomAccessStream (for input). 
-
-	// Write the offset to the SpotList message into the offset position
-	RandomAccessFile f = null;try
-	{
-		f = new RandomAccessFile(new File(filename), "rw");
-		f.seek(4);
-		f.writeLong(offset);
-	}catch(
-	Exception e)
-	{
-		System.err.println("Failed to record offset for SpotList message");
-		e.printStackTrace();
-	}finally
-	{
-		if (f != null)
 		{
-			try
+			builder.setConfiguration(singleLine(configuration));
+		}
+
+		// Have a property so the boxSize can be set
+		if (boxSize > 0)
+			builder.setBoxSize(boxSize);
+
+		builder.setFitMode(fitMode);
+
+		FluorophoreType.Builder typeBuilder = FluorophoreType.newBuilder();
+		typeBuilder.setId(1);
+		typeBuilder.setDescription("Default fluorophore");
+		typeBuilder.setIsFiducial(false);
+		builder.addFluorophoreTypes(typeBuilder.build());
+
+		SpotList spotList = builder.build();
+		try
+		{
+			spotList.writeDelimitedTo(out);
+		}
+		catch (IOException e)
+		{
+			System.err.println("Failed to write SpotList message");
+			e.printStackTrace();
+			return;
+		}
+		finally
+		{
+			closeOutput();
+		}
+
+		// Note: it would be good to be able to use the ability to write to any output stream. However
+		// the TSF format requires a seek at the end of writing to record the offset. seek() is not
+		// supported by OutputStream. It is supported by: RandomAccessFile, RandomAccessStream (for input). 
+
+		// Write the offset to the SpotList message into the offset position
+		RandomAccessFile f = null;
+		try
+		{
+			f = new RandomAccessFile(new File(filename), "rw");
+			f.seek(4);
+			f.writeLong(offset);
+		}
+		catch (Exception e)
+		{
+			System.err.println("Failed to record offset for SpotList message");
+			e.printStackTrace();
+		}
+		finally
+		{
+			if (f != null)
 			{
-				f.close();
-			}
-			catch (IOException e)
-			{
+				try
+				{
+					f.close();
+				}
+				catch (IOException e)
+				{
+				}
 			}
 		}
-	}
 	}
 
 	private String singleLine(String text)

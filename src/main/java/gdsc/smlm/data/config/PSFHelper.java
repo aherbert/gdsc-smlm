@@ -7,6 +7,7 @@ import gdsc.smlm.data.config.SMLMSettings.PSF;
 import gdsc.smlm.data.config.SMLMSettings.PSFParameter;
 import gdsc.smlm.data.config.SMLMSettings.PSFParameterUnit;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -82,11 +83,14 @@ public class PSFHelper
 	}
 
 	/**
-	 * Gets the Gaussian 2D x-width and y-width indices for the additional parameters.
+	 * Gets the Gaussian 2D x-width and y-width indices for the PeakResult parameters.
+	 * <p>
+	 * Note that the indices can be used directly with the PeakResult parameters array as they have been adjusted using
+	 * an offset of PeakResult.STANDARD_PARAMETERS.
 	 *
 	 * @param psf
 	 *            the psf
-	 * @return the Gaussian 2D x-width and y-width indices for the additional parameters.
+	 * @return the Gaussian 2D x-width and y-width indices for the PeakResult parameters.
 	 * @throws ConfigurationException
 	 *             if the psf is null, or not a Gaussian 2D function
 	 */
@@ -97,11 +101,11 @@ public class PSFHelper
 		switch (psf.getPsfType())
 		{
 			case OneAxisGaussian2D:
-				return new int[] { 0, 0 };
+				return new int[] { PeakResult.STANDARD_PARAMETERS, PeakResult.STANDARD_PARAMETERS };
 			case AstigmaticGaussian2D:
 			case TwoAxisAndThetaGaussian2D:
 			case TwoAxisGaussian2D:
-				return new int[] { 0, 1 };
+				return new int[] { PeakResult.STANDARD_PARAMETERS, PeakResult.STANDARD_PARAMETERS + 1 };
 			case Custom:
 			case UNRECOGNIZED:
 			default:
@@ -110,6 +114,33 @@ public class PSFHelper
 		throw new ConfigurationException("psf is not Gaussian2D");
 	}
 
+
+	/**
+	 * Gets the Gaussian 2D angle index for the PeakResult parameters.
+	 * <p>
+	 * Note that the index can be used directly with the PeakResult parameters array as they have been adjusted using
+	 * an offset of PeakResult.STANDARD_PARAMETERS.
+	 *
+	 * @param psf
+	 *            the psf
+	 * @return the Gaussian 2D x-width and y-width indices for the PeakResult parameters.
+	 * @throws ConfigurationException
+	 *             if the psf is null, or not a rotated two axis Gaussian 2D function
+	 */
+	public static int getGaussian2DAngleIndex(PSF psf) throws ConfigurationException
+	{
+		if (psf == null)
+			throw new ConfigurationException("psf is null");
+		switch (psf.getPsfType())
+		{
+			case TwoAxisAndThetaGaussian2D:
+				return PeakResult.STANDARD_PARAMETERS + 2;
+			default:
+				break;
+		}
+		throw new ConfigurationException("psf is not a rotated two axis Gaussian2D");
+	}
+	
 	private static final ArrayList<PSFParameter> sxParameters, sxsyParameters, sxsyaParameters;
 	static
 	{
@@ -197,11 +228,12 @@ public class PSFHelper
 		}
 		return defaultList;
 	}
-	
+
 	/**
 	 * Creates the PSF builder.
 	 *
-	 * @param psfType the PSF type
+	 * @param psfType
+	 *            the PSF type
 	 * @return the PSF builder
 	 */
 	public static PSF.Builder createBuilder(PSFType psfType)
@@ -210,11 +242,12 @@ public class PSFHelper
 		builder.setPsfType(psfType);
 		return builder;
 	}
-	
+
 	/**
 	 * Creates the PSF.
 	 *
-	 * @param psfType the PSF type
+	 * @param psfType
+	 *            the PSF type
 	 * @return the PSF
 	 */
 	public static PSF create(PSFType psfType)

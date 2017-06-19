@@ -1,13 +1,19 @@
 package gdsc.smlm.ij.results;
 
-import gdsc.core.utils.NotImplementedException;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.results.PeakResult;
-
 import java.awt.Rectangle;
 import java.util.Collection;
 
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.utils.NotImplementedException;
+import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -31,9 +37,11 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	private float psfWidth = 0f;
 	private boolean calculatedPrecision = false;
 
-	private double nmPerPixel = 100.0;
-	private double gain = 1;
-	private boolean emCCD = true;
+	private Gaussian2DPeakResultCalculator calculator;
+	private TypeConverter<DistanceUnit> dc;
+	private int isx, isy, ia;
+
+	private boolean requirePSFParameters;
 
 	// Multiplication factors and variables for plotting the fixed Gaussian
 	private double[] fixedParams = null;
@@ -59,15 +67,76 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	@Override
 	protected void preBegin()
 	{
-		// Flags should be OK
+		// this.displayFlags should be OK so don't call super.preBegin()
 
-		// Cache the nmPerPixel and gain
-		if (calibration != null)
+		requirePSFParameters = true;
+
+		int flags = 0;
+		if ((displayFlags & DISPLAY_SIGNAL) != 0)
+			flags |= Gaussian2DPeakResultHelper.AMPLITUDE;
+
+		// Note: we do not catch configuration exceptions if required Gaussian 2D configuration is missing
+
+		if (fixedWidth)
 		{
-			nmPerPixel = calibration.getNmPerPixel();
-			gain = calibration.getGain();
-			emCCD = calibration.isEmCCD();
+			requirePSFParameters = flags == 0;
 		}
+		else
+		{
+			if (calculatedPrecision)
+			{
+				flags |= Gaussian2DPeakResultHelper.PRECISION;
+
+				// To convert the precision to pixels
+				if (calibration == null)
+					throw new ConfigurationException("nm/pixel is required when drawing using the precision");
+
+				dc = UnitConverterFactory.createConverter(DistanceUnit.NM, DistanceUnit.PIXEL,
+						calibration.getNmPerPixel());
+			}
+			else
+			{
+				// We need to know the parameters for the Gaussian 2D PSF
+				int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+				isx = indices[0];
+				isy = indices[1];
+				try
+				{
+					ia = PSFHelper.getGaussian2DAngleIndex(psf);
+				}
+				catch (ConfigurationException e)
+				{
+					// No rotation angle
+					ia = 0;
+				}
+			}
+		}
+
+		if (flags != 0)
+			calculator = Gaussian2DPeakResultHelper.create(psf, calibration, flags);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.results.IJImagePeakResults#isUncalibrated()
+	 */
+	@Override
+	public boolean isUncalibrated()
+	{
+		// Not supported
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.results.IJImagePeakResults#setUncalibrated(boolean)
+	 */
+	@Override
+	public void setUncalibrated(boolean uncalibrated)
+	{
+		throw new NotImplementedException("This method is not supported. The PSF assumes the units are in pixels.");
 	}
 
 	/*
@@ -78,8 +147,9 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	@Override
 	public void add(int peak, float x, float y, float v)
 	{
-		throw new NotImplementedException(
-				"This method is not supported. Some PSF images require the PSF parameters for amplitude and angle.");
+		if (requirePSFParameters)
+			throw new IllegalStateException("The PSF image requires missing Gaussian 2D parameters");
+		add(new PeakResult(peak, x, y, v));
 	}
 
 	/*
@@ -90,8 +160,9 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	@Override
 	public void add(float x, float y, float v)
 	{
-		throw new NotImplementedException(
-				"This method is not supported. Some PSF images require the PSF parameters for amplitude and angle.");
+		if (requirePSFParameters)
+			throw new IllegalStateException("The PSF image requires missing Gaussian 2D parameters");
+		add(new PeakResult(x, y, v));
 	}
 
 	/*
@@ -102,8 +173,10 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	@Override
 	public void add(int[] allpeak, float[] allx, float[] ally, float[] allv)
 	{
-		throw new NotImplementedException(
-				"This method is not supported. Some PSF images require the PSF parameters for amplitude and angle.");
+		if (requirePSFParameters)
+			throw new IllegalStateException("The PSF image requires missing Gaussian 2D parameters");
+		for (int i = 0; i < allx.length; i++)
+			add(new PeakResult(allpeak[i], allx[i], ally[i], allv[i]));
 	}
 
 	/*
@@ -114,8 +187,10 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	@Override
 	public void add(float[] allx, float[] ally, float[] allv)
 	{
-		throw new NotImplementedException(
-				"This method is not supported. Some PSF images require the PSF parameters for amplitude and angle.");
+		if (requirePSFParameters)
+			throw new IllegalStateException("The PSF image requires missing Gaussian 2D parameters");
+		for (int i = 0; i < allx.length; i++)
+			add(new PeakResult(allx[i], ally[i], allv[i]));
 	}
 
 	/*
@@ -148,7 +223,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		//   f(x,y) = A exp(-(a(x-x0)(x-x0) + 2b(x-x0)(y-y0) + c(y-y0)(y-y0)))
 		// See: http://en.wikipedia.org/wiki/Gaussian_function#Two-dimensional_Gaussian_function
 
-		final float amplitude = ((displayFlags & DISPLAY_SIGNAL) != 0) ? PeakResult.getAmplitude(params) : 1;
+		final float amplitude = ((displayFlags & DISPLAY_SIGNAL) != 0) ? calculator.getAmplitude(params) : 1;
 
 		final double[] psfParams;
 		if (fixedWidth)
@@ -159,19 +234,17 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		{
 			// Precalculate multiplication factors
 			final double t, sx, sy;
-			if (calculatedPrecision && nmPerPixel > 0)
+			if (calculatedPrecision)
 			{
 				t = 0.0;
-				final double N = params[Gaussian2DFunction.SIGNAL] / gain;
-				final double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
-				final double precision = PeakResult.getPrecision(nmPerPixel, s, N, noise / gain, emCCD);
-				sx = sy = (precision / nmPerPixel);
+				final double precision = calculator.getPrecision(params, noise);
+				sx = sy = dc.convert(precision);
 			}
 			else
 			{
-				t = params[Gaussian2DFunction.SHAPE];
-				sx = params[Gaussian2DFunction.X_SD];
-				sy = params[Gaussian2DFunction.Y_SD];
+				sx = params[isx];
+				sy = params[isy];
+				t = (ia != 0) ? params[ia] : 0;
 			}
 			psfParams = setPSFParameters(t, sx, sy, new double[5]);
 		}

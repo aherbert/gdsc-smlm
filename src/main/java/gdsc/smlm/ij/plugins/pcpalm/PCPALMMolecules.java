@@ -50,6 +50,7 @@ import gdsc.core.clustering.Cluster;
 import gdsc.core.clustering.ClusterPoint;
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.clustering.ClusteringEngine;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleData;
@@ -900,23 +901,17 @@ public class PCPALMMolecules implements PlugIn
 		tm.traceMolecules(distanceThreshold, time);
 		Trace[] traces = tm.getTraces();
 		ArrayList<Molecule> molecules = new ArrayList<Molecule>(traces.length);
-		final double nmPerPixel = results.getNmPerPixel();
-		final double gain = results.getGain();
-		final boolean emCCD = results.isEMCCD();
+
+		// These plugins are not really supported so just leave them to throw an exception if
+		// the data cannot be handled
+		TypeConverter<IntensityUnit> ic = results.getCalibration().getIntensityConverter(IntensityUnit.PHOTON);
+		TypeConverter<DistanceUnit> dc = results.getCalibration().getDistanceConverter(DistanceUnit.NM);
+
 		for (Trace t : traces)
 		{
-			double p = t.getLocalisationPrecision(nmPerPixel, gain, emCCD);
-			if (t.size() == 1)
-			{
-				float[] centroid = t.getCentroid();
-				singles.add(new Molecule(centroid[0] * nmPerPixel, centroid[1] * nmPerPixel, p, t.getSignal() / gain));
-			}
-			else
-			{
-				float[] centroid = t.getCentroid();
-				molecules
-						.add(new Molecule(centroid[0] * nmPerPixel, centroid[1] * nmPerPixel, p, t.getSignal() / gain));
-			}
+			double p = t.getLocalisationPrecision(dc);
+			float[] centroid = t.getCentroid();
+			singles.add(new Molecule(dc.convert(centroid[0]), dc.convert(centroid[1]), p, ic.convert(t.getSignal())));
 		}
 		log("  %d localisations traced to %d molecules (%d singles, %d traces) using d=%.2f nm, t=%d frames (%s s)",
 				results.size(), molecules.size() + singles.size(), singles.size(), molecules.size(), distance, time,

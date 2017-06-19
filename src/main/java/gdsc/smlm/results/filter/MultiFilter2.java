@@ -19,6 +19,9 @@ import java.util.regex.Pattern;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
+import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -56,11 +59,9 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	@XStreamOmitField
 	double variance;
 	@XStreamOmitField
-	double nmPerPixel = 100;
+	boolean useBackground = false;
 	@XStreamOmitField
-	boolean emCCD = true;
-	@XStreamOmitField
-	double gain = 1;
+	private Gaussian2DPeakResultCalculator calculator;
 	@XStreamOmitField
 	double bias = -1;
 	@XStreamOmitField
@@ -105,9 +106,20 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		// Set the signal limit using the gain
-		gain = peakResults.getGain();
-		signalThreshold = (float) (signal * gain);
+		try
+		{
+			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+					Gaussian2DPeakResultHelper.PRECISION_X);
+			useBackground = true;
+		}
+		catch (ConfigurationException e)
+		{
+			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+					Gaussian2DPeakResultHelper.PRECISION);
+			useBackground = false;
+		}
+		
+		signalThreshold = (float) (signal);
 
 		// Set the width limit
 		lowerSigmaThreshold = 0;
@@ -128,13 +140,6 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 
 		// Configure the precision limit
 		variance = Filter.getDUpperSquaredLimit(precision);
-		nmPerPixel = peakResults.getNmPerPixel();
-		emCCD = peakResults.isEMCCD();
-		bias = -1;
-		if (peakResults.getCalibration() != null)
-		{
-			bias = peakResults.getCalibration().getBias();
-		}
 	}
 
 	@Override
@@ -230,25 +235,19 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 			return false;
 
 		// Width
-		final float sd = peak.getSD();
+		final float sd = calculator.getStandardDeviation(peak.getParameters());
 		if (sd > upperSigmaThreshold || sd < lowerSigmaThreshold)
 			return false;
 
 		// Precision
-		final double s = nmPerPixel * sd;
-		final double N = peak.getSignal();
-		// Use the background directly
-		if (bias != -1)
+		if (useBackground)
 		{
-			// Use the estimated background for the peak
-			if (PeakResult.getVarianceX(nmPerPixel, s, N / gain, Math.max(0, peak.getBackground() - bias) / gain,
-					emCCD) > variance)
+			if (calculator.getVarianceX(peak.getParameters()) > variance)
 				return false;
 		}
 		else
 		{
-			// Use the background noise to estimate precision 
-			if (PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) > variance)
+			if (calculator.getVariance(peak.getParameters(), peak.noise) > variance)
 				return false;
 		}
 

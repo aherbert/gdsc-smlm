@@ -19,7 +19,10 @@ import java.util.Comparator;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.logging.TrackProgress;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
@@ -566,12 +569,10 @@ public class TraceManager
 
 	/**
 	 * Convert a list of traces into peak results. The signal weighted centroid of each trace is used as the
-	 * coordinates. The weighted localisation precision is used as the width. The amplitude is the average from all
+	 * coordinates. The weighted localisation precision is used as the precision. The signal is the sum from all
 	 * the peaks in the trace.
 	 * <p>
-	 * If the trace is empty it is ignored. If the trace contains one spot then the result is passed through unchanged.
-	 * <p>
-	 * Note: If the calibration is null then a default calibration is 100nm per pixel and gain 1.
+	 * If the trace is empty it is ignored.
 	 * 
 	 * @param traces
 	 * @return the peak results
@@ -583,20 +584,16 @@ public class TraceManager
 		results.setCalibration(calibration);
 		if (traces != null)
 		{
-			final double nmPerPixel, gain;
-			final boolean emCCD;
+			TypeConverter<DistanceUnit> converter = null;
 			if (calibration != null)
-			{
-				nmPerPixel = calibration.getNmPerPixel();
-				gain = calibration.getGain();
-				emCCD = calibration.isEmCCD();
-			}
-			else
-			{
-				nmPerPixel = 100;
-				gain = 1;
-				emCCD = true;
-			}
+				try
+				{
+					converter = calibration.getDistanceConverter(DistanceUnit.NM);
+				}
+				catch (ConversionException e)
+				{
+				}
+
 			// Ensure all results are added as extended peak results with their trace ID.
 			for (int i = 0; i < traces.length; i++)
 			{
@@ -606,14 +603,18 @@ public class TraceManager
 				PeakResult result = traces[i].getHead();
 				if (traces[i].size() == 1)
 				{
-					results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue,
-							0, result.noise, result.params, null, 0, traces[i].getId()));
+					AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(), result.origX,
+							result.origY, result.origValue, 0, result.noise, result.params, null);
+					peakResult.setId(traces[i].getId());
+					peakResult.setEndFrame(result.getEndFrame());
+					if (converter != null)
+						peakResult.setPrecision(traces[i].getLocalisationPrecision(converter));
+					results.add(peakResult);
 					continue;
 				}
 
 				traces[i].sort();
 				traces[i].resetCentroid();
-				float sd = (float) (traces[i].getLocalisationPrecision(nmPerPixel, gain, emCCD) / nmPerPixel);
 				float[] centroid = traces[i].getCentroid();
 				float background = 0;
 				double noise = 0;
@@ -623,14 +624,24 @@ public class TraceManager
 					background += r.getBackground();
 				}
 				noise = Math.sqrt(noise);
-				background /= traces[i].size();
+				background /= traces[i].size();				
 				double signal = traces[i].getSignal();
-				float amplitude = (float) (signal / (2 * Math.PI * sd * sd));
-
-				float[] params = new float[] { background, amplitude, 0, centroid[0], centroid[1], sd, sd };
 				int endFrame = traces[i].getTail().getEndFrame();
-				results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue, 0,
-						(float) noise, params, null, endFrame, traces[i].getId()));
+				AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(), centroid[0], centroid[1],
+						(float) signal);
+				// Build standard peak data
+				peakResult.setBackground(background);
+				peakResult.noise = (float) noise;
+				// These could be weighted, at the moment we use the first peak 
+				peakResult.origX = result.origX;
+				peakResult.origY = result.origY;
+				peakResult.origValue = result.origValue;
+				
+				peakResult.setId(traces[i].getId());
+				peakResult.setEndFrame(endFrame);
+				if (converter != null)
+					peakResult.setPrecision(traces[i].getLocalisationPrecision(converter));
+				results.add(peakResult);
 			}
 		}
 		return results;

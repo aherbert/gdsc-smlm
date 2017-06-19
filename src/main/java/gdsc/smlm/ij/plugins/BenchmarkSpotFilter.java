@@ -28,6 +28,8 @@ import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
+import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
@@ -56,6 +58,8 @@ import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -154,6 +158,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private ImagePlus imp;
 	private MemoryPeakResults results;
+	private Gaussian2DPeakResultCalculator calculator;
 	private CreateData.SimulationParameters simulationParameters;
 
 	private static TIntObjectHashMap<PSFSpot[]> actualCoordinates = null;
@@ -482,7 +487,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			double[] sa2 = new double[actual.length];
 			for (int i = 0; i < actual.length; i++)
 			{
-				sa[i] = PSFCalculator.squarePixelAdjustment(actual[i].peakResult.getSD() * simulationParameters.a,
+				sa[i] = PSFCalculator.squarePixelAdjustment(
+						calculator.getStandardDeviation(actual[i].peakResult.getParameters()) * simulationParameters.a,
 						simulationParameters.a) / simulationParameters.a;
 				sa2[i] = 2 * sa[i];
 			}
@@ -982,18 +988,10 @@ public class BenchmarkSpotFilter implements PlugIn
 			results.put(frame, new FilterResult(frame, calc, result, scoredSpots, actual, actualAssignment));
 		}
 
-		@SuppressWarnings("unused")
-		private double getOffsetIntensity(final PSFSpot p)
-		{
-			// Use the amplitude as all spot filters currently estimate the height, not the total signal
-			final double intensity = p.peakResult.getAmplitude() + p.backgroundOffset;
-			return intensity;
-		}
-
 		private double getIntensity(final PSFSpot p)
 		{
 			// Use the amplitude as all spot filters currently estimate the height, not the total signal
-			final double intensity = p.peakResult.getAmplitude();
+			final double intensity = calculator.getAmplitude(p.peakResult.getParameters());
 			return intensity;
 		}
 
@@ -1016,7 +1014,6 @@ public class BenchmarkSpotFilter implements PlugIn
 				this.spot = spot;
 			}
 		}
-
 	}
 
 	/*
@@ -1047,6 +1044,21 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (results == null)
 		{
 			IJ.error(TITLE, "No benchmark results in memory");
+			return;
+		}
+
+		// Set-up the converters
+		try
+		{
+			if (results.getCalibration() == null || results.getCalibration().getDistanceUnit() != DistanceUnit.PIXEL)
+				throw new ConfigurationException("Require results in pixel distance units");
+
+			int flags = Gaussian2DPeakResultHelper.AMPLITUDE;
+			calculator = Gaussian2DPeakResultHelper.create(results.getPSF(), results.getCalibration(), flags);
+		}
+		catch (ConfigurationException e)
+		{
+			IJ.error(TITLE, "Bad configuration: " + e.getMessage());
 			return;
 		}
 
