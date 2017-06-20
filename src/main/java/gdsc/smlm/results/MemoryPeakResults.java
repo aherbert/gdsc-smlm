@@ -918,6 +918,19 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Checks for 3D results. At least 1 result must have a non-zero z-coordinate.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean is3D()
+	{
+		for (int i = 0, size = size(); i < size; i++)
+			if (get(i).getZPosition() != 0)
+				return true;
+		return false;
+	}
+
+	/**
 	 * Gets the first frame.
 	 * <p>
 	 * This may be different from {@link #getMinFrame()} if the results are not sorted by frame.
