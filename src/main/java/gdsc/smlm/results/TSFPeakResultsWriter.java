@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+import com.google.protobuf.util.JsonFormat.Printer;
+
+import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -534,9 +539,23 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			}
 		}
 		if (configuration != null && configuration.length() > 0)
-
 		{
 			builder.setConfiguration(singleLine(configuration));
+		}
+		Printer printer = null;
+		if (psf != null)
+		{
+			try
+			{
+				if (printer == null)
+					printer = JsonFormat.printer().omittingInsignificantWhitespace();
+				builder.setPSF(printer.print(psf));
+			}
+			catch (InvalidProtocolBufferException e)
+			{
+				// This shouldn't happen so throw it
+				throw new NotImplementedException("Unable to serialise the PSF settings", e);
+			}
 		}
 
 		// Have a property so the boxSize can be set

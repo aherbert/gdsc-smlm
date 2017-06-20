@@ -146,6 +146,8 @@ message SpotList {
       // when fitting using Maximum Likelihood Estimation (MLE).
    optional CameraType cameraType = 1509; // The camera type
 
+   optional string PSF = 1510; // PSF used for fitting (can be a serialised object)
+
    // These ids can be used in your own .proto derived from this one
    extensions 1700 to 2047;
 }

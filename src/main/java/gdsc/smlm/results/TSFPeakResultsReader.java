@@ -7,6 +7,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+import com.google.protobuf.util.JsonFormat.Parser;
+
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.PSF;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -491,6 +499,25 @@ public class TSFPeakResultsReader
 			capacity = (int) Math.min(100000, spotList.getNrSpots());
 		MemoryPeakResults results = new MemoryPeakResults(capacity);
 
+		// Create the type of Gaussian PSF
+		if (spotList.hasFitMode())
+		{
+			switch (spotList.getFitMode())
+			{
+				case ONEAXIS:
+					results.setPSF(PSFHelper.create(PSFType.OneAxisGaussian2D));
+					break;
+				case TWOAXIS:
+					results.setPSF(PSFHelper.create(PSFType.TwoAxisGaussian2D));
+					break;
+				case TWOAXISANDTHETA:
+					results.setPSF(PSFHelper.create(PSFType.TwoAxisAndThetaGaussian2D));
+					break;
+				default:
+					break;
+			}
+		}
+		
 		// Generic reconstruction
 		String name;
 		if (spotList.hasName())
@@ -568,6 +595,25 @@ public class TSFPeakResultsReader
 			if (spotList.hasConfiguration())
 			{
 				results.setConfiguration(spotList.getConfiguration());
+			}
+			// Allow restoring the GDSC PSF exactly
+			Parser parser = null;
+			if (spotList.hasPSF())
+			{
+				try
+				{
+					if (parser == null)
+						parser = JsonFormat.parser();
+
+					PSF.Builder psfBuilder = PSF.newBuilder();
+					parser.merge(spotList.getPSF(), psfBuilder);
+					results.setPSF(psfBuilder.build());
+				}
+				catch (InvalidProtocolBufferException e)
+				{
+					// This should be OK
+					System.err.println("Unable to deserialise the PSF settings");
+				}				
 			}
 		}
 
