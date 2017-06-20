@@ -28,14 +28,21 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.PSF;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.utils.XmlUtils;
@@ -46,7 +53,7 @@ import gdsc.smlm.utils.XmlUtils;
 public class PeakResultsReader
 {
 	/** The columns to recognise in the ImageJ table results header */
-	private static String IMAGEJ_TABLE_RESULTS_HEADER = "origX\torigY\torigValue\tError\tNoise\tS";
+	private static String IMAGEJ_TABLE_RESULTS_HEADER = "origX\torigY\torigValue\tError\tNoise";
 
 	/** The space patterm */
 	private static Pattern spacePattern = Pattern.compile(" ");
@@ -65,6 +72,7 @@ public class PeakResultsReader
 	private ImageSource source = null;
 	private Rectangle bounds = null;
 	private Calibration calibration = null;
+	private PSF psf = null;
 	private String configuration = null;
 	private TrackProgress tracker = null;
 	private ResultOption[] options = null;
@@ -217,32 +225,6 @@ public class PeakResultsReader
 		else if (header.contains(IMAGEJ_TABLE_RESULTS_HEADER))
 		{
 			format = FileFormat.SMLM_TABLE;
-			// Header contains:
-			// [#]
-			// [Source]
-			// Peak
-			// [End Peak]
-			// origX
-			// origY
-			// origValue
-			// Error
-			// Noise
-			// SNR
-			// Background
-			// [+/-]
-			// Signal
-			// [+/-]
-			// Angle
-			// [+/-]
-			// X
-			// [+/-]
-			// Y
-			// [+/-]
-			// X SD
-			// [+/-]
-			// Y SD
-			// [+/-]
-			// [Precision] 
 			readId = header.startsWith("#");
 			readEndFrame = header.contains("\tEnd ");
 			deviations = header.contains("\t+/-\t");
@@ -429,6 +411,70 @@ public class PeakResultsReader
 		return calibration;
 	}
 
+	public PSF getPSF()
+	{
+		if (psf == null)
+		{
+			getHeader();
+			if (header != null && header.length() > 0)
+			{
+				String json = getField("PSF");
+				if (json != null && json.length() > 0
+				//&& json.startsWith("[")
+				)
+				{
+					// Convert the JSON back
+					try
+					{
+						PSF.Builder psfBuilder = PSF.newBuilder();
+						JsonFormat.parser().merge(json, psfBuilder);
+						psf = psfBuilder.build();
+					}
+					catch (InvalidProtocolBufferException e)
+					{
+						// This should be OK
+						System.err.println("Unable to deserialise the PSF settings");
+					}
+				}
+
+				if (psf == null)
+				{
+					// Guess base on type
+					switch (format)
+					{
+						case NSTORM:
+						case RAPID_STORM:
+							// We currently only support two axis data
+							psf = PSFHelper.create(PSFType.TwoAxisGaussian2D);
+							break;
+
+						// Note: Older GDSC results were all TwoAxisAndTheta
+						case SMLM_BINARY:
+						case SMLM_TABLE:
+						case SMLM_TEXT:
+							if (smlmVersion < 3)
+								psf = PSFHelper.create(PSFType.TwoAxisAndThetaGaussian2D);
+							break;
+
+						case TSF_BINARY:
+							// This is read separately so ignore
+							break;
+
+						case MALK:
+							// Use the custom type with no additional PSF parameters
+							psf = PSFHelper.create(PSFType.Custom);
+							break;
+
+						case UNKNOWN:
+						default:
+							break;
+					}
+				}
+			}
+		}
+		return psf;
+	}
+
 	/**
 	 * @return The configuration specified in the results header
 	 */
@@ -471,6 +517,9 @@ public class PeakResultsReader
 		getHeader();
 		if (header == null || format == null || format == FileFormat.UNKNOWN)
 			return null;
+
+		// Always do this as we can guess the PSF based on the file type
+		getPSF();
 
 		// Use a switch statement with no break statements to fall through
 		switch (format)
@@ -534,8 +583,19 @@ public class PeakResultsReader
 		MemoryPeakResults results = createResults();
 
 		// Units were added in version 3
+		int nFields;
 		if (smlmVersion < 3)
+		{
+			nFields = 7;
+			calibration.setIntensityUnit(IntensityUnit.COUNT);
+			calibration.setDistanceUnit(DistanceUnit.PIXEL);
 			calibration.setAngleUnit(AngleUnit.DEGREE);
+		}
+		else
+		{
+			// The number of fields should be within the PSF object
+			nFields = new PeakResultsHelper(calibration, psf).getNames().length;
+		}
 
 		DataInputStream input = null;
 		try
@@ -547,10 +607,10 @@ public class PeakResultsReader
 			// Seek to the start of the binary data by just reading the header again
 			BinaryFilePeakResults.readHeader(input);
 
-			// Format: [i]i[i]iifdffffffff[fffffff]
-			// where [] are optional
+			// Format: [i]i[i]iifdf + n*f [+ n*f]
+			// where [] are optional and n is the number of fields
 
-			int length = BinaryFilePeakResults.getDataSize(deviations, readEndFrame, readId);
+			int length = BinaryFilePeakResults.getDataSize(deviations, readEndFrame, readId, nFields);
 			byte[] buffer = new byte[length];
 
 			int c = 0;
@@ -573,8 +633,8 @@ public class PeakResultsReader
 				float origValue = readFloat(buffer);
 				double chiSquared = readDouble(buffer);
 				float noise = readFloat(buffer);
-				float[] params = readData(buffer, new float[7]);
-				float[] paramsStdDev = (deviations) ? readData(buffer, new float[7]) : null;
+				float[] params = readData(buffer, new float[nFields]);
+				float[] paramsStdDev = (deviations) ? readData(buffer, new float[nFields]) : null;
 
 				// Convert old binary format with the amplitude to signal
 				if (convert)
@@ -623,6 +683,7 @@ public class PeakResultsReader
 		results.setBounds(bounds);
 		results.setCalibration(calibration);
 		results.setConfiguration(configuration);
+		results.setPSF(psf);
 		return results;
 	}
 
@@ -679,8 +740,19 @@ public class PeakResultsReader
 		MemoryPeakResults results = createResults();
 
 		// Units were added in version 3
+		int nFields;
 		if (smlmVersion < 3)
+		{
+			nFields = 7;
+			calibration.setIntensityUnit(IntensityUnit.COUNT);
+			calibration.setDistanceUnit(DistanceUnit.PIXEL);
 			calibration.setAngleUnit(AngleUnit.DEGREE);
+		}
+		else
+		{
+			// The number of fields should be within the PSF object
+			nFields = new PeakResultsHelper(calibration, psf).getNames().length;
+		}
 
 		BufferedReader input = null;
 		try
@@ -701,7 +773,7 @@ public class PeakResultsReader
 				if (line.charAt(0) != '#')
 				{
 					// This is the first record
-					if (!addPeakResult(results, line, smlmVersion))
+					if (!addPeakResult(results, line, smlmVersion, nFields))
 						errors = 1;
 					break;
 				}
@@ -715,7 +787,7 @@ public class PeakResultsReader
 				if (line.charAt(0) == '#')
 					continue;
 
-				if (!addPeakResult(results, line, smlmVersion))
+				if (!addPeakResult(results, line, smlmVersion, nFields))
 				{
 					if (++errors >= 10)
 					{
@@ -746,13 +818,16 @@ public class PeakResultsReader
 		return results;
 	}
 
-	private boolean addPeakResult(MemoryPeakResults results, String line, int version)
+	private boolean addPeakResult(MemoryPeakResults results, String line, int version, int nFields)
 	{
 		PeakResult result;
 		switch (version)
 		{
 			case 3:
-				// Version 3 has an improved calibration header. The fields are the same.
+				// Version 3 has variable PSF parameter fields
+				result = (deviations) ? createPeakResultDeviationsV3(line, nFields) : createPeakResultV3(line, nFields);
+				break;
+
 			case 2:
 				result = (deviations) ? createPeakResultDeviationsV2(line) : createPeakResultV2(line);
 				break;
@@ -931,9 +1006,19 @@ public class PeakResultsReader
 
 	private PeakResult createPeakResultV2(String line)
 	{
+		return createPeakResultV3(line, 7);
+	}
+
+	private PeakResult createPeakResultDeviationsV2(String line)
+	{
+		return createPeakResultDeviationsV3(line, 7);
+	}
+
+	private PeakResult createPeakResultV3(String line, int nFields)
+	{
 		try
 		{
-			float[] params = new float[7];
+			float[] params = new float[nFields];
 
 			if (isUseScanner())
 			{
@@ -1002,12 +1087,12 @@ public class PeakResultsReader
 		return null;
 	}
 
-	private PeakResult createPeakResultDeviationsV2(String line)
+	private PeakResult createPeakResultDeviationsV3(String line, int nFields)
 	{
 		try
 		{
-			float[] params = new float[7];
-			float[] paramsStdDev = new float[7];
+			float[] params = new float[nFields];
+			float[] paramsStdDev = new float[nFields];
 
 			if (isUseScanner())
 			{
@@ -1098,11 +1183,68 @@ public class PeakResultsReader
 			// Skip over the single line header
 			String header = input.readLine();
 
-			// Old table results had the Signal and Amplitude.
-			// New table results have only the Signal.
-			int version = 2;
-			if (header.contains("Amplitude"))
+			// V1: had the Signal and Amplitude. Parameters 
+			// V2: have only the Signal.
+			// V3: Has variable columns with units for the PSF parameters. Signal was renamed to Intensity.
+			int version;
+			int nFields = 0;
+			if (header.contains("Signal"))
 				version = 1;
+			else if (header.contains("Amplitude"))
+				version = 2;
+			else
+			{
+				version = 3;
+				// Get the number of data fields by counting the standard fields
+				String[] columns = header.split("\t");
+				int field = 0;
+				if (readId)
+					field++; // ID #
+				if (readSource)
+					field++; // Source
+				field++; // Frame
+				if (readEndFrame)
+					field++; // End frame
+				field++; // origX
+				field++; // origY
+				field++; // origValue
+				field++; // error
+				field++; // noise
+				field++; // SNR
+
+				// The remaining fields are PSF parameters with the exception of the final precision field
+
+				nFields = columns.length - field;
+				if (columns[columns.length - 1].contains("Precision"))
+					nFields--;
+				if (deviations)
+				{
+					nFields /= 2;
+				}
+
+				// We can guess part of the calibration.
+				if (calibration == null)
+					calibration = new Calibration();
+				int jump = (deviations) ? 2 : 1;
+				// field is currently on Background
+				calibration.setIntensityUnit(UnitHelper.guessIntensityUnitFromShortName(extractUnit(columns[field])));
+				field += jump; // Move to Intensity
+				field += jump; // Move to X
+				calibration.setDistanceUnit(UnitHelper.guessDistanceUnitFromShortName(extractUnit(columns[field])));
+				field += jump; // Move to Y
+				field += jump; // Move to Z
+				// The angle may be used in fields above the standard ones
+				while (field < columns.length)
+				{
+					field += jump;
+					AngleUnit u = UnitHelper.guessAngleUnitFromShortName(extractUnit(columns[field]));
+					if (u != null)
+					{
+						calibration.setAngleUnit(u);
+						break;
+					}
+				}
+			}
 
 			int c = 0;
 			while ((line = input.readLine()) != null)
@@ -1110,7 +1252,7 @@ public class PeakResultsReader
 				if (line.length() == 0)
 					continue;
 
-				if (!addTableResult(results, line, version))
+				if (!addTableResult(results, line, version, nFields))
 				{
 					if (++errors >= 10)
 					{
@@ -1142,11 +1284,39 @@ public class PeakResultsReader
 		return results;
 	}
 
-	private boolean addTableResult(MemoryPeakResults results, String line, int version)
+	/**
+	 * Extract the unit from a string. The unit is the first string within brackets, e.g. (unit) would return unit.
+	 *
+	 * @param string
+	 *            the string
+	 * @return the unit string (or null)
+	 */
+	public static String extractUnit(String string)
+	{
+		if (string != null)
+		{
+			int beginIndex = string.indexOf('(');
+			if (beginIndex >= 0)
+			{
+				int endIndex = string.indexOf(')');
+				if (endIndex > beginIndex)
+				{
+					return string.substring(beginIndex, endIndex);
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean addTableResult(MemoryPeakResults results, String line, int version, int nFields)
 	{
 		final PeakResult result;
 		switch (version)
 		{
+			case 3:
+				result = createTableResultV3(line, nFields);
+				break;
+
 			case 2:
 				result = createTableResultV2(line);
 				break;
@@ -1349,6 +1519,88 @@ public class PeakResultsReader
 		return null;
 	}
 
+	private PeakResult createTableResultV3(String line, int nFields)
+	{
+		// Text file with fields:
+		// [#]
+		// [Source]
+		// Peak
+		// [End Peak]
+		// origX
+		// origY
+		// origValue
+		// Error
+		// Noise[ (units)]
+		// SNR
+		// Background[ (units)]
+		// [+/-]
+		// Intensity[ (units)]
+		// [+/-]
+		// X[ (units)]
+		// [+/-]
+		// Y[ (units)]
+		// [+/-]
+		// Z[ (units)]
+		// [+/-]
+		// Repeated:
+		//   Field[ (units)]
+		//   [+/-]
+		// [Precision] 
+		try
+		{
+			Scanner scanner = new Scanner(line);
+			scanner.useDelimiter(tabPattern);
+			scanner.useLocale(Locale.US);
+			int id = 0, endPeak = 0;
+			if (readId)
+				id = scanner.nextInt();
+			if (readSource)
+				scanner.next();
+			int peak = scanner.nextInt();
+			if (readEndFrame)
+				endPeak = scanner.nextInt();
+			int origX = scanner.nextInt();
+			int origY = scanner.nextInt();
+			float origValue = scanner.nextFloat();
+			double error = scanner.nextDouble();
+			float noise = scanner.nextFloat();
+			@SuppressWarnings("unused")
+			float snr = scanner.nextFloat(); // Ignored but must be read
+			float[] params = new float[nFields];
+			float[] paramsStdDev;
+			if (deviations)
+			{
+				paramsStdDev = new float[params.length];
+				for (int i = 0; i < params.length; i++)
+				{
+					params[i] = scanner.nextFloat();
+					paramsStdDev[i] = scanner.nextFloat();
+				}
+			}
+			else
+			{
+				paramsStdDev = null;
+				for (int i = 0; i < params.length; i++)
+				{
+					params[i] = scanner.nextFloat();
+				}
+			}
+			scanner.close();
+			if (readId || readEndFrame)
+				return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
+						endPeak, id);
+			else
+				return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
+		}
+		catch (InputMismatchException e)
+		{
+		}
+		catch (NoSuchElementException e)
+		{
+		}
+		return null;
+	}
+
 	private MemoryPeakResults readRapidSTORM()
 	{
 		MemoryPeakResults results = createResults();
@@ -1439,7 +1691,7 @@ public class PeakResultsReader
 		//   sy^2 (pm^2)
 		//   2 kernel improvement
 		//   Fit residues chi square
-		// *Note that the RapidSTORM Amplitude is the signal. To get the Amplitude we must divide by the 2*pi*sx*sy
+		// *Note that the RapidSTORM Amplitude is the signal.
 		try
 		{
 			Scanner scanner = new Scanner(line);
@@ -1572,10 +1824,10 @@ public class PeakResultsReader
 		// We could support setting the PSF as a Gaussian2D with one/two axis SD.
 		// This would mean updating all the result params if it is a one axis PSF.
 		// For now just record it as a 2 axis PSF.
-		
+
 		// Create a calibration
 		calibration = new Calibration();
-		
+
 		// Q. Is NSTORM in photons?
 		calibration.setIntensityUnit(IntensityUnit.COUNT);
 		calibration.setDistanceUnit(DistanceUnit.NM);
@@ -1587,7 +1839,7 @@ public class PeakResultsReader
 		}
 
 		results.setCalibration(calibration);
-		
+
 		return results;
 	}
 

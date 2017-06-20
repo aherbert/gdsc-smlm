@@ -31,9 +31,11 @@ import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
 
 /**
  * Saves the fit results to file using the simple MALK file format (Molecular Accuracy Localisation Keep). This consists
@@ -160,6 +162,10 @@ public class MALKFilePeakResults extends FilePeakResults
 				}
 			}
 		}
+		
+		// The data loses PSF information so reset this to a custom type with 
+		// no additional parameters.
+		setPSF(PSFHelper.create(PSFType.Custom));
 
 		super.begin();
 

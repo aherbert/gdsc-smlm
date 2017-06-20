@@ -107,6 +107,27 @@ public class UnitHelper
 	}
 
 	/**
+	 * Guess distance unit from short name.
+	 *
+	 * @param name
+	 *            the name
+	 * @return the distance unit
+	 */
+	public static DistanceUnit guessDistanceUnitFromShortName(String name)
+	{
+		if (name != null)
+		{
+			if (name.equalsIgnoreCase("px"))
+				return DistanceUnit.PIXEL;
+			if (name.equalsIgnoreCase("um"))
+				return DistanceUnit.UM;
+			if (name.equalsIgnoreCase("nm"))
+				return DistanceUnit.NM;
+		}
+		return null;
+	}
+
+	/**
 	 * Gets the short name.
 	 *
 	 * @param unit
@@ -127,6 +148,25 @@ public class UnitHelper
 	}
 
 	/**
+	 * Guess intensity unit from short name.
+	 *
+	 * @param name
+	 *            the name
+	 * @return the intensity unit
+	 */
+	public static IntensityUnit guessIntensityUnitFromShortName(String name)
+	{
+		if (name != null)
+		{
+			if (name.equalsIgnoreCase("photon"))
+				return IntensityUnit.PHOTON;
+			if (name.equalsIgnoreCase("count"))
+				return IntensityUnit.COUNT;
+		}
+		return null;
+	}
+
+	/**
 	 * Gets the short name.
 	 *
 	 * @param unit
@@ -144,5 +184,24 @@ public class UnitHelper
 			default:
 				return "na";
 		}
+	}
+
+	/**
+	 * Guess angle unit from short name.
+	 *
+	 * @param name
+	 *            the name
+	 * @return the angle unit
+	 */
+	public static AngleUnit guessAngleUnitFromShortName(String name)
+	{
+		if (name != null)
+		{
+			if (name.equalsIgnoreCase("°"))
+				return AngleUnit.DEGREE;
+			if (name.equalsIgnoreCase("rad"))
+				return AngleUnit.RADIAN;
+		}
+		return null;
 	}
 }

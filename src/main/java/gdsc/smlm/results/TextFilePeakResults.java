@@ -13,13 +13,6 @@ import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.ConfigurationException;
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.UnitHelper;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -33,7 +26,12 @@ import gdsc.smlm.data.config.UnitHelper;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.core.data.utils.Converter;
+import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 
 /**
  * Saves the fit results to file
@@ -42,14 +40,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 {
 	private Gaussian2DPeakResultCalculator calculator;
 
-	/** Converter to change the distances. */
-	private TypeConverter<DistanceUnit> distanceConverter;
-	/** Converter to change the intensity. */
-	private TypeConverter<IntensityUnit> intensityConverter;
-	/** Converter to change the background intensity. */
-	private TypeConverter<IntensityUnit> backgroundConverter;
-	/** Converter to change the shape. */
-	private TypeConverter<AngleUnit> shapeConverter;
+	private PeakResultsHelper helper;
+	private Converter[] converters;
 
 	private DistanceUnit distanceUnit = null;
 	private IntensityUnit intensityUnit = null;
@@ -143,7 +135,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			{
 				try
 				{
-					calculator = Gaussian2DPeakResultHelper.create(psf, calibration, Gaussian2DPeakResultHelper.PRECISION);
+					calculator = Gaussian2DPeakResultHelper.create(psf, calibration,
+							Gaussian2DPeakResultHelper.PRECISION);
 					canComputePrecision = true;
 				}
 				catch (ConfigurationException e)
@@ -151,25 +144,16 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 					// Not a Gaussian 2D function
 				}
 			}
-
-			// Add ability to write output in selected units
-
-			// Clone the calibration as it may change
-			this.calibration = calibration.clone();
-
-			distanceConverter = calibration.getDistanceConverterSafe(distanceUnit);
-			if (distanceConverter.to() != null)
-				calibration.setDistanceUnit(distanceConverter.to());
-			ArrayList<TypeConverter<IntensityUnit>> converters = calibration.getDualIntensityConverter(intensityUnit);
-			intensityConverter = (TypeConverter<IntensityUnit>) converters.get(0);
-			backgroundConverter = (TypeConverter<IntensityUnit>) converters.get(1);
-			if (intensityConverter.to() != null)
-				calibration.setIntensityUnit(intensityConverter.to());
-			// TODO - better support for the shape
-			shapeConverter = calibration.getAngleConverter(angleUnit);
-			if (shapeConverter.to() != null)
-				calibration.setAngleUnit(shapeConverter.to());
 		}
+
+		// We must correctly convert all the PSF parameter types
+		helper = new PeakResultsHelper(calibration, psf);
+		helper.setIntensityUnit(intensityUnit);
+		helper.setDistanceUnit(distanceUnit);
+		helper.setAngleUnit(angleUnit);
+		converters = helper.getConverters();
+		// Update the calibration if converters were created
+		setCalibration(helper.getCalibration());
 
 		super.begin();
 	}
@@ -179,6 +163,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 */
 	protected String[] getFieldNames()
 	{
+		String[] unitNames = helper.getUnitNames();
+
 		ArrayList<String> names = new ArrayList<String>(20);
 		if (isShowId())
 			names.add("Id");
@@ -189,34 +175,20 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		names.add("origY");
 		names.add("origValue");
 		names.add("Error");
-		names.add("Noise");
-		String[] fields = new String[] { "Background", "Signal", "Angle", "X", "Y", "X SD", "Y SD" };
-		// Add units
-		if (calibration != null)
+		String noiseField = "Noise";
+		if (!Utils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
+			noiseField += " (" + (unitNames[PeakResult.INTENSITY] + ")");
+		names.add(noiseField);
+
+		String[] fields = helper.getNames();
+
+		for (int i = 0; i < fields.length; i++)
 		{
-			if (calibration.hasIntensityUnit())
-			{
-				String unit = " (" + UnitHelper.getShortName(calibration.getIntensityUnit()) + ")";
-				fields[0] += unit;
-				fields[1] += unit;
-			}
-			if (calibration.hasAngleUnit())
-			{
-				String unit = " (" + UnitHelper.getShortName(calibration.getAngleUnit()) + ")";
-				fields[2] += unit;
-			}
-			if (calibration.hasDistanceUnit())
-			{
-				String unit = " (" + UnitHelper.getShortName(calibration.getDistanceUnit()) + ")";
-				fields[3] += unit;
-				fields[4] += unit;
-				fields[5] += unit;
-				fields[6] += unit;
-			}
-		}
-		for (String field : fields)
-		{
-			names.add(field);
+			String f = fields[i];
+			// Add units
+			if (!Utils.isNullOrEmpty(unitNames[i]))
+				f += " (" + unitNames[i] + ")";
+			names.add(f);
 			if (isShowDeviations())
 				names.add("+/-");
 		}
@@ -237,68 +209,48 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			return;
 
 		StringBuilder sb = new StringBuilder();
-
 		addStandardData(sb, 0, peak, peak, origX, origY, origValue, error, noise);
 
-		// Add the parameters		
-		//@formatter:off
+		// Add the parameters
 		if (isShowDeviations())
 		{
 			if (paramsStdDev != null)
-				paramsStdDev = new float[7];
-			addResult(sb, 
-					mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
-					mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
-					mapS(params[Gaussian2DFunction.SHAPE]), mapS(paramsStdDev[Gaussian2DFunction.SHAPE]), 
-					mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
-					mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
-					mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
-					mapD(params[Gaussian2DFunction.Y_SD]), mapD(paramsStdDev[Gaussian2DFunction.Y_SD]));
+			{
+				for (int i = 0; i < converters.length; i++)
+				{
+					add(sb, converters[i].convert(params[i]));
+					add(sb, converters[i].convert(paramsStdDev[i]));
+				}
+			}
+			else
+			{
+				for (int i = 0; i < converters.length; i++)
+				{
+					add(sb, converters[i].convert(params[i]));
+					sb.append("\t0");
+				}
+			}
 		}
 		else
 		{
-			addResult(sb, 
-					mapB(params[Gaussian2DFunction.BACKGROUND]),
-					mapI(params[Gaussian2DFunction.SIGNAL]),  
-					mapS(params[Gaussian2DFunction.SHAPE]),  
-					mapD(params[Gaussian2DFunction.X_POSITION]), 
-					mapD(params[Gaussian2DFunction.Y_POSITION]), 
-					mapD(params[Gaussian2DFunction.X_SD]), 
-					mapD(params[Gaussian2DFunction.Y_SD]));
+			for (int i = 0; i < converters.length; i++)
+			{
+				add(sb, converters[i].convert(params[i]));
+				sb.append("\t0");
+			}
 		}
-		//@formatter:on
 
 		if (canComputePrecision)
 		{
-			addResult(sb, (float) calculator.getPrecision(params, noise));
+			add(sb, calculator.getPrecision(params, noise));
 		}
 
 		sb.append('\n');
 		writeResult(1, sb.toString());
 	}
 
-	private float mapB(float f)
-	{
-		return (float) backgroundConverter.convert(f);
-	}
-
-	private float mapS(float f)
-	{
-		return (float) shapeConverter.convert(f);
-	}
-
-	private float mapI(float f)
-	{
-		return (float) intensityConverter.convert(f);
-	}
-
-	private float mapD(float f)
-	{
-		return (float) distanceConverter.convert(f);
-	}
-
 	private void addStandardData(StringBuilder sb, final int id, final int peak, final int endPeak, final int origX,
-			final int origY, final float origValue, final double chiSquared, final float noise)
+			final int origY, final float origValue, final double error, final float noise)
 	{
 		if (isShowId())
 		{
@@ -306,21 +258,22 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			sb.append('\t');
 		}
 		sb.append(peak);
-		sb.append('\t');
 		if (isShowEndFrame())
-		{
-			sb.append(endPeak);
-			sb.append('\t');
-		}
-		sb.append(origX);
-		sb.append('\t');
-		sb.append(origY);
-		sb.append('\t');
-		sb.append(origValue);
-		sb.append('\t');
-		sb.append(chiSquared);
-		sb.append('\t');
-		sb.append(mapI(noise));
+			sb.append('\t').append(endPeak);
+		sb.append('\t').append(origX).append('\t').append(origY);
+		add(sb, origValue);
+		add(sb, error);
+		add(sb, converters[PeakResult.INTENSITY].convert(noise));
+	}
+
+	private void add(StringBuilder sb, float value)
+	{
+		sb.append('\t').append(value);
+	}
+
+	private void add(StringBuilder sb, double value)
+	{
+		sb.append('\t').append(value);
 	}
 
 	private void addResult(StringBuilder sb, float... args)
@@ -346,33 +299,35 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				result.origValue, result.error, result.noise);
 
 		// Add the parameters		
-		//@formatter:off
 		final float[] params = result.params;
 		if (isShowDeviations())
 		{
-			final float[] paramsStdDev = (result.paramsStdDev != null) ? result.paramsStdDev : new float[7];
-			addResult(sb, 
-					mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
-					mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
-					mapS(params[Gaussian2DFunction.SHAPE]), mapS(paramsStdDev[Gaussian2DFunction.SHAPE]), 
-					mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
-					mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
-					mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
-					mapD(params[Gaussian2DFunction.Y_SD]), mapD(paramsStdDev[Gaussian2DFunction.Y_SD]));
+			final float[] paramsStdDev = result.paramsStdDev;
+			if (paramsStdDev != null)
+			{
+				for (int i = 0; i < converters.length; i++)
+				{
+					add(sb, converters[i].convert(params[i]));
+					add(sb, converters[i].convert(paramsStdDev[i]));
+				}
+			}
+			else
+			{
+				for (int i = 0; i < converters.length; i++)
+				{
+					add(sb, converters[i].convert(params[i]));
+					sb.append("\t0");
+				}
+			}
 		}
 		else
 		{
-			addResult(sb, 
-					mapB(params[Gaussian2DFunction.BACKGROUND]),
-					mapI(params[Gaussian2DFunction.SIGNAL]),  
-					mapS(params[Gaussian2DFunction.SHAPE]),  
-					mapD(params[Gaussian2DFunction.X_POSITION]), 
-					mapD(params[Gaussian2DFunction.Y_POSITION]), 
-					mapD(params[Gaussian2DFunction.X_SD]), 
-					mapD(params[Gaussian2DFunction.Y_SD]));
+			for (int i = 0; i < converters.length; i++)
+			{
+				add(sb, converters[i].convert(params[i]));
+				sb.append("\t0");
+			}
 		}
-		//@formatter:on
-
 		if (canComputePrecision)
 		{
 			addResult(sb, (float) calculator.getPrecision(params, result.noise));
@@ -419,8 +374,10 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		if (cluster.size() > 0)
 		{
 			float[] centroid = cluster.getCentroid();
-			writeResult(0, String.format("#Cluster %f %f (+/-%f) n=%d\n", mapD(centroid[0]), mapD(centroid[1]),
-					mapD(cluster.getStandardDeviation()), cluster.size()));
+			writeResult(0,
+					String.format("#Cluster %f %f (+/-%f) n=%d\n", converters[PeakResult.X].convert(centroid[0]),
+							converters[PeakResult.X].convert(centroid[1]),
+							converters[PeakResult.X].convert(cluster.getStandardDeviation()), cluster.size()));
 			addAll(cluster);
 		}
 	}
@@ -465,10 +422,11 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		if (trace.size() > 0)
 		{
 			float[] centroid = trace.getCentroid();
-			writeResult(0,
-					String.format("#Trace %f %f (+/-%f) n=%d, b=%d, on=%f, off=%f, signal= %f\n", mapD(centroid[0]),
-							mapD(centroid[1]), mapD(trace.getStandardDeviation()), trace.size(), trace.getNBlinks(),
-							trace.getOnTime(), trace.getOffTime(), intensityConverter.convert(trace.getSignal())));
+			writeResult(0, String.format("#Trace %f %f (+/-%f) n=%d, b=%d, on=%f, off=%f, signal= %f\n",
+					converters[PeakResult.X].convert(centroid[0]), converters[PeakResult.X].convert(centroid[1]),
+					converters[PeakResult.X].convert(trace.getStandardDeviation()), trace.size(), trace.getNBlinks(),
+					trace.getOnTime(), trace.getOffTime(),
+					converters[PeakResult.INTENSITY].convert(trace.getSignal())));
 			addAll(trace);
 		}
 	}

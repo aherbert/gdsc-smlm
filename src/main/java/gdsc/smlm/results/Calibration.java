@@ -963,7 +963,7 @@ public class Calibration implements Cloneable
 	/**
 	 * Gets a distance converter to update values.
 	 * <p>
-	 * If the conversion is not possible then an identity converter will be returned with no units.
+	 * If the conversion is not possible then an identity converter will be returned with the current units.
 	 *
 	 * @param toDistanceUnit
 	 *            the distance unit
@@ -977,14 +977,14 @@ public class Calibration implements Cloneable
 		}
 		catch (ConversionException e)
 		{
-			return new IdentityTypeConverter<DistanceUnit>(null);
+			return new IdentityTypeConverter<DistanceUnit>(distanceUnit);
 		}
 	}
 
 	/**
 	 * Gets intensity converters to update values.
 	 * <p>
-	 * If the conversion is not possible then an identity converter will be returned with no units.
+	 * If the conversion is not possible then an identity converter will be returned with the current units.
 	 * <p>
 	 * The returned list calibration has a converter with only the gain, and a second converter with the gain and bias.
 	 * If the bias is not available then the second converter is the same as the first.
@@ -1002,7 +1002,7 @@ public class Calibration implements Cloneable
 		catch (ConversionException e)
 		{
 			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
-			TypeConverter<IntensityUnit> c = new IdentityTypeConverter<IntensityUnit>(null);
+			TypeConverter<IntensityUnit> c = new IdentityTypeConverter<IntensityUnit>(intensityUnit);
 			list.add(c);
 			list.add(c);
 			return list;
@@ -1012,7 +1012,7 @@ public class Calibration implements Cloneable
 	/**
 	 * Gets a angle converter to update values.
 	 * <p>
-	 * If the conversion is not possible then an identity converter will be returned with no units.
+	 * If the conversion is not possible then an identity converter will be returned with the current units.
 	 *
 	 * @param toAngleUnit
 	 *            the angle unit
@@ -1026,7 +1026,7 @@ public class Calibration implements Cloneable
 		}
 		catch (ConversionException e)
 		{
-			return new IdentityTypeConverter<AngleUnit>(null);
+			return new IdentityTypeConverter<AngleUnit>(angleUnit);
 		}
 	}
 }

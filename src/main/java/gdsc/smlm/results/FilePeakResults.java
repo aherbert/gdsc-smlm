@@ -3,9 +3,14 @@ package gdsc.smlm.results;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+import com.google.protobuf.util.JsonFormat.Printer;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
+
+import gdsc.core.utils.NotImplementedException;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -60,7 +65,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 			closeOutput();
 		}
 	}
-	
+
 	/**
 	 * Open the required output from the open file output stream
 	 */
@@ -92,13 +97,15 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		size += count;
 		write(result);
 	}
-	
+
 	protected String createResultsHeader()
 	{
 		StringBuilder sb = new StringBuilder();
 
 		addComment(sb, getHeaderTitle());
 		sb.append(String.format("#FileVersion %s\n", getVersion()));
+
+		Printer printer = null;
 
 		// Add the standard details
 		if (name != null)
@@ -111,6 +118,20 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 			sb.append(String.format("#Calibration %s\n", singleLine(toXML(calibration))));
 		if (configuration != null && configuration.length() > 0)
 			sb.append(String.format("#Configuration %s\n", singleLine(configuration)));
+		if (psf != null)
+		{
+			try
+			{
+				if (printer == null)
+					printer = JsonFormat.printer().omittingInsignificantWhitespace();
+				sb.append(String.format("#PSF %s\n", printer.print(psf)));
+			}
+			catch (InvalidProtocolBufferException e)
+			{
+				// This shouldn't happen so throw it
+				throw new NotImplementedException("Unable to serialise the PSF settings", e);
+			}
+		}
 
 		// Add any extra comments
 		String[] comments = getHeaderComments();
@@ -124,7 +145,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		String[] fields = getFieldNames();
 		if (fields != null)
 		{
-			sb.append("#");
+			sb.append('#');
 			for (int i = 0; i < fields.length; i++)
 			{
 				if (i != 0)

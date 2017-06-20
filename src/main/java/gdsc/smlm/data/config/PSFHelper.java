@@ -114,7 +114,6 @@ public class PSFHelper
 		throw new ConfigurationException("psf is not Gaussian2D");
 	}
 
-
 	/**
 	 * Gets the Gaussian 2D angle index for the PeakResult parameters.
 	 * <p>
@@ -140,7 +139,7 @@ public class PSFHelper
 		}
 		throw new ConfigurationException("psf is not a rotated two axis Gaussian2D");
 	}
-	
+
 	private static final ArrayList<PSFParameter> sxParameters, sxsyParameters, sxsyaParameters;
 	static
 	{
@@ -201,6 +200,60 @@ public class PSFHelper
 		}
 
 		return list;
+	}
+
+	/**
+	 * Gets the count of parameters for the PSF.
+	 *
+	 * @param psf
+	 *            the psf
+	 * @return the parameter count
+	 * @throws ConfigurationException
+	 *             if the psf is null, or not recognised
+	 */
+	public static int getParameterCount(PSF psf) throws ConfigurationException
+	{
+		if (psf == null)
+			throw new ConfigurationException("psf is null");
+
+		switch (psf.getPsfType())
+		{
+			case OneAxisGaussian2D:
+				return 1;
+
+			case AstigmaticGaussian2D:
+			case TwoAxisGaussian2D:
+				return 2;
+
+			case TwoAxisAndThetaGaussian2D:
+				return 3;
+
+			case UNRECOGNIZED:
+				throw new ConfigurationException("psf is not recognised");
+
+			case Custom:
+			default:
+				return psf.getParameterCount();
+		}
+	}
+
+	/**
+	 * Gets the count of parameters for the PSF.
+	 *
+	 * @param psf
+	 *            the psf
+	 * @return the parameter count (may be zero if the PSF is not configured)
+	 */
+	public static int getParameterCountSafe(PSF psf)
+	{
+		try
+		{
+			return getParameterCount(psf);
+		}
+		catch (ConfigurationException e)
+		{
+			return 0;
+		}
 	}
 
 	/**

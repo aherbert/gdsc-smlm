@@ -792,7 +792,7 @@ public final class TaggedSpotFile {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasId()) {
         hash = (37 * hash) + ID_FIELD_NUMBER;
         hash = (53 * hash) + getId();
@@ -811,6 +811,17 @@ public final class TaggedSpotFile {
       return hash;
     }
 
+    public static gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1560,7 +1571,7 @@ public final class TaggedSpotFile {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasX()) {
         hash = (37 * hash) + X_FIELD_NUMBER;
         hash = (53 * hash) + getX();
@@ -1582,6 +1593,17 @@ public final class TaggedSpotFile {
       return hash;
     }
 
+    public static gdsc.smlm.tsf.TaggedSpotFile.ROI parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.tsf.TaggedSpotFile.ROI parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static gdsc.smlm.tsf.TaggedSpotFile.ROI parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2657,6 +2679,32 @@ public final class TaggedSpotFile {
      * <code>optional .TSF.CameraType cameraType = 1509;</code>
      */
     gdsc.smlm.tsf.TaggedSpotFile.CameraType getCameraType();
+
+    /**
+     * <pre>
+     * PSF used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string PSF = 1510;</code>
+     */
+    boolean hasPSF();
+    /**
+     * <pre>
+     * PSF used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string PSF = 1510;</code>
+     */
+    java.lang.String getPSF();
+    /**
+     * <pre>
+     * PSF used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string PSF = 1510;</code>
+     */
+    com.google.protobuf.ByteString
+        getPSFBytes();
   }
   /**
    * Protobuf type {@code TSF.SpotList}
@@ -2701,6 +2749,7 @@ public final class TaggedSpotFile {
       emCCD_ = false;
       amplification_ = 0D;
       cameraType_ = 0;
+      pSF_ = "";
     }
 
     @java.lang.Override
@@ -2962,6 +3011,12 @@ public final class TaggedSpotFile {
                 bitField0_ |= 0x08000000;
                 cameraType_ = rawValue;
               }
+              break;
+            }
+            case 12082: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x10000000;
+              pSF_ = bs;
               break;
             }
           }
@@ -3926,6 +3981,60 @@ public final class TaggedSpotFile {
       return result == null ? gdsc.smlm.tsf.TaggedSpotFile.CameraType.CCD : result;
     }
 
+    public static final int PSF_FIELD_NUMBER = 1510;
+    private volatile java.lang.Object pSF_;
+    /**
+     * <pre>
+     * PSF used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string PSF = 1510;</code>
+     */
+    public boolean hasPSF() {
+      return ((bitField0_ & 0x10000000) == 0x10000000);
+    }
+    /**
+     * <pre>
+     * PSF used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string PSF = 1510;</code>
+     */
+    public java.lang.String getPSF() {
+      java.lang.Object ref = pSF_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          pSF_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * PSF used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string PSF = 1510;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPSFBytes() {
+      java.lang.Object ref = pSF_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pSF_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -4053,6 +4162,9 @@ public final class TaggedSpotFile {
       }
       if (((bitField0_ & 0x08000000) == 0x08000000)) {
         output.writeEnum(1509, cameraType_);
+      }
+      if (((bitField0_ & 0x10000000) == 0x10000000)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1510, pSF_);
       }
       extensionWriter.writeUntil(2048, output);
       unknownFields.writeTo(output);
@@ -4186,6 +4298,9 @@ public final class TaggedSpotFile {
       if (((bitField0_ & 0x08000000) == 0x08000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1509, cameraType_);
+      }
+      if (((bitField0_ & 0x10000000) == 0x10000000)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1510, pSF_);
       }
       size += extensionsSerializedSize();
       size += unknownFields.getSerializedSize();
@@ -4358,6 +4473,11 @@ public final class TaggedSpotFile {
       if (hasCameraType()) {
         result = result && cameraType_ == other.cameraType_;
       }
+      result = result && (hasPSF() == other.hasPSF());
+      if (hasPSF()) {
+        result = result && getPSF()
+            .equals(other.getPSF());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       result = result &&
           getExtensionFields().equals(other.getExtensionFields());
@@ -4370,7 +4490,7 @@ public final class TaggedSpotFile {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasApplicationId()) {
         hash = (37 * hash) + APPLICATION_ID_FIELD_NUMBER;
         hash = (53 * hash) + getApplicationId();
@@ -4505,12 +4625,27 @@ public final class TaggedSpotFile {
         hash = (37 * hash) + CAMERATYPE_FIELD_NUMBER;
         hash = (53 * hash) + cameraType_;
       }
+      if (hasPSF()) {
+        hash = (37 * hash) + PSF_FIELD_NUMBER;
+        hash = (53 * hash) + getPSF().hashCode();
+      }
       hash = hashFields(hash, getExtensionFields());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
+    public static gdsc.smlm.tsf.TaggedSpotFile.SpotList parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.tsf.TaggedSpotFile.SpotList parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static gdsc.smlm.tsf.TaggedSpotFile.SpotList parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -4697,6 +4832,8 @@ public final class TaggedSpotFile {
         bitField0_ = (bitField0_ & ~0x20000000);
         cameraType_ = 0;
         bitField0_ = (bitField0_ & ~0x40000000);
+        pSF_ = "";
+        bitField0_ = (bitField0_ & ~0x80000000);
         return this;
       }
 
@@ -4856,6 +4993,10 @@ public final class TaggedSpotFile {
           to_bitField0_ |= 0x08000000;
         }
         result.cameraType_ = cameraType_;
+        if (((from_bitField0_ & 0x80000000) == 0x80000000)) {
+          to_bitField0_ |= 0x10000000;
+        }
+        result.pSF_ = pSF_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -5058,6 +5199,11 @@ public final class TaggedSpotFile {
         }
         if (other.hasCameraType()) {
           setCameraType(other.getCameraType());
+        }
+        if (other.hasPSF()) {
+          bitField0_ |= 0x80000000;
+          pSF_ = other.pSF_;
+          onChanged();
         }
         this.mergeExtensionFields(other);
         this.mergeUnknownFields(other.unknownFields);
@@ -7330,6 +7476,106 @@ public final class TaggedSpotFile {
         onChanged();
         return this;
       }
+
+      private java.lang.Object pSF_ = "";
+      /**
+       * <pre>
+       * PSF used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string PSF = 1510;</code>
+       */
+      public boolean hasPSF() {
+        return ((bitField0_ & 0x80000000) == 0x80000000);
+      }
+      /**
+       * <pre>
+       * PSF used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string PSF = 1510;</code>
+       */
+      public java.lang.String getPSF() {
+        java.lang.Object ref = pSF_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            pSF_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * PSF used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string PSF = 1510;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPSFBytes() {
+        java.lang.Object ref = pSF_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pSF_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * PSF used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string PSF = 1510;</code>
+       */
+      public Builder setPSF(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x80000000;
+        pSF_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * PSF used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string PSF = 1510;</code>
+       */
+      public Builder clearPSF() {
+        bitField0_ = (bitField0_ & ~0x80000000);
+        pSF_ = getDefaultInstance().getPSF();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * PSF used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string PSF = 1510;</code>
+       */
+      public Builder setPSFBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x80000000;
+        pSF_ = value;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
@@ -9405,7 +9651,7 @@ public final class TaggedSpotFile {
         return memoizedHashCode;
       }
       int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (19 * hash) + getDescriptor().hashCode();
       if (hasMolecule()) {
         hash = (37 * hash) + MOLECULE_FIELD_NUMBER;
         hash = (53 * hash) + getMolecule();
@@ -9549,6 +9795,17 @@ public final class TaggedSpotFile {
       return hash;
     }
 
+    public static gdsc.smlm.tsf.TaggedSpotFile.Spot parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.tsf.TaggedSpotFile.Spot parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static gdsc.smlm.tsf.TaggedSpotFile.Spot parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -11702,7 +11959,7 @@ public final class TaggedSpotFile {
       "\n\016TSFProto.proto\022\003TSF\"G\n\017FluorophoreType" +
       "\022\n\n\002id\030\001 \002(\005\022\023\n\013description\030\002 \001(\t\022\023\n\013is_" +
       "fiducial\030\003 \001(\010\"=\n\003ROI\022\t\n\001x\030\001 \002(\005\022\t\n\001y\030\002 " +
-      "\002(\005\022\017\n\007x_width\030\003 \002(\005\022\017\n\007y_width\030\004 \002(\005\"\345\005" +
+      "\002(\005\022\017\n\007x_width\030\003 \002(\005\022\017\n\007y_width\030\004 \002(\005\"\363\005" +
       "\n\010SpotList\022\031\n\016application_id\030\001 \002(\005:\0011\022\014\n" +
       "\004name\030\002 \001(\t\022\020\n\010filepath\030\003 \001(\t\022\013\n\003uid\030\004 \001" +
       "(\003\022\023\n\013nr_pixels_x\030\005 \001(\005\022\023\n\013nr_pixels_y\030\006" +
@@ -11721,29 +11978,29 @@ public final class TaggedSpotFile {
       "osureTime\030\340\013 \001(\001\022\022\n\treadNoise\030\341\013 \001(\001\022\r\n\004",
       "bias\030\342\013 \001(\001\022\022\n\005emCCD\030\343\013 \001(\010B\002\030\001\022\026\n\rampli" +
       "fication\030\344\013 \001(\001\022$\n\ncameraType\030\345\013 \001(\0162\017.T" +
-      "SF.CameraType*\006\010\244\r\020\200\020\"\333\004\n\004Spot\022\020\n\010molecu" +
-      "le\030\001 \002(\005\022\017\n\007channel\030\002 \002(\005\022\r\n\005frame\030\003 \002(\005" +
-      "\022\r\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005 \001(\005\022\030\n\020fluoroph" +
-      "ore_type\030\023 \001(\005\022\017\n\007cluster\030\024 \001(\005\022*\n\016locat" +
-      "ion_units\030\021 \001(\0162\022.TSF.LocationUnits\022\t\n\001x" +
-      "\030\007 \002(\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001(\002\022,\n\017intensit" +
-      "y_units\030\022 \001(\0162\023.TSF.IntensityUnits\022\021\n\tin" +
-      "tensity\030\n \002(\002\022\022\n\nbackground\030\013 \001(\002\022\r\n\005wid",
-      "th\030\014 \001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005theta\030\016 \001(\002\022\022\n\nx_" +
-      "original\030e \001(\002\022\022\n\ny_original\030f \001(\002\022\022\n\nz_" +
-      "original\030g \001(\002\022\023\n\013x_precision\030h \001(\002\022\023\n\013y" +
-      "_precision\030i \001(\002\022\023\n\013z_precision\030j \001(\002\022\022\n" +
-      "\nx_position\030k \001(\005\022\022\n\ny_position\030l \001(\005\022\016\n" +
-      "\005error\030\334\013 \001(\001\022\016\n\005noise\030\335\013 \001(\002\022\022\n\tend_fra" +
-      "me\030\337\013 \001(\005\022\027\n\016original_value\030\340\013 \001(\002\022\027\n\016pa" +
-      "rams_std_dev\030\341\013 \003(\002*\006\010\244\r\020\200\020*8\n\007FitMode\022\013" +
-      "\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023\n\017TWOAXISANDTH" +
-      "ETA\020\002*&\n\nThetaUnits\022\013\n\007DEGREES\020\000\022\013\n\007RADI",
-      "ANS\020\001*)\n\016IntensityUnits\022\n\n\006COUNTS\020\000\022\013\n\007P" +
-      "HOTONS\020\001*+\n\rLocationUnits\022\006\n\002NM\020\000\022\006\n\002UM\020" +
-      "\001\022\n\n\006PIXELS\020\002*+\n\nCameraType\022\007\n\003CCD\020\000\022\t\n\005" +
-      "EMCCD\020\001\022\t\n\005SCMOS\020\002B\037\n\rgdsc.smlm.tsfB\016Tag" +
-      "gedSpotFile"
+      "SF.CameraType\022\014\n\003PSF\030\346\013 \001(\t*\006\010\244\r\020\200\020\"\333\004\n\004" +
+      "Spot\022\020\n\010molecule\030\001 \002(\005\022\017\n\007channel\030\002 \002(\005\022" +
+      "\r\n\005frame\030\003 \002(\005\022\r\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005 \001" +
+      "(\005\022\030\n\020fluorophore_type\030\023 \001(\005\022\017\n\007cluster\030" +
+      "\024 \001(\005\022*\n\016location_units\030\021 \001(\0162\022.TSF.Loca" +
+      "tionUnits\022\t\n\001x\030\007 \002(\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001" +
+      "(\002\022,\n\017intensity_units\030\022 \001(\0162\023.TSF.Intens" +
+      "ityUnits\022\021\n\tintensity\030\n \002(\002\022\022\n\nbackgroun",
+      "d\030\013 \001(\002\022\r\n\005width\030\014 \001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005the" +
+      "ta\030\016 \001(\002\022\022\n\nx_original\030e \001(\002\022\022\n\ny_origin" +
+      "al\030f \001(\002\022\022\n\nz_original\030g \001(\002\022\023\n\013x_precis" +
+      "ion\030h \001(\002\022\023\n\013y_precision\030i \001(\002\022\023\n\013z_prec" +
+      "ision\030j \001(\002\022\022\n\nx_position\030k \001(\005\022\022\n\ny_pos" +
+      "ition\030l \001(\005\022\016\n\005error\030\334\013 \001(\001\022\016\n\005noise\030\335\013 " +
+      "\001(\002\022\022\n\tend_frame\030\337\013 \001(\005\022\027\n\016original_valu" +
+      "e\030\340\013 \001(\002\022\027\n\016params_std_dev\030\341\013 \003(\002*\006\010\244\r\020\200" +
+      "\020*8\n\007FitMode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023" +
+      "\n\017TWOAXISANDTHETA\020\002*&\n\nThetaUnits\022\013\n\007DEG",
+      "REES\020\000\022\013\n\007RADIANS\020\001*)\n\016IntensityUnits\022\n\n" +
+      "\006COUNTS\020\000\022\013\n\007PHOTONS\020\001*+\n\rLocationUnits\022" +
+      "\006\n\002NM\020\000\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002*+\n\nCameraTyp" +
+      "e\022\007\n\003CCD\020\000\022\t\n\005EMCCD\020\001\022\t\n\005SCMOS\020\002B\037\n\rgdsc" +
+      ".smlm.tsfB\016TaggedSpotFile"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -11774,7 +12031,7 @@ public final class TaggedSpotFile {
     internal_static_TSF_SpotList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_SpotList_descriptor,
-        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "ThetaUnits", "FitMode", "IsTrack", "Ecf", "Qe", "Roi", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "EmCCD", "Amplification", "CameraType", });
+        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "ThetaUnits", "FitMode", "IsTrack", "Ecf", "Qe", "Roi", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "EmCCD", "Amplification", "CameraType", "PSF", });
     internal_static_TSF_Spot_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_TSF_Spot_fieldAccessorTable = new

@@ -1,42 +1,26 @@
 package gdsc.smlm.ij.results;
 
 import java.awt.Frame;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
 import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.Converter;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.ConfigurationException;
-import gdsc.smlm.data.config.UnitConverterFactory;
-import gdsc.smlm.data.config.UnitHelper;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResultsHelper;
 import ij.WindowManager;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
@@ -59,14 +43,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private boolean canComputePrecision = false;
 
-	/** Converter to change the distances. */
-	private TypeConverter<DistanceUnit> distanceConverter;
-	/** Converter to change the intensity. */
-	private TypeConverter<IntensityUnit> intensityConverter;
-	/** Converter to change the background intensity. */
-	private TypeConverter<IntensityUnit> backgroundConverter;
-	/** Converter to change the shape. */
-	private TypeConverter<AngleUnit> shapeConverter;
+	private PeakResultsHelper helper;
+	private Converter[] converters;
 
 	private DistanceUnit distanceUnit = null;
 	private IntensityUnit intensityUnit = null;
@@ -155,25 +133,16 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			{
 				// Gracefully fail so ignore this
 			}
-
-			// Add ability to write output in selected units
-
-			// Clone the calibration as it may change
-			this.calibration = calibration.clone();
-
-			distanceConverter = calibration.getDistanceConverterSafe(distanceUnit);
-			if (distanceConverter.to() != null)
-				calibration.setDistanceUnit(distanceConverter.to());
-			ArrayList<TypeConverter<IntensityUnit>> converters = calibration.getDualIntensityConverter(intensityUnit);
-			intensityConverter = (TypeConverter<IntensityUnit>) converters.get(0);
-			backgroundConverter = (TypeConverter<IntensityUnit>) converters.get(1);
-			if (intensityConverter.to() != null)
-				calibration.setIntensityUnit(intensityConverter.to());
-			// TODO - better support for the shape
-			shapeConverter = calibration.getAngleConverter(angleUnit);
-			if (shapeConverter.to() != null)
-				calibration.setAngleUnit(shapeConverter.to());
 		}
+
+		// We must correctly convert all the PSF parameter types
+		helper = new PeakResultsHelper(calibration, psf);
+		helper.setIntensityUnit(intensityUnit);
+		helper.setDistanceUnit(distanceUnit);
+		helper.setAngleUnit(angleUnit);
+		converters = helper.getConverters();
+		// Update the calibration if converters were created
+		setCalibration(helper.getCalibration());
 
 		createSourceText();
 		createResultsWindow();
@@ -186,22 +155,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		// ImageJ will auto-layout columns if it has less than 10 rows
 		nextRepaintSize = 9;
 		tableActive = true;
-	}
-
-	private boolean isCCD()
-	{
-		if (calibration.hasCameraType())
-		{
-			switch (calibration.getCameraType())
-			{
-				case CCD:
-				case EMCCD:
-					return true;
-				default:
-					break;
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -276,22 +229,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private String createResultsHeader()
 	{
-		String iUnit = "", dUnit = "", sUnit = "";
-		if (calibration != null)
-		{
-			if (calibration.hasIntensityUnit())
-			{
-				iUnit = " (" + UnitHelper.getShortName(calibration.getIntensityUnit()) + ")";
-			}
-			if (calibration.hasDistanceUnit())
-			{
-				dUnit = " (" + UnitHelper.getShortName(calibration.getDistanceUnit()) + ")";
-			}
-			if (calibration.hasAngleUnit())
-			{
-				sUnit = " (" + UnitHelper.getShortName(calibration.getAngleUnit()) + ")";
-			}
-		}
+		String[] names = helper.getNames();
+		String[] unitNames = helper.getUnitNames();
 
 		StringBuilder sb = new StringBuilder();
 		if (addCounter)
@@ -306,29 +245,17 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		sb.append("\torigValue");
 		sb.append("\tError");
 		sb.append("\tNoise");
-		sb.append(iUnit);
+		if (!Utils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
+			sb.append(" (").append(unitNames[PeakResult.INTENSITY]).append(')');
 		sb.append("\tSNR");
-		sb.append("\tBackground");
-		sb.append(iUnit);
-		addDeviation(sb);
-		sb.append("\tSignal");
-		sb.append(iUnit);
-		addDeviation(sb);
-		sb.append("\tAngle");
-		sb.append(sUnit);
-		addDeviation(sb);
-		sb.append("\tX");
-		sb.append(dUnit);
-		addDeviation(sb);
-		sb.append("\tY");
-		sb.append(dUnit);
-		addDeviation(sb);
-		sb.append("\tX SD");
-		sb.append(dUnit);
-		addDeviation(sb);
-		sb.append("\tY SD");
-		sb.append(dUnit);
-		addDeviation(sb);
+
+		for (int i = 0; i < names.length; i++)
+		{
+			sb.append('\t').append(names[i]);
+			if (!Utils.isNullOrEmpty(unitNames[i]))
+				sb.append(" (").append(unitNames[i]).append(')');
+			addDeviation(sb);
+		}
 		if (canComputePrecision)
 		{
 			sb.append("\tPrecision (nm)");
@@ -384,64 +311,42 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		if (!tableActive)
 			return;
 
-		float precision = 0;
-		if (canComputePrecision)
-		{
-			precision = (float) calculator.getPrecision(params, noise);
-		}
 		final float snr = (noise > 0) ? params[PeakResult.INTENSITY] / noise : 0;
-		//@formatter:off
+		StringBuilder sb = addStandardData(peak, endFrame, origX, origY, origValue, error, noise, snr);
 		if (isShowDeviations())
 		{
 			if (paramsStdDev != null)
-				paramsStdDev = new float[7];
-			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr,
-					mapB(params[Gaussian2DFunction.BACKGROUND]), mapI(paramsStdDev[Gaussian2DFunction.BACKGROUND]),
-					mapI(params[Gaussian2DFunction.SIGNAL]), mapI(paramsStdDev[Gaussian2DFunction.SIGNAL]), 
-					mapS(params[Gaussian2DFunction.SHAPE]), mapS(paramsStdDev[Gaussian2DFunction.SHAPE]), 
-					mapD(params[Gaussian2DFunction.X_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.X_POSITION]), 
-					mapD(params[Gaussian2DFunction.Y_POSITION]), mapD(paramsStdDev[Gaussian2DFunction.Y_POSITION]), 
-					mapD(params[Gaussian2DFunction.X_SD]), mapD(paramsStdDev[Gaussian2DFunction.X_SD]), 
-					mapD(params[Gaussian2DFunction.Y_SD]), mapD(paramsStdDev[Gaussian2DFunction.Y_SD]), 
-					precision);
+			{
+				for (int i = 0; i < converters.length; i++)
+				{
+					add(sb, converters[i].convert(params[i]));
+					add(sb, converters[i].convert(paramsStdDev[i]));
+				}
+			}
+			else
+			{
+				for (int i = 0; i < converters.length; i++)
+				{
+					add(sb, converters[i].convert(params[i]));
+					sb.append("\t0");
+				}
+			}
 		}
 		else
 		{
-			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr,
-					mapB(params[Gaussian2DFunction.BACKGROUND]),
-					mapI(params[Gaussian2DFunction.SIGNAL]),  
-					mapS(params[Gaussian2DFunction.SHAPE]),  
-					mapD(params[Gaussian2DFunction.X_POSITION]), 
-					mapD(params[Gaussian2DFunction.Y_POSITION]), 
-					mapD(params[Gaussian2DFunction.X_SD]), 
-					mapD(params[Gaussian2DFunction.Y_SD]), 
-					precision);
+			for (int i = 0; i < converters.length; i++)
+				add(sb, converters[i].convert(params[i]));
 		}
-		//@formatter:on
+		if (canComputePrecision)
+		{
+			add(sb, calculator.getPrecision(params, noise));
+		}
 
+		append(sb.toString());
 	}
 
-	private float mapB(float f)
-	{
-		return (float) backgroundConverter.convert(f);
-	}
-
-	private float mapS(float f)
-	{
-		return (float) shapeConverter.convert(f);
-	}
-
-	private float mapI(float f)
-	{
-		return (float) intensityConverter.convert(f);
-	}
-
-	private float mapD(float f)
-	{
-		return (float) distanceConverter.convert(f);
-	}
-
-	private void addResult(int peak, int endPeak, int origX, int origY, float origValue, double error, float... args)
+	private StringBuilder addStandardData(int peak, int endPeak, int origX, int origY, float origValue, double error,
+			float noise, float snr)
 	{
 		StringBuilder sb = new StringBuilder();
 		if (addCounter)
@@ -456,12 +361,21 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		if (showEndFrame)
 			sb.append('\t').append(endPeak);
 		sb.append('\t').append(origX).append('\t').append(origY);
-		sb.append('\t').append(rounder.round(origValue));
-		sb.append('\t').append(rounder.round(error));
-		for (float f : args)
-			sb.append('\t').append(rounder.round(f));
+		add(sb, origValue);
+		add(sb, error);
+		add(sb, converters[PeakResult.INTENSITY].convert(noise)); // This should be converted
+		add(sb, snr);
+		return sb;
+	}
 
-		append(sb.toString());
+	private void add(StringBuilder sb, float value)
+	{
+		sb.append('\t').append(rounder.toString(value));
+	}
+
+	private void add(StringBuilder sb, double value)
+	{
+		sb.append('\t').append(rounder.toString(value));
 	}
 
 	private void append(String result)

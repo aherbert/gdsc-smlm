@@ -30,6 +30,9 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 {
 	public static final String END_HEADER = "END_HEADER";
 
+	private String[] fieldNames;
+	private int nFields;
+
 	public BinaryFilePeakResults(String filename)
 	{
 		super(filename);
@@ -86,16 +89,28 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 */
 	protected String[] getHeaderComments()
 	{
+		fieldNames = new PeakResultsHelper(calibration, psf).getNames();
+		nFields = fieldNames.length;
+
 		String[] comments = new String[2];
 		comments[0] = "Records start after the final comment line";
-		String format = "iiifdffffffff";
-		if (isShowDeviations())
-			format += "fffffff";
+		StringBuilder sb = new StringBuilder();
 		if (isShowEndFrame())
-			format = "i" + format;
+			sb.append('i');
 		if (isShowId())
-			format = "i" + format;
-		comments[1] = "Binary Format (raw Java bytes) = " + format;
+			sb.append('i');
+		sb.append("iiifdf");
+		if (isShowDeviations())
+		{
+			for (int i = 0; i < nFields; i++)
+				sb.append("ff");
+		}
+		else
+		{
+			for (int i = 0; i < nFields; i++)
+				sb.append('f');
+		}
+		comments[1] = "Binary Format (raw Java bytes) = " + sb.toString();
 		return comments;
 	}
 
@@ -118,16 +133,15 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		names.add("Error");
 		names.add("Noise");
 		names.add("Signal");
-		String[] fieldNames = new String[] { "Background", "Amplitude", "Angle", "X", "Y", "X SD", "Y SD" };
-		for (String field : fieldNames)
+		for (int i = 0; i < nFields; i++)
 		{
-			names.add(field);
+			names.add(fieldNames[i]);
 		}
 		if (isShowDeviations())
 		{
-			for (String field : fieldNames)
+			for (int i = 0; i < nFields; i++)
 			{
-				names.add(field + " StdDev");
+				names.add(fieldNames[i] + " StdDev");
 			}
 		}
 		return names.toArray(new String[names.size()]);
@@ -198,14 +212,20 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		buffer.writeDouble(error);
 		buffer.writeFloat(noise);
 
-		for (int i = 0; i < 7; i++)
+		for (int i = 0; i < nFields; i++)
 			buffer.writeFloat(params[i]);
 		if (isShowDeviations())
 		{
 			if (paramsStdDev == null)
-				paramsStdDev = new float[7];
-			for (int i = 0; i < 7; i++)
-				buffer.writeFloat(paramsStdDev[i]);
+			{
+				for (int i = 0; i < nFields; i++)
+					buffer.writeInt(0); // An empty int is the same size as an empty float
+			}
+			else
+			{
+				for (int i = 0; i < nFields; i++)
+					buffer.writeFloat(paramsStdDev[i]);
+			}
 		}
 	}
 
@@ -233,7 +253,9 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		writeResult(1, bytes.toByteArray());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
 	public void addAll(PeakResult[] results)
@@ -326,7 +348,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			{
 				header = readHeader(input);
 
-				byte[] line = new byte[getDataSize(isShowDeviations(), isShowEndFrame(), isShowId())];
+				byte[] line = new byte[getDataSize(isShowDeviations(), isShowEndFrame(), isShowId(), nFields)];
 				while (input.read(line) == line.length)
 				{
 					results.add(new Result(line));
@@ -402,20 +424,20 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		return sb.toString();
 	}
 
-	public static int getDataSize(boolean deviations, boolean endFrame, boolean id)
+	public static int getDataSize(boolean deviations, boolean endFrame, boolean id, int nFields)
 	{
 		final int BYTES_INT = 4;
 		final int BYTES_FLOAT = 4;
 		final int BYTES_DOUBLE = 8;
 
-		// iiifdffffffff
+		// iiifdf + n*f
 		//	or
-		// iiifdfffffffffffffff
+		// iiifdf + 2*n*f
 		// + Extra i added for the end frame after the first integer
 		// + Extra i added for the id in the first field
-		int size = 3 * BYTES_INT + BYTES_FLOAT + BYTES_DOUBLE + 8 * BYTES_FLOAT;
+		int size = 3 * BYTES_INT + BYTES_FLOAT + BYTES_DOUBLE + BYTES_FLOAT + nFields * BYTES_FLOAT;
 		if (deviations)
-			size += 7 * BYTES_FLOAT;
+			size += nFields * BYTES_FLOAT;
 		if (endFrame)
 			size += BYTES_INT;
 		if (id)
@@ -448,7 +470,11 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		{
 			// Sort by slice number
 			// (Note: peak height is already done in the run(...) method)
-			return slice - o.slice;
+			if (slice < o.slice)
+				return -1;
+			if (slice > o.slice)
+				return 1;
+			return 0;
 		}
 	}
 
