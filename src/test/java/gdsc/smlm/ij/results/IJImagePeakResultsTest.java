@@ -9,7 +9,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.TurboList;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.PSF;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -408,10 +411,12 @@ public class IJImagePeakResultsTest
 		displayFlags |= IJImagePeakResults.DISPLAY_SIGNAL;
 
 		IJImagePeakResults[] r = new IJImagePeakResults[8];
+		PSF psf = PSFHelper.create(PSFType.OneAxisGaussian2D);
 		for (int i = 0; i < r.length; i++)
 		{
 			r[i] = new IJImagePeakResults(title + i, bounds, 1);
 			r[i].setDisplayFlags(displayFlags);
+			r[i].setPSF(psf);
 			begin(r[i]);
 		}
 
@@ -484,11 +489,7 @@ public class IJImagePeakResultsTest
 
 	private static float[] createParams(float x, float y, float v)
 	{
-		float[] params = new float[7];
-		params[Gaussian2DFunction.X_POSITION] = x;
-		params[Gaussian2DFunction.Y_POSITION] = y;
-		params[Gaussian2DFunction.SIGNAL] = v;
-		return params;
+		return Gaussian2DPeakResultHelper.createOneAxisParams(0, v, x, y, 0, 1);
 	}
 
 	private static void addPeakResults(IJImagePeakResults r, float[] x, float[] y, float[] v)

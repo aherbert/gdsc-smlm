@@ -124,7 +124,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 				for (int i = 0; i < peaks; i++)
 				{
 					sb.append(", Peak").append(i + 1).append("=[");
-					for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
+					for (int j = 0, k = i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
+							Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
 					{
 						if (j > 0)
 							sb.append(",");
@@ -142,7 +143,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	{
 		for (int i = 0; i < peaks; i++)
 		{
-			for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
+			for (int j = 0, k = i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
+					Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
 			{
 				// Check if the coordinates have moved less than the delta limit
 				if (Math.abs(bestA[k] - a[k]) > delta)
@@ -156,27 +158,27 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	{
 		for (int i = 0; i < peaks; i++)
 		{
-			if (a[i * 6 + Gaussian2DFunction.SIGNAL] < minimumSignal)
+			if (a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL] < minimumSignal)
 				return true;
 
-			if (isBelow(minimumPosition, a, i * 6 + Gaussian2DFunction.X_POSITION))
+			if (isBelow(minimumPosition, a, i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION))
 				return true;
-			if (isAbove(maximumPosition, a, i * 6 + Gaussian2DFunction.X_POSITION))
+			if (isAbove(maximumPosition, a, i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION))
 				return true;
 
 			if (func.evaluatesSD0())
 			{
-				if (isBelow(minimumSD, a, i * 6 + Gaussian2DFunction.X_SD))
+				if (isBelow(minimumSD, a, i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD))
 					return true;
-				if (isAbove(maximumSD, a, i * 6 + Gaussian2DFunction.X_SD))
+				if (isAbove(maximumSD, a, i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD))
 					return true;
 			}
 
 			if (func.evaluatesSD1())
 			{
-				if (isBelow(minimumSD, a, i * 6 + Gaussian2DFunction.Y_SD))
+				if (isBelow(minimumSD, a, i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD))
 					return true;
-				if (isAbove(maximumSD, a, i * 6 + Gaussian2DFunction.Y_SD))
+				if (isAbove(maximumSD, a, i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD))
 					return true;
 			}
 		}

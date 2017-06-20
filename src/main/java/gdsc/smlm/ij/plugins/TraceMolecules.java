@@ -1871,7 +1871,8 @@ public class TraceMolecules implements PlugIn
 					double minD = Double.POSITIVE_INFINITY;
 					for (int n = 0; n < indices.length; n++)
 					{
-						// Since the fit has failed we use the initial parameters
+						// Since the fit has failed we use the initial parameters.
+						// Note: This assumes the initial parameters are for a Gaussian 2D function
 						final double[] params = job.getFitResult(n).getInitialParameters();
 						final double dx = params[Gaussian2DFunction.X_POSITION] - centre[0];
 						final double dy = params[Gaussian2DFunction.Y_POSITION] - centre[1];

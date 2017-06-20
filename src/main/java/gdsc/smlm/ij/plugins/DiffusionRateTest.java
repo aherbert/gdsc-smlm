@@ -21,6 +21,8 @@ import gdsc.core.utils.RollingArray;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -36,7 +38,6 @@ import gdsc.core.utils.StoredDataStatistics;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -221,6 +222,7 @@ public class DiffusionRateTest implements PlugIn
 		Calibration cal = new Calibration(settings.pixelPitch, 1, 1000.0 / settings.stepsPerSecond);
 		results.setCalibration(cal);
 		results.setName(TITLE);
+		results.setPSF(PSFHelper.create(PSFType.Custom));
 		int peak = 0;
 		// Store raw coordinates
 		ArrayList<Point> points = new ArrayList<Point>(totalSteps);
@@ -381,7 +383,7 @@ public class DiffusionRateTest implements PlugIn
 
 		SimpleRegression r2D = new SimpleRegression(false);
 		SimpleRegression r3D = new SimpleRegression(false);
-		
+
 		final int firstN = (useConfinement) ? fitN : totalSteps;
 		for (int j = 0; j < totalSteps; j++)
 		{
@@ -419,10 +421,10 @@ public class DiffusionRateTest implements PlugIn
 		{
 			// Do linear regression to get diffusion rate
 
-			final double[] best2D = new double[]{ r2D.getIntercept(), r2D.getSlope() };
+			final double[] best2D = new double[] { r2D.getIntercept(), r2D.getSlope() };
 			fitted2D = new PolynomialFunction(best2D);
 
-			final double[] best3D = new double[]{ r3D.getIntercept(), r3D.getSlope() };
+			final double[] best3D = new double[] { r3D.getIntercept(), r3D.getSlope() };
 			fitted3D = new PolynomialFunction(best3D);
 
 			// For 2D diffusion: d^2 = 4D
@@ -650,14 +652,10 @@ public class DiffusionRateTest implements PlugIn
 		stats2D.add(d2);
 		stats3D.add(d2 + xyz[2] * xyz[2]);
 
-		final float[] params = new float[7];
-		params[Gaussian2DFunction.X_POSITION] = (float) xyz[0];
-		params[Gaussian2DFunction.Y_POSITION] = (float) xyz[1];
-		params[Gaussian2DFunction.SIGNAL] = 10f;
-		params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = 1;
+		final float[] params = PeakResult.createParams(0, 10f, (float) xyz[0], (float) xyz[1], (float) xyz[2]);
 		final float noise = 0.1f;
-		results.add(new ExtendedPeakResult(peak, (int) params[Gaussian2DFunction.X_POSITION],
-				(int) params[Gaussian2DFunction.Y_POSITION], 10, 0, noise, params, null, peak, id));
+		results.add(new ExtendedPeakResult(peak, (int) params[PeakResult.X], (int) params[PeakResult.Y], 10, 0, noise,
+				params, null, peak, id));
 		return ++peak;
 	}
 
@@ -920,6 +918,7 @@ public class DiffusionRateTest implements PlugIn
 		Calibration cal = new Calibration(settings.pixelPitch, 1, myAggregateSteps * 1000.0 / settings.stepsPerSecond);
 		results.setCalibration(cal);
 		results.setName(TITLE + " Aggregated");
+		results.setPSF(PSFHelper.create(PSFType.Custom));
 		MemoryPeakResults.addResults(results);
 		lastSimulatedDataset[1] = results.getName();
 		int id = 0;
@@ -937,17 +936,13 @@ public class DiffusionRateTest implements PlugIn
 			{
 				if (n != 0)
 				{
-					final float[] params = new float[7];
 					double[] xyz = new double[] { cx / n, cy / n };
 					if (addError)
 						xyz = addError(xyz, precisionInPixels, random);
-					params[Gaussian2DFunction.X_POSITION] = (float) xyz[0];
-					params[Gaussian2DFunction.Y_POSITION] = (float) xyz[1];
-					params[Gaussian2DFunction.SIGNAL] = n;
-					params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = 1;
+					final float[] params = PeakResult.createParams(0, n, (float) xyz[0], (float) xyz[1], 0);
 					final float noise = 0.1f;
-					PeakResult r = new ExtendedPeakResult(peak, (int) params[Gaussian2DFunction.X_POSITION],
-							(int) params[Gaussian2DFunction.Y_POSITION], n, 0, noise, params, null, peak, id);
+					PeakResult r = new ExtendedPeakResult(peak, (int) params[PeakResult.X], (int) params[PeakResult.Y],
+							n, 0, noise, params, null, peak, id);
 					results.add(r);
 					if (last != null)
 					{
@@ -974,17 +969,13 @@ public class DiffusionRateTest implements PlugIn
 		// Final peak
 		if (n != 0)
 		{
-			final float[] params = new float[7];
 			double[] xyz = new double[] { cx / n, cy / n };
 			if (addError)
 				xyz = addError(xyz, precisionInPixels, random);
-			params[Gaussian2DFunction.X_POSITION] = (float) xyz[0];
-			params[Gaussian2DFunction.Y_POSITION] = (float) xyz[1];
-			params[Gaussian2DFunction.SIGNAL] = n;
-			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = 1;
+			final float[] params = PeakResult.createParams(0, n, (float) xyz[0], (float) xyz[1], 0);
 			final float noise = 0.1f;
-			PeakResult r = new ExtendedPeakResult(peak, (int) params[Gaussian2DFunction.X_POSITION],
-					(int) params[Gaussian2DFunction.Y_POSITION], n, 0, noise, params, null, peak, id);
+			PeakResult r = new ExtendedPeakResult(peak, (int) params[PeakResult.X], (int) params[PeakResult.Y], n, 0,
+					noise, params, null, peak, id);
 			results.add(r);
 			if (last != null)
 			{

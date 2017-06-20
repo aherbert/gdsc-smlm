@@ -89,7 +89,7 @@ public class BenchmarkFit implements PlugIn
 	private FitConfiguration fitConfig;
 	private ImagePlus imp;
 	private CreateData.BenchmarkParameters benchmarkParameters;
-	private double[] answer = new double[7];
+	private double[] answer = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 	private Rectangle region = null;
 	private AtomicInteger comValid = new AtomicInteger();
 
@@ -239,7 +239,7 @@ public class BenchmarkFit implements PlugIn
 					comValid.incrementAndGet();
 			}
 
-			double[] initialParams = new double[7];
+			double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
 			initialParams[Gaussian2DFunction.SIGNAL] = signal;
 			initialParams[Gaussian2DFunction.X_SD] = initialParams[Gaussian2DFunction.Y_SD] = psfWidth;
@@ -1086,7 +1086,7 @@ public class BenchmarkFit implements PlugIn
 	private double[] getConversionFactors()
 	{
 		// TODO - Update this when the fitting is done in photons
-		
+
 		final double[] convert = new double[NAMES.length];
 		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / benchmarkParameters.gain : 0;
 		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() &&

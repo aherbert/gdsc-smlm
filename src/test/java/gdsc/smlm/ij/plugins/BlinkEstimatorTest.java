@@ -12,7 +12,8 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.model.ActivationEnergyImageModel;
 import gdsc.smlm.model.CompoundMoleculeModel;
 import gdsc.smlm.model.DiffusionType;
@@ -25,6 +26,7 @@ import gdsc.smlm.model.SpatialIllumination;
 import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
 import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
@@ -174,8 +176,8 @@ public class BlinkEstimatorTest
 		}
 	}
 
-	private TIntHashSet estimateBlinking(double nBlinks, double tOn, double tOff, int particles,
-			double fixedFraction, boolean timeAtLowerBound, boolean doAssert)
+	private TIntHashSet estimateBlinking(double nBlinks, double tOn, double tOff, int particles, double fixedFraction,
+			boolean timeAtLowerBound, boolean doAssert)
 	{
 		SpatialIllumination activationIllumination = new UniformIllumination(100);
 		int totalSteps = 100;
@@ -229,29 +231,31 @@ public class BlinkEstimatorTest
 
 		MemoryPeakResults results = new MemoryPeakResults();
 		results.setCalibration(new Calibration(pixelPitch, 1, msPerFrame));
+		results.setPSF(PSFHelper.create(PSFType.OneAxisGaussian2D));
+		float b = 0, intensity, z = 0;
 		for (LocalisationModel l : localisations)
 		{
 			// Remove by intensity threshold and optionally at random.
 			if (l.getIntensity() < minPhotons || rand.nextDouble() < pDelete)
 				continue;
-			float[] params = new float[7];
-			params[Gaussian2DFunction.X_POSITION] = (float) l.getX();
-			params[Gaussian2DFunction.Y_POSITION] = (float) l.getY();
-			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
-			params[Gaussian2DFunction.SIGNAL] = (float) (l.getIntensity());
-			results.add(l.getTime(), 0, 0, 0, 0, 0, params, null);
+			int frame = l.getTime();
+			intensity = (float) l.getIntensity();
+			float x = (float) l.getX();
+			float y = (float) l.getY();
+			float[] params = Gaussian2DPeakResultHelper.createParams(b, intensity, x, y, z, psfWidth);
+			results.add(frame, 0, 0, 0, 0, 0, params, null);
 		}
 
 		// Add random localisations
+		// Intensity doesn't matter at the moment for tracing
+		intensity = (float) photons;
 		for (int i = (int) (localisations.size() * pAdd); i-- > 0;)
 		{
-			float[] params = new float[7];
-			params[Gaussian2DFunction.X_POSITION] = (float) (rand.nextDouble() * max[0]);
-			params[Gaussian2DFunction.Y_POSITION] = (float) (rand.nextDouble() * max[1]);
-			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
-			// Intensity doesn't matter at the moment for tracing
-			params[Gaussian2DFunction.SIGNAL] = (float) (photons);
-			results.add(1 + rand.nextInt(totalSteps), 0, 0, 0, 0, 0, params, null);
+			int frame = 1 + rand.nextInt(totalSteps);
+			float x = (float) (rand.nextDouble() * max[0]);
+			float y = (float) (rand.nextDouble() * max[1]);
+			float[] params = Gaussian2DPeakResultHelper.createParams(b, intensity, x, y, z, psfWidth);
+			results.add(frame, 0, 0, 0, 0, 0, params, null);
 		}
 
 		// Get actual simulated stats ...

@@ -1,8 +1,5 @@
 package gdsc.smlm.results;
 
-import gdsc.core.utils.Random;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +7,8 @@ import java.util.Comparator;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.core.utils.Random;
 
 public class TraceManagerTest
 {
@@ -154,15 +153,12 @@ public class TraceManagerTest
 
 	private static float[] createParams(Random rand)
 	{
-		float[] params = new float[7];
-		params[Gaussian2DFunction.X_POSITION] = rand.next() * 256f;
-		params[Gaussian2DFunction.Y_POSITION] = rand.next() * 256f;
-		return params;
+		return Gaussian2DPeakResultHelper.createOneAxisParams(0, 1, rand.next() * 256f, rand.next() * 256f, 0, 1);
 	}
 
 	private MemoryPeakResults toPeakResults(Trace... traces)
 	{
-		ArrayList<PeakResult> results= new ArrayList<PeakResult>();
+		ArrayList<PeakResult> results = new ArrayList<PeakResult>();
 		for (Trace t : traces)
 		{
 			results.addAll(t.getPoints());
@@ -224,8 +220,8 @@ public class TraceManagerTest
 	{
 		if (distance > 0)
 		{
-			params[Gaussian2DFunction.X_POSITION] += -distance + rand.next() * 2 * distance;
-			params[Gaussian2DFunction.Y_POSITION] += -distance + rand.next() * 2 * distance;
+			params[PeakResult.X] += -distance + rand.next() * 2 * distance;
+			params[PeakResult.Y] += -distance + rand.next() * 2 * distance;
 		}
 	}
 }

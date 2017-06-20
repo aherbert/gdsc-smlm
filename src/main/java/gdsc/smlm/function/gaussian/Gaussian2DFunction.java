@@ -46,13 +46,23 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI;
 
+	/** Index of the background in the parameters array */
 	public static final int BACKGROUND = 0;
+	/** Index of the signal intensity in the parameters array */
 	public static final int SIGNAL = 1;
+	/** Index of the shape in the parameters array */
 	public static final int SHAPE = 2;
+	/** Index of the x-position in the parameters array */
 	public static final int X_POSITION = 3;
+	/** Index of the y-position in the parameters array */
 	public static final int Y_POSITION = 4;
+	/** Index of the x-standard deviation in the parameters array */
 	public static final int X_SD = 5;
+	/** Index of the y-standard deviation in the parameters array */
 	public static final int Y_SD = 6;
+	
+	/** The number of parameters per Gaussian peak */
+	public static final int PARAMETERS_PER_PEAK = 6;
 
 	/**
 	 * Gets the name of the parameter assuming a 2D Gaussian function packed as: background + n * [signal, shape,

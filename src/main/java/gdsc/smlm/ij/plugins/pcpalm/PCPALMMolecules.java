@@ -58,10 +58,11 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.function.SkewNormalFunction;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.plugins.ResultsManager;
@@ -1051,7 +1052,7 @@ public class PCPALMMolecules implements PlugIn
 
 		molecules = new ArrayList<Molecule>(nMolecules);
 		// Create some dummy results since the calibration is required for later analysis
-		results = new MemoryPeakResults();
+		results = new MemoryPeakResults(PSFHelper.create(PSFType.Custom));
 		results.setCalibration(new gdsc.smlm.results.Calibration(nmPerPixel, 1, 100));
 		results.setSource(new NullSource("Molecule Simulation"));
 		results.begin();
@@ -1385,10 +1386,10 @@ public class PCPALMMolecules implements PlugIn
 				molecules.add(new Molecule(x, y, i, 1));
 
 				// Store in pixels
-				float[] params = new float[7];
-				params[Gaussian2DFunction.X_POSITION] = (float) (x / nmPerPixel);
-				params[Gaussian2DFunction.Y_POSITION] = (float) (y / nmPerPixel);
-				results.add(i + 1, (int) x, (int) y, 0, 0, 0, params, null);
+				float xx = (float) (x / nmPerPixel);
+				float yy = (float) (y / nmPerPixel);
+				float[] params = PeakResult.createParams(0, 0, xx, yy, 0);
+				results.add(i + 1, (int) xx, (int) yy, 0, 0, 0, params, null);
 			}
 
 			if (molecules.size() > size)

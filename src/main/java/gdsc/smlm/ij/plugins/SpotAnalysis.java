@@ -73,6 +73,7 @@ import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.utils.ImageROIPainter;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -1021,11 +1022,8 @@ public class SpotAnalysis extends PlugInFrame
 			final double spotSignal = getSignal(s.frame);
 			signal += spotSignal;
 			//signal += s.signal;
-			float[] params = new float[7];
-			params[Gaussian2DFunction.X_POSITION] = cx;
-			params[Gaussian2DFunction.Y_POSITION] = cy;
-			params[Gaussian2DFunction.SIGNAL] = (float) (spotSignal);
-			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
+			float[] params = Gaussian2DPeakResultHelper.createOneAxisParams(0, (float) (spotSignal), cx, cy, 0,
+					psfWidth);
 			PeakResult result = new PeakResult(s.frame, (int) cx, (int) cy, 0, 0, 0, params, null);
 			if (trace == null)
 				trace = new Trace(result);

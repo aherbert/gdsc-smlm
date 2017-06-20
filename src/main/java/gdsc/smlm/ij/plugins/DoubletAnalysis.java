@@ -755,15 +755,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							// -+-+-
 							// Estimate params using the single fitted peak
 							// -+-+-
-							final double[] doubletParams = new double[1 + 2 * 6];
+							final double[] doubletParams = new double[1 + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 
 							doubletParams[Gaussian2DFunction.BACKGROUND] = fitParams[Gaussian2DFunction.BACKGROUND];
 							doubletParams[Gaussian2DFunction.SIGNAL] = fitParams[Gaussian2DFunction.SIGNAL] * 0.5;
 							doubletParams[Gaussian2DFunction.X_POSITION] = (float) (qa.x1 - 0.5);
 							doubletParams[Gaussian2DFunction.Y_POSITION] = (float) (qa.y1 - 0.5);
-							doubletParams[6 + Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] * 0.5;
-							doubletParams[6 + Gaussian2DFunction.X_POSITION] = (float) (qa.x2 - 0.5);
-							doubletParams[6 + Gaussian2DFunction.Y_POSITION] = (float) (qa.y2 - 0.5);
+							doubletParams[Gaussian2DFunction.PARAMETERS_PER_PEAK +
+									Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] * 0.5;
+							doubletParams[Gaussian2DFunction.PARAMETERS_PER_PEAK +
+									Gaussian2DFunction.X_POSITION] = (float) (qa.x2 - 0.5);
+							doubletParams[Gaussian2DFunction.PARAMETERS_PER_PEAK +
+									Gaussian2DFunction.Y_POSITION] = (float) (qa.y2 - 0.5);
 							// -+-+-
 
 							// Increase the iterations level then reset afterwards.
@@ -860,9 +863,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 								final double[] newParams = result.fitResult2.getParameters();
 								for (int p = 0; p < 2; p++)
 								{
-									final double xShift = newParams[Gaussian2DFunction.X_POSITION + p * 6] -
+									final double xShift = newParams[Gaussian2DFunction.X_POSITION +
+											p * Gaussian2DFunction.PARAMETERS_PER_PEAK] -
 											params[Gaussian2DFunction.X_POSITION];
-									final double yShift = newParams[Gaussian2DFunction.Y_POSITION + p * 6] -
+									final double yShift = newParams[Gaussian2DFunction.Y_POSITION +
+											p * Gaussian2DFunction.PARAMETERS_PER_PEAK] -
 											params[Gaussian2DFunction.Y_POSITION];
 									result.a[p] = 57.29577951 *
 											QuadrantAnalysis.getAngle(qa.vector, new double[] { xShift, yShift });
@@ -872,9 +877,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 								// Store the distance between the spots
 								final double dx = newParams[Gaussian2DFunction.X_POSITION] -
-										newParams[Gaussian2DFunction.X_POSITION + 6];
+										newParams[Gaussian2DFunction.PARAMETERS_PER_PEAK +
+												Gaussian2DFunction.X_POSITION];
 								final double dy = newParams[Gaussian2DFunction.Y_POSITION] -
-										newParams[Gaussian2DFunction.Y_POSITION + 6];
+										newParams[Gaussian2DFunction.PARAMETERS_PER_PEAK +
+												Gaussian2DFunction.Y_POSITION];
 								result.gap = Math.sqrt(dx * dx + dy * dy);
 							}
 						}
@@ -929,8 +936,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							double y2 = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION] +
 									regionBounds.y;
 							f2.add(new ResultCoordinate(result, 0, x2, y2));
-							x2 = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION + 6] + regionBounds.x;
-							y2 = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION + 6] + regionBounds.y;
+							x2 = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION +
+									Gaussian2DFunction.PARAMETERS_PER_PEAK] + regionBounds.x;
+							y2 = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION +
+									Gaussian2DFunction.PARAMETERS_PER_PEAK] + regionBounds.y;
 							f2.add(new ResultCoordinate(result, 1, x2, y2));
 						}
 					}
@@ -1048,10 +1057,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 									regionBounds.x);
 							float y1 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION] +
 									regionBounds.y);
-							float x2 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION + 6] +
-									regionBounds.x);
-							float y2 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION + 6] +
-									regionBounds.y);
+							float x2 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION +
+									Gaussian2DFunction.PARAMETERS_PER_PEAK] + regionBounds.x);
+							float y2 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION +
+									Gaussian2DFunction.PARAMETERS_PER_PEAK] + regionBounds.y);
 
 							ResultCoordinate ra = new ResultCoordinate(result, 0, x1, y1);
 							ResultCoordinate rb = new ResultCoordinate(result, 1, x2, y2);
@@ -1168,8 +1177,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							double y2 = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION] +
 									regionBounds.y;
 							f2.add(new ResultCoordinate(result, 0, x2, y2));
-							x2 = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION + 6] + regionBounds.x;
-							y2 = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION + 6] + regionBounds.y;
+							x2 = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION +
+									Gaussian2DFunction.PARAMETERS_PER_PEAK] + regionBounds.x;
+							y2 = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION +
+									Gaussian2DFunction.PARAMETERS_PER_PEAK] + regionBounds.y;
 							f2.add(new ResultCoordinate(result, 1, x2, y2));
 						}
 					}
@@ -1303,7 +1314,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						break;
 
 					case 1:
-						s2 = result.fitResult2.getParameters()[Gaussian2DFunction.SIGNAL + 6];
+						s2 = result.fitResult2.getParameters()[Gaussian2DFunction.SIGNAL +
+								Gaussian2DFunction.PARAMETERS_PER_PEAK];
 						break;
 
 					case 0:
@@ -1392,19 +1404,21 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			for (int n = 0; n < 2; n++)
 			{
 				// Check the width is reasonable
-				if (params[n * 6 + Gaussian2DFunction.X_SD] < 0 ||
-						params[n * 6 + Gaussian2DFunction.X_SD] > regionSize ||
-						params[n * 6 + Gaussian2DFunction.Y_SD] < 0 ||
-						params[n * 6 + Gaussian2DFunction.Y_SD] > regionSize)
+				if (params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD] < 0 ||
+						params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD] > regionSize ||
+						params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD] < 0 ||
+						params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD] > regionSize)
 					return 1;
 
 				// Check if centre is within the region - Border allowing fit slightly outside
 				final double borderx = Gaussian2DFunction.SD_TO_HWHM_FACTOR * fitConfig.getInitialPeakStdDev0();
 				final double bordery = Gaussian2DFunction.SD_TO_HWHM_FACTOR * fitConfig.getInitialPeakStdDev1();
-				if ((params[n * 6 + Gaussian2DFunction.X_POSITION] < -borderx ||
-						params[n * 6 + Gaussian2DFunction.X_POSITION] > width + borderx) ||
-						params[n * 6 + Gaussian2DFunction.Y_POSITION] < -bordery ||
-						params[n * 6 + Gaussian2DFunction.Y_POSITION] > height + bordery)
+				if ((params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] < -borderx ||
+						params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] > width +
+								borderx) ||
+						params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] < -bordery ||
+						params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] > height +
+								bordery)
 				{
 					// Perhaps do a check on the quadrant?					
 					return 1;
@@ -1820,8 +1834,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		final ImageStack stack = imp.getImageStack();
 
 		// Get the coordinates per frame
-		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator
-				.getCoordinates(results, false);
+		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator.getCoordinates(results,
+				false);
 
 		final long[] sumCount = new long[1];
 		actualCoordinates.forEachValue(new TObjectProcedure<ArrayList<Coordinate>>()
@@ -2721,10 +2735,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 								continue;
 							accept[n] = false; // Reset
 
-							final double xShift = newParams[Gaussian2DFunction.X_POSITION + n * 6] -
-									params[Gaussian2DFunction.X_POSITION];
-							final double yShift = newParams[Gaussian2DFunction.Y_POSITION + n * 6] -
-									params[Gaussian2DFunction.Y_POSITION];
+							final double xShift = newParams[Gaussian2DFunction.X_POSITION +
+									n * Gaussian2DFunction.PARAMETERS_PER_PEAK] - params[Gaussian2DFunction.X_POSITION];
+							final double yShift = newParams[Gaussian2DFunction.Y_POSITION +
+									n * Gaussian2DFunction.PARAMETERS_PER_PEAK] - params[Gaussian2DFunction.Y_POSITION];
 							if (Math.abs(xShift) > maxShiftX || Math.abs(yShift) > maxShiftY)
 							{
 								if (analysisLogging)

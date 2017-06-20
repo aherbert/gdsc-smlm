@@ -1,7 +1,5 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
@@ -37,7 +35,6 @@ import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
 import gdsc.smlm.function.PoissonGaussianLikelihoodWrapper;
 import gdsc.smlm.function.PoissonLikelihoodWrapper;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -313,7 +310,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 
 	// The function to use for the Powell optimiser (which may have parameters mapped using the sqrt function) 
 	private MultivariateLikelihood powellFunction = null;
-	private final boolean mapGaussian;
 
 	/**
 	 * Default constructor
@@ -324,26 +320,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	public MaximumLikelihoodFitter(NonLinearFunction f)
 	{
 		super(f);
-		mapGaussian = false;
-	}
-
-	/**
-	 * Constructor for Gaussian2D functions. When using the Powell optimiser the background and signal parameters can be
-	 * scaled using the sqrt() function. Parameters are reduced before passing to the Powell optimiser. The parameters
-	 * are expanded before evaluation of the function. This allows faster exploration of the larger parameter range
-	 * expected for the background and signal within the
-	 * Powell optimiser.
-	 * 
-	 * @param f
-	 *            The function
-	 * @param mapGaussian
-	 *            Set to true to map the background and signal parameters using sqrt() before passing to the Powell
-	 *            optimiser.
-	 */
-	public MaximumLikelihoodFitter(Gaussian2DFunction f, boolean mapGaussian)
-	{
-		super(f);
-		this.mapGaussian = mapGaussian;
 	}
 
 	/*
@@ -410,36 +386,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				{
 					if (powellFunction == null)
 					{
-						// We must map all the parameters into the same range. This is done in the Mortensen MLE 
-						// Python code by using the sqrt of the number of photons and background.
-						if (mapGaussian)
-						{
-							Gaussian2DFunction gf = (Gaussian2DFunction) f;
-							// Re-map signal and background using the sqrt
-							int[] indices = gf.gradientIndices();
-							int[] map = new int[indices.length];
-							int count = 0;
-							// Background is always first
-							if (indices[0] == Gaussian2DFunction.BACKGROUND)
-							{
-								map[count++] = 0;
-							}
-							// Look for the Signal in multiple peak 2D Gaussians
-							for (int i = 1; i < indices.length; i++)
-								if (indices[i] % 6 == Gaussian2DFunction.SIGNAL)
-								{
-									map[count++] = i;
-								}
-							if (count > 0)
-							{
-								powellFunction = new MappedMultivariateLikelihood(maximumLikelihoodFunction,
-										Arrays.copyOf(map, count));
-							}
-						}
-						if (powellFunction == null)
-						{
-							powellFunction = new MultivariateLikelihood(maximumLikelihoodFunction);
-						}
+						powellFunction = new MultivariateLikelihood(maximumLikelihoodFunction);
 					}
 
 					// Update the maximum likelihood function in the Powell function wrapper

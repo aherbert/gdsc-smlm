@@ -65,20 +65,22 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 				for (int i = 0; i < peaks; i++)
 				{
 					sb.append(", Peak").append(i + 1).append("=[");
-					sb.append(DoubleEquality.relativeError(bestA[i * 6 + Gaussian2DFunction.SIGNAL], a[i * 6 +
-							Gaussian2DFunction.SIGNAL]));
+					sb.append(DoubleEquality.relativeError(
+							bestA[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL],
+							a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL]));
 					sb.append(",");
 
 					if (func.evaluatesShape())
 					{
-						double x = bestA[i * 6 + Gaussian2DFunction.SHAPE];
-						double y = a[i * 6 + Gaussian2DFunction.SHAPE];
+						double x = bestA[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SHAPE];
+						double y = a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SHAPE];
 						sb.append(relativeAngle(x, y));
 					}
 					else
 						sb.append(0);
 
-					for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2 * 2; j++, k++)
+					for (int j = 0, k = i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
+							Gaussian2DFunction.X_POSITION; j < 2 * 2; j++, k++)
 					{
 						sb.append(",");
 						sb.append(DoubleEquality.relativeError(bestA[k], a[k]));
@@ -104,27 +106,30 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 
 		if (func.evaluatesBackground())
 		{
-			if (!eq.almostEqualRelativeOrAbsolute(bestA[Gaussian2DFunction.BACKGROUND], a[Gaussian2DFunction.BACKGROUND]))
+			if (!eq.almostEqualRelativeOrAbsolute(bestA[Gaussian2DFunction.BACKGROUND],
+					a[Gaussian2DFunction.BACKGROUND]))
 				return false;
 		}
 
 		for (int i = 0; i < peaks; i++)
 		{
-			if (!eq.almostEqualRelativeOrAbsolute(bestA[i * 6 + Gaussian2DFunction.SIGNAL], a[i * 6 +
-					Gaussian2DFunction.SIGNAL]))
+			if (!eq.almostEqualRelativeOrAbsolute(
+					bestA[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL],
+					a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL]))
 				return false;
 
 			// Calculate the smallest angle between the two angles. This should be in the range 0 - 90 degrees.
 			// Use this to compare if the angle has changed significantly relative to the maximum it could change.
 			if (func.evaluatesShape())
 			{
-				double x = bestA[i * 6 + Gaussian2DFunction.SHAPE];
-				double y = a[i * 6 + Gaussian2DFunction.SHAPE];
+				double x = bestA[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SHAPE];
+				double y = a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SHAPE];
 				if (relativeAngle(x, y) > angleLimit)
 					return false;
 			}
 
-			for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
+			for (int j = 0, k = i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
+					Gaussian2DFunction.X_POSITION; j < 2; j++, k++)
 			{
 				if (!eq.almostEqualRelativeOrAbsolute(bestA[k], a[k]))
 					return false;

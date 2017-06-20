@@ -122,6 +122,26 @@ public class PeakResult implements Comparable<PeakResult>
 		this(0, x, y, intensity);
 	}
 
+	/**
+	 * Creates the params array for a peak result.
+	 *
+	 * @param background
+	 *            the background
+	 * @param intensity
+	 *            the intensity
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @return the params array
+	 */
+	public static float[] createParams(float background, float intensity, float x, float y, float z)
+	{
+		return new float[] { background, intensity, x, y, z };
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

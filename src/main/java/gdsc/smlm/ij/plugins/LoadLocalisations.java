@@ -32,10 +32,13 @@ import gdsc.core.data.utils.TypeConverter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitHelper;
@@ -45,6 +48,7 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.AttributePeakResult;
 import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
@@ -117,38 +121,56 @@ public class LoadLocalisations implements PlugIn
 			calibration.setIntensityUnit(intensityUnit);
 			results.setCalibration(calibration);
 
-			for (int i = 0; i < size(); i++)
+			if (size() > 0)
 			{
-				final Localisation l = get(i);
-				final float[] params = new float[7];
-				if (l.intensity <= 0)
-					params[Gaussian2DFunction.SIGNAL] = 1;
-				else
-					params[Gaussian2DFunction.SIGNAL] = (float) (l.intensity);
-				params[Gaussian2DFunction.X_POSITION] = (float) (l.x);
-				params[Gaussian2DFunction.Y_POSITION] = (float) (l.y);
-				// We may not have read in the widths
-				if (l.sx == -1)
-					params[Gaussian2DFunction.X_SD] = 1;
-				else
-					params[Gaussian2DFunction.X_SD] = (float) (l.sx);
-				if (l.sy == -1)
-					params[Gaussian2DFunction.Y_SD] = 1;
-				else
-					params[Gaussian2DFunction.Y_SD] = (float) (l.sy);
-				// Store the z-position in the error field.
-				// Q. Should this be converted?
-				// TODO - fix this to store the z explicitly				
-				AttributePeakResult peakResult = new AttributePeakResult(l.t,
-						(int) params[Gaussian2DFunction.X_POSITION], (int) params[Gaussian2DFunction.Y_POSITION], 0,
-						l.z, 0, params, null);
-				peakResult.setId(l.id);
-				// Convert to nm
-				peakResult.setPrecision(distanceConverter.convert(l.precision));
-				results.add(peakResult);
-			}
+				// Guess the PSF type from the first localisation
+				Localisation l = get(0);
+				PSFType psfType = PSFType.Custom;
+				if (l.sx != -1)
+				{
+					psfType = PSFType.OneAxisGaussian2D;
+					if (l.sy != -1)
+					{
+						psfType = PSFType.TwoAxisGaussian2D;
+					}
+				}
+				results.setPSF(PSFHelper.create(psfType));
 
-			// Convert to preferred units
+				float intensity = (l.intensity <= 0) ? 1 : (float) (l.intensity);
+				float x = (float) (l.x);
+				float y = (float) (l.y);
+				float z = (float) (l.z);
+
+				for (int i = 0; i < size(); i++)
+				{
+					l = get(i);
+					float[] params;
+					switch (psfType)
+					{
+						case Custom:
+							params = PeakResult.createParams(0, intensity, x, y, z);
+							break;
+						case OneAxisGaussian2D:
+							params = Gaussian2DPeakResultHelper.createOneAxisParams(0, intensity, x, y, z,
+									(float) l.sx);
+							break;
+						case TwoAxisGaussian2D:
+							params = Gaussian2DPeakResultHelper.createTwoAxisParams(0, intensity, x, y, z, (float) l.sx,
+									(float) l.sy);
+							break;
+						default:
+							throw new NotImplementedException("Unsupported PSF type: " + psfType);
+					}
+					AttributePeakResult peakResult = new AttributePeakResult(l.t, (int) x, (int) y, 0, 0, 0, params,
+							null);
+					peakResult.setId(l.id);
+					// Convert to nm
+					peakResult.setPrecision(distanceConverter.convert(l.precision));
+					results.add(peakResult);
+				}
+			}
+			
+			// Convert to preferred units. This can be done even if the results are empty.
 			results.convertToPreferredUnits();
 
 			return results;

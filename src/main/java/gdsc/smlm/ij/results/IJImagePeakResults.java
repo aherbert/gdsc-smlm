@@ -6,7 +6,6 @@ import java.util.Collection;
 
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.utils.XmlUtils;
 import ij.ImagePlus;
@@ -470,8 +469,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		if (!imageActive)
 			return;
 
-		final float x = mapX(params[Gaussian2DFunction.X_POSITION]);
-		final float y = mapY(params[Gaussian2DFunction.Y_POSITION]);
+		final float x = mapX(params[PeakResult.X]);
+		final float y = mapY(params[PeakResult.Y]);
 
 		// Check bounds
 		if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
@@ -577,7 +576,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		// Use the signal for the count
 		if ((displayFlags & DISPLAY_SIGNAL) != 0)
 		{
-			v = params[Gaussian2DFunction.SIGNAL];
+			v = params[PeakResult.INTENSITY];
 		}
 		// Use the peak number for the count
 		else if ((displayFlags & DISPLAY_PEAK) != 0)

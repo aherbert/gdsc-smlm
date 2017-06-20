@@ -183,7 +183,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		if (f2.evaluatesSignal())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
-			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL + 6);
+			functionComputesSecondTargetGradientWith2Peaks(
+					Gaussian2DFunction.SIGNAL + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		}
 	}
 
@@ -194,7 +195,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		if (f2.evaluatesShape())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.SHAPE);
-			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.SHAPE + 6);
+			functionComputesSecondTargetGradientWith2Peaks(
+					Gaussian2DFunction.SHAPE + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		}
 	}
 
@@ -203,7 +205,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	{
 		org.junit.Assume.assumeNotNull(f2);
 		functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION);
-		functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION + 6);
+		functionComputesSecondTargetGradientWith2Peaks(
+				Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	@Test
@@ -211,7 +214,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	{
 		org.junit.Assume.assumeNotNull(f2);
 		functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION);
-		functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION + 6);
+		functionComputesSecondTargetGradientWith2Peaks(
+				Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	@Test
@@ -221,7 +225,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		if (f2.evaluatesSD0())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.X_SD);
-			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.X_SD + 6);
+			functionComputesSecondTargetGradientWith2Peaks(
+					Gaussian2DFunction.X_SD + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		}
 	}
 
@@ -232,7 +237,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		if (f2.evaluatesSD1())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD);
-			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD + 6);
+			functionComputesSecondTargetGradientWith2Peaks(
+					Gaussian2DFunction.Y_SD + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		}
 	}
 

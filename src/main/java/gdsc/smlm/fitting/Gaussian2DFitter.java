@@ -152,7 +152,7 @@ public class Gaussian2DFitter
 	{
 		int npeaks = peaks.length;
 
-		final int paramsPerPeak = 6;
+		final int paramsPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK;
 
 		double[] params = new double[1 + paramsPerPeak * npeaks];
 
@@ -351,7 +351,7 @@ public class Gaussian2DFitter
 		// Y must be the correct size
 		final double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize); // Value at index
 
-		final int paramsPerPeak = 6; // Fixed for a Gaussian2DFunction
+		final int paramsPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK; // Fixed for a Gaussian2DFunction
 
 		double background = params[0];
 		if (background == 0 && !zeroBackground)
@@ -498,7 +498,7 @@ public class Gaussian2DFitter
 			if (!fitConfiguration.isWidth1Fitting() && fitConfiguration.isWidth0Fitting())
 			{
 				// Ensure Y width is updated with the fitted X width
-				for (int i = Gaussian2DFunction.X_SD; i < params.length; i += 6)
+				for (int i = Gaussian2DFunction.X_SD; i < params.length; i += paramsPerPeak)
 				{
 					params[i + 1] = params[i];
 					if (params_dev != null)
@@ -508,7 +508,7 @@ public class Gaussian2DFitter
 			if (fitConfiguration.isAngleFitting())
 			{
 				// Ensure the angle is within the correct bounds
-				for (int i = Gaussian2DFunction.SHAPE; i < params.length; i += 6)
+				for (int i = Gaussian2DFunction.SHAPE; i < params.length; i += paramsPerPeak)
 				{
 					correctAngle(i, params, params_dev);
 				}

@@ -1058,7 +1058,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		// additional peaks will be neighbours. In the future we may want to control this better.
 		if (isRegionValidation())
 		{
-			final int offset = n * 6;
+			final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
 			final double x = params[Gaussian2DFunction.X_POSITION + offset] + coordinateOffset;
 			final double y = params[Gaussian2DFunction.Y_POSITION + offset] + coordinateOffset;
 			if (x <= 0 || x >= fitRegionWidth || y <= 0 || y >= fitRegionHeight)
@@ -1076,7 +1076,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		if (isDisableSimpleFilter())
 			return setValidationResult(FitStatus.OK, null);
 
-		final int offset = n * 6;
+		final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		// Check spot movement
 		final double xShift = params[Gaussian2DFunction.X_POSITION + offset] -
 				initialParams[Gaussian2DFunction.X_POSITION + offset];
@@ -1283,7 +1283,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		{
 			this.id = n;
 			this.candidateId = candidateId;
-			offset = n * 6;
+			offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
 			this.initialParams = initialParams;
 			this.params = params;
 			this.localBackground = localBackground;
@@ -1455,7 +1455,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		{
 			final double[] p = new double[7];
 			p[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
-			System.arraycopy(params, 1 + offset, p, 1, 6);
+			System.arraycopy(params, 1 + offset, p, 1, Gaussian2DFunction.PARAMETERS_PER_PEAK);
 			p[Gaussian2DFunction.X_POSITION] += offsetx;
 			p[Gaussian2DFunction.Y_POSITION] += offsety;
 			return p;
@@ -1629,7 +1629,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			double[] initialParameters, double[] parameters, double localBackground, ResultType resultType,
 			float offsetx, float offsety)
 	{
-		final int offset = n * 6;
+		final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL] * gain;
 		final double photons = parameters[offset + Gaussian2DFunction.SIGNAL];
 		final double b = (localBackground > 0) ? localBackground : parameters[Gaussian2DFunction.BACKGROUND];
@@ -2263,11 +2263,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		double[] clamp = getClampValues();
 		// Note: The units are photons. This is OK as all solvers except the legacy MLE fit in photons.
 		nClampPeaks = gaussianFunction.getNPeaks();
-		double[] clampValues = new double[1 + 6 * nClampPeaks];
+		double[] clampValues = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * nClampPeaks];
 		clampValues[Gaussian2DFunction.BACKGROUND] = clamp[Gaussian2DFunction.BACKGROUND];
 		for (int i = 0; i < nClampPeaks; i++)
 		{
-			for (int j = 1; j <= 6; j++)
+			for (int j = 1; j <= Gaussian2DFunction.PARAMETERS_PER_PEAK; j++)
 				clampValues[i + j] = clamp[j];
 		}
 		bounds.setClampValues(clampValues);

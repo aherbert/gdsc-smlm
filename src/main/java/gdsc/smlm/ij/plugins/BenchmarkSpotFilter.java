@@ -493,7 +493,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				sa2[i] = 2 * sa[i];
 			}
 
-			double[] allParams = new double[1 + 6 * actual.length];
+			double[] allParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * actual.length];
 			final int flags = GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED;
 			for (int i = 0; i < actual.length; i++)
 			{
@@ -534,7 +534,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						allParams[offset + Gaussian2DFunction.Y_POSITION] = actual[j].peakResult.getYPosition();
 						allParams[offset +
 								Gaussian2DFunction.X_SD] = allParams[offset + Gaussian2DFunction.Y_SD] = sa[j];
-						offset += 6;
+						offset += Gaussian2DFunction.PARAMETERS_PER_PEAK;
 					}
 				}
 

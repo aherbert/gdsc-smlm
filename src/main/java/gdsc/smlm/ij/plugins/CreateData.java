@@ -57,8 +57,10 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.data.config.UnitHelper;
 
 /*----------------------------------------------------------------------------- 
@@ -908,11 +910,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
 		// is the same as MLE with the caveat of numerical instability.
 
-		double lowerP = Gaussian2DPeakResultHelper.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
-		double upperP = Gaussian2DPeakResultHelper.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
-		double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2,
+		double lowerP = Gaussian2DPeakResultHelper.getPrecisionX(settings.pixelPitch, sd,
+				settings.photonsPerSecondMaximum, b2, emCCD);
+		double upperP = Gaussian2DPeakResultHelper.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2,
 				emCCD);
-		double upperMLP = Gaussian2DPeakResultHelper.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+		double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecisionX(settings.pixelPitch, sd,
+				settings.photonsPerSecondMaximum, b2, emCCD);
+		double upperMLP = Gaussian2DPeakResultHelper.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond,
+				b2, emCCD);
 		double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 		double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
 		//final double b = Math.sqrt(b2);
@@ -1806,6 +1811,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setCalibration(c);
 		results.setSortAfterEnd(true);
 		results.begin();
+		// TODO - Add better support for the type of PSF that is being drawn
+		results.setPSF(PSFHelper.create(PSFType.TwoAxisGaussian2D));
 
 		maxT = localisationSets.get(localisationSets.size() - 1).getTime();
 
@@ -2325,42 +2332,44 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Account for gain 
 					totalPhotonsRendered *= totalGain;
 
-					// Add to memory. 0.5 is the centre of the pixel so just round down.
-					int origX = (int) localisation.getX();
-					int origY = (int) localisation.getY();
-					float[] params = new float[7];
+					// Add to memory.
+					// Use the actual intensity (not the total photons rendered)
+					float intensity = (float) localisation.getIntensity();
+					float x = (float) localisation.getX();
+					float y = (float) localisation.getY();
+					float z = (float) localisation.getZ();
+					// 0.5 is the centre of the pixel so just round down.
+					int origX = (int) x;
+					int origY = (int) y;
 					// Background and noise should be calculated using the
 					// region covered by the PSF.
 					double[] localStats = getStatistics(imageCache, imageReadNoise, origX, origY);
-					params[Gaussian2DFunction.BACKGROUND] = (float) (localStats[0] * totalGain + settings.bias);
-					params[Gaussian2DFunction.X_POSITION] = (float) localisation.getX();
-					params[Gaussian2DFunction.Y_POSITION] = (float) localisation.getY();
+					float background = (float) (localStats[0] * totalGain + settings.bias);
 
 					// Note: The width estimate does not account for diffusion
+					float sx, sy;
 					if (psfModel instanceof GaussianPSFModel)
 					{
 						GaussianPSFModel m = (GaussianPSFModel) psfModel;
-						params[Gaussian2DFunction.X_SD] = (float) m.getS0();
-						params[Gaussian2DFunction.Y_SD] = (float) m.getS1();
+						sx = (float) m.getS0();
+						sy = (float) m.getS1();
 					}
 					else if (psfModel instanceof AiryPSFModel)
 					{
 						AiryPSFModel m = (AiryPSFModel) psfModel;
-						params[Gaussian2DFunction.X_SD] = (float) (m.getW0() * AiryPattern.FACTOR);
-						params[Gaussian2DFunction.Y_SD] = (float) (m.getW1() * AiryPattern.FACTOR);
+						sx = (float) (m.getW0() * AiryPattern.FACTOR);
+						sy = (float) (m.getW1() * AiryPattern.FACTOR);
 					}
 					else if (psfModel instanceof ImagePSFModel)
 					{
 						ImagePSFModel m = (ImagePSFModel) psfModel;
-						params[Gaussian2DFunction.X_SD] = (float) (m.getHWHM0() / Gaussian2DFunction.SD_TO_HWHM_FACTOR);
-						params[Gaussian2DFunction.Y_SD] = (float) (m.getHWHM1() / Gaussian2DFunction.SD_TO_HWHM_FACTOR);
+						sx = (float) (m.getHWHM0() / Gaussian2DFunction.SD_TO_HWHM_FACTOR);
+						sy = (float) (m.getHWHM1() / Gaussian2DFunction.SD_TO_HWHM_FACTOR);
 					}
 					else
 					{
-						params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) psfSD;
+						sx = sy = (float) psfSD;
 					}
-					// Use the actual intensity (not the total photons rendered)
-					params[Gaussian2DFunction.SIGNAL] = (float) localisation.getIntensity();
 
 					// The variance of the background image is currently in photons^2. Apply gain to convert to ADUs. 
 					double backgroundVariance = localStats[1] * totalGain * totalGain;
@@ -2388,8 +2397,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Ensure the new data is added before the intensity is updated. This avoids 
 					// syncronisation clashes in the getIntensity(...) function.
 					// Use the total photons rendered for signal filtering.
-					localisationSet.setData(new double[] { localStats[0], totalNoise, params[Gaussian2DFunction.X_SD],
-							params[Gaussian2DFunction.Y_SD], totalPhotonsRendered });
+					localisationSet.setData(new double[] { localStats[0], totalNoise, sx, sy, totalPhotonsRendered });
 
 					if (checkSNR)
 					{
@@ -2406,7 +2414,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					newLocalisations.add(localisationSet);
 					// Use extended result to store the ID.
-					// Store the z position in the error.
+					// Store the z position in the error. 
+					// TODO - This is no longer necessary as we now store the z in the results so update plugins to 
+					// use the z-position from the results.
+					float[] params = Gaussian2DPeakResultHelper.createTwoAxisParams(background, intensity, x, y, z, sx,
+							sy);
 					results.add(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoise, params,
 							null, localisationSet.getId()));
 				}
@@ -3390,7 +3402,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		LocalisationModel start = null;
 		int currentId = -1;
 		int n = 0;
-		float[] params = new float[7];
+		float[] params = Gaussian2DPeakResultHelper.createTwoAxisParams(0, 0, 0, 0, 0, 0, 0);
+		final int isx = Gaussian2DPeakResultHelper.INDEX_SX;
+		final int isy = Gaussian2DPeakResultHelper.INDEX_SY;
 		double noise = 0;
 		int lastT = -1;
 		for (LocalisationModel localisation : localisations)
@@ -3399,11 +3413,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				if (n > 0)
 				{
-					params[Gaussian2DFunction.BACKGROUND] /= n;
-					params[Gaussian2DFunction.X_POSITION] /= n;
-					params[Gaussian2DFunction.Y_POSITION] /= n;
-					params[Gaussian2DFunction.X_SD] /= n;
-					params[Gaussian2DFunction.Y_SD] /= n;
+					params[PeakResult.BACKGROUND] /= n;
+					params[PeakResult.X] /= n;
+					params[PeakResult.Y] /= n;
+					params[isx] /= n;
+					params[isy] /= n;
 
 					ExtendedPeakResult p = new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()),
 							(int) Math.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), params, null, lastT,
@@ -3422,13 +3436,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 
 			final double[] data = localisation.getData();
-			params[Gaussian2DFunction.BACKGROUND] += data[0];
-			params[Gaussian2DFunction.X_POSITION] += localisation.getX();
-			params[Gaussian2DFunction.Y_POSITION] += localisation.getY();
-			params[Gaussian2DFunction.SIGNAL] += localisation.getIntensity();
+			params[PeakResult.BACKGROUND] += data[0];
+			params[PeakResult.X] += localisation.getX();
+			params[PeakResult.Y] += localisation.getY();
+			params[PeakResult.INTENSITY] += localisation.getIntensity();
 			noise += data[1] * data[1];
-			params[Gaussian2DFunction.X_SD] += data[2];
-			params[Gaussian2DFunction.Y_SD] += data[3];
+			params[isx] += data[2];
+			params[isy] += data[3];
 			n++;
 			lastT = localisation.getTime();
 		}
@@ -3436,11 +3450,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Final pulse
 		if (n > 0)
 		{
-			params[Gaussian2DFunction.BACKGROUND] /= n;
-			params[Gaussian2DFunction.X_POSITION] /= n;
-			params[Gaussian2DFunction.Y_POSITION] /= n;
-			params[Gaussian2DFunction.X_SD] /= n;
-			params[Gaussian2DFunction.Y_SD] /= n;
+			params[PeakResult.BACKGROUND] /= n;
+			params[PeakResult.X] /= n;
+			params[PeakResult.Y] /= n;
+			params[isx] /= n;
+			params[isy] /= n;
 
 			traceResults.add(new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()),
 					(int) Math.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), params, null, lastT, currentId));

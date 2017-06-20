@@ -49,14 +49,11 @@ public class FastMLEGradient2ProcedureTest
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		double[] y = new double[0];
-		Assert.assertEquals(
-				FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(4)).getClass(),
+		Assert.assertEquals(FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(4)).getClass(),
 				FastMLEGradient2Procedure4.class);
-		Assert.assertEquals(
-				FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(5)).getClass(),
+		Assert.assertEquals(FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(5)).getClass(),
 				FastMLEGradient2Procedure5.class);
-		Assert.assertEquals(
-				FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(6)).getClass(),
+		Assert.assertEquals(FastMLEGradient2ProcedureFactory.createUnrolled(y, new DummyGradientFunction(6)).getClass(),
 				FastMLEGradient2Procedure6.class);
 	}
 
@@ -100,8 +97,7 @@ public class FastMLEGradient2ProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i),
-					func);
+			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			double s = p.computeLogLikelihood(paramsList.get(i));
 			double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
 			// Virtually the same ...
@@ -134,11 +130,11 @@ public class FastMLEGradient2ProcedureTest
 			a2[Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(3, 5);
 			a2[Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
 			a2[Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
-			a2[6 + Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
-			a2[6 + Gaussian2DFunction.X_POSITION] = rdg.nextUniform(5, 7);
-			a2[6 + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(5, 7);
-			a2[6 + Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
-			a2[6 + Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
+			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
+			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] = rdg.nextUniform(5, 7);
+			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(5, 7);
+			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
+			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
 
 			// Simulate Poisson data
 			f2.initialise0(a2);
@@ -155,7 +151,7 @@ public class FastMLEGradient2ProcedureTest
 			// Precompute peak 2 (no background)
 			a1[Gaussian2DFunction.BACKGROUND] = 0;
 			for (int j = 1; j < 7; j++)
-				a1[j] = a2[6 + j];
+				a1[j] = a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + j];
 			f1.initialise0(a1);
 			f1.forEach(new ValueProcedure()
 			{
@@ -178,7 +174,7 @@ public class FastMLEGradient2ProcedureTest
 			double[] d21 = Arrays.copyOf(p12.d2, f1.getNumberOfGradients());
 
 			// Compute peak 1+(precomputed 2)
-			FastMLEGradient2Procedure p1b2 = FastMLEGradient2ProcedureFactory.create(x, 
+			FastMLEGradient2Procedure p1b2 = FastMLEGradient2ProcedureFactory.create(x,
 					PrecomputedGradient2Function.wrapGradient2Function(f1, b));
 			p1b2.computeSecondDerivative(a1);
 			double[] d12 = p1b2.d1;
@@ -259,8 +255,7 @@ public class FastMLEGradient2ProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i),
-					func);
+			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p.computeLogLikelihood(paramsList.get(i));
 		}
 
@@ -291,8 +286,7 @@ public class FastMLEGradient2ProcedureTest
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory
-							.createUnrolled(yList.get(i), func);
+					FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p.computeLogLikelihood(paramsList.get(k++ % iter));
 				}
@@ -386,8 +380,7 @@ public class FastMLEGradient2ProcedureTest
 			p1.computeSecondDerivative(paramsList.get(i));
 			p1.computeSecondDerivative(paramsList.get(i));
 
-			FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i),
-					func);
+			FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p2.computeSecondDerivative(paramsList.get(i));
 			p2.computeSecondDerivative(paramsList.get(i));
 
@@ -422,8 +415,7 @@ public class FastMLEGradient2ProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory
-							.createUnrolled(yList.get(i), func);
+					FastMLEGradient2Procedure p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 					for (int j = loops; j-- > 0;)
 						p2.computeSecondDerivative(paramsList.get(k++ % iter));
 				}
@@ -523,7 +515,7 @@ public class FastMLEGradient2ProcedureTest
 		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
 				blockWidth, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 		params[0] = random(Background);
-		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
+		for (int i = 0, j = 1; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
 			params[j] = random(Signal);
 			params[j + 2] = random(Xpos);
@@ -543,7 +535,7 @@ public class FastMLEGradient2ProcedureTest
 		if (randomiseParams)
 		{
 			params[0] = random(params[0]);
-			for (int i = 0, j = 1; i < npeaks; i++, j += 6)
+			for (int i = 0, j = 1; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 			{
 				params[j] = random(params[j]);
 				params[j + 2] = random(params[j + 2]);
@@ -574,7 +566,7 @@ public class FastMLEGradient2ProcedureTest
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[1 + 6 * npeaks];
+			double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
 			double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
 			paramsList.add(params);
 			yList.add(y);

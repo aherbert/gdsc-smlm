@@ -537,7 +537,7 @@ public abstract class BaseFunctionSolverTest
 	double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel)
 	{
 		double[] data = new double[size * size];
-		int n = params.length / 6;
+		int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK ;
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, flags, null);
 		f.initialise(params);
 

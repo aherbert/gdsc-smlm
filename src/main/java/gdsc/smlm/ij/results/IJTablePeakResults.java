@@ -389,7 +389,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		{
 			precision = (float) calculator.getPrecision(params, noise);
 		}
-		final float snr = (noise > 0) ? params[Gaussian2DFunction.SIGNAL] / noise : 0;
+		final float snr = (noise > 0) ? params[PeakResult.INTENSITY] / noise : 0;
 		//@formatter:off
 		if (isShowDeviations())
 		{

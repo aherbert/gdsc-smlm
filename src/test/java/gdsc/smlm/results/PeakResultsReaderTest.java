@@ -12,7 +12,8 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
@@ -610,7 +611,7 @@ public class PeakResultsReaderTest
 	{
 		double bias = rand.next();
 
-		MemoryPeakResults results = new MemoryPeakResults();
+		MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.TwoAxisAndThetaGaussian2D));
 		while (i-- > 0)
 		{
 			int startFrame = (int) (i * rand.next());
@@ -620,7 +621,7 @@ public class PeakResultsReaderTest
 			double error = rand.next();
 			float noise = rand.next();
 			float[] params = createData();
-			params[Gaussian2DFunction.BACKGROUND] += bias;
+			params[PeakResult.BACKGROUND] += bias;
 			float[] paramsStdDev = (showDeviations) ? createData() : null;
 			if (showEndFrame || showId)
 				results.add(new ExtendedPeakResult(startFrame, origX, origY, origValue, error, noise, params,
@@ -646,10 +647,8 @@ public class PeakResultsReaderTest
 
 	private float[] createData()
 	{
-		float[] data = new float[7];
-		for (int i = 0; i < data.length; i++)
-			data[i] = rand.next();
-		return data;
+		return Gaussian2DPeakResultHelper.createTwoAxisAndAngleParams(rand.next(), rand.next(), rand.next(),
+				rand.next(), rand.next(), rand.next(), rand.next(), rand.next());
 	}
 
 	private String createFile()

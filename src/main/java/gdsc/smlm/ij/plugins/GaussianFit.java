@@ -530,7 +530,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				int[] ypoints = new int[maxIndices.length];
 				int nMaxima = 0;
 
-				for (int i = 1, n = 0; i < params.length; i += 6, n++)
+				for (int i = 1, n = 0; i < params.length; i += Gaussian2DFunction.PARAMETERS_PER_PEAK, n++)
 				{
 					int y = maxIndices[n] / width;
 					int x = maxIndices[n] % width;
@@ -543,7 +543,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					{
 						// Copy the valid parameters
 						validPeaks++;
-						for (int ii = i, j = 0; j < 6; ii++, j++)
+						for (int ii = i, j = 0; j < Gaussian2DFunction.PARAMETERS_PER_PEAK; ii++, j++)
 							validParams[c++] = params[ii];
 					}
 
@@ -798,7 +798,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		// Convert coordinates with 0.5 pixel offset
 		// Convert radians to degrees (if elliptical fitting)
-		for (int i = 6; i < params.length; i += 6)
+		for (int i = Gaussian2DFunction.PARAMETERS_PER_PEAK; i < params.length; i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
 			params[i - 3] += 0.5;
 			params[i - 2] += 0.5;
@@ -815,7 +815,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		// Convert coordinates with 0.5 pixel offset
 		// Convert radians to degrees (if elliptical fitting)
-		for (int i = 6; i < params.length; i += 6)
+		for (int i = Gaussian2DFunction.PARAMETERS_PER_PEAK; i < params.length; i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
 			params[i - 3] -= 0.5;
 			params[i - 2] -= 0.5;

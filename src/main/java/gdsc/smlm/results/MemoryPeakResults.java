@@ -18,6 +18,7 @@ import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.PSF;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
@@ -255,6 +256,17 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		addAll(results);
 	}
 
+	/**
+	 * Instantiates a new memory peak results.
+	 *
+	 * @param psf the psf
+	 */
+	public MemoryPeakResults(PSF psf)
+	{
+		this(1000);
+		setPSF(psf);
+	}
+	
 	/**
 	 * Gets the results.
 	 *

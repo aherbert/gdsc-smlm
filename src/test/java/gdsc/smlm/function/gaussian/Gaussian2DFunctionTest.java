@@ -129,7 +129,7 @@ public abstract class Gaussian2DFunctionTest
 		int p = 0;
 		if (gf.evaluatesBackground())
 			Assert.assertEquals("Background", 0, gradientIndices[p++]);
-		for (int peak = 1, i = 1; peak <= npeaks; peak++, i += 6)
+		for (int peak = 1, i = 1; peak <= npeaks; peak++, i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
 			if (gf.evaluatesSignal())
 				Assert.assertEquals(gf.getName(i), i, gradientIndices[p++]);
@@ -405,7 +405,8 @@ public abstract class Gaussian2DFunctionTest
 		if (f2.evaluatesSignal())
 		{
 			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL + 6);
+			functionComputesTargetGradientWith2Peaks(
+					Gaussian2DFunction.SIGNAL + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		}
 	}
 
@@ -416,7 +417,7 @@ public abstract class Gaussian2DFunctionTest
 		if (f2.evaluatesShape())
 		{
 			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SHAPE);
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SHAPE + 6);
+			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SHAPE + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		}
 	}
 
@@ -425,7 +426,8 @@ public abstract class Gaussian2DFunctionTest
 	{
 		org.junit.Assume.assumeNotNull(f2);
 		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION);
-		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION + 6);
+		functionComputesTargetGradientWith2Peaks(
+				Gaussian2DFunction.X_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	@Test
@@ -433,7 +435,8 @@ public abstract class Gaussian2DFunctionTest
 	{
 		org.junit.Assume.assumeNotNull(f2);
 		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION);
-		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION + 6);
+		functionComputesTargetGradientWith2Peaks(
+				Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	@Test
@@ -443,7 +446,7 @@ public abstract class Gaussian2DFunctionTest
 		if (f2.evaluatesSD0())
 		{
 			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD);
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD + 6);
+			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		}
 	}
 
@@ -454,7 +457,7 @@ public abstract class Gaussian2DFunctionTest
 		if (f2.evaluatesSD1())
 		{
 			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD);
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD + 6);
+			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		}
 	}
 

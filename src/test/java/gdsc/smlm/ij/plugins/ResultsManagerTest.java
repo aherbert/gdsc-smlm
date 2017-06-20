@@ -11,11 +11,13 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.Random;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.TSFPeakResultsWriter;
 import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
 import gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType;
 import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
@@ -297,7 +299,7 @@ public class ResultsManagerTest
 
 	private MemoryPeakResults extract(Spot[] spots, int channel, int slice, int position, int type)
 	{
-		MemoryPeakResults results = new MemoryPeakResults();
+		MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.OneAxisGaussian2D));
 		for (Spot spot : spots)
 		{
 			if (spot.getChannel() == channel && spot.getSlice() == slice && spot.getPos() == position &&
@@ -310,13 +312,9 @@ public class ResultsManagerTest
 				float origValue = 0;
 				double error = 0;
 				float noise = 0;
-				float[] params = new float[7];
-				params[Gaussian2DFunction.BACKGROUND] = spot.getBackground();
-				params[Gaussian2DFunction.SIGNAL] = spot.getIntensity();
-				params[Gaussian2DFunction.X_POSITION] = spot.getX();
-				params[Gaussian2DFunction.Y_POSITION] = spot.getY();
-				params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) (spot.getWidth() /
-						Gaussian2DFunction.SD_TO_FWHM_FACTOR);
+				float[] params = Gaussian2DPeakResultHelper.createOneAxisParams(spot.getBackground(),
+						spot.getIntensity(), spot.getX(), spot.getY(), 0,
+						(float) (spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR));
 				float[] paramsStdDev = null;
 				IdPeakResult peak = new IdPeakResult(startFrame, origX, origY, origValue, error, noise, params,
 						paramsStdDev, id);

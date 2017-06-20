@@ -11,9 +11,9 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.BitFlags;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.PSF;
 
 /*----------------------------------------------------------------------------- 
@@ -165,7 +165,7 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhotonB.convert(params[PeakResult.BACKGROUND]),
 					emCCD);
 		}
-		
+
 		public double getVariance(float[] params, float noise) throws ConfigurationException
 		{
 			// Try to create the converter
@@ -212,10 +212,10 @@ public class Gaussian2DPeakResultHelper
 		{
 			super(helper);
 		}
-		
+
 		@Override
 		public abstract float getStandardDeviation(float[] params);
-		
+
 		@Override
 		public float getAmplitude(float[] params) throws ConfigurationException
 		{
@@ -253,7 +253,7 @@ public class Gaussian2DPeakResultHelper
 					emCCD);
 		}
 	}
-	
+
 	/**
 	 * Private class to allow caching the converters for two-axis Gaussian 2D
 	 */
@@ -299,6 +299,13 @@ public class Gaussian2DPeakResultHelper
 
 	/** Dummy Gaussian 2D parameters */
 	private static final float[] PARAMS = new float[7];
+
+	/** The index of the Sx parameter in the PeakResult parameters array. */
+	public static final int INDEX_SX = PeakResult.STANDARD_PARAMETERS;
+	/** The index of the Sy parameter in the PeakResult parameters array. */
+	public static final int INDEX_SY = PeakResult.STANDARD_PARAMETERS + 1;
+	/** The index of the Angle parameter in the PeakResult parameters array. */
+	public static final int INDEX_A = PeakResult.STANDARD_PARAMETERS + 2;
 
 	/**
 	 * Creates a new Gaussian 2D peak result calculator.
@@ -816,5 +823,144 @@ public class Gaussian2DPeakResultHelper
 	public static double getStandardDeviation(double sx, double sy)
 	{
 		return Math.sqrt(Math.abs(sx * sy));
+	}
+
+	/**
+	 * Creates the params array for a Gaussian 2D peak result.
+	 * <p>
+	 * The psf parameters are used to determine if the PSF is one axis, two axis or two axis and angle. If no PSF
+	 * parameters are given then a 1 axis Gaussian is created with a standard deviation of 1.
+	 *
+	 * @param background
+	 *            the background
+	 * @param intensity
+	 *            the intensity
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @param psfParameters
+	 *            the psf parameters
+	 * @return the params
+	 * @throws IllegalArgumentException
+	 *             If the number of PSF parameters is invalid
+	 */
+	public static float[] createParams(float background, float intensity, float x, float y, float z,
+			float... psfParameters) throws IllegalArgumentException
+	{
+		if (psfParameters == null)
+			return createOneAxisParams(background, intensity, x, y, z, 1);
+		switch (psfParameters.length)
+		{
+			case 1:
+				return createOneAxisParams(background, intensity, x, y, z, psfParameters[0]);
+			case 2:
+				return createTwoAxisParams(background, intensity, x, y, z, psfParameters[0], psfParameters[1]);
+			case 3:
+				return createTwoAxisAndAngleParams(background, intensity, x, y, z, psfParameters[0], psfParameters[1],
+						psfParameters[2]);
+			default:
+				throw new IllegalArgumentException("Invalid number of Gaussian 2D PSF parameters");
+		}
+	}
+
+	/**
+	 * Creates the params array for a one axis Gaussian 2D peak result.
+	 *
+	 * @param background
+	 *            the background
+	 * @param intensity
+	 *            the intensity
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @param s
+	 *            the s
+	 * @return the params
+	 */
+	public static float[] createOneAxisParams(float background, float intensity, float x, float y, float z, float s)
+	{
+		float[] params = new float[PeakResult.STANDARD_PARAMETERS + 1];
+		params[PeakResult.BACKGROUND] = background;
+		params[PeakResult.INTENSITY] = intensity;
+		params[PeakResult.X] = x;
+		params[PeakResult.Y] = y;
+		params[PeakResult.Z] = z;
+		params[INDEX_SX] = s;
+		return params;
+	}
+
+	/**
+	 * Creates the params array for a two axis Gaussian 2D peak result.
+	 *
+	 * @param background
+	 *            the background
+	 * @param intensity
+	 *            the intensity
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @param sx
+	 *            the sx
+	 * @param sy
+	 *            the sy
+	 * @return the params
+	 */
+	public static float[] createTwoAxisParams(float background, float intensity, float x, float y, float z, float sx,
+			float sy)
+	{
+		float[] params = new float[PeakResult.STANDARD_PARAMETERS + 2];
+		params[PeakResult.BACKGROUND] = background;
+		params[PeakResult.INTENSITY] = intensity;
+		params[PeakResult.X] = x;
+		params[PeakResult.Y] = y;
+		params[PeakResult.Z] = z;
+		params[INDEX_SX] = sx;
+		params[INDEX_SY] = sy;
+		return params;
+	}
+
+	/**
+	 * Creates the params array for a two axis and angle Gaussian 2D peak result.
+	 *
+	 * @param background
+	 *            the background
+	 * @param intensity
+	 *            the intensity
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @param sx
+	 *            the sx
+	 * @param sy
+	 *            the sy
+	 * @param a
+	 *            the a
+	 * @return the params
+	 */
+	public static float[] createTwoAxisAndAngleParams(float background, float intensity, float x, float y, float z,
+			float sx, float sy, float a)
+	{
+		float[] params = new float[PeakResult.STANDARD_PARAMETERS + 3];
+		params[PeakResult.BACKGROUND] = background;
+		params[PeakResult.INTENSITY] = intensity;
+		params[PeakResult.X] = x;
+		params[PeakResult.Y] = y;
+		params[PeakResult.Z] = z;
+		params[INDEX_SX] = sx;
+		params[INDEX_SY] = sy;
+		params[INDEX_A] = a;
+		return params;
 	}
 }

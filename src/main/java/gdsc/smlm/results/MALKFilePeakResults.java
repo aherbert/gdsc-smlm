@@ -14,14 +14,6 @@ import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import gdsc.core.data.utils.ConversionException;
-import gdsc.core.data.utils.IdentityTypeConverter;
-import gdsc.core.data.utils.TypeConverter;
-import gdsc.core.ij.Utils;
-import gdsc.smlm.data.config.UnitConverterFactory;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -35,7 +27,13 @@ import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.IdentityTypeConverter;
+import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 
 /**
  * Saves the fit results to file using the simple MALK file format (Molecular Accuracy Localisation Keep). This consists
@@ -233,8 +231,7 @@ public class MALKFilePeakResults extends FilePeakResults
 
 		StringBuilder sb = new StringBuilder(100);
 
-		addStandardData(sb, params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION], peak,
-				params[Gaussian2DFunction.SIGNAL]);
+		addStandardData(sb, params[PeakResult.X], params[PeakResult.Y], peak, params[PeakResult.INTENSITY]);
 
 		writeResult(1, sb.toString());
 	}
