@@ -38,9 +38,12 @@ public class PeakResult implements Comparable<PeakResult>
 	public double error;
 	public float noise;
 
-	// TODO - make this private
+	/** The parameters (for the standard parameters plus any PSF specific parameters). This is never null. */
 	float[] params;
-	// TODO - make this private
+	/**
+	 * The parameter standard deviations (for the standard parameters plus any PSF specific parameters). This may be
+	 * null or the same length as {@link #params}.
+	 */
 	float[] paramsStdDev;
 
 	/**
@@ -160,6 +163,76 @@ public class PeakResult implements Comparable<PeakResult>
 		if (params[INTENSITY] < o.params[INTENSITY])
 			return 1;
 		return 0;
+	}
+
+	/**
+	 * Utility function to check for equality.
+	 *
+	 * @param r1
+	 *            the first result
+	 * @param r2
+	 *            the second result
+	 * @return true, if equal
+	 */
+	public static boolean equals(PeakResult r1, PeakResult r2)
+	{
+		if (r1 == r2)
+			// The same or both null
+			return true;
+		if (r1 == null || r2 == null)
+			// At least one is not null so this is not equal
+			return false;
+
+		// Check parameters (and deviations)
+		if (r1.getNumberOfParameters() != r2.getNumberOfParameters())
+			return false;
+		for (int i = 0; i < r1.params.length; i++)
+			if (r1.params[i] != r2.params[i])
+				return false;
+		if (r1.paramsStdDev == null)
+		{
+			if (r2.paramsStdDev != null)
+				return false;
+		}
+		else
+		{
+			if (r2.paramsStdDev == null)
+				return false;
+			for (int i = 0; i < r1.paramsStdDev.length; i++)
+				if (r1.paramsStdDev[i] != r2.paramsStdDev[i])
+					return false;
+		}
+
+		// Check primitive fields
+		if (r1.frame != r2.frame)
+			return false;
+		if (r1.origX != r2.origX)
+			return false;
+		if (r1.origY != r2.origY)
+			return false;
+		if (r1.origValue != r2.origValue)
+			return false;
+		if (r1.noise != r2.noise)
+			return false;
+		
+		// Check optional properties
+		if (r1.hasId())
+		{
+			if (!r2.hasId() || r1.getId() != r2.getId())
+				return false;				
+		}
+		if (r1.hasEndFrame())
+		{
+			if (!r2.hasEndFrame() || r1.getEndFrame() != r2.getEndFrame())
+				return false;				
+		}
+		if (r1.hasPrecision())
+		{
+			if (!r2.hasPrecision() || r1.getPrecision() != r2.getPrecision())
+				return false;				
+		}
+
+		return true;
 	}
 
 	/**
