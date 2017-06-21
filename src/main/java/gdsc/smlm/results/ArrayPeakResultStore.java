@@ -52,8 +52,10 @@ public class ArrayPeakResultStore implements PeakResultStore
 		this.size = store.size;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Note: This does not check against the current size so can return stale data.
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#get(int)
 	 */
