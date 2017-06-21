@@ -180,7 +180,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 	 */
 	public void sort()
 	{
-		Arrays.sort(results);
+		Arrays.sort(results, 0, size);
 	}
 
 	/*
@@ -190,7 +190,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 	 */
 	public void sort(Comparator<PeakResult> comparator)
 	{
-		Arrays.sort(results, comparator);
+		Arrays.sort(results, 0, size, comparator);
 	}
 
 	/*

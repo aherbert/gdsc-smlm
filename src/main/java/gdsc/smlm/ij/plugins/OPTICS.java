@@ -56,9 +56,12 @@ import gdsc.smlm.ij.settings.OPTICSSettings.OutlineMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.PlotMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.SpanningTreeMode;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.StandardResultProcedure;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -147,18 +150,10 @@ public class OPTICS implements PlugIn
 			// The first item should be the memory peak results 
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			// Convert results to coordinates
-			float[] x, y;
-			int size = results.size();
-			x = new float[size];
-			y = new float[size];
-			for (int i = 0; i < size; i++)
-			{
-				PeakResult p = results.get(i);
-				x[i] = p.getXPosition();
-				y[i] = p.getYPosition();
-			}
+			StandardResultProcedure p = new StandardResultProcedure(results, DistanceUnit.PIXEL);
+			p.getXY();
 			Rectangle bounds = results.getBounds(true);
-			OPTICSManager opticsManager = new OPTICSManager(x, y, bounds);
+			OPTICSManager opticsManager = new OPTICSManager(p.x, p.y, bounds);
 			opticsManager.setTracker(new IJTrackProgress());
 			opticsManager.setOptions(Option.CACHE);
 			return new Settings(results, opticsManager);
@@ -511,7 +506,7 @@ public class OPTICS implements PlugIn
 			// It may be null if cancelled.
 			if (clusteringResult != null)
 			{
-				int[] clusters;
+				final int[] clusters;
 				synchronized (clusteringResult)
 				{
 					clusters = clusteringResult.getClusters();
@@ -519,16 +514,20 @@ public class OPTICS implements PlugIn
 				int max = Maths.max(clusters);
 
 				// Save the clusters to memory
-				Trace[] traces = new Trace[max + 1];
+				final Trace[] traces = new Trace[max + 1];
 				for (int i = 0; i <= max; i++)
 				{
 					traces[i] = new Trace();
 					traces[i].setId(i);
 				}
-				for (int i = 0, size = results.size(); i < size; i++)
+				final Counter counter = new Counter();
+				results.forEach(new PeakResultProcedure()
 				{
-					traces[clusters[i++]].add(results.get(i));
-				}
+					public void execute(PeakResult result)
+					{
+						traces[clusters[counter.getAndIncrement()]].add(result);
+					}
+				});
 				TraceMolecules.saveResults(results, traces, TITLE);
 			}
 
@@ -966,8 +965,8 @@ public class OPTICS implements PlugIn
 
 			int[] clusters = null, order = null;
 			int max = 0; // max cluster value
-			float[] x = null, y = null;
 			ImageMode mode = settings.getImageMode();
+			final StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
 
 			if (settings.imageScale > 0)
 			{
@@ -1051,19 +1050,13 @@ public class OPTICS implements PlugIn
 						image.getImagePlus().getProcessor().setColorModel(lut);
 
 						// Add in a single batch
-						float[] v;
-						x = new float[results.size()];
-						y = new float[x.length];
-						v = new float[x.length];
+						sp.getIXY();
 						OrderProvider op = (order == null) ? new OrderProvider() : new RealOrderProvider(order);
-						for (int i = 0, size = results.size(); i < size; i++)
+						for (int i = sp.size(); i-- > 0;)
 						{
-							PeakResult r = results.get(i);
-							x[i] = r.getXPosition();
-							y[i] = r.getYPosition();
-							v[i] = mapper.mapf(mode.getValue(r.getSignal(), clusters[i], op.getOrder(i)));
+							sp.intensity[i] = mapper.mapf(mode.getValue(sp.intensity[i], clusters[i], op.getOrder(i)));
 						}
-						image.add(x, y, v);
+						image.add(sp.x, sp.y, sp.intensity);
 					}
 					image.end();
 					if (mode.isMapped())
@@ -1222,17 +1215,9 @@ public class OPTICS implements PlugIn
 						}
 
 						// Get the coordinates
-						if (x == null)
+						if (sp.x == null)
 						{
-							int size = results.size();
-							x = new float[size];
-							y = new float[x.length];
-							for (int i = 0; i < size; i++)
-							{
-								PeakResult r = results.get(i);
-								x[i] = r.getXPosition();
-								y[i] = r.getYPosition();
-							}
+							sp.getXY();
 						}
 
 						spanningTree = new Overlay();
@@ -1284,10 +1269,10 @@ public class OPTICS implements PlugIn
 							if (topLevelClusters[i] != topLevelClusters[i])
 								continue;
 
-							float xi = image.mapX(x[i]);
-							float yi = image.mapY(y[i]);
-							float xj = image.mapX(x[j]);
-							float yj = image.mapY(y[j]);
+							float xi = image.mapX(sp.x[i]);
+							float yi = image.mapY(sp.y[i]);
+							float xj = image.mapX(sp.x[j]);
+							float yj = image.mapY(sp.y[j]);
 
 							Line roi = new Line(xi, yi, xj, yj);
 							if (useMap)
@@ -1729,8 +1714,7 @@ public class OPTICS implements PlugIn
 		else
 		{
 			String[] clusteringModes = SettingsManager.getNames((Object[]) ClusteringMode.values());
-			gd.addChoice("Clustering_mode", clusteringModes,
-					inputSettings.getClusteringMode().toString());
+			gd.addChoice("Clustering_mode", clusteringModes, inputSettings.getClusteringMode().toString());
 			gd.addMessage(ClusteringMode.XI.toString() + " options:\n" + ClusteringMode.XI.toString() +
 					" controls the change in reachability (profile steepness) to define a cluster");
 			gd.addNumericField("Xi", inputSettings.xi, 4);
@@ -1942,7 +1926,8 @@ public class OPTICS implements PlugIn
 
 			// Load the results. 
 			// TODO - update the plugin to handle any data, not just pixels 
-			MemoryPeakResults results = ResultsManager.loadInputResults(inputSettings.inputOption, true, DistanceUnit.PIXEL, null);
+			MemoryPeakResults results = ResultsManager.loadInputResults(inputSettings.inputOption, true,
+					DistanceUnit.PIXEL, null);
 			if (results == null || results.size() == 0)
 			{
 				IJ.error(TITLE, "No results could be loaded");

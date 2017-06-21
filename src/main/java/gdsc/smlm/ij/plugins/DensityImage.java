@@ -98,7 +98,7 @@ public class DensityImage implements PlugIn
 		if (!showDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -395,7 +395,7 @@ public class DensityImage implements PlugIn
 			public void executeXYR(float x, float y, PeakResult result)
 			{
 				if (x >= minX && x <= maxX && y >= minY && y <= maxY)
-				newResults.add(result);
+					newResults.add(result);
 			}
 		});
 		newResults.end();
@@ -508,20 +508,21 @@ public class DensityImage implements PlugIn
 		}
 
 		// Draw an image - Use error so that a floating point value can be used on a single pixel
-		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.ERROR, false, false,
-				results.getName() + " Density", results.getBounds(), results.getNmPerPixel(), results.getGain(),
+		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.SIGNAL_INTENSITY, false,
+				false, results.getName() + " Density", results.getBounds(), results.getNmPerPixel(), results.getGain(),
 				imageScale, 0, (cumulativeImage) ? ResultsMode.ADD : ResultsMode.MAX);
 		image.setDisplayFlags(image.getDisplayFlags() | IJImagePeakResults.DISPLAY_NEGATIVES);
 		image.setLutName("grays");
 		image.begin();
+		StandardResultProcedure sp = new StandardResultProcedure(newResults, DistanceUnit.PIXEL);
+		sp.getXYR();
 		for (int i = 0; i < density.length; i++)
 		{
 			if (density[i] < densityThreshold)
 				continue;
-			PeakResult r = results.get(i);
-			image.add(0, 0, 0, 0, density[i], 0, r.getParameters(), null);
+			image.add(sp.x[i], sp.y[i], density[i]);
 			if (newResults != null)
-				newResults.add(r);
+				newResults.add(sp.peakResults[i]);
 		}
 		image.end();
 

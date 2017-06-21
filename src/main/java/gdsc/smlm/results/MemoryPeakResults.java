@@ -86,6 +86,21 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public PeakResult get(int index)
 	{
+		if (index >= size())
+			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
+		return getf(index);
+	}
+
+	/**
+	 * Gets the result. Note that this uses the get(int) method from the backing PeakResultStore which may return stale
+	 * data if index is outside of the current size.
+	 *
+	 * @param index
+	 *            the index
+	 * @return the peak result
+	 */
+	PeakResult getf(int index)
+	{
 		return this.results.get(index);
 	}
 
@@ -240,7 +255,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public MemoryPeakResults(int capacity)
 	{
-		results = new ArrayListPeakResultStore(capacity);
+		// Use the fast and simple implementation for the store
+		results = new ArrayPeakResultStore(capacity);
 	}
 
 	/**
@@ -413,7 +429,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		long memorySize = 0;
 		if (r != null && r.size() > 0)
 		{
-			boolean includeDeviations = r.get(0).paramsStdDev != null;
+			boolean includeDeviations = r.getf(0).paramsStdDev != null;
 			memorySize = MemoryPeakResults.estimateMemorySize(r.size(), includeDeviations);
 		}
 		return memorySize;
@@ -625,7 +641,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * Gets the bounds. These are returned in Pixel units as the bounds are defined in the PeakResults interface as the
-	 * bounds used to create the resuls.
+	 * bounds used to create the results.
 	 *
 	 * @param calculate
 	 *            Set to true to calculate the bounds if they are null or zero width/height
@@ -687,11 +703,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		}
 
 		// Get the native bounds
-		float minX = get(0).getXPosition(), maxX = minX;
-		float minY = get(0).getYPosition(), maxY = minY;
+		float minX = getf(0).getXPosition(), maxX = minX;
+		float minY = getf(0).getYPosition(), maxY = minY;
 		for (int i = 1, size = size(); i < size; i++)
 		{
-			PeakResult p = get(i);
+			PeakResult p = getf(i);
 			float x = p.getXPosition();
 			float y = p.getYPosition();
 			if (minX > x)
@@ -805,7 +821,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (get(i).getBackground() != 0)
+			if (getf(i).getBackground() != 0)
 				return true;
 		}
 		return false;
@@ -820,7 +836,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (get(i).noise > 0)
+			if (getf(i).noise > 0)
 				return true;
 		}
 		return false;
@@ -835,7 +851,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (get(i).getSignal() > 0)
+			if (getf(i).getSignal() > 0)
 				return true;
 		}
 		return false;
@@ -850,7 +866,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (get(i).paramsStdDev == null)
+			if (getf(i).paramsStdDev == null)
 				return false;
 		}
 		return !isEmpty();
@@ -865,7 +881,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (get(i).getFrame() != get(i).getEndFrame())
+			if (getf(i).getFrame() != getf(i).getEndFrame())
 				return true;
 		}
 		return false;
@@ -880,7 +896,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (get(i).getId() != 0)
+			if (getf(i).getId() != 0)
 				return true;
 		}
 		return false;
@@ -897,15 +913,15 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (isEmpty())
 			return false;
 		if (size() == 1)
-			return get(0).getId() != 0;
+			return getf(0).getId() != 0;
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			int id = get(i).getId();
+			int id = getf(i).getId();
 			if (id != 0)
 			{
 				while (++i < size)
 				{
-					int id2 = get(i).getId();
+					int id2 = getf(i).getId();
 					if (id2 != 0 && id2 != id)
 						return true;
 				}
@@ -923,7 +939,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean hasPrecision()
 	{
 		for (int i = 0, size = size(); i < size; i++)
-			if (!get(i).hasPrecision())
+			if (!getf(i).hasPrecision())
 				return false;
 		return true;
 	}
@@ -936,7 +952,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public boolean is3D()
 	{
 		for (int i = 0, size = size(); i < size; i++)
-			if (get(i).getZPosition() != 0)
+			if (getf(i).getZPosition() != 0)
 				return true;
 		return false;
 	}
@@ -954,7 +970,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (isEmpty())
 			throw new IllegalStateException("Empty");
-		return get(0).getFrame();
+		return getf(0).getFrame();
 	}
 
 	/**
@@ -970,7 +986,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (isEmpty())
 			throw new IllegalStateException("Empty");
-		return get(size() - 1).getEndFrame();
+		return getf(size() - 1).getEndFrame();
 	}
 
 	/**
@@ -984,10 +1000,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (isEmpty())
 			throw new IllegalStateException("Empty");
-		int min = get(0).getFrame();
+		int min = getf(0).getFrame();
 		for (int i = 1, size = size(); i < size; i++)
-			if (min > get(i).getFrame())
-				min = get(i).getFrame();
+			if (min > getf(i).getFrame())
+				min = getf(i).getFrame();
 		return min;
 	}
 
@@ -1002,10 +1018,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (isEmpty())
 			throw new IllegalStateException("Empty");
-		int max = get(0).getEndFrame();
+		int max = getf(0).getEndFrame();
 		for (int i = 1, size = size(); i < size; i++)
-			if (max < get(i).getEndFrame())
-				max = get(i).getEndFrame();
+			if (max < getf(i).getEndFrame())
+				max = getf(i).getEndFrame();
 		return max;
 	}
 
@@ -1018,7 +1034,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0; i < size(); i++)
 		{
-			if (!get(i).hasPrecision())
+			if (!getf(i).hasPrecision())
 				return false;
 		}
 		return true;
@@ -1033,7 +1049,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0; i < size(); i++)
 		{
-			if (get(i) == null)
+			if (getf(i) == null)
 				return true;
 		}
 		return false;
@@ -1074,7 +1090,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			PeakResult p = get(i);
+			PeakResult p = getf(i);
 			p.noise = noiseConverter.convert(p.noise);
 			final float[] params = p.params;
 			final float[] paramsStdDev = p.paramsStdDev;
@@ -1145,7 +1161,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			procedure.execute(get(i));
+			procedure.execute(getf(i));
 		}
 	}
 
@@ -1159,7 +1175,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (isEmpty())
 			return;
-		procedure.execute(get(0));
+		procedure.execute(getf(0));
 	}
 
 	/**
@@ -1173,7 +1189,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (procedure.execute(get(i)))
+			if (procedure.execute(getf(i)))
 				return true;
 		}
 		return false;
@@ -1191,7 +1207,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(),
 					r.getZPosition());
 		}
@@ -1209,7 +1225,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (isEmpty())
 			return;
-		final PeakResult r = get(0);
+		final PeakResult r = getf(0);
 		procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getZPosition());
 	}
 
@@ -1242,7 +1258,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeBIXY(
 					bic.convert(r.getBackground()), 
@@ -1282,7 +1298,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeBIXYZ(
 					bic.convert(r.getBackground()), 
@@ -1328,7 +1344,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 
 			// Convert the widths to pixels
 			float sx = dc.convert(r.getParameter(isx));
@@ -1365,7 +1381,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeI(
 					ic.convert(r.getSignal()));
@@ -1400,7 +1416,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeIXY(
 					ic.convert(r.getSignal()), 
@@ -1437,7 +1453,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeIXYZ(
 					ic.convert(r.getSignal()), 
@@ -1467,7 +1483,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeT(
 					r.getFrame());
@@ -1499,7 +1515,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeTXY(
 					r.getFrame(),
@@ -1543,7 +1559,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		{
 			for (int i = 0, size = size(); i < size; i++)
 			{
-				final PeakResult r = get(i);
+				final PeakResult r = getf(i);
 				//@formatter:off
     			procedure.executeW(
     					dc.convert(r.getParameter(isx)));
@@ -1554,7 +1570,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		{
 			for (int i = 0, size = size(); i < size; i++)
 			{
-				final PeakResult r = get(i);
+				final PeakResult r = getf(i);
 				// Convert the separate widths into a single width
 				double s = Gaussian2DPeakResultHelper.getStandardDeviation(r.getParameter(isx), r.getParameter(isy));
 				//@formatter:off
@@ -1597,7 +1613,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeWxWy(
 					dc.convert(r.getParameter(isx)),
@@ -1630,7 +1646,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeXY(
 					dc.convert(r.getXPosition()),
@@ -1665,7 +1681,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeXYR(
 					dc.convert(r.getXPosition()),
@@ -1699,7 +1715,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeXYZ(
 					dc.convert(r.getXPosition()),
@@ -1751,7 +1767,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		{
 			for (int i = 0, size = size(); i < size; i++)
 			{
-				final PeakResult r = get(i);
+				final PeakResult r = getf(i);
 				double s = r.getParameter(ix);
 				procedure.executeLSEPrecision(Gaussian2DPeakResultHelper.getPrecision(nmPerPixel, dc.convert(s),
 						ic.convert(r.getSignal()), bic.convert(r.getBackground()), emCCD));
@@ -1761,7 +1777,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		{
 			for (int i = 0, size = size(); i < size; i++)
 			{
-				final PeakResult r = get(i);
+				final PeakResult r = getf(i);
 				double s = Gaussian2DPeakResultHelper.getStandardDeviation(r.getParameter(ix), r.getParameter(iy));
 				procedure.executeLSEPrecision(Gaussian2DPeakResultHelper.getPrecision(nmPerPixel, dc.convert(s),
 						ic.convert(r.getSignal()), bic.convert(r.getBackground()), emCCD));
@@ -1828,7 +1844,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = get(i);
+			final PeakResult r = getf(i);
 			if (r.params[0] == 0)
 				r.params[0] = newBackground;
 		}

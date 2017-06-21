@@ -863,7 +863,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	}
 
 	/**
-	 * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a value
+	 * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a value
 	 * 
 	 * @param allx
 	 *            The X coordinates

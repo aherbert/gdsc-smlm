@@ -680,7 +680,7 @@ public class PeakResultsReader
 
 		// Update the results.
 		// We can directly manipulate the params array
-		final int newLength = results.get(0).params.length - remove;
+		final int newLength = results.getf(0).params.length - remove;
 		if (!deviations)
 		{
 			results.forEach(new PeakResultProcedure()

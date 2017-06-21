@@ -248,6 +248,7 @@ public abstract class AbstractPeakResults implements PeakResults
 		this.setSource(peakResults.getSource());
 		this.setBounds(peakResults.getBounds());
 		this.setCalibration(peakResults.getCalibration());
+		this.setPSF(peakResults.getPSF());
 		this.setConfiguration(peakResults.getConfiguration());
 		this.setName(peakResults.getName());
 	}

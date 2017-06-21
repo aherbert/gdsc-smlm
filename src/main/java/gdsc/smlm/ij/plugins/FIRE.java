@@ -1290,7 +1290,7 @@ public class FIRE implements PlugIn
 
 		// Sort by time
 		results.sort();
-		
+
 		int nSteps = 10;
 		int maxT = results.getLastFrame();
 		if (maxT == 0)
@@ -1307,13 +1307,15 @@ public class FIRE implements PlugIn
 		newResults.copySettings(results);
 		int i = 0;
 
+		PeakResult[] list = results.toArray();
 		for (int t = step; t <= maxT - step; t += step)
 		{
-			while (i < results.size())
+			while (i < list.length)
 			{
-				if (results.get(i).getFrame() <= t)
+				PeakResult r = list[i];
+				if (r.getFrame() <= t)
 				{
-					newResults.add(results.get(i));
+					newResults.add(r);
 					i++;
 				}
 				else

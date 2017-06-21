@@ -183,25 +183,12 @@ public class PeakResult implements Comparable<PeakResult>
 			// At least one is not null so this is not equal
 			return false;
 
-		// Check parameters (and deviations)
+		// Check parameters
 		if (r1.getNumberOfParameters() != r2.getNumberOfParameters())
 			return false;
 		for (int i = 0; i < r1.params.length; i++)
 			if (r1.params[i] != r2.params[i])
 				return false;
-		if (r1.paramsStdDev == null)
-		{
-			if (r2.paramsStdDev != null)
-				return false;
-		}
-		else
-		{
-			if (r2.paramsStdDev == null)
-				return false;
-			for (int i = 0; i < r1.paramsStdDev.length; i++)
-				if (r1.paramsStdDev[i] != r2.paramsStdDev[i])
-					return false;
-		}
 
 		// Check primitive fields
 		if (r1.frame != r2.frame)
@@ -214,24 +201,42 @@ public class PeakResult implements Comparable<PeakResult>
 			return false;
 		if (r1.noise != r2.noise)
 			return false;
-		
+
 		// Check optional properties
 		if (r1.hasId())
 		{
 			if (!r2.hasId() || r1.getId() != r2.getId())
-				return false;				
+				return false;
 		}
+		else if (r2.hasId())
+			return false;
 		if (r1.hasEndFrame())
 		{
 			if (!r2.hasEndFrame() || r1.getEndFrame() != r2.getEndFrame())
-				return false;				
+				return false;
 		}
+		else if (r2.hasEndFrame())
+			return false;
 		if (r1.hasPrecision())
 		{
 			if (!r2.hasPrecision() || r1.getPrecision() != r2.getPrecision())
-				return false;				
+				return false;
 		}
+		else if (r2.hasPrecision())
+			return false;
 
+		// Check parameters deviations. Do this last as they are not often used.
+		if (r1.paramsStdDev != null)
+		{
+			if (r2.paramsStdDev == null)
+				return false;
+			for (int i = 0; i < r1.paramsStdDev.length; i++)
+				if (r1.paramsStdDev[i] != r2.paramsStdDev[i])
+					return false;
+		}
+		else if (r2.paramsStdDev != null)
+			return false;
+		
 		return true;
 	}
 
