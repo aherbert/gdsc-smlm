@@ -65,6 +65,7 @@ public class PeakResultsReader
 	private static Pattern whitespacePattern = Pattern.compile("[\t ]");
 
 	private boolean useScanner = false;
+	private boolean rawResults = false;
 
 	private String filename;
 	private String header = null;
@@ -363,8 +364,7 @@ public class PeakResultsReader
 								final double nmPerPixel = (float) (1e9 / resolution);
 								calibration = new Calibration();
 								calibration.setNmPerPixel(nmPerPixel);
-								// We will convert the units to pixels
-								calibration.setDistanceUnit(DistanceUnit.PIXEL);
+								// Q. Where are the units stored since we could read them?
 							}
 						}
 						catch (NumberFormatException e)
@@ -572,11 +572,14 @@ public class PeakResultsReader
 		{
 			results.trimToSize();
 
-			if (psf != null)
-				simplifyPSF(results);
+			if (!rawResults)
+			{
+				if (psf != null)
+					simplifyPSF(results);
 
-			// Convert to the preferred units if possible
-			results.convertToPreferredUnits();
+				// Convert to the preferred units if possible
+				results.convertToPreferredUnits();
+			}
 		}
 		return results;
 	}
@@ -2289,6 +2292,16 @@ public class PeakResultsReader
 	public void setUseScanner(boolean useScanner)
 	{
 		this.useScanner = useScanner;
+	}
+
+	public boolean isRawResults()
+	{
+		return rawResults;
+	}
+
+	public void setRawResults(boolean rawResults)
+	{
+		this.rawResults = rawResults;
 	}
 
 	/**

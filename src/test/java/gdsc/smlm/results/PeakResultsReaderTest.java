@@ -13,6 +13,7 @@ import org.junit.internal.ArrayComparisonFailure;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.*;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
@@ -598,12 +599,27 @@ public class PeakResultsReaderTest
 			Assert.assertEquals("Calibration exposureTime", c1.getExposureTime(), c2.getExposureTime(), 1e-6);
 			Assert.assertEquals("Calibration readNoise", c1.getReadNoise(), c2.getReadNoise(), 1e-6);
 			Assert.assertEquals("Calibration bias", c1.getBias(), c2.getBias(), 1e-6);
-			Assert.assertEquals("Calibration emCCD", c1.isEmCCD(), c2.isEmCCD());
 			Assert.assertEquals("Calibration amplification", c1.getAmplification(), c2.getAmplification(), 1e-6);
+			Assert.assertEquals("Calibration CameraType", c1.getCameraType(), c2.getCameraType());
+			Assert.assertEquals("Calibration DistanceUnit", c1.getDistanceUnit(), c2.getDistanceUnit());
+			Assert.assertEquals("Calibration IntensityUnit", c1.getIntensityUnit(), c2.getIntensityUnit());
+			Assert.assertEquals("Calibration AngleUnit", c1.getAngleUnit(), c2.getAngleUnit());
 		}
 		else
 		{
 			Assert.assertNull("Calibration", c2);
+		}
+		
+		PSF p1 = expectedResults.getPSF();
+		PSF p2 = actualResults.getPSF();
+		if (p1 != null)
+		{
+			Assert.assertNotNull("PSF", p2);
+			Assert.assertTrue("PSF nmPerPixel", p1.equals(p2));
+		}
+		else
+		{
+			Assert.assertNull("PSF", p2);
 		}
 	}
 
@@ -639,8 +655,11 @@ public class PeakResultsReaderTest
 		cal.setExposureTime(rand.next());
 		cal.setReadNoise(rand.next());
 		cal.setBias(bias);
-		cal.setEmCCD(rand.next() < 0.5f);
 		cal.setAmplification(rand.next());
+		cal.setCameraType(CameraType.values()[rand.nextInt(CameraType.values().length)]);
+		cal.setDistanceUnit(DistanceUnit.values()[rand.nextInt(DistanceUnit.values().length)]);
+		cal.setIntensityUnit(IntensityUnit.values()[rand.nextInt(IntensityUnit.values().length)]);
+		cal.setAngleUnit(AngleUnit.values()[rand.nextInt(AngleUnit.values().length)]);
 		results.setCalibration(cal);
 		return results;
 	}
@@ -698,6 +717,7 @@ public class PeakResultsReaderTest
 
 		// TODO - option to test adding using:
 		// add(peak);
+		// addAll(PeakResult[])
 
 		if (sequential)
 		{
@@ -719,8 +739,13 @@ public class PeakResultsReaderTest
 
 	private MemoryPeakResults readFile(String filename, boolean useScanner)
 	{
+		return readFile(filename, useScanner, true);
+	}
+	private MemoryPeakResults readFile(String filename, boolean useScanner, boolean rawResults)
+	{
 		PeakResultsReader reader = new PeakResultsReader(filename);
 		reader.setUseScanner(useScanner);
+		reader.setRawResults(rawResults);
 		MemoryPeakResults in = reader.getResults();
 		return in;
 	}
