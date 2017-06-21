@@ -10,17 +10,15 @@ import java.util.Set;
 
 import gdsc.core.data.DataException;
 import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.Converter;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.PSF;
-import gdsc.smlm.data.config.UnitConverterFactory;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import gdsc.smlm.results.procedures.HResultProcedure;
@@ -259,14 +257,15 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	/**
 	 * Instantiates a new memory peak results.
 	 *
-	 * @param psf the psf
+	 * @param psf
+	 *            the psf
 	 */
 	public MemoryPeakResults(PSF psf)
 	{
 		this(1000);
 		setPSF(psf);
 	}
-	
+
 	/**
 	 * Gets the results.
 	 *
@@ -1056,13 +1055,45 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (calibration == null)
 			return false;
-		// TODO - use the helper
-		CalibrationHelper helper = null; //new CalibrationHelper(calibration);
-		boolean success = convertDistance(helper);
-		success &= convertIntensity(helper);
-		success &= convertAngle(helper);
-		//setCalibration(helper.getCalibration());
-		return success;
+
+		PeakResultsHelper helper = new PeakResultsHelper(calibration, psf);
+		helper.setIntensityUnit(PREFERRED_INTENSITY_UNIT);
+		helper.setDistanceUnit(PREFERRED_DISTANCE_UNIT);
+		helper.setAngleUnit(PREFERRED_ANGLE_UNIT);
+		final Converter[] converters = helper.getConverters();
+
+		if (!helper.calibrationChanged())
+			// Already in preferred units
+			return true;
+
+		// Update the calibration
+		setCalibration(helper.getCalibration());
+
+		// We must convert the noise
+		Converter noiseConverter = converters[PeakResult.INTENSITY];
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			PeakResult p = get(i);
+			p.noise = noiseConverter.convert(p.noise);
+			final float[] params = p.params;
+			final float[] paramsStdDev = p.paramsStdDev;
+			if (paramsStdDev == null)
+			{
+				for (int j = 0; j < converters.length; j++)
+					params[j] = converters[j].convert(params[j]);
+			}
+			else
+			{
+				for (int j = 0; j < converters.length; j++)
+				{
+					params[j] = converters[j].convert(params[j]);
+					paramsStdDev[j] = converters[j].convert(paramsStdDev[j]);
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -1076,196 +1107,23 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Convert the distance units to pixels. Requires the calibration to have distance units and nm/pixel.
+	 * Checks if is intensity in preferred units.
 	 *
-	 * @param helper
-	 *            the helper
-	 * @return true, if the distance units are now in pixels
+	 * @return true, if is intensity in preferred units
 	 */
-	private boolean convertDistance(CalibrationHelper helper)
-	{
-		if (isDistanceInPreferredUnits())
-			return true;
-
-		if (calibration.hasNmPerPixel())
-		{
-			try
-			{
-				TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(getDistanceUnit(),
-						PREFERRED_DISTANCE_UNIT, calibration.getNmPerPixel());
-				// Convert data
-				for (int i = 0, size = size(); i < size; i++)
-				{
-					PeakResult p = get(i);
-					// Leave the original positions
-					//p.origX
-					//p.origY
-					convertDistance(p.params, c);
-					if (p.paramsStdDev != null)
-						convertDistance(p.paramsStdDev, c);
-				}
-				calibration.setDistanceUnit(PREFERRED_DISTANCE_UNIT);
-				return true;
-			}
-			catch (ConversionException e)
-			{
-				// Gracefully fail so ignore this
-			}
-		}
-		return false;
-	}
-
-	/** The Constant offsetYSD. */
-	private final static int offsetY, offsetXSD, offsetYSD;
-	static
-	{
-		offsetY = Gaussian2DFunction.Y_POSITION - Gaussian2DFunction.X_POSITION;
-		offsetXSD = Gaussian2DFunction.X_SD - Gaussian2DFunction.X_POSITION;
-		offsetYSD = Gaussian2DFunction.Y_SD - Gaussian2DFunction.X_POSITION;
-	}
-
-	/**
-	 * Convert distance.
-	 *
-	 * @param params
-	 *            the params
-	 * @param c
-	 *            the c
-	 */
-	private void convertDistance(float[] params, TypeConverter<DistanceUnit> c)
-	{
-		for (int i = Gaussian2DFunction.X_POSITION; i < params.length; i += 6)
-		{
-			params[i] = c.convert(params[i]);
-			params[i + offsetY] = c.convert(params[i + offsetY]);
-			params[i + offsetXSD] = c.convert(params[i + offsetXSD]);
-			params[i + offsetYSD] = c.convert(params[i + offsetYSD]);
-		}
-	}
-
 	public boolean isIntensityInPreferredUnits()
 	{
 		return (getIntensityUnit() == PREFERRED_INTENSITY_UNIT);
 	}
 
 	/**
-	 * Convert the intensity units to photons. Requires the calibration to have intensity units, gain and bias.
+	 * Checks if is angle in preferred units.
 	 *
-	 * @param helper
-	 *            the helper
-	 * @return true, if the intensity units are now in photons
+	 * @return true, if is angle in preferred units
 	 */
-	private boolean convertIntensity(CalibrationHelper helper)
-	{
-		if (isIntensityInPreferredUnits())
-			return true;
-
-		if (calibration.hasGain() && calibration.hasBias())
-		{
-			try
-			{
-				TypeConverter<IntensityUnit> bc = UnitConverterFactory.createConverter(getIntensityUnit(),
-						PREFERRED_INTENSITY_UNIT, calibration.getBias(), calibration.getGain());
-				TypeConverter<IntensityUnit> c = UnitConverterFactory.createConverter(getIntensityUnit(),
-						PREFERRED_INTENSITY_UNIT, calibration.getGain());
-				// Convert data
-				for (int i = 0, size = size(); i < size; i++)
-				{
-					PeakResult p = get(i);
-					// Leave the original value
-					//p.origValue
-					p.noise = (float) c.convert(p.noise);
-					// Background must account for the bias
-					p.params[Gaussian2DFunction.BACKGROUND] = (float) bc
-							.convert(p.params[Gaussian2DFunction.BACKGROUND]);
-					convertIntensity(p.params, c);
-					if (p.paramsStdDev != null)
-					{
-						// Standard deviations so do not subtract the bias from the background
-						p.paramsStdDev[Gaussian2DFunction.BACKGROUND] = (float) c
-								.convert(p.paramsStdDev[Gaussian2DFunction.BACKGROUND]);
-						convertIntensity(p.paramsStdDev, c);
-					}
-				}
-				calibration.setIntensityUnit(PREFERRED_INTENSITY_UNIT);
-				return true;
-			}
-			catch (ConversionException e)
-			{
-				// Gracefully fail so ignore this
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Convert intensity.
-	 *
-	 * @param params
-	 *            the params
-	 * @param c
-	 *            the c
-	 */
-	private void convertIntensity(float[] params, TypeConverter<IntensityUnit> c)
-	{
-		for (int i = Gaussian2DFunction.SIGNAL; i < params.length; i += 6)
-		{
-			params[Gaussian2DFunction.SIGNAL] = c.convert(params[Gaussian2DFunction.SIGNAL]);
-		}
-	}
-
 	public boolean isAngleInPreferredUnits()
 	{
 		return getAngleUnit() == PREFERRED_ANGLE_UNIT;
-	}
-
-	/**
-	 * Convert the angle units to radians. Requires the calibration to have angle units.
-	 *
-	 * @param helper
-	 *            the helper
-	 * @return true, if the angle units are now in radians
-	 */
-	private boolean convertAngle(CalibrationHelper helper)
-	{
-		if (isAngleInPreferredUnits())
-			return true;
-
-		try
-		{
-			TypeConverter<AngleUnit> c = UnitConverterFactory.createConverter(getAngleUnit(), PREFERRED_ANGLE_UNIT);
-			// Convert data
-			for (int i = 0, size = size(); i < size; i++)
-			{
-				PeakResult p = get(i);
-				convertAngle(p.params, c);
-				if (p.paramsStdDev != null)
-					convertAngle(p.paramsStdDev, c);
-			}
-			calibration.setAngleUnit(PREFERRED_ANGLE_UNIT);
-			return true;
-		}
-		catch (ConversionException e)
-		{
-			// Gracefully fail so ignore this
-		}
-		return false;
-	}
-
-	/**
-	 * Convert angle.
-	 *
-	 * @param params
-	 *            the params
-	 * @param c
-	 *            the c
-	 */
-	private void convertAngle(float[] params, TypeConverter<AngleUnit> c)
-	{
-		for (int i = Gaussian2DFunction.SHAPE; i < params.length; i += 6)
-		{
-			params[i] = c.convert(params[i]);
-		}
 	}
 
 	/////////////////////////////////////////////////////////////////

@@ -374,6 +374,26 @@ public class PeakResultsHelper
 	}
 
 	/**
+	 * Test if the current converters will cause the calibration to be changed, i.e. new units.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean calibrationChanged()
+	{
+		if (calibration == null)
+			return false;
+
+		if (hasIntensityConverter() && getIntensityConverter().from() != getIntensityConverter().to())
+			return true;
+		if (hasDistanceConverter() && getDistanceConverter().from() != getDistanceConverter().to())
+			return true;
+		if (hasAngleConverter() && getAngleConverter().from() != getAngleConverter().to())
+			return true;
+
+		return false;
+	}
+
+	/**
 	 * Gets the calibration, updated with the current output units of the converters.
 	 *
 	 * @return the calibration
