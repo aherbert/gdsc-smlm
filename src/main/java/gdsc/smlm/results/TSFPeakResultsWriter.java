@@ -182,12 +182,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setFrame(peak);
 		builder.setXPosition(origX);
 		builder.setYPosition(origY);
-		builder.setBackground(params[PeakResult.BACKGROUND]);
-		builder.setIntensity(params[PeakResult.INTENSITY]);
-		builder.setX(params[PeakResult.X]);
-		builder.setY(params[PeakResult.Y]);
 
-		setWidth(params, builder);
+		setParams(params, builder);
 
 		builder.setError(error);
 		builder.setNoise(noise);
@@ -211,12 +207,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setFrame(result.getFrame());
 		builder.setXPosition(result.origX);
 		builder.setYPosition(result.origY);
-		builder.setBackground(params[PeakResult.BACKGROUND]);
-		builder.setIntensity(params[PeakResult.INTENSITY]);
-		builder.setX(params[PeakResult.X]);
-		builder.setY(params[PeakResult.Y]);
 
-		setWidth(params, builder);
+		setParams(params, builder);
 
 		if (result.hasPrecision())
 		{
@@ -250,8 +242,14 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 * @param builder
 	 *            the builder
 	 */
-	private void setWidth(float[] params, Spot.Builder builder)
+	private void setParams(float[] params, Spot.Builder builder)
 	{
+		builder.setBackground(params[PeakResult.BACKGROUND]);
+		builder.setIntensity(params[PeakResult.INTENSITY]);
+		builder.setX(params[PeakResult.X]);
+		builder.setY(params[PeakResult.Y]);
+		builder.setZ(params[PeakResult.Z]);
+		
 		switch (fitMode)
 		{
 			case ONEAXIS:
@@ -260,13 +258,13 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 			case TWOAXIS:
 				builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR *
-						Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isx])));
+						Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isy])));
 				builder.setA(params[isx] / params[isy]);
 				break;
 
 			case TWOAXISANDTHETA:
 				builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR *
-						Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isx])));
+						Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isy])));
 				builder.setA(params[isx] / params[isy]);
 				builder.setTheta(params[ia]);
 				break;
@@ -306,12 +304,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			builder.setFrame(result.getFrame());
 			builder.setXPosition(result.origX);
 			builder.setYPosition(result.origY);
-			builder.setBackground(params[PeakResult.BACKGROUND]);
-			builder.setIntensity(params[PeakResult.INTENSITY]);
-			builder.setX(params[PeakResult.X]);
-			builder.setY(params[PeakResult.Y]);
 
-			setWidth(params, builder);
+			setParams(params, builder);
 
 			if (result.hasPrecision())
 			{

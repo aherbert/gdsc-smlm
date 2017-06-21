@@ -656,10 +656,11 @@ public class PeakResultsReaderTest
 		cal.setReadNoise(rand.next());
 		cal.setBias(bias);
 		cal.setAmplification(rand.next());
-		cal.setCameraType(CameraType.values()[rand.nextInt(CameraType.values().length)]);
-		cal.setDistanceUnit(DistanceUnit.values()[rand.nextInt(DistanceUnit.values().length)]);
-		cal.setIntensityUnit(IntensityUnit.values()[rand.nextInt(IntensityUnit.values().length)]);
-		cal.setAngleUnit(AngleUnit.values()[rand.nextInt(AngleUnit.values().length)]);
+		// Subtract 1 to avoid the additional UNRECOGNISED enum value
+		cal.setCameraType(CameraType.values()[rand.nextInt(CameraType.values().length-1)]);
+		cal.setDistanceUnit(DistanceUnit.values()[rand.nextInt(DistanceUnit.values().length-1)]);
+		cal.setIntensityUnit(IntensityUnit.values()[rand.nextInt(IntensityUnit.values().length-1)]);
+		cal.setAngleUnit(AngleUnit.values()[rand.nextInt(AngleUnit.values().length-1)]);
 		results.setCalibration(cal);
 		return results;
 	}

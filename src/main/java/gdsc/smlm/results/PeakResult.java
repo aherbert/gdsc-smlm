@@ -76,7 +76,7 @@ public class PeakResult implements Comparable<PeakResult>
 		if (params.length < STANDARD_PARAMETERS)
 			throw new IllegalArgumentException("Parameters must contain all standard parameters");
 		if (paramsStdDev != null && paramsStdDev.length != params.length)
-			throw new IllegalArgumentException("Parameters must contain all standard parameters");
+			throw new IllegalArgumentException("Parameter deviations length must match parameters");
 		this.frame = frame;
 		this.origX = origX;
 		this.origY = origY;

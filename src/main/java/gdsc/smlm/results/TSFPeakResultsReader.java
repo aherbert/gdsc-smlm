@@ -241,55 +241,8 @@ public class TSFPeakResultsReader
 		LocationUnits locationUnits = spotList.getLocationUnits();
 		boolean locationUnitsWarning = false;
 
-		float locationConversion = 1;
-		switch (locationUnits)
-		{
-			case PIXELS:
-				break;
-			case NM:
-				locationConversion = 1 / getNmPerPixel(results.getCalibration());
-				break;
-			case UM:
-				float nmPerPixel = getNmPerPixel(results.getCalibration());
-				if (nmPerPixel != 1)
-				{
-					float umPerPixel = nmPerPixel / 1000;
-					locationConversion = 1 / umPerPixel;
-				}
-				break;
-			default:
-				System.err.println("Unsupported location units conversion: " + locationUnits);
-		}
-
 		IntensityUnits intensityUnits = spotList.getIntensityUnits();
 		boolean intensityUnitsWarning = false;
-
-		float intensityConversion = 1;
-		switch (intensityUnits)
-		{
-			case COUNTS:
-				break;
-			case PHOTONS:
-				intensityConversion = getGain(results.getCalibration());
-				break;
-			default:
-				System.err.println("Unsupported intensity units conversion: " + intensityUnits);
-		}
-		final float bias = (results.getCalibration().hasBias()) ? (float) results.getCalibration().getBias() : 0f;
-
-		ThetaUnits thetaUnits = spotList.getThetaUnits();
-
-		float thetaConversion = 1;
-		switch (thetaUnits)
-		{
-			case DEGREES:
-				thetaConversion = (float) (Math.PI / 180.0);
-				break;
-			case RADIANS:
-				break;
-			default:
-				System.err.println("Unsupported theta units conversion: " + thetaUnits);
-		}
 
 		FitMode fitMode = FitMode.ONEAXIS;
 		if (spotList.hasFitMode())
@@ -297,6 +250,25 @@ public class TSFPeakResultsReader
 
 		final boolean filterPosition = position > 0;
 		final boolean filterSlice = slice > 0;
+
+		// Set up to read two-axis and theta data
+		PSF psf = PSFHelper.create(PSFType.TwoAxisAndThetaGaussian2D);
+		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+		final int isx = indices[0];
+		final int isy = indices[1];
+		final int ia = PSFHelper.getGaussian2DAngleIndex(psf);
+		int nParams = PeakResult.STANDARD_PARAMETERS;
+		switch (fitMode)
+		{
+			case TWOAXISANDTHETA:
+				nParams++;
+			case TWOAXIS:
+				nParams++;
+			case ONEAXIS:
+			default:
+				nParams++;
+				break;
+		}
 
 		long expectedSpots = getExpectedSpots();
 		try
@@ -334,41 +306,37 @@ public class TSFPeakResultsReader
 				// Required fields
 				int frame = spot.getFrame();
 
-				float[] params = new float[7];
-				params[Gaussian2DFunction.X_POSITION] = spot.getX() * locationConversion;
-				params[Gaussian2DFunction.Y_POSITION] = spot.getY() * locationConversion;
-				params[Gaussian2DFunction.SIGNAL] = spot.getIntensity() * intensityConversion;
+				float[] params = new float[nParams];
+				params[PeakResult.X] = spot.getX();
+				params[PeakResult.Y] = spot.getY();
+				params[PeakResult.INTENSITY] = spot.getIntensity();
 				if (spot.hasBackground())
-				{
-					// The writer of the TSF file should have removed the bias (as documented in the format).
-					// We can add it back for GSDC results
-					params[Gaussian2DFunction.BACKGROUND] = spot.getBackground() * intensityConversion + bias;
-				}
+					params[PeakResult.BACKGROUND] = spot.getBackground();
+				if (spot.hasZ())
+					params[PeakResult.Z] = spot.getZ();
 
 				// Support different Gaussian shapes
 				if (fitMode == FitMode.ONEAXIS)
 				{
-					params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) (spot.getWidth() /
-							Gaussian2DFunction.SD_TO_FWHM_FACTOR);
+					params[isx] = params[isy] = (float) (spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR);
 				}
 				else
 				{
 					if (!spot.hasA())
 					{
-						params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) (spot.getWidth() /
-								Gaussian2DFunction.SD_TO_FWHM_FACTOR);
+						params[isx] = params[isy] = (float) (spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR);
 					}
 					else
 					{
 						double a = Math.sqrt(spot.getA());
 						double sd = spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR;
-						params[Gaussian2DFunction.X_SD] = (float) (sd * a);
-						params[Gaussian2DFunction.Y_SD] = (float) (sd / a);
+						params[isx] = (float) (sd * a);
+						params[isy] = (float) (sd / a);
 					}
 
 					if (fitMode == FitMode.TWOAXISANDTHETA && spot.hasTheta())
 					{
-						params[Gaussian2DFunction.SHAPE] = spot.getTheta() * thetaConversion;
+						params[ia] = spot.getTheta();
 					}
 				}
 
@@ -517,7 +485,7 @@ public class TSFPeakResultsReader
 					break;
 			}
 		}
-		
+
 		// Generic reconstruction
 		String name;
 		if (spotList.hasName())
@@ -613,7 +581,7 @@ public class TSFPeakResultsReader
 				{
 					// This should be OK
 					System.err.println("Unable to deserialise the PSF settings");
-				}				
+				}
 			}
 		}
 
@@ -641,20 +609,6 @@ public class TSFPeakResultsReader
 		}
 
 		return results;
-	}
-
-	private float getNmPerPixel(Calibration cal)
-	{
-		if (cal.getNmPerPixel() <= 0)
-			return 1f;
-		return (float) cal.getNmPerPixel();
-	}
-
-	private float getGain(Calibration cal)
-	{
-		if (cal.getGain() <= 0)
-			return 1f;
-		return (float) cal.getGain();
 	}
 
 	/**
