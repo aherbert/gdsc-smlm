@@ -324,7 +324,6 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			for (int i = 0; i < converters.length; i++)
 			{
 				add(sb, converters[i].convert(params[i]));
-				sb.append("\t0");
 			}
 		}
 		if (canComputePrecision)
