@@ -10,11 +10,11 @@ option java_outer_classname = "SMLMSettings";
 
 // The type of Point Spread Function (PSF)
 enum PSFType {
-   OneAxisGaussian2D = 0; // A 2D Gaussian with the same standard deviation in X and Y dimensions
-   TwoAxisGaussian2D = 1; // A 2D Gaussian with standard deviations in X and Y dimensions
-   TwoAxisAndThetaGaussian2D = 2; // A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
-   AstigmaticGaussian2D = 3; // A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
-   Custom = 4; // A custom point spread function (PSF) 
+   ONE_AXIS_GAUSSIAN_2D = 0; // A 2D Gaussian with the same standard deviation in X and Y dimensions
+   TWO_AXIS_GAUSSIAN_2D = 1; // A 2D Gaussian with standard deviations in X and Y dimensions
+   TWO_AXIS_AND_THETA_GAUSSIAN_2D = 2; // A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
+   ASTIGMATIC_GAUSSIAN_2D = 3; // A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
+   CUSTOM = 4; // A custom point spread function (PSF) 
 }
 
 // Define the type of units supported in the Point Spread Function (PSF)

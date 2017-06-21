@@ -1,14 +1,11 @@
 package gdsc.smlm.data.config;
 
-import java.util.ArrayList;
-
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.Calibration;
-import gdsc.smlm.data.config.SMLMSettings.CameraCalibration;
 import gdsc.smlm.data.config.SMLMSettings.DistanceCalibration;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityCalibration;
@@ -70,39 +67,6 @@ public class CalibrationHelperTest
 		Assert.assertEquals(intensityConverter2.to(), IntensityUnit.COUNT);
 
 		Assert.assertEquals(intensityConverter.getFunction(), intensityConverter2.getFunction());
-	}
-
-	@Test
-	public void canUpdateDualIntensityCalibration()
-	{
-		Calibration.Builder builder = Calibration.newBuilder();
-		IntensityCalibration.Builder intensityBuilder = builder.getIntensityCalibrationBuilder();
-		CameraCalibration.Builder cameraBuilder = builder.getCameraCalibrationBuilder();
-
-		intensityBuilder.setUnit(IntensityUnit.PHOTON);
-		intensityBuilder.setGain(gain);
-		cameraBuilder.setBias(bias);
-
-		Calibration c = builder.build();
-
-		CalibrationHelper helper = new CalibrationHelper(c);
-
-		ArrayList<TypeConverter<IntensityUnit>> list = helper.getDualIntensityConverter(IntensityUnit.COUNT);
-		Assert.assertEquals(list.get(0).from(), IntensityUnit.PHOTON);
-		Assert.assertEquals(list.get(0).to(), IntensityUnit.COUNT);
-		Assert.assertEquals(list.get(1).from(), IntensityUnit.PHOTON);
-		Assert.assertEquals(list.get(1).to(), IntensityUnit.COUNT);
-		Assert.assertEquals(helper.getCalibration().getIntensityCalibration().getUnit(), IntensityUnit.COUNT);
-
-		ArrayList<TypeConverter<IntensityUnit>> list2 = CalibrationHelper.getDualIntensityConverter(c,
-				IntensityUnit.COUNT);
-		Assert.assertEquals(list2.get(0).from(), IntensityUnit.PHOTON);
-		Assert.assertEquals(list2.get(0).to(), IntensityUnit.COUNT);
-		Assert.assertEquals(list2.get(1).from(), IntensityUnit.PHOTON);
-		Assert.assertEquals(list2.get(1).to(), IntensityUnit.COUNT);
-
-		Assert.assertEquals(list.get(0).getFunction(), list2.get(0).getFunction());
-		Assert.assertEquals(list.get(1).getFunction(), list2.get(1).getFunction());
 	}
 
 	@Test

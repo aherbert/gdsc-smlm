@@ -411,7 +411,7 @@ public class IJImagePeakResultsTest
 		displayFlags |= IJImagePeakResults.DISPLAY_SIGNAL;
 
 		IJImagePeakResults[] r = new IJImagePeakResults[8];
-		PSF psf = PSFHelper.create(PSFType.OneAxisGaussian2D);
+		PSF psf = PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D);
 		for (int i = 0; i < r.length; i++)
 		{
 			r[i] = new IJImagePeakResults(title + i, bounds, 1);

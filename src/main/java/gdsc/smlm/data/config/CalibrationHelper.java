@@ -111,48 +111,6 @@ public class CalibrationHelper
 	}
 
 	/**
-	 * Gets intensity converters to update values.
-	 * <p>
-	 * If the conversion is not possible then an exception is thrown.
-	 * <p>
-	 * The returned list calibration has a converter with only the gain, and a second converter with the gain and bias.
-	 * If the bias is not available then the second converter is the same as the first.
-	 * <p>
-	 * If a converter if successfully created then the instance calibration will be updated.
-	 *
-	 * @param toIntensityUnit
-	 *            the intensity unit
-	 * @return the intensity converters (gain, gain + bias)
-	 * @throws ConversionException
-	 *             if a converter cannot be created
-	 */
-	public ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverter(IntensityUnit toIntensityUnit)
-	{
-		if (toIntensityUnit != null && calibrationBuilder.hasIntensityCalibration())
-		{
-			IntensityCalibration.Builder intensityCalibration = calibrationBuilder.getIntensityCalibrationBuilder();
-			IntensityUnit fromUnit = intensityCalibration.getUnit();
-			double gain = intensityCalibration.getGain();
-			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
-			list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit, gain));
-			// Add a second converter with the camera bias
-			if (calibrationBuilder.hasCameraCalibration() && calibrationBuilder.getCameraCalibration().getBias() != 0)
-			{
-				list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit,
-						calibrationBuilder.getCameraCalibration().getBias(), gain));
-			}
-			else
-			{
-				// No bias so just duplicate the converter
-				list.add(list.get(0));
-			}
-			intensityCalibration.setUnit(toIntensityUnit);
-			return list;
-		}
-		throw new ConversionException();
-	}
-
-	/**
 	 * Gets a angle converter to update values.
 	 * <p>
 	 * If the conversion is not possible then an exception is thrown.
@@ -229,48 +187,6 @@ public class CalibrationHelper
 	}
 
 	/**
-	 * Gets intensity converters to update values.
-	 * <p>
-	 * If the conversion is not possible then an exception is thrown.
-	 * <p>
-	 * The returned list calibration has a converter with only the gain, and a second converter with the gain and bias.
-	 * If the bias is not available then the second converter is the same as the first.
-	 *
-	 * @param calibration
-	 *            the calibration
-	 * @param toIntensityUnit
-	 *            the intensity unit
-	 * @return the intensity converters (gain, gain + bias)
-	 * @throws ConversionException
-	 *             if a converter cannot be created
-	 */
-	public static ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverter(Calibration calibration,
-			IntensityUnit toIntensityUnit)
-	{
-		if (toIntensityUnit != null && calibration.hasIntensityCalibration())
-		{
-			IntensityCalibration intensityCalibration = calibration.getIntensityCalibration();
-			IntensityUnit fromUnit = intensityCalibration.getUnit();
-			double gain = intensityCalibration.getGain();
-			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
-			list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit, gain));
-			// Add a second converter with the camera bias
-			if (calibration.hasCameraCalibration() && calibration.getCameraCalibration().getBias() != 0)
-			{
-				list.add(UnitConverterFactory.createConverter(fromUnit, toIntensityUnit,
-						calibration.getCameraCalibration().getBias(), gain));
-			}
-			else
-			{
-				// No bias so just duplicate the converter
-				list.add(list.get(0));
-			}
-			return list;
-		}
-		throw new ConversionException();
-	}
-
-	/**
 	 * Gets an angle converter to update values.
 	 * <p>
 	 * If the conversion is not possible then an exception is thrown.
@@ -338,37 +254,6 @@ public class CalibrationHelper
 		catch (ConversionException e)
 		{
 			return new IdentityTypeConverter<IntensityUnit>(null);
-		}
-	}
-
-	/**
-	 * Gets intensity converters to update values.
-	 * <p>
-	 * If the calibration is already in the given units or conversion is not possible
-	 * then an identity converter will be returned.
-	 * <p>
-	 * The returned list calibration has a converter with only the gain, and a second converter with the gain and bias.
-	 * If the bias is not available then the second converter is the same as the first.
-	 * <p>
-	 * If a converter if successfully created then the instance calibration will be updated.
-	 *
-	 * @param toIntensityUnit
-	 *            the intensity unit
-	 * @return the intensity converters (gain, gain + bias)
-	 */
-	public ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverterSafe(IntensityUnit toIntensityUnit)
-	{
-		try
-		{
-			return getDualIntensityConverter(toIntensityUnit);
-		}
-		catch (ConversionException e)
-		{
-			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
-			TypeConverter<IntensityUnit> c = new IdentityTypeConverter<IntensityUnit>(null);
-			list.add(c);
-			list.add(c);
-			return list;
 		}
 	}
 
@@ -443,38 +328,6 @@ public class CalibrationHelper
 		catch (ConversionException e)
 		{
 			return new IdentityTypeConverter<IntensityUnit>(null);
-		}
-	}
-
-	/**
-	 * Gets intensity converters to update values.
-	 * <p>
-	 * If the calibration is already in the given units or conversion is not possible
-	 * then an identity converter will be returned.
-	 * <p>
-	 * The returned list calibration has a converter with only the gain, and a second converter with the gain and bias.
-	 * If the bias is not available then the second converter is the same as the first.
-	 *
-	 * @param calibration
-	 *            the calibration
-	 * @param toIntensityUnit
-	 *            the intensity unit
-	 * @return the intensity converters (gain, gain + bias)
-	 */
-	public static ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverterSafe(Calibration calibration,
-			IntensityUnit toIntensityUnit)
-	{
-		try
-		{
-			return getDualIntensityConverter(calibration, toIntensityUnit);
-		}
-		catch (ConversionException e)
-		{
-			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
-			TypeConverter<IntensityUnit> c = new IdentityTypeConverter<IntensityUnit>(null);
-			list.add(c);
-			list.add(c);
-			return list;
 		}
 	}
 

@@ -928,6 +928,7 @@ public class Calibration implements Cloneable
 	 * @throws ConversionException
 	 *             if a converter cannot be created
 	 */
+	@Deprecated
 	public ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverter(IntensityUnit toIntensityUnit)
 	{
 		if (hasIntensityUnit() && hasBias())
@@ -993,6 +994,7 @@ public class Calibration implements Cloneable
 	 *            the intensity unit
 	 * @return the intensity converters (gain, gain + bias)
 	 */
+	@Deprecated
 	public ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverterSafe(IntensityUnit toIntensityUnit)
 	{
 		try

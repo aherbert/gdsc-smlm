@@ -29,41 +29,41 @@ public final class SMLMSettings {
      * A 2D Gaussian with the same standard deviation in X and Y dimensions
      * </pre>
      *
-     * <code>OneAxisGaussian2D = 0;</code>
+     * <code>ONE_AXIS_GAUSSIAN_2D = 0;</code>
      */
-    OneAxisGaussian2D(0),
+    ONE_AXIS_GAUSSIAN_2D(0),
     /**
      * <pre>
      * A 2D Gaussian with standard deviations in X and Y dimensions
      * </pre>
      *
-     * <code>TwoAxisGaussian2D = 1;</code>
+     * <code>TWO_AXIS_GAUSSIAN_2D = 1;</code>
      */
-    TwoAxisGaussian2D(1),
+    TWO_AXIS_GAUSSIAN_2D(1),
     /**
      * <pre>
      * A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
      * </pre>
      *
-     * <code>TwoAxisAndThetaGaussian2D = 2;</code>
+     * <code>TWO_AXIS_AND_THETA_GAUSSIAN_2D = 2;</code>
      */
-    TwoAxisAndThetaGaussian2D(2),
+    TWO_AXIS_AND_THETA_GAUSSIAN_2D(2),
     /**
      * <pre>
      * A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
      * </pre>
      *
-     * <code>AstigmaticGaussian2D = 3;</code>
+     * <code>ASTIGMATIC_GAUSSIAN_2D = 3;</code>
      */
-    AstigmaticGaussian2D(3),
+    ASTIGMATIC_GAUSSIAN_2D(3),
     /**
      * <pre>
      * A custom point spread function (PSF) 
      * </pre>
      *
-     * <code>Custom = 4;</code>
+     * <code>CUSTOM = 4;</code>
      */
-    Custom(4),
+    CUSTOM(4),
     UNRECOGNIZED(-1),
     ;
 
@@ -72,41 +72,41 @@ public final class SMLMSettings {
      * A 2D Gaussian with the same standard deviation in X and Y dimensions
      * </pre>
      *
-     * <code>OneAxisGaussian2D = 0;</code>
+     * <code>ONE_AXIS_GAUSSIAN_2D = 0;</code>
      */
-    public static final int OneAxisGaussian2D_VALUE = 0;
+    public static final int ONE_AXIS_GAUSSIAN_2D_VALUE = 0;
     /**
      * <pre>
      * A 2D Gaussian with standard deviations in X and Y dimensions
      * </pre>
      *
-     * <code>TwoAxisGaussian2D = 1;</code>
+     * <code>TWO_AXIS_GAUSSIAN_2D = 1;</code>
      */
-    public static final int TwoAxisGaussian2D_VALUE = 1;
+    public static final int TWO_AXIS_GAUSSIAN_2D_VALUE = 1;
     /**
      * <pre>
      * A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
      * </pre>
      *
-     * <code>TwoAxisAndThetaGaussian2D = 2;</code>
+     * <code>TWO_AXIS_AND_THETA_GAUSSIAN_2D = 2;</code>
      */
-    public static final int TwoAxisAndThetaGaussian2D_VALUE = 2;
+    public static final int TWO_AXIS_AND_THETA_GAUSSIAN_2D_VALUE = 2;
     /**
      * <pre>
      * A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
      * </pre>
      *
-     * <code>AstigmaticGaussian2D = 3;</code>
+     * <code>ASTIGMATIC_GAUSSIAN_2D = 3;</code>
      */
-    public static final int AstigmaticGaussian2D_VALUE = 3;
+    public static final int ASTIGMATIC_GAUSSIAN_2D_VALUE = 3;
     /**
      * <pre>
      * A custom point spread function (PSF) 
      * </pre>
      *
-     * <code>Custom = 4;</code>
+     * <code>CUSTOM = 4;</code>
      */
-    public static final int Custom_VALUE = 4;
+    public static final int CUSTOM_VALUE = 4;
 
 
     public final int getNumber() {
@@ -127,11 +127,11 @@ public final class SMLMSettings {
 
     public static PSFType forNumber(int value) {
       switch (value) {
-        case 0: return OneAxisGaussian2D;
-        case 1: return TwoAxisGaussian2D;
-        case 2: return TwoAxisAndThetaGaussian2D;
-        case 3: return AstigmaticGaussian2D;
-        case 4: return Custom;
+        case 0: return ONE_AXIS_GAUSSIAN_2D;
+        case 1: return TWO_AXIS_GAUSSIAN_2D;
+        case 2: return TWO_AXIS_AND_THETA_GAUSSIAN_2D;
+        case 3: return ASTIGMATIC_GAUSSIAN_2D;
+        case 4: return CUSTOM;
         default: return null;
       }
     }
@@ -1837,7 +1837,7 @@ public final class SMLMSettings {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (psfType_ != gdsc.smlm.data.config.SMLMSettings.PSFType.OneAxisGaussian2D.getNumber()) {
+      if (psfType_ != gdsc.smlm.data.config.SMLMSettings.PSFType.ONE_AXIS_GAUSSIAN_2D.getNumber()) {
         output.writeEnum(1, psfType_);
       }
       for (int i = 0; i < parameter_.size(); i++) {
@@ -1850,7 +1850,7 @@ public final class SMLMSettings {
       if (size != -1) return size;
 
       size = 0;
-      if (psfType_ != gdsc.smlm.data.config.SMLMSettings.PSFType.OneAxisGaussian2D.getNumber()) {
+      if (psfType_ != gdsc.smlm.data.config.SMLMSettings.PSFType.ONE_AXIS_GAUSSIAN_2D.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, psfType_);
       }
@@ -7448,19 +7448,19 @@ public final class SMLMSettings {
       "8\n\024intensityCalibration\030\003 \001(\0132\032.SMLM.Int" +
       "ensityCalibration\0222\n\021cameraCalibration\030\004" +
       " \001(\0132\027.SMLM.CameraCalibration\022,\n\016psfCali",
-      "bration\030\005 \001(\0132\024.SMLM.PSFCalibration*|\n\007P" +
-      "SFType\022\025\n\021OneAxisGaussian2D\020\000\022\025\n\021TwoAxis" +
-      "Gaussian2D\020\001\022\035\n\031TwoAxisAndThetaGaussian2" +
-      "D\020\002\022\030\n\024AstigmaticGaussian2D\020\003\022\n\n\006Custom\020" +
-      "\004*:\n\020PSFParameterUnit\022\014\n\010DISTANCE\020\000\022\r\n\tI" +
-      "NTENSITY\020\001\022\t\n\005ANGLE\020\002*+\n\nCameraType\022\t\n\005E" +
-      "MCCD\020\000\022\007\n\003CCD\020\001\022\t\n\005SCMOS\020\002*)\n\014DistanceUn" +
-      "it\022\t\n\005PIXEL\020\000\022\006\n\002UM\020\001\022\006\n\002NM\020\002*&\n\rIntensi" +
-      "tyUnit\022\n\n\006PHOTON\020\000\022\t\n\005COUNT\020\001*#\n\tAngleUn" +
-      "it\022\n\n\006RADIAN\020\000\022\n\n\006DEGREE\020\001*2\n\010TimeUnit\022\t",
-      "\n\005FRAME\020\000\022\n\n\006SECOND\020\001\022\017\n\013MILLISECOND\020\002B%" +
-      "\n\025gdsc.smlm.data.configB\014SMLMSettingsb\006p" +
-      "roto3"
+      "bration\030\005 \001(\0132\024.SMLM.PSFCalibration*\211\001\n\007" +
+      "PSFType\022\030\n\024ONE_AXIS_GAUSSIAN_2D\020\000\022\030\n\024TWO" +
+      "_AXIS_GAUSSIAN_2D\020\001\022\"\n\036TWO_AXIS_AND_THET" +
+      "A_GAUSSIAN_2D\020\002\022\032\n\026ASTIGMATIC_GAUSSIAN_2" +
+      "D\020\003\022\n\n\006CUSTOM\020\004*:\n\020PSFParameterUnit\022\014\n\010D" +
+      "ISTANCE\020\000\022\r\n\tINTENSITY\020\001\022\t\n\005ANGLE\020\002*+\n\nC" +
+      "ameraType\022\t\n\005EMCCD\020\000\022\007\n\003CCD\020\001\022\t\n\005SCMOS\020\002" +
+      "*)\n\014DistanceUnit\022\t\n\005PIXEL\020\000\022\006\n\002UM\020\001\022\006\n\002N" +
+      "M\020\002*&\n\rIntensityUnit\022\n\n\006PHOTON\020\000\022\t\n\005COUN" +
+      "T\020\001*#\n\tAngleUnit\022\n\n\006RADIAN\020\000\022\n\n\006DEGREE\020\001",
+      "*2\n\010TimeUnit\022\t\n\005FRAME\020\000\022\n\n\006SECOND\020\001\022\017\n\013M" +
+      "ILLISECOND\020\002B%\n\025gdsc.smlm.data.configB\014S" +
+      "MLMSettingsb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

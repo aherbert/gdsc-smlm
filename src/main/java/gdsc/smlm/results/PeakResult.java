@@ -260,7 +260,7 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Get the signal strength (i.e. the volume under the Gaussian peak, amplitude * 2 * pi * sx * sy)
+	 * Get the signal strength
 	 * 
 	 * @return The signal of the first peak
 	 */

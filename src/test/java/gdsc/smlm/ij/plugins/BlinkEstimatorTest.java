@@ -231,7 +231,7 @@ public class BlinkEstimatorTest
 
 		MemoryPeakResults results = new MemoryPeakResults();
 		results.setCalibration(new Calibration(pixelPitch, 1, msPerFrame));
-		results.setPSF(PSFHelper.create(PSFType.OneAxisGaussian2D));
+		results.setPSF(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
 		float b = 0, intensity, z = 0;
 		for (LocalisationModel l : localisations)
 		{

@@ -125,13 +125,13 @@ public class LoadLocalisations implements PlugIn
 			{
 				// Guess the PSF type from the first localisation
 				Localisation l = get(0);
-				PSFType psfType = PSFType.Custom;
+				PSFType psfType = PSFType.CUSTOM;
 				if (l.sx != -1)
 				{
-					psfType = PSFType.OneAxisGaussian2D;
+					psfType = PSFType.ONE_AXIS_GAUSSIAN_2D;
 					if (l.sy != -1)
 					{
-						psfType = PSFType.TwoAxisGaussian2D;
+						psfType = PSFType.TWO_AXIS_GAUSSIAN_2D;
 					}
 				}
 				results.setPSF(PSFHelper.create(psfType));
@@ -147,14 +147,14 @@ public class LoadLocalisations implements PlugIn
 					float[] params;
 					switch (psfType)
 					{
-						case Custom:
+						case CUSTOM:
 							params = PeakResult.createParams(0, intensity, x, y, z);
 							break;
-						case OneAxisGaussian2D:
+						case ONE_AXIS_GAUSSIAN_2D:
 							params = Gaussian2DPeakResultHelper.createOneAxisParams(0, intensity, x, y, z,
 									(float) l.sx);
 							break;
-						case TwoAxisGaussian2D:
+						case TWO_AXIS_GAUSSIAN_2D:
 							params = Gaussian2DPeakResultHelper.createTwoAxisParams(0, intensity, x, y, z, (float) l.sx,
 									(float) l.sy);
 							break;

@@ -1052,7 +1052,7 @@ public class PCPALMMolecules implements PlugIn
 
 		molecules = new ArrayList<Molecule>(nMolecules);
 		// Create some dummy results since the calibration is required for later analysis
-		results = new MemoryPeakResults(PSFHelper.create(PSFType.Custom));
+		results = new MemoryPeakResults(PSFHelper.create(PSFType.CUSTOM));
 		results.setCalibration(new gdsc.smlm.results.Calibration(nmPerPixel, 1, 100));
 		results.setSource(new NullSource("Molecule Simulation"));
 		results.begin();

@@ -299,7 +299,7 @@ public class ResultsManagerTest
 
 	private MemoryPeakResults extract(Spot[] spots, int channel, int slice, int position, int type)
 	{
-		MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.OneAxisGaussian2D));
+		MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
 		for (Spot spot : spots)
 		{
 			if (spot.getChannel() == channel && spot.getSlice() == slice && spot.getPos() == position &&

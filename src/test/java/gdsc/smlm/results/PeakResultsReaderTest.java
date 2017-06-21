@@ -483,6 +483,14 @@ public class PeakResultsReaderTest
 			boolean showEndFrame, boolean showId, boolean sort, boolean binary)
 	{
 		MemoryPeakResults out = createResults(200, showDeviations, showEndFrame, showId);
+		if (fileFormat == ResultsFileFormat.MALK)
+		{
+			Calibration cal = out.getCalibration();
+			cal.setDistanceUnit(DistanceUnit.NM);
+			cal.setIntensityUnit(IntensityUnit.PHOTON);
+			out.setPSF(PSFHelper.create(PSFType.CUSTOM));			
+		}
+		
 		String filename = createFile();
 
 		writeFile(sequential, fileFormat, showDeviations, showEndFrame, showId, sort, out, filename);
@@ -615,7 +623,7 @@ public class PeakResultsReaderTest
 		if (p1 != null)
 		{
 			Assert.assertNotNull("PSF", p2);
-			Assert.assertTrue("PSF nmPerPixel", p1.equals(p2));
+			Assert.assertTrue("PSF", p1.equals(p2));
 		}
 		else
 		{
@@ -627,7 +635,7 @@ public class PeakResultsReaderTest
 	{
 		double bias = rand.next();
 
-		MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.TwoAxisAndThetaGaussian2D));
+		MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
 		while (i-- > 0)
 		{
 			int startFrame = (int) (i * rand.next());

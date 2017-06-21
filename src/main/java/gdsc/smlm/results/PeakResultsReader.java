@@ -43,8 +43,9 @@ import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.PSF;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
-import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+//import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.utils.XmlUtils;
@@ -54,6 +55,19 @@ import gdsc.smlm.utils.XmlUtils;
  */
 public class PeakResultsReader
 {
+	// Set up to read two-axis (and theta) Gaussian 2D data into the current format
+	private final static int isx, isy, ia, nTwoAxis, nTwoAxisAndTheta;
+	static
+	{
+		PSF psf = PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
+		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+		isx = indices[0];
+		isy = indices[1];
+		ia = PSFHelper.getGaussian2DAngleIndex(psf);
+		nTwoAxis = PeakResult.STANDARD_PARAMETERS + 2;
+		nTwoAxisAndTheta = PeakResult.STANDARD_PARAMETERS + 3;
+	}
+
 	/** The columns to recognise in the ImageJ table results header */
 	private static String IMAGEJ_TABLE_RESULTS_HEADER = "origX\torigY\torigValue\tError\tNoise";
 
@@ -81,7 +95,7 @@ public class PeakResultsReader
 	private ResultOption[] options = null;
 
 	private boolean deviations, readEndFrame, readId, readSource;
-	private int smlmVersion = 1; // Assume the oldest
+	private int smlmVersion = 3; // Assume the current
 
 	public PeakResultsReader(String filename)
 	{
@@ -351,6 +365,8 @@ public class PeakResultsReader
 			{
 				if (format == FileFormat.RAPID_STORM)
 				{
+					calibration.setDistanceUnit(DistanceUnit.NM);
+
 					// RapidSTORM has a resolution attribute in the header in units of px m^-1
 					Pattern pattern = Pattern.compile("resolution=\"([^ ]+) px m");
 					Matcher match = pattern.matcher(header);
@@ -364,7 +380,6 @@ public class PeakResultsReader
 								final double nmPerPixel = (float) (1e9 / resolution);
 								calibration = new Calibration();
 								calibration.setNmPerPixel(nmPerPixel);
-								// Q. Where are the units stored since we could read them?
 							}
 						}
 						catch (NumberFormatException e)
@@ -400,6 +415,14 @@ public class PeakResultsReader
 						{
 							ex.printStackTrace();
 						}
+					}
+					
+					if (format == FileFormat.MALK)
+					{
+						if (calibration == null)
+							calibration = new Calibration();
+						calibration.setDistanceUnit(DistanceUnit.NM);
+						calibration.setIntensityUnit(IntensityUnit.PHOTON);
 					}
 				}
 			}
@@ -447,7 +470,7 @@ public class PeakResultsReader
 						case NSTORM:
 						case RAPID_STORM:
 							// We currently only support two axis data
-							psf = PSFHelper.create(PSFType.TwoAxisGaussian2D);
+							psf = PSFHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D);
 							break;
 
 						// Note: Older GDSC results were all TwoAxisAndTheta
@@ -455,7 +478,7 @@ public class PeakResultsReader
 						case SMLM_TABLE:
 						case SMLM_TEXT:
 							if (smlmVersion < 3)
-								psf = PSFHelper.create(PSFType.TwoAxisAndThetaGaussian2D);
+								psf = PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
 							break;
 
 						case TSF_BINARY:
@@ -464,7 +487,7 @@ public class PeakResultsReader
 
 						case MALK:
 							// Use the custom type with no additional PSF parameters
-							psf = PSFHelper.create(PSFType.Custom);
+							psf = PSFHelper.create(PSFType.CUSTOM);
 							break;
 
 						case UNKNOWN:
@@ -588,16 +611,16 @@ public class PeakResultsReader
 	{
 		switch (psf.getPsfType())
 		{
-			case TwoAxisAndThetaGaussian2D:
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
 				simplifyTwoAxisAndTheta(results);
 				break;
 
-			case TwoAxisGaussian2D:
+			case TWO_AXIS_GAUSSIAN_2D:
 				simplifyTwoAxis(results, false);
 				break;
 
-			case AstigmaticGaussian2D:
-			case OneAxisGaussian2D:
+			case ASTIGMATIC_GAUSSIAN_2D:
+			case ONE_AXIS_GAUSSIAN_2D:
 			case UNRECOGNIZED:
 			default:
 				break;
@@ -667,12 +690,12 @@ public class PeakResultsReader
 
 			// Otherwise this was a TwoAxisAndTheta with 1 column to remove 
 			// so it should be simplified
-			psfType = PSFType.TwoAxisGaussian2D;
+			psfType = PSFType.TWO_AXIS_GAUSSIAN_2D;
 		}
 		else
 		{
 			// sy is redundant so remove another column
-			psfType = PSFType.OneAxisGaussian2D;
+			psfType = PSFType.ONE_AXIS_GAUSSIAN_2D;
 			remove++;
 		}
 
@@ -715,15 +738,18 @@ public class PeakResultsReader
 
 		// Units were added in version 3
 		int nFields;
+		boolean gaussian2Dformat;
 		if (smlmVersion < 3)
 		{
 			nFields = 7;
+			gaussian2Dformat = true;
 			calibration.setIntensityUnit(IntensityUnit.COUNT);
 			calibration.setDistanceUnit(DistanceUnit.PIXEL);
 			calibration.setAngleUnit(AngleUnit.DEGREE);
 		}
 		else
 		{
+			gaussian2Dformat = false;
 			// The number of fields should be within the PSF object
 			nFields = new PeakResultsHelper(calibration, psf).getNames().length;
 		}
@@ -762,21 +788,27 @@ public class PeakResultsReader
 				int origX = readInt(buffer);
 				int origY = readInt(buffer);
 				float origValue = readFloat(buffer);
-				double chiSquared = readDouble(buffer);
+				double error = readDouble(buffer);
 				float noise = readFloat(buffer);
 				float[] params = readData(buffer, new float[nFields]);
 				float[] paramsStdDev = (deviations) ? readData(buffer, new float[nFields]) : null;
 
-				// Convert old binary format with the amplitude to signal
-				if (convert)
-					params[Gaussian2DFunction.SIGNAL] *= 2 * Math.PI * params[Gaussian2DFunction.X_SD] *
-							params[Gaussian2DFunction.Y_SD];
+				// Convert format which had the full Gaussian2D parameters array
+				if (gaussian2Dformat)
+				{
+					// Convert old binary format with the amplitude to signal
+					if (convert)
+						params[Gaussian2DFunction.SIGNAL] *= 2 * Math.PI * params[Gaussian2DFunction.X_SD] *
+								params[Gaussian2DFunction.Y_SD];
+					params = mapGaussian2DFormatParams(params);
+					paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+				}
 
 				if (readId || readEndFrame)
-					results.add(new ExtendedPeakResult(peak, origX, origY, origValue, chiSquared, noise, params,
+					results.add(new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
 							paramsStdDev, endPeak, id));
 				else
-					results.add(new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev));
+					results.add(new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev));
 
 				if (++c % 512 == 0)
 					showProgress(channel);
@@ -804,6 +836,32 @@ public class PeakResultsReader
 			}
 		}
 		return results;
+	}
+
+	private float[] mapGaussian2DFormatParams(float[] params)
+	{
+		final float[] p = mapGaussian2DFormat(params);
+		// New format does not have the bias
+		p[PeakResult.BACKGROUND] -= calibration.getBias();
+		return p;
+	}
+
+	private float[] mapGaussian2DFormatDeviations(float[] params)
+	{
+		return (params != null) ? mapGaussian2DFormat(params) : null;
+	}
+
+	private static float[] mapGaussian2DFormat(float[] params)
+	{
+		final float[] p = new float[nTwoAxisAndTheta];
+		p[PeakResult.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
+		p[PeakResult.INTENSITY] = params[Gaussian2DFunction.SIGNAL];
+		p[PeakResult.X] = params[Gaussian2DFunction.X_POSITION];
+		p[PeakResult.Y] = params[Gaussian2DFunction.Y_POSITION];
+		p[isx] = params[Gaussian2DFunction.X_SD];
+		p[isy] = params[Gaussian2DFunction.Y_SD];
+		p[ia] = params[Gaussian2DFunction.SHAPE];
+		return p;
 	}
 
 	private MemoryPeakResults createResults()
@@ -878,6 +936,10 @@ public class PeakResultsReader
 			calibration.setIntensityUnit(IntensityUnit.COUNT);
 			calibration.setDistanceUnit(DistanceUnit.PIXEL);
 			calibration.setAngleUnit(AngleUnit.DEGREE);
+
+			// Note that in older versions the background included the bias. 
+			// The bias is not included in the table and so the user will have to 
+			// add this manually. They will also have to add the gain.
 		}
 		else
 		{
@@ -997,7 +1059,7 @@ public class PeakResultsReader
 				int origX = scanner.nextInt();
 				int origY = scanner.nextInt();
 				float origValue = scanner.nextFloat();
-				double chiSquared = scanner.nextDouble();
+				double error = scanner.nextDouble();
 				float noise = scanner.nextFloat();
 				float signal = scanner.nextFloat(); // Ignored but must be read
 				for (int i = 0; i < params.length; i++)
@@ -1006,11 +1068,12 @@ public class PeakResultsReader
 				}
 				scanner.close();
 				params[Gaussian2DFunction.SIGNAL] = signal;
+				params = mapGaussian2DFormatParams(params);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, chiSquared, noise, params, null,
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
 							endPeak, id);
 				else
-					return new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, null);
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
 			}
 			else
 			{
@@ -1023,7 +1086,7 @@ public class PeakResultsReader
 				int origX = Integer.parseInt(fields[j++]);
 				int origY = Integer.parseInt(fields[j++]);
 				float origValue = Float.parseFloat(fields[j++]);
-				double chiSquared = Double.parseDouble(fields[j++]);
+				double error = Double.parseDouble(fields[j++]);
 				float noise = Float.parseFloat(fields[j++]);
 				float signal = Float.parseFloat(fields[j++]);
 				for (int i = 0; i < params.length; i++)
@@ -1031,11 +1094,12 @@ public class PeakResultsReader
 					params[i] = Float.parseFloat(fields[j++]);
 				}
 				params[Gaussian2DFunction.SIGNAL] = signal;
+				params = mapGaussian2DFormatParams(params);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, chiSquared, noise, params, null,
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
 							endPeak, id);
 				else
-					return new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, null);
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
 			}
 		}
 		catch (InputMismatchException e)
@@ -1075,7 +1139,7 @@ public class PeakResultsReader
 				int origX = scanner.nextInt();
 				int origY = scanner.nextInt();
 				float origValue = scanner.nextFloat();
-				double chiSquared = scanner.nextDouble();
+				double error = scanner.nextDouble();
 				float noise = scanner.nextFloat();
 				float signal = scanner.nextFloat(); // Ignored but must be read
 				for (int i = 0; i < params.length; i++)
@@ -1085,11 +1149,13 @@ public class PeakResultsReader
 				}
 				params[Gaussian2DFunction.SIGNAL] = signal;
 				scanner.close();
+				params = mapGaussian2DFormatParams(params);
+				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, chiSquared, noise, params,
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
 							paramsStdDev, endPeak, id);
 				else
-					return new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev);
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 			}
 			else
 			{
@@ -1104,7 +1170,7 @@ public class PeakResultsReader
 				int origX = Integer.parseInt(fields[j++]);
 				int origY = Integer.parseInt(fields[j++]);
 				float origValue = Float.parseFloat(fields[j++]);
-				double chiSquared = Double.parseDouble(fields[j++]);
+				double error = Double.parseDouble(fields[j++]);
 				float noise = Float.parseFloat(fields[j++]);
 				float signal = Float.parseFloat(fields[j++]);
 				for (int i = 0; i < params.length; i++)
@@ -1113,11 +1179,13 @@ public class PeakResultsReader
 					paramsStdDev[i] = Float.parseFloat(fields[j++]);
 				}
 				params[Gaussian2DFunction.SIGNAL] = signal;
+				params = mapGaussian2DFormatParams(params);
+				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, chiSquared, noise, params,
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
 							paramsStdDev, endPeak, id);
 				else
-					return new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev);
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 			}
 		}
 		catch (InputMismatchException e)
@@ -1137,12 +1205,159 @@ public class PeakResultsReader
 
 	private PeakResult createPeakResultV2(String line)
 	{
-		return createPeakResultV3(line, 7);
+		try
+		{
+			float[] params = new float[7];
+
+			if (isUseScanner())
+			{
+				// Code using a Scanner
+				Scanner scanner = new Scanner(line);
+				scanner.useDelimiter(tabPattern);
+				scanner.useLocale(Locale.US);
+				int id = 0, endPeak = 0;
+				if (readId)
+					id = scanner.nextInt();
+				int peak = scanner.nextInt();
+				if (readEndFrame)
+					endPeak = scanner.nextInt();
+				int origX = scanner.nextInt();
+				int origY = scanner.nextInt();
+				float origValue = scanner.nextFloat();
+				double error = scanner.nextDouble();
+				float noise = scanner.nextFloat();
+				for (int i = 0; i < params.length; i++)
+				{
+					params[i] = scanner.nextFloat();
+				}
+				scanner.close();
+				params = mapGaussian2DFormatParams(params);
+				if (readId || readEndFrame)
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
+							endPeak, id);
+				else
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
+			}
+			else
+			{
+				// Code using split and parse
+				String[] fields = tabPattern.split(line);
+				int j = 0;
+				int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
+				int peak = Integer.parseInt(fields[j++]);
+				int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
+				int origX = Integer.parseInt(fields[j++]);
+				int origY = Integer.parseInt(fields[j++]);
+				float origValue = Float.parseFloat(fields[j++]);
+				double error = Double.parseDouble(fields[j++]);
+				float noise = Float.parseFloat(fields[j++]);
+				for (int i = 0; i < params.length; i++)
+				{
+					params[i] = Float.parseFloat(fields[j++]);
+				}
+				params = mapGaussian2DFormatParams(params);
+				if (readId || readEndFrame)
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
+							endPeak, id);
+				else
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
+			}
+		}
+		catch (InputMismatchException e)
+		{
+		}
+		catch (NoSuchElementException e)
+		{
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+		}
+		catch (NumberFormatException e)
+		{
+		}
+		return null;
 	}
 
 	private PeakResult createPeakResultDeviationsV2(String line)
 	{
-		return createPeakResultDeviationsV3(line, 7);
+		try
+		{
+			float[] params = new float[7];
+			float[] paramsStdDev = new float[7];
+
+			if (isUseScanner())
+			{
+				// Code using a Scanner
+				Scanner scanner = new Scanner(line);
+				scanner.useDelimiter(tabPattern);
+				scanner.useLocale(Locale.US);
+				int id = 0, endPeak = 0;
+				if (readId)
+					id = scanner.nextInt();
+				int peak = scanner.nextInt();
+				if (readEndFrame)
+					endPeak = scanner.nextInt();
+				int origX = scanner.nextInt();
+				int origY = scanner.nextInt();
+				float origValue = scanner.nextFloat();
+				double error = scanner.nextDouble();
+				float noise = scanner.nextFloat();
+				for (int i = 0; i < params.length; i++)
+				{
+					params[i] = scanner.nextFloat();
+					paramsStdDev[i] = scanner.nextFloat();
+				}
+				scanner.close();
+				params = mapGaussian2DFormatParams(params);
+				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+				if (readId || readEndFrame)
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
+							paramsStdDev, endPeak, id);
+				else
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
+			}
+			else
+			{
+				// JUnit test shows this is faster than the scanner
+
+				// Code using split and parse
+				String[] fields = tabPattern.split(line);
+				int j = 0;
+				int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
+				int peak = Integer.parseInt(fields[j++]);
+				int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
+				int origX = Integer.parseInt(fields[j++]);
+				int origY = Integer.parseInt(fields[j++]);
+				float origValue = Float.parseFloat(fields[j++]);
+				double error = Double.parseDouble(fields[j++]);
+				float noise = Float.parseFloat(fields[j++]);
+				for (int i = 0; i < params.length; i++)
+				{
+					params[i] = Float.parseFloat(fields[j++]);
+					paramsStdDev[i] = Float.parseFloat(fields[j++]);
+				}
+				params = mapGaussian2DFormatParams(params);
+				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+				if (readId || readEndFrame)
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
+							paramsStdDev, endPeak, id);
+				else
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
+			}
+		}
+		catch (InputMismatchException e)
+		{
+		}
+		catch (NoSuchElementException e)
+		{
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+		}
+		catch (NumberFormatException e)
+		{
+		}
+		return null;
 	}
 
 	private PeakResult createPeakResultV3(String line, int nFields)
@@ -1166,7 +1381,7 @@ public class PeakResultsReader
 				int origX = scanner.nextInt();
 				int origY = scanner.nextInt();
 				float origValue = scanner.nextFloat();
-				double chiSquared = scanner.nextDouble();
+				double error = scanner.nextDouble();
 				float noise = scanner.nextFloat();
 				for (int i = 0; i < params.length; i++)
 				{
@@ -1174,10 +1389,10 @@ public class PeakResultsReader
 				}
 				scanner.close();
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, chiSquared, noise, params, null,
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
 							endPeak, id);
 				else
-					return new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, null);
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
 			}
 			else
 			{
@@ -1190,17 +1405,17 @@ public class PeakResultsReader
 				int origX = Integer.parseInt(fields[j++]);
 				int origY = Integer.parseInt(fields[j++]);
 				float origValue = Float.parseFloat(fields[j++]);
-				double chiSquared = Double.parseDouble(fields[j++]);
+				double error = Double.parseDouble(fields[j++]);
 				float noise = Float.parseFloat(fields[j++]);
 				for (int i = 0; i < params.length; i++)
 				{
 					params[i] = Float.parseFloat(fields[j++]);
 				}
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, chiSquared, noise, params, null,
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
 							endPeak, id);
 				else
-					return new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, null);
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
 			}
 		}
 		catch (InputMismatchException e)
@@ -1240,7 +1455,7 @@ public class PeakResultsReader
 				int origX = scanner.nextInt();
 				int origY = scanner.nextInt();
 				float origValue = scanner.nextFloat();
-				double chiSquared = scanner.nextDouble();
+				double error = scanner.nextDouble();
 				float noise = scanner.nextFloat();
 				for (int i = 0; i < params.length; i++)
 				{
@@ -1249,10 +1464,10 @@ public class PeakResultsReader
 				}
 				scanner.close();
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, chiSquared, noise, params,
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
 							paramsStdDev, endPeak, id);
 				else
-					return new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev);
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 			}
 			else
 			{
@@ -1267,7 +1482,7 @@ public class PeakResultsReader
 				int origX = Integer.parseInt(fields[j++]);
 				int origY = Integer.parseInt(fields[j++]);
 				float origValue = Float.parseFloat(fields[j++]);
-				double chiSquared = Double.parseDouble(fields[j++]);
+				double error = Double.parseDouble(fields[j++]);
 				float noise = Float.parseFloat(fields[j++]);
 				for (int i = 0; i < params.length; i++)
 				{
@@ -1275,10 +1490,10 @@ public class PeakResultsReader
 					paramsStdDev[i] = Float.parseFloat(fields[j++]);
 				}
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, chiSquared, noise, params,
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
 							paramsStdDev, endPeak, id);
 				else
-					return new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev);
+					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 			}
 		}
 		catch (InputMismatchException e)
@@ -1563,6 +1778,9 @@ public class PeakResultsReader
 			params[Gaussian2DFunction.SIGNAL] *= 2 * Math.PI * params[Gaussian2DFunction.X_SD] *
 					params[Gaussian2DFunction.Y_SD];
 
+			params = mapGaussian2DFormatParams(params);
+			paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+
 			if (readId || readEndFrame)
 				return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
 						endPeak, id);
@@ -1635,6 +1853,10 @@ public class PeakResultsReader
 					paramsStdDev[i] = scanner.nextFloat();
 			}
 			scanner.close();
+
+			params = mapGaussian2DFormatParams(params);
+			paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
+
 			if (readId || readEndFrame)
 				return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
 						endPeak, id);
@@ -1836,32 +2058,22 @@ public class PeakResultsReader
 			final float sy2 = scanner.nextFloat();
 			@SuppressWarnings("unused")
 			final float kernelImprovement = scanner.nextFloat();
-			final double chiSquared = scanner.nextDouble();
+			final double error = scanner.nextDouble();
 			scanner.close();
 
 			// Convert from pm^2 to nm
 			float sx = (float) (Math.sqrt(sx2) * 1000);
 			float sy = (float) (Math.sqrt(sy2) * 1000);
 
-			// If calibration was found convert to pixels
-			if (calibration != null)
-			{
-				final double nmPerPixel = calibration.getNmPerPixel();
-				x /= nmPerPixel;
-				y /= nmPerPixel;
-				sx /= nmPerPixel;
-				sy /= nmPerPixel;
-			}
-
-			float[] params = new float[7];
-			params[Gaussian2DFunction.SIGNAL] = signal;
-			params[Gaussian2DFunction.X_POSITION] = x;
-			params[Gaussian2DFunction.Y_POSITION] = y;
-			params[Gaussian2DFunction.X_SD] = sx;
-			params[Gaussian2DFunction.Y_SD] = sy;
+			float[] params = new float[nTwoAxis];
+			params[PeakResult.INTENSITY] = signal;
+			params[PeakResult.X] = x;
+			params[PeakResult.Y] = y;
+			params[isx] = sx;
+			params[isy] = sy;
 
 			// Store the signal as the original value
-			return new PeakResult(peak, (int) x, (int) y, signal, chiSquared, 0.0f, params, null);
+			return new PeakResult(peak, (int) x, (int) y, signal, error, 0.0f, params, null);
 		}
 		catch (InputMismatchException e)
 		{
@@ -1939,9 +2151,9 @@ public class PeakResultsReader
 				if (p.getFrame() == p.getEndFrame())
 				{
 					float height = p.origValue;
-					float intensity = p.params[Gaussian2DFunction.SIGNAL];
-					float sd0 = p.params[Gaussian2DFunction.X_SD];
-					float sd1 = p.params[Gaussian2DFunction.Y_SD];
+					float intensity = p.params[PeakResult.INTENSITY];
+					float sd0 = p.params[isx];
+					float sd1 = p.params[isy];
 					pixelPitch.add(Math.sqrt(height * twoPi * sd0 * sd1 / intensity));
 					// Stop when we have enough for a good guess
 					return (pixelPitch.getN() > 100);
@@ -2063,12 +2275,12 @@ public class PeakResultsReader
 			// Area = Height * 2 * pi * (Width / (pixel_pitch*2) )^2
 			// => Pixel_pitch = 0.5 * Width / sqrt(Area / (Height * 2 * pi))
 
-			float[] params = new float[7];
-			params[Gaussian2DFunction.BACKGROUND] = bg;
+			float[] params = new float[nTwoAxis];
+			params[PeakResult.BACKGROUND] = bg;
 			//params[Gaussian2DFunction.ANGLE] = ax;
-			params[Gaussian2DFunction.SIGNAL] = area;
-			params[Gaussian2DFunction.X_POSITION] = xc;
-			params[Gaussian2DFunction.Y_POSITION] = yc;
+			params[PeakResult.INTENSITY] = area;
+			params[PeakResult.X] = xc;
+			params[PeakResult.Y] = yc;
 
 			// Convert width (2*SD) to SD
 			width /= 2f;
@@ -2076,8 +2288,8 @@ public class PeakResultsReader
 			// Convert to separate XY widths using the axial ratio
 			if (ax == 1)
 			{
-				params[Gaussian2DFunction.X_SD] = width;
-				params[Gaussian2DFunction.Y_SD] = width;
+				params[isx] = width;
+				params[isy] = width;
 			}
 			else
 			{
@@ -2086,8 +2298,8 @@ public class PeakResultsReader
 					ax = 1.0f / ax;
 				double a = Math.sqrt(ax);
 
-				params[Gaussian2DFunction.X_SD] = (float) (width * a);
-				params[Gaussian2DFunction.Y_SD] = (float) (width / a);
+				params[isx] = (float) (width * a);
+				params[isy] = (float) (width / a);
 			}
 
 			// Store the signal as the original value
@@ -2213,10 +2425,7 @@ public class PeakResultsReader
 	{
 		try
 		{
-			float[] params = new float[7];
-
-			// To avoid problems handling the data
-			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = 1;
+			float[] params = new float[PeakResult.STANDARD_PARAMETERS];
 
 			if (isUseScanner())
 			{
@@ -2224,10 +2433,10 @@ public class PeakResultsReader
 				Scanner scanner = new Scanner(line);
 				scanner.useDelimiter(whitespacePattern);
 				scanner.useLocale(Locale.US);
-				params[Gaussian2DFunction.X_POSITION] = scanner.nextFloat();
-				params[Gaussian2DFunction.Y_POSITION] = scanner.nextFloat();
+				params[PeakResult.X] = scanner.nextFloat();
+				params[PeakResult.Y] = scanner.nextFloat();
 				int peak = scanner.nextInt();
-				params[Gaussian2DFunction.SIGNAL] = scanner.nextFloat();
+				params[PeakResult.INTENSITY] = scanner.nextFloat();
 				scanner.close();
 
 				return new PeakResult(peak, 0, 0, 0, 0, 0, params, null);
@@ -2237,10 +2446,10 @@ public class PeakResultsReader
 				// Code using split and parse
 				String[] fields = whitespacePattern.split(line);
 
-				params[Gaussian2DFunction.X_POSITION] = Float.parseFloat(fields[0]);
-				params[Gaussian2DFunction.Y_POSITION] = Float.parseFloat(fields[1]);
+				params[PeakResult.X] = Float.parseFloat(fields[0]);
+				params[PeakResult.Y] = Float.parseFloat(fields[1]);
 				int peak = Integer.parseInt(fields[2]);
-				params[Gaussian2DFunction.SIGNAL] = Float.parseFloat(fields[3]);
+				params[PeakResult.INTENSITY] = Float.parseFloat(fields[3]);
 
 				return new PeakResult(peak, 0, 0, 0, 0, 0, params, null);
 			}

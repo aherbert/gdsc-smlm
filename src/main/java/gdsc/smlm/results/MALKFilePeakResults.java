@@ -165,7 +165,7 @@ public class MALKFilePeakResults extends FilePeakResults
 		
 		// The data loses PSF information so reset this to a custom type with 
 		// no additional parameters.
-		setPSF(PSFHelper.create(PSFType.Custom));
+		setPSF(PSFHelper.create(PSFType.CUSTOM));
 
 		super.begin();
 

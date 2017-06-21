@@ -1812,7 +1812,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setSortAfterEnd(true);
 		results.begin();
 		// TODO - Add better support for the type of PSF that is being drawn
-		results.setPSF(PSFHelper.create(PSFType.TwoAxisGaussian2D));
+		results.setPSF(PSFHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D));
 
 		maxT = localisationSets.get(localisationSets.size() - 1).getTime();
 

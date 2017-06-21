@@ -222,7 +222,7 @@ public class DiffusionRateTest implements PlugIn
 		Calibration cal = new Calibration(settings.pixelPitch, 1, 1000.0 / settings.stepsPerSecond);
 		results.setCalibration(cal);
 		results.setName(TITLE);
-		results.setPSF(PSFHelper.create(PSFType.Custom));
+		results.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		int peak = 0;
 		// Store raw coordinates
 		ArrayList<Point> points = new ArrayList<Point>(totalSteps);
@@ -918,7 +918,7 @@ public class DiffusionRateTest implements PlugIn
 		Calibration cal = new Calibration(settings.pixelPitch, 1, myAggregateSteps * 1000.0 / settings.stepsPerSecond);
 		results.setCalibration(cal);
 		results.setName(TITLE + " Aggregated");
-		results.setPSF(PSFHelper.create(PSFType.Custom));
+		results.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		MemoryPeakResults.addResults(results);
 		lastSimulatedDataset[1] = results.getName();
 		int id = 0;

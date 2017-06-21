@@ -69,12 +69,12 @@ public class PSFHelper
 			throw new ConfigurationException("psf is null");
 		switch (psf.getPsfType())
 		{
-			case OneAxisGaussian2D:
-			case AstigmaticGaussian2D:
-			case TwoAxisAndThetaGaussian2D:
-			case TwoAxisGaussian2D:
+			case ONE_AXIS_GAUSSIAN_2D:
+			case ASTIGMATIC_GAUSSIAN_2D:
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
+			case TWO_AXIS_GAUSSIAN_2D:
 				return true;
-			case Custom:
+			case CUSTOM:
 			case UNRECOGNIZED:
 			default:
 				break;
@@ -100,13 +100,13 @@ public class PSFHelper
 			throw new ConfigurationException("psf is null");
 		switch (psf.getPsfType())
 		{
-			case OneAxisGaussian2D:
+			case ONE_AXIS_GAUSSIAN_2D:
 				return new int[] { PeakResult.STANDARD_PARAMETERS, PeakResult.STANDARD_PARAMETERS };
-			case AstigmaticGaussian2D:
-			case TwoAxisAndThetaGaussian2D:
-			case TwoAxisGaussian2D:
+			case ASTIGMATIC_GAUSSIAN_2D:
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
+			case TWO_AXIS_GAUSSIAN_2D:
 				return new int[] { PeakResult.STANDARD_PARAMETERS, PeakResult.STANDARD_PARAMETERS + 1 };
-			case Custom:
+			case CUSTOM:
 			case UNRECOGNIZED:
 			default:
 				break;
@@ -132,7 +132,7 @@ public class PSFHelper
 			throw new ConfigurationException("psf is null");
 		switch (psf.getPsfType())
 		{
-			case TwoAxisAndThetaGaussian2D:
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
 				return PeakResult.STANDARD_PARAMETERS + 2;
 			default:
 				break;
@@ -181,20 +181,20 @@ public class PSFHelper
 		List<PSFParameter> list = psf.getParameterList();
 		switch (psf.getPsfType())
 		{
-			case OneAxisGaussian2D:
+			case ONE_AXIS_GAUSSIAN_2D:
 				return checkParameters(sxParameters, list);
 
-			case AstigmaticGaussian2D:
-			case TwoAxisGaussian2D:
+			case ASTIGMATIC_GAUSSIAN_2D:
+			case TWO_AXIS_GAUSSIAN_2D:
 				return checkParameters(sxsyParameters, list);
 
-			case TwoAxisAndThetaGaussian2D:
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
 				return checkParameters(sxsyaParameters, list);
 
 			case UNRECOGNIZED:
 				throw new ConfigurationException("psf is not recognised");
 
-			case Custom:
+			case CUSTOM:
 			default:
 				break;
 		}
@@ -218,20 +218,20 @@ public class PSFHelper
 
 		switch (psf.getPsfType())
 		{
-			case OneAxisGaussian2D:
+			case ONE_AXIS_GAUSSIAN_2D:
 				return 1;
 
-			case AstigmaticGaussian2D:
-			case TwoAxisGaussian2D:
+			case ASTIGMATIC_GAUSSIAN_2D:
+			case TWO_AXIS_GAUSSIAN_2D:
 				return 2;
 
-			case TwoAxisAndThetaGaussian2D:
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
 				return 3;
 
 			case UNRECOGNIZED:
 				throw new ConfigurationException("psf is not recognised");
 
-			case Custom:
+			case CUSTOM:
 			default:
 				return psf.getParameterCount();
 		}

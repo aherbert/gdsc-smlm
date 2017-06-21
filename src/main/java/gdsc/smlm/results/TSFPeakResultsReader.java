@@ -252,7 +252,7 @@ public class TSFPeakResultsReader
 		final boolean filterSlice = slice > 0;
 
 		// Set up to read two-axis and theta data
-		PSF psf = PSFHelper.create(PSFType.TwoAxisAndThetaGaussian2D);
+		PSF psf = PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
 		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 		final int isx = indices[0];
 		final int isy = indices[1];
@@ -473,13 +473,13 @@ public class TSFPeakResultsReader
 			switch (spotList.getFitMode())
 			{
 				case ONEAXIS:
-					results.setPSF(PSFHelper.create(PSFType.OneAxisGaussian2D));
+					results.setPSF(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
 					break;
 				case TWOAXIS:
-					results.setPSF(PSFHelper.create(PSFType.TwoAxisGaussian2D));
+					results.setPSF(PSFHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D));
 					break;
 				case TWOAXISANDTHETA:
-					results.setPSF(PSFHelper.create(PSFType.TwoAxisAndThetaGaussian2D));
+					results.setPSF(PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
 					break;
 				default:
 					break;

@@ -18,7 +18,7 @@ public class SMLMSettingsTest
 	{
 		SMLMSettings.PSF.Builder psfBuilder = SMLMSettings.PSF.newBuilder();
 		PSFParameter.Builder psfParamBuilder = SMLMSettings.PSFParameter.newBuilder();
-		psfBuilder.setPsfType(PSFType.TwoAxisAndThetaGaussian2D);
+		psfBuilder.setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
 		psfParamBuilder.setName("X SD");
 		psfParamBuilder.setUnit(PSFParameterUnit.DISTANCE);
 		psfBuilder.addParameter(psfParamBuilder);
