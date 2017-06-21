@@ -171,7 +171,7 @@ public class SplitResults implements PlugIn
 		i.reset();
 		for (int object = (nonMaskDataset) ? 0 : 1; object <= maxObject; object++)
 		{
-			if (!resultsSet[object].isEmpty())
+			if (resultsSet[object].isNotEmpty())
 			{
 				MemoryPeakResults.addResults(resultsSet[object]);
 				i.increment();

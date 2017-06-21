@@ -813,6 +813,16 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Checks if is not empty.
+	 *
+	 * @return True if not empty
+	 */
+	public boolean isNotEmpty()
+	{
+		return size() != 0;
+	}
+
+	/**
 	 * Checks for background. At least one result must have a non-zero background.
 	 *
 	 * @return true, if successful

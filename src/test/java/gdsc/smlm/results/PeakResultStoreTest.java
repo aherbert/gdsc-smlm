@@ -38,7 +38,8 @@ public class PeakResultStoreTest
 		PeakResult[] list = new PeakResult[20];
 		int size = 0;
 
-		Assert.assertEquals(size, store.size());
+		Assert.assertEquals(size, store.size());		
+		Assert.assertEquals(size, store.toArray().length);
 
 		// Can store data in order
 		for (int i = 0; i < 10; i++)

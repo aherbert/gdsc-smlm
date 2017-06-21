@@ -170,7 +170,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 	public void trimToSize()
 	{
 		if (size < results.length)
-			results = Arrays.copyOf(results, size);
+			results = toArray();
 	}
 
 	/*
