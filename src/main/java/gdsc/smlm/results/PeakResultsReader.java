@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -44,6 +45,7 @@ import gdsc.smlm.data.config.SMLMSettings.PSF;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.utils.XmlUtils;
 
@@ -570,10 +572,136 @@ public class PeakResultsReader
 		{
 			results.trimToSize();
 
+			if (psf != null)
+				simplifyPSF(results);
+
 			// Convert to the preferred units if possible
 			results.convertToPreferredUnits();
 		}
 		return results;
+	}
+
+	private void simplifyPSF(MemoryPeakResults results)
+	{
+		switch (psf.getPsfType())
+		{
+			case TwoAxisAndThetaGaussian2D:
+				simplifyTwoAxisAndTheta(results);
+				break;
+
+			case TwoAxisGaussian2D:
+				simplifyTwoAxis(results, false);
+				break;
+
+			case AstigmaticGaussian2D:
+			case OneAxisGaussian2D:
+			case UNRECOGNIZED:
+			default:
+				break;
+		}
+	}
+
+	/**
+	 * Simplify two axis and theta Gaussian 2D data.
+	 *
+	 * @param results
+	 *            the results
+	 */
+	private void simplifyTwoAxisAndTheta(MemoryPeakResults results)
+	{
+		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+		final int isx = indices[0];
+		final int isy = indices[1];
+		final int ia = PSFHelper.getGaussian2DAngleIndex(psf);
+
+		// Determine if the angle is non-zero with asymmetric widths 
+		if (results.forEach(new PeakResultProcedureX()
+		{
+			public boolean execute(PeakResult peakResult)
+			{
+				return (peakResult.params[ia] != 0 && peakResult.params[isx] != peakResult.params[isy]);
+			}
+		}))
+		{
+			// Nothing to simplify
+			return;
+		}
+
+		simplifyTwoAxis(results, true);
+	}
+
+	/**
+	 * Simplify two axis Gaussian 2D data.
+	 *
+	 * @param results
+	 *            the results
+	 * @param removeTheta
+	 *            the remove theta flag
+	 */
+	private void simplifyTwoAxis(MemoryPeakResults results, boolean removeTheta)
+	{
+		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+		final int isx = indices[0];
+		final int isy = indices[1];
+
+		// Columns to remove
+		int remove = (removeTheta) ? 1 : 0;
+		// New PSF type
+		PSFType psfType;
+
+		// Determine if sy is redundant
+		if (results.forEach(new PeakResultProcedureX()
+		{
+			public boolean execute(PeakResult peakResult)
+			{
+				return (peakResult.params[isx] != peakResult.params[isy]);
+			}
+		}))
+		{
+			if (!removeTheta)
+				// Already a TwoAxis Gaussian
+				return;
+
+			// Otherwise this was a TwoAxisAndTheta with 1 column to remove 
+			// so it should be simplified
+			psfType = PSFType.TwoAxisGaussian2D;
+		}
+		else
+		{
+			// sy is redundant so remove another column
+			psfType = PSFType.OneAxisGaussian2D;
+			remove++;
+		}
+
+		// Update the PSF
+		PSF.Builder builder = psf.toBuilder();
+		builder.setPsfType(psfType);
+		results.setPSF(psf = builder.build());
+
+		// Update the results.
+		// We can directly manipulate the params array
+		final int newLength = results.get(0).params.length - remove;
+		if (!deviations)
+		{
+			results.forEach(new PeakResultProcedure()
+			{
+				public void execute(PeakResult peakResult)
+				{
+					peakResult.params = Arrays.copyOf(peakResult.params, newLength);
+				}
+			});
+		}
+		else
+		{
+			results.forEach(new PeakResultProcedure()
+			{
+				public void execute(PeakResult peakResult)
+				{
+					peakResult.params = Arrays.copyOf(peakResult.params, newLength);
+					peakResult.paramsStdDev = Arrays.copyOf(peakResult.paramsStdDev, newLength);
+				}
+			});
+		}
 	}
 
 	private int position;
