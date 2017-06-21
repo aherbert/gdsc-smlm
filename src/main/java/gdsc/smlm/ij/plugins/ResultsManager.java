@@ -14,14 +14,25 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
-import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.ij.IJImageSource;
@@ -40,6 +51,7 @@ import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.FixedPeakResultList;
 import gdsc.smlm.results.MALKFilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -186,7 +198,7 @@ public class ResultsManager implements PlugIn
 			}
 
 			SummariseResults.clearSummaryTable();
-			IJ.log(String.format("Cleared %s (%s, %s)", count, sets, memory));
+			Utils.log("Cleared %s (%s, %s)", count, sets, memory);
 			return;
 		}
 
@@ -202,8 +214,25 @@ public class ResultsManager implements PlugIn
 			return;
 		}
 
+		IJ.showStatus("Loaded " + Utils.pleural(results.size(), "result"));
+
+		boolean saved = false;
 		if (resultsSettings.resultsInMemory && fileInput)
+		{
 			MemoryPeakResults.addResults(results);
+			saved = true;
+		}
+
+		if (!resultsSettings.showResultsTable && resultsSettings.getResultsImage() == ResultsImage.NONE &&
+				Utils.isNullOrEmpty(resultsSettings.resultsFilename))
+		{
+			// No outputs. Error if results were not saved to memory
+			if (!saved)
+			{
+				IJ.error(TITLE, "No output selected");
+			}
+			return;
+		}
 
 		Rectangle bounds = results.getBounds(true);
 		boolean showDeviations = resultsSettings.showDeviations && canShowDeviations(results);
@@ -222,79 +251,54 @@ public class ResultsManager implements PlugIn
 		addImageResults(outputList, results.getName(), bounds, results.getNmPerPixel(), results.getGain());
 		addFileResults(outputList, showDeviations, showEndFrame, showId);
 
-		if (outputList.numberOfOutputs() == 0)
+		IJ.showStatus("Processing outputs ...");
+
+		// Reduce to single object for speed
+		final PeakResults output = (outputList.numberOfOutputs() == 1) ? outputList.toArray()[0] : outputList;
+
+		output.begin();
+
+		// Note: We could add a batch iterator to the MemoryPeakResults.
+		// However the speed increase will be marginal as the main time
+		// taken is in processing the outputs.
+
+		// Process in batches to provide progress
+		final Counter progress = new Counter();
+		final int totalProgress = results.size();
+		final int batchSize = Math.max(100, totalProgress / 10);
+		final FixedPeakResultList batch = new FixedPeakResultList(batchSize);
+		IJ.showProgress(0);
+		results.forEach(new PeakResultProcedureX()
 		{
-			// Error if results were loaded since we have no outputs
-			if (!(resultsSettings.resultsInMemory && fileInput))
+			public boolean execute(PeakResult result)
 			{
-				IJ.error(TITLE, "No output selected");
-				return;
-			}
-		}
-		else
-		{
-			IJ.showStatus("Processing outputs ...");
-
-			// Reduce to single object for speed
-			final PeakResults output = (outputList.numberOfOutputs() == 1) ? outputList.toArray()[0] : outputList;
-
-			output.begin();
-
-			// Note: We could add a batch iterator to the MemoryPeakResults.
-			// However the speed increase will be marginal as the main time
-			// taken is in processing the outputs.
-
-			// Process in batches to provide progress
-			final Counter progress = new Counter();
-			final int totalProgress = results.size();
-			final int stepProgress = Utils.getProgressInterval(totalProgress);
-			final TurboList<PeakResult> batch = new TurboList<PeakResult>(stepProgress);
-			results.forEach(new PeakResultProcedureX()
-			{
-				public boolean execute(PeakResult result)
+				batch.add(result);
+				if (batch.size == batchSize)
 				{
-					if (progress.getAndIncrement() % stepProgress == 0)
+					if (IJ.escapePressed())
 					{
-						IJ.showProgress(progress.getCount() - 1, totalProgress);
+						batch.clear();
+						return true;
 					}
-					batch.addf(result);
-
-					if (batch.size() == stepProgress)
-					{
-						output.addAll(batch);
-						batch.clearf();
-						if (isInterrupted())
-							return true;
-					}
-					return false;
+					output.addAll(batch.results);
+					batch.clear();
+					IJ.showProgress(progress.incrementAndGet(batchSize), totalProgress);
 				}
-			});
+				return false;
+			}
+		});
 
-			// Will be empty if interrupted
-			if (!batch.isEmpty())
-				output.addAll(batch);
+		// Will be empty if interrupted
+		if (batch.isNotEmpty())
+			output.addAll(batch.toArray());
 
-			IJ.showProgress(1);
-			output.end();
-		}
+		IJ.showProgress(1);
+		output.end();
 
-		IJ.showStatus(String.format("Processed %d result%s", results.size(), (results.size() > 1) ? "s" : ""));
-	}
-
-	/**
-	 * Check if the escape key has been pressed. Show a status aborted message if true.
-	 * 
-	 * @return True if aborted
-	 */
-	public static boolean isInterrupted()
-	{
-		if (IJ.escapePressed())
-		{
-			IJ.beep();
-			IJ.showStatus("Aborted");
-			return true;
-		}
-		return false;
+		if (output.size() == results.size())
+			IJ.showStatus("Processed " + Utils.pleural(results.size(), "result"));
+		else
+			IJ.showStatus(String.format("A %d/%s", output.size(), Utils.pleural(results.size(), "result")));
 	}
 
 	private boolean canShowDeviations(MemoryPeakResults results)
@@ -347,7 +351,7 @@ public class ResultsManager implements PlugIn
 	private void addFileResults(PeakResultsList resultsList, boolean showDeviations, boolean showEndFrame,
 			boolean showId)
 	{
-		if (resultsSettings.resultsFilename != null && resultsSettings.resultsFilename.length() > 0)
+		if (!Utils.isNullOrEmpty(resultsSettings.resultsFilename))
 		{
 			// Remove extension
 			resultsSettings.resultsFilename = Utils.replaceExtension(resultsSettings.resultsFilename,
