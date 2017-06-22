@@ -13,7 +13,6 @@ import gdsc.smlm.data.config.SMLMSettings.IntensityCalibration;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.PSFCalibration;
 
-// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -489,6 +488,11 @@ public class CalibrationHelper
 		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getBias() : 0;
 	}
 
+	/**
+	 * Checks for bias.
+	 *
+	 * @return true, if successful
+	 */
 	public boolean hasBias()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
@@ -514,7 +518,7 @@ public class CalibrationHelper
 	public CameraType getCameraType()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraType() : null;
+		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraType() : CameraType.CAMERA_NA;
 	}
 
 	/**
@@ -524,7 +528,7 @@ public class CalibrationHelper
 	 */
 	public boolean hasCameraType()
 	{
-		return getCameraType() != null;
+		return getCameraType().getNumber() > 0;
 	}
 
 	/**
@@ -641,7 +645,7 @@ public class CalibrationHelper
 	public DistanceUnit getDistanceUnit()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getUnit() : null;
+		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getUnit() : DistanceUnit.DISTANCE_NA;
 	}
 
 	/**
@@ -651,7 +655,7 @@ public class CalibrationHelper
 	 */
 	public boolean hasDistanceUnit()
 	{
-		return getDistanceUnit() != null;
+		return getDistanceUnit().getNumber() > 0;
 	}
 
 	/**
@@ -676,7 +680,7 @@ public class CalibrationHelper
 	public IntensityUnit getIntensityUnit()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getUnit() : null;
+		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getUnit() : IntensityUnit.INTENSITY_NA;
 	}
 
 	/**
@@ -686,7 +690,7 @@ public class CalibrationHelper
 	 */
 	public boolean hasIntensityUnit()
 	{
-		return getIntensityUnit() != null;
+		return getIntensityUnit().getNumber() > 0;
 	}
 
 	/**
@@ -711,7 +715,7 @@ public class CalibrationHelper
 	public AngleUnit getAngleUnit()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasPsfCalibration()) ? c.getPsfCalibration().getAngleUnit() : null;
+		return (c.hasPsfCalibration()) ? c.getPsfCalibration().getAngleUnit() : AngleUnit.ANGLE_NA;
 	}
 
 	/**
@@ -721,7 +725,7 @@ public class CalibrationHelper
 	 */
 	public boolean hasAngleUnit()
 	{
-		return getAngleUnit() != null;
+		return getAngleUnit().getNumber() > 0;
 	}
 
 	/**

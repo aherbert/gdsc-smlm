@@ -2,26 +2,31 @@ syntax = "proto3";
 
 // ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
 // Authors: Alex Herbert, 2017 
-// License: BSD 2-Clause License
+// License: GPL V3
 package SMLM;
 
 option java_package = "gdsc.smlm.data.config";
 option java_outer_classname = "SMLMSettings";
 
+// enums that are used for optional units have [enum_name]_NA as the first entry as the 
+// proto definition will use this as the default
+
 // The type of Point Spread Function (PSF)
 enum PSFType {
-   ONE_AXIS_GAUSSIAN_2D = 0; // A 2D Gaussian with the same standard deviation in X and Y dimensions
-   TWO_AXIS_GAUSSIAN_2D = 1; // A 2D Gaussian with standard deviations in X and Y dimensions
-   TWO_AXIS_AND_THETA_GAUSSIAN_2D = 2; // A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
-   ASTIGMATIC_GAUSSIAN_2D = 3; // A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
-   CUSTOM = 4; // A custom point spread function (PSF) 
+	PSF_NA = 0; // Not available. Only the standard parameters are supported.
+	ONE_AXIS_GAUSSIAN_2D = 1; // A 2D Gaussian with the same standard deviation in X and Y dimensions
+	TWO_AXIS_GAUSSIAN_2D = 2; // A 2D Gaussian with standard deviations in X and Y dimensions
+	TWO_AXIS_AND_THETA_GAUSSIAN_2D = 3; // A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
+	ASTIGMATIC_GAUSSIAN_2D = 4; // A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
+	CUSTOM = 5; // A custom point spread function (PSF) 
 }
 
 // Define the type of units supported in the Point Spread Function (PSF)
 enum PSFParameterUnit {
-	DISTANCE = 0; // The parameter describes a distance
-	INTENSITY = 1; // The parameter describes an intensity
-	ANGLE = 2; // The parameter describes an angle
+	PSF_PARAMETER_NA = 0; // Not available
+	DISTANCE = 1; // The parameter describes a distance
+	INTENSITY = 2; // The parameter describes an intensity
+	ANGLE = 3; // The parameter describes an angle
 }
 
 // Define the additional parameters of the Point Spread Function (PSF)
@@ -42,35 +47,40 @@ message PSF {
 
 // The camera type
 enum CameraType {
-   EMCCD = 0; // Electron Multiplying Charge Coupled Device (EM CCD)
-   CCD = 1; // Charge Coupled Device (CCD)
-   SCMOS = 2; // Scientific Complementary Metal-Oxide-Semiconductor (sCMOS)
+	CAMERA_NA = 0; // Not available
+	EMCCD = 1; // Electron Multiplying Charge Coupled Device (EM CCD)
+	CCD = 2; // Charge Coupled Device (CCD)
+	SCMOS = 3; // Scientific Complementary Metal-Oxide-Semiconductor (sCMOS)
 }
 
 // Unit for measuring distance
 enum DistanceUnit {
-	PIXEL = 0; // Camera pixel units
-	UM = 1; // Micrometer units
-	NM = 2; // Nanometer units
+	DISTANCE_NA = 0; // Not available
+	PIXEL = 1; // Camera pixel units
+	UM = 2; // Micrometer units
+	NM = 3; // Nanometer units
 }
 
 // Unit for measuring intensity
 enum IntensityUnit {
-	PHOTON = 0; // Photon units
-	COUNT = 1; // Camera count units
+	INTENSITY_NA = 0; // Not available
+	PHOTON = 1; // Photon units
+	COUNT = 2; // Camera count units
 }
 
 // Unit for measuring angle
 enum AngleUnit {
-	RADIAN = 0; // Radian units
-	DEGREE = 1; // Degree units
+	ANGLE_NA = 0; // Not available
+	RADIAN = 1; // Radian units
+	DEGREE = 2; // Degree units
 }
 
 // Unit for measuring time
 enum TimeUnit {
-	FRAME = 0; // Frame units
-	SECOND = 1; // Second units
-	MILLISECOND = 2; // Millisecond units
+	TIME_NA = 0; // Not available
+	FRAME = 1; // Frame units
+	SECOND = 2; // Second units
+	MILLISECOND = 3; // Millisecond units
 }
 
 // Define the calibration for distance
@@ -83,7 +93,8 @@ message DistanceCalibration {
 
 // Define the calibration for time
 message TimeCalibration {
-	// The time unit.
+	// The time unit. This is currently unused as it is assumed the time in the results 
+	// is in frames.
 	TimeUnit unit = 1;
 	// The exposure time in milliseconds per frame.
 	double exposureTime = 2;
@@ -92,8 +103,8 @@ message TimeCalibration {
 message IntensityCalibration {
 	// The intensity unit.
 	IntensityUnit unit = 1;
-	// The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital count units
-	// (Counts) to photons.
+	// The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital
+	// count units (Counts) to photons.
 	double gain = 2;
 }	
 

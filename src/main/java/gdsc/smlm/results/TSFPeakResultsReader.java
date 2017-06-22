@@ -444,18 +444,18 @@ public class TSFPeakResultsReader
 	static
 	{
 		// These should have 1:1 mapping. We can extends the TSF proto if necessary.		
-		cameraTypeMap = new gdsc.smlm.data.config.SMLMSettings.CameraType[3];
+		cameraTypeMap = new gdsc.smlm.data.config.SMLMSettings.CameraType[CameraType.values().length];
 		cameraTypeMap[CameraType.CCD.ordinal()] = gdsc.smlm.data.config.SMLMSettings.CameraType.CCD;
 		cameraTypeMap[CameraType.EMCCD.ordinal()] = gdsc.smlm.data.config.SMLMSettings.CameraType.EMCCD;
 		cameraTypeMap[CameraType.SCMOS.ordinal()] = gdsc.smlm.data.config.SMLMSettings.CameraType.SCMOS;
-		thetaUnitsMap = new gdsc.smlm.data.config.SMLMSettings.AngleUnit[2];
+		thetaUnitsMap = new gdsc.smlm.data.config.SMLMSettings.AngleUnit[ThetaUnits.values().length];
 		thetaUnitsMap[ThetaUnits.RADIANS.ordinal()] = gdsc.smlm.data.config.SMLMSettings.AngleUnit.RADIAN;
 		thetaUnitsMap[ThetaUnits.DEGREES.ordinal()] = gdsc.smlm.data.config.SMLMSettings.AngleUnit.DEGREE;
-		locationUnitsMap = new gdsc.smlm.data.config.SMLMSettings.DistanceUnit[3];
+		locationUnitsMap = new gdsc.smlm.data.config.SMLMSettings.DistanceUnit[LocationUnits.values().length];
 		locationUnitsMap[LocationUnits.NM.ordinal()] = gdsc.smlm.data.config.SMLMSettings.DistanceUnit.NM;
 		locationUnitsMap[LocationUnits.UM.ordinal()] = gdsc.smlm.data.config.SMLMSettings.DistanceUnit.UM;
 		locationUnitsMap[LocationUnits.PIXELS.ordinal()] = gdsc.smlm.data.config.SMLMSettings.DistanceUnit.PIXEL;
-		intensityUnitsMap = new gdsc.smlm.data.config.SMLMSettings.IntensityUnit[2];
+		intensityUnitsMap = new gdsc.smlm.data.config.SMLMSettings.IntensityUnit[IntensityUnits.values().length];
 		intensityUnitsMap[IntensityUnits.COUNTS.ordinal()] = gdsc.smlm.data.config.SMLMSettings.IntensityUnit.COUNT;
 		intensityUnitsMap[IntensityUnits.PHOTONS.ordinal()] = gdsc.smlm.data.config.SMLMSettings.IntensityUnit.PHOTON;
 	}
@@ -555,6 +555,8 @@ public class TSFPeakResultsReader
 				cal.setBias(spotList.getBias());
 			if (spotList.hasCameraType())
 				cal.setCameraType(cameraTypeMap[spotList.getCameraType().ordinal()]);
+			else
+				cal.setCameraType(null);
 			if (spotList.hasAmplification())
 				cal.setAmplification(spotList.getAmplification());
 
@@ -591,6 +593,9 @@ public class TSFPeakResultsReader
 						"TSF location units are not pixels and no pixel size calibration is available. The dataset will be constructed in the native units: " +
 								spotList.getLocationUnits());
 		}
+		else
+			cal.setDistanceUnit(null);
+		
 		if (spotList.hasIntensityUnits())
 		{
 			cal.setIntensityUnit(intensityUnitsMap[spotList.getIntensityUnits().ordinal()]);
@@ -601,11 +606,16 @@ public class TSFPeakResultsReader
 								spotList.getIntensityUnits());
 			}
 		}
+		else
+			cal.setIntensityUnit(null);
+			
 		if (spotList.hasThetaUnits())
 		{
 			cal.setAngleUnit(thetaUnitsMap[spotList.getThetaUnits().ordinal()]);
 		}
-
+		else
+			cal.setAngleUnit(null);
+			
 		results.setCalibration(cal.getCalibration());
 		
 		return results;

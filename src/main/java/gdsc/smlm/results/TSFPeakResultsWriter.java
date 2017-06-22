@@ -14,6 +14,7 @@ import com.google.protobuf.util.JsonFormat.Printer;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -411,18 +412,18 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	static
 	{
 		// These should have 1:1 mapping. We can extends the TSF proto if necessary.		
-		cameraTypeMap = new CameraType[3];
+		cameraTypeMap = new CameraType[gdsc.smlm.data.config.SMLMSettings.CameraType.values().length];
 		cameraTypeMap[gdsc.smlm.data.config.SMLMSettings.CameraType.CCD.ordinal()] = CameraType.CCD;
 		cameraTypeMap[gdsc.smlm.data.config.SMLMSettings.CameraType.EMCCD.ordinal()] = CameraType.EMCCD;
 		cameraTypeMap[gdsc.smlm.data.config.SMLMSettings.CameraType.SCMOS.ordinal()] = CameraType.SCMOS;
-		thetaUnitsMap = new ThetaUnits[2];
+		thetaUnitsMap = new ThetaUnits[gdsc.smlm.data.config.SMLMSettings.AngleUnit.values().length];
 		thetaUnitsMap[gdsc.smlm.data.config.SMLMSettings.AngleUnit.RADIAN.ordinal()] = ThetaUnits.RADIANS;
 		thetaUnitsMap[gdsc.smlm.data.config.SMLMSettings.AngleUnit.DEGREE.ordinal()] = ThetaUnits.DEGREES;
-		locationUnitsMap = new LocationUnits[3];
+		locationUnitsMap = new LocationUnits[gdsc.smlm.data.config.SMLMSettings.DistanceUnit.values().length];
 		locationUnitsMap[gdsc.smlm.data.config.SMLMSettings.DistanceUnit.NM.ordinal()] = LocationUnits.NM;
 		locationUnitsMap[gdsc.smlm.data.config.SMLMSettings.DistanceUnit.UM.ordinal()] = LocationUnits.UM;
 		locationUnitsMap[gdsc.smlm.data.config.SMLMSettings.DistanceUnit.PIXEL.ordinal()] = LocationUnits.PIXELS;
-		intensityUnitsMap = new IntensityUnits[2];
+		intensityUnitsMap = new IntensityUnits[gdsc.smlm.data.config.SMLMSettings.IntensityUnit.values().length];
 		intensityUnitsMap[gdsc.smlm.data.config.SMLMSettings.IntensityUnit.COUNT.ordinal()] = IntensityUnits.COUNTS;
 		intensityUnitsMap[gdsc.smlm.data.config.SMLMSettings.IntensityUnit.PHOTON.ordinal()] = IntensityUnits.PHOTONS;
 	}

@@ -763,6 +763,19 @@ public class PeakResultsReaderTest
 
 		Calibration c1 = expectedResults.getCalibration();
 		Calibration c2 = actualResults.getCalibration();
+		//		try
+		//		{
+		//			Printer printer = JsonFormat.printer().omittingInsignificantWhitespace()
+		//			//.includingDefaultValueFields()
+		//			;
+		//			System.out.println(printer.print(c1));
+		//			System.out.println(printer.print(c2));
+		//		}
+		//		catch (InvalidProtocolBufferException e)
+		//		{
+		//			// This shouldn't happen so throw it
+		//		}
+
 		if (c1 != null)
 		{
 			Assert.assertNotNull("Calibration", c2);
