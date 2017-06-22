@@ -1073,24 +1073,72 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public static final AngleUnit PREFERRED_ANGLE_UNIT = AngleUnit.RADIAN;
 
 	/**
+	 * Checks if is distance in preferred units.
+	 *
+	 * @return true, if is distance in preferred units
+	 */
+	public boolean isDistanceInPreferredUnits()
+	{
+		return getDistanceUnit() == PREFERRED_DISTANCE_UNIT;
+	}
+
+	/**
+	 * Checks if is intensity in preferred units.
+	 *
+	 * @return true, if is intensity in preferred units
+	 */
+	public boolean isIntensityInPreferredUnits()
+	{
+		return (getIntensityUnit() == PREFERRED_INTENSITY_UNIT);
+	}
+
+	/**
+	 * Checks if is angle in preferred units.
+	 *
+	 * @return true, if is angle in preferred units
+	 */
+	public boolean isAngleInPreferredUnits()
+	{
+		return getAngleUnit() == PREFERRED_ANGLE_UNIT;
+	}
+
+	/**
 	 * Convert to preferred units.
 	 *
 	 * @return true, if the data is now stored in the preferred units.
 	 */
 	public boolean convertToPreferredUnits()
 	{
+		return convertToUnits(PREFERRED_DISTANCE_UNIT, PREFERRED_INTENSITY_UNIT, PREFERRED_ANGLE_UNIT);
+	}
+
+	/**
+	 * Convert to the specified units. If the units are null they will remain unchanged.
+	 *
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param angleUnit
+	 *            the angle unit
+	 * @return true, if the data is now stored in the preferred units.
+	 */
+	public boolean convertToUnits(DistanceUnit distanceUnit, IntensityUnit intensityUnit, AngleUnit angleUnit)
+	{
 		if (calibration == null)
 			return false;
 
 		PeakResultsHelper helper = new PeakResultsHelper(calibration, psf);
-		helper.setIntensityUnit(PREFERRED_INTENSITY_UNIT);
-		helper.setDistanceUnit(PREFERRED_DISTANCE_UNIT);
-		helper.setAngleUnit(PREFERRED_ANGLE_UNIT);
+		helper.setIntensityUnit(intensityUnit);
+		helper.setDistanceUnit(distanceUnit);
+		helper.setAngleUnit(angleUnit);
 		final Converter[] converters = helper.getConverters();
 
-		if (!helper.calibrationChanged())
-			// Already in preferred units
-			return true;
+		if (!helper.isCalibrationChanged())
+		{
+			// Check if already in the specified units
+			return helper.isValidConversion();
+		}
 
 		// Update the calibration
 		setCalibration(helper.getCalibration());
@@ -1120,36 +1168,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		}
 
 		return true;
-	}
-
-	/**
-	 * Checks if is distance in preferred units.
-	 *
-	 * @return true, if is distance in preferred units
-	 */
-	public boolean isDistanceInPreferredUnits()
-	{
-		return getDistanceUnit() == PREFERRED_DISTANCE_UNIT;
-	}
-
-	/**
-	 * Checks if is intensity in preferred units.
-	 *
-	 * @return true, if is intensity in preferred units
-	 */
-	public boolean isIntensityInPreferredUnits()
-	{
-		return (getIntensityUnit() == PREFERRED_INTENSITY_UNIT);
-	}
-
-	/**
-	 * Checks if is angle in preferred units.
-	 *
-	 * @return true, if is angle in preferred units
-	 */
-	public boolean isAngleInPreferredUnits()
-	{
-		return getAngleUnit() == PREFERRED_ANGLE_UNIT;
 	}
 
 	/////////////////////////////////////////////////////////////////

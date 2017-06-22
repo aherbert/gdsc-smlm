@@ -73,6 +73,16 @@ public class PeakResultsHelper
 	}
 
 	/**
+	 * Checks for intensity unit.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasIntensityUnit()
+	{
+		return intensityUnit != null;
+	}
+	
+	/**
 	 * Checks for intensity converter.
 	 *
 	 * @return true, if successful
@@ -127,6 +137,16 @@ public class PeakResultsHelper
 	}
 
 	/**
+	 * Checks for distance unit.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasDistanceUnit()
+	{
+		return distanceUnit != null;
+	}
+	
+	/**
 	 * Checks for distance converter.
 	 *
 	 * @return true, if successful
@@ -178,6 +198,16 @@ public class PeakResultsHelper
 	{
 		angleConverter = null;
 		this.angleUnit = angleUnit;
+	}
+
+	/**
+	 * Checks for angle unit.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasAngleUnit()
+	{
+		return angleUnit != null;
 	}
 
 	/**
@@ -353,7 +383,7 @@ public class PeakResultsHelper
 	 *
 	 * @return true, if successful
 	 */
-	public boolean calibrationChanged()
+	public boolean isCalibrationChanged()
 	{
 		if (calibration == null)
 			return false;
@@ -366,6 +396,27 @@ public class PeakResultsHelper
 			return true;
 
 		return false;
+	}
+
+	/**
+	 * Test if the current converters will changed to desired units.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean isValidConversion()
+	{
+		boolean bad = false;
+
+		// The conversion is bad if the output unit is specified and either: 
+		// there is no converter; or the converter will output the wrong units.
+		
+		//@formatter:off
+		bad |= (hasIntensityUnit() && (!hasIntensityConverter() || intensityUnit != getIntensityConverter().to()));
+		bad |= (hasDistanceUnit() && (!hasDistanceConverter() || distanceUnit != getDistanceConverter().to()));
+		bad |= (hasAngleUnit() && (!hasAngleConverter() || angleUnit != getAngleConverter().to()));
+		//@formatter:on
+
+		return !bad;
 	}
 
 	/**

@@ -605,8 +605,12 @@ public class PeakResultsReader
 
 			if (!rawResults)
 			{
-				if (psf != null)
+				if (results.getPSF() != null)
+				{
+					// The TSF reader may set the PSF so copy if back
+					psf = results.getPSF();
 					simplifyPSF(results);
+				}
 
 				// Convert to the preferred units if possible
 				results.convertToPreferredUnits();

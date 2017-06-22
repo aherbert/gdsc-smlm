@@ -29,52 +29,52 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTextMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, false, false, false, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, false, false, false);
 	}
 
 	@Test
 	public void writeSequentialTextMatchesRead()
 	{
-		writeMatchesRead(true, ResultsFileFormat.GDSC_TEXT, false, false, false, false, false);
+		writeMatchesRead(true, ResultsFileFormat.GDSC_TEXT, false, false, false, false);
 	}
 
 	@Test
 	public void writeTextWithDeviationsMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, false, false, false, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, false, false, false);
 	}
 
 	@Test
 	public void writeTextWithEndFrameMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, true, false, false, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, true, false, false);
 	}
 
 	@Test
 	public void writeTextWithIdMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, false, true, false, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, false, true, false);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndEndFrameMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, true, false, false, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, true, false, false);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndIdMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, false, true, false, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, false, true, false);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndEndFrameAndIdMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, true, true, false, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, true, true, false);
 	}
 
 	// -=-=-=-=-
@@ -82,52 +82,52 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, false, false, false, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, false, false, false);
 	}
 
 	@Test
 	public void writeSequentialBinaryMatchesRead()
 	{
-		writeMatchesRead(true, ResultsFileFormat.GDSC_BINARY, false, false, false, false, true);
+		writeMatchesRead(true, ResultsFileFormat.GDSC_BINARY, false, false, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, false, false, false, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, false, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithEndFrameMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, true, false, false, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, true, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithIdMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, false, true, false, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, false, true, false);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndEndFrameMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, true, false, false, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, true, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndIdMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, false, true, false, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, false, true, false);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndEndFrameAndIdMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, true, true, false, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, true, true, false);
 	}
 
 	// -=-=-=-=-
@@ -135,52 +135,52 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTextWithSortMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, false, false, true, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, false, false, true);
 	}
 
 	@Test
 	public void writeSequentialTextWithSortMatchesRead()
 	{
-		writeMatchesRead(true, ResultsFileFormat.GDSC_TEXT, false, false, false, true, false);
+		writeMatchesRead(true, ResultsFileFormat.GDSC_TEXT, false, false, false, true);
 	}
 
 	@Test
 	public void writeTextWithDeviationsWithSortMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, false, false, true, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, false, false, true);
 	}
 
 	@Test
 	public void writeTextWithEndFrameWithSortMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, true, false, true, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, true, false, true);
 	}
 
 	@Test
 	public void writeTextWithIdWithSortMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, false, true, true, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, false, false, true, true);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndEndFrameWithSortMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, true, false, true, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, true, false, true);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndIdWithSortMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, false, true, true, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, false, true, true);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndEndFrameAndIdWithSortMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, true, true, true, false);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_TEXT, true, true, true, true);
 	}
 
 	// -=-=-=-=-
@@ -188,52 +188,52 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryWithSortMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, false, false, true, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, false, false, true);
 	}
 
 	@Test
 	public void writeSequentialBinaryWithSortMatchesRead()
 	{
-		writeMatchesRead(true, ResultsFileFormat.GDSC_BINARY, false, false, false, true, true);
+		writeMatchesRead(true, ResultsFileFormat.GDSC_BINARY, false, false, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsWithSortMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, false, false, true, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, false, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithEndFrameWithSortMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, true, false, true, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, true, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithIdWithSortMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, false, true, true, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, false, false, true, true);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndEndFrameWithSortMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, true, false, true, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, true, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndIdWithSortMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, false, true, true, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, false, true, true);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndEndFrameAndIdWithSortMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, true, true, true, true);
+		writeMatchesRead(false, ResultsFileFormat.GDSC_BINARY, true, true, true, true);
 	}
 
 	// -=-=-=-=-
@@ -243,25 +243,25 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeMALKMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.MALK, false, false, false, false, false);
+		writeMatchesRead(false, ResultsFileFormat.MALK, false, false, false, false);
 	}
 
 	@Test
 	public void writeSequentialMALKMatchesRead()
 	{
-		writeMatchesRead(true, ResultsFileFormat.MALK, false, false, false, false, false);
+		writeMatchesRead(true, ResultsFileFormat.MALK, false, false, false, false);
 	}
 
 	@Test
 	public void writeMALKWithSortMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.MALK, false, false, false, true, false);
+		writeMatchesRead(false, ResultsFileFormat.MALK, false, false, false, true);
 	}
 
 	@Test
 	public void writeSequentialMALKWithSortMatchesRead()
 	{
-		writeMatchesRead(true, ResultsFileFormat.MALK, false, false, false, true, false);
+		writeMatchesRead(true, ResultsFileFormat.MALK, false, false, false, true);
 	}
 
 	// -=-=-=-=-
@@ -272,52 +272,52 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeTSFMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, false, false, false);
+		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, false, false);
 	}
 
 	@Test
 	public void writeSequentialTSFMatchesRead()
 	{
-		writeMatchesRead(true, ResultsFileFormat.TSF, false, false, false, false, false);
+		writeMatchesRead(true, ResultsFileFormat.TSF, false, false, false, false);
 	}
 
 	@Test
 	public void writeTSFWithDeviationsMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.TSF, true, false, false, false, false);
+		writeMatchesRead(false, ResultsFileFormat.TSF, true, false, false, false);
 	}
 
 	@Test
 	public void writeTSFWithEndFrameMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.TSF, false, true, false, false, false);
+		writeMatchesRead(false, ResultsFileFormat.TSF, false, true, false, false);
 	}
 
 	@Test
 	public void writeTSFWithIdMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, true, false, false);
+		writeMatchesRead(false, ResultsFileFormat.TSF, false, false, true, false);
 	}
 
 	@Test
 	public void writeTSFWithDeviationsAndEndFrameMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.TSF, true, true, false, false, false);
+		writeMatchesRead(false, ResultsFileFormat.TSF, true, true, false, false);
 	}
 
 	@Test
 	public void writeTSFWithDeviationsAndIdMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.TSF, true, false, true, false, false);
+		writeMatchesRead(false, ResultsFileFormat.TSF, true, false, true, false);
 	}
 
 	@Test
 	public void writeTSFWithDeviationsAndEndFrameAndIdMatchesRead()
 
 	{
-		writeMatchesRead(false, ResultsFileFormat.TSF, true, true, true, false, false);
+		writeMatchesRead(false, ResultsFileFormat.TSF, true, true, true, false);
 	}
 
 	// -=-=-=-=-
@@ -325,49 +325,49 @@ public class PeakResultsReaderTest
 	@Test
 	public void readWithScannerMatchesNonScanner()
 	{
-		readWithScannerMatchesNonScanner(false, false, false, false, false);
+		readWithScannerMatchesNonScanner(false, false, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviations()
 
 	{
-		readWithScannerMatchesNonScanner(true, false, false, false, false);
+		readWithScannerMatchesNonScanner(true, false, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithEndFrame()
 
 	{
-		readWithScannerMatchesNonScanner(false, true, false, false, false);
+		readWithScannerMatchesNonScanner(false, true, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithId()
 
 	{
-		readWithScannerMatchesNonScanner(false, false, true, false, false);
+		readWithScannerMatchesNonScanner(false, false, true, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviationsWithEndFrame()
 
 	{
-		readWithScannerMatchesNonScanner(true, true, false, false, false);
+		readWithScannerMatchesNonScanner(true, true, false, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviationsWithId()
 
 	{
-		readWithScannerMatchesNonScanner(true, false, true, false, false);
+		readWithScannerMatchesNonScanner(true, false, true, false);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviationsWithEndFrameWithId()
 
 	{
-		readWithScannerMatchesNonScanner(true, true, true, false, false);
+		readWithScannerMatchesNonScanner(true, true, true, false);
 	}
 
 	// -=-=-=-=-
@@ -375,49 +375,49 @@ public class PeakResultsReaderTest
 	@Test
 	public void readWithScannerMatchesNonScannerWithSort()
 	{
-		readWithScannerMatchesNonScanner(false, false, false, true, false);
+		readWithScannerMatchesNonScanner(false, false, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviationsWithSort()
 
 	{
-		readWithScannerMatchesNonScanner(true, false, false, true, false);
+		readWithScannerMatchesNonScanner(true, false, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithEndFrameWithSort()
 
 	{
-		readWithScannerMatchesNonScanner(false, true, false, true, false);
+		readWithScannerMatchesNonScanner(false, true, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithIdWithSort()
 
 	{
-		readWithScannerMatchesNonScanner(false, false, true, true, false);
+		readWithScannerMatchesNonScanner(false, false, true, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviationsWithEndFrameWithSort()
 
 	{
-		readWithScannerMatchesNonScanner(true, true, false, true, false);
+		readWithScannerMatchesNonScanner(true, true, false, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviationsWithIdWithSort()
 
 	{
-		readWithScannerMatchesNonScanner(true, false, true, true, false);
+		readWithScannerMatchesNonScanner(true, false, true, true);
 	}
 
 	@Test
 	public void readWithScannerMatchesNonScannerWithDeviationsWithEndFrameWithIdWithSort()
 
 	{
-		readWithScannerMatchesNonScanner(true, true, true, true, false);
+		readWithScannerMatchesNonScanner(true, true, true, true);
 	}
 
 	// -=-=-=-=-
@@ -456,12 +456,156 @@ public class PeakResultsReaderTest
 		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TSF, false, ResultsFileFormat.GDSC_BINARY, false,
 				20);
 	}
-	
-	// TODO - Test can write MALK in pixels and Counts and it reads back in nm and photons
-	// TODO - Test can read back Text/Binary in pixels and photons when output is written in nm and counts, i.e. convert to preferred units works.
-	// TODO - Test can read back simplified Gaussian 2D PSF when the PSF params are redundant
-	
-	// TODO - Switch to using the proto calibration 
+
+	@Test
+	public void canConvertMalkToNMAndPhotons()
+	{
+		MemoryPeakResults out = createResults(200, false, false, false);
+
+		// Output in pixel and count
+		Calibration cal = out.getCalibration();
+		cal.setDistanceUnit(DistanceUnit.PIXEL);
+		cal.setIntensityUnit(IntensityUnit.COUNT);
+		out.setPSF(PSFHelper.create(PSFType.CUSTOM));
+
+		String filename = createFile();
+
+		writeFile(false, ResultsFileFormat.MALK, false, false, false, false, out, filename);
+
+		MemoryPeakResults in = readFile(filename, false);
+
+		// Change to nm and photon for the validation
+		out.convertToUnits(DistanceUnit.NM, IntensityUnit.PHOTON, null);
+
+		checkEqual(ResultsFileFormat.MALK, false, false, false, false, out, in);
+	}
+
+	@Test
+	public void canReadTextIntoPreferredUnits()
+	{
+		canReadIntoPreferredUnits(ResultsFileFormat.GDSC_TEXT);
+	}
+
+	@Test
+	public void canReadBinaryIntoPreferredUnits()
+	{
+		canReadIntoPreferredUnits(ResultsFileFormat.GDSC_BINARY);
+	}
+
+	@Test
+	public void canReadTSFIntoPreferredUnits()
+	{
+		canReadIntoPreferredUnits(ResultsFileFormat.TSF);
+	}
+
+	private void canReadIntoPreferredUnits(ResultsFileFormat fileFormat)
+	{
+		MemoryPeakResults out = createResults(200, false, false, false);
+
+		// Output in nm and count
+		Calibration cal = out.getCalibration();
+		cal.setDistanceUnit(DistanceUnit.NM);
+		cal.setIntensityUnit(IntensityUnit.COUNT);
+
+		String filename = createFile();
+
+		writeFile(false, fileFormat, false, false, false, false, out, filename);
+
+		MemoryPeakResults in = readFile(filename, false, false);
+
+		// Change to preferred units
+		out.convertToUnits(MemoryPeakResults.PREFERRED_DISTANCE_UNIT, MemoryPeakResults.PREFERRED_INTENSITY_UNIT,
+				MemoryPeakResults.PREFERRED_ANGLE_UNIT);
+
+		checkEqual(fileFormat, false, false, false, false, out, in);
+	}
+
+	@Test
+	public void canReadTextAndSimplifyGaussian2DPSF()
+	{
+		canReadAndSimplifyGaussian2DPSF(ResultsFileFormat.GDSC_TEXT);
+	}
+
+	@Test
+	public void canReadBinaryAndSimplifyGaussian2DPSF()
+	{
+		canReadAndSimplifyGaussian2DPSF(ResultsFileFormat.GDSC_BINARY);
+	}
+
+	@Test
+	public void canReadTSFAndSimplifyGaussian2DPSF()
+	{
+		canReadAndSimplifyGaussian2DPSF(ResultsFileFormat.TSF);
+	}
+
+	private void canReadAndSimplifyGaussian2DPSF(ResultsFileFormat fileFormat)
+	{
+		MemoryPeakResults out = createResults(200, false, false, false);
+
+		Calibration cal = out.getCalibration();
+		cal.setDistanceUnit(MemoryPeakResults.PREFERRED_DISTANCE_UNIT);
+		cal.setIntensityUnit(MemoryPeakResults.PREFERRED_INTENSITY_UNIT);
+		cal.setAngleUnit(MemoryPeakResults.PREFERRED_ANGLE_UNIT);
+		
+		// Remove angle
+		final int ia = PSFHelper.getGaussian2DAngleIndex(out.getPSF());
+		out.forEach(new PeakResultProcedure()
+		{
+			public void execute(PeakResult peakResult)
+			{
+				peakResult.getParameters()[ia] = 0;
+			}
+		});
+
+		String filename = createFile();
+
+		writeFile(false, fileFormat, false, false, false, false, out, filename);
+
+		MemoryPeakResults in = readFile(filename, false, false);
+
+		// Change to two-axis PSF
+		out.setPSF(PSFHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D));
+		final int twoAxisLength = PSFHelper.getParameterCount(out.getPSF()) + PeakResult.STANDARD_PARAMETERS;
+		out.forEach(new PeakResultProcedure()
+		{
+			public void execute(PeakResult peakResult)
+			{
+				peakResult.params = Arrays.copyOf(peakResult.params, twoAxisLength);
+			}
+		});
+
+		checkEqual(fileFormat, false, false, false, false, out, in);
+		
+		// Remove sy
+		final int[] indices = PSFHelper.getGaussian2DWxWyIndices(out.getPSF());
+		final int isx = indices[0];
+		final int isy = indices[1];
+		out.forEach(new PeakResultProcedure()
+		{
+			public void execute(PeakResult peakResult)
+			{
+				float[] p = peakResult.getParameters();
+				p[isy] = p[isx];
+			}
+		});
+
+		writeFile(false, fileFormat, false, false, false, false, out, filename);
+
+		in = readFile(filename, false, false);
+
+		// Change to one-axis PSF
+		out.setPSF(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
+		final int oneAxisLength = PSFHelper.getParameterCount(out.getPSF()) + PeakResult.STANDARD_PARAMETERS;
+		out.forEach(new PeakResultProcedure()
+		{
+			public void execute(PeakResult peakResult)
+			{
+				peakResult.params = Arrays.copyOf(peakResult.params, oneAxisLength);
+			}
+		});
+
+		checkEqual(fileFormat, false, false, false, false, out, in);
+	}
 
 	private void readWith2IsFasterThan1(boolean showDeviations, boolean showEndFrame, boolean showId,
 			ResultsFileFormat f1, boolean useScanner1, ResultsFileFormat f2, boolean useScanner2, int loops)
@@ -486,7 +630,7 @@ public class PeakResultsReaderTest
 	// -=-=-=-=-
 
 	private void writeMatchesRead(boolean sequential, ResultsFileFormat fileFormat, boolean showDeviations,
-			boolean showEndFrame, boolean showId, boolean sort, boolean binary)
+			boolean showEndFrame, boolean showId, boolean sort)
 	{
 		MemoryPeakResults out = createResults(200, showDeviations, showEndFrame, showId);
 		if (fileFormat == ResultsFileFormat.MALK)
@@ -494,20 +638,20 @@ public class PeakResultsReaderTest
 			Calibration cal = out.getCalibration();
 			cal.setDistanceUnit(DistanceUnit.NM);
 			cal.setIntensityUnit(IntensityUnit.PHOTON);
-			out.setPSF(PSFHelper.create(PSFType.CUSTOM));			
+			out.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		}
-		
+
 		String filename = createFile();
 
 		writeFile(sequential, fileFormat, showDeviations, showEndFrame, showId, sort, out, filename);
 
 		MemoryPeakResults in = readFile(filename, false);
 
-		checkEqual(fileFormat, showDeviations, showEndFrame, showId, sort, binary, out, in);
+		checkEqual(fileFormat, showDeviations, showEndFrame, showId, sort, out, in);
 	}
 
 	private void readWithScannerMatchesNonScanner(boolean showDeviations, boolean showEndFrame, boolean showId,
-			boolean sort, boolean binary)
+			boolean sort)
 	{
 		MemoryPeakResults out = createResults(1000, showDeviations, showEndFrame, showId);
 		String filename = createFile();
@@ -518,17 +662,17 @@ public class PeakResultsReaderTest
 		MemoryPeakResults in = readFile(filename, false);
 		MemoryPeakResults in2 = readFile(filename, true);
 
-		checkEqual(fileFormat, showDeviations, showEndFrame, showId, sort, binary, in, in2);
+		checkEqual(fileFormat, showDeviations, showEndFrame, showId, sort, in, in2);
 	}
 
 	private void checkEqual(ResultsFileFormat fileFormat, boolean showDeviations, boolean showEndFrame, boolean showId,
-			boolean sort, boolean binary, MemoryPeakResults expectedResults, MemoryPeakResults actualResults)
+			boolean sort, MemoryPeakResults expectedResults, MemoryPeakResults actualResults)
 			throws ArrayComparisonFailure
 	{
 		Assert.assertNotNull("Input results are null", actualResults);
 		Assert.assertEquals("Size differ", expectedResults.size(), actualResults.size());
 
-		final float delta = (binary) ? 0 : 1e-6f;
+		final float delta = (fileFormat == ResultsFileFormat.GDSC_BINARY) ? 0 : 1e-6f;
 
 		PeakResult[] expected = expectedResults.toArray();
 		PeakResult[] actual = actualResults.toArray();
@@ -623,7 +767,7 @@ public class PeakResultsReaderTest
 		{
 			Assert.assertNull("Calibration", c2);
 		}
-		
+
 		PSF p1 = expectedResults.getPSF();
 		PSF p2 = actualResults.getPSF();
 		if (p1 != null)
@@ -651,7 +795,6 @@ public class PeakResultsReaderTest
 			double error = rand.next();
 			float noise = rand.next();
 			float[] params = createData();
-			params[PeakResult.BACKGROUND] += bias;
 			float[] paramsStdDev = (showDeviations) ? createData() : null;
 			if (showEndFrame || showId)
 				results.add(new ExtendedPeakResult(startFrame, origX, origY, origValue, error, noise, params,
@@ -671,10 +814,10 @@ public class PeakResultsReaderTest
 		cal.setBias(bias);
 		cal.setAmplification(rand.next());
 		// Subtract 1 to avoid the additional UNRECOGNISED enum value
-		cal.setCameraType(CameraType.values()[rand.nextInt(CameraType.values().length-1)]);
-		cal.setDistanceUnit(DistanceUnit.values()[rand.nextInt(DistanceUnit.values().length-1)]);
-		cal.setIntensityUnit(IntensityUnit.values()[rand.nextInt(IntensityUnit.values().length-1)]);
-		cal.setAngleUnit(AngleUnit.values()[rand.nextInt(AngleUnit.values().length-1)]);
+		cal.setCameraType(CameraType.values()[rand.nextInt(CameraType.values().length - 1)]);
+		cal.setDistanceUnit(DistanceUnit.values()[rand.nextInt(DistanceUnit.values().length - 1)]);
+		cal.setIntensityUnit(IntensityUnit.values()[rand.nextInt(IntensityUnit.values().length - 1)]);
+		cal.setAngleUnit(AngleUnit.values()[rand.nextInt(AngleUnit.values().length - 1)]);
 		results.setCalibration(cal);
 		return results;
 	}
@@ -756,6 +899,7 @@ public class PeakResultsReaderTest
 	{
 		return readFile(filename, useScanner, true);
 	}
+
 	private MemoryPeakResults readFile(String filename, boolean useScanner, boolean rawResults)
 	{
 		PeakResultsReader reader = new PeakResultsReader(filename);
