@@ -554,9 +554,7 @@ public class TSFPeakResultsReader
 			if (spotList.hasBias())
 				cal.setBias(spotList.getBias());
 			if (spotList.hasCameraType())
-			{
 				cal.setCameraType(cameraTypeMap[spotList.getCameraType().ordinal()]);
-			}
 			if (spotList.hasAmplification())
 				cal.setAmplification(spotList.getAmplification());
 

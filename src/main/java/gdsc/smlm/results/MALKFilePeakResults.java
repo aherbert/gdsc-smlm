@@ -130,6 +130,7 @@ public class MALKFilePeakResults extends FilePeakResults
 			try
 			{
 				toNMConverter = calibration.getDistanceConverter(DistanceUnit.NM);
+				calibration.setDistanceUnit(DistanceUnit.NM);
 			}
 			catch (ConversionException e)
 			{
@@ -154,9 +155,9 @@ public class MALKFilePeakResults extends FilePeakResults
 
 		// Create converters to avoid null pointers
 		if (toNMConverter == null)
-			toNMConverter = new IdentityTypeConverter<DistanceUnit>(DistanceUnit.NM);
+			toNMConverter = new IdentityTypeConverter<DistanceUnit>(null);
 		if (toPhotonConverter == null)
-			toPhotonConverter = new IdentityTypeConverter<IntensityUnit>(IntensityUnit.PHOTON);
+			toPhotonConverter = new IdentityTypeConverter<IntensityUnit>(null);
 	}
 
 	/*

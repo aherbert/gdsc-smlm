@@ -493,9 +493,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			if (calibration.hasBias())
 				builder.setBias(calibration.getBias());
 			if (calibration.hasCameraType())
-			{
 				builder.setCameraType(cameraTypeMap[calibration.getCameraType().ordinal()]);
-			}
 			if (calibration.hasAmplification())
 				builder.setAmplification(calibration.getAmplification());
 

@@ -503,7 +503,7 @@ public class CalibrationHelper
 	 */
 	public void setBias(double bias)
 	{
-		getBuilder().getCameraCalibrationBuilder().setReadNoise(bias);
+		getBuilder().getCameraCalibrationBuilder().setBias(bias);
 	}
 
 	/**

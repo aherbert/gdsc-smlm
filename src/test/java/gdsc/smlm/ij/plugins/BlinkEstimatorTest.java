@@ -12,6 +12,7 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.model.ActivationEnergyImageModel;
@@ -25,7 +26,6 @@ import gdsc.smlm.model.SpatialDistribution;
 import gdsc.smlm.model.SpatialIllumination;
 import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gnu.trove.procedure.TIntProcedure;
@@ -230,7 +230,11 @@ public class BlinkEstimatorTest
 		//		fluorophores = newFluorophores;
 
 		MemoryPeakResults results = new MemoryPeakResults();
-		results.setCalibration(new Calibration(pixelPitch, 1, msPerFrame));
+		CalibrationHelper calibration = new CalibrationHelper();
+		calibration.setNmPerPixel(pixelPitch);
+		calibration.setExposureTime(msPerFrame);
+		calibration.setGain(1);
+		results.setCalibration(calibration.getCalibration());
 		results.setPSF(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
 		float b = 0, intensity, z = 0;
 		for (LocalisationModel l : localisations)

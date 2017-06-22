@@ -650,11 +650,10 @@ public class PeakResultsReaderTest
 		{
 			CalibrationHelper cal = new CalibrationHelper(out.getCalibration());
 			cal.setDistanceUnit(DistanceUnit.NM);
-			cal.setIntensityUnit(IntensityUnit.COUNT);
+			cal.setIntensityUnit(IntensityUnit.PHOTON);
 			out.setCalibration(cal.getCalibration());
 			out.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		}
-		System.out.println(out.getCalibration());
 
 		String filename = createFile();
 
@@ -764,8 +763,6 @@ public class PeakResultsReaderTest
 
 		Calibration c1 = expectedResults.getCalibration();
 		Calibration c2 = actualResults.getCalibration();
-		System.out.println(c1);
-		System.out.println(c2);
 		if (c1 != null)
 		{
 			Assert.assertNotNull("Calibration", c2);
@@ -827,18 +824,6 @@ public class PeakResultsReaderTest
 		cal.setIntensityUnit(IntensityUnit.values()[rand.nextInt(IntensityUnit.values().length - 1)]);
 		cal.setAngleUnit(AngleUnit.values()[rand.nextInt(AngleUnit.values().length - 1)]);
 		results.setCalibration(cal.getCalibration());
-
-		Calibration c = results.getCalibration();
-		System.out.println(c);
-		try
-		{
-			Printer printer = JsonFormat.printer().omittingInsignificantWhitespace().includingDefaultValueFields();
-			System.out.println(printer.print(c));
-		}
-		catch (InvalidProtocolBufferException e)
-		{
-		}
-
 		return results;
 	}
 
