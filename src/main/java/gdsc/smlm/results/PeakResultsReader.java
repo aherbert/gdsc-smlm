@@ -68,8 +68,12 @@ public class PeakResultsReader
 		nTwoAxisAndTheta = PeakResult.STANDARD_PARAMETERS + 3;
 	}
 
-	/** The columns to recognise in the ImageJ table results header */
-	private static String IMAGEJ_TABLE_RESULTS_HEADER = "origX\torigY\torigValue\tError\tNoise";
+	/**
+	 * The columns to recognise in the ImageJ table results header for version 1/2.
+	 * Version 3 may also have this but we can distinguish because V1/2 had Amplitude/Signal
+	 * and V3 does not.
+	 */
+	private static String IMAGEJ_TABLE_RESULTS_HEADER_V1_V2 = "origX\torigY\torigValue\tError\tNoise";
 
 	/** The space patterm */
 	private static Pattern spacePattern = Pattern.compile(" ");
@@ -130,7 +134,7 @@ public class PeakResultsReader
 							break;
 						}
 						// User may try and load the text saved directly from the ImageJ Table Results
-						if (line.contains(IMAGEJ_TABLE_RESULTS_HEADER))
+						if (line.contains(IMAGEJ_TABLE_RESULTS_HEADER_V1_V2))
 						{
 							sb.append(line).append("\n");
 							break;
@@ -148,8 +152,7 @@ public class PeakResultsReader
 				version = getField("FileVersion");
 
 				format = FileFormat.UNKNOWN;
-				guessFormatFromVersion();
-				if (format == FileFormat.UNKNOWN)
+				if (!guessFormatFromVersion())
 					guessFormat(line);
 			}
 			catch (IOException e)
@@ -172,7 +175,7 @@ public class PeakResultsReader
 		return header;
 	}
 
-	private void guessFormatFromVersion()
+	private boolean guessFormatFromVersion()
 	{
 		// Extract information about the file format
 		if (version.length() > 0)
@@ -182,7 +185,7 @@ public class PeakResultsReader
 			else if (version.startsWith("Text"))
 				format = FileFormat.SMLM_TEXT;
 			else
-				return;
+				return false;
 
 			if (version.contains(".V3"))
 			{
@@ -215,7 +218,9 @@ public class PeakResultsReader
 					readId = version.contains(".E2");
 				}
 			}
+			return true;
 		}
+		return false;
 	}
 
 	private void guessFormat(String firstLine)
@@ -234,18 +239,22 @@ public class PeakResultsReader
 				return;
 		}
 
-		// Check for Nikon NSTORM header
-		if (header.contains("Channel Name"))
-		{
-			format = FileFormat.NSTORM;
-		}
-		else if (header.contains(IMAGEJ_TABLE_RESULTS_HEADER))
+		// Support reading old IJ table results. 
+		// The latest table results have dynamic columns so these must be loaded manually
+		// as guessing the column format is not supported.
+		if (header.contains(IMAGEJ_TABLE_RESULTS_HEADER_V1_V2))
 		{
 			format = FileFormat.SMLM_TABLE;
+			smlmVersion = 2; // V1/V2 doesn't matter 
 			readId = header.startsWith("#");
 			readEndFrame = header.contains("\tEnd ");
 			deviations = header.contains("\t+/-\t");
 			readSource = header.contains("Source\t");
+		}
+		// Check for Nikon NSTORM header
+		else if (header.contains("Channel Name"))
+		{
+			format = FileFormat.NSTORM;
 		}
 		// Check for RapidSTORM stuff in the header
 		else if (header.contains("<localizations "))
@@ -268,8 +277,7 @@ public class PeakResultsReader
 		}
 		else
 		{
-			// Assume SMLM format
-			guessFormatFromVersion();
+
 		}
 	}
 
@@ -416,7 +424,7 @@ public class PeakResultsReader
 							ex.printStackTrace();
 						}
 					}
-					
+
 					if (format == FileFormat.MALK)
 					{
 						if (calibration == null)
@@ -1070,8 +1078,8 @@ public class PeakResultsReader
 				params[Gaussian2DFunction.SIGNAL] = signal;
 				params = mapGaussian2DFormatParams(params);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
-							endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null, endPeak,
+							id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
 			}
@@ -1096,8 +1104,8 @@ public class PeakResultsReader
 				params[Gaussian2DFunction.SIGNAL] = signal;
 				params = mapGaussian2DFormatParams(params);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
-							endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null, endPeak,
+							id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
 			}
@@ -1152,8 +1160,8 @@ public class PeakResultsReader
 				params = mapGaussian2DFormatParams(params);
 				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
-							paramsStdDev, endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
+							endPeak, id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 			}
@@ -1182,8 +1190,8 @@ public class PeakResultsReader
 				params = mapGaussian2DFormatParams(params);
 				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
-							paramsStdDev, endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
+							endPeak, id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 			}
@@ -1233,8 +1241,8 @@ public class PeakResultsReader
 				scanner.close();
 				params = mapGaussian2DFormatParams(params);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
-							endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null, endPeak,
+							id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
 			}
@@ -1257,8 +1265,8 @@ public class PeakResultsReader
 				}
 				params = mapGaussian2DFormatParams(params);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
-							endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null, endPeak,
+							id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
 			}
@@ -1311,8 +1319,8 @@ public class PeakResultsReader
 				params = mapGaussian2DFormatParams(params);
 				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
-							paramsStdDev, endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
+							endPeak, id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 			}
@@ -1339,8 +1347,8 @@ public class PeakResultsReader
 				params = mapGaussian2DFormatParams(params);
 				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
-							paramsStdDev, endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
+							endPeak, id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 			}
@@ -1389,8 +1397,8 @@ public class PeakResultsReader
 				}
 				scanner.close();
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
-							endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null, endPeak,
+							id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
 			}
@@ -1412,8 +1420,8 @@ public class PeakResultsReader
 					params[i] = Float.parseFloat(fields[j++]);
 				}
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null,
-							endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null, endPeak,
+							id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
 			}
@@ -1464,8 +1472,8 @@ public class PeakResultsReader
 				}
 				scanner.close();
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
-							paramsStdDev, endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
+							endPeak, id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 			}
@@ -1490,8 +1498,8 @@ public class PeakResultsReader
 					paramsStdDev[i] = Float.parseFloat(fields[j++]);
 				}
 				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
-							paramsStdDev, endPeak, id);
+					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
+							endPeak, id);
 				else
 					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 			}
@@ -1541,55 +1549,63 @@ public class PeakResultsReader
 			else
 			{
 				version = 3;
-				// Get the number of data fields by counting the standard fields
-				String[] columns = header.split("\t");
-				int field = 0;
-				if (readId)
-					field++; // ID #
-				if (readSource)
-					field++; // Source
-				field++; // Frame
-				if (readEndFrame)
-					field++; // End frame
-				field++; // origX
-				field++; // origY
-				field++; // origValue
-				field++; // error
-				field++; // noise
-				field++; // SNR
 
-				// The remaining fields are PSF parameters with the exception of the final precision field
+				// We support reading old IJ table results as they had fixed columns. 
+				// The latest table results have dynamic columns so these must be loaded manually
+				// as guessing the column format is not supported.
+				return null;
 
-				nFields = columns.length - field;
-				if (columns[columns.length - 1].contains("Precision"))
-					nFields--;
-				if (deviations)
-				{
-					nFields /= 2;
-				}
-
-				// We can guess part of the calibration.
-				if (calibration == null)
-					calibration = new Calibration();
-				int jump = (deviations) ? 2 : 1;
-				// field is currently on Background
-				calibration.setIntensityUnit(UnitHelper.guessIntensityUnitFromShortName(extractUnit(columns[field])));
-				field += jump; // Move to Intensity
-				field += jump; // Move to X
-				calibration.setDistanceUnit(UnitHelper.guessDistanceUnitFromShortName(extractUnit(columns[field])));
-				field += jump; // Move to Y
-				field += jump; // Move to Z
-				// The angle may be used in fields above the standard ones
-				while (field < columns.length)
-				{
-					field += jump;
-					AngleUnit u = UnitHelper.guessAngleUnitFromShortName(extractUnit(columns[field]));
-					if (u != null)
-					{
-						calibration.setAngleUnit(u);
-						break;
-					}
-				}
+				// This code functioned when the table was not dynamic ...
+				
+				//				// Get the number of data fields by counting the standard fields
+				//				String[] columns = header.split("\t");
+				//				int field = 0;
+				//				if (readId)
+				//					field++; // ID #
+				//				if (readSource)
+				//					field++; // Source
+				//				field++; // Frame
+				//				if (readEndFrame)
+				//					field++; // End frame
+				//				field++; // origX
+				//				field++; // origY
+				//				field++; // origValue
+				//				field++; // error
+				//				field++; // noise
+				//				field++; // SNR
+				//
+				//				// The remaining fields are PSF parameters with the exception of the final precision field
+				//
+				//				nFields = columns.length - field;
+				//				if (columns[columns.length - 1].contains("Precision"))
+				//					nFields--;
+				//				if (deviations)
+				//				{
+				//					nFields /= 2;
+				//				}
+				//
+				//				// We can guess part of the calibration.
+				//				if (calibration == null)
+				//					calibration = new Calibration();
+				//				int jump = (deviations) ? 2 : 1;
+				//				// field is currently on Background
+				//				calibration.setIntensityUnit(UnitHelper.guessIntensityUnitFromShortName(extractUnit(columns[field])));
+				//				field += jump; // Move to Intensity
+				//				field += jump; // Move to X
+				//				calibration.setDistanceUnit(UnitHelper.guessDistanceUnitFromShortName(extractUnit(columns[field])));
+				//				field += jump; // Move to Y
+				//				field += jump; // Move to Z
+				//				// The angle may be used in fields above the standard ones
+				//				while (field < columns.length)
+				//				{
+				//					field += jump;
+				//					AngleUnit u = UnitHelper.guessAngleUnitFromShortName(extractUnit(columns[field]));
+				//					if (u != null)
+				//					{
+				//						calibration.setAngleUnit(u);
+				//						break;
+				//					}
+				//				}
 			}
 
 			int c = 0;

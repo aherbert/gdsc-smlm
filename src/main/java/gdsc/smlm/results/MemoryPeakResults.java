@@ -1261,9 +1261,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (calibration == null)
 			throw new ConfigurationException("No calibration");
 
-		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getDualIntensityConverter(intensityUnit);
-		TypeConverter<IntensityUnit> ic = list.get(0);
-		TypeConverter<IntensityUnit> bic = list.get(1);
+		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(intensityUnit);
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
@@ -1271,7 +1269,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeBIXY(
-					bic.convert(r.getBackground()), 
+					ic.convert(r.getBackground()), 
 					ic.convert(r.getSignal()), 
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()));
@@ -1301,9 +1299,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (calibration == null)
 			throw new ConfigurationException("No calibration");
 
-		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getDualIntensityConverter(intensityUnit);
-		TypeConverter<IntensityUnit> ic = list.get(0);
-		TypeConverter<IntensityUnit> bic = list.get(1);
+		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(intensityUnit);
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
@@ -1311,7 +1307,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeBIXYZ(
-					bic.convert(r.getBackground()), 
+					ic.convert(r.getBackground()), 
 					ic.convert(r.getSignal()), 
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()), 
@@ -1765,9 +1761,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			throw new ConfigurationException("Not a CCD camera");
 		final boolean emCCD = isEMCCD();
 
-		ArrayList<TypeConverter<IntensityUnit>> list = calibration.getDualIntensityConverter(IntensityUnit.PHOTON);
-		TypeConverter<IntensityUnit> ic = list.get(0);
-		TypeConverter<IntensityUnit> bic = list.get(1);
+		TypeConverter<IntensityUnit> ic = calibration.getIntensityConverter(IntensityUnit.PHOTON);
 		TypeConverter<DistanceUnit> dc = calibration.getDistanceConverter(DistanceUnit.NM);
 
 		// This will be fine if the intensity converter was created
@@ -1780,7 +1774,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 				final PeakResult r = getf(i);
 				double s = r.getParameter(ix);
 				procedure.executeLSEPrecision(Gaussian2DPeakResultHelper.getPrecision(nmPerPixel, dc.convert(s),
-						ic.convert(r.getSignal()), bic.convert(r.getBackground()), emCCD));
+						ic.convert(r.getSignal()), ic.convert(r.getBackground()), emCCD));
 			}
 		}
 		else
@@ -1790,7 +1784,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 				final PeakResult r = getf(i);
 				double s = Gaussian2DPeakResultHelper.getStandardDeviation(r.getParameter(ix), r.getParameter(iy));
 				procedure.executeLSEPrecision(Gaussian2DPeakResultHelper.getPrecision(nmPerPixel, dc.convert(s),
-						ic.convert(r.getSignal()), bic.convert(r.getBackground()), emCCD));
+						ic.convert(r.getSignal()), ic.convert(r.getBackground()), emCCD));
 			}
 		}
 	}

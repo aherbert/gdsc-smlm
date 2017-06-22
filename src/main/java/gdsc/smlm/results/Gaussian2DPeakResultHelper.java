@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import java.util.ArrayList;
-
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
@@ -45,7 +43,6 @@ public class Gaussian2DPeakResultHelper
 		// Set dynamically when needed
 		double nmPerPixel;
 		TypeConverter<IntensityUnit> toPhoton;
-		TypeConverter<IntensityUnit> toPhotonB;
 		TypeConverter<DistanceUnit> toPixel;
 		TypeConverter<DistanceUnit> toNM;
 		boolean emCCD;
@@ -86,7 +83,6 @@ public class Gaussian2DPeakResultHelper
 			this.calibration = helper.calibration;
 			this.nmPerPixel = helper.nmPerPixel;
 			this.toPhoton = helper.toPhoton;
-			this.toPhotonB = helper.toPhotonB;
 			this.toPixel = helper.toPixel;
 			this.toNM = helper.toNM;
 			this.emCCD = helper.emCCD;
@@ -148,21 +144,18 @@ public class Gaussian2DPeakResultHelper
 		public double getPrecisionX(float[] params) throws ConfigurationException
 		{
 			// Try to create the converter
-			if (toPhotonB == null)
+			if (toPhoton == null)
 			{
 				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
 					throw new ConfigurationException("Not a valid calibration");
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
-				ArrayList<TypeConverter<IntensityUnit>> list = calibration
-						.getDualIntensityConverter(IntensityUnit.PHOTON);
-				toPhoton = list.get(0);
-				toPhotonB = list.get(1);
+				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
 				toNM = calibration.getDistanceConverter(DistanceUnit.NM);
 			}
 
 			return Gaussian2DPeakResultHelper.getPrecisionX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
-					toPhoton.convert(params[PeakResult.INTENSITY]), toPhotonB.convert(params[PeakResult.BACKGROUND]),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
 					emCCD);
 		}
 
@@ -186,21 +179,18 @@ public class Gaussian2DPeakResultHelper
 		public double getVarianceX(float[] params) throws ConfigurationException
 		{
 			// Try to create the converter
-			if (toPhotonB == null)
+			if (toPhoton == null)
 			{
 				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
 					throw new ConfigurationException("Not a valid calibration");
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
-				ArrayList<TypeConverter<IntensityUnit>> list = calibration
-						.getDualIntensityConverter(IntensityUnit.PHOTON);
-				toPhoton = list.get(0);
-				toPhotonB = list.get(1);
+				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
 				toNM = calibration.getDistanceConverter(DistanceUnit.NM);
 			}
 
 			return Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
-					toPhoton.convert(params[PeakResult.INTENSITY]), toPhotonB.convert(params[PeakResult.BACKGROUND]),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
 					emCCD);
 		}
 	}
@@ -234,7 +224,7 @@ public class Gaussian2DPeakResultHelper
 		public double getPrecisionX(float[] params) throws ConfigurationException
 		{
 			return Gaussian2DPeakResultHelper.getPrecisionX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
-					toPhoton.convert(params[PeakResult.INTENSITY]), toPhotonB.convert(params[PeakResult.BACKGROUND]),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
 					emCCD);
 		}
 
@@ -249,7 +239,7 @@ public class Gaussian2DPeakResultHelper
 		public double getVarianceX(float[] params) throws ConfigurationException
 		{
 			return Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
-					toPhoton.convert(params[PeakResult.INTENSITY]), toPhotonB.convert(params[PeakResult.BACKGROUND]),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
 					emCCD);
 		}
 	}

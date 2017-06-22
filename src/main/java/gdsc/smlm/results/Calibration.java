@@ -916,32 +916,6 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Gets intensity converters to update values.
-	 * <p>
-	 * If the conversion is not possible then an exception is thrown.
-	 * <p>
-	 * The returned list has a converter with only the gain, and a second converter with the gain and bias.
-	 *
-	 * @param toIntensityUnit
-	 *            the intensity unit
-	 * @return the intensity converters (gain, gain + bias)
-	 * @throws ConversionException
-	 *             if a converter cannot be created
-	 */
-	@Deprecated
-	public ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverter(IntensityUnit toIntensityUnit)
-	{
-		if (hasIntensityUnit() && hasBias())
-		{
-			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
-			list.add(UnitConverterFactory.createConverter(intensityUnit, toIntensityUnit, gain));
-			list.add(UnitConverterFactory.createConverter(intensityUnit, toIntensityUnit, bias, gain));
-			return list;
-		}
-		throw new ConversionException();
-	}
-
-	/**
 	 * Gets a angle converter to update values.
 	 * <p>
 	 * If the conversion is not possible then an exception is thrown.
@@ -983,31 +957,23 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Gets intensity converters to update values.
+	 * Gets a intensity converter to update values.
 	 * <p>
 	 * If the conversion is not possible then an identity converter will be returned with the current units.
-	 * <p>
-	 * The returned list calibration has a converter with only the gain, and a second converter with the gain and bias.
-	 * If the bias is not available then the second converter is the same as the first.
 	 *
 	 * @param toIntensityUnit
 	 *            the intensity unit
-	 * @return the intensity converters (gain, gain + bias)
+	 * @return the intensity converter
 	 */
-	@Deprecated
-	public ArrayList<TypeConverter<IntensityUnit>> getDualIntensityConverterSafe(IntensityUnit toIntensityUnit)
+	public TypeConverter<IntensityUnit> getIntensityConverterSafe(IntensityUnit toIntensityUnit)
 	{
 		try
 		{
-			return getDualIntensityConverter(toIntensityUnit);
+			return getIntensityConverter(toIntensityUnit);
 		}
 		catch (ConversionException e)
 		{
-			ArrayList<TypeConverter<IntensityUnit>> list = new ArrayList<TypeConverter<IntensityUnit>>(2);
-			TypeConverter<IntensityUnit> c = new IdentityTypeConverter<IntensityUnit>(intensityUnit);
-			list.add(c);
-			list.add(c);
-			return list;
+			return new IdentityTypeConverter<IntensityUnit>(intensityUnit);
 		}
 	}
 

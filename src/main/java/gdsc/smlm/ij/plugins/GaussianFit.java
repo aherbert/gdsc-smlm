@@ -91,7 +91,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	private FitResult fitResult;
 	private double chiSquared;
 
-	private PeakResults results;
+	private IJTablePeakResults results;
 
 	/*
 	 * (non-Javadoc)
@@ -492,6 +492,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		}
 
 		results = new IJTablePeakResults(showDeviations, imp.getTitle() + " [" + imp.getCurrentSlice() + "]");
+		results.setShowFittingData(true);
 		results.begin();
 
 		// Perform the Gaussian fit

@@ -322,13 +322,16 @@ public class ResultsManager implements PlugIn
 		if (resultsSettings.showResultsTable)
 		{
 			IJTablePeakResults r = new IJTablePeakResults(showDeviations);
-			r.setPeakIdColumnName("Frame");
 			r.setDistanceUnit(resultsSettings.getTableDistanceUnit());
 			r.setIntensityUnit(resultsSettings.getTableIntensityUnit());
 			r.setAngleUnit(resultsSettings.getTableAngleUnit());
 			r.setComputePrecision(resultsSettings.tableComputePrecision);
 			r.setShowEndFrame(showEndFrame);
 			r.setRoundingPrecision(resultsSettings.tableRoundingPrecision);
+			r.setShowZ(results.is3D());
+			// TODO - Add to settings
+			r.setShowFittingData(false);
+			r.setShowNoise(false);
 			resultsList.addOutput(r);
 		}
 	}

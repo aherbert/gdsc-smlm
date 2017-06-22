@@ -307,4 +307,20 @@ public class PSFHelper
 	{
 		return createBuilder(psfType).build();
 	}
+
+	/**
+	 * Checks if is a 3D.
+	 *
+	 * @param psf
+	 *            the psf
+	 * @return true, if is 3D
+	 */
+	public static boolean is3D(PSF psf)
+	{
+		if (psf != null)
+		{
+			return psf.getPsfType() == PSFType.ASTIGMATIC_GAUSSIAN_2D;
+		}
+		return false;
+	}
 }

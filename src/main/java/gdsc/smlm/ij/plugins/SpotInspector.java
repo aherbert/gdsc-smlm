@@ -185,28 +185,16 @@ public class SpotInspector implements PlugIn, MouseListener
 		});
 		Collections.sort(rankedResults);
 
-		// Prepare results table. Get bias if necessary
-		if (showCalibratedValues)
-		{
-			// Get a bias if required
-			Calibration calibration = results.getCalibration();
-			if (calibration.getBias() == 0)
-			{
-				ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-				gd.addMessage("Calibrated results requires a camera bias");
-				gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
-				gd.showDialog();
-				if (!gd.wasCanceled())
-				{
-					calibration.setBias(Math.abs(gd.getNextNumber()));
-				}
-			}
-		}
-
+		// Prepare results table
 		IJTablePeakResults table = new IJTablePeakResults(false, results.getName(), true);
 		table.copySettings(results);
 		table.setTableTitle(TITLE);
 		table.setAddCounter(true);
+		table.setShowZ(results.is3D());
+		// TODO - Add to settings
+		table.setShowFittingData(true);
+		table.setShowNoise(true);
+		
 		if (showCalibratedValues)
 		{
 			table.setDistanceUnit(DistanceUnit.NM);

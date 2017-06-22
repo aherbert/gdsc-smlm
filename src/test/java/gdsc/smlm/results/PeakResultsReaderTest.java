@@ -456,6 +456,12 @@ public class PeakResultsReaderTest
 		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TSF, false, ResultsFileFormat.GDSC_BINARY, false,
 				20);
 	}
+	
+	// TODO - Test can write MALK in pixels and Counts and it reads back in nm and photons
+	// TODO - Test can read back Text/Binary in pixels and photons when output is written in nm and counts, i.e. convert to preferred units works.
+	// TODO - Test can read back simplified Gaussian 2D PSF when the PSF params are redundant
+	
+	// TODO - Switch to using the proto calibration 
 
 	private void readWith2IsFasterThan1(boolean showDeviations, boolean showEndFrame, boolean showId,
 			ResultsFileFormat f1, boolean useScanner1, ResultsFileFormat f2, boolean useScanner2, int loops)

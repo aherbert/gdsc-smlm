@@ -30,6 +30,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.TextUtils;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -2123,7 +2124,9 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		{
 			String title = null; // imp.getTitle()
 			IJTablePeakResults r = new IJTablePeakResults(resultsSettings.showDeviations, title);
-			r.setPeakIdColumnName("Frame");
+			r.setShowFittingData(true);
+			r.setShowNoise(true);
+			r.setShowZ(PSFHelper.is3D(resultsList.getPSF()));
 			r.setDistanceUnit(resultsSettings.getTableDistanceUnit());
 			r.setIntensityUnit(resultsSettings.getTableIntensityUnit());
 			r.setComputePrecision(resultsSettings.tableComputePrecision);

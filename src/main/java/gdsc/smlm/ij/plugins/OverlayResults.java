@@ -210,12 +210,14 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			if (showTable)
 			{
 				table = new IJTablePeakResults(false);
-				table.setPeakIdColumnName("Frame");
 				table.setTableTitle(TITLE);
 				table.copySettings(results);
 				table.setClearAtStart(true);
 				table.setAddCounter(true);
 				table.setHideSourceText(true);
+				table.setShowZ(results.is3D());
+				//table.setShowFittingData(true);
+				//table.setShowNoise(true);
 				table.begin();
 				// Position under thew window
 				tw = table.getResultsWindow();

@@ -21,6 +21,7 @@ import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultsHelper;
+import gnu.trove.list.array.TIntArrayList;
 import ij.WindowManager;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
@@ -45,6 +46,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private PeakResultsHelper helper;
 	private Converter[] converters;
+	private Converter ic;
+	private int[] outIndices;
 
 	private DistanceUnit distanceUnit = null;
 	private IntensityUnit intensityUnit = null;
@@ -56,11 +59,14 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	// with a new image source
 	private static HashMap<TextPanel, ImageROIPainter> map = new HashMap<TextPanel, ImageROIPainter>();
 
-	private boolean showDeviations = true;
+	private boolean showDeviations = false;
 	private boolean showEndFrame = false;
+	private boolean showFittingData = false;
+	private boolean showNoise = false;
+	private boolean showZ = false;
 	private boolean clearAtStart = false;
 	private boolean hideSourceText = false;
-	private String peakIdColumnName = "Peak";
+	private String frameColumnName = "T";
 	private String source = null;
 	private String sourceText = null;
 	private String tableTitle = "Fit Results";
@@ -141,6 +147,14 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		helper.setDistanceUnit(distanceUnit);
 		helper.setAngleUnit(angleUnit);
 		converters = helper.getConverters();
+		ic = converters[PeakResult.INTENSITY];
+		outIndices = Utils.newArray(outIndices.length, 0, 1);
+		if (!showZ)
+		{
+			TIntArrayList list = new TIntArrayList(outIndices);
+			list.remove(PeakResult.Z);
+			outIndices = list.toArray();
+		}
 		// Update the calibration if converters were created
 		setCalibration(helper.getCalibration());
 
@@ -208,7 +222,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			String[] headings = tp.getColumnHeadings().split("\t");
 			for (int i = 0; i < headings.length; i++)
 			{
-				if (headings[i].equals(peakIdColumnName))
+				if (headings[i].equals(frameColumnName))
 				{
 					indexT = i;
 					continue;
@@ -237,23 +251,29 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			sb.append("#\t");
 		if (sourceText != null)
 			sb.append("Source\t");
-		sb.append(peakIdColumnName);
+		sb.append(frameColumnName);
 		if (showEndFrame)
-			sb.append("\tEnd ").append(peakIdColumnName);
-		sb.append("\torigX");
-		sb.append("\torigY");
-		sb.append("\torigValue");
-		sb.append("\tError");
-		sb.append("\tNoise");
-		if (!Utils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
-			sb.append(" (").append(unitNames[PeakResult.INTENSITY]).append(')');
-		sb.append("\tSNR");
-
-		for (int i = 0; i < names.length; i++)
+			sb.append("\tEnd ").append(frameColumnName);
+		if (showFittingData)
 		{
-			sb.append('\t').append(names[i]);
-			if (!Utils.isNullOrEmpty(unitNames[i]))
-				sb.append(" (").append(unitNames[i]).append(')');
+			sb.append("\torigX");
+			sb.append("\torigY");
+			sb.append("\torigValue");
+			sb.append("\tError");
+		}
+		if (showNoise)
+		{
+			sb.append("\tNoise");
+			if (!Utils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
+				sb.append(" (").append(unitNames[PeakResult.INTENSITY]).append(')');
+			sb.append("\tSNR");
+		}
+
+		for (int i = 0; i < outIndices.length; i++)
+		{
+			sb.append('\t').append(names[outIndices[i]]);
+			if (!Utils.isNullOrEmpty(unitNames[outIndices[i]]))
+				sb.append(" (").append(unitNames[outIndices[i]]).append(')');
 			addDeviation(sb);
 		}
 		if (canComputePrecision)
@@ -299,43 +319,43 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 * 
 	 * @see gdsc.smlm.results.AbstractPeakResults#add(int, int, int, float, double, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
+	public void add(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsDev)
 	{
-		addPeak(peak, peak, origX, origY, origValue, error, noise, params, paramsDev);
+		addPeak(frame, frame, origX, origY, origValue, error, noise, params, paramsDev);
 	}
 
-	private void addPeak(int peak, int endFrame, int origX, int origY, float origValue, double error, float noise,
+	private void addPeak(int frame, int endFrame, int origX, int origY, float origValue, double error, float noise,
 			float[] params, float[] paramsStdDev)
 	{
 		if (!tableActive)
 			return;
 
 		final float snr = (noise > 0) ? params[PeakResult.INTENSITY] / noise : 0;
-		StringBuilder sb = addStandardData(peak, endFrame, origX, origY, origValue, error, noise, snr);
+		StringBuilder sb = addStandardData(frame, endFrame, origX, origY, origValue, error, noise, snr);
 		if (isShowDeviations())
 		{
 			if (paramsStdDev != null)
 			{
-				for (int i = 0; i < converters.length; i++)
+				for (int i = 0; i < outIndices.length; i++)
 				{
-					add(sb, converters[i].convert(params[i]));
-					add(sb, converters[i].convert(paramsStdDev[i]));
+					add(sb, converters[outIndices[i]].convert(params[i]));
+					add(sb, converters[outIndices[i]].convert(paramsStdDev[i]));
 				}
 			}
 			else
 			{
-				for (int i = 0; i < converters.length; i++)
+				for (int i = 0; i < outIndices.length; i++)
 				{
-					add(sb, converters[i].convert(params[i]));
+					add(sb, converters[outIndices[i]].convert(params[i]));
 					sb.append("\t0");
 				}
 			}
 		}
 		else
 		{
-			for (int i = 0; i < converters.length; i++)
-				add(sb, converters[i].convert(params[i]));
+			for (int i = 0; i < outIndices.length; i++)
+				add(sb, converters[outIndices[i]].convert(params[i]));
 		}
 		if (canComputePrecision)
 		{
@@ -345,7 +365,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		append(sb.toString());
 	}
 
-	private StringBuilder addStandardData(int peak, int endPeak, int origX, int origY, float origValue, double error,
+	private StringBuilder addStandardData(int frame, int endFrame, int origX, int origY, float origValue, double error,
 			float noise, float snr)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -355,16 +375,22 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			sb.append(sourceText);
 		// Do not calibrate the original values		
 		//if (showCalibratedValues)
-		//	sb.append(peak).append(String.format("\t%g", origX)).append(String.format("\t%g", origY));
+		//	sb.append(frame).append(String.format("\t%g", origX)).append(String.format("\t%g", origY));
 		//else
-		sb.append(peak);
+		sb.append(frame);
 		if (showEndFrame)
-			sb.append('\t').append(endPeak);
-		sb.append('\t').append(origX).append('\t').append(origY);
-		add(sb, origValue);
-		add(sb, error);
-		add(sb, converters[PeakResult.INTENSITY].convert(noise)); // This should be converted
-		add(sb, snr);
+			sb.append('\t').append(endFrame);
+		if (showFittingData)
+		{
+			sb.append('\t').append(origX).append('\t').append(origY);
+			add(sb, origValue);
+			add(sb, error);
+		}
+		if (showNoise)
+		{
+			add(sb, ic.convert(noise)); // This should be converted
+			add(sb, snr);
+		}
 		return sb;
 	}
 
@@ -480,20 +506,20 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	}
 
 	/**
-	 * @return the name of the peak column
+	 * @return the name of the frame column
 	 */
-	public String getPeakIdColumnName()
+	public String getFrameColumnName()
 	{
-		return peakIdColumnName;
+		return frameColumnName;
 	}
 
 	/**
-	 * @param peakIdColumnName
-	 *            the name of the peak column
+	 * @param frameColumnName
+	 *            the name of the frame column
 	 */
-	public void setPeakIdColumnName(String peakIdColumnName)
+	public void setFrameColumnName(String frameColumnName)
 	{
-		this.peakIdColumnName = peakIdColumnName;
+		this.frameColumnName = frameColumnName;
 	}
 
 	/*
@@ -648,6 +674,61 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void setShowEndFrame(boolean showEndFrame)
 	{
 		this.showEndFrame = showEndFrame;
+	}
+
+	/**
+	 * @return If true then show the fitting data (original pixel data and fit error) in the table
+	 */
+	public boolean isShowFittingData()
+	{
+		return showFittingData;
+	}
+
+	/**
+	 * @param showFittingData
+	 *            If true then show the fitting data (original pixel data and fit error) in the table
+	 */
+	public void setShowFittingData(boolean showFittingData)
+	{
+		this.showFittingData = showFittingData;
+	}
+
+	/**
+	 * @return If true then show the noise and SNR in the table
+	 */
+	public boolean isShowNoise()
+	{
+		return showNoise;
+	}
+
+	/**
+	 * @param showNoise
+	 *            If true then show the noise and SNR in the table
+	 */
+	public void setShowNoise(boolean showNoise)
+	{
+		this.showNoise = showNoise;
+	}
+
+	/**
+	 * Checks if showing the Z column.
+	 *
+	 * @return true, if is show Z
+	 */
+	public boolean isShowZ()
+	{
+		return showZ;
+	}
+
+	/**
+	 * Set to true to show the Z column.
+	 *
+	 * @param showZ
+	 *            the new show Z
+	 */
+	public void setShowZ(boolean showZ)
+	{
+		this.showZ = showZ;
 	}
 
 	/**

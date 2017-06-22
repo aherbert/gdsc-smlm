@@ -47,8 +47,6 @@ public class PeakResultsHelper
 	/** The intensity unit. */
 	private IntensityUnit intensityUnit;
 
-	/** The background converter. */
-	private TypeConverter<IntensityUnit> backgroundConverter = null;
 	/** The intensity converter. */
 	private TypeConverter<IntensityUnit> intensityConverter = null;
 
@@ -70,32 +68,8 @@ public class PeakResultsHelper
 	 */
 	public void setIntensityUnit(IntensityUnit intensityUnit)
 	{
-		backgroundConverter = intensityConverter = null;
+		intensityConverter = null;
 		this.intensityUnit = intensityUnit;
-	}
-
-	/**
-	 * Gets the background converter for the configured units. If the calibration is null then an identity converter is
-	 * returned.
-	 *
-	 * @return the background converter
-	 */
-	public TypeConverter<IntensityUnit> getBackgroundConverter()
-	{
-		if (backgroundConverter == null)
-		{
-			if (calibration == null)
-			{
-				backgroundConverter = intensityConverter = new IdentityTypeConverter<IntensityUnit>(null);
-			}
-			else
-			{
-				ArrayList<TypeConverter<IntensityUnit>> list = calibration.getDualIntensityConverterSafe(intensityUnit);
-				intensityConverter = list.get(0);
-				backgroundConverter = list.get(1);
-			}
-		}
-		return backgroundConverter;
 	}
 
 	/**
@@ -118,7 +92,8 @@ public class PeakResultsHelper
 	{
 		if (intensityConverter == null)
 		{
-			getBackgroundConverter();
+			intensityConverter = (calibration == null) ? new IdentityTypeConverter<IntensityUnit>(null)
+					: calibration.getIntensityConverterSafe(intensityUnit);
 		}
 		return intensityConverter;
 	}
@@ -241,10 +216,10 @@ public class PeakResultsHelper
 	{
 		TurboList<Converter> list = new TurboList<Converter>(5);
 
-		getBackgroundConverter();
+		getIntensityConverter();
 		getDistanceConverter();
 
-		list.add(backgroundConverter);
+		list.add(intensityConverter);
 		list.add(intensityConverter);
 		list.add(distanceConverter);
 		list.add(distanceConverter);
@@ -320,7 +295,7 @@ public class PeakResultsHelper
 	{
 		TurboList<String> list = new TurboList<String>(5);
 
-		getBackgroundConverter();
+		getIntensityConverter();
 		getDistanceConverter();
 
 		String intensityUnit = (intensityConverter.to() != null) ? UnitHelper.getShortName(intensityConverter.to())
