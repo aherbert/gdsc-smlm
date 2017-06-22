@@ -17,19 +17,23 @@ import java.awt.Rectangle;
 import java.util.Collection;
 
 import gdsc.smlm.data.config.SMLMSettings.PSF;
+import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.SMLMSettings.Calibration;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 
 /**
  * Abstract base class for peak results.
  */
 public abstract class AbstractPeakResults implements PeakResults
 {
-	public static final double DEFAULT_NM_PER_PIXEL = 100;
-	public static final double DEFAULT_GAIN = 1;
+	public static final double DEFAULT_NM_PER_PIXEL = 0;
+	public static final double DEFAULT_GAIN = 0;
 	public static final boolean DEFAULT_EMCCD = true;
 
 	protected ImageSource source = null;
 	protected Rectangle bounds = null;
-	protected Calibration calibration = null;
+	protected CalibrationHelper calibration = null;
 	protected PSF psf = null;
 	protected String configuration = "";
 	protected String name = "";
@@ -101,7 +105,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public void setCalibration(Calibration calibration)
 	{
-		this.calibration = calibration;
+		this.calibration = (calibration != null) ? new CalibrationHelper(calibration) : null;
 	}
 
 	/*
@@ -111,14 +115,32 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public Calibration getCalibration()
 	{
-		return calibration;
+		return (calibration != null) ? calibration.getCalibration() : null;
+	}
+	
+	/**
+	 * Copy the calibration.
+	 */
+	public void copyCalibration()
+	{
+		setCalibration(getCalibration());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResults#getPSF()
+	 */
 	public PSF getPSF()
 	{
 		return psf;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResults#setPSF(gdsc.smlm.data.config.SMLMSettings.PSF)
+	 */
 	public void setPSF(PSF psf)
 	{
 		this.psf = psf;
@@ -173,8 +195,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public double getNmPerPixel()
 	{
-		return (calibration != null && calibration.hasNmPerPixel()) ? calibration.getNmPerPixel()
-				: DEFAULT_NM_PER_PIXEL;
+		return (calibration != null) ? calibration.getNmPerPixel() : DEFAULT_NM_PER_PIXEL;
 	}
 
 	/**
@@ -184,7 +205,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public double getGain()
 	{
-		return (calibration != null && calibration.hasGain()) ? calibration.getGain() : DEFAULT_GAIN;
+		return (calibration != null) ? calibration.getGain() : DEFAULT_GAIN;
 	}
 
 	/**
@@ -205,12 +226,13 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public boolean isEMCCD()
 	{
-		return (calibration != null && calibration.isCCDCamera()) ? calibration.isEmCCD() : DEFAULT_EMCCD;
+		return (calibration != null && calibration.isCCDCamera()) ? calibration.isEmCCD()
+				: DEFAULT_EMCCD;
 	}
 
 	/**
-	 * Checks if the results have a valid calibration to compute the localisation precision. This requires the pixel
-	 * size and camera details (gain and CCD type).
+	 * Checks if the results have a valid calibration to compute the localisation precision. This requires the
+	 * pixel size and camera gain, or alternatively the units to be in nm and photons, and camera CCD type.
 	 *
 	 * @return true, if is calibrated for precision
 	 */
@@ -218,14 +240,20 @@ public abstract class AbstractPeakResults implements PeakResults
 	{
 		if (calibration != null)
 		{
-			return calibration.hasNmPerPixel() && calibration.hasGain() && calibration.isCCDCamera();
+			if (!calibration.isCCDCamera())
+				return false;
+			DistanceUnit du = calibration.getDistanceUnit();
+			IntensityUnit iu = calibration.getIntensityUnit();
+			if (du == DistanceUnit.NM && iu == IntensityUnit.PHOTON)
+				return true;
+			return isCalibrated();
 		}
 		return false;
 	}
 
 	/**
 	 * Checks if the results have a basic calibration. This requires the pixel
-	 * size and camera gain.
+	 * size and camera gain with the distance and intensity units.
 	 *
 	 * @return true, if is calibrated
 	 */
@@ -233,7 +261,12 @@ public abstract class AbstractPeakResults implements PeakResults
 	{
 		if (calibration != null)
 		{
-			return calibration.hasNmPerPixel() && calibration.hasGain();
+			DistanceUnit du = calibration.getDistanceUnit();
+			IntensityUnit iu = calibration.getIntensityUnit();
+			//@formatter:off
+			return (du != null && calibration.getNmPerPixel() > 0) &&
+				   (iu != null && calibration.getGain() > 0);
+			//@formatter:on
 		}
 		return false;
 	}

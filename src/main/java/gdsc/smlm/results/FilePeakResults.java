@@ -4,11 +4,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.XStreamException;
-import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.utils.NotImplementedException;
 
@@ -115,23 +113,11 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		if (bounds != null)
 			sb.append(String.format("#Bounds x%d y%d w%d h%d\n", bounds.x, bounds.y, bounds.width, bounds.height));
 		if (calibration != null)
-			sb.append(String.format("#Calibration %s\n", singleLine(toXML(calibration))));
+			printer = addMessage(sb, printer, "Calibration", calibration.getCalibrationOrBuilder());
 		if (configuration != null && configuration.length() > 0)
 			sb.append(String.format("#Configuration %s\n", singleLine(configuration)));
 		if (psf != null)
-		{
-			try
-			{
-				if (printer == null)
-					printer = JsonFormat.printer().omittingInsignificantWhitespace();
-				sb.append(String.format("#PSF %s\n", printer.print(psf)));
-			}
-			catch (InvalidProtocolBufferException e)
-			{
-				// This shouldn't happen so throw it
-				throw new NotImplementedException("Unable to serialise the PSF settings", e);
-			}
-		}
+			printer = addMessage(sb, printer, "PSF", psf);
 
 		// Add any extra comments
 		String[] comments = getHeaderComments();
@@ -160,41 +146,20 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		return sb.toString();
 	}
 
-	private static XStream xs = null;
-
-	/**
-	 * Convert the calibration to XML.
-	 * <p>
-	 * This method was added in version 3 to support an update to the calibration
-	 *
-	 * @param calibration
-	 *            the calibration
-	 * @return the string
-	 */
-	private static String toXML(Calibration calibration)
+	private Printer addMessage(StringBuilder sb, Printer printer, String name, MessageOrBuilder msg)
 	{
-		if (xs == null)
+		try
 		{
-			xs = new XStream(new DomDriver());
-			// Control what is serialised
-			xs.omitField(Calibration.class, "fields");
-			// This field is deprecated
-			xs.omitField(Calibration.class, "emCCD");
-			// Do not ignore missing fields. This is so XStream deserialisation
-			// will read the invalid values that are set in the object.
+			if (printer == null)
+				printer = JsonFormat.printer().omittingInsignificantWhitespace();
+			sb.append(String.format("#%s %s\n", name, printer.print(msg)));
 		}
-		if (xs != null)
+		catch (InvalidProtocolBufferException e)
 		{
-			try
-			{
-				return xs.toXML(calibration);
-			}
-			catch (XStreamException ex)
-			{
-				//ex.printStackTrace();
-			}
+			// This shouldn't happen so throw it
+			throw new NotImplementedException("Unable to serialise the " + name + " settings", e);
 		}
-		return null;
+		return printer;
 	}
 
 	private void addComment(StringBuilder sb, String comment)

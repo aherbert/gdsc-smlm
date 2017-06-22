@@ -4,6 +4,7 @@ import java.awt.Rectangle;
 import java.util.Collection;
 
 import gdsc.smlm.data.config.SMLMSettings.PSF;
+import gdsc.smlm.data.config.SMLMSettings.Calibration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

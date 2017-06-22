@@ -89,7 +89,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 */
 	protected String[] getHeaderComments()
 	{
-		fieldNames = new PeakResultsHelper(calibration, psf).getNames();
+		fieldNames = new PeakResultsHelper(null, psf).getNames();
 		nFields = fieldNames.length;
 
 		String[] comments = new String[2];

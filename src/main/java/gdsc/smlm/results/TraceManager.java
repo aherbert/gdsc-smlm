@@ -22,6 +22,8 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.logging.TrackProgress;
+import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.SMLMSettings.Calibration;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -588,7 +590,7 @@ public class TraceManager
 			if (calibration != null)
 				try
 				{
-					converter = calibration.getDistanceConverter(DistanceUnit.NM);
+					converter = CalibrationHelper.getDistanceConverter(calibration, DistanceUnit.NM);
 				}
 				catch (ConversionException e)
 				{
@@ -624,7 +626,7 @@ public class TraceManager
 					background += r.getBackground();
 				}
 				noise = Math.sqrt(noise);
-				background /= traces[i].size();				
+				background /= traces[i].size();
 				double signal = traces[i].getSignal();
 				int endFrame = traces[i].getTail().getEndFrame();
 				AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(), centroid[0], centroid[1],
@@ -636,7 +638,7 @@ public class TraceManager
 				peakResult.origX = result.origX;
 				peakResult.origY = result.origY;
 				peakResult.origValue = result.origValue;
-				
+
 				peakResult.setId(traces[i].getId());
 				peakResult.setEndFrame(endFrame);
 				if (converter != null)

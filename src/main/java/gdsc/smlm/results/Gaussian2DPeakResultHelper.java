@@ -7,6 +7,7 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.BitFlags;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.CameraType;
@@ -36,7 +37,7 @@ public class Gaussian2DPeakResultHelper
 	{
 		final static double twoPi = 2 * Math.PI;
 
-		final Calibration calibration;
+		final CalibrationHelper calibration;
 		final int isx, isy;
 		boolean oneAxisSD;
 
@@ -61,11 +62,11 @@ public class Gaussian2DPeakResultHelper
 		 *            the psf
 		 * @param calibration
 		 *            the calibration (used for converting the parameters)
-		 * @see #create(PSF, Calibration, int)
+		 * @see #create(PSF, CalibrationHelper, int)
 		 * @throws ConfigurationException
 		 *             If not a Gaussian 2D PSF
 		 */
-		public BaseGaussian2DPeakResultCalculator(PSF psf, Calibration calibration) throws ConfigurationException
+		public BaseGaussian2DPeakResultCalculator(PSF psf, CalibrationHelper calibration) throws ConfigurationException
 		{
 			int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 			isx = indices[0];
@@ -108,20 +109,9 @@ public class Gaussian2DPeakResultHelper
 					(twoPi * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
 		}
 
-		private static boolean isCCD(Calibration calibration)
+		private static boolean isCCD(CalibrationHelper calibration)
 		{
-			if (calibration.hasCameraType())
-			{
-				switch (calibration.getCameraType())
-				{
-					case CCD:
-					case EMCCD:
-						return true;
-					default:
-						break;
-				}
-			}
-			return false;
+			return calibration.isCCDCamera();
 		}
 
 		public double getPrecision(float[] params, float noise) throws ConfigurationException
@@ -312,7 +302,7 @@ public class Gaussian2DPeakResultHelper
 	 * @throws ConfigurationException
 	 *             If not a Gaussian 2D PSF or the calibration is invalid
 	 */
-	public static Gaussian2DPeakResultCalculator create(PSF psf, Calibration calibration, int flags)
+	public static Gaussian2DPeakResultCalculator create(PSF psf, CalibrationHelper calibration, int flags)
 			throws ConfigurationException
 	{
 		BaseGaussian2DPeakResultCalculator helper = new BaseGaussian2DPeakResultCalculator(psf, calibration);

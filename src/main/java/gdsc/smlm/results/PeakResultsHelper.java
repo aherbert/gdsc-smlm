@@ -1,21 +1,21 @@
 package gdsc.smlm.results;
 
-import java.util.ArrayList;
-
 import gdsc.core.data.utils.Converter;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.Calibration;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.PSF;
 import gdsc.smlm.data.config.SMLMSettings.PSFParameter;
 import gdsc.smlm.data.config.SMLMSettings.PSFParameterUnit;
+import gdsc.smlm.data.config.UnitHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -35,10 +35,10 @@ import gdsc.smlm.data.config.SMLMSettings.PSFParameterUnit;
  */
 public class PeakResultsHelper
 {
-	private Calibration calibration;
+	private CalibrationHelper calibration;
 	private PSF psf;
 
-	public PeakResultsHelper(Calibration calibration, PSF psf)
+	public PeakResultsHelper(CalibrationHelper calibration, PSF psf)
 	{
 		this.calibration = calibration;
 		this.psf = psf;
@@ -429,9 +429,6 @@ public class PeakResultsHelper
 		if (calibration == null)
 			return null;
 
-		// Clone the calibration as it may change
-		Calibration calibration = this.calibration.clone();
-
 		if (hasIntensityConverter())
 			calibration.setIntensityUnit(getIntensityConverter().to());
 		if (hasDistanceConverter())
@@ -439,6 +436,6 @@ public class PeakResultsHelper
 		if (hasAngleConverter())
 			calibration.setAngleUnit(getAngleConverter().to());
 
-		return calibration;
+		return calibration.getCalibration();
 	}
 }

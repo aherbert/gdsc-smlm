@@ -1,7 +1,7 @@
 package gdsc.smlm.ij.results;
 
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.results.AbstractPeakResults;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ThreadSafePeakResults;
 
 /*----------------------------------------------------------------------------- 
@@ -24,11 +24,9 @@ public abstract class IJAbstractPeakResults extends AbstractPeakResults implemen
 {
 	public void setCalibration(double nmPerPixel, double gain)
 	{
-		Calibration calibration = getCalibration();
 		if (calibration == null)
-			calibration = new Calibration();
+			calibration = new CalibrationHelper();
 		calibration.setNmPerPixel(nmPerPixel);
 		calibration.setGain(gain);
-		setCalibration(calibration);
 	}
 }

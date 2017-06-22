@@ -2,7 +2,6 @@ package gdsc.smlm.results;
 
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -795,8 +794,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			// Deep copy the objects that are not immutable
 			if (bounds != null)
 				copy.bounds = new Rectangle(bounds);
-			if (calibration != null)
-				copy.calibration = calibration.clone();
+			copy.copyCalibration();
 			copy.results = results.copy();
 		}
 		return copy;

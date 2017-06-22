@@ -32,7 +32,6 @@ import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
@@ -125,44 +124,28 @@ public class MALKFilePeakResults extends FilePeakResults
 		if (calibration != null)
 		{
 			// Copy it so it can be modified
-			setCalibration(calibration.clone());
+			copyCalibration();
 
 			// Create converters 
-			if (calibration.hasNmPerPixel())
+			try
 			{
-				double nmPerPixel = calibration.getNmPerPixel();
-				if (calibration.hasDistanceUnit())
-				{
-					try
-					{
-						toNMConverter = UnitConverterFactory.createConverter(calibration.getDistanceUnit(),
-								DistanceUnit.NM, nmPerPixel);
-						calibration.setDistanceUnit(DistanceUnit.NM);
-					}
-					catch (ConversionException e)
-					{
-						// Gracefully fail so ignore this
-					}
-				}
+				toNMConverter = calibration.getDistanceConverter(DistanceUnit.NM);
 			}
-			if (calibration.hasIntensityUnit())
+			catch (ConversionException e)
 			{
-				if (calibration.hasGain())
-				{
-					try
-					{
-						toPhotonConverter = UnitConverterFactory.createConverter(calibration.getIntensityUnit(),
-								IntensityUnit.PHOTON, calibration.getGain());
-						calibration.setIntensityUnit(IntensityUnit.PHOTON);
-					}
-					catch (ConversionException e)
-					{
-						// Gracefully fail so ignore this
-					}
-				}
+				// Gracefully fail so ignore this
+			}
+			try
+			{
+				toPhotonConverter = calibration.getIntensityConverter(IntensityUnit.PHOTON);
+				calibration.setIntensityUnit(IntensityUnit.PHOTON);
+			}
+			catch (ConversionException e)
+			{
+				// Gracefully fail so ignore this
 			}
 		}
-		
+
 		// The data loses PSF information so reset this to a custom type with 
 		// no additional parameters.
 		setPSF(PSFHelper.create(PSFType.CUSTOM));

@@ -1,14 +1,12 @@
 package gdsc.smlm.results;
 
-import java.util.ArrayList;
-
-import gdsc.smlm.data.config.SMLMSettings.CameraType;
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.CameraType;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
 
 /*----------------------------------------------------------------------------- 
@@ -29,8 +27,12 @@ import gdsc.smlm.data.config.UnitConverterFactory;
  * <p>
  * The calibration has flags to indicate that a valid value has been set for each property. If these are false then the
  * property get method can optionally throw an exception.
+ * <p>
+ * @deprecated This class has been replaced with generated objects using Google protocol buffers. It is left to support
+ *             deserialisation of legacy files.
  */
-public class Calibration implements Cloneable
+@Deprecated
+class Calibration implements Cloneable
 {
 	/** The field missing exception. */
 	// State flags
