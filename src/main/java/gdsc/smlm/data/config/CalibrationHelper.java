@@ -33,7 +33,7 @@ import gdsc.smlm.data.config.SMLMSettings.PSFCalibration;
 public class CalibrationHelper
 {
 	/** The original calibration. This is immutable. */
-	private final Calibration calibration;
+	private Calibration calibration;
 
 	/** The calibration builder holding the latest calibration if changes have been made. */
 	private Calibration.Builder calibrationBuilder;
@@ -59,6 +59,21 @@ public class CalibrationHelper
 		if (calibration == null)
 			throw new IllegalArgumentException("Calibration is null");
 		this.calibration = calibration;
+	}
+
+	/**
+	 * Instantiates a new calibration helper.
+	 *
+	 * @param calibration
+	 *            the calibration
+	 * @throws IllegalArgumentException
+	 *             if the calibration is null
+	 */
+	public CalibrationHelper(Calibration.Builder calibration) throws IllegalArgumentException
+	{
+		if (calibration == null)
+			throw new IllegalArgumentException("Calibration is null");
+		this.calibrationBuilder = calibration;
 	}
 
 	/**
@@ -644,7 +659,10 @@ public class CalibrationHelper
 	 */
 	public void setDistanceUnit(DistanceUnit distanceUnit)
 	{
-		getBuilder().getDistanceCalibrationBuilder().setUnit(distanceUnit);
+		if (distanceUnit == null)
+			getBuilder().getDistanceCalibrationBuilder().clearUnit();
+		else
+			getBuilder().getDistanceCalibrationBuilder().setUnit(distanceUnit);
 	}
 
 	/**
@@ -676,7 +694,10 @@ public class CalibrationHelper
 	 */
 	public void setIntensityUnit(IntensityUnit intensityUnit)
 	{
-		getBuilder().getIntensityCalibrationBuilder().setUnit(intensityUnit);
+		if (intensityUnit == null)
+			getBuilder().getIntensityCalibrationBuilder().clearUnit();
+		else
+			getBuilder().getIntensityCalibrationBuilder().setUnit(intensityUnit);
 	}
 
 	/**
@@ -708,6 +729,9 @@ public class CalibrationHelper
 	 */
 	public void setAngleUnit(AngleUnit angleUnit)
 	{
-		getBuilder().getPsfCalibrationBuilder().setAngleUnit(angleUnit);
+		if (angleUnit == null)
+			getBuilder().getPsfCalibrationBuilder().clearAngleUnit();
+		else
+			getBuilder().getPsfCalibrationBuilder().setAngleUnit(angleUnit);
 	}
 }

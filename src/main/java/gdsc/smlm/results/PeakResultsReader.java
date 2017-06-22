@@ -37,15 +37,16 @@ import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.Calibration;
+import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.PSF;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-//import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.utils.XmlUtils;
@@ -92,7 +93,7 @@ public class PeakResultsReader
 	private String name = null;
 	private ImageSource source = null;
 	private Rectangle bounds = null;
-	private Calibration calibration = null;
+	private CalibrationHelper calibration = null;
 	private PSF psf = null;
 	private String configuration = null;
 	private TrackProgress tracker = null;
@@ -364,6 +365,7 @@ public class PeakResultsReader
 	/**
 	 * @return The calibration specified in the results header
 	 */
+	@SuppressWarnings("deprecation")
 	public Calibration getCalibration()
 	{
 		if (calibration == null)
@@ -386,7 +388,7 @@ public class PeakResultsReader
 							if (Maths.isFinite(resolution) && resolution > 0)
 							{
 								final double nmPerPixel = (float) (1e9 / resolution);
-								calibration = new Calibration();
+								calibration = new CalibrationHelper();
 								calibration.setNmPerPixel(nmPerPixel);
 							}
 						}
@@ -398,37 +400,73 @@ public class PeakResultsReader
 				}
 				else
 				{
-					String xml = getField("Calibration");
-					if (xml != null && xml.length() > 0 && xml.startsWith("<"))
+					String calibrationString = getField("Calibration");
+					if (calibrationString != null && calibrationString.length() > 0)
 					{
-						// Convert the XML back
-						try
+						// Older formats used XML
+						// TODO - Test this still works using older code, e.g. that
+						// released to Fiji.
+						if (calibrationString.startsWith("<"))
 						{
-							calibration = (Calibration) XmlUtils.fromXML(xml);
-							calibration.validate();
-							if (smlmVersion < 3)
+							// Convert the XML back
+							try
 							{
-								// Support reading old objects that had an emCCD boolean
-								calibration.setCameraTypeFromEmCCDField();
-								// Previous version were always in pixels and counts
+								gdsc.smlm.results.Calibration cal = (gdsc.smlm.results.Calibration) XmlUtils
+										.fromXML(calibrationString);
+								cal.validate();
+								
+								// Convert to a calibration helper
+								calibration = new CalibrationHelper();
+								if (cal.hasNmPerPixel())
+									calibration.setNmPerPixel(cal.getNmPerPixel());
+								if (cal.hasGain())
+									calibration.setGain(cal.getGain());
+								if (cal.hasExposureTime())
+									calibration.setExposureTime(cal.getExposureTime());
+								if (cal.hasReadNoise())
+									calibration.setReadNoise(cal.getReadNoise());
+								if (cal.hasBias())
+									calibration.setBias(cal.getBias());
+								if (cal.emCCD)
+									calibration.setCameraType(CameraType.EMCCD);
+								if (cal.hasAmplification())
+									calibration.setAmplification(cal.getAmplification());
+								
+								// Previous version were always in fixed units
 								calibration.setDistanceUnit(DistanceUnit.PIXEL);
 								calibration.setIntensityUnit(IntensityUnit.COUNT);
+								calibration.setAngleUnit(AngleUnit.DEGREE);
+							}
+							catch (ClassCastException ex)
+							{
+								ex.printStackTrace();
+							}
+							catch (Exception ex)
+							{
+								ex.printStackTrace();
 							}
 						}
-						catch (ClassCastException ex)
+						else
 						{
-							ex.printStackTrace();
-						}
-						catch (Exception ex)
-						{
-							ex.printStackTrace();
+							// Assume JSON format
+							try
+							{
+								Calibration.Builder calibrationBuilder = Calibration.newBuilder();
+								JsonFormat.parser().merge(calibrationString, calibrationBuilder);
+								calibration = new CalibrationHelper(calibrationBuilder);
+							}
+							catch (InvalidProtocolBufferException e)
+							{
+								// This should be OK
+								System.err.println("Unable to deserialise the Calibration settings");
+							}
 						}
 					}
 
 					if (format == FileFormat.MALK)
 					{
 						if (calibration == null)
-							calibration = new Calibration();
+							calibration = new CalibrationHelper();
 						calibration.setDistanceUnit(DistanceUnit.NM);
 						calibration.setIntensityUnit(IntensityUnit.PHOTON);
 					}
@@ -437,11 +475,9 @@ public class PeakResultsReader
 
 			// Calibration is a smart object so we can create an empty one
 			if (calibration == null)
-				calibration = new Calibration();
-			// For debugging we can ensure that the calibration is not used incorrectly 
-			calibration.setFieldMissingException(true);
+				calibration = new CalibrationHelper();
 		}
-		return calibration;
+		return calibration.getCalibration();
 	}
 
 	public PSF getPSF()
@@ -882,7 +918,8 @@ public class PeakResultsReader
 		results.setName(name);
 		results.setSource(source);
 		results.setBounds(bounds);
-		results.setCalibration(calibration);
+		if (calibration != null)
+			results.setCalibration(calibration.getCalibration());
 		results.setConfiguration(configuration);
 		results.setPSF(psf);
 		return results;
@@ -1560,7 +1597,7 @@ public class PeakResultsReader
 				return null;
 
 				// This code functioned when the table was not dynamic ...
-				
+
 				//				// Get the number of data fields by counting the standard fields
 				//				String[] columns = header.split("\t");
 				//				int field = 0;
@@ -2189,7 +2226,7 @@ public class PeakResultsReader
 		// For now just record it as a 2 axis PSF.
 
 		// Create a calibration
-		calibration = new Calibration();
+		calibration = new CalibrationHelper();
 
 		// Q. Is NSTORM in photons?
 		calibration.setIntensityUnit(IntensityUnit.COUNT);
@@ -2201,7 +2238,7 @@ public class PeakResultsReader
 			calibration.setNmPerPixel(nmPerPixel);
 		}
 
-		results.setCalibration(calibration);
+		results.setCalibration(getCalibration());
 
 		return results;
 	}
@@ -2409,11 +2446,13 @@ public class PeakResultsReader
 		// The calibration may not be null if this was a GDSC MALK file since that has a header.
 		if (calibration == null)
 		{
-			calibration = new Calibration();
+			calibration = new CalibrationHelper();
 			// Default assumption is nm
 			calibration.setDistanceUnit(DistanceUnit.NM);
 			// MALK uses photons
 			calibration.setIntensityUnit(IntensityUnit.PHOTON);
+			
+			results.setCalibration(getCalibration());
 		}
 
 		return results;

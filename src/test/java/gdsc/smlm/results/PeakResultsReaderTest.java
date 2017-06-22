@@ -12,8 +12,14 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.SMLMSettings.*;
+import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
+import gdsc.smlm.data.config.SMLMSettings.Calibration;
+import gdsc.smlm.data.config.SMLMSettings.CameraType;
+import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.PSF;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
@@ -463,9 +469,10 @@ public class PeakResultsReaderTest
 		MemoryPeakResults out = createResults(200, false, false, false);
 
 		// Output in pixel and count
-		Calibration cal = out.getCalibration();
+		CalibrationHelper cal = new CalibrationHelper(out.getCalibration());
 		cal.setDistanceUnit(DistanceUnit.PIXEL);
 		cal.setIntensityUnit(IntensityUnit.COUNT);
+		out.setCalibration(cal.getCalibration());
 		out.setPSF(PSFHelper.create(PSFType.CUSTOM));
 
 		String filename = createFile();
@@ -503,9 +510,10 @@ public class PeakResultsReaderTest
 		MemoryPeakResults out = createResults(200, false, false, false);
 
 		// Output in nm and count
-		Calibration cal = out.getCalibration();
+		CalibrationHelper cal = new CalibrationHelper(out.getCalibration());
 		cal.setDistanceUnit(DistanceUnit.NM);
 		cal.setIntensityUnit(IntensityUnit.COUNT);
+		out.setCalibration(cal.getCalibration());
 
 		String filename = createFile();
 
@@ -542,11 +550,12 @@ public class PeakResultsReaderTest
 	{
 		MemoryPeakResults out = createResults(200, false, false, false);
 
-		Calibration cal = out.getCalibration();
+		CalibrationHelper cal = new CalibrationHelper(out.getCalibration());
 		cal.setDistanceUnit(MemoryPeakResults.PREFERRED_DISTANCE_UNIT);
 		cal.setIntensityUnit(MemoryPeakResults.PREFERRED_INTENSITY_UNIT);
 		cal.setAngleUnit(MemoryPeakResults.PREFERRED_ANGLE_UNIT);
-		
+		out.setCalibration(cal.getCalibration());
+
 		// Remove angle
 		final int ia = PSFHelper.getGaussian2DAngleIndex(out.getPSF());
 		out.forEach(new PeakResultProcedure()
@@ -575,7 +584,7 @@ public class PeakResultsReaderTest
 		});
 
 		checkEqual(fileFormat, false, false, false, false, out, in);
-		
+
 		// Remove sy
 		final int[] indices = PSFHelper.getGaussian2DWxWyIndices(out.getPSF());
 		final int isx = indices[0];
@@ -635,9 +644,10 @@ public class PeakResultsReaderTest
 		MemoryPeakResults out = createResults(200, showDeviations, showEndFrame, showId);
 		if (fileFormat == ResultsFileFormat.MALK)
 		{
-			Calibration cal = out.getCalibration();
+			CalibrationHelper cal = new CalibrationHelper(out.getCalibration());
 			cal.setDistanceUnit(DistanceUnit.NM);
-			cal.setIntensityUnit(IntensityUnit.PHOTON);
+			cal.setIntensityUnit(IntensityUnit.COUNT);
+			out.setCalibration(cal.getCalibration());
 			out.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		}
 
@@ -752,16 +762,7 @@ public class PeakResultsReaderTest
 		if (c1 != null)
 		{
 			Assert.assertNotNull("Calibration", c2);
-			Assert.assertEquals("Calibration nmPerPixel", c1.getNmPerPixel(), c2.getNmPerPixel(), 1e-6);
-			Assert.assertEquals("Calibration gain", c1.getGain(), c2.getGain(), 1e-6);
-			Assert.assertEquals("Calibration exposureTime", c1.getExposureTime(), c2.getExposureTime(), 1e-6);
-			Assert.assertEquals("Calibration readNoise", c1.getReadNoise(), c2.getReadNoise(), 1e-6);
-			Assert.assertEquals("Calibration bias", c1.getBias(), c2.getBias(), 1e-6);
-			Assert.assertEquals("Calibration amplification", c1.getAmplification(), c2.getAmplification(), 1e-6);
-			Assert.assertEquals("Calibration CameraType", c1.getCameraType(), c2.getCameraType());
-			Assert.assertEquals("Calibration DistanceUnit", c1.getDistanceUnit(), c2.getDistanceUnit());
-			Assert.assertEquals("Calibration IntensityUnit", c1.getIntensityUnit(), c2.getIntensityUnit());
-			Assert.assertEquals("Calibration AngleUnit", c1.getAngleUnit(), c2.getAngleUnit());
+			Assert.assertTrue("Calibration", c1.equals(c2));
 		}
 		else
 		{
@@ -806,7 +807,7 @@ public class PeakResultsReaderTest
 		results.setConfiguration(Float.toString(rand.next()) + Float.toString(rand.next()));
 		results.setBounds(new Rectangle((int) (10 * rand.next()), (int) (10 * rand.next()), (int) (100 * rand.next()),
 				(int) (100 * rand.next())));
-		Calibration cal = new Calibration();
+		CalibrationHelper cal = new CalibrationHelper();
 		cal.setNmPerPixel(rand.next());
 		cal.setGain(rand.next());
 		cal.setExposureTime(rand.next());
@@ -818,7 +819,7 @@ public class PeakResultsReaderTest
 		cal.setDistanceUnit(DistanceUnit.values()[rand.nextInt(DistanceUnit.values().length - 1)]);
 		cal.setIntensityUnit(IntensityUnit.values()[rand.nextInt(IntensityUnit.values().length - 1)]);
 		cal.setAngleUnit(AngleUnit.values()[rand.nextInt(AngleUnit.values().length - 1)]);
-		results.setCalibration(cal);
+		results.setCalibration(cal.getCalibration());
 		return results;
 	}
 

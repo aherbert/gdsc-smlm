@@ -401,8 +401,7 @@ class Calibration implements Cloneable
 	 * @deprecated This has been replaced by camaraType. It is left to enable XStream deserialisation of old
 	 *             configuration.
 	 */
-	@Deprecated
-	private boolean emCCD;
+	boolean emCCD;
 	/**
 	 * The camera amplification (ADUs/e-) used when modelling a microscope camera.
 	 * <p>
