@@ -29,9 +29,9 @@ public final class SMLMSettings {
      * Not available. Only the standard parameters are supported.
      * </pre>
      *
-     * <code>PSF_NA = 0;</code>
+     * <code>PSF_TYPE_NA = 0;</code>
      */
-    PSF_NA(0),
+    PSF_TYPE_NA(0),
     /**
      * <pre>
      * A 2D Gaussian with the same standard deviation in X and Y dimensions
@@ -80,9 +80,9 @@ public final class SMLMSettings {
      * Not available. Only the standard parameters are supported.
      * </pre>
      *
-     * <code>PSF_NA = 0;</code>
+     * <code>PSF_TYPE_NA = 0;</code>
      */
-    public static final int PSF_NA_VALUE = 0;
+    public static final int PSF_TYPE_NA_VALUE = 0;
     /**
      * <pre>
      * A 2D Gaussian with the same standard deviation in X and Y dimensions
@@ -143,7 +143,7 @@ public final class SMLMSettings {
 
     public static PSFType forNumber(int value) {
       switch (value) {
-        case 0: return PSF_NA;
+        case 0: return PSF_TYPE_NA;
         case 1: return ONE_AXIS_GAUSSIAN_2D;
         case 2: return TWO_AXIS_GAUSSIAN_2D;
         case 3: return TWO_AXIS_AND_THETA_GAUSSIAN_2D;
@@ -215,9 +215,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>PSF_PARAMETER_NA = 0;</code>
+     * <code>PSF_PARAMETER_UNIT_NA = 0;</code>
      */
-    PSF_PARAMETER_NA(0),
+    PSF_PARAMETER_UNIT_NA(0),
     /**
      * <pre>
      * The parameter describes a distance
@@ -250,9 +250,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>PSF_PARAMETER_NA = 0;</code>
+     * <code>PSF_PARAMETER_UNIT_NA = 0;</code>
      */
-    public static final int PSF_PARAMETER_NA_VALUE = 0;
+    public static final int PSF_PARAMETER_UNIT_NA_VALUE = 0;
     /**
      * <pre>
      * The parameter describes a distance
@@ -297,7 +297,7 @@ public final class SMLMSettings {
 
     public static PSFParameterUnit forNumber(int value) {
       switch (value) {
-        case 0: return PSF_PARAMETER_NA;
+        case 0: return PSF_PARAMETER_UNIT_NA;
         case 1: return DISTANCE;
         case 2: return INTENSITY;
         case 3: return ANGLE;
@@ -367,9 +367,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>CAMERA_NA = 0;</code>
+     * <code>CAMERA_TYPE_NA = 0;</code>
      */
-    CAMERA_NA(0),
+    CAMERA_TYPE_NA(0),
     /**
      * <pre>
      * Electron Multiplying Charge Coupled Device (EM CCD)
@@ -402,9 +402,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>CAMERA_NA = 0;</code>
+     * <code>CAMERA_TYPE_NA = 0;</code>
      */
-    public static final int CAMERA_NA_VALUE = 0;
+    public static final int CAMERA_TYPE_NA_VALUE = 0;
     /**
      * <pre>
      * Electron Multiplying Charge Coupled Device (EM CCD)
@@ -449,7 +449,7 @@ public final class SMLMSettings {
 
     public static CameraType forNumber(int value) {
       switch (value) {
-        case 0: return CAMERA_NA;
+        case 0: return CAMERA_TYPE_NA;
         case 1: return EMCCD;
         case 2: return CCD;
         case 3: return SCMOS;
@@ -519,9 +519,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>DISTANCE_NA = 0;</code>
+     * <code>DISTANCE_UNIT_NA = 0;</code>
      */
-    DISTANCE_NA(0),
+    DISTANCE_UNIT_NA(0),
     /**
      * <pre>
      * Camera pixel units
@@ -554,9 +554,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>DISTANCE_NA = 0;</code>
+     * <code>DISTANCE_UNIT_NA = 0;</code>
      */
-    public static final int DISTANCE_NA_VALUE = 0;
+    public static final int DISTANCE_UNIT_NA_VALUE = 0;
     /**
      * <pre>
      * Camera pixel units
@@ -601,7 +601,7 @@ public final class SMLMSettings {
 
     public static DistanceUnit forNumber(int value) {
       switch (value) {
-        case 0: return DISTANCE_NA;
+        case 0: return DISTANCE_UNIT_NA;
         case 1: return PIXEL;
         case 2: return UM;
         case 3: return NM;
@@ -671,9 +671,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>INTENSITY_NA = 0;</code>
+     * <code>INTENSITY_UNIT_NA = 0;</code>
      */
-    INTENSITY_NA(0),
+    INTENSITY_UNIT_NA(0),
     /**
      * <pre>
      * Photon units
@@ -698,9 +698,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>INTENSITY_NA = 0;</code>
+     * <code>INTENSITY_UNIT_NA = 0;</code>
      */
-    public static final int INTENSITY_NA_VALUE = 0;
+    public static final int INTENSITY_UNIT_NA_VALUE = 0;
     /**
      * <pre>
      * Photon units
@@ -737,7 +737,7 @@ public final class SMLMSettings {
 
     public static IntensityUnit forNumber(int value) {
       switch (value) {
-        case 0: return INTENSITY_NA;
+        case 0: return INTENSITY_UNIT_NA;
         case 1: return PHOTON;
         case 2: return COUNT;
         default: return null;
@@ -806,9 +806,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>ANGLE_NA = 0;</code>
+     * <code>ANGLE_UNIT_NA = 0;</code>
      */
-    ANGLE_NA(0),
+    ANGLE_UNIT_NA(0),
     /**
      * <pre>
      * Radian units
@@ -833,9 +833,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>ANGLE_NA = 0;</code>
+     * <code>ANGLE_UNIT_NA = 0;</code>
      */
-    public static final int ANGLE_NA_VALUE = 0;
+    public static final int ANGLE_UNIT_NA_VALUE = 0;
     /**
      * <pre>
      * Radian units
@@ -872,7 +872,7 @@ public final class SMLMSettings {
 
     public static AngleUnit forNumber(int value) {
       switch (value) {
-        case 0: return ANGLE_NA;
+        case 0: return ANGLE_UNIT_NA;
         case 1: return RADIAN;
         case 2: return DEGREE;
         default: return null;
@@ -941,9 +941,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>TIME_NA = 0;</code>
+     * <code>TIME_UNIT_NA = 0;</code>
      */
-    TIME_NA(0),
+    TIME_UNIT_NA(0),
     /**
      * <pre>
      * Frame units
@@ -976,9 +976,9 @@ public final class SMLMSettings {
      * Not available
      * </pre>
      *
-     * <code>TIME_NA = 0;</code>
+     * <code>TIME_UNIT_NA = 0;</code>
      */
-    public static final int TIME_NA_VALUE = 0;
+    public static final int TIME_UNIT_NA_VALUE = 0;
     /**
      * <pre>
      * Frame units
@@ -1023,7 +1023,7 @@ public final class SMLMSettings {
 
     public static TimeUnit forNumber(int value) {
       switch (value) {
-        case 0: return TIME_NA;
+        case 0: return TIME_UNIT_NA;
         case 1: return FRAME;
         case 2: return SECOND;
         case 3: return MILLISECOND;
@@ -1247,7 +1247,7 @@ public final class SMLMSettings {
       if (!getNameBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
       }
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.PSFParameterUnit.PSF_PARAMETER_NA.getNumber()) {
+      if (unit_ != gdsc.smlm.data.config.SMLMSettings.PSFParameterUnit.PSF_PARAMETER_UNIT_NA.getNumber()) {
         output.writeEnum(2, unit_);
       }
     }
@@ -1260,7 +1260,7 @@ public final class SMLMSettings {
       if (!getNameBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
       }
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.PSFParameterUnit.PSF_PARAMETER_NA.getNumber()) {
+      if (unit_ != gdsc.smlm.data.config.SMLMSettings.PSFParameterUnit.PSF_PARAMETER_UNIT_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, unit_);
       }
@@ -1956,7 +1956,7 @@ public final class SMLMSettings {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (psfType_ != gdsc.smlm.data.config.SMLMSettings.PSFType.PSF_NA.getNumber()) {
+      if (psfType_ != gdsc.smlm.data.config.SMLMSettings.PSFType.PSF_TYPE_NA.getNumber()) {
         output.writeEnum(1, psfType_);
       }
       for (int i = 0; i < parameter_.size(); i++) {
@@ -1969,7 +1969,7 @@ public final class SMLMSettings {
       if (size != -1) return size;
 
       size = 0;
-      if (psfType_ != gdsc.smlm.data.config.SMLMSettings.PSFType.PSF_NA.getNumber()) {
+      if (psfType_ != gdsc.smlm.data.config.SMLMSettings.PSFType.PSF_TYPE_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, psfType_);
       }
@@ -2904,7 +2904,7 @@ public final class SMLMSettings {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.DistanceUnit.DISTANCE_NA.getNumber()) {
+      if (unit_ != gdsc.smlm.data.config.SMLMSettings.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
         output.writeEnum(1, unit_);
       }
       if (nmPerPixel_ != 0D) {
@@ -2917,7 +2917,7 @@ public final class SMLMSettings {
       if (size != -1) return size;
 
       size = 0;
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.DistanceUnit.DISTANCE_NA.getNumber()) {
+      if (unit_ != gdsc.smlm.data.config.SMLMSettings.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, unit_);
       }
@@ -3507,7 +3507,7 @@ public final class SMLMSettings {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.TimeUnit.TIME_NA.getNumber()) {
+      if (unit_ != gdsc.smlm.data.config.SMLMSettings.TimeUnit.TIME_UNIT_NA.getNumber()) {
         output.writeEnum(1, unit_);
       }
       if (exposureTime_ != 0D) {
@@ -3520,7 +3520,7 @@ public final class SMLMSettings {
       if (size != -1) return size;
 
       size = 0;
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.TimeUnit.TIME_NA.getNumber()) {
+      if (unit_ != gdsc.smlm.data.config.SMLMSettings.TimeUnit.TIME_UNIT_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, unit_);
       }
@@ -4109,7 +4109,7 @@ public final class SMLMSettings {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.IntensityUnit.INTENSITY_NA.getNumber()) {
+      if (unit_ != gdsc.smlm.data.config.SMLMSettings.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
         output.writeEnum(1, unit_);
       }
       if (gain_ != 0D) {
@@ -4122,7 +4122,7 @@ public final class SMLMSettings {
       if (size != -1) return size;
 
       size = 0;
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.IntensityUnit.INTENSITY_NA.getNumber()) {
+      if (unit_ != gdsc.smlm.data.config.SMLMSettings.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, unit_);
       }
@@ -4769,7 +4769,7 @@ public final class SMLMSettings {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (cameraType_ != gdsc.smlm.data.config.SMLMSettings.CameraType.CAMERA_NA.getNumber()) {
+      if (cameraType_ != gdsc.smlm.data.config.SMLMSettings.CameraType.CAMERA_TYPE_NA.getNumber()) {
         output.writeEnum(1, cameraType_);
       }
       if (readNoise_ != 0D) {
@@ -4788,7 +4788,7 @@ public final class SMLMSettings {
       if (size != -1) return size;
 
       size = 0;
-      if (cameraType_ != gdsc.smlm.data.config.SMLMSettings.CameraType.CAMERA_NA.getNumber()) {
+      if (cameraType_ != gdsc.smlm.data.config.SMLMSettings.CameraType.CAMERA_TYPE_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, cameraType_);
       }
@@ -5465,7 +5465,7 @@ public final class SMLMSettings {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (angleUnit_ != gdsc.smlm.data.config.SMLMSettings.AngleUnit.ANGLE_NA.getNumber()) {
+      if (angleUnit_ != gdsc.smlm.data.config.SMLMSettings.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
         output.writeEnum(1, angleUnit_);
       }
     }
@@ -5475,7 +5475,7 @@ public final class SMLMSettings {
       if (size != -1) return size;
 
       size = 0;
-      if (angleUnit_ != gdsc.smlm.data.config.SMLMSettings.AngleUnit.ANGLE_NA.getNumber()) {
+      if (angleUnit_ != gdsc.smlm.data.config.SMLMSettings.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, angleUnit_);
       }
@@ -7576,22 +7576,23 @@ public final class SMLMSettings {
       "8\n\024intensityCalibration\030\003 \001(\0132\032.SMLM.Int" +
       "ensityCalibration\0222\n\021cameraCalibration\030\004" +
       " \001(\0132\027.SMLM.CameraCalibration\022,\n\016psfCali",
-      "bration\030\005 \001(\0132\024.SMLM.PSFCalibration*\225\001\n\007" +
-      "PSFType\022\n\n\006PSF_NA\020\000\022\030\n\024ONE_AXIS_GAUSSIAN" +
-      "_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036TWO_A" +
-      "XIS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTIGMATI" +
-      "C_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*P\n\020PSFParame" +
-      "terUnit\022\024\n\020PSF_PARAMETER_NA\020\000\022\014\n\010DISTANC" +
-      "E\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003*:\n\nCameraT" +
-      "ype\022\r\n\tCAMERA_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t" +
-      "\n\005SCMOS\020\003*:\n\014DistanceUnit\022\017\n\013DISTANCE_NA" +
-      "\020\000\022\t\n\005PIXEL\020\001\022\006\n\002UM\020\002\022\006\n\002NM\020\003*8\n\rIntensi",
-      "tyUnit\022\020\n\014INTENSITY_NA\020\000\022\n\n\006PHOTON\020\001\022\t\n\005" +
-      "COUNT\020\002*1\n\tAngleUnit\022\014\n\010ANGLE_NA\020\000\022\n\n\006RA" +
-      "DIAN\020\001\022\n\n\006DEGREE\020\002*?\n\010TimeUnit\022\013\n\007TIME_N" +
-      "A\020\000\022\t\n\005FRAME\020\001\022\n\n\006SECOND\020\002\022\017\n\013MILLISECON" +
-      "D\020\003B%\n\025gdsc.smlm.data.configB\014SMLMSettin" +
-      "gsb\006proto3"
+      "bration\030\005 \001(\0132\024.SMLM.PSFCalibration*\232\001\n\007" +
+      "PSFType\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAU" +
+      "SSIAN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036" +
+      "TWO_AXIS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTI" +
+      "GMATIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFP" +
+      "arameterUnit\022\031\n\025PSF_PARAMETER_UNIT_NA\020\000\022" +
+      "\014\n\010DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003*" +
+      "?\n\nCameraType\022\022\n\016CAMERA_TYPE_NA\020\000\022\t\n\005EMC" +
+      "CD\020\001\022\007\n\003CCD\020\002\022\t\n\005SCMOS\020\003*?\n\014DistanceUnit" +
+      "\022\024\n\020DISTANCE_UNIT_NA\020\000\022\t\n\005PIXEL\020\001\022\006\n\002UM\020",
+      "\002\022\006\n\002NM\020\003*=\n\rIntensityUnit\022\025\n\021INTENSITY_" +
+      "UNIT_NA\020\000\022\n\n\006PHOTON\020\001\022\t\n\005COUNT\020\002*6\n\tAngl" +
+      "eUnit\022\021\n\rANGLE_UNIT_NA\020\000\022\n\n\006RADIAN\020\001\022\n\n\006" +
+      "DEGREE\020\002*D\n\010TimeUnit\022\020\n\014TIME_UNIT_NA\020\000\022\t" +
+      "\n\005FRAME\020\001\022\n\n\006SECOND\020\002\022\017\n\013MILLISECOND\020\003B%" +
+      "\n\025gdsc.smlm.data.configB\014SMLMSettingsb\006p" +
+      "roto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

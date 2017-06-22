@@ -518,7 +518,7 @@ public class CalibrationHelper
 	public CameraType getCameraType()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraType() : CameraType.CAMERA_NA;
+		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraType() : CameraType.CAMERA_TYPE_NA;
 	}
 
 	/**
@@ -645,7 +645,7 @@ public class CalibrationHelper
 	public DistanceUnit getDistanceUnit()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getUnit() : DistanceUnit.DISTANCE_NA;
+		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getUnit() : DistanceUnit.DISTANCE_UNIT_NA;
 	}
 
 	/**
@@ -680,7 +680,7 @@ public class CalibrationHelper
 	public IntensityUnit getIntensityUnit()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getUnit() : IntensityUnit.INTENSITY_NA;
+		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getUnit() : IntensityUnit.INTENSITY_UNIT_NA;
 	}
 
 	/**
@@ -715,7 +715,7 @@ public class CalibrationHelper
 	public AngleUnit getAngleUnit()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasPsfCalibration()) ? c.getPsfCalibration().getAngleUnit() : AngleUnit.ANGLE_NA;
+		return (c.hasPsfCalibration()) ? c.getPsfCalibration().getAngleUnit() : AngleUnit.ANGLE_UNIT_NA;
 	}
 
 	/**

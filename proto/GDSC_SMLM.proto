@@ -13,7 +13,7 @@ option java_outer_classname = "SMLMSettings";
 
 // The type of Point Spread Function (PSF)
 enum PSFType {
-	PSF_NA = 0; // Not available. Only the standard parameters are supported.
+	PSF_TYPE_NA = 0; // Not available. Only the standard parameters are supported.
 	ONE_AXIS_GAUSSIAN_2D = 1; // A 2D Gaussian with the same standard deviation in X and Y dimensions
 	TWO_AXIS_GAUSSIAN_2D = 2; // A 2D Gaussian with standard deviations in X and Y dimensions
 	TWO_AXIS_AND_THETA_GAUSSIAN_2D = 3; // A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
@@ -23,7 +23,7 @@ enum PSFType {
 
 // Define the type of units supported in the Point Spread Function (PSF)
 enum PSFParameterUnit {
-	PSF_PARAMETER_NA = 0; // Not available
+	PSF_PARAMETER_UNIT_NA = 0; // Not available
 	DISTANCE = 1; // The parameter describes a distance
 	INTENSITY = 2; // The parameter describes an intensity
 	ANGLE = 3; // The parameter describes an angle
@@ -47,7 +47,7 @@ message PSF {
 
 // The camera type
 enum CameraType {
-	CAMERA_NA = 0; // Not available
+	CAMERA_TYPE_NA = 0; // Not available
 	EMCCD = 1; // Electron Multiplying Charge Coupled Device (EM CCD)
 	CCD = 2; // Charge Coupled Device (CCD)
 	SCMOS = 3; // Scientific Complementary Metal-Oxide-Semiconductor (sCMOS)
@@ -55,7 +55,7 @@ enum CameraType {
 
 // Unit for measuring distance
 enum DistanceUnit {
-	DISTANCE_NA = 0; // Not available
+	DISTANCE_UNIT_NA = 0; // Not available
 	PIXEL = 1; // Camera pixel units
 	UM = 2; // Micrometer units
 	NM = 3; // Nanometer units
@@ -63,21 +63,21 @@ enum DistanceUnit {
 
 // Unit for measuring intensity
 enum IntensityUnit {
-	INTENSITY_NA = 0; // Not available
+	INTENSITY_UNIT_NA = 0; // Not available
 	PHOTON = 1; // Photon units
 	COUNT = 2; // Camera count units
 }
 
 // Unit for measuring angle
 enum AngleUnit {
-	ANGLE_NA = 0; // Not available
+	ANGLE_UNIT_NA = 0; // Not available
 	RADIAN = 1; // Radian units
 	DEGREE = 2; // Degree units
 }
 
 // Unit for measuring time
 enum TimeUnit {
-	TIME_NA = 0; // Not available
+	TIME_UNIT_NA = 0; // Not available
 	FRAME = 1; // Frame units
 	SECOND = 2; // Second units
 	MILLISECOND = 3; // Millisecond units
