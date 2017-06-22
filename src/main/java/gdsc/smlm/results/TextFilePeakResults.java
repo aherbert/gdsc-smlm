@@ -153,7 +153,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		helper.setAngleUnit(angleUnit);
 		converters = helper.getConverters();
 		// Update the calibration if converters were created
-		setCalibration(helper.getCalibration());
+		if (helper.isCalibrationChanged())
+			setCalibration(helper.getCalibration());
 
 		super.begin();
 	}

@@ -151,8 +151,9 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		try
 		{
 			if (printer == null)
-				printer = JsonFormat.printer().omittingInsignificantWhitespace();
+				printer = JsonFormat.printer().omittingInsignificantWhitespace().includingDefaultValueFields();
 			sb.append(String.format("#%s %s\n", name, printer.print(msg)));
+			System.out.println(printer.print(msg));
 		}
 		catch (InvalidProtocolBufferException e)
 		{

@@ -156,7 +156,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			outIndices = list.toArray();
 		}
 		// Update the calibration if converters were created
-		setCalibration(helper.getCalibration());
+		if (helper.isCalibrationChanged())
+			setCalibration(helper.getCalibration());
 
 		createSourceText();
 		createResultsWindow();

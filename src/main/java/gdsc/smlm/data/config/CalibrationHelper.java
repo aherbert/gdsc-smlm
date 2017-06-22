@@ -535,7 +535,10 @@ public class CalibrationHelper
 	 */
 	public void setCameraType(CameraType cameraType)
 	{
-		getBuilder().getCameraCalibrationBuilder().setCameraType(cameraType);
+		if (cameraType == null)
+			getBuilder().getCameraCalibrationBuilder().clearCameraType();
+		else
+			getBuilder().getCameraCalibrationBuilder().setCameraType(cameraType);
 	}
 
 	/**
