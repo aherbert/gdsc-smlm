@@ -193,7 +193,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		table.setShowZ(results.is3D());
 		// TODO - Add to settings
 		table.setShowFittingData(true);
-		table.setShowNoise(true);
+		table.setShowNoiseData(true);
 		
 		if (showCalibratedValues)
 		{

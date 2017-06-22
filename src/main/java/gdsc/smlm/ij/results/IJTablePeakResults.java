@@ -62,7 +62,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private boolean showDeviations = false;
 	private boolean showEndFrame = false;
 	private boolean showFittingData = false;
-	private boolean showNoise = false;
+	private boolean showNoiseData = false;
 	private boolean showZ = false;
 	private boolean clearAtStart = false;
 	private boolean hideSourceText = false;
@@ -261,7 +261,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			sb.append("\torigValue");
 			sb.append("\tError");
 		}
-		if (showNoise)
+		if (showNoiseData)
 		{
 			sb.append("\tNoise");
 			if (!Utils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
@@ -386,7 +386,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			add(sb, origValue);
 			add(sb, error);
 		}
-		if (showNoise)
+		if (showNoiseData)
 		{
 			add(sb, ic.convert(noise)); // This should be converted
 			add(sb, snr);
@@ -696,18 +696,18 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	/**
 	 * @return If true then show the noise and SNR in the table
 	 */
-	public boolean isShowNoise()
+	public boolean isShowNoiseData()
 	{
-		return showNoise;
+		return showNoiseData;
 	}
 
 	/**
-	 * @param showNoise
+	 * @param showNoiseData
 	 *            If true then show the noise and SNR in the table
 	 */
-	public void setShowNoise(boolean showNoise)
+	public void setShowNoiseData(boolean showNoiseData)
 	{
-		this.showNoise = showNoise;
+		this.showNoiseData = showNoiseData;
 	}
 
 	/**

@@ -329,9 +329,8 @@ public class ResultsManager implements PlugIn
 			r.setShowEndFrame(showEndFrame);
 			r.setRoundingPrecision(resultsSettings.tableRoundingPrecision);
 			r.setShowZ(results.is3D());
-			// TODO - Add to settings
-			r.setShowFittingData(false);
-			r.setShowNoise(false);
+			r.setShowFittingData(resultsSettings.tableShowFittingData);
+			r.setShowNoiseData(resultsSettings.tableShowNoiseData);
 			resultsList.addOutput(r);
 		}
 	}
@@ -447,6 +446,8 @@ public class ResultsManager implements PlugIn
 						SettingsManager.intensityUnitNames[resultsSettings.getTableIntensityUnit().ordinal()]);
 				egd.addChoice("Table_angle_unit", SettingsManager.angleUnitNames,
 						SettingsManager.angleUnitNames[resultsSettings.getTableAngleUnit().ordinal()]);
+				egd.addCheckbox("Table_show_fitting_data", resultsSettings.tableShowFittingData);
+				egd.addCheckbox("Table_show_noise_data", resultsSettings.tableShowNoiseData);
 				egd.addCheckbox("Table_show_precision", resultsSettings.tableComputePrecision);
 				egd.addSlider("Table_precision", 0, 10, resultsSettings.tableRoundingPrecision);
 				egd.showDialog(true, gd);
@@ -455,6 +456,8 @@ public class ResultsManager implements PlugIn
 				resultsSettings.setTableDistanceUnit(egd.getNextChoiceIndex());
 				resultsSettings.setTableIntensityUnit(egd.getNextChoiceIndex());
 				resultsSettings.setTableAngleUnit(egd.getNextChoiceIndex());
+				resultsSettings.tableShowFittingData = egd.getNextBoolean();
+				resultsSettings.tableShowNoiseData = egd.getNextBoolean();
 				resultsSettings.tableComputePrecision = egd.getNextBoolean();
 				resultsSettings.tableRoundingPrecision = (int) egd.getNextNumber();
 			}

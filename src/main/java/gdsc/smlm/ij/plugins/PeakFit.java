@@ -2125,7 +2125,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			String title = null; // imp.getTitle()
 			IJTablePeakResults r = new IJTablePeakResults(resultsSettings.showDeviations, title);
 			r.setShowFittingData(true);
-			r.setShowNoise(true);
+			r.setShowNoiseData(true);
 			r.setShowZ(PSFHelper.is3D(resultsList.getPSF()));
 			r.setDistanceUnit(resultsSettings.getTableDistanceUnit());
 			r.setIntensityUnit(resultsSettings.getTableIntensityUnit());
