@@ -13,7 +13,7 @@ package gdsc.smlm.ij.settings;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.results.Calibration;
+import gdsc.smlm.data.config.SMLMSettings.Calibration;
 
 import java.util.ArrayList;
 
@@ -25,23 +25,23 @@ public class BatchSettings
 	public ArrayList<String> images = new ArrayList<String>();
 	public ArrayList<ParameterSettings> parameters = new ArrayList<ParameterSettings>();
 	public String resultsDirectory = null;
-	public boolean runPeakFit = true; 
-	private Calibration calibration = new Calibration();
-	
+	public boolean runPeakFit = true;
+	private Calibration calibration = Calibration.getDefaultInstance();
+
 	/**
 	 * @return the calibration
 	 */
 	public Calibration getCalibration()
 	{
-		if (calibration == null)
-			calibration = new Calibration();
 		return calibration;
 	}
+
 	/**
-	 * @param calibration the calibration to set
+	 * @param calibration
+	 *            the calibration to set
 	 */
 	public void setCalibration(Calibration calibration)
 	{
-		this.calibration = calibration;
+		this.calibration = (calibration != null) ? calibration : Calibration.getDefaultInstance();
 	}
 }

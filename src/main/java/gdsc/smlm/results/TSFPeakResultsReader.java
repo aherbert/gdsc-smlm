@@ -11,7 +11,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Parser;
 
-import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.PSF;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
@@ -511,7 +511,7 @@ public class TSFPeakResultsReader
 		//			results.setBounds(new Rectangle(0, 0, spotList.getNrPixelsX(), spotList.getNrPixelsY()));
 		//		}
 
-		CalibrationHelper cal = new CalibrationHelper();
+		CalibrationWriter cal = new CalibrationWriter();
 
 		if (spotList.hasPixelSize())
 		{

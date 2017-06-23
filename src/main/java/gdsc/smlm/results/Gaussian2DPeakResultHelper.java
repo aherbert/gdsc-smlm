@@ -7,13 +7,14 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.BitFlags;
-import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.data.config.SMLMSettings.PSF;
+import gdsc.smlm.data.config.SMLMSettings.Calibration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -37,7 +38,7 @@ public class Gaussian2DPeakResultHelper
 	{
 		final static double twoPi = 2 * Math.PI;
 
-		final CalibrationHelper calibration;
+		final CalibrationReader calibration;
 		final int isx, isy;
 		boolean oneAxisSD;
 
@@ -62,11 +63,11 @@ public class Gaussian2DPeakResultHelper
 		 *            the psf
 		 * @param calibration
 		 *            the calibration (used for converting the parameters)
-		 * @see #create(PSF, CalibrationHelper, int)
+		 * @see #create(PSF, CalibrationReader, int)
 		 * @throws ConfigurationException
 		 *             If not a Gaussian 2D PSF
 		 */
-		public BaseGaussian2DPeakResultCalculator(PSF psf, CalibrationHelper calibration) throws ConfigurationException
+		public BaseGaussian2DPeakResultCalculator(PSF psf, CalibrationReader calibration) throws ConfigurationException
 		{
 			int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 			isx = indices[0];
@@ -109,7 +110,7 @@ public class Gaussian2DPeakResultHelper
 					(twoPi * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
 		}
 
-		private static boolean isCCD(CalibrationHelper calibration)
+		private static boolean isCCD(CalibrationReader calibration)
 		{
 			return calibration.isCCDCamera();
 		}
@@ -302,10 +303,32 @@ public class Gaussian2DPeakResultHelper
 	 * @throws ConfigurationException
 	 *             If not a Gaussian 2D PSF or the calibration is invalid
 	 */
-	public static Gaussian2DPeakResultCalculator create(PSF psf, CalibrationHelper calibration, int flags)
+	public static Gaussian2DPeakResultCalculator create(PSF psf, Calibration calibration, int flags)
 			throws ConfigurationException
 	{
-		BaseGaussian2DPeakResultCalculator helper = new BaseGaussian2DPeakResultCalculator(psf, calibration);
+		CalibrationReader helper = (calibration != null) ? new CalibrationReader(calibration) : null;
+		return create(psf, helper, flags);
+	}
+
+	/**
+	 * Creates a new Gaussian 2D peak result calculator.
+	 * <p>
+	 * The calibration need only contain the information required for the specified functions.
+	 *
+	 * @param psf
+	 *            the psf
+	 * @param calibrationReader
+	 *            the calibration reader (used for converting the parameters)
+	 * @param flags
+	 *            the flags specifying the helper functions to support
+	 * @return the gaussian 2 D peak result helper
+	 * @throws ConfigurationException
+	 *             If not a Gaussian 2D PSF or the calibration is invalid
+	 */
+	public static Gaussian2DPeakResultCalculator create(PSF psf, CalibrationReader calibrationReader, int flags)
+			throws ConfigurationException
+	{
+		BaseGaussian2DPeakResultCalculator helper = new BaseGaussian2DPeakResultCalculator(psf, calibrationReader);
 
 		// Try the desired methods
 		if (BitFlags.anySet(flags, AMPLITUDE))

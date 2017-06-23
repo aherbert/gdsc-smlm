@@ -15,9 +15,11 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Rectangle;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import gdsc.core.data.DataException;
 import gdsc.core.ij.Utils;
-import gdsc.smlm.results.Calibration;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
@@ -26,8 +28,6 @@ import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
  * Produces a summary table of the results that are stored in memory.
@@ -176,7 +176,7 @@ public class SummariseResults implements PlugIn
 			}
 		}
 
-		Calibration calibration = result.getCalibration();
+		CalibrationReader calibration = result.getCalibrationReader();
 
 		sb.append(result.getName());
 		sb.append('\t').append(result.size());

@@ -7,7 +7,6 @@ import java.util.Collection;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.utils.XmlUtils;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.MappedImageStack;
@@ -119,6 +118,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	private double repaintInterval = 0.1;
 	private long repaintDelay = 1000;
 	private int currentFrame;
+	protected int ox;
+	protected int oy;
 
 	private String lutName = "fire";
 
@@ -138,7 +139,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		this.title = title + " " + IMAGE_SUFFIX;
 
-		this.bounds = (Rectangle) bounds.clone();
+		bounds = (Rectangle) bounds.clone();
 		if (bounds.width < 0)
 			bounds.width = 0;
 		if (bounds.height < 0)
@@ -147,6 +148,11 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		imageWidth = ceil(bounds.width * scale);
 		imageHeight = ceil(bounds.height * scale);
+
+		ox = bounds.x;
+		oy = bounds.y;
+		
+		setBounds(bounds);
 
 		// Set the limits used to check if a coordinate has 4 neighbour cells
 		xlimit = imageWidth - 1;
@@ -187,8 +193,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		// Q. Should this be changed to handle the data in non-pixel distances.
 		// At the moment we hope that the results IO can work out the units and convert them during load. 
-		boolean validCalibration = isUncalibrated() ||
-				(calibration.hasDistanceUnit() && calibration.getDistanceUnit() == DistanceUnit.PIXEL);
+		boolean validCalibration = isUncalibrated() || (hasCalibration() && getCalibrationReader().hasDistanceUnit() &&
+				getCalibrationReader().getDistanceUnit() == DistanceUnit.PIXEL);
 
 		size = 0;
 		lastPaintSize = 0;
@@ -241,14 +247,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		imp.setProperty("Info", createInfo());
 
-		if (calibration != null)
+		if (hasCalibration() && getCalibrationReader().hasNmPerPixel())
 		{
 			Calibration cal = new Calibration();
-			
+
 			// This assumes the input data is in pixels
-			
+
 			String unit = "nm";
-			double unitPerPixel = calibration.getNmPerPixel() / scale;
+			double unitPerPixel = getCalibrationReader().getNmPerPixel() / scale;
 			if (unitPerPixel > 100)
 			{
 				unit = "um";
@@ -266,14 +272,16 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	private String createInfo()
 	{
 		StringBuilder sb = new StringBuilder();
-		if (source != null)
-			sb.append("Source: ").append(source.toXML()).append("\n");
-		if (bounds != null)
+		if (getSource() != null)
+			sb.append("Source: ").append(getSource().toXML()).append("\n");
+		if (getBounds() != null)
 			sb.append("Bounds: ").append(getBoundsString()).append("\n");
-		if (calibration != null)
-			sb.append("Calibration:\n").append(XmlUtils.toXML(calibration)).append("\n");
-		if (configuration != null)
-			sb.append("Configuration:\n").append(configuration).append("\n");
+		if (getCalibration() != null)
+			sb.append("Calibration:\n").append(getCalibration()).append("\n");
+		if (getCalibration() != null)
+			sb.append("PSF:\n").append(getCalibration()).append("\n");
+		if (!Utils.isNullOrEmpty(getConfiguration()))
+			sb.append("Configuration:\n").append(getConfiguration()).append("\n");
 		return (sb.length() > 0) ? sb.toString() : null;
 	}
 
@@ -532,7 +540,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 */
 	public float mapX(float x)
 	{
-		return (x - bounds.x) * scale;
+		return (x - ox) * scale;
 	}
 
 	/**
@@ -544,7 +552,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 */
 	public float mapY(float y)
 	{
-		return (y - bounds.y) * scale;
+		return (y - oy) * scale;
 	}
 
 	/**

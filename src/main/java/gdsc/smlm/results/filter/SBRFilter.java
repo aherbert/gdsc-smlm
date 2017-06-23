@@ -43,10 +43,10 @@ public class SBRFilter extends DirectFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		bias = -1;
-		if (peakResults.getCalibration() != null)
+		if (peakResults.hasCalibration())
 		{
-			if (peakResults.getCalibration().getBias() >= 0)
-				bias = peakResults.getCalibration().getBias();
+			if (peakResults.getCalibrationReader().hasBias())
+				bias = peakResults.getCalibrationReader().getBias();
 		}
 	}
 

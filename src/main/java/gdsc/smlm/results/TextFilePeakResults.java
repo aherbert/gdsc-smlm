@@ -129,13 +129,13 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		calculator = null;
 		canComputePrecision = false;
 
-		if (calibration != null)
+		if (hasCalibration())
 		{
 			if (computePrecision)
 			{
 				try
 				{
-					calculator = Gaussian2DPeakResultHelper.create(psf, calibration,
+					calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
 							Gaussian2DPeakResultHelper.PRECISION);
 					canComputePrecision = true;
 				}
@@ -147,7 +147,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		}
 
 		// We must correctly convert all the PSF parameter types
-		helper = new PeakResultsHelper(calibration, psf);
+		helper = new PeakResultsHelper(getCalibration(), getPSF());
 		helper.setIntensityUnit(intensityUnit);
 		helper.setDistanceUnit(distanceUnit);
 		helper.setAngleUnit(angleUnit);

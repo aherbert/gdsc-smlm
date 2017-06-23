@@ -6,6 +6,7 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
@@ -35,10 +36,10 @@ import gdsc.smlm.data.config.UnitHelper;
  */
 public class PeakResultsHelper
 {
-	private CalibrationHelper calibration;
+	private Calibration calibration;
 	private PSF psf;
 
-	public PeakResultsHelper(CalibrationHelper calibration, PSF psf)
+	public PeakResultsHelper(Calibration calibration, PSF psf)
 	{
 		this.calibration = calibration;
 		this.psf = psf;
@@ -103,7 +104,7 @@ public class PeakResultsHelper
 		if (intensityConverter == null)
 		{
 			intensityConverter = (calibration == null) ? new IdentityTypeConverter<IntensityUnit>(null)
-					: calibration.getIntensityConverterSafe(intensityUnit);
+					: CalibrationHelper.getIntensityConverterSafe(calibration, intensityUnit);
 		}
 		return intensityConverter;
 	}
@@ -167,7 +168,7 @@ public class PeakResultsHelper
 		if (distanceConverter == null)
 		{
 			distanceConverter = (calibration == null) ? new IdentityTypeConverter<DistanceUnit>(null)
-					: calibration.getDistanceConverterSafe(distanceUnit);
+					: CalibrationHelper.getDistanceConverterSafe(calibration, distanceUnit);
 		}
 		return distanceConverter;
 	}
@@ -231,7 +232,7 @@ public class PeakResultsHelper
 		if (angleConverter == null)
 		{
 			angleConverter = (calibration == null) ? new IdentityTypeConverter<AngleUnit>(null)
-					: calibration.getAngleConverterSafe(angleUnit);
+					: CalibrationHelper.getAngleConverterSafe(calibration, angleUnit);
 		}
 		return angleConverter;
 	}
@@ -429,6 +430,7 @@ public class PeakResultsHelper
 		if (calibration == null)
 			return null;
 
+		CalibrationWriter calibration = new CalibrationWriter(this.calibration);
 		if (hasIntensityConverter())
 			calibration.setIntensityUnit(getIntensityConverter().to());
 		if (hasDistanceConverter())

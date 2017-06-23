@@ -25,6 +25,8 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.CalibrationReader;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 
@@ -47,7 +49,6 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -199,8 +200,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			//--- MSD Analysis ---
 
 			// Conversion constants
-			final double px2ToUm2 = results.getCalibration().getNmPerPixel() *
-					results.getCalibration().getNmPerPixel() / 1e6;
+			final double px2ToUm2 = Maths.pow2(results.getCalibrationReader().getNmPerPixel()) / 1e6;
 			final double px2ToUm2PerSecond = px2ToUm2 / exposureTime;
 
 			// Get the maximum trace length
@@ -1001,12 +1001,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 */
 	private boolean checkCalibration(MemoryPeakResults results)
 	{
-		if (results.getCalibration() == null || results.getCalibration().getExposureTime() <= 0 ||
-				results.getCalibration().getNmPerPixel() <= 0)
+		if (results.getCalibration() == null || !results.getCalibrationReader().hasExposureTime() ||
+				!results.getCalibrationReader().hasNmPerPixel())
 		{
-			Calibration cal = results.getCalibration();
-			if (cal == null)
-				cal = new Calibration();
+			CalibrationWriter cal = results.getCalibrationWriterSafe();
 
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Uncalibrated results! Please enter the calibration:");
@@ -1019,6 +1017,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			cal.setNmPerPixel(gd.getNextNumber());
 			if (cal.getExposureTime() <= 0 || cal.getNmPerPixel() <= 0)
 				return false;
+			results.setCalibration(cal.getCalibration());
 		}
 		return true;
 	}
@@ -1056,9 +1055,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		this.results = allResults.get(0);
 
 		// Results should be checked for calibration by this point
-		exposureTime = results.getCalibration().getExposureTime() / 1000;
+		exposureTime = results.getCalibrationReader().getExposureTime() / 1000;
 
-		final double nmPerPixel = results.getCalibration().getNmPerPixel();
+		final double nmPerPixel = results.getCalibrationReader().getNmPerPixel();
 
 		ArrayList<Trace> allTraces = new ArrayList<Trace>();
 		additionalDatasets = -1;
@@ -1989,7 +1988,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			return false;
 
 		// Check the calibration is the same for the rest
-		Calibration cal = allResults.get(0).getCalibration();
+		CalibrationReader cal = allResults.get(0).getCalibrationReader();
 		final double nmPerPixel = cal.getNmPerPixel();
 		final double exposureTime = cal.getExposureTime();
 		final DistanceUnit distanceUnit = cal.getDistanceUnit();
@@ -1997,7 +1996,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		{
 			MemoryPeakResults results = allResults.get(1);
 
-			if (results.getCalibration() == null || results.getCalibration().getExposureTime() != exposureTime ||
+			if (!results.hasCalibration() || results.getCalibrationReader().getExposureTime() != exposureTime ||
 					results.getNmPerPixel() != nmPerPixel || results.getDistanceUnit() != distanceUnit)
 			{
 				IJ.error(TITLE, "The exposure time and pixel pitch must match across all the results");

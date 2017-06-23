@@ -31,6 +31,8 @@ import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.CalibrationReader;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
@@ -121,16 +123,16 @@ public class MALKFilePeakResults extends FilePeakResults
 	public void begin()
 	{
 		// Ensure we write out in nm and photons if possible.
-		if (calibration != null)
+		if (hasCalibration())
 		{
 			// Copy it so it can be modified
-			copyCalibration();
+			CalibrationWriter cw = new CalibrationWriter(getCalibration());
 
 			// Create converters 
 			try
 			{
-				toNMConverter = calibration.getDistanceConverter(DistanceUnit.NM);
-				calibration.setDistanceUnit(DistanceUnit.NM);
+				toNMConverter = cw.getDistanceConverter(DistanceUnit.NM);
+				cw.setDistanceUnit(DistanceUnit.NM);
 			}
 			catch (ConversionException e)
 			{
@@ -138,13 +140,15 @@ public class MALKFilePeakResults extends FilePeakResults
 			}
 			try
 			{
-				toPhotonConverter = calibration.getIntensityConverter(IntensityUnit.PHOTON);
-				calibration.setIntensityUnit(IntensityUnit.PHOTON);
+				toPhotonConverter = cw.getIntensityConverter(IntensityUnit.PHOTON);
+				cw.setIntensityUnit(IntensityUnit.PHOTON);
 			}
 			catch (ConversionException e)
 			{
 				// Gracefully fail so ignore this
 			}
+			
+			setCalibration(cw.getCalibration());
 		}
 
 		// The data loses PSF information so reset this to a custom type with 
@@ -169,20 +173,21 @@ public class MALKFilePeakResults extends FilePeakResults
 	{
 		String[] comments = new String[3];
 		int count = 0;
-		if (calibration != null)
+		if (hasCalibration())
 		{
-			if (calibration.hasNmPerPixel())
+			CalibrationReader cr = getCalibrationReader();
+			if (cr.hasNmPerPixel())
 			{
-				comments[count++] = String.format("Pixel pitch %s (nm)", Utils.rounded(calibration.getNmPerPixel()));
+				comments[count++] = String.format("Pixel pitch %s (nm)", Utils.rounded(cr.getNmPerPixel()));
 			}
-			if (calibration.hasGain())
+			if (cr.hasGain())
 			{
-				comments[count++] = String.format("Gain %s (Count/photon)", Utils.rounded(calibration.getGain()));
+				comments[count++] = String.format("Gain %s (Count/photon)", Utils.rounded(cr.getGain()));
 			}
-			if (calibration.hasExposureTime())
+			if (cr.hasExposureTime())
 			{
 				comments[count++] = String.format("Exposure time %s (seconds)",
-						Utils.rounded(calibration.getExposureTime() * 1e-3));
+						Utils.rounded(cr.getExposureTime() * 1e-3));
 			}
 		}
 		return Arrays.copyOf(comments, count);

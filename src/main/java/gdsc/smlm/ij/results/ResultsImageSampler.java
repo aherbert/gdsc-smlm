@@ -10,8 +10,8 @@ import org.apache.commons.math3.random.Well19937c;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.list.array.TLongArrayList;
@@ -485,9 +485,9 @@ public class ResultsImageSampler
 			return null;
 
 		double nmPerPixel = 1;
-		if (results.getCalibration() != null)
+		if (results.hasCalibration())
 		{
-			Calibration calibration = results.getCalibration();
+			CalibrationReader calibration = results.getCalibrationReader();
 			if (calibration.hasNmPerPixel())
 			{
 				nmPerPixel = calibration.getNmPerPixel();

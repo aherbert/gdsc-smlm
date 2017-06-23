@@ -37,7 +37,7 @@ import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.UnicodeReader;
-import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.Calibration;
@@ -93,7 +93,7 @@ public class PeakResultsReader
 	private String name = null;
 	private ImageSource source = null;
 	private Rectangle bounds = null;
-	private CalibrationHelper calibration = null;
+	private CalibrationWriter calibration = null;
 	private PSF psf = null;
 	private String configuration = null;
 	private TrackProgress tracker = null;
@@ -388,7 +388,7 @@ public class PeakResultsReader
 							if (Maths.isFinite(resolution) && resolution > 0)
 							{
 								final double nmPerPixel = (float) (1e9 / resolution);
-								calibration = new CalibrationHelper();
+								calibration = new CalibrationWriter();
 								calibration.setNmPerPixel(nmPerPixel);
 							}
 						}
@@ -416,7 +416,7 @@ public class PeakResultsReader
 								cal.validate();
 								
 								// Convert to a calibration helper
-								calibration = new CalibrationHelper();
+								calibration = new CalibrationWriter();
 								if (cal.hasNmPerPixel())
 									calibration.setNmPerPixel(cal.getNmPerPixel());
 								if (cal.hasGain())
@@ -453,7 +453,7 @@ public class PeakResultsReader
 							{
 								Calibration.Builder calibrationBuilder = Calibration.newBuilder();
 								JsonFormat.parser().merge(calibrationString, calibrationBuilder);
-								calibration = new CalibrationHelper(calibrationBuilder);
+								calibration = new CalibrationWriter(calibrationBuilder);
 							}
 							catch (InvalidProtocolBufferException e)
 							{
@@ -466,7 +466,7 @@ public class PeakResultsReader
 					if (format == FileFormat.MALK)
 					{
 						if (calibration == null)
-							calibration = new CalibrationHelper();
+							calibration = new CalibrationWriter();
 						calibration.setDistanceUnit(DistanceUnit.NM);
 						calibration.setIntensityUnit(IntensityUnit.PHOTON);
 					}
@@ -475,7 +475,7 @@ public class PeakResultsReader
 
 			// Calibration is a smart object so we can create an empty one
 			if (calibration == null)
-				calibration = new CalibrationHelper();
+				calibration = new CalibrationWriter();
 		}
 		return calibration.getCalibration();
 	}
@@ -799,7 +799,7 @@ public class PeakResultsReader
 		{
 			gaussian2Dformat = false;
 			// The number of fields should be within the PSF object
-			nFields = new PeakResultsHelper(calibration, psf).getNames().length;
+			nFields = new PeakResultsHelper(null, psf).getNames().length;
 		}
 
 		DataInputStream input = null;
@@ -993,7 +993,7 @@ public class PeakResultsReader
 		else
 		{
 			// The number of fields should be within the PSF object
-			nFields = new PeakResultsHelper(calibration, psf).getNames().length;
+			nFields = new PeakResultsHelper(null, psf).getNames().length;
 		}
 
 		BufferedReader input = null;
@@ -2226,7 +2226,7 @@ public class PeakResultsReader
 		// For now just record it as a 2 axis PSF.
 
 		// Create a calibration
-		calibration = new CalibrationHelper();
+		calibration = new CalibrationWriter();
 
 		// Q. Is NSTORM in photons?
 		calibration.setIntensityUnit(IntensityUnit.COUNT);
@@ -2446,7 +2446,7 @@ public class PeakResultsReader
 		// The calibration may not be null if this was a GDSC MALK file since that has a header.
 		if (calibration == null)
 		{
-			calibration = new CalibrationHelper();
+			calibration = new CalibrationWriter();
 			// Default assumption is nm
 			calibration.setDistanceUnit(DistanceUnit.NM);
 			// MALK uses photons

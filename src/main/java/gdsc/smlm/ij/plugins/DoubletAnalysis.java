@@ -48,6 +48,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.QuadrantAnalysis;
@@ -69,7 +70,6 @@ import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntProcedure;
@@ -110,11 +110,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static final String TITLE = "Doublet Analysis";
 	private static FitConfiguration fitConfig, filterFitConfig;
 	private static FitEngineConfiguration config;
-	private static Calibration cal;
+	private static CalibrationWriter cal;
 	private static int lastId = 0;
 	static
 	{
-		cal = new Calibration();
+		cal = new CalibrationWriter();
 		fitConfig = new FitConfiguration();
 		config = new FitEngineConfiguration(fitConfig);
 		// Set some default fit settings here ...
@@ -1714,7 +1714,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
-		settings.setCalibration(cal);
+		settings.setCalibration(cal.getCalibration());
 
 		boolean configure = true;
 		if (useBenchmarkSettings)
@@ -3126,7 +3126,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		filterFitConfig.setBias(cal.getBias());
 		filterFitConfig.setReadNoise(cal.getReadNoise());
 		filterFitConfig.setAmplification(cal.getAmplification());
-		filterFitConfig.setEmCCD(cal.isEmCCD());
+		filterFitConfig.setEmCCD(cal.isEMCCD());
 		filterFitConfig.setFitSolver(fitConfig.getFitSolver());
 
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);

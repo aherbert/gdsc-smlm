@@ -11,12 +11,13 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
-import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.Calibration;
@@ -473,7 +474,7 @@ public class PeakResultsReaderTest
 		MemoryPeakResults out = createResults(200, false, false, false);
 
 		// Output in pixel and count
-		CalibrationHelper cal = new CalibrationHelper(out.getCalibration());
+		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 		cal.setDistanceUnit(DistanceUnit.PIXEL);
 		cal.setIntensityUnit(IntensityUnit.COUNT);
 		out.setCalibration(cal.getCalibration());
@@ -514,7 +515,7 @@ public class PeakResultsReaderTest
 		MemoryPeakResults out = createResults(200, false, false, false);
 
 		// Output in nm and count
-		CalibrationHelper cal = new CalibrationHelper(out.getCalibration());
+		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 		cal.setDistanceUnit(DistanceUnit.NM);
 		cal.setIntensityUnit(IntensityUnit.COUNT);
 		out.setCalibration(cal.getCalibration());
@@ -554,7 +555,7 @@ public class PeakResultsReaderTest
 	{
 		MemoryPeakResults out = createResults(200, false, false, false);
 
-		CalibrationHelper cal = new CalibrationHelper(out.getCalibration());
+		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 		cal.setDistanceUnit(MemoryPeakResults.PREFERRED_DISTANCE_UNIT);
 		cal.setIntensityUnit(MemoryPeakResults.PREFERRED_INTENSITY_UNIT);
 		cal.setAngleUnit(MemoryPeakResults.PREFERRED_ANGLE_UNIT);
@@ -648,12 +649,31 @@ public class PeakResultsReaderTest
 		MemoryPeakResults out = createResults(200, showDeviations, showEndFrame, showId);
 		if (fileFormat == ResultsFileFormat.MALK)
 		{
-			CalibrationHelper cal = new CalibrationHelper(out.getCalibration());
+			CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 			cal.setDistanceUnit(DistanceUnit.NM);
 			cal.setIntensityUnit(IntensityUnit.PHOTON);
 			out.setCalibration(cal.getCalibration());
 			out.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		}
+
+		//		System.out.println(out.getCalibration());
+		//		System.out.println(out.getPSF().toString());
+		//		
+		//		System.out.println(TextFormat.shortDebugString(out.getCalibration()));
+		//
+		//		try
+		//		{
+		//			Printer printer = JsonFormat.printer()
+		//					.omittingInsignificantWhitespace()
+		//					//.includingDefaultValueFields()
+		//					;
+		//			System.out.println(printer.print(out.getCalibration()));
+		//			System.out.println(printer.print(out.getPSF()));
+		//		}
+		//		catch (InvalidProtocolBufferException e)
+		//		{
+		//			// This shouldn't happen so throw it
+		//		}
 
 		String filename = createFile();
 
@@ -824,7 +844,7 @@ public class PeakResultsReaderTest
 		results.setConfiguration(Float.toString(rand.next()) + Float.toString(rand.next()));
 		results.setBounds(new Rectangle((int) (10 * rand.next()), (int) (10 * rand.next()), (int) (100 * rand.next()),
 				(int) (100 * rand.next())));
-		CalibrationHelper cal = new CalibrationHelper();
+		CalibrationWriter cal = new CalibrationWriter();
 		cal.setNmPerPixel(rand.next());
 		cal.setGain(rand.next());
 		cal.setExposureTime(rand.next());

@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -72,7 +73,9 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 		globalSettings.getFitEngineConfiguration().getFitConfiguration().setInitialPeakStdDev((float) sd);
 		globalSettings.getFitEngineConfiguration().getFitConfiguration().setInitialAngle(0);
-		globalSettings.getCalibration().setNmPerPixel(getPixelPitch());
+		CalibrationWriter cw = CalibrationWriter.create(globalSettings.getCalibration());
+		cw.setNmPerPixel(getPixelPitch());
+		globalSettings.setCalibration(cw.getCalibration());
 		SettingsManager.saveSettings(globalSettings);
 	}
 

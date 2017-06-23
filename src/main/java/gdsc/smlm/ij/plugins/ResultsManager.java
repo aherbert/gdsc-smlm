@@ -33,6 +33,7 @@ import javax.swing.JFileChooser;
 
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.ij.IJImageSource;
@@ -48,7 +49,6 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.BinaryFilePeakResults;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FixedPeakResultList;
@@ -1126,24 +1126,19 @@ public class ResultsManager implements PlugIn
 	private static boolean checkCalibration(MemoryPeakResults results, PeakResultsReader reader)
 	{
 		// Check for Calibration
-		Calibration calibration = results.getCalibration();
+		CalibrationWriter calibration = results.getCalibrationWriterSafe();
 		String msg = "partially calibrated";
-		if (calibration == null)
+		if (results.hasCalibration())
 		{
 			// Make sure the user knows all the values have not been set
-			calibration = new Calibration();
 			msg = "uncalibrated";
 		}
-		else
-		{
-			// Validate to set the valid flags
-			calibration.validate();
-		}
 
-		final float noise = getNoise(results);
 		// Only check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification)
-		if (!calibration.hasNmPerPixel() || !calibration.hasGain() || !calibration.hasExposureTime() || noise <= 0)
+		if (!calibration.hasNmPerPixel() || !calibration.hasGain() || !calibration.hasExposureTime())
 		{
+			final float noise = getNoise(results);
+			
 			if (!calibration.hasNmPerPixel())
 				calibration.setNmPerPixel(input_nmPerPixel);
 			if (!calibration.hasGain())
@@ -1177,7 +1172,11 @@ public class ResultsManager implements PlugIn
 			Prefs.set(Constants.inputExposureTime, input_exposureTime);
 			Prefs.set(Constants.inputNoise, input_noise);
 
-			results.setCalibration(new Calibration(input_nmPerPixel, input_gain, input_exposureTime));
+			calibration.setNmPerPixel(input_nmPerPixel);
+			calibration.setGain(input_gain);
+			calibration.setExposureTime(input_exposureTime);
+			
+			results.setCalibration(calibration.getCalibration());
 
 			if (noise == 0)
 			{

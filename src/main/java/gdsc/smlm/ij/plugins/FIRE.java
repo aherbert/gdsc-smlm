@@ -63,6 +63,7 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.function.Erf;
@@ -93,7 +94,6 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -841,7 +841,7 @@ public class FIRE implements PlugIn
 		DistanceUnit unit = null;
 		units = "unknown";
 
-		Calibration cal = results.getCalibration();
+		CalibrationReader cal = results.getCalibrationReader();
 		if (cal != null)
 		{
 			try
@@ -863,7 +863,7 @@ public class FIRE implements PlugIn
 		// Calibration must match between datasets
 		if (this.results2 != null)
 		{
-			Calibration cal2 = results.getCalibration();
+			CalibrationReader cal2 = results.getCalibrationReader();
 			if (unit == null)
 			{
 				if (cal2 != null)

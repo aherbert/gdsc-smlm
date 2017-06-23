@@ -58,6 +58,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
@@ -905,8 +906,8 @@ public class PCPALMMolecules implements PlugIn
 
 		// These plugins are not really supported so just leave them to throw an exception if
 		// the data cannot be handled
-		TypeConverter<IntensityUnit> ic = results.getCalibration().getIntensityConverter(IntensityUnit.PHOTON);
-		TypeConverter<DistanceUnit> dc = results.getCalibration().getDistanceConverter(DistanceUnit.NM);
+		TypeConverter<IntensityUnit> ic = results.getCalibrationReader().getIntensityConverter(IntensityUnit.PHOTON);
+		TypeConverter<DistanceUnit> dc = results.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
 
 		for (Trace t : traces)
 		{
@@ -916,7 +917,7 @@ public class PCPALMMolecules implements PlugIn
 		}
 		log("  %d localisations traced to %d molecules (%d singles, %d traces) using d=%.2f nm, t=%d frames (%s s)",
 				results.size(), molecules.size() + singles.size(), singles.size(), molecules.size(), distance, time,
-				Utils.rounded(time * results.getCalibration().getExposureTime() / 1000.0));
+				Utils.rounded(time * results.getCalibrationReader().getExposureTime() / 1000.0));
 		return molecules;
 	}
 
@@ -963,7 +964,7 @@ public class PCPALMMolecules implements PlugIn
 
 		// Convert seconds to frames
 		int timeInFrames = FastMath.max(1,
-				(int) Math.round(tThreshold * 1000.0 / results.getCalibration().getExposureTime()));
+				(int) Math.round(tThreshold * 1000.0 / results.getCalibrationReader().getExposureTime()));
 
 		ArrayList<Molecule> singles = new ArrayList<Molecule>();
 		molecules = traceMolecules(results, dThreshold, timeInFrames, singles);
@@ -1053,7 +1054,7 @@ public class PCPALMMolecules implements PlugIn
 		molecules = new ArrayList<Molecule>(nMolecules);
 		// Create some dummy results since the calibration is required for later analysis
 		results = new MemoryPeakResults(PSFHelper.create(PSFType.CUSTOM));
-		results.setCalibration(new gdsc.smlm.results.Calibration(nmPerPixel, 1, 100));
+		results.setCalibration(CalibrationHelper.create(nmPerPixel, 1, 100));
 		results.setSource(new NullSource("Molecule Simulation"));
 		results.begin();
 		int count = 0;
@@ -1767,7 +1768,7 @@ public class PCPALMMolecules implements PlugIn
 		results.forEach(p);
 		start = p.start;
 		end = p.end;
-		seconds = (end - start + 1) * results.getCalibration().getExposureTime() / 1000;
+		seconds = (end - start + 1) * results.getCalibrationReader().getExposureTime() / 1000;
 	}
 
 	private boolean createImage(ArrayList<Molecule> molecules)

@@ -34,6 +34,7 @@ import gdsc.core.utils.Sort;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 
@@ -1407,7 +1408,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	{
 		final String filename = SettingsManager.getSettingsFilename();
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
-		nmPerPixel = settings.getCalibration().getNmPerPixel();
+		nmPerPixel = new CalibrationReader(settings.getCalibration()).getNmPerPixel();
 		config = settings.getFitEngineConfiguration();
 		fitConfig = config.getFitConfiguration();
 		if (radius < 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()))

@@ -12,7 +12,7 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.model.ActivationEnergyImageModel;
@@ -230,7 +230,7 @@ public class BlinkEstimatorTest
 		//		fluorophores = newFluorophores;
 
 		MemoryPeakResults results = new MemoryPeakResults();
-		CalibrationHelper calibration = new CalibrationHelper();
+		CalibrationWriter calibration = new CalibrationWriter();
 		calibration.setNmPerPixel(pixelPitch);
 		calibration.setExposureTime(msPerFrame);
 		calibration.setGain(1);

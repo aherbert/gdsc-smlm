@@ -3,6 +3,7 @@ package gdsc.smlm.data.config;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -39,46 +40,6 @@ public class UnitHelper
 				return "pixel";
 			case UM:
 				return "micrometer";
-			default:
-				return "unknown";
-		}
-	}
-
-	/**
-	 * Gets the name.
-	 *
-	 * @param unit
-	 *            the unit
-	 * @return the name
-	 */
-	public static String getName(IntensityUnit unit)
-	{
-		switch (unit)
-		{
-			case COUNT:
-				return "count";
-			case PHOTON:
-				return "photon";
-			default:
-				return "unknown";
-		}
-	}
-
-	/**
-	 * Gets the name.
-	 *
-	 * @param unit
-	 *            the unit
-	 * @return the name
-	 */
-	public static String getName(AngleUnit unit)
-	{
-		switch (unit)
-		{
-			case DEGREE:
-				return "degree";
-			case RADIAN:
-				return "radian";
 			default:
 				return "unknown";
 		}
@@ -128,6 +89,26 @@ public class UnitHelper
 	}
 
 	/**
+	 * Gets the name.
+	 *
+	 * @param unit
+	 *            the unit
+	 * @return the name
+	 */
+	public static String getName(IntensityUnit unit)
+	{
+		switch (unit)
+		{
+			case COUNT:
+				return "count";
+			case PHOTON:
+				return "photon";
+			default:
+				return "unknown";
+		}
+	}
+
+	/**
 	 * Gets the short name.
 	 *
 	 * @param unit
@@ -167,6 +148,26 @@ public class UnitHelper
 	}
 
 	/**
+	 * Gets the name.
+	 *
+	 * @param unit
+	 *            the unit
+	 * @return the name
+	 */
+	public static String getName(AngleUnit unit)
+	{
+		switch (unit)
+		{
+			case DEGREE:
+				return "degree";
+			case RADIAN:
+				return "radian";
+			default:
+				return "unknown";
+		}
+	}
+
+	/**
 	 * Gets the short name.
 	 *
 	 * @param unit
@@ -201,6 +202,71 @@ public class UnitHelper
 				return AngleUnit.DEGREE;
 			if (name.equalsIgnoreCase("rad"))
 				return AngleUnit.RADIAN;
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @param unit
+	 *            the unit
+	 * @return the name
+	 */
+	public static String getName(TimeUnit unit)
+	{
+		switch (unit)
+		{
+			case FRAME:
+				return "frame";
+			case MILLISECOND:
+				return "millisecond";
+			case SECOND:
+				return "second";
+			default:
+				return "unknown";
+		}
+	}
+
+	/**
+	 * Gets the short name.
+	 *
+	 * @param unit
+	 *            the unit
+	 * @return the short name
+	 */
+	public static String getShortName(TimeUnit unit)
+	{
+		switch (unit)
+		{
+			case FRAME:
+				return "frame";
+			case MILLISECOND:
+				return "ms";
+			case SECOND:
+				return "s";
+			default:
+				return "na";
+		}
+	}
+
+	/**
+	 * Guess time unit from short name.
+	 *
+	 * @param name
+	 *            the name
+	 * @return the time unit
+	 */
+	public static TimeUnit guessTimeUnitFromShortName(String name)
+	{
+		if (name != null)
+		{
+			if (name.equalsIgnoreCase("frame"))
+				return TimeUnit.FRAME;
+			if (name.equalsIgnoreCase("s"))
+				return TimeUnit.SECOND;
+			if (name.equalsIgnoreCase("ms"))
+				return TimeUnit.MILLISECOND;
 		}
 		return null;
 	}

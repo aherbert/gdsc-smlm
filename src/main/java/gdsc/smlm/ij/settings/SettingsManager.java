@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.EnumSet;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
@@ -13,6 +14,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.data.NamedObject;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
@@ -53,17 +55,75 @@ public class SettingsManager
 
 	private static XStream xs = null;
 
-	public static String[] resultsImageNames, resultsFileFormatNames, distanceUnitNames, intensityUnitNames,
-			angleUnitNames, timeUnitNames, dataFilterTypeNames, dataFilterNames, fitSolverNames, fitFunctionNames,
-			noiseEstimatorMethodNames, fitCriteriaNames, clusteringAlgorithmNames;
+	public final static DistanceUnit[] distanceUnitValues;
+	public final static String[] distanceUnitNames;
 	static
 	{
-		// TODO: These can be done with the CalibrationHelper
-		distanceUnitNames = getNames((Object[]) DistanceUnit.values());
-		intensityUnitNames = getNames((Object[]) IntensityUnit.values());
-		angleUnitNames = getNames((Object[]) AngleUnit.values());
-		timeUnitNames = getNames((Object[]) TimeUnit.values());
-		
+		EnumSet<DistanceUnit> d = EnumSet.allOf(DistanceUnit.class);
+		d.remove(DistanceUnit.UNRECOGNIZED);
+		d.remove(DistanceUnit.DISTANCE_UNIT_NA);
+		distanceUnitValues = d.toArray(new DistanceUnit[d.size()]);
+		distanceUnitNames = new String[distanceUnitValues.length];
+		for (int i = 0; i < distanceUnitValues.length; i++)
+		{
+			distanceUnitNames[i] = getName(UnitHelper.getName(distanceUnitValues[i]),
+					UnitHelper.getShortName(distanceUnitValues[i]));
+		}
+	}
+
+	public final static IntensityUnit[] intensityUnitValues;
+	public final static String[] intensityUnitNames;
+	static
+	{
+		EnumSet<IntensityUnit> d = EnumSet.allOf(IntensityUnit.class);
+		d.remove(IntensityUnit.UNRECOGNIZED);
+		d.remove(IntensityUnit.INTENSITY_UNIT_NA);
+		intensityUnitValues = d.toArray(new IntensityUnit[d.size()]);
+		intensityUnitNames = new String[intensityUnitValues.length];
+		for (int i = 0; i < intensityUnitValues.length; i++)
+		{
+			intensityUnitNames[i] = getName(UnitHelper.getName(intensityUnitValues[i]),
+					UnitHelper.getShortName(intensityUnitValues[i]));
+		}
+	}
+
+	public final static AngleUnit[] angleUnitValues;
+	public final static String[] angleUnitNames;
+	static
+	{
+		EnumSet<AngleUnit> d = EnumSet.allOf(AngleUnit.class);
+		d.remove(AngleUnit.UNRECOGNIZED);
+		d.remove(AngleUnit.ANGLE_UNIT_NA);
+		angleUnitValues = d.toArray(new AngleUnit[d.size()]);
+		angleUnitNames = new String[angleUnitValues.length];
+		for (int i = 0; i < angleUnitValues.length; i++)
+		{
+			angleUnitNames[i] = getName(UnitHelper.getName(angleUnitValues[i]),
+					UnitHelper.getShortName(angleUnitValues[i]));
+		}
+	}
+
+	public final static TimeUnit[] timeUnitValues;
+	public final static String[] timeUnitNames;
+	static
+	{
+		EnumSet<TimeUnit> d = EnumSet.allOf(TimeUnit.class);
+		d.remove(TimeUnit.UNRECOGNIZED);
+		d.remove(TimeUnit.TIME_UNIT_NA);
+		timeUnitValues = d.toArray(new TimeUnit[d.size()]);
+		timeUnitNames = new String[timeUnitValues.length];
+		for (int i = 0; i < timeUnitValues.length; i++)
+		{
+			timeUnitNames[i] = getName(UnitHelper.getName(timeUnitValues[i]),
+					UnitHelper.getShortName(timeUnitValues[i]));
+		}
+	}
+
+	public final static String[] resultsImageNames, resultsFileFormatNames, dataFilterTypeNames, dataFilterNames,
+			fitSolverNames, fitFunctionNames, noiseEstimatorMethodNames, fitCriteriaNames, clusteringAlgorithmNames;
+
+	static
+	{
 		resultsImageNames = getNames((Object[]) ResultsImage.values());
 		resultsFileFormatNames = getNames((Object[]) ResultsFileFormat.values());
 		dataFilterTypeNames = getNames((Object[]) DataFilterType.values());
@@ -73,26 +133,6 @@ public class SettingsManager
 		noiseEstimatorMethodNames = getNames((Object[]) Method.values());
 		fitCriteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
 		clusteringAlgorithmNames = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
-	}
-
-	/**
-	 * @return The settings filename (from the ImageJ preferences or the default in the home directory)
-	 */
-	public static String getSettingsFilename()
-	{
-		String filename = Prefs.get(Constants.settingsFilename, DEFAULT_FILENAME);
-		return filename;
-	}
-
-	/**
-	 * Save settings filename.
-	 *
-	 * @param filename
-	 *            the filename
-	 */
-	public static void saveSettingsFilename(String filename)
-	{
-		Prefs.set(Constants.settingsFilename, filename);
 	}
 
 	/**
@@ -114,9 +154,7 @@ public class SettingsManager
 			if (objects[i] instanceof NamedObject)
 			{
 				NamedObject o = (NamedObject) objects[i];
-				name = o.getName();
-				if (!name.equals(o.getShortName()))
-					name += " (" + o.getShortName() + ")";
+				name = getName(o.getName(), o.getShortName());
 			}
 			else
 			{
@@ -141,6 +179,33 @@ public class SettingsManager
 			names[i] = name;
 		}
 		return names;
+	}
+
+	private static String getName(String name, String shortName)
+	{
+		if (!name.equals(shortName))
+			name += " (" + shortName + ")";
+		return name;
+	}
+
+	/**
+	 * @return The settings filename (from the ImageJ preferences or the default in the home directory)
+	 */
+	public static String getSettingsFilename()
+	{
+		String filename = Prefs.get(Constants.settingsFilename, DEFAULT_FILENAME);
+		return filename;
+	}
+
+	/**
+	 * Save settings filename.
+	 *
+	 * @param filename
+	 *            the filename
+	 */
+	public static void saveSettingsFilename(String filename)
+	{
+		Prefs.set(Constants.settingsFilename, filename);
 	}
 
 	/**

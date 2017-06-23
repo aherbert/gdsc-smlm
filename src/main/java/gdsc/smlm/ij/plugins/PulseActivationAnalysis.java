@@ -23,6 +23,7 @@ import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.CalibrationHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
@@ -45,7 +46,6 @@ import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.Cluster.CentroidMethod;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -1823,7 +1823,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 			// Create a dataset to store the activations
 			MemoryPeakResults r = new MemoryPeakResults();
-			r.setCalibration(new Calibration(sim_nmPerPixel, 1, 100));
+			r.setCalibration(CalibrationHelper.create(sim_nmPerPixel, 1, 100));
 			r.setBounds(bounds);
 			r.setName(TITLE + " C" + (c + 1));
 			results[c] = r;
@@ -1837,7 +1837,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		// Combine
 		Utils.showStatus("Producing simulation output ...");
 		MemoryPeakResults r = new MemoryPeakResults();
-		r.setCalibration(new Calibration(sim_nmPerPixel, 1, 100));
+		r.setCalibration(CalibrationHelper.create(sim_nmPerPixel, 1, 100));
 		r.setBounds(new Rectangle(0, 0, sim_size, sim_size));
 		r.setName(TITLE);
 

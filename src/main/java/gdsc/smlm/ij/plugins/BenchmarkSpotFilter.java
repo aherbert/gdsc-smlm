@@ -1050,7 +1050,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Set-up the converters
 		try
 		{
-			if (results.getCalibration() == null || results.getCalibration().getDistanceUnit() != DistanceUnit.PIXEL)
+			if (results.getCalibration() == null || results.getCalibrationReader().getDistanceUnit() != DistanceUnit.PIXEL)
 				throw new ConfigurationException("Require results in pixel distance units");
 
 			int flags = Gaussian2DPeakResultHelper.AMPLITUDE;

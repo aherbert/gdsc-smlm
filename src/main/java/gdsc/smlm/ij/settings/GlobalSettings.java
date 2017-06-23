@@ -15,7 +15,7 @@ package gdsc.smlm.ij.settings;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.results.Calibration;
+import gdsc.smlm.data.config.SMLMSettings.Calibration;
 
 /**
  * Contain the settings for the gdsc.fitting package
@@ -55,7 +55,7 @@ public class GlobalSettings
 	public Calibration getCalibration()
 	{
 		if (calibration == null)
-			calibration = new Calibration();
+			calibration = Calibration.getDefaultInstance();
 		return calibration;
 	}
 

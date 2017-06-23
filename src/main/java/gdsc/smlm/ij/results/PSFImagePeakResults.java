@@ -88,21 +88,21 @@ public class PSFImagePeakResults extends IJImagePeakResults
 				flags |= Gaussian2DPeakResultHelper.PRECISION;
 
 				// To convert the precision to pixels
-				if (calibration == null)
+				if (!hasCalibration())
 					throw new ConfigurationException("nm/pixel is required when drawing using the precision");
 
 				dc = UnitConverterFactory.createConverter(DistanceUnit.NM, DistanceUnit.PIXEL,
-						calibration.getNmPerPixel());
+						getCalibrationReader().getNmPerPixel());
 			}
 			else
 			{
 				// We need to know the parameters for the Gaussian 2D PSF
-				int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+				int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
 				isx = indices[0];
 				isy = indices[1];
 				try
 				{
-					ia = PSFHelper.getGaussian2DAngleIndex(psf);
+					ia = PSFHelper.getGaussian2DAngleIndex(getPSF());
 				}
 				catch (ConfigurationException e)
 				{
@@ -113,7 +113,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		}
 
 		if (flags != 0)
-			calculator = Gaussian2DPeakResultHelper.create(psf, calibration, flags);
+			calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(), flags);
 	}
 
 	/*
@@ -210,8 +210,8 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	private void addPeak(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
 			float[] params, float[] paramsDev)
 	{
-		float x = (params[3] - bounds.x) * scale;
-		float y = (params[4] - bounds.y) * scale;
+		float x = (params[3] - ox) * scale;
+		float y = (params[4] - oy) * scale;
 
 		// Check bounds
 		if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)

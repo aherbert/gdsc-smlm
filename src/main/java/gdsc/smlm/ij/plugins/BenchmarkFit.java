@@ -16,6 +16,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
+import gdsc.smlm.data.config.CalibrationWriter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -41,7 +42,6 @@ import gdsc.smlm.ij.plugins.CreateData.BenchmarkParameters;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.results.Calibration;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -612,7 +612,7 @@ public class BenchmarkFit implements PlugIn
 			return false;
 
 		// Initialise the correct calibration
-		Calibration calibration = settings.getCalibration();
+		CalibrationWriter calibration = CalibrationWriter.create(settings.getCalibration());
 		calibration.setNmPerPixel(benchmarkParameters.a);
 		calibration.setGain(benchmarkParameters.gain);
 		calibration.setAmplification(benchmarkParameters.amplification);
@@ -620,6 +620,7 @@ public class BenchmarkFit implements PlugIn
 		calibration.setEmCCD(benchmarkParameters.emCCD);
 		calibration.setReadNoise(benchmarkParameters.readNoise);
 		calibration.setExposureTime(1000);
+		settings.setCalibration(calibration.getCalibration());
 
 		if (!PeakFit.configureFitSolver(settings, filename, false))
 			return false;

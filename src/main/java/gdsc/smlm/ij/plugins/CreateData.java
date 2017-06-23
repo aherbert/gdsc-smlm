@@ -57,6 +57,7 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
@@ -114,13 +115,12 @@ import gdsc.smlm.model.SpatialIllumination;
 import gdsc.smlm.model.SphericalDistribution;
 import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FrameCounter;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsReader;
 import gdsc.smlm.results.SynchronizedPeakResults;
@@ -1803,12 +1803,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Add drawn spots to memory
 		results = new MemoryPeakResults();
-		Calibration c = new Calibration(settings.pixelPitch, settings.getTotalGain(), settings.exposureTime);
+		CalibrationWriter c = new CalibrationWriter();
+		c.setNmPerPixel(settings.pixelPitch);
+		c.setGain(settings.getTotalGain());
+		c.setExposureTime(settings.exposureTime);
 		c.setEmCCD((settings.getEmGain() > 1));
 		c.setBias(settings.bias);
 		c.setReadNoise(settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1));
 		c.setAmplification(settings.getAmplification());
-		results.setCalibration(c);
+		results.setCalibration(c.getCalibration());
 		results.setSortAfterEnd(true);
 		results.begin();
 		// TODO - Add better support for the type of PSF that is being drawn
@@ -5078,7 +5081,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		float depth = Math.max(Math.abs(limits[0]), Math.abs(limits[1]));
 		boolean fixedDepth = Double.compare(limits[0], limits[1]) == 0;
 
-		Calibration cal = results.getCalibration();
+		CalibrationWriter cal = results.getCalibrationWriter();
 		String iUnits = " " + UnitHelper.getName(cal.getIntensityUnit());
 		String zUnits = " " + UnitHelper.getName(cal.getDistanceUnit());
 
@@ -5123,7 +5126,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Background", b, 3, 8, "photon");
 		gd.addNumericField("Total_gain", cal.getGain(), 3, 8, "ADU/photon");
 		gd.addNumericField("Amplification", cal.getAmplification(), 3, 8, "ADU/e-");
-		gd.addCheckbox("EM-CCD", cal.isEmCCD());
+		gd.addCheckbox("EM-CCD", cal.isEMCCD());
 		gd.addNumericField("Read_noise", cal.getReadNoise(), 3, 8, "ADU");
 		gd.addNumericField("Bias", cal.getBias(), 3, 8, "pixel");
 
@@ -5176,14 +5179,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// Store calibration
-		results.setCalibration(cal);
+		results.setCalibration(cal.getCalibration());
 
 		double gain = cal.getGain();
 		double a = cal.getNmPerPixel();
 		double bias = cal.getBias();
 		double readNoise = cal.getReadNoise();
 		double amplification = cal.getAmplification();
-		boolean emCCD = cal.isEmCCD();
+		boolean emCCD = cal.isEMCCD();
 
 		// Note: The calibration will throw an exception if the converter cannot be created.
 		// This is OK as the data will be invalid.

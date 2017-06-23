@@ -2755,17 +2755,17 @@ public final class SMLMSettings {
      * The distance unit.
      * </pre>
      *
-     * <code>.SMLM.DistanceUnit unit = 1;</code>
+     * <code>.SMLM.DistanceUnit distanceUnit = 1;</code>
      */
-    int getUnitValue();
+    int getDistanceUnitValue();
     /**
      * <pre>
      * The distance unit.
      * </pre>
      *
-     * <code>.SMLM.DistanceUnit unit = 1;</code>
+     * <code>.SMLM.DistanceUnit distanceUnit = 1;</code>
      */
-    gdsc.smlm.data.config.SMLMSettings.DistanceUnit getUnit();
+    gdsc.smlm.data.config.SMLMSettings.DistanceUnit getDistanceUnit();
 
     /**
      * <pre>
@@ -2792,7 +2792,7 @@ public final class SMLMSettings {
       super(builder);
     }
     private DistanceCalibration() {
-      unit_ = 0;
+      distanceUnit_ = 0;
       nmPerPixel_ = 0D;
     }
 
@@ -2824,7 +2824,7 @@ public final class SMLMSettings {
             case 8: {
               int rawValue = input.readEnum();
 
-              unit_ = rawValue;
+              distanceUnit_ = rawValue;
               break;
             }
             case 17: {
@@ -2855,27 +2855,27 @@ public final class SMLMSettings {
               gdsc.smlm.data.config.SMLMSettings.DistanceCalibration.class, gdsc.smlm.data.config.SMLMSettings.DistanceCalibration.Builder.class);
     }
 
-    public static final int UNIT_FIELD_NUMBER = 1;
-    private int unit_;
+    public static final int DISTANCEUNIT_FIELD_NUMBER = 1;
+    private int distanceUnit_;
     /**
      * <pre>
      * The distance unit.
      * </pre>
      *
-     * <code>.SMLM.DistanceUnit unit = 1;</code>
+     * <code>.SMLM.DistanceUnit distanceUnit = 1;</code>
      */
-    public int getUnitValue() {
-      return unit_;
+    public int getDistanceUnitValue() {
+      return distanceUnit_;
     }
     /**
      * <pre>
      * The distance unit.
      * </pre>
      *
-     * <code>.SMLM.DistanceUnit unit = 1;</code>
+     * <code>.SMLM.DistanceUnit distanceUnit = 1;</code>
      */
-    public gdsc.smlm.data.config.SMLMSettings.DistanceUnit getUnit() {
-      gdsc.smlm.data.config.SMLMSettings.DistanceUnit result = gdsc.smlm.data.config.SMLMSettings.DistanceUnit.valueOf(unit_);
+    public gdsc.smlm.data.config.SMLMSettings.DistanceUnit getDistanceUnit() {
+      gdsc.smlm.data.config.SMLMSettings.DistanceUnit result = gdsc.smlm.data.config.SMLMSettings.DistanceUnit.valueOf(distanceUnit_);
       return result == null ? gdsc.smlm.data.config.SMLMSettings.DistanceUnit.UNRECOGNIZED : result;
     }
 
@@ -2904,8 +2904,8 @@ public final class SMLMSettings {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        output.writeEnum(1, unit_);
+      if (distanceUnit_ != gdsc.smlm.data.config.SMLMSettings.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
+        output.writeEnum(1, distanceUnit_);
       }
       if (nmPerPixel_ != 0D) {
         output.writeDouble(2, nmPerPixel_);
@@ -2917,9 +2917,9 @@ public final class SMLMSettings {
       if (size != -1) return size;
 
       size = 0;
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
+      if (distanceUnit_ != gdsc.smlm.data.config.SMLMSettings.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, unit_);
+          .computeEnumSize(1, distanceUnit_);
       }
       if (nmPerPixel_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
@@ -2941,7 +2941,7 @@ public final class SMLMSettings {
       gdsc.smlm.data.config.SMLMSettings.DistanceCalibration other = (gdsc.smlm.data.config.SMLMSettings.DistanceCalibration) obj;
 
       boolean result = true;
-      result = result && unit_ == other.unit_;
+      result = result && distanceUnit_ == other.distanceUnit_;
       result = result && (
           java.lang.Double.doubleToLongBits(getNmPerPixel())
           == java.lang.Double.doubleToLongBits(
@@ -2956,8 +2956,8 @@ public final class SMLMSettings {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + UNIT_FIELD_NUMBER;
-      hash = (53 * hash) + unit_;
+      hash = (37 * hash) + DISTANCEUNIT_FIELD_NUMBER;
+      hash = (53 * hash) + distanceUnit_;
       hash = (37 * hash) + NMPERPIXEL_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getNmPerPixel()));
@@ -3094,7 +3094,7 @@ public final class SMLMSettings {
       }
       public Builder clear() {
         super.clear();
-        unit_ = 0;
+        distanceUnit_ = 0;
 
         nmPerPixel_ = 0D;
 
@@ -3120,7 +3120,7 @@ public final class SMLMSettings {
 
       public gdsc.smlm.data.config.SMLMSettings.DistanceCalibration buildPartial() {
         gdsc.smlm.data.config.SMLMSettings.DistanceCalibration result = new gdsc.smlm.data.config.SMLMSettings.DistanceCalibration(this);
-        result.unit_ = unit_;
+        result.distanceUnit_ = distanceUnit_;
         result.nmPerPixel_ = nmPerPixel_;
         onBuilt();
         return result;
@@ -3163,8 +3163,8 @@ public final class SMLMSettings {
 
       public Builder mergeFrom(gdsc.smlm.data.config.SMLMSettings.DistanceCalibration other) {
         if (other == gdsc.smlm.data.config.SMLMSettings.DistanceCalibration.getDefaultInstance()) return this;
-        if (other.unit_ != 0) {
-          setUnitValue(other.getUnitValue());
+        if (other.distanceUnit_ != 0) {
+          setDistanceUnitValue(other.getDistanceUnitValue());
         }
         if (other.getNmPerPixel() != 0D) {
           setNmPerPixel(other.getNmPerPixel());
@@ -3195,26 +3195,26 @@ public final class SMLMSettings {
         return this;
       }
 
-      private int unit_ = 0;
+      private int distanceUnit_ = 0;
       /**
        * <pre>
        * The distance unit.
        * </pre>
        *
-       * <code>.SMLM.DistanceUnit unit = 1;</code>
+       * <code>.SMLM.DistanceUnit distanceUnit = 1;</code>
        */
-      public int getUnitValue() {
-        return unit_;
+      public int getDistanceUnitValue() {
+        return distanceUnit_;
       }
       /**
        * <pre>
        * The distance unit.
        * </pre>
        *
-       * <code>.SMLM.DistanceUnit unit = 1;</code>
+       * <code>.SMLM.DistanceUnit distanceUnit = 1;</code>
        */
-      public Builder setUnitValue(int value) {
-        unit_ = value;
+      public Builder setDistanceUnitValue(int value) {
+        distanceUnit_ = value;
         onChanged();
         return this;
       }
@@ -3223,10 +3223,10 @@ public final class SMLMSettings {
        * The distance unit.
        * </pre>
        *
-       * <code>.SMLM.DistanceUnit unit = 1;</code>
+       * <code>.SMLM.DistanceUnit distanceUnit = 1;</code>
        */
-      public gdsc.smlm.data.config.SMLMSettings.DistanceUnit getUnit() {
-        gdsc.smlm.data.config.SMLMSettings.DistanceUnit result = gdsc.smlm.data.config.SMLMSettings.DistanceUnit.valueOf(unit_);
+      public gdsc.smlm.data.config.SMLMSettings.DistanceUnit getDistanceUnit() {
+        gdsc.smlm.data.config.SMLMSettings.DistanceUnit result = gdsc.smlm.data.config.SMLMSettings.DistanceUnit.valueOf(distanceUnit_);
         return result == null ? gdsc.smlm.data.config.SMLMSettings.DistanceUnit.UNRECOGNIZED : result;
       }
       /**
@@ -3234,14 +3234,14 @@ public final class SMLMSettings {
        * The distance unit.
        * </pre>
        *
-       * <code>.SMLM.DistanceUnit unit = 1;</code>
+       * <code>.SMLM.DistanceUnit distanceUnit = 1;</code>
        */
-      public Builder setUnit(gdsc.smlm.data.config.SMLMSettings.DistanceUnit value) {
+      public Builder setDistanceUnit(gdsc.smlm.data.config.SMLMSettings.DistanceUnit value) {
         if (value == null) {
           throw new NullPointerException();
         }
         
-        unit_ = value.getNumber();
+        distanceUnit_ = value.getNumber();
         onChanged();
         return this;
       }
@@ -3250,11 +3250,11 @@ public final class SMLMSettings {
        * The distance unit.
        * </pre>
        *
-       * <code>.SMLM.DistanceUnit unit = 1;</code>
+       * <code>.SMLM.DistanceUnit distanceUnit = 1;</code>
        */
-      public Builder clearUnit() {
+      public Builder clearDistanceUnit() {
         
-        unit_ = 0;
+        distanceUnit_ = 0;
         onChanged();
         return this;
       }
@@ -3355,18 +3355,18 @@ public final class SMLMSettings {
      * is in frames.
      * </pre>
      *
-     * <code>.SMLM.TimeUnit unit = 1;</code>
+     * <code>.SMLM.TimeUnit timeUnit = 1;</code>
      */
-    int getUnitValue();
+    int getTimeUnitValue();
     /**
      * <pre>
      * The time unit. This is currently unused as it is assumed the time in the results 
      * is in frames.
      * </pre>
      *
-     * <code>.SMLM.TimeUnit unit = 1;</code>
+     * <code>.SMLM.TimeUnit timeUnit = 1;</code>
      */
-    gdsc.smlm.data.config.SMLMSettings.TimeUnit getUnit();
+    gdsc.smlm.data.config.SMLMSettings.TimeUnit getTimeUnit();
 
     /**
      * <pre>
@@ -3393,7 +3393,7 @@ public final class SMLMSettings {
       super(builder);
     }
     private TimeCalibration() {
-      unit_ = 0;
+      timeUnit_ = 0;
       exposureTime_ = 0D;
     }
 
@@ -3425,7 +3425,7 @@ public final class SMLMSettings {
             case 8: {
               int rawValue = input.readEnum();
 
-              unit_ = rawValue;
+              timeUnit_ = rawValue;
               break;
             }
             case 17: {
@@ -3456,18 +3456,18 @@ public final class SMLMSettings {
               gdsc.smlm.data.config.SMLMSettings.TimeCalibration.class, gdsc.smlm.data.config.SMLMSettings.TimeCalibration.Builder.class);
     }
 
-    public static final int UNIT_FIELD_NUMBER = 1;
-    private int unit_;
+    public static final int TIMEUNIT_FIELD_NUMBER = 1;
+    private int timeUnit_;
     /**
      * <pre>
      * The time unit. This is currently unused as it is assumed the time in the results 
      * is in frames.
      * </pre>
      *
-     * <code>.SMLM.TimeUnit unit = 1;</code>
+     * <code>.SMLM.TimeUnit timeUnit = 1;</code>
      */
-    public int getUnitValue() {
-      return unit_;
+    public int getTimeUnitValue() {
+      return timeUnit_;
     }
     /**
      * <pre>
@@ -3475,10 +3475,10 @@ public final class SMLMSettings {
      * is in frames.
      * </pre>
      *
-     * <code>.SMLM.TimeUnit unit = 1;</code>
+     * <code>.SMLM.TimeUnit timeUnit = 1;</code>
      */
-    public gdsc.smlm.data.config.SMLMSettings.TimeUnit getUnit() {
-      gdsc.smlm.data.config.SMLMSettings.TimeUnit result = gdsc.smlm.data.config.SMLMSettings.TimeUnit.valueOf(unit_);
+    public gdsc.smlm.data.config.SMLMSettings.TimeUnit getTimeUnit() {
+      gdsc.smlm.data.config.SMLMSettings.TimeUnit result = gdsc.smlm.data.config.SMLMSettings.TimeUnit.valueOf(timeUnit_);
       return result == null ? gdsc.smlm.data.config.SMLMSettings.TimeUnit.UNRECOGNIZED : result;
     }
 
@@ -3507,8 +3507,8 @@ public final class SMLMSettings {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.TimeUnit.TIME_UNIT_NA.getNumber()) {
-        output.writeEnum(1, unit_);
+      if (timeUnit_ != gdsc.smlm.data.config.SMLMSettings.TimeUnit.TIME_UNIT_NA.getNumber()) {
+        output.writeEnum(1, timeUnit_);
       }
       if (exposureTime_ != 0D) {
         output.writeDouble(2, exposureTime_);
@@ -3520,9 +3520,9 @@ public final class SMLMSettings {
       if (size != -1) return size;
 
       size = 0;
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.TimeUnit.TIME_UNIT_NA.getNumber()) {
+      if (timeUnit_ != gdsc.smlm.data.config.SMLMSettings.TimeUnit.TIME_UNIT_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, unit_);
+          .computeEnumSize(1, timeUnit_);
       }
       if (exposureTime_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
@@ -3544,7 +3544,7 @@ public final class SMLMSettings {
       gdsc.smlm.data.config.SMLMSettings.TimeCalibration other = (gdsc.smlm.data.config.SMLMSettings.TimeCalibration) obj;
 
       boolean result = true;
-      result = result && unit_ == other.unit_;
+      result = result && timeUnit_ == other.timeUnit_;
       result = result && (
           java.lang.Double.doubleToLongBits(getExposureTime())
           == java.lang.Double.doubleToLongBits(
@@ -3559,8 +3559,8 @@ public final class SMLMSettings {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + UNIT_FIELD_NUMBER;
-      hash = (53 * hash) + unit_;
+      hash = (37 * hash) + TIMEUNIT_FIELD_NUMBER;
+      hash = (53 * hash) + timeUnit_;
       hash = (37 * hash) + EXPOSURETIME_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getExposureTime()));
@@ -3697,7 +3697,7 @@ public final class SMLMSettings {
       }
       public Builder clear() {
         super.clear();
-        unit_ = 0;
+        timeUnit_ = 0;
 
         exposureTime_ = 0D;
 
@@ -3723,7 +3723,7 @@ public final class SMLMSettings {
 
       public gdsc.smlm.data.config.SMLMSettings.TimeCalibration buildPartial() {
         gdsc.smlm.data.config.SMLMSettings.TimeCalibration result = new gdsc.smlm.data.config.SMLMSettings.TimeCalibration(this);
-        result.unit_ = unit_;
+        result.timeUnit_ = timeUnit_;
         result.exposureTime_ = exposureTime_;
         onBuilt();
         return result;
@@ -3766,8 +3766,8 @@ public final class SMLMSettings {
 
       public Builder mergeFrom(gdsc.smlm.data.config.SMLMSettings.TimeCalibration other) {
         if (other == gdsc.smlm.data.config.SMLMSettings.TimeCalibration.getDefaultInstance()) return this;
-        if (other.unit_ != 0) {
-          setUnitValue(other.getUnitValue());
+        if (other.timeUnit_ != 0) {
+          setTimeUnitValue(other.getTimeUnitValue());
         }
         if (other.getExposureTime() != 0D) {
           setExposureTime(other.getExposureTime());
@@ -3798,17 +3798,17 @@ public final class SMLMSettings {
         return this;
       }
 
-      private int unit_ = 0;
+      private int timeUnit_ = 0;
       /**
        * <pre>
        * The time unit. This is currently unused as it is assumed the time in the results 
        * is in frames.
        * </pre>
        *
-       * <code>.SMLM.TimeUnit unit = 1;</code>
+       * <code>.SMLM.TimeUnit timeUnit = 1;</code>
        */
-      public int getUnitValue() {
-        return unit_;
+      public int getTimeUnitValue() {
+        return timeUnit_;
       }
       /**
        * <pre>
@@ -3816,10 +3816,10 @@ public final class SMLMSettings {
        * is in frames.
        * </pre>
        *
-       * <code>.SMLM.TimeUnit unit = 1;</code>
+       * <code>.SMLM.TimeUnit timeUnit = 1;</code>
        */
-      public Builder setUnitValue(int value) {
-        unit_ = value;
+      public Builder setTimeUnitValue(int value) {
+        timeUnit_ = value;
         onChanged();
         return this;
       }
@@ -3829,10 +3829,10 @@ public final class SMLMSettings {
        * is in frames.
        * </pre>
        *
-       * <code>.SMLM.TimeUnit unit = 1;</code>
+       * <code>.SMLM.TimeUnit timeUnit = 1;</code>
        */
-      public gdsc.smlm.data.config.SMLMSettings.TimeUnit getUnit() {
-        gdsc.smlm.data.config.SMLMSettings.TimeUnit result = gdsc.smlm.data.config.SMLMSettings.TimeUnit.valueOf(unit_);
+      public gdsc.smlm.data.config.SMLMSettings.TimeUnit getTimeUnit() {
+        gdsc.smlm.data.config.SMLMSettings.TimeUnit result = gdsc.smlm.data.config.SMLMSettings.TimeUnit.valueOf(timeUnit_);
         return result == null ? gdsc.smlm.data.config.SMLMSettings.TimeUnit.UNRECOGNIZED : result;
       }
       /**
@@ -3841,14 +3841,14 @@ public final class SMLMSettings {
        * is in frames.
        * </pre>
        *
-       * <code>.SMLM.TimeUnit unit = 1;</code>
+       * <code>.SMLM.TimeUnit timeUnit = 1;</code>
        */
-      public Builder setUnit(gdsc.smlm.data.config.SMLMSettings.TimeUnit value) {
+      public Builder setTimeUnit(gdsc.smlm.data.config.SMLMSettings.TimeUnit value) {
         if (value == null) {
           throw new NullPointerException();
         }
         
-        unit_ = value.getNumber();
+        timeUnit_ = value.getNumber();
         onChanged();
         return this;
       }
@@ -3858,11 +3858,11 @@ public final class SMLMSettings {
        * is in frames.
        * </pre>
        *
-       * <code>.SMLM.TimeUnit unit = 1;</code>
+       * <code>.SMLM.TimeUnit timeUnit = 1;</code>
        */
-      public Builder clearUnit() {
+      public Builder clearTimeUnit() {
         
-        unit_ = 0;
+        timeUnit_ = 0;
         onChanged();
         return this;
       }
@@ -3962,17 +3962,17 @@ public final class SMLMSettings {
      * The intensity unit.
      * </pre>
      *
-     * <code>.SMLM.IntensityUnit unit = 1;</code>
+     * <code>.SMLM.IntensityUnit intensityUnit = 1;</code>
      */
-    int getUnitValue();
+    int getIntensityUnitValue();
     /**
      * <pre>
      * The intensity unit.
      * </pre>
      *
-     * <code>.SMLM.IntensityUnit unit = 1;</code>
+     * <code>.SMLM.IntensityUnit intensityUnit = 1;</code>
      */
-    gdsc.smlm.data.config.SMLMSettings.IntensityUnit getUnit();
+    gdsc.smlm.data.config.SMLMSettings.IntensityUnit getIntensityUnit();
 
     /**
      * <pre>
@@ -3996,7 +3996,7 @@ public final class SMLMSettings {
       super(builder);
     }
     private IntensityCalibration() {
-      unit_ = 0;
+      intensityUnit_ = 0;
       gain_ = 0D;
     }
 
@@ -4028,7 +4028,7 @@ public final class SMLMSettings {
             case 8: {
               int rawValue = input.readEnum();
 
-              unit_ = rawValue;
+              intensityUnit_ = rawValue;
               break;
             }
             case 17: {
@@ -4059,27 +4059,27 @@ public final class SMLMSettings {
               gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.class, gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.Builder.class);
     }
 
-    public static final int UNIT_FIELD_NUMBER = 1;
-    private int unit_;
+    public static final int INTENSITYUNIT_FIELD_NUMBER = 1;
+    private int intensityUnit_;
     /**
      * <pre>
      * The intensity unit.
      * </pre>
      *
-     * <code>.SMLM.IntensityUnit unit = 1;</code>
+     * <code>.SMLM.IntensityUnit intensityUnit = 1;</code>
      */
-    public int getUnitValue() {
-      return unit_;
+    public int getIntensityUnitValue() {
+      return intensityUnit_;
     }
     /**
      * <pre>
      * The intensity unit.
      * </pre>
      *
-     * <code>.SMLM.IntensityUnit unit = 1;</code>
+     * <code>.SMLM.IntensityUnit intensityUnit = 1;</code>
      */
-    public gdsc.smlm.data.config.SMLMSettings.IntensityUnit getUnit() {
-      gdsc.smlm.data.config.SMLMSettings.IntensityUnit result = gdsc.smlm.data.config.SMLMSettings.IntensityUnit.valueOf(unit_);
+    public gdsc.smlm.data.config.SMLMSettings.IntensityUnit getIntensityUnit() {
+      gdsc.smlm.data.config.SMLMSettings.IntensityUnit result = gdsc.smlm.data.config.SMLMSettings.IntensityUnit.valueOf(intensityUnit_);
       return result == null ? gdsc.smlm.data.config.SMLMSettings.IntensityUnit.UNRECOGNIZED : result;
     }
 
@@ -4109,8 +4109,8 @@ public final class SMLMSettings {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
-        output.writeEnum(1, unit_);
+      if (intensityUnit_ != gdsc.smlm.data.config.SMLMSettings.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
+        output.writeEnum(1, intensityUnit_);
       }
       if (gain_ != 0D) {
         output.writeDouble(2, gain_);
@@ -4122,9 +4122,9 @@ public final class SMLMSettings {
       if (size != -1) return size;
 
       size = 0;
-      if (unit_ != gdsc.smlm.data.config.SMLMSettings.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
+      if (intensityUnit_ != gdsc.smlm.data.config.SMLMSettings.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, unit_);
+          .computeEnumSize(1, intensityUnit_);
       }
       if (gain_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
@@ -4146,7 +4146,7 @@ public final class SMLMSettings {
       gdsc.smlm.data.config.SMLMSettings.IntensityCalibration other = (gdsc.smlm.data.config.SMLMSettings.IntensityCalibration) obj;
 
       boolean result = true;
-      result = result && unit_ == other.unit_;
+      result = result && intensityUnit_ == other.intensityUnit_;
       result = result && (
           java.lang.Double.doubleToLongBits(getGain())
           == java.lang.Double.doubleToLongBits(
@@ -4161,8 +4161,8 @@ public final class SMLMSettings {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + UNIT_FIELD_NUMBER;
-      hash = (53 * hash) + unit_;
+      hash = (37 * hash) + INTENSITYUNIT_FIELD_NUMBER;
+      hash = (53 * hash) + intensityUnit_;
       hash = (37 * hash) + GAIN_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getGain()));
@@ -4295,7 +4295,7 @@ public final class SMLMSettings {
       }
       public Builder clear() {
         super.clear();
-        unit_ = 0;
+        intensityUnit_ = 0;
 
         gain_ = 0D;
 
@@ -4321,7 +4321,7 @@ public final class SMLMSettings {
 
       public gdsc.smlm.data.config.SMLMSettings.IntensityCalibration buildPartial() {
         gdsc.smlm.data.config.SMLMSettings.IntensityCalibration result = new gdsc.smlm.data.config.SMLMSettings.IntensityCalibration(this);
-        result.unit_ = unit_;
+        result.intensityUnit_ = intensityUnit_;
         result.gain_ = gain_;
         onBuilt();
         return result;
@@ -4364,8 +4364,8 @@ public final class SMLMSettings {
 
       public Builder mergeFrom(gdsc.smlm.data.config.SMLMSettings.IntensityCalibration other) {
         if (other == gdsc.smlm.data.config.SMLMSettings.IntensityCalibration.getDefaultInstance()) return this;
-        if (other.unit_ != 0) {
-          setUnitValue(other.getUnitValue());
+        if (other.intensityUnit_ != 0) {
+          setIntensityUnitValue(other.getIntensityUnitValue());
         }
         if (other.getGain() != 0D) {
           setGain(other.getGain());
@@ -4396,26 +4396,26 @@ public final class SMLMSettings {
         return this;
       }
 
-      private int unit_ = 0;
+      private int intensityUnit_ = 0;
       /**
        * <pre>
        * The intensity unit.
        * </pre>
        *
-       * <code>.SMLM.IntensityUnit unit = 1;</code>
+       * <code>.SMLM.IntensityUnit intensityUnit = 1;</code>
        */
-      public int getUnitValue() {
-        return unit_;
+      public int getIntensityUnitValue() {
+        return intensityUnit_;
       }
       /**
        * <pre>
        * The intensity unit.
        * </pre>
        *
-       * <code>.SMLM.IntensityUnit unit = 1;</code>
+       * <code>.SMLM.IntensityUnit intensityUnit = 1;</code>
        */
-      public Builder setUnitValue(int value) {
-        unit_ = value;
+      public Builder setIntensityUnitValue(int value) {
+        intensityUnit_ = value;
         onChanged();
         return this;
       }
@@ -4424,10 +4424,10 @@ public final class SMLMSettings {
        * The intensity unit.
        * </pre>
        *
-       * <code>.SMLM.IntensityUnit unit = 1;</code>
+       * <code>.SMLM.IntensityUnit intensityUnit = 1;</code>
        */
-      public gdsc.smlm.data.config.SMLMSettings.IntensityUnit getUnit() {
-        gdsc.smlm.data.config.SMLMSettings.IntensityUnit result = gdsc.smlm.data.config.SMLMSettings.IntensityUnit.valueOf(unit_);
+      public gdsc.smlm.data.config.SMLMSettings.IntensityUnit getIntensityUnit() {
+        gdsc.smlm.data.config.SMLMSettings.IntensityUnit result = gdsc.smlm.data.config.SMLMSettings.IntensityUnit.valueOf(intensityUnit_);
         return result == null ? gdsc.smlm.data.config.SMLMSettings.IntensityUnit.UNRECOGNIZED : result;
       }
       /**
@@ -4435,14 +4435,14 @@ public final class SMLMSettings {
        * The intensity unit.
        * </pre>
        *
-       * <code>.SMLM.IntensityUnit unit = 1;</code>
+       * <code>.SMLM.IntensityUnit intensityUnit = 1;</code>
        */
-      public Builder setUnit(gdsc.smlm.data.config.SMLMSettings.IntensityUnit value) {
+      public Builder setIntensityUnit(gdsc.smlm.data.config.SMLMSettings.IntensityUnit value) {
         if (value == null) {
           throw new NullPointerException();
         }
         
-        unit_ = value.getNumber();
+        intensityUnit_ = value.getNumber();
         onChanged();
         return this;
       }
@@ -4451,11 +4451,11 @@ public final class SMLMSettings {
        * The intensity unit.
        * </pre>
        *
-       * <code>.SMLM.IntensityUnit unit = 1;</code>
+       * <code>.SMLM.IntensityUnit intensityUnit = 1;</code>
        */
-      public Builder clearUnit() {
+      public Builder clearIntensityUnit() {
         
-        unit_ = 0;
+        intensityUnit_ = 0;
         onChanged();
         return this;
       }
@@ -7560,39 +7560,39 @@ public final class SMLMSettings {
       "\014\n\004name\030\001 \001(\t\022$\n\004unit\030\002 \001(\0162\026.SMLM.PSFPa" +
       "rameterUnit\"L\n\003PSF\022\036\n\007psfType\030\001 \001(\0162\r.SM" +
       "LM.PSFType\022%\n\tparameter\030\002 \003(\0132\022.SMLM.PSF" +
-      "Parameter\"K\n\023DistanceCalibration\022 \n\004unit" +
-      "\030\001 \001(\0162\022.SMLM.DistanceUnit\022\022\n\nnmPerPixel" +
-      "\030\002 \001(\001\"E\n\017TimeCalibration\022\034\n\004unit\030\001 \001(\0162" +
-      "\016.SMLM.TimeUnit\022\024\n\014exposureTime\030\002 \001(\001\"G\n" +
-      "\024IntensityCalibration\022!\n\004unit\030\001 \001(\0162\023.SM" +
-      "LM.IntensityUnit\022\014\n\004gain\030\002 \001(\001\"q\n\021Camera",
-      "Calibration\022$\n\ncameraType\030\001 \001(\0162\020.SMLM.C" +
-      "ameraType\022\021\n\treadNoise\030\002 \001(\001\022\014\n\004bias\030\003 \001" +
-      "(\001\022\025\n\ramplification\030\004 \001(\001\"4\n\016PSFCalibrat" +
-      "ion\022\"\n\tangleUnit\030\001 \001(\0162\017.SMLM.AngleUnit\"" +
-      "\221\002\n\013Calibration\0226\n\023distanceCalibration\030\001" +
-      " \001(\0132\031.SMLM.DistanceCalibration\022.\n\017timeC" +
-      "alibration\030\002 \001(\0132\025.SMLM.TimeCalibration\022" +
-      "8\n\024intensityCalibration\030\003 \001(\0132\032.SMLM.Int" +
-      "ensityCalibration\0222\n\021cameraCalibration\030\004" +
-      " \001(\0132\027.SMLM.CameraCalibration\022,\n\016psfCali",
-      "bration\030\005 \001(\0132\024.SMLM.PSFCalibration*\232\001\n\007" +
-      "PSFType\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAU" +
-      "SSIAN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036" +
-      "TWO_AXIS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTI" +
-      "GMATIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFP" +
-      "arameterUnit\022\031\n\025PSF_PARAMETER_UNIT_NA\020\000\022" +
-      "\014\n\010DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003*" +
-      "?\n\nCameraType\022\022\n\016CAMERA_TYPE_NA\020\000\022\t\n\005EMC" +
-      "CD\020\001\022\007\n\003CCD\020\002\022\t\n\005SCMOS\020\003*?\n\014DistanceUnit" +
-      "\022\024\n\020DISTANCE_UNIT_NA\020\000\022\t\n\005PIXEL\020\001\022\006\n\002UM\020",
-      "\002\022\006\n\002NM\020\003*=\n\rIntensityUnit\022\025\n\021INTENSITY_" +
-      "UNIT_NA\020\000\022\n\n\006PHOTON\020\001\022\t\n\005COUNT\020\002*6\n\tAngl" +
-      "eUnit\022\021\n\rANGLE_UNIT_NA\020\000\022\n\n\006RADIAN\020\001\022\n\n\006" +
-      "DEGREE\020\002*D\n\010TimeUnit\022\020\n\014TIME_UNIT_NA\020\000\022\t" +
-      "\n\005FRAME\020\001\022\n\n\006SECOND\020\002\022\017\n\013MILLISECOND\020\003B%" +
-      "\n\025gdsc.smlm.data.configB\014SMLMSettingsb\006p" +
-      "roto3"
+      "Parameter\"S\n\023DistanceCalibration\022(\n\014dist" +
+      "anceUnit\030\001 \001(\0162\022.SMLM.DistanceUnit\022\022\n\nnm" +
+      "PerPixel\030\002 \001(\001\"I\n\017TimeCalibration\022 \n\010tim" +
+      "eUnit\030\001 \001(\0162\016.SMLM.TimeUnit\022\024\n\014exposureT" +
+      "ime\030\002 \001(\001\"P\n\024IntensityCalibration\022*\n\rint" +
+      "ensityUnit\030\001 \001(\0162\023.SMLM.IntensityUnit\022\014\n",
+      "\004gain\030\002 \001(\001\"q\n\021CameraCalibration\022$\n\ncame" +
+      "raType\030\001 \001(\0162\020.SMLM.CameraType\022\021\n\treadNo" +
+      "ise\030\002 \001(\001\022\014\n\004bias\030\003 \001(\001\022\025\n\ramplification" +
+      "\030\004 \001(\001\"4\n\016PSFCalibration\022\"\n\tangleUnit\030\001 " +
+      "\001(\0162\017.SMLM.AngleUnit\"\221\002\n\013Calibration\0226\n\023" +
+      "distanceCalibration\030\001 \001(\0132\031.SMLM.Distanc" +
+      "eCalibration\022.\n\017timeCalibration\030\002 \001(\0132\025." +
+      "SMLM.TimeCalibration\0228\n\024intensityCalibra" +
+      "tion\030\003 \001(\0132\032.SMLM.IntensityCalibration\0222" +
+      "\n\021cameraCalibration\030\004 \001(\0132\027.SMLM.CameraC",
+      "alibration\022,\n\016psfCalibration\030\005 \001(\0132\024.SML" +
+      "M.PSFCalibration*\232\001\n\007PSFType\022\017\n\013PSF_TYPE" +
+      "_NA\020\000\022\030\n\024ONE_AXIS_GAUSSIAN_2D\020\001\022\030\n\024TWO_A" +
+      "XIS_GAUSSIAN_2D\020\002\022\"\n\036TWO_AXIS_AND_THETA_" +
+      "GAUSSIAN_2D\020\003\022\032\n\026ASTIGMATIC_GAUSSIAN_2D\020" +
+      "\004\022\n\n\006CUSTOM\020\005*U\n\020PSFParameterUnit\022\031\n\025PSF" +
+      "_PARAMETER_UNIT_NA\020\000\022\014\n\010DISTANCE\020\001\022\r\n\tIN" +
+      "TENSITY\020\002\022\t\n\005ANGLE\020\003*?\n\nCameraType\022\022\n\016CA" +
+      "MERA_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t\n\005SC" +
+      "MOS\020\003*?\n\014DistanceUnit\022\024\n\020DISTANCE_UNIT_N",
+      "A\020\000\022\t\n\005PIXEL\020\001\022\006\n\002UM\020\002\022\006\n\002NM\020\003*=\n\rIntens" +
+      "ityUnit\022\025\n\021INTENSITY_UNIT_NA\020\000\022\n\n\006PHOTON" +
+      "\020\001\022\t\n\005COUNT\020\002*6\n\tAngleUnit\022\021\n\rANGLE_UNIT" +
+      "_NA\020\000\022\n\n\006RADIAN\020\001\022\n\n\006DEGREE\020\002*D\n\010TimeUni" +
+      "t\022\020\n\014TIME_UNIT_NA\020\000\022\t\n\005FRAME\020\001\022\n\n\006SECOND" +
+      "\020\002\022\017\n\013MILLISECOND\020\003B%\n\025gdsc.smlm.data.co" +
+      "nfigB\014SMLMSettingsb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -7623,19 +7623,19 @@ public final class SMLMSettings {
     internal_static_SMLM_DistanceCalibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_SMLM_DistanceCalibration_descriptor,
-        new java.lang.String[] { "Unit", "NmPerPixel", });
+        new java.lang.String[] { "DistanceUnit", "NmPerPixel", });
     internal_static_SMLM_TimeCalibration_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_SMLM_TimeCalibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_SMLM_TimeCalibration_descriptor,
-        new java.lang.String[] { "Unit", "ExposureTime", });
+        new java.lang.String[] { "TimeUnit", "ExposureTime", });
     internal_static_SMLM_IntensityCalibration_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_SMLM_IntensityCalibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_SMLM_IntensityCalibration_descriptor,
-        new java.lang.String[] { "Unit", "Gain", });
+        new java.lang.String[] { "IntensityUnit", "Gain", });
     internal_static_SMLM_CameraCalibration_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_SMLM_CameraCalibration_fieldAccessorTable = new

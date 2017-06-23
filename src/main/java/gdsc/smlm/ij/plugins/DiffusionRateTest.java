@@ -21,6 +21,7 @@ import gdsc.core.utils.RollingArray;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.PSFType;
 
@@ -45,7 +46,6 @@ import gdsc.smlm.model.DiffusionType;
 import gdsc.smlm.model.ImageModel;
 import gdsc.smlm.model.MoleculeModel;
 import gdsc.smlm.model.SphericalDistribution;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -219,8 +219,7 @@ public class DiffusionRateTest implements PlugIn
 
 		// Save results to memory
 		MemoryPeakResults results = new MemoryPeakResults(totalSteps);
-		Calibration cal = new Calibration(settings.pixelPitch, 1, 1000.0 / settings.stepsPerSecond);
-		results.setCalibration(cal);
+		results.setCalibration(CalibrationHelper.create(settings.pixelPitch, 1, 1000.0 / settings.stepsPerSecond));
 		results.setName(TITLE);
 		results.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		int peak = 0;
@@ -353,13 +352,13 @@ public class DiffusionRateTest implements PlugIn
 
 		// Convert pixels^2/step to um^2/sec
 		final double msd2D = (jumpDistances2D.getMean() / conversionFactor) /
-				(results.getCalibration().getExposureTime() / 1000);
+				(results.getCalibrationReader().getExposureTime() / 1000);
 		final double msd3D = (jumpDistances3D.getMean() / conversionFactor) /
-				(results.getCalibration().getExposureTime() / 1000);
+				(results.getCalibrationReader().getExposureTime() / 1000);
 		Utils.log(
 				"Raw data D=%s um^2/s, Precision = %s nm, N=%d, step=%s s, mean2D=%s um^2, MSD 2D = %s um^2/s, mean3D=%s um^2, MSD 3D = %s um^2/s",
 				Utils.rounded(settings.diffusionRate), Utils.rounded(myPrecision), jumpDistances2D.getN(),
-				Utils.rounded(results.getCalibration().getExposureTime() / 1000),
+				Utils.rounded(results.getCalibrationReader().getExposureTime() / 1000),
 				Utils.rounded(jumpDistances2D.getMean() / conversionFactor), Utils.rounded(msd2D),
 				Utils.rounded(jumpDistances3D.getMean() / conversionFactor), Utils.rounded(msd3D));
 
@@ -915,8 +914,7 @@ public class DiffusionRateTest implements PlugIn
 			return;
 
 		MemoryPeakResults results = new MemoryPeakResults(points.size() / myAggregateSteps);
-		Calibration cal = new Calibration(settings.pixelPitch, 1, myAggregateSteps * 1000.0 / settings.stepsPerSecond);
-		results.setCalibration(cal);
+		results.setCalibration(CalibrationHelper.create(settings.pixelPitch, 1, myAggregateSteps * 1000.0 / settings.stepsPerSecond));
 		results.setName(TITLE + " Aggregated");
 		results.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		MemoryPeakResults.addResults(results);
@@ -989,8 +987,8 @@ public class DiffusionRateTest implements PlugIn
 		// Convert to um^2/second
 		Utils.log("Aggregated data D=%s um^2/s, Precision=%s nm, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s",
 				Utils.rounded(settings.diffusionRate), Utils.rounded(myPrecision), count,
-				Utils.rounded(results.getCalibration().getExposureTime() / 1000), Utils.rounded(msd / conversionFactor),
-				Utils.rounded((msd / conversionFactor) / (results.getCalibration().getExposureTime() / 1000)));
+				Utils.rounded(results.getCalibrationReader().getExposureTime() / 1000), Utils.rounded(msd / conversionFactor),
+				Utils.rounded((msd / conversionFactor) / (results.getCalibrationReader().getExposureTime() / 1000)));
 
 		msdAnalysis(points);
 	}

@@ -1,5 +1,14 @@
 package gdsc.smlm.ij.plugins;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.clustering.Cluster;
+import gdsc.core.clustering.ClusteringAlgorithm;
+import gdsc.core.clustering.ClusteringEngine;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -14,28 +23,18 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.core.ij.IJTrackProgress;
-import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.core.ij.Utils;
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.Trace;
-import gdsc.smlm.results.TraceManager;
-import gdsc.core.clustering.Cluster;
-import gdsc.core.clustering.ClusteringAlgorithm;
-import gdsc.core.clustering.ClusteringEngine;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.Trace;
+import gdsc.smlm.results.TraceManager;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Computes a graph of the dark time and estimates the time threshold for the specified point in the
@@ -92,7 +91,7 @@ public class DarkTimeAnalysis implements PlugIn
 			IJ.showStatus("");
 			return;
 		}
-		msPerFrame = results.getCalibration().getExposureTime();
+		msPerFrame = results.getCalibrationReader().getExposureTime();
 		Utils.log("%s: %d localisations", TITLE, results.size());
 
 		if (results.size() == 0)
@@ -152,7 +151,7 @@ public class DarkTimeAnalysis implements PlugIn
 		int max = results.getLastFrame();
 
 		// Trace results
-		double d = searchDistance / results.getCalibration().getNmPerPixel();
+		double d = searchDistance / results.getCalibrationReader().getNmPerPixel();
 		int range = max - min + 1;
 		if (maxDarkTime > 0)
 			range = FastMath.max(1, (int) Math.round(maxDarkTime * 1000 / msPerFrame));

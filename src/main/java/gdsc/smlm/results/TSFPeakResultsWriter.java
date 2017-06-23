@@ -11,10 +11,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -88,18 +89,18 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		size = 0;
 
 		// Only support Gaussian 2D data
-		if (psf == null || !PSFHelper.isGaussian2D(psf))
+		if (getPSF() == null || !PSFHelper.isGaussian2D(getPSF()))
 		{
 			System.err.println("TSF format requires a Gaussian 2D PSF");
 			closeOutput();
 			return;
 		}
-		int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+		int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
 		isx = indices[0];
 		isy = indices[1];
 		try
 		{
-			ia = PSFHelper.getGaussian2DAngleIndex(psf);
+			ia = PSFHelper.getGaussian2DAngleIndex(getPSF());
 			fitMode = FitMode.TWOAXISANDTHETA;
 		}
 		catch (ConfigurationException e)
@@ -461,88 +462,89 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setNrSpots(size);
 
 		// Add the standard details the TSF supports. We use extensions to add GDSC SMLM data.
-		if (name != null)
+		if (!Utils.isNullOrEmpty(getName()))
 		{
-			builder.setName(name);
+			builder.setName(getName());
 		}
-		if (source != null)
+		if (getSource() != null)
 		{
-			builder.setNrPixelsX(source.width);
-			builder.setNrPixelsY(source.height);
-			builder.setNrFrames(source.frames);
+			builder.setNrPixelsX(getSource().width);
+			builder.setNrPixelsY(getSource().height);
+			builder.setNrFrames(getSource().frames);
 
-			builder.setSource(singleLine(source.toXML()));
+			builder.setSource(singleLine(getSource().toXML()));
 		}
-		if (bounds != null)
+		if (getBounds() != null)
 		{
 			ROI.Builder roiBuilder = builder.getRoiBuilder();
-			roiBuilder.setX(bounds.x);
-			roiBuilder.setY(bounds.y);
-			roiBuilder.setXWidth(bounds.width);
-			roiBuilder.setYWidth(bounds.height);
+			roiBuilder.setX(getBounds().x);
+			roiBuilder.setY(getBounds().y);
+			roiBuilder.setXWidth(getBounds().width);
+			roiBuilder.setYWidth(getBounds().height);
 			builder.setRoi(roiBuilder.build());
 		}
-		if (calibration != null)
+		if (hasCalibration())
 		{
-			if (calibration.hasNmPerPixel())
-				builder.setPixelSize((float) calibration.getNmPerPixel());
+			CalibrationReader cr = getCalibrationReader();
+			if (cr.hasNmPerPixel())
+				builder.setPixelSize((float) cr.getNmPerPixel());
 
-			if (calibration.hasExposureTime())
-				builder.setExposureTime(calibration.getExposureTime());
-			if (calibration.hasReadNoise())
-				builder.setReadNoise(calibration.getReadNoise());
-			if (calibration.hasBias())
-				builder.setBias(calibration.getBias());
-			if (calibration.hasCameraType())
-				builder.setCameraType(cameraTypeMap[calibration.getCameraType().ordinal()]);
-			if (calibration.hasAmplification())
-				builder.setAmplification(calibration.getAmplification());
+			if (cr.hasExposureTime())
+				builder.setExposureTime(cr.getExposureTime());
+			if (cr.hasReadNoise())
+				builder.setReadNoise(cr.getReadNoise());
+			if (cr.hasBias())
+				builder.setBias(cr.getBias());
+			if (cr.hasCameraType())
+				builder.setCameraType(cameraTypeMap[cr.getCameraType().ordinal()]);
+			if (cr.hasAmplification())
+				builder.setAmplification(cr.getAmplification());
 
-			if (calibration.hasDistanceUnit())
+			if (cr.hasDistanceUnit())
 			{
-				builder.setLocationUnits(locationUnitsMap[calibration.getDistanceUnit().ordinal()]);
+				builder.setLocationUnits(locationUnitsMap[cr.getDistanceUnit().ordinal()]);
 			}
-			if (calibration.hasIntensityUnit())
+			if (cr.hasIntensityUnit())
 			{
-				builder.setIntensityUnits(intensityUnitsMap[calibration.getIntensityUnit().ordinal()]);
+				builder.setIntensityUnits(intensityUnitsMap[cr.getIntensityUnit().ordinal()]);
 			}
-			if (calibration.hasAngleUnit())
+			if (cr.hasAngleUnit())
 			{
-				builder.setThetaUnits(thetaUnitsMap[calibration.getAngleUnit().ordinal()]);
+				builder.setThetaUnits(thetaUnitsMap[cr.getAngleUnit().ordinal()]);
 			}
 
 			// We can use some logic here to get the QE
-			if (calibration.hasGain())
+			if (cr.hasGain())
 			{
-				builder.setGain(calibration.getGain());
+				builder.setGain(cr.getGain());
 
 				// Use amplification if present (as this is the correct electrons/count value), otherwise use gain
-				if (calibration.hasAmplification())
+				if (cr.hasAmplification())
 				{
-					double ecf = calibration.getAmplification();
-					double qe = calibration.getGain() / ecf;
+					double ecf = cr.getAmplification();
+					double qe = cr.getGain() / ecf;
 					builder.addEcf(ecf);
 					builder.addQe(qe);
 				}
 				else
 				{
-					builder.addEcf(calibration.getGain());
+					builder.addEcf(cr.getGain());
 					builder.addQe(1);
 				}
 			}
 		}
-		if (configuration != null && configuration.length() > 0)
+		if (!Utils.isNullOrEmpty(getConfiguration()))
 		{
-			builder.setConfiguration(singleLine(configuration));
+			builder.setConfiguration(singleLine(getConfiguration()));
 		}
 		Printer printer = null;
-		if (psf != null)
+		if (getPSF() != null)
 		{
 			try
 			{
 				if (printer == null)
 					printer = JsonFormat.printer().omittingInsignificantWhitespace();
-				builder.setPSF(printer.print(psf));
+				builder.setPSF(printer.print(getPSF()));
 			}
 			catch (InvalidProtocolBufferException e)
 			{

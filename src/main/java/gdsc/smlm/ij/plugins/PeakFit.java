@@ -30,7 +30,10 @@ import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.TextUtils;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.SMLMSettings.Calibration;
+import gdsc.smlm.data.config.SMLMSettings.CameraType;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -60,7 +63,6 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.BinaryFilePeakResults;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FilePeakResults;
@@ -133,7 +135,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	private ImageSource source = null;
 	private PeakResultsList results;
 	private long time, runTime;
-	private Calibration calibration;
+	private CalibrationWriter calibration;
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig;
 	private ResultsSettings resultsSettings;
@@ -217,17 +219,17 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 
 	public PeakFit()
 	{
-		init(new FitEngineConfiguration(new FitConfiguration()), new ResultsSettings(), new Calibration());
+		init(new FitEngineConfiguration(new FitConfiguration()), new ResultsSettings(), null);
 	}
 
 	public PeakFit(FitEngineConfiguration config)
 	{
-		init(config, new ResultsSettings(), new Calibration());
+		init(config, new ResultsSettings(), null);
 	}
 
 	public PeakFit(FitEngineConfiguration config, ResultsSettings resultsSettings)
 	{
-		init(config, resultsSettings, new Calibration());
+		init(config, resultsSettings, null);
 	}
 
 	public PeakFit(FitEngineConfiguration config, ResultsSettings resultsSettings, Calibration calibration)
@@ -239,7 +241,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	{
 		this.config = config;
 		this.resultsSettings = resultsSettings;
-		this.calibration = calibration;
+		this.calibration = CalibrationWriter.create(calibration);
 	}
 
 	/*
@@ -583,7 +585,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		else
 			results.setName(source.getName() + " (" + getSolverName() + ")");
 		results.setBounds(bounds);
-		Calibration cal = calibration.clone();
+
+		//Calibration cal = calibration.clone();
 		// Account for the frame integration
 		// TODO - Should we change this so that if integrate frames is used then the data 
 		// are converted to ExtendedPeakResult with a start and end frame
@@ -592,7 +595,9 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		//{
 		//	cal.exposureTime *= ((double)dataBlock / (dataBlock + dataSkip));
 		//}
-		results.setCalibration(cal);
+
+		results.setCalibration(calibration.getCalibration());
+		results.setPSF(null); // TODO - fix this
 		results.setConfiguration(XmlUtils.toXML(config));
 
 		addMemoryResults(results, false);
@@ -711,7 +716,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		}
 
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
-		calibration = settings.getCalibration();
+		calibration = CalibrationWriter.create(settings.getCalibration());
 		config = settings.getFitEngineConfiguration();
 		fitConfig = config.getFitConfiguration();
 		resultsSettings = settings.getResultsSettings();
@@ -740,7 +745,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		gd.addFilenameField("Config_file", filename, 40);
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 		gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
-		gd.addCheckbox("EM-CCD", calibration.isEmCCD());
+		gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 
 		if (isCrop)
@@ -999,7 +1004,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		// The refreshSettings method can be called by the dialog listener.
 		// This updates the Calibration, FitEngineConfiguration, and ResultsSettings so set these
 		// back in the GlobalSettings object.
-		settings.setCalibration(this.calibration);
+		settings.setCalibration(this.calibration.getCalibration());
 		settings.setFitEngineConfiguration(this.config);
 		settings.setResultsSettings(this.resultsSettings);
 
@@ -1164,7 +1169,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		}
 
 		// Log the settings we care about:
-		calibration = settings.getCalibration();
+		calibration = CalibrationWriter.create(settings.getCalibration());
 		IJ.log("-=-=-=-");
 		IJ.log("Peak Fit");
 		IJ.log("-=-=-=-");
@@ -1176,6 +1181,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		// Save
 		settings.setFitEngineConfiguration(config);
 		settings.setResultsSettings(resultsSettings);
+		settings.setCalibration(calibration.getCalibration());
 		SettingsManager.saveSettings(settings, filename);
 
 		return FLAGS;
@@ -1196,14 +1202,14 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		if (!new File(filename).exists())
 			return true;
 
-		calibration = settings.getCalibration();
+		calibration = CalibrationWriter.create(settings.getCalibration());
 
 		// Check if the calibration contains: Pixel pitch, Gain (can be 1), Exposure time
-		if (calibration.getNmPerPixel() <= 0)
+		if (!calibration.hasNmPerPixel())
 			return true;
-		if (calibration.getGain() <= 0)
+		if (!calibration.hasGain())
 			return true;
-		if (calibration.getExposureTime() <= 0)
+		if (!calibration.hasExposureTime())
 			return true;
 
 		// Check for a PSF width
@@ -1289,12 +1295,12 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				"A value of 1 means no conversion to photons will occur.");
 		// TODO - Add a wizard to allow calculation of total gain from EM-gain, camera gain and QE
 		gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
-		gd.addCheckbox("EM-CCD", calibration.isEmCCD());
+		gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
 		calibration.setGain(Math.abs(gd.getNextNumber()));
-		calibration.setEmCCD(gd.getNextBoolean());
+		calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 		return true;
 	}
 
@@ -1359,7 +1365,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				}
 				if (template.isCalibration())
 				{
-					refreshSettings(template.getCalibration().clone());
+					refreshSettings(template.getCalibration());
 				}
 				if (template.isResultsSettings())
 				{
@@ -1442,8 +1448,10 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 
 		calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
 		calibration.setGain(Math.abs(gd.getNextNumber()));
-		calibration.setEmCCD(gd.getNextBoolean());
+		calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 		calibration.setExposureTime(Math.abs(gd.getNextNumber()));
+		settings.setCalibration(calibration.getCalibration());
+		
 		// Note: The bias and read noise will just end up being what was in the configuration file
 		// One fix for this is to save/load only the settings that are required from the configuration file
 		// (the others will remain unchanged). This will require a big refactor of the settings save/load.
@@ -1595,6 +1603,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 					return false;
 				fitConfig.setPrecisionUsingBackground(gd.getNextBoolean());
 				calibration.setBias(Math.abs(gd.getNextNumber()));
+				settings.setCalibration(calibration.getCalibration());
 			}
 		}
 
@@ -1673,7 +1682,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	{
 		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		Calibration calibration = settings.getCalibration();
+		CalibrationWriter calibration = CalibrationWriter.create(settings.getCalibration());
 		if (!fitConfig.isSmartFilter())
 			return true;
 
@@ -1701,6 +1710,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		fitConfig.setDirectFilter((DirectFilter) f);
 
 		calibration.setBias(Math.abs(gd.getNextNumber()));
+		settings.setCalibration(calibration.getCalibration());
 
 		if (filename != null)
 			SettingsManager.saveSettings(settings, filename);
@@ -1828,7 +1838,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	{
 		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		Calibration calibration = settings.getCalibration();
+		CalibrationWriter calibration = CalibrationWriter.create(settings.getCalibration());
 
 		boolean isBoundedLVM = fitConfig.getFitSolver() == FitSolver.LVM_MLE ||
 				fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM ||
@@ -1844,7 +1854,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				gd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
 				gd.addNumericField("Read_noise (ADUs)", calibration.getReadNoise(), 2);
 				gd.addNumericField("Amplification (ADU/electron)", calibration.getAmplification(), 2);
-				gd.addCheckbox("EM-CCD", calibration.isEmCCD());
+				gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 			}
 			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
 			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
@@ -1863,11 +1873,11 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				fitConfig.setModelCamera(gd.getNextBoolean());
 				calibration.setReadNoise(Math.abs(gd.getNextNumber()));
 				calibration.setAmplification(Math.abs(gd.getNextNumber()));
-				calibration.setEmCCD(gd.getNextBoolean());
+				calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 				fitConfig.setBias(calibration.getBias());
 				fitConfig.setReadNoise(calibration.getReadNoise());
 				fitConfig.setAmplification(calibration.getAmplification());
-				fitConfig.setEmCCD(calibration.isEmCCD());
+				fitConfig.setEmCCD(calibration.isEMCCD());
 			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
 			try
@@ -1888,6 +1898,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				// This option is for the Conjugate Gradient optimiser and makes it less stable
 				fitConfig.setGradientLineMinimisation(false);
 
+			settings.setCalibration(calibration.getCalibration());
 			if (filename != null)
 				SettingsManager.saveSettings(settings, filename);
 
@@ -1999,7 +2010,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			if (isWeightedLVM && !ignoreCalibration)
 			{
 				fitConfig.setNoiseModel(CameraNoiseModel.createNoiseModel(calibration.getReadNoise(),
-						calibration.getBias(), calibration.isEmCCD()));
+						calibration.getBias(), calibration.isEMCCD()));
 			}
 
 			if (filename != null)
@@ -2214,7 +2225,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			{
 				public void executeXYR(float x, float y, PeakResult r)
 				{
-					PointRoi roi = new PointRoi(x,y);
+					PointRoi roi = new PointRoi(x, y);
 					Color c = LUTHelper.getColour(lut, j.decrementAndGet(), size);
 					roi.setStrokeColor(c);
 					roi.setFillColor(c);
@@ -2499,7 +2510,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		fitConfig.setNmPerPixel(calibration.getNmPerPixel());
 		fitConfig.setGain(calibration.getGain());
 		fitConfig.setBias(calibration.getBias());
-		fitConfig.setEmCCD(calibration.isEmCCD());
+		fitConfig.setEmCCD(calibration.isEMCCD());
 	}
 
 	/**
@@ -2552,7 +2563,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 					sliceCandidates.clear();
 				}
 				sliceCandidates.add(r);
-				
+
 				return false;
 			}
 		});
@@ -2686,16 +2697,19 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		}
 	}
 
-	private void refreshSettings(Calibration calibration)
+	private void refreshSettings(Calibration cal)
 	{
-		this.calibration = calibration;
+		if (cal == null)
+			return;
 
-		if (calibration.getNmPerPixel() > 0)
+		this.calibration = new CalibrationWriter(cal);
+
+		if (calibration.hasNmPerPixel())
 			textNmPerPixel.setText("" + calibration.getNmPerPixel());
-		if (calibration.getGain() > 0)
+		if (calibration.hasGain())
 			textGain.setText("" + calibration.getGain());
-		textEMCCD.setState(calibration.isEmCCD());
-		if (calibration.getExposureTime() > 0)
+		textEMCCD.setState(calibration.isEMCCD());
+		if (calibration.hasExposureTime())
 			textExposure.setText("" + calibration.getExposureTime());
 	}
 

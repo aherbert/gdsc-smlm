@@ -35,6 +35,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
@@ -42,12 +43,10 @@ import gdsc.smlm.data.config.SMLMSettings.PSFType;
 import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitHelper;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.AttributePeakResult;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -116,10 +115,13 @@ public class LoadLocalisations implements PlugIn
 
 			MemoryPeakResults results = new MemoryPeakResults();
 			results.setName(name);
-			Calibration calibration = new Calibration(pixelPitch, gain, timeConverter.convert(exposureTime));
+			CalibrationWriter calibration = new CalibrationWriter();
+			calibration.setNmPerPixel(pixelPitch);
+			calibration.setGain(gain);
+			calibration.setExposureTime(timeConverter.convert(exposureTime));
 			calibration.setDistanceUnit(distanceUnit);
 			calibration.setIntensityUnit(intensityUnit);
-			results.setCalibration(calibration);
+			results.setCalibration(calibration.getCalibration());
 
 			if (size() > 0)
 			{
@@ -169,7 +171,7 @@ public class LoadLocalisations implements PlugIn
 					results.add(peakResult);
 				}
 			}
-			
+
 			// Convert to preferred units. This can be done even if the results are empty.
 			results.convertToPreferredUnits();
 
@@ -308,9 +310,7 @@ public class LoadLocalisations implements PlugIn
 			unit = UnitHelper.getShortName(nativeUnit);
 			try
 			{
-				// XXX - Fix this to get the calibration
-				c = CalibrationHelper.getDistanceConverter(null, //results.getCalibration(), 
-						DistanceUnit.NM);
+				c = CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
 				unit = UnitHelper.getShortName(DistanceUnit.NM);
 			}
 			catch (ConversionException e)

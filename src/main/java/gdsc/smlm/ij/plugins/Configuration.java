@@ -16,29 +16,12 @@ import java.io.File;
 import java.util.Vector;
 
 import gdsc.core.ij.Utils;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.engine.DataFilter;
-import gdsc.smlm.engine.DataFilterType;
+import gdsc.smlm.data.config.CalibrationReader;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitFunction;
-import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.results.Calibration;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.YesNoCancelDialog;
@@ -112,7 +95,7 @@ public class Configuration implements PlugIn, TextListener, ItemListener
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
 		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		Calibration calibration = settings.getCalibration();
+		CalibrationWriter calibration = CalibrationWriter.create(settings.getCalibration());
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -121,7 +104,7 @@ public class Configuration implements PlugIn, TextListener, ItemListener
 		gd.addFilenameField("Config_file", filename, 40);
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 		gd.addNumericField("Gain", calibration.getGain(), 2);
-		gd.addCheckbox("EM-CCD", calibration.isEmCCD());
+		gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 
 		gd.addMessage("--- Gaussian parameters ---");
@@ -320,6 +303,7 @@ public class Configuration implements PlugIn, TextListener, ItemListener
 		if (gd.invalidNumber())
 			return;
 
+		settings.setCalibration(calibration.getCalibration());
 		configurationChanged = SettingsManager.saveSettings(settings, filename);
 		if (configurationChanged)
 			SettingsManager.saveSettingsFilename(filename);
@@ -369,12 +353,14 @@ public class Configuration implements PlugIn, TextListener, ItemListener
 					return;
 				FitEngineConfiguration config = settings.getFitEngineConfiguration();
 				FitConfiguration fitConfig = config.getFitConfiguration();
-				Calibration calibration = settings.getCalibration();
-
-				textNmPerPixel.setText("" + calibration.getNmPerPixel());
-				textGain.setText("" + calibration.getGain());
-				textEMCCD.setState(calibration.isEmCCD());
-				textExposure.setText("" + calibration.getExposureTime());
+				if (settings.getCalibration() != null)
+				{
+					CalibrationReader calibration = new CalibrationReader(settings.getCalibration());
+					textNmPerPixel.setText("" + calibration.getNmPerPixel());
+					textGain.setText("" + calibration.getGain());
+					textEMCCD.setState(calibration.isEMCCD());
+					textExposure.setText("" + calibration.getExposureTime());
+				}
 				textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
 				textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
 				textInitialAngleD.setText("" + fitConfig.getInitialAngle());

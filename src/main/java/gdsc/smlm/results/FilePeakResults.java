@@ -8,6 +8,7 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
 
 /*----------------------------------------------------------------------------- 
@@ -106,18 +107,18 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		Printer printer = null;
 
 		// Add the standard details
-		if (name != null)
-			sb.append(String.format("#Name %s\n", singleLine(name)));
-		if (source != null)
-			sb.append(String.format("#Source %s\n", singleLine(source.toXML())));
-		if (bounds != null)
-			sb.append(String.format("#Bounds x%d y%d w%d h%d\n", bounds.x, bounds.y, bounds.width, bounds.height));
-		if (calibration != null)
-			printer = addMessage(sb, printer, "Calibration", calibration.getCalibrationOrBuilder());
-		if (configuration != null && configuration.length() > 0)
-			sb.append(String.format("#Configuration %s\n", singleLine(configuration)));
-		if (psf != null)
-			printer = addMessage(sb, printer, "PSF", psf);
+		if (!Utils.isNullOrEmpty(getName()))
+			sb.append(String.format("#Name %s\n", singleLine(getName())));
+		if (getSource() != null)
+			sb.append(String.format("#Source %s\n", singleLine(getSource().toXML())));
+		if (getBounds() != null)
+			sb.append(String.format("#Bounds x%d y%d w%d h%d\n", getBounds().x, getBounds().y, getBounds().width, getBounds().height));
+		if (getCalibration() != null)
+			printer = addMessage(sb, printer, "Calibration", getCalibration());
+		if (!Utils.isNullOrEmpty(getConfiguration()))
+			sb.append(String.format("#Configuration %s\n", singleLine(getConfiguration())));
+		if (getPSF() != null)
+			printer = addMessage(sb, printer, "PSF", getPSF());
 
 		// Add any extra comments
 		String[] comments = getHeaderComments();

@@ -59,6 +59,7 @@ import gdsc.core.utils.Settings;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.XmlUtils;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitParameters.FitTask;
@@ -67,7 +68,6 @@ import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
@@ -78,7 +78,6 @@ import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
@@ -300,7 +299,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	static FitConfiguration fitConfig;
 	static FitEngineConfiguration config;
-	private static Calibration cal;
+	private static CalibrationWriter cal;
 	static MultiPathFilter multiFilter;
 	private static final MultiPathFilter defaultMultiFilter;
 	private static final double[] defaultParameters;
@@ -308,7 +307,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	static
 	{
-		cal = new Calibration();
+		cal = new CalibrationWriter();
 		fitConfig = new FitConfiguration();
 		config = new FitEngineConfiguration(fitConfig);
 		// Set some default fit settings here ...
@@ -1217,7 +1216,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
-		settings.setCalibration(cal);
 		// Copy simulation defaults if a new simulation
 		if (lastId != simulationParameters.id)
 		{
@@ -1235,8 +1233,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitConfig.setBias(Maths.round(cal.getBias()));
 			fitConfig.setReadNoise(Maths.round(cal.getReadNoise()));
 			fitConfig.setAmplification(Maths.round(cal.getAmplification()));
-			fitConfig.setEmCCD(cal.isEmCCD());
+			fitConfig.setEmCCD(cal.isEMCCD());
 		}
+		settings.setCalibration(cal.getCalibration());
 		if (!PeakFit.configureFitSolver(settings, null, extraOptions))
 			return false;
 

@@ -8,6 +8,7 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.core.utils.NotImplementedException;
+import gdsc.smlm.data.config.CalibrationReader;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -299,15 +300,17 @@ public abstract class HysteresisFilter extends Filter
 		switch (timeThresholdMode)
 		{
 			case 1:
-				if (peakResults.getCalibration() != null)
+				myTimeThreshold = 1;
+				if (peakResults.hasCalibration())
 				{
-					myTimeThreshold = (int) Math
-							.round((this.timeThreshold / peakResults.getCalibration().getExposureTime()));
+					CalibrationReader cr = peakResults.getCalibrationReader();
+					double et = cr.getExposureTime();
+					if (et > 0)
+						myTimeThreshold = (int) Math.round((this.timeThreshold / et));
 				}
 				else
-					myTimeThreshold = 1;
 
-				break;
+					break;
 
 			case 0:
 			default:

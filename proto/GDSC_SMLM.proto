@@ -86,7 +86,7 @@ enum TimeUnit {
 // Define the calibration for distance
 message DistanceCalibration {
 	// The distance unit.
-	DistanceUnit unit = 1;
+	DistanceUnit distanceUnit = 1;
 	// The camera pixel size in nanometers.
 	double nmPerPixel = 2;
 }
@@ -95,14 +95,14 @@ message DistanceCalibration {
 message TimeCalibration {
 	// The time unit. This is currently unused as it is assumed the time in the results 
 	// is in frames.
-	TimeUnit unit = 1;
+	TimeUnit timeUnit = 1;
 	// The exposure time in milliseconds per frame.
 	double exposureTime = 2;
 }
 
 message IntensityCalibration {
 	// The intensity unit.
-	IntensityUnit unit = 1;
+	IntensityUnit intensityUnit = 1;
 	// The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital
 	// count units (Counts) to photons.
 	double gain = 2;

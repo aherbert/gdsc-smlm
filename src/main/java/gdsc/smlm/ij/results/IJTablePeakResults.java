@@ -115,13 +115,13 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		canComputePrecision = false;
 		rounder = RounderFactory.create(roundingPrecision);
 
-		if (calibration != null)
+		if (hasCalibration())
 		{
 			if (computePrecision)
 			{
 				try
 				{
-					calculator = Gaussian2DPeakResultHelper.create(psf, calibration,
+					calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(),
 							Gaussian2DPeakResultHelper.PRECISION);
 					canComputePrecision = true;
 				}
@@ -133,7 +133,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 			try
 			{
-				toPixelConverter = calibration.getDistanceConverter(DistanceUnit.PIXEL);
+				toPixelConverter = getCalibrationReader().getDistanceConverter(DistanceUnit.PIXEL);
 			}
 			catch (ConversionException e)
 			{
@@ -142,7 +142,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		}
 
 		// We must correctly convert all the PSF parameter types
-		helper = new PeakResultsHelper(calibration, psf);
+		helper = new PeakResultsHelper(getCalibration(), getPSF());
 		helper.setIntensityUnit(intensityUnit);
 		helper.setDistanceUnit(distanceUnit);
 		helper.setAngleUnit(angleUnit);
@@ -296,7 +296,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			sb.append(source);
 		else if (getSource() != null)
 			sb.append(getSource().getName());
-		if (bounds != null)
+		if (getBounds() != null)
 		{
 			if (sb.length() > 0)
 				sb.append(": ");

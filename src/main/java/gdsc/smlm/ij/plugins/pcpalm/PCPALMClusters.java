@@ -1,44 +1,5 @@
 package gdsc.smlm.ij.plugins.pcpalm;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.fitting.BinomialFitter;
-import gdsc.core.ij.IJTrackProgress;
-import gdsc.smlm.ij.plugins.About;
-import gdsc.smlm.ij.plugins.Parameters;
-import gdsc.smlm.ij.plugins.SMLMUsageTracker;
-import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.IJLogger;
-import gdsc.core.ij.Utils;
-import gdsc.smlm.results.Calibration;
-import gdsc.smlm.results.ExtendedPeakResult;
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.core.clustering.Cluster;
-import gdsc.core.clustering.ClusterPoint;
-import gdsc.core.clustering.ClusteringAlgorithm;
-import gdsc.core.clustering.ClusteringEngine;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.UnicodeReader;
-import ij.IJ;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.Plot2;
-import ij.plugin.PlugIn;
-import ij.plugin.frame.Recorder;
-import ij.process.ImageProcessor;
-
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -58,6 +19,46 @@ import java.util.regex.Pattern;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.clustering.Cluster;
+import gdsc.core.clustering.ClusterPoint;
+import gdsc.core.clustering.ClusteringAlgorithm;
+import gdsc.core.clustering.ClusteringEngine;
+import gdsc.core.ij.IJLogger;
+import gdsc.core.ij.IJTrackProgress;
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.CalibrationHelper;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.fitting.BinomialFitter;
+import gdsc.smlm.ij.plugins.About;
+import gdsc.smlm.ij.plugins.Parameters;
+import gdsc.smlm.ij.plugins.SMLMUsageTracker;
+import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.MemoryPeakResults;
+import ij.IJ;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.Plot2;
+import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
+import ij.process.ImageProcessor;
 
 /**
  * Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm.
@@ -313,7 +314,7 @@ public class PCPALMClusters implements PlugIn
 		results.setName(TITLE);
 		// Set an arbitrary calibration so that the lifetime of the results is stored in the exposure time
 		// The results will be handled as a single mega-frame containing all localisation. 
-		results.setCalibration(new Calibration(100, 1, PCPALMMolecules.seconds * 1000));
+		results.setCalibration(CalibrationHelper.create(100, 1, PCPALMMolecules.seconds * 1000));
 		int id = 0;
 		for (Cluster c : clusters)
 		{

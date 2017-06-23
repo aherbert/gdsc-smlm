@@ -16,11 +16,12 @@ package gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.util.Collection;
 
-import gdsc.smlm.data.config.SMLMSettings.PSF;
-import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationReader;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.SMLMSettings.Calibration;
 import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
 import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.SMLMSettings.PSF;
 
 /**
  * Abstract base class for peak results.
@@ -31,12 +32,15 @@ public abstract class AbstractPeakResults implements PeakResults
 	public static final double DEFAULT_GAIN = 0;
 	public static final boolean DEFAULT_EMCCD = true;
 
-	protected ImageSource source = null;
-	protected Rectangle bounds = null;
-	protected CalibrationHelper calibration = null;
-	protected PSF psf = null;
-	protected String configuration = "";
-	protected String name = "";
+	private ImageSource source = null;
+	private Rectangle bounds = null;
+	private Calibration calibration = null;
+	private PSF psf = null;
+	private String configuration = "";
+	private String name = "";
+
+	/** The calibration reader. This is encapsulated */
+	private CalibrationReader calibrationReader = null;
 
 	/*
 	 * (non-Javadoc)
@@ -105,7 +109,8 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public void setCalibration(Calibration calibration)
 	{
-		this.calibration = (calibration != null) ? new CalibrationHelper(calibration) : null;
+		this.calibration = calibration;
+		calibrationReader = (calibration != null) ? new CalibrationReader(calibration) : null;
 	}
 
 	/*
@@ -115,15 +120,53 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public Calibration getCalibration()
 	{
-		return (calibration != null) ? calibration.getCalibration() : null;
+		return calibration;
 	}
-	
+
 	/**
-	 * Copy the calibration.
+	 * Checks for calibration.
+	 *
+	 * @return true, if successful
 	 */
-	public void copyCalibration()
+	public boolean hasCalibration()
 	{
-		setCalibration(getCalibration());
+		return (calibration != null);
+	}
+
+	/**
+	 * Gets the calibration reader with the current calibration.
+	 *
+	 * @return the calibration reader (or null)
+	 */
+	public CalibrationReader getCalibrationReader()
+	{
+		return calibrationReader;
+	}
+
+	/**
+	 * Gets the calibration writer with the current calibration (must not be null). The writer can be used to update the
+	 * calibration but changes are not saved until {@link #setCalibration(Calibration)} is called with the new
+	 * calibration.
+	 *
+	 * @return the calibration writer
+	 * @throws IllegalArgumentException
+	 *             if the calibration is null
+	 */
+	public CalibrationWriter getCalibrationWriter() throws IllegalArgumentException
+	{
+		return new CalibrationWriter(calibration);
+	}
+
+	/**
+	 * Gets the calibration writer with the current calibration, or a default calibration. The writer can be used to
+	 * update the calibration but changes are not saved until {@link #setCalibration(Calibration)} is called with the
+	 * new calibration.
+	 *
+	 * @return the calibration writer
+	 */
+	public CalibrationWriter getCalibrationWriterSafe()
+	{
+		return (calibration != null) ? new CalibrationWriter(calibration) : new CalibrationWriter();
 	}
 
 	/*
@@ -195,7 +238,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public double getNmPerPixel()
 	{
-		return (calibration != null) ? calibration.getNmPerPixel() : DEFAULT_NM_PER_PIXEL;
+		return (calibration != null) ? calibrationReader.getNmPerPixel() : DEFAULT_NM_PER_PIXEL;
 	}
 
 	/**
@@ -205,7 +248,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public double getGain()
 	{
-		return (calibration != null) ? calibration.getGain() : DEFAULT_GAIN;
+		return (calibration != null) ? calibrationReader.getGain() : DEFAULT_GAIN;
 	}
 
 	/**
@@ -215,7 +258,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public boolean isCCDCamera()
 	{
-		return (calibration != null) ? calibration.isCCDCamera() : false;
+		return (calibration != null) ? calibrationReader.isCCDCamera() : false;
 	}
 
 	/**
@@ -226,8 +269,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public boolean isEMCCD()
 	{
-		return (calibration != null && calibration.isCCDCamera()) ? calibration.isEmCCD()
-				: DEFAULT_EMCCD;
+		return (calibration != null && calibrationReader.isCCDCamera()) ? calibrationReader.isEMCCD() : DEFAULT_EMCCD;
 	}
 
 	/**
@@ -240,10 +282,10 @@ public abstract class AbstractPeakResults implements PeakResults
 	{
 		if (calibration != null)
 		{
-			if (!calibration.isCCDCamera())
+			if (!calibrationReader.isCCDCamera())
 				return false;
-			DistanceUnit du = calibration.getDistanceUnit();
-			IntensityUnit iu = calibration.getIntensityUnit();
+			DistanceUnit du = calibrationReader.getDistanceUnit();
+			IntensityUnit iu = calibrationReader.getIntensityUnit();
 			if (du == DistanceUnit.NM && iu == IntensityUnit.PHOTON)
 				return true;
 			return isCalibrated();
@@ -261,11 +303,11 @@ public abstract class AbstractPeakResults implements PeakResults
 	{
 		if (calibration != null)
 		{
-			DistanceUnit du = calibration.getDistanceUnit();
-			IntensityUnit iu = calibration.getIntensityUnit();
+			DistanceUnit du = calibrationReader.getDistanceUnit();
+			IntensityUnit iu = calibrationReader.getIntensityUnit();
 			//@formatter:off
-			return (du != null && calibration.getNmPerPixel() > 0) &&
-				   (iu != null && calibration.getGain() > 0);
+			return (du != null && calibrationReader.getNmPerPixel() > 0) &&
+				   (iu != null && calibrationReader.getGain() > 0);
 			//@formatter:on
 		}
 		return false;
