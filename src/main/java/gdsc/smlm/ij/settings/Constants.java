@@ -19,6 +19,7 @@ package gdsc.smlm.ij.settings;
 public class Constants
 {
 	public static final String settingsFilename = "gdsc.smlm.settingsFilename";
+	public static final String settingsDirectory = "gdsc.smlm.settingsDirectory";
 
 	// -=-=-=- 
 	// Used in the GaussianFit class

@@ -1,24 +1,31 @@
 package gdsc.smlm.ij.settings;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.EnumSet;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.google.protobuf.Parser;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
+import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.data.NamedObject;
-import gdsc.smlm.data.config.UnitHelper;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.data.config.UnitConfig.TimeUnit;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.DataFilterType;
 
@@ -46,12 +53,57 @@ import ij.IJ;
 import ij.Prefs;
 
 /**
- * Manage the settings for the gdsc.fitting package
+ * Manage the settings for ImageJ plugins
  */
 public class SettingsManager
 {
 	private static final String DEFAULT_FILENAME = System.getProperty("user.home") +
 			System.getProperty("file.separator") + "gdsc.smlm.settings.xml";
+	private static final String DEFAULT_DIRECTORY = System.getProperty("user.home") +
+			System.getProperty("file.separator") + ".gdsc.smlm";
+	
+	/** Use this to suppress warnings. */
+	public static final int FLAG_SILENT = 0x00000001;
+	/** Use this flag to suppress returning a default instance. */
+	public static final int FLAG_NO_DEFAULT = 0x00000002;
+	
+	/** The settings directory. */
+	private static File settingsDirectory;
+	static
+	{
+		setSettingsDirectory(Prefs.get(Constants.settingsDirectory, DEFAULT_DIRECTORY));
+	}
+
+	/**
+	 * Gets the settings directory.
+	 *
+	 * @return The settings directory (from the ImageJ preferences or the default under the home directory)
+	 */
+	public static String getSettingsDirectory()
+	{
+		return settingsDirectory.getPath();
+	}
+
+	/**
+	 * Save the settings directory.
+	 *
+	 * @param directory
+	 *            the directory
+	 */
+	public static void setSettingsDirectory(String directory)
+	{
+		Prefs.set(Constants.settingsDirectory, directory);
+		settingsDirectory = new File(directory);
+		try
+		{
+			if (!settingsDirectory.exists())
+				settingsDirectory.mkdirs();
+		}
+		catch (Exception e)
+		{
+			IJ.log("Unable create settings directory: " + e.getMessage());
+		}
+	}
 
 	private static XStream xs = null;
 
@@ -578,5 +630,296 @@ public class SettingsManager
 	public static GlobalSettings loadSettings()
 	{
 		return loadSettings(getSettingsFilename(), false);
+	}
+
+	/**
+	 * Creates the settings file using the class name to create the filename in the settings directory.
+	 *
+	 * @param clazz
+	 *            the clazz
+	 * @return the file
+	 */
+	private static File createSettingsFile(Class<?> clazz)
+	{
+		return new File(settingsDirectory, clazz.getSimpleName().toLowerCase() + ".settings");
+	}
+
+	/**
+	 * Write a message to a settings file in the settings directory.
+	 *
+	 * @param message
+	 *            the message
+	 * @return true, if successful
+	 */
+	public static boolean writeSettings(Message message)
+	{
+		return writeSettings(message, 0);
+	}
+
+	/**
+	 * Write a message to a settings file in the settings directory.
+	 *
+	 * @param message
+	 *            the message
+	 * @param flags
+	 *            the flags
+	 * @return true, if successful
+	 */
+	public static boolean writeSettings(Message message, int flags)
+	{
+		return writeMessage(message, createSettingsFile(message.getClass()), BitFlags.anySet(flags, FLAG_SILENT));
+	}
+
+	/**
+	 * Clear the settings file for the given class.
+	 *
+	 * @param clazz
+	 *            the class
+	 * @return true, if the settings are cleared
+	 */
+	public static boolean clearSettings(Class<?> clazz)
+	{
+		File file = createSettingsFile(clazz);
+		try
+		{
+			if (file.exists())
+			{
+				return file.delete();
+			}
+			return true; // Already clear
+		}
+		catch (SecurityException e)
+		{
+			IJ.log("Unable to clear the settings: " + e.getMessage());
+		}
+		return false;
+	}
+
+	/**
+	 * Simple class to allow generic message reading.
+	 *
+	 * @param <T>
+	 *            the generic message type
+	 */
+	private static class ConfigurationReader<T extends Message>
+	{
+		T t;
+
+		ConfigurationReader(T t)
+		{
+			this.t = t;
+		}
+
+		@SuppressWarnings("unchecked")
+		public T read(int flags)
+		{
+			T c = (T) readMessage(t.getParserForType(), createSettingsFile(t.getClass()),
+					BitFlags.anySet(flags, FLAG_SILENT));
+			if (c == null && BitFlags.anyNotSet(flags, FLAG_NO_DEFAULT))
+				c = (T) t.getDefaultInstanceForType();
+			return c;
+		}
+	}
+
+	/**
+	 * Read the calibration from the settings file in the settings directory.
+	 *
+	 * @return the calibration
+	 */
+	public static Calibration readCalibration()
+	{
+		return readCalibration(0);
+	}
+
+	/**
+	 * Read the calibration from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the calibration
+	 */
+	public static Calibration readCalibration(int flags)
+	{
+		return new ConfigurationReader<Calibration>(Calibration.getDefaultInstance()).read(flags);
+	}
+
+	/**
+	 * Write the message to file.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
+	 * @param message
+	 *            the message
+	 * @param filename
+	 *            the filename
+	 * @param silent
+	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @return True if written
+	 */
+	public static boolean writeMessage(Message message, String filename, boolean silent)
+	{
+		return writeMessage(message, new File(filename), silent);
+	}
+
+	/**
+	 * Write the message to file.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
+	 * @param message
+	 *            the message
+	 * @param file
+	 *            the file
+	 * @param silent
+	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @return True if written
+	 */
+	public static boolean writeMessage(Message message, File file, boolean silent)
+	{
+		FileOutputStream fs = null;
+		try
+		{
+			fs = new FileOutputStream(file);
+			return writeMessage(message, fs, silent);
+		}
+		catch (FileNotFoundException e)
+		{
+			//e.printStackTrace();
+			if (!silent)
+				IJ.log("Unable to write message: " + e.getMessage());
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				try
+				{
+					fs.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Write the message to file.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
+	 * @param message
+	 *            the message
+	 * @param output
+	 *            the output
+	 * @param silent
+	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @return True if saved
+	 */
+	public static boolean writeMessage(Message message, OutputStream output, boolean silent)
+	{
+		try
+		{
+			message.writeDelimitedTo(output);
+			return true;
+		}
+		catch (IOException e)
+		{
+			if (!silent)
+				IJ.log("Unable to write message: " + e.getMessage());
+		}
+		return false;
+	}
+
+	/**
+	 * Read the message from file.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
+	 * @param parser
+	 *            the parser
+	 * @param filename
+	 *            the filename
+	 * @param silent
+	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @return the message
+	 */
+	public static Message readMessage(Parser<? extends Message> parser, String filename, boolean silent)
+	{
+		return readMessage(parser, new File(filename), silent);
+	}
+
+	/**
+	 * Read the message from file.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
+	 * @param parser
+	 *            the parser
+	 * @param file
+	 *            the file
+	 * @param silent
+	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @return the message
+	 */
+	public static Message readMessage(Parser<? extends Message> parser, File file, boolean silent)
+	{
+		FileInputStream fs = null;
+		try
+		{
+			fs = new FileInputStream(file);
+			return readMessage(parser, fs, silent);
+		}
+		catch (FileNotFoundException e)
+		{
+			//e.printStackTrace();
+			if (!silent)
+				IJ.log("Unable to read message to: " + e.getMessage());
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				try
+				{
+					fs.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Read the message from file.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
+	 * @param parser
+	 *            the parser
+	 * @param input
+	 *            the input
+	 * @param silent
+	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @return the message
+	 */
+	public static Message readMessage(Parser<? extends Message> parser, InputStream input, boolean silent)
+	{
+		try
+		{
+			return parser.parseDelimitedFrom(input);
+		}
+		catch (InvalidProtocolBufferException e)
+		{
+			//e.printStackTrace();
+			if (!silent)
+				IJ.log("Unable to read message to: " + e.getMessage());
+		}
+		return null;
 	}
 }
