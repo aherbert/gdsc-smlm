@@ -59,9 +59,9 @@ import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.UnitHelper;
 
 /*----------------------------------------------------------------------------- 

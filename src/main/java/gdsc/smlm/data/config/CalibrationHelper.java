@@ -3,14 +3,14 @@ package gdsc.smlm.data.config;
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.Calibration;
-import gdsc.smlm.data.config.SMLMSettings.CalibrationOrBuilder;
-import gdsc.smlm.data.config.SMLMSettings.DistanceCalibration;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityCalibration;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.SMLMSettings.PSFCalibration;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder;
+import gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.CalibrationConfig.PSFCalibration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

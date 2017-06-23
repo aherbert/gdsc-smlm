@@ -13,7 +13,7 @@ package gdsc.smlm.ij.settings;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.data.config.SMLMSettings.Calibration;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 
 import java.util.ArrayList;
 

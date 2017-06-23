@@ -3,8 +3,8 @@ package gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.util.Collection;
 
-import gdsc.smlm.data.config.SMLMSettings.PSF;
-import gdsc.smlm.data.config.SMLMSettings.Calibration;
+import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

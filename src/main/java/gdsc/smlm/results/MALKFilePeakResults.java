@@ -34,9 +34,9 @@ import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 
 /**
  * Saves the fit results to file using the simple MALK file format (Molecular Accuracy Localisation Keep). This consists

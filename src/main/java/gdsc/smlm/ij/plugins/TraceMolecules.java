@@ -24,7 +24,7 @@ import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
+import gdsc.smlm.data.config.UnitConfig.TimeUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;

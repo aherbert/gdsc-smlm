@@ -50,7 +50,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ

@@ -10,11 +10,11 @@ import gdsc.core.utils.BitFlags;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.SMLMSettings.CameraType;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.SMLMSettings.PSF;
-import gdsc.smlm.data.config.SMLMSettings.Calibration;
+import gdsc.smlm.data.config.CalibrationConfig.CameraType;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

@@ -5,10 +5,10 @@ import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.CameraType;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.CalibrationConfig.CameraType;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 
 public class CalibrationWriterTest
 {

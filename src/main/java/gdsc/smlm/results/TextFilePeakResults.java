@@ -29,9 +29,9 @@ import java.util.Scanner;
 import gdsc.core.data.utils.Converter;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.ConfigurationException;
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 
 /**
  * Saves the fit results to file

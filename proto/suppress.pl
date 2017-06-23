@@ -18,17 +18,36 @@ Usage:
 Options:
 
   input     Java proto file(s)
-
-  -help     Print this help and exit
+  --help    Print this help and exit
+  --unchecked
+  --unused
+  --deprecation
 
 ";
 
 my $help;
 GetOptions(
 	"help" => \$help,
+    "unchecked" => \$unchecked,
+    "unused" => \$unused,
+    "deprecation" => \$deprecation,
 );
 
 die $usage if $help;
+
+my @warning;
+push @warning, "unchecked" if ($unchecked);
+push @warning, "unused" if ($unused);
+push @warning, "deprecation" if ($deprecation);
+
+exit(0) unless @warning;
+
+$warning = '@SuppressWarnings({';
+for ($i=0; $i<=$#warning; $i++) {
+    $warning .= ', ' if $i;
+    $warning .= '"' . $warning[$i] . '"';
+}
+$warning .= "})\n";
 
 @ARGV or die $usage;
 
@@ -51,8 +70,7 @@ for $input (@files)
         if ($looking && m/ class /)
         {
             $looking = 0;
-            push @file, 
-                sprintf('@SuppressWarnings({"unchecked", "unused"})%s', "\n");
+            push @file, $warning;
         }
         push @file, $_;
 	}

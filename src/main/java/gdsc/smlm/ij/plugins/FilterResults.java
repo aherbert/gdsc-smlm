@@ -6,7 +6,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.data.DataException;
 import gdsc.core.utils.Maths;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

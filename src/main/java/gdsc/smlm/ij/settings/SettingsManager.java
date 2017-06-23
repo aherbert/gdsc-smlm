@@ -15,10 +15,10 @@ import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.UnitHelper;
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.UnitConfig.TimeUnit;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.DataFilterType;
 

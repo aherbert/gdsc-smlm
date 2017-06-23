@@ -13,8 +13,8 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

@@ -7,17 +7,17 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
-import gdsc.smlm.data.config.SMLMSettings.PSFParameter;
-import gdsc.smlm.data.config.SMLMSettings.PSFParameterUnit;
-import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.data.config.PSFConfig.PSFParameter;
+import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 
-public class SMLMSettingsTest
+public class PSFConfigTest
 {
 	@Test
 	public void canWriteAndReadString()
 	{
-		SMLMSettings.PSF.Builder psfBuilder = SMLMSettings.PSF.newBuilder();
-		PSFParameter.Builder psfParamBuilder = SMLMSettings.PSFParameter.newBuilder();
+		PSFConfig.PSF.Builder psfBuilder = PSFConfig.PSF.newBuilder();
+		PSFParameter.Builder psfParamBuilder = PSFConfig.PSFParameter.newBuilder();
 		psfBuilder.setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
 		psfParamBuilder.setName("X SD");
 		psfParamBuilder.setUnit(PSFParameterUnit.DISTANCE);
@@ -30,20 +30,20 @@ public class SMLMSettingsTest
 		psfBuilder.addParameter(psfParamBuilder);
 		//psfBuilder.addParameterName("Y SD");
 		String e = psfBuilder.toString();
-		SMLMSettings.PSF psf = psfBuilder.build();
+		PSFConfig.PSF psf = psfBuilder.build();
 		String o = psf.toString();
 		Assert.assertEquals(e, o);
 		//psf.getParameterName(0);
 		
 		// Standard string
-		System.out.printf(o);
+		//System.out.printf(o);
 		
 		try
 		{
 			// JSON
 			Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
 			String json = printer.print(psf);
-			System.out.println(json);
+			//System.out.println(json);
 			
 			psfBuilder.clear();
 			JsonFormat.parser().merge(json, psfBuilder);

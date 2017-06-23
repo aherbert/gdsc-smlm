@@ -44,7 +44,7 @@ import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Settings;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.settings.GlobalSettings;

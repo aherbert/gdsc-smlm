@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

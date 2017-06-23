@@ -11,7 +11,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationReader;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.list.array.TLongArrayList;

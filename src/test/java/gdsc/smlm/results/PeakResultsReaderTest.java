@@ -10,22 +10,17 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.TextFormat;
-import com.google.protobuf.util.JsonFormat;
-import com.google.protobuf.util.JsonFormat.Printer;
-
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.Calibration;
-import gdsc.smlm.data.config.SMLMSettings.CameraType;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.SMLMSettings.PSF;
-import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.CalibrationConfig.CameraType;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 

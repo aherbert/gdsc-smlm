@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.core.ij.AlignImagesFFT;
 import gdsc.core.ij.IJTrackProgress;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;

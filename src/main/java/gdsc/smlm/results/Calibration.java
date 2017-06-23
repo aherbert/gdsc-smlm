@@ -3,10 +3,10 @@ package gdsc.smlm.results;
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.CameraType;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.CalibrationConfig.CameraType;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
 
 /*----------------------------------------------------------------------------- 

@@ -9,13 +9,13 @@ import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.Calibration;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.SMLMSettings.PSF;
-import gdsc.smlm.data.config.SMLMSettings.PSFParameter;
-import gdsc.smlm.data.config.SMLMSettings.PSFParameterUnit;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.PSFConfig.PSFParameter;
+import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
 import gdsc.smlm.data.config.UnitHelper;
 
 /*----------------------------------------------------------------------------- 

@@ -1,7 +1,7 @@
 package gdsc.smlm.results.procedures;
 
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.results.MemoryPeakResults;
 
 /*----------------------------------------------------------------------------- 

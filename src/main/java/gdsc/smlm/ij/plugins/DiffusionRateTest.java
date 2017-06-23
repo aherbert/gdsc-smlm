@@ -23,7 +23,7 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

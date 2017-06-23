@@ -14,7 +14,7 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.model.ActivationEnergyImageModel;
 import gdsc.smlm.model.CompoundMoleculeModel;
 import gdsc.smlm.model.DiffusionType;

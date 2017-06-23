@@ -3,10 +3,10 @@ package gdsc.smlm.data.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import gdsc.smlm.data.config.SMLMSettings.PSF;
-import gdsc.smlm.data.config.SMLMSettings.PSFParameter;
-import gdsc.smlm.data.config.SMLMSettings.PSFParameterUnit;
-import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.PSFConfig.PSFParameter;
+import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 

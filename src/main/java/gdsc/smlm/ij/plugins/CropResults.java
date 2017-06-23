@@ -17,7 +17,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
 import gdsc.core.utils.TurboList;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;

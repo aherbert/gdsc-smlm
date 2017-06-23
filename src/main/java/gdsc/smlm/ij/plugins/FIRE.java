@@ -64,7 +64,7 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationReader;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.function.Erf;
 

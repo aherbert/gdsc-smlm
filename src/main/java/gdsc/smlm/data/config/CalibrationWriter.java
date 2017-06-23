@@ -1,11 +1,11 @@
 package gdsc.smlm.data.config;
 
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.Calibration;
-import gdsc.smlm.data.config.SMLMSettings.CalibrationOrBuilder;
-import gdsc.smlm.data.config.SMLMSettings.CameraType;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder;
+import gdsc.smlm.data.config.CalibrationConfig.CameraType;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

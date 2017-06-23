@@ -12,7 +12,7 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import gdsc.core.clustering.DensityManager;
 import gdsc.core.ij.Utils;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

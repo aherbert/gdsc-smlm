@@ -6,10 +6,10 @@ import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.MultiplyAddTypeConverter;
 import gdsc.core.data.utils.MultiplyTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.SMLMSettings.AngleUnit;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
-import gdsc.smlm.data.config.SMLMSettings.TimeUnit;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.UnitConfig.TimeUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

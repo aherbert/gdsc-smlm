@@ -29,8 +29,8 @@ import gdsc.core.utils.Settings;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.smlm.data.config.ConfigurationException;
-import gdsc.smlm.data.config.SMLMSettings.DistanceUnit;
-import gdsc.smlm.data.config.SMLMSettings.IntensityUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

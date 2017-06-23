@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+// ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
+// Authors: Alex Herbert, 2017 
+// License: GPL V3
+package gdsc.smlm.data.config;
+
+option java_outer_classname = "PSFConfig";
+
+// enums that are used for optional units have [enum_name]_NA as the first entry as the 
+// proto definition will use this as the default
+
+// The type of Point Spread Function (PSF)
+enum PSFType {
+	PSF_TYPE_NA = 0; // Not available. Only the standard parameters are supported.
+	ONE_AXIS_GAUSSIAN_2D = 1; // A 2D Gaussian with the same standard deviation in X and Y dimensions
+	TWO_AXIS_GAUSSIAN_2D = 2; // A 2D Gaussian with standard deviations in X and Y dimensions
+	TWO_AXIS_AND_THETA_GAUSSIAN_2D = 3; // A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
+	ASTIGMATIC_GAUSSIAN_2D = 4; // A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
+	CUSTOM = 5; // A custom point spread function (PSF) 
+}
+
+// Define the type of units supported in the Point Spread Function (PSF)
+enum PSFParameterUnit {
+	PSF_PARAMETER_UNIT_NA = 0; // Not available
+	DISTANCE = 1; // The parameter describes a distance
+	INTENSITY = 2; // The parameter describes an intensity
+	ANGLE = 3; // The parameter describes an angle
+}
+
+// Define the additional parameters of the Point Spread Function (PSF)
+message PSFParameter {
+	string name = 1;
+	PSFParameterUnit unit = 2;
+}
+
+// Define the Point Spread Function (PSF)
+message PSF {
+	PSFType psfType = 1; // The PSF type
+	
+	// The names of the PSF parameters. The results are stored using the standard parameters of 
+	// [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+	// parameters array. The names of the non-standard parameters, in order, can be defined here.
+	repeated PSFParameter parameter = 2;
+}

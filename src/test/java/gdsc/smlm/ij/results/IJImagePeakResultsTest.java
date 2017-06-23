@@ -10,8 +10,8 @@ import org.junit.Test;
 
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.SMLMSettings.PSF;
-import gdsc.smlm.data.config.SMLMSettings.PSFType;
+import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
 import ij.process.FloatProcessor;

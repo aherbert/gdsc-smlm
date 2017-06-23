@@ -15,7 +15,7 @@ package gdsc.smlm.ij.settings;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.data.config.SMLMSettings.Calibration;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 
 /**
  * Contain the settings for the gdsc.fitting package
