@@ -3,6 +3,7 @@
 
 package gdsc.smlm.tsf;
 
+@SuppressWarnings({"unchecked", "unused"})
 public final class TaggedSpotFile {
   private TaggedSpotFile() {}
   public static void registerAllExtensions(
