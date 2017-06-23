@@ -176,7 +176,7 @@ public final class CalibrationConfig {
      * The distance unit.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DistanceUnit distanceUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 1;</code>
      */
     int getDistanceUnitValue();
     /**
@@ -184,7 +184,7 @@ public final class CalibrationConfig {
      * The distance unit.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DistanceUnit distanceUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 1;</code>
      */
     gdsc.smlm.data.config.UnitConfig.DistanceUnit getDistanceUnit();
 
@@ -193,7 +193,7 @@ public final class CalibrationConfig {
      * The camera pixel size in nanometers.
      * </pre>
      *
-     * <code>double nmPerPixel = 2;</code>
+     * <code>double nm_per_pixel = 2;</code>
      */
     double getNmPerPixel();
   }
@@ -276,14 +276,14 @@ public final class CalibrationConfig {
               gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration.class, gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration.Builder.class);
     }
 
-    public static final int DISTANCEUNIT_FIELD_NUMBER = 1;
+    public static final int DISTANCE_UNIT_FIELD_NUMBER = 1;
     private int distanceUnit_;
     /**
      * <pre>
      * The distance unit.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DistanceUnit distanceUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 1;</code>
      */
     public int getDistanceUnitValue() {
       return distanceUnit_;
@@ -293,21 +293,21 @@ public final class CalibrationConfig {
      * The distance unit.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DistanceUnit distanceUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 1;</code>
      */
     public gdsc.smlm.data.config.UnitConfig.DistanceUnit getDistanceUnit() {
       gdsc.smlm.data.config.UnitConfig.DistanceUnit result = gdsc.smlm.data.config.UnitConfig.DistanceUnit.valueOf(distanceUnit_);
       return result == null ? gdsc.smlm.data.config.UnitConfig.DistanceUnit.UNRECOGNIZED : result;
     }
 
-    public static final int NMPERPIXEL_FIELD_NUMBER = 2;
+    public static final int NM_PER_PIXEL_FIELD_NUMBER = 2;
     private double nmPerPixel_;
     /**
      * <pre>
      * The camera pixel size in nanometers.
      * </pre>
      *
-     * <code>double nmPerPixel = 2;</code>
+     * <code>double nm_per_pixel = 2;</code>
      */
     public double getNmPerPixel() {
       return nmPerPixel_;
@@ -377,9 +377,9 @@ public final class CalibrationConfig {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + DISTANCEUNIT_FIELD_NUMBER;
+      hash = (37 * hash) + DISTANCE_UNIT_FIELD_NUMBER;
       hash = (53 * hash) + distanceUnit_;
-      hash = (37 * hash) + NMPERPIXEL_FIELD_NUMBER;
+      hash = (37 * hash) + NM_PER_PIXEL_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getNmPerPixel()));
       hash = (29 * hash) + unknownFields.hashCode();
@@ -622,7 +622,7 @@ public final class CalibrationConfig {
        * The distance unit.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceUnit distanceUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 1;</code>
        */
       public int getDistanceUnitValue() {
         return distanceUnit_;
@@ -632,7 +632,7 @@ public final class CalibrationConfig {
        * The distance unit.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceUnit distanceUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 1;</code>
        */
       public Builder setDistanceUnitValue(int value) {
         distanceUnit_ = value;
@@ -644,7 +644,7 @@ public final class CalibrationConfig {
        * The distance unit.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceUnit distanceUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 1;</code>
        */
       public gdsc.smlm.data.config.UnitConfig.DistanceUnit getDistanceUnit() {
         gdsc.smlm.data.config.UnitConfig.DistanceUnit result = gdsc.smlm.data.config.UnitConfig.DistanceUnit.valueOf(distanceUnit_);
@@ -655,7 +655,7 @@ public final class CalibrationConfig {
        * The distance unit.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceUnit distanceUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 1;</code>
        */
       public Builder setDistanceUnit(gdsc.smlm.data.config.UnitConfig.DistanceUnit value) {
         if (value == null) {
@@ -671,7 +671,7 @@ public final class CalibrationConfig {
        * The distance unit.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceUnit distanceUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 1;</code>
        */
       public Builder clearDistanceUnit() {
         
@@ -686,7 +686,7 @@ public final class CalibrationConfig {
        * The camera pixel size in nanometers.
        * </pre>
        *
-       * <code>double nmPerPixel = 2;</code>
+       * <code>double nm_per_pixel = 2;</code>
        */
       public double getNmPerPixel() {
         return nmPerPixel_;
@@ -696,7 +696,7 @@ public final class CalibrationConfig {
        * The camera pixel size in nanometers.
        * </pre>
        *
-       * <code>double nmPerPixel = 2;</code>
+       * <code>double nm_per_pixel = 2;</code>
        */
       public Builder setNmPerPixel(double value) {
         
@@ -709,7 +709,7 @@ public final class CalibrationConfig {
        * The camera pixel size in nanometers.
        * </pre>
        *
-       * <code>double nmPerPixel = 2;</code>
+       * <code>double nm_per_pixel = 2;</code>
        */
       public Builder clearNmPerPixel() {
         
@@ -776,7 +776,7 @@ public final class CalibrationConfig {
      * is in frames.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.TimeUnit timeUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 1;</code>
      */
     int getTimeUnitValue();
     /**
@@ -785,7 +785,7 @@ public final class CalibrationConfig {
      * is in frames.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.TimeUnit timeUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 1;</code>
      */
     gdsc.smlm.data.config.UnitConfig.TimeUnit getTimeUnit();
 
@@ -794,7 +794,7 @@ public final class CalibrationConfig {
      * The exposure time in milliseconds per frame.
      * </pre>
      *
-     * <code>double exposureTime = 2;</code>
+     * <code>double exposure_time = 2;</code>
      */
     double getExposureTime();
   }
@@ -877,7 +877,7 @@ public final class CalibrationConfig {
               gdsc.smlm.data.config.CalibrationConfig.TimeCalibration.class, gdsc.smlm.data.config.CalibrationConfig.TimeCalibration.Builder.class);
     }
 
-    public static final int TIMEUNIT_FIELD_NUMBER = 1;
+    public static final int TIME_UNIT_FIELD_NUMBER = 1;
     private int timeUnit_;
     /**
      * <pre>
@@ -885,7 +885,7 @@ public final class CalibrationConfig {
      * is in frames.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.TimeUnit timeUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 1;</code>
      */
     public int getTimeUnitValue() {
       return timeUnit_;
@@ -896,21 +896,21 @@ public final class CalibrationConfig {
      * is in frames.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.TimeUnit timeUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 1;</code>
      */
     public gdsc.smlm.data.config.UnitConfig.TimeUnit getTimeUnit() {
       gdsc.smlm.data.config.UnitConfig.TimeUnit result = gdsc.smlm.data.config.UnitConfig.TimeUnit.valueOf(timeUnit_);
       return result == null ? gdsc.smlm.data.config.UnitConfig.TimeUnit.UNRECOGNIZED : result;
     }
 
-    public static final int EXPOSURETIME_FIELD_NUMBER = 2;
+    public static final int EXPOSURE_TIME_FIELD_NUMBER = 2;
     private double exposureTime_;
     /**
      * <pre>
      * The exposure time in milliseconds per frame.
      * </pre>
      *
-     * <code>double exposureTime = 2;</code>
+     * <code>double exposure_time = 2;</code>
      */
     public double getExposureTime() {
       return exposureTime_;
@@ -980,9 +980,9 @@ public final class CalibrationConfig {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + TIMEUNIT_FIELD_NUMBER;
+      hash = (37 * hash) + TIME_UNIT_FIELD_NUMBER;
       hash = (53 * hash) + timeUnit_;
-      hash = (37 * hash) + EXPOSURETIME_FIELD_NUMBER;
+      hash = (37 * hash) + EXPOSURE_TIME_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getExposureTime()));
       hash = (29 * hash) + unknownFields.hashCode();
@@ -1226,7 +1226,7 @@ public final class CalibrationConfig {
        * is in frames.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeUnit timeUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 1;</code>
        */
       public int getTimeUnitValue() {
         return timeUnit_;
@@ -1237,7 +1237,7 @@ public final class CalibrationConfig {
        * is in frames.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeUnit timeUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 1;</code>
        */
       public Builder setTimeUnitValue(int value) {
         timeUnit_ = value;
@@ -1250,7 +1250,7 @@ public final class CalibrationConfig {
        * is in frames.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeUnit timeUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 1;</code>
        */
       public gdsc.smlm.data.config.UnitConfig.TimeUnit getTimeUnit() {
         gdsc.smlm.data.config.UnitConfig.TimeUnit result = gdsc.smlm.data.config.UnitConfig.TimeUnit.valueOf(timeUnit_);
@@ -1262,7 +1262,7 @@ public final class CalibrationConfig {
        * is in frames.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeUnit timeUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 1;</code>
        */
       public Builder setTimeUnit(gdsc.smlm.data.config.UnitConfig.TimeUnit value) {
         if (value == null) {
@@ -1279,7 +1279,7 @@ public final class CalibrationConfig {
        * is in frames.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeUnit timeUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 1;</code>
        */
       public Builder clearTimeUnit() {
         
@@ -1294,7 +1294,7 @@ public final class CalibrationConfig {
        * The exposure time in milliseconds per frame.
        * </pre>
        *
-       * <code>double exposureTime = 2;</code>
+       * <code>double exposure_time = 2;</code>
        */
       public double getExposureTime() {
         return exposureTime_;
@@ -1304,7 +1304,7 @@ public final class CalibrationConfig {
        * The exposure time in milliseconds per frame.
        * </pre>
        *
-       * <code>double exposureTime = 2;</code>
+       * <code>double exposure_time = 2;</code>
        */
       public Builder setExposureTime(double value) {
         
@@ -1317,7 +1317,7 @@ public final class CalibrationConfig {
        * The exposure time in milliseconds per frame.
        * </pre>
        *
-       * <code>double exposureTime = 2;</code>
+       * <code>double exposure_time = 2;</code>
        */
       public Builder clearExposureTime() {
         
@@ -1383,7 +1383,7 @@ public final class CalibrationConfig {
      * The intensity unit.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.IntensityUnit intensityUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 1;</code>
      */
     int getIntensityUnitValue();
     /**
@@ -1391,7 +1391,7 @@ public final class CalibrationConfig {
      * The intensity unit.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.IntensityUnit intensityUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 1;</code>
      */
     gdsc.smlm.data.config.UnitConfig.IntensityUnit getIntensityUnit();
 
@@ -1480,14 +1480,14 @@ public final class CalibrationConfig {
               gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration.class, gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration.Builder.class);
     }
 
-    public static final int INTENSITYUNIT_FIELD_NUMBER = 1;
+    public static final int INTENSITY_UNIT_FIELD_NUMBER = 1;
     private int intensityUnit_;
     /**
      * <pre>
      * The intensity unit.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.IntensityUnit intensityUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 1;</code>
      */
     public int getIntensityUnitValue() {
       return intensityUnit_;
@@ -1497,7 +1497,7 @@ public final class CalibrationConfig {
      * The intensity unit.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.IntensityUnit intensityUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 1;</code>
      */
     public gdsc.smlm.data.config.UnitConfig.IntensityUnit getIntensityUnit() {
       gdsc.smlm.data.config.UnitConfig.IntensityUnit result = gdsc.smlm.data.config.UnitConfig.IntensityUnit.valueOf(intensityUnit_);
@@ -1582,7 +1582,7 @@ public final class CalibrationConfig {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + INTENSITYUNIT_FIELD_NUMBER;
+      hash = (37 * hash) + INTENSITY_UNIT_FIELD_NUMBER;
       hash = (53 * hash) + intensityUnit_;
       hash = (37 * hash) + GAIN_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
@@ -1823,7 +1823,7 @@ public final class CalibrationConfig {
        * The intensity unit.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityUnit intensityUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 1;</code>
        */
       public int getIntensityUnitValue() {
         return intensityUnit_;
@@ -1833,7 +1833,7 @@ public final class CalibrationConfig {
        * The intensity unit.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityUnit intensityUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 1;</code>
        */
       public Builder setIntensityUnitValue(int value) {
         intensityUnit_ = value;
@@ -1845,7 +1845,7 @@ public final class CalibrationConfig {
        * The intensity unit.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityUnit intensityUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 1;</code>
        */
       public gdsc.smlm.data.config.UnitConfig.IntensityUnit getIntensityUnit() {
         gdsc.smlm.data.config.UnitConfig.IntensityUnit result = gdsc.smlm.data.config.UnitConfig.IntensityUnit.valueOf(intensityUnit_);
@@ -1856,7 +1856,7 @@ public final class CalibrationConfig {
        * The intensity unit.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityUnit intensityUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 1;</code>
        */
       public Builder setIntensityUnit(gdsc.smlm.data.config.UnitConfig.IntensityUnit value) {
         if (value == null) {
@@ -1872,7 +1872,7 @@ public final class CalibrationConfig {
        * The intensity unit.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityUnit intensityUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 1;</code>
        */
       public Builder clearIntensityUnit() {
         
@@ -1979,7 +1979,7 @@ public final class CalibrationConfig {
      * The camera type.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraType cameraType = 1;</code>
+     * <code>.gdsc.smlm.data.config.CameraType camera_type = 1;</code>
      */
     int getCameraTypeValue();
     /**
@@ -1987,7 +1987,7 @@ public final class CalibrationConfig {
      * The camera type.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraType cameraType = 1;</code>
+     * <code>.gdsc.smlm.data.config.CameraType camera_type = 1;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.CameraType getCameraType();
 
@@ -1996,7 +1996,7 @@ public final class CalibrationConfig {
      * The camera Gaussian read noise (in Counts).
      * </pre>
      *
-     * <code>double readNoise = 2;</code>
+     * <code>double read_noise = 2;</code>
      */
     double getReadNoise();
 
@@ -2112,14 +2112,14 @@ public final class CalibrationConfig {
               gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.class, gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.Builder.class);
     }
 
-    public static final int CAMERATYPE_FIELD_NUMBER = 1;
+    public static final int CAMERA_TYPE_FIELD_NUMBER = 1;
     private int cameraType_;
     /**
      * <pre>
      * The camera type.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraType cameraType = 1;</code>
+     * <code>.gdsc.smlm.data.config.CameraType camera_type = 1;</code>
      */
     public int getCameraTypeValue() {
       return cameraType_;
@@ -2129,21 +2129,21 @@ public final class CalibrationConfig {
      * The camera type.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraType cameraType = 1;</code>
+     * <code>.gdsc.smlm.data.config.CameraType camera_type = 1;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.CameraType getCameraType() {
       gdsc.smlm.data.config.CalibrationConfig.CameraType result = gdsc.smlm.data.config.CalibrationConfig.CameraType.valueOf(cameraType_);
       return result == null ? gdsc.smlm.data.config.CalibrationConfig.CameraType.UNRECOGNIZED : result;
     }
 
-    public static final int READNOISE_FIELD_NUMBER = 2;
+    public static final int READ_NOISE_FIELD_NUMBER = 2;
     private double readNoise_;
     /**
      * <pre>
      * The camera Gaussian read noise (in Counts).
      * </pre>
      *
-     * <code>double readNoise = 2;</code>
+     * <code>double read_noise = 2;</code>
      */
     public double getReadNoise() {
       return readNoise_;
@@ -2264,9 +2264,9 @@ public final class CalibrationConfig {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + CAMERATYPE_FIELD_NUMBER;
+      hash = (37 * hash) + CAMERA_TYPE_FIELD_NUMBER;
       hash = (53 * hash) + cameraType_;
-      hash = (37 * hash) + READNOISE_FIELD_NUMBER;
+      hash = (37 * hash) + READ_NOISE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getReadNoise()));
       hash = (37 * hash) + BIAS_FIELD_NUMBER;
@@ -2527,7 +2527,7 @@ public final class CalibrationConfig {
        * The camera type.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraType cameraType = 1;</code>
+       * <code>.gdsc.smlm.data.config.CameraType camera_type = 1;</code>
        */
       public int getCameraTypeValue() {
         return cameraType_;
@@ -2537,7 +2537,7 @@ public final class CalibrationConfig {
        * The camera type.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraType cameraType = 1;</code>
+       * <code>.gdsc.smlm.data.config.CameraType camera_type = 1;</code>
        */
       public Builder setCameraTypeValue(int value) {
         cameraType_ = value;
@@ -2549,7 +2549,7 @@ public final class CalibrationConfig {
        * The camera type.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraType cameraType = 1;</code>
+       * <code>.gdsc.smlm.data.config.CameraType camera_type = 1;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.CameraType getCameraType() {
         gdsc.smlm.data.config.CalibrationConfig.CameraType result = gdsc.smlm.data.config.CalibrationConfig.CameraType.valueOf(cameraType_);
@@ -2560,7 +2560,7 @@ public final class CalibrationConfig {
        * The camera type.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraType cameraType = 1;</code>
+       * <code>.gdsc.smlm.data.config.CameraType camera_type = 1;</code>
        */
       public Builder setCameraType(gdsc.smlm.data.config.CalibrationConfig.CameraType value) {
         if (value == null) {
@@ -2576,7 +2576,7 @@ public final class CalibrationConfig {
        * The camera type.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraType cameraType = 1;</code>
+       * <code>.gdsc.smlm.data.config.CameraType camera_type = 1;</code>
        */
       public Builder clearCameraType() {
         
@@ -2591,7 +2591,7 @@ public final class CalibrationConfig {
        * The camera Gaussian read noise (in Counts).
        * </pre>
        *
-       * <code>double readNoise = 2;</code>
+       * <code>double read_noise = 2;</code>
        */
       public double getReadNoise() {
         return readNoise_;
@@ -2601,7 +2601,7 @@ public final class CalibrationConfig {
        * The camera Gaussian read noise (in Counts).
        * </pre>
        *
-       * <code>double readNoise = 2;</code>
+       * <code>double read_noise = 2;</code>
        */
       public Builder setReadNoise(double value) {
         
@@ -2614,7 +2614,7 @@ public final class CalibrationConfig {
        * The camera Gaussian read noise (in Counts).
        * </pre>
        *
-       * <code>double readNoise = 2;</code>
+       * <code>double read_noise = 2;</code>
        */
       public Builder clearReadNoise() {
         
@@ -2765,7 +2765,7 @@ public final class CalibrationConfig {
      * The angle units, e.g. for a rotated point spread function
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.AngleUnit angleUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
      */
     int getAngleUnitValue();
     /**
@@ -2773,7 +2773,7 @@ public final class CalibrationConfig {
      * The angle units, e.g. for a rotated point spread function
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.AngleUnit angleUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
      */
     gdsc.smlm.data.config.UnitConfig.AngleUnit getAngleUnit();
   }
@@ -2850,14 +2850,14 @@ public final class CalibrationConfig {
               gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.class, gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder.class);
     }
 
-    public static final int ANGLEUNIT_FIELD_NUMBER = 1;
+    public static final int ANGLE_UNIT_FIELD_NUMBER = 1;
     private int angleUnit_;
     /**
      * <pre>
      * The angle units, e.g. for a rotated point spread function
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.AngleUnit angleUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
      */
     public int getAngleUnitValue() {
       return angleUnit_;
@@ -2867,7 +2867,7 @@ public final class CalibrationConfig {
      * The angle units, e.g. for a rotated point spread function
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.AngleUnit angleUnit = 1;</code>
+     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
      */
     public gdsc.smlm.data.config.UnitConfig.AngleUnit getAngleUnit() {
       gdsc.smlm.data.config.UnitConfig.AngleUnit result = gdsc.smlm.data.config.UnitConfig.AngleUnit.valueOf(angleUnit_);
@@ -2927,7 +2927,7 @@ public final class CalibrationConfig {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ANGLEUNIT_FIELD_NUMBER;
+      hash = (37 * hash) + ANGLE_UNIT_FIELD_NUMBER;
       hash = (53 * hash) + angleUnit_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -3163,7 +3163,7 @@ public final class CalibrationConfig {
        * The angle units, e.g. for a rotated point spread function
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.AngleUnit angleUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
        */
       public int getAngleUnitValue() {
         return angleUnit_;
@@ -3173,7 +3173,7 @@ public final class CalibrationConfig {
        * The angle units, e.g. for a rotated point spread function
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.AngleUnit angleUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
        */
       public Builder setAngleUnitValue(int value) {
         angleUnit_ = value;
@@ -3185,7 +3185,7 @@ public final class CalibrationConfig {
        * The angle units, e.g. for a rotated point spread function
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.AngleUnit angleUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
        */
       public gdsc.smlm.data.config.UnitConfig.AngleUnit getAngleUnit() {
         gdsc.smlm.data.config.UnitConfig.AngleUnit result = gdsc.smlm.data.config.UnitConfig.AngleUnit.valueOf(angleUnit_);
@@ -3196,7 +3196,7 @@ public final class CalibrationConfig {
        * The angle units, e.g. for a rotated point spread function
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.AngleUnit angleUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
        */
       public Builder setAngleUnit(gdsc.smlm.data.config.UnitConfig.AngleUnit value) {
         if (value == null) {
@@ -3212,7 +3212,7 @@ public final class CalibrationConfig {
        * The angle units, e.g. for a rotated point spread function
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.AngleUnit angleUnit = 1;</code>
+       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
        */
       public Builder clearAngleUnit() {
         
@@ -3278,7 +3278,7 @@ public final class CalibrationConfig {
      * The distance calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+     * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
      */
     boolean hasDistanceCalibration();
     /**
@@ -3286,7 +3286,7 @@ public final class CalibrationConfig {
      * The distance calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+     * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration getDistanceCalibration();
     /**
@@ -3294,7 +3294,7 @@ public final class CalibrationConfig {
      * The distance calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+     * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.DistanceCalibrationOrBuilder getDistanceCalibrationOrBuilder();
 
@@ -3303,7 +3303,7 @@ public final class CalibrationConfig {
      * The time calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+     * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
      */
     boolean hasTimeCalibration();
     /**
@@ -3311,7 +3311,7 @@ public final class CalibrationConfig {
      * The time calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+     * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.TimeCalibration getTimeCalibration();
     /**
@@ -3319,7 +3319,7 @@ public final class CalibrationConfig {
      * The time calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+     * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.TimeCalibrationOrBuilder getTimeCalibrationOrBuilder();
 
@@ -3328,7 +3328,7 @@ public final class CalibrationConfig {
      * The intensity calibration
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+     * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
      */
     boolean hasIntensityCalibration();
     /**
@@ -3336,7 +3336,7 @@ public final class CalibrationConfig {
      * The intensity calibration
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+     * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration getIntensityCalibration();
     /**
@@ -3344,7 +3344,7 @@ public final class CalibrationConfig {
      * The intensity calibration
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+     * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.IntensityCalibrationOrBuilder getIntensityCalibrationOrBuilder();
 
@@ -3353,7 +3353,7 @@ public final class CalibrationConfig {
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
      */
     boolean hasCameraCalibration();
     /**
@@ -3361,7 +3361,7 @@ public final class CalibrationConfig {
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.CameraCalibration getCameraCalibration();
     /**
@@ -3369,7 +3369,7 @@ public final class CalibrationConfig {
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.CameraCalibrationOrBuilder getCameraCalibrationOrBuilder();
 
@@ -3378,7 +3378,7 @@ public final class CalibrationConfig {
      * The PSF calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
      */
     boolean hasPsfCalibration();
     /**
@@ -3386,7 +3386,7 @@ public final class CalibrationConfig {
      * The PSF calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.PSFCalibration getPsfCalibration();
     /**
@@ -3394,7 +3394,7 @@ public final class CalibrationConfig {
      * The PSF calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder getPsfCalibrationOrBuilder();
   }
@@ -3531,14 +3531,14 @@ public final class CalibrationConfig {
               gdsc.smlm.data.config.CalibrationConfig.Calibration.class, gdsc.smlm.data.config.CalibrationConfig.Calibration.Builder.class);
     }
 
-    public static final int DISTANCECALIBRATION_FIELD_NUMBER = 1;
+    public static final int DISTANCE_CALIBRATION_FIELD_NUMBER = 1;
     private gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration distanceCalibration_;
     /**
      * <pre>
      * The distance calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+     * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
      */
     public boolean hasDistanceCalibration() {
       return distanceCalibration_ != null;
@@ -3548,7 +3548,7 @@ public final class CalibrationConfig {
      * The distance calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+     * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration getDistanceCalibration() {
       return distanceCalibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration.getDefaultInstance() : distanceCalibration_;
@@ -3558,20 +3558,20 @@ public final class CalibrationConfig {
      * The distance calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+     * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.DistanceCalibrationOrBuilder getDistanceCalibrationOrBuilder() {
       return getDistanceCalibration();
     }
 
-    public static final int TIMECALIBRATION_FIELD_NUMBER = 2;
+    public static final int TIME_CALIBRATION_FIELD_NUMBER = 2;
     private gdsc.smlm.data.config.CalibrationConfig.TimeCalibration timeCalibration_;
     /**
      * <pre>
      * The time calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+     * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
      */
     public boolean hasTimeCalibration() {
       return timeCalibration_ != null;
@@ -3581,7 +3581,7 @@ public final class CalibrationConfig {
      * The time calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+     * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.TimeCalibration getTimeCalibration() {
       return timeCalibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.TimeCalibration.getDefaultInstance() : timeCalibration_;
@@ -3591,20 +3591,20 @@ public final class CalibrationConfig {
      * The time calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+     * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.TimeCalibrationOrBuilder getTimeCalibrationOrBuilder() {
       return getTimeCalibration();
     }
 
-    public static final int INTENSITYCALIBRATION_FIELD_NUMBER = 3;
+    public static final int INTENSITY_CALIBRATION_FIELD_NUMBER = 3;
     private gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration intensityCalibration_;
     /**
      * <pre>
      * The intensity calibration
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+     * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
      */
     public boolean hasIntensityCalibration() {
       return intensityCalibration_ != null;
@@ -3614,7 +3614,7 @@ public final class CalibrationConfig {
      * The intensity calibration
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+     * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration getIntensityCalibration() {
       return intensityCalibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration.getDefaultInstance() : intensityCalibration_;
@@ -3624,20 +3624,20 @@ public final class CalibrationConfig {
      * The intensity calibration
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+     * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.IntensityCalibrationOrBuilder getIntensityCalibrationOrBuilder() {
       return getIntensityCalibration();
     }
 
-    public static final int CAMERACALIBRATION_FIELD_NUMBER = 4;
+    public static final int CAMERA_CALIBRATION_FIELD_NUMBER = 4;
     private gdsc.smlm.data.config.CalibrationConfig.CameraCalibration cameraCalibration_;
     /**
      * <pre>
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
      */
     public boolean hasCameraCalibration() {
       return cameraCalibration_ != null;
@@ -3647,7 +3647,7 @@ public final class CalibrationConfig {
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.CameraCalibration getCameraCalibration() {
       return cameraCalibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.getDefaultInstance() : cameraCalibration_;
@@ -3657,20 +3657,20 @@ public final class CalibrationConfig {
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.CameraCalibrationOrBuilder getCameraCalibrationOrBuilder() {
       return getCameraCalibration();
     }
 
-    public static final int PSFCALIBRATION_FIELD_NUMBER = 5;
+    public static final int PSF_CALIBRATION_FIELD_NUMBER = 5;
     private gdsc.smlm.data.config.CalibrationConfig.PSFCalibration psfCalibration_;
     /**
      * <pre>
      * The PSF calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
      */
     public boolean hasPsfCalibration() {
       return psfCalibration_ != null;
@@ -3680,7 +3680,7 @@ public final class CalibrationConfig {
      * The PSF calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.PSFCalibration getPsfCalibration() {
       return psfCalibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.getDefaultInstance() : psfCalibration_;
@@ -3690,7 +3690,7 @@ public final class CalibrationConfig {
      * The PSF calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder getPsfCalibrationOrBuilder() {
       return getPsfCalibration();
@@ -3802,23 +3802,23 @@ public final class CalibrationConfig {
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasDistanceCalibration()) {
-        hash = (37 * hash) + DISTANCECALIBRATION_FIELD_NUMBER;
+        hash = (37 * hash) + DISTANCE_CALIBRATION_FIELD_NUMBER;
         hash = (53 * hash) + getDistanceCalibration().hashCode();
       }
       if (hasTimeCalibration()) {
-        hash = (37 * hash) + TIMECALIBRATION_FIELD_NUMBER;
+        hash = (37 * hash) + TIME_CALIBRATION_FIELD_NUMBER;
         hash = (53 * hash) + getTimeCalibration().hashCode();
       }
       if (hasIntensityCalibration()) {
-        hash = (37 * hash) + INTENSITYCALIBRATION_FIELD_NUMBER;
+        hash = (37 * hash) + INTENSITY_CALIBRATION_FIELD_NUMBER;
         hash = (53 * hash) + getIntensityCalibration().hashCode();
       }
       if (hasCameraCalibration()) {
-        hash = (37 * hash) + CAMERACALIBRATION_FIELD_NUMBER;
+        hash = (37 * hash) + CAMERA_CALIBRATION_FIELD_NUMBER;
         hash = (53 * hash) + getCameraCalibration().hashCode();
       }
       if (hasPsfCalibration()) {
-        hash = (37 * hash) + PSFCALIBRATION_FIELD_NUMBER;
+        hash = (37 * hash) + PSF_CALIBRATION_FIELD_NUMBER;
         hash = (53 * hash) + getPsfCalibration().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
@@ -4123,7 +4123,7 @@ public final class CalibrationConfig {
        * The distance calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
        */
       public boolean hasDistanceCalibration() {
         return distanceCalibrationBuilder_ != null || distanceCalibration_ != null;
@@ -4133,7 +4133,7 @@ public final class CalibrationConfig {
        * The distance calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration getDistanceCalibration() {
         if (distanceCalibrationBuilder_ == null) {
@@ -4147,7 +4147,7 @@ public final class CalibrationConfig {
        * The distance calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
        */
       public Builder setDistanceCalibration(gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration value) {
         if (distanceCalibrationBuilder_ == null) {
@@ -4167,7 +4167,7 @@ public final class CalibrationConfig {
        * The distance calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
        */
       public Builder setDistanceCalibration(
           gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration.Builder builderForValue) {
@@ -4185,7 +4185,7 @@ public final class CalibrationConfig {
        * The distance calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
        */
       public Builder mergeDistanceCalibration(gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration value) {
         if (distanceCalibrationBuilder_ == null) {
@@ -4207,7 +4207,7 @@ public final class CalibrationConfig {
        * The distance calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
        */
       public Builder clearDistanceCalibration() {
         if (distanceCalibrationBuilder_ == null) {
@@ -4225,7 +4225,7 @@ public final class CalibrationConfig {
        * The distance calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration.Builder getDistanceCalibrationBuilder() {
         
@@ -4237,7 +4237,7 @@ public final class CalibrationConfig {
        * The distance calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.DistanceCalibrationOrBuilder getDistanceCalibrationOrBuilder() {
         if (distanceCalibrationBuilder_ != null) {
@@ -4252,7 +4252,7 @@ public final class CalibrationConfig {
        * The distance calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.DistanceCalibration distanceCalibration = 1;</code>
+       * <code>.gdsc.smlm.data.config.DistanceCalibration distance_calibration = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration, gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.DistanceCalibrationOrBuilder> 
@@ -4276,7 +4276,7 @@ public final class CalibrationConfig {
        * The time calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+       * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
        */
       public boolean hasTimeCalibration() {
         return timeCalibrationBuilder_ != null || timeCalibration_ != null;
@@ -4286,7 +4286,7 @@ public final class CalibrationConfig {
        * The time calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+       * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.TimeCalibration getTimeCalibration() {
         if (timeCalibrationBuilder_ == null) {
@@ -4300,7 +4300,7 @@ public final class CalibrationConfig {
        * The time calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+       * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
        */
       public Builder setTimeCalibration(gdsc.smlm.data.config.CalibrationConfig.TimeCalibration value) {
         if (timeCalibrationBuilder_ == null) {
@@ -4320,7 +4320,7 @@ public final class CalibrationConfig {
        * The time calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+       * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
        */
       public Builder setTimeCalibration(
           gdsc.smlm.data.config.CalibrationConfig.TimeCalibration.Builder builderForValue) {
@@ -4338,7 +4338,7 @@ public final class CalibrationConfig {
        * The time calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+       * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
        */
       public Builder mergeTimeCalibration(gdsc.smlm.data.config.CalibrationConfig.TimeCalibration value) {
         if (timeCalibrationBuilder_ == null) {
@@ -4360,7 +4360,7 @@ public final class CalibrationConfig {
        * The time calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+       * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
        */
       public Builder clearTimeCalibration() {
         if (timeCalibrationBuilder_ == null) {
@@ -4378,7 +4378,7 @@ public final class CalibrationConfig {
        * The time calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+       * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.TimeCalibration.Builder getTimeCalibrationBuilder() {
         
@@ -4390,7 +4390,7 @@ public final class CalibrationConfig {
        * The time calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+       * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.TimeCalibrationOrBuilder getTimeCalibrationOrBuilder() {
         if (timeCalibrationBuilder_ != null) {
@@ -4405,7 +4405,7 @@ public final class CalibrationConfig {
        * The time calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.TimeCalibration timeCalibration = 2;</code>
+       * <code>.gdsc.smlm.data.config.TimeCalibration time_calibration = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.CalibrationConfig.TimeCalibration, gdsc.smlm.data.config.CalibrationConfig.TimeCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.TimeCalibrationOrBuilder> 
@@ -4429,7 +4429,7 @@ public final class CalibrationConfig {
        * The intensity calibration
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+       * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
        */
       public boolean hasIntensityCalibration() {
         return intensityCalibrationBuilder_ != null || intensityCalibration_ != null;
@@ -4439,7 +4439,7 @@ public final class CalibrationConfig {
        * The intensity calibration
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+       * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration getIntensityCalibration() {
         if (intensityCalibrationBuilder_ == null) {
@@ -4453,7 +4453,7 @@ public final class CalibrationConfig {
        * The intensity calibration
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+       * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
        */
       public Builder setIntensityCalibration(gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration value) {
         if (intensityCalibrationBuilder_ == null) {
@@ -4473,7 +4473,7 @@ public final class CalibrationConfig {
        * The intensity calibration
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+       * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
        */
       public Builder setIntensityCalibration(
           gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration.Builder builderForValue) {
@@ -4491,7 +4491,7 @@ public final class CalibrationConfig {
        * The intensity calibration
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+       * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
        */
       public Builder mergeIntensityCalibration(gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration value) {
         if (intensityCalibrationBuilder_ == null) {
@@ -4513,7 +4513,7 @@ public final class CalibrationConfig {
        * The intensity calibration
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+       * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
        */
       public Builder clearIntensityCalibration() {
         if (intensityCalibrationBuilder_ == null) {
@@ -4531,7 +4531,7 @@ public final class CalibrationConfig {
        * The intensity calibration
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+       * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration.Builder getIntensityCalibrationBuilder() {
         
@@ -4543,7 +4543,7 @@ public final class CalibrationConfig {
        * The intensity calibration
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+       * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.IntensityCalibrationOrBuilder getIntensityCalibrationOrBuilder() {
         if (intensityCalibrationBuilder_ != null) {
@@ -4558,7 +4558,7 @@ public final class CalibrationConfig {
        * The intensity calibration
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.IntensityCalibration intensityCalibration = 3;</code>
+       * <code>.gdsc.smlm.data.config.IntensityCalibration intensity_calibration = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration, gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.IntensityCalibrationOrBuilder> 
@@ -4582,7 +4582,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
        */
       public boolean hasCameraCalibration() {
         return cameraCalibrationBuilder_ != null || cameraCalibration_ != null;
@@ -4592,7 +4592,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.CameraCalibration getCameraCalibration() {
         if (cameraCalibrationBuilder_ == null) {
@@ -4606,7 +4606,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
        */
       public Builder setCameraCalibration(gdsc.smlm.data.config.CalibrationConfig.CameraCalibration value) {
         if (cameraCalibrationBuilder_ == null) {
@@ -4626,7 +4626,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
        */
       public Builder setCameraCalibration(
           gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.Builder builderForValue) {
@@ -4644,7 +4644,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
        */
       public Builder mergeCameraCalibration(gdsc.smlm.data.config.CalibrationConfig.CameraCalibration value) {
         if (cameraCalibrationBuilder_ == null) {
@@ -4666,7 +4666,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
        */
       public Builder clearCameraCalibration() {
         if (cameraCalibrationBuilder_ == null) {
@@ -4684,7 +4684,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.Builder getCameraCalibrationBuilder() {
         
@@ -4696,7 +4696,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.CameraCalibrationOrBuilder getCameraCalibrationOrBuilder() {
         if (cameraCalibrationBuilder_ != null) {
@@ -4711,7 +4711,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration cameraCalibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.CalibrationConfig.CameraCalibration, gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.CameraCalibrationOrBuilder> 
@@ -4735,7 +4735,7 @@ public final class CalibrationConfig {
        * The PSF calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
        */
       public boolean hasPsfCalibration() {
         return psfCalibrationBuilder_ != null || psfCalibration_ != null;
@@ -4745,7 +4745,7 @@ public final class CalibrationConfig {
        * The PSF calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.PSFCalibration getPsfCalibration() {
         if (psfCalibrationBuilder_ == null) {
@@ -4759,7 +4759,7 @@ public final class CalibrationConfig {
        * The PSF calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
        */
       public Builder setPsfCalibration(gdsc.smlm.data.config.CalibrationConfig.PSFCalibration value) {
         if (psfCalibrationBuilder_ == null) {
@@ -4779,7 +4779,7 @@ public final class CalibrationConfig {
        * The PSF calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
        */
       public Builder setPsfCalibration(
           gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder builderForValue) {
@@ -4797,7 +4797,7 @@ public final class CalibrationConfig {
        * The PSF calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
        */
       public Builder mergePsfCalibration(gdsc.smlm.data.config.CalibrationConfig.PSFCalibration value) {
         if (psfCalibrationBuilder_ == null) {
@@ -4819,7 +4819,7 @@ public final class CalibrationConfig {
        * The PSF calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
        */
       public Builder clearPsfCalibration() {
         if (psfCalibrationBuilder_ == null) {
@@ -4837,7 +4837,7 @@ public final class CalibrationConfig {
        * The PSF calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder getPsfCalibrationBuilder() {
         
@@ -4849,7 +4849,7 @@ public final class CalibrationConfig {
        * The PSF calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder getPsfCalibrationOrBuilder() {
         if (psfCalibrationBuilder_ != null) {
@@ -4864,7 +4864,7 @@ public final class CalibrationConfig {
        * The PSF calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psfCalibration = 5;</code>
+       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.CalibrationConfig.PSFCalibration, gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder> 
@@ -4968,31 +4968,31 @@ public final class CalibrationConfig {
   static {
     java.lang.String[] descriptorData = {
       "\n\021calibration.proto\022\025gdsc.smlm.data.conf" +
-      "ig\032\nunit.proto\"d\n\023DistanceCalibration\0229\n" +
-      "\014distanceUnit\030\001 \001(\0162#.gdsc.smlm.data.con" +
-      "fig.DistanceUnit\022\022\n\nnmPerPixel\030\002 \001(\001\"Z\n\017" +
-      "TimeCalibration\0221\n\010timeUnit\030\001 \001(\0162\037.gdsc" +
-      ".smlm.data.config.TimeUnit\022\024\n\014exposureTi" +
-      "me\030\002 \001(\001\"a\n\024IntensityCalibration\022;\n\rinte" +
-      "nsityUnit\030\001 \001(\0162$.gdsc.smlm.data.config." +
-      "IntensityUnit\022\014\n\004gain\030\002 \001(\001\"\202\001\n\021CameraCa" +
-      "libration\0225\n\ncameraType\030\001 \001(\0162!.gdsc.sml",
-      "m.data.config.CameraType\022\021\n\treadNoise\030\002 " +
-      "\001(\001\022\014\n\004bias\030\003 \001(\001\022\025\n\ramplification\030\004 \001(\001" +
-      "\"E\n\016PSFCalibration\0223\n\tangleUnit\030\001 \001(\0162 ." +
-      "gdsc.smlm.data.config.AngleUnit\"\346\002\n\013Cali" +
-      "bration\022G\n\023distanceCalibration\030\001 \001(\0132*.g" +
-      "dsc.smlm.data.config.DistanceCalibration" +
-      "\022?\n\017timeCalibration\030\002 \001(\0132&.gdsc.smlm.da" +
-      "ta.config.TimeCalibration\022I\n\024intensityCa" +
-      "libration\030\003 \001(\0132+.gdsc.smlm.data.config." +
-      "IntensityCalibration\022C\n\021cameraCalibratio",
-      "n\030\004 \001(\0132(.gdsc.smlm.data.config.CameraCa" +
-      "libration\022=\n\016psfCalibration\030\005 \001(\0132%.gdsc" +
-      ".smlm.data.config.PSFCalibration*?\n\nCame" +
-      "raType\022\022\n\016CAMERA_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n" +
-      "\003CCD\020\002\022\t\n\005SCMOS\020\003B\023B\021CalibrationConfigb\006" +
-      "proto3"
+      "ig\032\nunit.proto\"g\n\023DistanceCalibration\022:\n" +
+      "\rdistance_unit\030\001 \001(\0162#.gdsc.smlm.data.co" +
+      "nfig.DistanceUnit\022\024\n\014nm_per_pixel\030\002 \001(\001\"" +
+      "\\\n\017TimeCalibration\0222\n\ttime_unit\030\001 \001(\0162\037." +
+      "gdsc.smlm.data.config.TimeUnit\022\025\n\rexposu" +
+      "re_time\030\002 \001(\001\"b\n\024IntensityCalibration\022<\n" +
+      "\016intensity_unit\030\001 \001(\0162$.gdsc.smlm.data.c" +
+      "onfig.IntensityUnit\022\014\n\004gain\030\002 \001(\001\"\204\001\n\021Ca" +
+      "meraCalibration\0226\n\013camera_type\030\001 \001(\0162!.g",
+      "dsc.smlm.data.config.CameraType\022\022\n\nread_" +
+      "noise\030\002 \001(\001\022\014\n\004bias\030\003 \001(\001\022\025\n\ramplificati" +
+      "on\030\004 \001(\001\"F\n\016PSFCalibration\0224\n\nangle_unit" +
+      "\030\001 \001(\0162 .gdsc.smlm.data.config.AngleUnit" +
+      "\"\353\002\n\013Calibration\022H\n\024distance_calibration" +
+      "\030\001 \001(\0132*.gdsc.smlm.data.config.DistanceC" +
+      "alibration\022@\n\020time_calibration\030\002 \001(\0132&.g" +
+      "dsc.smlm.data.config.TimeCalibration\022J\n\025" +
+      "intensity_calibration\030\003 \001(\0132+.gdsc.smlm." +
+      "data.config.IntensityCalibration\022D\n\022came",
+      "ra_calibration\030\004 \001(\0132(.gdsc.smlm.data.co" +
+      "nfig.CameraCalibration\022>\n\017psf_calibratio" +
+      "n\030\005 \001(\0132%.gdsc.smlm.data.config.PSFCalib" +
+      "ration*?\n\nCameraType\022\022\n\016CAMERA_TYPE_NA\020\000" +
+      "\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t\n\005SCMOS\020\003B\023B\021Calib" +
+      "rationConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

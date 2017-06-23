@@ -12,23 +12,23 @@ import "unit.proto";
 // Define the calibration for distance
 message DistanceCalibration {
 	// The distance unit.
-	DistanceUnit distanceUnit = 1;
+	DistanceUnit distance_unit = 1;
 	// The camera pixel size in nanometers.
-	double nmPerPixel = 2;
+	double nm_per_pixel = 2;
 }
 
 // Define the calibration for time
 message TimeCalibration {
 	// The time unit. This is currently unused as it is assumed the time in the results 
 	// is in frames.
-	TimeUnit timeUnit = 1;
+	TimeUnit time_unit = 1;
 	// The exposure time in milliseconds per frame.
-	double exposureTime = 2;
+	double exposure_time = 2;
 }
 
 message IntensityCalibration {
 	// The intensity unit.
-	IntensityUnit intensityUnit = 1;
+	IntensityUnit intensity_unit = 1;
 	// The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital
 	// count units (Counts) to photons.
 	double gain = 2;
@@ -45,10 +45,10 @@ enum CameraType {
 // Define the camera calibration
 message CameraCalibration {
 	// The camera type.
-	CameraType cameraType = 1;
+	CameraType camera_type = 1;
 	
 	// The camera Gaussian read noise (in Counts).
-	double readNoise = 2;
+	double read_noise = 2;
 
 	// The camera bias (in Counts) 
 	double bias = 3;
@@ -63,7 +63,7 @@ message CameraCalibration {
 // Define additional calibration required for the Point Spread Function (PSF) parameters
 message PSFCalibration {
 	// The angle units, e.g. for a rotated point spread function
-	AngleUnit angleUnit = 1;
+	AngleUnit angle_unit = 1;
 }
 
 // Define the calibration for the results. The calibration contains details of the 
@@ -72,17 +72,17 @@ message PSFCalibration {
 message Calibration
 {
 	// The distance calibration.
-	DistanceCalibration distanceCalibration = 1;
+	DistanceCalibration distance_calibration = 1;
 
 	// The time calibration.
-	TimeCalibration timeCalibration = 2;
+	TimeCalibration time_calibration = 2;
 	
 	// The intensity calibration
-	IntensityCalibration intensityCalibration = 3;
+	IntensityCalibration intensity_calibration = 3;
 	
 	// The camera calibration.
-	CameraCalibration cameraCalibration = 4;
+	CameraCalibration camera_calibration = 4;
 	
 	// The PSF calibration.
-	PSFCalibration psfCalibration = 5;
+	PSFCalibration psf_calibration = 5;
 }

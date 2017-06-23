@@ -36,7 +36,7 @@ message PSFParameter {
 
 // Define the Point Spread Function (PSF)
 message PSF {
-	PSFType psfType = 1; // The PSF type
+	PSFType psf_type = 1; // The PSF type
 	
 	// The names of the PSF parameters. The results are stored using the standard parameters of 
 	// [background, intensity, x, y, z]. Any additional parameters can be stored in the results

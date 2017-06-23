@@ -3,7 +3,6 @@
 
 package gdsc.smlm.tsf;
 
-@SuppressWarnings({"unchecked", "unused"})
 public final class TaggedSpotFile {
   private TaggedSpotFile() {}
   public static void registerAllExtensions(
@@ -2575,7 +2574,7 @@ public final class TaggedSpotFile {
      * (units=count/photon)
      * </pre>
      *
-     * <code>optional double exposureTime = 1504;</code>
+     * <code>optional double exposure_time = 1504;</code>
      */
     boolean hasExposureTime();
     /**
@@ -2583,7 +2582,7 @@ public final class TaggedSpotFile {
      * (units=count/photon)
      * </pre>
      *
-     * <code>optional double exposureTime = 1504;</code>
+     * <code>optional double exposure_time = 1504;</code>
      */
     double getExposureTime();
 
@@ -2592,7 +2591,7 @@ public final class TaggedSpotFile {
      * (units=millisecond)
      * </pre>
      *
-     * <code>optional double readNoise = 1505;</code>
+     * <code>optional double read_noise = 1505;</code>
      */
     boolean hasReadNoise();
     /**
@@ -2600,7 +2599,7 @@ public final class TaggedSpotFile {
      * (units=millisecond)
      * </pre>
      *
-     * <code>optional double readNoise = 1505;</code>
+     * <code>optional double read_noise = 1505;</code>
      */
     double getReadNoise();
 
@@ -2626,17 +2625,17 @@ public final class TaggedSpotFile {
      * Set to true if this was an EM-CCD camera
      * </pre>
      *
-     * <code>optional bool emCCD = 1507 [deprecated = true];</code>
+     * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
      */
-    @java.lang.Deprecated boolean hasEmCCD();
+    @java.lang.Deprecated boolean hasIsEmCcd();
     /**
      * <pre>
      * Set to true if this was an EM-CCD camera
      * </pre>
      *
-     * <code>optional bool emCCD = 1507 [deprecated = true];</code>
+     * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
      */
-    @java.lang.Deprecated boolean getEmCCD();
+    @java.lang.Deprecated boolean getIsEmCcd();
 
     /**
      * <pre>
@@ -2664,7 +2663,7 @@ public final class TaggedSpotFile {
      * when fitting using Maximum Likelihood Estimation (MLE).
      * </pre>
      *
-     * <code>optional .TSF.CameraType cameraType = 1509;</code>
+     * <code>optional .TSF.CameraType camera_type = 1509;</code>
      */
     boolean hasCameraType();
     /**
@@ -2676,7 +2675,7 @@ public final class TaggedSpotFile {
      * when fitting using Maximum Likelihood Estimation (MLE).
      * </pre>
      *
-     * <code>optional .TSF.CameraType cameraType = 1509;</code>
+     * <code>optional .TSF.CameraType camera_type = 1509;</code>
      */
     gdsc.smlm.tsf.TaggedSpotFile.CameraType getCameraType();
 
@@ -2746,7 +2745,7 @@ public final class TaggedSpotFile {
       exposureTime_ = 0D;
       readNoise_ = 0D;
       bias_ = 0D;
-      emCCD_ = false;
+      isEmCcd_ = false;
       amplification_ = 0D;
       cameraType_ = 0;
       pSF_ = "";
@@ -2994,7 +2993,7 @@ public final class TaggedSpotFile {
             }
             case 12056: {
               bitField0_ |= 0x02000000;
-              emCCD_ = input.readBool();
+              isEmCcd_ = input.readBool();
               break;
             }
             case 12065: {
@@ -3834,14 +3833,14 @@ public final class TaggedSpotFile {
       return gain_;
     }
 
-    public static final int EXPOSURETIME_FIELD_NUMBER = 1504;
+    public static final int EXPOSURE_TIME_FIELD_NUMBER = 1504;
     private double exposureTime_;
     /**
      * <pre>
      * (units=count/photon)
      * </pre>
      *
-     * <code>optional double exposureTime = 1504;</code>
+     * <code>optional double exposure_time = 1504;</code>
      */
     public boolean hasExposureTime() {
       return ((bitField0_ & 0x00400000) == 0x00400000);
@@ -3851,20 +3850,20 @@ public final class TaggedSpotFile {
      * (units=count/photon)
      * </pre>
      *
-     * <code>optional double exposureTime = 1504;</code>
+     * <code>optional double exposure_time = 1504;</code>
      */
     public double getExposureTime() {
       return exposureTime_;
     }
 
-    public static final int READNOISE_FIELD_NUMBER = 1505;
+    public static final int READ_NOISE_FIELD_NUMBER = 1505;
     private double readNoise_;
     /**
      * <pre>
      * (units=millisecond)
      * </pre>
      *
-     * <code>optional double readNoise = 1505;</code>
+     * <code>optional double read_noise = 1505;</code>
      */
     public boolean hasReadNoise() {
       return ((bitField0_ & 0x00800000) == 0x00800000);
@@ -3874,7 +3873,7 @@ public final class TaggedSpotFile {
      * (units=millisecond)
      * </pre>
      *
-     * <code>optional double readNoise = 1505;</code>
+     * <code>optional double read_noise = 1505;</code>
      */
     public double getReadNoise() {
       return readNoise_;
@@ -3903,16 +3902,16 @@ public final class TaggedSpotFile {
       return bias_;
     }
 
-    public static final int EMCCD_FIELD_NUMBER = 1507;
-    private boolean emCCD_;
+    public static final int IS_EM_CCD_FIELD_NUMBER = 1507;
+    private boolean isEmCcd_;
     /**
      * <pre>
      * Set to true if this was an EM-CCD camera
      * </pre>
      *
-     * <code>optional bool emCCD = 1507 [deprecated = true];</code>
+     * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
      */
-    @java.lang.Deprecated public boolean hasEmCCD() {
+    @java.lang.Deprecated public boolean hasIsEmCcd() {
       return ((bitField0_ & 0x02000000) == 0x02000000);
     }
     /**
@@ -3920,10 +3919,10 @@ public final class TaggedSpotFile {
      * Set to true if this was an EM-CCD camera
      * </pre>
      *
-     * <code>optional bool emCCD = 1507 [deprecated = true];</code>
+     * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
      */
-    @java.lang.Deprecated public boolean getEmCCD() {
-      return emCCD_;
+    @java.lang.Deprecated public boolean getIsEmCcd() {
+      return isEmCcd_;
     }
 
     public static final int AMPLIFICATION_FIELD_NUMBER = 1508;
@@ -3949,7 +3948,7 @@ public final class TaggedSpotFile {
       return amplification_;
     }
 
-    public static final int CAMERATYPE_FIELD_NUMBER = 1509;
+    public static final int CAMERA_TYPE_FIELD_NUMBER = 1509;
     private int cameraType_;
     /**
      * <pre>
@@ -3960,7 +3959,7 @@ public final class TaggedSpotFile {
      * when fitting using Maximum Likelihood Estimation (MLE).
      * </pre>
      *
-     * <code>optional .TSF.CameraType cameraType = 1509;</code>
+     * <code>optional .TSF.CameraType camera_type = 1509;</code>
      */
     public boolean hasCameraType() {
       return ((bitField0_ & 0x08000000) == 0x08000000);
@@ -3974,7 +3973,7 @@ public final class TaggedSpotFile {
      * when fitting using Maximum Likelihood Estimation (MLE).
      * </pre>
      *
-     * <code>optional .TSF.CameraType cameraType = 1509;</code>
+     * <code>optional .TSF.CameraType camera_type = 1509;</code>
      */
     public gdsc.smlm.tsf.TaggedSpotFile.CameraType getCameraType() {
       gdsc.smlm.tsf.TaggedSpotFile.CameraType result = gdsc.smlm.tsf.TaggedSpotFile.CameraType.valueOf(cameraType_);
@@ -4155,7 +4154,7 @@ public final class TaggedSpotFile {
         output.writeDouble(1506, bias_);
       }
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
-        output.writeBool(1507, emCCD_);
+        output.writeBool(1507, isEmCcd_);
       }
       if (((bitField0_ & 0x04000000) == 0x04000000)) {
         output.writeDouble(1508, amplification_);
@@ -4289,7 +4288,7 @@ public final class TaggedSpotFile {
       }
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1507, emCCD_);
+          .computeBoolSize(1507, isEmCcd_);
       }
       if (((bitField0_ & 0x04000000) == 0x04000000)) {
         size += com.google.protobuf.CodedOutputStream
@@ -4457,10 +4456,10 @@ public final class TaggedSpotFile {
             == java.lang.Double.doubleToLongBits(
                 other.getBias()));
       }
-      result = result && (hasEmCCD() == other.hasEmCCD());
-      if (hasEmCCD()) {
-        result = result && (getEmCCD()
-            == other.getEmCCD());
+      result = result && (hasIsEmCcd() == other.hasIsEmCcd());
+      if (hasIsEmCcd()) {
+        result = result && (getIsEmCcd()
+            == other.getIsEmCcd());
       }
       result = result && (hasAmplification() == other.hasAmplification());
       if (hasAmplification()) {
@@ -4597,12 +4596,12 @@ public final class TaggedSpotFile {
             java.lang.Double.doubleToLongBits(getGain()));
       }
       if (hasExposureTime()) {
-        hash = (37 * hash) + EXPOSURETIME_FIELD_NUMBER;
+        hash = (37 * hash) + EXPOSURE_TIME_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getExposureTime()));
       }
       if (hasReadNoise()) {
-        hash = (37 * hash) + READNOISE_FIELD_NUMBER;
+        hash = (37 * hash) + READ_NOISE_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getReadNoise()));
       }
@@ -4611,10 +4610,10 @@ public final class TaggedSpotFile {
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getBias()));
       }
-      if (hasEmCCD()) {
-        hash = (37 * hash) + EMCCD_FIELD_NUMBER;
+      if (hasIsEmCcd()) {
+        hash = (37 * hash) + IS_EM_CCD_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-            getEmCCD());
+            getIsEmCcd());
       }
       if (hasAmplification()) {
         hash = (37 * hash) + AMPLIFICATION_FIELD_NUMBER;
@@ -4622,7 +4621,7 @@ public final class TaggedSpotFile {
             java.lang.Double.doubleToLongBits(getAmplification()));
       }
       if (hasCameraType()) {
-        hash = (37 * hash) + CAMERATYPE_FIELD_NUMBER;
+        hash = (37 * hash) + CAMERA_TYPE_FIELD_NUMBER;
         hash = (53 * hash) + cameraType_;
       }
       if (hasPSF()) {
@@ -4826,7 +4825,7 @@ public final class TaggedSpotFile {
         bitField0_ = (bitField0_ & ~0x04000000);
         bias_ = 0D;
         bitField0_ = (bitField0_ & ~0x08000000);
-        emCCD_ = false;
+        isEmCcd_ = false;
         bitField0_ = (bitField0_ & ~0x10000000);
         amplification_ = 0D;
         bitField0_ = (bitField0_ & ~0x20000000);
@@ -4984,7 +4983,7 @@ public final class TaggedSpotFile {
         if (((from_bitField0_ & 0x10000000) == 0x10000000)) {
           to_bitField0_ |= 0x02000000;
         }
-        result.emCCD_ = emCCD_;
+        result.isEmCcd_ = isEmCcd_;
         if (((from_bitField0_ & 0x20000000) == 0x20000000)) {
           to_bitField0_ |= 0x04000000;
         }
@@ -5191,8 +5190,8 @@ public final class TaggedSpotFile {
         if (other.hasBias()) {
           setBias(other.getBias());
         }
-        if (other.hasEmCCD()) {
-          setEmCCD(other.getEmCCD());
+        if (other.hasIsEmCcd()) {
+          setIsEmCcd(other.getIsEmCcd());
         }
         if (other.hasAmplification()) {
           setAmplification(other.getAmplification());
@@ -7175,7 +7174,7 @@ public final class TaggedSpotFile {
        * (units=count/photon)
        * </pre>
        *
-       * <code>optional double exposureTime = 1504;</code>
+       * <code>optional double exposure_time = 1504;</code>
        */
       public boolean hasExposureTime() {
         return ((bitField0_ & 0x02000000) == 0x02000000);
@@ -7185,7 +7184,7 @@ public final class TaggedSpotFile {
        * (units=count/photon)
        * </pre>
        *
-       * <code>optional double exposureTime = 1504;</code>
+       * <code>optional double exposure_time = 1504;</code>
        */
       public double getExposureTime() {
         return exposureTime_;
@@ -7195,7 +7194,7 @@ public final class TaggedSpotFile {
        * (units=count/photon)
        * </pre>
        *
-       * <code>optional double exposureTime = 1504;</code>
+       * <code>optional double exposure_time = 1504;</code>
        */
       public Builder setExposureTime(double value) {
         bitField0_ |= 0x02000000;
@@ -7208,7 +7207,7 @@ public final class TaggedSpotFile {
        * (units=count/photon)
        * </pre>
        *
-       * <code>optional double exposureTime = 1504;</code>
+       * <code>optional double exposure_time = 1504;</code>
        */
       public Builder clearExposureTime() {
         bitField0_ = (bitField0_ & ~0x02000000);
@@ -7223,7 +7222,7 @@ public final class TaggedSpotFile {
        * (units=millisecond)
        * </pre>
        *
-       * <code>optional double readNoise = 1505;</code>
+       * <code>optional double read_noise = 1505;</code>
        */
       public boolean hasReadNoise() {
         return ((bitField0_ & 0x04000000) == 0x04000000);
@@ -7233,7 +7232,7 @@ public final class TaggedSpotFile {
        * (units=millisecond)
        * </pre>
        *
-       * <code>optional double readNoise = 1505;</code>
+       * <code>optional double read_noise = 1505;</code>
        */
       public double getReadNoise() {
         return readNoise_;
@@ -7243,7 +7242,7 @@ public final class TaggedSpotFile {
        * (units=millisecond)
        * </pre>
        *
-       * <code>optional double readNoise = 1505;</code>
+       * <code>optional double read_noise = 1505;</code>
        */
       public Builder setReadNoise(double value) {
         bitField0_ |= 0x04000000;
@@ -7256,7 +7255,7 @@ public final class TaggedSpotFile {
        * (units=millisecond)
        * </pre>
        *
-       * <code>optional double readNoise = 1505;</code>
+       * <code>optional double read_noise = 1505;</code>
        */
       public Builder clearReadNoise() {
         bitField0_ = (bitField0_ & ~0x04000000);
@@ -7313,15 +7312,15 @@ public final class TaggedSpotFile {
         return this;
       }
 
-      private boolean emCCD_ ;
+      private boolean isEmCcd_ ;
       /**
        * <pre>
        * Set to true if this was an EM-CCD camera
        * </pre>
        *
-       * <code>optional bool emCCD = 1507 [deprecated = true];</code>
+       * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
        */
-      @java.lang.Deprecated public boolean hasEmCCD() {
+      @java.lang.Deprecated public boolean hasIsEmCcd() {
         return ((bitField0_ & 0x10000000) == 0x10000000);
       }
       /**
@@ -7329,21 +7328,21 @@ public final class TaggedSpotFile {
        * Set to true if this was an EM-CCD camera
        * </pre>
        *
-       * <code>optional bool emCCD = 1507 [deprecated = true];</code>
+       * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
        */
-      @java.lang.Deprecated public boolean getEmCCD() {
-        return emCCD_;
+      @java.lang.Deprecated public boolean getIsEmCcd() {
+        return isEmCcd_;
       }
       /**
        * <pre>
        * Set to true if this was an EM-CCD camera
        * </pre>
        *
-       * <code>optional bool emCCD = 1507 [deprecated = true];</code>
+       * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
        */
-      @java.lang.Deprecated public Builder setEmCCD(boolean value) {
+      @java.lang.Deprecated public Builder setIsEmCcd(boolean value) {
         bitField0_ |= 0x10000000;
-        emCCD_ = value;
+        isEmCcd_ = value;
         onChanged();
         return this;
       }
@@ -7352,11 +7351,11 @@ public final class TaggedSpotFile {
        * Set to true if this was an EM-CCD camera
        * </pre>
        *
-       * <code>optional bool emCCD = 1507 [deprecated = true];</code>
+       * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
        */
-      @java.lang.Deprecated public Builder clearEmCCD() {
+      @java.lang.Deprecated public Builder clearIsEmCcd() {
         bitField0_ = (bitField0_ & ~0x10000000);
-        emCCD_ = false;
+        isEmCcd_ = false;
         onChanged();
         return this;
       }
@@ -7419,7 +7418,7 @@ public final class TaggedSpotFile {
        * when fitting using Maximum Likelihood Estimation (MLE).
        * </pre>
        *
-       * <code>optional .TSF.CameraType cameraType = 1509;</code>
+       * <code>optional .TSF.CameraType camera_type = 1509;</code>
        */
       public boolean hasCameraType() {
         return ((bitField0_ & 0x40000000) == 0x40000000);
@@ -7433,7 +7432,7 @@ public final class TaggedSpotFile {
        * when fitting using Maximum Likelihood Estimation (MLE).
        * </pre>
        *
-       * <code>optional .TSF.CameraType cameraType = 1509;</code>
+       * <code>optional .TSF.CameraType camera_type = 1509;</code>
        */
       public gdsc.smlm.tsf.TaggedSpotFile.CameraType getCameraType() {
         gdsc.smlm.tsf.TaggedSpotFile.CameraType result = gdsc.smlm.tsf.TaggedSpotFile.CameraType.valueOf(cameraType_);
@@ -7448,7 +7447,7 @@ public final class TaggedSpotFile {
        * when fitting using Maximum Likelihood Estimation (MLE).
        * </pre>
        *
-       * <code>optional .TSF.CameraType cameraType = 1509;</code>
+       * <code>optional .TSF.CameraType camera_type = 1509;</code>
        */
       public Builder setCameraType(gdsc.smlm.tsf.TaggedSpotFile.CameraType value) {
         if (value == null) {
@@ -7468,7 +7467,7 @@ public final class TaggedSpotFile {
        * when fitting using Maximum Likelihood Estimation (MLE).
        * </pre>
        *
-       * <code>optional .TSF.CameraType cameraType = 1509;</code>
+       * <code>optional .TSF.CameraType camera_type = 1509;</code>
        */
       public Builder clearCameraType() {
         bitField0_ = (bitField0_ & ~0x40000000);
@@ -11959,7 +11958,7 @@ public final class TaggedSpotFile {
       "\n\016TSFProto.proto\022\003TSF\"G\n\017FluorophoreType" +
       "\022\n\n\002id\030\001 \002(\005\022\023\n\013description\030\002 \001(\t\022\023\n\013is_" +
       "fiducial\030\003 \001(\010\"=\n\003ROI\022\t\n\001x\030\001 \002(\005\022\t\n\001y\030\002 " +
-      "\002(\005\022\017\n\007x_width\030\003 \002(\005\022\017\n\007y_width\030\004 \002(\005\"\363\005" +
+      "\002(\005\022\017\n\007x_width\030\003 \002(\005\022\017\n\007y_width\030\004 \002(\005\"\372\005" +
       "\n\010SpotList\022\031\n\016application_id\030\001 \002(\005:\0011\022\014\n" +
       "\004name\030\002 \001(\t\022\020\n\010filepath\030\003 \001(\t\022\013\n\003uid\030\004 \001" +
       "(\003\022\023\n\013nr_pixels_x\030\005 \001(\005\022\023\n\013nr_pixels_y\030\006" +
@@ -11974,33 +11973,33 @@ public final class TaggedSpotFile {
       "mode\030\030 \001(\0162\014.TSF.FitMode\022\027\n\010is_track\030\031 \001" +
       "(\010:\005false\022\013\n\003ecf\030\034 \003(\001\022\n\n\002qe\030\036 \003(\001\022\025\n\003ro" +
       "i\030\035 \001(\0132\010.TSF.ROI\022\017\n\006source\030\335\013 \001(\t\022\026\n\rco" +
-      "nfiguration\030\336\013 \001(\t\022\r\n\004gain\030\337\013 \001(\001\022\025\n\014exp" +
-      "osureTime\030\340\013 \001(\001\022\022\n\treadNoise\030\341\013 \001(\001\022\r\n\004",
-      "bias\030\342\013 \001(\001\022\022\n\005emCCD\030\343\013 \001(\010B\002\030\001\022\026\n\rampli" +
-      "fication\030\344\013 \001(\001\022$\n\ncameraType\030\345\013 \001(\0162\017.T" +
-      "SF.CameraType\022\014\n\003PSF\030\346\013 \001(\t*\006\010\244\r\020\200\020\"\333\004\n\004" +
-      "Spot\022\020\n\010molecule\030\001 \002(\005\022\017\n\007channel\030\002 \002(\005\022" +
-      "\r\n\005frame\030\003 \002(\005\022\r\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005 \001" +
-      "(\005\022\030\n\020fluorophore_type\030\023 \001(\005\022\017\n\007cluster\030" +
-      "\024 \001(\005\022*\n\016location_units\030\021 \001(\0162\022.TSF.Loca" +
-      "tionUnits\022\t\n\001x\030\007 \002(\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001" +
-      "(\002\022,\n\017intensity_units\030\022 \001(\0162\023.TSF.Intens" +
-      "ityUnits\022\021\n\tintensity\030\n \002(\002\022\022\n\nbackgroun",
-      "d\030\013 \001(\002\022\r\n\005width\030\014 \001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005the" +
-      "ta\030\016 \001(\002\022\022\n\nx_original\030e \001(\002\022\022\n\ny_origin" +
-      "al\030f \001(\002\022\022\n\nz_original\030g \001(\002\022\023\n\013x_precis" +
-      "ion\030h \001(\002\022\023\n\013y_precision\030i \001(\002\022\023\n\013z_prec" +
-      "ision\030j \001(\002\022\022\n\nx_position\030k \001(\005\022\022\n\ny_pos" +
-      "ition\030l \001(\005\022\016\n\005error\030\334\013 \001(\001\022\016\n\005noise\030\335\013 " +
-      "\001(\002\022\022\n\tend_frame\030\337\013 \001(\005\022\027\n\016original_valu" +
-      "e\030\340\013 \001(\002\022\027\n\016params_std_dev\030\341\013 \003(\002*\006\010\244\r\020\200" +
-      "\020*8\n\007FitMode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023" +
-      "\n\017TWOAXISANDTHETA\020\002*&\n\nThetaUnits\022\013\n\007DEG",
-      "REES\020\000\022\013\n\007RADIANS\020\001*)\n\016IntensityUnits\022\n\n" +
-      "\006COUNTS\020\000\022\013\n\007PHOTONS\020\001*+\n\rLocationUnits\022" +
-      "\006\n\002NM\020\000\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002*+\n\nCameraTyp" +
-      "e\022\007\n\003CCD\020\000\022\t\n\005EMCCD\020\001\022\t\n\005SCMOS\020\002B\037\n\rgdsc" +
-      ".smlm.tsfB\016TaggedSpotFile"
+      "nfiguration\030\336\013 \001(\t\022\r\n\004gain\030\337\013 \001(\001\022\026\n\rexp" +
+      "osure_time\030\340\013 \001(\001\022\023\n\nread_noise\030\341\013 \001(\001\022\r",
+      "\n\004bias\030\342\013 \001(\001\022\026\n\tis_em_ccd\030\343\013 \001(\010B\002\030\001\022\026\n" +
+      "\ramplification\030\344\013 \001(\001\022%\n\013camera_type\030\345\013 " +
+      "\001(\0162\017.TSF.CameraType\022\014\n\003PSF\030\346\013 \001(\t*\006\010\244\r\020" +
+      "\200\020\"\333\004\n\004Spot\022\020\n\010molecule\030\001 \002(\005\022\017\n\007channel" +
+      "\030\002 \002(\005\022\r\n\005frame\030\003 \002(\005\022\r\n\005slice\030\004 \001(\005\022\013\n\003" +
+      "pos\030\005 \001(\005\022\030\n\020fluorophore_type\030\023 \001(\005\022\017\n\007c" +
+      "luster\030\024 \001(\005\022*\n\016location_units\030\021 \001(\0162\022.T" +
+      "SF.LocationUnits\022\t\n\001x\030\007 \002(\002\022\t\n\001y\030\010 \002(\002\022\t" +
+      "\n\001z\030\t \001(\002\022,\n\017intensity_units\030\022 \001(\0162\023.TSF" +
+      ".IntensityUnits\022\021\n\tintensity\030\n \002(\002\022\022\n\nba",
+      "ckground\030\013 \001(\002\022\r\n\005width\030\014 \001(\002\022\t\n\001a\030\r \001(\002" +
+      "\022\r\n\005theta\030\016 \001(\002\022\022\n\nx_original\030e \001(\002\022\022\n\ny" +
+      "_original\030f \001(\002\022\022\n\nz_original\030g \001(\002\022\023\n\013x" +
+      "_precision\030h \001(\002\022\023\n\013y_precision\030i \001(\002\022\023\n" +
+      "\013z_precision\030j \001(\002\022\022\n\nx_position\030k \001(\005\022\022" +
+      "\n\ny_position\030l \001(\005\022\016\n\005error\030\334\013 \001(\001\022\016\n\005no" +
+      "ise\030\335\013 \001(\002\022\022\n\tend_frame\030\337\013 \001(\005\022\027\n\016origin" +
+      "al_value\030\340\013 \001(\002\022\027\n\016params_std_dev\030\341\013 \003(\002" +
+      "*\006\010\244\r\020\200\020*8\n\007FitMode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOA" +
+      "XIS\020\001\022\023\n\017TWOAXISANDTHETA\020\002*&\n\nThetaUnits",
+      "\022\013\n\007DEGREES\020\000\022\013\n\007RADIANS\020\001*)\n\016IntensityU" +
+      "nits\022\n\n\006COUNTS\020\000\022\013\n\007PHOTONS\020\001*+\n\rLocatio" +
+      "nUnits\022\006\n\002NM\020\000\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002*+\n\nCa" +
+      "meraType\022\007\n\003CCD\020\000\022\t\n\005EMCCD\020\001\022\t\n\005SCMOS\020\002B" +
+      "\037\n\rgdsc.smlm.tsfB\016TaggedSpotFile"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -12031,7 +12030,7 @@ public final class TaggedSpotFile {
     internal_static_TSF_SpotList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_SpotList_descriptor,
-        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "ThetaUnits", "FitMode", "IsTrack", "Ecf", "Qe", "Roi", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "EmCCD", "Amplification", "CameraType", "PSF", });
+        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "ThetaUnits", "FitMode", "IsTrack", "Ecf", "Qe", "Roi", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "IsEmCcd", "Amplification", "CameraType", "PSF", });
     internal_static_TSF_Spot_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_TSF_Spot_fieldAccessorTable = new

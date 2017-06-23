@@ -132,19 +132,19 @@ message SpotList {
    // The pixel pitch is expected in pixel_size.
    optional double gain = 1503; // The system gain to convert counts to photons 
       // (units=count/photon)
-   optional double exposureTime = 1504; // The exposure time for a single frame 
+   optional double exposure_time = 1504; // The exposure time for a single frame 
       // (units=millisecond)
-   optional double readNoise = 1505; // The camera read noise for a pixel 
+   optional double read_noise = 1505; // The camera read noise for a pixel 
       // (units=count)
    optional double bias = 1506; // The camera bias (units=counts)
-   optional bool emCCD = 1507 [deprecated=true]; // Set to true if this was an EM-CCD camera
+   optional bool is_em_ccd = 1507 [deprecated=true]; // Set to true if this was an EM-CCD camera
    optional double amplification = 1508; // The readout amplification applied 
       // when converting the pixel value to counts (units=count/electron). This 
       // is expected to be higher than the total system gain. The factor 
       // difference (gain/amplification) is the Quantum Efficiency (QE, 
       // units=electron/photon). The amplification is used in the noise model 
       // when fitting using Maximum Likelihood Estimation (MLE).
-   optional CameraType cameraType = 1509; // The camera type
+   optional CameraType camera_type = 1509; // The camera type
 
    optional string PSF = 1510; // PSF used for fitting (can be a serialised object)
 

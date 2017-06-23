@@ -976,7 +976,7 @@ public final class PSFConfig {
      * The PSF type
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.PSFType psfType = 1;</code>
+     * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
      */
     int getPsfTypeValue();
     /**
@@ -984,7 +984,7 @@ public final class PSFConfig {
      * The PSF type
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.PSFType psfType = 1;</code>
+     * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
      */
     gdsc.smlm.data.config.PSFConfig.PSFType getPsfType();
 
@@ -1129,14 +1129,14 @@ public final class PSFConfig {
     }
 
     private int bitField0_;
-    public static final int PSFTYPE_FIELD_NUMBER = 1;
+    public static final int PSF_TYPE_FIELD_NUMBER = 1;
     private int psfType_;
     /**
      * <pre>
      * The PSF type
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.PSFType psfType = 1;</code>
+     * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
      */
     public int getPsfTypeValue() {
       return psfType_;
@@ -1146,7 +1146,7 @@ public final class PSFConfig {
      * The PSF type
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.PSFType psfType = 1;</code>
+     * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
      */
     public gdsc.smlm.data.config.PSFConfig.PSFType getPsfType() {
       gdsc.smlm.data.config.PSFConfig.PSFType result = gdsc.smlm.data.config.PSFConfig.PSFType.valueOf(psfType_);
@@ -1280,7 +1280,7 @@ public final class PSFConfig {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + PSFTYPE_FIELD_NUMBER;
+      hash = (37 * hash) + PSF_TYPE_FIELD_NUMBER;
       hash = (53 * hash) + psfType_;
       if (getParameterCount() > 0) {
         hash = (37 * hash) + PARAMETER_FIELD_NUMBER;
@@ -1566,7 +1566,7 @@ public final class PSFConfig {
        * The PSF type
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFType psfType = 1;</code>
+       * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
        */
       public int getPsfTypeValue() {
         return psfType_;
@@ -1576,7 +1576,7 @@ public final class PSFConfig {
        * The PSF type
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFType psfType = 1;</code>
+       * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
        */
       public Builder setPsfTypeValue(int value) {
         psfType_ = value;
@@ -1588,7 +1588,7 @@ public final class PSFConfig {
        * The PSF type
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFType psfType = 1;</code>
+       * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
        */
       public gdsc.smlm.data.config.PSFConfig.PSFType getPsfType() {
         gdsc.smlm.data.config.PSFConfig.PSFType result = gdsc.smlm.data.config.PSFConfig.PSFType.valueOf(psfType_);
@@ -1599,7 +1599,7 @@ public final class PSFConfig {
        * The PSF type
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFType psfType = 1;</code>
+       * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
        */
       public Builder setPsfType(gdsc.smlm.data.config.PSFConfig.PSFType value) {
         if (value == null) {
@@ -1615,7 +1615,7 @@ public final class PSFConfig {
        * The PSF type
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.PSFType psfType = 1;</code>
+       * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
        */
       public Builder clearPsfType() {
         
@@ -2042,16 +2042,16 @@ public final class PSFConfig {
       "\n\tpsf.proto\022\025gdsc.smlm.data.config\"S\n\014PS" +
       "FParameter\022\014\n\004name\030\001 \001(\t\0225\n\004unit\030\002 \001(\0162\'" +
       ".gdsc.smlm.data.config.PSFParameterUnit\"" +
-      "n\n\003PSF\022/\n\007psfType\030\001 \001(\0162\036.gdsc.smlm.data" +
-      ".config.PSFType\0226\n\tparameter\030\002 \003(\0132#.gds" +
-      "c.smlm.data.config.PSFParameter*\232\001\n\007PSFT" +
-      "ype\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAUSSIA" +
-      "N_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036TWO_" +
-      "AXIS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTIGMAT" +
-      "IC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFParam",
-      "eterUnit\022\031\n\025PSF_PARAMETER_UNIT_NA\020\000\022\014\n\010D" +
-      "ISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003B\013B\tP" +
-      "SFConfigb\006proto3"
+      "o\n\003PSF\0220\n\010psf_type\030\001 \001(\0162\036.gdsc.smlm.dat" +
+      "a.config.PSFType\0226\n\tparameter\030\002 \003(\0132#.gd" +
+      "sc.smlm.data.config.PSFParameter*\232\001\n\007PSF" +
+      "Type\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAUSSI" +
+      "AN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036TWO" +
+      "_AXIS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTIGMA" +
+      "TIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFPara",
+      "meterUnit\022\031\n\025PSF_PARAMETER_UNIT_NA\020\000\022\014\n\010" +
+      "DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003B\013B\t" +
+      "PSFConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
