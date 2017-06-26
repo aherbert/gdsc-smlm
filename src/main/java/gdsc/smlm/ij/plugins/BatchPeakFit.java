@@ -35,6 +35,8 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
+import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -51,13 +53,9 @@ import gdsc.core.ij.Utils;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.ij.results.ResultsFileFormat;
-import gdsc.smlm.ij.results.ResultsImage;
-import gdsc.smlm.ij.results.ResultsTable;
 import gdsc.smlm.ij.settings.BatchRun;
 import gdsc.smlm.ij.settings.BatchSettings;
 import gdsc.smlm.ij.settings.ParameterSettings;
-import gdsc.smlm.ij.settings.ResultsSettings;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.ExtendedGenericDialog;
@@ -384,16 +382,11 @@ public class BatchPeakFit implements PlugIn
 
 	private ResultsSettings createResultsSettings(FitEngineConfiguration fitConfig, String prefix)
 	{
-		ResultsSettings resultsSettings = new ResultsSettings();
-		resultsSettings.setResultsImage(ResultsImage.NONE);
-		resultsSettings.resultsInMemory = false;
-		resultsSettings.showResultsTable = false;
-		resultsSettings.logProgress = false;
-		resultsSettings.resultsDirectory = null;
-		resultsSettings.showDeviations = fitConfig.getFitConfiguration().isComputeDeviations();
-		resultsSettings.resultsFilename = prefix + ".xls";
-		resultsSettings.setResultsFileFormat(ResultsFileFormat.GDSC_TEXT);
-		return resultsSettings;
+		ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
+		resultsSettings.setShowDeviations(fitConfig.getFitConfiguration().isComputeDeviations());
+		resultsSettings.getResultsFileSettingsBuilder().setResultsFilename(prefix + ".xls");
+		resultsSettings.getResultsFileSettingsBuilder().setFileFormat(ResultsFileFormat.TEXT);
+		return resultsSettings.build();
 	}
 
 	/**

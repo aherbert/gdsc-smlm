@@ -12,6 +12,8 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import gdsc.core.clustering.DensityManager;
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageMode;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
@@ -30,8 +32,6 @@ import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
-import gdsc.smlm.ij.results.ResultsImage;
-import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
@@ -508,9 +508,9 @@ public class DensityImage implements PlugIn
 		}
 
 		// Draw an image - Use error so that a floating point value can be used on a single pixel
-		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.SIGNAL_INTENSITY, false,
+		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY, false,
 				false, results.getName() + " Density", results.getBounds(), results.getNmPerPixel(), results.getGain(),
-				imageScale, 0, (cumulativeImage) ? ResultsMode.ADD : ResultsMode.MAX);
+				imageScale, 0, (cumulativeImage) ? ResultsImageMode.IMAGE_ADD : ResultsImageMode.IMAGE_MAX);
 		image.setDisplayFlags(image.getDisplayFlags() | IJImagePeakResults.DISPLAY_NEGATIVES);
 		image.setLutName("grays");
 		image.begin();

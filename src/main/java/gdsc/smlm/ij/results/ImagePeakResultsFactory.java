@@ -1,6 +1,8 @@
 package gdsc.smlm.ij.results;
 
 import java.awt.Rectangle;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageMode;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -44,28 +46,28 @@ public class ImagePeakResultsFactory
 	 *            The mode for showing consecutive results in the same pixel location
 	 * @return The PeakResults image
 	 */
-	public static IJImagePeakResults createPeakResultsImage(ResultsImage resultsImage, boolean weighted,
+	public static IJImagePeakResults createPeakResultsImage(ResultsImageType resultsImage, boolean weighted,
 			boolean equalised, String title, Rectangle bounds, double nmPerPixel, double gain, double imageScale,
-			double precision, ResultsMode mode)
+			double precision, ResultsImageMode mode)
 	{
 		IJImagePeakResults image;
 		switch (resultsImage)
 		{
-			case PSF:
-			case SIGNAL_PRECISION:
-			case LOCALISATIONS_PRECISION:
-			case SIGNAL_AV_PRECISION:
-			case LOCALISATIONS_AV_PRECISION:
+			case DRAW_FITTED_PSF:
+			case DRAW_INTENSITY_PRECISION:
+			case DRAW_LOCALISATIONS_PRECISION:
+			case DRAW_INTENSITY_AVERAGE_PRECISION:
+			case DRAW_LOCALISATIONS_AVERAGE_PRECISION:
 				// Special case for full PSF image
 				PSFImagePeakResults image2 = new PSFImagePeakResults(title, bounds, (float) imageScale);
-				if (resultsImage == ResultsImage.SIGNAL_AV_PRECISION ||
-						resultsImage == ResultsImage.LOCALISATIONS_AV_PRECISION)
+				if (resultsImage == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION ||
+						resultsImage == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION)
 				{
 					// Fixed width display (in pixels)
 					image2.setWidth((float) (((precision <= 0) ? nmPerPixel : precision) / nmPerPixel));
 				}
-				else if (resultsImage == ResultsImage.SIGNAL_PRECISION ||
-						resultsImage == ResultsImage.LOCALISATIONS_PRECISION)
+				else if (resultsImage == ResultsImageType.DRAW_INTENSITY_PRECISION ||
+						resultsImage == ResultsImageType.DRAW_LOCALISATIONS_PRECISION)
 				{
 					image2.setCalculatedPrecision(true);
 				}
@@ -79,15 +81,15 @@ public class ImagePeakResultsFactory
 
 		switch (resultsImage)
 		{
-			case SIGNAL_INTENSITY:
-			case SIGNAL_PRECISION:
-			case PSF:
+			case DRAW_INTENSITY:
+			case DRAW_INTENSITY_PRECISION:
+			case DRAW_FITTED_PSF:
 				flags |= IJImagePeakResults.DISPLAY_SIGNAL;
 				break;
-			case FRAME_NUMBER:
+			case DRAW_FRAME_NUMBER:
 				flags |= IJImagePeakResults.DISPLAY_PEAK;
 				break;
-			case ERROR:
+			case DRAW_FIT_ERROR:
 				flags |= IJImagePeakResults.DISPLAY_ERROR;
 				break;
 			default:
@@ -97,10 +99,10 @@ public class ImagePeakResultsFactory
 
 		switch (mode)
 		{
-			case MAX:
+			case IMAGE_MAX:
 				flags |= IJImagePeakResults.DISPLAY_MAX;
 				break;
-			case REPLACE:
+			case IMAGE_REPLACE:
 				flags |= IJImagePeakResults.DISPLAY_REPLACE;
 				break;
 			default:

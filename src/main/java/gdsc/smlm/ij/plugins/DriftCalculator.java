@@ -19,8 +19,8 @@ import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
-import gdsc.smlm.ij.results.ResultsImage;
-import gdsc.smlm.ij.results.ResultsMode;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageMode;
 import gdsc.core.ij.Utils;
 import gdsc.core.ij.AlignImagesFFT.SubPixelMethod;
 import gdsc.core.ij.AlignImagesFFT.WindowMethod;
@@ -1303,13 +1303,13 @@ public class DriftCalculator implements PlugIn
 		}
 		return ok;
 	}
-	
+
 	private class BlockPeakResultProcedure implements PeakResultProcedure
 	{
 		final ArrayList<ArrayList<Localisation>> blocks = new ArrayList<ArrayList<Localisation>>();
 		ArrayList<Localisation> nextBlock = null;
 		final Counter counter = new Counter();
-		
+
 		public void execute(PeakResult r)
 		{
 			if (r.getFrame() > counter.getCount())
@@ -1342,7 +1342,7 @@ public class DriftCalculator implements PlugIn
 
 		final ArrayList<ArrayList<Localisation>> blocks = p.blocks;
 		ArrayList<Localisation> nextBlock = p.nextBlock;
-		
+
 		if (blocks.size() < 2)
 		{
 			tracker.log("ERROR : Require at least 2 images for drift calculation");
@@ -1358,7 +1358,7 @@ public class DriftCalculator implements PlugIn
 				tracker.log("ERROR : Require at least 2 images for drift calculation");
 				return null;
 			}
-			
+
 			ArrayList<Localisation> combinedBlock = blocks.get(blocks.size() - 1);
 			combinedBlock.addAll(nextBlock);
 		}
@@ -1384,7 +1384,7 @@ public class DriftCalculator implements PlugIn
 
 		double[] dx = new double[limits[1] + 1];
 		double[] dy = new double[dx.length];
-		
+
 		double[] originalDriftTimePoints = getOriginalDriftTimePoints(dx, blockT);
 		lastdx = null;
 
@@ -1626,8 +1626,8 @@ public class DriftCalculator implements PlugIn
 
 	private IJImagePeakResults newImage(Rectangle bounds, float imageScale)
 	{
-		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.SIGNAL_INTENSITY, true,
-				false, "", bounds, 100, 1, imageScale, 0, ResultsMode.ADD);
+		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY, true,
+				false, "", bounds, 100, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
 		image.setDisplayImage(false);
 		image.begin();
 		return image;

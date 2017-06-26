@@ -41,10 +41,10 @@ import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
-import gdsc.smlm.ij.results.ResultsImage;
-import gdsc.smlm.ij.results.ResultsMode;
-import gdsc.smlm.ij.settings.GlobalSettings;
-import gdsc.smlm.ij.settings.ResultsSettings;
+import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageMode;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Cluster.CentroidMethod;
 import gdsc.smlm.results.IdPeakResult;
@@ -286,8 +286,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private static double sim_activationDensity = 0.1; // molecules/micrometer
 	private static double sim_nonSpecificFrequency = 0.01;
 
-	private GlobalSettings settings;
 	private ResultsSettings resultsSettings;
+	private ResultsSettings.Builder resultsSettingsBuilder;
 	private MemoryPeakResults results;
 	private Trace[] traces;
 
@@ -901,7 +901,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 						PulseActivationAnalysis.nonSpecificCorrectionIndex);
 				this.nonSpecificCorrectionCutoff = PulseActivationAnalysis.nonSpecificCorrectionCutoff / 100.0;
 			}
-			this.resultsSettings = PulseActivationAnalysis.this.resultsSettings.clone();
+			this.resultsSettings = PulseActivationAnalysis.this.resultsSettings;
 		}
 
 		Correction getCorrection(Correction[] correction, int index)
@@ -1024,15 +1024,16 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			gd.addSlider("Nonspecific_assignment_cutoff (%)", 0, 100, nonSpecificCorrectionCutoff);
 		}
 
-		settings = SettingsManager.loadSettings();
-		resultsSettings = settings.getResultsSettings();
+		resultsSettings = SettingsManager.readResultsSettings();
 
 		gd.addMessage("--- Image output ---");
-		gd.addChoice("Image", SettingsManager.resultsImageNames, SettingsManager.resultsImageNames[resultsSettings.getResultsImage().ordinal()]);
-		gd.addCheckbox("Weighted", resultsSettings.weightedImage);
-		gd.addCheckbox("Equalised", resultsSettings.equalisedImage);
-		gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
-		gd.addSlider("Image_Scale", 1, 15, resultsSettings.imageScale);
+		ResultsImageSettings s = resultsSettings.getResultsImageSettings();
+		gd.addChoice("Image", SettingsManager.resultsImageTypeNames,
+				SettingsManager.resultsImageTypeNames[s.getImageTypeValue()]);
+		gd.addCheckbox("Weighted", s.getWeighted());
+		gd.addCheckbox("Equalised", s.getEqualised());
+		gd.addSlider("Image_Precision (nm)", 5, 30, s.getAveragePrecision());
+		gd.addSlider("Image_Scale", 1, 15, s.getScale());
 
 		gd.addCheckbox("Preview", false);
 		gd.addDialogListener(this);
@@ -1074,16 +1075,17 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 						Double.toString(nonSpecificCorrectionCutoff));
 			}
 
-			Recorder.recordOption("Image", SettingsManager.resultsImageNames[resultsSettings.getResultsImage().ordinal()]);
-			if (resultsSettings.weightedImage)
+			s = resultsSettings.getResultsImageSettings();
+			Recorder.recordOption("Image", SettingsManager.resultsImageTypeNames[s.getImageTypeValue()]);
+			if (s.getWeighted())
 				Recorder.recordOption("Weighted");
-			if (resultsSettings.equalisedImage)
+			if (s.getEqualised())
 				Recorder.recordOption("Equalised");
-			Recorder.recordOption("Image_Precision", Double.toString(resultsSettings.precision));
-			Recorder.recordOption("Image_Scale", Double.toString(resultsSettings.imageScale));
+			Recorder.recordOption("Image_Precision", Double.toString(s.getAveragePrecision()));
+			Recorder.recordOption("Image_Scale", Double.toString(s.getScale()));
 		}
 
-		SettingsManager.saveSettings(settings);
+		SettingsManager.writeSettings(resultsSettings);
 
 		return true;
 	}
@@ -1145,15 +1147,20 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			return false;
 		}
 
-		resultsSettings.setResultsImage(gd.getNextChoiceIndex());
-		resultsSettings.weightedImage = gd.getNextBoolean();
-		resultsSettings.equalisedImage = gd.getNextBoolean();
-		resultsSettings.precision = gd.getNextNumber();
-		resultsSettings.imageScale = gd.getNextNumber();
+		if (resultsSettingsBuilder == null)
+			resultsSettingsBuilder = resultsSettings.toBuilder();
+		ResultsImageSettings.Builder s = resultsSettingsBuilder.getResultsImageSettingsBuilder();
+		s.setImageTypeValue(gd.getNextChoiceIndex());
+		s.setWeighted(gd.getNextBoolean());
+		s.setEqualised(gd.getNextBoolean());
+		s.setAveragePrecision(gd.getNextNumber());
+		s.setScale(gd.getNextNumber());
 		boolean preview = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
 			return false;
+
+		resultsSettings = resultsSettingsBuilder.build();
 
 		RunSettings settings = new RunSettings();
 		if (preview)
@@ -1330,7 +1337,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		}
 
 		// Collate image into a stack
-		if (channels > 1 && resultsSettings.getResultsImage() != ResultsImage.NONE)
+		if (channels > 1 && resultsSettings.getResultsImageSettings().getImageType() != ResultsImageType.DRAW_NONE)
 		{
 			ImageProcessor[] images = new ImageProcessor[channels];
 			for (int c = 0; c < channels; c++)
@@ -1754,11 +1761,12 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private void addImageResults(PeakResultsList resultsList, String title, Rectangle bounds, double nmPerPixel,
 			double gain)
 	{
-		if (resultsSettings.getResultsImage() != ResultsImage.NONE)
+		ResultsImageSettings s = resultsSettings.getResultsImageSettings();
+		if (s.getImageType() != ResultsImageType.DRAW_NONE)
 		{
-			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getResultsImage(),
-					resultsSettings.weightedImage, resultsSettings.equalisedImage, title, bounds, nmPerPixel, gain,
-					resultsSettings.imageScale, resultsSettings.precision, ResultsMode.ADD);
+			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(s.getImageType(), s.getWeighted(),
+					s.getEqualised(), title, bounds, nmPerPixel, gain, s.getScale(), s.getAveragePrecision(),
+					ResultsImageMode.IMAGE_ADD);
 			image.setLiveImage(false);
 			image.setDisplayImage(channels == 1);
 			resultsList.addOutput(image);
@@ -1848,8 +1856,9 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			r.addAll(list);
 
 			// Draw the unmixed activations
-			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.LOCALISATIONS, true,
-					true, TITLE, bounds, sim_nmPerPixel, 1, 1024.0 / sim_size, 0, ResultsMode.ADD);
+			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
+					ResultsImageType.DRAW_LOCALISATIONS, true, true, TITLE, bounds, sim_nmPerPixel, 1,
+					1024.0 / sim_size, 0, ResultsImageMode.IMAGE_ADD);
 			image.setLiveImage(false);
 			image.setDisplayImage(false);
 			image.begin();

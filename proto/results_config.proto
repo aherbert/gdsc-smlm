@@ -37,6 +37,16 @@ enum ResultsImageType {
 	DRAW_FIT_ERROR = 9;
 }
 
+// The mode for the results image
+enum ResultsImageMode {
+	// Add the value to the image
+	IMAGE_ADD = 0;
+	// Replace the current value
+	IMAGE_REPLACE = 1;
+	// Use the maximum value
+	IMAGE_MAX = 2;
+}
+
 // Define the results image settings
 message ResultsImageSettings {
 	// Define the type of results image
@@ -88,7 +98,7 @@ message ResultsFileSettings {
 // Define the results table settings
 message ResultsTableSettings {
 	// Set to true to show the results table
-	bool show_results_table = 1;
+	bool show_table = 1;
 	// The distance unit
 	DistanceUnit distance_unit = 2;
 	// The intensity unit
@@ -108,7 +118,7 @@ message ResultsTableSettings {
 // Define the in-memory results settings
 message ResultsInMemorySettings {
 	// Set to true to save the results to memory
-	bool results_in_memory = 1;	
+	bool in_memory = 1;	
 }
 
 // Define the results settings

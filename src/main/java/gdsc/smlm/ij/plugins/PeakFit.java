@@ -11,8 +11,6 @@ import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.TextEvent;
-import java.awt.event.TextListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,10 +29,16 @@ import gdsc.core.logging.Logger;
 import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.TextUtils;
-import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfig.CameraType;
+import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.ResultsConfig.ResultsFileSettings;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageSettings;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
+import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
+import gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings;
+import gdsc.smlm.data.config.ResultsConfigHelper;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -55,11 +59,8 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
-import gdsc.smlm.ij.results.ResultsImage;
-import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFCalculatorSettings;
-import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.AggregatedImageSource;
@@ -139,7 +140,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private CalibrationWriter calibration;
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig;
-	private ResultsSettings resultsSettings;
+	private ResultsSettings.Builder resultsSettings;
 	private boolean silent = false;
 
 	private static int numberOfThreads = 1;
@@ -206,23 +207,18 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private Checkbox textShowDeviations;
 	private Checkbox textResultsTable;
 	private Choice textResultsImage;
-	private Checkbox textWeightedImage;
-	private Checkbox textEqualisedImage;
-	private TextField textPrecision;
-	private TextField textImageScale;
-	private TextField textImageRollingWindow;
 	private TextField textResultsDirectory;
-	private Choice textBinaryResults;
+	private Choice textFileFormat;
 	private Checkbox textResultsInMemory;
 
 	public PeakFit()
 	{
-		init(new FitEngineConfiguration(new FitConfiguration()), new ResultsSettings(), null);
+		init(new FitEngineConfiguration(new FitConfiguration()), null, null);
 	}
 
 	public PeakFit(FitEngineConfiguration config)
 	{
-		init(config, new ResultsSettings(), null);
+		init(config, null, null);
 	}
 
 	public PeakFit(FitEngineConfiguration config, ResultsSettings resultsSettings)
@@ -238,7 +234,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private void init(FitEngineConfiguration config, ResultsSettings resultsSettings, Calibration calibration)
 	{
 		this.config = config;
-		this.resultsSettings = resultsSettings;
+		this.resultsSettings = (resultsSettings != null) ? ResultsSettings.newBuilder(resultsSettings)
+				: ResultsSettings.newBuilder();
 		this.calibration = CalibrationWriter.create(calibration);
 	}
 
@@ -598,10 +595,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 		results.setPSF(null); // TODO - fix this
 		results.setConfiguration(XmlUtils.toXML(config));
 
-		addMemoryResults(results, false);
-		addImageResults(results);
-		addFileResults(results);
 		addTableResults(results);
+		ResultsManager.addImageResults(results, resultsSettings.getResultsImageSettings(), bounds,
+				(extraOptions) ? ResultsManager.FLAG_EXTRA_OPTIONS : 0);
+		addFileResults(results);
+		addMemoryResults(results, false);
 		addDefaultResults(results);
 
 		results.begin();
@@ -665,7 +663,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			int size = getSize();
 			String message = String.format("%s. Fitting Time = %s. Run time = %s", Utils.pleural(size, "localisation"),
 					textTime, textRunTime);
-			if (resultsSettings.logProgress)
+			if (resultsSettings.getLogProgress())
 				IJ.log("-=-=-=-");
 			IJ.log(message);
 			IJ.showStatus(message);
@@ -714,11 +712,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 		final String filename = SettingsManager.getSettingsFilename();
 
 		calibration = CalibrationWriter.create(SettingsManager.readCalibration());
+		resultsSettings = SettingsManager.readResultsSettings().toBuilder();
+
 		{
 			GlobalSettings settings = SettingsManager.loadSettings(filename);
 			config = settings.getFitEngineConfiguration();
 			fitConfig = config.getFitConfiguration();
-			resultsSettings = settings.getResultsSettings();
 		}
 
 		boolean isCrop = (bounds != null && imp != null &&
@@ -727,7 +726,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (!extraOptions)
 		{
 			integrateFrames = 1;
-			resultsSettings.imageRollingWindow = 0;
+			resultsSettings.getResultsImageSettingsBuilder().setRollingWindowSize(0);
 			fitConfig.setBackgroundFitting(true);
 			fitConfig.setMinIterations(0);
 			fitConfig.setNoise(0);
@@ -813,59 +812,16 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 
 		gd.addMessage("--- Results ---");
-		gd.addCheckbox("Log_progress", resultsSettings.logProgress);
+		gd.addCheckbox("Log_progress", resultsSettings.getLogProgress());
 		if (!maximaIdentification)
-		{
-			gd.addCheckbox("Show_deviations", resultsSettings.showDeviations);
-		}
-
-		gd.addCheckbox("Show_results_table", resultsSettings.showResultsTable, new OptionListener<Checkbox>()
-		{
-			public void collectOptions(Checkbox field)
-			{
-				resultsSettings.showResultsTable = field.getState();
-				collectOptions();
-			}
-
-			public void collectOptions()
-			{
-				if (!resultsSettings.showResultsTable)
-				{
-					return;
-				}
-				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
-				egd.addChoice("Table_distance_unit", SettingsManager.distanceUnitNames,
-						SettingsManager.distanceUnitNames[resultsSettings.getTableDistanceUnit().ordinal()]);
-				egd.addChoice("Table_intensity_unit", SettingsManager.intensityUnitNames,
-						SettingsManager.intensityUnitNames[resultsSettings.getTableIntensityUnit().ordinal()]);
-				egd.addCheckbox("Table_show_precision", resultsSettings.tableComputePrecision);
-				egd.showDialog(true, gd);
-				if (egd.wasCanceled())
-					return;
-				resultsSettings.setTableDistanceUnit(egd.getNextChoiceIndex());
-				resultsSettings.setTableIntensityUnit(egd.getNextChoiceIndex());
-				resultsSettings.tableComputePrecision = egd.getNextBoolean();
-			}
-		});
-
-		gd.addMessage("--- Image output ---");
-		gd.addChoice("Image", SettingsManager.resultsImageNames,
-				SettingsManager.resultsImageNames[resultsSettings.getResultsImage().ordinal()]);
-		gd.addCheckbox("Weighted", resultsSettings.weightedImage);
-		gd.addCheckbox("Equalised", resultsSettings.equalisedImage);
-		gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
-		gd.addSlider("Image_Scale", 1, 15, resultsSettings.imageScale);
+			gd.addCheckbox("Show_deviations", resultsSettings.getShowDeviations());
+		ResultsManager.addTableResultsOptions(gd, resultsSettings);
+		ResultsManager.addImageResultsOptions(gd, resultsSettings,
+				(extraOptions) ? ResultsManager.FLAG_EXTRA_OPTIONS : 0);
 		if (extraOptions)
-		{
-			gd.addNumericField("Image_window", resultsSettings.imageRollingWindow, 0);
 			gd.addCheckbox("Show_processed_frames", optionShowProcessedFrames);
-		}
-		gd.addMessage("--- File output ---");
-		gd.addDirectoryField("Results_dir", resultsSettings.resultsDirectory);
-		gd.addChoice("Results_format", SettingsManager.resultsFileFormatNames,
-				SettingsManager.resultsFileFormatNames[resultsSettings.getResultsFileFormat().ordinal()]);
-		gd.addMessage(" ");
-		gd.addCheckbox("Results_in_memory", resultsSettings.resultsInMemory);
+		ResultsManager.addFileResultsOptions(gd, resultsSettings, ResultsManager.FLAG_RESULTS_DIRECTORY);
+		ResultsManager.addInMemoryResultsOptions(gd, resultsSettings);
 
 		if (extraOptions)
 		{
@@ -978,18 +934,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 				textShowDeviations = checkboxes.get(b++);
 			textResultsTable = checkboxes.get(ch++);
 			textResultsImage = choices.get(ch++);
-			textWeightedImage = checkboxes.get(b++);
-			textEqualisedImage = checkboxes.get(b++);
-			textPrecision = numerics.get(n++);
-			textImageScale = numerics.get(n++);
 			if (extraOptions)
 			{
-				textImageRollingWindow = numerics.get(n++);
 				b++; // Skip over show processed frames option
 			}
 			textResultsDirectory = texts.get(t++);
 
-			textBinaryResults = choices.get(ch++);
+			textFileFormat = choices.get(ch++);
 			textResultsInMemory = checkboxes.get(b++);
 		}
 
@@ -1067,20 +1018,18 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 
 		// Ask if the user wants to log progress on multiple frame images
-		if (resultsSettings.logProgress && source.getFrames() > 1)
+		if (resultsSettings.getLogProgress() && source.getFrames() > 1)
 		{
 			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 			egd.addMessage("Warning: Log progress on multiple-frame image will be slow");
-			egd.addCheckbox("Log_progress", resultsSettings.logProgress);
+			egd.addCheckbox("Log_progress", true);
 			egd.showDialog();
 			if (egd.wasCanceled())
 				return DONE;
-			resultsSettings.logProgress = egd.getNextBoolean();
-			if (!resultsSettings.logProgress)
+			if (!egd.getNextBoolean())
 			{
-				GlobalSettings settings = SettingsManager.loadSettings(filename);
-				settings.setResultsSettings(this.resultsSettings);
-				SettingsManager.saveSettings(settings, filename);
+				resultsSettings.setLogProgress(false);
+				SettingsManager.writeSettings(resultsSettings.build());
 			}
 		}
 
@@ -1143,21 +1092,22 @@ public class PeakFit implements PlugInFilter, ItemListener
 		fitConfig.setInitialPeakStdDev(sd);
 		// Allow to move 1 SD
 		fitConfig.setCoordinateShiftFactor(1);
-		resultsSettings = new ResultsSettings();
+		resultsSettings = ResultsSettings.newBuilder();
 
-		// Do simple results output
-		resultsSettings.resultsInMemory = true;
-		resultsSettings.showResultsTable = showTable;
+		// Do simple results output. We only need set non-default values.
+		resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(true);
+		if (showTable)
+		{
+			ResultsTableSettings.Builder tableSettings = resultsSettings.getResultsTableSettingsBuilder();
+			tableSettings.setShowTable(true);
+		}
 		if (showImage)
 		{
-			resultsSettings.setResultsImage(ResultsImage.SIGNAL_INTENSITY);
-			resultsSettings.imageScale = Math.ceil(1024 / (FastMath.max(bounds.width, bounds.height)));
-			resultsSettings.weightedImage = true;
-			resultsSettings.equalisedImage = true;
-		}
-		else
-		{
-			resultsSettings.setResultsImage(ResultsImage.NONE);
+			ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
+			imageSettings.setImageType(ResultsImageType.DRAW_INTENSITY);
+			imageSettings.setScale(Math.ceil(1024 / (FastMath.max(bounds.width, bounds.height))));
+			imageSettings.setWeighted(true);
+			imageSettings.setEqualised(true);
 		}
 
 		// Log the settings we care about:
@@ -1171,9 +1121,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		// Save
 		settings.setFitEngineConfiguration(config);
-		settings.setResultsSettings(resultsSettings);
 		SettingsManager.saveSettings(settings);
 		SettingsManager.writeSettings(calibration.getCalibration());
+		SettingsManager.writeSettings(resultsSettings.build());
 
 		return FLAGS;
 	}
@@ -1351,10 +1301,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 				//				{
 				//					refreshSettings(template.getCalibration());
 				//				}
-				if (template.isResultsSettings())
-				{
-					refreshSettings(template.getResultsSettings().clone());
-				}
+				//				if (template.isResultsSettings())
+				//				{
+				//					refreshSettings(template.getResultsSettings().clone());
+				//				}
 			}
 		}
 		else if (e.getSource() instanceof Checkbox)
@@ -1486,25 +1436,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 			fitConfig.setPrecisionThreshold(gd.getNextNumber());
 		}
 
-		resultsSettings.logProgress = gd.getNextBoolean();
+		resultsSettings.setLogProgress(gd.getNextBoolean());
 		if (!maximaIdentification)
-			resultsSettings.showDeviations = gd.getNextBoolean();
+			resultsSettings.setShowDeviations(gd.getNextBoolean());
 
-		resultsSettings.showResultsTable = gd.getNextBoolean();
-		resultsSettings.setResultsImage(gd.getNextChoiceIndex());
-		resultsSettings.weightedImage = gd.getNextBoolean();
-		resultsSettings.equalisedImage = gd.getNextBoolean();
-		resultsSettings.precision = gd.getNextNumber();
-		resultsSettings.imageScale = gd.getNextNumber();
+		resultsSettings.getResultsTableSettingsBuilder().setShowTable(gd.getNextBoolean());
+		resultsSettings.getResultsImageSettingsBuilder().setImageTypeValue(gd.getNextChoiceIndex());
 		if (extraOptions)
-		{
-			resultsSettings.imageRollingWindow = (int) gd.getNextNumber();
 			showProcessedFrames = optionShowProcessedFrames = gd.getNextBoolean();
-		}
-		resultsSettings.resultsDirectory = gd.getNextString();
-		resultsSettings.setResultsFileFormat(gd.getNextChoiceIndex());
-		resultsSettings.resultsInMemory = gd.getNextBoolean();
-
+		resultsSettings.getResultsFileSettingsBuilder().setResultsDirectory(gd.getNextString());
+		resultsSettings.getResultsFileSettingsBuilder().setFileFormatValue(gd.getNextChoiceIndex());
+		resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(gd.getNextBoolean());
 		if (extraOptions)
 			fractionOfThreads = Math.abs(gd.getNextNumber());
 
@@ -1512,8 +1454,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		{
 			GlobalSettings settings = SettingsManager.loadSettings();
 			settings.setFitEngineConfiguration(config);
-			settings.setResultsSettings(resultsSettings);
 			SettingsManager.saveSettings(settings);
+			SettingsManager.writeSettings(calibration.getCalibration());
+			SettingsManager.writeSettings(resultsSettings.build());
 		}
 
 		if (gd.invalidNumber())
@@ -1556,14 +1499,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 					Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
 				}
 			}
-			if (resultsSettings.getResultsImage() == ResultsImage.SIGNAL_AV_PRECISION ||
-					resultsSettings.getResultsImage() == ResultsImage.LOCALISATIONS_AV_PRECISION)
+			final ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
+			if (imageSettings.getImageType() == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION ||
+					imageSettings.getImageType() == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION)
 			{
-				Parameters.isAboveZero("Image precision", resultsSettings.precision);
+				Parameters.isAboveZero("Image precision", imageSettings.getAveragePrecision());
 			}
-			Parameters.isAboveZero("Image scale", resultsSettings.imageScale);
+			Parameters.isAboveZero("Image scale", imageSettings.getScale());
 			if (extraOptions)
-				Parameters.isPositive("Image rolling window", resultsSettings.imageRollingWindow);
+				Parameters.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -1574,7 +1518,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 		int flags = (extraOptions) ? FLAG_EXTRA_OPTIONS : 0;
 		GlobalSettings settings = SettingsManager.loadSettings();
 		settings.setFitEngineConfiguration(config);
-		settings.setResultsSettings(resultsSettings);
 
 		// If precision filtering then we need the camera bias
 		if (!maximaIdentification)
@@ -2058,87 +2001,50 @@ public class PeakFit implements PlugInFilter, ItemListener
 			results.addOutput(peakResults);
 	}
 
-	private void addImageResults(PeakResultsList resultsList)
+	private void addTableResults(PeakResultsList resultsList)
 	{
-		if (resultsSettings.getResultsImage() != ResultsImage.NONE)
+		IJTablePeakResults r = ResultsManager.addTableResults(resultsList, resultsSettings.getResultsTableSettings(),
+				resultsSettings.getShowDeviations(), false, false);
+		if (r != null)
 		{
-			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getResultsImage(),
-					resultsSettings.weightedImage, resultsSettings.equalisedImage, resultsList.getName(), bounds,
-					calibration.getNmPerPixel(), calibration.getGain(), resultsSettings.imageScale,
-					resultsSettings.precision, ResultsMode.ADD);
-			if (extraOptions)
-				image.setRollingWindowSize(resultsSettings.imageRollingWindow);
-			resultsList.addOutput(image);
+			r.setShowFittingData(true);
+			r.setShowNoiseData(true);
+			r.setShowZ(PSFHelper.is3D(resultsList.getPSF()));
+			r.setClearAtStart(simpleFit);
+			r.setShowEndFrame(integrateFrames > 1);
 		}
 	}
 
 	private void addFileResults(PeakResultsList resultsList)
 	{
-		String filename = null;
-		if (resultsSettings.resultsDirectory != null && new File(resultsSettings.resultsDirectory).exists())
+		ResultsFileSettings resultsSettings = this.resultsSettings.getResultsFileSettings();
+		String resultsFilename = null;
+		if (resultsSettings.getResultsDirectory() != null && new File(resultsSettings.getResultsDirectory()).exists())
 		{
-			filename = resultsSettings.resultsDirectory + File.separatorChar + source.getName() + ".results." +
-					resultsSettings.getResultsFileFormat().getExtension();
+			resultsFilename = resultsSettings.getResultsDirectory() + File.separatorChar + source.getName() +
+					".results." + ResultsConfigHelper.getExtension(resultsSettings.getFileFormat());
 		}
-		else if (resultsSettings.resultsFilename != null && resultsSettings.resultsFilename.length() > 0)
+		else
 		{
-			filename = resultsSettings.resultsFilename;
+			resultsFilename = resultsSettings.getResultsFilename();
 		}
-		if (filename != null)
+		PeakResults r = ResultsManager.addFileResults(resultsList, resultsSettings, resultsFilename,
+				this.resultsSettings.getShowDeviations(), integrateFrames > 1, false);
+		if (r instanceof FilePeakResults)
 		{
-			PeakResults r;
-			switch (resultsSettings.getResultsFileFormat())
-			{
-				case GDSC_BINARY:
-					r = new BinaryFilePeakResults(filename, resultsSettings.showDeviations);
-					break;
-				case GDSC_TEXT:
-					r = new TextFilePeakResults(filename, resultsSettings.showDeviations);
-					break;
-				case MALK:
-					r = new MALKFilePeakResults(resultsSettings.resultsFilename);
-					break;
-				case TSF:
-					r = new TSFPeakResultsWriter(resultsSettings.resultsFilename);
-					break;
-				default:
-					throw new RuntimeException("Unsupported file format: " + resultsSettings.getResultsFileFormat());
-			}
-			if (r instanceof FilePeakResults)
-			{
-				FilePeakResults fr = (FilePeakResults) r;
-				fr.setSortAfterEnd(Prefs.getThreads() > 1);
-			}
-			resultsList.addOutput(r);
+			FilePeakResults fr = (FilePeakResults) r;
+			fr.setSortAfterEnd(Prefs.getThreads() > 1);
 		}
 	}
 
 	private void addMemoryResults(PeakResultsList resultsList, boolean force)
 	{
-		if (resultsSettings.resultsInMemory || force)
+		if (resultsSettings.getResultsInMemorySettings().getInMemory() || force)
 		{
 			MemoryPeakResults results = new MemoryPeakResults();
 			results.setSortAfterEnd(Prefs.getThreads() > 1);
 			resultsList.addOutput(results);
 			MemoryPeakResults.addResults(results);
-		}
-	}
-
-	private void addTableResults(PeakResultsList resultsList)
-	{
-		if (resultsSettings.showResultsTable)
-		{
-			String title = null; // imp.getTitle()
-			IJTablePeakResults r = new IJTablePeakResults(resultsSettings.showDeviations, title);
-			r.setShowFittingData(true);
-			r.setShowNoiseData(true);
-			r.setShowZ(PSFHelper.is3D(resultsList.getPSF()));
-			r.setDistanceUnit(resultsSettings.getTableDistanceUnit());
-			r.setIntensityUnit(resultsSettings.getTableIntensityUnit());
-			r.setComputePrecision(resultsSettings.tableComputePrecision);
-			r.setClearAtStart(simpleFit);
-			r.setShowEndFrame(integrateFrames > 1);
-			resultsList.addOutput(r);
 		}
 	}
 
@@ -2458,7 +2364,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		FitEngine engine = new FitEngine(config, r, numberOfThreads, queue, queueSize);
 
 		// Write settings out to the IJ log
-		if (resultsSettings.logProgress)
+		if (resultsSettings.getLogProgress())
 		{
 			IJ.log("-=-=-=-");
 			IJ.log("Peak Fit");
@@ -2496,10 +2402,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		// Adjust the settings that are relevant within the fitting configuration. 
 		fitConfig.setComputeResiduals(config.getResidualsThreshold() < 1);
-		logger = (resultsSettings.logProgress) ? new IJLogger() : null;
+		logger = (resultsSettings.getLogProgress()) ? new IJLogger() : null;
 		fitConfig.setLog(logger);
 
-		fitConfig.setComputeDeviations(resultsSettings.showDeviations);
+		fitConfig.setComputeDeviations(resultsSettings.getShowDeviations());
 
 		// Add the calibration for precision filtering
 		fitConfig.setNmPerPixel(calibration.getNmPerPixel());
@@ -2736,20 +2642,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private void refreshSettings(ResultsSettings resultsSettings)
 	{
-		this.resultsSettings = resultsSettings;
-		textLogProgress.setState(resultsSettings.logProgress);
+		this.resultsSettings = resultsSettings.toBuilder();
+		textLogProgress.setState(resultsSettings.getLogProgress());
 		if (!maximaIdentification)
-			textShowDeviations.setState(resultsSettings.showDeviations);
-		textResultsTable.setState(resultsSettings.showResultsTable);
-		textResultsImage.select(resultsSettings.getResultsImage().ordinal());
-		textWeightedImage.setState(resultsSettings.weightedImage);
-		textEqualisedImage.setState(resultsSettings.equalisedImage);
-		textPrecision.setText("" + resultsSettings.precision);
-		textImageScale.setText("" + resultsSettings.imageScale);
-		if (extraOptions)
-			textImageRollingWindow.setText("" + resultsSettings.imageRollingWindow);
-		textResultsDirectory.setText("" + resultsSettings.resultsDirectory);
-		textBinaryResults.select(resultsSettings.getResultsFileFormat().ordinal());
-		textResultsInMemory.setState(resultsSettings.resultsInMemory);
+			textShowDeviations.setState(resultsSettings.getShowDeviations());
+		textResultsTable.setState(resultsSettings.getResultsTableSettings().getShowTable());
+		textResultsImage.select(resultsSettings.getResultsImageSettings().getImageTypeValue());
+		textResultsDirectory.setText("" + resultsSettings.getResultsFileSettings().getResultsDirectory());
+		textFileFormat.select(resultsSettings.getResultsFileSettings().getFileFormatValue());
+		textResultsInMemory.setState(resultsSettings.getResultsInMemorySettings().getInMemory());
 	}
 }

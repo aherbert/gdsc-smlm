@@ -279,6 +279,141 @@ public final class ResultsConfig {
 
   /**
    * <pre>
+   * The mode for the results image
+   * </pre>
+   *
+   * Protobuf enum {@code gdsc.smlm.data.config.ResultsImageMode}
+   */
+  public enum ResultsImageMode
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     * Add the value to the image
+     * </pre>
+     *
+     * <code>IMAGE_ADD = 0;</code>
+     */
+    IMAGE_ADD(0),
+    /**
+     * <pre>
+     * Replace the current value
+     * </pre>
+     *
+     * <code>IMAGE_REPLACE = 1;</code>
+     */
+    IMAGE_REPLACE(1),
+    /**
+     * <pre>
+     * Use the maximum value
+     * </pre>
+     *
+     * <code>IMAGE_MAX = 2;</code>
+     */
+    IMAGE_MAX(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * Add the value to the image
+     * </pre>
+     *
+     * <code>IMAGE_ADD = 0;</code>
+     */
+    public static final int IMAGE_ADD_VALUE = 0;
+    /**
+     * <pre>
+     * Replace the current value
+     * </pre>
+     *
+     * <code>IMAGE_REPLACE = 1;</code>
+     */
+    public static final int IMAGE_REPLACE_VALUE = 1;
+    /**
+     * <pre>
+     * Use the maximum value
+     * </pre>
+     *
+     * <code>IMAGE_MAX = 2;</code>
+     */
+    public static final int IMAGE_MAX_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static ResultsImageMode valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static ResultsImageMode forNumber(int value) {
+      switch (value) {
+        case 0: return IMAGE_ADD;
+        case 1: return IMAGE_REPLACE;
+        case 2: return IMAGE_MAX;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<ResultsImageMode>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        ResultsImageMode> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<ResultsImageMode>() {
+            public ResultsImageMode findValueByNumber(int number) {
+              return ResultsImageMode.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.ResultsConfig.getDescriptor().getEnumTypes().get(1);
+    }
+
+    private static final ResultsImageMode[] VALUES = values();
+
+    public static ResultsImageMode valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private ResultsImageMode(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.ResultsImageMode)
+  }
+
+  /**
+   * <pre>
    * The type of results file
    * </pre>
    *
@@ -420,7 +555,7 @@ public final class ResultsConfig {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return gdsc.smlm.data.config.ResultsConfig.getDescriptor().getEnumTypes().get(1);
+      return gdsc.smlm.data.config.ResultsConfig.getDescriptor().getEnumTypes().get(2);
     }
 
     private static final ResultsFileFormat[] VALUES = values();
@@ -487,7 +622,7 @@ public final class ResultsConfig {
 
     /**
      * <pre>
-     * The average precision to use when   
+     * The average precision to use when drawing a Gaussian 2D PSF (in nm)
      * </pre>
      *
      * <code>double average_precision = 4;</code>
@@ -669,7 +804,7 @@ public final class ResultsConfig {
     private double averagePrecision_;
     /**
      * <pre>
-     * The average precision to use when   
+     * The average precision to use when drawing a Gaussian 2D PSF (in nm)
      * </pre>
      *
      * <code>double average_precision = 4;</code>
@@ -1223,7 +1358,7 @@ public final class ResultsConfig {
       private double averagePrecision_ ;
       /**
        * <pre>
-       * The average precision to use when   
+       * The average precision to use when drawing a Gaussian 2D PSF (in nm)
        * </pre>
        *
        * <code>double average_precision = 4;</code>
@@ -1233,7 +1368,7 @@ public final class ResultsConfig {
       }
       /**
        * <pre>
-       * The average precision to use when   
+       * The average precision to use when drawing a Gaussian 2D PSF (in nm)
        * </pre>
        *
        * <code>double average_precision = 4;</code>
@@ -1246,7 +1381,7 @@ public final class ResultsConfig {
       }
       /**
        * <pre>
-       * The average precision to use when   
+       * The average precision to use when drawing a Gaussian 2D PSF (in nm)
        * </pre>
        *
        * <code>double average_precision = 4;</code>
@@ -2718,9 +2853,9 @@ public final class ResultsConfig {
      * Set to true to show the results table
      * </pre>
      *
-     * <code>bool show_results_table = 1;</code>
+     * <code>bool show_table = 1;</code>
      */
-    boolean getShowResultsTable();
+    boolean getShowTable();
 
     /**
      * <pre>
@@ -2825,7 +2960,7 @@ public final class ResultsConfig {
       super(builder);
     }
     private ResultsTableSettings() {
-      showResultsTable_ = false;
+      showTable_ = false;
       distanceUnit_ = 0;
       intensityUnit_ = 0;
       angleUnit_ = 0;
@@ -2862,7 +2997,7 @@ public final class ResultsConfig {
             }
             case 8: {
 
-              showResultsTable_ = input.readBool();
+              showTable_ = input.readBool();
               break;
             }
             case 16: {
@@ -2926,17 +3061,17 @@ public final class ResultsConfig {
               gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings.class, gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings.Builder.class);
     }
 
-    public static final int SHOW_RESULTS_TABLE_FIELD_NUMBER = 1;
-    private boolean showResultsTable_;
+    public static final int SHOW_TABLE_FIELD_NUMBER = 1;
+    private boolean showTable_;
     /**
      * <pre>
      * Set to true to show the results table
      * </pre>
      *
-     * <code>bool show_results_table = 1;</code>
+     * <code>bool show_table = 1;</code>
      */
-    public boolean getShowResultsTable() {
-      return showResultsTable_;
+    public boolean getShowTable() {
+      return showTable_;
     }
 
     public static final int DISTANCE_UNIT_FIELD_NUMBER = 2;
@@ -3075,8 +3210,8 @@ public final class ResultsConfig {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (showResultsTable_ != false) {
-        output.writeBool(1, showResultsTable_);
+      if (showTable_ != false) {
+        output.writeBool(1, showTable_);
       }
       if (distanceUnit_ != gdsc.smlm.data.config.UnitConfig.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
         output.writeEnum(2, distanceUnit_);
@@ -3106,9 +3241,9 @@ public final class ResultsConfig {
       if (size != -1) return size;
 
       size = 0;
-      if (showResultsTable_ != false) {
+      if (showTable_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1, showResultsTable_);
+          .computeBoolSize(1, showTable_);
       }
       if (distanceUnit_ != gdsc.smlm.data.config.UnitConfig.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
@@ -3154,8 +3289,8 @@ public final class ResultsConfig {
       gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings other = (gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings) obj;
 
       boolean result = true;
-      result = result && (getShowResultsTable()
-          == other.getShowResultsTable());
+      result = result && (getShowTable()
+          == other.getShowTable());
       result = result && distanceUnit_ == other.distanceUnit_;
       result = result && intensityUnit_ == other.intensityUnit_;
       result = result && angleUnit_ == other.angleUnit_;
@@ -3177,9 +3312,9 @@ public final class ResultsConfig {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + SHOW_RESULTS_TABLE_FIELD_NUMBER;
+      hash = (37 * hash) + SHOW_TABLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getShowResultsTable());
+          getShowTable());
       hash = (37 * hash) + DISTANCE_UNIT_FIELD_NUMBER;
       hash = (53 * hash) + distanceUnit_;
       hash = (37 * hash) + INTENSITY_UNIT_FIELD_NUMBER;
@@ -3330,7 +3465,7 @@ public final class ResultsConfig {
       }
       public Builder clear() {
         super.clear();
-        showResultsTable_ = false;
+        showTable_ = false;
 
         distanceUnit_ = 0;
 
@@ -3368,7 +3503,7 @@ public final class ResultsConfig {
 
       public gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings buildPartial() {
         gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings result = new gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings(this);
-        result.showResultsTable_ = showResultsTable_;
+        result.showTable_ = showTable_;
         result.distanceUnit_ = distanceUnit_;
         result.intensityUnit_ = intensityUnit_;
         result.angleUnit_ = angleUnit_;
@@ -3417,8 +3552,8 @@ public final class ResultsConfig {
 
       public Builder mergeFrom(gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings other) {
         if (other == gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings.getDefaultInstance()) return this;
-        if (other.getShowResultsTable() != false) {
-          setShowResultsTable(other.getShowResultsTable());
+        if (other.getShowTable() != false) {
+          setShowTable(other.getShowTable());
         }
         if (other.distanceUnit_ != 0) {
           setDistanceUnitValue(other.getDistanceUnitValue());
@@ -3467,27 +3602,27 @@ public final class ResultsConfig {
         return this;
       }
 
-      private boolean showResultsTable_ ;
+      private boolean showTable_ ;
       /**
        * <pre>
        * Set to true to show the results table
        * </pre>
        *
-       * <code>bool show_results_table = 1;</code>
+       * <code>bool show_table = 1;</code>
        */
-      public boolean getShowResultsTable() {
-        return showResultsTable_;
+      public boolean getShowTable() {
+        return showTable_;
       }
       /**
        * <pre>
        * Set to true to show the results table
        * </pre>
        *
-       * <code>bool show_results_table = 1;</code>
+       * <code>bool show_table = 1;</code>
        */
-      public Builder setShowResultsTable(boolean value) {
+      public Builder setShowTable(boolean value) {
         
-        showResultsTable_ = value;
+        showTable_ = value;
         onChanged();
         return this;
       }
@@ -3496,11 +3631,11 @@ public final class ResultsConfig {
        * Set to true to show the results table
        * </pre>
        *
-       * <code>bool show_results_table = 1;</code>
+       * <code>bool show_table = 1;</code>
        */
-      public Builder clearShowResultsTable() {
+      public Builder clearShowTable() {
         
-        showResultsTable_ = false;
+        showTable_ = false;
         onChanged();
         return this;
       }
@@ -3906,9 +4041,9 @@ public final class ResultsConfig {
      * Set to true to save the results to memory
      * </pre>
      *
-     * <code>bool results_in_memory = 1;</code>
+     * <code>bool in_memory = 1;</code>
      */
-    boolean getResultsInMemory();
+    boolean getInMemory();
   }
   /**
    * <pre>
@@ -3926,7 +4061,7 @@ public final class ResultsConfig {
       super(builder);
     }
     private ResultsInMemorySettings() {
-      resultsInMemory_ = false;
+      inMemory_ = false;
     }
 
     @java.lang.Override
@@ -3956,7 +4091,7 @@ public final class ResultsConfig {
             }
             case 8: {
 
-              resultsInMemory_ = input.readBool();
+              inMemory_ = input.readBool();
               break;
             }
           }
@@ -3982,17 +4117,17 @@ public final class ResultsConfig {
               gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings.class, gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings.Builder.class);
     }
 
-    public static final int RESULTS_IN_MEMORY_FIELD_NUMBER = 1;
-    private boolean resultsInMemory_;
+    public static final int IN_MEMORY_FIELD_NUMBER = 1;
+    private boolean inMemory_;
     /**
      * <pre>
      * Set to true to save the results to memory
      * </pre>
      *
-     * <code>bool results_in_memory = 1;</code>
+     * <code>bool in_memory = 1;</code>
      */
-    public boolean getResultsInMemory() {
-      return resultsInMemory_;
+    public boolean getInMemory() {
+      return inMemory_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -4007,8 +4142,8 @@ public final class ResultsConfig {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (resultsInMemory_ != false) {
-        output.writeBool(1, resultsInMemory_);
+      if (inMemory_ != false) {
+        output.writeBool(1, inMemory_);
       }
     }
 
@@ -4017,9 +4152,9 @@ public final class ResultsConfig {
       if (size != -1) return size;
 
       size = 0;
-      if (resultsInMemory_ != false) {
+      if (inMemory_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1, resultsInMemory_);
+          .computeBoolSize(1, inMemory_);
       }
       memoizedSize = size;
       return size;
@@ -4037,8 +4172,8 @@ public final class ResultsConfig {
       gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings other = (gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings) obj;
 
       boolean result = true;
-      result = result && (getResultsInMemory()
-          == other.getResultsInMemory());
+      result = result && (getInMemory()
+          == other.getInMemory());
       return result;
     }
 
@@ -4049,9 +4184,9 @@ public final class ResultsConfig {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + RESULTS_IN_MEMORY_FIELD_NUMBER;
+      hash = (37 * hash) + IN_MEMORY_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getResultsInMemory());
+          getInMemory());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4185,7 +4320,7 @@ public final class ResultsConfig {
       }
       public Builder clear() {
         super.clear();
-        resultsInMemory_ = false;
+        inMemory_ = false;
 
         return this;
       }
@@ -4209,7 +4344,7 @@ public final class ResultsConfig {
 
       public gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings buildPartial() {
         gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings result = new gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings(this);
-        result.resultsInMemory_ = resultsInMemory_;
+        result.inMemory_ = inMemory_;
         onBuilt();
         return result;
       }
@@ -4251,8 +4386,8 @@ public final class ResultsConfig {
 
       public Builder mergeFrom(gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings other) {
         if (other == gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings.getDefaultInstance()) return this;
-        if (other.getResultsInMemory() != false) {
-          setResultsInMemory(other.getResultsInMemory());
+        if (other.getInMemory() != false) {
+          setInMemory(other.getInMemory());
         }
         onChanged();
         return this;
@@ -4280,27 +4415,27 @@ public final class ResultsConfig {
         return this;
       }
 
-      private boolean resultsInMemory_ ;
+      private boolean inMemory_ ;
       /**
        * <pre>
        * Set to true to save the results to memory
        * </pre>
        *
-       * <code>bool results_in_memory = 1;</code>
+       * <code>bool in_memory = 1;</code>
        */
-      public boolean getResultsInMemory() {
-        return resultsInMemory_;
+      public boolean getInMemory() {
+        return inMemory_;
       }
       /**
        * <pre>
        * Set to true to save the results to memory
        * </pre>
        *
-       * <code>bool results_in_memory = 1;</code>
+       * <code>bool in_memory = 1;</code>
        */
-      public Builder setResultsInMemory(boolean value) {
+      public Builder setInMemory(boolean value) {
         
-        resultsInMemory_ = value;
+        inMemory_ = value;
         onChanged();
         return this;
       }
@@ -4309,11 +4444,11 @@ public final class ResultsConfig {
        * Set to true to save the results to memory
        * </pre>
        *
-       * <code>bool results_in_memory = 1;</code>
+       * <code>bool in_memory = 1;</code>
        */
-      public Builder clearResultsInMemory() {
+      public Builder clearInMemory() {
         
-        resultsInMemory_ = false;
+        inMemory_ = false;
         onChanged();
         return this;
       }
@@ -5984,36 +6119,37 @@ public final class ResultsConfig {
       "(\0162$.gdsc.smlm.data.config.IntensityUnit" +
       "\0224\n\nangle_unit\030\006 \001(\0162 .gdsc.smlm.data.co" +
       "nfig.AngleUnit\022\031\n\021compute_precision\030\007 \001(" +
-      "\010\"\315\002\n\024ResultsTableSettings\022\032\n\022show_resul" +
-      "ts_table\030\001 \001(\010\022:\n\rdistance_unit\030\002 \001(\0162#." +
-      "gdsc.smlm.data.config.DistanceUnit\022<\n\016in" +
-      "tensity_unit\030\003 \001(\0162$.gdsc.smlm.data.conf" +
-      "ig.IntensityUnit\0224\n\nangle_unit\030\004 \001(\0162 .g",
-      "dsc.smlm.data.config.AngleUnit\022\031\n\021comput" +
-      "e_precision\030\005 \001(\010\022\031\n\021show_fitting_data\030\006" +
-      " \001(\010\022\027\n\017show_noise_data\030\007 \001(\010\022\032\n\022roundin" +
-      "g_precision\030\010 \001(\005\"4\n\027ResultsInMemorySett" +
-      "ings\022\031\n\021results_in_memory\030\001 \001(\010\"\371\002\n\017Resu" +
-      "ltsSettings\022\024\n\014log_progress\030\001 \001(\010\022\027\n\017sho" +
-      "w_deviations\030\002 \001(\010\022K\n\026results_image_sett" +
-      "ings\030\003 \001(\0132+.gdsc.smlm.data.config.Resul" +
-      "tsImageSettings\022I\n\025results_file_settings" +
-      "\030\004 \001(\0132*.gdsc.smlm.data.config.ResultsFi",
-      "leSettings\022K\n\026results_table_settings\030\005 \001" +
-      "(\0132+.gdsc.smlm.data.config.ResultsTableS" +
-      "ettings\022R\n\032results_in_memory_settings\030\006 " +
-      "\001(\0132..gdsc.smlm.data.config.ResultsInMem" +
-      "orySettings*\235\002\n\020ResultsImageType\022\r\n\tDRAW" +
-      "_NONE\020\000\022\026\n\022DRAW_LOCALISATIONS\020\001\022\022\n\016DRAW_" +
-      "INTENSITY\020\002\022\025\n\021DRAW_FRAME_NUMBER\020\003\022\023\n\017DR" +
-      "AW_FITTED_PSF\020\004\022 \n\034DRAW_LOCALISATIONS_PR" +
-      "ECISION\020\005\022\034\n\030DRAW_INTENSITY_PRECISION\020\006\022" +
-      "(\n$DRAW_LOCALISATIONS_AVERAGE_PRECISION\020",
-      "\007\022$\n DRAW_INTENSITY_AVERAGE_PRECISION\020\010\022" +
-      "\022\n\016DRAW_FIT_ERROR\020\t*K\n\021ResultsFileFormat" +
-      "\022\r\n\tFILE_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BINARY\020\002\022\007\n" +
-      "\003TSF\020\003\022\010\n\004MALK\020\004B\017B\rResultsConfigb\006proto" +
-      "3"
+      "\010\"\305\002\n\024ResultsTableSettings\022\022\n\nshow_table" +
+      "\030\001 \001(\010\022:\n\rdistance_unit\030\002 \001(\0162#.gdsc.sml" +
+      "m.data.config.DistanceUnit\022<\n\016intensity_" +
+      "unit\030\003 \001(\0162$.gdsc.smlm.data.config.Inten" +
+      "sityUnit\0224\n\nangle_unit\030\004 \001(\0162 .gdsc.smlm",
+      ".data.config.AngleUnit\022\031\n\021compute_precis" +
+      "ion\030\005 \001(\010\022\031\n\021show_fitting_data\030\006 \001(\010\022\027\n\017" +
+      "show_noise_data\030\007 \001(\010\022\032\n\022rounding_precis" +
+      "ion\030\010 \001(\005\",\n\027ResultsInMemorySettings\022\021\n\t" +
+      "in_memory\030\001 \001(\010\"\371\002\n\017ResultsSettings\022\024\n\014l" +
+      "og_progress\030\001 \001(\010\022\027\n\017show_deviations\030\002 \001" +
+      "(\010\022K\n\026results_image_settings\030\003 \001(\0132+.gds" +
+      "c.smlm.data.config.ResultsImageSettings\022" +
+      "I\n\025results_file_settings\030\004 \001(\0132*.gdsc.sm" +
+      "lm.data.config.ResultsFileSettings\022K\n\026re",
+      "sults_table_settings\030\005 \001(\0132+.gdsc.smlm.d" +
+      "ata.config.ResultsTableSettings\022R\n\032resul" +
+      "ts_in_memory_settings\030\006 \001(\0132..gdsc.smlm." +
+      "data.config.ResultsInMemorySettings*\235\002\n\020" +
+      "ResultsImageType\022\r\n\tDRAW_NONE\020\000\022\026\n\022DRAW_" +
+      "LOCALISATIONS\020\001\022\022\n\016DRAW_INTENSITY\020\002\022\025\n\021D" +
+      "RAW_FRAME_NUMBER\020\003\022\023\n\017DRAW_FITTED_PSF\020\004\022" +
+      " \n\034DRAW_LOCALISATIONS_PRECISION\020\005\022\034\n\030DRA" +
+      "W_INTENSITY_PRECISION\020\006\022(\n$DRAW_LOCALISA" +
+      "TIONS_AVERAGE_PRECISION\020\007\022$\n DRAW_INTENS",
+      "ITY_AVERAGE_PRECISION\020\010\022\022\n\016DRAW_FIT_ERRO" +
+      "R\020\t*C\n\020ResultsImageMode\022\r\n\tIMAGE_ADD\020\000\022\021" +
+      "\n\rIMAGE_REPLACE\020\001\022\r\n\tIMAGE_MAX\020\002*K\n\021Resu" +
+      "ltsFileFormat\022\r\n\tFILE_NONE\020\000\022\010\n\004TEXT\020\001\022\n" +
+      "\n\006BINARY\020\002\022\007\n\003TSF\020\003\022\010\n\004MALK\020\004B\017B\rResults" +
+      "Configb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6045,13 +6181,13 @@ public final class ResultsConfig {
     internal_static_gdsc_smlm_data_config_ResultsTableSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ResultsTableSettings_descriptor,
-        new java.lang.String[] { "ShowResultsTable", "DistanceUnit", "IntensityUnit", "AngleUnit", "ComputePrecision", "ShowFittingData", "ShowNoiseData", "RoundingPrecision", });
+        new java.lang.String[] { "ShowTable", "DistanceUnit", "IntensityUnit", "AngleUnit", "ComputePrecision", "ShowFittingData", "ShowNoiseData", "RoundingPrecision", });
     internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_descriptor,
-        new java.lang.String[] { "ResultsInMemory", });
+        new java.lang.String[] { "InMemory", });
     internal_static_gdsc_smlm_data_config_ResultsSettings_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_gdsc_smlm_data_config_ResultsSettings_fieldAccessorTable = new

@@ -33,20 +33,25 @@ import javax.swing.JFileChooser;
 
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.BitFlags;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
+import gdsc.smlm.data.config.ResultsConfig.ResultsFileSettings;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageMode;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageSettings;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
+import gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings;
+import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
+import gdsc.smlm.data.config.ResultsConfig.ResultsSettings.Builder;
+import gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings;
+import gdsc.smlm.data.config.ResultsConfigHelper;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
-import gdsc.smlm.ij.results.ResultsFileFormat;
-import gdsc.smlm.ij.results.ResultsImage;
-import gdsc.smlm.ij.results.ResultsMode;
-import gdsc.smlm.ij.results.ResultsTable;
 import gdsc.smlm.ij.settings.Constants;
-import gdsc.smlm.ij.settings.GlobalSettings;
-import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Counter;
@@ -113,7 +118,7 @@ public class ResultsManager implements PlugIn
 	private static String inputOption = "";
 	private static String inputFilename = Prefs.get(Constants.inputFilename, "");
 
-	private ResultsSettings resultsSettings = new ResultsSettings();
+	private ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
 	private boolean extraOptions;
 
 	private boolean fileInput = false;
@@ -217,14 +222,15 @@ public class ResultsManager implements PlugIn
 		IJ.showStatus("Loaded " + Utils.pleural(results.size(), "result"));
 
 		boolean saved = false;
-		if (resultsSettings.resultsInMemory && fileInput)
+		if (resultsSettings.getResultsInMemorySettings().getInMemory() && fileInput)
 		{
 			MemoryPeakResults.addResults(results);
 			saved = true;
 		}
 
-		if (!resultsSettings.showResultsTable && resultsSettings.getResultsImage() == ResultsImage.NONE &&
-				Utils.isNullOrEmpty(resultsSettings.resultsFilename))
+		if (!resultsSettings.getResultsTableSettings().getShowTable() &&
+				resultsSettings.getResultsImageSettings().getImageType().getNumber() <= 0 &&
+				Utils.isNullOrEmpty(resultsSettings.getResultsFileSettings().getResultsFilename()))
 		{
 			// No outputs. Error if results were not saved to memory
 			if (!saved)
@@ -235,7 +241,7 @@ public class ResultsManager implements PlugIn
 		}
 
 		Rectangle bounds = results.getBounds(true);
-		boolean showDeviations = resultsSettings.showDeviations && canShowDeviations(results);
+		boolean showDeviations = resultsSettings.getShowDeviations() && canShowDeviations(results);
 		boolean showEndFrame = canShowEndFrame(results);
 		boolean showId = canShowId(results);
 
@@ -247,8 +253,10 @@ public class ResultsManager implements PlugIn
 		//if (title == null || title.length() == 0)
 		//	output.setSource(TITLE);
 
-		addTableResults(results, outputList, showDeviations, showEndFrame);
-		addImageResults(outputList, results.getName(), bounds, results.getNmPerPixel(), results.getGain());
+		addTableResults(outputList, resultsSettings.getResultsTableSettings(), showDeviations, showEndFrame,
+				results.is3D());
+		addImageResults(outputList, resultsSettings.getResultsImageSettings(), bounds,
+				(extraOptions) ? FLAG_EXTRA_OPTIONS : 0);
 		addFileResults(outputList, showDeviations, showEndFrame, showId);
 
 		IJ.showStatus("Processing outputs ...");
@@ -316,35 +324,38 @@ public class ResultsManager implements PlugIn
 		return results.hasId();
 	}
 
-	private void addTableResults(MemoryPeakResults results, PeakResultsList resultsList, boolean showDeviations,
-			boolean showEndFrame)
+	public static IJTablePeakResults addTableResults(PeakResultsList resultsList, ResultsTableSettings resultsSettings,
+			boolean showDeviations, boolean showEndFrame, boolean showZ)
 	{
-		if (resultsSettings.showResultsTable)
+		if (resultsSettings.getShowTable())
 		{
 			IJTablePeakResults r = new IJTablePeakResults(showDeviations);
-			r.setDistanceUnit(resultsSettings.getTableDistanceUnit());
-			r.setIntensityUnit(resultsSettings.getTableIntensityUnit());
-			r.setAngleUnit(resultsSettings.getTableAngleUnit());
-			r.setComputePrecision(resultsSettings.tableComputePrecision);
+			r.setDistanceUnit(resultsSettings.getDistanceUnit());
+			r.setIntensityUnit(resultsSettings.getIntensityUnit());
+			r.setAngleUnit(resultsSettings.getAngleUnit());
+			r.setComputePrecision(resultsSettings.getComputePrecision());
 			r.setShowEndFrame(showEndFrame);
-			r.setRoundingPrecision(resultsSettings.tableRoundingPrecision);
-			r.setShowZ(results.is3D());
-			r.setShowFittingData(resultsSettings.tableShowFittingData);
-			r.setShowNoiseData(resultsSettings.tableShowNoiseData);
+			r.setRoundingPrecision(resultsSettings.getRoundingPrecision());
+			r.setShowZ(showZ);
+			r.setShowFittingData(resultsSettings.getShowFittingData());
+			r.setShowNoiseData(resultsSettings.getShowNoiseData());
 			resultsList.addOutput(r);
+			return r;
 		}
+		return null;
 	}
 
-	private void addImageResults(PeakResultsList resultsList, String title, Rectangle bounds, double nmPerPixel,
-			double gain)
+	public static void addImageResults(PeakResultsList resultsList, ResultsImageSettings resultsSettings,
+			Rectangle bounds, int flags)
 	{
-		if (resultsSettings.getResultsImage() != ResultsImage.NONE)
+		if (resultsSettings.getImageType().getNumber() > 0)
 		{
-			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getResultsImage(),
-					resultsSettings.weightedImage, resultsSettings.equalisedImage, title, bounds, nmPerPixel, gain,
-					resultsSettings.imageScale, resultsSettings.precision, ResultsMode.ADD);
-			if (extraOptions)
-				image.setRollingWindowSize(resultsSettings.imageRollingWindow);
+			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getImageType(),
+					resultsSettings.getWeighted(), resultsSettings.getEqualised(), resultsList.getName(), bounds,
+					resultsList.getNmPerPixel(), resultsList.getGain(), resultsSettings.getScale(),
+					resultsSettings.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
+			if (BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS))
+				image.setRollingWindowSize(resultsSettings.getRollingWindowSize());
 			image.setRepaintDelay(2000);
 			resultsList.addOutput(image);
 		}
@@ -353,60 +364,72 @@ public class ResultsManager implements PlugIn
 	private void addFileResults(PeakResultsList resultsList, boolean showDeviations, boolean showEndFrame,
 			boolean showId)
 	{
-		if (!Utils.isNullOrEmpty(resultsSettings.resultsFilename))
+		ResultsFileSettings resultsSettings = this.resultsSettings.getResultsFileSettings();
+		if (!Utils.isNullOrEmpty(resultsSettings.getResultsFilename()))
 		{
 			// Remove extension
-			resultsSettings.resultsFilename = Utils.replaceExtension(resultsSettings.resultsFilename,
-					resultsSettings.getResultsFileFormat().getExtension());
+			String resultsFilename = Utils.replaceExtension(resultsSettings.getResultsFilename(),
+					ResultsConfigHelper.getExtension(resultsSettings.getFileFormat()));
 
-			if (fileInput && inputFilename.equals(resultsSettings.resultsFilename))
+			if (fileInput && inputFilename.equals(resultsFilename))
 			{
 				IJ.log(TITLE + ": Input and output files are the same, skipping output ...");
 				return;
 			}
 
+			// Update
+			this.resultsSettings.getResultsFileSettingsBuilder().setResultsFilename(resultsFilename);
+			SettingsManager.writeSettings(this.resultsSettings.build());
+
 			// Check if file exists
-			File file = new File(resultsSettings.resultsFilename);
+			File file = new File(resultsFilename);
 			if (file.exists())
 			{
 				YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), TITLE,
-						"Overwrite existing file?\n" + resultsSettings.resultsFilename);
+						"Overwrite existing file?\n" + resultsFilename);
 				if (!d.yesPressed())
 					return;
 			}
 
-			File parent = file.getParentFile();
-			if (parent != null && parent.exists())
-			{
-				PeakResults r;
-				switch (resultsSettings.getResultsFileFormat())
-				{
-					case GDSC_BINARY:
-						r = new BinaryFilePeakResults(resultsSettings.resultsFilename, showDeviations, showEndFrame,
-								showId);
-						break;
-					case GDSC_TEXT:
-						TextFilePeakResults f = new TextFilePeakResults(resultsSettings.resultsFilename, showDeviations,
-								showEndFrame, showId);
-						f.setDistanceUnit(resultsSettings.getFileDistanceUnit());
-						f.setIntensityUnit(resultsSettings.getFileIntensityUnit());
-						f.setAngleUnit(resultsSettings.getFileAngleUnit());
-						f.setComputePrecision(resultsSettings.fileComputePrecision);
-						r = f;
-						break;
-					case MALK:
-						r = new MALKFilePeakResults(resultsSettings.resultsFilename);
-						break;
-					case TSF:
-						r = new TSFPeakResultsWriter(resultsSettings.resultsFilename);
-						break;
-					default:
-						throw new RuntimeException(
-								"Unsupported file format: " + resultsSettings.getResultsFileFormat());
-				}
-				resultsList.addOutput(r);
-			}
+			addFileResults(resultsList, resultsSettings, resultsFilename, showDeviations, showEndFrame, showId);
 		}
+	}
+
+	public static PeakResults addFileResults(PeakResultsList resultsList, ResultsFileSettings resultsSettings,
+			String resultsFilename, boolean showDeviations, boolean showEndFrame, boolean showId)
+	{
+		File file = new File(resultsFilename);
+		File parent = file.getParentFile();
+		if (parent != null && parent.exists())
+		{
+			PeakResults r;
+			switch (resultsSettings.getFileFormat())
+			{
+				case BINARY:
+					r = new BinaryFilePeakResults(resultsFilename, showDeviations, showEndFrame, showId);
+					break;
+				case TEXT:
+					TextFilePeakResults f = new TextFilePeakResults(resultsFilename, showDeviations, showEndFrame,
+							showId);
+					f.setDistanceUnit(resultsSettings.getDistanceUnit());
+					f.setIntensityUnit(resultsSettings.getIntensityUnit());
+					f.setAngleUnit(resultsSettings.getAngleUnit());
+					f.setComputePrecision(resultsSettings.getComputePrecision());
+					r = f;
+					break;
+				case MALK:
+					r = new MALKFilePeakResults(resultsFilename);
+					break;
+				case TSF:
+					r = new TSFPeakResultsWriter(resultsFilename);
+					break;
+				default:
+					throw new RuntimeException("Unsupported file format: " + resultsSettings.getFileFormat());
+			}
+			resultsList.addOutput(r);
+			return r;
+		}
+		return null;
 	}
 
 	private boolean showDialog()
@@ -414,8 +437,7 @@ public class ResultsManager implements PlugIn
 		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		GlobalSettings settings = SettingsManager.loadSettings();
-		resultsSettings = settings.getResultsSettings();
+		resultsSettings = SettingsManager.readResultsSettings().toBuilder();
 
 		gd.addMessage("Read the Peak Results and output to a new format");
 
@@ -424,140 +446,15 @@ public class ResultsManager implements PlugIn
 
 		final Choice inputChoice = gd.getLastChoice();
 
-		gd.addMessage("--- Table output ---");
-		gd.addCheckbox("Show_results_table", resultsSettings.showResultsTable, new OptionListener<Checkbox>()
-		{
-			public void collectOptions(Checkbox field)
-			{
-				resultsSettings.showResultsTable = field.getState();
-				collectOptions();
-			}
+		addTableResultsOptions(gd, resultsSettings);
+		addImageResultsOptions(gd, resultsSettings);
+		addFileResultsOptions(gd, resultsSettings, 0);
+		addInMemoryResultsOptions(gd, resultsSettings);
 
-			public void collectOptions()
-			{
-				if (!resultsSettings.showResultsTable)
-				{
-					return;
-				}
-				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
-				egd.addChoice("Table_distance_unit", SettingsManager.distanceUnitNames,
-						SettingsManager.distanceUnitNames[resultsSettings.getTableDistanceUnit().ordinal()]);
-				egd.addChoice("Table_intensity_unit", SettingsManager.intensityUnitNames,
-						SettingsManager.intensityUnitNames[resultsSettings.getTableIntensityUnit().ordinal()]);
-				egd.addChoice("Table_angle_unit", SettingsManager.angleUnitNames,
-						SettingsManager.angleUnitNames[resultsSettings.getTableAngleUnit().ordinal()]);
-				egd.addCheckbox("Table_show_fitting_data", resultsSettings.tableShowFittingData);
-				egd.addCheckbox("Table_show_noise_data", resultsSettings.tableShowNoiseData);
-				egd.addCheckbox("Table_show_precision", resultsSettings.tableComputePrecision);
-				egd.addSlider("Table_precision", 0, 10, resultsSettings.tableRoundingPrecision);
-				egd.showDialog(true, gd);
-				if (egd.wasCanceled())
-					return;
-				resultsSettings.setTableDistanceUnit(egd.getNextChoiceIndex());
-				resultsSettings.setTableIntensityUnit(egd.getNextChoiceIndex());
-				resultsSettings.setTableAngleUnit(egd.getNextChoiceIndex());
-				resultsSettings.tableShowFittingData = egd.getNextBoolean();
-				resultsSettings.tableShowNoiseData = egd.getNextBoolean();
-				resultsSettings.tableComputePrecision = egd.getNextBoolean();
-				resultsSettings.tableRoundingPrecision = (int) egd.getNextNumber();
-			}
-		});
-
-		gd.addMessage("--- Image output ---");
-		final EnumSet<ResultsImage> requirePrecision = EnumSet.of(ResultsImage.LOCALISATIONS_AV_PRECISION,
-				ResultsImage.SIGNAL_AV_PRECISION);
-		final EnumSet<ResultsImage> requireWeighted = EnumSet.of(ResultsImage.LOCALISATIONS,
-				ResultsImage.SIGNAL_INTENSITY, ResultsImage.FRAME_NUMBER, ResultsImage.ERROR);
-		gd.addChoice("Image", SettingsManager.resultsImageNames,
-				SettingsManager.resultsImageNames[resultsSettings.getResultsImage().ordinal()],
-				new OptionListener<Choice>()
-				{
-					public void collectOptions(Choice field)
-					{
-						resultsSettings.setResultsImage(field.getSelectedIndex());
-						collectOptions();
-					}
-
-					public void collectOptions()
-					{
-						ResultsImage resultsImage = resultsSettings.getResultsImage();
-						if (resultsImage == ResultsImage.NONE)
-						{
-							return;
-						}
-						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
-						if (requireWeighted.contains(resultsImage))
-							egd.addCheckbox("Weighted", resultsSettings.weightedImage);
-						egd.addCheckbox("Equalised", resultsSettings.equalisedImage);
-						if (requirePrecision.contains(resultsImage))
-							egd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
-						egd.addSlider("Image_Scale", 1, 15, resultsSettings.imageScale);
-						if (extraOptions)
-							egd.addNumericField("Image_Window", resultsSettings.imageRollingWindow, 0);
-						egd.showDialog(true, gd);
-						if (egd.wasCanceled())
-							return;
-						if (requireWeighted.contains(resultsImage))
-							resultsSettings.weightedImage = egd.getNextBoolean();
-						resultsSettings.equalisedImage = egd.getNextBoolean();
-						if (requirePrecision.contains(resultsImage))
-							resultsSettings.precision = egd.getNextNumber();
-						resultsSettings.imageScale = egd.getNextNumber();
-						if (extraOptions)
-							resultsSettings.imageRollingWindow = (int) egd.getNextNumber();
-					}
-				});
-
-		gd.addMessage("--- File output ---");
-		// Do not add a results file to prevent constant overwrite messages
-		gd.addFilenameField("Results_file", "");
-		gd.addChoice("Results_format", SettingsManager.resultsFileFormatNames,
-				SettingsManager.resultsFileFormatNames[resultsSettings.getResultsFileFormat().ordinal()],
-				new OptionListener<Choice>()
-				{
-					public void collectOptions(Choice field)
-					{
-						resultsSettings.setResultsFileFormat(field.getSelectedIndex());
-						collectOptions();
-					}
-
-					public void collectOptions()
-					{
-						ResultsFileFormat resultsFileFormat = resultsSettings.getResultsFileFormat();
-						if (!resultsFileFormat.isGDSC())
-						{
-							return;
-						}
-						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
-						if (resultsFileFormat == ResultsFileFormat.GDSC_TEXT)
-						{
-							egd.addChoice("File_distance_unit", SettingsManager.distanceUnitNames,
-									SettingsManager.distanceUnitNames[resultsSettings.getFileDistanceUnit().ordinal()]);
-							egd.addChoice("File_intensity_unit", SettingsManager.intensityUnitNames,
-									SettingsManager.intensityUnitNames[resultsSettings.getFileIntensityUnit()
-											.ordinal()]);
-							egd.addChoice("File_angle_unit", SettingsManager.angleUnitNames,
-									SettingsManager.angleUnitNames[resultsSettings.getFileAngleUnit().ordinal()]);
-							egd.addCheckbox("File_show_precision", resultsSettings.fileComputePrecision);
-						}
-						egd.addCheckbox("Show_deviations", resultsSettings.showDeviations);
-						egd.showDialog(true, gd);
-						if (egd.wasCanceled())
-							return;
-						resultsSettings.setFileDistanceUnit(egd.getNextChoiceIndex());
-						resultsSettings.setFileIntensityUnit(egd.getNextChoiceIndex());
-						resultsSettings.setFileAngleUnit(egd.getNextChoiceIndex());
-						resultsSettings.fileComputePrecision = egd.getNextBoolean();
-						resultsSettings.showDeviations = egd.getNextBoolean();
-					}
-				});
-
-		// Hide these if the input is not a file
-
-		gd.addMessage("--- Memory output ---");
 		final Label messageLabel = (Label) gd.getMessage();
-		final Checkbox saveCheckbox = gd.addAndGetCheckbox("Save_to_memory (file input only)",
-				resultsSettings.resultsInMemory);
+		final Checkbox saveCheckbox = gd.getLastCheckbox();
+
+		// Hide the in-memory settings if the input is not a file
 		if (Utils.isShowGenericDialog())
 		{
 			final Label saveLabel = gd.getLastLabel();
@@ -589,23 +486,24 @@ public class ResultsManager implements PlugIn
 
 		inputOption = ResultsManager.getInputSource(gd);
 		inputFilename = gd.getNextString();
-		resultsSettings.showResultsTable = gd.getNextBoolean();
-		resultsSettings.setResultsImage(gd.getNextChoiceIndex());
-		resultsSettings.resultsFilename = gd.getNextString();
-		resultsSettings.setResultsFileFormat(gd.getNextChoiceIndex());
-		resultsSettings.resultsInMemory = gd.getNextBoolean();
+		resultsSettings.getResultsTableSettingsBuilder().setShowTable(gd.getNextBoolean());
+		resultsSettings.getResultsImageSettingsBuilder().setImageTypeValue(gd.getNextChoiceIndex());
+		resultsSettings.getResultsFileSettingsBuilder().setResultsFilename(gd.getNextString());
+		resultsSettings.getResultsFileSettingsBuilder().setFileFormatValue(gd.getNextChoiceIndex());
+		resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(gd.getNextBoolean());
 
 		// Check arguments
 		try
 		{
-			if (resultsSettings.getResultsImage() == ResultsImage.SIGNAL_AV_PRECISION ||
-					resultsSettings.getResultsImage() == ResultsImage.LOCALISATIONS_AV_PRECISION)
+			final ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
+			if (imageSettings.getImageType() == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION ||
+					imageSettings.getImageType() == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION)
 			{
-				Parameters.isAboveZero("Image precision", resultsSettings.precision);
+				Parameters.isAboveZero("Image precision", imageSettings.getAveragePrecision());
 			}
-			Parameters.isAboveZero("Image scale", resultsSettings.imageScale);
+			Parameters.isAboveZero("Image scale", imageSettings.getScale());
 			if (extraOptions)
-				Parameters.isPositive("Image rolling window", resultsSettings.imageRollingWindow);
+				Parameters.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -615,9 +513,176 @@ public class ResultsManager implements PlugIn
 
 		Prefs.set(Constants.inputFilename, inputFilename);
 
-		SettingsManager.saveSettings(settings);
+		SettingsManager.writeSettings(resultsSettings.build());
 
 		return true;
+	}
+
+	public static void addTableResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)
+	{
+		gd.addMessage("--- Table output ---");
+		final ResultsTableSettings.Builder tableSettings = resultsSettings.getResultsTableSettingsBuilder();
+		gd.addCheckbox("Show_results_table", tableSettings.getShowTable(), new OptionListener<Checkbox>()
+		{
+			public void collectOptions(Checkbox field)
+			{
+				tableSettings.setShowTable(field.getState());
+				collectOptions();
+			}
+
+			public void collectOptions()
+			{
+				if (!tableSettings.getShowTable())
+				{
+					return;
+				}
+				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+				egd.addChoice("Table_distance_unit", SettingsManager.distanceUnitNames,
+						SettingsManager.distanceUnitNames[tableSettings.getDistanceUnit().getNumber()]);
+				egd.addChoice("Table_intensity_unit", SettingsManager.intensityUnitNames,
+						SettingsManager.intensityUnitNames[tableSettings.getIntensityUnit().getNumber()]);
+				egd.addChoice("Table_angle_unit", SettingsManager.angleUnitNames,
+						SettingsManager.angleUnitNames[tableSettings.getAngleUnit().getNumber()]);
+				egd.addCheckbox("Table_show_fitting_data", tableSettings.getShowFittingData());
+				egd.addCheckbox("Table_show_noise_data", tableSettings.getShowNoiseData());
+				egd.addCheckbox("Table_show_precision", tableSettings.getComputePrecision());
+				egd.addSlider("Table_precision", 0, 10, tableSettings.getRoundingPrecision());
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return;
+				tableSettings.setDistanceUnitValue(egd.getNextChoiceIndex());
+				tableSettings.setIntensityUnitValue(egd.getNextChoiceIndex());
+				tableSettings.setAngleUnitValue(egd.getNextChoiceIndex());
+				tableSettings.setShowFittingData(egd.getNextBoolean());
+				tableSettings.setShowNoiseData(egd.getNextBoolean());
+				tableSettings.setComputePrecision(egd.getNextBoolean());
+				tableSettings.setRoundingPrecision((int) egd.getNextNumber());
+			}
+		});
+	}
+
+	/** Use this to add extra options to the dialog. */
+	public static final int FLAG_EXTRA_OPTIONS = 0x00000001;
+	/** Use this to add the results directory to the file results dialog. */
+	public static final int FLAG_RESULTS_DIRECTORY = 0x00000002;
+	/** Use this to add the results file to the file results dialog. */
+	public static final int FLAG_RESULTS_FILE = 0x00000004;
+
+	private void addImageResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)
+	{
+		addImageResultsOptions(gd, resultsSettings, (extraOptions) ? FLAG_EXTRA_OPTIONS : 0);
+	}
+
+	public static void addImageResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
+			final int flags)
+	{
+		gd.addMessage("--- Image output ---");
+		final ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
+		final EnumSet<ResultsImageType> requirePrecision = EnumSet.of(
+				ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION,
+				ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION);
+		final EnumSet<ResultsImageType> requireWeighted = EnumSet.of(ResultsImageType.DRAW_LOCALISATIONS,
+				ResultsImageType.DRAW_INTENSITY, ResultsImageType.DRAW_FRAME_NUMBER, ResultsImageType.DRAW_FIT_ERROR);
+		gd.addChoice("Image", SettingsManager.resultsImageTypeNames,
+				SettingsManager.resultsImageTypeNames[imageSettings.getImageType().getNumber()],
+				new OptionListener<Choice>()
+				{
+					public void collectOptions(Choice field)
+					{
+						imageSettings.setImageTypeValue(field.getSelectedIndex());
+						collectOptions();
+					}
+
+					public void collectOptions()
+					{
+						ResultsImageType resultsImage = imageSettings.getImageType();
+						if (resultsImage.getNumber() <= 0)
+						{
+							return;
+						}
+						boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
+						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						if (requireWeighted.contains(resultsImage))
+							egd.addCheckbox("Weighted", imageSettings.getWeighted());
+						egd.addCheckbox("Equalised", imageSettings.getEqualised());
+						if (requirePrecision.contains(resultsImage))
+							egd.addSlider("Image_Precision (nm)", 5, 30, imageSettings.getAveragePrecision());
+						egd.addSlider("Image_Scale", 1, 15, imageSettings.getScale());
+						if (extraOptions)
+							egd.addNumericField("Image_Window", imageSettings.getRollingWindowSize(), 0);
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
+							return;
+						if (requireWeighted.contains(resultsImage))
+							imageSettings.setWeighted(egd.getNextBoolean());
+						imageSettings.setEqualised(egd.getNextBoolean());
+						if (requirePrecision.contains(resultsImage))
+							imageSettings.setAveragePrecision(egd.getNextNumber());
+						imageSettings.setScale(egd.getNextNumber());
+						if (extraOptions)
+							imageSettings.setRollingWindowSize((int) egd.getNextNumber());
+					}
+				});
+	}
+
+	public static void addFileResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
+			final int flags)
+	{
+		gd.addMessage("--- File output ---");
+		final ResultsFileSettings.Builder fileSettings = resultsSettings.getResultsFileSettingsBuilder();
+		if (BitFlags.anySet(flags, FLAG_RESULTS_DIRECTORY))
+			gd.addDirectoryField("Results_directory", fileSettings.getResultsDirectory());
+		if (BitFlags.anySet(flags, FLAG_RESULTS_FILE))
+			gd.addFilenameField("Results_file", fileSettings.getResultsFilename());
+		else
+			// Do not add a results file to prevent constant overwrite messages
+			gd.addFilenameField("Results_file", "");
+		gd.addChoice("Results_format", SettingsManager.resultsFileFormatNames,
+				SettingsManager.resultsFileFormatNames[fileSettings.getFileFormat().getNumber()],
+				new OptionListener<Choice>()
+				{
+					public void collectOptions(Choice field)
+					{
+						fileSettings.setFileFormatValue(field.getSelectedIndex());
+						collectOptions();
+					}
+
+					public void collectOptions()
+					{
+						ResultsFileFormat resultsFileFormat = fileSettings.getFileFormat();
+						if (!ResultsConfigHelper.isGDSC(resultsFileFormat))
+						{
+							return;
+						}
+						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						if (resultsFileFormat == ResultsFileFormat.TEXT)
+						{
+							egd.addChoice("File_distance_unit", SettingsManager.distanceUnitNames,
+									SettingsManager.distanceUnitNames[fileSettings.getDistanceUnit().ordinal()]);
+							egd.addChoice("File_intensity_unit", SettingsManager.intensityUnitNames,
+									SettingsManager.intensityUnitNames[fileSettings.getIntensityUnit().ordinal()]);
+							egd.addChoice("File_angle_unit", SettingsManager.angleUnitNames,
+									SettingsManager.angleUnitNames[fileSettings.getAngleUnit().ordinal()]);
+							egd.addCheckbox("File_show_precision", fileSettings.getComputePrecision());
+						}
+						egd.addCheckbox("Show_deviations", resultsSettings.getShowDeviations());
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
+							return;
+						fileSettings.setDistanceUnitValue(egd.getNextChoiceIndex());
+						fileSettings.setIntensityUnitValue(egd.getNextChoiceIndex());
+						fileSettings.setAngleUnitValue(egd.getNextChoiceIndex());
+						fileSettings.setComputePrecision(egd.getNextBoolean());
+						resultsSettings.setShowDeviations(egd.getNextBoolean());
+					}
+				});
+	}
+
+	public static void addInMemoryResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)
+	{
+		gd.addMessage("--- Memory output ---");
+		final ResultsInMemorySettings.Builder memorySettings = resultsSettings.getResultsInMemorySettingsBuilder();
+		gd.addCheckbox("Save_to_memory (file input only)", memorySettings.getInMemory());
 	}
 
 	/**
@@ -1138,7 +1203,7 @@ public class ResultsManager implements PlugIn
 		if (!calibration.hasNmPerPixel() || !calibration.hasGain() || !calibration.hasExposureTime())
 		{
 			final float noise = getNoise(results);
-			
+
 			if (!calibration.hasNmPerPixel())
 				calibration.setNmPerPixel(input_nmPerPixel);
 			if (!calibration.hasGain())
@@ -1175,7 +1240,7 @@ public class ResultsManager implements PlugIn
 			calibration.setNmPerPixel(input_nmPerPixel);
 			calibration.setGain(input_gain);
 			calibration.setExposureTime(input_exposureTime);
-			
+
 			results.setCalibration(calibration.getCalibration());
 
 			if (noise == 0)
@@ -1319,8 +1384,8 @@ public class ResultsManager implements PlugIn
 			Recorder.setCommand("Results Manager");
 			Recorder.recordOption("input", INPUT_FILE);
 			Recorder.recordOption("input_file", path);
-			Recorder.recordOption("results_table", ResultsTable.NONE.getName());
-			Recorder.recordOption("image", ResultsImage.NONE.getName());
+			Recorder.recordOption("image",
+					SettingsManager.resultsImageTypeNames[ResultsImageType.DRAW_NONE.getNumber()]);
 			Recorder.recordOption("results_file", "[]");
 			Recorder.recordOption("save_to_memory");
 		}

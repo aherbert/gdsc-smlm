@@ -27,7 +27,6 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFEstimatorSettings;
-import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.AggregatedImageSource;
@@ -755,13 +754,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	private PeakFit createFitter()
 	{
-		ResultsSettings resultsSettings = new ResultsSettings();
-		resultsSettings.showResultsTable = false;
-		resultsSettings.showDeviations = false;
-		resultsSettings.logProgress = false;
-		resultsSettings.setResultsImage(0);
-		resultsSettings.resultsDirectory = null;
-		PeakFit fitter = new PeakFit(config, resultsSettings, calibrationBuilder.build());
+		PeakFit fitter = new PeakFit(config, null, calibrationBuilder.build());
 		return fitter;
 	}
 

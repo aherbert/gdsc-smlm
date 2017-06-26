@@ -1,6 +1,7 @@
-package gdsc.smlm.ij.settings;
+package gdsc.smlm.data.config;
 
 import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -15,7 +16,7 @@ import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-public class ResultsFileFormatHelper
+public class ResultsConfigHelper
 {
 	/**
 	 * Gets the name.
@@ -87,6 +88,43 @@ public class ResultsFileFormatHelper
 				return true;
 			default:
 				return false;
+		}
+	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @param resultsImage
+	 *            the results image
+	 * @return the name
+	 */
+	public static String getName(ResultsImageType resultsImage)
+	{
+		switch (resultsImage)
+		{
+			case DRAW_FITTED_PSF:
+				return "Fitted PSF";
+			case DRAW_FIT_ERROR:
+				return "Fit Error";
+			case DRAW_FRAME_NUMBER:
+				return "Frame number";
+			case DRAW_INTENSITY:
+				return "Intensity";
+			case DRAW_INTENSITY_AVERAGE_PRECISION:
+				return "Intensity (width=av.precision)";
+			case DRAW_INTENSITY_PRECISION:
+				return "Intensity (width=precision)";
+			case DRAW_LOCALISATIONS:
+				return "Localisations";
+			case DRAW_LOCALISATIONS_AVERAGE_PRECISION:
+				return "Localisations (width=av.precision)";
+			case DRAW_LOCALISATIONS_PRECISION:
+				return "Localisations (width=precision)";
+			case DRAW_NONE:
+				return "None";
+			case UNRECOGNIZED:
+			default:
+				return "Unknown";
 		}
 	}
 }

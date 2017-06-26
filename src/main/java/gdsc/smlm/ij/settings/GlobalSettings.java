@@ -15,7 +15,6 @@ package gdsc.smlm.ij.settings;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 
 /**
  * Contain the settings for the gdsc.fitting package
@@ -29,7 +28,6 @@ public class GlobalSettings
 	private FitEngineConfiguration fitEngineConfiguration = null;
 	private PSFEstimatorSettings psfEstimatorSettings = null;
 	private PSFCalculatorSettings psfCalculatorSettings = null;
-	private ResultsSettings resultsSettings = null;
 	private FilterSettings filterSettings = null;
 	private ClusteringSettings clusteringSettings = null;
 	private CreateDataSettings createDataSettings = null;
@@ -83,16 +81,6 @@ public class GlobalSettings
 	}
 
 	/**
-	 * @return the resultsSettings
-	 */
-	public ResultsSettings getResultsSettings()
-	{
-		if (resultsSettings == null)
-			resultsSettings = new ResultsSettings();
-		return resultsSettings;
-	}
-
-	/**
 	 * @return the filterSettings
 	 */
 	public FilterSettings getFilterSettings()
@@ -141,14 +129,6 @@ public class GlobalSettings
 	}
 
 	/**
-	 * @param resultsSettings
-	 */
-	public void setResultsSettings(ResultsSettings resultsSettings)
-	{
-		this.resultsSettings = resultsSettings;
-	}
-
-	/**
 	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
 	 * default object.
 	 * 
@@ -179,17 +159,6 @@ public class GlobalSettings
 	public boolean isPsfCalculatorSettings()
 	{
 		return (psfCalculatorSettings != null);
-	}
-
-	/**
-	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
-	 * default object.
-	 * 
-	 * @return true if the setting is not null
-	 */
-	public boolean isResultsSettings()
-	{
-		return (resultsSettings != null);
 	}
 
 	/**

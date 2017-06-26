@@ -26,6 +26,7 @@ import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.data.config.UnitConfig.TimeUnit;
+import gdsc.smlm.data.config.ResultsConfigHelper;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.DataFilterType;
@@ -48,8 +49,8 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitCriteria;
 import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
-import gdsc.smlm.ij.results.ResultsFileFormat;
-import gdsc.smlm.ij.results.ResultsImage;
+import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 import ij.IJ;
 import ij.Prefs;
 
@@ -114,7 +115,7 @@ public class SettingsManager
 	{
 		EnumSet<DistanceUnit> d = EnumSet.allOf(DistanceUnit.class);
 		d.remove(DistanceUnit.UNRECOGNIZED);
-		d.remove(DistanceUnit.DISTANCE_UNIT_NA);
+		//d.remove(DistanceUnit.DISTANCE_UNIT_NA);
 		distanceUnitValues = d.toArray(new DistanceUnit[d.size()]);
 		distanceUnitNames = new String[distanceUnitValues.length];
 		for (int i = 0; i < distanceUnitValues.length; i++)
@@ -130,7 +131,7 @@ public class SettingsManager
 	{
 		EnumSet<IntensityUnit> d = EnumSet.allOf(IntensityUnit.class);
 		d.remove(IntensityUnit.UNRECOGNIZED);
-		d.remove(IntensityUnit.INTENSITY_UNIT_NA);
+		//d.remove(IntensityUnit.INTENSITY_UNIT_NA);
 		intensityUnitValues = d.toArray(new IntensityUnit[d.size()]);
 		intensityUnitNames = new String[intensityUnitValues.length];
 		for (int i = 0; i < intensityUnitValues.length; i++)
@@ -146,7 +147,7 @@ public class SettingsManager
 	{
 		EnumSet<AngleUnit> d = EnumSet.allOf(AngleUnit.class);
 		d.remove(AngleUnit.UNRECOGNIZED);
-		d.remove(AngleUnit.ANGLE_UNIT_NA);
+		//d.remove(AngleUnit.ANGLE_UNIT_NA);
 		angleUnitValues = d.toArray(new AngleUnit[d.size()]);
 		angleUnitNames = new String[angleUnitValues.length];
 		for (int i = 0; i < angleUnitValues.length; i++)
@@ -162,7 +163,7 @@ public class SettingsManager
 	{
 		EnumSet<TimeUnit> d = EnumSet.allOf(TimeUnit.class);
 		d.remove(TimeUnit.UNRECOGNIZED);
-		d.remove(TimeUnit.TIME_UNIT_NA);
+		//d.remove(TimeUnit.TIME_UNIT_NA);
 		timeUnitValues = d.toArray(new TimeUnit[d.size()]);
 		timeUnitNames = new String[timeUnitValues.length];
 		for (int i = 0; i < timeUnitValues.length; i++)
@@ -172,13 +173,41 @@ public class SettingsManager
 		}
 	}
 
-	public final static String[] resultsImageNames, resultsFileFormatNames, dataFilterTypeNames, dataFilterNames,
+	public final static ResultsImageType[] resultsImageTypeValues;
+	public final static String[] resultsImageTypeNames;
+	static
+	{
+		EnumSet<ResultsImageType> d = EnumSet.allOf(ResultsImageType.class);
+		d.remove(ResultsImageType.UNRECOGNIZED);
+		resultsImageTypeValues = d.toArray(new ResultsImageType[d.size()]);
+		resultsImageTypeNames = new String[resultsImageTypeValues.length];
+		for (int i = 0; i < resultsImageTypeValues.length; i++)
+		{
+			resultsImageTypeNames[i] = ResultsConfigHelper.getName(resultsImageTypeValues[i]);
+		}
+	}	
+
+	public final static ResultsFileFormat[] resultsFileFormatValues;
+	public final static String[] resultsFileFormatNames;
+	static
+	{
+		EnumSet<ResultsFileFormat> d = EnumSet.allOf(ResultsFileFormat.class);
+		d.remove(ResultsFileFormat.UNRECOGNIZED);
+		resultsFileFormatValues = d.toArray(new ResultsFileFormat[d.size()]);
+		resultsFileFormatNames = new String[resultsFileFormatValues.length];
+		for (int i = 0; i < resultsFileFormatValues.length; i++)
+		{
+			resultsFileFormatNames[i] = ResultsConfigHelper.getName(resultsFileFormatValues[i]);
+		}
+	}	
+	
+	public final static String[] dataFilterTypeNames, dataFilterNames,
 			fitSolverNames, fitFunctionNames, noiseEstimatorMethodNames, fitCriteriaNames, clusteringAlgorithmNames;
 
 	static
 	{
-		resultsImageNames = getNames((Object[]) ResultsImage.values());
-		resultsFileFormatNames = getNames((Object[]) ResultsFileFormat.values());
+		// TODO Update these as the configuration objects are auto-generated
+		
 		dataFilterTypeNames = getNames((Object[]) DataFilterType.values());
 		dataFilterNames = getNames((Object[]) DataFilter.values());
 		fitSolverNames = getNames((Object[]) FitSolver.values());
@@ -616,7 +645,6 @@ public class SettingsManager
 		{
 			config.getFitEngineConfiguration().initialiseState();
 			config.getCreateDataSettings().initialiseState();
-			config.getResultsSettings().initialiseState();
 		}
 		return config;
 	}
@@ -775,7 +803,7 @@ public class SettingsManager
 		builder.getResultsImageSettingsBuilder().setAveragePrecision(30);
 		builder.getResultsImageSettingsBuilder().setScale(1);
 		builder.getResultsTableSettingsBuilder().setRoundingPrecision(4);
-		builder.getResultsInMemorySettingsBuilder().setResultsInMemory(true);
+		builder.getResultsInMemorySettingsBuilder().setInMemory(true);
 		defaultResultsSettings = builder.build();
 	}
 

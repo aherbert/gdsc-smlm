@@ -64,6 +64,8 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationReader;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageMode;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.function.Erf;
@@ -91,8 +93,6 @@ import gdsc.smlm.ij.frc.FRC.ThresholdMethod;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
-import gdsc.smlm.ij.results.ResultsImage;
-import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -1046,14 +1046,14 @@ public class FIRE implements PlugIn
 		else
 			imageScale = fourierImageScale;
 
-		IJImagePeakResults image1 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.NONE, weighted,
-				equalised, "IP1", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
+		IJImagePeakResults image1 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_NONE, weighted,
+				equalised, "IP1", bounds, 1, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
 		image1.setDisplayImage(false);
 		image1.setUncalibrated(true);
 		image1.begin();
 
-		IJImagePeakResults image2 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.NONE, weighted,
-				equalised, "IP2", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
+		IJImagePeakResults image2 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_NONE, weighted,
+				equalised, "IP2", bounds, 1, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
 		image2.setDisplayImage(false);
 		image1.setUncalibrated(true);
 		image2.begin();
