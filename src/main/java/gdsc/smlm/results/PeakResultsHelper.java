@@ -82,7 +82,7 @@ public class PeakResultsHelper
 	{
 		return intensityUnit != null;
 	}
-	
+
 	/**
 	 * Checks for intensity converter.
 	 *
@@ -90,7 +90,7 @@ public class PeakResultsHelper
 	 */
 	public boolean hasIntensityConverter()
 	{
-		return intensityConverter != null;
+		return intensityConverter != null && intensityConverter.to() != null;
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class PeakResultsHelper
 	{
 		return distanceUnit != null;
 	}
-	
+
 	/**
 	 * Checks for distance converter.
 	 *
@@ -154,7 +154,7 @@ public class PeakResultsHelper
 	 */
 	public boolean hasDistanceConverter()
 	{
-		return distanceConverter != null;
+		return distanceConverter != null && distanceConverter.to() != null;
 	}
 
 	/**
@@ -218,7 +218,7 @@ public class PeakResultsHelper
 	 */
 	public boolean hasAngleConverter()
 	{
-		return angleConverter != null;
+		return angleConverter != null && angleConverter.to() != null;
 	}
 
 	/**
@@ -410,7 +410,7 @@ public class PeakResultsHelper
 
 		// The conversion is bad if the output unit is specified and either: 
 		// there is no converter; or the converter will output the wrong units.
-		
+
 		//@formatter:off
 		bad |= (hasIntensityUnit() && (!hasIntensityConverter() || intensityUnit != getIntensityConverter().to()));
 		bad |= (hasDistanceUnit() && (!hasDistanceConverter() || distanceUnit != getDistanceConverter().to()));

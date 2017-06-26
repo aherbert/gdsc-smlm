@@ -21,6 +21,7 @@ import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
 import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
@@ -61,12 +62,12 @@ public class SettingsManager
 			System.getProperty("file.separator") + "gdsc.smlm.settings.xml";
 	private static final String DEFAULT_DIRECTORY = System.getProperty("user.home") +
 			System.getProperty("file.separator") + ".gdsc.smlm";
-	
+
 	/** Use this to suppress warnings. */
 	public static final int FLAG_SILENT = 0x00000001;
 	/** Use this flag to suppress returning a default instance. */
 	public static final int FLAG_NO_DEFAULT = 0x00000002;
-	
+
 	/** The settings directory. */
 	private static File settingsDirectory;
 	static
@@ -307,7 +308,7 @@ public class SettingsManager
 		if (xs == null)
 		{
 			xs = new XStream(new DomDriver());
-			
+
 			// Map the object names/fields for a nicer configuration file
 			xs.alias("gdsc.fitting.settings", GlobalSettings.class);
 			xs.alias("gdsc.fitting.configuration", FitEngineConfiguration.class);
@@ -703,22 +704,43 @@ public class SettingsManager
 	 */
 	private static class ConfigurationReader<T extends Message>
 	{
-		T t;
+		/** the default instance of the message type */
+		private T t;
 
-		ConfigurationReader(T t)
+		/**
+		 * Instantiates a new configuration reader.
+		 *
+		 * @param t
+		 *            the default instance of the message type
+		 */
+		public ConfigurationReader(T t)
 		{
 			this.t = t;
 		}
 
+		/**
+		 * Read the message.
+		 *
+		 * @param flags
+		 *            the flags
+		 * @return the message
+		 */
 		@SuppressWarnings("unchecked")
 		public T read(int flags)
 		{
 			T c = (T) readMessage(t.getParserForType(), createSettingsFile(t.getClass()),
 					BitFlags.anySet(flags, FLAG_SILENT));
 			if (c == null && BitFlags.anyNotSet(flags, FLAG_NO_DEFAULT))
-				c = (T) t.getDefaultInstanceForType();
+				c = t;
 			return c;
 		}
+	}
+
+	// This can be updated with default settings if necessary
+	private static final Calibration defaultCalibration;
+	static
+	{
+		defaultCalibration = Calibration.getDefaultInstance();
 	}
 
 	/**
@@ -740,9 +762,45 @@ public class SettingsManager
 	 */
 	public static Calibration readCalibration(int flags)
 	{
-		return new ConfigurationReader<Calibration>(Calibration.getDefaultInstance()).read(flags);
+		return new ConfigurationReader<Calibration>(defaultCalibration).read(flags);
 	}
 
+	// This can be updated with default settings if necessary
+	private static final ResultsSettings defaultResultsSettings;
+	static
+	{
+		ResultsSettings.Builder builder = ResultsSettings.getDefaultInstance().toBuilder();
+		builder.getResultsImageSettingsBuilder().setWeighted(true);
+		builder.getResultsImageSettingsBuilder().setEqualised(true);
+		builder.getResultsImageSettingsBuilder().setAveragePrecision(30);
+		builder.getResultsImageSettingsBuilder().setScale(1);
+		builder.getResultsTableSettingsBuilder().setRoundingPrecision(4);
+		builder.getResultsInMemorySettingsBuilder().setResultsInMemory(true);
+		defaultResultsSettings = builder.build();
+	}
+
+	/**
+	 * Read the calibration from the settings file in the settings directory.
+	 *
+	 * @return the calibration
+	 */
+	public static ResultsSettings readResultsSettings()
+	{
+		return readResultsSettings(0);
+	}
+
+	/**
+	 * Read the calibration from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the calibration
+	 */
+	public static ResultsSettings readResultsSettings(int flags)
+	{
+		return new ConfigurationReader<ResultsSettings>(defaultResultsSettings).read(flags);
+	}
+	
 	/**
 	 * Write the message to file.
 	 * <p>

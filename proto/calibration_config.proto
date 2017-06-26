@@ -7,7 +7,7 @@ package gdsc.smlm.data.config;
 
 option java_outer_classname = "CalibrationConfig";
 
-import "unit.proto";
+import "unit_config.proto";
 
 // Define the calibration for distance
 message DistanceCalibration {
