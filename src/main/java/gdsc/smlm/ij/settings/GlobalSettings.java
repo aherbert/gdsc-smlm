@@ -19,11 +19,13 @@ import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 
 /**
  * Contain the settings for the gdsc.fitting package
+ * 
+ * @deprecated The settings have been moved to the gdsc.smlm.data.config package.
  */
+@Deprecated
 public class GlobalSettings
 {
 	private String notes = null;
-	private Calibration calibration = null;
 	private FitEngineConfiguration fitEngineConfiguration = null;
 	private PSFEstimatorSettings psfEstimatorSettings = null;
 	private PSFCalculatorSettings psfCalculatorSettings = null;
@@ -42,21 +44,12 @@ public class GlobalSettings
 	}
 
 	/**
-	 * @param notes the notes to set
+	 * @param notes
+	 *            the notes to set
 	 */
 	public void setNotes(String notes)
 	{
 		this.notes = notes;
-	}
-
-	/**
-	 * @return the calibration
-	 */
-	public Calibration getCalibration()
-	{
-		if (calibration == null)
-			calibration = Calibration.getDefaultInstance();
-		return calibration;
 	}
 
 	/**
@@ -138,7 +131,7 @@ public class GlobalSettings
 			opticsSettings = new OPTICSSettings();
 		return opticsSettings;
 	}
-	
+
 	/**
 	 * @param config
 	 */
@@ -153,25 +146,6 @@ public class GlobalSettings
 	public void setResultsSettings(ResultsSettings resultsSettings)
 	{
 		this.resultsSettings = resultsSettings;
-	}
-
-	/**
-	 * @param calibration
-	 */
-	public void setCalibration(Calibration calibration)
-	{
-		this.calibration = calibration;
-	}
-
-	/**
-	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
-	 * default object.
-	 * 
-	 * @return true if the setting is not null
-	 */
-	public boolean isCalibration()
-	{
-		return (calibration != null);
 	}
 
 	/**
@@ -250,7 +224,7 @@ public class GlobalSettings
 	{
 		return (createDataSettings != null);
 	}
-	
+
 	/**
 	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
 	 * default object.

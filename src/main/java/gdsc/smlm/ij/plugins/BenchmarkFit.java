@@ -612,7 +612,7 @@ public class BenchmarkFit implements PlugIn
 			return false;
 
 		// Initialise the correct calibration
-		CalibrationWriter calibration = CalibrationWriter.create(settings.getCalibration());
+		CalibrationWriter calibration = CalibrationWriter.create(SettingsManager.readCalibration());
 		calibration.setNmPerPixel(benchmarkParameters.a);
 		calibration.setGain(benchmarkParameters.gain);
 		calibration.setAmplification(benchmarkParameters.amplification);
@@ -620,9 +620,8 @@ public class BenchmarkFit implements PlugIn
 		calibration.setEmCCD(benchmarkParameters.emCCD);
 		calibration.setReadNoise(benchmarkParameters.readNoise);
 		calibration.setExposureTime(1000);
-		settings.setCalibration(calibration.getCalibration());
 
-		if (!PeakFit.configureFitSolver(settings, filename, false))
+		if (!PeakFit.configureFitSolver(settings, calibration.getBuilder(), 0))
 			return false;
 
 		if (showHistograms)

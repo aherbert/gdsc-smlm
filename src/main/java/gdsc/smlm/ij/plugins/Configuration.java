@@ -18,6 +18,7 @@ import java.util.Vector;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -31,14 +32,11 @@ import ij.plugin.PlugIn;
  * Adjust the configuration used for fitting.
  */
 // TODO - This could be incorporated into the PeakFit plugin as another run mode.
-public class Configuration implements PlugIn, TextListener, ItemListener
+public class Configuration implements PlugIn, ItemListener
 {
 	private static final String TITLE = "Fit Configuration";
 
 	private boolean configurationChanged = false;
-
-	// Used for the mouse listener
-	private TextField textConfigFile;
 
 	// All the fields that will be updated when reloading the configuration file
 	private TextField textNmPerPixel;
@@ -90,18 +88,15 @@ public class Configuration implements PlugIn, TextListener, ItemListener
 	{
 		configurationChanged = false;
 
-		String filename = SettingsManager.getSettingsFilename();
-
-		GlobalSettings settings = SettingsManager.loadSettings(filename);
+		GlobalSettings settings = SettingsManager.loadSettings();
 		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		CalibrationWriter calibration = CalibrationWriter.create(settings.getCalibration());
+		CalibrationWriter calibration = CalibrationWriter.create(SettingsManager.readCalibration());
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 
-		gd.addFilenameField("Config_file", filename, 40);
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 		gd.addNumericField("Gain", calibration.getGain(), 2);
 		gd.addCheckbox("EM-CCD", calibration.isEMCCD());
@@ -162,11 +157,6 @@ public class Configuration implements PlugIn, TextListener, ItemListener
 			int t = 0;
 			int b = 0;
 			int ch = 0;
-
-			textConfigFile = texts.get(t++);
-			textConfigFile.addTextListener(this);
-
-			// TODO: add a value changed listener to detect when typing a new file
 
 			textNmPerPixel = numerics.get(n++);
 			textGain = numerics.get(n++);
@@ -238,8 +228,6 @@ public class Configuration implements PlugIn, TextListener, ItemListener
 		if (gd.wasCanceled())
 			return;
 
-		filename = gd.getNextString();
-
 		calibration.setNmPerPixel(gd.getNextNumber());
 		calibration.setGain(gd.getNextNumber());
 		calibration.setEmCCD(gd.getNextBoolean());
@@ -303,88 +291,21 @@ public class Configuration implements PlugIn, TextListener, ItemListener
 		if (gd.invalidNumber())
 			return;
 
-		settings.setCalibration(calibration.getCalibration());
-		configurationChanged = SettingsManager.saveSettings(settings, filename);
-		if (configurationChanged)
-			SettingsManager.saveSettingsFilename(filename);
+		SettingsManager.saveSettings(settings);
+		SettingsManager.writeSettings(calibration.getCalibration());
+		Calibration.Builder calibrationBuilder = calibration.getBuilder();
 
-		if (!PeakFit.configureSmartFilter(settings, filename))
+		int flags = 0;
+		if (!PeakFit.configureSmartFilter(settings, calibrationBuilder, flags))
 			return;
-		if (!PeakFit.configureDataFilter(settings, filename, false))
+		if (!PeakFit.configureDataFilter(settings, flags))
 			return;
-		PeakFit.configureFitSolver(settings, filename, false);
+		PeakFit.configureFitSolver(settings, calibrationBuilder, flags);
 	}
 
 	public boolean isConfigurationChanged()
 	{
 		return configurationChanged;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.TextListener#textValueChanged(java.awt.event.TextEvent)
-	 */
-	public void textValueChanged(TextEvent e)
-	{
-		if (e.getSource() == textConfigFile)
-		{
-			refreshSettings(textConfigFile.getText());
-		}
-	}
-
-	private void refreshSettings(String newFilename)
-	{
-		if (newFilename != null && new File(newFilename).exists())
-		{
-			YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), TITLE, "Reload settings from file");
-			d.setVisible(true);
-			if (d.yesPressed())
-			{
-				// Reload the settings and update the GUI
-				// XXX : This does not deal with loading settings into fields that are not displayed,
-				// e.g. for configuring the Fit Solvers. This could be done by writing into
-				// a class scope settings instance (loaded in showDialog()). However the user would not 
-				// see all the changes that have been written, since the later dialogs are shown depending 
-				// on what options are initially configured. 
-
-				GlobalSettings settings = SettingsManager.unsafeLoadSettings(newFilename, false);
-				if (settings == null)
-					return;
-				FitEngineConfiguration config = settings.getFitEngineConfiguration();
-				FitConfiguration fitConfig = config.getFitConfiguration();
-				if (settings.getCalibration() != null)
-				{
-					CalibrationReader calibration = new CalibrationReader(settings.getCalibration());
-					textNmPerPixel.setText("" + calibration.getNmPerPixel());
-					textGain.setText("" + calibration.getGain());
-					textEMCCD.setState(calibration.isEMCCD());
-					textExposure.setText("" + calibration.getExposureTime());
-				}
-				textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
-				textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
-				textInitialAngleD.setText("" + fitConfig.getInitialAngle());
-				textDataFilterType.select(config.getDataFilterType().ordinal());
-				textDataFilter.select(config.getDataFilter(0).ordinal());
-				textSmooth.setText("" + config.getSmooth(0));
-				textSearch.setText("" + config.getSearch());
-				textBorder.setText("" + config.getBorder());
-				textFitting.setText("" + config.getFitting());
-				textFitSolver.select(fitConfig.getFitSolver().ordinal());
-				textFitFunction.select(fitConfig.getFitFunction().ordinal());
-				textFailuresLimit.setText("" + config.getFailuresLimit());
-				textIncludeNeighbours.setState(config.isIncludeNeighbours());
-				textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
-				textResidualsThreshold.setText("" + config.getResidualsThreshold());
-				textDuplicateDistance.setText("" + fitConfig.getDuplicateDistance());
-				textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
-				textSignalStrength.setText("" + fitConfig.getSignalStrength());
-				textMinPhotons.setText("" + fitConfig.getMinPhotons());
-				textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
-				textWidthFactor.setText("" + fitConfig.getWidthFactor());
-				textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
-			}
-		}
 	}
 
 	/*

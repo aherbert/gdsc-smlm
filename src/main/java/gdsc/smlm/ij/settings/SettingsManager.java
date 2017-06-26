@@ -307,7 +307,7 @@ public class SettingsManager
 		if (xs == null)
 		{
 			xs = new XStream(new DomDriver());
-
+			
 			// Map the object names/fields for a nicer configuration file
 			xs.alias("gdsc.fitting.settings", GlobalSettings.class);
 			xs.alias("gdsc.fitting.configuration", FitEngineConfiguration.class);

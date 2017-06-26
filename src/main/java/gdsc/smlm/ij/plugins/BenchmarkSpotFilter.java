@@ -1551,7 +1551,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			// Allow more complicated filters to be configured
 			GlobalSettings settings = new GlobalSettings();
 			settings.setFitEngineConfiguration(config);
-			if (!PeakFit.configureDataFilter(settings, null, false))
+			if (!PeakFit.configureDataFilter(settings, PeakFit.FLAG_NO_SAVE))
 				return false;
 		}
 

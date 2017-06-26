@@ -73,10 +73,11 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 		globalSettings.getFitEngineConfiguration().getFitConfiguration().setInitialPeakStdDev((float) sd);
 		globalSettings.getFitEngineConfiguration().getFitConfiguration().setInitialAngle(0);
-		CalibrationWriter cw = CalibrationWriter.create(globalSettings.getCalibration());
-		cw.setNmPerPixel(getPixelPitch());
-		globalSettings.setCalibration(cw.getCalibration());
 		SettingsManager.saveSettings(globalSettings);
+		
+		CalibrationWriter cw = CalibrationWriter.create(SettingsManager.readCalibration());
+		cw.setNmPerPixel(getPixelPitch());
+		SettingsManager.writeSettings(cw.getCalibration());
 	}
 
 	/**

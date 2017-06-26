@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -463,7 +465,8 @@ public class PSFDrift implements PlugIn
 
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(new FitEngineConfiguration(fitConfig));
-		if (!PeakFit.configureFitSolver(settings, null, false, true))
+		Calibration.Builder calibrationBuilder = SettingsManager.readCalibration().toBuilder();
+		if (!PeakFit.configureFitSolver(settings, calibrationBuilder, PeakFit.FLAG_NO_SAVE))
 			return;
 
 		imp = WindowManager.getImage(title);

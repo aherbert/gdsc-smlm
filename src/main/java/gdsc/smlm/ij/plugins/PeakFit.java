@@ -28,6 +28,7 @@ import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.SeriesOpener;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
+import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationWriter;
@@ -117,7 +118,7 @@ import ij.process.LUTHelper.LutColour;
  * Fits local maxima using a 2D Gaussian. Process each frame until a successive number of fits
  * fail to meet the fit criteria.
  */
-public class PeakFit implements PlugInFilter, TextListener, ItemListener
+public class PeakFit implements PlugInFilter, ItemListener
 {
 	private static final String TITLE = "PeakFit";
 
@@ -168,9 +169,6 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	private static boolean showTable = true;
 	private static boolean showImage = true;
 	private static PSFCalculatorSettings calculatorSettings = new PSFCalculatorSettings();
-
-	// Used for the mouse listener
-	private TextField textConfigFile;
 
 	// All the fields that will be updated when reloading the configuration file
 	private TextField textNmPerPixel;
@@ -707,19 +705,21 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	private int showDialog(ImagePlus imp)
 	{
 		// Executing as an ImageJ plugin.
+		if (simpleFit)
+		{
+			return showSimpleDialog();
+		}
+
 		// Override the defaults with those in the configuration file
 		final String filename = SettingsManager.getSettingsFilename();
 
-		if (simpleFit)
+		calibration = CalibrationWriter.create(SettingsManager.readCalibration());
 		{
-			return showSimpleDialog(filename);
+			GlobalSettings settings = SettingsManager.loadSettings(filename);
+			config = settings.getFitEngineConfiguration();
+			fitConfig = config.getFitConfiguration();
+			resultsSettings = settings.getResultsSettings();
 		}
-
-		GlobalSettings settings = SettingsManager.loadSettings(filename);
-		calibration = CalibrationWriter.create(settings.getCalibration());
-		config = settings.getFitEngineConfiguration();
-		fitConfig = config.getFitConfiguration();
-		resultsSettings = settings.getResultsSettings();
 
 		boolean isCrop = (bounds != null && imp != null &&
 				(bounds.width < imp.getWidth() || bounds.height < imp.getHeight()));
@@ -742,7 +742,6 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 
-		gd.addFilenameField("Config_file", filename, 40);
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 		gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
 		gd.addCheckbox("EM-CCD", calibration.isEMCCD());
@@ -924,11 +923,6 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			Choice textTemplate = choices.get(ch++);
 			textTemplate.addItemListener(this);
 
-			textConfigFile = texts.get(t++);
-			textConfigFile.addTextListener(this);
-
-			// TODO: add a value changed listener to detect when typing a new file
-
 			textNmPerPixel = numerics.get(n++);
 			textGain = numerics.get(n++);
 			textEMCCD = checkboxes.get(b++);
@@ -1001,14 +995,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 
 		gd.showDialog();
 
-		// The refreshSettings method can be called by the dialog listener.
-		// This updates the Calibration, FitEngineConfiguration, and ResultsSettings so set these
-		// back in the GlobalSettings object.
-		settings.setCalibration(this.calibration.getCalibration());
-		settings.setFitEngineConfiguration(this.config);
-		settings.setResultsSettings(this.resultsSettings);
-
-		if (gd.wasCanceled() || !readDialog(settings, gd, isCrop))
+		if (gd.wasCanceled() || !readDialog(gd, isCrop))
 			return DONE;
 
 		if (imp != null)
@@ -1090,7 +1077,11 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				return DONE;
 			resultsSettings.logProgress = egd.getNextBoolean();
 			if (!resultsSettings.logProgress)
+			{
+				GlobalSettings settings = SettingsManager.loadSettings(filename);
+				settings.setResultsSettings(this.resultsSettings);
 				SettingsManager.saveSettings(settings, filename);
+			}
 		}
 
 		// Return the plugin flags (without the DOES_STACKS flag).
@@ -1105,13 +1096,14 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			Utils.log(format, args);
 	}
 
-	private int showSimpleDialog(final String filename)
+	private int showSimpleDialog()
 	{
-		GlobalSettings settings = SettingsManager.loadSettings(filename);
+		GlobalSettings settings = SettingsManager.loadSettings();
 		// Initialise the fit config so that it can be used in the calibration wizard 
 		fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
+		calibration = CalibrationWriter.create(SettingsManager.readCalibration());
 
-		boolean requireCalibration = requireCalibration(settings, filename);
+		boolean requireCalibration = requireCalibration();
 		if (requireCalibration)
 		{
 			if (!showCalibrationWizard(settings, true))
@@ -1169,7 +1161,6 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		}
 
 		// Log the settings we care about:
-		calibration = CalibrationWriter.create(settings.getCalibration());
 		IJ.log("-=-=-=-");
 		IJ.log("Peak Fit");
 		IJ.log("-=-=-=-");
@@ -1181,8 +1172,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		// Save
 		settings.setFitEngineConfiguration(config);
 		settings.setResultsSettings(resultsSettings);
-		settings.setCalibration(calibration.getCalibration());
-		SettingsManager.saveSettings(settings, filename);
+		SettingsManager.saveSettings(settings);
+		SettingsManager.writeSettings(calibration.getCalibration());
 
 		return FLAGS;
 	}
@@ -1190,20 +1181,12 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	/**
 	 * Check if additional calibration information is required
 	 * <p>
-	 * Check if the configuration file exists. If not then assume this is the first run of the plugin.
 	 * Check the calibration is valid for fitting.
-	 * 
-	 * @param settings
-	 * @param filename
+	 *
 	 * @return True if additional calibration information is required, false if the system is calibrated
 	 */
-	private boolean requireCalibration(GlobalSettings settings, String filename)
+	private boolean requireCalibration()
 	{
-		if (!new File(filename).exists())
-			return true;
-
-		calibration = CalibrationWriter.create(settings.getCalibration());
-
 		// Check if the calibration contains: Pixel pitch, Gain (can be 1), Exposure time
 		if (!calibration.hasNmPerPixel())
 			return true;
@@ -1363,10 +1346,11 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				{
 					refreshSettings(template.getFitEngineConfiguration().clone(), custom);
 				}
-				if (template.isCalibration())
-				{
-					refreshSettings(template.getCalibration());
-				}
+				// TODO - Fix this
+				//				if (template.isCalibration())
+				//				{
+				//					refreshSettings(template.getCalibration());
+				//				}
 				if (template.isResultsSettings())
 				{
 					refreshSettings(template.getResultsSettings().clone());
@@ -1439,19 +1423,17 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		textField.setBackground(SystemColor.white);
 	}
 
-	private boolean readDialog(GlobalSettings settings, ExtendedGenericDialog gd, boolean isCrop)
+	private boolean readDialog(ExtendedGenericDialog gd, boolean isCrop)
 	{
 		// Ignore the template
 		gd.getNextChoice();
-
-		String filename = gd.getNextString();
 
 		calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
 		calibration.setGain(Math.abs(gd.getNextNumber()));
 		calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 		calibration.setExposureTime(Math.abs(gd.getNextNumber()));
-		settings.setCalibration(calibration.getCalibration());
-		
+		SettingsManager.writeSettings(calibration.getCalibration());
+
 		// Note: The bias and read noise will just end up being what was in the configuration file
 		// One fix for this is to save/load only the settings that are required from the configuration file
 		// (the others will remain unchanged). This will require a big refactor of the settings save/load.
@@ -1527,8 +1509,12 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			fractionOfThreads = Math.abs(gd.getNextNumber());
 
 		// Save to allow dialog state to be maintained even with invalid parameters
-		if (SettingsManager.saveSettings(settings, filename))
-			SettingsManager.saveSettingsFilename(filename);
+		{
+			GlobalSettings settings = SettingsManager.loadSettings();
+			settings.setFitEngineConfiguration(config);
+			settings.setResultsSettings(resultsSettings);
+			SettingsManager.saveSettings(settings);
+		}
 
 		if (gd.invalidNumber())
 			return false;
@@ -1585,10 +1571,15 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			return false;
 		}
 
+		int flags = (extraOptions) ? FLAG_EXTRA_OPTIONS : 0;
+		GlobalSettings settings = SettingsManager.loadSettings();
+		settings.setFitEngineConfiguration(config);
+		settings.setResultsSettings(resultsSettings);
+
 		// If precision filtering then we need the camera bias
 		if (!maximaIdentification)
 		{
-			if (!configureSmartFilter(settings, filename))
+			if (!configureSmartFilter(settings, calibration.getBuilder(), flags))
 				return false;
 
 			if (!fitConfig.isSmartFilter() && fitConfig.getPrecisionThreshold() > 0)
@@ -1603,17 +1594,17 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 					return false;
 				fitConfig.setPrecisionUsingBackground(gd.getNextBoolean());
 				calibration.setBias(Math.abs(gd.getNextNumber()));
-				settings.setCalibration(calibration.getCalibration());
+				SettingsManager.writeSettings(calibration.getCalibration());
 			}
 		}
 
-		if (!configureDataFilter(settings, filename, extraOptions))
+		if (!configureDataFilter(settings, flags))
 			return false;
 
 		// Second dialog for solver dependent parameters
 		if (!maximaIdentification)
 		{
-			if (!configureFitSolver(settings, filename, extraOptions))
+			if (!configureFitSolver(settings, calibration.getBuilder(), flags))
 				return false;
 		}
 
@@ -1655,6 +1646,7 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			}
 		}
 
+		String filename = SettingsManager.getSettingsFilename();
 		boolean result = SettingsManager.saveSettings(settings, filename, true);
 		if (!result)
 			IJ.error(TITLE, "Failed to save settings to file " + filename);
@@ -1669,20 +1661,23 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	 * dialog is shown to input the configuration for a smart filter. If no valid filter can be created from the input
 	 * then the method returns false.
 	 * <p>
-	 * Note: If the smart filter is successfully configured then the use may want to disable the standard fit
+	 * Note: If the smart filter is successfully configured then the user may want to disable the standard fit
 	 * validation.
 	 *
 	 * @param settings
 	 *            the settings
-	 * @param filename
-	 *            the filename
+	 * @param calibrationBuilder
+	 *            the calibration builder
+	 * @param flags
+	 *            the flags
 	 * @return true, if successful
 	 */
-	public static boolean configureSmartFilter(GlobalSettings settings, String filename)
+	public static boolean configureSmartFilter(GlobalSettings settings, Calibration.Builder calibrationBuilder,
+			int flags)
 	{
 		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		CalibrationWriter calibration = CalibrationWriter.create(settings.getCalibration());
+		CalibrationWriter calibration = new CalibrationWriter(calibrationBuilder);
 		if (!fitConfig.isSmartFilter())
 			return true;
 
@@ -1710,24 +1705,26 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		fitConfig.setDirectFilter((DirectFilter) f);
 
 		calibration.setBias(Math.abs(gd.getNextNumber()));
-		settings.setCalibration(calibration.getCalibration());
 
-		if (filename != null)
-			SettingsManager.saveSettings(settings, filename);
+		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
+		{
+			SettingsManager.saveSettings(settings);
+			SettingsManager.writeSettings(calibration.getCalibration());
+		}
 		return true;
 	}
 
 	/**
 	 * Show a dialog to configure the data filter. The updated settings are saved to the settings file. An error
 	 * message is shown if the dialog is cancelled or the configuration is invalid.
-	 * 
+	 *
 	 * @param settings
-	 * @param filename
-	 * @param extraOptions
-	 *            True if extra configuration options should be allowed
+	 *            the settings
+	 * @param flags
+	 *            the flags
 	 * @return True if the configuration succeeded
 	 */
-	public static boolean configureDataFilter(GlobalSettings settings, String filename, boolean extraOptions)
+	public static boolean configureDataFilter(GlobalSettings settings, int flags)
 	{
 		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 
@@ -1795,50 +1792,39 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 			}
 		}
 		config.setNumberOfFilters(numberOfFilters);
-		if (filename != null)
-			SettingsManager.saveSettings(settings, filename);
+		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
+			SettingsManager.saveSettings(settings);
 		return true;
 	}
 
-	/**
-	 * Show a dialog to configure the fit solver. The updated settings are saved to the settings file. An error
-	 * message is shown if the dialog is cancelled or the configuration is invalid.
-	 * 
-	 * @param settings
-	 * @param filename
-	 * @param extraOptions
-	 *            True if extra configuration options should be allowed
-	 * @return True if the configuration succeeded
-	 */
-	/**
-	 * @param settings
-	 * @param filename
-	 * @param extraOptions
-	 * @return
-	 */
-	public static boolean configureFitSolver(GlobalSettings settings, String filename, boolean extraOptions)
-	{
-		return configureFitSolver(settings, filename, extraOptions, false);
-	}
+	/** Flag to indicate that additional options can be configured. */
+	public static final int FLAG_EXTRA_OPTIONS = 0x00000001;
+	/** Flag to indicate that the calibration should not be configured. */
+	public static final int FLAG_IGNORE_CALIBRATION = 0x00000002;
+	/** Flag to indicate that configuration should not be saved. */
+	public static final int FLAG_NO_SAVE = 0x00000004;
 
 	/**
 	 * Show a dialog to configure the fit solver. The updated settings are saved to the settings file. An error
 	 * message is shown if the dialog is cancelled or the configuration is invalid.
-	 * 
+	 *
 	 * @param settings
-	 * @param filename
-	 * @param extraOptions
-	 *            True if extra configuration options should be allowed
-	 * @param ignoreCalibration
-	 *            True if the calibration should not be configured
+	 *            the settings
+	 * @param calibrationBuilder
+	 *            the calibration builder
+	 * @param flags
+	 *            the flags
 	 * @return True if the configuration succeeded
 	 */
-	public static boolean configureFitSolver(GlobalSettings settings, String filename, boolean extraOptions,
-			boolean ignoreCalibration)
+	public static boolean configureFitSolver(GlobalSettings settings, Calibration.Builder calibrationBuilder, int flags)
 	{
+		boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
+		boolean ignoreCalibration = BitFlags.anySet(flags, FLAG_IGNORE_CALIBRATION);
+		boolean saveSettings = BitFlags.anyNotSet(flags, FLAG_NO_SAVE);
+
 		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		CalibrationWriter calibration = CalibrationWriter.create(settings.getCalibration());
+		CalibrationWriter calibration = new CalibrationWriter(calibrationBuilder);
 
 		boolean isBoundedLVM = fitConfig.getFitSolver() == FitSolver.LVM_MLE ||
 				fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM ||
@@ -1878,6 +1864,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				fitConfig.setReadNoise(calibration.getReadNoise());
 				fitConfig.setAmplification(calibration.getAmplification());
 				fitConfig.setEmCCD(calibration.isEMCCD());
+				if (saveSettings)
+					SettingsManager.writeSettings(calibration.getCalibration());
 			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
 			try
@@ -1898,9 +1886,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				// This option is for the Conjugate Gradient optimiser and makes it less stable
 				fitConfig.setGradientLineMinimisation(false);
 
-			settings.setCalibration(calibration.getCalibration());
-			if (filename != null)
-				SettingsManager.saveSettings(settings, filename);
+			if (saveSettings)
+				SettingsManager.saveSettings(settings);
 
 			try
 			{
@@ -1976,19 +1963,23 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 				fitConfig.setMinIterations((int) gd.getNextNumber());
 			fitConfig.setMaxIterations((int) gd.getNextNumber());
 
+			boolean saveCalibration = false;
 			if (isWeightedLVM && !ignoreCalibration)
 			{
 				calibration.setReadNoise(Math.abs(gd.getNextNumber()));
+				saveCalibration = true;
 			}
 			if (requireBias)
 			{
 				calibration.setBias(Math.abs(gd.getNextNumber()));
 				fitConfig.setBias(calibration.getBias());
+				saveCalibration = true;
 			}
 			if (requireGain)
 			{
 				calibration.setGain(Math.abs(gd.getNextNumber()));
 				fitConfig.setGain(calibration.getGain());
+				saveCalibration = true;
 			}
 
 			if (isBoundedLVM)
@@ -2013,8 +2004,12 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 						calibration.getBias(), calibration.isEMCCD()));
 			}
 
-			if (filename != null)
-				SettingsManager.saveSettings(settings, filename);
+			if (saveSettings)
+			{
+				if (saveCalibration)
+					SettingsManager.writeSettings(calibration.getCalibration());
+				SettingsManager.saveSettings(settings);
+			}
 
 			try
 			{
@@ -2033,8 +2028,8 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 		else if (fitConfig.getFitSolver() == FitSolver.LVM_QUASI_NEWTON)
 		{
 			// No options yet for Apache LVM fitting. Save options for consistency
-			if (filename != null)
-				SettingsManager.saveSettings(settings, filename);
+			if (saveSettings)
+				SettingsManager.saveSettings(settings);
 		}
 
 		if (config.isIncludeNeighbours())
@@ -2654,47 +2649,6 @@ public class PeakFit implements PlugInFilter, TextListener, ItemListener
 	public void setSilent(boolean silent)
 	{
 		this.silent = silent;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.TextListener#textValueChanged(java.awt.event.TextEvent)
-	 */
-	public void textValueChanged(TextEvent e)
-	{
-		if (e.getSource() == textConfigFile)
-		{
-			refreshSettings(textConfigFile.getText());
-		}
-	}
-
-	private void refreshSettings(String newFilename)
-	{
-		if (newFilename != null && new File(newFilename).exists())
-		{
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-			gd.enableYesNoCancel();
-			gd.hideCancelButton();
-			gd.addMessage("Reload settings from file");
-			gd.showDialog();
-			if (gd.wasOKed())
-			{
-				// Reload the settings and update the GUI
-				GlobalSettings settings = SettingsManager.unsafeLoadSettings(newFilename, false);
-				if (settings == null)
-					return;
-
-				Calibration calibration = settings.getCalibration();
-				refreshSettings(calibration);
-
-				FitEngineConfiguration config = settings.getFitEngineConfiguration();
-				refreshSettings(config, true);
-
-				ResultsSettings resultsSettings = settings.getResultsSettings();
-				refreshSettings(resultsSettings);
-			}
-		}
 	}
 
 	private void refreshSettings(Calibration cal)

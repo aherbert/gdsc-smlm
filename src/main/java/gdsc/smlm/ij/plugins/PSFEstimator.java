@@ -71,6 +71,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	private int dataSkip = 0;
 
 	private GlobalSettings globalSettings;
+	private Calibration.Builder calibrationBuilder;
 	private FitEngineConfiguration config;
 	private PSFEstimatorSettings settings;
 
@@ -109,6 +110,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		}
 
 		globalSettings = SettingsManager.loadSettings();
+		calibrationBuilder = SettingsManager.readCalibration().toBuilder();		
 		settings = globalSettings.getPsfEstimatorSettings();
 		// Reset
 		if (IJ.controlKeyDown())
@@ -335,14 +337,13 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			return false;
 		}
 
-		final String filename = SettingsManager.getSettingsFilename();
-		SettingsManager.saveSettings(globalSettings, filename);
+		SettingsManager.saveSettings(globalSettings);
 
-		if (!PeakFit.configureSmartFilter(globalSettings, filename))
+		if (!PeakFit.configureSmartFilter(globalSettings, calibrationBuilder, 0))
 			return false;
-		if (!PeakFit.configureDataFilter(globalSettings, filename, false))
+		if (!PeakFit.configureDataFilter(globalSettings, 0))
 			return false;
-		if (!PeakFit.configureFitSolver(globalSettings, filename, false))
+		if (!PeakFit.configureFitSolver(globalSettings, calibrationBuilder, 0))
 			return false;
 
 		// Extra parameters are needed for interlaced data
@@ -760,7 +761,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		resultsSettings.logProgress = false;
 		resultsSettings.setResultsImage(0);
 		resultsSettings.resultsDirectory = null;
-		PeakFit fitter = new PeakFit(config, resultsSettings, globalSettings.getCalibration());
+		PeakFit fitter = new PeakFit(config, resultsSettings, calibrationBuilder.build());
 		return fitter;
 	}
 

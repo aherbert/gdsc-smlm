@@ -1235,8 +1235,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitConfig.setAmplification(Maths.round(cal.getAmplification()));
 			fitConfig.setEmCCD(cal.isEMCCD());
 		}
-		settings.setCalibration(cal.getCalibration());
-		if (!PeakFit.configureFitSolver(settings, null, extraOptions))
+		if (!PeakFit.configureFitSolver(settings, cal.getBuilder(), (extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
 			return false;
 
 		return true;

@@ -1714,7 +1714,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
-		settings.setCalibration(cal.getCalibration());
 
 		boolean configure = true;
 		if (useBenchmarkSettings)
@@ -1722,7 +1721,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			// Only configure the fit solver if not in a macro
 			configure = Macro.getOptions() == null;
 		}
-		if (configure && !PeakFit.configureFitSolver(settings, null, false))
+		if (configure && !PeakFit.configureFitSolver(settings, cal.getBuilder(), PeakFit.FLAG_NO_SAVE))
 			return false;
 
 		lastId = simulationParameters.id;
