@@ -33,7 +33,6 @@ import gdsc.smlm.function.NoiseModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultHelper;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;

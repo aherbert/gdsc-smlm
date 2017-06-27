@@ -1,11 +1,9 @@
 package gdsc.smlm.data.config;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import gdsc.smlm.data.config.PSFConfig.PSF;
 import gdsc.smlm.data.config.PSFConfig.PSFParameter;
-import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.results.PeakResult;
 
@@ -140,29 +138,6 @@ public class PSFHelper
 		throw new ConfigurationException("psf is not a rotated two axis Gaussian2D");
 	}
 
-	private static final ArrayList<PSFParameter> sxParameters, sxsyParameters, sxsyaParameters;
-	static
-	{
-		PSFParameter.Builder builder = PSFParameter.newBuilder();
-
-		builder.setName("S");
-		builder.setUnit(PSFParameterUnit.DISTANCE);
-		sxParameters = new ArrayList<PSFParameter>(1);
-		sxParameters.add(builder.build());
-
-		sxsyParameters = new ArrayList<PSFParameter>(2);
-		builder.setName("Sx");
-		sxsyParameters.add(builder.build());
-		builder.setName("Sy");
-		sxsyParameters.add(builder.build());
-
-		sxsyaParameters = new ArrayList<PSFParameter>(sxsyParameters);
-		builder.setName("Angle");
-		builder.setUnit(PSFParameterUnit.ANGLE);
-		sxsyaParameters.add(builder.build());
-		sxsyaParameters.trimToSize();
-	}
-
 	/**
 	 * Gets the parameters for the PSF. If the PSF is a standard Gaussian2D function then the configured parameter list
 	 * is only used if it has the correct size and parameter types, otherwise a default list is returned.
@@ -182,14 +157,14 @@ public class PSFHelper
 		switch (psf.getPsfType())
 		{
 			case ONE_AXIS_GAUSSIAN_2D:
-				return checkParameters(sxParameters, list);
+				return checkParameters(PSFConfigHelper.defaultOneAxisGaussian2DPSF.getParameterList(), list);
 
 			case ASTIGMATIC_GAUSSIAN_2D:
 			case TWO_AXIS_GAUSSIAN_2D:
-				return checkParameters(sxsyParameters, list);
+				return checkParameters(PSFConfigHelper.defaultTwoAxisGaussian2DPSF.getParameterList(), list);
 
 			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
-				return checkParameters(sxsyaParameters, list);
+				return checkParameters(PSFConfigHelper.defaultTwoAxisAndThetaGaussian2DPSF.getParameterList(), list);
 
 			case UNRECOGNIZED:
 				throw new ConfigurationException("psf is not recognised");
@@ -266,7 +241,7 @@ public class PSFHelper
 	 *            the list
 	 * @return the list (or the default)
 	 */
-	private static List<PSFParameter> checkParameters(ArrayList<PSFParameter> defaultList, List<PSFParameter> list)
+	private static List<PSFParameter> checkParameters(List<PSFParameter> defaultList, List<PSFParameter> list)
 	{
 		if (list != null && list.size() == defaultList.size())
 		{

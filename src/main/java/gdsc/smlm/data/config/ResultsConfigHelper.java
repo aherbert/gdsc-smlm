@@ -2,6 +2,7 @@ package gdsc.smlm.data.config;
 
 import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
+import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -16,18 +17,35 @@ import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+/**
+ * Contains helper functions for the ResultsConfig class.
+ */
 public class ResultsConfigHelper
 {
+	/** The default ResultsSettings */
+	public static final ResultsSettings defaultResultsSettings;
+	static
+	{
+		ResultsSettings.Builder builder = ResultsSettings.newBuilder();
+		builder.getResultsImageSettingsBuilder().setWeighted(true);
+		builder.getResultsImageSettingsBuilder().setEqualised(true);
+		builder.getResultsImageSettingsBuilder().setAveragePrecision(30);
+		builder.getResultsImageSettingsBuilder().setScale(1);
+		builder.getResultsTableSettingsBuilder().setRoundingPrecision(4);
+		builder.getResultsInMemorySettingsBuilder().setInMemory(true);
+		defaultResultsSettings = builder.build();
+	}	
+	
 	/**
 	 * Gets the name.
 	 *
-	 * @param resultsFileFormat
+	 * @param value
 	 *            the results file format
 	 * @return the name
 	 */
-	public static String getName(ResultsFileFormat resultsFileFormat)
+	public static String getName(ResultsFileFormat value)
 	{
-		switch (resultsFileFormat)
+		switch (value)
 		{
 			case BINARY:
 				return "Binary";
@@ -40,21 +58,22 @@ public class ResultsConfigHelper
 			case TSF:
 				return "TSF (Tagged Spot File)";
 			case UNRECOGNIZED:
-			default:
 				return "Unknown";
+			default:
+				throw new IllegalStateException("Unknown name: " + value);
 		}
 	}
 
 	/**
 	 * Gets the extension.
 	 *
-	 * @param resultsFileFormat
+	 * @param value
 	 *            the results file format
 	 * @return the extension
 	 */
-	public static String getExtension(ResultsFileFormat resultsFileFormat)
+	public static String getExtension(ResultsFileFormat value)
 	{
-		switch (resultsFileFormat)
+		switch (value)
 		{
 			case BINARY:
 				return "bin";
@@ -75,13 +94,13 @@ public class ResultsConfigHelper
 	/**
 	 * Checks if is gdsc.
 	 *
-	 * @param resultsFileFormat
+	 * @param value
 	 *            the results file format
 	 * @return true, if is gdsc
 	 */
-	public static boolean isGDSC(ResultsFileFormat resultsFileFormat)
+	public static boolean isGDSC(ResultsFileFormat value)
 	{
-		switch (resultsFileFormat)
+		switch (value)
 		{
 			case BINARY:
 			case TEXT:
@@ -94,13 +113,13 @@ public class ResultsConfigHelper
 	/**
 	 * Gets the name.
 	 *
-	 * @param resultsImage
+	 * @param value
 	 *            the results image
 	 * @return the name
 	 */
-	public static String getName(ResultsImageType resultsImage)
+	public static String getName(ResultsImageType value)
 	{
-		switch (resultsImage)
+		switch (value)
 		{
 			case DRAW_FITTED_PSF:
 				return "Fitted PSF";
@@ -123,8 +142,9 @@ public class ResultsConfigHelper
 			case DRAW_NONE:
 				return "None";
 			case UNRECOGNIZED:
-			default:
 				return "Unknown";
+			default:
+				throw new IllegalStateException("Unknown name: " + value);
 		}
 	}
 }

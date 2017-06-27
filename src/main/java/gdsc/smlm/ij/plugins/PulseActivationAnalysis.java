@@ -1028,8 +1028,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		gd.addMessage("--- Image output ---");
 		ResultsImageSettings s = resultsSettings.getResultsImageSettings();
-		gd.addChoice("Image", SettingsManager.resultsImageTypeNames,
-				SettingsManager.resultsImageTypeNames[s.getImageTypeValue()]);
+		gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(),
+				SettingsManager.getResultsImageTypeNames()[s.getImageTypeValue()]);
 		gd.addCheckbox("Weighted", s.getWeighted());
 		gd.addCheckbox("Equalised", s.getEqualised());
 		gd.addSlider("Image_Precision (nm)", 5, 30, s.getAveragePrecision());
@@ -1076,7 +1076,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			}
 
 			s = resultsSettings.getResultsImageSettings();
-			Recorder.recordOption("Image", SettingsManager.resultsImageTypeNames[s.getImageTypeValue()]);
+			Recorder.recordOption("Image", SettingsManager.getResultsImageTypeNames()[s.getImageTypeValue()]);
 			if (s.getWeighted())
 				Recorder.recordOption("Weighted");
 			if (s.getEqualised())

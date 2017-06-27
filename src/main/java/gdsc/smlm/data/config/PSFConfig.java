@@ -375,6 +375,11 @@ public final class PSFConfig {
      * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
      */
     gdsc.smlm.data.config.PSFConfig.PSFParameterUnit getUnit();
+
+    /**
+     * <code>double value = 3;</code>
+     */
+    double getValue();
   }
   /**
    * <pre>
@@ -394,6 +399,7 @@ public final class PSFConfig {
     private PSFParameter() {
       name_ = "";
       unit_ = 0;
+      value_ = 0D;
     }
 
     @java.lang.Override
@@ -431,6 +437,11 @@ public final class PSFConfig {
               int rawValue = input.readEnum();
 
               unit_ = rawValue;
+              break;
+            }
+            case 25: {
+
+              value_ = input.readDouble();
               break;
             }
           }
@@ -506,6 +517,15 @@ public final class PSFConfig {
       return result == null ? gdsc.smlm.data.config.PSFConfig.PSFParameterUnit.UNRECOGNIZED : result;
     }
 
+    public static final int VALUE_FIELD_NUMBER = 3;
+    private double value_;
+    /**
+     * <code>double value = 3;</code>
+     */
+    public double getValue() {
+      return value_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -524,6 +544,9 @@ public final class PSFConfig {
       if (unit_ != gdsc.smlm.data.config.PSFConfig.PSFParameterUnit.PSF_PARAMETER_UNIT_NA.getNumber()) {
         output.writeEnum(2, unit_);
       }
+      if (value_ != 0D) {
+        output.writeDouble(3, value_);
+      }
     }
 
     public int getSerializedSize() {
@@ -537,6 +560,10 @@ public final class PSFConfig {
       if (unit_ != gdsc.smlm.data.config.PSFConfig.PSFParameterUnit.PSF_PARAMETER_UNIT_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, unit_);
+      }
+      if (value_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, value_);
       }
       memoizedSize = size;
       return size;
@@ -557,6 +584,10 @@ public final class PSFConfig {
       result = result && getName()
           .equals(other.getName());
       result = result && unit_ == other.unit_;
+      result = result && (
+          java.lang.Double.doubleToLongBits(getValue())
+          == java.lang.Double.doubleToLongBits(
+              other.getValue()));
       return result;
     }
 
@@ -571,6 +602,9 @@ public final class PSFConfig {
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + UNIT_FIELD_NUMBER;
       hash = (53 * hash) + unit_;
+      hash = (37 * hash) + VALUE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getValue()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -708,6 +742,8 @@ public final class PSFConfig {
 
         unit_ = 0;
 
+        value_ = 0D;
+
         return this;
       }
 
@@ -732,6 +768,7 @@ public final class PSFConfig {
         gdsc.smlm.data.config.PSFConfig.PSFParameter result = new gdsc.smlm.data.config.PSFConfig.PSFParameter(this);
         result.name_ = name_;
         result.unit_ = unit_;
+        result.value_ = value_;
         onBuilt();
         return result;
       }
@@ -779,6 +816,9 @@ public final class PSFConfig {
         }
         if (other.unit_ != 0) {
           setUnitValue(other.getUnitValue());
+        }
+        if (other.getValue() != 0D) {
+          setValue(other.getValue());
         }
         onChanged();
         return this;
@@ -915,6 +955,32 @@ public final class PSFConfig {
       public Builder clearUnit() {
         
         unit_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double value_ ;
+      /**
+       * <code>double value = 3;</code>
+       */
+      public double getValue() {
+        return value_;
+      }
+      /**
+       * <code>double value = 3;</code>
+       */
+      public Builder setValue(double value) {
+        
+        value_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double value = 3;</code>
+       */
+      public Builder clearValue() {
+        
+        value_ = 0D;
         onChanged();
         return this;
       }
@@ -2040,18 +2106,18 @@ public final class PSFConfig {
   static {
     java.lang.String[] descriptorData = {
       "\n\020psf_config.proto\022\025gdsc.smlm.data.confi" +
-      "g\"S\n\014PSFParameter\022\014\n\004name\030\001 \001(\t\0225\n\004unit\030" +
+      "g\"b\n\014PSFParameter\022\014\n\004name\030\001 \001(\t\0225\n\004unit\030" +
       "\002 \001(\0162\'.gdsc.smlm.data.config.PSFParamet" +
-      "erUnit\"o\n\003PSF\0220\n\010psf_type\030\001 \001(\0162\036.gdsc.s" +
-      "mlm.data.config.PSFType\0226\n\tparameter\030\002 \003" +
-      "(\0132#.gdsc.smlm.data.config.PSFParameter*" +
-      "\232\001\n\007PSFType\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS" +
-      "_GAUSSIAN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002" +
-      "\022\"\n\036TWO_AXIS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026" +
-      "ASTIGMATIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020",
-      "PSFParameterUnit\022\031\n\025PSF_PARAMETER_UNIT_N" +
-      "A\020\000\022\014\n\010DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGL" +
-      "E\020\003B\013B\tPSFConfigb\006proto3"
+      "erUnit\022\r\n\005value\030\003 \001(\001\"o\n\003PSF\0220\n\010psf_type" +
+      "\030\001 \001(\0162\036.gdsc.smlm.data.config.PSFType\0226" +
+      "\n\tparameter\030\002 \003(\0132#.gdsc.smlm.data.confi" +
+      "g.PSFParameter*\232\001\n\007PSFType\022\017\n\013PSF_TYPE_N" +
+      "A\020\000\022\030\n\024ONE_AXIS_GAUSSIAN_2D\020\001\022\030\n\024TWO_AXI" +
+      "S_GAUSSIAN_2D\020\002\022\"\n\036TWO_AXIS_AND_THETA_GA" +
+      "USSIAN_2D\020\003\022\032\n\026ASTIGMATIC_GAUSSIAN_2D\020\004\022",
+      "\n\n\006CUSTOM\020\005*U\n\020PSFParameterUnit\022\031\n\025PSF_P" +
+      "ARAMETER_UNIT_NA\020\000\022\014\n\010DISTANCE\020\001\022\r\n\tINTE" +
+      "NSITY\020\002\022\t\n\005ANGLE\020\003B\013B\tPSFConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2070,7 +2136,7 @@ public final class PSFConfig {
     internal_static_gdsc_smlm_data_config_PSFParameter_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFParameter_descriptor,
-        new java.lang.String[] { "Name", "Unit", });
+        new java.lang.String[] { "Name", "Unit", "Value", });
     internal_static_gdsc_smlm_data_config_PSF_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable = new

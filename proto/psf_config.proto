@@ -32,6 +32,7 @@ enum PSFParameterUnit {
 message PSFParameter {
 	string name = 1;
 	PSFParameterUnit unit = 2;
+	double value = 3;
 }
 
 // Define the Point Spread Function (PSF)

@@ -53,6 +53,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import ij.IJ;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
@@ -436,7 +437,7 @@ public class LoadLocalisations implements PlugIn
 
 	private static boolean getFields()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		gd.addMessage("Load delimited localisations");
 		gd.addStringField("Dataset_name", name, 30);
@@ -453,10 +454,10 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Header_lines", header, 0);
 		gd.addStringField("Comment", comment);
 		gd.addStringField("Delimiter", delimiter);
-		String[] dUnits = SettingsManager.distanceUnitNames;
-		gd.addChoice("Distance_unit", dUnits, dUnits[distanceUnit]);
-		String[] iUnits = SettingsManager.intensityUnitNames;
-		gd.addChoice("Intensity_unit", iUnits, iUnits[intensityUnit]);
+		String[] dUnits = SettingsManager.getDistanceUnitNames();
+		gd.addChoice("Distance_unit", dUnits, distanceUnit);
+		String[] iUnits = SettingsManager.getIntensityUnitNames();
+		gd.addChoice("Intensity_unit", iUnits, intensityUnit);
 
 		gd.addMessage("Define the fields:");
 		Label l = (Label) gd.getMessage();

@@ -201,13 +201,13 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	public enum SearchMethod
 	{
 		/**
-		 * Search using Powell's conjugate direction method
-		 */
-		POWELL("Powell", false),
-		/**
 		 * Search using Powell's conjugate direction method using hard limits to ensure a bounded search
 		 */
 		POWELL_BOUNDED("Powell (bounded)", false),
+		/**
+		 * Search using Powell's conjugate direction method
+		 */
+		POWELL("Powell", false),
 		/**
 		 * Search using Powell's conjugate direction method using a mapping adapter to ensure a bounded search
 		 */

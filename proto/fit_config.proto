@@ -1,0 +1,193 @@
+syntax = "proto3";
+
+// ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
+// Authors: Alex Herbert, 2017 
+// License: GPL V3
+package gdsc.smlm.data.config;
+
+option java_outer_classname = "FitConfig";
+
+import "psf_config.proto";
+import "calibration_config.proto";
+
+// Define the fitting solver.
+enum FitSolver {
+	// Custom Levenberg-Marquardt least-squares estimation.
+	// Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
+	LVM_LSE = 0;
+	// Custom Levenberg-Marquardt maximum-likelihood estimation for Poisson data using the method of Laurence & Chromy (2010) Nature Methods 7, 338-339.
+	// Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
+	// Parameters are bounded using a hard-stop limit to prevent negative function values being produced.
+	LVM_MLE = 1;
+	// Custom Levenberg-Marquardt weighted least-squares estimation for Poisson data using the method of Ruisheng, et al (2017) Optical Express 25, Issue 10, pp 11701-11716.
+	// Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
+	LVM_WLSE = 2;
+	// Maximum Likelihood Estimator.
+	// Uses a configurable noise model for the probability density function of the data.
+	MLE = 3;
+	// Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
+	// Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor. 
+	FAST_MLE = 4;
+	// Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
+	// Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation. 
+	BACKTRACKING_FAST_MLE = 5;
+}
+
+// Define the search method for the configurable maximum likelihood estimator.
+enum SearchMethod
+{
+	// Search using Powell's conjugate direction method using hard limits to ensure a bounded search
+	POWELL_BOUNDED = 0;
+	// Search using Powell's conjugate direction method
+	POWELL = 1;
+	// Search using Powell's conjugate direction method using a mapping adapter to ensure a bounded search
+	POWELL_ADAPTER = 2;
+	// Search using Powell's Bound Optimization BY Quadratic Approximation (BOBYQA) algorithm.
+	// BOBYQA could also be considered as a replacement of any derivative-based optimizer when the derivatives are
+	// approximated by finite differences. This is a bounded search.
+	BOBYQA = 3;
+	// Search using active Covariance Matrix Adaptation Evolution Strategy (CMA-ES).
+	// The CMA-ES is a reliable stochastic optimization method which should be applied if derivative-based methods,
+	// e.g. conjugate gradient, fail due to a rugged search landscape. This is a bounded search.
+	CMAES = 4;
+	// Search using a non-linear conjugate gradient optimiser. Use the Fletcher-Reeves update formulas for the
+	// conjugate search directions.
+	// This is a bounded search using simple truncation of coordinates at the bounds of the search space.
+	CONJUGATE_GRADIENT_FR = 5;
+	// Search using a non-linear conjugate gradient optimiser. Use the Polak-Ribière update formulas for the
+	// conjugate search directions.
+	// This is a bounded search using simple truncation of coordinates at the bounds of the search space.
+	CONJUGATE_GRADIENT_PR = 6;
+	// Search using a Broyden-Fletcher-Goldfarb-Shanno (BFGS) gradient optimiser.
+	BFGS = 7;
+}
+
+// Define settings for the fit solver.
+message FitSolverSettings {
+	bool fixed_psf = 1;
+	bool disable_background_fitting = 2;
+	bool disable_signal_fitting = 3;
+	
+	FitSolver fit_solver = 4;
+	int32 min_iterations = 5;
+	int32 max_iterations = 6;
+	double relative_threshold = 7;
+	double absolute_threshold = 8;
+	double parameter_relative_threshold = 9;
+	double parameter_absolute_threshold = 10;
+	
+	double lambda = 11;
+	
+	SearchMethod search_method = 12;
+	bool gradient_line_minimisation = 13;
+	bool model_camera = 14;
+	int32 max_function_evaluations = 15;
+
+	// Options for clamping
+	bool use_clamping = 16;
+	bool use_dynamic_clamping = 17;
+	repeated double clamp_value = 18;	
+}
+
+// Define the settings for filtering fit results.
+message FilterSettings {
+	double shift_factor = 1;
+	double signal_strength = 2;
+	double min_photons = 3;
+	double precision_threshold = 4;
+	bool precision_using_background = 5;
+	double min_width_factor = 6;
+	double max_width_factor = 7;
+	bool disable_simple_filter = 8;
+	bool smart_filter = 9;
+	string smart_filter_string = 10;
+}
+	
+// Define the settings for fitting. These settings are used to fit a PSF to an 
+// extracted region from the input data and validate the fit.
+message FitSettings {
+	// The calibration of the input data
+	Calibration calibration = 1;
+	
+	// The point spread function (PSF)
+	PSF psf = 2;
+	
+	// The fit solver settings
+	FitSolverSettings fit_solver_settings = 3;
+	
+	// The filter settings
+	FilterSettings filter_settings = 4;
+}
+
+// Define the type of filter used for identifying candidate peaks.
+enum DataFilterType
+{
+	// Use a single filter
+	SINGLE = 0;
+	// Use a difference filter (the second subtracted from the first).
+	DIFFERENCE = 1;
+	// Use a jury of multiple filters
+	JURY = 2;
+}
+
+// Define a distance used during fitting
+message FitDistance {
+	// The value of the distance
+	double value = 1;
+	// Set to true to use the distance as pixels. The default is relative to 
+	// the PSF width. 
+	bool absolute = 2;
+}
+
+// Define the settings for filtering data to identify candidates.
+message DataFilter {
+	// The type of data filter
+	DataFilterType data_filter_type = 1;
+	// Any distance parameters used by the data filter. These can be in pixels
+	// or relative to the PSF width.
+	repeated FitDistance distance = 2;
+	// Any non-distance parameters used by the data filter
+	repeated double parameter = 3;
+}
+
+// Define the methods for noise estimation.
+enum NoiseEstimatorMethod {
+	// Use all pixels
+	ALL_PIXELS = 0;
+	// Use a range around the lowest pixel in the image
+	LOWEST_PIXELS = 1;
+	// Use the psuedo-residuals and calculate the least median of squares
+	RESIDUALS_LEAST_MEDIAN_OF_SQUARES = 2;
+	// Use the psuedo-residuals and calculate the least trimmed of squares
+	RESIDUALS_LEAST_TRIMMED_OF_SQUARES = 3;
+	// Use the psuedo-residuals and calculate the least mean of squares
+	RESIDUALS_LEAST_MEAN_OF_SQUARES = 4;
+	// Use the psuedo-residuals ignoring image border and calculate the least median of squares
+	QUICK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES = 5;
+	// Use the psuedo-residuals ignoring image border and calculate the least trimmed of squares
+	QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES = 6;
+	// Use the psuedo-residuals ignoring image border and calculate the least mean of squares
+	QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES = 7;
+}
+
+// Define the settings for the fit engine. These settings are used to identify
+// candidates in the input data, extract regions for fitting, fit using various
+// methods (single, multiple, doublet) and select the best fit. 
+message FitEngineSettings {
+	FitSettings fit_settings = 1;
+	
+	NoiseEstimatorMethod noise_method = 2;
+	
+	DataFilter data_filter = 3;	
+
+	FitDistance search = 4;
+	FitDistance border = 5;
+	FitDistance fitting = 6;
+	
+	bool include_neighbours = 7;
+	double neighbour_height_threshold = 8;
+	double residuals_threshold = 9;
+	FitDistance duplicate_distance = 10;
+	
+	int32 failures_limit = 11;
+}

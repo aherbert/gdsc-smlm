@@ -7,11 +7,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.EnumSet;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Parser;
+import com.google.protobuf.ProtocolMessageEnum;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
@@ -21,6 +23,9 @@ import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.CalibrationConfigHelper;
+import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
+import gdsc.smlm.data.config.FitConfigHelper;
 import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
 import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
@@ -109,105 +114,205 @@ public class SettingsManager
 
 	private static XStream xs = null;
 
-	public final static DistanceUnit[] distanceUnitValues;
-	public final static String[] distanceUnitNames;
-	static
+	// Encapsulate the values and names of enums for lazy loading
+
+	private static DistanceUnit[] _DistanceUnitValues;
+
+	public static DistanceUnit[] getDistanceUnitValues()
+	{
+		if (_DistanceUnitValues == null)
+			initDistanceUnit();
+		return _DistanceUnitValues;
+	}
+
+	private static String[] _DistanceUnitNames;
+
+	public static String[] getDistanceUnitNames()
+	{
+		if (_DistanceUnitNames == null)
+			initDistanceUnit();
+		return _DistanceUnitNames;
+	}
+
+	private static void initDistanceUnit()
 	{
 		EnumSet<DistanceUnit> d = EnumSet.allOf(DistanceUnit.class);
 		d.remove(DistanceUnit.UNRECOGNIZED);
 		//d.remove(DistanceUnit.DISTANCE_UNIT_NA);
-		distanceUnitValues = d.toArray(new DistanceUnit[d.size()]);
-		distanceUnitNames = new String[distanceUnitValues.length];
-		for (int i = 0; i < distanceUnitValues.length; i++)
+		_DistanceUnitValues = d.toArray(new DistanceUnit[d.size()]);
+		_DistanceUnitNames = new String[_DistanceUnitValues.length];
+		for (int i = 0; i < _DistanceUnitValues.length; i++)
 		{
-			distanceUnitNames[i] = getName(UnitHelper.getName(distanceUnitValues[i]),
-					UnitHelper.getShortName(distanceUnitValues[i]));
+			_DistanceUnitNames[i] = getName(UnitHelper.getName(_DistanceUnitValues[i]),
+					UnitHelper.getShortName(_DistanceUnitValues[i]));
 		}
 	}
 
-	public final static IntensityUnit[] intensityUnitValues;
-	public final static String[] intensityUnitNames;
-	static
+	private static IntensityUnit[] _IntensityUnitValues;
+
+	public static IntensityUnit[] getIntensityUnitValues()
+	{
+		if (_IntensityUnitValues == null)
+			initIntensityUnit();
+		return _IntensityUnitValues;
+	}
+
+	private static String[] _IntensityUnitNames;
+
+	public static String[] getIntensityUnitNames()
+	{
+		if (_IntensityUnitNames == null)
+			initIntensityUnit();
+		return _IntensityUnitNames;
+	}
+
+	private static void initIntensityUnit()
 	{
 		EnumSet<IntensityUnit> d = EnumSet.allOf(IntensityUnit.class);
 		d.remove(IntensityUnit.UNRECOGNIZED);
-		//d.remove(IntensityUnit.INTENSITY_UNIT_NA);
-		intensityUnitValues = d.toArray(new IntensityUnit[d.size()]);
-		intensityUnitNames = new String[intensityUnitValues.length];
-		for (int i = 0; i < intensityUnitValues.length; i++)
+		//d.remove(IntensityUnit.DISTANCE_UNIT_NA);
+		_IntensityUnitValues = d.toArray(new IntensityUnit[d.size()]);
+		_IntensityUnitNames = new String[_IntensityUnitValues.length];
+		for (int i = 0; i < _IntensityUnitValues.length; i++)
 		{
-			intensityUnitNames[i] = getName(UnitHelper.getName(intensityUnitValues[i]),
-					UnitHelper.getShortName(intensityUnitValues[i]));
+			_IntensityUnitNames[i] = getName(UnitHelper.getName(_IntensityUnitValues[i]),
+					UnitHelper.getShortName(_IntensityUnitValues[i]));
 		}
 	}
 
-	public final static AngleUnit[] angleUnitValues;
-	public final static String[] angleUnitNames;
-	static
+	private static AngleUnit[] _AngleUnitValues;
+
+	public static AngleUnit[] getAngleUnitValues()
+	{
+		if (_AngleUnitValues == null)
+			initAngleUnit();
+		return _AngleUnitValues;
+	}
+
+	private static String[] _AngleUnitNames;
+
+	public static String[] getAngleUnitNames()
+	{
+		if (_AngleUnitNames == null)
+			initAngleUnit();
+		return _AngleUnitNames;
+	}
+
+	private static void initAngleUnit()
 	{
 		EnumSet<AngleUnit> d = EnumSet.allOf(AngleUnit.class);
 		d.remove(AngleUnit.UNRECOGNIZED);
-		//d.remove(AngleUnit.ANGLE_UNIT_NA);
-		angleUnitValues = d.toArray(new AngleUnit[d.size()]);
-		angleUnitNames = new String[angleUnitValues.length];
-		for (int i = 0; i < angleUnitValues.length; i++)
+		//d.remove(AngleUnit.DISTANCE_UNIT_NA);
+		_AngleUnitValues = d.toArray(new AngleUnit[d.size()]);
+		_AngleUnitNames = new String[_AngleUnitValues.length];
+		for (int i = 0; i < _AngleUnitValues.length; i++)
 		{
-			angleUnitNames[i] = getName(UnitHelper.getName(angleUnitValues[i]),
-					UnitHelper.getShortName(angleUnitValues[i]));
+			_AngleUnitNames[i] = getName(UnitHelper.getName(_AngleUnitValues[i]),
+					UnitHelper.getShortName(_AngleUnitValues[i]));
 		}
 	}
 
-	public final static TimeUnit[] timeUnitValues;
-	public final static String[] timeUnitNames;
-	static
+	private static TimeUnit[] _TimeUnitValues;
+
+	public static TimeUnit[] getTimeUnitValues()
+	{
+		if (_TimeUnitValues == null)
+			initTimeUnit();
+		return _TimeUnitValues;
+	}
+
+	private static String[] _TimeUnitNames;
+
+	public static String[] getTimeUnitNames()
+	{
+		if (_TimeUnitNames == null)
+			initTimeUnit();
+		return _TimeUnitNames;
+	}
+
+	private static void initTimeUnit()
 	{
 		EnumSet<TimeUnit> d = EnumSet.allOf(TimeUnit.class);
 		d.remove(TimeUnit.UNRECOGNIZED);
-		//d.remove(TimeUnit.TIME_UNIT_NA);
-		timeUnitValues = d.toArray(new TimeUnit[d.size()]);
-		timeUnitNames = new String[timeUnitValues.length];
-		for (int i = 0; i < timeUnitValues.length; i++)
+		//d.remove(TimeUnit.DISTANCE_UNIT_NA);
+		_TimeUnitValues = d.toArray(new TimeUnit[d.size()]);
+		_TimeUnitNames = new String[_TimeUnitValues.length];
+		for (int i = 0; i < _TimeUnitValues.length; i++)
 		{
-			timeUnitNames[i] = getName(UnitHelper.getName(timeUnitValues[i]),
-					UnitHelper.getShortName(timeUnitValues[i]));
+			_TimeUnitNames[i] = getName(UnitHelper.getName(_TimeUnitValues[i]),
+					UnitHelper.getShortName(_TimeUnitValues[i]));
 		}
 	}
 
-	public final static ResultsImageType[] resultsImageTypeValues;
-	public final static String[] resultsImageTypeNames;
-	static
+	private static ResultsImageType[] _ResultsImageTypeValues;
+
+	public static ResultsImageType[] getResultsImageTypeValues()
+	{
+		if (_ResultsImageTypeValues == null)
+			initResultsImageType();
+		return _ResultsImageTypeValues;
+	}
+
+	private static String[] _ResultsImageTypeNames;
+
+	public static String[] getResultsImageTypeNames()
+	{
+		if (_ResultsImageTypeNames == null)
+			initResultsImageType();
+		return _ResultsImageTypeNames;
+	}
+
+	private static void initResultsImageType()
 	{
 		EnumSet<ResultsImageType> d = EnumSet.allOf(ResultsImageType.class);
 		d.remove(ResultsImageType.UNRECOGNIZED);
-		resultsImageTypeValues = d.toArray(new ResultsImageType[d.size()]);
-		resultsImageTypeNames = new String[resultsImageTypeValues.length];
-		for (int i = 0; i < resultsImageTypeValues.length; i++)
+		//d.remove(ResultsImageType.DISTANCE_UNIT_NA);
+		_ResultsImageTypeValues = d.toArray(new ResultsImageType[d.size()]);
+		_ResultsImageTypeNames = new String[_ResultsImageTypeValues.length];
+		for (int i = 0; i < _ResultsImageTypeValues.length; i++)
 		{
-			resultsImageTypeNames[i] = ResultsConfigHelper.getName(resultsImageTypeValues[i]);
+			_ResultsImageTypeNames[i] = ResultsConfigHelper.getName(_ResultsImageTypeValues[i]);
 		}
-	}	
+	}
 
-	public final static ResultsFileFormat[] resultsFileFormatValues;
-	public final static String[] resultsFileFormatNames;
-	static
+	private static ResultsFileFormat[] _ResultsFileFormatValues;
+
+	public static ResultsFileFormat[] getResultsFileFormatValues()
+	{
+		if (_ResultsFileFormatValues == null)
+			initResultsFileFormat();
+		return _ResultsFileFormatValues;
+	}
+
+	private static String[] _ResultsFileFormatNames;
+
+	public static String[] getResultsFileFormatNames()
+	{
+		if (_ResultsFileFormatNames == null)
+			initResultsFileFormat();
+		return _ResultsFileFormatNames;
+	}
+
+	private static void initResultsFileFormat()
 	{
 		EnumSet<ResultsFileFormat> d = EnumSet.allOf(ResultsFileFormat.class);
 		d.remove(ResultsFileFormat.UNRECOGNIZED);
-		resultsFileFormatValues = d.toArray(new ResultsFileFormat[d.size()]);
-		resultsFileFormatNames = new String[resultsFileFormatValues.length];
-		for (int i = 0; i < resultsFileFormatValues.length; i++)
+		//d.remove(ResultsFileFormat.DISTANCE_UNIT_NA);
+		_ResultsFileFormatValues = d.toArray(new ResultsFileFormat[d.size()]);
+		_ResultsFileFormatNames = new String[_ResultsFileFormatValues.length];
+		for (int i = 0; i < _ResultsFileFormatValues.length; i++)
 		{
-			resultsFileFormatNames[i] = ResultsConfigHelper.getName(resultsFileFormatValues[i]);
+			_ResultsFileFormatNames[i] = ResultsConfigHelper.getName(_ResultsFileFormatValues[i]);
 		}
-	}	
-	
-	public final static String[] dataFilterTypeNames, dataFilterNames,
-			fitSolverNames, fitFunctionNames, noiseEstimatorMethodNames, fitCriteriaNames, clusteringAlgorithmNames;
+	}
+
+	public final static String[] dataFilterTypeNames, dataFilterNames, fitSolverNames, fitFunctionNames,
+			noiseEstimatorMethodNames, fitCriteriaNames, clusteringAlgorithmNames;
 
 	static
 	{
 		// TODO Update these as the configuration objects are auto-generated
-		
+
 		dataFilterTypeNames = getNames((Object[]) DataFilterType.values());
 		dataFilterNames = getNames((Object[]) DataFilter.values());
 		fitSolverNames = getNames((Object[]) FitSolver.values());
@@ -730,7 +835,7 @@ public class SettingsManager
 	 * @param <T>
 	 *            the generic message type
 	 */
-	private static class ConfigurationReader<T extends Message>
+	public static class ConfigurationReader<T extends Message>
 	{
 		/** the default instance of the message type */
 		private T t;
@@ -744,6 +849,16 @@ public class SettingsManager
 		public ConfigurationReader(T t)
 		{
 			this.t = t;
+		}
+
+		/**
+		 * Read the message.
+		 *
+		 * @return the message
+		 */
+		public T read()
+		{
+			return read(0);
 		}
 
 		/**
@@ -764,17 +879,10 @@ public class SettingsManager
 		}
 	}
 
-	// This can be updated with default settings if necessary
-	private static final Calibration defaultCalibration;
-	static
-	{
-		defaultCalibration = Calibration.getDefaultInstance();
-	}
-
 	/**
-	 * Read the calibration from the settings file in the settings directory.
+	 * Read the Calibration from the settings file in the settings directory.
 	 *
-	 * @return the calibration
+	 * @return the Calibration
 	 */
 	public static Calibration readCalibration()
 	{
@@ -782,35 +890,21 @@ public class SettingsManager
 	}
 
 	/**
-	 * Read the calibration from the settings file in the settings directory.
+	 * Read the Calibration from the settings file in the settings directory.
 	 *
 	 * @param flags
 	 *            the flags
-	 * @return the calibration
+	 * @return the Calibration
 	 */
 	public static Calibration readCalibration(int flags)
 	{
-		return new ConfigurationReader<Calibration>(defaultCalibration).read(flags);
-	}
-
-	// This can be updated with default settings if necessary
-	private static final ResultsSettings defaultResultsSettings;
-	static
-	{
-		ResultsSettings.Builder builder = ResultsSettings.getDefaultInstance().toBuilder();
-		builder.getResultsImageSettingsBuilder().setWeighted(true);
-		builder.getResultsImageSettingsBuilder().setEqualised(true);
-		builder.getResultsImageSettingsBuilder().setAveragePrecision(30);
-		builder.getResultsImageSettingsBuilder().setScale(1);
-		builder.getResultsTableSettingsBuilder().setRoundingPrecision(4);
-		builder.getResultsInMemorySettingsBuilder().setInMemory(true);
-		defaultResultsSettings = builder.build();
+		return new ConfigurationReader<Calibration>(CalibrationConfigHelper.defaultCalibration).read(flags);
 	}
 
 	/**
-	 * Read the calibration from the settings file in the settings directory.
+	 * Read the ResultsSettings from the settings file in the settings directory.
 	 *
-	 * @return the calibration
+	 * @return the ResultsSettings
 	 */
 	public static ResultsSettings readResultsSettings()
 	{
@@ -818,17 +912,39 @@ public class SettingsManager
 	}
 
 	/**
-	 * Read the calibration from the settings file in the settings directory.
+	 * Read the ResultsSettings from the settings file in the settings directory.
 	 *
 	 * @param flags
 	 *            the flags
-	 * @return the calibration
+	 * @return the ResultsSettings
 	 */
 	public static ResultsSettings readResultsSettings(int flags)
 	{
-		return new ConfigurationReader<ResultsSettings>(defaultResultsSettings).read(flags);
+		return new ConfigurationReader<ResultsSettings>(ResultsConfigHelper.defaultResultsSettings).read(flags);
 	}
-	
+
+	/**
+	 * Read the FitEngineSettings from the settings file in the settings directory.
+	 *
+	 * @return the FitEngineSettings
+	 */
+	public static FitEngineSettings readFitEngineSettings()
+	{
+		return readFitEngineSettings(0);
+	}
+
+	/**
+	 * Read the FitEngineSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the FitEngineSettings
+	 */
+	public static FitEngineSettings readFitEngineSettings(int flags)
+	{
+		return new ConfigurationReader<FitEngineSettings>(FitConfigHelper.defaultFitEngineSettings).read(flags);
+	}
+
 	/**
 	 * Write the message to file.
 	 * <p>

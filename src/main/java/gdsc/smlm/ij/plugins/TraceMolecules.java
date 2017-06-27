@@ -26,15 +26,7 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.UnitConfig.TimeUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
-import gdsc.smlm.engine.FitEngine;
-import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.engine.FitParameters;
-import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
-import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitResult;
-import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
@@ -45,14 +37,11 @@ import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResults;
-import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
-import gdsc.smlm.utils.XmlUtils;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
@@ -672,8 +661,7 @@ public class TraceMolecules implements PlugIn
 		gd.addNumericField("Distance_Threshold (nm)", settings.distanceThreshold, 2);
 		gd.addNumericField("Distance_Exclusion (nm)", settings.distanceExclusion, 2);
 		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
-		gd.addChoice("Time_unit", SettingsManager.timeUnitNames,
-				SettingsManager.timeUnitNames[settings.getTimeUnit().ordinal()]);
+		gd.addChoice("Time_unit", SettingsManager.getTimeUnitNames(), settings.getTimeUnit().ordinal());
 		String[] traceModes = SettingsManager.getNames((Object[]) TraceManager.TraceMode.values());
 		gd.addChoice("Trace_mode", traceModes, traceModes[settings.getTraceMode().ordinal()]);
 		gd.addNumericField("Pulse_interval (frames)", settings.pulseInterval, 0);
@@ -784,8 +772,7 @@ public class TraceMolecules implements PlugIn
 
 		gd.addNumericField("Distance_Threshold (nm)", settings.distanceThreshold, 2);
 		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
-		gd.addChoice("Time_unit", SettingsManager.timeUnitNames,
-				SettingsManager.timeUnitNames[settings.getTimeUnit().ordinal()]);
+		gd.addChoice("Time_unit", SettingsManager.getTimeUnitNames(), settings.getTimeUnit().ordinal());
 		String[] algorithm = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
 		gd.addChoice("Clustering_algorithm", algorithm, algorithm[settings.getClusteringAlgorithm().ordinal()]);
 		gd.addNumericField("Pulse_interval (frames)", settings.pulseInterval, 0);
@@ -1611,381 +1598,381 @@ public class TraceMolecules implements PlugIn
 	@SuppressWarnings("unused")
 	private void fitTraces(MemoryPeakResults results, Trace[] traces)
 	{
-//		// Check if the original image is open and the fit configuration can be extracted
-//		ImageSource source = results.getSource();
-//		if (source == null)
-//			return;
-//		if (!source.open())
-//			return;
-//		FitEngineConfiguration config = (FitEngineConfiguration) XmlUtils.fromXML(results.getConfiguration());
-//		if (config == null)
-//			return;
-//
-//		// Show a dialog asking if the traces should be refit
-//		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-//		gd.addMessage("Do you want to fit the traces as a single peak using a combined image?");
-//
-//		//gd.addCheckbox("Fit_closest_to_centroid", !fitOnlyCentroid);
-//		//gd.addSlider("Distance_threshold", 0.01, 3, distanceThreshold);
-//		gd.addSlider("Expansion_factor", 1, 4.5, expansionFactor);
-//
-//		// Allow fitting settings to be adjusted
-//		FitConfiguration fitConfig = config.getFitConfiguration();
-//		gd.addMessage("--- Gaussian fitting ---");
-//		gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
-//				SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
-//		gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
-//				SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
-//		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
-//		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
-//		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
-//		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
-//
-//		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
-//				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
-//		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
-//				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
-//
-//		gd.addChoice("Fit_criteria", SettingsManager.fitCriteriaNames,
-//				SettingsManager.fitCriteriaNames[fitConfig.getFitCriteria().ordinal()]);
-//		gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
-//		gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
-//		gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
-//		gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
-//		gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
-//		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
-//		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
-//		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
-//
-//		//gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
-//
-//		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
-//
-//		gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
-//		gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
-//		gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
-//		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
-//		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
-//		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-//		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
-//		gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
-//
-//		gd.addCheckbox("Debug_failures", debugFailures);
-//		gd.showDialog();
-//		if (!gd.wasOKed())
-//		{
-//			source.close();
-//			return;
-//		}
-//
-//		// Get parameters for the fit
-//		//fitOnlyCentroid = !gd.getNextBoolean();
-//		//distanceThreshold = (float) gd.getNextNumber();
-//		expansionFactor = (float) gd.getNextNumber();
-//
-//		config.setDataFilterType(gd.getNextChoiceIndex());
-//		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
-//		config.setSearch(gd.getNextNumber());
-//		config.setBorder(gd.getNextNumber());
-//		config.setFitting(gd.getNextNumber());
-//		fitConfig.setFitSolver(gd.getNextChoiceIndex());
-//		fitConfig.setFitFunction(gd.getNextChoiceIndex());
-//		fitConfig.setFitCriteria(gd.getNextChoiceIndex());
-//
-//		fitConfig.setSignificantDigits((int) gd.getNextNumber());
-//		fitConfig.setDelta(gd.getNextNumber());
-//		fitConfig.setLambda(gd.getNextNumber());
-//		fitConfig.setMaxIterations((int) gd.getNextNumber());
-//		config.setFailuresLimit((int) gd.getNextNumber());
-//		config.setIncludeNeighbours(gd.getNextBoolean());
-//		config.setNeighbourHeightThreshold(gd.getNextNumber());
-//		config.setResidualsThreshold(gd.getNextNumber());
-//
-//		fitConfig.setSmartFilter(gd.getNextBoolean());
-//		fitConfig.setDisableSimpleFilter(gd.getNextBoolean());
-//		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
-//		fitConfig.setSignalStrength(gd.getNextNumber());
-//		fitConfig.setMinPhotons(gd.getNextNumber());
-//		fitConfig.setMinWidthFactor(gd.getNextNumber());
-//		fitConfig.setWidthFactor(gd.getNextNumber());
-//		fitConfig.setPrecisionThreshold(gd.getNextNumber());
-//
-//		// Check arguments
-//		try
-//		{
-//			//Parameters.isAboveZero("Distance threshold", distanceThreshold);
-//			Parameters.isAbove("Expansion factor", expansionFactor, 1);
-//			Parameters.isAboveZero("Search_width", config.getSearch());
-//			Parameters.isAboveZero("Fitting_width", config.getFitting());
-//			Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
-//			Parameters.isAboveZero("Delta", fitConfig.getDelta());
-//			Parameters.isAboveZero("Lambda", fitConfig.getLambda());
-//			Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
-//			Parameters.isPositive("Failures limit", config.getFailuresLimit());
-//			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
-//			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
-//			Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
-//			Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
-//			Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
-//			Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
-//			Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
-//			Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
-//		}
-//		catch (IllegalArgumentException e)
-//		{
-//			IJ.error(TITLE, e.getMessage());
-//			source.close();
-//			return;
-//		}
-//
-//		debugFailures = gd.getNextBoolean();
-//
-//		if (!PeakFit.configureSmartFilter(globalSettings, null))
-//			return;
-//		if (!PeakFit.configureDataFilter(globalSettings, null, false))
-//			return;
-//		if (!PeakFit.configureFitSolver(globalSettings, null, false))
-//			return;
-//
-//		// Adjust settings for a single maxima
-//		config.setIncludeNeighbours(false);
-//		fitConfig.setDuplicateDistance(0);
-//
-//		// Create a fit engine
-//		MemoryPeakResults refitResults = new MemoryPeakResults();
-//		refitResults.copySettings(results);
-//		refitResults.setName(results.getName() + " Trace Fit");
-//		refitResults.setSortAfterEnd(true);
-//		refitResults.begin();
-//		int threadCount = Prefs.getThreads();
-//		PeakResults syncResults = SynchronizedPeakResults.create(refitResults, threadCount);
-//		// No border since we know where the peaks are and we must not miss them due to truncated searching 
-//		FitEngine engine = new FitEngine(config, syncResults, threadCount, FitQueue.BLOCKING);
-//
-//		// Either : Only fit the centroid
-//		// or     : Extract a bigger region, allowing all fits to run as normal and then 
-//		//          find the correct spot using Euclidian distance.
-//
-//		// Set up the limits
-//		final double stdDev = FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
-//		float fitWidth = (float) (stdDev * config.getFitting() * expansionFactor);
-//
-//		IJ.showStatus("Refitting traces ...");
-//
-//		List<JobItem> jobItems = new ArrayList<JobItem>(traces.length);
-//		int singles = 0;
-//		int fitted = 0;
-//		for (int n = 0; n < traces.length; n++)
-//		{
-//			Trace trace = traces[n];
-//
-//			if (n % 32 == 0)
-//				IJ.showProgress(n, traces.length);
-//
-//			// Skip traces with one peak
-//			if (trace.size() == 1)
-//			{
-//				singles++;
-//				// Use the synchronized method to avoid thread clashes with the FitEngine
-//				syncResults.add(trace.getHead());
-//				continue;
-//			}
-//
-//			Rectangle bounds = new Rectangle();
-//			double[] combinedNoise = new double[1];
-//			float[] data = buildCombinedImage(source, trace, fitWidth, bounds, combinedNoise, false);
-//			if (data == null)
-//				continue;
-//
-//			// Fit the combined image
-//			FitParameters params = new FitParameters();
-//			params.noise = (float) combinedNoise[0];
-//			float[] centre = trace.getCentroid();
-//
-//			//if (fitOnlyCentroid)
-//			//{
-//			int newX = (int) Math.round(centre[0]) - bounds.x;
-//			int newY = (int) Math.round(centre[1]) - bounds.y;
-//			params.maxIndices = new int[] { newY * bounds.width + newX };
-//			//}
-//			//else
-//			//{
-//			//	params.filter = new ArrayList<float[]>();
-//			//	params.filter.add(new float[] { centre[0] - bounds.x, centre[1] - bounds.y });
-//			//	params.distanceThreshold = distanceThreshold;
-//			//}
-//
-//			// This is not needed since the bounds are passed using the FitJob
-//			//params.setOffset(new float[] { bounds.x, bounds.y });
-//			int startT = trace.getHead().getFrame();
-//			params.endT = trace.getTail().getFrame();
-//
-//			ParameterisedFitJob job = new ParameterisedFitJob(n, params, startT, data, bounds);
-//			jobItems.add(new JobItem(job, trace, centre));
-//			engine.run(job);
-//			fitted++;
-//		}
-//
-//		engine.end(false);
-//
-//		IJ.showStatus("");
-//		IJ.showProgress(1);
-//
-//		// Check the success ...
-//		FitStatus[] values = FitStatus.values();
-//		int[] statusCount = new int[values.length + 1];
-//		ArrayList<String> names = new ArrayList<String>(Arrays.asList(SettingsManager.getNames((Object[]) values)));
-//		//names.add(String.format("No maxima within %.2f of centroid", distanceThreshold));
-//		int separated = 0;
-//		int success = 0;
-//		final int debugLimit = 3;
-//		for (JobItem jobItem : jobItems)
-//		{
-//			int id = jobItem.getId();
-//			ParameterisedFitJob job = jobItem.job;
-//			Trace trace = jobItem.trace;
-//			int[] indices = job.getIndices();
-//			FitResult fitResult = null;
-//			int status;
-//			if (indices.length < 1)
-//			{
-//				status = values.length;
-//			}
-//			else if (indices.length > 1)
-//			{
-//				//System.out.printf("Multiple fits performed for trace : Job Id = %d\n", id);
-//
-//				// Fits are recorded if (a) they succeeded and were close to the target centroid; 
-//				// or (b) if they failed and started close to the target centroid.
-//
-//				// Choose the first OK result. This is all that matters for the success reporting
-//				for (int n = 0; n < indices.length; n++)
-//				{
-//					if (job.getFitResult(n).getStatus() == FitStatus.OK)
-//					{
-//						fitResult = job.getFitResult(n);
-//						break;
-//					}
-//				}
-//				// Otherwise use the closest failure. 
-//				if (fitResult == null)
-//				{
-//					final float[] centre = traces[id].getCentroid();
-//					double minD = Double.POSITIVE_INFINITY;
-//					for (int n = 0; n < indices.length; n++)
-//					{
-//						// Since the fit has failed we use the initial parameters.
-//						// Note: This assumes the initial parameters are for a Gaussian 2D function
-//						final double[] params = job.getFitResult(n).getInitialParameters();
-//						final double dx = params[Gaussian2DFunction.X_POSITION] - centre[0];
-//						final double dy = params[Gaussian2DFunction.Y_POSITION] - centre[1];
-//						final double d = dx * dx + dy * dy;
-//						if (minD > d)
-//						{
-//							minD = d;
-//							fitResult = job.getFitResult(n);
-//						}
-//					}
-//				}
-//
-//				status = fitResult.getStatus().ordinal();
-//			}
-//			else
-//			{
-//				fitResult = job.getFitResult(0);
-//				status = fitResult.getStatus().ordinal();
-//			}
-//
-//			// All jobs have only one peak
-//			statusCount[status]++;
-//
-//			// Debug why any fits failed
-//			if (fitResult == null || fitResult.getStatus() != FitStatus.OK)
-//			{
-//				refitResults.addAll(trace.getPoints());
-//				separated += trace.size();
-//
-//				if (debugFailures)
-//				{
-//					FitStatus s = (fitResult == null) ? FitStatus.UNKNOWN : fitResult.getStatus();
-//
-//					// Only display the first n per category to limit the number of images
-//					double[] noise = new double[1];
-//					if (statusCount[status] <= debugLimit)
-//					{
-//						Rectangle bounds = new Rectangle();
-//						buildCombinedImage(source, trace, fitWidth, bounds, noise, true);
-//						float[] centre = trace.getCentroid();
-//						Utils.display(
-//								String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0], centre[1]),
-//								slices);
-//
-//						switch (s)
-//						{
-//							case INSUFFICIENT_PRECISION:
-//								float precision = (Float) fitResult.getStatusData();
-//								IJ.log(String.format("Trace %d (n=%d) : %s = %f", id, trace.size(), names.get(status),
-//										precision));
-//								break;
-//							case INSUFFICIENT_SIGNAL:
-//								if (noise[0] == 0)
-//									noise[0] = getCombinedNoise(trace);
-//								float snr = (Float) fitResult.getStatusData();
-//								IJ.log(String.format("Trace %d (n=%d) : %s = %f (noise=%.2f)", id, trace.size(),
-//										names.get(status), snr, noise[0]));
-//								break;
-//							case COORDINATES_MOVED:
-//							case OUTSIDE_FIT_REGION:
-//							case WIDTH_DIVERGED:
-//								float[] shift = (float[]) fitResult.getStatusData();
-//								IJ.log(String.format("Trace %d (n=%d) : %s = %.3f,%.3f", id, trace.size(),
-//										names.get(status), shift[0], shift[1]));
-//								break;
-//							default:
-//								IJ.log(String.format("Trace %d (n=%d) : %s", id, trace.size(), names.get(status)));
-//								break;
-//						}
-//					}
-//				}
-//			}
-//			else
-//			{
-//				success++;
-//
-//				if (debugFailures)
-//				{
-//					// Only display the first n per category to limit the number of images
-//					double[] noise = new double[1];
-//					if (statusCount[status] <= debugLimit)
-//					{
-//						Rectangle bounds = new Rectangle();
-//						buildCombinedImage(source, trace, fitWidth, bounds, noise, true);
-//						float[] centre = trace.getCentroid();
-//						Utils.display(
-//								String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0], centre[1]),
-//								slices);
-//					}
-//				}
-//			}
-//		}
-//
-//		IJ.log(String.format("Trace fitting : %d singles : %d / %d fitted : %d separated", singles, success, fitted,
-//				separated));
-//		if (separated > 0)
-//		{
-//			IJ.log("Reasons for fit failure :");
-//			// Start at i=1 to skip FitStatus.OK
-//			for (int i = 1; i < statusCount.length; i++)
-//			{
-//				if (statusCount[i] != 0)
-//					IJ.log("  " + names.get(i) + " = " + statusCount[i]);
-//			}
-//		}
-//
-//		refitResults.end();
-//		MemoryPeakResults.addResults(refitResults);
-//
-//		source.close();
+		//		// Check if the original image is open and the fit configuration can be extracted
+		//		ImageSource source = results.getSource();
+		//		if (source == null)
+		//			return;
+		//		if (!source.open())
+		//			return;
+		//		FitEngineConfiguration config = (FitEngineConfiguration) XmlUtils.fromXML(results.getConfiguration());
+		//		if (config == null)
+		//			return;
+		//
+		//		// Show a dialog asking if the traces should be refit
+		//		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		//		gd.addMessage("Do you want to fit the traces as a single peak using a combined image?");
+		//
+		//		//gd.addCheckbox("Fit_closest_to_centroid", !fitOnlyCentroid);
+		//		//gd.addSlider("Distance_threshold", 0.01, 3, distanceThreshold);
+		//		gd.addSlider("Expansion_factor", 1, 4.5, expansionFactor);
+		//
+		//		// Allow fitting settings to be adjusted
+		//		FitConfiguration fitConfig = config.getFitConfiguration();
+		//		gd.addMessage("--- Gaussian fitting ---");
+		//		gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
+		//				SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
+		//		gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
+		//				SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
+		//		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
+		//		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		//		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
+		//		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
+		//
+		//		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
+		//				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
+		//		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
+		//				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
+		//
+		//		gd.addChoice("Fit_criteria", SettingsManager.fitCriteriaNames,
+		//				SettingsManager.fitCriteriaNames[fitConfig.getFitCriteria().ordinal()]);
+		//		gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
+		//		gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
+		//		gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
+		//		gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
+		//		gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
+		//		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
+		//		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
+		//		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
+		//
+		//		//gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
+		//
+		//		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
+		//
+		//		gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
+		//		gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
+		//		gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
+		//		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
+		//		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
+		//		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
+		//		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
+		//		gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
+		//
+		//		gd.addCheckbox("Debug_failures", debugFailures);
+		//		gd.showDialog();
+		//		if (!gd.wasOKed())
+		//		{
+		//			source.close();
+		//			return;
+		//		}
+		//
+		//		// Get parameters for the fit
+		//		//fitOnlyCentroid = !gd.getNextBoolean();
+		//		//distanceThreshold = (float) gd.getNextNumber();
+		//		expansionFactor = (float) gd.getNextNumber();
+		//
+		//		config.setDataFilterType(gd.getNextChoiceIndex());
+		//		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
+		//		config.setSearch(gd.getNextNumber());
+		//		config.setBorder(gd.getNextNumber());
+		//		config.setFitting(gd.getNextNumber());
+		//		fitConfig.setFitSolver(gd.getNextChoiceIndex());
+		//		fitConfig.setFitFunction(gd.getNextChoiceIndex());
+		//		fitConfig.setFitCriteria(gd.getNextChoiceIndex());
+		//
+		//		fitConfig.setSignificantDigits((int) gd.getNextNumber());
+		//		fitConfig.setDelta(gd.getNextNumber());
+		//		fitConfig.setLambda(gd.getNextNumber());
+		//		fitConfig.setMaxIterations((int) gd.getNextNumber());
+		//		config.setFailuresLimit((int) gd.getNextNumber());
+		//		config.setIncludeNeighbours(gd.getNextBoolean());
+		//		config.setNeighbourHeightThreshold(gd.getNextNumber());
+		//		config.setResidualsThreshold(gd.getNextNumber());
+		//
+		//		fitConfig.setSmartFilter(gd.getNextBoolean());
+		//		fitConfig.setDisableSimpleFilter(gd.getNextBoolean());
+		//		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
+		//		fitConfig.setSignalStrength(gd.getNextNumber());
+		//		fitConfig.setMinPhotons(gd.getNextNumber());
+		//		fitConfig.setMinWidthFactor(gd.getNextNumber());
+		//		fitConfig.setWidthFactor(gd.getNextNumber());
+		//		fitConfig.setPrecisionThreshold(gd.getNextNumber());
+		//
+		//		// Check arguments
+		//		try
+		//		{
+		//			//Parameters.isAboveZero("Distance threshold", distanceThreshold);
+		//			Parameters.isAbove("Expansion factor", expansionFactor, 1);
+		//			Parameters.isAboveZero("Search_width", config.getSearch());
+		//			Parameters.isAboveZero("Fitting_width", config.getFitting());
+		//			Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
+		//			Parameters.isAboveZero("Delta", fitConfig.getDelta());
+		//			Parameters.isAboveZero("Lambda", fitConfig.getLambda());
+		//			Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
+		//			Parameters.isPositive("Failures limit", config.getFailuresLimit());
+		//			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
+		//			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
+		//			Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
+		//			Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
+		//			Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
+		//			Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
+		//			Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
+		//			Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
+		//		}
+		//		catch (IllegalArgumentException e)
+		//		{
+		//			IJ.error(TITLE, e.getMessage());
+		//			source.close();
+		//			return;
+		//		}
+		//
+		//		debugFailures = gd.getNextBoolean();
+		//
+		//		if (!PeakFit.configureSmartFilter(globalSettings, null))
+		//			return;
+		//		if (!PeakFit.configureDataFilter(globalSettings, null, false))
+		//			return;
+		//		if (!PeakFit.configureFitSolver(globalSettings, null, false))
+		//			return;
+		//
+		//		// Adjust settings for a single maxima
+		//		config.setIncludeNeighbours(false);
+		//		fitConfig.setDuplicateDistance(0);
+		//
+		//		// Create a fit engine
+		//		MemoryPeakResults refitResults = new MemoryPeakResults();
+		//		refitResults.copySettings(results);
+		//		refitResults.setName(results.getName() + " Trace Fit");
+		//		refitResults.setSortAfterEnd(true);
+		//		refitResults.begin();
+		//		int threadCount = Prefs.getThreads();
+		//		PeakResults syncResults = SynchronizedPeakResults.create(refitResults, threadCount);
+		//		// No border since we know where the peaks are and we must not miss them due to truncated searching 
+		//		FitEngine engine = new FitEngine(config, syncResults, threadCount, FitQueue.BLOCKING);
+		//
+		//		// Either : Only fit the centroid
+		//		// or     : Extract a bigger region, allowing all fits to run as normal and then 
+		//		//          find the correct spot using Euclidian distance.
+		//
+		//		// Set up the limits
+		//		final double stdDev = FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+		//		float fitWidth = (float) (stdDev * config.getFitting() * expansionFactor);
+		//
+		//		IJ.showStatus("Refitting traces ...");
+		//
+		//		List<JobItem> jobItems = new ArrayList<JobItem>(traces.length);
+		//		int singles = 0;
+		//		int fitted = 0;
+		//		for (int n = 0; n < traces.length; n++)
+		//		{
+		//			Trace trace = traces[n];
+		//
+		//			if (n % 32 == 0)
+		//				IJ.showProgress(n, traces.length);
+		//
+		//			// Skip traces with one peak
+		//			if (trace.size() == 1)
+		//			{
+		//				singles++;
+		//				// Use the synchronized method to avoid thread clashes with the FitEngine
+		//				syncResults.add(trace.getHead());
+		//				continue;
+		//			}
+		//
+		//			Rectangle bounds = new Rectangle();
+		//			double[] combinedNoise = new double[1];
+		//			float[] data = buildCombinedImage(source, trace, fitWidth, bounds, combinedNoise, false);
+		//			if (data == null)
+		//				continue;
+		//
+		//			// Fit the combined image
+		//			FitParameters params = new FitParameters();
+		//			params.noise = (float) combinedNoise[0];
+		//			float[] centre = trace.getCentroid();
+		//
+		//			//if (fitOnlyCentroid)
+		//			//{
+		//			int newX = (int) Math.round(centre[0]) - bounds.x;
+		//			int newY = (int) Math.round(centre[1]) - bounds.y;
+		//			params.maxIndices = new int[] { newY * bounds.width + newX };
+		//			//}
+		//			//else
+		//			//{
+		//			//	params.filter = new ArrayList<float[]>();
+		//			//	params.filter.add(new float[] { centre[0] - bounds.x, centre[1] - bounds.y });
+		//			//	params.distanceThreshold = distanceThreshold;
+		//			//}
+		//
+		//			// This is not needed since the bounds are passed using the FitJob
+		//			//params.setOffset(new float[] { bounds.x, bounds.y });
+		//			int startT = trace.getHead().getFrame();
+		//			params.endT = trace.getTail().getFrame();
+		//
+		//			ParameterisedFitJob job = new ParameterisedFitJob(n, params, startT, data, bounds);
+		//			jobItems.add(new JobItem(job, trace, centre));
+		//			engine.run(job);
+		//			fitted++;
+		//		}
+		//
+		//		engine.end(false);
+		//
+		//		IJ.showStatus("");
+		//		IJ.showProgress(1);
+		//
+		//		// Check the success ...
+		//		FitStatus[] values = FitStatus.values();
+		//		int[] statusCount = new int[values.length + 1];
+		//		ArrayList<String> names = new ArrayList<String>(Arrays.asList(SettingsManager.getNames((Object[]) values)));
+		//		//names.add(String.format("No maxima within %.2f of centroid", distanceThreshold));
+		//		int separated = 0;
+		//		int success = 0;
+		//		final int debugLimit = 3;
+		//		for (JobItem jobItem : jobItems)
+		//		{
+		//			int id = jobItem.getId();
+		//			ParameterisedFitJob job = jobItem.job;
+		//			Trace trace = jobItem.trace;
+		//			int[] indices = job.getIndices();
+		//			FitResult fitResult = null;
+		//			int status;
+		//			if (indices.length < 1)
+		//			{
+		//				status = values.length;
+		//			}
+		//			else if (indices.length > 1)
+		//			{
+		//				//System.out.printf("Multiple fits performed for trace : Job Id = %d\n", id);
+		//
+		//				// Fits are recorded if (a) they succeeded and were close to the target centroid; 
+		//				// or (b) if they failed and started close to the target centroid.
+		//
+		//				// Choose the first OK result. This is all that matters for the success reporting
+		//				for (int n = 0; n < indices.length; n++)
+		//				{
+		//					if (job.getFitResult(n).getStatus() == FitStatus.OK)
+		//					{
+		//						fitResult = job.getFitResult(n);
+		//						break;
+		//					}
+		//				}
+		//				// Otherwise use the closest failure. 
+		//				if (fitResult == null)
+		//				{
+		//					final float[] centre = traces[id].getCentroid();
+		//					double minD = Double.POSITIVE_INFINITY;
+		//					for (int n = 0; n < indices.length; n++)
+		//					{
+		//						// Since the fit has failed we use the initial parameters.
+		//						// Note: This assumes the initial parameters are for a Gaussian 2D function
+		//						final double[] params = job.getFitResult(n).getInitialParameters();
+		//						final double dx = params[Gaussian2DFunction.X_POSITION] - centre[0];
+		//						final double dy = params[Gaussian2DFunction.Y_POSITION] - centre[1];
+		//						final double d = dx * dx + dy * dy;
+		//						if (minD > d)
+		//						{
+		//							minD = d;
+		//							fitResult = job.getFitResult(n);
+		//						}
+		//					}
+		//				}
+		//
+		//				status = fitResult.getStatus().ordinal();
+		//			}
+		//			else
+		//			{
+		//				fitResult = job.getFitResult(0);
+		//				status = fitResult.getStatus().ordinal();
+		//			}
+		//
+		//			// All jobs have only one peak
+		//			statusCount[status]++;
+		//
+		//			// Debug why any fits failed
+		//			if (fitResult == null || fitResult.getStatus() != FitStatus.OK)
+		//			{
+		//				refitResults.addAll(trace.getPoints());
+		//				separated += trace.size();
+		//
+		//				if (debugFailures)
+		//				{
+		//					FitStatus s = (fitResult == null) ? FitStatus.UNKNOWN : fitResult.getStatus();
+		//
+		//					// Only display the first n per category to limit the number of images
+		//					double[] noise = new double[1];
+		//					if (statusCount[status] <= debugLimit)
+		//					{
+		//						Rectangle bounds = new Rectangle();
+		//						buildCombinedImage(source, trace, fitWidth, bounds, noise, true);
+		//						float[] centre = trace.getCentroid();
+		//						Utils.display(
+		//								String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0], centre[1]),
+		//								slices);
+		//
+		//						switch (s)
+		//						{
+		//							case INSUFFICIENT_PRECISION:
+		//								float precision = (Float) fitResult.getStatusData();
+		//								IJ.log(String.format("Trace %d (n=%d) : %s = %f", id, trace.size(), names.get(status),
+		//										precision));
+		//								break;
+		//							case INSUFFICIENT_SIGNAL:
+		//								if (noise[0] == 0)
+		//									noise[0] = getCombinedNoise(trace);
+		//								float snr = (Float) fitResult.getStatusData();
+		//								IJ.log(String.format("Trace %d (n=%d) : %s = %f (noise=%.2f)", id, trace.size(),
+		//										names.get(status), snr, noise[0]));
+		//								break;
+		//							case COORDINATES_MOVED:
+		//							case OUTSIDE_FIT_REGION:
+		//							case WIDTH_DIVERGED:
+		//								float[] shift = (float[]) fitResult.getStatusData();
+		//								IJ.log(String.format("Trace %d (n=%d) : %s = %.3f,%.3f", id, trace.size(),
+		//										names.get(status), shift[0], shift[1]));
+		//								break;
+		//							default:
+		//								IJ.log(String.format("Trace %d (n=%d) : %s", id, trace.size(), names.get(status)));
+		//								break;
+		//						}
+		//					}
+		//				}
+		//			}
+		//			else
+		//			{
+		//				success++;
+		//
+		//				if (debugFailures)
+		//				{
+		//					// Only display the first n per category to limit the number of images
+		//					double[] noise = new double[1];
+		//					if (statusCount[status] <= debugLimit)
+		//					{
+		//						Rectangle bounds = new Rectangle();
+		//						buildCombinedImage(source, trace, fitWidth, bounds, noise, true);
+		//						float[] centre = trace.getCentroid();
+		//						Utils.display(
+		//								String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0], centre[1]),
+		//								slices);
+		//					}
+		//				}
+		//			}
+		//		}
+		//
+		//		IJ.log(String.format("Trace fitting : %d singles : %d / %d fitted : %d separated", singles, success, fitted,
+		//				separated));
+		//		if (separated > 0)
+		//		{
+		//			IJ.log("Reasons for fit failure :");
+		//			// Start at i=1 to skip FitStatus.OK
+		//			for (int i = 1; i < statusCount.length; i++)
+		//			{
+		//				if (statusCount[i] != 0)
+		//					IJ.log("  " + names.get(i) + " = " + statusCount[i]);
+		//			}
+		//		}
+		//
+		//		refitResults.end();
+		//		MemoryPeakResults.addResults(refitResults);
+		//
+		//		source.close();
 	}
 
 	private ImageStack slices;

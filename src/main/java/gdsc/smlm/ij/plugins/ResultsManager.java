@@ -537,12 +537,12 @@ public class ResultsManager implements PlugIn
 					return;
 				}
 				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
-				egd.addChoice("Table_distance_unit", SettingsManager.distanceUnitNames,
-						SettingsManager.distanceUnitNames[tableSettings.getDistanceUnit().getNumber()]);
-				egd.addChoice("Table_intensity_unit", SettingsManager.intensityUnitNames,
-						SettingsManager.intensityUnitNames[tableSettings.getIntensityUnit().getNumber()]);
-				egd.addChoice("Table_angle_unit", SettingsManager.angleUnitNames,
-						SettingsManager.angleUnitNames[tableSettings.getAngleUnit().getNumber()]);
+				egd.addChoice("Table_distance_unit", SettingsManager.getDistanceUnitNames(),
+						tableSettings.getDistanceUnit().getNumber());
+				egd.addChoice("Table_intensity_unit", SettingsManager.getIntensityUnitNames(),
+						tableSettings.getIntensityUnit().getNumber());
+				egd.addChoice("Table_angle_unit", SettingsManager.getAngleUnitNames(),
+						tableSettings.getAngleUnit().getNumber());
 				egd.addCheckbox("Table_show_fitting_data", tableSettings.getShowFittingData());
 				egd.addCheckbox("Table_show_noise_data", tableSettings.getShowNoiseData());
 				egd.addCheckbox("Table_show_precision", tableSettings.getComputePrecision());
@@ -583,8 +583,7 @@ public class ResultsManager implements PlugIn
 				ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION);
 		final EnumSet<ResultsImageType> requireWeighted = EnumSet.of(ResultsImageType.DRAW_LOCALISATIONS,
 				ResultsImageType.DRAW_INTENSITY, ResultsImageType.DRAW_FRAME_NUMBER, ResultsImageType.DRAW_FIT_ERROR);
-		gd.addChoice("Image", SettingsManager.resultsImageTypeNames,
-				SettingsManager.resultsImageTypeNames[imageSettings.getImageType().getNumber()],
+		gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(), imageSettings.getImageType().getNumber(),
 				new OptionListener<Choice>()
 				{
 					public void collectOptions(Choice field)
@@ -637,9 +636,8 @@ public class ResultsManager implements PlugIn
 		else
 			// Do not add a results file to prevent constant overwrite messages
 			gd.addFilenameField("Results_file", "");
-		gd.addChoice("Results_format", SettingsManager.resultsFileFormatNames,
-				SettingsManager.resultsFileFormatNames[fileSettings.getFileFormat().getNumber()],
-				new OptionListener<Choice>()
+		gd.addChoice("Results_format", SettingsManager.getResultsFileFormatNames(),
+				fileSettings.getFileFormat().getNumber(), new OptionListener<Choice>()
 				{
 					public void collectOptions(Choice field)
 					{
@@ -657,12 +655,12 @@ public class ResultsManager implements PlugIn
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (resultsFileFormat == ResultsFileFormat.TEXT)
 						{
-							egd.addChoice("File_distance_unit", SettingsManager.distanceUnitNames,
-									SettingsManager.distanceUnitNames[fileSettings.getDistanceUnit().ordinal()]);
-							egd.addChoice("File_intensity_unit", SettingsManager.intensityUnitNames,
-									SettingsManager.intensityUnitNames[fileSettings.getIntensityUnit().ordinal()]);
-							egd.addChoice("File_angle_unit", SettingsManager.angleUnitNames,
-									SettingsManager.angleUnitNames[fileSettings.getAngleUnit().ordinal()]);
+							egd.addChoice("File_distance_unit", SettingsManager.getDistanceUnitNames(),
+									fileSettings.getDistanceUnit().ordinal());
+							egd.addChoice("File_intensity_unit", SettingsManager.getIntensityUnitNames(),
+									fileSettings.getIntensityUnit().ordinal());
+							egd.addChoice("File_angle_unit", SettingsManager.getAngleUnitNames(),
+									fileSettings.getAngleUnit().ordinal());
 							egd.addCheckbox("File_show_precision", fileSettings.getComputePrecision());
 						}
 						egd.addCheckbox("Show_deviations", resultsSettings.getShowDeviations());
@@ -1385,7 +1383,7 @@ public class ResultsManager implements PlugIn
 			Recorder.recordOption("input", INPUT_FILE);
 			Recorder.recordOption("input_file", path);
 			Recorder.recordOption("image",
-					SettingsManager.resultsImageTypeNames[ResultsImageType.DRAW_NONE.getNumber()]);
+					SettingsManager.getResultsImageTypeNames()[ResultsImageType.DRAW_NONE.getNumber()]);
 			Recorder.recordOption("results_file", "[]");
 			Recorder.recordOption("save_to_memory");
 		}
