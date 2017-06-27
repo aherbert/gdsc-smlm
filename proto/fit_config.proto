@@ -62,6 +62,8 @@ enum SearchMethod
 	BFGS = 7;
 }
 
+// TODO - comment all the fields
+
 // Define settings for the fit solver.
 message FitSolverSettings {
 	bool fixed_psf = 1;
@@ -130,24 +132,44 @@ enum DataFilterType
 	JURY = 2;
 }
 
-// Define a distance used during fitting
-message FitDistance {
-	// The value of the distance
+// Define the method used to filter the input data before identifying candidate peaks
+enum DataFilterMethod
+{
+	// Use a mean within a specified area
+	MEAN = 0;
+	// Use a mean within a specified box area. The box has integer size.
+	BLOCK_MEAN = 1;
+	// Use a mean within a specified circle area
+	CIRCULAR_MEAN = 2;
+	// Use a Gaussian with a specified radius
+	GAUSSIAN = 3;
+	// Use a median within a specified box area. The box has integer size.
+	MEDIAN = 4;
+}
+
+// Define a parameter used during fitting that can be absolute of relative to the PSF width
+message RelativeParameter {
+	// The value of the parameter
 	double value = 1;
-	// Set to true to use the distance as pixels. The default is relative to 
-	// the PSF width. 
+	// Set to true to use the absolute value. The default is relative to the PSF width. 
 	bool absolute = 2;
 }
 
-// Define the settings for filtering data to identify candidates.
+// Define a data filter
 message DataFilter {
+	// The method used by the data filter
+	DataFilterMethod data_filter_method = 1;
+	// Any parameters used by the data filter. These can be in pixels
+	// or relative to the PSF width.
+	repeated RelativeParameter parameter = 2;
+}
+
+// Define the settings for filtering data to identify candidates.
+message DataFilterSettings {
 	// The type of data filter
 	DataFilterType data_filter_type = 1;
-	// Any distance parameters used by the data filter. These can be in pixels
-	// or relative to the PSF width.
-	repeated FitDistance distance = 2;
-	// Any non-distance parameters used by the data filter
-	repeated double parameter = 3;
+	// The data filter
+	repeated DataFilter data_filter = 2;
 }
 
 // Define the methods for noise estimation.
@@ -178,16 +200,16 @@ message FitEngineSettings {
 	
 	NoiseEstimatorMethod noise_method = 2;
 	
-	DataFilter data_filter = 3;	
+	DataFilterSettings data_filter_settings = 3;	
 
-	FitDistance search = 4;
-	FitDistance border = 5;
-	FitDistance fitting = 6;
+	RelativeParameter search = 4;
+	RelativeParameter border = 5;
+	RelativeParameter fitting = 6;
 	
 	bool include_neighbours = 7;
 	double neighbour_height_threshold = 8;
 	double residuals_threshold = 9;
-	FitDistance duplicate_distance = 10;
+	RelativeParameter duplicate_distance = 10;
 	
 	int32 failures_limit = 11;
 }

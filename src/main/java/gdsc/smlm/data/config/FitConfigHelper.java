@@ -2,9 +2,11 @@ package gdsc.smlm.data.config;
 
 import gdsc.core.utils.Maths;
 import gdsc.smlm.data.config.FitConfig.DataFilter;
+import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
+import gdsc.smlm.data.config.FitConfig.DataFilterSettings;
 import gdsc.smlm.data.config.FitConfig.DataFilterType;
 import gdsc.smlm.data.config.FitConfig.FilterSettings;
-import gdsc.smlm.data.config.FitConfig.FitDistance;
+import gdsc.smlm.data.config.FitConfig.RelativeParameter;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
 import gdsc.smlm.data.config.FitConfig.FitSettings;
 import gdsc.smlm.data.config.FitConfig.FitSolver;
@@ -110,26 +112,29 @@ public class FitConfigHelper
 		
 		builder.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
 
-		FitDistance.Builder fd = FitDistance.newBuilder();
-		DataFilter.Builder df = DataFilter.newBuilder();
-		df.setDataFilterType(DataFilterType.SINGLE);
-		fd.setAbsolute(false);
-		fd.setValue(1.2);
-		df.addDistance(fd.build());
+		RelativeParameter.Builder rp = RelativeParameter.newBuilder();
+		DataFilterSettings.Builder dfs = DataFilterSettings.newBuilder();
+		dfs.setDataFilterType(DataFilterType.SINGLE);
+		rp.setAbsolute(false);
+		rp.setValue(1.2);
+		DataFilter.Builder dfb = DataFilter.newBuilder();
+		dfb.setDataFilterMethod(DataFilterMethod.MEAN);
+		dfb.addParameter(rp.build());
+		dfs.addDataFilter(dfb.build());
 		
-		fd.setAbsolute(false);
-		fd.setValue(1);
-		builder.setSearch(fd.build());
-		builder.setBorder(fd.build());
-		fd.setValue(3);
-		builder.setFitting(fd.build());
+		rp.setAbsolute(false);
+		rp.setValue(1);
+		builder.setSearch(rp.build());
+		builder.setBorder(rp.build());
+		rp.setValue(3);
+		builder.setFitting(rp.build());
 		
 		builder.setIncludeNeighbours(true);
 		builder.setNeighbourHeightThreshold(0.3);
 		builder.setResidualsThreshold(1);
-		fd.setValue(0.5);
-		fd.setAbsolute(true);
-		builder.setDuplicateDistance(fd.build());
+		rp.setValue(0.5);
+		rp.setAbsolute(true);
+		builder.setDuplicateDistance(rp.build());
 
 		builder.setFailuresLimit(3);
 		

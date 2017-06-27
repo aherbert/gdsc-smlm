@@ -588,6 +588,175 @@ public final class FitConfig {
 
   /**
    * <pre>
+   * Define the method used to filter the input data before identifying candidate peaks
+   * </pre>
+   *
+   * Protobuf enum {@code gdsc.smlm.data.config.DataFilterMethod}
+   */
+  public enum DataFilterMethod
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     * Use a mean within a specified area
+     * </pre>
+     *
+     * <code>MEAN = 0;</code>
+     */
+    MEAN(0),
+    /**
+     * <pre>
+     * Use a mean within a specified box area. The box has integer size.
+     * </pre>
+     *
+     * <code>BLOCK_MEAN = 1;</code>
+     */
+    BLOCK_MEAN(1),
+    /**
+     * <pre>
+     * Use a mean within a specified circle area
+     * </pre>
+     *
+     * <code>CIRCULAR_MEAN = 2;</code>
+     */
+    CIRCULAR_MEAN(2),
+    /**
+     * <pre>
+     * Use a Gaussian with a specified radius
+     * </pre>
+     *
+     * <code>GAUSSIAN = 3;</code>
+     */
+    GAUSSIAN(3),
+    /**
+     * <pre>
+     * Use a median within a specified box area. The box has integer size.
+     * </pre>
+     *
+     * <code>MEDIAN = 4;</code>
+     */
+    MEDIAN(4),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * Use a mean within a specified area
+     * </pre>
+     *
+     * <code>MEAN = 0;</code>
+     */
+    public static final int MEAN_VALUE = 0;
+    /**
+     * <pre>
+     * Use a mean within a specified box area. The box has integer size.
+     * </pre>
+     *
+     * <code>BLOCK_MEAN = 1;</code>
+     */
+    public static final int BLOCK_MEAN_VALUE = 1;
+    /**
+     * <pre>
+     * Use a mean within a specified circle area
+     * </pre>
+     *
+     * <code>CIRCULAR_MEAN = 2;</code>
+     */
+    public static final int CIRCULAR_MEAN_VALUE = 2;
+    /**
+     * <pre>
+     * Use a Gaussian with a specified radius
+     * </pre>
+     *
+     * <code>GAUSSIAN = 3;</code>
+     */
+    public static final int GAUSSIAN_VALUE = 3;
+    /**
+     * <pre>
+     * Use a median within a specified box area. The box has integer size.
+     * </pre>
+     *
+     * <code>MEDIAN = 4;</code>
+     */
+    public static final int MEDIAN_VALUE = 4;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static DataFilterMethod valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static DataFilterMethod forNumber(int value) {
+      switch (value) {
+        case 0: return MEAN;
+        case 1: return BLOCK_MEAN;
+        case 2: return CIRCULAR_MEAN;
+        case 3: return GAUSSIAN;
+        case 4: return MEDIAN;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<DataFilterMethod>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        DataFilterMethod> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<DataFilterMethod>() {
+            public DataFilterMethod findValueByNumber(int number) {
+              return DataFilterMethod.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.FitConfig.getDescriptor().getEnumTypes().get(3);
+    }
+
+    private static final DataFilterMethod[] VALUES = values();
+
+    public static DataFilterMethod valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private DataFilterMethod(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.DataFilterMethod)
+  }
+
+  /**
+   * <pre>
    * Define the methods for noise estimation.
    * </pre>
    *
@@ -780,7 +949,7 @@ public final class FitConfig {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return gdsc.smlm.data.config.FitConfig.getDescriptor().getEnumTypes().get(3);
+      return gdsc.smlm.data.config.FitConfig.getDescriptor().getEnumTypes().get(4);
     }
 
     private static final NoiseEstimatorMethod[] VALUES = values();
@@ -5049,13 +5218,13 @@ public final class FitConfig {
 
   }
 
-  public interface FitDistanceOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.FitDistance)
+  public interface RelativeParameterOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.RelativeParameter)
       com.google.protobuf.MessageOrBuilder {
 
     /**
      * <pre>
-     * The value of the distance
+     * The value of the parameter
      * </pre>
      *
      * <code>double value = 1;</code>
@@ -5064,8 +5233,7 @@ public final class FitConfig {
 
     /**
      * <pre>
-     * Set to true to use the distance as pixels. The default is relative to 
-     * the PSF width. 
+     * Set to true to use the absolute value. The default is relative to the PSF width. 
      * </pre>
      *
      * <code>bool absolute = 2;</code>
@@ -5074,20 +5242,20 @@ public final class FitConfig {
   }
   /**
    * <pre>
-   * Define a distance used during fitting
+   * Define a parameter used during fitting that can be absolute of relative to the PSF width
    * </pre>
    *
-   * Protobuf type {@code gdsc.smlm.data.config.FitDistance}
+   * Protobuf type {@code gdsc.smlm.data.config.RelativeParameter}
    */
-  public  static final class FitDistance extends
+  public  static final class RelativeParameter extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.FitDistance)
-      FitDistanceOrBuilder {
-    // Use FitDistance.newBuilder() to construct.
-    private FitDistance(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.RelativeParameter)
+      RelativeParameterOrBuilder {
+    // Use RelativeParameter.newBuilder() to construct.
+    private RelativeParameter(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private FitDistance() {
+    private RelativeParameter() {
       value_ = 0D;
       absolute_ = false;
     }
@@ -5097,7 +5265,7 @@ public final class FitConfig {
     getUnknownFields() {
       return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
     }
-    private FitDistance(
+    private RelativeParameter(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -5140,21 +5308,21 @@ public final class FitConfig {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_FitDistance_descriptor;
+      return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_FitDistance_fieldAccessorTable
+      return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.FitConfig.FitDistance.class, gdsc.smlm.data.config.FitConfig.FitDistance.Builder.class);
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.class, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder.class);
     }
 
     public static final int VALUE_FIELD_NUMBER = 1;
     private double value_;
     /**
      * <pre>
-     * The value of the distance
+     * The value of the parameter
      * </pre>
      *
      * <code>double value = 1;</code>
@@ -5167,8 +5335,7 @@ public final class FitConfig {
     private boolean absolute_;
     /**
      * <pre>
-     * Set to true to use the distance as pixels. The default is relative to 
-     * the PSF width. 
+     * Set to true to use the absolute value. The default is relative to the PSF width. 
      * </pre>
      *
      * <code>bool absolute = 2;</code>
@@ -5220,10 +5387,10 @@ public final class FitConfig {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof gdsc.smlm.data.config.FitConfig.FitDistance)) {
+      if (!(obj instanceof gdsc.smlm.data.config.FitConfig.RelativeParameter)) {
         return super.equals(obj);
       }
-      gdsc.smlm.data.config.FitConfig.FitDistance other = (gdsc.smlm.data.config.FitConfig.FitDistance) obj;
+      gdsc.smlm.data.config.FitConfig.RelativeParameter other = (gdsc.smlm.data.config.FitConfig.RelativeParameter) obj;
 
       boolean result = true;
       result = result && (
@@ -5253,69 +5420,69 @@ public final class FitConfig {
       return hash;
     }
 
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseFrom(
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseFrom(
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseFrom(
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseFrom(
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseFrom(byte[] data)
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseFrom(
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseFrom(java.io.InputStream input)
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseFrom(
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseDelimitedFrom(java.io.InputStream input)
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseDelimitedFrom(
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseFrom(
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static gdsc.smlm.data.config.FitConfig.FitDistance parseFrom(
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -5327,7 +5494,7 @@ public final class FitConfig {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(gdsc.smlm.data.config.FitConfig.FitDistance prototype) {
+    public static Builder newBuilder(gdsc.smlm.data.config.FitConfig.RelativeParameter prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() {
@@ -5343,28 +5510,28 @@ public final class FitConfig {
     }
     /**
      * <pre>
-     * Define a distance used during fitting
+     * Define a parameter used during fitting that can be absolute of relative to the PSF width
      * </pre>
      *
-     * Protobuf type {@code gdsc.smlm.data.config.FitDistance}
+     * Protobuf type {@code gdsc.smlm.data.config.RelativeParameter}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.FitDistance)
-        gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder {
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.RelativeParameter)
+        gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_FitDistance_descriptor;
+        return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_FitDistance_fieldAccessorTable
+        return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.FitConfig.FitDistance.class, gdsc.smlm.data.config.FitConfig.FitDistance.Builder.class);
+                gdsc.smlm.data.config.FitConfig.RelativeParameter.class, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder.class);
       }
 
-      // Construct using gdsc.smlm.data.config.FitConfig.FitDistance.newBuilder()
+      // Construct using gdsc.smlm.data.config.FitConfig.RelativeParameter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -5390,23 +5557,23 @@ public final class FitConfig {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_FitDistance_descriptor;
+        return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
       }
 
-      public gdsc.smlm.data.config.FitConfig.FitDistance getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance();
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FitConfig.FitDistance build() {
-        gdsc.smlm.data.config.FitConfig.FitDistance result = buildPartial();
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter build() {
+        gdsc.smlm.data.config.FitConfig.RelativeParameter result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public gdsc.smlm.data.config.FitConfig.FitDistance buildPartial() {
-        gdsc.smlm.data.config.FitConfig.FitDistance result = new gdsc.smlm.data.config.FitConfig.FitDistance(this);
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter buildPartial() {
+        gdsc.smlm.data.config.FitConfig.RelativeParameter result = new gdsc.smlm.data.config.FitConfig.RelativeParameter(this);
         result.value_ = value_;
         result.absolute_ = absolute_;
         onBuilt();
@@ -5440,16 +5607,16 @@ public final class FitConfig {
         return (Builder) super.addRepeatedField(field, value);
       }
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.FitConfig.FitDistance) {
-          return mergeFrom((gdsc.smlm.data.config.FitConfig.FitDistance)other);
+        if (other instanceof gdsc.smlm.data.config.FitConfig.RelativeParameter) {
+          return mergeFrom((gdsc.smlm.data.config.FitConfig.RelativeParameter)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(gdsc.smlm.data.config.FitConfig.FitDistance other) {
-        if (other == gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance()) return this;
+      public Builder mergeFrom(gdsc.smlm.data.config.FitConfig.RelativeParameter other) {
+        if (other == gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance()) return this;
         if (other.getValue() != 0D) {
           setValue(other.getValue());
         }
@@ -5468,11 +5635,11 @@ public final class FitConfig {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        gdsc.smlm.data.config.FitConfig.FitDistance parsedMessage = null;
+        gdsc.smlm.data.config.FitConfig.RelativeParameter parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.FitConfig.FitDistance) e.getUnfinishedMessage();
+          parsedMessage = (gdsc.smlm.data.config.FitConfig.RelativeParameter) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -5485,7 +5652,7 @@ public final class FitConfig {
       private double value_ ;
       /**
        * <pre>
-       * The value of the distance
+       * The value of the parameter
        * </pre>
        *
        * <code>double value = 1;</code>
@@ -5495,7 +5662,7 @@ public final class FitConfig {
       }
       /**
        * <pre>
-       * The value of the distance
+       * The value of the parameter
        * </pre>
        *
        * <code>double value = 1;</code>
@@ -5508,7 +5675,7 @@ public final class FitConfig {
       }
       /**
        * <pre>
-       * The value of the distance
+       * The value of the parameter
        * </pre>
        *
        * <code>double value = 1;</code>
@@ -5523,8 +5690,7 @@ public final class FitConfig {
       private boolean absolute_ ;
       /**
        * <pre>
-       * Set to true to use the distance as pixels. The default is relative to 
-       * the PSF width. 
+       * Set to true to use the absolute value. The default is relative to the PSF width. 
        * </pre>
        *
        * <code>bool absolute = 2;</code>
@@ -5534,8 +5700,7 @@ public final class FitConfig {
       }
       /**
        * <pre>
-       * Set to true to use the distance as pixels. The default is relative to 
-       * the PSF width. 
+       * Set to true to use the absolute value. The default is relative to the PSF width. 
        * </pre>
        *
        * <code>bool absolute = 2;</code>
@@ -5548,8 +5713,7 @@ public final class FitConfig {
       }
       /**
        * <pre>
-       * Set to true to use the distance as pixels. The default is relative to 
-       * the PSF width. 
+       * Set to true to use the absolute value. The default is relative to the PSF width. 
        * </pre>
        *
        * <code>bool absolute = 2;</code>
@@ -5571,39 +5735,39 @@ public final class FitConfig {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.FitDistance)
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.RelativeParameter)
     }
 
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.FitDistance)
-    private static final gdsc.smlm.data.config.FitConfig.FitDistance DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.RelativeParameter)
+    private static final gdsc.smlm.data.config.FitConfig.RelativeParameter DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.FitConfig.FitDistance();
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.FitConfig.RelativeParameter();
     }
 
-    public static gdsc.smlm.data.config.FitConfig.FitDistance getDefaultInstance() {
+    public static gdsc.smlm.data.config.FitConfig.RelativeParameter getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<FitDistance>
-        PARSER = new com.google.protobuf.AbstractParser<FitDistance>() {
-      public FitDistance parsePartialFrom(
+    private static final com.google.protobuf.Parser<RelativeParameter>
+        PARSER = new com.google.protobuf.AbstractParser<RelativeParameter>() {
+      public RelativeParameter parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-          return new FitDistance(input, extensionRegistry);
+          return new RelativeParameter(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<FitDistance> parser() {
+    public static com.google.protobuf.Parser<RelativeParameter> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<FitDistance> getParserForType() {
+    public com.google.protobuf.Parser<RelativeParameter> getParserForType() {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FitConfig.FitDistance getDefaultInstanceForType() {
+    public gdsc.smlm.data.config.FitConfig.RelativeParameter getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -5615,98 +5779,73 @@ public final class FitConfig {
 
     /**
      * <pre>
-     * The type of data filter
+     * The method used by the data filter
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
+     * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
      */
-    int getDataFilterTypeValue();
+    int getDataFilterMethodValue();
     /**
      * <pre>
-     * The type of data filter
+     * The method used by the data filter
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
+     * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
      */
-    gdsc.smlm.data.config.FitConfig.DataFilterType getDataFilterType();
+    gdsc.smlm.data.config.FitConfig.DataFilterMethod getDataFilterMethod();
 
     /**
      * <pre>
-     * Any distance parameters used by the data filter. These can be in pixels
+     * Any parameters used by the data filter. These can be in pixels
      * or relative to the PSF width.
      * </pre>
      *
-     * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+     * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
      */
-    java.util.List<gdsc.smlm.data.config.FitConfig.FitDistance> 
-        getDistanceList();
+    java.util.List<gdsc.smlm.data.config.FitConfig.RelativeParameter> 
+        getParameterList();
     /**
      * <pre>
-     * Any distance parameters used by the data filter. These can be in pixels
+     * Any parameters used by the data filter. These can be in pixels
      * or relative to the PSF width.
      * </pre>
      *
-     * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+     * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
      */
-    gdsc.smlm.data.config.FitConfig.FitDistance getDistance(int index);
+    gdsc.smlm.data.config.FitConfig.RelativeParameter getParameter(int index);
     /**
      * <pre>
-     * Any distance parameters used by the data filter. These can be in pixels
+     * Any parameters used by the data filter. These can be in pixels
      * or relative to the PSF width.
      * </pre>
      *
-     * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
-     */
-    int getDistanceCount();
-    /**
-     * <pre>
-     * Any distance parameters used by the data filter. These can be in pixels
-     * or relative to the PSF width.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
-     */
-    java.util.List<? extends gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> 
-        getDistanceOrBuilderList();
-    /**
-     * <pre>
-     * Any distance parameters used by the data filter. These can be in pixels
-     * or relative to the PSF width.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
-     */
-    gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getDistanceOrBuilder(
-        int index);
-
-    /**
-     * <pre>
-     * Any non-distance parameters used by the data filter
-     * </pre>
-     *
-     * <code>repeated double parameter = 3;</code>
-     */
-    java.util.List<java.lang.Double> getParameterList();
-    /**
-     * <pre>
-     * Any non-distance parameters used by the data filter
-     * </pre>
-     *
-     * <code>repeated double parameter = 3;</code>
+     * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
      */
     int getParameterCount();
     /**
      * <pre>
-     * Any non-distance parameters used by the data filter
+     * Any parameters used by the data filter. These can be in pixels
+     * or relative to the PSF width.
      * </pre>
      *
-     * <code>repeated double parameter = 3;</code>
+     * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
      */
-    double getParameter(int index);
+    java.util.List<? extends gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> 
+        getParameterOrBuilderList();
+    /**
+     * <pre>
+     * Any parameters used by the data filter. These can be in pixels
+     * or relative to the PSF width.
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+     */
+    gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getParameterOrBuilder(
+        int index);
   }
   /**
    * <pre>
-   * Define the settings for filtering data to identify candidates.
+   * Define a data filter
    * </pre>
    *
    * Protobuf type {@code gdsc.smlm.data.config.DataFilter}
@@ -5720,8 +5859,7 @@ public final class FitConfig {
       super(builder);
     }
     private DataFilter() {
-      dataFilterType_ = 0;
-      distance_ = java.util.Collections.emptyList();
+      dataFilterMethod_ = 0;
       parameter_ = java.util.Collections.emptyList();
     }
 
@@ -5753,37 +5891,16 @@ public final class FitConfig {
             case 8: {
               int rawValue = input.readEnum();
 
-              dataFilterType_ = rawValue;
+              dataFilterMethod_ = rawValue;
               break;
             }
             case 18: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                distance_ = new java.util.ArrayList<gdsc.smlm.data.config.FitConfig.FitDistance>();
+                parameter_ = new java.util.ArrayList<gdsc.smlm.data.config.FitConfig.RelativeParameter>();
                 mutable_bitField0_ |= 0x00000002;
               }
-              distance_.add(
-                  input.readMessage(gdsc.smlm.data.config.FitConfig.FitDistance.parser(), extensionRegistry));
-              break;
-            }
-            case 25: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-                parameter_ = new java.util.ArrayList<java.lang.Double>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              parameter_.add(input.readDouble());
-              break;
-            }
-            case 26: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004) && input.getBytesUntilLimit() > 0) {
-                parameter_ = new java.util.ArrayList<java.lang.Double>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                parameter_.add(input.readDouble());
-              }
-              input.popLimit(limit);
+              parameter_.add(
+                  input.readMessage(gdsc.smlm.data.config.FitConfig.RelativeParameter.parser(), extensionRegistry));
               break;
             }
           }
@@ -5795,9 +5912,6 @@ public final class FitConfig {
             e).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-          distance_ = java.util.Collections.unmodifiableList(distance_);
-        }
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
           parameter_ = java.util.Collections.unmodifiableList(parameter_);
         }
         makeExtensionsImmutable();
@@ -5816,124 +5930,89 @@ public final class FitConfig {
     }
 
     private int bitField0_;
-    public static final int DATA_FILTER_TYPE_FIELD_NUMBER = 1;
-    private int dataFilterType_;
+    public static final int DATA_FILTER_METHOD_FIELD_NUMBER = 1;
+    private int dataFilterMethod_;
     /**
      * <pre>
-     * The type of data filter
+     * The method used by the data filter
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
+     * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
      */
-    public int getDataFilterTypeValue() {
-      return dataFilterType_;
+    public int getDataFilterMethodValue() {
+      return dataFilterMethod_;
     }
     /**
      * <pre>
-     * The type of data filter
+     * The method used by the data filter
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
+     * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.DataFilterType getDataFilterType() {
-      gdsc.smlm.data.config.FitConfig.DataFilterType result = gdsc.smlm.data.config.FitConfig.DataFilterType.valueOf(dataFilterType_);
-      return result == null ? gdsc.smlm.data.config.FitConfig.DataFilterType.UNRECOGNIZED : result;
-    }
-
-    public static final int DISTANCE_FIELD_NUMBER = 2;
-    private java.util.List<gdsc.smlm.data.config.FitConfig.FitDistance> distance_;
-    /**
-     * <pre>
-     * Any distance parameters used by the data filter. These can be in pixels
-     * or relative to the PSF width.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
-     */
-    public java.util.List<gdsc.smlm.data.config.FitConfig.FitDistance> getDistanceList() {
-      return distance_;
-    }
-    /**
-     * <pre>
-     * Any distance parameters used by the data filter. These can be in pixels
-     * or relative to the PSF width.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
-     */
-    public java.util.List<? extends gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> 
-        getDistanceOrBuilderList() {
-      return distance_;
-    }
-    /**
-     * <pre>
-     * Any distance parameters used by the data filter. These can be in pixels
-     * or relative to the PSF width.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
-     */
-    public int getDistanceCount() {
-      return distance_.size();
-    }
-    /**
-     * <pre>
-     * Any distance parameters used by the data filter. These can be in pixels
-     * or relative to the PSF width.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
-     */
-    public gdsc.smlm.data.config.FitConfig.FitDistance getDistance(int index) {
-      return distance_.get(index);
-    }
-    /**
-     * <pre>
-     * Any distance parameters used by the data filter. These can be in pixels
-     * or relative to the PSF width.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
-     */
-    public gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getDistanceOrBuilder(
-        int index) {
-      return distance_.get(index);
+    public gdsc.smlm.data.config.FitConfig.DataFilterMethod getDataFilterMethod() {
+      gdsc.smlm.data.config.FitConfig.DataFilterMethod result = gdsc.smlm.data.config.FitConfig.DataFilterMethod.valueOf(dataFilterMethod_);
+      return result == null ? gdsc.smlm.data.config.FitConfig.DataFilterMethod.UNRECOGNIZED : result;
     }
 
-    public static final int PARAMETER_FIELD_NUMBER = 3;
-    private java.util.List<java.lang.Double> parameter_;
+    public static final int PARAMETER_FIELD_NUMBER = 2;
+    private java.util.List<gdsc.smlm.data.config.FitConfig.RelativeParameter> parameter_;
     /**
      * <pre>
-     * Any non-distance parameters used by the data filter
+     * Any parameters used by the data filter. These can be in pixels
+     * or relative to the PSF width.
      * </pre>
      *
-     * <code>repeated double parameter = 3;</code>
+     * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
      */
-    public java.util.List<java.lang.Double>
-        getParameterList() {
+    public java.util.List<gdsc.smlm.data.config.FitConfig.RelativeParameter> getParameterList() {
       return parameter_;
     }
     /**
      * <pre>
-     * Any non-distance parameters used by the data filter
+     * Any parameters used by the data filter. These can be in pixels
+     * or relative to the PSF width.
      * </pre>
      *
-     * <code>repeated double parameter = 3;</code>
+     * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+     */
+    public java.util.List<? extends gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> 
+        getParameterOrBuilderList() {
+      return parameter_;
+    }
+    /**
+     * <pre>
+     * Any parameters used by the data filter. These can be in pixels
+     * or relative to the PSF width.
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
      */
     public int getParameterCount() {
       return parameter_.size();
     }
     /**
      * <pre>
-     * Any non-distance parameters used by the data filter
+     * Any parameters used by the data filter. These can be in pixels
+     * or relative to the PSF width.
      * </pre>
      *
-     * <code>repeated double parameter = 3;</code>
+     * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
      */
-    public double getParameter(int index) {
+    public gdsc.smlm.data.config.FitConfig.RelativeParameter getParameter(int index) {
       return parameter_.get(index);
     }
-    private int parameterMemoizedSerializedSize = -1;
+    /**
+     * <pre>
+     * Any parameters used by the data filter. These can be in pixels
+     * or relative to the PSF width.
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+     */
+    public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getParameterOrBuilder(
+        int index) {
+      return parameter_.get(index);
+    }
 
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -5947,19 +6026,11 @@ public final class FitConfig {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
-      if (dataFilterType_ != gdsc.smlm.data.config.FitConfig.DataFilterType.SINGLE.getNumber()) {
-        output.writeEnum(1, dataFilterType_);
-      }
-      for (int i = 0; i < distance_.size(); i++) {
-        output.writeMessage(2, distance_.get(i));
-      }
-      if (getParameterList().size() > 0) {
-        output.writeUInt32NoTag(26);
-        output.writeUInt32NoTag(parameterMemoizedSerializedSize);
+      if (dataFilterMethod_ != gdsc.smlm.data.config.FitConfig.DataFilterMethod.MEAN.getNumber()) {
+        output.writeEnum(1, dataFilterMethod_);
       }
       for (int i = 0; i < parameter_.size(); i++) {
-        output.writeDoubleNoTag(parameter_.get(i));
+        output.writeMessage(2, parameter_.get(i));
       }
     }
 
@@ -5968,24 +6039,13 @@ public final class FitConfig {
       if (size != -1) return size;
 
       size = 0;
-      if (dataFilterType_ != gdsc.smlm.data.config.FitConfig.DataFilterType.SINGLE.getNumber()) {
+      if (dataFilterMethod_ != gdsc.smlm.data.config.FitConfig.DataFilterMethod.MEAN.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, dataFilterType_);
+          .computeEnumSize(1, dataFilterMethod_);
       }
-      for (int i = 0; i < distance_.size(); i++) {
+      for (int i = 0; i < parameter_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, distance_.get(i));
-      }
-      {
-        int dataSize = 0;
-        dataSize = 8 * getParameterList().size();
-        size += dataSize;
-        if (!getParameterList().isEmpty()) {
-          size += 1;
-          size += com.google.protobuf.CodedOutputStream
-              .computeInt32SizeNoTag(dataSize);
-        }
-        parameterMemoizedSerializedSize = dataSize;
+          .computeMessageSize(2, parameter_.get(i));
       }
       memoizedSize = size;
       return size;
@@ -6003,9 +6063,7 @@ public final class FitConfig {
       gdsc.smlm.data.config.FitConfig.DataFilter other = (gdsc.smlm.data.config.FitConfig.DataFilter) obj;
 
       boolean result = true;
-      result = result && dataFilterType_ == other.dataFilterType_;
-      result = result && getDistanceList()
-          .equals(other.getDistanceList());
+      result = result && dataFilterMethod_ == other.dataFilterMethod_;
       result = result && getParameterList()
           .equals(other.getParameterList());
       return result;
@@ -6018,12 +6076,8 @@ public final class FitConfig {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + DATA_FILTER_TYPE_FIELD_NUMBER;
-      hash = (53 * hash) + dataFilterType_;
-      if (getDistanceCount() > 0) {
-        hash = (37 * hash) + DISTANCE_FIELD_NUMBER;
-        hash = (53 * hash) + getDistanceList().hashCode();
-      }
+      hash = (37 * hash) + DATA_FILTER_METHOD_FIELD_NUMBER;
+      hash = (53 * hash) + dataFilterMethod_;
       if (getParameterCount() > 0) {
         hash = (37 * hash) + PARAMETER_FIELD_NUMBER;
         hash = (53 * hash) + getParameterList().hashCode();
@@ -6123,7 +6177,7 @@ public final class FitConfig {
     }
     /**
      * <pre>
-     * Define the settings for filtering data to identify candidates.
+     * Define a data filter
      * </pre>
      *
      * Protobuf type {@code gdsc.smlm.data.config.DataFilter}
@@ -6157,21 +6211,19 @@ public final class FitConfig {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
-          getDistanceFieldBuilder();
+          getParameterFieldBuilder();
         }
       }
       public Builder clear() {
         super.clear();
-        dataFilterType_ = 0;
+        dataFilterMethod_ = 0;
 
-        if (distanceBuilder_ == null) {
-          distance_ = java.util.Collections.emptyList();
+        if (parameterBuilder_ == null) {
+          parameter_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
         } else {
-          distanceBuilder_.clear();
+          parameterBuilder_.clear();
         }
-        parameter_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -6196,21 +6248,16 @@ public final class FitConfig {
         gdsc.smlm.data.config.FitConfig.DataFilter result = new gdsc.smlm.data.config.FitConfig.DataFilter(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
-        result.dataFilterType_ = dataFilterType_;
-        if (distanceBuilder_ == null) {
+        result.dataFilterMethod_ = dataFilterMethod_;
+        if (parameterBuilder_ == null) {
           if (((bitField0_ & 0x00000002) == 0x00000002)) {
-            distance_ = java.util.Collections.unmodifiableList(distance_);
+            parameter_ = java.util.Collections.unmodifiableList(parameter_);
             bitField0_ = (bitField0_ & ~0x00000002);
           }
-          result.distance_ = distance_;
+          result.parameter_ = parameter_;
         } else {
-          result.distance_ = distanceBuilder_.build();
+          result.parameter_ = parameterBuilder_.build();
         }
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          parameter_ = java.util.Collections.unmodifiableList(parameter_);
-          bitField0_ = (bitField0_ & ~0x00000004);
-        }
-        result.parameter_ = parameter_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -6253,44 +6300,34 @@ public final class FitConfig {
 
       public Builder mergeFrom(gdsc.smlm.data.config.FitConfig.DataFilter other) {
         if (other == gdsc.smlm.data.config.FitConfig.DataFilter.getDefaultInstance()) return this;
-        if (other.dataFilterType_ != 0) {
-          setDataFilterTypeValue(other.getDataFilterTypeValue());
+        if (other.dataFilterMethod_ != 0) {
+          setDataFilterMethodValue(other.getDataFilterMethodValue());
         }
-        if (distanceBuilder_ == null) {
-          if (!other.distance_.isEmpty()) {
-            if (distance_.isEmpty()) {
-              distance_ = other.distance_;
+        if (parameterBuilder_ == null) {
+          if (!other.parameter_.isEmpty()) {
+            if (parameter_.isEmpty()) {
+              parameter_ = other.parameter_;
               bitField0_ = (bitField0_ & ~0x00000002);
             } else {
-              ensureDistanceIsMutable();
-              distance_.addAll(other.distance_);
+              ensureParameterIsMutable();
+              parameter_.addAll(other.parameter_);
             }
             onChanged();
           }
         } else {
-          if (!other.distance_.isEmpty()) {
-            if (distanceBuilder_.isEmpty()) {
-              distanceBuilder_.dispose();
-              distanceBuilder_ = null;
-              distance_ = other.distance_;
+          if (!other.parameter_.isEmpty()) {
+            if (parameterBuilder_.isEmpty()) {
+              parameterBuilder_.dispose();
+              parameterBuilder_ = null;
+              parameter_ = other.parameter_;
               bitField0_ = (bitField0_ & ~0x00000002);
-              distanceBuilder_ = 
+              parameterBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getDistanceFieldBuilder() : null;
+                   getParameterFieldBuilder() : null;
             } else {
-              distanceBuilder_.addAllMessages(other.distance_);
+              parameterBuilder_.addAllMessages(other.parameter_);
             }
           }
-        }
-        if (!other.parameter_.isEmpty()) {
-          if (parameter_.isEmpty()) {
-            parameter_ = other.parameter_;
-            bitField0_ = (bitField0_ & ~0x00000004);
-          } else {
-            ensureParameterIsMutable();
-            parameter_.addAll(other.parameter_);
-          }
-          onChanged();
         }
         onChanged();
         return this;
@@ -6309,6 +6346,1021 @@ public final class FitConfig {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (gdsc.smlm.data.config.FitConfig.DataFilter) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private int dataFilterMethod_ = 0;
+      /**
+       * <pre>
+       * The method used by the data filter
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
+       */
+      public int getDataFilterMethodValue() {
+        return dataFilterMethod_;
+      }
+      /**
+       * <pre>
+       * The method used by the data filter
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
+       */
+      public Builder setDataFilterMethodValue(int value) {
+        dataFilterMethod_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The method used by the data filter
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
+       */
+      public gdsc.smlm.data.config.FitConfig.DataFilterMethod getDataFilterMethod() {
+        gdsc.smlm.data.config.FitConfig.DataFilterMethod result = gdsc.smlm.data.config.FitConfig.DataFilterMethod.valueOf(dataFilterMethod_);
+        return result == null ? gdsc.smlm.data.config.FitConfig.DataFilterMethod.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The method used by the data filter
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
+       */
+      public Builder setDataFilterMethod(gdsc.smlm.data.config.FitConfig.DataFilterMethod value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        dataFilterMethod_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The method used by the data filter
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
+       */
+      public Builder clearDataFilterMethod() {
+        
+        dataFilterMethod_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<gdsc.smlm.data.config.FitConfig.RelativeParameter> parameter_ =
+        java.util.Collections.emptyList();
+      private void ensureParameterIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          parameter_ = new java.util.ArrayList<gdsc.smlm.data.config.FitConfig.RelativeParameter>(parameter_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> parameterBuilder_;
+
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public java.util.List<gdsc.smlm.data.config.FitConfig.RelativeParameter> getParameterList() {
+        if (parameterBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(parameter_);
+        } else {
+          return parameterBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public int getParameterCount() {
+        if (parameterBuilder_ == null) {
+          return parameter_.size();
+        } else {
+          return parameterBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter getParameter(int index) {
+        if (parameterBuilder_ == null) {
+          return parameter_.get(index);
+        } else {
+          return parameterBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public Builder setParameter(
+          int index, gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
+        if (parameterBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureParameterIsMutable();
+          parameter_.set(index, value);
+          onChanged();
+        } else {
+          parameterBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public Builder setParameter(
+          int index, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder builderForValue) {
+        if (parameterBuilder_ == null) {
+          ensureParameterIsMutable();
+          parameter_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          parameterBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public Builder addParameter(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
+        if (parameterBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureParameterIsMutable();
+          parameter_.add(value);
+          onChanged();
+        } else {
+          parameterBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public Builder addParameter(
+          int index, gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
+        if (parameterBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureParameterIsMutable();
+          parameter_.add(index, value);
+          onChanged();
+        } else {
+          parameterBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public Builder addParameter(
+          gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder builderForValue) {
+        if (parameterBuilder_ == null) {
+          ensureParameterIsMutable();
+          parameter_.add(builderForValue.build());
+          onChanged();
+        } else {
+          parameterBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public Builder addParameter(
+          int index, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder builderForValue) {
+        if (parameterBuilder_ == null) {
+          ensureParameterIsMutable();
+          parameter_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          parameterBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public Builder addAllParameter(
+          java.lang.Iterable<? extends gdsc.smlm.data.config.FitConfig.RelativeParameter> values) {
+        if (parameterBuilder_ == null) {
+          ensureParameterIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, parameter_);
+          onChanged();
+        } else {
+          parameterBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public Builder clearParameter() {
+        if (parameterBuilder_ == null) {
+          parameter_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          parameterBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public Builder removeParameter(int index) {
+        if (parameterBuilder_ == null) {
+          ensureParameterIsMutable();
+          parameter_.remove(index);
+          onChanged();
+        } else {
+          parameterBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder getParameterBuilder(
+          int index) {
+        return getParameterFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getParameterOrBuilder(
+          int index) {
+        if (parameterBuilder_ == null) {
+          return parameter_.get(index);  } else {
+          return parameterBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public java.util.List<? extends gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> 
+           getParameterOrBuilderList() {
+        if (parameterBuilder_ != null) {
+          return parameterBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(parameter_);
+        }
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder addParameterBuilder() {
+        return getParameterFieldBuilder().addBuilder(
+            gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder addParameterBuilder(
+          int index) {
+        return getParameterFieldBuilder().addBuilder(
+            index, gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Any parameters used by the data filter. These can be in pixels
+       * or relative to the PSF width.
+       * </pre>
+       *
+       * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameter = 2;</code>
+       */
+      public java.util.List<gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder> 
+           getParameterBuilderList() {
+        return getParameterFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> 
+          getParameterFieldBuilder() {
+        if (parameterBuilder_ == null) {
+          parameterBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder>(
+                  parameter_,
+                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  getParentForChildren(),
+                  isClean());
+          parameter_ = null;
+        }
+        return parameterBuilder_;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.DataFilter)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.DataFilter)
+    private static final gdsc.smlm.data.config.FitConfig.DataFilter DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.FitConfig.DataFilter();
+    }
+
+    public static gdsc.smlm.data.config.FitConfig.DataFilter getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DataFilter>
+        PARSER = new com.google.protobuf.AbstractParser<DataFilter>() {
+      public DataFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new DataFilter(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<DataFilter> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DataFilter> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.FitConfig.DataFilter getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DataFilterSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.DataFilterSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The type of data filter
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
+     */
+    int getDataFilterTypeValue();
+    /**
+     * <pre>
+     * The type of data filter
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
+     */
+    gdsc.smlm.data.config.FitConfig.DataFilterType getDataFilterType();
+
+    /**
+     * <pre>
+     * The data filter
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
+     */
+    java.util.List<gdsc.smlm.data.config.FitConfig.DataFilter> 
+        getDataFilterList();
+    /**
+     * <pre>
+     * The data filter
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
+     */
+    gdsc.smlm.data.config.FitConfig.DataFilter getDataFilter(int index);
+    /**
+     * <pre>
+     * The data filter
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
+     */
+    int getDataFilterCount();
+    /**
+     * <pre>
+     * The data filter
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
+     */
+    java.util.List<? extends gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder> 
+        getDataFilterOrBuilderList();
+    /**
+     * <pre>
+     * The data filter
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
+     */
+    gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder getDataFilterOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * Define the settings for filtering data to identify candidates.
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.DataFilterSettings}
+   */
+  public  static final class DataFilterSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.DataFilterSettings)
+      DataFilterSettingsOrBuilder {
+    // Use DataFilterSettings.newBuilder() to construct.
+    private DataFilterSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DataFilterSettings() {
+      dataFilterType_ = 0;
+      dataFilter_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private DataFilterSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              int rawValue = input.readEnum();
+
+              dataFilterType_ = rawValue;
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                dataFilter_ = new java.util.ArrayList<gdsc.smlm.data.config.FitConfig.DataFilter>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              dataFilter_.add(
+                  input.readMessage(gdsc.smlm.data.config.FitConfig.DataFilter.parser(), extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          dataFilter_ = java.util.Collections.unmodifiableList(dataFilter_);
+        }
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.FitConfig.DataFilterSettings.class, gdsc.smlm.data.config.FitConfig.DataFilterSettings.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int DATA_FILTER_TYPE_FIELD_NUMBER = 1;
+    private int dataFilterType_;
+    /**
+     * <pre>
+     * The type of data filter
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
+     */
+    public int getDataFilterTypeValue() {
+      return dataFilterType_;
+    }
+    /**
+     * <pre>
+     * The type of data filter
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
+     */
+    public gdsc.smlm.data.config.FitConfig.DataFilterType getDataFilterType() {
+      gdsc.smlm.data.config.FitConfig.DataFilterType result = gdsc.smlm.data.config.FitConfig.DataFilterType.valueOf(dataFilterType_);
+      return result == null ? gdsc.smlm.data.config.FitConfig.DataFilterType.UNRECOGNIZED : result;
+    }
+
+    public static final int DATA_FILTER_FIELD_NUMBER = 2;
+    private java.util.List<gdsc.smlm.data.config.FitConfig.DataFilter> dataFilter_;
+    /**
+     * <pre>
+     * The data filter
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
+     */
+    public java.util.List<gdsc.smlm.data.config.FitConfig.DataFilter> getDataFilterList() {
+      return dataFilter_;
+    }
+    /**
+     * <pre>
+     * The data filter
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
+     */
+    public java.util.List<? extends gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder> 
+        getDataFilterOrBuilderList() {
+      return dataFilter_;
+    }
+    /**
+     * <pre>
+     * The data filter
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
+     */
+    public int getDataFilterCount() {
+      return dataFilter_.size();
+    }
+    /**
+     * <pre>
+     * The data filter
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
+     */
+    public gdsc.smlm.data.config.FitConfig.DataFilter getDataFilter(int index) {
+      return dataFilter_.get(index);
+    }
+    /**
+     * <pre>
+     * The data filter
+     * </pre>
+     *
+     * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
+     */
+    public gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder getDataFilterOrBuilder(
+        int index) {
+      return dataFilter_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (dataFilterType_ != gdsc.smlm.data.config.FitConfig.DataFilterType.SINGLE.getNumber()) {
+        output.writeEnum(1, dataFilterType_);
+      }
+      for (int i = 0; i < dataFilter_.size(); i++) {
+        output.writeMessage(2, dataFilter_.get(i));
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (dataFilterType_ != gdsc.smlm.data.config.FitConfig.DataFilterType.SINGLE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, dataFilterType_);
+      }
+      for (int i = 0; i < dataFilter_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, dataFilter_.get(i));
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.FitConfig.DataFilterSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.FitConfig.DataFilterSettings other = (gdsc.smlm.data.config.FitConfig.DataFilterSettings) obj;
+
+      boolean result = true;
+      result = result && dataFilterType_ == other.dataFilterType_;
+      result = result && getDataFilterList()
+          .equals(other.getDataFilterList());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATA_FILTER_TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + dataFilterType_;
+      if (getDataFilterCount() > 0) {
+        hash = (37 * hash) + DATA_FILTER_FIELD_NUMBER;
+        hash = (53 * hash) + getDataFilterList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.FitConfig.DataFilterSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define the settings for filtering data to identify candidates.
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.DataFilterSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.DataFilterSettings)
+        gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.FitConfig.DataFilterSettings.class, gdsc.smlm.data.config.FitConfig.DataFilterSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.FitConfig.DataFilterSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getDataFilterFieldBuilder();
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        dataFilterType_ = 0;
+
+        if (dataFilterBuilder_ == null) {
+          dataFilter_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          dataFilterBuilder_.clear();
+        }
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.FitConfig.internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.FitConfig.DataFilterSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.FitConfig.DataFilterSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.FitConfig.DataFilterSettings build() {
+        gdsc.smlm.data.config.FitConfig.DataFilterSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.FitConfig.DataFilterSettings buildPartial() {
+        gdsc.smlm.data.config.FitConfig.DataFilterSettings result = new gdsc.smlm.data.config.FitConfig.DataFilterSettings(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        result.dataFilterType_ = dataFilterType_;
+        if (dataFilterBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+            dataFilter_ = java.util.Collections.unmodifiableList(dataFilter_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.dataFilter_ = dataFilter_;
+        } else {
+          result.dataFilter_ = dataFilterBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.FitConfig.DataFilterSettings) {
+          return mergeFrom((gdsc.smlm.data.config.FitConfig.DataFilterSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.FitConfig.DataFilterSettings other) {
+        if (other == gdsc.smlm.data.config.FitConfig.DataFilterSettings.getDefaultInstance()) return this;
+        if (other.dataFilterType_ != 0) {
+          setDataFilterTypeValue(other.getDataFilterTypeValue());
+        }
+        if (dataFilterBuilder_ == null) {
+          if (!other.dataFilter_.isEmpty()) {
+            if (dataFilter_.isEmpty()) {
+              dataFilter_ = other.dataFilter_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureDataFilterIsMutable();
+              dataFilter_.addAll(other.dataFilter_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.dataFilter_.isEmpty()) {
+            if (dataFilterBuilder_.isEmpty()) {
+              dataFilterBuilder_.dispose();
+              dataFilterBuilder_ = null;
+              dataFilter_ = other.dataFilter_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              dataFilterBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getDataFilterFieldBuilder() : null;
+            } else {
+              dataFilterBuilder_.addAllMessages(other.dataFilter_);
+            }
+          }
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.FitConfig.DataFilterSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.FitConfig.DataFilterSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -6383,428 +7435,316 @@ public final class FitConfig {
         return this;
       }
 
-      private java.util.List<gdsc.smlm.data.config.FitConfig.FitDistance> distance_ =
+      private java.util.List<gdsc.smlm.data.config.FitConfig.DataFilter> dataFilter_ =
         java.util.Collections.emptyList();
-      private void ensureDistanceIsMutable() {
+      private void ensureDataFilterIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          distance_ = new java.util.ArrayList<gdsc.smlm.data.config.FitConfig.FitDistance>(distance_);
+          dataFilter_ = new java.util.ArrayList<gdsc.smlm.data.config.FitConfig.DataFilter>(dataFilter_);
           bitField0_ |= 0x00000002;
          }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> distanceBuilder_;
+          gdsc.smlm.data.config.FitConfig.DataFilter, gdsc.smlm.data.config.FitConfig.DataFilter.Builder, gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder> dataFilterBuilder_;
 
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.FitConfig.FitDistance> getDistanceList() {
-        if (distanceBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(distance_);
+      public java.util.List<gdsc.smlm.data.config.FitConfig.DataFilter> getDataFilterList() {
+        if (dataFilterBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(dataFilter_);
         } else {
-          return distanceBuilder_.getMessageList();
+          return dataFilterBuilder_.getMessageList();
         }
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public int getDistanceCount() {
-        if (distanceBuilder_ == null) {
-          return distance_.size();
+      public int getDataFilterCount() {
+        if (dataFilterBuilder_ == null) {
+          return dataFilter_.size();
         } else {
-          return distanceBuilder_.getCount();
+          return dataFilterBuilder_.getCount();
         }
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance getDistance(int index) {
-        if (distanceBuilder_ == null) {
-          return distance_.get(index);
+      public gdsc.smlm.data.config.FitConfig.DataFilter getDataFilter(int index) {
+        if (dataFilterBuilder_ == null) {
+          return dataFilter_.get(index);
         } else {
-          return distanceBuilder_.getMessage(index);
+          return dataFilterBuilder_.getMessage(index);
         }
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public Builder setDistance(
-          int index, gdsc.smlm.data.config.FitConfig.FitDistance value) {
-        if (distanceBuilder_ == null) {
+      public Builder setDataFilter(
+          int index, gdsc.smlm.data.config.FitConfig.DataFilter value) {
+        if (dataFilterBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureDistanceIsMutable();
-          distance_.set(index, value);
+          ensureDataFilterIsMutable();
+          dataFilter_.set(index, value);
           onChanged();
         } else {
-          distanceBuilder_.setMessage(index, value);
+          dataFilterBuilder_.setMessage(index, value);
         }
         return this;
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public Builder setDistance(
-          int index, gdsc.smlm.data.config.FitConfig.FitDistance.Builder builderForValue) {
-        if (distanceBuilder_ == null) {
-          ensureDistanceIsMutable();
-          distance_.set(index, builderForValue.build());
+      public Builder setDataFilter(
+          int index, gdsc.smlm.data.config.FitConfig.DataFilter.Builder builderForValue) {
+        if (dataFilterBuilder_ == null) {
+          ensureDataFilterIsMutable();
+          dataFilter_.set(index, builderForValue.build());
           onChanged();
         } else {
-          distanceBuilder_.setMessage(index, builderForValue.build());
+          dataFilterBuilder_.setMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public Builder addDistance(gdsc.smlm.data.config.FitConfig.FitDistance value) {
-        if (distanceBuilder_ == null) {
+      public Builder addDataFilter(gdsc.smlm.data.config.FitConfig.DataFilter value) {
+        if (dataFilterBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureDistanceIsMutable();
-          distance_.add(value);
+          ensureDataFilterIsMutable();
+          dataFilter_.add(value);
           onChanged();
         } else {
-          distanceBuilder_.addMessage(value);
+          dataFilterBuilder_.addMessage(value);
         }
         return this;
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public Builder addDistance(
-          int index, gdsc.smlm.data.config.FitConfig.FitDistance value) {
-        if (distanceBuilder_ == null) {
+      public Builder addDataFilter(
+          int index, gdsc.smlm.data.config.FitConfig.DataFilter value) {
+        if (dataFilterBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureDistanceIsMutable();
-          distance_.add(index, value);
+          ensureDataFilterIsMutable();
+          dataFilter_.add(index, value);
           onChanged();
         } else {
-          distanceBuilder_.addMessage(index, value);
+          dataFilterBuilder_.addMessage(index, value);
         }
         return this;
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public Builder addDistance(
-          gdsc.smlm.data.config.FitConfig.FitDistance.Builder builderForValue) {
-        if (distanceBuilder_ == null) {
-          ensureDistanceIsMutable();
-          distance_.add(builderForValue.build());
+      public Builder addDataFilter(
+          gdsc.smlm.data.config.FitConfig.DataFilter.Builder builderForValue) {
+        if (dataFilterBuilder_ == null) {
+          ensureDataFilterIsMutable();
+          dataFilter_.add(builderForValue.build());
           onChanged();
         } else {
-          distanceBuilder_.addMessage(builderForValue.build());
+          dataFilterBuilder_.addMessage(builderForValue.build());
         }
         return this;
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public Builder addDistance(
-          int index, gdsc.smlm.data.config.FitConfig.FitDistance.Builder builderForValue) {
-        if (distanceBuilder_ == null) {
-          ensureDistanceIsMutable();
-          distance_.add(index, builderForValue.build());
+      public Builder addDataFilter(
+          int index, gdsc.smlm.data.config.FitConfig.DataFilter.Builder builderForValue) {
+        if (dataFilterBuilder_ == null) {
+          ensureDataFilterIsMutable();
+          dataFilter_.add(index, builderForValue.build());
           onChanged();
         } else {
-          distanceBuilder_.addMessage(index, builderForValue.build());
+          dataFilterBuilder_.addMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public Builder addAllDistance(
-          java.lang.Iterable<? extends gdsc.smlm.data.config.FitConfig.FitDistance> values) {
-        if (distanceBuilder_ == null) {
-          ensureDistanceIsMutable();
+      public Builder addAllDataFilter(
+          java.lang.Iterable<? extends gdsc.smlm.data.config.FitConfig.DataFilter> values) {
+        if (dataFilterBuilder_ == null) {
+          ensureDataFilterIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, distance_);
+              values, dataFilter_);
           onChanged();
         } else {
-          distanceBuilder_.addAllMessages(values);
+          dataFilterBuilder_.addAllMessages(values);
         }
         return this;
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public Builder clearDistance() {
-        if (distanceBuilder_ == null) {
-          distance_ = java.util.Collections.emptyList();
+      public Builder clearDataFilter() {
+        if (dataFilterBuilder_ == null) {
+          dataFilter_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
         } else {
-          distanceBuilder_.clear();
+          dataFilterBuilder_.clear();
         }
         return this;
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public Builder removeDistance(int index) {
-        if (distanceBuilder_ == null) {
-          ensureDistanceIsMutable();
-          distance_.remove(index);
+      public Builder removeDataFilter(int index) {
+        if (dataFilterBuilder_ == null) {
+          ensureDataFilterIsMutable();
+          dataFilter_.remove(index);
           onChanged();
         } else {
-          distanceBuilder_.remove(index);
+          dataFilterBuilder_.remove(index);
         }
         return this;
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance.Builder getDistanceBuilder(
+      public gdsc.smlm.data.config.FitConfig.DataFilter.Builder getDataFilterBuilder(
           int index) {
-        return getDistanceFieldBuilder().getBuilder(index);
+        return getDataFilterFieldBuilder().getBuilder(index);
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getDistanceOrBuilder(
+      public gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder getDataFilterOrBuilder(
           int index) {
-        if (distanceBuilder_ == null) {
-          return distance_.get(index);  } else {
-          return distanceBuilder_.getMessageOrBuilder(index);
+        if (dataFilterBuilder_ == null) {
+          return dataFilter_.get(index);  } else {
+          return dataFilterBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public java.util.List<? extends gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> 
-           getDistanceOrBuilderList() {
-        if (distanceBuilder_ != null) {
-          return distanceBuilder_.getMessageOrBuilderList();
+      public java.util.List<? extends gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder> 
+           getDataFilterOrBuilderList() {
+        if (dataFilterBuilder_ != null) {
+          return dataFilterBuilder_.getMessageOrBuilderList();
         } else {
-          return java.util.Collections.unmodifiableList(distance_);
+          return java.util.Collections.unmodifiableList(dataFilter_);
         }
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance.Builder addDistanceBuilder() {
-        return getDistanceFieldBuilder().addBuilder(
-            gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance());
+      public gdsc.smlm.data.config.FitConfig.DataFilter.Builder addDataFilterBuilder() {
+        return getDataFilterFieldBuilder().addBuilder(
+            gdsc.smlm.data.config.FitConfig.DataFilter.getDefaultInstance());
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance.Builder addDistanceBuilder(
+      public gdsc.smlm.data.config.FitConfig.DataFilter.Builder addDataFilterBuilder(
           int index) {
-        return getDistanceFieldBuilder().addBuilder(
-            index, gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance());
+        return getDataFilterFieldBuilder().addBuilder(
+            index, gdsc.smlm.data.config.FitConfig.DataFilter.getDefaultInstance());
       }
       /**
        * <pre>
-       * Any distance parameters used by the data filter. These can be in pixels
-       * or relative to the PSF width.
+       * The data filter
        * </pre>
        *
-       * <code>repeated .gdsc.smlm.data.config.FitDistance distance = 2;</code>
+       * <code>repeated .gdsc.smlm.data.config.DataFilter data_filter = 2;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.FitConfig.FitDistance.Builder> 
-           getDistanceBuilderList() {
-        return getDistanceFieldBuilder().getBuilderList();
+      public java.util.List<gdsc.smlm.data.config.FitConfig.DataFilter.Builder> 
+           getDataFilterBuilderList() {
+        return getDataFilterFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> 
-          getDistanceFieldBuilder() {
-        if (distanceBuilder_ == null) {
-          distanceBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder>(
-                  distance_,
+          gdsc.smlm.data.config.FitConfig.DataFilter, gdsc.smlm.data.config.FitConfig.DataFilter.Builder, gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder> 
+          getDataFilterFieldBuilder() {
+        if (dataFilterBuilder_ == null) {
+          dataFilterBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              gdsc.smlm.data.config.FitConfig.DataFilter, gdsc.smlm.data.config.FitConfig.DataFilter.Builder, gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder>(
+                  dataFilter_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
                   isClean());
-          distance_ = null;
+          dataFilter_ = null;
         }
-        return distanceBuilder_;
-      }
-
-      private java.util.List<java.lang.Double> parameter_ = java.util.Collections.emptyList();
-      private void ensureParameterIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
-          parameter_ = new java.util.ArrayList<java.lang.Double>(parameter_);
-          bitField0_ |= 0x00000004;
-         }
-      }
-      /**
-       * <pre>
-       * Any non-distance parameters used by the data filter
-       * </pre>
-       *
-       * <code>repeated double parameter = 3;</code>
-       */
-      public java.util.List<java.lang.Double>
-          getParameterList() {
-        return java.util.Collections.unmodifiableList(parameter_);
-      }
-      /**
-       * <pre>
-       * Any non-distance parameters used by the data filter
-       * </pre>
-       *
-       * <code>repeated double parameter = 3;</code>
-       */
-      public int getParameterCount() {
-        return parameter_.size();
-      }
-      /**
-       * <pre>
-       * Any non-distance parameters used by the data filter
-       * </pre>
-       *
-       * <code>repeated double parameter = 3;</code>
-       */
-      public double getParameter(int index) {
-        return parameter_.get(index);
-      }
-      /**
-       * <pre>
-       * Any non-distance parameters used by the data filter
-       * </pre>
-       *
-       * <code>repeated double parameter = 3;</code>
-       */
-      public Builder setParameter(
-          int index, double value) {
-        ensureParameterIsMutable();
-        parameter_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Any non-distance parameters used by the data filter
-       * </pre>
-       *
-       * <code>repeated double parameter = 3;</code>
-       */
-      public Builder addParameter(double value) {
-        ensureParameterIsMutable();
-        parameter_.add(value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Any non-distance parameters used by the data filter
-       * </pre>
-       *
-       * <code>repeated double parameter = 3;</code>
-       */
-      public Builder addAllParameter(
-          java.lang.Iterable<? extends java.lang.Double> values) {
-        ensureParameterIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, parameter_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Any non-distance parameters used by the data filter
-       * </pre>
-       *
-       * <code>repeated double parameter = 3;</code>
-       */
-      public Builder clearParameter() {
-        parameter_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
-        onChanged();
-        return this;
+        return dataFilterBuilder_;
       }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -6817,39 +7757,39 @@ public final class FitConfig {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.DataFilter)
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.DataFilterSettings)
     }
 
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.DataFilter)
-    private static final gdsc.smlm.data.config.FitConfig.DataFilter DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.DataFilterSettings)
+    private static final gdsc.smlm.data.config.FitConfig.DataFilterSettings DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.FitConfig.DataFilter();
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.FitConfig.DataFilterSettings();
     }
 
-    public static gdsc.smlm.data.config.FitConfig.DataFilter getDefaultInstance() {
+    public static gdsc.smlm.data.config.FitConfig.DataFilterSettings getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<DataFilter>
-        PARSER = new com.google.protobuf.AbstractParser<DataFilter>() {
-      public DataFilter parsePartialFrom(
+    private static final com.google.protobuf.Parser<DataFilterSettings>
+        PARSER = new com.google.protobuf.AbstractParser<DataFilterSettings>() {
+      public DataFilterSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-          return new DataFilter(input, extensionRegistry);
+          return new DataFilterSettings(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<DataFilter> parser() {
+    public static com.google.protobuf.Parser<DataFilterSettings> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<DataFilter> getParserForType() {
+    public com.google.protobuf.Parser<DataFilterSettings> getParserForType() {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FitConfig.DataFilter getDefaultInstanceForType() {
+    public gdsc.smlm.data.config.FitConfig.DataFilterSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -6882,56 +7822,56 @@ public final class FitConfig {
     gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod getNoiseMethod();
 
     /**
-     * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+     * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    boolean hasDataFilter();
+    boolean hasDataFilterSettings();
     /**
-     * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+     * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    gdsc.smlm.data.config.FitConfig.DataFilter getDataFilter();
+    gdsc.smlm.data.config.FitConfig.DataFilterSettings getDataFilterSettings();
     /**
-     * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+     * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder getDataFilterOrBuilder();
+    gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder();
 
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
     boolean hasSearch();
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
-    gdsc.smlm.data.config.FitConfig.FitDistance getSearch();
+    gdsc.smlm.data.config.FitConfig.RelativeParameter getSearch();
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
-    gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getSearchOrBuilder();
+    gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getSearchOrBuilder();
 
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
     boolean hasBorder();
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
-    gdsc.smlm.data.config.FitConfig.FitDistance getBorder();
+    gdsc.smlm.data.config.FitConfig.RelativeParameter getBorder();
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
-    gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getBorderOrBuilder();
+    gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getBorderOrBuilder();
 
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
     boolean hasFitting();
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
-    gdsc.smlm.data.config.FitConfig.FitDistance getFitting();
+    gdsc.smlm.data.config.FitConfig.RelativeParameter getFitting();
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
-    gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getFittingOrBuilder();
+    gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getFittingOrBuilder();
 
     /**
      * <code>bool include_neighbours = 7;</code>
@@ -6949,17 +7889,17 @@ public final class FitConfig {
     double getResidualsThreshold();
 
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
     boolean hasDuplicateDistance();
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
-    gdsc.smlm.data.config.FitConfig.FitDistance getDuplicateDistance();
+    gdsc.smlm.data.config.FitConfig.RelativeParameter getDuplicateDistance();
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
-    gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getDuplicateDistanceOrBuilder();
+    gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder();
 
     /**
      * <code>int32 failures_limit = 11;</code>
@@ -7036,24 +7976,24 @@ public final class FitConfig {
               break;
             }
             case 26: {
-              gdsc.smlm.data.config.FitConfig.DataFilter.Builder subBuilder = null;
-              if (dataFilter_ != null) {
-                subBuilder = dataFilter_.toBuilder();
+              gdsc.smlm.data.config.FitConfig.DataFilterSettings.Builder subBuilder = null;
+              if (dataFilterSettings_ != null) {
+                subBuilder = dataFilterSettings_.toBuilder();
               }
-              dataFilter_ = input.readMessage(gdsc.smlm.data.config.FitConfig.DataFilter.parser(), extensionRegistry);
+              dataFilterSettings_ = input.readMessage(gdsc.smlm.data.config.FitConfig.DataFilterSettings.parser(), extensionRegistry);
               if (subBuilder != null) {
-                subBuilder.mergeFrom(dataFilter_);
-                dataFilter_ = subBuilder.buildPartial();
+                subBuilder.mergeFrom(dataFilterSettings_);
+                dataFilterSettings_ = subBuilder.buildPartial();
               }
 
               break;
             }
             case 34: {
-              gdsc.smlm.data.config.FitConfig.FitDistance.Builder subBuilder = null;
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder subBuilder = null;
               if (search_ != null) {
                 subBuilder = search_.toBuilder();
               }
-              search_ = input.readMessage(gdsc.smlm.data.config.FitConfig.FitDistance.parser(), extensionRegistry);
+              search_ = input.readMessage(gdsc.smlm.data.config.FitConfig.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(search_);
                 search_ = subBuilder.buildPartial();
@@ -7062,11 +8002,11 @@ public final class FitConfig {
               break;
             }
             case 42: {
-              gdsc.smlm.data.config.FitConfig.FitDistance.Builder subBuilder = null;
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder subBuilder = null;
               if (border_ != null) {
                 subBuilder = border_.toBuilder();
               }
-              border_ = input.readMessage(gdsc.smlm.data.config.FitConfig.FitDistance.parser(), extensionRegistry);
+              border_ = input.readMessage(gdsc.smlm.data.config.FitConfig.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(border_);
                 border_ = subBuilder.buildPartial();
@@ -7075,11 +8015,11 @@ public final class FitConfig {
               break;
             }
             case 50: {
-              gdsc.smlm.data.config.FitConfig.FitDistance.Builder subBuilder = null;
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder subBuilder = null;
               if (fitting_ != null) {
                 subBuilder = fitting_.toBuilder();
               }
-              fitting_ = input.readMessage(gdsc.smlm.data.config.FitConfig.FitDistance.parser(), extensionRegistry);
+              fitting_ = input.readMessage(gdsc.smlm.data.config.FitConfig.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(fitting_);
                 fitting_ = subBuilder.buildPartial();
@@ -7103,11 +8043,11 @@ public final class FitConfig {
               break;
             }
             case 82: {
-              gdsc.smlm.data.config.FitConfig.FitDistance.Builder subBuilder = null;
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder subBuilder = null;
               if (duplicateDistance_ != null) {
                 subBuilder = duplicateDistance_.toBuilder();
               }
-              duplicateDistance_ = input.readMessage(gdsc.smlm.data.config.FitConfig.FitDistance.parser(), extensionRegistry);
+              duplicateDistance_ = input.readMessage(gdsc.smlm.data.config.FitConfig.RelativeParameter.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(duplicateDistance_);
                 duplicateDistance_ = subBuilder.buildPartial();
@@ -7180,87 +8120,87 @@ public final class FitConfig {
       return result == null ? gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod.UNRECOGNIZED : result;
     }
 
-    public static final int DATA_FILTER_FIELD_NUMBER = 3;
-    private gdsc.smlm.data.config.FitConfig.DataFilter dataFilter_;
+    public static final int DATA_FILTER_SETTINGS_FIELD_NUMBER = 3;
+    private gdsc.smlm.data.config.FitConfig.DataFilterSettings dataFilterSettings_;
     /**
-     * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+     * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    public boolean hasDataFilter() {
-      return dataFilter_ != null;
+    public boolean hasDataFilterSettings() {
+      return dataFilterSettings_ != null;
     }
     /**
-     * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+     * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.DataFilter getDataFilter() {
-      return dataFilter_ == null ? gdsc.smlm.data.config.FitConfig.DataFilter.getDefaultInstance() : dataFilter_;
+    public gdsc.smlm.data.config.FitConfig.DataFilterSettings getDataFilterSettings() {
+      return dataFilterSettings_ == null ? gdsc.smlm.data.config.FitConfig.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
     }
     /**
-     * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+     * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder getDataFilterOrBuilder() {
-      return getDataFilter();
+    public gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
+      return getDataFilterSettings();
     }
 
     public static final int SEARCH_FIELD_NUMBER = 4;
-    private gdsc.smlm.data.config.FitConfig.FitDistance search_;
+    private gdsc.smlm.data.config.FitConfig.RelativeParameter search_;
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
     public boolean hasSearch() {
       return search_ != null;
     }
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.FitDistance getSearch() {
-      return search_ == null ? gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : search_;
+    public gdsc.smlm.data.config.FitConfig.RelativeParameter getSearch() {
+      return search_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : search_;
     }
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getSearchOrBuilder() {
+    public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getSearchOrBuilder() {
       return getSearch();
     }
 
     public static final int BORDER_FIELD_NUMBER = 5;
-    private gdsc.smlm.data.config.FitConfig.FitDistance border_;
+    private gdsc.smlm.data.config.FitConfig.RelativeParameter border_;
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
     public boolean hasBorder() {
       return border_ != null;
     }
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.FitDistance getBorder() {
-      return border_ == null ? gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : border_;
+    public gdsc.smlm.data.config.FitConfig.RelativeParameter getBorder() {
+      return border_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : border_;
     }
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getBorderOrBuilder() {
+    public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getBorderOrBuilder() {
       return getBorder();
     }
 
     public static final int FITTING_FIELD_NUMBER = 6;
-    private gdsc.smlm.data.config.FitConfig.FitDistance fitting_;
+    private gdsc.smlm.data.config.FitConfig.RelativeParameter fitting_;
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
     public boolean hasFitting() {
       return fitting_ != null;
     }
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.FitDistance getFitting() {
-      return fitting_ == null ? gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : fitting_;
+    public gdsc.smlm.data.config.FitConfig.RelativeParameter getFitting() {
+      return fitting_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : fitting_;
     }
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getFittingOrBuilder() {
+    public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getFittingOrBuilder() {
       return getFitting();
     }
 
@@ -7292,23 +8232,23 @@ public final class FitConfig {
     }
 
     public static final int DUPLICATE_DISTANCE_FIELD_NUMBER = 10;
-    private gdsc.smlm.data.config.FitConfig.FitDistance duplicateDistance_;
+    private gdsc.smlm.data.config.FitConfig.RelativeParameter duplicateDistance_;
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
     public boolean hasDuplicateDistance() {
       return duplicateDistance_ != null;
     }
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.FitDistance getDuplicateDistance() {
-      return duplicateDistance_ == null ? gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : duplicateDistance_;
+    public gdsc.smlm.data.config.FitConfig.RelativeParameter getDuplicateDistance() {
+      return duplicateDistance_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : duplicateDistance_;
     }
     /**
-     * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+     * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
-    public gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getDuplicateDistanceOrBuilder() {
+    public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
       return getDuplicateDistance();
     }
 
@@ -7339,8 +8279,8 @@ public final class FitConfig {
       if (noiseMethod_ != gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod.ALL_PIXELS.getNumber()) {
         output.writeEnum(2, noiseMethod_);
       }
-      if (dataFilter_ != null) {
-        output.writeMessage(3, getDataFilter());
+      if (dataFilterSettings_ != null) {
+        output.writeMessage(3, getDataFilterSettings());
       }
       if (search_ != null) {
         output.writeMessage(4, getSearch());
@@ -7381,9 +8321,9 @@ public final class FitConfig {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, noiseMethod_);
       }
-      if (dataFilter_ != null) {
+      if (dataFilterSettings_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, getDataFilter());
+          .computeMessageSize(3, getDataFilterSettings());
       }
       if (search_ != null) {
         size += com.google.protobuf.CodedOutputStream
@@ -7439,10 +8379,10 @@ public final class FitConfig {
             .equals(other.getFitSettings());
       }
       result = result && noiseMethod_ == other.noiseMethod_;
-      result = result && (hasDataFilter() == other.hasDataFilter());
-      if (hasDataFilter()) {
-        result = result && getDataFilter()
-            .equals(other.getDataFilter());
+      result = result && (hasDataFilterSettings() == other.hasDataFilterSettings());
+      if (hasDataFilterSettings()) {
+        result = result && getDataFilterSettings()
+            .equals(other.getDataFilterSettings());
       }
       result = result && (hasSearch() == other.hasSearch());
       if (hasSearch()) {
@@ -7492,9 +8432,9 @@ public final class FitConfig {
       }
       hash = (37 * hash) + NOISE_METHOD_FIELD_NUMBER;
       hash = (53 * hash) + noiseMethod_;
-      if (hasDataFilter()) {
-        hash = (37 * hash) + DATA_FILTER_FIELD_NUMBER;
-        hash = (53 * hash) + getDataFilter().hashCode();
+      if (hasDataFilterSettings()) {
+        hash = (37 * hash) + DATA_FILTER_SETTINGS_FIELD_NUMBER;
+        hash = (53 * hash) + getDataFilterSettings().hashCode();
       }
       if (hasSearch()) {
         hash = (37 * hash) + SEARCH_FIELD_NUMBER;
@@ -7666,11 +8606,11 @@ public final class FitConfig {
         }
         noiseMethod_ = 0;
 
-        if (dataFilterBuilder_ == null) {
-          dataFilter_ = null;
+        if (dataFilterSettingsBuilder_ == null) {
+          dataFilterSettings_ = null;
         } else {
-          dataFilter_ = null;
-          dataFilterBuilder_ = null;
+          dataFilterSettings_ = null;
+          dataFilterSettingsBuilder_ = null;
         }
         if (searchBuilder_ == null) {
           search_ = null;
@@ -7732,10 +8672,10 @@ public final class FitConfig {
           result.fitSettings_ = fitSettingsBuilder_.build();
         }
         result.noiseMethod_ = noiseMethod_;
-        if (dataFilterBuilder_ == null) {
-          result.dataFilter_ = dataFilter_;
+        if (dataFilterSettingsBuilder_ == null) {
+          result.dataFilterSettings_ = dataFilterSettings_;
         } else {
-          result.dataFilter_ = dataFilterBuilder_.build();
+          result.dataFilterSettings_ = dataFilterSettingsBuilder_.build();
         }
         if (searchBuilder_ == null) {
           result.search_ = search_;
@@ -7808,8 +8748,8 @@ public final class FitConfig {
         if (other.noiseMethod_ != 0) {
           setNoiseMethodValue(other.getNoiseMethodValue());
         }
-        if (other.hasDataFilter()) {
-          mergeDataFilter(other.getDataFilter());
+        if (other.hasDataFilterSettings()) {
+          mergeDataFilterSettings(other.getDataFilterSettings());
         }
         if (other.hasSearch()) {
           mergeSearch(other.getSearch());
@@ -8022,146 +8962,146 @@ public final class FitConfig {
         return this;
       }
 
-      private gdsc.smlm.data.config.FitConfig.DataFilter dataFilter_ = null;
+      private gdsc.smlm.data.config.FitConfig.DataFilterSettings dataFilterSettings_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.DataFilter, gdsc.smlm.data.config.FitConfig.DataFilter.Builder, gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder> dataFilterBuilder_;
+          gdsc.smlm.data.config.FitConfig.DataFilterSettings, gdsc.smlm.data.config.FitConfig.DataFilterSettings.Builder, gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder> dataFilterSettingsBuilder_;
       /**
-       * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+       * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public boolean hasDataFilter() {
-        return dataFilterBuilder_ != null || dataFilter_ != null;
+      public boolean hasDataFilterSettings() {
+        return dataFilterSettingsBuilder_ != null || dataFilterSettings_ != null;
       }
       /**
-       * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+       * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.DataFilter getDataFilter() {
-        if (dataFilterBuilder_ == null) {
-          return dataFilter_ == null ? gdsc.smlm.data.config.FitConfig.DataFilter.getDefaultInstance() : dataFilter_;
+      public gdsc.smlm.data.config.FitConfig.DataFilterSettings getDataFilterSettings() {
+        if (dataFilterSettingsBuilder_ == null) {
+          return dataFilterSettings_ == null ? gdsc.smlm.data.config.FitConfig.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
         } else {
-          return dataFilterBuilder_.getMessage();
+          return dataFilterSettingsBuilder_.getMessage();
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+       * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public Builder setDataFilter(gdsc.smlm.data.config.FitConfig.DataFilter value) {
-        if (dataFilterBuilder_ == null) {
+      public Builder setDataFilterSettings(gdsc.smlm.data.config.FitConfig.DataFilterSettings value) {
+        if (dataFilterSettingsBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          dataFilter_ = value;
+          dataFilterSettings_ = value;
           onChanged();
         } else {
-          dataFilterBuilder_.setMessage(value);
+          dataFilterSettingsBuilder_.setMessage(value);
         }
 
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+       * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public Builder setDataFilter(
-          gdsc.smlm.data.config.FitConfig.DataFilter.Builder builderForValue) {
-        if (dataFilterBuilder_ == null) {
-          dataFilter_ = builderForValue.build();
+      public Builder setDataFilterSettings(
+          gdsc.smlm.data.config.FitConfig.DataFilterSettings.Builder builderForValue) {
+        if (dataFilterSettingsBuilder_ == null) {
+          dataFilterSettings_ = builderForValue.build();
           onChanged();
         } else {
-          dataFilterBuilder_.setMessage(builderForValue.build());
+          dataFilterSettingsBuilder_.setMessage(builderForValue.build());
         }
 
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+       * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public Builder mergeDataFilter(gdsc.smlm.data.config.FitConfig.DataFilter value) {
-        if (dataFilterBuilder_ == null) {
-          if (dataFilter_ != null) {
-            dataFilter_ =
-              gdsc.smlm.data.config.FitConfig.DataFilter.newBuilder(dataFilter_).mergeFrom(value).buildPartial();
+      public Builder mergeDataFilterSettings(gdsc.smlm.data.config.FitConfig.DataFilterSettings value) {
+        if (dataFilterSettingsBuilder_ == null) {
+          if (dataFilterSettings_ != null) {
+            dataFilterSettings_ =
+              gdsc.smlm.data.config.FitConfig.DataFilterSettings.newBuilder(dataFilterSettings_).mergeFrom(value).buildPartial();
           } else {
-            dataFilter_ = value;
+            dataFilterSettings_ = value;
           }
           onChanged();
         } else {
-          dataFilterBuilder_.mergeFrom(value);
+          dataFilterSettingsBuilder_.mergeFrom(value);
         }
 
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+       * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public Builder clearDataFilter() {
-        if (dataFilterBuilder_ == null) {
-          dataFilter_ = null;
+      public Builder clearDataFilterSettings() {
+        if (dataFilterSettingsBuilder_ == null) {
+          dataFilterSettings_ = null;
           onChanged();
         } else {
-          dataFilter_ = null;
-          dataFilterBuilder_ = null;
+          dataFilterSettings_ = null;
+          dataFilterSettingsBuilder_ = null;
         }
 
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+       * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.DataFilter.Builder getDataFilterBuilder() {
+      public gdsc.smlm.data.config.FitConfig.DataFilterSettings.Builder getDataFilterSettingsBuilder() {
         
         onChanged();
-        return getDataFilterFieldBuilder().getBuilder();
+        return getDataFilterSettingsFieldBuilder().getBuilder();
       }
       /**
-       * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+       * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder getDataFilterOrBuilder() {
-        if (dataFilterBuilder_ != null) {
-          return dataFilterBuilder_.getMessageOrBuilder();
+      public gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
+        if (dataFilterSettingsBuilder_ != null) {
+          return dataFilterSettingsBuilder_.getMessageOrBuilder();
         } else {
-          return dataFilter_ == null ?
-              gdsc.smlm.data.config.FitConfig.DataFilter.getDefaultInstance() : dataFilter_;
+          return dataFilterSettings_ == null ?
+              gdsc.smlm.data.config.FitConfig.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.DataFilter data_filter = 3;</code>
+       * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.DataFilter, gdsc.smlm.data.config.FitConfig.DataFilter.Builder, gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder> 
-          getDataFilterFieldBuilder() {
-        if (dataFilterBuilder_ == null) {
-          dataFilterBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitConfig.DataFilter, gdsc.smlm.data.config.FitConfig.DataFilter.Builder, gdsc.smlm.data.config.FitConfig.DataFilterOrBuilder>(
-                  getDataFilter(),
+          gdsc.smlm.data.config.FitConfig.DataFilterSettings, gdsc.smlm.data.config.FitConfig.DataFilterSettings.Builder, gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder> 
+          getDataFilterSettingsFieldBuilder() {
+        if (dataFilterSettingsBuilder_ == null) {
+          dataFilterSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              gdsc.smlm.data.config.FitConfig.DataFilterSettings, gdsc.smlm.data.config.FitConfig.DataFilterSettings.Builder, gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder>(
+                  getDataFilterSettings(),
                   getParentForChildren(),
                   isClean());
-          dataFilter_ = null;
+          dataFilterSettings_ = null;
         }
-        return dataFilterBuilder_;
+        return dataFilterSettingsBuilder_;
       }
 
-      private gdsc.smlm.data.config.FitConfig.FitDistance search_ = null;
+      private gdsc.smlm.data.config.FitConfig.RelativeParameter search_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> searchBuilder_;
+          gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> searchBuilder_;
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public boolean hasSearch() {
         return searchBuilder_ != null || search_ != null;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance getSearch() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter getSearch() {
         if (searchBuilder_ == null) {
-          return search_ == null ? gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : search_;
+          return search_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : search_;
         } else {
           return searchBuilder_.getMessage();
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      public Builder setSearch(gdsc.smlm.data.config.FitConfig.FitDistance value) {
+      public Builder setSearch(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
         if (searchBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -8175,10 +9115,10 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public Builder setSearch(
-          gdsc.smlm.data.config.FitConfig.FitDistance.Builder builderForValue) {
+          gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder builderForValue) {
         if (searchBuilder_ == null) {
           search_ = builderForValue.build();
           onChanged();
@@ -8189,13 +9129,13 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      public Builder mergeSearch(gdsc.smlm.data.config.FitConfig.FitDistance value) {
+      public Builder mergeSearch(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
         if (searchBuilder_ == null) {
           if (search_ != null) {
             search_ =
-              gdsc.smlm.data.config.FitConfig.FitDistance.newBuilder(search_).mergeFrom(value).buildPartial();
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.newBuilder(search_).mergeFrom(value).buildPartial();
           } else {
             search_ = value;
           }
@@ -8207,7 +9147,7 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public Builder clearSearch() {
         if (searchBuilder_ == null) {
@@ -8221,33 +9161,33 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance.Builder getSearchBuilder() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder getSearchBuilder() {
         
         onChanged();
         return getSearchFieldBuilder().getBuilder();
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getSearchOrBuilder() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getSearchOrBuilder() {
         if (searchBuilder_ != null) {
           return searchBuilder_.getMessageOrBuilder();
         } else {
           return search_ == null ?
-              gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : search_;
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : search_;
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance search = 4;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> 
+          gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> 
           getSearchFieldBuilder() {
         if (searchBuilder_ == null) {
           searchBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder>(
+              gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder>(
                   getSearch(),
                   getParentForChildren(),
                   isClean());
@@ -8256,29 +9196,29 @@ public final class FitConfig {
         return searchBuilder_;
       }
 
-      private gdsc.smlm.data.config.FitConfig.FitDistance border_ = null;
+      private gdsc.smlm.data.config.FitConfig.RelativeParameter border_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> borderBuilder_;
+          gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> borderBuilder_;
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public boolean hasBorder() {
         return borderBuilder_ != null || border_ != null;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance getBorder() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter getBorder() {
         if (borderBuilder_ == null) {
-          return border_ == null ? gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : border_;
+          return border_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : border_;
         } else {
           return borderBuilder_.getMessage();
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      public Builder setBorder(gdsc.smlm.data.config.FitConfig.FitDistance value) {
+      public Builder setBorder(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
         if (borderBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -8292,10 +9232,10 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public Builder setBorder(
-          gdsc.smlm.data.config.FitConfig.FitDistance.Builder builderForValue) {
+          gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder builderForValue) {
         if (borderBuilder_ == null) {
           border_ = builderForValue.build();
           onChanged();
@@ -8306,13 +9246,13 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      public Builder mergeBorder(gdsc.smlm.data.config.FitConfig.FitDistance value) {
+      public Builder mergeBorder(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
         if (borderBuilder_ == null) {
           if (border_ != null) {
             border_ =
-              gdsc.smlm.data.config.FitConfig.FitDistance.newBuilder(border_).mergeFrom(value).buildPartial();
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.newBuilder(border_).mergeFrom(value).buildPartial();
           } else {
             border_ = value;
           }
@@ -8324,7 +9264,7 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public Builder clearBorder() {
         if (borderBuilder_ == null) {
@@ -8338,33 +9278,33 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance.Builder getBorderBuilder() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder getBorderBuilder() {
         
         onChanged();
         return getBorderFieldBuilder().getBuilder();
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getBorderOrBuilder() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getBorderOrBuilder() {
         if (borderBuilder_ != null) {
           return borderBuilder_.getMessageOrBuilder();
         } else {
           return border_ == null ?
-              gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : border_;
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : border_;
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance border = 5;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> 
+          gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> 
           getBorderFieldBuilder() {
         if (borderBuilder_ == null) {
           borderBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder>(
+              gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder>(
                   getBorder(),
                   getParentForChildren(),
                   isClean());
@@ -8373,29 +9313,29 @@ public final class FitConfig {
         return borderBuilder_;
       }
 
-      private gdsc.smlm.data.config.FitConfig.FitDistance fitting_ = null;
+      private gdsc.smlm.data.config.FitConfig.RelativeParameter fitting_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> fittingBuilder_;
+          gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> fittingBuilder_;
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public boolean hasFitting() {
         return fittingBuilder_ != null || fitting_ != null;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance getFitting() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter getFitting() {
         if (fittingBuilder_ == null) {
-          return fitting_ == null ? gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : fitting_;
+          return fitting_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : fitting_;
         } else {
           return fittingBuilder_.getMessage();
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      public Builder setFitting(gdsc.smlm.data.config.FitConfig.FitDistance value) {
+      public Builder setFitting(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
         if (fittingBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -8409,10 +9349,10 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public Builder setFitting(
-          gdsc.smlm.data.config.FitConfig.FitDistance.Builder builderForValue) {
+          gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder builderForValue) {
         if (fittingBuilder_ == null) {
           fitting_ = builderForValue.build();
           onChanged();
@@ -8423,13 +9363,13 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      public Builder mergeFitting(gdsc.smlm.data.config.FitConfig.FitDistance value) {
+      public Builder mergeFitting(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
         if (fittingBuilder_ == null) {
           if (fitting_ != null) {
             fitting_ =
-              gdsc.smlm.data.config.FitConfig.FitDistance.newBuilder(fitting_).mergeFrom(value).buildPartial();
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.newBuilder(fitting_).mergeFrom(value).buildPartial();
           } else {
             fitting_ = value;
           }
@@ -8441,7 +9381,7 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public Builder clearFitting() {
         if (fittingBuilder_ == null) {
@@ -8455,33 +9395,33 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance.Builder getFittingBuilder() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder getFittingBuilder() {
         
         onChanged();
         return getFittingFieldBuilder().getBuilder();
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getFittingOrBuilder() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getFittingOrBuilder() {
         if (fittingBuilder_ != null) {
           return fittingBuilder_.getMessageOrBuilder();
         } else {
           return fitting_ == null ?
-              gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : fitting_;
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : fitting_;
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance fitting = 6;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> 
+          gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> 
           getFittingFieldBuilder() {
         if (fittingBuilder_ == null) {
           fittingBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder>(
+              gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder>(
                   getFitting(),
                   getParentForChildren(),
                   isClean());
@@ -8568,29 +9508,29 @@ public final class FitConfig {
         return this;
       }
 
-      private gdsc.smlm.data.config.FitConfig.FitDistance duplicateDistance_ = null;
+      private gdsc.smlm.data.config.FitConfig.RelativeParameter duplicateDistance_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> duplicateDistanceBuilder_;
+          gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> duplicateDistanceBuilder_;
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public boolean hasDuplicateDistance() {
         return duplicateDistanceBuilder_ != null || duplicateDistance_ != null;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance getDuplicateDistance() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter getDuplicateDistance() {
         if (duplicateDistanceBuilder_ == null) {
-          return duplicateDistance_ == null ? gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : duplicateDistance_;
+          return duplicateDistance_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : duplicateDistance_;
         } else {
           return duplicateDistanceBuilder_.getMessage();
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      public Builder setDuplicateDistance(gdsc.smlm.data.config.FitConfig.FitDistance value) {
+      public Builder setDuplicateDistance(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
         if (duplicateDistanceBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -8604,10 +9544,10 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public Builder setDuplicateDistance(
-          gdsc.smlm.data.config.FitConfig.FitDistance.Builder builderForValue) {
+          gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder builderForValue) {
         if (duplicateDistanceBuilder_ == null) {
           duplicateDistance_ = builderForValue.build();
           onChanged();
@@ -8618,13 +9558,13 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      public Builder mergeDuplicateDistance(gdsc.smlm.data.config.FitConfig.FitDistance value) {
+      public Builder mergeDuplicateDistance(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
         if (duplicateDistanceBuilder_ == null) {
           if (duplicateDistance_ != null) {
             duplicateDistance_ =
-              gdsc.smlm.data.config.FitConfig.FitDistance.newBuilder(duplicateDistance_).mergeFrom(value).buildPartial();
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.newBuilder(duplicateDistance_).mergeFrom(value).buildPartial();
           } else {
             duplicateDistance_ = value;
           }
@@ -8636,7 +9576,7 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public Builder clearDuplicateDistance() {
         if (duplicateDistanceBuilder_ == null) {
@@ -8650,33 +9590,33 @@ public final class FitConfig {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistance.Builder getDuplicateDistanceBuilder() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder getDuplicateDistanceBuilder() {
         
         onChanged();
         return getDuplicateDistanceFieldBuilder().getBuilder();
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      public gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder getDuplicateDistanceOrBuilder() {
+      public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
         if (duplicateDistanceBuilder_ != null) {
           return duplicateDistanceBuilder_.getMessageOrBuilder();
         } else {
           return duplicateDistance_ == null ?
-              gdsc.smlm.data.config.FitConfig.FitDistance.getDefaultInstance() : duplicateDistance_;
+              gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : duplicateDistance_;
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.FitDistance duplicate_distance = 10;</code>
+       * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder> 
+          gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> 
           getDuplicateDistanceFieldBuilder() {
         if (duplicateDistanceBuilder_ == null) {
           duplicateDistanceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitConfig.FitDistance, gdsc.smlm.data.config.FitConfig.FitDistance.Builder, gdsc.smlm.data.config.FitConfig.FitDistanceOrBuilder>(
+              gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder>(
                   getDuplicateDistance(),
                   getParentForChildren(),
                   isClean());
@@ -8775,15 +9715,20 @@ public final class FitConfig {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_FitDistance_descriptor;
+    internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_FitDistance_fieldAccessorTable;
+      internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_DataFilter_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_DataFilter_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor;
   private static final 
@@ -8828,41 +9773,48 @@ public final class FitConfig {
       "ver_settings\030\003 \001(\0132(.gdsc.smlm.data.conf" +
       "ig.FitSolverSettings\022>\n\017filter_settings\030" +
       "\004 \001(\0132%.gdsc.smlm.data.config.FilterSett",
-      "ings\".\n\013FitDistance\022\r\n\005value\030\001 \001(\001\022\020\n\010ab" +
-      "solute\030\002 \001(\010\"\226\001\n\nDataFilter\022?\n\020data_filt" +
-      "er_type\030\001 \001(\0162%.gdsc.smlm.data.config.Da" +
-      "taFilterType\0224\n\010distance\030\002 \003(\0132\".gdsc.sm" +
-      "lm.data.config.FitDistance\022\021\n\tparameter\030" +
-      "\003 \003(\001\"\232\004\n\021FitEngineSettings\0228\n\014fit_setti" +
-      "ngs\030\001 \001(\0132\".gdsc.smlm.data.config.FitSet" +
-      "tings\022A\n\014noise_method\030\002 \001(\0162+.gdsc.smlm." +
-      "data.config.NoiseEstimatorMethod\0226\n\013data" +
-      "_filter\030\003 \001(\0132!.gdsc.smlm.data.config.Da",
-      "taFilter\0222\n\006search\030\004 \001(\0132\".gdsc.smlm.dat" +
-      "a.config.FitDistance\0222\n\006border\030\005 \001(\0132\".g" +
-      "dsc.smlm.data.config.FitDistance\0223\n\007fitt" +
-      "ing\030\006 \001(\0132\".gdsc.smlm.data.config.FitDis" +
-      "tance\022\032\n\022include_neighbours\030\007 \001(\010\022\"\n\032nei" +
-      "ghbour_height_threshold\030\010 \001(\001\022\033\n\023residua" +
-      "ls_threshold\030\t \001(\001\022>\n\022duplicate_distance" +
-      "\030\n \001(\0132\".gdsc.smlm.data.config.FitDistan" +
-      "ce\022\026\n\016failures_limit\030\013 \001(\005*e\n\tFitSolver\022" +
-      "\013\n\007LVM_LSE\020\000\022\013\n\007LVM_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022",
-      "\007\n\003MLE\020\003\022\014\n\010FAST_MLE\020\004\022\031\n\025BACKTRACKING_F" +
-      "AST_MLE\020\005*\231\001\n\014SearchMethod\022\022\n\016POWELL_BOU" +
-      "NDED\020\000\022\n\n\006POWELL\020\001\022\022\n\016POWELL_ADAPTER\020\002\022\n" +
-      "\n\006BOBYQA\020\003\022\t\n\005CMAES\020\004\022\031\n\025CONJUGATE_GRADI" +
-      "ENT_FR\020\005\022\031\n\025CONJUGATE_GRADIENT_PR\020\006\022\010\n\004B" +
-      "FGS\020\007*6\n\016DataFilterType\022\n\n\006SINGLE\020\000\022\016\n\nD" +
-      "IFFERENCE\020\001\022\010\n\004JURY\020\002*\263\002\n\024NoiseEstimator" +
-      "Method\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWEST_PIXELS\020" +
-      "\001\022%\n!RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\002" +
-      "\022&\n\"RESIDUALS_LEAST_TRIMMED_OF_SQUARES\020\003",
-      "\022#\n\037RESIDUALS_LEAST_MEAN_OF_SQUARES\020\004\022+\n" +
-      "\'QUICK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES" +
-      "\020\005\022,\n(QUICK_RESIDUALS_LEAST_TRIMMED_OF_S" +
-      "QUARES\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEAN_O" +
-      "F_SQUARES\020\007B\013B\tFitConfigb\006proto3"
+      "ings\"4\n\021RelativeParameter\022\r\n\005value\030\001 \001(\001" +
+      "\022\020\n\010absolute\030\002 \001(\010\"\216\001\n\nDataFilter\022C\n\022dat" +
+      "a_filter_method\030\001 \001(\0162\'.gdsc.smlm.data.c" +
+      "onfig.DataFilterMethod\022;\n\tparameter\030\002 \003(" +
+      "\0132(.gdsc.smlm.data.config.RelativeParame" +
+      "ter\"\215\001\n\022DataFilterSettings\022?\n\020data_filte" +
+      "r_type\030\001 \001(\0162%.gdsc.smlm.data.config.Dat" +
+      "aFilterType\0226\n\013data_filter\030\002 \003(\0132!.gdsc." +
+      "smlm.data.config.DataFilter\"\303\004\n\021FitEngin" +
+      "eSettings\0228\n\014fit_settings\030\001 \001(\0132\".gdsc.s",
+      "mlm.data.config.FitSettings\022A\n\014noise_met" +
+      "hod\030\002 \001(\0162+.gdsc.smlm.data.config.NoiseE" +
+      "stimatorMethod\022G\n\024data_filter_settings\030\003" +
+      " \001(\0132).gdsc.smlm.data.config.DataFilterS" +
+      "ettings\0228\n\006search\030\004 \001(\0132(.gdsc.smlm.data" +
+      ".config.RelativeParameter\0228\n\006border\030\005 \001(" +
+      "\0132(.gdsc.smlm.data.config.RelativeParame" +
+      "ter\0229\n\007fitting\030\006 \001(\0132(.gdsc.smlm.data.co" +
+      "nfig.RelativeParameter\022\032\n\022include_neighb" +
+      "ours\030\007 \001(\010\022\"\n\032neighbour_height_threshold",
+      "\030\010 \001(\001\022\033\n\023residuals_threshold\030\t \001(\001\022D\n\022d" +
+      "uplicate_distance\030\n \001(\0132(.gdsc.smlm.data" +
+      ".config.RelativeParameter\022\026\n\016failures_li" +
+      "mit\030\013 \001(\005*e\n\tFitSolver\022\013\n\007LVM_LSE\020\000\022\013\n\007L" +
+      "VM_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010FAST_" +
+      "MLE\020\004\022\031\n\025BACKTRACKING_FAST_MLE\020\005*\231\001\n\014Sea" +
+      "rchMethod\022\022\n\016POWELL_BOUNDED\020\000\022\n\n\006POWELL\020" +
+      "\001\022\022\n\016POWELL_ADAPTER\020\002\022\n\n\006BOBYQA\020\003\022\t\n\005CMA" +
+      "ES\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022\031\n\025CONJU" +
+      "GATE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*6\n\016DataFilt",
+      "erType\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENCE\020\001\022\010\n\004JU" +
+      "RY\020\002*Y\n\020DataFilterMethod\022\010\n\004MEAN\020\000\022\016\n\nBL" +
+      "OCK_MEAN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014\n\010GAUSSIA" +
+      "N\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024NoiseEstimatorMethod" +
+      "\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWEST_PIXELS\020\001\022%\n!R" +
+      "ESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\002\022&\n\"RE" +
+      "SIDUALS_LEAST_TRIMMED_OF_SQUARES\020\003\022#\n\037RE" +
+      "SIDUALS_LEAST_MEAN_OF_SQUARES\020\004\022+\n\'QUICK" +
+      "_RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\005\022,\n(" +
+      "QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES",
+      "\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEAN_OF_SQUA" +
+      "RES\020\007B\013B\tFitConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -8896,24 +9848,30 @@ public final class FitConfig {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FitSettings_descriptor,
         new java.lang.String[] { "Calibration", "Psf", "FitSolverSettings", "FilterSettings", });
-    internal_static_gdsc_smlm_data_config_FitDistance_descriptor =
+    internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor =
       getDescriptor().getMessageTypes().get(3);
-    internal_static_gdsc_smlm_data_config_FitDistance_fieldAccessorTable = new
+    internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_FitDistance_descriptor,
+        internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor,
         new java.lang.String[] { "Value", "Absolute", });
     internal_static_gdsc_smlm_data_config_DataFilter_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_gdsc_smlm_data_config_DataFilter_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_DataFilter_descriptor,
-        new java.lang.String[] { "DataFilterType", "Distance", "Parameter", });
-    internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor =
+        new java.lang.String[] { "DataFilterMethod", "Parameter", });
+    internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor =
       getDescriptor().getMessageTypes().get(5);
+    internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor,
+        new java.lang.String[] { "DataFilterType", "DataFilter", });
+    internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor =
+      getDescriptor().getMessageTypes().get(6);
     internal_static_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor,
-        new java.lang.String[] { "FitSettings", "NoiseMethod", "DataFilter", "Search", "Border", "Fitting", "IncludeNeighbours", "NeighbourHeightThreshold", "ResidualsThreshold", "DuplicateDistance", "FailuresLimit", });
+        new java.lang.String[] { "FitSettings", "NoiseMethod", "DataFilterSettings", "Search", "Border", "Fitting", "IncludeNeighbours", "NeighbourHeightThreshold", "ResidualsThreshold", "DuplicateDistance", "FailuresLimit", });
     gdsc.smlm.data.config.PSFConfig.getDescriptor();
     gdsc.smlm.data.config.CalibrationConfig.getDescriptor();
   }
