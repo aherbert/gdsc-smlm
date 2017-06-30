@@ -87,22 +87,22 @@ public class FisherInformationMatrixTest
 		// Use a real Gaussian function here to compute the Fisher information.
 		// The matrix may be sensitive to the type of equation used.
 		int npeaks = 1;
-		while (1 + npeaks * 6 < n)
+		while (1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK < n)
 			npeaks++;
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxx,
 				GaussianFunctionFactory.FIT_ELLIPTICAL, null);
 
-		double[] a = new double[1 + npeaks * 6];
+		double[] a = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		a[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(1, 5);
 		for (int i = 0, j = 0; i < npeaks; i++, j += 6)
 		{
 			a[j + Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
-			a[j + Gaussian2DFunction.ANGLE] = rdg.nextUniform(-Math.PI, Math.PI);
 			// Non-overlapping peaks otherwise the CRLB are poor
 			a[j + Gaussian2DFunction.X_POSITION] = rdg.nextUniform(2 + i * 2, 4 + i * 2);
 			a[j + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(2 + i * 2, 4 + i * 2);
 			a[j + Gaussian2DFunction.X_SD] = rdg.nextUniform(1.5, 2);
 			a[j + Gaussian2DFunction.Y_SD] = rdg.nextUniform(1.5, 2);
+			a[j + Gaussian2DFunction.ANGLE] = rdg.nextUniform(-Math.PI, Math.PI);
 		}
 		f.initialise(a);
 
