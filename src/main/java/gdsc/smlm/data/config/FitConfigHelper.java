@@ -207,6 +207,26 @@ public class FitConfigHelper
 				throw new IllegalStateException("Unknown name: " + value);
 		}
 	}
+	public static String getName(DataFilterMethod value)
+	{
+		switch (value)
+		{
+			case BLOCK_MEAN:
+				return "Block Mean";
+			case CIRCULAR_MEAN:
+				return "Circular Mean";
+			case GAUSSIAN:
+				return "Gaussian";
+			case MEAN:
+				return "Mean";
+			case MEDIAN:
+				return "Median";
+			case UNRECOGNIZED:
+				return "Unknown";
+			default:
+				throw new IllegalStateException("Unknown name: " + value);
+		}
+	}
 
 	public static String getName(NoiseEstimatorMethod value)
 	{
