@@ -26,7 +26,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
-	protected static final int PARAMETERS_PER_PEAK = 5;
+	protected static final int GRADIENT_PARAMETERS_PER_PEAK = 5;
 
 	protected boolean[] zeroAngle;
 	protected final double[][] peakFactors;
@@ -85,15 +85,15 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		// Precalculate multiplication factors
 		for (int j = 0; j < npeaks; j++)
 		{
-			final double theta = a[j * 6 + SHAPE];
-			final double sx = a[j * 6 + X_SD];
-			final double sy = a[j * 6 + Y_SD];
+			final double theta = a[j * PARAMETERS_PER_PEAK + ANGLE];
+			final double sx = a[j * PARAMETERS_PER_PEAK + X_SD];
+			final double sy = a[j * PARAMETERS_PER_PEAK + Y_SD];
 			final double sx2 = sx * sx;
 			final double sy2 = sy * sy;
 			final double sx3 = sx2 * sx;
 			final double sy3 = sy2 * sy;
 			peakFactors[j][N] = ONE_OVER_TWO_PI / (sx * sy);
-			peakFactors[j][HEIGHT] = a[j * 6 + SIGNAL] * peakFactors[j][N];
+			peakFactors[j][HEIGHT] = a[j * PARAMETERS_PER_PEAK + SIGNAL] * peakFactors[j][N];
 
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
@@ -192,8 +192,8 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		for (int j = 0; j < npeaks; j++)
 		{
 			y_fit += gaussian(x0, x1, dyda, apos, dydapos, zeroAngle[j], peakFactors[j]);
-			apos += 6;
-			dydapos += PARAMETERS_PER_PEAK;
+			apos += PARAMETERS_PER_PEAK;
+			dydapos += GRADIENT_PARAMETERS_PER_PEAK;
 		}
 
 		return y_fit;
@@ -262,7 +262,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
 
-		for (int j = 0; j < npeaks; j++, apos += 6)
+		for (int j = 0; j < npeaks; j++, apos += PARAMETERS_PER_PEAK)
 		{
 			y_fit += gaussian(x0, x1, apos, zeroAngle[j], peakFactors[j]);
 		}
@@ -295,7 +295,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesShape()
+	public boolean evaluatesAngle()
 	{
 		return false;
 	}
@@ -319,8 +319,8 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	@Override
-	public int getParametersPerPeak()
+	public int getGradientParametersPerPeak()
 	{
-		return PARAMETERS_PER_PEAK;
+		return GRADIENT_PARAMETERS_PER_PEAK;
 	}
 }

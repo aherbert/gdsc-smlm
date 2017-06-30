@@ -10,8 +10,12 @@ import org.junit.Test;
 
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFConfig.PSF;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
 import ij.process.FloatProcessor;
@@ -24,6 +28,16 @@ public class IJImagePeakResultsTest
 {
 	//private RandomGenerator rand = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 	private RandomGenerator rand = new Well19937c(30051977);
+	static Calibration calibration;
+	static PSF psf;
+	static
+	{
+		psf = PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D);
+		CalibrationWriter cw = new CalibrationWriter();
+		cw.setDistanceUnit(DistanceUnit.PIXEL);
+		cw.setIntensityUnit(IntensityUnit.COUNT);
+		calibration = cw.getCalibration();
+	}
 
 	private static final String title = "Test";
 	Rectangle bounds = new Rectangle(0, 0, 3, 5);
@@ -473,7 +487,9 @@ public class IJImagePeakResultsTest
 
 	private static void begin(IJImagePeakResults r)
 	{
+		r.setPSF(psf);
 		r.setDisplayImage(false);
+		r.setCalibration(calibration);
 		r.begin();
 	}
 

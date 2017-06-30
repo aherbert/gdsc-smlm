@@ -101,7 +101,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private static double[] defaultClampValues;
 	static
 	{
-		defaultClampValues = new double[7];
+		defaultClampValues = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		// Taken from the 3D-DAO-STORM paper:
 		// (Babcock et al. 2012) A high-density 3D localization algorithm for stochastic optical 
 		// reconstruction microscopy. Optical Nanoscopy. 2012 1:6
@@ -110,11 +110,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
 		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
 		defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
-		defaultClampValues[Gaussian2DFunction.SHAPE] = Math.PI;
 		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
 		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
+		defaultClampValues[Gaussian2DFunction.Z_POSITION] = 1; // This depends on calibration
 		defaultClampValues[Gaussian2DFunction.X_SD] = 3;
 		defaultClampValues[Gaussian2DFunction.Y_SD] = 3;
+		defaultClampValues[Gaussian2DFunction.ANGLE] = Math.PI;
 	}
 
 	private StoppingCriteria stoppingCriteria = null;
@@ -580,6 +581,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public boolean isAngleFitting()
 	{
 		return (flags & GaussianFunctionFactory.FIT_ANGLE) != 0;
+	}
+
+	/**
+	 * @return True if fitting the z-position
+	 */
+	public boolean isZFitting()
+	{
+		return (flags & GaussianFunctionFactory.FIT_Z) != 0;
 	}
 
 	/**
@@ -1381,7 +1390,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public float getAngle()
 		{
-			return (float) params[Gaussian2DFunction.SHAPE + offset];
+			return (float) params[Gaussian2DFunction.ANGLE + offset];
 		}
 
 		public float getX()
@@ -1392,6 +1401,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		public float getY()
 		{
 			return (float) params[Gaussian2DFunction.Y_POSITION + offset] + offsety;
+		}
+
+		public float getZ()
+		{
+			return (float) params[Gaussian2DFunction.Z_POSITION + offset];
 		}
 
 		public float getXRelativeShift2()
@@ -1452,7 +1466,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public double[] toGaussian2DParameters()
 		{
-			final double[] p = new double[7];
+			final double[] p = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			p[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
 			System.arraycopy(params, 1 + offset, p, 1, Gaussian2DFunction.PARAMETERS_PER_PEAK);
 			p[Gaussian2DFunction.X_POSITION] += offsetx;
@@ -1632,9 +1646,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL] * gain;
 		final double photons = parameters[offset + Gaussian2DFunction.SIGNAL];
 		final double b = (localBackground > 0) ? localBackground : parameters[Gaussian2DFunction.BACKGROUND];
-		final double angle = parameters[offset + Gaussian2DFunction.SHAPE];
+		final double angle = parameters[offset + Gaussian2DFunction.ANGLE];
 		final double x = parameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
 		final double y = parameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
+		final double z = parameters[offset + Gaussian2DFunction.Z_POSITION];
 		final double x0 = initialParameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
 		final double y0 = initialParameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
 		final double xsd = parameters[offset + Gaussian2DFunction.X_SD];
@@ -1653,7 +1668,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		// This uses the local fitted background to estimate the noise
 		final double noise = (b > 0) ? PeakResultHelper.localBackgroundToNoise(b, 1.0, this.emCCD) : this.noise;
-		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, noise, b, angle, x, y, x0, y0,
+		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, noise, b, angle, x, y, z, x0, y0,
 				xsd, ysd, xsd0, ysd0, variance, variance2, resultType);
 	}
 
@@ -2625,25 +2640,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
-	 * @return The clamp value for the angle
-	 */
-	public double getClampAngle()
-	{
-		return getClampValues()[Gaussian2DFunction.SHAPE];
-	}
-
-	/**
-	 * Sets the clamp value for the angle
-	 *
-	 * @param value
-	 *            the new clamp value
-	 */
-	public void setClampAngle(double value)
-	{
-		updateClampValue(Gaussian2DFunction.SHAPE, value);
-	}
-
-	/**
 	 * @return The clamp value for the x position
 	 */
 	public double getClampX()
@@ -2682,6 +2678,25 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
+	 * @return The clamp value for the z position
+	 */
+	public double getClampZ()
+	{
+		return getClampValues()[Gaussian2DFunction.Z_POSITION];
+	}
+
+	/**
+	 * Sets the clamp value for the z position
+	 *
+	 * @param value
+	 *            the new clamp value
+	 */
+	public void setClampZ(double value)
+	{
+		updateClampValue(Gaussian2DFunction.Z_POSITION, value);
+	}
+
+	/**
 	 * @return The clamp value for the x sd
 	 */
 	public double getClampXSD()
@@ -2717,6 +2732,25 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public void setClampYSD(double value)
 	{
 		updateClampValue(Gaussian2DFunction.Y_SD, value);
+	}
+
+	/**
+	 * @return The clamp value for the angle
+	 */
+	public double getClampAngle()
+	{
+		return getClampValues()[Gaussian2DFunction.ANGLE];
+	}
+
+	/**
+	 * Sets the clamp value for the angle
+	 *
+	 * @param value
+	 *            the new clamp value
+	 */
+	public void setClampAngle(double value)
+	{
+		updateClampValue(Gaussian2DFunction.ANGLE, value);
 	}
 
 	private void updateClampValue(int index, double value)

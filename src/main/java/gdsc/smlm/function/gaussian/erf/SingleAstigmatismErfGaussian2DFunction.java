@@ -188,9 +188,9 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		// Use pre-computed gradients
 		duda[0] = 1.0;
 		duda[1] = deltaEx[x] * deltaEy[y];
-		duda[2] = du_dtsx[x] * deltaEy[y] * dtsx_dtz + du_dtsy[y] * deltaEx[x] * dtsy_dtz;
-		duda[3] = du_dtx[x] * deltaEy[y];
-		duda[4] = du_dty[y] * deltaEx[x];
+		duda[2] = du_dtx[x] * deltaEy[y];
+		duda[3] = du_dty[y] * deltaEx[x];
+		duda[4] = du_dtsx[x] * deltaEy[y] * dtsx_dtz + du_dtsy[y] * deltaEx[x] * dtsy_dtz;
 
 		return tB + tI * duda[1];
 	}
@@ -219,13 +219,15 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 		duda[0] = 1.0;
 		duda[1] = deltaEx[x] * deltaEy[y];
-		duda[2] = du_dsx * dtsx_dtz + du_dsy * dtsy_dtz;
-		duda[3] = du_dtx[x] * deltaEy[y];
-		duda[4] = du_dty[y] * deltaEx[x];
+		duda[2] = du_dtx[x] * deltaEy[y];
+		duda[3] = du_dty[y] * deltaEx[x];
+		duda[4] = du_dtsx[x] * deltaEy[y] * dtsx_dtz + du_dtsy[y] * deltaEx[x] * dtsy_dtz;
 		d2uda2[0] = 0;
 		d2uda2[1] = 0;
+		d2uda2[2] = d2u_dtx2[x] * deltaEy[y];
+		d2uda2[3] = d2u_dty2[y] * deltaEx[x];
 		//@formatter:off
-		d2uda2[2] =
+		d2uda2[4] =
 				d2u_dtsx2[x] * deltaEy[y] * dtsx_dtz * dtsx_dtz +
 				du_dsx * d2tsx_dtz2 +
 				d2u_dtsy2[y] * deltaEx[x] * dtsy_dtz * dtsy_dtz + 
@@ -235,8 +237,6 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 				// in the GraspJ source code and it works in JUnit tests.
 				2 * du_dtsx[x] * dtsx_dtz * du_dtsy[y] * dtsy_dtz / tI;		
 		//@formatter:on
-		d2uda2[3] = d2u_dtx2[x] * deltaEy[y];
-		d2uda2[4] = d2u_dty2[y] * deltaEx[x];
 
 		return tB + tI * duda[1];
 	}
@@ -254,13 +254,13 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 	}
 
 	@Override
-	public boolean evaluatesShape()
+	public boolean evaluatesPosition()
 	{
 		return true;
 	}
 
 	@Override
-	public boolean evaluatesPosition()
+	public boolean evaluatesZ()
 	{
 		return true;
 	}
@@ -278,7 +278,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 	}
 
 	@Override
-	public int getParametersPerPeak()
+	public int getGradientParametersPerPeak()
 	{
 		return 4;
 	}
@@ -321,9 +321,9 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 			for (int x = 0; x < maxx; x++)
 			{
 				duda[1] = deltaEx[x] * deltaEy;
-				duda[2] = du_dtsx[x] * deltaEy_by_dtsx_dtz + du_dtsy_by_dtsy_dtz * deltaEx[x];
-				duda[3] = du_dtx[x] * deltaEy;
-				duda[4] = du_dty * deltaEx[x];
+				duda[2] = du_dtx[x] * deltaEy;
+				duda[3] = du_dty * deltaEx[x];
+				duda[4] = du_dtsx[x] * deltaEy_by_dtsx_dtz + du_dtsy_by_dtsy_dtz * deltaEx[x];
 				procedure.execute(tB + tI * duda[1], duda);
 			}
 		}
@@ -357,11 +357,13 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 				final double du_dsy = du_dtsy * deltaEx[x];
 
 				duda[1] = deltaEx[x] * deltaEy;
-				duda[2] = du_dsx * dtsx_dtz + du_dsy * dtsy_dtz;
-				duda[3] = du_dtx[x] * deltaEy;
-				duda[4] = du_dty * deltaEx[x];
+				duda[2] = du_dtx[x] * deltaEy;
+				duda[3] = du_dty * deltaEx[x];
+				duda[4] = du_dsx * dtsx_dtz + du_dsy * dtsy_dtz;
+				d2uda2[2] = d2u_dtx2[x] * deltaEy;
+				d2uda2[3] = d2u_dty2 * deltaEx[x];
 				//@formatter:off
-				d2uda2[2] =
+				d2uda2[4] =
 						d2u_dtsx2[x] * deltaEy_by_dtsx_dtz_2 +
 						du_dsx * d2tsx_dtz2 +
 						//d2u_dtsy2[y] * deltaEx[x] * dtsy_dtz_2 +
@@ -373,8 +375,6 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 						//2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
 						two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x]; 
 				//@formatter:on
-				d2uda2[3] = d2u_dtx2[x] * deltaEy;
-				d2uda2[4] = d2u_dty2 * deltaEx[x];
 
 				procedure.execute(tB + tI * duda[1], duda, d2uda2);
 			}
@@ -416,26 +416,48 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 				final double du_dsy = du_dtsy * deltaEx[x];
 
 				duda[1] = deltaEx[x] * deltaEy;
-				duda[2] = du_dsx * dtsx_dtz + du_dsy * dtsy_dtz;
-				duda[3] = du_dtx[x] * deltaEy;
-				duda[4] = du_dty * deltaEx[x];
+				duda[2] = du_dtx[x] * deltaEy;
+				duda[3] = du_dty * deltaEx[x];
+				duda[4] = du_dsx * dtsx_dtz + du_dsy * dtsy_dtz;
 
 				// Compute all the partial second order derivatives
 
 				// Background are all 0
 
-				// Signal,Z
-				d2udadb[7] = duda[2] / tI;
 				// Signal,X
-				d2udadb[8] = duda[3] / tI;
+				d2udadb[7] = duda[2] / tI;
 				// Signal,Y
+				d2udadb[8] = duda[3] / tI;
+				// Signal,Z
 				d2udadb[9] = duda[4] / tI;
 
-				// Z,Signal
+				// X,Signal
 				d2udadb[11] = d2udadb[7];
+				// X,X
+				d2udadb[12] = d2u_dtx2[x] * deltaEy;
+				// X,Y
+				d2udadb[13] = du_dtx[x] * du_dty_tI;
+				// X,Z
+				d2udadb[14] = deltaEy * d2deltaEx_dtsxdx[x] + du_dtx[x] * du_dtsy_by_dtsy_dtz_tI;
+
+				// Y,Signal
+				d2udadb[16] = d2udadb[8];
+				// Y,X
+				d2udadb[17] = d2udadb[13];
+				// Y,Y
+				d2udadb[18] = d2u_dty2 * deltaEx[x];
+				// Y,Z
+				d2udadb[19] = du_dtsx[x] * du_dty_by_dtsx_dtz_tI + deltaEx[x] * d2deltaEy_dtsydy;
+				
+				// Z,Signal
+				d2udadb[21] = d2udadb[9];
+				// Z,X
+				d2udadb[22] = d2udadb[14];
+				// Z,Y
+				d2udadb[23] = d2udadb[19];
 				// Z,Z
 				//@formatter:off
-				d2udadb[12] =
+				d2udadb[24] =
 						d2u_dtsx2[x] * deltaEy_by_dtsx_dtz_2 +
 						du_dsx * d2tsx_dtz2 +
 						//d2u_dtsy2[y] * deltaEx[x] * dtsy_dtz_2 +
@@ -447,28 +469,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 						//2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
 						two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x]; 
 				//@formatter:on
-				// Z,X
-				d2udadb[13] = deltaEy * d2deltaEx_dtsxdx[x] + du_dtx[x] * du_dtsy_by_dtsy_dtz_tI;
-				// Z,Y
-				d2udadb[14] = du_dtsx[x] * du_dty_by_dtsx_dtz_tI + deltaEx[x] * d2deltaEy_dtsydy;
 
-				// X,Signal
-				d2udadb[16] = d2udadb[8];
-				// X,Z
-				d2udadb[17] = d2udadb[13];
-				// X,X
-				d2udadb[18] = d2u_dtx2[x] * deltaEy;
-				// X,Y
-				d2udadb[19] = du_dtx[x] * du_dty_tI;
-
-				// Y,Signal
-				d2udadb[21] = d2udadb[9];
-				// Y,Z
-				d2udadb[22] = d2udadb[14];
-				// Y,X
-				d2udadb[23] = d2udadb[19];
-				// Y,Y
-				d2udadb[24] = d2u_dty2 * deltaEx[x];
 
 				procedure.executeExtended(tB + tI * duda[1], duda, d2udadb);
 			}

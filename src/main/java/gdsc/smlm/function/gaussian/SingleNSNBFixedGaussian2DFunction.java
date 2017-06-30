@@ -176,7 +176,7 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesShape()
+	public boolean evaluatesAngle()
 	{
 		return false;
 	}
@@ -200,7 +200,7 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public int getParametersPerPeak()
+	public int getGradientParametersPerPeak()
 	{
 		return 2;
 	}

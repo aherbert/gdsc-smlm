@@ -82,7 +82,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 		int p = 0;
 		if (evaluatesBackground())
 			indices[p++] = 0;
-		for (int n = 0, i = 0; n < nPeaks; n++, i += 6)
+		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
 		{
 			for (int j = start; j < m; j++)
 				indices[p++] = i + singleGradientIndices[j];

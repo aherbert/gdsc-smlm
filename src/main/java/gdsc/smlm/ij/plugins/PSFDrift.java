@@ -237,7 +237,7 @@ public class PSFDrift implements PlugIn
 				xy[xy.length - 1][1] -= cy;
 			}
 
-			double[] initialParams = new double[7];
+			double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
 			initialParams[Gaussian2DFunction.SIGNAL] = signal;
 			initialParams[Gaussian2DFunction.X_SD] = initialParams[Gaussian2DFunction.Y_SD] = s;
@@ -287,8 +287,8 @@ public class PSFDrift implements PlugIn
 		{
 			if (ub == null)
 			{
-				ub = new double[7];
-				lb = new double[7];
+				ub = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+				lb = new double[ub.length];
 
 				// Background could be zero so always have an upper limit
 				ub[Gaussian2DFunction.BACKGROUND] = 1;
@@ -296,8 +296,10 @@ public class PSFDrift implements PlugIn
 				ub[Gaussian2DFunction.SIGNAL] = photons * 2;
 				ub[Gaussian2DFunction.X_POSITION] = w;
 				ub[Gaussian2DFunction.Y_POSITION] = w;
-				lb[Gaussian2DFunction.SHAPE] = -Math.PI;
-				ub[Gaussian2DFunction.SHAPE] = Math.PI;
+				lb[Gaussian2DFunction.ANGLE] = -Math.PI;
+				ub[Gaussian2DFunction.ANGLE] = Math.PI;
+				lb[Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
+				ub[Gaussian2DFunction.Z_POSITION] = Double.POSITIVE_INFINITY;
 				double wf = 1.5;
 				lb[Gaussian2DFunction.X_SD] = s / wf;
 				ub[Gaussian2DFunction.X_SD] = s * 5;
@@ -310,8 +312,8 @@ public class PSFDrift implements PlugIn
 		{
 			if (uc == null)
 			{
-				lc = new double[7];
-				uc = new double[7];
+				lc = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+				uc = new double[uc.length];
 				Arrays.fill(lc, Float.NEGATIVE_INFINITY);
 				Arrays.fill(uc, Float.POSITIVE_INFINITY);
 				lc[Gaussian2DFunction.BACKGROUND] = 0;

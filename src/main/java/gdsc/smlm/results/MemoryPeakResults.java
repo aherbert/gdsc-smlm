@@ -268,6 +268,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public MemoryPeakResults(Collection<PeakResult> results)
 	{
+		this();
 		addAll(results);
 	}
 
@@ -279,7 +280,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public MemoryPeakResults(PSF psf)
 	{
-		this(1000);
+		this();
 		setPSF(psf);
 	}
 

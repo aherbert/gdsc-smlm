@@ -40,6 +40,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private final float angle;
 	private final float x;
 	private final float y;
+	private final float z;
 	private final float xshift2;
 	private final float yshift2;
 	private final float xsd;
@@ -73,6 +74,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * @param angle The angle of the fit
 	 * @param x The x-position
 	 * @param y The y-position
+	 * @param z The z-position
 	 * @param x0 The initial x-position
 	 * @param y0 The initial y-position
 	 * @param xsd The x standard deviation
@@ -94,6 +96,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 			double angle,
 			double x,
 			double y,
+			double z,
 			double x0,
 			double y0,
 			double xsd,
@@ -119,6 +122,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		this.angle = (float) (angle);
 		this.x = (float) (x);
 		this.y = (float) (y);
+		this.z = (float) (z);
 		this.xshift2 = squared((x - x0) / xsd0);
 		this.yshift2 = squared((y - y0) / ysd0);
 		this.xsd = (float) (xsd);
@@ -214,6 +218,11 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	public float getY()
 	{
 		return y;
+	}
+
+	public float getZ()
+	{
+		return z;
 	}
 
 	public float getXRelativeShift2()
@@ -321,14 +330,15 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 */
 	public double[] toGaussian2DParameters()
 	{
-		final double[] p = new double[7];
+		final double[] p = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		p[Gaussian2DFunction.BACKGROUND] = b;
 		p[Gaussian2DFunction.SIGNAL] = signal;
-		p[Gaussian2DFunction.SHAPE] = angle;
 		p[Gaussian2DFunction.X_POSITION] = x;
 		p[Gaussian2DFunction.Y_POSITION] = y;
+		p[Gaussian2DFunction.Z_POSITION] = z;
 		p[Gaussian2DFunction.X_SD] = xsd;
 		p[Gaussian2DFunction.Y_SD] = ysd;
+		p[Gaussian2DFunction.ANGLE] = angle;
 		return p;
 	}
 

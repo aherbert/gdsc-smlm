@@ -149,7 +149,7 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesShape()
+	public boolean evaluatesAngle()
 	{
 		return false;
 	}
@@ -173,7 +173,7 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public int getParametersPerPeak()
+	public int getGradientParametersPerPeak()
 	{
 		return 0;
 	}

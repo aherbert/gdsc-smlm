@@ -1,16 +1,15 @@
 package gdsc.smlm.function.gaussian;
 
-import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
-import gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
-import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
-import gdsc.smlm.function.gaussian.erf.SingleNBFreeCircularErfGaussian2DFunction;
-import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiNBFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.SingleNBFreeCircularErfGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -327,9 +326,9 @@ public class GaussianFunctionFactory
 			if ((flags & FIT_Z) != 0 && zModel != null)
 			{
 				// Convert the parameters for a free-circle function
-				for (int i = 0, j = 0; i < nPeaks; i++, j += 6)
+				for (int i = 0, j = 0; i < nPeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 				{
-					final double tz = a[j + ErfGaussian2DFunction.Z_POSITION];
+					final double tz = a[j + Gaussian2DFunction.Z_POSITION];
 					a[j + Gaussian2DFunction.X_SD] *= zModel.getSx(tz);
 					a[j + Gaussian2DFunction.Y_SD] *= zModel.getSy(tz);
 					//a[ErfGaussian2DFunction.Z_POSITION] = 0;
@@ -341,7 +340,7 @@ public class GaussianFunctionFactory
 			// Check the need for X/Y widths
 			if ((flags & FIT_Y_WIDTH) == 0)
 			{
-				for (int i = 0, j = 0; i < nPeaks; i++, j += 6)
+				for (int i = 0, j = 0; i < nPeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 					a[j + Gaussian2DFunction.Y_SD] = a[j + Gaussian2DFunction.X_SD];
 				return FIT_ERF_FIXED;
 			}
@@ -354,7 +353,7 @@ public class GaussianFunctionFactory
 		// Check the need for X/Y widths
 		if ((flags & FIT_Y_WIDTH) == 0)
 		{
-			for (int i = 0, j = 0; i < nPeaks; i++, j += 6)
+			for (int i = 0, j = 0; i < nPeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 				a[j + Gaussian2DFunction.Y_SD] = a[j + Gaussian2DFunction.X_SD];
 			return FIT_SIMPLE_FIXED;
 		}
@@ -389,7 +388,7 @@ public class GaussianFunctionFactory
 			if ((flags & FIT_Z) != 0 && zModel != null)
 			{
 				// Convert the parameters for a free-circle function
-				final double tz = a[ErfGaussian2DFunction.Z_POSITION];
+				final double tz = a[Gaussian2DFunction.Z_POSITION];
 				a[Gaussian2DFunction.X_SD] *= zModel.getSx(tz);
 				a[Gaussian2DFunction.Y_SD] *= zModel.getSy(tz);
 				//a[ErfGaussian2DFunction.Z_POSITION] = 0;

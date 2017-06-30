@@ -319,7 +319,7 @@ public class TSFPeakResultsReader
 				// Support different Gaussian shapes
 				if (fitMode == FitMode.ONEAXIS)
 				{
-					params[isx] = params[isy] = (float) (spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR);
+					params[isx] = (float) (spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR);
 				}
 				else
 				{

@@ -2,6 +2,7 @@ package gdsc.smlm.fitting.linear;
 
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 
 import java.util.ArrayList;
@@ -351,10 +352,15 @@ public class SolverSpeedTest
 	{
 		// Generate a 2D Gaussian
 		SingleFreeCircularGaussian2DFunction func = new SingleFreeCircularGaussian2DFunction(10, 10);
-		double[] a = new double[] {
-				// Background, Amplitude, Angle, Xpos, Ypos, Xwidth, yWidth
-				20 + rand.nextDouble() * 5, 10 + rand.nextDouble() * 5, 0, 5 + rand.nextDouble() * 2,
-				5 + rand.nextDouble() * 2, 5 + rand.nextDouble() * 2, 5 + rand.nextDouble() * 2 };
+		double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		a[Gaussian2DFunction.BACKGROUND] = 2 + rand.nextDouble() * 2;
+		a[Gaussian2DFunction.SIGNAL] = 100 + rand.nextDouble() * 5;
+		a[Gaussian2DFunction.X_POSITION] = 4.5 + rand.nextDouble();
+		a[Gaussian2DFunction.Y_POSITION] = 4.5 + rand.nextDouble();
+		a[Gaussian2DFunction.X_SD] = 1 + rand.nextDouble();
+		a[Gaussian2DFunction.Y_SD] = 1 + rand.nextDouble();
+		a[Gaussian2DFunction.ANGLE] = rand.nextDouble();
+
 		int[] x = new int[100];
 		double[] y = new double[100];
 		func.initialise(a);
@@ -476,7 +482,7 @@ public class SolverSpeedTest
 		ITER = FastMath.min(ITER, A.size());
 		for (int i = 0; i < ITER; i++)
 		{
-			double[][]a = A.get(i);
+			double[][] a = A.get(i);
 			solver.solveLinear(a, B.get(i));
 			solver.invertLastA(a);
 		}

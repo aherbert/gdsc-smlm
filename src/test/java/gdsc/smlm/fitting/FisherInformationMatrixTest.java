@@ -97,7 +97,7 @@ public class FisherInformationMatrixTest
 		for (int i = 0, j = 0; i < npeaks; i++, j += 6)
 		{
 			a[j + Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
-			a[j + Gaussian2DFunction.SHAPE] = rdg.nextUniform(-Math.PI, Math.PI);
+			a[j + Gaussian2DFunction.ANGLE] = rdg.nextUniform(-Math.PI, Math.PI);
 			// Non-overlapping peaks otherwise the CRLB are poor
 			a[j + Gaussian2DFunction.X_POSITION] = rdg.nextUniform(2 + i * 2, 4 + i * 2);
 			a[j + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(2 + i * 2, 4 + i * 2);

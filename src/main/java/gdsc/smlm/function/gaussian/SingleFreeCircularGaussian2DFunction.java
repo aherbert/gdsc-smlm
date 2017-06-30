@@ -87,7 +87,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 		x1pos = a[Y_POSITION];
 
 		// Precalculate multiplication factors
-		final double theta = a[SHAPE];
+		final double theta = a[ANGLE];
 		final double sx = a[X_SD];
 		final double sy = a[Y_SD];
 		final double sx2 = sx * sx;
@@ -265,7 +265,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesShape()
+	public boolean evaluatesAngle()
 	{
 		return false;
 	}
@@ -289,7 +289,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public int getParametersPerPeak()
+	public int getGradientParametersPerPeak()
 	{
 		return 5;
 	}

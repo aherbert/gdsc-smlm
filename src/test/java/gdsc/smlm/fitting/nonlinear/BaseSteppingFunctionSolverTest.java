@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.core.utils.NotImplementedException;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 
@@ -69,7 +70,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 			case MLELVM:
 				solver = new MLELVMSteppingFunctionSolver(f, tc, bounds);
 				// MLE requires a positive function value so use a lower bound
-				solver.setBounds(new double[7], null);
+				solver.setBounds(getLB(), null);
 				break;
 			case WLSELVM:
 				solver = new WLSELVMSteppingFunctionSolver(f, tc, bounds);
@@ -77,19 +78,19 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 			case FastMLE:
 				solver = new FastMLESteppingFunctionSolver(f, tc, bounds);
 				// MLE requires a positive function value so use a lower bound
-				solver.setBounds(new double[7], null);
+				solver.setBounds(getLB(), null);
 				break;
 			case BTFastMLE:
 				solver = new BacktrackingFastMLESteppingFunctionSolver(f, tc, bounds);
 				// MLE requires a positive function value so use a lower bound
-				solver.setBounds(new double[7], null);
+				solver.setBounds(getLB(), null);
 				break;
 			case JFastMLE:
 				FastMLESteppingFunctionSolver s = new FastMLESteppingFunctionSolver(f, tc, bounds);
 				s.enableJacobianSolution(true);
 				// MLE requires a positive function value so use a lower bound
 				solver = s;
-				solver.setBounds(new double[7], null);
+				solver.setBounds(getLB(), null);
 				break;
 			default:
 				throw new NotImplementedException();
@@ -97,6 +98,13 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 		if (solver instanceof LVMSteppingFunctionSolver)
 			((LVMSteppingFunctionSolver) solver).setInitialLambda(1);
 		return solver;
+	}
+
+	double[] getLB()
+	{
+		double[] lb = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		lb[Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
+		return lb;
 	}
 
 	String getName(boolean bounded, SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type)

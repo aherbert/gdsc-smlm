@@ -431,11 +431,11 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 				new double[] { 0, 10, initialPeakAngle, 0, 0, initialPeakStdDev0, initialPeakStdDev1 });
 		createResultsWindow();
 		int iteration = 0;
-		ignore[ANGLE] = !gf.evaluatesShape();
+		ignore[ANGLE] = !gf.evaluatesAngle();
 		ignore[X] = !gf.evaluatesSD0();
 		ignore[Y] = !gf.evaluatesSD1();
 
-		double[] params = new double[] { gf.evaluatesShape() ? initialPeakAngle : 0,
+		double[] params = new double[] { gf.evaluatesAngle() ? initialPeakAngle : 0,
 				gf.evaluatesSD0() ? initialPeakStdDev0 : 0, gf.evaluatesSD1() ? initialPeakStdDev1 : 0, 0, 0 };
 		double[] params_dev = new double[3];
 		boolean[] identical = new boolean[4];

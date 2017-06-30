@@ -35,7 +35,7 @@ public abstract class BaseFunctionSolverTest
 	RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
 
 	// Basic Gaussian
-	static double[] params = new double[7];
+	static double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 	static double[] base = { 0.8, 1, 1.2 }; // Applied (*) to the background
 	//@formatter:off
 	static double[] signal = {
@@ -59,7 +59,7 @@ public abstract class BaseFunctionSolverTest
 	static double[] defaultClampValues;
 	static
 	{
-		defaultClampValues = new double[7];
+		defaultClampValues = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		// Taken from the 3D-DAO-STORM paper:
 		// (Babcock et al. 2012) A high-density 3D localization algorithm for stochastic optical 
 		// reconstruction microscopy. Optical Nanoscopy. 2012 1:6
@@ -73,21 +73,20 @@ public abstract class BaseFunctionSolverTest
 		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
 		//defaultClampValues[Gaussian2DFunction.BACKGROUND] = 20;
 		defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
-		// TODO - set this specifically for angle or z-depth fitting
-		defaultClampValues[Gaussian2DFunction.SHAPE] = Math.PI;
 		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
 		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
+		defaultClampValues[Gaussian2DFunction.Z_POSITION] = 1;
 		// This seems big for width changes
 		defaultClampValues[Gaussian2DFunction.X_SD] = 3;
 		defaultClampValues[Gaussian2DFunction.Y_SD] = 3;
+		defaultClampValues[Gaussian2DFunction.ANGLE] = Math.PI;
 
-		
 		// More restrictive ...
-		
+
 		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 5;
 		//defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
-		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
-		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
+		//defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
+		//defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
 		defaultClampValues[Gaussian2DFunction.X_SD] = 1;
 		defaultClampValues[Gaussian2DFunction.Y_SD] = 1;
 	}
@@ -537,7 +536,7 @@ public abstract class BaseFunctionSolverTest
 	double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel)
 	{
 		double[] data = new double[size * size];
-		int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK ;
+		int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, flags, null);
 		f.initialise(params);
 

@@ -60,17 +60,10 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	}
 
 	@Test
-	public void functionComputesSecondAmplitudeGradient()
+	public void functionComputesSecondsignalGradient()
 	{
 		if (f1.evaluatesSignal())
 			functionComputesSecondTargetGradient(Gaussian2DFunction.SIGNAL);
-	}
-
-	@Test
-	public void functionComputesSecondShapeGradient()
-	{
-		if (f1.evaluatesShape())
-			functionComputesSecondTargetGradient(Gaussian2DFunction.SHAPE);
 	}
 
 	@Test
@@ -86,6 +79,13 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	}
 
 	@Test
+	public void functionComputesSecondZGradient()
+	{
+		if (f1.evaluatesZ())
+			functionComputesSecondTargetGradient(Gaussian2DFunction.Z_POSITION);
+	}
+
+	@Test
 	public void functionComputesSecondXWidthGradient()
 	{
 		if (f1.evaluatesSD0())
@@ -97,6 +97,13 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	{
 		if (f1.evaluatesSD1())
 			functionComputesSecondTargetGradient(Gaussian2DFunction.Y_SD);
+	}
+
+	@Test
+	public void functionComputesSecondAngleGradient()
+	{
+		if (f1.evaluatesAngle())
+			functionComputesSecondTargetGradient(Gaussian2DFunction.ANGLE);
 	}
 
 	private void functionComputesSecondTargetGradient(int targetParameter)
@@ -116,53 +123,52 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		for (double background : testbackground)
 			// Peak 1
-			for (double amplitude1 : testamplitude1)
-				for (double shape1 : testshape1)
-					for (double cx1 : testcx1)
-						for (double cy1 : testcy1)
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
 							for (double[] w1 : testw1)
-							{
-								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
-								f1.initialise2(a);
+								for (double angle1 : testangle1)
+								{
+									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+									f1.initialise2(a);
 
-								// Numerically solve gradient. 
-								// Calculate the step size h to be an exact numerical representation
-								final double xx = a[targetParameter];
+									// Numerically solve gradient. 
+									// Calculate the step size h to be an exact numerical representation
+									final double xx = a[targetParameter];
 
-								// Get h to minimise roundoff error
-								double h = Precision.representableDelta(xx, h_);
+									// Get h to minimise roundoff error
+									double h = Precision.representableDelta(xx, h_);
 
-								// Evaluate at (x+h) and (x-h)
-								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
-								a[targetParameter] = xx + h;
-								f1a.initialise1(a);
+									// Evaluate at (x+h) and (x-h)
+									a[targetParameter] = xx + h;
+									f1a.initialise1(a.clone());
 
-								a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
-								a[targetParameter] = xx - h;
-								f1b.initialise1(a);
+									a[targetParameter] = xx - h;
+									f1b.initialise1(a.clone());
 
-								for (int x : testx)
-									for (int y : testy)
-									{
-										int i = y * maxx + x;
-										f1a.eval(i, dyda);
-										double value2 = dyda[gradientIndex];
-										f1b.eval(i, dyda);
-										double value3 = dyda[gradientIndex];
-										f1.eval(i, dyda, dyda2);
+									for (int x : testx)
+										for (int y : testy)
+										{
+											int i = y * maxx + x;
+											f1a.eval(i, dyda);
+											double value2 = dyda[gradientIndex];
+											f1b.eval(i, dyda);
+											double value3 = dyda[gradientIndex];
+											f1.eval(i, dyda, dyda2);
 
-										double gradient = (value2 - value3) / (2 * h);
-										double error = DoubleEquality.relativeError(gradient, dyda2[gradientIndex]);
-										s.add(error);
-										Assert.assertTrue(gradient + " sign != " + dyda2[gradientIndex],
-												(gradient * dyda2[gradientIndex]) >= 0);
-										//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
-										//		gradientIndex, dyda2[gradientIndex], error);
-										Assert.assertTrue(gradient + " != " + dyda2[gradientIndex],
-												eq.almostEqualRelativeOrAbsolute(gradient, dyda2[gradientIndex]));
+											double gradient = (value2 - value3) / (2 * h);
+											double error = DoubleEquality.relativeError(gradient, dyda2[gradientIndex]);
+											s.add(error);
+											Assert.assertTrue(gradient + " sign != " + dyda2[gradientIndex],
+													(gradient * dyda2[gradientIndex]) >= 0);
+											//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
+											//		gradientIndex, dyda2[gradientIndex], error);
+											Assert.assertTrue(gradient + " != " + dyda2[gradientIndex],
+													eq.almostEqualRelativeOrAbsolute(gradient, dyda2[gradientIndex]));
 
-									}
-							}
+										}
+								}
 		System.out.printf("functionComputesSecondTargetGradient %s %s (error %s +/- %s)\n",
 				f1.getClass().getSimpleName(), f1.getName(targetParameter), Utils.rounded(s.getMean()),
 				Utils.rounded(s.getStandardDeviation()));
@@ -177,7 +183,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	}
 
 	@Test
-	public void functionComputesSecondAmplitudeGradientWith2Peaks()
+	public void functionComputesSecondsignalGradientWith2Peaks()
 	{
 		org.junit.Assume.assumeNotNull(f2);
 		if (f2.evaluatesSignal())
@@ -185,18 +191,6 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
 			functionComputesSecondTargetGradientWith2Peaks(
 					Gaussian2DFunction.SIGNAL + Gaussian2DFunction.PARAMETERS_PER_PEAK);
-		}
-	}
-
-	@Test
-	public void functionComputesSecondShapeGradientWith2Peaks()
-	{
-		org.junit.Assume.assumeNotNull(f2);
-		if (f2.evaluatesShape())
-		{
-			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.SHAPE);
-			functionComputesSecondTargetGradientWith2Peaks(
-					Gaussian2DFunction.SHAPE + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		}
 	}
 
@@ -216,6 +210,18 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION);
 		functionComputesSecondTargetGradientWith2Peaks(
 				Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
+	}
+
+	@Test
+	public void functionComputesSecondZGradientWith2Peaks()
+	{
+		org.junit.Assume.assumeNotNull(f2);
+		if (f2.evaluatesZ())
+		{
+			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Z_POSITION);
+			functionComputesSecondTargetGradientWith2Peaks(
+					Gaussian2DFunction.Z_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
+		}
 	}
 
 	@Test
@@ -242,6 +248,18 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		}
 	}
 
+	@Test
+	public void functionComputesSecondAngleGradientWith2Peaks()
+	{
+		org.junit.Assume.assumeNotNull(f2);
+		if (f2.evaluatesAngle())
+		{
+			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE);
+			functionComputesSecondTargetGradientWith2Peaks(
+					Gaussian2DFunction.ANGLE + Gaussian2DFunction.PARAMETERS_PER_PEAK);
+		}
+	}
+
 	private void functionComputesSecondTargetGradientWith2Peaks(int targetParameter)
 	{
 		ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) this.f2;
@@ -259,64 +277,65 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		for (double background : testbackground)
 			// Peak 1
-			for (double amplitude1 : testamplitude1)
-				for (double shape1 : testshape1)
-					for (double cx1 : testcx1)
-						for (double cy1 : testcy1)
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
 							for (double[] w1 : testw1)
-								// Peak 2
-								for (double amplitude2 : testamplitude2)
-									for (double shape2 : testshape2)
+								for (double angle1 : testangle1)
+									// Peak 2
+									for (double signal2 : testsignal2)
 										for (double cx2 : testcx2)
 											for (double cy2 : testcy2)
-												for (double[] w2 : testw2)
-												{
-													a = createParameters(background, amplitude1, shape1, cx1, cy1,
-															w1[0], w1[1], amplitude2, shape2, cx2, cy2, w2[0], w2[1]);
-													f2.initialise2(a);
-
-													// Numerically solve gradient. 
-													// Calculate the step size h to be an exact numerical representation
-													final double xx = a[targetParameter];
-
-													// Get h to minimise roundoff error
-													double h = Precision.representableDelta(xx, h_);
-
-													// Evaluate at (x+h) and (x-h)
-													a = createParameters(background, amplitude1, shape1, cx1, cy1,
-															w1[0], w1[1], amplitude2, shape2, cx2, cy2, w2[0], w2[1]);
-													a[targetParameter] = xx + h;
-													f2a.initialise1(a);
-
-													a = createParameters(background, amplitude1, shape1, cx1, cy1,
-															w1[0], w1[1], amplitude2, shape2, cx2, cy2, w2[0], w2[1]);
-													a[targetParameter] = xx - h;
-													f2b.initialise1(a);
-
-													for (int x : testx)
-														for (int y : testy)
+												for (double cz2 : testcz2)
+													for (double[] w2 : testw2)
+														for (double angle2 : testangle2)
 														{
-															int i = y * maxx + x;
-															f2a.eval(i, dyda);
-															double value2 = dyda[gradientIndex];
-															f2b.eval(i, dyda);
-															double value3 = dyda[gradientIndex];
-															f2.eval(i, dyda, dyda2);
+															a = createParameters(background, signal1, cx1, cy1, cz1,
+																	w1[0], w1[1], angle1, signal2, cx2, cy2, cz2, w2[0],
+																	w2[1], angle2);
+															f2.initialise2(a);
 
-															double gradient = (value2 - value3) / (2 * h);
-															double error = DoubleEquality.relativeError(gradient,
-																	dyda2[gradientIndex]);
-															s.add(error);
-															Assert.assertTrue(
-																	gradient + " sign != " + dyda2[gradientIndex],
-																	(gradient * dyda2[gradientIndex]) >= 0);
-															//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
-															//		gradientIndex, dyda2[gradientIndex], error);
-															Assert.assertTrue(gradient + " != " + dyda2[gradientIndex],
-																	eq.almostEqualRelativeOrAbsolute(gradient,
-																			dyda2[gradientIndex]));
+															// Numerically solve gradient. 
+															// Calculate the step size h to be an exact numerical representation
+															final double xx = a[targetParameter];
+
+															// Get h to minimise roundoff error
+															double h = Precision.representableDelta(xx, h_);
+
+															// Evaluate at (x+h) and (x-h)
+															a[targetParameter] = xx + h;
+															f2a.initialise1(a.clone());
+
+															a[targetParameter] = xx - h;
+															f2b.initialise1(a.clone());
+
+															for (int x : testx)
+																for (int y : testy)
+																{
+																	int i = y * maxx + x;
+																	f2a.eval(i, dyda);
+																	double value2 = dyda[gradientIndex];
+																	f2b.eval(i, dyda);
+																	double value3 = dyda[gradientIndex];
+																	f2.eval(i, dyda, dyda2);
+
+																	double gradient = (value2 - value3) / (2 * h);
+																	double error = DoubleEquality.relativeError(
+																			gradient, dyda2[gradientIndex]);
+																	s.add(error);
+																	Assert.assertTrue(
+																			gradient + " sign != " +
+																					dyda2[gradientIndex],
+																			(gradient * dyda2[gradientIndex]) >= 0);
+																	//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
+																	//		gradientIndex, dyda2[gradientIndex], error);
+																	Assert.assertTrue(
+																			gradient + " != " + dyda2[gradientIndex],
+																			eq.almostEqualRelativeOrAbsolute(gradient,
+																					dyda2[gradientIndex]));
+																}
 														}
-												}
 		System.out.printf("functionComputesSecondTargetGradient %s [%d] %s (error %s +/- %s)\n",
 				f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter), f2.getName(targetParameter),
 				Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
@@ -401,24 +420,26 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		final TurboList<double[]> params2 = new TurboList<double[]>();
 		for (double background : testbackground)
 			// Peak 1
-			for (double amplitude1 : testamplitude1)
-				for (double shape1 : testshape1)
-					for (double cx1 : testcx1)
-						for (double cy1 : testcy1)
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
 							for (double[] w1 : testw1)
-							{
-								double[] a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
-								params.add(a);
-								if (zDepth)
+								for (double angle1 : testangle1)
 								{
-									// Change to a standard free circular function
-									a = a.clone();
-									a[Gaussian2DFunction.X_SD] *= zModel.getSx(a[Gaussian2DFunction.SHAPE]);
-									a[Gaussian2DFunction.Y_SD] *= zModel.getSy(a[Gaussian2DFunction.SHAPE]);
-									a[Gaussian2DFunction.SHAPE] = 0;
-									params2.add(a);
+									double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
+											angle1);
+									params.add(a);
+									if (zDepth)
+									{
+										// Change to a standard free circular function
+										a = a.clone();
+										a[Gaussian2DFunction.X_SD] *= zModel.getSx(a[Gaussian2DFunction.Z_POSITION]);
+										a[Gaussian2DFunction.Y_SD] *= zModel.getSy(a[Gaussian2DFunction.Z_POSITION]);
+										a[Gaussian2DFunction.Z_POSITION] = 0;
+										params2.add(a);
+									}
 								}
-							}
 		double[][] x = params.toArray(new double[params.size()][]);
 		double[][] x2 = (zDepth) ? params2.toArray(new double[params2.size()][]) : x;
 
@@ -460,83 +481,87 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		for (double background : testbackground)
 			// Peak 1
-			for (double amplitude1 : testamplitude1)
-				for (double shape1 : testshape1)
-					for (double cx1 : testcx1)
-						for (double cy1 : testcy1)
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
 							for (double[] w1 : testw1)
-							{
-								double[] a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
-								f1.initialiseExtended2(a);
-
-								// Compute single
-								for (int i = 0; i < n; i++)
+								for (double angle1 : testangle1)
 								{
-									double o1 = f1.eval(i, du_da);
-									double o2 = f1.eval(i, du_db, d2u_da2);
-									Assert.assertEquals("Value", o1, o2, 1e-10);
-									Assert.assertArrayEquals("Jacobian!=Jacobian", du_da, du_db, 1e-10);
-									values[i] = o1;
-									jacobian[i] = du_da.clone();
-									jacobian2[i] = d2u_da2.clone();
+									double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
+											angle1);
+									f1.initialiseExtended2(a);
+
+									// Compute single
+									for (int i = 0; i < n; i++)
+									{
+										double o1 = f1.eval(i, du_da);
+										double o2 = f1.eval(i, du_db, d2u_da2);
+										Assert.assertEquals("Value", o1, o2, 1e-10);
+										Assert.assertArrayEquals("Jacobian!=Jacobian", du_da, du_db, 1e-10);
+										values[i] = o1;
+										jacobian[i] = du_da.clone();
+										jacobian2[i] = d2u_da2.clone();
+									}
+
+									// Use procedures
+									f1.forEach(new ValueProcedure()
+									{
+										int i = 0;
+
+										public void execute(double value)
+										{
+											Assert.assertEquals("Value ValueProcedure", values[i], value, 1e-10);
+											i++;
+										}
+									});
+
+									f1.forEach(new Gradient1Procedure()
+									{
+										int i = 0;
+
+										public void execute(double value, double[] dy_da)
+										{
+											Assert.assertEquals("Value Gradient1Procedure", values[i], value, 1e-10);
+											Assert.assertArrayEquals("du_da Gradient1Procedure", jacobian[i], dy_da,
+													1e-10);
+											i++;
+										}
+									});
+
+									f1.forEach(new Gradient2Procedure()
+									{
+										int i = 0;
+
+										public void execute(double value, double[] dy_da, double[] d2y_da2)
+										{
+											Assert.assertEquals("Value Gradient2Procedure", values[i], value, 1e-10);
+											Assert.assertArrayEquals("du_da Gradient2Procedure", jacobian[i], dy_da,
+													1e-10);
+											Assert.assertArrayEquals("d2u_da2 Gradient2Procedure", jacobian2[i],
+													d2y_da2, 1e-10);
+											i++;
+										}
+									});
+
+									f1.forEach(new ExtendedGradient2Procedure()
+									{
+										int i = 0;
+
+										public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
+										{
+											Assert.assertEquals("Value ExtendedGradient2Procedure", values[i], value,
+													1e-10);
+											Assert.assertArrayEquals("du_da ExtendedGradient2Procedure", jacobian[i],
+													dy_da, 1e-10);
+											for (int j = 0, k = 0; j < d2u_da2.length; j++, k += d2u_da2.length + 1)
+												d2u_da2[j] = d2y_dadb[k];
+											Assert.assertArrayEquals("d2u_da2 Gradient2Procedure", jacobian2[i],
+													d2u_da2, 1e-10);
+											i++;
+										}
+									});
 								}
-
-								// Use procedures
-								f1.forEach(new ValueProcedure()
-								{
-									int i = 0;
-
-									public void execute(double value)
-									{
-										Assert.assertEquals("Value ValueProcedure", values[i], value, 1e-10);
-										i++;
-									}
-								});
-
-								f1.forEach(new Gradient1Procedure()
-								{
-									int i = 0;
-
-									public void execute(double value, double[] dy_da)
-									{
-										Assert.assertEquals("Value Gradient1Procedure", values[i], value, 1e-10);
-										Assert.assertArrayEquals("du_da Gradient1Procedure", jacobian[i], dy_da, 1e-10);
-										i++;
-									}
-								});
-
-								f1.forEach(new Gradient2Procedure()
-								{
-									int i = 0;
-
-									public void execute(double value, double[] dy_da, double[] d2y_da2)
-									{
-										Assert.assertEquals("Value Gradient2Procedure", values[i], value, 1e-10);
-										Assert.assertArrayEquals("du_da Gradient2Procedure", jacobian[i], dy_da, 1e-10);
-										Assert.assertArrayEquals("d2u_da2 Gradient2Procedure", jacobian2[i], d2y_da2,
-												1e-10);
-										i++;
-									}
-								});
-
-								f1.forEach(new ExtendedGradient2Procedure()
-								{
-									int i = 0;
-
-									public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
-									{
-										Assert.assertEquals("Value ExtendedGradient2Procedure", values[i], value,
-												1e-10);
-										Assert.assertArrayEquals("du_da ExtendedGradient2Procedure", jacobian[i], dy_da,
-												1e-10);
-										for (int j = 0, k = 0; j < d2u_da2.length; j++, k += d2u_da2.length + 1)
-											d2u_da2[j] = d2y_dadb[k];
-										Assert.assertArrayEquals("d2u_da2 Gradient2Procedure", jacobian2[i], d2u_da2,
-												1e-10);
-										i++;
-									}
-								});
-							}
 	}
 
 	@Test
@@ -560,67 +585,70 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		for (double background : testbackground)
 			// Peak 1
-			for (double amplitude1 : testamplitude1)
-				for (double shape1 : testshape1)
-					for (double cx1 : testcx1)
-						for (double cy1 : testcy1)
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
 							for (double[] w1 : testw1)
-							{
-								double[] a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
-								f1.initialiseExtended2(a);
-
-								// Create a set of functions initialised +/- delta in each parameter
-								for (int j = 0; j < nparams; j++)
+								for (double angle1 : testangle1)
 								{
-									int targetParameter = gradientIndices[j];
-									// Numerically solve gradient. 
-									// Calculate the step size h to be an exact numerical representation
-									final double xx = a[targetParameter];
+									double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
+											angle1);
+									f1.initialiseExtended2(a);
 
-									// Get h to minimise roundoff error
-									double h = Precision.representableDelta(xx, h_);
-
-									// Evaluate at (x+h) and (x-h)
-									a[targetParameter] = xx + h;
-									fHigh[j].initialise1(a);
-
-									a[targetParameter] = xx - h;
-									fLow[j].initialise1(a);
-
-									a[targetParameter] = xx;
-									delta[j] = 2 * h;
-								}
-
-								f1.forEach(new ExtendedGradient2Procedure()
-								{
-									int i = -1;
-
-									public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
+									// Create a set of functions initialised +/- delta in each parameter
+									for (int j = 0; j < nparams; j++)
 									{
-										i++;
-										DenseMatrix64F m = DenseMatrix64F.wrap(nparams, nparams, d2y_dadb);
-										for (int j = 0; j < nparams; j++)
+										int targetParameter = gradientIndices[j];
+										// Numerically solve gradient. 
+										// Calculate the step size h to be an exact numerical representation
+										final double xx = a[targetParameter];
+
+										// Get h to minimise roundoff error
+										double h = Precision.representableDelta(xx, h_);
+
+										// Evaluate at (x+h) and (x-h)
+										a[targetParameter] = xx + h;
+										fHigh[j].initialise1(a.clone());
+
+										a[targetParameter] = xx - h;
+										fLow[j].initialise1(a.clone());
+
+										a[targetParameter] = xx;
+										delta[j] = 2 * h;
+									}
+
+									f1.forEach(new ExtendedGradient2Procedure()
+									{
+										int i = -1;
+
+										public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
 										{
-											// Evaluate the function +/- delta for parameter j
-											fHigh[j].eval(i, du_da);
-											fLow[j].eval(i, du_db);
-											// Check the gradient with respect to parameter k
-											for (int k = 0; k < nparams; k++)
+											i++;
+											DenseMatrix64F m = DenseMatrix64F.wrap(nparams, nparams, d2y_dadb);
+											for (int j = 0; j < nparams; j++)
 											{
-												double gradient = (du_da[k] - du_db[k]) / delta[j];
-												boolean ok = eq.almostEqualRelativeOrAbsolute(gradient, m.get(j, k));
-												if (!ok)
+												// Evaluate the function +/- delta for parameter j
+												fHigh[j].eval(i, du_da);
+												fLow[j].eval(i, du_db);
+												// Check the gradient with respect to parameter k
+												for (int k = 0; k < nparams; k++)
 												{
-													System.out.printf("%d [%d,%d] %f ?= %f\n", i, j, k, gradient,
+													double gradient = (du_da[k] - du_db[k]) / delta[j];
+													boolean ok = eq.almostEqualRelativeOrAbsolute(gradient,
 															m.get(j, k));
-													Assert.fail(String.format("%d [%d,%d] %f != %f", i, j, k, gradient,
-															m.get(j, k)));
+													if (!ok)
+													{
+														System.out.printf("%d [%d,%d] %f ?= %f\n", i, j, k, gradient,
+																m.get(j, k));
+														Assert.fail(String.format("%d [%d,%d] %f != %f", i, j, k,
+																gradient, m.get(j, k)));
+													}
 												}
 											}
 										}
-									}
-								});
-							}
+									});
+								}
 	}
 
 	@Test
@@ -640,100 +668,106 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		for (double background : testbackground)
 			// Peak 1
-			for (double amplitude1 : testamplitude1)
-				for (double shape1 : testshape1)
-					for (double cx1 : testcx1)
-						for (double cy1 : testcy1)
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
 							for (double[] w1 : testw1)
-								// Peak 2
-								for (double amplitude2 : testamplitude2)
-									for (double shape2 : testshape2)
+								for (double angle1 : testangle1)
+									// Peak 2
+									for (double signal2 : testsignal2)
 										for (double cx2 : testcx2)
 											for (double cy2 : testcy2)
-												for (double[] w2 : testw2)
-												{
-													double[] a = createParameters(background, amplitude1, shape1, cx1,
-															cy1, w1[0], w1[1], amplitude2, shape2, cx2, cy2, w2[0],
-															w2[1]);
-													f2.initialiseExtended2(a);
-
-													// Compute single
-													for (int i = 0; i < n; i++)
-													{
-														double o1 = f2.eval(i, du_da);
-														double o2 = f2.eval(i, du_db, d2u_da2);
-														Assert.assertEquals("Value", o1, o2, 1e-10);
-														Assert.assertArrayEquals("Jacobian!=Jacobian", du_da, du_db,
-																1e-10);
-														values[i] = o1;
-														jacobian[i] = du_da.clone();
-														jacobian2[i] = d2u_da2.clone();
-													}
-
-													// Use procedures
-													f2.forEach(new ValueProcedure()
-													{
-														int i = 0;
-
-														public void execute(double value)
+												for (double cz2 : testcz2)
+													for (double[] w2 : testw2)
+														for (double angle2 : testangle2)
 														{
-															Assert.assertEquals("Value ValueProcedure", values[i],
-																	value, 1e-10);
-															i++;
+															double[] a = createParameters(background, signal1, cx1, cy1,
+																	cz1, w1[0], w1[1], angle1, signal2, cx2, cy2, cz2,
+																	w2[0], w2[1], angle2);
+															f2.initialiseExtended2(a);
+
+															// Compute single
+															for (int i = 0; i < n; i++)
+															{
+																double o1 = f2.eval(i, du_da);
+																double o2 = f2.eval(i, du_db, d2u_da2);
+																Assert.assertEquals("Value", o1, o2, 1e-10);
+																Assert.assertArrayEquals("Jacobian!=Jacobian", du_da,
+																		du_db, 1e-10);
+																values[i] = o1;
+																jacobian[i] = du_da.clone();
+																jacobian2[i] = d2u_da2.clone();
+															}
+
+															// Use procedures
+															f2.forEach(new ValueProcedure()
+															{
+																int i = 0;
+
+																public void execute(double value)
+																{
+																	Assert.assertEquals("Value ValueProcedure",
+																			values[i], value, 1e-10);
+																	i++;
+																}
+															});
+
+															f2.forEach(new Gradient1Procedure()
+															{
+																int i = 0;
+
+																public void execute(double value, double[] dy_da)
+																{
+																	Assert.assertEquals("Value Gradient1Procedure",
+																			values[i], value, 1e-10);
+																	Assert.assertArrayEquals("du_da Gradient1Procedure",
+																			jacobian[i], dy_da, 1e-10);
+																	i++;
+																}
+															});
+
+															f2.forEach(new Gradient2Procedure()
+															{
+																int i = 0;
+
+																public void execute(double value, double[] dy_da,
+																		double[] d2y_da2)
+																{
+																	Assert.assertEquals("Value Gradient2Procedure",
+																			values[i], value, 1e-10);
+																	Assert.assertArrayEquals("du_da Gradient2Procedure",
+																			jacobian[i], dy_da, 1e-10);
+																	Assert.assertArrayEquals(
+																			"d2u_da2 Gradient2Procedure", jacobian2[i],
+																			d2y_da2, 1e-10);
+																	i++;
+																}
+															});
+
+															f2.forEach(new ExtendedGradient2Procedure()
+															{
+																int i = 0;
+
+																public void executeExtended(double value,
+																		double[] dy_da, double[] d2y_dadb)
+																{
+																	Assert.assertEquals(
+																			"Value ExtendedGradient2Procedure",
+																			values[i], value, 1e-10);
+																	Assert.assertArrayEquals(
+																			"du_da ExtendedGradient2Procedure",
+																			jacobian[i], dy_da, 1e-10);
+																	for (int j = 0, k = 0; j < d2u_da2.length; j++, k += d2u_da2.length +
+																			1)
+																		d2u_da2[j] = d2y_dadb[k];
+																	Assert.assertArrayEquals(
+																			"d2u_da2 Gradient2Procedure", jacobian2[i],
+																			d2u_da2, 1e-10);
+																	i++;
+																}
+															});
 														}
-													});
-
-													f2.forEach(new Gradient1Procedure()
-													{
-														int i = 0;
-
-														public void execute(double value, double[] dy_da)
-														{
-															Assert.assertEquals("Value Gradient1Procedure", values[i],
-																	value, 1e-10);
-															Assert.assertArrayEquals("du_da Gradient1Procedure",
-																	jacobian[i], dy_da, 1e-10);
-															i++;
-														}
-													});
-
-													f2.forEach(new Gradient2Procedure()
-													{
-														int i = 0;
-
-														public void execute(double value, double[] dy_da,
-																double[] d2y_da2)
-														{
-															Assert.assertEquals("Value Gradient2Procedure", values[i],
-																	value, 1e-10);
-															Assert.assertArrayEquals("du_da Gradient2Procedure",
-																	jacobian[i], dy_da, 1e-10);
-															Assert.assertArrayEquals("d2u_da2 Gradient2Procedure",
-																	jacobian2[i], d2y_da2, 1e-10);
-															i++;
-														}
-													});
-
-													f2.forEach(new ExtendedGradient2Procedure()
-													{
-														int i = 0;
-
-														public void executeExtended(double value, double[] dy_da,
-																double[] d2y_dadb)
-														{
-															Assert.assertEquals("Value ExtendedGradient2Procedure",
-																	values[i], value, 1e-10);
-															Assert.assertArrayEquals("du_da ExtendedGradient2Procedure",
-																	jacobian[i], dy_da, 1e-10);
-															for (int j = 0, k = 0; j < d2u_da2.length; j++, k += d2u_da2.length +
-																	1)
-																d2u_da2[j] = d2y_dadb[k];
-															Assert.assertArrayEquals("d2u_da2 Gradient2Procedure",
-																	jacobian2[i], d2u_da2, 1e-10);
-															i++;
-														}
-													});
-												}
 	}
 
 	@Test
@@ -758,81 +792,87 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		for (double background : testbackground)
 			// Peak 1
-			for (double amplitude1 : testamplitude1)
-				for (double shape1 : testshape1)
-					for (double cx1 : testcx1)
-						for (double cy1 : testcy1)
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
 							for (double[] w1 : testw1)
-								// Peak 2
-								for (double amplitude2 : testamplitude2)
-									for (double shape2 : testshape2)
+								for (double angle1 : testangle1)
+									// Peak 2
+									for (double signal2 : testsignal2)
 										for (double cx2 : testcx2)
 											for (double cy2 : testcy2)
-												for (double[] w2 : testw2)
-												{
-													double[] a = createParameters(background, amplitude1, shape1, cx1,
-															cy1, w1[0], w1[1], amplitude2, shape2, cx2, cy2, w2[0],
-															w2[1]);
-
-													f2.initialiseExtended2(a);
-
-													// Create a set of functions initialised +/- delta in each parameter
-													for (int j = 0; j < nparams; j++)
-													{
-														int targetParameter = gradientIndices[j];
-														// Numerically solve gradient. 
-														// Calculate the step size h to be an exact numerical representation
-														final double xx = a[targetParameter];
-
-														// Get h to minimise roundoff error
-														double h = Precision.representableDelta(xx, h_);
-
-														// Evaluate at (x+h) and (x-h)
-														a[targetParameter] = xx + h;
-														fHigh[j].initialise1(a);
-
-														a[targetParameter] = xx - h;
-														fLow[j].initialise1(a);
-
-														a[targetParameter] = xx;
-														delta[j] = 2 * h;
-													}
-
-													f2.forEach(new ExtendedGradient2Procedure()
-													{
-														int i = -1;
-
-														public void executeExtended(double value, double[] dy_da,
-																double[] d2y_dadb)
+												for (double cz2 : testcz2)
+													for (double[] w2 : testw2)
+														for (double angle2 : testangle2)
 														{
-															i++;
-															//if (i!=f2.size()/2) return;
-															DenseMatrix64F m = DenseMatrix64F.wrap(nparams, nparams,
-																	d2y_dadb);
+															double[] a = createParameters(background, signal1, cx1, cy1,
+																	cz1, w1[0], w1[1], angle1, signal2, cx2, cy2, cz2,
+																	w2[0], w2[1], angle2);
+
+															f2.initialiseExtended2(a);
+
+															// Create a set of functions initialised +/- delta in each parameter
 															for (int j = 0; j < nparams; j++)
 															{
-																// Evaluate the function +/- delta for parameter j
-																fHigh[j].eval(i, du_da);
-																fLow[j].eval(i, du_db);
-																// Check the gradient with respect to parameter k
-																for (int k = 0; k < nparams; k++)
+																int targetParameter = gradientIndices[j];
+																// Numerically solve gradient. 
+																// Calculate the step size h to be an exact numerical representation
+																final double xx = a[targetParameter];
+
+																// Get h to minimise roundoff error
+																double h = Precision.representableDelta(xx, h_);
+
+																// Evaluate at (x+h) and (x-h)
+																a[targetParameter] = xx + h;
+																fHigh[j].initialise1(a.clone());
+
+																a[targetParameter] = xx - h;
+																fLow[j].initialise1(a.clone());
+
+																a[targetParameter] = xx;
+																delta[j] = 2 * h;
+															}
+
+															f2.forEach(new ExtendedGradient2Procedure()
+															{
+																int i = -1;
+
+																public void executeExtended(double value,
+																		double[] dy_da, double[] d2y_dadb)
 																{
-																	double gradient = (du_da[k] - du_db[k]) / delta[j];
-																	boolean ok = eq.almostEqualRelativeOrAbsolute(
-																			gradient, m.get(j, k));
-																	if (!ok)
+																	i++;
+																	//if (i!=f2.size()/2) return;
+																	DenseMatrix64F m = DenseMatrix64F.wrap(nparams,
+																			nparams, d2y_dadb);
+																	for (int j = 0; j < nparams; j++)
 																	{
-																		System.out.printf("%d [%d,%d] %f ?= %f\n", i, j,
-																				k, gradient, m.get(j, k));
-																		Assert.fail(String.format("%d [%d,%d] %f != %f",
-																				i, j, k, gradient, m.get(j, k)));
+																		// Evaluate the function +/- delta for parameter j
+																		fHigh[j].eval(i, du_da);
+																		fLow[j].eval(i, du_db);
+																		// Check the gradient with respect to parameter k
+																		for (int k = 0; k < nparams; k++)
+																		{
+																			double gradient = (du_da[k] - du_db[k]) /
+																					delta[j];
+																			boolean ok = eq
+																					.almostEqualRelativeOrAbsolute(
+																							gradient, m.get(j, k));
+																			if (!ok)
+																			{
+																				System.out.printf(
+																						"%d [%d,%d] %f ?= %f\n", i, j,
+																						k, gradient, m.get(j, k));
+																				Assert.fail(String.format(
+																						"%d [%d,%d] %f != %f", i, j, k,
+																						gradient, m.get(j, k)));
+																			}
+																		}
 																	}
 																}
-															}
+															});
+															//return;
 														}
-													});
-													//return;
-												}
 	}
 
 	abstract class SimpleProcedure
@@ -990,15 +1030,17 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		final TurboList<double[]> params = new TurboList<double[]>();
 		for (double background : testbackground)
 			// Peak 1
-			for (double amplitude1 : testamplitude1)
-				for (double shape1 : testshape1)
-					for (double cx1 : testcx1)
-						for (double cy1 : testcy1)
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
 							for (double[] w1 : testw1)
-							{
-								double[] a = createParameters(background, amplitude1, shape1, cx1, cy1, w1[0], w1[1]);
-								params.add(a);
-							}
+								for (double angle1 : testangle1)
+								{
+									double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
+											angle1);
+									params.add(a);
+								}
 		double[][] x = params.toArray(new double[params.size()][]);
 
 		int runs = 10000 / x.length;

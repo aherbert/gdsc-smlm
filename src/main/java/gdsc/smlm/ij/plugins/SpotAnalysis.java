@@ -1417,7 +1417,7 @@ public class SpotAnalysis extends PlugInFrame
 			fitConfiguration.setComputeResiduals(false);
 			fitConfiguration.setComputeDeviations(false);
 			Gaussian2DFitter gf = new Gaussian2DFitter(fitConfiguration);
-			double[] params = new double[7];
+			double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			double psfWidth = Double.parseDouble(widthTextField.getText());
 			params[Gaussian2DFunction.BACKGROUND] = smoothMean[slice - 1];
 			params[Gaussian2DFunction.SIGNAL] = (gain * signal);
@@ -1446,7 +1446,7 @@ public class SpotAnalysis extends PlugInFrame
 
 			data2 = (float[]) blurImp.getImageStack().getProcessor(slice).getPixels();
 			data = Utils.toDouble(data2);
-			params = new double[7];
+			params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			//float psfWidth = Float.parseFloat(widthTextField.getText());
 			params[Gaussian2DFunction.BACKGROUND] = (float) smoothMean[slice - 1];
 			params[Gaussian2DFunction.SIGNAL] = (float) (gain * signal);

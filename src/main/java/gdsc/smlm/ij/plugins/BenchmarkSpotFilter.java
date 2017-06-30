@@ -520,7 +520,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						// Initialise a Gaussian2D function for i
 						if (overlapAnalysis == null)
 						{
-							double[] params = new double[7];
+							double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 							params[Gaussian2DFunction.SIGNAL] = actual[i].peakResult.getSignal();
 							params[Gaussian2DFunction.X_POSITION] = cx;
 							params[Gaussian2DFunction.Y_POSITION] = cy;
@@ -1050,7 +1050,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Set-up the converters
 		try
 		{
-			if (results.getCalibration() == null || results.getCalibrationReader().getDistanceUnit() != DistanceUnit.PIXEL)
+			if (results.getCalibration() == null ||
+					results.getCalibrationReader().getDistanceUnit() != DistanceUnit.PIXEL)
 				throw new ConfigurationException("Require results in pixel distance units");
 
 			int flags = Gaussian2DPeakResultHelper.AMPLITUDE;

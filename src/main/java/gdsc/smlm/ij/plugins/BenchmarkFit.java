@@ -374,8 +374,8 @@ public class BenchmarkFit implements PlugIn
 		{
 			if (ub == null)
 			{
-				ub = new double[7];
-				lb = new double[7];
+				ub = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+				lb = new double[ub.length];
 
 				// Background could be zero so always have an upper limit
 				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0,
@@ -385,8 +385,10 @@ public class BenchmarkFit implements PlugIn
 				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
 				ub[Gaussian2DFunction.X_POSITION] = 2 * regionSize + 1;
 				ub[Gaussian2DFunction.Y_POSITION] = 2 * regionSize + 1;
-				lb[Gaussian2DFunction.SHAPE] = -Math.PI;
-				ub[Gaussian2DFunction.SHAPE] = Math.PI;
+				lb[Gaussian2DFunction.ANGLE] = -Math.PI;
+				ub[Gaussian2DFunction.ANGLE] = Math.PI;
+				lb[Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
+				ub[Gaussian2DFunction.Z_POSITION] = Double.POSITIVE_INFINITY;
 				double wf = 1.5;
 				double s = benchmarkParameters.s / benchmarkParameters.a;
 				lb[Gaussian2DFunction.X_SD] = s / wf;
@@ -409,8 +411,8 @@ public class BenchmarkFit implements PlugIn
 		{
 			if (uc == null)
 			{
-				lc = new double[7];
-				uc = new double[7];
+				lc = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+				uc = new double[lc.length];
 				Arrays.fill(lc, Float.NEGATIVE_INFINITY);
 				Arrays.fill(uc, Float.POSITIVE_INFINITY);
 				lc[Gaussian2DFunction.BACKGROUND] = 0;
@@ -1091,7 +1093,7 @@ public class BenchmarkFit implements PlugIn
 		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / benchmarkParameters.gain : 0;
 		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() &&
 				fitConfig.getFitFunction() == FitFunction.FIXED) ? 0 : 1 / benchmarkParameters.gain;
-		convert[Gaussian2DFunction.SHAPE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
+		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
 		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.X_SD] = (fitConfig.isWidth0Fitting()) ? benchmarkParameters.a : 0;

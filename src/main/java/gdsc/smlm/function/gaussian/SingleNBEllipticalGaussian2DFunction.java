@@ -84,14 +84,15 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 			final double exp = FastMath.exp(aa * dx2 + cc * dy2);
 			dy_da[0] = n * exp;
 			final double y = height * exp;
-			dy_da[1] = y * (bb2 * dxy);
 
-			dy_da[2] = y * (-2.0 * aa * dx);
-			dy_da[3] = y * (-2.0 * cc * dy);
+			dy_da[1] = y * (-2.0 * aa * dx);
+			dy_da[2] = y * (-2.0 * cc * dy);
 
-			dy_da[4] = y * (nx + ax * dx2);
-			dy_da[5] = y * (ny + cy * dy2);
+			dy_da[3] = y * (nx + ax * dx2);
+			dy_da[4] = y * (ny + cy * dy2);
 
+			dy_da[5] = y * (bb2 * dxy);
+			
 			return y;
 		}
 		else
@@ -100,14 +101,14 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 			dy_da[0] = n * exp;
 			final double y = height * exp;
 
-			dy_da[1] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
+			dy_da[1] = y * (-2.0 * aa * dx - bb * dy);
+			dy_da[2] = y * (-2.0 * cc * dy - bb * dx);
 
-			dy_da[2] = y * (-2.0 * aa * dx - bb * dy);
-			dy_da[3] = y * (-2.0 * cc * dy - bb * dx);
+			dy_da[3] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
+			dy_da[4] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
 
-			dy_da[4] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
-			dy_da[5] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
-
+			dy_da[5] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
+			
 			return y;
 		}
 	}

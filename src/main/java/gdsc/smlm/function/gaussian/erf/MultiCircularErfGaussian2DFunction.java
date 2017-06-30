@@ -53,7 +53,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	public void initialise0(double[] a)
 	{
 		tB = a[Gaussian2DFunction.BACKGROUND];
-		for (int n = 0, i = 0; n < nPeaks; n++, i += 6)
+		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
 		{
 			tI[n] = a[i + Gaussian2DFunction.SIGNAL];
 			// Pre-compute the offset by 0.5
@@ -71,7 +71,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	{
 		create1Arrays();
 		tB = a[Gaussian2DFunction.BACKGROUND];
-		for (int n = 0, i = 0; n < nPeaks; n++, i += 6)
+		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
 		{
 			tI[n] = a[i + Gaussian2DFunction.SIGNAL];
 			// Pre-compute the offset by 0.5
@@ -97,7 +97,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	{
 		create2Arrays();
 		tB = a[Gaussian2DFunction.BACKGROUND];
-		for (int n = 0, i = 0; n < nPeaks; n++, i += 6)
+		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
 		{
 			tI[n] = a[i + Gaussian2DFunction.SIGNAL];
 			// Pre-compute the offset by 0.5
@@ -130,7 +130,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	{
 		createEx2Arrays();
 		tB = a[Gaussian2DFunction.BACKGROUND];
-		for (int n = 0, i = 0; n < nPeaks; n++, i += 6)
+		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
 		{
 			tI[n] = a[i + Gaussian2DFunction.SIGNAL];
 			// Pre-compute the offset by 0.5
@@ -247,7 +247,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	}
 
 	@Override
-	public boolean evaluatesShape()
+	public boolean evaluatesAngle()
 	{
 		return false;
 	}
@@ -271,7 +271,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	}
 
 	@Override
-	public int getParametersPerPeak()
+	public int getGradientParametersPerPeak()
 	{
 		return 4;
 	}

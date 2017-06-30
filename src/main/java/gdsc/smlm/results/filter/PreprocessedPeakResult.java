@@ -125,6 +125,11 @@ public interface PreprocessedPeakResult
 	float getY();
 
 	/**
+	 * @return The z position
+	 */
+	float getZ();
+
+	/**
 	 * Return the squared shift between the initial and the final x-position, i.e. how much the position moved during
 	 * fitting, relative to the initial peak SD
 	 * 

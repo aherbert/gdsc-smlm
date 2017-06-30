@@ -70,10 +70,10 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 							a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL]));
 					sb.append(",");
 
-					if (func.evaluatesShape())
+					if (func.evaluatesAngle())
 					{
-						double x = bestA[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SHAPE];
-						double y = a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SHAPE];
+						double x = bestA[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.ANGLE];
+						double y = a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.ANGLE];
 						sb.append(relativeAngle(x, y));
 					}
 					else
@@ -120,10 +120,10 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 
 			// Calculate the smallest angle between the two angles. This should be in the range 0 - 90 degrees.
 			// Use this to compare if the angle has changed significantly relative to the maximum it could change.
-			if (func.evaluatesShape())
+			if (func.evaluatesAngle())
 			{
-				double x = bestA[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SHAPE];
-				double y = a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SHAPE];
+				double x = bestA[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.ANGLE];
+				double y = a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.ANGLE];
 				if (relativeAngle(x, y) > angleLimit)
 					return false;
 			}

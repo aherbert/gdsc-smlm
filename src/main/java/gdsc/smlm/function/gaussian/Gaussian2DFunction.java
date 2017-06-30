@@ -50,19 +50,21 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	public static final int BACKGROUND = 0;
 	/** Index of the signal intensity in the parameters array */
 	public static final int SIGNAL = 1;
-	/** Index of the shape in the parameters array */
-	public static final int SHAPE = 2;
 	/** Index of the x-position in the parameters array */
-	public static final int X_POSITION = 3;
+	public static final int X_POSITION = 2;
 	/** Index of the y-position in the parameters array */
-	public static final int Y_POSITION = 4;
+	public static final int Y_POSITION = 3;
+	/** Index of the z-position in the parameters array */
+	public static final int Z_POSITION = 4;
 	/** Index of the x-standard deviation in the parameters array */
 	public static final int X_SD = 5;
 	/** Index of the y-standard deviation in the parameters array */
 	public static final int Y_SD = 6;
-	
+	/** Index of the angle in the parameters array */
+	public static final int ANGLE = 7;
+
 	/** The number of parameters per Gaussian peak */
-	public static final int PARAMETERS_PER_PEAK = 6;
+	public static final int PARAMETERS_PER_PEAK = 7;
 
 	/**
 	 * Gets the name of the parameter assuming a 2D Gaussian function packed as: background + n * [signal, shape,
@@ -74,17 +76,18 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 */
 	public String getName(int index)
 	{
-		final int i = 1 + (index - 1) % 6;
+		final int i = 1 + (index - 1) % PARAMETERS_PER_PEAK;
 		switch (i)
 		{
 			//@formatter:off
-			case 0: return "Background";
-			case 1: return "Signal";
-			case 2: return getShapeName();
-			case 3: return "X";
-			case 4: return "Y";
-			case 5: return "X SD";
-			case 6: return "Y SD";
+			case BACKGROUND: return "Background";
+			case SIGNAL: return "Signal";
+			case X_POSITION: return "X";
+			case Y_POSITION: return "Y";
+			case Z_POSITION: return "Z";
+			case X_SD: return "X SD";
+			case Y_SD: return "Y SD";
+			case ANGLE: return "Angle";
 			default: return "Unknown: "+index;
 			//@formatter:on
 		}
@@ -102,15 +105,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	{
 		if (index < 1)
 			return 0;
-		return (index - 1) / 6;
-	}
-
-	protected String getShapeName()
-	{
-		// This method provides a link between the simple Gaussian functions in this package 
-		// which evaluate an elliptical Gaussian with an angle of rotation and the functions 
-		// in the erf sub-package which support z-depth.
-		return "Angle";
+		return (index - 1) / PARAMETERS_PER_PEAK;
 	}
 
 	protected final int maxx, maxy;
@@ -176,14 +171,18 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	public abstract boolean evaluatesSignal();
 
 	/**
-	 * @return True if the function can evaluate the shape gradient
-	 */
-	public abstract boolean evaluatesShape();
-
-	/**
-	 * @return True if the function can evaluate the position gradient
+	 * @return True if the function can evaluate the XY-position gradient
 	 */
 	public abstract boolean evaluatesPosition();
+
+	/**
+	 * @return True if the function can evaluate the Z-position gradient
+	 */
+	public boolean evaluatesZ()
+	{
+		// No standard Gaussian 2D function evaluates the z-position
+		return false;
+	}
 
 	/**
 	 * @return True if the function can evaluate the standard deviation gradient for the 1st dimension
@@ -196,9 +195,14 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	public abstract boolean evaluatesSD1();
 
 	/**
-	 * @return The number of parameters per peak
+	 * @return True if the function can evaluate the angle gradient
 	 */
-	public abstract int getParametersPerPeak();
+	public abstract boolean evaluatesAngle();
+
+	/**
+	 * @return The number of gradient parameters per peak
+	 */
+	public abstract int getGradientParametersPerPeak();
 
 	/**
 	 * Execute the {@link #eval(int, float[])} method and set the expected variance using the noise model
@@ -277,25 +281,27 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	{
 		// Parameters are: 
 		// Background + n * { Signal, Shape, Xpos, Ypos, Xsd, Ysd }
-		int nparams = (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getParametersPerPeak();
+		int nparams = (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getGradientParametersPerPeak();
 		int[] indices = new int[nparams];
 
 		int p = 0;
 		if (gf.evaluatesBackground())
 			indices[p++] = 0;
-		for (int n = 0, i = 0; n < nPeaks; n++, i += 6)
+		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
 		{
 			if (gf.evaluatesSignal())
 				indices[p++] = i + SIGNAL;
-			if (gf.evaluatesShape())
-				indices[p++] = i + SHAPE;
 			// All functions evaluate the position gradient
 			indices[p++] = i + X_POSITION;
 			indices[p++] = i + Y_POSITION;
+			if (gf.evaluatesZ())
+				indices[p++] = i + Z_POSITION;
 			if (gf.evaluatesSD0())
 				indices[p++] = i + X_SD;
 			if (gf.evaluatesSD1())
 				indices[p++] = i + Y_SD;
+			if (gf.evaluatesAngle())
+				indices[p++] = i + ANGLE;
 		}
 
 		return indices;

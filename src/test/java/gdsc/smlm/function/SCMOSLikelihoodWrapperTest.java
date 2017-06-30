@@ -33,7 +33,7 @@ public class SCMOSLikelihoodWrapperTest
 	static
 	{
 		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, 1, 1, GaussianFunctionFactory.FIT_FIXED, null);
-		NAME = new String[7];
+		NAME = new String[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		for (int i = 0; i < 7; i++)
 			NAME[i] = f1.getName(i);
 	}
@@ -49,14 +49,14 @@ public class SCMOSLikelihoodWrapperTest
 	private int[] testy = new int[] { 4, 5, 6 };
 	// Do not test zero background since this is an edge case for the likelihood function
 	private double[] testbackground_ = new double[] { 0.1, 1, 10 };
-
 	private double[] testsignal1_ = new double[] { 15, 55, 105 };
 	private double[] testangle1_ = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
 	private double[] testcx1_ = new double[] { 4.9, 5.3 };
 	private double[] testcy1_ = new double[] { 4.8, 5.2 };
+	private double[] testcz1_ = new double[] { -1.5, 1.0 };
 	private double[][] testw1_ = new double[][] { { 1.1, 1.4 }, { 1.1, 1.7 }, { 1.5, 1.2 }, { 1.3, 1.7 }, };
 
-	private double[] testbackground, testsignal1, testangle1, testcx1, testcy1;
+	private double[] testbackground, testsignal1, testangle1, testcx1, testcy1, testcz1;
 	private double[][] testw1;
 
 	private int maxx = 10;
@@ -142,12 +142,14 @@ public class SCMOSLikelihoodWrapperTest
 	{
 		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
 		// Setup
+		// Setup
 		testbackground = testbackground_;
 		testsignal1 = testsignal1_;
-		testangle1 = testangle1_;
 		testcx1 = testcx1_;
 		testcy1 = testcy1_;
+		testcz1 = testcz1_;
 		testw1 = testw1_;
+		testangle1 = testangle1_;
 		if (!f1.evaluatesBackground())
 		{
 			testbackground = new double[] { testbackground[0] };
@@ -156,12 +158,12 @@ public class SCMOSLikelihoodWrapperTest
 		{
 			testsignal1 = new double[] { testsignal1[0] };
 		}
-		if (!f1.evaluatesShape())
-		{
-			testangle1 = new double[] { 0 };
-		}
 		// Position is always evaluated
 
+		if (!f1.evaluatesZ())
+		{
+			testcz1 = new double[] { 0 };
+		}
 		boolean noSecondWidth = false;
 		if (!f1.evaluatesSD0())
 		{
@@ -183,19 +185,25 @@ public class SCMOSLikelihoodWrapperTest
 				testw1[i][1] = testw1[i][0];
 			}
 		}
+		if (!f1.evaluatesAngle())
+		{
+			testangle1 = new double[] { 0 };
+		}
 
 		if (f1.evaluatesBackground())
 			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.BACKGROUND);
 		if (f1.evaluatesSignal())
 			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.SIGNAL);
-		if (f1.evaluatesShape())
-			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.SHAPE);
 		functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.X_POSITION);
 		functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.Y_POSITION);
+		if (f1.evaluatesZ())
+			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.Z_POSITION);
 		if (f1.evaluatesSD0())
 			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.X_SD);
 		if (f1.evaluatesSD1())
 			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.Y_SD);
+		if (f1.evaluatesAngle())
+			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.ANGLE);
 	}
 
 	private void functionComputesTargetGradientPerDatum(Gaussian2DFunction f1, int targetParameter)
@@ -214,62 +222,64 @@ public class SCMOSLikelihoodWrapperTest
 
 		for (double background : testbackground)
 			for (double signal1 : testsignal1)
-				for (double angle1 : testangle1)
-					for (double cx1 : testcx1)
-						for (double cy1 : testcy1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
 							for (double[] w1 : testw1)
-							{
-								a = createParameters(background, signal1, angle1, cx1, cy1, w1[0], w1[1]);
-
-								// Create y as a function we would want to move towards
-								double[] a2 = a.clone();
-								a2[targetParameter] *= 1.1;
-								f1.initialise(a2);
-								double[] data = new double[n];
-								for (int i = 0; i < n; i++)
+								for (double angle1 : testangle1)
 								{
-									// Simulate sCMOS camera
-									double u = f1.eval(i);
-									data[i] = rdg.nextPoisson(u) * g[i] + rdg.nextGaussian(o[i], sd[i]);
-								}
+									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
-								ff1 = new SCMOSLikelihoodWrapper(f1, a, data, n, var, g, o);
-
-								// Numerically solve gradient. 
-								// Calculate the step size h to be an exact numerical representation
-								final double xx = a[targetParameter];
-
-								// Get h to minimise roundoff error
-								double h = Precision.representableDelta(xx, h_);
-
-								for (int x : testx)
-									for (int y : testy)
+									// Create y as a function we would want to move towards
+									double[] a2 = a.clone();
+									a2[targetParameter] *= 1.1;
+									f1.initialise(a2);
+									double[] data = new double[n];
+									for (int i = 0; i < n; i++)
 									{
-										int i = y * maxx + x;
-										a[targetParameter] = xx;
-										ff1.likelihood(getVariables(indices, a), dyda, i);
-
-										// Evaluate at (x+h) and (x-h)
-										a[targetParameter] = xx + h;
-										double value2 = ff1.likelihood(getVariables(indices, a), i);
-
-										a[targetParameter] = xx - h;
-										double value3 = ff1.likelihood(getVariables(indices, a), i);
-
-										double gradient = (value2 - value3) / (2 * h);
-										boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
-												Math.abs(gradient - dyda[gradientIndex]) < 0.1;
-										//logf("[%s-%s]/2*%g : %g == %g\n", "" + value2, "" + value3, h, gradient,
-										//		dyda[gradientIndex]);
-										if (!ok)
-											Assert.assertTrue(NAME[targetParameter] + ": " + gradient + " != " +
-													dyda[gradientIndex], ok);
-										ok = eqPerDatum.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
-										if (ok)
-											count++;
-										total++;
+										// Simulate sCMOS camera
+										double u = f1.eval(i);
+										data[i] = rdg.nextPoisson(u) * g[i] + rdg.nextGaussian(o[i], sd[i]);
 									}
-							}
+
+									ff1 = new SCMOSLikelihoodWrapper(f1, a, data, n, var, g, o);
+
+									// Numerically solve gradient. 
+									// Calculate the step size h to be an exact numerical representation
+									final double xx = a[targetParameter];
+
+									// Get h to minimise roundoff error
+									double h = Precision.representableDelta(xx, h_);
+
+									for (int x : testx)
+										for (int y : testy)
+										{
+											int i = y * maxx + x;
+											a[targetParameter] = xx;
+											ff1.likelihood(getVariables(indices, a), dyda, i);
+
+											// Evaluate at (x+h) and (x-h)
+											a[targetParameter] = xx + h;
+											double value2 = ff1.likelihood(getVariables(indices, a), i);
+
+											a[targetParameter] = xx - h;
+											double value3 = ff1.likelihood(getVariables(indices, a), i);
+
+											double gradient = (value2 - value3) / (2 * h);
+											boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
+													Math.abs(gradient - dyda[gradientIndex]) < 0.1;
+											//logf("[%s-%s]/2*%g : %g == %g\n", "" + value2, "" + value3, h, gradient,
+											//		dyda[gradientIndex]);
+											if (!ok)
+												Assert.assertTrue(NAME[targetParameter] + ": " + gradient + " != " +
+														dyda[gradientIndex], ok);
+											ok = eqPerDatum.almostEqualRelativeOrAbsolute(gradient,
+													dyda[gradientIndex]);
+											if (ok)
+												count++;
+											total++;
+										}
+								}
 		double p = (100.0 * count) / total;
 		logf("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
 				p);
@@ -338,10 +348,11 @@ public class SCMOSLikelihoodWrapperTest
 		// Setup
 		testbackground = testbackground_;
 		testsignal1 = testsignal1_;
-		testangle1 = testangle1_;
 		testcx1 = testcx1_;
 		testcy1 = testcy1_;
+		testcz1 = testcz1_;
 		testw1 = testw1_;
+		testangle1 = testangle1_;
 		if (!f1.evaluatesBackground())
 		{
 			testbackground = new double[] { testbackground[0] };
@@ -350,12 +361,12 @@ public class SCMOSLikelihoodWrapperTest
 		{
 			testsignal1 = new double[] { testsignal1[0] };
 		}
-		if (!f1.evaluatesShape())
-		{
-			testangle1 = new double[] { 0 };
-		}
 		// Position is always evaluated
 
+		if (!f1.evaluatesZ())
+		{
+			testcz1 = new double[] { 0 };
+		}
 		boolean noSecondWidth = false;
 		if (!f1.evaluatesSD0())
 		{
@@ -377,20 +388,26 @@ public class SCMOSLikelihoodWrapperTest
 				testw1[i][1] = testw1[i][0];
 			}
 		}
+		if (!f1.evaluatesAngle())
+		{
+			testangle1 = new double[] { 0 };
+		}
 
 		double fraction = 90;
 		if (f1.evaluatesBackground())
 			functionComputesTargetGradient(f1, Gaussian2DFunction.BACKGROUND, fraction);
 		if (f1.evaluatesSignal())
 			functionComputesTargetGradient(f1, Gaussian2DFunction.SIGNAL, fraction);
-		if (f1.evaluatesShape())
-			functionComputesTargetGradient(f1, Gaussian2DFunction.SHAPE, fraction);
 		functionComputesTargetGradient(f1, Gaussian2DFunction.X_POSITION, fraction);
 		functionComputesTargetGradient(f1, Gaussian2DFunction.Y_POSITION, fraction);
+		if (f1.evaluatesZ())
+			functionComputesTargetGradient(f1, Gaussian2DFunction.Z_POSITION, fraction);
 		if (f1.evaluatesSD0())
 			functionComputesTargetGradient(f1, Gaussian2DFunction.X_SD, fraction);
 		if (f1.evaluatesSD1())
 			functionComputesTargetGradient(f1, Gaussian2DFunction.Y_SD, fraction);
+		if (f1.evaluatesAngle())
+			functionComputesTargetGradient(f1, Gaussian2DFunction.ANGLE, fraction);
 	}
 
 	private void functionComputesTargetGradient(Gaussian2DFunction f1, int targetParameter, double threshold)
@@ -409,57 +426,59 @@ public class SCMOSLikelihoodWrapperTest
 
 		for (double background : testbackground)
 			for (double signal1 : testsignal1)
-				for (double angle1 : testangle1)
-					for (double cx1 : testcx1)
-						for (double cy1 : testcy1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
 							for (double[] w1 : testw1)
-							{
-								a = createParameters(background, signal1, angle1, cx1, cy1, w1[0], w1[1]);
-
-								// Create y as a function we would want to move towards
-								double[] a2 = a.clone();
-								a2[targetParameter] *= 1.3;
-								f1.initialise(a2);
-								double[] data = new double[n];
-								for (int i = 0; i < n; i++)
+								for (double angle1 : testangle1)
 								{
-									// Simulate sCMOS camera
-									double u = f1.eval(i);
-									data[i] = rdg.nextPoisson(u) * g[i] + rdg.nextGaussian(o[i], sd[i]);
+									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+
+									// Create y as a function we would want to move towards
+									double[] a2 = a.clone();
+									a2[targetParameter] *= 1.3;
+									f1.initialise(a2);
+									double[] data = new double[n];
+									for (int i = 0; i < n; i++)
+									{
+										// Simulate sCMOS camera
+										double u = f1.eval(i);
+										data[i] = rdg.nextPoisson(u) * g[i] + rdg.nextGaussian(o[i], sd[i]);
+									}
+
+									ff1 = new SCMOSLikelihoodWrapper(f1, a, data, n, var, g, o);
+
+									// Numerically solve gradient. 
+									// Calculate the step size h to be an exact numerical representation
+									final double xx = a[targetParameter];
+
+									// Get h to minimise roundoff error
+									double h = Precision.representableDelta(xx, h_);
+
+									ff1.likelihood(getVariables(indices, a), dyda);
+
+									// Evaluate at (x+h) and (x-h)
+									a[targetParameter] = xx + h;
+									double value2 = ff1.likelihood(getVariables(indices, a));
+
+									a[targetParameter] = xx - h;
+									double value3 = ff1.likelihood(getVariables(indices, a));
+
+									double gradient = (value2 - value3) / (2 * h);
+									boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
+											Math.abs(gradient - dyda[gradientIndex]) < 0.1;
+									//logf("[%s-%s]/2*%g : %g == %g\n", "" + value2, "" + value3, h, gradient,
+									//		dyda[gradientIndex]);
+									if (!ok)
+										Assert.assertTrue(
+												NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex],
+												ok);
+									ok = eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
+									if (ok)
+										count++;
+									total++;
+
 								}
-
-								ff1 = new SCMOSLikelihoodWrapper(f1, a, data, n, var, g, o);
-
-								// Numerically solve gradient. 
-								// Calculate the step size h to be an exact numerical representation
-								final double xx = a[targetParameter];
-
-								// Get h to minimise roundoff error
-								double h = Precision.representableDelta(xx, h_);
-
-								ff1.likelihood(getVariables(indices, a), dyda);
-
-								// Evaluate at (x+h) and (x-h)
-								a[targetParameter] = xx + h;
-								double value2 = ff1.likelihood(getVariables(indices, a));
-
-								a[targetParameter] = xx - h;
-								double value3 = ff1.likelihood(getVariables(indices, a));
-
-								double gradient = (value2 - value3) / (2 * h);
-								boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
-										Math.abs(gradient - dyda[gradientIndex]) < 0.1;
-								//logf("[%s-%s]/2*%g : %g == %g\n", "" + value2, "" + value3, h, gradient,
-								//		dyda[gradientIndex]);
-								if (!ok)
-									Assert.assertTrue(
-											NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex], ok);
-								ok = eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
-								if (ok)
-									count++;
-								total++;
-
-							}
 		double p = (100.0 * count) / total;
 		logf("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low: " + p, p > threshold);
@@ -471,7 +490,6 @@ public class SCMOSLikelihoodWrapperTest
 		for (int i = 0; i < indices.length; i++)
 		{
 			variables[i] = a[indices[i]];
-
 		}
 		return variables;
 	}

@@ -672,17 +672,17 @@ public class LVMGradientProcedureTest
 
 		double delta = 1e-3;
 		DoubleEquality eq = new DoubleEquality(5e-3, 1e-6);
-		double[] a1peaks = new double[7];
+		double[] a1peaks = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		final double[] y_b = new double[b.length];
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			final double[] y = yList.get(i);
 			double[] a3peaks = paramsList.get(i);
-			double[] a2peaks = Arrays.copyOf(a3peaks, 1 + 2 * 6);
+			double[] a2peaks = Arrays.copyOf(a3peaks, 1 + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK);
 			double[] a2peaks2 = a2peaks.clone();
-			for (int j = 1; j < 7; j++)
-				a1peaks[j] = a3peaks[j + 2 * 6];
+			for (int j = 1; j < a1peaks.length; j++)
+				a1peaks[j] = a3peaks[j + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 
 			// Evaluate peak 3 to get the background and subtract it from the data to get the new data
 			f3.initialise0(a1peaks);
@@ -748,8 +748,8 @@ public class LVMGradientProcedureTest
 				beta[j] *= -2;
 
 				double gradient = (s1 - s2) / (2 * d);
-				System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s, f12.getName(k), a2peaks[k],
-						d, beta[j], gradient, DoubleEquality.relativeError(gradient, beta[j]));
+				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s, f12.getName(k), a2peaks[k],
+				//		d, beta[j], gradient, DoubleEquality.relativeError(gradient, beta[j]));
 				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[j], gradient));
 			}
 
@@ -759,7 +759,7 @@ public class LVMGradientProcedureTest
 			beta = p12m3.beta.clone();
 			alpha = p12m3.getAlphaMatrix();
 
-			System.out.printf("%s [%d] p12m3  %f  %f\n", type, i, p123.value, s);
+			//System.out.printf("%s [%d] p12m3  %f  %f\n", type, i, p123.value, s);
 
 			if (type != Type.LSQ)
 			{
@@ -798,8 +798,8 @@ public class LVMGradientProcedureTest
 				beta[j] *= -2;
 
 				double gradient = (s1 - s2) / (2 * d);
-				System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s, f12.getName(k), a2peaks[k],
-						d, beta[j], gradient, DoubleEquality.relativeError(gradient, beta[j]));
+				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s, f12.getName(k), a2peaks[k],
+				//		d, beta[j], gradient, DoubleEquality.relativeError(gradient, beta[j]));
 				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[j], gradient));
 			}
 		}
@@ -826,13 +826,13 @@ public class LVMGradientProcedureTest
 		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
 				blockWidth, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 		params[0] = random(Background);
-		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
+		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
-			params[j] = random(Signal);
-			params[j + 2] = random(Xpos);
-			params[j + 3] = random(Ypos);
-			params[j + 4] = random(Xwidth);
-			params[j + 5] = random(Ywidth);
+			params[j + Gaussian2DFunction.SIGNAL] = random(Signal);
+			params[j + Gaussian2DFunction.X_POSITION] = random(Xpos);
+			params[j + Gaussian2DFunction.Y_POSITION] = random(Ypos);
+			params[j + Gaussian2DFunction.X_SD] = random(Xwidth);
+			params[j + Gaussian2DFunction.Y_SD] = random(Ywidth);
 		}
 
 		double[] y = new double[n];
@@ -846,13 +846,13 @@ public class LVMGradientProcedureTest
 		if (randomiseParams)
 		{
 			params[0] = random(params[0]);
-			for (int i = 0, j = 1; i < npeaks; i++, j += 6)
+			for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 			{
-				params[j] = random(params[j]);
-				params[j + 2] = random(params[j + 2]);
-				params[j + 3] = random(params[j + 3]);
-				params[j + 4] = random(params[j + 4]);
-				params[j + 5] = random(params[j + 5]);
+				params[j + Gaussian2DFunction.SIGNAL] = random(params[j + Gaussian2DFunction.SIGNAL]);
+				params[j + Gaussian2DFunction.X_POSITION] = random(params[j + Gaussian2DFunction.X_POSITION]);
+				params[j + Gaussian2DFunction.Y_POSITION] = random(params[j + Gaussian2DFunction.Y_POSITION]);
+				params[j + Gaussian2DFunction.X_SD] = random(params[j + Gaussian2DFunction.X_SD]);
+				params[j + Gaussian2DFunction.Y_SD] = random(params[j + Gaussian2DFunction.Y_SD]); //params[j + 4];
 			}
 		}
 
@@ -877,7 +877,7 @@ public class LVMGradientProcedureTest
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[1 + 6 * npeaks];
+			double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
 			double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
 			paramsList.add(params);
 			yList.add(y);

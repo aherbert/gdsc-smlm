@@ -78,18 +78,17 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 			final boolean[] amplitudeEstimate, final int ySize, final double[] y, final int paramsPerPeak,
 			double background, double[] initialParams)
 	{
-		int parameter = 1;
 		final int[] dim = new int[] { maxx, maxy };
 		final int[] position = new int[2];
 		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 		{
 			// Get the parameters
 			double signal = params[j + Gaussian2DFunction.SIGNAL];
-			double angle = params[j + Gaussian2DFunction.SHAPE];
 			double xpos = params[j + Gaussian2DFunction.X_POSITION];
 			double ypos = params[j + Gaussian2DFunction.Y_POSITION];
 			double sx = params[j + Gaussian2DFunction.X_SD];
 			double sy = params[j + Gaussian2DFunction.Y_SD];
+			double angle = params[j + Gaussian2DFunction.ANGLE];
 
 			// ----
 			// Check all input parameters and uses the default values if necessary
@@ -142,12 +141,12 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 				signal *= 6.283185307 * sx * sy; // 2 * Math.PI * sx * sy
 
 			// Set all the parameters
-			params[parameter++] = signal;
-			params[parameter++] = angle;
-			params[parameter++] = xpos;
-			params[parameter++] = ypos;
-			params[parameter++] = sx;
-			params[parameter++] = sy;
+			params[j + Gaussian2DFunction.SIGNAL] = signal;
+			params[j + Gaussian2DFunction.X_POSITION] = xpos;
+			params[j + Gaussian2DFunction.Y_POSITION] = ypos;
+			params[j + Gaussian2DFunction.X_SD] = sx;
+			params[j + Gaussian2DFunction.Y_SD] = sy;
+			params[j + Gaussian2DFunction.ANGLE] = angle;
 		}
 
 		return true;

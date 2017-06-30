@@ -37,16 +37,15 @@ import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.UnicodeReader;
-import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfig.CameraType;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFConfig.PSF;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.utils.XmlUtils;
@@ -68,6 +67,21 @@ public class PeakResultsReader
 		nTwoAxis = PeakResult.STANDARD_PARAMETERS + 2;
 		nTwoAxisAndTheta = PeakResult.STANDARD_PARAMETERS + 3;
 	}
+
+	/** Index of the background in the parameters array in the legacy GDSC file format */
+	static final int LEGACY_FORMAT_BACKGROUND = 0;
+	/** Index of the signal intensity in the parameters array in the legacy GDSC file format */
+	static final int LEGACY_FORMAT_SIGNAL = 1;
+	/** Index of the angle in the parameters array in the legacy GDSC file format */
+	static final int LEGACY_FORMAT_ANGLE = 2;
+	/** Index of the x-position in the parameters array in the legacy GDSC file format */
+	static final int LEGACY_FORMAT_X_POSITION = 3;
+	/** Index of the y-position in the parameters array in the legacy GDSC file format */
+	static final int LEGACY_FORMAT_Y_POSITION = 4;
+	/** Index of the x-standard deviation in the parameters array in the legacy GDSC file format */
+	static final int LEGACY_FORMAT_X_SD = 5;
+	/** Index of the y-standard deviation in the parameters array in the legacy GDSC file format */
+	static final int LEGACY_FORMAT_Y_SD = 6;
 
 	/**
 	 * The columns to recognise in the ImageJ table results header for version 1/2.
@@ -414,7 +428,7 @@ public class PeakResultsReader
 								gdsc.smlm.results.Calibration cal = (gdsc.smlm.results.Calibration) XmlUtils
 										.fromXML(calibrationString);
 								cal.validate();
-								
+
 								// Convert to a calibration helper
 								calibration = new CalibrationWriter();
 								if (cal.hasNmPerPixel())
@@ -431,7 +445,7 @@ public class PeakResultsReader
 									calibration.setCameraType(CameraType.EMCCD);
 								if (cal.hasAmplification())
 									calibration.setAmplification(cal.getAmplification());
-								
+
 								// Previous version were always in fixed units
 								calibration.setDistanceUnit(DistanceUnit.PIXEL);
 								calibration.setIntensityUnit(IntensityUnit.COUNT);
@@ -846,8 +860,8 @@ public class PeakResultsReader
 				{
 					// Convert old binary format with the amplitude to signal
 					if (convert)
-						params[Gaussian2DFunction.SIGNAL] *= 2 * Math.PI * params[Gaussian2DFunction.X_SD] *
-								params[Gaussian2DFunction.Y_SD];
+						params[LEGACY_FORMAT_SIGNAL] *= 2 * Math.PI * params[LEGACY_FORMAT_X_SD] *
+								params[LEGACY_FORMAT_Y_SD];
 					params = mapGaussian2DFormatParams(params);
 					paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 				}
@@ -902,13 +916,13 @@ public class PeakResultsReader
 	private static float[] mapGaussian2DFormat(float[] params)
 	{
 		final float[] p = new float[nTwoAxisAndTheta];
-		p[PeakResult.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
-		p[PeakResult.INTENSITY] = params[Gaussian2DFunction.SIGNAL];
-		p[PeakResult.X] = params[Gaussian2DFunction.X_POSITION];
-		p[PeakResult.Y] = params[Gaussian2DFunction.Y_POSITION];
-		p[isx] = params[Gaussian2DFunction.X_SD];
-		p[isy] = params[Gaussian2DFunction.Y_SD];
-		p[ia] = params[Gaussian2DFunction.SHAPE];
+		p[PeakResult.BACKGROUND] = params[LEGACY_FORMAT_BACKGROUND];
+		p[PeakResult.INTENSITY] = params[LEGACY_FORMAT_SIGNAL];
+		p[PeakResult.X] = params[LEGACY_FORMAT_X_POSITION];
+		p[PeakResult.Y] = params[LEGACY_FORMAT_Y_POSITION];
+		p[isx] = params[LEGACY_FORMAT_X_SD];
+		p[isy] = params[LEGACY_FORMAT_Y_SD];
+		p[ia] = params[LEGACY_FORMAT_ANGLE];
 		return p;
 	}
 
@@ -1116,7 +1130,7 @@ public class PeakResultsReader
 					params[i] = scanner.nextFloat();
 				}
 				scanner.close();
-				params[Gaussian2DFunction.SIGNAL] = signal;
+				params[LEGACY_FORMAT_SIGNAL] = signal;
 				params = mapGaussian2DFormatParams(params);
 				if (readId || readEndFrame)
 					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null, endPeak,
@@ -1142,7 +1156,7 @@ public class PeakResultsReader
 				{
 					params[i] = Float.parseFloat(fields[j++]);
 				}
-				params[Gaussian2DFunction.SIGNAL] = signal;
+				params[LEGACY_FORMAT_SIGNAL] = signal;
 				params = mapGaussian2DFormatParams(params);
 				if (readId || readEndFrame)
 					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null, endPeak,
@@ -1196,7 +1210,7 @@ public class PeakResultsReader
 					params[i] = scanner.nextFloat();
 					paramsStdDev[i] = scanner.nextFloat();
 				}
-				params[Gaussian2DFunction.SIGNAL] = signal;
+				params[LEGACY_FORMAT_SIGNAL] = signal;
 				scanner.close();
 				params = mapGaussian2DFormatParams(params);
 				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
@@ -1227,7 +1241,7 @@ public class PeakResultsReader
 					params[i] = Float.parseFloat(fields[j++]);
 					paramsStdDev[i] = Float.parseFloat(fields[j++]);
 				}
-				params[Gaussian2DFunction.SIGNAL] = signal;
+				params[LEGACY_FORMAT_SIGNAL] = signal;
 				params = mapGaussian2DFormatParams(params);
 				paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 				if (readId || readEndFrame)
@@ -1832,8 +1846,7 @@ public class PeakResultsReader
 
 			// For the new format we store the signal (not the amplitude).
 			// Convert the amplitude into a signal
-			params[Gaussian2DFunction.SIGNAL] *= 2 * Math.PI * params[Gaussian2DFunction.X_SD] *
-					params[Gaussian2DFunction.Y_SD];
+			params[LEGACY_FORMAT_SIGNAL] *= 2 * Math.PI * params[LEGACY_FORMAT_X_SD] * params[LEGACY_FORMAT_Y_SD];
 
 			params = mapGaussian2DFormatParams(params);
 			paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
@@ -2334,7 +2347,7 @@ public class PeakResultsReader
 
 			float[] params = new float[nTwoAxis];
 			params[PeakResult.BACKGROUND] = bg;
-			//params[Gaussian2DFunction.ANGLE] = ax;
+			//params[ia] = ax;
 			params[PeakResult.INTENSITY] = area;
 			params[PeakResult.X] = xc;
 			params[PeakResult.Y] = yc;
@@ -2451,7 +2464,7 @@ public class PeakResultsReader
 			calibration.setDistanceUnit(DistanceUnit.NM);
 			// MALK uses photons
 			calibration.setIntensityUnit(IntensityUnit.PHOTON);
-			
+
 			results.setCalibration(getCalibration());
 		}
 

@@ -545,7 +545,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 	}
 
 	@Override
-	public boolean evaluatesShape()
+	public boolean evaluatesAngle()
 	{
 		return false;
 	}
@@ -569,7 +569,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 	}
 
 	@Override
-	public int getParametersPerPeak()
+	public int getGradientParametersPerPeak()
 	{
 		return 5;
 	}

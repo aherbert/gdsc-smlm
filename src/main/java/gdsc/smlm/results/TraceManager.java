@@ -152,6 +152,7 @@ public class TraceManager
 		{
 			localisations[id] = new Localisation(id, result.getFrame(), result.getEndFrame(), result.getXPosition(),
 					result.getYPosition());
+			id++;
 		}
 	}
 

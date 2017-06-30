@@ -30,8 +30,6 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 		implements Gradient2Function, ExtendedGradient2Function
 {
-	public static final int Z_POSITION = 2;
-
 	protected final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
 	protected final static double ONE_OVER_ROOT2PI = 1.0 / Math.sqrt(2 * Math.PI);
 
@@ -112,16 +110,11 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	@Override
 	abstract public ErfGaussian2DFunction copy();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#getShapeName()
-	 */
 	@Override
-	protected String getShapeName()
+	public boolean evaluatesAngle()
 	{
-		// The shape parameter is used for the z-position
-		return "Z";
+		// None of the ERF functions support rotation due to the strict XY separation
+		return false;
 	}
 
 	/**

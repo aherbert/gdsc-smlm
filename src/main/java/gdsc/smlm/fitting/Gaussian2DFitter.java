@@ -508,7 +508,7 @@ public class Gaussian2DFitter
 			if (fitConfiguration.isAngleFitting())
 			{
 				// Ensure the angle is within the correct bounds
-				for (int i = Gaussian2DFunction.SHAPE; i < params.length; i += paramsPerPeak)
+				for (int i = Gaussian2DFunction.ANGLE; i < params.length; i += paramsPerPeak)
 				{
 					correctAngle(i, params, params_dev);
 				}
@@ -549,7 +549,6 @@ public class Gaussian2DFitter
 			final boolean[] amplitudeEstimate, final int ySize, final double[] y, final int paramsPerPeak,
 			double background, double[] initialParams)
 	{
-		int parameter = 1;
 		final int[] dim = new int[] { maxx, maxy };
 		final int[] position = new int[2];
 		final int[] cumul_region = new int[] { 1, maxx, ySize };
@@ -557,11 +556,11 @@ public class Gaussian2DFitter
 		{
 			// Get the parameters
 			double signal = params[j + Gaussian2DFunction.SIGNAL];
-			double angle = params[j + Gaussian2DFunction.SHAPE];
 			double xpos = params[j + Gaussian2DFunction.X_POSITION];
 			double ypos = params[j + Gaussian2DFunction.Y_POSITION];
 			double sx = params[j + Gaussian2DFunction.X_SD];
 			double sy = params[j + Gaussian2DFunction.Y_SD];
+			double angle = params[j + Gaussian2DFunction.ANGLE];
 
 			// ----
 			// Check all input parameters and estimate them if necessary
@@ -642,12 +641,12 @@ public class Gaussian2DFitter
 				signal *= 2 * Math.PI * sx * sy;
 
 			// Set all the parameters
-			params[parameter++] = signal;
-			params[parameter++] = angle;
-			params[parameter++] = xpos;
-			params[parameter++] = ypos;
-			params[parameter++] = sx;
-			params[parameter++] = sy;
+			params[j + Gaussian2DFunction.SIGNAL] = signal;
+			params[j + Gaussian2DFunction.X_POSITION] = xpos;
+			params[j + Gaussian2DFunction.Y_POSITION] = ypos;
+			params[j + Gaussian2DFunction.X_SD] = sx;
+			params[j + Gaussian2DFunction.Y_SD] = sy;
+			params[j + Gaussian2DFunction.ANGLE] = angle;
 		}
 
 		return true;
@@ -814,10 +813,15 @@ public class Gaussian2DFitter
 
 			if (fitConfiguration.isAngleFitting())
 			{
-				lower[j + Gaussian2DFunction.SHAPE] = -Math.PI;
-				upper[j + Gaussian2DFunction.SHAPE] = Math.PI;
+				lower[j + Gaussian2DFunction.ANGLE] = -Math.PI;
+				upper[j + Gaussian2DFunction.ANGLE] = Math.PI;
 			}
 			// TODO - Add support for z-depth fitting in the shape parameter			
+			if (fitConfiguration.isZFitting())
+			{
+				lower[j + Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
+				upper[j + Gaussian2DFunction.Z_POSITION] = Double.POSITIVE_INFINITY;
+			}
 
 			lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * min_wf;
 			upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * max_wf;
@@ -972,8 +976,8 @@ public class Gaussian2DFitter
 		//		}
 
 		// Commented out as this interferes with the PSF Estimator
-		double xWidth = params[i + Gaussian2DFunction.X_SD - Gaussian2DFunction.SHAPE];
-		double yWidth = params[i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.SHAPE];
+		double xWidth = params[i + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE];
+		double yWidth = params[i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE];
 		// The fit will compute the angle from the major axis. 
 		// Standardise so it is always from the X-axis
 		if (yWidth > xWidth)

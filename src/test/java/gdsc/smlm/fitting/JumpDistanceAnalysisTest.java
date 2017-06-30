@@ -17,6 +17,7 @@ import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 public class JumpDistanceAnalysisTest
@@ -227,6 +228,9 @@ public class JumpDistanceAnalysisTest
 	@Test
 	public void canDoBenchmark()
 	{
+		// Skip this as it is slow
+		Assume.assumeTrue(false);
+		
 		out = null;
 		try
 		{
@@ -253,8 +257,8 @@ public class JumpDistanceAnalysisTest
 								{
 									try
 									{
-										fit(title, samples, 0, new double[] { D[i], D[j] }, new double[] { fraction,
-												1 - fraction }, mle);
+										fit(title, samples, 0, new double[] { D[i], D[j] },
+												new double[] { fraction, 1 - fraction }, mle);
 									}
 									catch (AssertionError e)
 									{
@@ -264,8 +268,8 @@ public class JumpDistanceAnalysisTest
 										continue;
 									try
 									{
-										fit(title + " Fixed", samples, n, new double[] { D[i], D[j] }, new double[] { fraction,
-												1 - fraction }, mle);
+										fit(title + " Fixed", samples, n, new double[] { D[i], D[j] },
+												new double[] { fraction, 1 - fraction }, mle);
 									}
 									catch (AssertionError e)
 									{
@@ -366,9 +370,9 @@ public class JumpDistanceAnalysisTest
 		{
 			double[] e1 = getPercentError(d, fitD);
 			double[] e2 = getPercentError(f, fitF);
-			log("%s %s N=%d sample=%d, n=%d : %s = %s [%s] : %s = %s [%s]\n", (error == null) ? "+++ Pass"
-					: "--- Fail", title, d.length, samples, n, toString(d), toString(fitD), toString(e1), toString(f),
-					toString(fitF), toString(e2));
+			log("%s %s N=%d sample=%d, n=%d : %s = %s [%s] : %s = %s [%s]\n", (error == null) ? "+++ Pass" : "--- Fail",
+					title, d.length, samples, n, toString(d), toString(fitD), toString(e1), toString(f), toString(fitF),
+					toString(e2));
 			if (error != null)
 				throw error;
 		}

@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
@@ -138,6 +139,9 @@ public class BlinkEstimatorTest
 	@Test
 	public void findOptimalFittedPoints()
 	{
+		// Skip this as it is slow
+		Assume.assumeTrue(false);
+		
 		int particles = 1000;
 		double fixedFraction = 1;
 

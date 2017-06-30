@@ -126,7 +126,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 	}
 
 	@Override
-	public boolean evaluatesShape()
+	public boolean evaluatesAngle()
 	{
 		return false;
 	}
@@ -150,7 +150,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 	}
 
 	@Override
-	public int getParametersPerPeak()
+	public int getGradientParametersPerPeak()
 	{
 		return 5;
 	}

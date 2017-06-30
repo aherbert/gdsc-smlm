@@ -116,8 +116,8 @@ public class FastMLEGradient2ProcedureTest
 		ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(2, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 
-		double[] a1 = new double[7];
-		double[] a2 = new double[13];
+		double[] a1 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		double[] a2 = new double[1 + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 
 		final double[] x = new double[f1.size()];
 		final double[] b = new double[f1.size()];
@@ -128,11 +128,13 @@ public class FastMLEGradient2ProcedureTest
 			a2[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
 			a2[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(3, 5);
 			a2[Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(3, 5);
+			a2[Gaussian2DFunction.Z_POSITION] = rdg.nextUniform(-2, 2);
 			a2[Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
 			a2[Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
 			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
 			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] = rdg.nextUniform(5, 7);
 			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(5, 7);
+			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Z_POSITION] = rdg.nextUniform(-3, 1);
 			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
 			a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD] = rdg.nextUniform(1, 1.3);
 
@@ -515,13 +517,13 @@ public class FastMLEGradient2ProcedureTest
 		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth,
 				blockWidth, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 		params[0] = random(Background);
-		for (int i = 0, j = 1; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
+		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
-			params[j] = random(Signal);
-			params[j + 2] = random(Xpos);
-			params[j + 3] = random(Ypos);
-			params[j + 4] = random(Xwidth);
-			params[j + 5] = random(Ywidth);
+			params[j + Gaussian2DFunction.SIGNAL] = random(Signal);
+			params[j + Gaussian2DFunction.X_POSITION] = random(Xpos);
+			params[j + Gaussian2DFunction.Y_POSITION] = random(Ypos);
+			params[j + Gaussian2DFunction.X_SD] = random(Xwidth);
+			params[j + Gaussian2DFunction.Y_SD] = random(Ywidth);
 		}
 
 		double[] y = new double[n];
@@ -535,13 +537,13 @@ public class FastMLEGradient2ProcedureTest
 		if (randomiseParams)
 		{
 			params[0] = random(params[0]);
-			for (int i = 0, j = 1; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
+			for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 			{
-				params[j] = random(params[j]);
-				params[j + 2] = random(params[j + 2]);
-				params[j + 3] = random(params[j + 3]);
-				params[j + 4] = random(params[j + 4]);
-				params[j + 5] = random(params[j + 5]);
+				params[j + Gaussian2DFunction.SIGNAL] = random(params[j + Gaussian2DFunction.SIGNAL]);
+				params[j + Gaussian2DFunction.X_POSITION] = random(params[j + Gaussian2DFunction.X_POSITION]);
+				params[j + Gaussian2DFunction.Y_POSITION] = random(params[j + Gaussian2DFunction.Y_POSITION]);
+				params[j + Gaussian2DFunction.X_SD] = random(params[j + Gaussian2DFunction.X_SD]);
+				params[j + Gaussian2DFunction.Y_SD] = random(params[j + Gaussian2DFunction.Y_SD]); //params[j + 4];
 			}
 		}
 

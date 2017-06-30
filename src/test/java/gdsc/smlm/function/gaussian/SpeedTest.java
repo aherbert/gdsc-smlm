@@ -1,17 +1,14 @@
 package gdsc.smlm.function.gaussian;
 
-import gdsc.core.utils.DoubleEquality;
-import gdsc.smlm.TestSettings;
-import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-
 import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.core.utils.DoubleEquality;
+import gdsc.smlm.TestSettings;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -100,31 +97,36 @@ public class SpeedTest
 	@Test
 	public void freeCircularFasterThanEllipticalSinglePeakNB()
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
+		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
 	@Test
 	public void circularComputesSameAsFreeCircularSinglePeakNB()
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
+		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void circularFasterThanFreeCircularSinglePeakNB()
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
+		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fixedComputesSameAsFreeCircularSinglePeakNB()
 	{
-		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
+		f1ComputesSameAsf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fixedFasterThanFreeCircularSinglePeakNB()
 	{
-		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
+		f1FasterThanf2(Single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
@@ -173,31 +175,36 @@ public class SpeedTest
 	@Test
 	public void freeCircularFasterThanEllipticalDoublePeakNB()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
+		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
 	@Test
 	public void circularComputesSameAsFreeCircularDoublePeakNB()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
+		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void circularFasterThanFreeCircularDoublePeakNB()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
+		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fixedComputesSameAsFreeCircularDoublePeakNB()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
+		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fixedFasterThanFreeCircularDoublePeakNB()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
+		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
+				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	void f1ComputesSameAsf2(int npeaks, int flags1, int flags2)
@@ -210,8 +217,8 @@ public class SpeedTest
 		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags1, null);
 		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags2, null);
 
-		double[] dyda1 = new double[1 + npeaks * 6];
-		double[] dyda2 = new double[1 + npeaks * 6];
+		double[] dyda1 = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		double[] dyda2 = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 
 		int[] gradientIndices = f1.gradientIndices();
 		int[] g1 = new int[gradientIndices.length];
@@ -315,14 +322,14 @@ public class SpeedTest
 		// Generate a 2D Gaussian
 		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
 		params[0] = Background + rand.nextFloat() * 5f;
-		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
+		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
 			params[j] = Amplitude + rand.nextFloat() * 5f;
-			params[j + 1] = 0f; //(double) (Math.PI / 4.0); // Angle
-			params[j + 2] = Xpos + rand.nextFloat() * 2f;
-			params[j + 3] = Ypos + rand.nextFloat() * 2f;
-			params[j + 4] = Xwidth + rand.nextFloat() * 2f;
-			params[j + 5] = params[j + 4];
+			params[j + Gaussian2DFunction.X_POSITION] = Xpos + rand.nextFloat() * 2f;
+			params[j + Gaussian2DFunction.Y_POSITION] = Ypos + rand.nextFloat() * 2f;
+			params[j + Gaussian2DFunction.X_SD] = Xwidth + rand.nextFloat() * 2f;
+			params[j + Gaussian2DFunction.Y_SD] = params[j + 4];
+			params[j + Gaussian2DFunction.ANGLE] = 0f; //(double) (Math.PI / 4.0); // Angle
 		}
 
 		double[] dy_da = new double[params.length];
@@ -336,12 +343,14 @@ public class SpeedTest
 
 		// Randomise only the necessary parameters (i.e. not angle and X & Y widths should be the same)
 		params[0] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat());
-		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
+		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
-			params[j + 1] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat());
-			params[j + 3] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat());
-			params[j + 4] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat());
-			params[j + 5] = params[j + 4];
+			params[j + Gaussian2DFunction.X_POSITION] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat()
+					: rand.nextFloat());
+			params[j + Gaussian2DFunction.Y_POSITION] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat()
+					: rand.nextFloat());
+			params[j + Gaussian2DFunction.X_SD] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat());
+			params[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.X_SD];
 		}
 
 		return y;
@@ -354,7 +363,7 @@ public class SpeedTest
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[1 + 6 * npeaks];
+			double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
 			double[] y = doubleCreateGaussianData(npeaks, params);
 			paramsList.add(params);
 			yList.add(y);

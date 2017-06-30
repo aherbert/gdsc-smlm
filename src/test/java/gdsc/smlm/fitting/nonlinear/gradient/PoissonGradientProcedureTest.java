@@ -351,7 +351,7 @@ public class PoissonGradientProcedureTest
 		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 
-		double[] a = new double[7];
+		double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		int n = func.getNumberOfGradients();
 
 		// Get a background

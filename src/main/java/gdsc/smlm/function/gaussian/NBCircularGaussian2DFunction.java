@@ -71,8 +71,8 @@ public class NBCircularGaussian2DFunction extends CircularGaussian2DFunction
 		for (int j = 0; j < npeaks; j++)
 		{
 			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
-			apos += 6;
-			dydapos += PARAMETERS_PER_PEAK;
+			apos += PARAMETERS_PER_PEAK;
+			dydapos += GRADIENT_PARAMETERS_PER_PEAK;
 		}
 
 		return y_fit;

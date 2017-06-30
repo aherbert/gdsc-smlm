@@ -32,12 +32,12 @@ import gdsc.smlm.engine.FitParameters.FitTask;
 import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
+import gdsc.smlm.fitting.FastGaussian2DFitter;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.FunctionSolverType;
-import gdsc.smlm.fitting.FastGaussian2DFitter;
 import gdsc.smlm.fitting.LSEFunctionSolver;
 import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.fitting.WLSEFunctionSolver;
@@ -45,7 +45,6 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.ExtendedPeakResult;
-import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultHelper;
@@ -1434,7 +1433,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				//				int nn = 1;
 				//				for (int i = 0; i < candidateNeighbourCount; i++)
 				//				{
-				//					offset += Gaussian2DFunction.PARAMETERS_PER_PEAK;
+				//					offset += Gaussian2DFunction.NUMBER_PER_PEAK;
 				//					System.out.printf("[%d] %d N %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId, !amplitudeEstimate[nn], 
 				//							DoubleEquality.relativeError(initialParams[offset + 1], params[offset + 1]), 
 				//							DoubleEquality.relativeError(initialParams[offset + 2], params[offset + 2]), 
@@ -1450,7 +1449,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				//				{
 				//					if (subtract[i])
 				//						continue;
-				//					offset += Gaussian2DFunction.PARAMETERS_PER_PEAK;
+				//					offset += Gaussian2DFunction.NUMBER_PER_PEAK;
 				//					System.out.printf("[%d] %d F %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId, !amplitudeEstimate[nn], 
 				//							DoubleEquality.relativeError(initialParams[offset + 1], params[offset + 1]), 
 				//							DoubleEquality.relativeError(initialParams[offset + 2], params[offset + 2]), 
@@ -1643,9 +1642,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						regionBounds.x;
 				params[j + Gaussian2DFunction.Y_POSITION] = estimatedParams[Gaussian2DFunction.Y_POSITION] -
 						regionBounds.y;
-				params[j + Gaussian2DFunction.SHAPE] = estimatedParams[Gaussian2DFunction.SHAPE];
+				params[j + Gaussian2DFunction.Z_POSITION] = estimatedParams[Gaussian2DFunction.Z_POSITION];
 				params[j + Gaussian2DFunction.X_SD] = estimatedParams[Gaussian2DFunction.X_SD];
 				params[j + Gaussian2DFunction.Y_SD] = estimatedParams[Gaussian2DFunction.Y_SD];
+				params[j + Gaussian2DFunction.ANGLE] = estimatedParams[Gaussian2DFunction.ANGLE];
 				return false;
 			}
 			else
@@ -2030,7 +2030,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			this.singleRegion = region;
 
 			// Use the multi-fitting background as this uses the background of fitted neighbours if available.
-			final double[] params = new double[7];
+			final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 
 			// Estimate background.
 			// Use the fitted peaks within the region or fall-back to the estimate for 
@@ -2450,17 +2450,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Note: Quadrant analysis sets the positions using 0.5,0.5 as the centre of the pixel.
 			// The fitting does not, so subtract 0.5.
+			// Note that we set position and signal but leave the z-position and widths to their 
+			// standard values since this is 'new' fit.
 
 			doubletParams[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
 			doubletParams[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] * 0.5;
-			doubletParams[Gaussian2DFunction.X_POSITION] = (float) (qa.x1 - 0.5);
-			doubletParams[Gaussian2DFunction.Y_POSITION] = (float) (qa.y1 - 0.5);
+			doubletParams[Gaussian2DFunction.X_POSITION] = (qa.x1 - 0.5);
+			doubletParams[Gaussian2DFunction.Y_POSITION] = (qa.y1 - 0.5);
 			doubletParams[Gaussian2DFunction.PARAMETERS_PER_PEAK +
 					Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] * 0.5;
-			doubletParams[Gaussian2DFunction.PARAMETERS_PER_PEAK +
-					Gaussian2DFunction.X_POSITION] = (float) (qa.x2 - 0.5);
-			doubletParams[Gaussian2DFunction.PARAMETERS_PER_PEAK +
-					Gaussian2DFunction.Y_POSITION] = (float) (qa.y2 - 0.5);
+			doubletParams[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] = (qa.x2 - 0.5);
+			doubletParams[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] = (qa.y2 - 0.5);
 			// -+-+-
 
 			// If validation is on in the fit configuration:
@@ -2564,10 +2564,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						int npeaks = peakParams.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 						for (int i = 0; i < npeaks; i++)
 						{
-							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
-									Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
-							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
-									Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
+							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] += 0.5 +
+									regionBounds.x;
+							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] += 0.5 +
+									regionBounds.y;
 						}
 					}
 					String msg = String.format("Doublet %d [%d,%d] %s (%s) %s [%f -> %f] IC [%f -> %f] = %s\n", slice,
@@ -2786,10 +2786,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						int npeaks = peakParams.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 						for (int i = 0; i < npeaks; i++)
 						{
-							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
-									Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
-							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
-									Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
+							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] += 0.5 +
+									regionBounds.x;
+							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] += 0.5 +
+									regionBounds.y;
 						}
 					}
 					String msg = String.format("Doublet %d [%d,%d] %s (%s) = %s\n", slice, cc.fromRegionToGlobalX(cx),
@@ -2879,7 +2879,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	private static double[] extractSpotParams(double[] params, int n)
 	{
-		final double[] newParams = new double[7];
+		final double[] newParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		System.arraycopy(params, n * Gaussian2DFunction.PARAMETERS_PER_PEAK + 1, newParams, 1,
 				Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		return newParams;
@@ -3674,9 +3674,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				p[Gaussian2DFunction.X_POSITION] -= cc.dataBounds.x;
 				p[Gaussian2DFunction.Y_POSITION] -= cc.dataBounds.y;
 
-				final float[] params = new float[7];
+				final float[] params = new float[p.length];
 				params[Gaussian2DFunction.BACKGROUND] = background;
-				for (int j = 1; j < 7; j++)
+				for (int j = 1; j < p.length; j++)
 					params[j] = (float) p[j];
 
 				final float[] paramsDev;
@@ -3686,10 +3686,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				}
 				else
 				{
-					paramsDev = new float[7];
+					paramsDev = new float[p.length];
 					paramsDev[Gaussian2DFunction.BACKGROUND] = (float) dev[Gaussian2DFunction.BACKGROUND];
 					final int offset = results[i].getId() * Gaussian2DFunction.PARAMETERS_PER_PEAK;
-					for (int j = 1; j < 7; j++)
+					for (int j = 1; j < p.length; j++)
 						paramsDev[j] = (float) dev[offset + j];
 				}
 
@@ -3769,7 +3769,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] += cc
 							.fromFitRegionToGlobalY();
 					if (fitConfig.isAngleFitting())
-						peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SHAPE] *= 180.0 /
+						peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.ANGLE] *= 180.0 /
 								Math.PI;
 				}
 			}

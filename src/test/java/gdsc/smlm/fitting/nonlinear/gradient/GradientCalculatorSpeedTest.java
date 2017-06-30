@@ -232,7 +232,8 @@ public class GradientCalculatorSpeedTest
 			Assert.assertTrue("Result: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
 			Assert.assertTrue("Observations: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
-				Assert.assertTrue("Observations: Not same alpha @ " + i, eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
+				Assert.assertTrue("Observations: Not same alpha @ " + i,
+						eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
 		}
 
 		for (int i = 0; i < paramsList.size(); i++)
@@ -255,7 +256,8 @@ public class GradientCalculatorSpeedTest
 				double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 				double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
 				Assert.assertTrue("Result+Noise: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
-				Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
+				Assert.assertTrue("Observations+Noise: Not same beta @ " + i,
+						eq.almostEqualRelativeOrAbsolute(beta, beta2));
 				for (int j = 0; j < beta.length; j++)
 					Assert.assertTrue("Observations+Noise: Not same alpha @ " + i,
 							eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
@@ -266,7 +268,8 @@ public class GradientCalculatorSpeedTest
 				double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
 				double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
 				Assert.assertTrue("N-Result+Noise: Not same @ " + i, eq.almostEqualRelativeOrAbsolute(s, s2));
-				Assert.assertTrue("N-Observations+Noise: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
+				Assert.assertTrue("N-Observations+Noise: Not same beta @ " + i,
+						eq.almostEqualRelativeOrAbsolute(beta, beta2));
 				for (int j = 0; j < beta.length; j++)
 					Assert.assertTrue("N-Observations+Noise: Not same alpha @ " + i,
 							eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
@@ -352,8 +355,6 @@ public class GradientCalculatorSpeedTest
 
 		int iter = 10000;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
-		double[][] alpha = new double[7][7];
-		double[] beta = new double[7];
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -364,6 +365,9 @@ public class GradientCalculatorSpeedTest
 		GradientCalculator calc2 = new GradientCalculator6();
 		SingleFreeCircularGaussian2DFunction func = new SingleFreeCircularGaussian2DFunction(blockWidth, blockWidth);
 		int n = x.length;
+		int ng = func.getNumberOfGradients();
+		double[][] alpha = new double[ng][ng];
+		double[] beta = new double[ng];
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -404,7 +408,8 @@ public class GradientCalculatorSpeedTest
 		int nparams = calc.nparams;
 		Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
 		// Check the function is the correct size
-		Assert.assertEquals(nparams, func.gradientIndices().length);
+		int[] indices = func.gradientIndices();
+		Assert.assertEquals(nparams, indices.length);
 
 		int iter = 100;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
@@ -428,8 +433,9 @@ public class GradientCalculatorSpeedTest
 			//double s = 
 			calc.evaluate(x, y, a, beta, func);
 
-			for (int j = 0; j < nparams; j++)
+			for (int k = 0; k < nparams; k++)
 			{
+				int j = indices[k];
 				double d = Precision.representableDelta(a[j], (a[j] == 0) ? 1e-3 : a[j] * delta);
 				a2[j] = a[j] + d;
 				double s1 = calc.evaluate(x, y, a2, beta2, func);
@@ -438,9 +444,9 @@ public class GradientCalculatorSpeedTest
 				a2[j] = a[j];
 
 				double gradient = (s1 - s2) / (2 * d);
-				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, j, s, func.getName(j), a[j], d, beta[j],
+				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, j, s, func.getName(j), a[j], d, beta[k],
 				//		gradient);
-				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[j], gradient));
+				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[k], gradient));
 			}
 		}
 	}
@@ -604,17 +610,17 @@ public class GradientCalculatorSpeedTest
 	{
 		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
 		int n = blockWidth * blockWidth;
-		double[] a = new double[7];
+		double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
 		for (int run = 5; run-- > 0;)
 		{
-			a[0] = random(Background);
-			a[1] = random(Amplitude);
-			a[2] = random(Angle);
-			a[3] = random(Xpos);
-			a[4] = random(Ypos);
-			a[5] = random(Xwidth);
-			a[6] = random(Ywidth);
+			a[Gaussian2DFunction.BACKGROUND] = random(Background);
+			a[Gaussian2DFunction.SIGNAL] = random(Amplitude);
+			a[Gaussian2DFunction.ANGLE] = random(Angle);
+			a[Gaussian2DFunction.X_POSITION] = random(Xpos);
+			a[Gaussian2DFunction.Y_POSITION] = random(Ypos);
+			a[Gaussian2DFunction.X_SD] = random(Xwidth);
+			a[Gaussian2DFunction.Y_SD] = random(Ywidth);
 
 			// Simulate Poisson process
 			func.initialise(a);
@@ -627,10 +633,12 @@ public class GradientCalculatorSpeedTest
 					x[i] = rdg.nextPoisson(u[i]);
 			}
 
-			GradientCalculator calc = GradientCalculatorFactory.newCalculator(func.getNumberOfGradients(), true);
+			int ng = func.getNumberOfGradients();
+			double[][] alpha = new double[ng][ng];
+			double[] beta = new double[ng];
 
-			double[][] alpha = new double[7][7];
-			double[] beta = new double[7];
+			GradientCalculator calc = GradientCalculatorFactory.newCalculator(ng, true);
+
 			double llr = PoissonCalculator.logLikelihoodRatio(u, x);
 			double llr2 = calc.findLinearised(n, x, a, alpha, beta, func);
 			//System.out.printf("llr=%f, llr2=%f\n", llr, llr2);
@@ -658,14 +666,14 @@ public class GradientCalculatorSpeedTest
 		// Generate a 2D Gaussian
 		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
 		params[0] = random(Background);
-		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
+		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
-			params[j] = random(Amplitude);
-			params[j + 1] = random(Angle);
-			params[j + 2] = random(Xpos);
-			params[j + 3] = random(Ypos);
-			params[j + 4] = random(Xwidth);
-			params[j + 5] = random(Ywidth);
+			params[j + Gaussian2DFunction.SIGNAL] = random(Amplitude);
+			params[j + Gaussian2DFunction.ANGLE] = random(Angle);
+			params[j + Gaussian2DFunction.X_POSITION] = random(Xpos);
+			params[j + Gaussian2DFunction.Y_POSITION] = random(Ypos);
+			params[j + Gaussian2DFunction.X_SD] = random(Xwidth);
+			params[j + Gaussian2DFunction.Y_SD] = random(Ywidth);
 		}
 
 		double[] dy_da = new double[params.length];
@@ -680,14 +688,14 @@ public class GradientCalculatorSpeedTest
 		if (randomiseParams)
 		{
 			params[0] = random(params[0]);
-			for (int i = 0, j = 1; i < npeaks; i++, j += 6)
+			for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 			{
-				params[j] = random(params[j]);
-				params[j + 1] = random(params[j + 1]);
-				params[j + 2] = random(params[j + 2]);
-				params[j + 3] = random(params[j + 3]);
-				params[j + 4] = random(params[j + 4]);
-				params[j + 5] = random(params[j + 5]); //params[j + 4];
+				params[j + Gaussian2DFunction.SIGNAL] = random(params[j + Gaussian2DFunction.SIGNAL]);
+				params[j + Gaussian2DFunction.ANGLE] = random(params[j + Gaussian2DFunction.ANGLE]);
+				params[j + Gaussian2DFunction.X_POSITION] = random(params[j + Gaussian2DFunction.X_POSITION]);
+				params[j + Gaussian2DFunction.Y_POSITION] = random(params[j + Gaussian2DFunction.Y_POSITION]);
+				params[j + Gaussian2DFunction.X_SD] = random(params[j + Gaussian2DFunction.X_SD]);
+				params[j + Gaussian2DFunction.Y_SD] = random(params[j + Gaussian2DFunction.Y_SD]); //params[j + 4];
 			}
 		}
 
@@ -712,7 +720,7 @@ public class GradientCalculatorSpeedTest
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			double[] params = new double[1 + 6 * npeaks];
+			double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
 			double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
 			paramsList.add(params);
 			yList.add(y);

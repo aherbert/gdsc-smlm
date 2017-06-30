@@ -118,6 +118,7 @@ public class ResultsManagerTest
 			builder.setIntensity(rand.next());
 			builder.setX(rand.next());
 			builder.setY(rand.next());
+			builder.setZ(rand.next());
 			builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR * rand.next()));
 
 			Spot spot = builder.build();
@@ -313,7 +314,7 @@ public class ResultsManagerTest
 				double error = 0;
 				float noise = 0;
 				float[] params = Gaussian2DPeakResultHelper.createOneAxisParams(spot.getBackground(),
-						spot.getIntensity(), spot.getX(), spot.getY(), 0,
+						spot.getIntensity(), spot.getX(), spot.getY(), spot.getZ(),
 						(float) (spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR));
 				float[] paramsStdDev = null;
 				IdPeakResult peak = new IdPeakResult(startFrame, origX, origY, origValue, error, noise, params,
