@@ -1,5 +1,7 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -16,9 +18,6 @@ package gdsc.smlm.results.filter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 /**
  * Filter results using a signal-to-background ratio (SBR) threshold.
  * <p>
@@ -31,8 +30,6 @@ public class SBRFilter extends DirectFilter
 {
 	@XStreamAsAttribute
 	final float sbr;
-	@XStreamOmitField
-	double bias = -1;
 
 	public SBRFilter(float sbr)
 	{
@@ -42,39 +39,26 @@ public class SBRFilter extends DirectFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		bias = -1;
-		if (peakResults.hasCalibration())
-		{
-			if (peakResults.getCalibrationReader().hasBias())
-				bias = peakResults.getCalibrationReader().getBias();
-		}
 	}
 
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		if (bias != -1)
-		{
-			final double background = peak.getBackground() - bias;
-			if (background > 0)
-				return peak.getSignal() / Math.sqrt(background) >= this.sbr;
-		}
+		final double background = peak.getBackground();
+		if (background > 0)
+			return peak.getSignal() / Math.sqrt(background) >= this.sbr;
 		return SNRFilter.getSNR(peak) >= this.sbr;
 	}
 
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
-		if (bias != -1)
+		final double background = peak.getBackground();
+		if (background > 0)
 		{
-			// This is not preprocessed
-			final double background = peak.getBackground() - bias;
-			if (background > 0)
-			{
-				if (peak.getSignal() / Math.sqrt(background) < this.sbr)
-					return V_PHOTONS | V_BACKGROUND;
-				return 0;
-			}
+			if (peak.getSignal() / Math.sqrt(background) < this.sbr)
+				return V_PHOTONS | V_BACKGROUND;
+			return 0;
 		}
 		if (peak.getSNR() < this.sbr)
 			return V_SNR;
