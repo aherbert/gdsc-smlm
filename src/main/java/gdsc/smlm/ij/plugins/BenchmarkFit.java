@@ -18,6 +18,7 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.PSFConfigHelper;
 import gdsc.smlm.engine.FitEngineConfiguration;
 
@@ -35,7 +36,6 @@ import gdsc.smlm.engine.FitEngineConfiguration;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;
@@ -569,7 +569,8 @@ public class BenchmarkFit implements PlugIn
 		gd.addNumericField("Start_offset", startOffset, 3);
 		gd.addCheckbox("Include_CoM_fit", comFitting);
 		gd.addCheckbox("Background_fitting", backgroundFitting);
-		gd.addMessage("Signal fitting can be disabled for " + FitFunction.FIXED.toString() + " function");
+		gd.addMessage("Signal fitting can be disabled for " + 
+				PSFConfigHelper.getName(PSFType.ONE_AXIS_GAUSSIAN_2D) + " function");
 		gd.addCheckbox("Signal_fitting", signalFitting);
 		gd.addCheckbox("Show_histograms", showHistograms);
 		gd.addCheckbox("Save_raw_data", saveRawData);
