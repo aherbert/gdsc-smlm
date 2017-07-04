@@ -1682,12 +1682,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 			if (variance > precisionThreshold)
 			{
-				final double precision = Math.sqrt(variance);
 				if (log != null)
 				{
+					final double precision = Math.sqrt(variance);
 					log.info("Bad peak %d: Insufficient precision (%gx)\n", n, precision);
 				}
-				return setValidationResult(FitStatus.INSUFFICIENT_PRECISION, precision);
+				return setValidationResult(FitStatus.INSUFFICIENT_PRECISION, variance);
 			}
 		}
 
@@ -1903,8 +1903,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public float getSD()
 		{
-			return (float) Gaussian2DPeakResultHelper.getStandardDeviation(params[Gaussian2DFunction.X_SD + offset],
-					params[Gaussian2DFunction.Y_SD + offset]);
+			if (isTwoAxisGaussian2D)
+				return (float) Gaussian2DPeakResultHelper.getStandardDeviation(params[Gaussian2DFunction.X_SD + offset],
+						params[Gaussian2DFunction.Y_SD + offset]);
+			return (float) params[Gaussian2DFunction.X_SD + offset];
 		}
 
 		public float getBackground()
@@ -2187,10 +2189,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		final double ysd = parameters[offset + Gaussian2DFunction.Y_SD];
 		final double xsd0 = initialParameters[offset + Gaussian2DFunction.X_SD];
 		final double ysd0 = initialParameters[offset + Gaussian2DFunction.Y_SD];
-		final double variance = getVariance(0, signal, Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd),
-				false);
-		final double variance2 = getVariance(b, signal, Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd),
-				true);
+		final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd) : xsd;
+		final double variance = getVariance(0, signal, sd, false);
+		final double variance2 = getVariance(b, signal, sd, true);
 		// Q. Should noise be the local background or the estimate from the whole image?
 
 		// This uses the local background if specified or the estimate from the whole image 
