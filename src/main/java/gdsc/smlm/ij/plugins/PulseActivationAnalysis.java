@@ -261,6 +261,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private static int targetChannel = 1;
 
 	private static double densityRadius = 35;
+	private static int minNeighbours = 5;
 	private static int specificCorrectionIndex = Correction.SUBTRACTION.ordinal();
 	private static double[] specificCorrectionCutoff = { 50, 50, 50 };
 	private static int nonSpecificCorrectionIndex = 0;
@@ -875,6 +876,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private class RunSettings
 	{
 		double densityRadius;
+		int minNeighbours;
 		Correction specificCorrection = Correction.NONE;
 		double[] specificCorrectionCutoff;
 		Correction nonSpecificCorrection = Correction.NONE;
@@ -889,6 +891,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			if (channels > 1)
 			{
 				this.densityRadius = PulseActivationAnalysis.densityRadius / results.getNmPerPixel();
+				this.minNeighbours = PulseActivationAnalysis.minNeighbours;
 
 				specificCorrection = getCorrection(PulseActivationAnalysis.specificCorrection,
 						PulseActivationAnalysis.specificCorrectionIndex);
@@ -917,6 +920,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				return true;
 			if (lastRunSettings.densityRadius != densityRadius)
 				return true;
+			if (lastRunSettings.minNeighbours != minNeighbours)
+				return true;
 			if (lastRunSettings.specificCorrection != specificCorrection)
 				return true;
 			if (specificCorrection != Correction.NONE)
@@ -933,6 +938,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			if (lastRunSettings == null)
 				return true;
 			if (lastRunSettings.densityRadius != densityRadius)
+				return true;
+			if (lastRunSettings.minNeighbours != minNeighbours)
 				return true;
 			if (lastRunSettings.nonSpecificCorrection != nonSpecificCorrection)
 				return true;
@@ -1015,6 +1022,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			}
 
 			gd.addNumericField("Local_density_radius", densityRadius, 0, 6, "nm");
+			gd.addSlider("Min_neighbours", 0, 15, minNeighbours);
 			correctionNames = SettingsManager.getNames((Object[]) specificCorrection);
 			gd.addChoice("Crosstalk_correction", correctionNames, correctionNames[specificCorrectionIndex]);
 			for (int c = 1; c <= channels; c++)
@@ -1064,6 +1072,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				}
 
 				Recorder.recordOption("Local_density_radius", Double.toString(densityRadius));
+				Recorder.recordOption("Min_neighbours", Integer.toString(minNeighbours));
 
 				Recorder.recordOption("Crosstalk_correction", correctionNames[specificCorrectionIndex]);
 				for (int c = 1; c <= channels; c++)
@@ -1130,6 +1139,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 				}
 
 				densityRadius = Math.abs(gd.getNextNumber());
+				minNeighbours = Math.abs((int) gd.getNextNumber());
 				specificCorrectionIndex = gd.getNextChoiceIndex();
 				for (int c = 1; c <= channels; c++)
 				{
@@ -1621,11 +1631,25 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		{
 			for (int i = from; i < to; i++)
 			{
-				// Current channel (1-indexed)
-				int c = specificActivations[i].channel;
-
 				// Observed density
 				int[] D = density[i];
+
+				// Compute the number of neighbours. 
+				int neighbours = 0;
+				for (int j = 1; j <= channels; j++)
+					neighbours += D[j];
+
+				// Do not unmix if there are not enough neighbours.
+				// Note this will count the target activation so 
+				// use <= to ensure the neighbours is above the min.
+				if (neighbours <= runSettings.minNeighbours)
+				{
+					newChannel[i] = 0;
+					continue;
+				}
+
+				// Current channel (1-indexed)
+				int c = specificActivations[i].channel;
 
 				// Compute the true local densities
 				double[] d;
@@ -1719,7 +1743,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 					sum += d[j];
 				}
 
-				if (sum != 0)
+				// Do not unmix if there are not enough neighbours.
+				if (sum >= runSettings.minNeighbours)
 				{
 					for (int j = channels; j-- > 0;)
 						p[j] = d[j + 1] / sum;
