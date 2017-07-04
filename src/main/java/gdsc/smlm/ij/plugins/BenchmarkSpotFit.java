@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -53,13 +52,13 @@ import gdsc.core.match.PointPair;
 import gdsc.core.utils.Correlator;
 import gdsc.core.utils.FastCorrelator;
 import gdsc.core.utils.Maths;
-import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.XmlUtils;
-import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.FitConfig.FitSolver;
+import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitParameters.FitTask;
@@ -69,7 +68,6 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitResult;
-import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
@@ -111,7 +109,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
@@ -299,7 +297,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	static FitConfiguration fitConfig;
 	static FitEngineConfiguration config;
-	private static CalibrationWriter cal;
 	static MultiPathFilter multiFilter;
 	private static final MultiPathFilter defaultMultiFilter;
 	private static final double[] defaultParameters;
@@ -307,9 +304,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	static
 	{
-		cal = new CalibrationWriter();
-		fitConfig = new FitConfiguration();
-		config = new FitEngineConfiguration(fitConfig);
+		config = new FitEngineConfiguration();
+		fitConfig = config.getFitConfiguration();
 		// Set some default fit settings here ...
 		fitConfig.setDisableSimpleFilter(false);
 		fitConfig.setMinPhotons(1); // Do not allow negative photons 
@@ -319,13 +315,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		fitConfig.setWidthFactor(0);
 
 		fitConfig.setBackgroundFitting(true);
-		fitConfig.setMinIterations(0);
 		fitConfig.setNoise(0);
-		config.setNoiseMethod(Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
+		config.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
 
 		// Use bounded so that we can fit the neighbours
 		config.setIncludeNeighbours(true);
-		fitConfig.setFitSolver(FitSolver.BOUNDED_LVM);
+		fitConfig.setFitSolver(FitSolver.LVM_LSE);
 
 		// Add a filter to use for storing the slice results:
 		// Use the standard configuration to ensure sensible fits are stored as the current slice results.
@@ -868,8 +863,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 								{
 									// This is a fitted candidate
 
-									final double a = p3.peakResult.getSignal();
-									final double p = point.result.getSignal();
+									final double a = p3.peakResult.getSignal(); // Should be in photons
+									final double p = point.result.getPhotons();
 
 									match[matchCount++] = new FitMatch(point, d, p3.peakResult.error, p, a);
 								}
@@ -1006,7 +1001,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	@SuppressWarnings("unchecked")
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage(String.format(
@@ -1025,31 +1020,31 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		// Collect options for fitting
 		final double sa = getSa();
-		gd.addNumericField("Initial_StdDev", Maths.round(sa / simulationParameters.a), 3);
+		fitConfig.setInitialPeakStdDev(Maths.round(sa / simulationParameters.a));
+		PeakFit.addPSFOptions(gd, fitConfig);
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
-		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
-				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
-		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
-				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 
 		gd.addMessage("Multi-path filter (used to pick optimum results during fitting)");
 
-		// Allow loading the best filter fot these results
+		// Allow loading the best filter for these results
 		boolean benchmarkSettingsCheckbox = fitResultsId == BenchmarkFilterAnalysis.lastId;
 
 		// This should always be an opt-in decision. Otherwise the user cannot use the previous settings
 		useBenchmarkSettings = false;
+		Checkbox cbBenchmark = null;
 		if (benchmarkSettingsCheckbox)
-			gd.addCheckbox("Benchmark_settings", useBenchmarkSettings);
+			cbBenchmark = gd.addAndGetCheckbox("Benchmark_settings", useBenchmarkSettings);
 
 		gd.addTextAreas(XmlUtils.convertQuotes(multiFilter.toXML()), null, 6, 60);
 
-		gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
-		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
-		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
+		textFailLimit = gd.addAndGetNumericField("Fail_limit", config.getFailuresLimit(), 0);
+		cbIncludeNeighbours = gd.addAndGetCheckbox("Include_neighbours", config.isIncludeNeighbours());
+		gd.addAndGetSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
+		textNeighbourHeight = gd.getLastTextField();
 		//gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
-		gd.addCheckbox("Compute_doublets", computeDoublets);
-		gd.addNumericField("Duplicate_distance", fitConfig.getDuplicateDistance(), 2);
+		cbComputeDoublets = gd.addAndGetCheckbox("Compute_doublets", computeDoublets);
+		gd.addNumericField("Duplicate_distance", config.getDuplicateDistance(), 2);
 		gd.addCheckbox("Show_score_histograms", showFilterScoreHistograms);
 		gd.addCheckbox("Show_correlation", showCorrelation);
 		gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
@@ -1062,21 +1057,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Add a mouse listener to the config file field
 		if (benchmarkSettingsCheckbox && Utils.isShowGenericDialog())
 		{
-			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
-			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();
 			taFilterXml = gd.getTextArea1();
-
-			Checkbox b = checkboxes.get(0);
-			b.addItemListener(this);
-			textFailLimit = numerics.get(9);
-			cbIncludeNeighbours = checkboxes.get(1);
-			textNeighbourHeight = numerics.get(10);
-			cbComputeDoublets = checkboxes.get(2);
+			cbBenchmark.addItemListener(this);
 
 			if (useBenchmarkSettings)
 			{
-				FitConfiguration tmpFitConfig = new FitConfiguration();
-				FitEngineConfiguration tmp = new FitEngineConfiguration(tmpFitConfig);
+				FitEngineConfiguration tmp = new FitEngineConfiguration();
+				FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
 				tmpFitConfig.setComputeResiduals(true); // Collect the residuals threshold
 				if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
 				{
@@ -1105,10 +1092,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		signalFactor = Math.abs(gd.getNextNumber());
 		lowerSignalFactor = Math.abs(gd.getNextNumber());
 
-		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
+		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
-		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 
 		boolean myUseBenchmarkSettings = false;
 		if (benchmarkSettingsCheckbox)
@@ -1123,12 +1109,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		boolean myComputeDoublets = gd.getNextBoolean();
 		double myDuplicateDistance = gd.getNextNumber();
 
+		gd.collectOptions();
+
 		MultiPathFilter myMultiFilter = null;
 		if (myUseBenchmarkSettings && !Utils.isShowGenericDialog())
 		{
 			// Only copy the benchmark settings if not interactive
-			FitConfiguration tmpFitConfig = new FitConfiguration();
-			FitEngineConfiguration tmp = new FitEngineConfiguration(tmpFitConfig);
+			FitEngineConfiguration tmp = new FitEngineConfiguration();
+			FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
 			tmpFitConfig.setComputeResiduals(true); // Collect the residuals threshold
 			if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
 			{
@@ -1136,7 +1124,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				config.setIncludeNeighbours(tmp.isIncludeNeighbours());
 				config.setNeighbourHeightThreshold(tmp.getNeighbourHeightThreshold());
 				computeDoublets = (tmp.getResidualsThreshold() < 1);
-				fitConfig.setDuplicateDistance(tmpFitConfig.getDuplicateDistance());
+				config.setDuplicateDistance(tmp.getDuplicateDistance());
 
 				final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
 				final double residualsThreshold = tmp.getResidualsThreshold();
@@ -1151,12 +1139,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			config.setIncludeNeighbours(includeNeighbours);
 			config.setNeighbourHeightThreshold(neighbourHeightThreshold);
 			computeDoublets = myComputeDoublets;
-			fitConfig.setDuplicateDistance(myDuplicateDistance);
+			config.setDuplicateDistance(myDuplicateDistance);
 		}
 
 		if (myMultiFilter == null)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("The multi-path filter was invalid.\n \nContinue with a default filter?");
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
@@ -1214,28 +1202,18 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		distanceInPixels = distance * sa / simulationParameters.a;
 		lowerDistanceInPixels = lowerDistance * sa / simulationParameters.a;
 
-		GlobalSettings settings = new GlobalSettings();
-		settings.setFitEngineConfiguration(config);
 		// Copy simulation defaults if a new simulation
 		if (lastId != simulationParameters.id)
 		{
-			cal.setNmPerPixel(simulationParameters.a);
-			cal.setGain(simulationParameters.gain);
-			cal.setAmplification(simulationParameters.amplification);
-			cal.setExposureTime(100);
-			cal.setReadNoise(simulationParameters.readNoise);
-			cal.setBias(simulationParameters.bias);
-			cal.setEmCCD(simulationParameters.emCCD);
-
 			// This is needed to configure the fit solver
-			fitConfig.setNmPerPixel(Maths.round(cal.getNmPerPixel()));
-			fitConfig.setGain(Maths.round(cal.getGain()));
-			fitConfig.setBias(Maths.round(cal.getBias()));
-			fitConfig.setReadNoise(Maths.round(cal.getReadNoise()));
-			fitConfig.setAmplification(Maths.round(cal.getAmplification()));
-			fitConfig.setEmCCD(cal.isEMCCD());
+			fitConfig.setNmPerPixel(simulationParameters.a);
+			fitConfig.setGain(simulationParameters.gain);
+			fitConfig.setAmplification(simulationParameters.amplification);
+			fitConfig.setReadNoise(simulationParameters.readNoise);
+			fitConfig.setBias(simulationParameters.bias);
+			fitConfig.setEmCCD(simulationParameters.emCCD);
 		}
-		if (!PeakFit.configureFitSolver(settings, cal.getBuilder(), (extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
+		if (!PeakFit.configureFitSolver(config, (extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
 			return false;
 
 		return true;
@@ -1745,7 +1723,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		MultiPathFilter mpf = new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
 		FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults, Integer.MAX_VALUE,
 				this.results.size(), assignments, scoreStore,
-				CoordinateStoreFactory.create(imp.getWidth(), imp.getHeight(), fitConfig.getDuplicateDistance()));
+				CoordinateStoreFactory.create(imp.getWidth(), imp.getHeight(), config.getDuplicateDistance()));
 		double nPredicted = fractionResult.getTP() + fractionResult.getFP();
 
 		final double[][] matchScores = new double[set.size()][];
@@ -2796,13 +2774,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		final FitConfiguration pFitConfig = pConfig.getFitConfiguration();
 
-		pFitConfig.setInitialPeakStdDev(fitConfig.getInitialPeakStdDev0());
+		pFitConfig.mergePSF(pFitConfig.getPSF());
+		pFitConfig.mergeFitSolverSettings(pFitConfig.getFitSolverSettings());
+		pFitConfig.mergeFilterSettings(pFitConfig.getFilterSettings());
+
+		// Set the fit engine settings manually to avoid merging all child settings
 		pConfig.setFitting(config.getFitting());
-		pFitConfig.setFitSolver(fitConfig.getFitSolver());
-		pFitConfig.setFitFunction(fitConfig.getFitFunction());
 		pConfig.setIncludeNeighbours(config.isIncludeNeighbours());
 		pConfig.setNeighbourHeightThreshold(config.getNeighbourHeightThreshold());
-		pFitConfig.setDuplicateDistance(fitConfig.getDuplicateDistance());
+		pConfig.setDuplicateDistance(config.getDuplicateDistance());
 
 		if (computeDoublets)
 		{
@@ -2816,38 +2796,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			pFitConfig.setComputeResiduals(false);
 		}
 
-		pFitConfig.setMaxIterations(fitConfig.getMaxIterations());
-		pFitConfig.setMaxFunctionEvaluations(fitConfig.getMaxFunctionEvaluations());
-
-		// MLE settings
-		pFitConfig.setModelCamera(fitConfig.isModelCamera());
-		pFitConfig.setBias(0);
-		pFitConfig.setReadNoise(0);
-		pFitConfig.setAmplification(0);
-		pFitConfig.setEmCCD(fitConfig.isEmCCD());
-		pFitConfig.setSearchMethod(fitConfig.getSearchMethod());
-		pFitConfig.setRelativeThreshold(fitConfig.getRelativeThreshold());
-		pFitConfig.setAbsoluteThreshold(fitConfig.getAbsoluteThreshold());
-		pFitConfig.setGradientLineMinimisation(fitConfig.isGradientLineMinimisation());
-
-		// LSE settings
-		pFitConfig.setFitCriteria(fitConfig.getFitCriteria());
-		pFitConfig.setSignificantDigits(fitConfig.getSignificantDigits());
-		pFitConfig.setDelta(fitConfig.getDelta());
-		pFitConfig.setLambda(fitConfig.getLambda());
-
+		// We used simple filtering. 
 		pFitConfig.setSmartFilter(false);
-
-		// We used simple filtering. Also we must set the width factors as these are used 
-		// during fitting to set the bounds.
-		pFitConfig.setDisableSimpleFilter(fitConfig.isDisableSimpleFilter());
-		pFitConfig.setCoordinateShiftFactor(fitConfig.getCoordinateShiftFactor());
-		pFitConfig.setSignalStrength(fitConfig.getSignalStrength());
-		pFitConfig.setMinPhotons(fitConfig.getMinPhotons());
-		pFitConfig.setMinWidthFactor(fitConfig.getMinWidthFactor());
-		pFitConfig.setWidthFactor(fitConfig.getWidthFactor());
-		pFitConfig.setPrecisionThreshold(fitConfig.getPrecisionThreshold());
-		pFitConfig.setPrecisionUsingBackground(fitConfig.isPrecisionUsingBackground());
 
 		return true;
 	}
@@ -2866,8 +2816,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			if (checkbox.getState())
 			{
-				FitConfiguration tmpFitConfig = new FitConfiguration();
-				FitEngineConfiguration tmp = new FitEngineConfiguration(tmpFitConfig);
+				FitEngineConfiguration tmp = new FitEngineConfiguration();
+				FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
 				tmpFitConfig.setComputeResiduals(true); // Collect residuals threshold
 				if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
 				{
@@ -2921,7 +2871,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		multiFilter = new MultiPathFilter(filter, minimalFilter, residualsThreshold);
 		config.setFailuresLimit(failuresLimit);
-		fitConfig.setDuplicateDistance(duplicateDistance);
+		config.setDuplicateDistance(duplicateDistance);
 
 		clearFitResults();
 
@@ -2949,7 +2899,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		config.setFailuresLimit((int) defaultParameters[0]);
 		// Note we are not resetting the residuals threshold in the config.
 		// Only the threshold in the multi-filter matters.
-		fitConfig.setDuplicateDistance(defaultParameters[1]);
+		config.setDuplicateDistance(defaultParameters[1]);
 		return true;
 	}
 
@@ -2963,6 +2913,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	private static double[] createParameters()
 	{
-		return new double[] { config.getFailuresLimit(), fitConfig.getDuplicateDistance() };
+		return new double[] { config.getFailuresLimit(), config.getDuplicateDistance() };
 	}
 }

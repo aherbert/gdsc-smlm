@@ -51,17 +51,17 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.threshold.AutoThreshold;
 import gdsc.core.utils.Maths;
-import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.UnitHelper;
 
 /*----------------------------------------------------------------------------- 
@@ -2001,6 +2001,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setName(CREATE_DATA_IMAGE_TITLE + " (" + TITLE + ")");
 		results.setConfiguration(createConfiguration((float) psfSD));
 		results.setBounds(new Rectangle(0, 0, settings.size, settings.size));
+		// TODO - set the PSF
 		MemoryPeakResults.addResults(results);
 
 		setBenchmarkResults(imp, results);
@@ -2662,10 +2663,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private String createConfiguration(float psfWidth)
 	{
-		FitConfiguration fitConfig = new FitConfiguration();
+		FitEngineConfiguration config = new FitEngineConfiguration();
+		FitConfiguration fitConfig = config.getFitConfiguration();
 		fitConfig.setInitialPeakStdDev0(psfWidth);
 		fitConfig.setInitialPeakStdDev1(psfWidth);
-		FitEngineConfiguration config = new FitEngineConfiguration(fitConfig);
+		// TODO - support JSON serialisation
 		return XmlUtils.toXML(config);
 	}
 
@@ -5010,7 +5012,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			float[] data = source.next();
 			// Use the trimmed method as there may be a lot of spots in the frame
 			noise[slice] = (float) FitWorker.estimateNoise(data, width, height,
-					NoiseEstimator.Method.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
+					NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
 		}
 
 		Statistics stats = new Statistics(Arrays.copyOfRange(noise, 1, noise.length));

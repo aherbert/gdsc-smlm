@@ -62,46 +62,73 @@ enum SearchMethod
 	BFGS = 7;
 }
 
-// TODO - comment all the fields
-
 // Define settings for the fit solver.
 message FitSolverSettings {
+	// Set to true to fix the PSF using the initial parameters
 	bool fixed_psf = 1;
+	// Set to true to disable background fitting
 	bool disable_background_fitting = 2;
+	// Set to true to disable signal intensity fitting
 	bool disable_signal_fitting = 3;
 	
+	// The type of fit solver
 	FitSolver fit_solver = 4;
-	int32 min_iterations = 5;
+	// Set to true to use a fixed number of iterations during fitting
+	bool fixed_iterations = 5;
+	// The maximum/fixed iterations to use during fitting. 
+	// If not using fixed iterations then fitting will fail if this limit is reached. 
 	int32 max_iterations = 6;
+	// The relative threshold for convergence on the function score. Set to negative to disable.
 	double relative_threshold = 7;
+	// The absolute threshold for convergence on the function score. Set to negative to disable.
 	double absolute_threshold = 8;
+	// The relative threshold for convergence on the function parameters. Set to negative to disable.
 	double parameter_relative_threshold = 9;
+	// The absolute threshold for convergence on the function parameters. Set to negative to disable.
 	double parameter_absolute_threshold = 10;
 	
+	// The initial lambda parameter for the Levenberg-Marquardt algorithm
 	double lambda = 11;
 	
+	// The search method to use for the configurable maximum likelihood estimator
 	SearchMethod search_method = 12;
+	// Set to true to use the function gradient during line minimisation, i.e. find the 
+	// parameters where the gradient is zero. The default is the to minimise the function value.
 	bool gradient_line_minimisation = 13;
+	// Set to true to model the camera noise in the configurable maximum likelihood estimator. 
 	bool model_camera = 14;
+	// The maximum number of function evaluations in the configurable maximum likelihood estimator.
 	int32 max_function_evaluations = 15;
 
-	// Options for clamping
+	// Set to true to use parameter clamping
 	bool use_clamping = 16;
+	// Set to true to use dynamic parameter clamping, i.e. update the clamp values when the step direction changes
 	bool use_dynamic_clamping = 17;
+	// The initial clamp values for each of the PSF parameters.
 	repeated double clamp_value = 18;	
 }
 
 // Define the settings for filtering fit results.
 message FilterSettings {
+    // The maximum amount a localisation can move from the initial estimate relative to the PSF width
 	double shift_factor = 1;
+	// The minimum Signal-to-Noise (SNR) threshold
 	double signal_strength = 2;
+	// The minimum number of photons threshold
 	double min_photons = 3;
+	// The maximum allowed localisation precision (expressed as the localisation standard deviation)
 	double precision_threshold = 4;
+	// Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
 	bool precision_using_background = 5;
+	// The minimum allowed width relative to the initial width estimate
 	double min_width_factor = 6;
+	// The maximum allowed width relative to the initial width estimate
 	double max_width_factor = 7;
+	// Set to true to disable the use of simple filters
 	bool disable_simple_filter = 8;
+	// Set to true to use a smart filter
 	bool smart_filter = 9;
+	// The smart filter expressed as a serialised string
 	string smart_filter_string = 10;
 }
 	
@@ -126,7 +153,7 @@ enum DataFilterType
 {
 	// Use a single filter
 	SINGLE = 0;
-	// Use a difference filter (the second subtracted from the first).
+	// Use a difference filter (the second subtracted from the first)
 	DIFFERENCE = 1;
 	// Use a jury of multiple filters
 	JURY = 2;
@@ -196,20 +223,31 @@ enum NoiseEstimatorMethod {
 // candidates in the input data, extract regions for fitting, fit using various
 // methods (single, multiple, doublet) and select the best fit. 
 message FitEngineSettings {
+	// The fit settings
 	FitSettings fit_settings = 1;
 	
+	// the method for estimating noise in the entire frame
 	NoiseEstimatorMethod noise_method = 2;
 	
+	// The data filter settings 
 	DataFilterSettings data_filter_settings = 3;	
 
+	// The square radius to use to identify local maxima (candidates)
 	RelativeParameter search = 4;
+	// The border to ignore at the edge of the image 
 	RelativeParameter border = 5;
+	// The square radius to use for fitting around each candidate 
 	RelativeParameter fitting = 6;
 	
+	// Set to true to include neighbours during fitting
 	bool include_neighbours = 7;
+	// The height threshold for including neighbours expressed relative to the current candidate
 	double neighbour_height_threshold = 8;
+	// The residuals threshold for refitting a single peak as a doublet following analysis of the symmetry of the fit residuals.
 	double residuals_threshold = 9;
+	// The distance to categorise localisations as duplicates and ignore them.
 	RelativeParameter duplicate_distance = 10;
 	
+	// The number of consecutive failures to allow before stopping fitting of the remaining candidates
 	int32 failures_limit = 11;
 }

@@ -29,12 +29,12 @@ public class PSFConfigHelper
 	public static final PSF defaultTwoAxisGaussian2DPSF;
 	/** The default two-axis and theta Gaussian 2D PSF */
 	public static final PSF defaultTwoAxisAndThetaGaussian2DPSF;
-	
+
 	static
 	{
 		PSFParameter.Builder paramBuilder = PSFParameter.newBuilder();
 		PSF.Builder builder = PSF.newBuilder();
-		
+
 		builder.setPsfType(PSFType.ONE_AXIS_GAUSSIAN_2D);
 		paramBuilder.setName("S");
 		paramBuilder.setValue(1);
@@ -49,7 +49,6 @@ public class PSFConfigHelper
 		paramBuilder.setName("Sy");
 		builder.addParameter(paramBuilder.build());
 		defaultTwoAxisGaussian2DPSF = builder.build();
-		
 
 		builder.setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
 		paramBuilder.setName("Angle");
@@ -86,6 +85,35 @@ public class PSFConfigHelper
 				return "Unknown";
 			default:
 				throw new IllegalStateException("Unknown name: " + value);
+		}
+	}
+
+	/**
+	 * Gets the default PSF.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the default PSF
+	 */
+	public static PSF getDefaultPSF(PSFType value)
+	{
+		switch (value)
+		{
+			case ONE_AXIS_GAUSSIAN_2D:
+				return defaultOneAxisGaussian2DPSF;
+			case TWO_AXIS_GAUSSIAN_2D:
+			case ASTIGMATIC_GAUSSIAN_2D:
+				return defaultTwoAxisGaussian2DPSF;
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
+				return defaultTwoAxisAndThetaGaussian2DPSF;
+
+			case CUSTOM:
+				return PSF.getDefaultInstance();
+			case PSF_TYPE_NA:
+				return PSF.getDefaultInstance();
+			case UNRECOGNIZED:
+			default:
+				throw new IllegalStateException("No default PSF for type: " + value);
 		}
 	}
 }

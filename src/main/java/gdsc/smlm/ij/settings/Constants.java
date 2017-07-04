@@ -40,8 +40,8 @@ public class Constants
 	public static final String fitCriteria = "gdsc.smlm.fitCriteria";
 	public static final String logProgress = "gdsc.smlm.logProgress";
 	public static final String maxIterations = "gdsc.smlm.maxIterations";
-	public static final String significantDigits = "gdsc.smlm.significantDigits";
-	public static final String delta = "gdsc.smlm.delta";
+	public static final String relativeThreshold = "gdsc.smlm.relativeThreshold";
+	public static final String absoluteThreshold = "gdsc.smlm.absoluteThreshold";
 	public static final String singleFit = "gdsc.smlm.singleFit";
 	public static final String singleRegionSize = "gdsc.smlm.singleRegionSize";
 	public static final String initialPeakStdDev0 = "gdsc.smlm.initialPeakStdDev0";

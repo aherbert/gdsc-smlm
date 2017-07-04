@@ -10,28 +10,21 @@ import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.TextEvent;
-import java.awt.event.TextListener;
-import java.io.File;
 import java.util.Vector;
 
 import gdsc.core.ij.Utils;
-import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
-import ij.gui.YesNoCancelDialog;
 import ij.plugin.PlugIn;
 
 /**
  * Adjust the configuration used for fitting.
  */
-// TODO - This could be incorporated into the PeakFit plugin as another run mode.
+@SuppressWarnings("unused")
 public class Configuration implements PlugIn, ItemListener
 {
 	private static final String TITLE = "Fit Configuration";
@@ -43,9 +36,7 @@ public class Configuration implements PlugIn, ItemListener
 	private TextField textGain;
 	private Checkbox textEMCCD;
 	private TextField textExposure;
-	private TextField textInitialPeakStdDev0;
-	private TextField textInitialPeakStdDev1;
-	private TextField textInitialAngleD;
+	private Choice textPSF;
 	private Choice textDataFilterType;
 	private Choice textDataFilter;
 	private TextField textSmooth;
@@ -53,7 +44,6 @@ public class Configuration implements PlugIn, ItemListener
 	private TextField textBorder;
 	private TextField textFitting;
 	private Choice textFitSolver;
-	private Choice textFitFunction;
 	private TextField textFailuresLimit;
 	private Checkbox textIncludeNeighbours;
 	private TextField textNeighbourHeightThreshold;
@@ -88,8 +78,7 @@ public class Configuration implements PlugIn, ItemListener
 	{
 		configurationChanged = false;
 
-		GlobalSettings settings = SettingsManager.loadSettings();
-		FitEngineConfiguration config = settings.getFitEngineConfiguration();
+		FitEngineConfiguration config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings());
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		CalibrationWriter calibration = CalibrationWriter.create(SettingsManager.readCalibration());
 
@@ -103,15 +92,13 @@ public class Configuration implements PlugIn, ItemListener
 		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 
 		gd.addMessage("--- Gaussian parameters ---");
-		gd.addNumericField("Initial_StdDev0", fitConfig.getInitialPeakStdDev0(), 3);
-		gd.addNumericField("Initial_StdDev1", fitConfig.getInitialPeakStdDev1(), 3);
-		gd.addNumericField("Initial_Angle", fitConfig.getInitialAngle(), 3);
+		PeakFit.addPSFOptions(gd, fitConfig);
 
 		gd.addMessage("--- Maxima identification ---");
-		gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
-				SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
-		gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
-				SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
+		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
+				config.getDataFilterType().ordinal());
+		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
+				config.getDataFilterMethod(0).ordinal());
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
@@ -120,10 +107,7 @@ public class Configuration implements PlugIn, ItemListener
 		gd.addMessage("--- Gaussian fitting ---");
 		Component splitLabel = gd.getMessage();
 
-		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
-				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
-		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
-				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 
 		// Parameters specific to each Fit solver are collected in a second dialog 
 
@@ -132,7 +116,7 @@ public class Configuration implements PlugIn, ItemListener
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
 
-		gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
+		gd.addSlider("Duplicate_distance", 0, 1.5, config.getDuplicateDistance());
 
 		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 
@@ -148,13 +132,11 @@ public class Configuration implements PlugIn, ItemListener
 		// Add a mouse listener to the config file field
 		if (Utils.isShowGenericDialog())
 		{
-			Vector<TextField> texts = (Vector<TextField>) gd.getStringFields();
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
 			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();
 			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
 
 			int n = 0;
-			int t = 0;
 			int b = 0;
 			int ch = 0;
 
@@ -162,9 +144,7 @@ public class Configuration implements PlugIn, ItemListener
 			textGain = numerics.get(n++);
 			textEMCCD = checkboxes.get(b++);
 			textExposure = numerics.get(n++);
-			textInitialPeakStdDev0 = numerics.get(n++);
-			textInitialPeakStdDev1 = numerics.get(n++);
-			textInitialAngleD = numerics.get(n++);
+			textPSF = choices.get(n++);
 			textDataFilterType = choices.get(ch++);
 			textDataFilter = choices.get(ch++);
 			textSmooth = numerics.get(n++);
@@ -172,7 +152,6 @@ public class Configuration implements PlugIn, ItemListener
 			textBorder = numerics.get(n++);
 			textFitting = numerics.get(n++);
 			textFitSolver = choices.get(ch++);
-			textFitFunction = choices.get(ch++);
 			textFailuresLimit = numerics.get(n++);
 			textIncludeNeighbours = checkboxes.get(b++);
 			textNeighbourHeightThreshold = numerics.get(n++);
@@ -232,24 +211,21 @@ public class Configuration implements PlugIn, ItemListener
 		calibration.setGain(gd.getNextNumber());
 		calibration.setEmCCD(gd.getNextBoolean());
 		calibration.setExposureTime(gd.getNextNumber());
-		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
-		fitConfig.setInitialPeakStdDev1(gd.getNextNumber());
-		fitConfig.setInitialAngleD(gd.getNextNumber());
+		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		config.setDataFilterType(gd.getNextChoiceIndex());
-		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
-		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 
 		config.setFailuresLimit((int) gd.getNextNumber());
 		config.setIncludeNeighbours(gd.getNextBoolean());
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		config.setResidualsThreshold(gd.getNextNumber());
 
-		fitConfig.setDuplicateDistance(gd.getNextNumber());
+		config.setDuplicateDistance(gd.getNextNumber());
 
 		fitConfig.setSmartFilter(gd.getNextBoolean());
 		fitConfig.setDisableSimpleFilter(gd.getNextBoolean());
@@ -260,6 +236,8 @@ public class Configuration implements PlugIn, ItemListener
 		fitConfig.setWidthFactor(gd.getNextNumber());
 		fitConfig.setPrecisionThreshold(gd.getNextNumber());
 
+		gd.collectOptions();
+		
 		// Check arguments
 		try
 		{
@@ -268,13 +246,12 @@ public class Configuration implements PlugIn, ItemListener
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialPeakStdDev0());
 			Parameters.isAboveZero("Initial SD1", fitConfig.getInitialPeakStdDev1());
-			Parameters.isPositive("Initial angle", fitConfig.getInitialAngleD());
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isPositive("Failures limit", config.getFailuresLimit());
 			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
-			Parameters.isPositive("Duplicate distance", fitConfig.getDuplicateDistance());
+			Parameters.isPositive("Duplicate distance", config.getDuplicateDistance());
 			Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
 			Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
 			Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
@@ -291,16 +268,15 @@ public class Configuration implements PlugIn, ItemListener
 		if (gd.invalidNumber())
 			return;
 
-		SettingsManager.saveSettings(settings);
-		SettingsManager.writeSettings(calibration.getCalibration());
-		Calibration.Builder calibrationBuilder = calibration.getBuilder();
+		SettingsManager.writeSettings(config.getFitEngineSettings());
+		configurationChanged = true;
 
 		int flags = 0;
-		if (!PeakFit.configureSmartFilter(settings, calibrationBuilder, flags))
+		if (!PeakFit.configureSmartFilter(config, flags))
 			return;
-		if (!PeakFit.configureDataFilter(settings, flags))
+		if (!PeakFit.configureDataFilter(config, flags))
 			return;
-		PeakFit.configureFitSolver(settings, calibrationBuilder, flags);
+		PeakFit.configureFitSolver(config, flags);
 	}
 
 	public boolean isConfigurationChanged()

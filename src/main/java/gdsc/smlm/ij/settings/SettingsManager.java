@@ -7,34 +7,35 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.EnumSet;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Parser;
-import com.google.protobuf.ProtocolMessageEnum;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.BitFlags;
-import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfigHelper;
+import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
+import gdsc.smlm.data.config.FitConfig.DataFilterType;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
+import gdsc.smlm.data.config.FitConfig.FitSolver;
+import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
+import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
+import gdsc.smlm.data.config.ResultsConfigHelper;
 import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.data.config.UnitConfig.TimeUnit;
-import gdsc.smlm.data.config.ResultsConfigHelper;
 import gdsc.smlm.data.config.UnitHelper;
-import gdsc.smlm.engine.DataFilter;
-import gdsc.smlm.engine.DataFilterType;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -51,11 +52,6 @@ import gdsc.smlm.engine.DataFilterType;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitCriteria;
-import gdsc.smlm.fitting.FitFunction;
-import gdsc.smlm.fitting.FitSolver;
-import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 import ij.IJ;
 import ij.Prefs;
 
@@ -170,7 +166,7 @@ public class SettingsManager
 	{
 		EnumSet<IntensityUnit> d = EnumSet.allOf(IntensityUnit.class);
 		d.remove(IntensityUnit.UNRECOGNIZED);
-		//d.remove(IntensityUnit.DISTANCE_UNIT_NA);
+		//d.remove(IntensityUnit.INTENSITY_UNIT_NA);
 		_IntensityUnitValues = d.toArray(new IntensityUnit[d.size()]);
 		_IntensityUnitNames = new String[_IntensityUnitValues.length];
 		for (int i = 0; i < _IntensityUnitValues.length; i++)
@@ -202,7 +198,7 @@ public class SettingsManager
 	{
 		EnumSet<AngleUnit> d = EnumSet.allOf(AngleUnit.class);
 		d.remove(AngleUnit.UNRECOGNIZED);
-		//d.remove(AngleUnit.DISTANCE_UNIT_NA);
+		//d.remove(AngleUnit.ANGLE_UNIT_NA);
 		_AngleUnitValues = d.toArray(new AngleUnit[d.size()]);
 		_AngleUnitNames = new String[_AngleUnitValues.length];
 		for (int i = 0; i < _AngleUnitValues.length; i++)
@@ -234,7 +230,7 @@ public class SettingsManager
 	{
 		EnumSet<TimeUnit> d = EnumSet.allOf(TimeUnit.class);
 		d.remove(TimeUnit.UNRECOGNIZED);
-		//d.remove(TimeUnit.DISTANCE_UNIT_NA);
+		//d.remove(TimeUnit.TIME_UNIT_NA);
 		_TimeUnitValues = d.toArray(new TimeUnit[d.size()]);
 		_TimeUnitNames = new String[_TimeUnitValues.length];
 		for (int i = 0; i < _TimeUnitValues.length; i++)
@@ -266,7 +262,6 @@ public class SettingsManager
 	{
 		EnumSet<ResultsImageType> d = EnumSet.allOf(ResultsImageType.class);
 		d.remove(ResultsImageType.UNRECOGNIZED);
-		//d.remove(ResultsImageType.DISTANCE_UNIT_NA);
 		_ResultsImageTypeValues = d.toArray(new ResultsImageType[d.size()]);
 		_ResultsImageTypeNames = new String[_ResultsImageTypeValues.length];
 		for (int i = 0; i < _ResultsImageTypeValues.length; i++)
@@ -297,7 +292,6 @@ public class SettingsManager
 	{
 		EnumSet<ResultsFileFormat> d = EnumSet.allOf(ResultsFileFormat.class);
 		d.remove(ResultsFileFormat.UNRECOGNIZED);
-		//d.remove(ResultsFileFormat.DISTANCE_UNIT_NA);
 		_ResultsFileFormatValues = d.toArray(new ResultsFileFormat[d.size()]);
 		_ResultsFileFormatNames = new String[_ResultsFileFormatValues.length];
 		for (int i = 0; i < _ResultsFileFormatValues.length; i++)
@@ -306,19 +300,132 @@ public class SettingsManager
 		}
 	}
 
-	public final static String[] dataFilterTypeNames, dataFilterNames, fitSolverNames, fitFunctionNames,
-			noiseEstimatorMethodNames, fitCriteriaNames, clusteringAlgorithmNames;
+	private static DataFilterType[] _DataFilterTypeValues;
+
+	public static DataFilterType[] getDataFilterTypeValues()
+	{
+		if (_DataFilterTypeValues == null)
+			initDataFilterType();
+		return _DataFilterTypeValues;
+	}
+
+	private static String[] _DataFilterTypeNames;
+
+	public static String[] getDataFilterTypeNames()
+	{
+		if (_DataFilterTypeNames == null)
+			initDataFilterType();
+		return _DataFilterTypeNames;
+	}
+
+	private static void initDataFilterType()
+	{
+		EnumSet<DataFilterType> d = EnumSet.allOf(DataFilterType.class);
+		d.remove(DataFilterType.UNRECOGNIZED);
+		_DataFilterTypeValues = d.toArray(new DataFilterType[d.size()]);
+		_DataFilterTypeNames = new String[_DataFilterTypeValues.length];
+		for (int i = 0; i < _DataFilterTypeValues.length; i++)
+		{
+			_DataFilterTypeNames[i] = FitConfigHelper.getName(_DataFilterTypeValues[i]);
+		}
+	}
+
+	private static DataFilterMethod[] _DataFilterMethodValues;
+
+	public static DataFilterMethod[] getDataFilterMethodValues()
+	{
+		if (_DataFilterMethodValues == null)
+			initDataFilterMethod();
+		return _DataFilterMethodValues;
+	}
+
+	private static String[] _DataFilterMethodNames;
+
+	public static String[] getDataFilterMethodNames()
+	{
+		if (_DataFilterMethodNames == null)
+			initDataFilterMethod();
+		return _DataFilterMethodNames;
+	}
+
+	private static void initDataFilterMethod()
+	{
+		EnumSet<DataFilterMethod> d = EnumSet.allOf(DataFilterMethod.class);
+		d.remove(DataFilterMethod.UNRECOGNIZED);
+		_DataFilterMethodValues = d.toArray(new DataFilterMethod[d.size()]);
+		_DataFilterMethodNames = new String[_DataFilterMethodValues.length];
+		for (int i = 0; i < _DataFilterMethodValues.length; i++)
+		{
+			_DataFilterMethodNames[i] = FitConfigHelper.getName(_DataFilterMethodValues[i]);
+		}
+	}
+
+	private static FitSolver[] _FitSolverValues;
+
+	public static FitSolver[] getFitSolverValues()
+	{
+		if (_FitSolverValues == null)
+			initFitSolver();
+		return _FitSolverValues;
+	}
+
+	private static String[] _FitSolverNames;
+
+	public static String[] getFitSolverNames()
+	{
+		if (_FitSolverNames == null)
+			initFitSolver();
+		return _FitSolverNames;
+	}
+
+	private static void initFitSolver()
+	{
+		EnumSet<FitSolver> d = EnumSet.allOf(FitSolver.class);
+		d.remove(FitSolver.UNRECOGNIZED);
+		_FitSolverValues = d.toArray(new FitSolver[d.size()]);
+		_FitSolverNames = new String[_FitSolverValues.length];
+		for (int i = 0; i < _FitSolverValues.length; i++)
+		{
+			_FitSolverNames[i] = FitConfigHelper.getName(_FitSolverValues[i]);
+		}
+	}
+
+	private static NoiseEstimatorMethod[] _NoiseEstimatorMethodValues;
+
+	public static NoiseEstimatorMethod[] getNoiseEstimatorMethodValues()
+	{
+		if (_NoiseEstimatorMethodValues == null)
+			initNoiseEstimatorMethod();
+		return _NoiseEstimatorMethodValues;
+	}
+
+	private static String[] _NoiseEstimatorMethodNames;
+
+	public static String[] getNoiseEstimatorMethodNames()
+	{
+		if (_NoiseEstimatorMethodNames == null)
+			initNoiseEstimatorMethod();
+		return _NoiseEstimatorMethodNames;
+	}
+
+	private static void initNoiseEstimatorMethod()
+	{
+		EnumSet<NoiseEstimatorMethod> d = EnumSet.allOf(NoiseEstimatorMethod.class);
+		d.remove(NoiseEstimatorMethod.UNRECOGNIZED);
+		_NoiseEstimatorMethodValues = d.toArray(new NoiseEstimatorMethod[d.size()]);
+		_NoiseEstimatorMethodNames = new String[_NoiseEstimatorMethodValues.length];
+		for (int i = 0; i < _NoiseEstimatorMethodValues.length; i++)
+		{
+			_NoiseEstimatorMethodNames[i] = FitConfigHelper.getName(_NoiseEstimatorMethodValues[i]);
+		}
+	}
+
+	public final static String[] clusteringAlgorithmNames;
 
 	static
 	{
 		// TODO Update these as the configuration objects are auto-generated
 
-		dataFilterTypeNames = getNames((Object[]) DataFilterType.values());
-		dataFilterNames = getNames((Object[]) DataFilter.values());
-		fitSolverNames = getNames((Object[]) FitSolver.values());
-		fitFunctionNames = getNames((Object[]) FitFunction.values());
-		noiseEstimatorMethodNames = getNames((Object[]) Method.values());
-		fitCriteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
 		clusteringAlgorithmNames = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
 	}
 
@@ -530,7 +637,7 @@ public class SettingsManager
 	{
 		FitEngineConfiguration config = unsafeLoadFitEngineConfiguration(filename);
 		if (config == null)
-			config = new FitEngineConfiguration(new FitConfiguration());
+			config = new FitEngineConfiguration();
 		return config;
 	}
 

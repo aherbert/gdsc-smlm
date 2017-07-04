@@ -32,10 +32,10 @@ import java.util.regex.Pattern;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TurboList;
 import gdsc.core.utils.TurboList.SimplePredicate;
-import gdsc.smlm.engine.DataFilter;
+import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
+import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -209,15 +209,15 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		// Q. What settings should be in the template?
 
-		FitConfiguration fitConfig = new FitConfiguration();
-		FitEngineConfiguration config = new FitEngineConfiguration(fitConfig);
+		FitEngineConfiguration config = new FitEngineConfiguration();
+		FitConfiguration fitConfig = config.getFitConfiguration();
 
 		fitConfig.setPrecisionUsingBackground(true);
 		config.setFailuresLimit(1);
 
 		// LSE
-		fitConfig.setFitSolver(FitSolver.LVM);
-		config.setDataFilter(DataFilter.MEAN, 1.2, 0);
+		fitConfig.setFitSolver(FitSolver.LVM_LSE);
+		config.setDataFilter(DataFilterMethod.MEAN, 1.2, false, 0);
 		fitConfig.setCoordinateShiftFactor(1.2);
 		fitConfig.setSignalStrength(35);
 		fitConfig.setMinPhotons(30);
@@ -235,7 +235,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		// Change settings for different fit engines
 		fitConfig.setFitSolver(FitSolver.MLE);
-		config.setDataFilter(DataFilter.GAUSSIAN, 1.2, 0);
+		config.setDataFilter(DataFilterMethod.GAUSSIAN, 1.2, false, 0);
 		fitConfig.setCoordinateShiftFactor(1.2);
 		fitConfig.setSignalStrength(32);
 		fitConfig.setMinPhotons(30);

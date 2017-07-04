@@ -1,14 +1,13 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
-import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +34,8 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationReader;
+import gdsc.smlm.data.config.FitConfig.FitSolver;
+import gdsc.smlm.data.config.FitConfigHelper;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 
@@ -57,8 +58,6 @@ import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitSolver;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -76,6 +75,7 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.gui.Plot2;
@@ -95,7 +95,7 @@ import ij.process.ImageProcessor;
  * The input image must be a z-stack of diffraction limited spots for example quantum dots or fluorescent beads. Spots
  * will be used only when there are no spots within a specified distance to ensure a clean signal is extracted.
  */
-public class PSFCreator implements PlugInFilter, ItemListener
+public class PSFCreator implements PlugInFilter
 {
 	private final static String TITLE = "PSF Creator";
 	private final static String TITLE_AMPLITUDE = "Spot Amplitude";
@@ -195,13 +195,21 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 	private int showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage(
 				"Produces an average PSF using selected diffraction limited spots.\nUses the current fit configuration to fit spots.");
 
-		gd.addCheckbox("Update_Fit_Configuration", false);
+		gd.addAndGetButton("Update Fit Configuration", new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				// Run the fit configuration plugin to update the settings.
+				Configuration c = new Configuration();
+				c.run("");
+			}
+		});
 		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
 		gd.addSlider("Radius", 3, 20, radius);
 		gd.addSlider("Amplitude_fraction", 0.01, 0.5, amplitudeFraction);
@@ -214,8 +222,6 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		gd.addCheckbox("Interactive_mode", interactiveMode);
 		String[] methods = ImageProcessor.getInterpolationMethods();
 		gd.addChoice("Interpolation", methods, methods[interpolationMethod]);
-
-		((Checkbox) gd.getCheckboxes().get(0)).addItemListener(this);
 
 		gd.showDialog();
 
@@ -280,7 +286,6 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		// Adjust settings for a single maxima
 		config.setIncludeNeighbours(false);
-		fitConfig.setDuplicateDistance(0);
 
 		ArrayList<double[]> centres = new ArrayList<double[]>(spots.length);
 		int iterations = 1;
@@ -1406,10 +1411,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 	private void loadConfiguration()
 	{
-		final String filename = SettingsManager.getSettingsFilename();
-		GlobalSettings settings = SettingsManager.loadSettings(filename);
 		nmPerPixel = new CalibrationReader(SettingsManager.readCalibration()).getNmPerPixel();
-		config = settings.getFitEngineConfiguration();
+		config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings());
 		fitConfig = config.getFitConfiguration();
 		if (radius < 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()))
 		{
@@ -1498,21 +1501,6 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		return newStack;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-	 */
-	public void itemStateChanged(ItemEvent e)
-	{
-		// Run the fit configuration plugin to update the settings.
-		if (e.getSource() instanceof Checkbox)
-		{
-			((Checkbox) e.getSource()).setState(false);
-			IJ.run("Fit Configuration");
-		}
-	}
-
 	/**
 	 * Fit the new PSF image and show a graph of the amplitude/width
 	 * 
@@ -1528,17 +1516,16 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		// Note: Fitting the final PSF does not really work using MLE. This is because the noise model
 		// is not appropriate for a normalised PSF. 
-		if (fitConfig.getFitSolver() == FitSolver.MLE)
+		if (fitConfig.getFitSolver() != FitSolver.LVM_LSE)
 		{
-			Utils.log("  Maximum Likelihood Estimation (MLE) is not appropriate for final PSF fitting.");
+			Utils.log("  " + FitConfigHelper.getName(fitConfig.getFitSolver()) +
+					" is not appropriate for final PSF fitting.");
 			Utils.log("  Switching to Least Square Estimation");
-			fitConfig.setFitSolver(FitSolver.LVM);
+			fitConfig.setFitSolver(FitSolver.LVM_LSE);
 			if (interactiveMode)
 			{
-				GlobalSettings settings = new GlobalSettings();
-				settings.setFitEngineConfiguration(config);
 				// This assumes the LVM does not need the calibration
-				PeakFit.configureFitSolver(settings, null, 0);
+				PeakFit.configureFitSolver(config, 0);
 			}
 		}
 

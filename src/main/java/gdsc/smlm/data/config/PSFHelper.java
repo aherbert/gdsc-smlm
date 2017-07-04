@@ -25,6 +25,13 @@ import gdsc.smlm.results.PeakResult;
  */
 public class PSFHelper
 {
+	/** The index in the Gaussian 2D PSF parameters for the first axis standard deviation (Sx). */
+	public static final int INDEX_SX = 0;
+	/** The index in the Gaussian 2D PSF parameters for the second axis standard deviation (Sy). */
+	public static final int INDEX_SY = 1;
+	/** The index in the Gaussian 2D PSF parameters for the theta rotation angle. */
+	public static final int INDEX_THETA = 2;
+
 	private final PSF.Builder psfBuilder;
 
 	/**
@@ -99,17 +106,63 @@ public class PSFHelper
 		switch (psf.getPsfType())
 		{
 			case ONE_AXIS_GAUSSIAN_2D:
-				return new int[] { PeakResult.STANDARD_PARAMETERS, PeakResult.STANDARD_PARAMETERS };
+				return new int[] { PeakResult.STANDARD_PARAMETERS + INDEX_SX,
+						PeakResult.STANDARD_PARAMETERS + INDEX_SX };
 			case ASTIGMATIC_GAUSSIAN_2D:
 			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
 			case TWO_AXIS_GAUSSIAN_2D:
-				return new int[] { PeakResult.STANDARD_PARAMETERS, PeakResult.STANDARD_PARAMETERS + 1 };
+				return new int[] { PeakResult.STANDARD_PARAMETERS + INDEX_SX,
+						PeakResult.STANDARD_PARAMETERS + INDEX_SY };
 			case CUSTOM:
 			case UNRECOGNIZED:
 			default:
 				break;
 		}
 		throw new ConfigurationException("psf is not Gaussian2D");
+	}
+
+	/**
+	 * Gets the Gaussian 2D x-width and y-width for the PSF parameters.
+	 *
+	 * @param psf
+	 *            the psf
+	 * @return the Gaussian 2D x-width and y-width for the PSF parameters.
+	 * @throws ConfigurationException
+	 *             if the psf is null, or not a Gaussian 2D function
+	 */
+	public static double[] getGaussian2DWxWy(PSF psf) throws ConfigurationException
+	{
+		if (psf == null)
+			throw new ConfigurationException("psf is null");
+		double sx, sy;
+		switch (psf.getPsfType())
+		{
+			case ONE_AXIS_GAUSSIAN_2D:
+				sx = getParameterValue(psf, INDEX_SX, 1);
+				return new double[] { sx, sx };
+			case ASTIGMATIC_GAUSSIAN_2D:
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
+			case TWO_AXIS_GAUSSIAN_2D:
+				sx = getParameterValue(psf, INDEX_SX, 1);
+				sy = getParameterValue(psf, INDEX_SY, 1);
+				return new double[] { sx, sy };
+			case CUSTOM:
+			case UNRECOGNIZED:
+			default:
+				break;
+		}
+		throw new ConfigurationException("psf is not Gaussian2D");
+	}
+
+	private static double getParameterValue(PSF psf, int i, double defaultValue)
+	{
+		if (psf.getParameterCount() > i)
+		{
+			double v = psf.getParameter(i).getValue();
+			if (v > 0)
+				return v;
+		}
+		return defaultValue;
 	}
 
 	/**
@@ -131,7 +184,7 @@ public class PSFHelper
 		switch (psf.getPsfType())
 		{
 			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
-				return PeakResult.STANDARD_PARAMETERS + 2;
+				return PeakResult.STANDARD_PARAMETERS + INDEX_THETA;
 			default:
 				break;
 		}
@@ -297,5 +350,25 @@ public class PSFHelper
 			return psf.getPsfType() == PSFType.ASTIGMATIC_GAUSSIAN_2D;
 		}
 		return false;
+	}
+
+	/**
+	 * Checks if is two axis gaussian 2 D.
+	 *
+	 * @param psfType
+	 *            the psf type
+	 * @return true, if is two axis gaussian 2 D
+	 */
+	public static boolean isTwoAxisGaussian2D(PSFType psfType)
+	{
+		switch (psfType)
+		{
+			case ASTIGMATIC_GAUSSIAN_2D:
+			case TWO_AXIS_GAUSSIAN_2D:
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
+				return true;
+			default:
+				return false;
+		}
 	}
 }

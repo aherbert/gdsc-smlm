@@ -492,6 +492,8 @@ public class ResultsManager implements PlugIn
 		resultsSettings.getResultsFileSettingsBuilder().setFileFormatValue(gd.getNextChoiceIndex());
 		resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(gd.getNextBoolean());
 
+		gd.collectOptions();
+		
 		// Check arguments
 		try
 		{

@@ -1,18 +1,19 @@
 package gdsc.smlm.data.config;
 
-import gdsc.core.utils.Maths;
+import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.data.config.FitConfig.DataFilter;
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
 import gdsc.smlm.data.config.FitConfig.DataFilterSettings;
 import gdsc.smlm.data.config.FitConfig.DataFilterType;
 import gdsc.smlm.data.config.FitConfig.FilterSettings;
-import gdsc.smlm.data.config.FitConfig.RelativeParameter;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
 import gdsc.smlm.data.config.FitConfig.FitSettings;
 import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.data.config.FitConfig.FitSolverSettings;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitConfig.RelativeParameter;
 import gdsc.smlm.data.config.FitConfig.SearchMethod;
+import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -42,7 +43,7 @@ public class FitConfigHelper
 		builder.setDisableSignalFitting(false);
 		
 		builder.setFitSolver(FitSolver.LVM_LSE);
-		builder.setMinIterations(0);
+		builder.setFixedIterations(false);
 		builder.setMaxIterations(20);
 		builder.setRelativeThreshold(1e-6);
 		builder.setAbsoluteThreshold(1e-16);
@@ -54,16 +55,17 @@ public class FitConfigHelper
 		builder.setSearchMethod(SearchMethod.POWELL_BOUNDED);
 		builder.setGradientLineMinimisation(false);
 		builder.setModelCamera(false);
-		builder.setMaxFunctionEvaluations(100);
+		builder.setMaxFunctionEvaluations(2000);
 		
 		builder.setUseClamping(false);
 		builder.setUseDynamicClamping(false);
 		// Add defaults for a two-axis and theta Gaussian 2D function.
 		// The units are photons and pixels.
-		builder.addClampValue(100); // B
+		builder.addClampValue(10); // B (3D DAOSTORM uses 100 which is high compared to the expected background of a 'clean' image)
 		builder.addClampValue(1000); // I
 		builder.addClampValue(1); // X
 		builder.addClampValue(1); // Y
+		// TODO: determine what this should be
 		builder.addClampValue(10); // Z
 		builder.addClampValue(3); // Sx
 		builder.addClampValue(3); // Sy
@@ -80,7 +82,7 @@ public class FitConfigHelper
 		builder.setShiftFactor(1);
 		builder.setSignalStrength(30);
 		builder.setMinPhotons(30);
-		builder.setPrecisionThreshold(Maths.pow2(40));
+		builder.setPrecisionThreshold(40);
 		builder.setPrecisionUsingBackground(false);
 		builder.setMinWidthFactor(0.5);
 		builder.setMaxWidthFactor(2);
@@ -107,6 +109,18 @@ public class FitConfigHelper
 	public static final FitEngineSettings defaultFitEngineSettings;
 	static
 	{
+		// Analysis* shows the best area-under-precision-recall curve (AUC) using a mean filter or
+		// a Gaussian filter with ~1.2 SD smoothing. The Gaussian filter is more robust to width mismatch but
+		// the mean filter will be faster as it uses a smaller block size. The Gaussian filter has higher 
+		// recall but lower precision as it identifies more spots due to the shape of the smoothing filter.
+		// The overall AUC is very similar.
+		//
+		// Note: Setting the parameter at a higher level allows the filter to work on out-of-focus spots which
+		// will have a wider PSF.
+		//
+		// *Analysis was performed on simulated data using a Image PSF with spots of 20-100 photons at a 
+		// depth of up to 1380nm (the PSF limit).
+
 		FitEngineSettings.Builder builder = FitEngineSettings.newBuilder();
 		builder.setFitSettings(defaultFitSettings);
 		
@@ -255,4 +269,57 @@ public class FitConfigHelper
 		}
 	}
 
+	public static Method convertNoiseEstimatorMethod(NoiseEstimatorMethod method)
+	{
+		switch (method)
+		{
+			case ALL_PIXELS:
+				return Method.ALL_PIXELS;
+			case LOWEST_PIXELS:
+				return Method.LOWEST_PIXELS;
+			case QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES:
+				return Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
+			case QUICK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES:
+				return Method.QUICK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES;
+			case QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES:
+				return Method.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
+			case RESIDUALS_LEAST_MEAN_OF_SQUARES:
+				return Method.RESIDUALS_LEAST_MEAN_OF_SQUARES;
+			case RESIDUALS_LEAST_MEDIAN_OF_SQUARES:
+				return Method.RESIDUALS_LEAST_MEDIAN_OF_SQUARES;
+			case RESIDUALS_LEAST_TRIMMED_OF_SQUARES:
+				return Method.RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
+			case UNRECOGNIZED:
+				break;
+			default:
+				break;
+		}
+		throw new IllegalStateException("Unknown method: " + method);
+	}
+	
+	public static gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod convertSearchMethod(SearchMethod searchMethod)
+	{
+		switch (searchMethod)
+		{
+			case BFGS:
+				return MaximumLikelihoodFitter.SearchMethod.BFGS;
+			case BOBYQA:
+				return MaximumLikelihoodFitter.SearchMethod.BOBYQA;
+			case CMAES:
+				return MaximumLikelihoodFitter.SearchMethod.CMAES;
+			case CONJUGATE_GRADIENT_FR:
+				return MaximumLikelihoodFitter.SearchMethod.CONJUGATE_GRADIENT_FR;
+			case CONJUGATE_GRADIENT_PR:
+				return MaximumLikelihoodFitter.SearchMethod.CONJUGATE_GRADIENT_PR;
+			case POWELL:
+				return MaximumLikelihoodFitter.SearchMethod.POWELL;
+			case POWELL_ADAPTER:
+				return MaximumLikelihoodFitter.SearchMethod.POWELL_ADAPTER;
+			case POWELL_BOUNDED:
+				return MaximumLikelihoodFitter.SearchMethod.POWELL_BOUNDED;
+			case UNRECOGNIZED:
+			default:
+				throw new IllegalStateException("Unknown method: " + searchMethod);
+		}
+	}
 }

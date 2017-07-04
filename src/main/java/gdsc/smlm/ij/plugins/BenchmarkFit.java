@@ -16,7 +16,10 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.PSFConfigHelper;
+import gdsc.smlm.engine.FitEngineConfiguration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -33,20 +36,18 @@ import gdsc.smlm.data.config.CalibrationWriter;
 
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
-import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.CreateData.BenchmarkParameters;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
@@ -59,7 +60,6 @@ public class BenchmarkFit implements PlugIn
 	private static final String TITLE = "Benchmark Fit";
 
 	private static int regionSize = 3;
-	private static double psfWidth = 1;
 	private static double lastS = 0;
 	private static boolean offsetFitting = true;
 	private static double startOffset = 0.5;
@@ -221,12 +221,25 @@ public class BenchmarkFit implements PlugIn
 			final int size = region.height;
 			final int totalFrames = benchmarkParameters.frames;
 
+			// Subtract the bias
+			final double bias = benchmarkParameters.bias;
+			for (int i = 0; i < data.length; i++)
+				data[i] -= bias;
+			// Remove the gain
+			double gain = 1;
+			if (!fitConfig.isFitCameraCounts())
+			{
+				gain = benchmarkParameters.gain;
+				for (int i = 0; i < data.length; i++)
+					data[i] /= gain;
+			}
+
 			// Get the background and signal estimate
 			final double b = (backgroundFitting) ? getBackground(data, size, size)
-					: answer[Gaussian2DFunction.BACKGROUND] + benchmarkParameters.bias;
+					: answer[Gaussian2DFunction.BACKGROUND] * gain;
 			final double signal = (signalFitting) ? getSignal(data, b)
 					//: benchmarkParameters.p[frame];
-					: answer[Gaussian2DFunction.SIGNAL];
+					: answer[Gaussian2DFunction.SIGNAL] * gain;
 
 			// Find centre-of-mass estimate
 			if (comFitting)
@@ -242,24 +255,8 @@ public class BenchmarkFit implements PlugIn
 			double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
 			initialParams[Gaussian2DFunction.SIGNAL] = signal;
-			initialParams[Gaussian2DFunction.X_SD] = initialParams[Gaussian2DFunction.Y_SD] = psfWidth;
-
-			// Subtract the bias
-			final double bias = benchmarkParameters.bias;
-			initialParams[Gaussian2DFunction.BACKGROUND] -= bias;
-			for (int i = 0; i < data.length; i++)
-				data[i] -= bias;
-			// Remove the gain
-			if (!fitConfig.isFitCameraCounts())
-			{
-				final double gain = 1.0 / fitConfig.getGainSafe();
-				for (int i = 0; i < data.length; i++)
-					data[i] *= gain;
-
-				// Update all the parameters affected by gain
-				initialParams[Gaussian2DFunction.BACKGROUND] *= gain;
-				initialParams[Gaussian2DFunction.SIGNAL] *= gain;
-			}
+			initialParams[Gaussian2DFunction.X_SD] = fitConfig.getInitialPeakStdDev0();
+			initialParams[Gaussian2DFunction.Y_SD] = fitConfig.getInitialPeakStdDev1();
 
 			double[][] bounds = null;
 			double[][] result = new double[xy.length][];
@@ -289,9 +286,8 @@ public class BenchmarkFit implements PlugIn
 					if (fitConfig.isFitCameraCounts())
 					{
 						// Update all the parameters to be in photons
-						final double gain = 1.0 / fitConfig.getGainSafe();
-						params[Gaussian2DFunction.BACKGROUND] *= gain;
-						params[Gaussian2DFunction.SIGNAL] *= gain;
+						params[Gaussian2DFunction.BACKGROUND] /= gain;
+						params[Gaussian2DFunction.SIGNAL] /= gain;
 					}
 					result[c] = params;
 					time[c] = System.nanoTime() - start;
@@ -378,9 +374,8 @@ public class BenchmarkFit implements PlugIn
 				lb = new double[ub.length];
 
 				// Background could be zero so always have an upper limit
-				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0,
-						2 * benchmarkParameters.getBackground() * benchmarkParameters.gain);
-				double signal = benchmarkParameters.getSignal() * benchmarkParameters.gain;
+				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0, 2 * benchmarkParameters.getBackground());
+				double signal = benchmarkParameters.getSignal();
 				lb[Gaussian2DFunction.SIGNAL] = signal * 0.5;
 				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
 				ub[Gaussian2DFunction.X_POSITION] = 2 * regionSize + 1;
@@ -395,9 +390,9 @@ public class BenchmarkFit implements PlugIn
 				ub[Gaussian2DFunction.X_SD] = s * wf;
 				lb[Gaussian2DFunction.Y_SD] = s / wf;
 				ub[Gaussian2DFunction.Y_SD] = s * wf;
-				if (!fitConfig.isFitCameraCounts())
+				if (fitConfig.isFitCameraCounts())
 				{
-					final double gain = 1.0 / fitConfig.getGainSafe();
+					final double gain = benchmarkParameters.gain;
 					// Update all the parameters affected by gain
 					lb[Gaussian2DFunction.BACKGROUND] *= gain;
 					lb[Gaussian2DFunction.SIGNAL] *= gain;
@@ -548,7 +543,7 @@ public class BenchmarkFit implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		final double sa = getSa();
@@ -560,21 +555,16 @@ public class BenchmarkFit implements PlugIn
 		if (lastS != benchmarkParameters.s)
 		{
 			lastS = benchmarkParameters.s;
-			psfWidth = sa;
+			fitConfig.setInitialPeakStdDev(sa);
 		}
 
-		final String filename = SettingsManager.getSettingsFilename();
-		GlobalSettings settings = SettingsManager.loadSettings(filename);
-
-		fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
+		FitEngineConfiguration config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings());
+		fitConfig = config.getFitConfiguration();
 		fitConfig.setNmPerPixel(benchmarkParameters.a);
 
 		gd.addSlider("Region_size", 2, 20, regionSize);
-		gd.addNumericField("PSF_width", psfWidth, 3);
-		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
-				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
-		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
-				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
+		PeakFit.addPSFOptions(gd, fitConfig);
+		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 		gd.addCheckbox("Offset_fit", offsetFitting);
 		gd.addNumericField("Start_offset", startOffset, 3);
 		gd.addCheckbox("Include_CoM_fit", comFitting);
@@ -590,9 +580,8 @@ public class BenchmarkFit implements PlugIn
 			return false;
 
 		regionSize = (int) Math.abs(gd.getNextNumber());
-		psfWidth = Math.abs(gd.getNextNumber());
+		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
-		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 		offsetFitting = gd.getNextBoolean();
 		startOffset = Math.abs(gd.getNextNumber());
 		comFitting = gd.getNextBoolean();
@@ -600,6 +589,8 @@ public class BenchmarkFit implements PlugIn
 		signalFitting = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
 		saveRawData = gd.getNextBoolean();
+		
+		gd.collectOptions();
 
 		if (!comFitting && !offsetFitting)
 		{
@@ -614,7 +605,7 @@ public class BenchmarkFit implements PlugIn
 			return false;
 
 		// Initialise the correct calibration
-		CalibrationWriter calibration = CalibrationWriter.create(SettingsManager.readCalibration());
+		CalibrationWriter calibration = CalibrationWriter.create(fitConfig.getCalibration());
 		calibration.setNmPerPixel(benchmarkParameters.a);
 		calibration.setGain(benchmarkParameters.gain);
 		calibration.setAmplification(benchmarkParameters.amplification);
@@ -622,13 +613,14 @@ public class BenchmarkFit implements PlugIn
 		calibration.setEmCCD(benchmarkParameters.emCCD);
 		calibration.setReadNoise(benchmarkParameters.readNoise);
 		calibration.setExposureTime(1000);
+		fitConfig.mergeCalibration(calibration.getCalibration());
 
-		if (!PeakFit.configureFitSolver(settings, calibration.getBuilder(), 0))
+		if (!PeakFit.configureFitSolver(config, 0))
 			return false;
 
 		if (showHistograms)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Select the histograms to display");
 			gd.addNumericField("Histogram_bins", histogramBins, 0);
 
@@ -674,11 +666,9 @@ public class BenchmarkFit implements PlugIn
 
 	private void run()
 	{
-		// TODO - This needs to be updated for the answer in photons.
-
-		// Initialise the answer. Convert to units of the image (ADUs and pixels)
-		answer[Gaussian2DFunction.BACKGROUND] = benchmarkParameters.getBackground() * benchmarkParameters.gain;
-		answer[Gaussian2DFunction.SIGNAL] = benchmarkParameters.getSignal() * benchmarkParameters.gain;
+		// Initialise the answer.
+		answer[Gaussian2DFunction.BACKGROUND] = benchmarkParameters.getBackground();
+		answer[Gaussian2DFunction.SIGNAL] = benchmarkParameters.getSignal();
 		answer[Gaussian2DFunction.X_POSITION] = benchmarkParameters.x;
 		answer[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.y;
 		answer[Gaussian2DFunction.X_SD] = benchmarkParameters.s / benchmarkParameters.a;
@@ -1025,9 +1015,9 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(benchmarkParameters.precisionXML)).append('\t');
 		sb.append(region.width).append("x");
 		sb.append(region.height).append('\t');
-		sb.append(Utils.rounded(psfWidth * benchmarkParameters.a)).append('\t');
-		sb.append(fitConfig.getFitFunction().toString());
-		if (fitConfig.getFitFunction() == FitFunction.FIXED)
+		sb.append(Utils.rounded(fitConfig.getInitialPeakStdDev() * benchmarkParameters.a)).append('\t');
+		sb.append(PSFConfigHelper.getName(fitConfig.getPSF().getPsfType()));
+		if (fitConfig.isFixedPSF())
 		{
 			// Only fixed fitting can ignore the signal
 			if (!signalFitting)
@@ -1036,14 +1026,15 @@ public class BenchmarkFit implements PlugIn
 		if (!backgroundFitting)
 			sb.append("NB");
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
-		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
+		if (fitConfig.isModelCameraMLE())
 		{
 			sb.append(":Camera\t");
 
 			// Add details of the noise model for the MLE
-			sb.append("EM=").append(fitConfig.isEmCCD());
-			sb.append(":G=").append(fitConfig.getGain());
-			sb.append(":N=").append(fitConfig.getReadNoise());
+			CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
+			sb.append("EM=").append(r.isEMCCD());
+			sb.append(":G=").append(r.getGain());
+			sb.append(":N=").append(r.getReadNoise());
 		}
 		else
 			sb.append('\t');
@@ -1080,19 +1071,16 @@ public class BenchmarkFit implements PlugIn
 	}
 
 	/**
-	 * Get the factors to convert the ADUs/pixel units in the statistics array into calibrated photons and nm units. Set
+	 * Get the factors to convert the fitted units into calibrated photons and nm units. Set
 	 * the conversion to zero if the function does not fit the specified statistic.
 	 * 
 	 * @return The conversion factors
 	 */
 	private double[] getConversionFactors()
 	{
-		// TODO - Update this when the fitting is done in photons
-
 		final double[] convert = new double[NAMES.length];
-		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / benchmarkParameters.gain : 0;
-		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() &&
-				fitConfig.getFitFunction() == FitFunction.FIXED) ? 0 : 1 / benchmarkParameters.gain;
+		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 : 0;
+		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() && fitConfig.isFixedPSF()) ? 0 : 1;
 		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
 		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;

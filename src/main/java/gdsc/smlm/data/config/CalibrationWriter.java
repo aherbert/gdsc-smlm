@@ -90,6 +90,16 @@ public class CalibrationWriter extends CalibrationReader
 	{
 		return (calibrationBuilder != null) ? calibrationBuilder.build() : calibration;
 	}
+	
+	/**
+	 * Merge the calibration.
+	 *
+	 * @param calibration the new calibration
+	 */
+	public void mergeCalibration(Calibration calibration)
+	{
+		getBuilder().mergeFrom(calibration);
+	}
 
 	/**
 	 * Gets the builder containing the latest calibration.

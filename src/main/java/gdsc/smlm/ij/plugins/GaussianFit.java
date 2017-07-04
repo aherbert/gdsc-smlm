@@ -7,12 +7,15 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.EnumSet;
 
 import gdsc.core.filters.FilteredNonMaximumSuppression;
 import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Sort;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.PSFConfigHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -29,8 +32,6 @@ import gdsc.core.utils.Sort;
 
 import gdsc.smlm.filters.AverageFilter;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitCriteria;
-import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
@@ -38,9 +39,7 @@ import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.Constants;
-import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.results.PeakResults;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -72,11 +71,10 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	private int border = (int) Prefs.get(Constants.border, 0);
 	private int fitFunction = (int) Prefs.get(Constants.fitFunction, 0);
 	private boolean fitBackground = Prefs.get(Constants.fitBackground, true);
-	private int fitCriteria = (int) Prefs.get(Constants.fitCriteria, 0);
 	private boolean logProgress = Prefs.get(Constants.logProgress, false);
 	private int maxIterations = (int) Prefs.get(Constants.maxIterations, 20);
-	private int significantDigits = (int) Prefs.get(Constants.significantDigits, 4);
-	private double delta = Prefs.get(Constants.delta, 0.01);
+	private double relativeThreshold = Prefs.get(Constants.relativeThreshold, 1e-5);
+	private double absoluteThreshold = Prefs.get(Constants.absoluteThreshold, 1e-10);
 	private boolean singleFit = Prefs.get(Constants.singleFit, false);
 	private int singleRegionSize = (int) Prefs.get(Constants.singleRegionSize, 10);
 	private double initialPeakStdDev = (double) Prefs.get(Constants.initialPeakStdDev0, 0);
@@ -125,6 +123,40 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		return flags;
 	}
 
+	private static PSFType[] _PSFTypeValues;
+
+	public static PSFType[] getPSFTypeValues()
+	{
+		if (_PSFTypeValues == null)
+			initPSFType();
+		return _PSFTypeValues;
+	}
+
+	private static String[] _PSFTypeNames;
+
+	public static String[] getPSFTypeNames()
+	{
+		if (_PSFTypeNames == null)
+			initPSFType();
+		return _PSFTypeNames;
+	}
+
+	private static void initPSFType()
+	{
+		//@formatter:off
+		EnumSet<PSFType> d = EnumSet.of(
+				PSFType.ONE_AXIS_GAUSSIAN_2D, 
+				PSFType.TWO_AXIS_GAUSSIAN_2D, 
+				PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
+		//@formatter:on
+		_PSFTypeValues = d.toArray(new PSFType[d.size()]);
+		_PSFTypeNames = new String[_PSFTypeValues.length];
+		for (int i = 0; i < _PSFTypeValues.length; i++)
+		{
+			_PSFTypeNames[i] = PSFConfigHelper.getName(_PSFTypeValues[i]);
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -163,12 +195,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		gd.addMessage("--- Gaussian fitting ---");
 		Component splitLabel = gd.getMessage();
-		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames, SettingsManager.fitFunctionNames[fitFunction]);
+		gd.addChoice("PSF", getPSFTypeNames(), PSFConfigHelper.getName(getPSFType()));
 		gd.addCheckbox("Fit_background", fitBackground);
-		gd.addChoice("Fit_criteria", SettingsManager.fitCriteriaNames, SettingsManager.fitCriteriaNames[fitCriteria]);
 		gd.addNumericField("Max_iterations", maxIterations, 0);
-		gd.addNumericField("Significant_digits", significantDigits, 0);
-		gd.addNumericField("Coord_delta", delta, 4);
+		gd.addStringField("Relative_threshold", "" + relativeThreshold);
+		gd.addStringField("Absolute_threshold", "" + absoluteThreshold);
 		gd.addCheckbox("Single_fit", singleFit);
 		gd.addNumericField("Single_region_size", singleRegionSize, 0);
 		gd.addNumericField("Initial_StdDev", initialPeakStdDev, 3);
@@ -281,10 +312,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		border = (int) gd.getNextNumber();
 		fitFunction = gd.getNextChoiceIndex();
 		fitBackground = gd.getNextBoolean();
-		fitCriteria = gd.getNextChoiceIndex();
 		maxIterations = (int) gd.getNextNumber();
-		significantDigits = (int) gd.getNextNumber();
-		delta = gd.getNextNumber();
+		relativeThreshold = gd.getNextNumber();
+		absoluteThreshold = gd.getNextNumber();
 		singleFit = gd.getNextBoolean();
 		singleRegionSize = (int) gd.getNextNumber();
 		initialPeakStdDev = (double) gd.getNextNumber();
@@ -306,8 +336,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			Parameters.isPositive("Peak width", peakWidth);
 			Parameters.isPositive("Top N", topN);
 			Parameters.isPositive("Border", border);
-			Parameters.isAboveZero("Significant digits", significantDigits);
-			Parameters.isAboveZero("Delta", delta);
+			Parameters.isAboveZero("Relative threshold", relativeThreshold);
+			Parameters.isAboveZero("Absolute threshold", absoluteThreshold);
 			Parameters.isAboveZero("Max iterations", maxIterations);
 			Parameters.isAboveZero("Single region size", singleRegionSize);
 			Parameters.isPositive("Initial peak StdDev", initialPeakStdDev);
@@ -340,14 +370,13 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		Prefs.set(Constants.border, border);
 		Prefs.set(Constants.fitFunction, fitFunction);
 		Prefs.set(Constants.fitBackground, fitBackground);
-		Prefs.set(Constants.fitCriteria, fitCriteria);
 		Prefs.set(Constants.logProgress, logProgress);
 		Prefs.set(Constants.showDeviations, showDeviations);
 		Prefs.set(Constants.filterResults, filterResults);
 		Prefs.set(Constants.showFit, showFit);
 		Prefs.set(Constants.maxIterations, maxIterations);
-		Prefs.set(Constants.significantDigits, significantDigits);
-		Prefs.set(Constants.delta, delta);
+		Prefs.set(Constants.relativeThreshold, relativeThreshold);
+		Prefs.set(Constants.absoluteThreshold, absoluteThreshold);
 		Prefs.set(Constants.singleFit, singleFit);
 		Prefs.set(Constants.singleRegionSize, singleRegionSize);
 		Prefs.set(Constants.initialPeakStdDev0, initialPeakStdDev);
@@ -873,12 +902,12 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	private Gaussian2DFitter createGaussianFitter(boolean simpleFiltering)
 	{
 		FitConfiguration config = new FitConfiguration();
+		config.mergePSF(PSFConfigHelper.getDefaultPSF(getPSFType()));
 		config.setMaxIterations(getMaxIterations());
-		config.setSignificantDigits(getSignificantDigits());
-		config.setDelta(getDelta());
+		config.setRelativeThreshold(relativeThreshold);
+		config.setAbsoluteThreshold(absoluteThreshold);
 		config.setInitialPeakStdDev(getInitialPeakStdDev());
 		config.setComputeDeviations(showDeviations);
-		config.setDuplicateDistance(0);
 
 		// Set-up peak filtering only for single fitting
 		config.setDisableSimpleFilter(!simpleFiltering);
@@ -889,22 +918,6 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			config.setLog(new IJLogger());
 		}
 
-		if (getFitCriteria() >= 0 && getFitCriteria() < FitCriteria.values().length)
-		{
-			config.setFitCriteria(FitCriteria.values()[getFitCriteria()]);
-		}
-		else
-		{
-			config.setFitCriteria(FitCriteria.LEAST_SQUARED_ERROR);
-		}
-		if (getFitFunction() >= 0 && getFitFunction() < FitFunction.values().length)
-		{
-			config.setFitFunction(FitFunction.values()[getFitFunction()]);
-		}
-		else
-		{
-			config.setFitFunction(FitFunction.CIRCULAR);
-		}
 		config.setBackgroundFitting(fitBackground);
 
 		return new Gaussian2DFitter(config);
@@ -1190,6 +1203,18 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	{
 		return fitFunction;
 	}
+	
+	/**
+	 * Gets the PSF type.
+	 *
+	 * @return the PSF type
+	 */
+	public PSFType getPSFType()
+	{
+		if (fitFunction >= 0 && fitFunction < getPSFTypeValues().length)
+			return getPSFTypeValues()[fitFunction];
+		return PSFType.ONE_AXIS_GAUSSIAN_2D;
+	}
 
 	/**
 	 * @param fitBackground
@@ -1206,23 +1231,6 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	public boolean isFitBackground()
 	{
 		return fitBackground;
-	}
-
-	/**
-	 * @param fitCriteria
-	 *            the fitCriteria to set
-	 */
-	public void setFitCriteria(int fitCriteria)
-	{
-		this.fitCriteria = fitCriteria;
-	}
-
-	/**
-	 * @return the fitCriteria
-	 */
-	public int getFitCriteria()
-	{
-		return fitCriteria;
 	}
 
 	/**
@@ -1257,40 +1265,6 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	public int getMaxIterations()
 	{
 		return maxIterations;
-	}
-
-	/**
-	 * @param significantDigits
-	 *            the significantDigits to set
-	 */
-	public void setSignificantDigits(int significantDigits)
-	{
-		this.significantDigits = significantDigits;
-	}
-
-	/**
-	 * @return the significantDigits
-	 */
-	public int getSignificantDigits()
-	{
-		return significantDigits;
-	}
-
-	/**
-	 * @param delta
-	 *            the delta to set
-	 */
-	public void setDelta(double delta)
-	{
-		this.delta = delta;
-	}
-
-	/**
-	 * @return the delta
-	 */
-	public double getDelta()
-	{
-		return delta;
 	}
 
 	/**

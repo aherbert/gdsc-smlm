@@ -41,7 +41,7 @@ import ij.ImagePlus;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.ImageRoi;
-import ij.gui.NonBlockingGenericDialog;
+import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
@@ -109,7 +109,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		config = settings.getFitEngineConfiguration();
 		fitConfig = config.getFitConfiguration();
 
-		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Preview candidate maxima");
 
@@ -119,10 +119,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		gd.addStringField("Config_file", filename, 40);
 
 		gd.addNumericField("Initial_StdDev0", fitConfig.getInitialPeakStdDev0(), 3);
-		gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
-				SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
-		gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
-				SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
+		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
+				config.getDataFilterType().ordinal());
+		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
+				config.getDataFilterMethod(0).ordinal());
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
@@ -185,7 +185,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
 		config.setDataFilterType(gd.getNextChoiceIndex());
-		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		if (label != null)

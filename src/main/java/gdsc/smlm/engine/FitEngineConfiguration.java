@@ -1,25 +1,20 @@
 package gdsc.smlm.engine;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Maths;
-import gdsc.core.utils.NoiseEstimator;
-import gdsc.core.utils.NoiseEstimator.Method;
+import gdsc.smlm.data.config.FitConfig;
+import gdsc.smlm.data.config.FitConfig.DataFilter;
+import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
+import gdsc.smlm.data.config.FitConfig.DataFilterSettings;
+import gdsc.smlm.data.config.FitConfig.DataFilterType;
+import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
+import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitConfig.RelativeParameter;
+import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.filters.AverageDataProcessor;
 import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.CircularMeanDataProcessor;
@@ -38,42 +33,76 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class FitEngineConfiguration implements Cloneable
 {
-	private FitConfiguration fitConfiguration;
-
-	// Analysis* shows the best area-under-precision-recall curve (AUC) using a mean filter or
-	// a Gaussian filter with ~1.2 SD smoothing. The Gaussian filter is more robust to width mismatch but
-	// the mean filter will be faster as it uses a smaller block size. The Gaussian filter has higher 
-	// recall but lower precision as it identifies more spots due to the shape of the smoothing filter.
-	// The overall AUC is very similar.
-	//
-	// Note: Setting the parameter at a higher level allows the filter to work on out-of-focus spots which
-	// will have a wider PSF.
-	//
-	// *Analysis was performed on simulated data using a Image PSF with spots of 20-100 photons at a 
-	// depth of up to 1380nm (the PSF limit).
-
-	private double search = 1;
-	private double border = 1;
-	private double fitting = 3;
-	private int failuresLimit = 3;
-	private boolean includeNeighbours = true;
-	private double neighbourHeightThreshold = 0.3;
-	private double residualsThreshold = 1;
-	
-	private NoiseEstimator.Method noiseMethod;
-	private DataFilterType dataFilterType;
-	private double[] smooth;
-	private DataFilter[] dataFilter;
+	private FitEngineSettings.Builder fitEngineSettings;
+	private FitConfiguration fitConfiguration = null;
 
 	/**
-	 * Constructor
-	 * 
-	 * @param fitConfiguration
+	 * Constructor.
 	 */
-	public FitEngineConfiguration(FitConfiguration fitConfiguration)
+	public FitEngineConfiguration()
 	{
-		this.fitConfiguration = fitConfiguration;
+		this(FitConfigHelper.defaultFitEngineSettings);
+	}
+
+	/**
+	 * Constructor.
+	 *
+	 * @param fitEngineSettings
+	 *            the fit engine settings
+	 */
+	public FitEngineConfiguration(FitEngineSettings fitEngineSettings)
+	{
+		if (fitEngineSettings == null)
+			throw new IllegalArgumentException("FitEngineSettings is null");
+		this.fitEngineSettings = fitEngineSettings.toBuilder();
 		initialiseState();
+	}
+
+	/**
+	 * Constructor.
+	 *
+	 * @param fitEngineSettings
+	 *            the fit engine settings
+	 */
+	public FitEngineConfiguration(FitEngineSettings.Builder fitEngineSettings)
+	{
+		if (fitEngineSettings == null)
+			throw new IllegalArgumentException("FitEngineSettings is null");
+		this.fitEngineSettings = fitEngineSettings;
+		initialiseState();
+	}
+
+	/**
+	 * Gets the fit engine settings.
+	 *
+	 * @return the fit engine settings
+	 */
+	public FitEngineSettings getFitEngineSettings()
+	{
+		return fitEngineSettings.build();
+	}
+
+	/**
+	 * Merge fit engine settings.
+	 *
+	 * @param fitEngineSettings
+	 *            the fit engine settings
+	 */
+	public void mergeFitEngineSettings(FitEngineSettings fitEngineSettings)
+	{
+		this.fitEngineSettings.mergeFrom(fitEngineSettings);
+	}
+
+	/**
+	 * Gets the fit configuration.
+	 *
+	 * @return the fit configuration
+	 */
+	public FitConfiguration getFitConfiguration()
+	{
+		if (fitConfiguration == null)
+			fitConfiguration = new FitConfiguration(fitEngineSettings.getFitSettingsBuilder());
+		return fitConfiguration;
 	}
 
 	/**
@@ -81,7 +110,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getSearch()
 	{
-		return search;
+		return fitEngineSettings.getSearch().getValue();
 	}
 
 	/**
@@ -91,7 +120,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setSearch(double search)
 	{
-		this.search = search;
+		fitEngineSettings.getSearchBuilder().setValue(search);
 	}
 
 	/**
@@ -101,7 +130,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getBorder()
 	{
-		return border;
+		return fitEngineSettings.getBorder().getValue();
 	}
 
 	/**
@@ -110,7 +139,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setBorder(double border)
 	{
-		this.border = border;
+		fitEngineSettings.getBorderBuilder().setValue(border);
 	}
 
 	/**
@@ -118,7 +147,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getFitting()
 	{
-		return fitting;
+		return fitEngineSettings.getFitting().getValue();
 	}
 
 	/**
@@ -128,7 +157,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setFitting(double fitting)
 	{
-		this.fitting = fitting;
+		fitEngineSettings.getFittingBuilder().setValue(fitting);
 	}
 
 	/**
@@ -138,7 +167,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public int getFailuresLimit()
 	{
-		return failuresLimit;
+		return fitEngineSettings.getFailuresLimit();
 	}
 
 	/**
@@ -151,15 +180,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setFailuresLimit(int failuresLimit)
 	{
-		this.failuresLimit = failuresLimit;
-	}
-
-	/**
-	 * @return the fitConfiguration
-	 */
-	public FitConfiguration getFitConfiguration()
-	{
-		return fitConfiguration;
+		fitEngineSettings.setFailuresLimit(failuresLimit);
 	}
 
 	/**
@@ -167,7 +188,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public boolean isIncludeNeighbours()
 	{
-		return includeNeighbours;
+		return fitEngineSettings.getIncludeNeighbours();
 	}
 
 	/**
@@ -180,7 +201,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setIncludeNeighbours(boolean includeNeighbours)
 	{
-		this.includeNeighbours = includeNeighbours;
+		fitEngineSettings.setIncludeNeighbours(includeNeighbours);
 	}
 
 	/**
@@ -188,7 +209,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getNeighbourHeightThreshold()
 	{
-		return neighbourHeightThreshold;
+		return fitEngineSettings.getNeighbourHeightThreshold();
 	}
 
 	/**
@@ -198,7 +219,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setNeighbourHeightThreshold(double neighbourHeightThreshold)
 	{
-		this.neighbourHeightThreshold = neighbourHeightThreshold;
+		fitEngineSettings.setNeighbourHeightThreshold(neighbourHeightThreshold);
 	}
 
 	/**
@@ -206,7 +227,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getResidualsThreshold()
 	{
-		return residualsThreshold;
+		return fitEngineSettings.getResidualsThreshold();
 	}
 
 	/**
@@ -215,24 +236,24 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setResidualsThreshold(double residualsThreshold)
 	{
-		this.residualsThreshold = residualsThreshold;
+		fitEngineSettings.setResidualsThreshold(residualsThreshold);
 	}
 
 	/**
 	 * @return the method used to estimate the image noise
 	 */
-	public NoiseEstimator.Method getNoiseMethod()
+	public NoiseEstimatorMethod getNoiseMethod()
 	{
-		return noiseMethod;
+		return fitEngineSettings.getNoiseMethod();
 	}
 
 	/**
 	 * @param noiseMethod
 	 *            Set the method used to estimate the image noise
 	 */
-	public void setNoiseMethod(NoiseEstimator.Method noiseMethod)
+	public void setNoiseMethod(NoiseEstimatorMethod noiseMethod)
 	{
-		this.noiseMethod = noiseMethod;
+		fitEngineSettings.setNoiseMethod(noiseMethod);
 	}
 
 	/**
@@ -241,10 +262,24 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setNoiseMethod(int noiseMethod)
 	{
-		if (noiseMethod >= 0 && noiseMethod < NoiseEstimator.Method.values().length)
-		{
-			setNoiseMethod(NoiseEstimator.Method.values()[noiseMethod]);
-		}
+		fitEngineSettings.setNoiseMethodValue(noiseMethod);
+	}
+
+	/**
+	 * @param duplicateDistance
+	 *            The distance within which spots are considered duplicates
+	 */
+	public void setDuplicateDistance(final double duplicateDistance)
+	{
+		fitEngineSettings.getDuplicateDistanceBuilder().setValue(duplicateDistance);
+	}
+
+	/**
+	 * @return The distance within which spots are considered duplicates
+	 */
+	public double getDuplicateDistance()
+	{
+		return fitEngineSettings.getDuplicateDistance().getValue();
 	}
 
 	/*
@@ -254,6 +289,8 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public FitEngineConfiguration clone()
 	{
+		// This is not a complete duplicate. The settings builder objects with the 
+		// underlying configuration will be the same between all instances. 
 		try
 		{
 			FitEngineConfiguration f = (FitEngineConfiguration) super.clone();
@@ -266,6 +303,7 @@ public class FitEngineConfiguration implements Cloneable
 			// Ignore
 		}
 		return null;
+
 	}
 
 	/**
@@ -274,17 +312,13 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void initialiseState()
 	{
-		if (fitConfiguration == null)
-			fitConfiguration = new FitConfiguration();
-		else
-			fitConfiguration.initialiseState();
-		if (noiseMethod == null)
-			noiseMethod = Method.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
-		if (dataFilter == null || smooth == null)
-			setDataFilter(DataFilter.MEAN, 1.2, 0);
-		// Do this last as it resizes the dataFilter and smooth arrays
-		if (dataFilterType == null)
-			setDataFilterType(DataFilterType.SINGLE);
+		//		if (noiseMethod == null)
+		//			noiseMethod = Method.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
+		//		if (dataFilter == null || smooth == null)
+		//			setDataFilter(DataFilter.MEAN, 1.2, 0);
+		//		// Do this last as it resizes the dataFilter and smooth arrays
+		//		if (dataFilterType == null)
+		//			setDataFilterType(DataFilterType.SINGLE);
 	}
 
 	/**
@@ -292,7 +326,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public DataFilterType getDataFilterType()
 	{
-		return dataFilterType;
+		return fitEngineSettings.getDataFilterSettings().getDataFilterType();
 	}
 
 	/**
@@ -301,7 +335,8 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setDataFilterType(DataFilterType dataFilterType)
 	{
-		this.dataFilterType = dataFilterType;
+		DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
+		b.setDataFilterType(dataFilterType);
 
 		// Resize the filter arrays to discard unused filters
 		final int n;
@@ -318,21 +353,14 @@ public class FitEngineConfiguration implements Cloneable
 			default:
 				n = 1;
 		}
-		resizeFilters(n);
+		resizeFilters(b, n);
 	}
 
-	private void resizeFilters(int n)
+	private void resizeFilters(DataFilterSettings.Builder b, int n)
 	{
-		if (this.dataFilter == null)
-		{
-			this.dataFilter = new DataFilter[n];
-			this.smooth = new double[n];
-		}
-		else if (this.dataFilter.length < n)
-		{
-			this.dataFilter = Arrays.copyOf(this.dataFilter, n);
-			this.smooth = Arrays.copyOf(this.smooth, n);
-		}
+		List<FitConfig.DataFilter> list = b.getDataFilterList();
+		while (list.size() > n)
+			list.remove(list.size() - 1);
 	}
 
 	/**
@@ -341,22 +369,47 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setDataFilterType(int dataFilterType)
 	{
-		if (dataFilterType >= 0 && dataFilterType < DataFilterType.values().length)
+		DataFilterType t = DataFilterType.forNumber(dataFilterType);
+		if (t != null)
 		{
-			setDataFilterType(DataFilterType.values()[dataFilterType]);
+			setDataFilterType(t);
 		}
 	}
+
+	//	/**
+	//	 * @param n
+	//	 *            The filter number
+	//	 * @return the filter to apply to the data before identifying local maxima
+	//	 */
+	//	public DataFilter getDataFilter(int n)
+	//	{
+	//		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFilterCount())
+	//			return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n);
+	//		return null;
+	//	}
 
 	/**
 	 * @param n
 	 *            The filter number
 	 * @return the filter to apply to the data before identifying local maxima
 	 */
-	public DataFilter getDataFilter(int n)
+	public DataFilterMethod getDataFilterMethod(int n)
 	{
-		if (n < this.dataFilter.length)
-			return dataFilter[n];
-		return DataFilter.MEAN;
+		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFilterCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n).getDataFilterMethod();
+		return DataFilterMethod.MEAN;
+	}
+
+	/**
+	 * @param n
+	 *            The filter number
+	 * @return if the smoothing parameter is absolute
+	 */
+	public boolean getDataFilterAbsolute(int n)
+	{
+		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFilterCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n).getParameter(0).getAbsolute();
+		return false;
 	}
 
 	/**
@@ -366,41 +419,66 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getSmooth(int n)
 	{
-		if (n < this.smooth.length)
-			return smooth[n];
+		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFilterCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n).getParameter(0).getValue();
 		return 0;
 	}
 
 	/**
-	 * @param DataFilter
-	 *            the filter to apply to the data before identifying local maxima
-	 * @param smooth
-	 *            the size of the smoothing window. The actual window is calculated dynamically in conjunction with the
-	 *            peak widths.
 	 * @param n
 	 *            The filter number
+	 * @return the absolute flag for the smoothing window size
 	 */
-	public void setDataFilter(DataFilter dataFilter, double smooth, int n)
+	public boolean getAbsolute(int n)
 	{
-		resizeFilters(n + 1);
-		this.dataFilter[n] = dataFilter;
-		this.smooth[n] = smooth;
+		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFilterCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n).getParameter(0).getAbsolute();
+		return false;
 	}
 
 	/**
-	 * @param DataFilter
+	 * Sets the data filter.
+	 *
+	 * @param dataFilterMethod
 	 *            the filter to apply to the data before identifying local maxima
 	 * @param smooth
 	 *            the size of the smoothing window. The actual window is calculated dynamically in conjunction with the
 	 *            peak widths.
+	 * @param absolute
+	 *            the absolute
 	 * @param n
 	 *            The filter number
 	 */
-	public void setDataFilter(int dataFilter, double smooth, int n)
+	public void setDataFilter(DataFilterMethod dataFilterMethod, double smooth, boolean absolute, int n)
 	{
-		if (dataFilter >= 0 && dataFilter < DataFilter.values().length)
+		DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
+		resizeFilters(b, n);
+		DataFilter.Builder b2 = b.addDataFilterBuilder();
+		b2.setDataFilterMethod(dataFilterMethod);
+		RelativeParameter.Builder b3 = b2.addParameterBuilder();
+		b3.setValue(smooth);
+		b3.setAbsolute(absolute);
+	}
+
+	/**
+	 * Sets the data filter.
+	 *
+	 * @param dataFilter
+	 *            the data filter
+	 * @param smooth
+	 *            the size of the smoothing window. The actual window is calculated dynamically in conjunction with the
+	 *            peak widths.
+	 * @param absolute
+	 *            the absolute
+	 * @param n
+	 *            The filter number
+	 */
+	public void setDataFilter(int dataFilter, double smooth, boolean absolute, int n)
+	{
+		DataFilterMethod m = DataFilterMethod.forNumber(dataFilter);
+		if (m != null)
 		{
-			setDataFilter(DataFilter.values()[dataFilter], smooth, n);
+			setDataFilter(m, smooth, absolute, n);
 		}
 	}
 
@@ -416,12 +494,9 @@ public class FitEngineConfiguration implements Cloneable
 	{
 		if (n < 1)
 			n = 1;
+		DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
 		// Truncate the filter
-		if (this.dataFilter != null)
-		{
-			this.dataFilter = Arrays.copyOf(this.dataFilter, n);
-			this.smooth = Arrays.copyOf(this.smooth, n);
-		}
+		resizeFilters(b, n);
 	}
 
 	/**
@@ -432,8 +507,10 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public int getRelativeFitting()
 	{
-		final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
-		final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
+		double[] w = PSFHelper.getGaussian2DWxWy(fitEngineSettings.getFitSettings().getPsf());
+
+		final double initialPeakStdDev0 = w[0];
+		final double initialPeakStdDev1 = w[1];
 
 		double widthMax = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
 		if (initialPeakStdDev1 > 0)
@@ -459,11 +536,13 @@ public class FitEngineConfiguration implements Cloneable
 	 * double smooth = getSmooth(i) * hwhmMin;
 	 * 
 	 * </pre>
-	 * 
+	 *
 	 * @param relative
 	 *            True if the parameters should be made relative to the configured standard deviations
-	 * @return
+	 * @return the maxima spot filter
+	 * @deprecated The relative flag will be removed and the configured parameters must be set as relative/absolute
 	 */
+	@Deprecated
 	public MaximaSpotFilter createSpotFilter(boolean relative)
 	{
 		final double hwhmMin, hwhmMax;
@@ -490,10 +569,11 @@ public class FitEngineConfiguration implements Cloneable
 			border = 0;
 
 		DataProcessor processor0 = createDataProcessor(border, 0, hwhmMin);
-		final int nFilters = Math.min(dataFilter.length, smooth.length);
+		DataFilterSettings f = fitEngineSettings.getDataFilterSettings();
+		final int nFilters = f.getDataFilterCount();
 
 		final MaximaSpotFilter spotFilter;
-		switch (dataFilterType)
+		switch (f.getDataFilterType())
 		{
 			case JURY:
 				if (nFilters > 1)
@@ -536,18 +616,18 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getHWHMMin()
 	{
-		final FitConfiguration fitConfiguration = getFitConfiguration();
-		final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
+		double[] w = PSFHelper.getGaussian2DWxWy(fitEngineSettings.getFitSettings().getPsf());
+
+		final double initialPeakStdDev0 = w[0];
+		final double initialPeakStdDev1 = w[1];
+
 		// Use 1 if zero to get at least a single pixel width
 		double widthMin = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
 
-		// Only use the second width if this is part of the function
-		if (fitConfiguration.isWidth1Fitting())
-		{
-			final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
-			if (initialPeakStdDev1 > 0)
-				widthMin = FastMath.min(initialPeakStdDev1, widthMin);
-		}
+		// Only use the second width if this is part of the function. 
+		// This should be taken care of within the PSF helper.
+		if (initialPeakStdDev1 > 0)
+			widthMin = FastMath.min(initialPeakStdDev1, widthMin);
 
 		// Get the half-width at half maximim
 		return Gaussian2DFunction.SD_TO_HWHM_FACTOR * widthMin;
@@ -563,18 +643,18 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getHWHMMax()
 	{
-		final FitConfiguration fitConfiguration = getFitConfiguration();
-		final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
+		double[] w = PSFHelper.getGaussian2DWxWy(fitEngineSettings.getFitSettings().getPsf());
+
+		final double initialPeakStdDev0 = w[0];
+		final double initialPeakStdDev1 = w[1];
+
 		// Use 1 if zero to get at least a single pixel width
 		double widthMax = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
 
-		// Only use the second width if this is part of the function
-		if (fitConfiguration.isWidth1Fitting())
-		{
-			final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
-			if (initialPeakStdDev1 > 0)
-				widthMax = FastMath.max(initialPeakStdDev1, widthMax);
-		}
+		// Only use the second width if this is part of the function.
+		// This should be taken care of within the PSF helper.
+		if (initialPeakStdDev1 > 0)
+			widthMax = FastMath.max(initialPeakStdDev1, widthMax);
 
 		// Get the half-width at half maximim
 		return Gaussian2DFunction.SD_TO_HWHM_FACTOR * widthMax;
@@ -587,8 +667,9 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public int getNumberOfFilters()
 	{
-		final int nFilters = Math.min(dataFilter.length, smooth.length);
-		switch (dataFilterType)
+		DataFilterSettings f = fitEngineSettings.getDataFilterSettings();
+		final int nFilters = f.getDataFilterCount();
+		switch (f.getDataFilterType())
 		{
 			case JURY:
 				if (nFilters > 1)
@@ -608,16 +689,23 @@ public class FitEngineConfiguration implements Cloneable
 		}
 	}
 
-	private double getSmoothingWindow(double smoothingParameter, double hwhmMin)
+	private double getSmoothingWindow(DataFilter f, double hwhmMin)
 	{
 		//return BlockAverageDataProcessor.convert(smoothingParameter * hwhmMin);
-		return Maths.round(smoothingParameter * hwhmMin, 0.01);
+		RelativeParameter rp = f.getParameter(0);
+		double p = rp.getValue();
+		if (!rp.getAbsolute())
+			p *= hwhmMin;
+		return Maths.round(p, 0.01);
 	}
 
 	private DataProcessor createDataProcessor(int border, int n, double hwhm)
 	{
-		if (n < dataFilter.length && n < smooth.length)
-			return createDataProcessor(border, getDataFilter(n), getSmoothingWindow(getSmooth(n), hwhm));
+		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFilterCount())
+		{
+			DataFilter f = fitEngineSettings.getDataFilterSettings().getDataFilter(n);
+			return createDataProcessor(border, f.getDataFilterMethod(), getSmoothingWindow(f, hwhm));
+		}
 		return null;
 	}
 
@@ -629,7 +717,7 @@ public class FitEngineConfiguration implements Cloneable
 	 * @param parameter
 	 * @return the data processor
 	 */
-	public static DataProcessor createDataProcessor(int border, DataFilter dataFilter, double parameter)
+	public static DataProcessor createDataProcessor(int border, DataFilterMethod dataFilter, double parameter)
 	{
 		switch (dataFilter)
 		{
@@ -653,13 +741,15 @@ public class FitEngineConfiguration implements Cloneable
 		}
 	}
 
+	/**
+	 * Copy data filter.
+	 *
+	 * @param config
+	 *            the config
+	 */
 	public void copyDataFilter(FitEngineConfiguration config)
 	{
-		setDataFilterType(config.getDataFilterType());
-		final int nFilters = config.getNumberOfFilters();
-		for (int n = 0; n < nFilters; n++)
-		{
-			setDataFilter(config.getDataFilter(n), config.getSmooth(n), n);
-		}
+		fitEngineSettings.setDataFilterSettings(config.fitEngineSettings.getDataFilterSettings());
 	}
+
 }

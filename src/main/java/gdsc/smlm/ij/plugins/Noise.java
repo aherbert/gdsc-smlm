@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitConfigHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.core.ij.Utils;
@@ -63,7 +65,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			return DONE;
 		}
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (imp == null)
 		{
 			IJ.noImage();
@@ -86,7 +88,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			gd = new GenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
-			String[] methodNames = SettingsManager.noiseEstimatorMethodNames;
+			String[] methodNames = SettingsManager.getNoiseEstimatorMethodNames();
 
 			gd.addChoice("Method1 (blue)", methodNames, methodNames[algorithm]);
 			gd.addChoice("Method2 (red)", methodNames, methodNames[algorithm2]);
@@ -127,9 +129,9 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	 */
 	private void drawPlot()
 	{
-		NoiseEstimator.Method method1 = NoiseEstimator.Method.values()[algorithm];
-		NoiseEstimator.Method method2 = NoiseEstimator.Method.values()[algorithm2];
-
+		NoiseEstimatorMethod[] values = SettingsManager.getNoiseEstimatorMethodValues();
+		NoiseEstimator.Method method1 = FitConfigHelper.convertNoiseEstimatorMethod(values[algorithm]);
+		NoiseEstimator.Method method2 = FitConfigHelper.convertNoiseEstimatorMethod(values[algorithm2]);
 		IJ.showStatus("Estimating noise ...");
 
 		boolean twoMethods = method1 != method2;
@@ -150,8 +152,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		{
 			IJ.showProgress(i, size);
 			final ImageProcessor ip = stack.getProcessor(slice);
-			buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(),
-					ip.getHeight(), bounds, buffer);
+			buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, buffer);
 			final NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
 			ne.preserveResiduals = preserveResiduals;
 			ne.setRange(lowestPixelsRange);
@@ -179,7 +180,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		double range = b1[1] - b1[0];
 		if (range == 0)
 			range = 1;
-		plot.setLimits(a[0], a[1], b1[0]-0.05*range, b1[1]+0.05*range);
+		plot.setLimits(a[0], a[1], b1[0] - 0.05 * range, b1[1] + 0.05 * range);
 		plot.setColor(Color.blue);
 		plot.draw();
 		String label = String.format("Blue = %s", Utils.rounded(new Statistics(yValues1).getMean()));
@@ -208,8 +209,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		int i = 0;
 		result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
 		Rectangle bounds = ip.getRoi();
-		float[] buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(),
-				ip.getHeight(), bounds, null);
+		float[] buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
 		NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
 		ne.preserveResiduals = true;
 		for (NoiseEstimator.Method m : NoiseEstimator.Method.values())

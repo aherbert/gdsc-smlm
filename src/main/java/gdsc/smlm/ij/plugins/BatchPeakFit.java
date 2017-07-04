@@ -68,7 +68,10 @@ import ij.plugin.PlugIn;
  * The batch specifies the set of images to process. For each image the batch can specify a set of values for each of
  * the fitting parameters. The Peak Fit plugin is then run for each combination of parameters and the results of each
  * run saved to file.
+ * 
+ * @deprecated This should be updated to use JSON and methods from the Google Proto Buffers library 
  */
+@Deprecated
 public class BatchPeakFit implements PlugIn
 {
 	private static final String TITLE = "Batch Peak Fit";
@@ -153,7 +156,7 @@ public class BatchPeakFit implements PlugIn
 		Document doc = null;
 		try
 		{
-			String configXml = xs.toXML(new FitEngineConfiguration(new FitConfiguration()));
+			String configXml = xs.toXML(new FitEngineConfiguration());
 			doc = loadDocument(configXml);
 		}
 		catch (XStreamException ex)

@@ -14,6 +14,9 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.CalibrationReader;
+import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitConfigHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -308,11 +311,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		gf = new FastGaussian2DFitter(fitConfig);
 		//duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		// Used for duplicate checking
-		coordinateStore = CoordinateStoreFactory.create(0, 0, fitConfig.getDuplicateDistance());
-		calculateNoise = config.getFitConfiguration().getNoise() <= 0;
+		coordinateStore = CoordinateStoreFactory.create(0, 0, config.getDuplicateDistance());
+		calculateNoise = fitConfig.getNoise() <= 0;
 		if (!calculateNoise)
 		{
-			noise = (float) config.getFitConfiguration().getNoise();
+			noise = (float) fitConfig.getNoise();
 		}
 
 		// Disable the use of the direct filter within the FitConfiguration validate method. 
@@ -396,12 +399,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// This allows support for per-pixel bias and gain (sCMOS cameras).
 
 		// Remove the bias
-		final double bias = fitConfig.getBias();
+		// TODO - update this to use the camera calibration (e.g. sCMOS) to remove per-pixel bias
+		final double bias = new CalibrationReader(fitConfig.getCalibration()).getBias();
 		for (int i = 0; i < size; i++)
 			data[i] -= bias;
 
 		// Remove the gain. This is done for all solvers except the legacy MLE solvers which 
 		// model camera amplification.
+		// TODO - update this to use the camera calibration (e.g. sCMOS) to remove per-pixel gain
 		if (!isFitCameraCounts)
 		{
 			final double f = 1.0 / gain;
@@ -537,7 +542,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				sb.append(((gdsc.smlm.results.filter.Filter) filter.getMinimalFilter()).toXML()).append("\n");
 				sb.append(filter.residualsThreshold).append("\n");
 				sb.append(config.getFailuresLimit()).append("\n");
-				sb.append(fitConfig.getDuplicateDistance()).append("\n");
+				sb.append(config.getDuplicateDistance()).append("\n");
 				if (spotFilter != null)
 					sb.append(spotFilter.getDescription()).append("\n");
 				sb.append("MaxCandidate = ").append(candidates.getSize()).append("\n");
@@ -570,30 +575,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (logger != null)
 				logger.info("Slice %d: %d / %d", slice, success, candidates.getSize());
 		}
-
-		if (isFitCameraCounts)
-		{
-			// Add back the bias so unit conversion works
-			for (int i = 0; i < sliceResults.size(); i++)
-			{
-				final PeakResult result = sliceResults.get(i);
-				result.setBackground((float) (result.getBackground() + bias));
-			}
-		}
-
-		//		// TODO - Remove this. It was a quick hack to ensure the fitting still worked 
-		//		// when results were not calibrated
-		//		if (!isFitCameraCounts)
-		//		{
-		//			for (int i = 0; i < sliceResults.size(); i++)
-		//			{
-		//				final PeakResult result = sliceResults.get(i);
-		//				// Fix the results so they are in ADU counts
-		//				float[] p = result.getParameters();
-		//				p[Gaussian2DFunction.BACKGROUND] *= gain;
-		//				p[Gaussian2DFunction.SIGNAL] *= gain;
-		//			}
-		//		}
 
 		this.results.addAll(sliceResults);
 
@@ -839,7 +820,20 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		params[Gaussian2DFunction.X_POSITION] += offsetx;
 		params[Gaussian2DFunction.Y_POSITION] += offsety;
 
-		return createResult(x, y, value, fitted.error, fitted.noise, fitted.params, fitted.paramsDev, candidateId);
+		if (isFitCameraCounts)
+		{
+			// Convert to photons
+			params[Gaussian2DFunction.BACKGROUND] /= gain;
+			params[Gaussian2DFunction.SIGNAL] /= gain;
+			fitted.noise /= gain;
+			if (fitted.paramsDev != null)
+			{
+				fitted.paramsDev[Gaussian2DFunction.BACKGROUND] /= gain;
+				fitted.paramsDev[Gaussian2DFunction.SIGNAL] /= gain;
+			}
+		}
+
+		return createResult(x, y, value, fitted.error, fitted.noise, params, fitted.paramsDev, candidateId);
 	}
 
 	private PeakResult createResult(int origX, int origY, float origValue, double error, float noise, float[] params,
@@ -1628,7 +1622,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			GaussianOverlapAnalysis overlap = new GaussianOverlapAnalysis(flags, null, extractSpotParams(params, n), 2);
 			overlap.add(extractOtherParams(params, n, npeaks), true);
 			double[] overlapData = overlap.getOverlapData();
-			return overlapData[1] + params[0];
+			return overlapData[1] + params[Gaussian2DFunction.BACKGROUND];
 		}
 
 		private boolean getEstimate(Candidate candidate, double[] params, int j, boolean close)
@@ -2564,10 +2558,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						int npeaks = peakParams.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 						for (int i = 0; i < npeaks; i++)
 						{
-							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] += 0.5 +
-									regionBounds.x;
-							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] += 0.5 +
-									regionBounds.y;
+							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
+									Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
+							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
+									Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
 						}
 					}
 					String msg = String.format("Doublet %d [%d,%d] %s (%s) %s [%f -> %f] IC [%f -> %f] = %s\n", slice,
@@ -2786,10 +2780,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						int npeaks = peakParams.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 						for (int i = 0; i < npeaks; i++)
 						{
-							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] += 0.5 +
-									regionBounds.x;
-							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] += 0.5 +
-									regionBounds.y;
+							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
+									Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
+							peakParams[i * Gaussian2DFunction.PARAMETERS_PER_PEAK +
+									Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
 						}
 					}
 					String msg = String.format("Doublet %d [%d,%d] %s (%s) = %s\n", slice, cc.fromRegionToGlobalX(cx),
@@ -2926,12 +2920,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 		else
 		{
-			if (fitConfig.getBias() != 0 && this.noise != 0)
+			if (this.noise != 0)
 			{
 				// Initial guess using the noise (assuming all noise is from Poisson background).
 				// EMCCD will have increase noise by a factor of sqrt(2)
-				background = (float) (fitConfig.getBias() +
-						PeakResultHelper.noiseToLocalBackground(noise, fitConfig.getGain(), fitConfig.isEmCCD()));
+				CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
+				double gain = (fitConfig.isFitCameraCounts()) ? r.getGain() : 1;
+				background = (float) (PeakResultHelper.noiseToLocalBackground(noise, gain, r.isEMCCD()));
 			}
 			else
 			{
@@ -3181,7 +3176,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private float estimateNoise(int width, int height)
 	{
 		createDataEstimator();
-		return estimateNoise(dataEstimator, config.getNoiseMethod());
+		return estimateNoise(dataEstimator, FitConfigHelper.convertNoiseEstimatorMethod(config.getNoiseMethod()));
 	}
 
 	/**
@@ -3197,11 +3192,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 *            the method
 	 * @return The noise
 	 */
-	public static float estimateNoise(float[] data, int width, int height, NoiseEstimator.Method method)
+	public static float estimateNoise(float[] data, int width, int height, NoiseEstimatorMethod method)
 	{
 		// Do the same logic as the non-static method 
 		DataEstimator dataEstimator = newDataEstimator(data, width, height);
-		return estimateNoise(dataEstimator, method);
+		return estimateNoise(dataEstimator, FitConfigHelper.convertNoiseEstimatorMethod(method));
 	}
 
 	private static float estimateNoise(DataEstimator dataEstimator, NoiseEstimator.Method method)

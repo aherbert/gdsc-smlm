@@ -16,6 +16,8 @@ import gdsc.core.threshold.AutoThreshold;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Statistics;
+import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitConfigHelper;
 import gdsc.smlm.engine.DataEstimator;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -24,7 +26,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
-import ij.gui.NonBlockingGenericDialog;
+import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.WindowOrganiser;
@@ -56,9 +58,10 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 	private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING | NO_CHANGES;
 	private PlugInFilterRunner pfr;
 	private ImagePlus imp;
-	private GenericDialog gd;
+	private NonBlockingExtendedGenericDialog gd;
 	private static double percentile;
-	private static NoiseEstimator.Method noiseMethod = NoiseEstimator.Method.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
+	private static NoiseEstimatorMethod noiseMethod = NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
+	private NoiseEstimator.Method myNoiseMethod = null;
 	private static AutoThreshold.Method thresholdMethod = AutoThreshold.Method.DEFAULT;
 	private static float fraction;
 	private static int histogramSize;
@@ -97,13 +100,12 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 
 			drawPlot();
 
-			gd = new NonBlockingGenericDialog(TITLE);
+			gd = new NonBlockingExtendedGenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
 			gd.addSlider("Percential", 0, 100, percentile);
 
-			gd.addChoice("Noise_method", SettingsManager.noiseEstimatorMethodNames,
-					SettingsManager.noiseEstimatorMethodNames[noiseMethod.ordinal()]);
+			gd.addChoice("Noise_method", SettingsManager.getNoiseEstimatorMethodNames(), noiseMethod.ordinal());
 
 			// For background based on pixel below a threshold
 			String[] thresholdMethods = AutoThreshold.getMethods(true);
@@ -130,7 +132,8 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		percentile = gd.getNextNumber();
-		noiseMethod = NoiseEstimator.Method.values()[gd.getNextChoiceIndex()];
+		noiseMethod = SettingsManager.getNoiseEstimatorMethodValues()[gd.getNextChoiceIndex()];
+		myNoiseMethod = FitConfigHelper.convertNoiseEstimatorMethod(noiseMethod);
 		thresholdMethod = AutoThreshold.getMethod(gd.getNextChoiceIndex(), true);
 		fraction = (float) gd.getNextNumber();
 		histogramSize = (int) gd.getNextNumber();
@@ -173,7 +176,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 			try
 			{
 				noise1[i] = de.getNoise();
-				noise2[i] = de.getNoise(noiseMethod);
+				noise2[i] = de.getNoise(myNoiseMethod);
 				background[i] = de.getBackground();
 				threshold[i] = de.getThreshold();
 				percentile[i] = de.getPercentile(BackgroundEstimator.percentile);
@@ -262,7 +265,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 		de.setThresholdMethod(thresholdMethod);
 		result[i++] = de.isBackgroundRegion() ? 1 : 0;
 		result[i++] = de.getNoise();
-		result[i++] = de.getNoise(noiseMethod);
+		result[i++] = de.getNoise(myNoiseMethod);
 		result[i++] = de.getBackground();
 		result[i++] = de.getThreshold();
 		result[i++] = de.getBackgroundSize();

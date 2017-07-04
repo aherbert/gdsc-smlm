@@ -92,10 +92,10 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.FrameCounter;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultGridManager;
-import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.CoordinateStore;
 import gdsc.smlm.results.filter.CoordinateStoreFactory;
@@ -108,7 +108,6 @@ import gdsc.smlm.results.filter.GridCoordinateStore;
 import gdsc.smlm.results.filter.IDirectFilter;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
-import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.MultiPathFitResults;
 import gdsc.smlm.results.filter.ParameterType;
@@ -116,6 +115,7 @@ import gdsc.smlm.results.filter.PeakFractionalAssignment;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
 import gdsc.smlm.results.filter.ResultAssignment;
 import gdsc.smlm.results.filter.XStreamWrapper;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.search.ConvergenceChecker;
 import gdsc.smlm.search.ConvergenceToleranceChecker;
 import gdsc.smlm.search.FixedDimension;
@@ -967,7 +967,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private void resetParametersFromFitting()
 	{
 		failCount = BenchmarkSpotFit.config.getFailuresLimit();
-		duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
+		duplicateDistance = BenchmarkSpotFit.config.getDuplicateDistance();
 		residualsThreshold = sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
 				? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
 	}
@@ -1524,7 +1524,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				// Copy the settings from the fitter if this is the first run
 				failCount = BenchmarkSpotFit.config.getFailuresLimit();
-				duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
+				duplicateDistance = BenchmarkSpotFit.config.getDuplicateDistance();
 				sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
 						? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
 			}
@@ -5168,7 +5168,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 */
 	private void saveTemplate(String topFilterSummary)
 	{
-		FitEngineConfiguration config = new FitEngineConfiguration(new FitConfiguration());
+		FitEngineConfiguration config = new FitEngineConfiguration();
 		if (!updateAllConfiguration(config, true))
 		{
 			IJ.log("Unable to create the template configuration");
@@ -7539,7 +7539,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		config.setFailuresLimit(best.failCount);
 
-		fitConfig.setDuplicateDistance(best.duplicateDistance);
+		config.setDuplicateDistance(best.duplicateDistance);
 
 		return true;
 	}
@@ -7906,7 +7906,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			// To produce the same results as the PeakFit plugin we must implement the border
 			// functionality used in the FitWorker. This respects the border of the spot filter.
-			FitEngineConfiguration config = new FitEngineConfiguration(new FitConfiguration());
+			FitEngineConfiguration config = new FitEngineConfiguration();
 			updateAllConfiguration(config);
 			MaximaSpotFilter spotFilter = config.createSpotFilter(true);
 			final int border = spotFilter.getBorder();

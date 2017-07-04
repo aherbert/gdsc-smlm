@@ -1,6 +1,24 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.random.Well19937c;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Statistics;
+import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
+import gdsc.smlm.data.config.FitConfigHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -17,46 +35,26 @@ import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitFunction;
-import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;
-import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFOffset;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
 import gdsc.smlm.model.ImagePSFModel;
 import gdsc.smlm.utils.XmlUtils;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.WindowManager;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.Well19937c;
 
 /**
  * Produces an drift curve for a PSF image using fitting.
@@ -92,13 +90,6 @@ public class PSFDrift implements PlugIn
 	{
 		// Initialise for fitting
 		fitConfig = new FitConfiguration();
-		// Set defaults for the MLE method
-		fitConfig.setBias(0);
-		fitConfig.setEmCCD(false);
-		fitConfig.setGain(1);
-		fitConfig.setReadNoise(0);
-		fitConfig.setModelCamera(false);
-		fitConfig.setSearchMethod(SearchMethod.POWELL_BOUNDED);
 	}
 
 	private int centrePixel;
@@ -403,7 +394,7 @@ public class PSFDrift implements PlugIn
 			return;
 		}
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select the input PSF image");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
 		gd.addCheckbox("Use_offset", useOffset);
@@ -414,10 +405,9 @@ public class PSFDrift implements PlugIn
 
 		gd.addSlider("Region_size", 2, 20, regionSize);
 		gd.addCheckbox("Background_fitting", backgroundFitting);
-		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
-				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
-		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
-				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
+		PeakFit.addPSFOptions(gd, fitConfig);
+		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
+				fitConfig.getFitSolver().ordinal());
 		// We need these to set bounds for any bounded fitters
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
@@ -441,8 +431,8 @@ public class PSFDrift implements PlugIn
 		recallLimit = gd.getNextNumber();
 		regionSize = (int) Math.abs(gd.getNextNumber());
 		backgroundFitting = gd.getNextBoolean();
+		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
-		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 		fitConfig.setMinWidthFactor(gd.getNextNumber());
 		fitConfig.setWidthFactor(gd.getNextNumber());
 		offsetFitting = gd.getNextBoolean();
@@ -453,6 +443,8 @@ public class PSFDrift implements PlugIn
 		photonLimit = Math.abs(gd.getNextNumber());
 		smoothing = Math.abs(gd.getNextNumber());
 
+		gd.collectOptions();
+		
 		if (!comFitting && !offsetFitting)
 		{
 			IJ.error(TITLE, "No initial fitting positions");
@@ -465,12 +457,16 @@ public class PSFDrift implements PlugIn
 		if (gd.invalidNumber())
 			return;
 
-		GlobalSettings settings = new GlobalSettings();
-		settings.setFitEngineConfiguration(new FitEngineConfiguration(fitConfig));
-		Calibration.Builder calibrationBuilder = SettingsManager.readCalibration().toBuilder();
-		if (!PeakFit.configureFitSolver(settings, calibrationBuilder, PeakFit.FLAG_NO_SAVE))
+		// Configure the fit solver. We must wrap the settings with a 
+		// FitEngineConfiguration and Calibration 
+		FitEngineSettings.Builder fitEngineSettings = FitConfigHelper.defaultFitEngineSettings.toBuilder();
+		fitConfig.mergeCalibration(SettingsManager.readCalibration());
+		fitEngineSettings.setFitSettings(fitConfig.getFitSettings());
+		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings);
+		if (!PeakFit.configureFitSolver(config, PeakFit.FLAG_NO_SAVE))
 			return;
-
+		fitConfig = config.getFitConfiguration();
+		
 		imp = WindowManager.getImage(title);
 		if (imp == null)
 		{

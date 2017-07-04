@@ -18,11 +18,11 @@ import gdsc.core.utils.Random;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitJob;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -38,7 +38,7 @@ import gdsc.smlm.results.ThreadSafePeakResults;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.Roi;
 import ij.plugin.WindowOrganiser;
 import ij.plugin.filter.PlugInFilter;
@@ -109,17 +109,16 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		}
 
 		globalSettings = SettingsManager.loadSettings();
-		calibrationBuilder = SettingsManager.readCalibration().toBuilder();		
+		calibrationBuilder = SettingsManager.readCalibration().toBuilder();
 		settings = globalSettings.getPsfEstimatorSettings();
 		// Reset
 		if (IJ.controlKeyDown())
 		{
-			config = new FitEngineConfiguration(new FitConfiguration());
-			globalSettings.setFitEngineConfiguration(config);
+			config = new FitEngineConfiguration();
 		}
 		else
 		{
-			config = globalSettings.getFitEngineConfiguration();
+			config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings());
 		}
 
 		Roi roi = imp.getRoi();
@@ -152,7 +151,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 		this.imp = imp;
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Estimate 2D Gaussian to fit maxima");
 
@@ -174,10 +173,12 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		gd.addCheckbox("Show_histograms", settings.showHistograms);
 		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
 
-		gd.addChoice("Spot_filter_type", SettingsManager.dataFilterTypeNames,
-				SettingsManager.dataFilterTypeNames[config.getDataFilterType().ordinal()]);
-		gd.addChoice("Spot_filter", SettingsManager.dataFilterNames,
-				SettingsManager.dataFilterNames[config.getDataFilter(0).ordinal()]);
+		PeakFit.addPSFOptions(gd, fitConfig);
+
+		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
+				config.getDataFilterType().ordinal());
+		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
+				config.getDataFilterMethod(0).ordinal());
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
@@ -192,10 +193,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		gd.addMessage("--- Gaussian fitting ---");
 		Component splitLabel = gd.getMessage();
 
-		gd.addChoice("Fit_solver", SettingsManager.fitSolverNames,
-				SettingsManager.fitSolverNames[fitConfig.getFitSolver().ordinal()]);
-		gd.addChoice("Fit_function", SettingsManager.fitFunctionNames,
-				SettingsManager.fitFunctionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 
 		// Parameters specific to each Fit solver are collected in a second dialog 
 
@@ -253,7 +251,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		return flags;
 	}
 
-	private boolean readDialog(GenericDialog gd)
+	private boolean readDialog(ExtendedGenericDialog gd)
 	{
 		initialPeakStdDev0 = gd.getNextNumber();
 		initialPeakStdDev1 = gd.getNextNumber();
@@ -267,8 +265,10 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		settings.showHistograms = gd.getNextBoolean();
 		settings.histogramBins = (int) gd.getNextNumber();
 
+		FitConfiguration fitConfig = config.getFitConfiguration();
+		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		config.setDataFilterType(gd.getNextChoiceIndex());
-		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
@@ -279,9 +279,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			integrateFrames = optionIntegrateFrames = (int) gd.getNextNumber();
 		}
 
-		FitConfiguration fitConfig = config.getFitConfiguration();
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
-		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 		config.setFailuresLimit((int) gd.getNextNumber());
 		config.setIncludeNeighbours(gd.getNextBoolean());
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
@@ -295,6 +293,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		fitConfig.setMinWidthFactor(gd.getNextNumber());
 		fitConfig.setWidthFactor(gd.getNextNumber());
 		fitConfig.setPrecisionThreshold(gd.getNextNumber());
+
+		gd.collectOptions();
 
 		if (gd.invalidNumber())
 			return false;
@@ -327,8 +327,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			return false;
 		}
 
-		if (fitConfig.getFitFunction() != FitFunction.FREE && fitConfig.getFitFunction() != FitFunction.FREE_CIRCULAR &&
-				fitConfig.getFitFunction() != FitFunction.CIRCULAR)
+		if (fitConfig.getPSFType() == PSFType.ONE_AXIS_GAUSSIAN_2D && fitConfig.isFixedPSF())
 		{
 			String msg = "ERROR: A width-fitting function must be selected (i.e. not fixed-width fitting)";
 			IJ.error(TITLE, msg);
@@ -336,19 +335,19 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			return false;
 		}
 
-		SettingsManager.saveSettings(globalSettings);
+		SettingsManager.writeSettings(config.getFitEngineSettings());
 
-		if (!PeakFit.configureSmartFilter(globalSettings, calibrationBuilder, 0))
+		if (!PeakFit.configureSmartFilter(config, 0))
 			return false;
-		if (!PeakFit.configureDataFilter(globalSettings, 0))
+		if (!PeakFit.configureDataFilter(config, 0))
 			return false;
-		if (!PeakFit.configureFitSolver(globalSettings, calibrationBuilder, 0))
+		if (!PeakFit.configureFitSolver(config, 0))
 			return false;
 
 		// Extra parameters are needed for interlaced data
 		if (interlacedData)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n" +
 					"Describe the regular repeat of the data:\n \n" + "Start = The first frame that contains data\n" +
 					"Block = The number of continuous frames containing data\n" +
@@ -409,7 +408,10 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 			// Only save if successful
 			if (settings.updatePreferences)
+			{
 				SettingsManager.saveSettings(globalSettings);
+				SettingsManager.writeSettings(config.getFitEngineSettings());
+			}
 		}
 	}
 
@@ -559,7 +561,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 				log("NOTE: Angle is not significant: %g ~ %g (p=%g) => Re-run with fixed zero angle",
 						sampleStats.getMean(), testAngle, p);
 				ignore[ANGLE] = true;
-				config.getFitConfiguration().setFitFunction(FitFunction.FREE_CIRCULAR);
+				config.getFitConfiguration().setPSFType(PSFType.TWO_AXIS_GAUSSIAN_2D);
 				tryAgain = true;
 				break;
 			}
@@ -576,7 +578,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		{
 			log("NOTE: X-width and Y-width are not significantly different: %g ~ %g => Re-run with circular function",
 					sampleNew[X].getMean(), sampleNew[Y].getMean());
-			config.getFitConfiguration().setFitFunction(FitFunction.CIRCULAR);
+			config.getFitConfiguration().setPSFType(PSFType.ONE_AXIS_GAUSSIAN_2D);
 			tryAgain = true;
 		}
 		return tryAgain;
@@ -849,7 +851,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	{
 		return size() >= settings.numberOfPeaks;
 	}
-	
+
 	public void add(PeakResult result)
 	{
 		add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
@@ -862,7 +864,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
 					result.getParameters(), result.getParameterDeviations());
 	}
-	
+
 	public synchronized void addAll(Collection<PeakResult> results)
 	{
 		for (PeakResult result : results)

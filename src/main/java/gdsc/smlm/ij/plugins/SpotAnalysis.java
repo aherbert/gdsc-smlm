@@ -50,6 +50,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
+import gdsc.smlm.data.config.PSFConfigHelper;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
@@ -66,7 +67,6 @@ import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
@@ -1410,7 +1410,8 @@ public class SpotAnalysis extends PlugInFrame
 			float[] data2 = (float[]) rawImp.getImageStack().getProcessor(slice).getPixels();
 			double[] data = Utils.toDouble(data2);
 			FitConfiguration fitConfiguration = new FitConfiguration();
-			fitConfiguration.setFitFunction(FitFunction.FIXED);
+			fitConfiguration.mergePSF(PSFConfigHelper.defaultOneAxisGaussian2DPSF);
+			fitConfiguration.setFixedPSF(true);
 			fitConfiguration.setBackgroundFitting(true);
 			fitConfiguration.setSignalStrength(0);
 			fitConfiguration.setCoordinateShift(rawImp.getWidth() / 4.0f);

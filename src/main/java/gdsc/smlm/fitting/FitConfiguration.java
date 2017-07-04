@@ -1,38 +1,40 @@
 package gdsc.smlm.fitting;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.fitting.nonlinear.ApacheLVMFitter;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.FitConfig.FilterSettings;
+import gdsc.smlm.data.config.FitConfig.FitSettings;
+import gdsc.smlm.data.config.FitConfig.FitSolver;
+import gdsc.smlm.data.config.FitConfig.FitSolverSettings;
+import gdsc.smlm.data.config.FitConfig.FitSolverSettingsOrBuilder;
+import gdsc.smlm.data.config.FitConfig.SearchMethod;
+import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.PSFConfig.PSFParameter;
+import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
+import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.fitting.nonlinear.BacktrackingFastMLESteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.BaseFunctionSolver;
-import gdsc.smlm.fitting.nonlinear.BoundedNonLinearFit;
+import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
+import gdsc.smlm.fitting.nonlinear.LSELVMSteppingFunctionSolver;
+import gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver;
+import gdsc.smlm.fitting.nonlinear.MLELVMSteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
-import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
-import gdsc.smlm.fitting.nonlinear.NonLinearFit;
 import gdsc.smlm.fitting.nonlinear.ParameterBounds;
-import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
-import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
-import gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria;
-import gdsc.smlm.fitting.nonlinear.stop.ParameterStoppingCriteria;
-import gdsc.smlm.function.NoiseModel;
+import gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver;
+import gdsc.smlm.fitting.nonlinear.ToleranceChecker;
+import gdsc.smlm.fitting.nonlinear.WLSELVMSteppingFunctionSolver;
+import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultHelper;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
@@ -48,79 +50,88 @@ import gdsc.smlm.results.filter.PreprocessedPeakResult;
  */
 public class FitConfiguration implements Cloneable, IDirectFilter
 {
-	private FitCriteria fitCriteria;
+	private FitSettings.Builder fitSettings;
+
+	// Extract the settings for convenience
+	private CalibrationWriter calibration;
+	private PSF.Builder psf;
+	private FilterSettings.Builder filterSettings;
+	private FitSolverSettings.Builder fitSolverSettings;
+
+	//	private FitCriteria fitCriteria;
 	private Logger log = null;
-	private double delta = 0.0001;
-	private double initialAngle = 0; // Radians
-	private double initialSD0 = 1;
-	private double initialSD1 = 1;
+	//	private double delta = 0.0001;
+	//	private double initialAngle = 0; // Radians
+	//	private double initialSD0 = 1;
+	//	private double initialSD1 = 1;
 	private boolean computeDeviations = false;
-	private FitSolver fitSolver;
-	private int minIterations = 0;
-	private int maxIterations = 20;
-	private int significantDigits = 5;
-	private FitFunction fitFunction;
+	//	private FitSolver fitSolver;
+	//	private int minIterations = 0;
+	//	private int maxIterations = 20;
+	//	private int significantDigits = 5;
+	//	private FitFunction fitFunction;
 	private int flags;
-	private boolean backgroundFitting = true;
-	private boolean notSignalFitting = false;
+	//	private boolean backgroundFitting = true;
+	//	private boolean notSignalFitting = false;
 	private double coordinateShift = 1;
-	private double shiftFactor = 1;
+	//	private double shiftFactor = 1;
 	private int fitRegionWidth = 0, fitRegionHeight = 0;
 	private double coordinateOffset = 0.5;
 	private double signalThreshold = 0;
-	private double signalStrength = 0;
-	private double minPhotons = 30;
-	private double precisionThreshold = 1600; // == 40nm * 40nm;
-	private boolean precisionUsingBackground = false;
+	//	private double signalStrength = 0;
+	//	private double minPhotons = 30;
+	private double precisionThreshold = 0;
+	private boolean isTwoAxisGaussian2D;
+	//	private boolean precisionUsingBackground = false;
 	private double nmPerPixel = 0;
 	private double gain = 0;
-	private boolean emCCD = true;
-	private boolean modelCamera = false;
+	private double signalToPhotons, signalToCount;
+	private boolean emCCD = false;
+	//	private boolean modelCamera = false;
 	private double noise = 0;
 	private double minWidthFactor = 0.5;
 	private double widthFactor = 2;
-	private double lambda = 10;
+	//	private double lambda = 10;
 	private boolean computeResiduals = true;
-	private double duplicateDistance = 0.5;
-	private double bias = 0;
-	private double readNoise = 0;
-	private double amplification = 0;
-	private int maxFunctionEvaluations;
-	private SearchMethod searchMethod;
-	private boolean gradientLineMinimisation = false;
-	private double relativeThreshold = 1e-6;
-	private double absoluteThreshold = 1e-16;
+	//	private double duplicateDistance = 0.5;
+	//	private double bias = 0;
+	//	private double readNoise = 0;
+	//	private double amplification = 0;
+	//	private int maxFunctionEvaluations;
+	//	private SearchMethod searchMethod;
+	//	private boolean gradientLineMinimisation = false;
+	//	private double relativeThreshold = 1e-6;
+	//	private double absoluteThreshold = 1e-16;
 
 	// Options for clamping
-	private boolean useClamping = false;
-	private boolean useDynamicClamping = false;
+	//	private boolean useClamping = false;
+	//	private boolean useDynamicClamping = false;
 	private double[] clampValues;
 	private int nClampPeaks;
 	private ParameterBounds bounds = null;
 
-	private static double[] defaultClampValues;
-	static
-	{
-		defaultClampValues = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		// Taken from the 3D-DAO-STORM paper:
-		// (Babcock et al. 2012) A high-density 3D localization algorithm for stochastic optical 
-		// reconstruction microscopy. Optical Nanoscopy. 2012 1:6
-		// DOI: 10.1186/2192-2853-1-6
-		// Page 3
-		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
-		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
-		defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
-		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
-		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
-		defaultClampValues[Gaussian2DFunction.Z_POSITION] = 1; // This depends on calibration
-		defaultClampValues[Gaussian2DFunction.X_SD] = 3;
-		defaultClampValues[Gaussian2DFunction.Y_SD] = 3;
-		defaultClampValues[Gaussian2DFunction.ANGLE] = Math.PI;
-	}
+	//	private static double[] defaultClampValues;
+	//	static
+	//	{
+	//		defaultClampValues = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+	//		// Taken from the 3D-DAO-STORM paper:
+	//		// (Babcock et al. 2012) A high-density 3D localization algorithm for stochastic optical 
+	//		// reconstruction microscopy. Optical Nanoscopy. 2012 1:6
+	//		// DOI: 10.1186/2192-2853-1-6
+	//		// Page 3
+	//		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
+	//		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
+	//		defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
+	//		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
+	//		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
+	//		defaultClampValues[Gaussian2DFunction.Z_POSITION] = 1; // This depends on calibration
+	//		defaultClampValues[Gaussian2DFunction.X_SD] = 3;
+	//		defaultClampValues[Gaussian2DFunction.Y_SD] = 3;
+	//		defaultClampValues[Gaussian2DFunction.ANGLE] = Math.PI;
+	//	}
 
-	private StoppingCriteria stoppingCriteria = null;
+	private ToleranceChecker toleranceChecker = null;
 	private Gaussian2DFunction gaussianFunction = null;
-	private NoiseModel noiseModel = null;
 	private BaseFunctionSolver functionSolver = null;
 
 	private DynamicPeakResult dynamicPeakResult = new DynamicPeakResult();
@@ -129,9 +140,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	//private boolean simpleFilter = true;
 
 	// Support using a smart filter and disabling the simple filtering
-	private boolean disableSimpleFilter = false;
-	private boolean smartFilter = false;
-	private String smartFilterXML = "";
+	//	private boolean disableSimpleFilter = false;
+	//	private boolean smartFilter = false;
+	//	private String smartFilterXML = "";
 	private DirectFilter directFilter = null;
 	private int filterResult = 0;
 	private boolean widthEnabled;
@@ -142,18 +153,290 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public FitConfiguration()
 	{
+		this(FitConfigHelper.defaultFitSettings);
+	}
+
+	/**
+	 * Instantiates a new fit configuration.
+	 *
+	 * @param fitSettings
+	 *            the fit settings
+	 */
+	public FitConfiguration(FitSettings fitSettings)
+	{
+		this((fitSettings == null) ? null : fitSettings.toBuilder());
+	}
+
+	public FitConfiguration(FitSettings.Builder fitSettings)
+	{
+		if (fitSettings == null)
+			throw new IllegalArgumentException("FitSettings is null");
+		this.fitSettings = fitSettings;
+
+		// Extract for convenience
+		calibration = new CalibrationWriter(fitSettings.getCalibrationBuilder());
+		psf = fitSettings.getPsfBuilder();
+		fitSolverSettings = fitSettings.getFitSolverSettingsBuilder();
+		filterSettings = fitSettings.getFilterSettingsBuilder();
+
 		initialiseState();
 	}
 
 	/**
-	 * Creates the appropriate stopping criteria and Gaussian function for the configuration
+	 * Gets the fit settings.
+	 *
+	 * @return the fit settings
+	 */
+	public FitSettings getFitSettings()
+	{
+		return fitSettings.build();
+	}
+
+	/**
+	 * Merge fit settings.
+	 *
+	 * @param fitSettings
+	 *            the fit settings
+	 */
+	public void mergeFitSettings(FitSettings fitSettings)
+	{
+		this.fitSettings.mergeFrom(fitSettings);
+		initialiseState();
+	}
+
+	/**
+	 * Gets the calibration.
+	 *
+	 * @return the calibration
+	 */
+	public Calibration getCalibration()
+	{
+		return calibration.getCalibration();
+	}
+
+	/**
+	 * Merge the calibration.
+	 *
+	 * @param calibration
+	 *            the new calibration
+	 */
+	public void mergeCalibration(Calibration calibration)
+	{
+		this.calibration.mergeCalibration(calibration);
+		updateCalibration();
+	}
+
+	private void updateCalibration()
+	{
+		nmPerPixel = calibration.getNmPerPixel();
+		gain = calibration.getGain();
+		emCCD = calibration.isEMCCD();
+
+		if (isFitCameraCounts())
+		{
+			signalToPhotons = 1.0 / gain;
+			signalToCount = 1;
+		}
+		else
+		{
+			signalToPhotons = 1;
+			signalToCount = gain;
+		}
+
+		updatePrecisionThreshold();
+	}
+
+	/**
+	 * Gets the PSF.
+	 *
+	 * @return the PSF
+	 */
+	public PSF getPSF()
+	{
+		return psf.build();
+	}
+
+	/**
+	 * Merge the PSF.
+	 *
+	 * @param psf
+	 *            the new PSF
+	 */
+	public void mergePSF(PSF psf)
+	{
+		this.psf.mergeFrom(psf);
+		updatePSF();
+	}
+
+	private void updatePSF()
+	{
+		invalidateGaussianFunction();
+
+		int nParams;
+		PSFType psfType = psf.getPsfType();
+		switch (psfType)
+		{
+			case ASTIGMATIC_GAUSSIAN_2D:
+				flags = GaussianFunctionFactory.FIT_ERF_ASTIGMATISM;
+				nParams = 2;
+				break;
+			case ONE_AXIS_GAUSSIAN_2D:
+				if (isFixedPSF())
+					flags = GaussianFunctionFactory.FIT_ERF_FIXED;
+				else
+					flags = GaussianFunctionFactory.FIT_ERF_CIRCLE;
+				nParams = 1;
+				break;
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
+				flags = GaussianFunctionFactory.FIT_ELLIPTICAL;
+				nParams = 3;
+				break;
+			case TWO_AXIS_GAUSSIAN_2D:
+				flags = GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE;
+				nParams = 2;
+				break;
+			default:
+				throw new IllegalArgumentException("FitSettings must be a Gaussian 2D PSF");
+		}
+		isTwoAxisGaussian2D = PSFHelper.isTwoAxisGaussian2D(psfType);
+
+		// Ensure we have enough parameters
+		if (psf.getParameterCount() == 0)
+		{
+			// Create a dummy Sx
+			PSFParameter.Builder p = psf.addParameterBuilder(PSFHelper.INDEX_SX);
+			p.setName("Sx");
+			p.setValue(1);
+			p.setUnit(PSFParameterUnit.DISTANCE);
+		}
+		if (psf.getParameterCount() == 1 && nParams > 1)
+		{
+			// Duplicate the Sx to Sy
+			PSFParameter.Builder p = psf.addParameterBuilder(PSFHelper.INDEX_SY);
+			p.setName("Sy");
+			p.setValue(psf.getParameter(PSFHelper.INDEX_SX).getValue());
+			p.setUnit(PSFParameterUnit.DISTANCE);
+		}
+		if (psf.getParameterCount() == 2 && nParams > 2)
+		{
+			// Create a dummy angle
+			PSFParameter.Builder p = psf.addParameterBuilder(PSFHelper.INDEX_THETA);
+			p.setName("Angle");
+			p.setUnit(PSFParameterUnit.ANGLE);
+		}
+
+		updateCoordinateShift();
+	}
+
+	/**
+	 * Gets the FitSolverSettings.
+	 *
+	 * @return the FitSolverSettings
+	 */
+	public FitSolverSettings getFitSolverSettings()
+	{
+		return fitSolverSettings.build();
+	}
+
+	/**
+	 * Merge the FitSolverSettings.
+	 *
+	 * @param fitSolverSettings
+	 *            the new FitSolverSettings
+	 */
+	public void mergeFitSolverSettings(FitSolverSettings fitSolverSettings)
+	{
+		this.fitSolverSettings.mergeFrom(fitSolverSettings);
+		updateFitSolverSettings();
+	}
+
+	private void updateFitSolverSettings()
+	{
+		invalidateGaussianFunction();
+		invalidateFunctionSolver();
+		invalidateToleranceChecker();
+		invalidateClampValues();
+	}
+
+	/**
+	 * Gets the FilterSettings.
+	 *
+	 * @return the FilterSettings
+	 */
+	public FilterSettings getFilterSettings()
+	{
+		return filterSettings.build();
+	}
+
+	/**
+	 * Merge the FilterSettings.
+	 *
+	 * @param filterSettings
+	 *            the new FilterSettings
+	 */
+	public void mergeFilterSettings(FilterSettings filterSettings)
+	{
+		this.filterSettings.mergeFrom(filterSettings);
+		updateDataFilterSettings();
+	}
+
+	private void updateDataFilterSettings()
+	{
+		updateSignalThreshold();
+	}
+
+	/**
+	 * Ensure that the internal state of the object is initialised. This is used after deserialisation since some state
+	 * is not saved but restored from other property values.
+	 */
+	public void initialiseState()
+	{
+		// Create the state using the settings
+		if (dynamicPeakResult == null)
+			dynamicPeakResult = new DynamicPeakResult();
+
+		updateCalibration();
+		updatePSF();
+		updateFitSolverSettings();
+		updateDataFilterSettings();
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public FitConfiguration clone()
+	{
+		// This is not a complete duplicate. The settings builder objects with the 
+		// underlying configuration will be the same between all instances. 
+		try
+		{
+			FitConfiguration f = (FitConfiguration) super.clone();
+			// Reset instance specific objects
+			f.toleranceChecker = null;
+			f.gaussianFunction = null;
+			f.functionSolver = null;
+			f.setValidationResult(null, null);
+			f.dynamicPeakResult = new DynamicPeakResult();
+			return f;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			// Ignore
+		}
+		return null;
+	}
+
+	/**
+	 * Creates the appropriate stopping criteria and Gaussian function for the configuration.
+	 *
 	 * @param npeaks
 	 *            The number of peaks to fit
 	 * @param maxx
-	 *            The width of the XY data
-	 * @param maxx
 	 *            The height of the XY data
+	 * @param maxy
+	 *            the maxy
 	 * @param params
 	 *            The Gaussian parameters
 	 */
@@ -175,11 +458,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			//invalidateFunctionSolver();
 			gaussianFunction = createGaussianFunction(npeaks, maxx, maxy, params);
 		}
-		if (stoppingCriteria == null)
+		if (toleranceChecker == null)
 		{
 			// Requires a new function solver
 			invalidateFunctionSolver();
-			stoppingCriteria = createStoppingCriteria(gaussianFunction, params);
+			toleranceChecker = createToleranceChecker(gaussianFunction, params);
 		}
 	}
 
@@ -192,48 +475,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 *            The Gaussian parameters
 	 * @return The stopping criteria
 	 */
-	public StoppingCriteria createStoppingCriteria(Gaussian2DFunction func, double[] params)
+	public ToleranceChecker createToleranceChecker(Gaussian2DFunction func, double[] params)
 	{
-		StoppingCriteria stoppingCriteria;
-		if (fitCriteria == FitCriteria.PARAMETERS)
-		{
-			ParameterStoppingCriteria sc = new ParameterStoppingCriteria(func);
-			sc.setSignificantDigits(significantDigits);
-			addPeakRestrictions(func, sc, params);
-			stoppingCriteria = sc;
-		}
-		else if (fitCriteria == FitCriteria.COORDINATES)
-		{
-			GaussianStoppingCriteria sc = new GaussianStoppingCriteria(func);
-			sc.setDelta(delta);
-			addPeakRestrictions(func, sc, params);
-			stoppingCriteria = sc;
-		}
-		else
-		{
-			ErrorStoppingCriteria sc = new ErrorStoppingCriteria();
-			sc.setSignificantDigits(significantDigits);
-			sc.setAvoidPlateau(fitCriteria == FitCriteria.LEAST_SQUARED_PLUS);
-			stoppingCriteria = sc;
-		}
-		// Removed to reduce verbosity of logging output
-		//stoppingCriteria.setLog(log);
-		stoppingCriteria.setMinimumIterations(minIterations);
-		stoppingCriteria.setMaximumIterations(maxIterations);
-		return stoppingCriteria;
-	}
-
-	/**
-	 * Add restrictions on peak during fitting
-	 * 
-	 * @param func
-	 * @param sc
-	 */
-	protected void addPeakRestrictions(Gaussian2DFunction func, GaussianStoppingCriteria sc, double[] params)
-	{
-		// TODO - Check if it is worth using this to stop fitting early or simply do it at the end.
-		sc.setMinimumSignal(0);
-		// We could also set min and max positions and widths
+		FitSolverSettingsOrBuilder s = getFitSolverSettings();
+		double relativeValue = s.getRelativeThreshold();
+		double absoluteValue = s.getAbsoluteThreshold();
+		double relativeParameters = s.getParameterRelativeThreshold();
+		double absoluteParameters = s.getParameterAbsoluteThreshold();
+		int maxIterations = s.getMaxIterations();
+		ToleranceChecker toleranceChecker = new ToleranceChecker(relativeValue, absoluteValue, relativeParameters,
+				absoluteParameters, maxIterations);
+		return toleranceChecker;
 	}
 
 	/**
@@ -282,36 +534,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
-	 * @param fitCriteria
-	 *            the fit criteria to set
-	 */
-	public void setFitCriteria(int fitCriteria)
-	{
-		if (fitCriteria >= 0 && fitCriteria < FitCriteria.values().length)
-		{
-			setFitCriteria(FitCriteria.values()[fitCriteria]);
-		}
-	}
-
-	/**
-	 * @param fitCriteria
-	 *            the fit criteria to set
-	 */
-	public void setFitCriteria(FitCriteria fitCriteria)
-	{
-		invalidateStoppingCriteria();
-		this.fitCriteria = fitCriteria;
-	}
-
-	/**
-	 * @return the fit criteria
-	 */
-	public FitCriteria getFitCriteria()
-	{
-		return fitCriteria;
-	}
-
-	/**
 	 * @param log
 	 *            the log to set. Used to output fit evaluations for each iteration
 	 */
@@ -329,55 +551,48 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
-	 * @param delta
-	 *            the delta to set for the fitting criteria
-	 */
-	public void setDelta(double delta)
-	{
-		invalidateStoppingCriteria();
-		this.delta = delta;
-	}
-
-	/**
-	 * @return the delta
-	 */
-	public double getDelta()
-	{
-		return delta;
-	}
-
-	/**
 	 * @param initialAngle
-	 *            the initialAngle to set (in radians)
+	 *            the initialAngle to set
 	 */
 	public void setInitialAngle(double initialAngle)
 	{
-		this.initialAngle = initialAngle;
+		// Provide backward compatibility
+		if (psf.getPsfType() != PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D)
+			throw new IllegalStateException("Not a 2 axis and theta Gaussian 2D PSF");
+		psf.getParameterBuilder(PSFHelper.INDEX_THETA).setValue(initialAngle);
 	}
 
 	/**
-	 * @param initialAngle
-	 *            the initialAngle to set (in degrees)
-	 */
-	public void setInitialAngleD(double initialAngle)
-	{
-		this.initialAngle = (double) (initialAngle * Math.PI / 180.0);
-	}
-
-	/**
-	 * @return the initialAngle (in radians)
+	 * @return the initialAngle
 	 */
 	public double getInitialAngle()
 	{
-		return initialAngle;
+		// Provide backward compatibility
+		if (psf.getPsfType() != PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D)
+			throw new IllegalStateException("Not a 2 axis and theta Gaussian 2D PSF");
+		return psf.getParameter(PSFHelper.INDEX_THETA).getValue();
 	}
 
 	/**
-	 * @return the initialAngle (in degrees)
+	 * Gets the PSF type.
+	 *
+	 * @return the PSF type
 	 */
-	public double getInitialAngleD()
+	public PSFType getPSFType()
 	{
-		return (double) (initialAngle * 180.0 / Math.PI);
+		return psf.getPsfType();
+	}
+
+	/**
+	 * Sets the PSF type.
+	 *
+	 * @param psfType
+	 *            the new PSF type
+	 */
+	public void setPSFType(PSFType psfType)
+	{
+		psf.setPsfType(psfType);
+		updatePSF();
 	}
 
 	/**
@@ -386,8 +601,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setInitialPeakStdDev(double initialPeakStdDev)
 	{
-		setInitialPeakStdDev0(initialPeakStdDev);
-		setInitialPeakStdDev1(initialPeakStdDev);
+		psf.getParameterBuilder(PSFHelper.INDEX_SX).setValue(initialPeakStdDev);
+		if (isTwoAxisGaussian2D)
+			psf.getParameterBuilder(PSFHelper.INDEX_SY).setValue(initialPeakStdDev);
+		updateCoordinateShift();
 	}
 
 	/**
@@ -400,8 +617,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setInitialPeakStdDev0(double initialPeakStdDev0)
 	{
-		this.initialSD0 = initialPeakStdDev0;
+		psf.getParameterBuilder(PSFHelper.INDEX_SX).setValue(initialPeakStdDev0);
 		updateCoordinateShift();
+	}
+
+	/**
+	 * @return An estimate for the combined peak standard deviation
+	 */
+	public double getInitialPeakStdDev()
+	{
+		if (isTwoAxisGaussian2D)
+			return Gaussian2DPeakResultHelper.getStandardDeviation(getInitialPeakStdDev0(), getInitialPeakStdDev1());
+		return getInitialPeakStdDev0();
 	}
 
 	/**
@@ -409,7 +636,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public double getInitialPeakStdDev0()
 	{
-		return initialSD0;
+		return psf.getParameter(PSFHelper.INDEX_SX).getValue();
 	}
 
 	/**
@@ -422,7 +649,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setInitialPeakStdDev1(double initialPeakStdDev1)
 	{
-		this.initialSD1 = initialPeakStdDev1;
+		if (!isTwoAxisGaussian2D)
+			throw new IllegalStateException("Not a 2 axis Gaussian 2D PSF");
+		psf.getParameterBuilder(PSFHelper.INDEX_SY).setValue(initialPeakStdDev1);
 		updateCoordinateShift();
 	}
 
@@ -431,7 +660,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public double getInitialPeakStdDev1()
 	{
-		return initialSD1;
+		if (isTwoAxisGaussian2D)
+			return psf.getParameter(PSFHelper.INDEX_SY).getValue();
+		return getInitialPeakStdDev0();
 	}
 
 	/**
@@ -456,7 +687,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public FitSolver getFitSolver()
 	{
-		return fitSolver;
+		return fitSolverSettings.getFitSolver();
 	}
 
 	/**
@@ -465,7 +696,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setFitSolver(FitSolver fitSolver)
 	{
-		this.fitSolver = fitSolver;
+		fitSolverSettings.setFitSolver(fitSolver);
 	}
 
 	/**
@@ -474,28 +705,31 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setFitSolver(int fitSolver)
 	{
-		if (fitSolver >= 0 && fitSolver < FitSolver.values().length)
+		FitSolver f = FitSolver.forNumber(fitSolver);
+		if (f != null)
 		{
-			setFitSolver(FitSolver.values()[fitSolver]);
+			setFitSolver(f);
 		}
 	}
 
 	/**
-	 * @param minIterations
-	 *            the minIterations to set
+	 * Sets the fixed iterations flag.
+	 *
+	 * @param fixedIterations
+	 *            the fixedIterations to set
 	 */
-	public void setMinIterations(int minIterations)
+	public void setFixedIterations(boolean fixedIterations)
 	{
-		invalidateStoppingCriteria();
-		this.minIterations = minIterations;
+		invalidateToleranceChecker();
+		fitSolverSettings.setFixedIterations(fixedIterations);
 	}
 
 	/**
-	 * @return the minIterations
+	 * @return the fixedIterations flag
 	 */
-	public int getMinIterations()
+	public boolean isFixedIterations()
 	{
-		return minIterations;
+		return fitSolverSettings.getFixedIterations();
 	}
 
 	/**
@@ -504,9 +738,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setMaxIterations(int maxIterations)
 	{
-		invalidateStoppingCriteria();
-		invalidateFunctionSolver();
-		this.maxIterations = maxIterations;
+		invalidateToleranceChecker();
+		fitSolverSettings.setMaxIterations(Math.max(0, maxIterations));
 	}
 
 	/**
@@ -514,26 +747,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public int getMaxIterations()
 	{
-		return maxIterations;
-	}
-
-	/**
-	 * @param significantDigits
-	 *            the significant digits for computing if the parameters have changed
-	 * @see gdsc.smlm.fitting.FitCriteria
-	 */
-	public void setSignificantDigits(int significantDigits)
-	{
-		invalidateStoppingCriteria();
-		this.significantDigits = significantDigits;
-	}
-
-	/**
-	 * @return the significant digits for computing if the parameters have changed
-	 */
-	public int getSignificantDigits()
-	{
-		return significantDigits;
+		return Math.max(0, fitSolverSettings.getMaxIterations());
 	}
 
 	/**
@@ -543,7 +757,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public void setBackgroundFitting(boolean backgroundFitting)
 	{
 		invalidateGaussianFunction();
-		this.backgroundFitting = backgroundFitting;
+		fitSolverSettings.setDisableBackgroundFitting(!backgroundFitting);
 	}
 
 	/**
@@ -551,7 +765,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public boolean isBackgroundFitting()
 	{
-		return backgroundFitting;
+		return !fitSolverSettings.getDisableBackgroundFitting();
 	}
 
 	/**
@@ -564,7 +778,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public void setNotSignalFitting(boolean noSignalFitting)
 	{
 		invalidateGaussianFunction();
-		this.notSignalFitting = noSignalFitting;
+		fitSolverSettings.setDisableSignalFitting(noSignalFitting);
 	}
 
 	/**
@@ -572,7 +786,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public boolean isNotSignalFitting()
 	{
-		return notSignalFitting;
+		return fitSolverSettings.getDisableBackgroundFitting();
 	}
 
 	/**
@@ -608,59 +822,26 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
-	 * @param fitFunction
-	 *            the fitting function to use
+	 * Set to true to fix the PSF using the initial parameters. This is only supported for a one-axis Gaussian 2D PSF.
+	 *
+	 * @param fixed
+	 *            the new fixed PSF
 	 */
-	public void setFitFunction(int fitFunction)
+	public void setFixedPSF(boolean fixed)
 	{
-		if (fitFunction >= 0 && fitFunction < FitFunction.values().length)
-		{
-			setFitFunction(FitFunction.values()[fitFunction]);
-		}
+		fitSolverSettings.setFixedPsf(fixed);
+		updatePSF();
 	}
 
 	/**
-	 * @param fitFunction
-	 *            the fitting function to use
+	 * Set to true to fix the PSF using the initial parameters. This is only supported for a one-axis Gaussian 2D PSF.
+	 *
+	 * @return the fixed PSF
 	 */
-	public void setFitFunction(FitFunction fitFunction)
+	public boolean isFixedPSF()
 	{
-		invalidateGaussianFunction();
-		this.fitFunction = fitFunction;
-		switch (fitFunction)
-		{
-			case CIRCULAR:
-				flags = GaussianFunctionFactory.FIT_CIRCLE;
-				break;
-			case FIXED:
-				flags = GaussianFunctionFactory.FIT_FIXED;
-				break;
-			case FREE_CIRCULAR:
-				flags = GaussianFunctionFactory.FIT_FREE_CIRCLE;
-				break;
-			case FREE:
-				flags = GaussianFunctionFactory.FIT_ELLIPTICAL;
-				break;
-			default:
-				throw new RuntimeException("Unknown fitting function");
-		}
+		return fitSolverSettings.getFixedPsf();
 	}
-
-	/**
-	 * @return the fitting function
-	 */
-	public FitFunction getFitFunction()
-	{
-		return fitFunction;
-	}
-
-	//	/**
-	//	 * @param fitValidation
-	//	 *            True if fit should be validated with {@link #validatePeak(int, double[], double[])}
-	//	 */
-	//	public void setFitValidation(boolean fitValidation)
-	//	{
-	//	}
 
 	/**
 	 * @return True if fit should be validated with {@link #validatePeak(int, double[], double[])}
@@ -702,17 +883,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setCoordinateShiftFactor(double shiftFactor)
 	{
-		this.shiftFactor = (shiftFactor > 0) ? shiftFactor : 0;
-		// Reset to zero for disabled values 
-		this.shiftFactor = getCoordinateShiftFactor();
+		filterSettings.setShiftFactor(shiftFactor);
 		updateCoordinateShift();
 	}
 
 	private void updateCoordinateShift()
 	{
+		double shiftFactor = getCoordinateShiftFactor();
 		if (shiftFactor > 0)
 		{
-			final double widthMax = Maths.max(initialSD0, initialSD1);
+			double widthMax = getInitialPeakStdDev0();
+			if (isTwoAxisGaussian2D)
+				widthMax = Math.max(widthMax, getInitialPeakStdDev1());
 			if (widthMax > 0)
 			{
 				setCoordinateShift(shiftFactor * widthMax);
@@ -727,9 +909,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public double getCoordinateShiftFactor()
 	{
-		if (shiftFactor == Double.POSITIVE_INFINITY)
-			return 0;
-		return shiftFactor;
+		return filterSettings.getShiftFactor();
 	}
 
 	/**
@@ -783,14 +963,19 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
+	 * Set the signal strength used to determine the signal strength for a good fit (signalThreshold =
+	 * max(minSignal, noise x signalStrength).
+	 * <p>
+	 * Note that minSignal is created appropriately from minPhotons using the
+	 * type of fitter, see {@link #isFitCameraCounts()}.
+	 * 
 	 * @param signalStrength
-	 *            The signal strength. Used to determine the signal strength for a good fit (signalThreshold =
-	 *            max(gain x minPhotons, noise x signalStrength).
+	 *            The signal strength
 	 */
 	public void setSignalStrength(double signalStrength)
 	{
-		this.signalStrength = signalStrength;
-		setSignalThreshold();
+		filterSettings.setSignalStrength(signalStrength);
+		updateSignalThreshold();
 	}
 
 	/**
@@ -798,7 +983,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public double getSignalStrength()
 	{
-		return signalStrength;
+		return filterSettings.getSignalStrength();
 	}
 
 	/**
@@ -806,18 +991,23 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public double getMinPhotons()
 	{
-		return minPhotons;
+		return filterSettings.getMinPhotons();
 	}
 
 	/**
+	 * Set the minimum photons used to determine the signal strength for a good fit (signalThreshold =
+	 * max(minSignal, noise x signalStrength).
+	 * <p>
+	 * Note that minSignal is created appropriately from minPhotons using the
+	 * type of fitter, see {@link #isFitCameraCounts()}.
+	 * 
 	 * @param minPhotons
-	 *            The minimum number of photons. Used to determine the signal strength for a good fit (signalThreshold =
-	 *            max(gain x minPhotons, noise x signalStrength).
+	 *            The minimum number of photons
 	 */
 	public void setMinPhotons(double minPhotons)
 	{
-		this.minPhotons = minPhotons;
-		setSignalThreshold();
+		filterSettings.setMinPhotons(minPhotons);
+		updateSignalThreshold();
 	}
 
 	/**
@@ -826,7 +1016,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public double getPrecisionThreshold()
 	{
-		return (precisionThreshold > 0) ? Math.sqrt(precisionThreshold) : 0;
+		return filterSettings.getPrecisionThreshold();
 	}
 
 	/**
@@ -835,8 +1025,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setPrecisionThreshold(double precisionThreshold)
 	{
-		// Store the squared threshold
-		this.precisionThreshold = precisionThreshold * precisionThreshold;
+		if (precisionThreshold > 0)
+			filterSettings.setPrecisionThreshold(precisionThreshold);
+		else
+			filterSettings.clearPrecisionThreshold();
+		updatePrecisionThreshold();
+	}
+
+	private void updatePrecisionThreshold()
+	{
+		// Store the squared threshold for speed
+		if (nmPerPixel > 0 && gain > 0 && calibration.isCCD())
+			this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
+		else
+			this.precisionThreshold = 0;
 	}
 
 	/**
@@ -844,7 +1046,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public boolean isPrecisionUsingBackground()
 	{
-		return precisionUsingBackground;
+		return filterSettings.getPrecisionUsingBackground();
 	}
 
 	/**
@@ -857,18 +1059,23 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setPrecisionUsingBackground(boolean precisionUsingBackground)
 	{
-		this.precisionUsingBackground = precisionUsingBackground;
+		filterSettings.setPrecisionUsingBackground(precisionUsingBackground);
 	}
 
 	/**
+	 * Set the image noise used to determine the signal strength for a good fit (signalThreshold =
+	 * max(minSignal, noise x signalStrength).
+	 * <p>
+	 * Note that minSignal is created appropriately from minPhotons using the
+	 * type of fitter, see {@link #isFitCameraCounts()}.
+	 * 
 	 * @param noise
-	 *            The image noise. Used to determine the signal strength for a good fit (signalThreshold =
-	 *            max(gain x minPhotons, noise x signalStrength).
+	 *            The image noise.
 	 */
 	public void setNoise(double noise)
 	{
 		this.noise = noise;
-		setSignalThreshold();
+		updateSignalThreshold();
 	}
 
 	/**
@@ -879,9 +1086,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		return noise;
 	}
 
-	private void setSignalThreshold()
+	private void updateSignalThreshold()
 	{
-		signalThreshold = Math.max(noise * signalStrength, minPhotons * gain);
+		double minSignal = (isFitCameraCounts()) ? getMinPhotons() * gain : getMinPhotons();
+		signalThreshold = Math.max(noise * getSignalStrength(), minSignal);
 	}
 
 	/**
@@ -890,6 +1098,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setWidthFactor(double widthFactor)
 	{
+		filterSettings.setMaxWidthFactor(widthFactor);
 		if (widthFactor > 1)
 		{
 			this.widthFactor = widthFactor;
@@ -905,7 +1114,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public double getWidthFactor()
 	{
-		return (widthFactor == Double.POSITIVE_INFINITY) ? 0 : widthFactor;
+		double widthFactor = filterSettings.getMaxWidthFactor();
+		return (widthFactor > 1) ? widthFactor : 0;
 	}
 
 	/**
@@ -914,6 +1124,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setMinWidthFactor(double minWidthFactor)
 	{
+		filterSettings.setMinWidthFactor(minWidthFactor);
 		if (minWidthFactor < 1 && minWidthFactor > 0)
 		{
 			this.minWidthFactor = minWidthFactor;
@@ -929,23 +1140,337 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public double getMinWidthFactor()
 	{
-		return minWidthFactor;
+		double minWidthFactor = filterSettings.getMinWidthFactor();
+		return (minWidthFactor < 1 && minWidthFactor > 0) ? minWidthFactor : 0;
 	}
 
 	/**
-	 * @return the stoppingCriteria
+	 * @param lambda
+	 *            the lambda to start the Levenberg-Marquardt fitting process
 	 */
-	public StoppingCriteria getStoppingCriteria()
+	public void setLambda(double lambda)
 	{
-		return stoppingCriteria;
+		invalidateFunctionSolver();
+		fitSolverSettings.setLambda(lambda);
+	}
+
+	/**
+	 * @return the lambda
+	 */
+	public double getLambda()
+	{
+		return fitSolverSettings.getLambda();
+	}
+
+	/**
+	 * @return the computeResiduals
+	 */
+	public boolean isComputeResiduals()
+	{
+		return computeResiduals;
+	}
+
+	/**
+	 * @param computeResiduals
+	 *            Set to true to compute the residuals
+	 */
+	public void setComputeResiduals(boolean computeResiduals)
+	{
+		this.computeResiduals = computeResiduals;
+	}
+
+	/**
+	 * @param nmPerPixel
+	 *            the nm per pixel scale to use when evaluating a fitted peak's localisation precision
+	 */
+	public void setNmPerPixel(double nmPerPixel)
+	{
+		calibration.setNmPerPixel(nmPerPixel);
+		updateCalibration();
+	}
+
+	/**
+	 * @return the gain (or 1 if the gain is invalid)
+	 */
+	public double getGainSafe()
+	{
+		return (gain <= 0) ? 1 : gain;
+	}
+
+	/**
+	 * @param gain
+	 *            the camera gain to use when evaluating a fitted peak's localisation precision.
+	 */
+	public void setGain(double gain)
+	{
+		invalidateFunctionSolver();
+		calibration.setGain(gain);
+		updateCalibration();
+		//updateSignalThreshold();
+	}
+
+	/**
+	 * Specify if an EM-CCD camera is used. This is relevant when validating results using the localisation precision.
+	 * 
+	 * @param emCCD
+	 *            Set to true if using an EM-CCD camera
+	 */
+	public void setEmCCD(boolean emCCD)
+	{
+		invalidateFunctionSolver();
+		calibration.setEmCCD(emCCD);
+		updateCalibration();
+	}
+
+	/**
+	 * @return True if modelling the camera noise during maximum likelihood fitting
+	 */
+	public boolean isModelCamera()
+	{
+		return fitSolverSettings.getModelCamera();
+	}
+
+	/**
+	 * Specify if the camera noise should be modelled during maximum likelihood fitting. If true then the read noise
+	 * must be set. If the EmCCD property is true then the gain must also be set.
+	 * 
+	 * @param modelCamera
+	 *            Set to true to model the camera
+	 */
+	public void setModelCamera(boolean modelCamera)
+	{
+		invalidateFunctionSolver();
+		fitSolverSettings.setModelCamera(modelCamera);
+	}
+
+	/**
+	 * @param bias
+	 *            the camera bias (used for maximum likelihood estimation to evaluate the correct value of the
+	 *            observed count)
+	 */
+	public void setBias(double bias)
+	{
+		calibration.setBias(bias);
+	}
+
+	/**
+	 * @param readNoise
+	 *            the camera read noise (used for maximum likelihood estimation)
+	 */
+	public void setReadNoise(double readNoise)
+	{
+		invalidateFunctionSolver();
+		calibration.setReadNoise(readNoise);
+	}
+
+	/**
+	 * @param amplification
+	 *            The amplification [ADUs/electron] (used for maximum likelihood estimation)
+	 */
+	public void setAmplification(double amplification)
+	{
+		invalidateFunctionSolver();
+		calibration.setAmplification(amplification);
+	}
+
+	/**
+	 * @return the maximum number of function evaluations for the Maximum Likelihood Estimator
+	 */
+	public int getMaxFunctionEvaluations()
+	{
+		return fitSolverSettings.getMaxFunctionEvaluations();
+	}
+
+	/**
+	 * @param maxFunctionEvaluations
+	 *            the maximum number of function evaluations for the Maximum Likelihood Estimator
+	 */
+	public void setMaxFunctionEvaluations(int maxFunctionEvaluations)
+	{
+		invalidateFunctionSolver();
+		fitSolverSettings.setMaxFunctionEvaluations(maxFunctionEvaluations);
+	}
+
+	/**
+	 * @return the search for the Maximum Likelihood Estimator
+	 */
+	public SearchMethod getSearchMethod()
+	{
+		return fitSolverSettings.getSearchMethod();
+	}
+
+	/**
+	 * @param searchMethod
+	 *            the search for the Maximum Likelihood Estimator
+	 */
+	public void setSearchMethod(int searchMethod)
+	{
+		SearchMethod sm = SearchMethod.forNumber(searchMethod);
+		if (sm != null)
+		{
+			setSearchMethod(sm);
+		}
+	}
+
+	/**
+	 * @param searchMethod
+	 *            the search for the Maximum Likelihood Estimator
+	 */
+	public void setSearchMethod(SearchMethod searchMethod)
+	{
+		invalidateFunctionSolver();
+		fitSolverSettings.getSearchMethod();
+	}
+
+	/**
+	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
+	 * 
+	 * @return the gradientLineMinimisation True if using the gradient for line minimisation
+	 */
+	public boolean isGradientLineMinimisation()
+	{
+		return fitSolverSettings.getGradientLineMinimisation();
+	}
+
+	/**
+	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
+	 * 
+	 * @param gradientLineMinimisation
+	 *            Set to true to use the gradient for line minimisation
+	 */
+	public void setGradientLineMinimisation(boolean gradientLineMinimisation)
+	{
+		invalidateFunctionSolver();
+		fitSolverSettings.setGradientLineMinimisation(gradientLineMinimisation);
+	}
+
+	/**
+	 * @return the relative threshold for convergence
+	 */
+	public double getRelativeThreshold()
+	{
+		return fitSolverSettings.getRelativeThreshold();
+	}
+
+	/**
+	 * @param relativeThreshold
+	 *            the relative threshold for convergence
+	 */
+	public void setRelativeThreshold(double relativeThreshold)
+	{
+		invalidateToleranceChecker();
+		fitSolverSettings.setRelativeThreshold(relativeThreshold);
+	}
+
+	/**
+	 * @return the absolute threshold for convergence
+	 */
+	public double getAbsoluteThreshold()
+	{
+		return fitSolverSettings.getAbsoluteThreshold();
+	}
+
+	/**
+	 * @param absoluteThreshold
+	 *            the absolute threshold for convergence
+	 */
+	public void setAbsoluteThreshold(double absoluteThreshold)
+	{
+		invalidateToleranceChecker();
+		fitSolverSettings.setAbsoluteThreshold(absoluteThreshold);
+	}
+
+	/**
+	 * @retParameterurn the parameter relative threshold for convergence
+	 */
+	public double getParameterRelativeThreshold()
+	{
+		return fitSolverSettings.getParameterRelativeThreshold();
+	}
+
+	/**
+	 * @param relativeThreshold
+	 *            the parameter relative threshold for convergence
+	 */
+	public void setParameterRelativeThreshold(double relativeThreshold)
+	{
+		invalidateToleranceChecker();
+		fitSolverSettings.setParameterRelativeThreshold(relativeThreshold);
+	}
+
+	/**
+	 * @retParameterurn the parameter absolute threshold for convergence
+	 */
+	public double getParameterAbsoluteThreshold()
+	{
+		return fitSolverSettings.getParameterAbsoluteThreshold();
+	}
+
+	/**
+	 * @param absoluteThreshold
+	 *            the parameter absolute threshold for convergence
+	 */
+	public void setParameterAbsoluteThreshold(double absoluteThreshold)
+	{
+		invalidateToleranceChecker();
+		fitSolverSettings.setParameterAbsoluteThreshold(absoluteThreshold);
+	}
+
+	/**
+	 * @return the toleranceChecker
+	 */
+	public ToleranceChecker getToleranceChecker()
+	{
+		if (toleranceChecker == null)
+		{
+			// This can be set to negative for fixed iterations
+			int maxIterations = getMaxIterations();
+			if (isFixedIterations())
+				maxIterations = -maxIterations;
+
+			boolean minimiseValue = isMinimiseValue();
+			toleranceChecker = new ToleranceChecker(minimiseValue, getRelativeThreshold(), getAbsoluteThreshold(),
+					getParameterRelativeThreshold(), getParameterAbsoluteThreshold(), maxIterations);
+		}
+		return toleranceChecker;
+	}
+
+	private boolean isMinimiseValue()
+	{
+		switch (getFitSolver())
+		{
+			case BACKTRACKING_FAST_MLE:
+			case FAST_MLE:
+				// Maximum likelihood
+				return false;
+
+			case LVM_LSE:
+			case LVM_WLSE:
+				// Minimise sum-of-squares
+				return true;
+
+			case LVM_MLE:
+				// Minimises the log-likelihood ratio 
+				return true;
+
+			case MLE:
+				// The legacy MLE actual minimises the negative likelihood.
+				// This should not matter anyway since the tolerance checker is not used
+				// for this fitter.
+				return true;
+
+			default:
+				throw new IllegalStateException("Unrecognised fit solver: " + getFitSolver());
+		}
 	}
 
 	/**
 	 * Call this when a property changes that will change the stopping criteria
 	 */
-	private void invalidateStoppingCriteria()
+	private void invalidateToleranceChecker()
 	{
-		stoppingCriteria = null;
+		toleranceChecker = null;
+		invalidateFunctionSolver();
 	}
 
 	/**
@@ -1100,8 +1625,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			return setValidationResult(FitStatus.COORDINATES_MOVED, new double[] { xShift, yShift });
 		}
 
-		// Check signal threshold
-		final double signal = params[Gaussian2DFunction.SIGNAL + offset] * gain;
+		// Check signal threshold. 
+		// The threshold should be set in the same units as those used during fitting. 
+		final double signal = params[Gaussian2DFunction.SIGNAL + offset];
 		// Compare the signal to the desired signal strength
 		if (signal < signalThreshold)
 		{
@@ -1145,12 +1671,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 
 		// Check precision
-		if (precisionThreshold > 0 && nmPerPixel > 0 && gain > 0)
+		if (precisionThreshold > 0)
 		{
-			final double sd = (params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) *
-					0.5;
+			final double sd = (isTwoAxisGaussian2D)
+					? Gaussian2DPeakResultHelper.getStandardDeviation(params[Gaussian2DFunction.X_SD + offset],
+							params[Gaussian2DFunction.Y_SD + offset])
+					: params[Gaussian2DFunction.X_SD + offset];
 			final double variance = getVariance(params[Gaussian2DFunction.BACKGROUND],
-					params[Gaussian2DFunction.SIGNAL + offset], sd, this.precisionUsingBackground);
+					params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, sd, isPrecisionUsingBackground());
 
 			if (variance > precisionThreshold)
 			{
@@ -1191,7 +1719,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		{
 			// Check using the formula which uses the estimated background.
 			// This allows for better filtering when the background is variable, e.g. when imaging cells.
-			if (fitSolver == FitSolver.MLE)
+			if (isModelCameraMLE())
 			{
 				try
 				{
@@ -1215,7 +1743,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 		else
 		{
-			if (fitSolver == FitSolver.MLE)
+			if (isModelCameraMLE())
 			{
 				try
 				{
@@ -1326,12 +1854,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public float getSignal()
 		{
-			return (float) (params[Gaussian2DFunction.SIGNAL + offset] * FitConfiguration.this.gain);
+			return (float) (params[Gaussian2DFunction.SIGNAL + offset] * signalToCount);
 		}
 
 		public float getPhotons()
 		{
-			return (float) (params[Gaussian2DFunction.SIGNAL + offset]);
+			return (float) (params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons);
 		}
 
 		public float getSNR()
@@ -1346,7 +1874,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			final double localBackground = getLocalBackground();
 
 			return (float) ((localBackground > 0)
-					? PeakResultHelper.localBackgroundToNoise(localBackground, gain, emCCD)
+					? (isFitCameraCounts()) ? PeakResultHelper.localBackgroundToNoise(localBackground, gain, emCCD)
+							: PeakResultHelper.localBackgroundToNoise(localBackground, emCCD)
 					: FitConfiguration.this.noise);
 		}
 
@@ -1359,7 +1888,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		{
 			// We do not use the local background so set as zero
 			if (var == -1)
-				var = FitConfiguration.this.getVariance(0, params[Gaussian2DFunction.SIGNAL + offset], getSD(), false);
+				var = FitConfiguration.this.getVariance(0, params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons,
+						getSD(), false);
 			return var;
 		}
 
@@ -1367,7 +1897,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		{
 			if (var2 == -1)
 				var2 = FitConfiguration.this.getVariance(getLocalBackground(),
-						params[Gaussian2DFunction.SIGNAL + offset], getSD(), true);
+						params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, getSD(), true);
 			return var2;
 		}
 
@@ -1643,9 +2173,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			float offsetx, float offsety)
 	{
 		final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
-		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL] * gain;
-		final double photons = parameters[offset + Gaussian2DFunction.SIGNAL];
-		final double b = (localBackground > 0) ? localBackground : parameters[Gaussian2DFunction.BACKGROUND];
+		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL] * signalToCount;
+		final double photons = parameters[offset + Gaussian2DFunction.SIGNAL] * signalToPhotons;
+		final double b = signalToPhotons *
+				((localBackground > 0) ? localBackground : parameters[Gaussian2DFunction.BACKGROUND]);
 		final double angle = parameters[offset + Gaussian2DFunction.ANGLE];
 		final double x = parameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
 		final double y = parameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
@@ -1673,305 +2204,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
-	 * @param lambda
-	 *            the lambda to start the Levenberg-Marquardt fitting process
-	 */
-	public void setLambda(double lambda)
-	{
-		invalidateFunctionSolver();
-		this.lambda = lambda;
-	}
-
-	/**
-	 * @return the lambda
-	 */
-	public double getLambda()
-	{
-		return lambda;
-	}
-
-	/**
-	 * @return the computeResiduals
-	 */
-	public boolean isComputeResiduals()
-	{
-		return computeResiduals;
-	}
-
-	/**
-	 * @param computeResiduals
-	 *            Set to true to compute the residuals
-	 */
-	public void setComputeResiduals(boolean computeResiduals)
-	{
-		this.computeResiduals = computeResiduals;
-	}
-
-	/**
-	 * @param duplicateDistance
-	 *            The distance within which spots are considered duplicates
-	 */
-	public void setDuplicateDistance(final double duplicateDistance)
-	{
-		this.duplicateDistance = duplicateDistance;
-	}
-
-	/**
-	 * @return The distance within which spots are considered duplicates
-	 */
-	public double getDuplicateDistance()
-	{
-		return duplicateDistance;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#clone()
-	 */
-	public FitConfiguration clone()
-	{
-		try
-		{
-			FitConfiguration f = (FitConfiguration) super.clone();
-			// Ensure the object reference is passed through.
-			// All other fields are primitives and so should be copied by Object.clone().
-			f.log = log;
-			// Reset instance specific objects
-			f.stoppingCriteria = null;
-			f.gaussianFunction = null;
-			f.noiseModel = null;
-			f.functionSolver = null;
-			f.setValidationResult(null, null);
-			f.dynamicPeakResult = new DynamicPeakResult();
-			return f;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
-	}
-
-	/**
-	 * Ensure that the internal state of the object is initialised. This is used after deserialisation since some state
-	 * is not saved but restored from other property values.
-	 */
-	public void initialiseState()
-	{
-		// Initialise objects that cannot be null
-		if (fitCriteria == null)
-			fitCriteria = FitCriteria.LEAST_SQUARED_ERROR;
-		if (fitSolver == null)
-			fitSolver = FitSolver.LVM;
-		if (fitFunction == null)
-			fitFunction = FitFunction.CIRCULAR;
-		if (searchMethod == null)
-			searchMethod = SearchMethod.POWELL;
-
-		if (maxFunctionEvaluations == 0)
-			maxFunctionEvaluations = 2000;
-		if (initialSD0 == 0)
-			initialSD0 = 1;
-		if (initialSD1 == 0)
-			initialSD1 = 1;
-		if (shiftFactor == 0)
-			setCoordinateShiftFactor(1);
-		if (dynamicPeakResult == null)
-			dynamicPeakResult = new DynamicPeakResult();
-
-		setNoise(noise);
-		setFitFunction(fitFunction);
-		invalidateFunctionSolver();
-	}
-
-	/**
-	 * @return the nmPerPixel
-	 */
-	public double getNmPerPixel()
-	{
-		return nmPerPixel;
-	}
-
-	/**
-	 * @param nmPerPixel
-	 *            the nm per pixel scale to use when evaluating a fitted peak's localisation precision
-	 */
-	public void setNmPerPixel(double nmPerPixel)
-	{
-		this.nmPerPixel = nmPerPixel;
-	}
-
-	/**
-	 * @return the gain
-	 */
-	public double getGain()
-	{
-		return gain;
-	}
-
-	/**
-	 * @return the gain (or 1 if the gain is invalid)
-	 */
-	public double getGainSafe()
-	{
-		return (gain <= 0) ? 1 : gain;
-	}
-
-	/**
-	 * @param gain
-	 *            the gain to use when evaluating a fitted peak's localisation precision. Also used to determine the
-	 *            signal threshold (signalThreshold = max(gain x minPhotons, noise x signalStrength)
-	 */
-	public void setGain(double gain)
-	{
-		invalidateFunctionSolver();
-		this.gain = Math.abs(gain);
-		setSignalThreshold();
-	}
-
-	/**
-	 * @return True if using an EM-CCD camera
-	 */
-	public boolean isEmCCD()
-	{
-		return emCCD;
-	}
-
-	/**
-	 * Specify if an EM-CCD camera is used. This is relevant when validating results using the localisation precision.
-	 * 
-	 * @param emCCD
-	 *            Set to true if using an EM-CCD camera
-	 */
-	public void setEmCCD(boolean emCCD)
-	{
-		invalidateFunctionSolver();
-		this.emCCD = emCCD;
-	}
-
-	/**
-	 * @return True if modelling the camera noise during maximum likelihood fitting
-	 */
-	public boolean isModelCamera()
-	{
-		return modelCamera;
-	}
-
-	/**
-	 * Specify if the camera noise should be modelled during maximum likelihood fitting. If true then the read noise
-	 * must be set. If the EmCCD property is true then the gain must also be set.
-	 * 
-	 * @param modelCamera
-	 *            Set to true to model the camera
-	 */
-	public void setModelCamera(boolean modelCamera)
-	{
-		invalidateFunctionSolver();
-		this.modelCamera = modelCamera;
-	}
-
-	/**
-	 * @return the noise model
-	 */
-	public NoiseModel getNoiseModel()
-	{
-		return noiseModel;
-	}
-
-	/**
-	 * Set the noise model for the fitted function
-	 * 
-	 * @param noiseModel
-	 *            the noise model
-	 */
-	public void setNoiseModel(NoiseModel noiseModel)
-	{
-		invalidateGaussianFunction();
-		this.noiseModel = noiseModel;
-	}
-
-	/**
-	 * @return the camera bias (used for maximum likelihood estimation)
-	 */
-	public double getBias()
-	{
-		return bias;
-	}
-
-	/**
-	 * @param bias
-	 *            the camera bias (used for maximum likelihood estimation to evaluate the correct value of the
-	 *            observed count)
-	 */
-	public void setBias(double bias)
-	{
-		this.bias = bias;
-	}
-
-	/**
-	 * @return the camera read noise (used for maximum likelihood estimation)
-	 */
-	public double getReadNoise()
-	{
-		return readNoise;
-	}
-
-	/**
-	 * @param readNoise
-	 *            the camera read noise (used for maximum likelihood estimation)
-	 */
-	public void setReadNoise(double readNoise)
-	{
-		invalidateFunctionSolver();
-		this.readNoise = readNoise;
-	}
-
-	/**
-	 * @return The amplification [ADUs/electron] (used for maximum likelihood estimation)
-	 */
-	public double getAmplification()
-	{
-		return amplification;
-	}
-
-	/**
-	 * @param amplification
-	 *            The amplification [ADUs/electron] (used for maximum likelihood estimation)
-	 */
-	public void setAmplification(double amplification)
-	{
-		invalidateFunctionSolver();
-		this.amplification = amplification;
-	}
-
-	/**
-	 * @return Set to true if the bias should be removed from the data before fitting
-	 * @deprecated The bias is always removed before fitting
-	 */
-	@Deprecated
-	public boolean isRemoveBiasBeforeFitting()
-	{
-		return true;
-	}
-
-	/**
-	 * @return Set to true if the gain should be removed from the data before fitting.
-	 * @deprecated The gain should always be removed before fitting as the system should produce estimates in
-	 *             photo-electrons. Only the legacy MLE solvers that explicitly model the camera noise require the data
-	 *             and estimate to be in ADUs.
-	 */
-	@Deprecated
-	public boolean isApplyGainBeforeFitting()
-	{
-		// Only the legacy MLE solvers that explicitly model the camera noise require the data
-		// and estimate to be in ADUs.
-		if (fitSolver == FitSolver.MLE)
-			return false;
-		return getGain() != 0;
-	}
-
-	/**
 	 * @return Set to true if fitting requires the camera counts, i.e. amplification is explicitly modelled during
 	 *         fitting.
 	 */
@@ -1979,9 +2211,19 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	{
 		// Only the legacy MLE solvers that explicitly model the camera noise require the data
 		// and estimate to be in ADUs.
-		if (fitSolver == FitSolver.MLE)
+		if (getFitSolver() == FitSolver.MLE)
 			return true;
 		return false;
+	}
+
+	/**
+	 * Checks if is a full maximum likelihood estimator (MLE) modelling the CCD camera.
+	 *
+	 * @return true, if is a MLE modelling the camera
+	 */
+	public boolean isModelCameraMLE()
+	{
+		return (isModelCamera() && fitSolverSettings.getFitSolverValue() == FitSolver.MLE.getNumber());
 	}
 
 	/**
@@ -1992,128 +2234,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public boolean requireStrictlyPositiveFunction()
 	{
 		// Only the LSE variants can fit negatives. The MLE variants all require a positive function. 
-		switch (fitSolver)
+		switch (getFitSolver())
 		{
-			case BOUNDED_LVM:
-			case BOUNDED_LVM_WEIGHTED:
-			case LVM:
-			case LVM_QUASI_NEWTON:
-			case LVM_WEIGHTED:
+			case LVM_LSE:
+			case LVM_WLSE:
 				return false;
 
 			case LVM_MLE:
 			case MLE:
+			case FAST_MLE:
+			case BACKTRACKING_FAST_MLE:
 				return true;
 
 			default:
-				throw new NotImplementedException("Unknown strictly positive requirement: " + fitSolver.getName());
+				throw new NotImplementedException("Unknown strictly positive requirement: " + getFitSolver());
 		}
-	}
-
-	/**
-	 * @return the maximum number of function evaluations for the Maximum Likelihood Estimator
-	 */
-	public int getMaxFunctionEvaluations()
-	{
-		return maxFunctionEvaluations;
-	}
-
-	/**
-	 * @param maxFunctionEvaluations
-	 *            the maximum number of function evaluations for the Maximum Likelihood Estimator
-	 */
-	public void setMaxFunctionEvaluations(int maxFunctionEvaluations)
-	{
-		invalidateFunctionSolver();
-		this.maxFunctionEvaluations = maxFunctionEvaluations;
-	}
-
-	/**
-	 * @return the search for the Maximum Likelihood Estimator
-	 */
-	public SearchMethod getSearchMethod()
-	{
-		return searchMethod;
-	}
-
-	/**
-	 * @param searchMethod
-	 *            the search for the Maximum Likelihood Estimator
-	 */
-	public void setSearchMethod(int searchMethod)
-	{
-		if (searchMethod >= 0 && searchMethod < SearchMethod.values().length)
-		{
-			setSearchMethod(SearchMethod.values()[searchMethod]);
-		}
-	}
-
-	/**
-	 * @param searchMethod
-	 *            the search for the Maximum Likelihood Estimator
-	 */
-	public void setSearchMethod(SearchMethod searchMethod)
-	{
-		invalidateFunctionSolver();
-		this.searchMethod = searchMethod;
-	}
-
-	/**
-	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
-	 * 
-	 * @return the gradientLineMinimisation True if using the gradient for line minimisation
-	 */
-	public boolean isGradientLineMinimisation()
-	{
-		return gradientLineMinimisation;
-	}
-
-	/**
-	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
-	 * 
-	 * @param gradientLineMinimisation
-	 *            Set to true to use the gradient for line minimisation
-	 */
-	public void setGradientLineMinimisation(boolean gradientLineMinimisation)
-	{
-		invalidateFunctionSolver();
-		this.gradientLineMinimisation = gradientLineMinimisation;
-	}
-
-	/**
-	 * @return the relative threshold for convergence in the Maximum Likelihood Estimator
-	 */
-	public double getRelativeThreshold()
-	{
-		return relativeThreshold;
-	}
-
-	/**
-	 * @param relativeThreshold
-	 *            the relative threshold for convergence in the Maximum Likelihood Estimator
-	 */
-	public void setRelativeThreshold(double relativeThreshold)
-	{
-		invalidateFunctionSolver();
-		this.relativeThreshold = relativeThreshold;
-	}
-
-	/**
-	 * @return the absolute threshold for convergence in the Maximum Likelihood Estimator
-	 */
-	public double getAbsoluteThreshold()
-	{
-		return absoluteThreshold;
-	}
-
-	/**
-	 * @param absoluteThreshold
-	 *            the absolute threshold for convergence in the Maximum Likelihood Estimator
-	 */
-	public void setAbsoluteThreshold(double absoluteThreshold)
-	{
-		invalidateFunctionSolver();
-		this.absoluteThreshold = absoluteThreshold;
 	}
 
 	/**
@@ -2165,111 +2300,124 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			gaussianFunction = createGaussianFunction(1, 1, 1, null);
 		}
 
-		// Remove noise model
-		gaussianFunction.setNoiseModel(null);
-
-		NonLinearFit nlinfit;
-
-		switch (fitSolver)
+		if (getFitSolver() == FitSolver.MLE)
 		{
-			case MLE:
-				// Only the Poisson likelihood function supports gradients
-				if (searchMethod.usesGradients() && modelCamera)
+			MaximumLikelihoodFitter.SearchMethod searchMethod = convertSearchMethod();
+
+			// Only the Poisson likelihood function supports gradients
+			if (searchMethod.usesGradients() && isModelCamera())
+			{
+				throw new IllegalArgumentException(String.format(
+						"The derivative based search method '%s' can only be used with the " +
+								"'%s' likelihood function, i.e. no model camera noise",
+						searchMethod, MaximumLikelihoodFitter.LikelihoodFunction.POISSON));
+			}
+
+			MaximumLikelihoodFitter fitter = new MaximumLikelihoodFitter(gaussianFunction);
+			fitter.setRelativeThreshold(getRelativeThreshold());
+			fitter.setAbsoluteThreshold(getAbsoluteThreshold());
+			fitter.setMaxEvaluations(getMaxFunctionEvaluations());
+			fitter.setMaxIterations(getMaxIterations());
+			fitter.setSearchMethod(searchMethod);
+			fitter.setGradientLineMinimisation(isGradientLineMinimisation());
+
+			// Specify the likelihood function to use
+			if (isModelCamera())
+			{
+				// Set the camera read noise
+				fitter.setSigma(calibration.getReadNoise());
+
+				if (emCCD)
 				{
-					throw new IllegalArgumentException(String.format(
-							"The derivative based search method '%s' can only be used with the " +
-									"'%s' likelihood function, i.e. no model camera noise",
-							searchMethod, MaximumLikelihoodFitter.LikelihoodFunction.POISSON));
-				}
-
-				MaximumLikelihoodFitter fitter = new MaximumLikelihoodFitter(gaussianFunction);
-				fitter.setRelativeThreshold(relativeThreshold);
-				fitter.setAbsoluteThreshold(absoluteThreshold);
-				fitter.setMaxEvaluations(maxFunctionEvaluations);
-				fitter.setMaxIterations(maxIterations);
-				fitter.setSearchMethod(searchMethod);
-				fitter.setGradientLineMinimisation(gradientLineMinimisation);
-
-				// Specify the likelihood function to use
-				if (modelCamera)
-				{
-					// Set the camera read noise
-					fitter.setSigma(readNoise);
-
-					if (emCCD)
-					{
-						// EMCCD = Poisson+Gamma+Gaussian
-						fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON_GAMMA_GAUSSIAN);
-					}
-					else
-					{
-						// CCD = Poisson+Gaussian
-						fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON_GAUSSIAN);
-					}
+					// EMCCD = Poisson+Gamma+Gaussian
+					fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON_GAMMA_GAUSSIAN);
 				}
 				else
 				{
-					fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON);
+					// CCD = Poisson+Gaussian
+					fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON_GAUSSIAN);
 				}
+			}
+			else
+			{
+				fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON);
+			}
 
-				// All models use the amplification gain (i.e. how many ADUs/electron)
-				if (amplification <= 0)
-				{
-					throw new IllegalArgumentException("The amplification is required for the " + fitSolver.getName());
-				}
+			// All models use the amplification gain (i.e. how many ADUs/electron)
+			if (!calibration.hasAmplification())
+			{
+				throw new IllegalArgumentException(
+						"The amplification is required for the fit solver: " + getFitSolver());
+			}
 
-				fitter.setAlpha(1.0 / amplification);
+			fitter.setAlpha(1.0 / calibration.getAmplification());
 
-				// TODO - Configure better stopping criteria ...
+			// TODO - Configure better stopping criteria ...
 
-				return fitter;
+			return fitter;
+		}
 
-			case BOUNDED_LVM_WEIGHTED:
-				gaussianFunction.setNoiseModel(getNoiseModel());
-			case BOUNDED_LVM:
-			case LVM_MLE:
+		// All the remaining solvers are based on the stepping function solver
+		ToleranceChecker tc = getToleranceChecker();
+		ParameterBounds bounds = new ParameterBounds(gaussianFunction);
+		if (isUseClamping())
+		{
+			setClampValues(bounds);
+		}
 
-				if (fitSolver == FitSolver.LVM_MLE && gain <= 0)
-				{
-					throw new IllegalArgumentException("The gain is required for the " + fitSolver.getName());
-				}
+		SteppingFunctionSolver solver;
 
-				if (useClamping)
-				{
-					bounds = new ParameterBounds(gaussianFunction);
-					setClampValues(bounds);
-				}
-				BoundedNonLinearFit bnlinfit = new BoundedNonLinearFit(gaussianFunction, getStoppingCriteria(), bounds);
-				nlinfit = bnlinfit;
-
+		switch (getFitSolver())
+		{
+			case LVM_LSE:
+				solver = new LSELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
 				break;
 
-			case LVM_QUASI_NEWTON:
-				// This only works with a Gaussian2DFunction
-				if (gaussianFunction instanceof Gaussian2DFunction)
-				{
-					ApacheLVMFitter apacheNLinFit = new ApacheLVMFitter((Gaussian2DFunction) gaussianFunction);
-					apacheNLinFit.setMaxEvaluations(maxIterations);
-					// TODO - Configure stopping criteria ...
-					return apacheNLinFit;
-				}
-				// else fall through to default LVM fitter
+			case LVM_MLE:
+				checkCalibration();
+				solver = new MLELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
+				break;
 
-			case LVM_WEIGHTED:
-			case LVM:
+			case LVM_WLSE:
+				checkCalibration();
+				solver = new WLSELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
+				break;
+
+			case FAST_MLE:
+				checkCalibration();
+				// This may throw a class cast exception is the function does not support
+				// the Gradient2Function interface
+				solver = new FastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc, bounds);
+				break;
+
+			case BACKTRACKING_FAST_MLE:
+				checkCalibration();
+				solver = new BacktrackingFastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc,
+						bounds);
+				break;
+
 			default:
-				// Only set the weighting function if necessary
-				if (fitSolver == FitSolver.LVM_WEIGHTED)
-					gaussianFunction.setNoiseModel(getNoiseModel());
-				nlinfit = new NonLinearFit(gaussianFunction, getStoppingCriteria());
+				throw new IllegalArgumentException("Unknown fit solver: " + getFitSolver());
 		}
 
-		nlinfit.setInitialLambda(getLambda());
-		if (fitSolver == FitSolver.LVM_MLE)
+		if (solver instanceof LVMSteppingFunctionSolver)
 		{
-			nlinfit.setMLE(true);
+			((LVMSteppingFunctionSolver) solver).setInitialLambda(getLambda());
 		}
-		return nlinfit;
+		return solver;
+	}
+
+	private gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod convertSearchMethod()
+	{
+		return FitConfigHelper.convertSearchMethod(getSearchMethod());
+	}
+
+	private void checkCalibration()
+	{
+		if (gain <= 0)
+		{
+			throw new IllegalArgumentException("The gain is required for fit solver: " + getFitSolver());
+		}
 	}
 
 	private void setClampValues(ParameterBounds bounds)
@@ -2285,7 +2433,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				clampValues[i + j] = clamp[j];
 		}
 		bounds.setClampValues(clampValues);
-		bounds.setDynamicClamp(useDynamicClamping);
+		bounds.setDynamicClamp(isUseDynamicClamping());
 	}
 
 	/**
@@ -2293,7 +2441,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public boolean isDisableSimpleFilter()
 	{
-		return disableSimpleFilter;
+		return filterSettings.getDisableSimpleFilter();
 	}
 
 	/**
@@ -2302,7 +2450,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setDisableSimpleFilter(boolean disableSimpleFilter)
 	{
-		this.disableSimpleFilter = disableSimpleFilter;
+		filterSettings.setDisableSimpleFilter(disableSimpleFilter);
 	}
 
 	/**
@@ -2310,7 +2458,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public boolean isSmartFilter()
 	{
-		return smartFilter;
+		return filterSettings.getSmartFilter();
 	}
 
 	/**
@@ -2319,7 +2467,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setSmartFilter(boolean smartFilter)
 	{
-		this.smartFilter = smartFilter;
+		filterSettings.setSmartFilter(smartFilter);
 	}
 
 	/**
@@ -2329,15 +2477,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public boolean isDirectFilter()
 	{
-		return smartFilter && directFilter != null;
+		return isSmartFilter() && directFilter != null;
 	}
 
 	/**
-	 * @return the smart filter XML
+	 * @return the smart filter string
 	 */
-	public String getSmartFilterXML()
+	public String getSmartFilterString()
 	{
-		return smartFilterXML;
+		String s = filterSettings.getSmartFilterString();
+		return (Utils.isNullOrEmpty(s)) ? "" : s;
 	}
 
 	/**
@@ -2374,16 +2523,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
-	 * @param smartFilterXML
-	 *            the smart filter XML to set
-	 */
-	public void setSmartFilterXML(String smartFilterXML)
-	{
-		this.smartFilterXML = smartFilterXML;
-	}
-
-	/**
-	 * Sets the direct filter. This changes the smart filter flag to true and updates the smart filter XML.
+	 * Sets the direct filter. This changes the smart filter flag to true and updates the smart filter string.
 	 *
 	 * @param directFilter
 	 *            the new direct filter
@@ -2391,14 +2531,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public void setDirectFilter(DirectFilter directFilter)
 	{
 		this.directFilter = directFilter;
-		this.smartFilter = directFilter != null;
-		if (smartFilter)
+		if (directFilter != null)
 		{
-			smartFilterXML = directFilter.toXML();
+			setSmartFilter(true);
+			filterSettings.setSmartFilterString(directFilter.toXML());
 		}
 		else
 		{
-			smartFilterXML = "";
+			setSmartFilter(false);
+			filterSettings.clearSmartFilterString();
 		}
 	}
 
@@ -2457,6 +2598,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		else
 		{
 			widthEnabled = !DirectFilter.areSet(flags, DirectFilter.NO_WIDTH);
+			double shiftFactor = getCoordinateShiftFactor();
 			offset = (float) ((shiftFactor > 0) ? shiftFactor * shiftFactor : Float.POSITIVE_INFINITY);
 		}
 	}
@@ -2499,9 +2641,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			return directFilter.validate(peak);
 
 		// Do filtering 
-		if (peak.getPhotons() < minPhotons)
+		if (peak.getPhotons() < getMinPhotons())
 			return V_PHOTONS;
-		if (peak.getSNR() < this.signalStrength)
+		if (peak.getSNR() < getSignalStrength())
 			return V_SNR;
 		if (widthEnabled)
 		{
@@ -2515,7 +2657,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		// Do not support Euclidian shift
 		//if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > offset)
 		//	return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
-		final double p = (precisionUsingBackground) ? peak.getLocationVariance2() : peak.getLocationVariance();
+		final double p = (isPrecisionUsingBackground()) ? peak.getLocationVariance2() : peak.getLocationVariance();
 		if (p > precisionThreshold)
 			return V_LOCATION_VARIANCE;
 		return 0;
@@ -2556,7 +2698,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public boolean isUseClamping()
 	{
-		return useClamping;
+		return fitSolverSettings.getUseClamping();
 	}
 
 	/**
@@ -2568,7 +2710,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public void setUseClamping(boolean useClamping)
 	{
 		invalidateFunctionSolver();
-		this.useClamping = useClamping;
+		fitSolverSettings.setUseClamping(useClamping);
 	}
 
 	/**
@@ -2576,7 +2718,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public boolean isUseDynamicClamping()
 	{
-		return useDynamicClamping;
+		return fitSolverSettings.getUseDynamicClamping();
 	}
 
 	/**
@@ -2588,7 +2730,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public void setUseDynamicClamping(boolean useDynamicClamping)
 	{
 		invalidateFunctionSolver();
-		this.useDynamicClamping = useDynamicClamping;
+		fitSolverSettings.setUseDynamicClamping(useDynamicClamping);
 	}
 
 	/**
@@ -2597,8 +2739,24 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private double[] getClampValues()
 	{
 		if (clampValues == null)
-			clampValues = defaultClampValues.clone();
+		{
+			int n = PeakResult.STANDARD_PARAMETERS + 3;
+			if (fitSolverSettings.getClampValueCount() != n)
+				throw new IllegalStateException("Require clamp values for all the Gaussian 2D parameters");
+
+			clampValues = new double[n];
+			for (int i = 0; i < n; i++)
+				clampValues[i] = fitSolverSettings.getClampValue(i);
+		}
 		return clampValues;
+	}
+
+	/**
+	 * Invalidate clamp values.
+	 */
+	private void invalidateClampValues()
+	{
+		clampValues = null;
 	}
 
 	/**

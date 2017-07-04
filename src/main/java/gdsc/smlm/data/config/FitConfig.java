@@ -470,7 +470,7 @@ public final class FitConfig {
     SINGLE(0),
     /**
      * <pre>
-     * Use a difference filter (the second subtracted from the first).
+     * Use a difference filter (the second subtracted from the first)
      * </pre>
      *
      * <code>DIFFERENCE = 1;</code>
@@ -497,7 +497,7 @@ public final class FitConfig {
     public static final int SINGLE_VALUE = 0;
     /**
      * <pre>
-     * Use a difference filter (the second subtracted from the first).
+     * Use a difference filter (the second subtracted from the first)
      * </pre>
      *
      * <code>DIFFERENCE = 1;</code>
@@ -980,91 +980,160 @@ public final class FitConfig {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Set to true to fix the PSF using the initial parameters
+     * </pre>
+     *
      * <code>bool fixed_psf = 1;</code>
      */
     boolean getFixedPsf();
 
     /**
+     * <pre>
+     * Set to true to disable background fitting
+     * </pre>
+     *
      * <code>bool disable_background_fitting = 2;</code>
      */
     boolean getDisableBackgroundFitting();
 
     /**
+     * <pre>
+     * Set to true to disable signal intensity fitting
+     * </pre>
+     *
      * <code>bool disable_signal_fitting = 3;</code>
      */
     boolean getDisableSignalFitting();
 
     /**
+     * <pre>
+     * The type of fit solver
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
      */
     int getFitSolverValue();
     /**
+     * <pre>
+     * The type of fit solver
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
      */
     gdsc.smlm.data.config.FitConfig.FitSolver getFitSolver();
 
     /**
-     * <code>int32 min_iterations = 5;</code>
+     * <pre>
+     * Set to true to use a fixed number of iterations during fitting
+     * </pre>
+     *
+     * <code>bool fixed_iterations = 5;</code>
      */
-    int getMinIterations();
+    boolean getFixedIterations();
 
     /**
+     * <pre>
+     * The maximum iterations to use during fitting
+     * </pre>
+     *
      * <code>int32 max_iterations = 6;</code>
      */
     int getMaxIterations();
 
     /**
+     * <pre>
+     * The relative threshold for convergence on the function score. Set to negative to disable.
+     * </pre>
+     *
      * <code>double relative_threshold = 7;</code>
      */
     double getRelativeThreshold();
 
     /**
+     * <pre>
+     * The absolute threshold for convergence on the function score. Set to negative to disable.
+     * </pre>
+     *
      * <code>double absolute_threshold = 8;</code>
      */
     double getAbsoluteThreshold();
 
     /**
+     * <pre>
+     * The relative threshold for convergence on the function parameters. Set to negative to disable.
+     * </pre>
+     *
      * <code>double parameter_relative_threshold = 9;</code>
      */
     double getParameterRelativeThreshold();
 
     /**
+     * <pre>
+     * The absolute threshold for convergence on the function parameters. Set to negative to disable.
+     * </pre>
+     *
      * <code>double parameter_absolute_threshold = 10;</code>
      */
     double getParameterAbsoluteThreshold();
 
     /**
+     * <pre>
+     * The initial lambda parameter for the Levenberg-Marquardt algorithm
+     * </pre>
+     *
      * <code>double lambda = 11;</code>
      */
     double getLambda();
 
     /**
+     * <pre>
+     * The search method to use for the configurable maximum likelihood estimator
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
      */
     int getSearchMethodValue();
     /**
+     * <pre>
+     * The search method to use for the configurable maximum likelihood estimator
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
      */
     gdsc.smlm.data.config.FitConfig.SearchMethod getSearchMethod();
 
     /**
+     * <pre>
+     * Set to true to use the function gradient during line minimisation, i.e. find the 
+     * parameters where the gradient is zero. The default is the to minimise the function value.
+     * </pre>
+     *
      * <code>bool gradient_line_minimisation = 13;</code>
      */
     boolean getGradientLineMinimisation();
 
     /**
+     * <pre>
+     * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+     * </pre>
+     *
      * <code>bool model_camera = 14;</code>
      */
     boolean getModelCamera();
 
     /**
+     * <pre>
+     * The maximum number of function evaluations in the configurable maximum likelihood estimator.
+     * </pre>
+     *
      * <code>int32 max_function_evaluations = 15;</code>
      */
     int getMaxFunctionEvaluations();
 
     /**
      * <pre>
-     * Options for clamping
+     * Set to true to use parameter clamping
      * </pre>
      *
      * <code>bool use_clamping = 16;</code>
@@ -1072,19 +1141,35 @@ public final class FitConfig {
     boolean getUseClamping();
 
     /**
+     * <pre>
+     * Set to true to use dynamic parameter clamping, i.e. update the clamp values when the step direction changes
+     * </pre>
+     *
      * <code>bool use_dynamic_clamping = 17;</code>
      */
     boolean getUseDynamicClamping();
 
     /**
+     * <pre>
+     * The initial clamp values for each of the PSF parameters.
+     * </pre>
+     *
      * <code>repeated double clamp_value = 18;</code>
      */
     java.util.List<java.lang.Double> getClampValueList();
     /**
+     * <pre>
+     * The initial clamp values for each of the PSF parameters.
+     * </pre>
+     *
      * <code>repeated double clamp_value = 18;</code>
      */
     int getClampValueCount();
     /**
+     * <pre>
+     * The initial clamp values for each of the PSF parameters.
+     * </pre>
+     *
      * <code>repeated double clamp_value = 18;</code>
      */
     double getClampValue(int index);
@@ -1109,7 +1194,7 @@ public final class FitConfig {
       disableBackgroundFitting_ = false;
       disableSignalFitting_ = false;
       fitSolver_ = 0;
-      minIterations_ = 0;
+      fixedIterations_ = false;
       maxIterations_ = 0;
       relativeThreshold_ = 0D;
       absoluteThreshold_ = 0D;
@@ -1173,7 +1258,7 @@ public final class FitConfig {
             }
             case 40: {
 
-              minIterations_ = input.readInt32();
+              fixedIterations_ = input.readBool();
               break;
             }
             case 48: {
@@ -1288,6 +1373,10 @@ public final class FitConfig {
     public static final int FIXED_PSF_FIELD_NUMBER = 1;
     private boolean fixedPsf_;
     /**
+     * <pre>
+     * Set to true to fix the PSF using the initial parameters
+     * </pre>
+     *
      * <code>bool fixed_psf = 1;</code>
      */
     public boolean getFixedPsf() {
@@ -1297,6 +1386,10 @@ public final class FitConfig {
     public static final int DISABLE_BACKGROUND_FITTING_FIELD_NUMBER = 2;
     private boolean disableBackgroundFitting_;
     /**
+     * <pre>
+     * Set to true to disable background fitting
+     * </pre>
+     *
      * <code>bool disable_background_fitting = 2;</code>
      */
     public boolean getDisableBackgroundFitting() {
@@ -1306,6 +1399,10 @@ public final class FitConfig {
     public static final int DISABLE_SIGNAL_FITTING_FIELD_NUMBER = 3;
     private boolean disableSignalFitting_;
     /**
+     * <pre>
+     * Set to true to disable signal intensity fitting
+     * </pre>
+     *
      * <code>bool disable_signal_fitting = 3;</code>
      */
     public boolean getDisableSignalFitting() {
@@ -1315,12 +1412,20 @@ public final class FitConfig {
     public static final int FIT_SOLVER_FIELD_NUMBER = 4;
     private int fitSolver_;
     /**
+     * <pre>
+     * The type of fit solver
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
      */
     public int getFitSolverValue() {
       return fitSolver_;
     }
     /**
+     * <pre>
+     * The type of fit solver
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
      */
     public gdsc.smlm.data.config.FitConfig.FitSolver getFitSolver() {
@@ -1328,18 +1433,26 @@ public final class FitConfig {
       return result == null ? gdsc.smlm.data.config.FitConfig.FitSolver.UNRECOGNIZED : result;
     }
 
-    public static final int MIN_ITERATIONS_FIELD_NUMBER = 5;
-    private int minIterations_;
+    public static final int FIXED_ITERATIONS_FIELD_NUMBER = 5;
+    private boolean fixedIterations_;
     /**
-     * <code>int32 min_iterations = 5;</code>
+     * <pre>
+     * Set to true to use a fixed number of iterations during fitting
+     * </pre>
+     *
+     * <code>bool fixed_iterations = 5;</code>
      */
-    public int getMinIterations() {
-      return minIterations_;
+    public boolean getFixedIterations() {
+      return fixedIterations_;
     }
 
     public static final int MAX_ITERATIONS_FIELD_NUMBER = 6;
     private int maxIterations_;
     /**
+     * <pre>
+     * The maximum iterations to use during fitting
+     * </pre>
+     *
      * <code>int32 max_iterations = 6;</code>
      */
     public int getMaxIterations() {
@@ -1349,6 +1462,10 @@ public final class FitConfig {
     public static final int RELATIVE_THRESHOLD_FIELD_NUMBER = 7;
     private double relativeThreshold_;
     /**
+     * <pre>
+     * The relative threshold for convergence on the function score. Set to negative to disable.
+     * </pre>
+     *
      * <code>double relative_threshold = 7;</code>
      */
     public double getRelativeThreshold() {
@@ -1358,6 +1475,10 @@ public final class FitConfig {
     public static final int ABSOLUTE_THRESHOLD_FIELD_NUMBER = 8;
     private double absoluteThreshold_;
     /**
+     * <pre>
+     * The absolute threshold for convergence on the function score. Set to negative to disable.
+     * </pre>
+     *
      * <code>double absolute_threshold = 8;</code>
      */
     public double getAbsoluteThreshold() {
@@ -1367,6 +1488,10 @@ public final class FitConfig {
     public static final int PARAMETER_RELATIVE_THRESHOLD_FIELD_NUMBER = 9;
     private double parameterRelativeThreshold_;
     /**
+     * <pre>
+     * The relative threshold for convergence on the function parameters. Set to negative to disable.
+     * </pre>
+     *
      * <code>double parameter_relative_threshold = 9;</code>
      */
     public double getParameterRelativeThreshold() {
@@ -1376,6 +1501,10 @@ public final class FitConfig {
     public static final int PARAMETER_ABSOLUTE_THRESHOLD_FIELD_NUMBER = 10;
     private double parameterAbsoluteThreshold_;
     /**
+     * <pre>
+     * The absolute threshold for convergence on the function parameters. Set to negative to disable.
+     * </pre>
+     *
      * <code>double parameter_absolute_threshold = 10;</code>
      */
     public double getParameterAbsoluteThreshold() {
@@ -1385,6 +1514,10 @@ public final class FitConfig {
     public static final int LAMBDA_FIELD_NUMBER = 11;
     private double lambda_;
     /**
+     * <pre>
+     * The initial lambda parameter for the Levenberg-Marquardt algorithm
+     * </pre>
+     *
      * <code>double lambda = 11;</code>
      */
     public double getLambda() {
@@ -1394,12 +1527,20 @@ public final class FitConfig {
     public static final int SEARCH_METHOD_FIELD_NUMBER = 12;
     private int searchMethod_;
     /**
+     * <pre>
+     * The search method to use for the configurable maximum likelihood estimator
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
      */
     public int getSearchMethodValue() {
       return searchMethod_;
     }
     /**
+     * <pre>
+     * The search method to use for the configurable maximum likelihood estimator
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
      */
     public gdsc.smlm.data.config.FitConfig.SearchMethod getSearchMethod() {
@@ -1410,6 +1551,11 @@ public final class FitConfig {
     public static final int GRADIENT_LINE_MINIMISATION_FIELD_NUMBER = 13;
     private boolean gradientLineMinimisation_;
     /**
+     * <pre>
+     * Set to true to use the function gradient during line minimisation, i.e. find the 
+     * parameters where the gradient is zero. The default is the to minimise the function value.
+     * </pre>
+     *
      * <code>bool gradient_line_minimisation = 13;</code>
      */
     public boolean getGradientLineMinimisation() {
@@ -1419,6 +1565,10 @@ public final class FitConfig {
     public static final int MODEL_CAMERA_FIELD_NUMBER = 14;
     private boolean modelCamera_;
     /**
+     * <pre>
+     * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+     * </pre>
+     *
      * <code>bool model_camera = 14;</code>
      */
     public boolean getModelCamera() {
@@ -1428,6 +1578,10 @@ public final class FitConfig {
     public static final int MAX_FUNCTION_EVALUATIONS_FIELD_NUMBER = 15;
     private int maxFunctionEvaluations_;
     /**
+     * <pre>
+     * The maximum number of function evaluations in the configurable maximum likelihood estimator.
+     * </pre>
+     *
      * <code>int32 max_function_evaluations = 15;</code>
      */
     public int getMaxFunctionEvaluations() {
@@ -1438,7 +1592,7 @@ public final class FitConfig {
     private boolean useClamping_;
     /**
      * <pre>
-     * Options for clamping
+     * Set to true to use parameter clamping
      * </pre>
      *
      * <code>bool use_clamping = 16;</code>
@@ -1450,6 +1604,10 @@ public final class FitConfig {
     public static final int USE_DYNAMIC_CLAMPING_FIELD_NUMBER = 17;
     private boolean useDynamicClamping_;
     /**
+     * <pre>
+     * Set to true to use dynamic parameter clamping, i.e. update the clamp values when the step direction changes
+     * </pre>
+     *
      * <code>bool use_dynamic_clamping = 17;</code>
      */
     public boolean getUseDynamicClamping() {
@@ -1459,6 +1617,10 @@ public final class FitConfig {
     public static final int CLAMP_VALUE_FIELD_NUMBER = 18;
     private java.util.List<java.lang.Double> clampValue_;
     /**
+     * <pre>
+     * The initial clamp values for each of the PSF parameters.
+     * </pre>
+     *
      * <code>repeated double clamp_value = 18;</code>
      */
     public java.util.List<java.lang.Double>
@@ -1466,12 +1628,20 @@ public final class FitConfig {
       return clampValue_;
     }
     /**
+     * <pre>
+     * The initial clamp values for each of the PSF parameters.
+     * </pre>
+     *
      * <code>repeated double clamp_value = 18;</code>
      */
     public int getClampValueCount() {
       return clampValue_.size();
     }
     /**
+     * <pre>
+     * The initial clamp values for each of the PSF parameters.
+     * </pre>
+     *
      * <code>repeated double clamp_value = 18;</code>
      */
     public double getClampValue(int index) {
@@ -1504,8 +1674,8 @@ public final class FitConfig {
       if (fitSolver_ != gdsc.smlm.data.config.FitConfig.FitSolver.LVM_LSE.getNumber()) {
         output.writeEnum(4, fitSolver_);
       }
-      if (minIterations_ != 0) {
-        output.writeInt32(5, minIterations_);
+      if (fixedIterations_ != false) {
+        output.writeBool(5, fixedIterations_);
       }
       if (maxIterations_ != 0) {
         output.writeInt32(6, maxIterations_);
@@ -1573,9 +1743,9 @@ public final class FitConfig {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, fitSolver_);
       }
-      if (minIterations_ != 0) {
+      if (fixedIterations_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(5, minIterations_);
+          .computeBoolSize(5, fixedIterations_);
       }
       if (maxIterations_ != 0) {
         size += com.google.protobuf.CodedOutputStream
@@ -1659,8 +1829,8 @@ public final class FitConfig {
       result = result && (getDisableSignalFitting()
           == other.getDisableSignalFitting());
       result = result && fitSolver_ == other.fitSolver_;
-      result = result && (getMinIterations()
-          == other.getMinIterations());
+      result = result && (getFixedIterations()
+          == other.getFixedIterations());
       result = result && (getMaxIterations()
           == other.getMaxIterations());
       result = result && (
@@ -1717,8 +1887,9 @@ public final class FitConfig {
           getDisableSignalFitting());
       hash = (37 * hash) + FIT_SOLVER_FIELD_NUMBER;
       hash = (53 * hash) + fitSolver_;
-      hash = (37 * hash) + MIN_ITERATIONS_FIELD_NUMBER;
-      hash = (53 * hash) + getMinIterations();
+      hash = (37 * hash) + FIXED_ITERATIONS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getFixedIterations());
       hash = (37 * hash) + MAX_ITERATIONS_FIELD_NUMBER;
       hash = (53 * hash) + getMaxIterations();
       hash = (37 * hash) + RELATIVE_THRESHOLD_FIELD_NUMBER;
@@ -1897,7 +2068,7 @@ public final class FitConfig {
 
         fitSolver_ = 0;
 
-        minIterations_ = 0;
+        fixedIterations_ = false;
 
         maxIterations_ = 0;
 
@@ -1953,7 +2124,7 @@ public final class FitConfig {
         result.disableBackgroundFitting_ = disableBackgroundFitting_;
         result.disableSignalFitting_ = disableSignalFitting_;
         result.fitSolver_ = fitSolver_;
-        result.minIterations_ = minIterations_;
+        result.fixedIterations_ = fixedIterations_;
         result.maxIterations_ = maxIterations_;
         result.relativeThreshold_ = relativeThreshold_;
         result.absoluteThreshold_ = absoluteThreshold_;
@@ -2025,8 +2196,8 @@ public final class FitConfig {
         if (other.fitSolver_ != 0) {
           setFitSolverValue(other.getFitSolverValue());
         }
-        if (other.getMinIterations() != 0) {
-          setMinIterations(other.getMinIterations());
+        if (other.getFixedIterations() != false) {
+          setFixedIterations(other.getFixedIterations());
         }
         if (other.getMaxIterations() != 0) {
           setMaxIterations(other.getMaxIterations());
@@ -2103,12 +2274,20 @@ public final class FitConfig {
 
       private boolean fixedPsf_ ;
       /**
+       * <pre>
+       * Set to true to fix the PSF using the initial parameters
+       * </pre>
+       *
        * <code>bool fixed_psf = 1;</code>
        */
       public boolean getFixedPsf() {
         return fixedPsf_;
       }
       /**
+       * <pre>
+       * Set to true to fix the PSF using the initial parameters
+       * </pre>
+       *
        * <code>bool fixed_psf = 1;</code>
        */
       public Builder setFixedPsf(boolean value) {
@@ -2118,6 +2297,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * Set to true to fix the PSF using the initial parameters
+       * </pre>
+       *
        * <code>bool fixed_psf = 1;</code>
        */
       public Builder clearFixedPsf() {
@@ -2129,12 +2312,20 @@ public final class FitConfig {
 
       private boolean disableBackgroundFitting_ ;
       /**
+       * <pre>
+       * Set to true to disable background fitting
+       * </pre>
+       *
        * <code>bool disable_background_fitting = 2;</code>
        */
       public boolean getDisableBackgroundFitting() {
         return disableBackgroundFitting_;
       }
       /**
+       * <pre>
+       * Set to true to disable background fitting
+       * </pre>
+       *
        * <code>bool disable_background_fitting = 2;</code>
        */
       public Builder setDisableBackgroundFitting(boolean value) {
@@ -2144,6 +2335,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * Set to true to disable background fitting
+       * </pre>
+       *
        * <code>bool disable_background_fitting = 2;</code>
        */
       public Builder clearDisableBackgroundFitting() {
@@ -2155,12 +2350,20 @@ public final class FitConfig {
 
       private boolean disableSignalFitting_ ;
       /**
+       * <pre>
+       * Set to true to disable signal intensity fitting
+       * </pre>
+       *
        * <code>bool disable_signal_fitting = 3;</code>
        */
       public boolean getDisableSignalFitting() {
         return disableSignalFitting_;
       }
       /**
+       * <pre>
+       * Set to true to disable signal intensity fitting
+       * </pre>
+       *
        * <code>bool disable_signal_fitting = 3;</code>
        */
       public Builder setDisableSignalFitting(boolean value) {
@@ -2170,6 +2373,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * Set to true to disable signal intensity fitting
+       * </pre>
+       *
        * <code>bool disable_signal_fitting = 3;</code>
        */
       public Builder clearDisableSignalFitting() {
@@ -2181,12 +2388,20 @@ public final class FitConfig {
 
       private int fitSolver_ = 0;
       /**
+       * <pre>
+       * The type of fit solver
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
       public int getFitSolverValue() {
         return fitSolver_;
       }
       /**
+       * <pre>
+       * The type of fit solver
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
       public Builder setFitSolverValue(int value) {
@@ -2195,6 +2410,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The type of fit solver
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
       public gdsc.smlm.data.config.FitConfig.FitSolver getFitSolver() {
@@ -2202,6 +2421,10 @@ public final class FitConfig {
         return result == null ? gdsc.smlm.data.config.FitConfig.FitSolver.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * The type of fit solver
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
       public Builder setFitSolver(gdsc.smlm.data.config.FitConfig.FitSolver value) {
@@ -2214,6 +2437,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The type of fit solver
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
       public Builder clearFitSolver() {
@@ -2223,40 +2450,60 @@ public final class FitConfig {
         return this;
       }
 
-      private int minIterations_ ;
+      private boolean fixedIterations_ ;
       /**
-       * <code>int32 min_iterations = 5;</code>
+       * <pre>
+       * Set to true to use a fixed number of iterations during fitting
+       * </pre>
+       *
+       * <code>bool fixed_iterations = 5;</code>
        */
-      public int getMinIterations() {
-        return minIterations_;
+      public boolean getFixedIterations() {
+        return fixedIterations_;
       }
       /**
-       * <code>int32 min_iterations = 5;</code>
+       * <pre>
+       * Set to true to use a fixed number of iterations during fitting
+       * </pre>
+       *
+       * <code>bool fixed_iterations = 5;</code>
        */
-      public Builder setMinIterations(int value) {
+      public Builder setFixedIterations(boolean value) {
         
-        minIterations_ = value;
+        fixedIterations_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 min_iterations = 5;</code>
+       * <pre>
+       * Set to true to use a fixed number of iterations during fitting
+       * </pre>
+       *
+       * <code>bool fixed_iterations = 5;</code>
        */
-      public Builder clearMinIterations() {
+      public Builder clearFixedIterations() {
         
-        minIterations_ = 0;
+        fixedIterations_ = false;
         onChanged();
         return this;
       }
 
       private int maxIterations_ ;
       /**
+       * <pre>
+       * The maximum iterations to use during fitting
+       * </pre>
+       *
        * <code>int32 max_iterations = 6;</code>
        */
       public int getMaxIterations() {
         return maxIterations_;
       }
       /**
+       * <pre>
+       * The maximum iterations to use during fitting
+       * </pre>
+       *
        * <code>int32 max_iterations = 6;</code>
        */
       public Builder setMaxIterations(int value) {
@@ -2266,6 +2513,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The maximum iterations to use during fitting
+       * </pre>
+       *
        * <code>int32 max_iterations = 6;</code>
        */
       public Builder clearMaxIterations() {
@@ -2277,12 +2528,20 @@ public final class FitConfig {
 
       private double relativeThreshold_ ;
       /**
+       * <pre>
+       * The relative threshold for convergence on the function score. Set to negative to disable.
+       * </pre>
+       *
        * <code>double relative_threshold = 7;</code>
        */
       public double getRelativeThreshold() {
         return relativeThreshold_;
       }
       /**
+       * <pre>
+       * The relative threshold for convergence on the function score. Set to negative to disable.
+       * </pre>
+       *
        * <code>double relative_threshold = 7;</code>
        */
       public Builder setRelativeThreshold(double value) {
@@ -2292,6 +2551,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The relative threshold for convergence on the function score. Set to negative to disable.
+       * </pre>
+       *
        * <code>double relative_threshold = 7;</code>
        */
       public Builder clearRelativeThreshold() {
@@ -2303,12 +2566,20 @@ public final class FitConfig {
 
       private double absoluteThreshold_ ;
       /**
+       * <pre>
+       * The absolute threshold for convergence on the function score. Set to negative to disable.
+       * </pre>
+       *
        * <code>double absolute_threshold = 8;</code>
        */
       public double getAbsoluteThreshold() {
         return absoluteThreshold_;
       }
       /**
+       * <pre>
+       * The absolute threshold for convergence on the function score. Set to negative to disable.
+       * </pre>
+       *
        * <code>double absolute_threshold = 8;</code>
        */
       public Builder setAbsoluteThreshold(double value) {
@@ -2318,6 +2589,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The absolute threshold for convergence on the function score. Set to negative to disable.
+       * </pre>
+       *
        * <code>double absolute_threshold = 8;</code>
        */
       public Builder clearAbsoluteThreshold() {
@@ -2329,12 +2604,20 @@ public final class FitConfig {
 
       private double parameterRelativeThreshold_ ;
       /**
+       * <pre>
+       * The relative threshold for convergence on the function parameters. Set to negative to disable.
+       * </pre>
+       *
        * <code>double parameter_relative_threshold = 9;</code>
        */
       public double getParameterRelativeThreshold() {
         return parameterRelativeThreshold_;
       }
       /**
+       * <pre>
+       * The relative threshold for convergence on the function parameters. Set to negative to disable.
+       * </pre>
+       *
        * <code>double parameter_relative_threshold = 9;</code>
        */
       public Builder setParameterRelativeThreshold(double value) {
@@ -2344,6 +2627,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The relative threshold for convergence on the function parameters. Set to negative to disable.
+       * </pre>
+       *
        * <code>double parameter_relative_threshold = 9;</code>
        */
       public Builder clearParameterRelativeThreshold() {
@@ -2355,12 +2642,20 @@ public final class FitConfig {
 
       private double parameterAbsoluteThreshold_ ;
       /**
+       * <pre>
+       * The absolute threshold for convergence on the function parameters. Set to negative to disable.
+       * </pre>
+       *
        * <code>double parameter_absolute_threshold = 10;</code>
        */
       public double getParameterAbsoluteThreshold() {
         return parameterAbsoluteThreshold_;
       }
       /**
+       * <pre>
+       * The absolute threshold for convergence on the function parameters. Set to negative to disable.
+       * </pre>
+       *
        * <code>double parameter_absolute_threshold = 10;</code>
        */
       public Builder setParameterAbsoluteThreshold(double value) {
@@ -2370,6 +2665,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The absolute threshold for convergence on the function parameters. Set to negative to disable.
+       * </pre>
+       *
        * <code>double parameter_absolute_threshold = 10;</code>
        */
       public Builder clearParameterAbsoluteThreshold() {
@@ -2381,12 +2680,20 @@ public final class FitConfig {
 
       private double lambda_ ;
       /**
+       * <pre>
+       * The initial lambda parameter for the Levenberg-Marquardt algorithm
+       * </pre>
+       *
        * <code>double lambda = 11;</code>
        */
       public double getLambda() {
         return lambda_;
       }
       /**
+       * <pre>
+       * The initial lambda parameter for the Levenberg-Marquardt algorithm
+       * </pre>
+       *
        * <code>double lambda = 11;</code>
        */
       public Builder setLambda(double value) {
@@ -2396,6 +2703,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The initial lambda parameter for the Levenberg-Marquardt algorithm
+       * </pre>
+       *
        * <code>double lambda = 11;</code>
        */
       public Builder clearLambda() {
@@ -2407,12 +2718,20 @@ public final class FitConfig {
 
       private int searchMethod_ = 0;
       /**
+       * <pre>
+       * The search method to use for the configurable maximum likelihood estimator
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
       public int getSearchMethodValue() {
         return searchMethod_;
       }
       /**
+       * <pre>
+       * The search method to use for the configurable maximum likelihood estimator
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
       public Builder setSearchMethodValue(int value) {
@@ -2421,6 +2740,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The search method to use for the configurable maximum likelihood estimator
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
       public gdsc.smlm.data.config.FitConfig.SearchMethod getSearchMethod() {
@@ -2428,6 +2751,10 @@ public final class FitConfig {
         return result == null ? gdsc.smlm.data.config.FitConfig.SearchMethod.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * The search method to use for the configurable maximum likelihood estimator
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
       public Builder setSearchMethod(gdsc.smlm.data.config.FitConfig.SearchMethod value) {
@@ -2440,6 +2767,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The search method to use for the configurable maximum likelihood estimator
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
       public Builder clearSearchMethod() {
@@ -2451,12 +2782,22 @@ public final class FitConfig {
 
       private boolean gradientLineMinimisation_ ;
       /**
+       * <pre>
+       * Set to true to use the function gradient during line minimisation, i.e. find the 
+       * parameters where the gradient is zero. The default is the to minimise the function value.
+       * </pre>
+       *
        * <code>bool gradient_line_minimisation = 13;</code>
        */
       public boolean getGradientLineMinimisation() {
         return gradientLineMinimisation_;
       }
       /**
+       * <pre>
+       * Set to true to use the function gradient during line minimisation, i.e. find the 
+       * parameters where the gradient is zero. The default is the to minimise the function value.
+       * </pre>
+       *
        * <code>bool gradient_line_minimisation = 13;</code>
        */
       public Builder setGradientLineMinimisation(boolean value) {
@@ -2466,6 +2807,11 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * Set to true to use the function gradient during line minimisation, i.e. find the 
+       * parameters where the gradient is zero. The default is the to minimise the function value.
+       * </pre>
+       *
        * <code>bool gradient_line_minimisation = 13;</code>
        */
       public Builder clearGradientLineMinimisation() {
@@ -2477,12 +2823,20 @@ public final class FitConfig {
 
       private boolean modelCamera_ ;
       /**
+       * <pre>
+       * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+       * </pre>
+       *
        * <code>bool model_camera = 14;</code>
        */
       public boolean getModelCamera() {
         return modelCamera_;
       }
       /**
+       * <pre>
+       * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+       * </pre>
+       *
        * <code>bool model_camera = 14;</code>
        */
       public Builder setModelCamera(boolean value) {
@@ -2492,6 +2846,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+       * </pre>
+       *
        * <code>bool model_camera = 14;</code>
        */
       public Builder clearModelCamera() {
@@ -2503,12 +2861,20 @@ public final class FitConfig {
 
       private int maxFunctionEvaluations_ ;
       /**
+       * <pre>
+       * The maximum number of function evaluations in the configurable maximum likelihood estimator.
+       * </pre>
+       *
        * <code>int32 max_function_evaluations = 15;</code>
        */
       public int getMaxFunctionEvaluations() {
         return maxFunctionEvaluations_;
       }
       /**
+       * <pre>
+       * The maximum number of function evaluations in the configurable maximum likelihood estimator.
+       * </pre>
+       *
        * <code>int32 max_function_evaluations = 15;</code>
        */
       public Builder setMaxFunctionEvaluations(int value) {
@@ -2518,6 +2884,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The maximum number of function evaluations in the configurable maximum likelihood estimator.
+       * </pre>
+       *
        * <code>int32 max_function_evaluations = 15;</code>
        */
       public Builder clearMaxFunctionEvaluations() {
@@ -2530,7 +2900,7 @@ public final class FitConfig {
       private boolean useClamping_ ;
       /**
        * <pre>
-       * Options for clamping
+       * Set to true to use parameter clamping
        * </pre>
        *
        * <code>bool use_clamping = 16;</code>
@@ -2540,7 +2910,7 @@ public final class FitConfig {
       }
       /**
        * <pre>
-       * Options for clamping
+       * Set to true to use parameter clamping
        * </pre>
        *
        * <code>bool use_clamping = 16;</code>
@@ -2553,7 +2923,7 @@ public final class FitConfig {
       }
       /**
        * <pre>
-       * Options for clamping
+       * Set to true to use parameter clamping
        * </pre>
        *
        * <code>bool use_clamping = 16;</code>
@@ -2567,12 +2937,20 @@ public final class FitConfig {
 
       private boolean useDynamicClamping_ ;
       /**
+       * <pre>
+       * Set to true to use dynamic parameter clamping, i.e. update the clamp values when the step direction changes
+       * </pre>
+       *
        * <code>bool use_dynamic_clamping = 17;</code>
        */
       public boolean getUseDynamicClamping() {
         return useDynamicClamping_;
       }
       /**
+       * <pre>
+       * Set to true to use dynamic parameter clamping, i.e. update the clamp values when the step direction changes
+       * </pre>
+       *
        * <code>bool use_dynamic_clamping = 17;</code>
        */
       public Builder setUseDynamicClamping(boolean value) {
@@ -2582,6 +2960,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * Set to true to use dynamic parameter clamping, i.e. update the clamp values when the step direction changes
+       * </pre>
+       *
        * <code>bool use_dynamic_clamping = 17;</code>
        */
       public Builder clearUseDynamicClamping() {
@@ -2599,6 +2981,10 @@ public final class FitConfig {
          }
       }
       /**
+       * <pre>
+       * The initial clamp values for each of the PSF parameters.
+       * </pre>
+       *
        * <code>repeated double clamp_value = 18;</code>
        */
       public java.util.List<java.lang.Double>
@@ -2606,18 +2992,30 @@ public final class FitConfig {
         return java.util.Collections.unmodifiableList(clampValue_);
       }
       /**
+       * <pre>
+       * The initial clamp values for each of the PSF parameters.
+       * </pre>
+       *
        * <code>repeated double clamp_value = 18;</code>
        */
       public int getClampValueCount() {
         return clampValue_.size();
       }
       /**
+       * <pre>
+       * The initial clamp values for each of the PSF parameters.
+       * </pre>
+       *
        * <code>repeated double clamp_value = 18;</code>
        */
       public double getClampValue(int index) {
         return clampValue_.get(index);
       }
       /**
+       * <pre>
+       * The initial clamp values for each of the PSF parameters.
+       * </pre>
+       *
        * <code>repeated double clamp_value = 18;</code>
        */
       public Builder setClampValue(
@@ -2628,6 +3026,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The initial clamp values for each of the PSF parameters.
+       * </pre>
+       *
        * <code>repeated double clamp_value = 18;</code>
        */
       public Builder addClampValue(double value) {
@@ -2637,6 +3039,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The initial clamp values for each of the PSF parameters.
+       * </pre>
+       *
        * <code>repeated double clamp_value = 18;</code>
        */
       public Builder addAllClampValue(
@@ -2648,6 +3054,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The initial clamp values for each of the PSF parameters.
+       * </pre>
+       *
        * <code>repeated double clamp_value = 18;</code>
        */
       public Builder clearClampValue() {
@@ -2710,55 +3120,99 @@ public final class FitConfig {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * The maximum amount a localisation can move from the initial estimate relative to the PSF width
+     * </pre>
+     *
      * <code>double shift_factor = 1;</code>
      */
     double getShiftFactor();
 
     /**
+     * <pre>
+     * The minimum Signal-to-Noise (SNR) threshold
+     * </pre>
+     *
      * <code>double signal_strength = 2;</code>
      */
     double getSignalStrength();
 
     /**
+     * <pre>
+     * The minimum number of photons threshold
+     * </pre>
+     *
      * <code>double min_photons = 3;</code>
      */
     double getMinPhotons();
 
     /**
+     * <pre>
+     * The maximum allowed localisation precision (expressed as the localisation standard deviation)
+     * </pre>
+     *
      * <code>double precision_threshold = 4;</code>
      */
     double getPrecisionThreshold();
 
     /**
+     * <pre>
+     * Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
+     * </pre>
+     *
      * <code>bool precision_using_background = 5;</code>
      */
     boolean getPrecisionUsingBackground();
 
     /**
+     * <pre>
+     * The minimum allowed width relative to the initial width estimate
+     * </pre>
+     *
      * <code>double min_width_factor = 6;</code>
      */
     double getMinWidthFactor();
 
     /**
+     * <pre>
+     * The maximum allowed width relative to the initial width estimate
+     * </pre>
+     *
      * <code>double max_width_factor = 7;</code>
      */
     double getMaxWidthFactor();
 
     /**
+     * <pre>
+     * Set to true to disable the use of simple filters
+     * </pre>
+     *
      * <code>bool disable_simple_filter = 8;</code>
      */
     boolean getDisableSimpleFilter();
 
     /**
+     * <pre>
+     * Set to true to use a smart filter
+     * </pre>
+     *
      * <code>bool smart_filter = 9;</code>
      */
     boolean getSmartFilter();
 
     /**
+     * <pre>
+     * The smart filter expressed as a serialised string
+     * </pre>
+     *
      * <code>string smart_filter_string = 10;</code>
      */
     java.lang.String getSmartFilterString();
     /**
+     * <pre>
+     * The smart filter expressed as a serialised string
+     * </pre>
+     *
      * <code>string smart_filter_string = 10;</code>
      */
     com.google.protobuf.ByteString
@@ -2894,6 +3348,10 @@ public final class FitConfig {
     public static final int SHIFT_FACTOR_FIELD_NUMBER = 1;
     private double shiftFactor_;
     /**
+     * <pre>
+     * The maximum amount a localisation can move from the initial estimate relative to the PSF width
+     * </pre>
+     *
      * <code>double shift_factor = 1;</code>
      */
     public double getShiftFactor() {
@@ -2903,6 +3361,10 @@ public final class FitConfig {
     public static final int SIGNAL_STRENGTH_FIELD_NUMBER = 2;
     private double signalStrength_;
     /**
+     * <pre>
+     * The minimum Signal-to-Noise (SNR) threshold
+     * </pre>
+     *
      * <code>double signal_strength = 2;</code>
      */
     public double getSignalStrength() {
@@ -2912,6 +3374,10 @@ public final class FitConfig {
     public static final int MIN_PHOTONS_FIELD_NUMBER = 3;
     private double minPhotons_;
     /**
+     * <pre>
+     * The minimum number of photons threshold
+     * </pre>
+     *
      * <code>double min_photons = 3;</code>
      */
     public double getMinPhotons() {
@@ -2921,6 +3387,10 @@ public final class FitConfig {
     public static final int PRECISION_THRESHOLD_FIELD_NUMBER = 4;
     private double precisionThreshold_;
     /**
+     * <pre>
+     * The maximum allowed localisation precision (expressed as the localisation standard deviation)
+     * </pre>
+     *
      * <code>double precision_threshold = 4;</code>
      */
     public double getPrecisionThreshold() {
@@ -2930,6 +3400,10 @@ public final class FitConfig {
     public static final int PRECISION_USING_BACKGROUND_FIELD_NUMBER = 5;
     private boolean precisionUsingBackground_;
     /**
+     * <pre>
+     * Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
+     * </pre>
+     *
      * <code>bool precision_using_background = 5;</code>
      */
     public boolean getPrecisionUsingBackground() {
@@ -2939,6 +3413,10 @@ public final class FitConfig {
     public static final int MIN_WIDTH_FACTOR_FIELD_NUMBER = 6;
     private double minWidthFactor_;
     /**
+     * <pre>
+     * The minimum allowed width relative to the initial width estimate
+     * </pre>
+     *
      * <code>double min_width_factor = 6;</code>
      */
     public double getMinWidthFactor() {
@@ -2948,6 +3426,10 @@ public final class FitConfig {
     public static final int MAX_WIDTH_FACTOR_FIELD_NUMBER = 7;
     private double maxWidthFactor_;
     /**
+     * <pre>
+     * The maximum allowed width relative to the initial width estimate
+     * </pre>
+     *
      * <code>double max_width_factor = 7;</code>
      */
     public double getMaxWidthFactor() {
@@ -2957,6 +3439,10 @@ public final class FitConfig {
     public static final int DISABLE_SIMPLE_FILTER_FIELD_NUMBER = 8;
     private boolean disableSimpleFilter_;
     /**
+     * <pre>
+     * Set to true to disable the use of simple filters
+     * </pre>
+     *
      * <code>bool disable_simple_filter = 8;</code>
      */
     public boolean getDisableSimpleFilter() {
@@ -2966,6 +3452,10 @@ public final class FitConfig {
     public static final int SMART_FILTER_FIELD_NUMBER = 9;
     private boolean smartFilter_;
     /**
+     * <pre>
+     * Set to true to use a smart filter
+     * </pre>
+     *
      * <code>bool smart_filter = 9;</code>
      */
     public boolean getSmartFilter() {
@@ -2975,6 +3465,10 @@ public final class FitConfig {
     public static final int SMART_FILTER_STRING_FIELD_NUMBER = 10;
     private volatile java.lang.Object smartFilterString_;
     /**
+     * <pre>
+     * The smart filter expressed as a serialised string
+     * </pre>
+     *
      * <code>string smart_filter_string = 10;</code>
      */
     public java.lang.String getSmartFilterString() {
@@ -2990,6 +3484,10 @@ public final class FitConfig {
       }
     }
     /**
+     * <pre>
+     * The smart filter expressed as a serialised string
+     * </pre>
+     *
      * <code>string smart_filter_string = 10;</code>
      */
     public com.google.protobuf.ByteString
@@ -3466,12 +3964,20 @@ public final class FitConfig {
 
       private double shiftFactor_ ;
       /**
+       * <pre>
+       * The maximum amount a localisation can move from the initial estimate relative to the PSF width
+       * </pre>
+       *
        * <code>double shift_factor = 1;</code>
        */
       public double getShiftFactor() {
         return shiftFactor_;
       }
       /**
+       * <pre>
+       * The maximum amount a localisation can move from the initial estimate relative to the PSF width
+       * </pre>
+       *
        * <code>double shift_factor = 1;</code>
        */
       public Builder setShiftFactor(double value) {
@@ -3481,6 +3987,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The maximum amount a localisation can move from the initial estimate relative to the PSF width
+       * </pre>
+       *
        * <code>double shift_factor = 1;</code>
        */
       public Builder clearShiftFactor() {
@@ -3492,12 +4002,20 @@ public final class FitConfig {
 
       private double signalStrength_ ;
       /**
+       * <pre>
+       * The minimum Signal-to-Noise (SNR) threshold
+       * </pre>
+       *
        * <code>double signal_strength = 2;</code>
        */
       public double getSignalStrength() {
         return signalStrength_;
       }
       /**
+       * <pre>
+       * The minimum Signal-to-Noise (SNR) threshold
+       * </pre>
+       *
        * <code>double signal_strength = 2;</code>
        */
       public Builder setSignalStrength(double value) {
@@ -3507,6 +4025,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The minimum Signal-to-Noise (SNR) threshold
+       * </pre>
+       *
        * <code>double signal_strength = 2;</code>
        */
       public Builder clearSignalStrength() {
@@ -3518,12 +4040,20 @@ public final class FitConfig {
 
       private double minPhotons_ ;
       /**
+       * <pre>
+       * The minimum number of photons threshold
+       * </pre>
+       *
        * <code>double min_photons = 3;</code>
        */
       public double getMinPhotons() {
         return minPhotons_;
       }
       /**
+       * <pre>
+       * The minimum number of photons threshold
+       * </pre>
+       *
        * <code>double min_photons = 3;</code>
        */
       public Builder setMinPhotons(double value) {
@@ -3533,6 +4063,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The minimum number of photons threshold
+       * </pre>
+       *
        * <code>double min_photons = 3;</code>
        */
       public Builder clearMinPhotons() {
@@ -3544,12 +4078,20 @@ public final class FitConfig {
 
       private double precisionThreshold_ ;
       /**
+       * <pre>
+       * The maximum allowed localisation precision (expressed as the localisation standard deviation)
+       * </pre>
+       *
        * <code>double precision_threshold = 4;</code>
        */
       public double getPrecisionThreshold() {
         return precisionThreshold_;
       }
       /**
+       * <pre>
+       * The maximum allowed localisation precision (expressed as the localisation standard deviation)
+       * </pre>
+       *
        * <code>double precision_threshold = 4;</code>
        */
       public Builder setPrecisionThreshold(double value) {
@@ -3559,6 +4101,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The maximum allowed localisation precision (expressed as the localisation standard deviation)
+       * </pre>
+       *
        * <code>double precision_threshold = 4;</code>
        */
       public Builder clearPrecisionThreshold() {
@@ -3570,12 +4116,20 @@ public final class FitConfig {
 
       private boolean precisionUsingBackground_ ;
       /**
+       * <pre>
+       * Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
+       * </pre>
+       *
        * <code>bool precision_using_background = 5;</code>
        */
       public boolean getPrecisionUsingBackground() {
         return precisionUsingBackground_;
       }
       /**
+       * <pre>
+       * Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
+       * </pre>
+       *
        * <code>bool precision_using_background = 5;</code>
        */
       public Builder setPrecisionUsingBackground(boolean value) {
@@ -3585,6 +4139,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
+       * </pre>
+       *
        * <code>bool precision_using_background = 5;</code>
        */
       public Builder clearPrecisionUsingBackground() {
@@ -3596,12 +4154,20 @@ public final class FitConfig {
 
       private double minWidthFactor_ ;
       /**
+       * <pre>
+       * The minimum allowed width relative to the initial width estimate
+       * </pre>
+       *
        * <code>double min_width_factor = 6;</code>
        */
       public double getMinWidthFactor() {
         return minWidthFactor_;
       }
       /**
+       * <pre>
+       * The minimum allowed width relative to the initial width estimate
+       * </pre>
+       *
        * <code>double min_width_factor = 6;</code>
        */
       public Builder setMinWidthFactor(double value) {
@@ -3611,6 +4177,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The minimum allowed width relative to the initial width estimate
+       * </pre>
+       *
        * <code>double min_width_factor = 6;</code>
        */
       public Builder clearMinWidthFactor() {
@@ -3622,12 +4192,20 @@ public final class FitConfig {
 
       private double maxWidthFactor_ ;
       /**
+       * <pre>
+       * The maximum allowed width relative to the initial width estimate
+       * </pre>
+       *
        * <code>double max_width_factor = 7;</code>
        */
       public double getMaxWidthFactor() {
         return maxWidthFactor_;
       }
       /**
+       * <pre>
+       * The maximum allowed width relative to the initial width estimate
+       * </pre>
+       *
        * <code>double max_width_factor = 7;</code>
        */
       public Builder setMaxWidthFactor(double value) {
@@ -3637,6 +4215,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The maximum allowed width relative to the initial width estimate
+       * </pre>
+       *
        * <code>double max_width_factor = 7;</code>
        */
       public Builder clearMaxWidthFactor() {
@@ -3648,12 +4230,20 @@ public final class FitConfig {
 
       private boolean disableSimpleFilter_ ;
       /**
+       * <pre>
+       * Set to true to disable the use of simple filters
+       * </pre>
+       *
        * <code>bool disable_simple_filter = 8;</code>
        */
       public boolean getDisableSimpleFilter() {
         return disableSimpleFilter_;
       }
       /**
+       * <pre>
+       * Set to true to disable the use of simple filters
+       * </pre>
+       *
        * <code>bool disable_simple_filter = 8;</code>
        */
       public Builder setDisableSimpleFilter(boolean value) {
@@ -3663,6 +4253,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * Set to true to disable the use of simple filters
+       * </pre>
+       *
        * <code>bool disable_simple_filter = 8;</code>
        */
       public Builder clearDisableSimpleFilter() {
@@ -3674,12 +4268,20 @@ public final class FitConfig {
 
       private boolean smartFilter_ ;
       /**
+       * <pre>
+       * Set to true to use a smart filter
+       * </pre>
+       *
        * <code>bool smart_filter = 9;</code>
        */
       public boolean getSmartFilter() {
         return smartFilter_;
       }
       /**
+       * <pre>
+       * Set to true to use a smart filter
+       * </pre>
+       *
        * <code>bool smart_filter = 9;</code>
        */
       public Builder setSmartFilter(boolean value) {
@@ -3689,6 +4291,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * Set to true to use a smart filter
+       * </pre>
+       *
        * <code>bool smart_filter = 9;</code>
        */
       public Builder clearSmartFilter() {
@@ -3700,6 +4306,10 @@ public final class FitConfig {
 
       private java.lang.Object smartFilterString_ = "";
       /**
+       * <pre>
+       * The smart filter expressed as a serialised string
+       * </pre>
+       *
        * <code>string smart_filter_string = 10;</code>
        */
       public java.lang.String getSmartFilterString() {
@@ -3715,6 +4325,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The smart filter expressed as a serialised string
+       * </pre>
+       *
        * <code>string smart_filter_string = 10;</code>
        */
       public com.google.protobuf.ByteString
@@ -3731,6 +4345,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The smart filter expressed as a serialised string
+       * </pre>
+       *
        * <code>string smart_filter_string = 10;</code>
        */
       public Builder setSmartFilterString(
@@ -3744,6 +4362,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The smart filter expressed as a serialised string
+       * </pre>
+       *
        * <code>string smart_filter_string = 10;</code>
        */
       public Builder clearSmartFilterString() {
@@ -3753,6 +4375,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The smart filter expressed as a serialised string
+       * </pre>
+       *
        * <code>string smart_filter_string = 10;</code>
        */
       public Builder setSmartFilterStringBytes(
@@ -7800,108 +8426,204 @@ public final class FitConfig {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * The fit settings
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
     boolean hasFitSettings();
     /**
+     * <pre>
+     * The fit settings
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
     gdsc.smlm.data.config.FitConfig.FitSettings getFitSettings();
     /**
+     * <pre>
+     * The fit settings
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
     gdsc.smlm.data.config.FitConfig.FitSettingsOrBuilder getFitSettingsOrBuilder();
 
     /**
+     * <pre>
+     * the method for estimating noise in the entire frame
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
      */
     int getNoiseMethodValue();
     /**
+     * <pre>
+     * the method for estimating noise in the entire frame
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
      */
     gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod getNoiseMethod();
 
     /**
+     * <pre>
+     * The data filter settings 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
     boolean hasDataFilterSettings();
     /**
+     * <pre>
+     * The data filter settings 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
     gdsc.smlm.data.config.FitConfig.DataFilterSettings getDataFilterSettings();
     /**
+     * <pre>
+     * The data filter settings 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
     gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder();
 
     /**
+     * <pre>
+     * The square radius to use to identify local maxima (candidates)
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
     boolean hasSearch();
     /**
+     * <pre>
+     * The square radius to use to identify local maxima (candidates)
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
     gdsc.smlm.data.config.FitConfig.RelativeParameter getSearch();
     /**
+     * <pre>
+     * The square radius to use to identify local maxima (candidates)
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
     gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getSearchOrBuilder();
 
     /**
+     * <pre>
+     * The border to ignore at the edge of the image 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
     boolean hasBorder();
     /**
+     * <pre>
+     * The border to ignore at the edge of the image 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
     gdsc.smlm.data.config.FitConfig.RelativeParameter getBorder();
     /**
+     * <pre>
+     * The border to ignore at the edge of the image 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
     gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getBorderOrBuilder();
 
     /**
+     * <pre>
+     * The square radius to use for fitting around each candidate 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
     boolean hasFitting();
     /**
+     * <pre>
+     * The square radius to use for fitting around each candidate 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
     gdsc.smlm.data.config.FitConfig.RelativeParameter getFitting();
     /**
+     * <pre>
+     * The square radius to use for fitting around each candidate 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
     gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getFittingOrBuilder();
 
     /**
+     * <pre>
+     * Set to true to include neighbours during fitting
+     * </pre>
+     *
      * <code>bool include_neighbours = 7;</code>
      */
     boolean getIncludeNeighbours();
 
     /**
+     * <pre>
+     * The height threshold for including neighbours expressed relative to the current candidate
+     * </pre>
+     *
      * <code>double neighbour_height_threshold = 8;</code>
      */
     double getNeighbourHeightThreshold();
 
     /**
+     * <pre>
+     * The residuals threshold for refitting a single peak as a doublet following analysis of the symmetry of the fit residuals.
+     * </pre>
+     *
      * <code>double residuals_threshold = 9;</code>
      */
     double getResidualsThreshold();
 
     /**
+     * <pre>
+     * The distance to categorise localisations as duplicates and ignore them.
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
     boolean hasDuplicateDistance();
     /**
+     * <pre>
+     * The distance to categorise localisations as duplicates and ignore them.
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
     gdsc.smlm.data.config.FitConfig.RelativeParameter getDuplicateDistance();
     /**
+     * <pre>
+     * The distance to categorise localisations as duplicates and ignore them.
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
     gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder();
 
     /**
+     * <pre>
+     * The number of consecutive failures to allow before stopping fitting of the remaining candidates
+     * </pre>
+     *
      * <code>int32 failures_limit = 11;</code>
      */
     int getFailuresLimit();
@@ -8086,18 +8808,30 @@ public final class FitConfig {
     public static final int FIT_SETTINGS_FIELD_NUMBER = 1;
     private gdsc.smlm.data.config.FitConfig.FitSettings fitSettings_;
     /**
+     * <pre>
+     * The fit settings
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
     public boolean hasFitSettings() {
       return fitSettings_ != null;
     }
     /**
+     * <pre>
+     * The fit settings
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
     public gdsc.smlm.data.config.FitConfig.FitSettings getFitSettings() {
       return fitSettings_ == null ? gdsc.smlm.data.config.FitConfig.FitSettings.getDefaultInstance() : fitSettings_;
     }
     /**
+     * <pre>
+     * The fit settings
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
     public gdsc.smlm.data.config.FitConfig.FitSettingsOrBuilder getFitSettingsOrBuilder() {
@@ -8107,12 +8841,20 @@ public final class FitConfig {
     public static final int NOISE_METHOD_FIELD_NUMBER = 2;
     private int noiseMethod_;
     /**
+     * <pre>
+     * the method for estimating noise in the entire frame
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
      */
     public int getNoiseMethodValue() {
       return noiseMethod_;
     }
     /**
+     * <pre>
+     * the method for estimating noise in the entire frame
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
      */
     public gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod getNoiseMethod() {
@@ -8123,18 +8865,30 @@ public final class FitConfig {
     public static final int DATA_FILTER_SETTINGS_FIELD_NUMBER = 3;
     private gdsc.smlm.data.config.FitConfig.DataFilterSettings dataFilterSettings_;
     /**
+     * <pre>
+     * The data filter settings 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
     public boolean hasDataFilterSettings() {
       return dataFilterSettings_ != null;
     }
     /**
+     * <pre>
+     * The data filter settings 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
     public gdsc.smlm.data.config.FitConfig.DataFilterSettings getDataFilterSettings() {
       return dataFilterSettings_ == null ? gdsc.smlm.data.config.FitConfig.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
     }
     /**
+     * <pre>
+     * The data filter settings 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
     public gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
@@ -8144,18 +8898,30 @@ public final class FitConfig {
     public static final int SEARCH_FIELD_NUMBER = 4;
     private gdsc.smlm.data.config.FitConfig.RelativeParameter search_;
     /**
+     * <pre>
+     * The square radius to use to identify local maxima (candidates)
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
     public boolean hasSearch() {
       return search_ != null;
     }
     /**
+     * <pre>
+     * The square radius to use to identify local maxima (candidates)
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
     public gdsc.smlm.data.config.FitConfig.RelativeParameter getSearch() {
       return search_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : search_;
     }
     /**
+     * <pre>
+     * The square radius to use to identify local maxima (candidates)
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
     public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getSearchOrBuilder() {
@@ -8165,18 +8931,30 @@ public final class FitConfig {
     public static final int BORDER_FIELD_NUMBER = 5;
     private gdsc.smlm.data.config.FitConfig.RelativeParameter border_;
     /**
+     * <pre>
+     * The border to ignore at the edge of the image 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
     public boolean hasBorder() {
       return border_ != null;
     }
     /**
+     * <pre>
+     * The border to ignore at the edge of the image 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
     public gdsc.smlm.data.config.FitConfig.RelativeParameter getBorder() {
       return border_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : border_;
     }
     /**
+     * <pre>
+     * The border to ignore at the edge of the image 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
     public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getBorderOrBuilder() {
@@ -8186,18 +8964,30 @@ public final class FitConfig {
     public static final int FITTING_FIELD_NUMBER = 6;
     private gdsc.smlm.data.config.FitConfig.RelativeParameter fitting_;
     /**
+     * <pre>
+     * The square radius to use for fitting around each candidate 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
     public boolean hasFitting() {
       return fitting_ != null;
     }
     /**
+     * <pre>
+     * The square radius to use for fitting around each candidate 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
     public gdsc.smlm.data.config.FitConfig.RelativeParameter getFitting() {
       return fitting_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : fitting_;
     }
     /**
+     * <pre>
+     * The square radius to use for fitting around each candidate 
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
     public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getFittingOrBuilder() {
@@ -8207,6 +8997,10 @@ public final class FitConfig {
     public static final int INCLUDE_NEIGHBOURS_FIELD_NUMBER = 7;
     private boolean includeNeighbours_;
     /**
+     * <pre>
+     * Set to true to include neighbours during fitting
+     * </pre>
+     *
      * <code>bool include_neighbours = 7;</code>
      */
     public boolean getIncludeNeighbours() {
@@ -8216,6 +9010,10 @@ public final class FitConfig {
     public static final int NEIGHBOUR_HEIGHT_THRESHOLD_FIELD_NUMBER = 8;
     private double neighbourHeightThreshold_;
     /**
+     * <pre>
+     * The height threshold for including neighbours expressed relative to the current candidate
+     * </pre>
+     *
      * <code>double neighbour_height_threshold = 8;</code>
      */
     public double getNeighbourHeightThreshold() {
@@ -8225,6 +9023,10 @@ public final class FitConfig {
     public static final int RESIDUALS_THRESHOLD_FIELD_NUMBER = 9;
     private double residualsThreshold_;
     /**
+     * <pre>
+     * The residuals threshold for refitting a single peak as a doublet following analysis of the symmetry of the fit residuals.
+     * </pre>
+     *
      * <code>double residuals_threshold = 9;</code>
      */
     public double getResidualsThreshold() {
@@ -8234,18 +9036,30 @@ public final class FitConfig {
     public static final int DUPLICATE_DISTANCE_FIELD_NUMBER = 10;
     private gdsc.smlm.data.config.FitConfig.RelativeParameter duplicateDistance_;
     /**
+     * <pre>
+     * The distance to categorise localisations as duplicates and ignore them.
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
     public boolean hasDuplicateDistance() {
       return duplicateDistance_ != null;
     }
     /**
+     * <pre>
+     * The distance to categorise localisations as duplicates and ignore them.
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
     public gdsc.smlm.data.config.FitConfig.RelativeParameter getDuplicateDistance() {
       return duplicateDistance_ == null ? gdsc.smlm.data.config.FitConfig.RelativeParameter.getDefaultInstance() : duplicateDistance_;
     }
     /**
+     * <pre>
+     * The distance to categorise localisations as duplicates and ignore them.
+     * </pre>
+     *
      * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
     public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
@@ -8255,6 +9069,10 @@ public final class FitConfig {
     public static final int FAILURES_LIMIT_FIELD_NUMBER = 11;
     private int failuresLimit_;
     /**
+     * <pre>
+     * The number of consecutive failures to allow before stopping fitting of the remaining candidates
+     * </pre>
+     *
      * <code>int32 failures_limit = 11;</code>
      */
     public int getFailuresLimit() {
@@ -8805,12 +9623,20 @@ public final class FitConfig {
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitConfig.FitSettings, gdsc.smlm.data.config.FitConfig.FitSettings.Builder, gdsc.smlm.data.config.FitConfig.FitSettingsOrBuilder> fitSettingsBuilder_;
       /**
+       * <pre>
+       * The fit settings
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       public boolean hasFitSettings() {
         return fitSettingsBuilder_ != null || fitSettings_ != null;
       }
       /**
+       * <pre>
+       * The fit settings
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       public gdsc.smlm.data.config.FitConfig.FitSettings getFitSettings() {
@@ -8821,6 +9647,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The fit settings
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       public Builder setFitSettings(gdsc.smlm.data.config.FitConfig.FitSettings value) {
@@ -8837,6 +9667,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The fit settings
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       public Builder setFitSettings(
@@ -8851,6 +9685,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The fit settings
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       public Builder mergeFitSettings(gdsc.smlm.data.config.FitConfig.FitSettings value) {
@@ -8869,6 +9707,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The fit settings
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       public Builder clearFitSettings() {
@@ -8883,6 +9725,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The fit settings
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       public gdsc.smlm.data.config.FitConfig.FitSettings.Builder getFitSettingsBuilder() {
@@ -8891,6 +9737,10 @@ public final class FitConfig {
         return getFitSettingsFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * The fit settings
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       public gdsc.smlm.data.config.FitConfig.FitSettingsOrBuilder getFitSettingsOrBuilder() {
@@ -8902,6 +9752,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The fit settings
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -8920,12 +9774,20 @@ public final class FitConfig {
 
       private int noiseMethod_ = 0;
       /**
+       * <pre>
+       * the method for estimating noise in the entire frame
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
       public int getNoiseMethodValue() {
         return noiseMethod_;
       }
       /**
+       * <pre>
+       * the method for estimating noise in the entire frame
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
       public Builder setNoiseMethodValue(int value) {
@@ -8934,6 +9796,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * the method for estimating noise in the entire frame
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
       public gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod getNoiseMethod() {
@@ -8941,6 +9807,10 @@ public final class FitConfig {
         return result == null ? gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * the method for estimating noise in the entire frame
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
       public Builder setNoiseMethod(gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod value) {
@@ -8953,6 +9823,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * the method for estimating noise in the entire frame
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
       public Builder clearNoiseMethod() {
@@ -8966,12 +9840,20 @@ public final class FitConfig {
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitConfig.DataFilterSettings, gdsc.smlm.data.config.FitConfig.DataFilterSettings.Builder, gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder> dataFilterSettingsBuilder_;
       /**
+       * <pre>
+       * The data filter settings 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public boolean hasDataFilterSettings() {
         return dataFilterSettingsBuilder_ != null || dataFilterSettings_ != null;
       }
       /**
+       * <pre>
+       * The data filter settings 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public gdsc.smlm.data.config.FitConfig.DataFilterSettings getDataFilterSettings() {
@@ -8982,6 +9864,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The data filter settings 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public Builder setDataFilterSettings(gdsc.smlm.data.config.FitConfig.DataFilterSettings value) {
@@ -8998,6 +9884,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The data filter settings 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public Builder setDataFilterSettings(
@@ -9012,6 +9902,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The data filter settings 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public Builder mergeDataFilterSettings(gdsc.smlm.data.config.FitConfig.DataFilterSettings value) {
@@ -9030,6 +9924,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The data filter settings 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public Builder clearDataFilterSettings() {
@@ -9044,6 +9942,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The data filter settings 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public gdsc.smlm.data.config.FitConfig.DataFilterSettings.Builder getDataFilterSettingsBuilder() {
@@ -9052,6 +9954,10 @@ public final class FitConfig {
         return getDataFilterSettingsFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * The data filter settings 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public gdsc.smlm.data.config.FitConfig.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
@@ -9063,6 +9969,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The data filter settings 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -9083,12 +9993,20 @@ public final class FitConfig {
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> searchBuilder_;
       /**
+       * <pre>
+       * The square radius to use to identify local maxima (candidates)
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public boolean hasSearch() {
         return searchBuilder_ != null || search_ != null;
       }
       /**
+       * <pre>
+       * The square radius to use to identify local maxima (candidates)
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameter getSearch() {
@@ -9099,6 +10017,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The square radius to use to identify local maxima (candidates)
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public Builder setSearch(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
@@ -9115,6 +10037,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The square radius to use to identify local maxima (candidates)
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public Builder setSearch(
@@ -9129,6 +10055,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The square radius to use to identify local maxima (candidates)
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public Builder mergeSearch(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
@@ -9147,6 +10077,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The square radius to use to identify local maxima (candidates)
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public Builder clearSearch() {
@@ -9161,6 +10095,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The square radius to use to identify local maxima (candidates)
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder getSearchBuilder() {
@@ -9169,6 +10107,10 @@ public final class FitConfig {
         return getSearchFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * The square radius to use to identify local maxima (candidates)
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getSearchOrBuilder() {
@@ -9180,6 +10122,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The square radius to use to identify local maxima (candidates)
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -9200,12 +10146,20 @@ public final class FitConfig {
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> borderBuilder_;
       /**
+       * <pre>
+       * The border to ignore at the edge of the image 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public boolean hasBorder() {
         return borderBuilder_ != null || border_ != null;
       }
       /**
+       * <pre>
+       * The border to ignore at the edge of the image 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameter getBorder() {
@@ -9216,6 +10170,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The border to ignore at the edge of the image 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public Builder setBorder(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
@@ -9232,6 +10190,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The border to ignore at the edge of the image 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public Builder setBorder(
@@ -9246,6 +10208,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The border to ignore at the edge of the image 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public Builder mergeBorder(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
@@ -9264,6 +10230,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The border to ignore at the edge of the image 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public Builder clearBorder() {
@@ -9278,6 +10248,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The border to ignore at the edge of the image 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder getBorderBuilder() {
@@ -9286,6 +10260,10 @@ public final class FitConfig {
         return getBorderFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * The border to ignore at the edge of the image 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getBorderOrBuilder() {
@@ -9297,6 +10275,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The border to ignore at the edge of the image 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -9317,12 +10299,20 @@ public final class FitConfig {
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> fittingBuilder_;
       /**
+       * <pre>
+       * The square radius to use for fitting around each candidate 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public boolean hasFitting() {
         return fittingBuilder_ != null || fitting_ != null;
       }
       /**
+       * <pre>
+       * The square radius to use for fitting around each candidate 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameter getFitting() {
@@ -9333,6 +10323,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The square radius to use for fitting around each candidate 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public Builder setFitting(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
@@ -9349,6 +10343,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The square radius to use for fitting around each candidate 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public Builder setFitting(
@@ -9363,6 +10361,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The square radius to use for fitting around each candidate 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public Builder mergeFitting(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
@@ -9381,6 +10383,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The square radius to use for fitting around each candidate 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public Builder clearFitting() {
@@ -9395,6 +10401,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The square radius to use for fitting around each candidate 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder getFittingBuilder() {
@@ -9403,6 +10413,10 @@ public final class FitConfig {
         return getFittingFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * The square radius to use for fitting around each candidate 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getFittingOrBuilder() {
@@ -9414,6 +10428,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The square radius to use for fitting around each candidate 
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -9432,12 +10450,20 @@ public final class FitConfig {
 
       private boolean includeNeighbours_ ;
       /**
+       * <pre>
+       * Set to true to include neighbours during fitting
+       * </pre>
+       *
        * <code>bool include_neighbours = 7;</code>
        */
       public boolean getIncludeNeighbours() {
         return includeNeighbours_;
       }
       /**
+       * <pre>
+       * Set to true to include neighbours during fitting
+       * </pre>
+       *
        * <code>bool include_neighbours = 7;</code>
        */
       public Builder setIncludeNeighbours(boolean value) {
@@ -9447,6 +10473,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * Set to true to include neighbours during fitting
+       * </pre>
+       *
        * <code>bool include_neighbours = 7;</code>
        */
       public Builder clearIncludeNeighbours() {
@@ -9458,12 +10488,20 @@ public final class FitConfig {
 
       private double neighbourHeightThreshold_ ;
       /**
+       * <pre>
+       * The height threshold for including neighbours expressed relative to the current candidate
+       * </pre>
+       *
        * <code>double neighbour_height_threshold = 8;</code>
        */
       public double getNeighbourHeightThreshold() {
         return neighbourHeightThreshold_;
       }
       /**
+       * <pre>
+       * The height threshold for including neighbours expressed relative to the current candidate
+       * </pre>
+       *
        * <code>double neighbour_height_threshold = 8;</code>
        */
       public Builder setNeighbourHeightThreshold(double value) {
@@ -9473,6 +10511,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The height threshold for including neighbours expressed relative to the current candidate
+       * </pre>
+       *
        * <code>double neighbour_height_threshold = 8;</code>
        */
       public Builder clearNeighbourHeightThreshold() {
@@ -9484,12 +10526,20 @@ public final class FitConfig {
 
       private double residualsThreshold_ ;
       /**
+       * <pre>
+       * The residuals threshold for refitting a single peak as a doublet following analysis of the symmetry of the fit residuals.
+       * </pre>
+       *
        * <code>double residuals_threshold = 9;</code>
        */
       public double getResidualsThreshold() {
         return residualsThreshold_;
       }
       /**
+       * <pre>
+       * The residuals threshold for refitting a single peak as a doublet following analysis of the symmetry of the fit residuals.
+       * </pre>
+       *
        * <code>double residuals_threshold = 9;</code>
        */
       public Builder setResidualsThreshold(double value) {
@@ -9499,6 +10549,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The residuals threshold for refitting a single peak as a doublet following analysis of the symmetry of the fit residuals.
+       * </pre>
+       *
        * <code>double residuals_threshold = 9;</code>
        */
       public Builder clearResidualsThreshold() {
@@ -9512,12 +10566,20 @@ public final class FitConfig {
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitConfig.RelativeParameter, gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder, gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder> duplicateDistanceBuilder_;
       /**
+       * <pre>
+       * The distance to categorise localisations as duplicates and ignore them.
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public boolean hasDuplicateDistance() {
         return duplicateDistanceBuilder_ != null || duplicateDistance_ != null;
       }
       /**
+       * <pre>
+       * The distance to categorise localisations as duplicates and ignore them.
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameter getDuplicateDistance() {
@@ -9528,6 +10590,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The distance to categorise localisations as duplicates and ignore them.
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public Builder setDuplicateDistance(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
@@ -9544,6 +10610,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The distance to categorise localisations as duplicates and ignore them.
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public Builder setDuplicateDistance(
@@ -9558,6 +10628,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The distance to categorise localisations as duplicates and ignore them.
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public Builder mergeDuplicateDistance(gdsc.smlm.data.config.FitConfig.RelativeParameter value) {
@@ -9576,6 +10650,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The distance to categorise localisations as duplicates and ignore them.
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public Builder clearDuplicateDistance() {
@@ -9590,6 +10668,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The distance to categorise localisations as duplicates and ignore them.
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameter.Builder getDuplicateDistanceBuilder() {
@@ -9598,6 +10680,10 @@ public final class FitConfig {
         return getDuplicateDistanceFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * The distance to categorise localisations as duplicates and ignore them.
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public gdsc.smlm.data.config.FitConfig.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
@@ -9609,6 +10695,10 @@ public final class FitConfig {
         }
       }
       /**
+       * <pre>
+       * The distance to categorise localisations as duplicates and ignore them.
+       * </pre>
+       *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -9627,12 +10717,20 @@ public final class FitConfig {
 
       private int failuresLimit_ ;
       /**
+       * <pre>
+       * The number of consecutive failures to allow before stopping fitting of the remaining candidates
+       * </pre>
+       *
        * <code>int32 failures_limit = 11;</code>
        */
       public int getFailuresLimit() {
         return failuresLimit_;
       }
       /**
+       * <pre>
+       * The number of consecutive failures to allow before stopping fitting of the remaining candidates
+       * </pre>
+       *
        * <code>int32 failures_limit = 11;</code>
        */
       public Builder setFailuresLimit(int value) {
@@ -9642,6 +10740,10 @@ public final class FitConfig {
         return this;
       }
       /**
+       * <pre>
+       * The number of consecutive failures to allow before stopping fitting of the remaining candidates
+       * </pre>
+       *
        * <code>int32 failures_limit = 11;</code>
        */
       public Builder clearFailuresLimit() {
@@ -9745,76 +10847,76 @@ public final class FitConfig {
     java.lang.String[] descriptorData = {
       "\n\020fit_config.proto\022\025gdsc.smlm.data.confi" +
       "g\032\020psf_config.proto\032\030calibration_config." +
-      "proto\"\305\004\n\021FitSolverSettings\022\021\n\tfixed_psf" +
+      "proto\"\307\004\n\021FitSolverSettings\022\021\n\tfixed_psf" +
       "\030\001 \001(\010\022\"\n\032disable_background_fitting\030\002 \001" +
       "(\010\022\036\n\026disable_signal_fitting\030\003 \001(\010\0224\n\nfi" +
       "t_solver\030\004 \001(\0162 .gdsc.smlm.data.config.F" +
-      "itSolver\022\026\n\016min_iterations\030\005 \001(\005\022\026\n\016max_" +
-      "iterations\030\006 \001(\005\022\032\n\022relative_threshold\030\007" +
-      " \001(\001\022\032\n\022absolute_threshold\030\010 \001(\001\022$\n\034para" +
-      "meter_relative_threshold\030\t \001(\001\022$\n\034parame",
-      "ter_absolute_threshold\030\n \001(\001\022\016\n\006lambda\030\013" +
-      " \001(\001\022:\n\rsearch_method\030\014 \001(\0162#.gdsc.smlm." +
-      "data.config.SearchMethod\022\"\n\032gradient_lin" +
-      "e_minimisation\030\r \001(\010\022\024\n\014model_camera\030\016 \001" +
-      "(\010\022 \n\030max_function_evaluations\030\017 \001(\005\022\024\n\014" +
-      "use_clamping\030\020 \001(\010\022\034\n\024use_dynamic_clampi" +
-      "ng\030\021 \001(\010\022\023\n\013clamp_value\030\022 \003(\001\"\233\002\n\016Filter" +
-      "Settings\022\024\n\014shift_factor\030\001 \001(\001\022\027\n\017signal" +
-      "_strength\030\002 \001(\001\022\023\n\013min_photons\030\003 \001(\001\022\033\n\023" +
-      "precision_threshold\030\004 \001(\001\022\"\n\032precision_u",
-      "sing_background\030\005 \001(\010\022\030\n\020min_width_facto" +
-      "r\030\006 \001(\001\022\030\n\020max_width_factor\030\007 \001(\001\022\035\n\025dis" +
-      "able_simple_filter\030\010 \001(\010\022\024\n\014smart_filter" +
-      "\030\t \001(\010\022\033\n\023smart_filter_string\030\n \001(\t\"\366\001\n\013" +
-      "FitSettings\0227\n\013calibration\030\001 \001(\0132\".gdsc." +
-      "smlm.data.config.Calibration\022\'\n\003psf\030\002 \001(" +
-      "\0132\032.gdsc.smlm.data.config.PSF\022E\n\023fit_sol" +
-      "ver_settings\030\003 \001(\0132(.gdsc.smlm.data.conf" +
-      "ig.FitSolverSettings\022>\n\017filter_settings\030" +
-      "\004 \001(\0132%.gdsc.smlm.data.config.FilterSett",
-      "ings\"4\n\021RelativeParameter\022\r\n\005value\030\001 \001(\001" +
-      "\022\020\n\010absolute\030\002 \001(\010\"\216\001\n\nDataFilter\022C\n\022dat" +
-      "a_filter_method\030\001 \001(\0162\'.gdsc.smlm.data.c" +
-      "onfig.DataFilterMethod\022;\n\tparameter\030\002 \003(" +
-      "\0132(.gdsc.smlm.data.config.RelativeParame" +
-      "ter\"\215\001\n\022DataFilterSettings\022?\n\020data_filte" +
-      "r_type\030\001 \001(\0162%.gdsc.smlm.data.config.Dat" +
-      "aFilterType\0226\n\013data_filter\030\002 \003(\0132!.gdsc." +
-      "smlm.data.config.DataFilter\"\303\004\n\021FitEngin" +
-      "eSettings\0228\n\014fit_settings\030\001 \001(\0132\".gdsc.s",
-      "mlm.data.config.FitSettings\022A\n\014noise_met" +
-      "hod\030\002 \001(\0162+.gdsc.smlm.data.config.NoiseE" +
-      "stimatorMethod\022G\n\024data_filter_settings\030\003" +
-      " \001(\0132).gdsc.smlm.data.config.DataFilterS" +
-      "ettings\0228\n\006search\030\004 \001(\0132(.gdsc.smlm.data" +
-      ".config.RelativeParameter\0228\n\006border\030\005 \001(" +
-      "\0132(.gdsc.smlm.data.config.RelativeParame" +
-      "ter\0229\n\007fitting\030\006 \001(\0132(.gdsc.smlm.data.co" +
-      "nfig.RelativeParameter\022\032\n\022include_neighb" +
-      "ours\030\007 \001(\010\022\"\n\032neighbour_height_threshold",
-      "\030\010 \001(\001\022\033\n\023residuals_threshold\030\t \001(\001\022D\n\022d" +
-      "uplicate_distance\030\n \001(\0132(.gdsc.smlm.data" +
-      ".config.RelativeParameter\022\026\n\016failures_li" +
-      "mit\030\013 \001(\005*e\n\tFitSolver\022\013\n\007LVM_LSE\020\000\022\013\n\007L" +
-      "VM_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010FAST_" +
-      "MLE\020\004\022\031\n\025BACKTRACKING_FAST_MLE\020\005*\231\001\n\014Sea" +
-      "rchMethod\022\022\n\016POWELL_BOUNDED\020\000\022\n\n\006POWELL\020" +
-      "\001\022\022\n\016POWELL_ADAPTER\020\002\022\n\n\006BOBYQA\020\003\022\t\n\005CMA" +
-      "ES\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022\031\n\025CONJU" +
-      "GATE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*6\n\016DataFilt",
-      "erType\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENCE\020\001\022\010\n\004JU" +
-      "RY\020\002*Y\n\020DataFilterMethod\022\010\n\004MEAN\020\000\022\016\n\nBL" +
-      "OCK_MEAN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014\n\010GAUSSIA" +
-      "N\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024NoiseEstimatorMethod" +
-      "\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWEST_PIXELS\020\001\022%\n!R" +
-      "ESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\002\022&\n\"RE" +
-      "SIDUALS_LEAST_TRIMMED_OF_SQUARES\020\003\022#\n\037RE" +
-      "SIDUALS_LEAST_MEAN_OF_SQUARES\020\004\022+\n\'QUICK" +
-      "_RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\005\022,\n(" +
-      "QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES",
-      "\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEAN_OF_SQUA" +
-      "RES\020\007B\013B\tFitConfigb\006proto3"
+      "itSolver\022\030\n\020fixed_iterations\030\005 \001(\010\022\026\n\016ma" +
+      "x_iterations\030\006 \001(\005\022\032\n\022relative_threshold" +
+      "\030\007 \001(\001\022\032\n\022absolute_threshold\030\010 \001(\001\022$\n\034pa" +
+      "rameter_relative_threshold\030\t \001(\001\022$\n\034para",
+      "meter_absolute_threshold\030\n \001(\001\022\016\n\006lambda" +
+      "\030\013 \001(\001\022:\n\rsearch_method\030\014 \001(\0162#.gdsc.sml" +
+      "m.data.config.SearchMethod\022\"\n\032gradient_l" +
+      "ine_minimisation\030\r \001(\010\022\024\n\014model_camera\030\016" +
+      " \001(\010\022 \n\030max_function_evaluations\030\017 \001(\005\022\024" +
+      "\n\014use_clamping\030\020 \001(\010\022\034\n\024use_dynamic_clam" +
+      "ping\030\021 \001(\010\022\023\n\013clamp_value\030\022 \003(\001\"\233\002\n\016Filt" +
+      "erSettings\022\024\n\014shift_factor\030\001 \001(\001\022\027\n\017sign" +
+      "al_strength\030\002 \001(\001\022\023\n\013min_photons\030\003 \001(\001\022\033" +
+      "\n\023precision_threshold\030\004 \001(\001\022\"\n\032precision",
+      "_using_background\030\005 \001(\010\022\030\n\020min_width_fac" +
+      "tor\030\006 \001(\001\022\030\n\020max_width_factor\030\007 \001(\001\022\035\n\025d" +
+      "isable_simple_filter\030\010 \001(\010\022\024\n\014smart_filt" +
+      "er\030\t \001(\010\022\033\n\023smart_filter_string\030\n \001(\t\"\366\001" +
+      "\n\013FitSettings\0227\n\013calibration\030\001 \001(\0132\".gds" +
+      "c.smlm.data.config.Calibration\022\'\n\003psf\030\002 " +
+      "\001(\0132\032.gdsc.smlm.data.config.PSF\022E\n\023fit_s" +
+      "olver_settings\030\003 \001(\0132(.gdsc.smlm.data.co" +
+      "nfig.FitSolverSettings\022>\n\017filter_setting" +
+      "s\030\004 \001(\0132%.gdsc.smlm.data.config.FilterSe",
+      "ttings\"4\n\021RelativeParameter\022\r\n\005value\030\001 \001" +
+      "(\001\022\020\n\010absolute\030\002 \001(\010\"\216\001\n\nDataFilter\022C\n\022d" +
+      "ata_filter_method\030\001 \001(\0162\'.gdsc.smlm.data" +
+      ".config.DataFilterMethod\022;\n\tparameter\030\002 " +
+      "\003(\0132(.gdsc.smlm.data.config.RelativePara" +
+      "meter\"\215\001\n\022DataFilterSettings\022?\n\020data_fil" +
+      "ter_type\030\001 \001(\0162%.gdsc.smlm.data.config.D" +
+      "ataFilterType\0226\n\013data_filter\030\002 \003(\0132!.gds" +
+      "c.smlm.data.config.DataFilter\"\303\004\n\021FitEng" +
+      "ineSettings\0228\n\014fit_settings\030\001 \001(\0132\".gdsc",
+      ".smlm.data.config.FitSettings\022A\n\014noise_m" +
+      "ethod\030\002 \001(\0162+.gdsc.smlm.data.config.Nois" +
+      "eEstimatorMethod\022G\n\024data_filter_settings" +
+      "\030\003 \001(\0132).gdsc.smlm.data.config.DataFilte" +
+      "rSettings\0228\n\006search\030\004 \001(\0132(.gdsc.smlm.da" +
+      "ta.config.RelativeParameter\0228\n\006border\030\005 " +
+      "\001(\0132(.gdsc.smlm.data.config.RelativePara" +
+      "meter\0229\n\007fitting\030\006 \001(\0132(.gdsc.smlm.data." +
+      "config.RelativeParameter\022\032\n\022include_neig" +
+      "hbours\030\007 \001(\010\022\"\n\032neighbour_height_thresho",
+      "ld\030\010 \001(\001\022\033\n\023residuals_threshold\030\t \001(\001\022D\n" +
+      "\022duplicate_distance\030\n \001(\0132(.gdsc.smlm.da" +
+      "ta.config.RelativeParameter\022\026\n\016failures_" +
+      "limit\030\013 \001(\005*e\n\tFitSolver\022\013\n\007LVM_LSE\020\000\022\013\n" +
+      "\007LVM_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010FAS" +
+      "T_MLE\020\004\022\031\n\025BACKTRACKING_FAST_MLE\020\005*\231\001\n\014S" +
+      "earchMethod\022\022\n\016POWELL_BOUNDED\020\000\022\n\n\006POWEL" +
+      "L\020\001\022\022\n\016POWELL_ADAPTER\020\002\022\n\n\006BOBYQA\020\003\022\t\n\005C" +
+      "MAES\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022\031\n\025CON" +
+      "JUGATE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*6\n\016DataFi",
+      "lterType\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENCE\020\001\022\010\n\004" +
+      "JURY\020\002*Y\n\020DataFilterMethod\022\010\n\004MEAN\020\000\022\016\n\n" +
+      "BLOCK_MEAN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014\n\010GAUSS" +
+      "IAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024NoiseEstimatorMeth" +
+      "od\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWEST_PIXELS\020\001\022%\n" +
+      "!RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\002\022&\n\"" +
+      "RESIDUALS_LEAST_TRIMMED_OF_SQUARES\020\003\022#\n\037" +
+      "RESIDUALS_LEAST_MEAN_OF_SQUARES\020\004\022+\n\'QUI" +
+      "CK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\005\022," +
+      "\n(QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUAR",
+      "ES\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEAN_OF_SQ" +
+      "UARES\020\007B\013B\tFitConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -9835,7 +10937,7 @@ public final class FitConfig {
     internal_static_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor,
-        new java.lang.String[] { "FixedPsf", "DisableBackgroundFitting", "DisableSignalFitting", "FitSolver", "MinIterations", "MaxIterations", "RelativeThreshold", "AbsoluteThreshold", "ParameterRelativeThreshold", "ParameterAbsoluteThreshold", "Lambda", "SearchMethod", "GradientLineMinimisation", "ModelCamera", "MaxFunctionEvaluations", "UseClamping", "UseDynamicClamping", "ClampValue", });
+        new java.lang.String[] { "FixedPsf", "DisableBackgroundFitting", "DisableSignalFitting", "FitSolver", "FixedIterations", "MaxIterations", "RelativeThreshold", "AbsoluteThreshold", "ParameterRelativeThreshold", "ParameterAbsoluteThreshold", "Lambda", "SearchMethod", "GradientLineMinimisation", "ModelCamera", "MaxFunctionEvaluations", "UseClamping", "UseDynamicClamping", "ClampValue", });
     internal_static_gdsc_smlm_data_config_FilterSettings_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable = new

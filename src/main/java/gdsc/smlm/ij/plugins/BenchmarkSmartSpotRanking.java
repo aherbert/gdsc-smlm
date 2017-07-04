@@ -31,7 +31,6 @@ import gdsc.core.threshold.AutoThreshold;
 import gdsc.core.threshold.FloatHistogram;
 import gdsc.core.threshold.Histogram;
 import gdsc.core.utils.ImageExtractor;
-import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.Statistics;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitWorker;
@@ -52,7 +51,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
@@ -70,9 +69,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	private static FitEngineConfiguration config;
 	static
 	{
-		fitConfig = new FitConfiguration();
-		config = new FitEngineConfiguration(fitConfig);
-		config.setNoiseMethod(Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
+		config = new FitEngineConfiguration();
+		fitConfig = config.getFitConfiguration();
 	}
 
 	private static AutoThreshold.Method[] thresholdMethods;
@@ -551,7 +549,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 	private boolean showDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage(String.format(
@@ -580,8 +578,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		if (extraOptions)
 		{
-			gd.addChoice("Noise_method", SettingsManager.noiseEstimatorMethodNames,
-					SettingsManager.noiseEstimatorMethodNames[config.getNoiseMethod().ordinal()]);
+			gd.addChoice("Noise_method", SettingsManager.getNoiseEstimatorMethodNames(),
+					config.getNoiseMethod().getNumber());
 		}
 
 		gd.showDialog();
@@ -607,7 +605,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		if (extraOptions)
 		{
-			config.setNoiseMethod(gd.getNextChoiceIndex());
+			config.setNoiseMethod(SettingsManager.getNoiseEstimatorMethodValues()[gd.getNextChoiceIndex()]);
 		}
 
 		if (gd.invalidNumber())
@@ -620,7 +618,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			methods = new AutoThreshold.Method[thresholdMethods.length];
 			levels = new double[snrLevels.length];
 
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 			for (int i = 0; i < thresholdMethodNames.length; i++)
 				gd.addCheckbox(thresholdMethodNames[i], thresholdMethodOptions[i]);

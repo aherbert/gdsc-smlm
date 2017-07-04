@@ -14,7 +14,6 @@ package gdsc.smlm.ij.settings;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.fitting.FitConfiguration;
 
 /**
  * Contain the settings for the gdsc.fitting package
@@ -56,7 +55,7 @@ public class GlobalSettings
 	public FitEngineConfiguration getFitEngineConfiguration()
 	{
 		if (fitEngineConfiguration == null)
-			fitEngineConfiguration = new FitEngineConfiguration(new FitConfiguration());
+			fitEngineConfiguration = new FitEngineConfiguration();
 		return fitEngineConfiguration;
 	}
 

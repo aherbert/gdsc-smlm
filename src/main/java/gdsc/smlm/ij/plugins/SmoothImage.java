@@ -1,5 +1,10 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.AWTEvent;
+import java.awt.Rectangle;
+
+import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -13,7 +18,6 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.DataProcessor;
 import gdsc.smlm.filters.DifferenceSpotFilter;
@@ -30,9 +34,6 @@ import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
-import java.awt.AWTEvent;
-import java.awt.Rectangle;
-
 /**
  * Smooths the selected rectangular ROI using a mean filter.
  */
@@ -40,11 +41,11 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 {
 	private final static String TITLE = "Smooth Image";
 	private static final String[] filterNames;
-	private static final DataFilter[] filters;
+	private static final DataFilterMethod[] filters;
 	static
 	{
-		filters = DataFilter.values();
-		filterNames = SettingsManager.dataFilterNames;
+		filters = SettingsManager.getDataFilterMethodValues();
+		filterNames = SettingsManager.getDataFilterMethodNames();
 	}
 
 	private static int filter1 = 0;
