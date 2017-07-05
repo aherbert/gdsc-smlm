@@ -168,30 +168,10 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	/**
-	 * Produce an output predicted value for a given set of input
-	 * predictors (x) and coefficients (a).
+	 * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
 	 * <p>
-	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
-	 * <p>
-	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the volume of the Gaussian. Angle (r) is the rotation
-	 * angle of the ellipse. Position (x,y) is the position of the Gaussian in each of the N-dimensions. SD (sx,sy) is
-	 * the standard deviation in each of the N-dimensions. This produces an additional 1+2N coefficients per peak.
-	 * <p>
-	 * The equation per peak is:<br/>
-	 * y_peak = A/(2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )<br/>
-	 * Where: <br/>
-	 * a = cos(r)^2/(2*sx^2) + sin(r)^2 /(2*sy^2) <br/>
-	 * b = -sin(2r)^2/(4*sx^2) + sin(2r)^2/(4*sy^2) <br/>
-	 * c = sin(r)^2/(2*sx^2) + cos(r)^2/(2*sy^2)
-	 * 
-	 * @param x
-	 *            Input predictor
-	 * @param dyda
-	 *            Partial gradient of function with respect to each coefficient
-	 * @return The predicted value
-	 * 
-	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+	 * {@inheritDoc}
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x, final double[] dyda)
 	{
@@ -243,7 +223,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 			dy_da[dydapos + 4] = y * (factors[NY] + factors[CY] * dy2);
 
 			dy_da[dydapos + 5] = y * (factors[BB2] * dxy);
-			
+
 			return y;
 		}
 		else
@@ -261,15 +241,16 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 			dy_da[dydapos + 4] = y * (factors[NY] + factors[AY] * dx2 + factors[BY] * dxy + factors[CY] * dy2);
 
 			dy_da[dydapos + 5] = y * (factors[AA2] * dx2 + factors[BB2] * dxy + factors[CC2] * dy2);
-			
+
 			return y;
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
+	/**
+	 * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
+	 * <p>
+	 * {@inheritDoc}
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int)
 	 */
 	public double eval(final int x)
 	{

@@ -69,7 +69,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 	abstract protected int[] createGradientIndices();
 
 	/**
-	 * Replicate the gradient indices from a single peak for the configured number of peaks.
+	 * Replicate the gradient indices from multiple peaks for the configured number of peaks.
 	 *
 	 * @param singleGradientIndices
 	 *            the single gradient indices
@@ -111,7 +111,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 	}
 
 	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	 * Evaluates an 2-dimensional Gaussian function for multiple peaks.
 	 * 
 	 * @param i
 	 *            Input predictor
@@ -130,6 +130,32 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 			I += tI[n] * deltaEx[xx] * deltaEy[yy];
 		return I;
 	}
+
+	/**
+	 * Evaluates an 2-dimensional Gaussian function for multiple peaks.
+	 * 
+	 * @param i
+	 *            Input predictor
+	 * @param duda
+	 *            Partial gradient of function with respect to each coefficient
+	 * @return The predicted value
+	 * 
+	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+	 */
+	public abstract double eval(final int i, final double[] duda);
+
+	/**
+	 * Evaluates an 2-dimensional Gaussian function for multiple peaks.
+	 * 
+	 * @param i
+	 *            Input predictor
+	 * @param duda
+	 *            Partial first gradient of function with respect to each coefficient
+	 * @param d2uda2
+	 *            Partial second gradient of function with respect to each coefficient
+	 * @return The predicted value
+	 */
+	public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
 
 	/*
 	 * (non-Javadoc)

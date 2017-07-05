@@ -253,16 +253,10 @@ public class MultiFixedErfGaussian2DFunction extends MultiFreeCircularErfGaussia
 		}
 	}
 
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param i
-	 *            Input predictor
-	 * @param duda
-	 *            Partial gradient of function with respect to each coefficient
-	 * @return The predicted value
-	 * 
-	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int i, final double[] duda)
 	{
@@ -284,16 +278,10 @@ public class MultiFixedErfGaussian2DFunction extends MultiFreeCircularErfGaussia
 		return I;
 	}
 
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param i
-	 *            Input predictor
-	 * @param duda
-	 *            Partial first gradient of function with respect to each coefficient
-	 * @param d2uda2
-	 *            Partial second gradient of function with respect to each coefficient
-	 * @return The predicted value
+	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[], double[])
 	 */
 	public double eval(final int i, final double[] duda, final double[] d2uda2)
 	{

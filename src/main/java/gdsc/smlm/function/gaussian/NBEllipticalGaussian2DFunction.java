@@ -50,10 +50,11 @@ public class NBEllipticalGaussian2DFunction extends EllipticalGaussian2DFunction
 		return new NBEllipticalGaussian2DFunction(npeaks, maxx, maxy);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.function.gaussian.EllipticalGaussian2DFunction#eval(int, double[])
+	/**
+	 * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
+	 * <p>
+	 * {@inheritDoc}
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x, final double[] dyda)
 	{

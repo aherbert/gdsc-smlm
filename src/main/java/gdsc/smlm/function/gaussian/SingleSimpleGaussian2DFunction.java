@@ -2,6 +2,8 @@ package gdsc.smlm.function.gaussian;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.utils.NotImplementedException;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -85,38 +87,21 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	/**
-	 * Produce an output predicted value for a given set of input
-	 * predictors (x) and coefficients (a).
+	 * Not implemented.
 	 * <p>
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 * <p>
-	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the volume of the Gaussian. Angle (r) is the rotation
-	 * angle of the ellipse. Position (x,y) is the position of the Gaussian in each of the N-dimensions. SD (sx,sy) is
-	 * the standard deviation in each of the N-dimensions.
-	 * <p>
-	 * The equation per peak is:<br/>
-	 * y_peak = A/(2*pi*sx*sy) * exp( -( a(x-x0)^2 + a(y-y0)^2 ) )<br/>
-	 * Where: <br/>
-	 * a = 1/(2*sx^2)
-	 * 
-	 * @param x
-	 *            Input predictor
-	 * @param dyda
-	 *            Ignored
-	 * @return The predicted value
-	 * 
-	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+	 * {@inheritDoc}
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x, final double[] dyda)
 	{
-		return eval(x, dyda);
+		throw new NotImplementedException();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
+	/**
+	 * Evaluates an 2-dimensional circular Gaussian function for a single peak.
+	 * <p>
+	 * {@inheritDoc}
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x)
 	{

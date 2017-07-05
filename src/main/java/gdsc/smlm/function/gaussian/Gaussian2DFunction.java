@@ -26,7 +26,8 @@ import gdsc.smlm.function.ValueProcedure;
  * <p>
  * The function will calculate the value of the Gaussian and evaluate the gradient of a set of parameters. The class can
  * specify which of the following parameters the function will evaluate:<br/>
- * background, signal, angle, position0, position1, sd0, sd1
+ * background, signal, position0, position1, sd0, sd1, angle. A parameter is provided for position2 (z-depth) to support
+ * 3D function using astimatism.
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */
@@ -203,6 +204,42 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * @return The number of gradient parameters per peak
 	 */
 	public abstract int getGradientParametersPerPeak();
+
+	/**
+	 * Produce an output predicted value for a given set of input
+	 * predictors (x) and coefficients (a).
+	 * <p>
+	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+	 * <p>
+	 * The first coefficient is the Gaussian background level. The coefficients are then packed for each peak
+	 * using the indices specified in the Gaussian2DFunction class.
+	 * 
+	 * @param x
+	 *            Input predictor
+	 * @return The predicted value
+	 * 
+	 * @see gdsc.smlm.function.NonLinearFunction#eval(int)
+	 */
+	public abstract double eval(final int x);
+
+	/**
+	 * Produce an output predicted value for a given set of input
+	 * predictors (x) and coefficients (a).
+	 * <p>
+	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+	 * <p>
+	 * The first coefficient is the Gaussian background level. The coefficients are then packed for each peak
+	 * using the indices specified in the Gaussian2DFunction class.
+	 * 
+	 * @param x
+	 *            Input predictor
+	 * @param dyda
+	 *            Partial gradient of function with respect to each coefficient
+	 * @return The predicted value
+	 * 
+	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+	 */
+	public abstract double eval(final int x, final double[] dyda);
 
 	/**
 	 * Execute the {@link #eval(int, float[])} method and set the expected variance using the noise model

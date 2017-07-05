@@ -42,7 +42,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 
 	// Required for the second gradients
 	protected double[] d2u_dtx2, d2u_dty2, d2u_dtsx2, d2u_dtsy2;
-	
+
 	// Required for the extended second gradients
 	protected double[] d2deltaEx_dtsxdx, d2deltaEy_dtsydy;
 

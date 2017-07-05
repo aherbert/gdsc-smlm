@@ -50,10 +50,11 @@ public class NBFreeCircularGaussian2DFunction extends FreeCircularGaussian2DFunc
 		return new NBFreeCircularGaussian2DFunction(npeaks, maxx, maxy);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.function.gaussian.FreeCircularGaussian2DFunction#eval(int, double[])
+	/**
+	 * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
+	 * <p>
+	 * {@inheritDoc}
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x, final double[] dyda)
 	{

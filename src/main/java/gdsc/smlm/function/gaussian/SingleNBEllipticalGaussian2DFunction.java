@@ -56,10 +56,11 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 		return new SingleNBEllipticalGaussian2DFunction(maxx, maxy);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.function.gaussian.SingleEllipticalGaussian2DFunction#eval(int, double[])
+	/**
+	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+	 * <p>
+	 * {@inheritDoc}
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x, final double[] dyda)
 	{

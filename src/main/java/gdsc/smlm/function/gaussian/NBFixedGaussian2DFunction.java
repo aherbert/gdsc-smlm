@@ -50,10 +50,11 @@ public class NBFixedGaussian2DFunction extends FixedGaussian2DFunction
 		return new NBFixedGaussian2DFunction(npeaks, maxx, maxy);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.function.gaussian.FixedGaussian2DFunction#eval(int, double[])
+	/**
+	 * Evaluates an 2-dimensional fixed circular Gaussian function for multiple peaks.
+	 * <p>
+	 * {@inheritDoc}
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x, final double[] dyda)
 	{

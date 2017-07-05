@@ -48,16 +48,10 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 		return new SingleNBFreeCircularErfGaussian2DFunction(maxx, maxy);
 	}
 
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param i
-	 *            Input predictor
-	 * @param duda
-	 *            Partial gradient of function with respect to each coefficient
-	 * @return The predicted value
-	 * 
-	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int i, final double[] duda)
 	{
@@ -79,7 +73,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction#eval(int, double[], double[])
+	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[], double[])
 	 */
 	public double eval(final int i, final double[] duda, final double[] d2uda2)
 	{
@@ -191,7 +185,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 			super.forEach(procedure);
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -248,7 +242,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 			}
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -338,5 +332,5 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 				procedure.executeExtended(tB + tI * duda[0], duda, d2udadb);
 			}
 		}
-	}	
+	}
 }

@@ -66,6 +66,32 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 		return tB + tI * deltaEx[x] * deltaEy[y];
 	}
 
+	/**
+	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	 * 
+	 * @param i
+	 *            Input predictor
+	 * @param duda
+	 *            Partial gradient of function with respect to each coefficient
+	 * @return The predicted value
+	 * 
+	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+	 */
+	public abstract double eval(final int i, final double[] duda);
+
+	/**
+	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	 * 
+	 * @param i
+	 *            Input predictor
+	 * @param duda
+	 *            Partial first gradient of function with respect to each coefficient
+	 * @param d2uda2
+	 *            Partial second gradient of function with respect to each coefficient
+	 * @return The predicted value
+	 */
+	public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
+
 	/*
 	 * (non-Javadoc)
 	 * 

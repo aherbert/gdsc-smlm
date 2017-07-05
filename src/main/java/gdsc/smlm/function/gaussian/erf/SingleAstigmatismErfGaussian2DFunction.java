@@ -167,16 +167,10 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 			d2deltaEy_dtsydy[i] *= dtsy_dtz;
 	}
 
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param i
-	 *            Input predictor
-	 * @param duda
-	 *            Partial gradient of function with respect to each coefficient
-	 * @return The predicted value
-	 * 
-	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int i, final double[] duda)
 	{
@@ -195,16 +189,10 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		return tB + tI * duda[1];
 	}
 
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param i
-	 *            Input predictor
-	 * @param duda
-	 *            Partial first gradient of function with respect to each coefficient
-	 * @param d2uda2
-	 *            Partial second gradient of function with respect to each coefficient
-	 * @return The predicted value
+	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[], double[])
 	 */
 	public double eval(final int i, final double[] duda, final double[] d2uda2)
 	{
@@ -448,7 +436,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 				d2udadb[18] = d2u_dty2 * deltaEx[x];
 				// Y,Z
 				d2udadb[19] = du_dtsx[x] * du_dty_by_dtsx_dtz_tI + deltaEx[x] * d2deltaEy_dtsydy;
-				
+
 				// Z,Signal
 				d2udadb[21] = d2udadb[9];
 				// Z,X
@@ -469,7 +457,6 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 						//2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
 						two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x]; 
 				//@formatter:on
-
 
 				procedure.executeExtended(tB + tI * duda[1], duda, d2udadb);
 			}

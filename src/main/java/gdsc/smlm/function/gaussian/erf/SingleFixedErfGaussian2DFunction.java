@@ -424,7 +424,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleFreeCircularErfGauss
 				duda[1] = deltaEx[x] * deltaEy;
 				duda[2] = du_dtx[x] * deltaEy;
 				duda[3] = du_dty * deltaEx[x];
-				
+
 				// Compute all the partial second order derivatives
 
 				// Background are all 0

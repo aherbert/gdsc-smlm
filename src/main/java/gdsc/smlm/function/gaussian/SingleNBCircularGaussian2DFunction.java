@@ -56,10 +56,11 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
 		return new SingleNBCircularGaussian2DFunction(maxx, maxy);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.function.gaussian.SingleCircularGaussian2DFunction#eval(int, double[])
+	/**
+	 * Evaluates an 2-dimensional circular Gaussian function for a single peak.
+	 * <p>
+	 * {@inheritDoc}
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x, final double[] dyda)
 	{

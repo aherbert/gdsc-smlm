@@ -50,10 +50,11 @@ public class NBCircularGaussian2DFunction extends CircularGaussian2DFunction
 		return new NBCircularGaussian2DFunction(npeaks, maxx, maxy);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.function.gaussian.CircularGaussian2DFunction#eval(int, double[])
+	/**
+	 * Evaluates an 2-dimensional circular Gaussian function for multiple peaks.
+	 * <p>
+	 * {@inheritDoc}
+	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int x, final double[] dyda)
 	{

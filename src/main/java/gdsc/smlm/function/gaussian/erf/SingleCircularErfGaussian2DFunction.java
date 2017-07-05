@@ -136,17 +136,10 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 				one_sssssSqrt2pi, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, d2deltaEy_dtsydy, ty);
 	}
 
-
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param i
-	 *            Input predictor
-	 * @param duda
-	 *            Partial gradient of function with respect to each coefficient
-	 * @return The predicted value
-	 * 
-	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
+	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[])
 	 */
 	public double eval(final int i, final double[] duda)
 	{
@@ -165,16 +158,10 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		return tB + tI * duda[1];
 	}
 
-	/**
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param i
-	 *            Input predictor
-	 * @param duda
-	 *            Partial first gradient of function with respect to each coefficient
-	 * @param d2uda2
-	 *            Partial second gradient of function with respect to each coefficient
-	 * @return The predicted value
+	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[], double[])
 	 */
 	public double eval(final int i, final double[] duda, final double[] d2uda2)
 	{
@@ -326,6 +313,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 			}
 		}
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -400,7 +388,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
          				      du_dtsx[x] * two_du_dtsy_tI;
 				//@formatter:on
 
-				procedure.executeExtended(tB + tI * duda[1], duda, d2udadb);				
+				procedure.executeExtended(tB + tI * duda[1], duda, d2udadb);
 			}
 		}
 	}
