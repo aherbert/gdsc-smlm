@@ -15,14 +15,12 @@ package gdsc.smlm.results;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Wrapper class to output to multiple results destinations
  */
 public class PeakResultsList extends AbstractPeakResults implements PeakResults
 {
-	private AtomicInteger size = new AtomicInteger(0);
 	private List<PeakResults> results = new LinkedList<PeakResults>();
 
 	/**
@@ -71,7 +69,6 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	 */
 	public void begin()
 	{
-		size = new AtomicInteger(0);
 		for (PeakResults peakResults : results)
 			peakResults.begin();
 	}
@@ -84,21 +81,18 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
 	{
-		size.incrementAndGet();
 		for (PeakResults peakResults : results)
 			peakResults.add(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
 	}
 
 	public void add(PeakResult result)
 	{
-		size.incrementAndGet();
 		for (PeakResults peakResults : results)
 			peakResults.add(result);
 	}
 
 	public void addAll(PeakResult[] results)
 	{
-		size.getAndAdd(results.length);
 		for (PeakResults peakResults : this.results)
 			peakResults.addAll(results);
 	}
@@ -110,7 +104,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	 */
 	public int size()
 	{
-		return size.intValue();
+		return (results.isEmpty()) ? 0 : results.get(0).size();
 	}
 
 	/*

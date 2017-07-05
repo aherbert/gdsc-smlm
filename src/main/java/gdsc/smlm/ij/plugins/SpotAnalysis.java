@@ -1410,7 +1410,7 @@ public class SpotAnalysis extends PlugInFrame
 			float[] data2 = (float[]) rawImp.getImageStack().getProcessor(slice).getPixels();
 			double[] data = Utils.toDouble(data2);
 			FitConfiguration fitConfiguration = new FitConfiguration();
-			fitConfiguration.mergePSF(PSFConfigHelper.defaultOneAxisGaussian2DPSF);
+			fitConfiguration.setPSF(PSFConfigHelper.defaultOneAxisGaussian2DPSF);
 			fitConfiguration.setFixedPSF(true);
 			fitConfiguration.setBackgroundFitting(true);
 			fitConfiguration.setSignalStrength(0);

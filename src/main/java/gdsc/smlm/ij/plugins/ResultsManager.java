@@ -682,7 +682,7 @@ public class ResultsManager implements PlugIn
 	{
 		gd.addMessage("--- Memory output ---");
 		final ResultsInMemorySettings.Builder memorySettings = resultsSettings.getResultsInMemorySettingsBuilder();
-		gd.addCheckbox("Save_to_memory (file input only)", memorySettings.getInMemory());
+		gd.addCheckbox("Save_to_memory", memorySettings.getInMemory());
 	}
 
 	/**

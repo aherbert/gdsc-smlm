@@ -2774,9 +2774,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		final FitConfiguration pFitConfig = pConfig.getFitConfiguration();
 
-		pFitConfig.mergePSF(pFitConfig.getPSF());
-		pFitConfig.mergeFitSolverSettings(pFitConfig.getFitSolverSettings());
-		pFitConfig.mergeFilterSettings(pFitConfig.getFilterSettings());
+		pFitConfig.setPSF(pFitConfig.getPSF());
+		pFitConfig.setFitSolverSettings(pFitConfig.getFitSolverSettings());
+		pFitConfig.setFilterSettings(pFitConfig.getFilterSettings());
 
 		// Set the fit engine settings manually to avoid merging all child settings
 		pConfig.setFitting(config.getFitting());

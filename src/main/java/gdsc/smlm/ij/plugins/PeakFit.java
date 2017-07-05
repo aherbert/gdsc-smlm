@@ -7,6 +7,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.awt.Scrollbar;
 import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
@@ -35,6 +36,8 @@ import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfig.CameraType;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
+import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
+import gdsc.smlm.data.config.FitConfig.FitSettings;
 import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitConfigHelper;
@@ -49,7 +52,9 @@ import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
 import gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings;
 import gdsc.smlm.data.config.ResultsConfigHelper;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitJob;
@@ -193,6 +198,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private TextField textNeighbourHeightThreshold;
 	private TextField textResidualsThreshold;
 	private TextField textDuplicateDistance;
+	private Scrollbar sliderCoordinateShiftFactor;
 	private TextField textCoordinateShiftFactor;
 	private TextField textSignalStrength;
 	private TextField textMinPhotons;
@@ -591,8 +597,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 		//	cal.exposureTime *= ((double)dataBlock / (dataBlock + dataSkip));
 		//}
 
+		// Fitting is always done in the system preferred units
+		calibration.setDistanceUnit(MemoryPeakResults.PREFERRED_DISTANCE_UNIT);
+		calibration.setIntensityUnit(MemoryPeakResults.PREFERRED_INTENSITY_UNIT);
+		calibration.setAngleUnit(MemoryPeakResults.PREFERRED_ANGLE_UNIT);
+		
 		results.setCalibration(calibration.getCalibration());
-		results.setPSF(null); // TODO - fix this
+		results.setPSF(fitConfig.getPSF());
 		results.setConfiguration(XmlUtils.toXML(config));
 
 		addTableResults(results);
@@ -820,6 +831,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
 			gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
 			gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
+			sliderCoordinateShiftFactor = gd.getLastScrollbar();
 			gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
 			gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 			if (extraOptions)
@@ -905,6 +917,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 			textGain = numerics.get(n++);
 			textEMCCD = checkboxes.get(b++);
 			textExposure = numerics.get(n++);
+			if (isCrop)
+				b++;
 			textPSF = choices.get(ch++);
 			textDataFilterType = choices.get(ch++);
 			textDataFilterMethod = choices.get(ch++);
@@ -948,7 +962,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			textLogProgress = checkboxes.get(b++);
 			if (!maximaIdentification)
 				textShowDeviations = checkboxes.get(b++);
-			textResultsTable = checkboxes.get(ch++);
+			textResultsTable = checkboxes.get(b++);
 			textResultsImage = choices.get(ch++);
 			if (extraOptions)
 			{
@@ -1082,7 +1096,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						int n = b.getParameterCount();
 						for (int i = 0; i < n; i++)
 							b.getParameterBuilder(i).setValue(egd.getNextNumber());
-						fitConfig.mergePSF(b.build());
+						fitConfig.setPSF(b.build());
 						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
 							fitConfig.setFixedPSF(egd.getNextBoolean());
 					}
@@ -1187,7 +1201,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (calibration != null)
 		{
 			Calibration c = calibration.getCalibration();
-			config.getFitConfiguration().mergeCalibration(c);
+			config.getFitConfiguration().setCalibration(c);
 			// Write this separately as some plugins may just want to load that		
 			ok &= SettingsManager.writeSettings(c);
 		}
@@ -1373,7 +1387,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
 				if (template.isFitEngineConfiguration())
 				{
-					refreshSettings(template.getFitEngineConfiguration().clone(), custom);
+					//System.out.println(template.getFitEngineConfiguration().getFitEngineSettings());
+					refreshSettings(template.getFitEngineConfiguration(), custom);
 				}
 				// TODO - Fix this
 				//				if (template.isCalibration())
@@ -1382,7 +1397,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				//				}
 				//				if (template.isResultsSettings())
 				//				{
-				//					refreshSettings(template.getResultsSettings().clone());
+				//					refreshSettings(template.getResultsSettings());
 				//				}
 			}
 		}
@@ -1405,6 +1420,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		if (textDisableSimpleFilter.getState())
 		{
+			sliderCoordinateShiftFactor.setEnabled(false);
 			disableEditing(textCoordinateShiftFactor);
 			disableEditing(textSignalStrength);
 			disableEditing(textMinPhotons);
@@ -1415,6 +1431,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 		else
 		{
+			sliderCoordinateShiftFactor.setEnabled(true);
 			enableEditing(textCoordinateShiftFactor);
 			enableEditing(textSignalStrength);
 			enableEditing(textMinPhotons);
@@ -1507,7 +1524,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			fractionOfThreads = Math.abs(gd.getNextNumber());
 
 		gd.collectOptions();
-		
+
 		// Save to allow dialog state to be maintained even with invalid parameters
 		saveFitEngineSettings();
 		SettingsManager.writeSettings(resultsSettings.build());
@@ -1697,7 +1714,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
 		{
-			fitConfig.mergeCalibration(calibration.getCalibration());
+			fitConfig.setCalibration(calibration.getCalibration());
 			SettingsManager.writeSettings(config.getFitEngineSettings());
 		}
 		return true;
@@ -1832,8 +1849,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
 			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
-			gd.addStringField("Relative_threshold", "" + fitConfig.getRelativeThreshold());
-			gd.addStringField("Absolute_threshold", "" + fitConfig.getAbsoluteThreshold());
+			gd.addStringField("Relative_threshold", Utils.rounded(fitConfig.getRelativeThreshold()));
+			gd.addStringField("Absolute_threshold", Utils.rounded(fitConfig.getAbsoluteThreshold()));
 			gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
 			gd.addNumericField("Max_function_evaluations", fitConfig.getMaxFunctionEvaluations(), 0);
 			if (extraOptions)
@@ -1848,22 +1865,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 				calibration.setReadNoise(Math.abs(gd.getNextNumber()));
 				calibration.setAmplification(Math.abs(gd.getNextNumber()));
 				calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
-				fitConfig.setBias(calibration.getBias());
-				fitConfig.setReadNoise(calibration.getReadNoise());
-				fitConfig.setAmplification(calibration.getAmplification());
-				fitConfig.setEmCCD(calibration.isEMCCD());
+				fitConfig.setCalibration(calibration.getCalibration());
 			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
-			try
-			{
-				fitConfig.setRelativeThreshold(Math.abs(Double.parseDouble(gd.getNextString())));
-				fitConfig.setAbsoluteThreshold(Math.abs(Double.parseDouble(gd.getNextString())));
-			}
-			catch (NumberFormatException e)
-			{
-				fitConfig.setRelativeThreshold(0);
-				fitConfig.setAbsoluteThreshold(0);
-			}
+			fitConfig.setRelativeThreshold(getNumber(gd));
+			fitConfig.setAbsoluteThreshold(getNumber(gd));
 			fitConfig.setMaxIterations((int) gd.getNextNumber());
 			fitConfig.setMaxFunctionEvaluations((int) gd.getNextNumber());
 			if (extraOptions)
@@ -1896,10 +1902,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			// Collect options for LVM fitting
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage(FitConfigHelper.getName(fitSolver) + " requires additional parameters");
-			gd.addStringField("Relative_threshold", "" + fitConfig.getRelativeThreshold());
-			gd.addStringField("Absolute_threshold", "" + fitConfig.getAbsoluteThreshold());
-			gd.addStringField("Parameter_relative_threshold", "" + fitConfig.getParameterRelativeThreshold());
-			gd.addStringField("Parameter_absolute_threshold", "" + fitConfig.getParameterAbsoluteThreshold());
+			gd.addStringField("Relative_threshold", Utils.rounded(fitConfig.getRelativeThreshold()));
+			gd.addStringField("Absolute_threshold", Utils.rounded(fitConfig.getAbsoluteThreshold()));
+			gd.addStringField("Parameter_relative_threshold", Utils.rounded(fitConfig.getParameterRelativeThreshold()));
+			gd.addStringField("Parameter_absolute_threshold", Utils.rounded(fitConfig.getParameterAbsoluteThreshold()));
 			gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
 			if (isLVM)
 				gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
@@ -1946,10 +1952,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (gd.wasCanceled())
 				return false;
 
-			fitConfig.setRelativeThreshold(gd.getNextNumber());
-			fitConfig.setAbsoluteThreshold(gd.getNextNumber());
-			fitConfig.setParameterRelativeThreshold(gd.getNextNumber());
-			fitConfig.setParameterAbsoluteThreshold(gd.getNextNumber());
+			fitConfig.setRelativeThreshold(getNumber(gd));
+			fitConfig.setAbsoluteThreshold(getNumber(gd));
+			fitConfig.setParameterRelativeThreshold(getNumber(gd));
+			fitConfig.setParameterAbsoluteThreshold(getNumber(gd));
 			fitConfig.setMaxIterations((int) gd.getNextNumber());
 			if (isLVM)
 				fitConfig.setLambda(gd.getNextNumber());
@@ -2022,6 +2028,18 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 
 		return true;
+	}
+
+	private static double getNumber(ExtendedGenericDialog gd)
+	{
+		try
+		{
+			return Math.abs(Double.parseDouble(gd.getNextString()));
+		}
+		catch (NumberFormatException e)
+		{
+			return 0;
+		}
 	}
 
 	/**
@@ -2573,8 +2591,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public int getSize()
 	{
 		// If only one output in the list it was extracted for the FitEngine to prevent 
-		// passing data through all methods in the PeakResultsList
-		return (results.numberOfOutputs() == 1) ? results.toArray()[0].size() : results.size();
+		// passing data through all methods in the PeakResultsList. However the list
+		// returns the size using the first entry so this is OK.
+		return results.size();
 	}
 
 	/**
@@ -2616,16 +2635,22 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * If this is a custom template then use all the settings. If a default template then leave some existing spot
 	 * settings untouched as the user may have updated them (e.g. PSF width).
 	 *
-	 * @param config
+	 * @param pConfig
 	 *            the config
 	 * @param isCustomTemplate
 	 *            True if a custom template.
 	 */
-	private void refreshSettings(FitEngineConfiguration config, boolean isCustomTemplate)
+	private void refreshSettings(FitEngineConfiguration pConfig, boolean isCustomTemplate)
 	{
 		// Set the configuration
-		this.config = config;
-		this.fitConfig = config.getFitConfiguration();
+		// Preserve the current settings for things we do not want to update
+		FitSettings current = fitConfig.getFitSettings();
+		// This will clear everything and merge the configuration
+		this.config.setFitEngineSettings(pConfig.getFitEngineSettings());
+		fitConfig = this.config.getFitConfiguration();
+		// Reset what we want to preserve
+		fitConfig.setCalibration(current.getCalibration());
+		fitConfig.setPSF(current.getPsf());
 
 		if (isCustomTemplate)
 			textPSF.select(getPSFTypeNames()[fitConfig.getPSFType().ordinal()]);

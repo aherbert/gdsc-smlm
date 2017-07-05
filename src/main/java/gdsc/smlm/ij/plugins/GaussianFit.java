@@ -902,7 +902,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	private Gaussian2DFitter createGaussianFitter(boolean simpleFiltering)
 	{
 		FitConfiguration config = new FitConfiguration();
-		config.mergePSF(PSFConfigHelper.getDefaultPSF(getPSFType()));
+		config.setPSF(PSFConfigHelper.getDefaultPSF(getPSFType()));
 		config.setMaxIterations(getMaxIterations());
 		config.setRelativeThreshold(relativeThreshold);
 		config.setAbsoluteThreshold(absoluteThreshold);

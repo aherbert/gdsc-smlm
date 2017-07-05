@@ -573,7 +573,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			}
 
 			if (logger != null)
-				logger.info("Slice %d: %d / %d", slice, success, candidates.getSize());
+				logger.info("Slice %d: %d / %d = %s", slice, success, candidates.getSize(),
+						Utils.pleural(fitted.size, "result"));
 		}
 
 		this.results.addAll(sliceResults);
@@ -716,12 +717,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	/**
 	 * Flush the results for the current position to the grid.
+	 *
+	 * @return true, if successful
 	 */
-	private void flushToGrid()
+	private boolean flushToGrid()
 	{
+		if (queueSize == 0)
+			return false;
 		for (int i = 0; i < queueSize; i++)
 			gridManager.putFittedOnGrid(queue[i]);
 		queueSize = 0;
+		return true;
 	}
 
 	/**
@@ -3603,7 +3609,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 
 		// Send the actual results to the neighbour grid
-		flushToGrid();
+		if (flushToGrid())
+		{
+			// Count if there were any new results
+			success++;
+		}
 	}
 
 	/*
@@ -3642,7 +3652,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Add to the slice results.
 		final PreprocessedPeakResult[] results = selectedResult.results;
 		if (results == null)
+		{
+			if (logger != null)
+			{
+				final int candidateId = dynamicMultiPathFitResult.candidateId;
+				logger.info("Not fit %d (%d,%d)", candidateId, cc.fromDataToGlobalX(candidates.get(candidateId).x),
+						cc.fromDataToGlobalY(candidates.get(candidateId).y));
+			}
 			return;
+		}
 
 		final int currentSize = gridManager.getFittedCandidatesSize();
 		final int candidateId = dynamicMultiPathFitResult.candidateId;
@@ -3658,11 +3676,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		for (int i = 0; i < results.length; i++)
 		{
-			if (results[i].isExistingResult())
+			PreprocessedPeakResult peak = results[i];
+			if (peak.isExistingResult())
 				continue;
-			if (results[i].isNewResult())
+			if (peak.isNewResult())
 			{
-				final double[] p = results[i].toGaussian2DParameters();
+				final double[] p = peak.toGaussian2DParameters();
 
 				// Store slice results relative to the data frame (not the global bounds)
 				// Convert back so that 0,0 is the top left of the data bounds
@@ -3683,18 +3702,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					paramsDev = new float[p.length];
 					paramsDev[Gaussian2DFunction.BACKGROUND] = (float) dev[Gaussian2DFunction.BACKGROUND];
-					final int offset = results[i].getId() * Gaussian2DFunction.PARAMETERS_PER_PEAK;
+					final int offset = peak.getId() * Gaussian2DFunction.PARAMETERS_PER_PEAK;
 					for (int j = 1; j < p.length; j++)
 						paramsDev[j] = (float) dev[offset + j];
 				}
 
-				addSingleResult(results[i].getCandidateId(), params, paramsDev, fitResult.getError(),
-						results[i].getNoise());
+				addSingleResult(peak.getCandidateId(), params, paramsDev, fitResult.getError(), peak.getNoise());
 
 				if (logger != null)
 				{
 					// Show the shift, signal and width spread
-					PreprocessedPeakResult peak = results[i];
 					logger.info("Fit OK %d (%.1f,%.1f) [%d]: Shift = %.3f,%.3f : SNR = %.2f : Width = %.2f,%.2f",
 							peak.getCandidateId(), peak.getX(), peak.getY(), peak.getId(),
 							Math.sqrt(peak.getXRelativeShift2()), Math.sqrt(peak.getYRelativeShift2()), peak.getSNR(),
@@ -3773,13 +3790,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			logger2.debug("%d:%d [%d,%d] %s (%s) = %s\n", slice, candidateId, cc.fromDataToGlobalX(x),
 					cc.fromDataToGlobalY(y), fitResult.getStatus(), fitResult.getStatusData(),
 					Arrays.toString(peakParams));
-		}
-
-		// Check if there were any new results
-		int npeaks = gridManager.getFittedCandidatesSize() - currentSize;
-		if (npeaks != 0)
-		{
-			success++;
 		}
 	}
 

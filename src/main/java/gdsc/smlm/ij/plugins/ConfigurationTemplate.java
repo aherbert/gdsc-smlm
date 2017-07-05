@@ -280,7 +280,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	private static void addTemplate(String name, FitEngineConfiguration config)
 	{
 		GlobalSettings settings = new GlobalSettings();
-		settings.setFitEngineConfiguration(config.clone());
+		settings.setFitEngineConfiguration(new FitEngineConfiguration(config.getFitEngineSettings()));
 		addTemplate(name, settings, false, null, null);
 	}
 

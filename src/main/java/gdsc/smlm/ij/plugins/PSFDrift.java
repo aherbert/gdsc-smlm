@@ -460,7 +460,7 @@ public class PSFDrift implements PlugIn
 		// Configure the fit solver. We must wrap the settings with a 
 		// FitEngineConfiguration and Calibration 
 		FitEngineSettings.Builder fitEngineSettings = FitConfigHelper.defaultFitEngineSettings.toBuilder();
-		fitConfig.mergeCalibration(SettingsManager.readCalibration());
+		fitConfig.setCalibration(SettingsManager.readCalibration());
 		fitEngineSettings.setFitSettings(fitConfig.getFitSettings());
 		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings);
 		if (!PeakFit.configureFitSolver(config, PeakFit.FLAG_NO_SAVE))

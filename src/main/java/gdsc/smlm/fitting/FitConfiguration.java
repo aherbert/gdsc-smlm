@@ -147,13 +147,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private int filterResult = 0;
 	private boolean widthEnabled;
 	private float offset;
+	private double varianceThreshold;
 
 	/**
 	 * Default constructor
 	 */
 	public FitConfiguration()
 	{
-		this(FitConfigHelper.defaultFitSettings);
+		this(FitConfigHelper.defaultFitSettings.toBuilder());
 	}
 
 	/**
@@ -205,6 +206,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
+	 * Sets the fit settings.
+	 *
+	 * @param fitSettings
+	 *            the new fit settings
+	 */
+	public void setFitSettings(FitSettings fitSettings)
+	{
+		this.fitSettings.clear().mergeFrom(fitSettings);
+		initialiseState();
+	}
+
+	/**
 	 * Gets the calibration.
 	 *
 	 * @return the calibration
@@ -223,6 +236,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public void mergeCalibration(Calibration calibration)
 	{
 		this.calibration.mergeCalibration(calibration);
+		updateCalibration();
+	}
+
+	/**
+	 * Sets the calibration.
+	 *
+	 * @param calibration
+	 *            the new calibration
+	 */
+	public void setCalibration(Calibration calibration)
+	{
+		this.calibration.setCalibration(calibration);
 		updateCalibration();
 	}
 
@@ -268,6 +293,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		updatePSF();
 	}
 
+	/**
+	 * Sets the psf.
+	 *
+	 * @param psf
+	 *            the new psf
+	 */
+	public void setPSF(PSF psf)
+	{
+		this.psf.clear().mergeFrom(psf);
+		updatePSF();
+	}
+
 	private void updatePSF()
 	{
 		invalidateGaussianFunction();
@@ -299,6 +336,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				throw new IllegalArgumentException("FitSettings must be a Gaussian 2D PSF");
 		}
 		isTwoAxisGaussian2D = PSFHelper.isTwoAxisGaussian2D(psfType);
+
+		while (psf.getParameterCount() > nParams)
+			psf.removeParameter(psf.getParameterCount() - 1);
 
 		// Ensure we have enough parameters
 		if (psf.getParameterCount() == 0)
@@ -350,6 +390,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		updateFitSolverSettings();
 	}
 
+	/**
+	 * Sets the fit solver settings.
+	 *
+	 * @param fitSolverSettings
+	 *            the new fit solver settings
+	 */
+	public void setFitSolverSettings(FitSolverSettings fitSolverSettings)
+	{
+		this.fitSolverSettings.clear().mergeFrom(fitSolverSettings);
+		updateFitSolverSettings();
+	}
+
 	private void updateFitSolverSettings()
 	{
 		invalidateGaussianFunction();
@@ -375,6 +427,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 *            the new FilterSettings
 	 */
 	public void mergeFilterSettings(FilterSettings filterSettings)
+	{
+		this.filterSettings.clear().mergeFrom(filterSettings);
+		updateDataFilterSettings();
+	}
+
+	/**
+	 * Sets the filter settings.
+	 *
+	 * @param filterSettings
+	 *            the new filter settings
+	 */
+	public void setFilterSettings(FilterSettings filterSettings)
 	{
 		this.filterSettings.mergeFrom(filterSettings);
 		updateDataFilterSettings();
@@ -2601,6 +2665,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			widthEnabled = !DirectFilter.areSet(flags, DirectFilter.NO_WIDTH);
 			double shiftFactor = getCoordinateShiftFactor();
 			offset = (float) ((shiftFactor > 0) ? shiftFactor * shiftFactor : Float.POSITIVE_INFINITY);
+			varianceThreshold = (precisionThreshold > 0) ? precisionThreshold : Double.POSITIVE_INFINITY;
 		}
 	}
 
@@ -2659,7 +2724,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		//if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > offset)
 		//	return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
 		final double p = (isPrecisionUsingBackground()) ? peak.getLocationVariance2() : peak.getLocationVariance();
-		if (p > precisionThreshold)
+		if (p > varianceThreshold)
 			return V_LOCATION_VARIANCE;
 		return 0;
 	}

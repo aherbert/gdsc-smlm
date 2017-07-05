@@ -614,7 +614,7 @@ public class BenchmarkFit implements PlugIn
 		calibration.setEmCCD(benchmarkParameters.emCCD);
 		calibration.setReadNoise(benchmarkParameters.readNoise);
 		calibration.setExposureTime(1000);
-		fitConfig.mergeCalibration(calibration.getCalibration());
+		fitConfig.setCalibration(calibration.getCalibration());
 
 		if (!PeakFit.configureFitSolver(config, 0))
 			return false;

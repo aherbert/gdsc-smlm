@@ -90,15 +90,27 @@ public class CalibrationWriter extends CalibrationReader
 	{
 		return (calibrationBuilder != null) ? calibrationBuilder.build() : calibration;
 	}
-	
+
 	/**
 	 * Merge the calibration.
 	 *
-	 * @param calibration the new calibration
+	 * @param calibration
+	 *            the new calibration
 	 */
 	public void mergeCalibration(Calibration calibration)
 	{
 		getBuilder().mergeFrom(calibration);
+	}
+
+	/**
+	 * Sets the calibration.
+	 *
+	 * @param calibration
+	 *            the new calibration
+	 */
+	public void setCalibration(Calibration calibration)
+	{
+		getBuilder().clear().mergeFrom(calibration);
 	}
 
 	/**
@@ -196,7 +208,8 @@ public class CalibrationWriter extends CalibrationReader
 	/**
 	 * Sets the camera type to EMCCD or CCD.
 	 *
-	 * @param isEMCCD true if an EMCCD
+	 * @param isEMCCD
+	 *            true if an EMCCD
 	 * @deprecated This has been replaced by {@link #setCameraType(CameraType)}
 	 */
 	@Deprecated

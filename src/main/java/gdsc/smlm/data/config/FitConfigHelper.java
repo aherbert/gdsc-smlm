@@ -126,15 +126,16 @@ public class FitConfigHelper
 		
 		builder.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
 
-		RelativeParameter.Builder rp = RelativeParameter.newBuilder();
-		DataFilterSettings.Builder dfs = DataFilterSettings.newBuilder();
+		
+		RelativeParameter.Builder rp =  RelativeParameter.newBuilder();
+		
+		DataFilterSettings.Builder dfs = builder.getDataFilterSettingsBuilder();
 		dfs.setDataFilterType(DataFilterType.SINGLE);
+		DataFilter.Builder dfb =  dfs.addDataFilterBuilder();
+		dfb.setDataFilterMethod(DataFilterMethod.MEAN);
 		rp.setAbsolute(false);
 		rp.setValue(1.2);
-		DataFilter.Builder dfb = DataFilter.newBuilder();
-		dfb.setDataFilterMethod(DataFilterMethod.MEAN);
 		dfb.addParameter(rp.build());
-		dfs.addDataFilter(dfb.build());
 		
 		rp.setAbsolute(false);
 		rp.setValue(1);

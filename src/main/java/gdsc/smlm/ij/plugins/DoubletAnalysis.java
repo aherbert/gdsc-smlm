@@ -1600,7 +1600,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			cal.setBias(simulationParameters.bias);
 			cal.setEmCCD(simulationParameters.emCCD);
 
-			fitConfig.mergeCalibration(cal.getCalibration());
+			fitConfig.setCalibration(cal.getCalibration());
 		}
 
 		// Support for using templates
@@ -1763,7 +1763,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		cal.setBias(simulationParameters.bias);
 		cal.setEmCCD(simulationParameters.emCCD);
 
-		fitConfig.mergeCalibration(cal.getCalibration());
+		fitConfig.setCalibration(cal.getCalibration());
 
 		if (!BenchmarkSpotFilter.updateConfiguration(config))
 		{
@@ -2854,7 +2854,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Start with a clone of the filter settings
 		FitEngineConfiguration config = new FitEngineConfiguration();
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		fitConfig.mergeFitSettings(filterFitConfig.getFitSettings());
+		fitConfig.setFitSettings(filterFitConfig.getFitSettings());
 
 		// Copy settings used during fitting
 		updateConfiguration(config);
@@ -3088,9 +3088,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addChoice("Selection_Criteria", SELECTION_CRITERIA, SELECTION_CRITERIA[selectionCriteria]);
 
 		// Copy the settings used when fitting
-		filterFitConfig.mergeCalibration(fitConfig.getCalibration());
-		filterFitConfig.mergePSF(fitConfig.getPSF());
-		filterFitConfig.mergeFitSolverSettings(fitConfig.getFitSolverSettings());
+		filterFitConfig.setCalibration(fitConfig.getCalibration());
+		filterFitConfig.setPSF(fitConfig.getPSF());
+		filterFitConfig.setFitSolverSettings(fitConfig.getFitSolverSettings());
 
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
@@ -3187,7 +3187,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			IJ.error(TITLE, "Unable to use the benchmark filter analysis configuration");
 			return false;
 		}
-		filterFitConfig.mergeFitSettings(c.getFitEngineSettings().getFitSettings());
+		filterFitConfig.setFitSettings(c.getFitEngineSettings().getFitSettings());
 		return true;
 	}
 
@@ -3280,8 +3280,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 						// Copy settings not in the dialog for the fit solver
 						if (custom)
-							fitConfig.mergePSF(fitConfig2.getPSF());
-						fitConfig.mergeFitSolverSettings(fitConfig2.getFitSolverSettings());
+							fitConfig.setPSF(fitConfig2.getPSF());
+						fitConfig.setFitSolverSettings(fitConfig2.getFitSolverSettings());
 					}
 				}
 				else
