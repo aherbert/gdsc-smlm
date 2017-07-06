@@ -1034,7 +1034,8 @@ public final class FitConfig {
 
     /**
      * <pre>
-     * The maximum iterations to use during fitting
+     * The maximum/fixed iterations to use during fitting. 
+     * If not using fixed iterations then fitting will fail if this limit is reached. 
      * </pre>
      *
      * <code>int32 max_iterations = 6;</code>
@@ -1450,7 +1451,8 @@ public final class FitConfig {
     private int maxIterations_;
     /**
      * <pre>
-     * The maximum iterations to use during fitting
+     * The maximum/fixed iterations to use during fitting. 
+     * If not using fixed iterations then fitting will fail if this limit is reached. 
      * </pre>
      *
      * <code>int32 max_iterations = 6;</code>
@@ -2491,7 +2493,8 @@ public final class FitConfig {
       private int maxIterations_ ;
       /**
        * <pre>
-       * The maximum iterations to use during fitting
+       * The maximum/fixed iterations to use during fitting. 
+       * If not using fixed iterations then fitting will fail if this limit is reached. 
        * </pre>
        *
        * <code>int32 max_iterations = 6;</code>
@@ -2501,7 +2504,8 @@ public final class FitConfig {
       }
       /**
        * <pre>
-       * The maximum iterations to use during fitting
+       * The maximum/fixed iterations to use during fitting. 
+       * If not using fixed iterations then fitting will fail if this limit is reached. 
        * </pre>
        *
        * <code>int32 max_iterations = 6;</code>
@@ -2514,7 +2518,8 @@ public final class FitConfig {
       }
       /**
        * <pre>
-       * The maximum iterations to use during fitting
+       * The maximum/fixed iterations to use during fitting. 
+       * If not using fixed iterations then fitting will fail if this limit is reached. 
        * </pre>
        *
        * <code>int32 max_iterations = 6;</code>

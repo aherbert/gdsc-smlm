@@ -71,6 +71,7 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TurboList;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.TemplateConfig.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
@@ -1115,6 +1116,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 		}
 
+		// TODO - Refactor to use proto object
 		GlobalSettings gs = SettingsManager.loadSettings();
 		FilterSettings filterSettings = gs.getFilterSettings();
 
@@ -5183,10 +5185,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			templateFilename = filename;
 			Prefs.set(KEY_TEMPLATE_FILENAME, filename);
-			GlobalSettings settings = new GlobalSettings();
-			settings.setNotes(getNotes(topFilterSummary));
-			settings.setFitEngineConfiguration(config);
-			if (!SettingsManager.saveSettings(settings, filename, true))
+			TemplateSettings.Builder settings = TemplateSettings.newBuilder();
+			getNotes(settings, topFilterSummary);
+			settings.setFitEngineSettings(config.getFitEngineSettings());
+			if (!SettingsManager.toJSON(settings.build(), filename, SettingsManager.FLAG_SILENT))
 			{
 				IJ.log("Unable to save the template configuration");
 				return;
@@ -5366,32 +5368,30 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return ConfigurationTemplate.displayTemplate(title, example);
 	}
 
-	private String getNotes(String topFilterSummary)
+	private void getNotes(TemplateSettings.Builder settings, String topFilterSummary)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("Benchmark template\n");
+		settings.addNotes("Benchmark template");
 		if (!Utils.isNullOrEmpty(resultsTitle))
-			addField(sb, "Filter Analysis Title", resultsTitle);
+			addField(settings, "Filter Analysis Title", resultsTitle);
 		// Add create data settings.
 		// Just add the columns and the data from the summary window
 		final String header = createResultsHeader(true);
-		addField(sb, "Filter Analysis Summary Fields", header);
-		addField(sb, "Filter Analysis Summary Values", topFilterSummary);
+		addField(settings, "Filter Analysis Summary Fields", header);
+		addField(settings, "Filter Analysis Summary Values", topFilterSummary);
 		// Now pick out key values...
-		addKeyFields(sb, header, topFilterSummary, new String[] { "Molecules", "Density", "SNR", "s (nm)", "a (nm)",
-				"Lower D", "Upper D", "Lower factor", "Upper factor" });
+		addKeyFields(settings, header, topFilterSummary, new String[] { "Molecules", "Density", "SNR", "s (nm)",
+				"a (nm)", "Lower D", "Upper D", "Lower factor", "Upper factor" });
 
 		// Add any other settings that may be useful in the template
-		addField(sb, "Created", getCurrentTimeStamp());
-		return sb.toString();
+		addField(settings, "Created", getCurrentTimeStamp());
 	}
 
-	static void addField(StringBuilder sb, String field, String value)
+	static void addField(TemplateSettings.Builder settings, String field, String value)
 	{
-		sb.append(field).append(": ").append(value).append('\n');
+		settings.addNotes(field + ": " + value);
 	}
 
-	static void addKeyFields(StringBuilder sb, String header, String summary, String[] fields)
+	static void addKeyFields(TemplateSettings.Builder settings, String header, String summary, String[] fields)
 	{
 		String[] labels = header.split("\t");
 		String[] values = summary.split("\t");
@@ -5401,7 +5401,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				if (labels[i].startsWith(field))
 				{
-					addField(sb, labels[i], values[i]);
+					addField(settings, labels[i], values[i]);
 					break;
 				}
 			}
@@ -6317,8 +6317,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		private TIntObjectHashMap<ArrayList<Coordinate>> getResults(FilterScore current)
 		{
-			return ResultsMatchCalculator
-					.getCoordinates(createResults(null, (DirectFilter) current.filter, false));
+			return ResultsMatchCalculator.getCoordinates(createResults(null, (DirectFilter) current.filter, false));
 		}
 
 		public boolean converged(String prefix, FilterScore previous, FilterScore current, double[] previousParameters,

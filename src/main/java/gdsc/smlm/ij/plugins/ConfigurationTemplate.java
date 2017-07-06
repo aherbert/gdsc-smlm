@@ -23,6 +23,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -34,9 +35,9 @@ import gdsc.core.utils.TurboList;
 import gdsc.core.utils.TurboList.SimplePredicate;
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
 import gdsc.smlm.data.config.FitConfig.FitSolver;
+import gdsc.smlm.data.config.TemplateConfig.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
@@ -87,14 +88,14 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	private static class Template
 	{
-		GlobalSettings settings;
+		TemplateSettings settings;
 		final boolean custom;
 		final File file;
 		long timestamp;
 		// An example image from the data used to build the template
 		String tifPath;
 
-		public Template(GlobalSettings settings, boolean custom, File file, String tifPath)
+		public Template(TemplateSettings settings, boolean custom, File file, String tifPath)
 		{
 			this.settings = settings;
 			this.custom = custom;
@@ -122,10 +123,10 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			{
 				if (file.lastModified() != timestamp)
 				{
-					GlobalSettings settings = SettingsManager.unsafeLoadSettings(file.getPath(), false);
-					if (settings != null)
+					TemplateSettings.Builder builder = TemplateSettings.newBuilder();
+					if (SettingsManager.fromJSON(file, builder, 0))
 					{
-						this.settings = settings;
+						this.settings = builder.build();
 						timestamp = file.lastModified();
 					}
 				}
@@ -141,12 +142,11 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		 */
 		public boolean save(File file)
 		{
-			boolean result = false;
 			if (file != null)
 			{
-				result = SettingsManager.saveSettings(settings, file.getPath());
+				return SettingsManager.toJSON(settings, file, SettingsManager.FLAG_JSON_WHITESPACE);
 			}
-			return result;
+			return false;
 		}
 
 		public boolean hasImage()
@@ -279,9 +279,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 */
 	private static void addTemplate(String name, FitEngineConfiguration config)
 	{
-		GlobalSettings settings = new GlobalSettings();
-		settings.setFitEngineConfiguration(new FitEngineConfiguration(config.getFitEngineSettings()));
-		addTemplate(name, settings, false, null, null);
+		TemplateSettings.Builder builder = TemplateSettings.newBuilder();
+		builder.setFitEngineSettings(config.getFitEngineSettings());
+		addTemplate(name, builder.build(), false, null, null);
 	}
 
 	/**
@@ -378,6 +378,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			return 0;
 		int count = 0;
 		Class<ConfigurationTemplate> resourceClass = ConfigurationTemplate.class;
+		TemplateSettings.Builder builder = TemplateSettings.newBuilder(); 
 		for (TemplateResource template : templates)
 		{
 			// Skip those already done
@@ -387,17 +388,18 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			InputStream templateStream = resourceClass.getResourceAsStream(template.path);
 			if (templateStream == null)
 				continue;
-			GlobalSettings settings = SettingsManager.unsafeLoadSettings(templateStream, true);
-			if (settings != null)
+			Reader reader = new InputStreamReader(templateStream);
+			builder.clear();
+			if (SettingsManager.fromJSON(reader, builder, SettingsManager.FLAG_SILENT))
 			{
 				count++;
-				addTemplate(template.name, settings, false, null, template.tifPath);
+				addTemplate(template.name, builder.build(), false, null, template.tifPath);
 			}
 		}
 		return count;
 	}
 
-	private static void addTemplate(String name, GlobalSettings settings, boolean custom, File file, String tifPath)
+	private static void addTemplate(String name, TemplateSettings settings, boolean custom, File file, String tifPath)
 	{
 		map.put(name, new Template(settings, custom, file, tifPath));
 	}
@@ -409,7 +411,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 *            The name of the template
 	 * @return The template
 	 */
-	public static GlobalSettings getTemplate(String name)
+	public static TemplateSettings getTemplate(String name)
 	{
 		Template template = map.get(name);
 		if (template == null)
@@ -445,7 +447,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 *            The file to save the template (over-riding the file the template was loaded from)
 	 * @return true, if successful
 	 */
-	public static boolean saveTemplate(String name, GlobalSettings settings, File file)
+	public static boolean saveTemplate(String name, TemplateSettings settings, File file)
 	{
 		Template template = map.get(name);
 		if (template == null)
@@ -624,15 +626,16 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		list = StringSorter.sortNumerically(list);
 
 		int count = 0;
+		TemplateSettings.Builder builder = TemplateSettings.newBuilder();		
 		for (String path : list)
 		{
-			GlobalSettings settings = SettingsManager.unsafeLoadSettings(path, false);
-			if (settings != null)
+			builder.clear();
+			File file = new File(path);
+			if (SettingsManager.fromJSON(file, builder, 0))
 			{
 				count++;
-				File file = new File(path);
 				String name = Utils.removeExtension(file.getName());
-				addTemplate(name, settings, true, file, null);
+				addTemplate(name, builder.build(), true, file, null);
 			}
 		}
 		IJ.showMessage("Loaded " + Utils.pleural(count, "custom template"));
@@ -846,8 +849,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 */
 	private void showTemplateInfo(String name)
 	{
-		GlobalSettings settings = getTemplate(name);
-		if (settings == null || Utils.isNullOrEmpty(settings.getNotes()))
+		TemplateSettings settings = getTemplate(name);
+		if (settings == null || settings.getNotesCount() == 0)
 			return;
 		if (infoWindow == null || !infoWindow.isVisible())
 		{
@@ -863,8 +866,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		}
 
 		infoWindow.getTextPanel().clear();
-		// Text window cannot show tabs
-		infoWindow.append(settings.getNotes().replace('\t', ','));
+		for (String note : settings.getNotesList())
+			// Text window cannot show tabs
+			infoWindow.append(note.replace('\t', ','));
 	}
 
 	private void closeInfo()

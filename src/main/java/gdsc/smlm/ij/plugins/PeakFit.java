@@ -52,6 +52,7 @@ import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
 import gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings;
 import gdsc.smlm.data.config.ResultsConfigHelper;
+import gdsc.smlm.data.config.TemplateConfig.TemplateSettings;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngine;
@@ -69,7 +70,6 @@ import gdsc.smlm.ij.SeriesImageSource;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -105,8 +105,6 @@ import ij.process.ImageProcessor;
 import ij.process.LUT;
 import ij.process.LUTHelper;
 import ij.process.LUTHelper.LutColour;
-
-//import ij.io.OpenDialog;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -1356,30 +1354,28 @@ public class PeakFit implements PlugInFilter, ItemListener
 			//System.out.println("Update to " + templateName);
 
 			// Get the configuration template
-			GlobalSettings template = ConfigurationTemplate.getTemplate(templateName);
+			TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
 
 			if (template != null)
 			{
-				String notes = template.getNotes();
 				IJ.log("Applying template: " + templateName);
-				if (!Utils.isNullOrEmpty(notes))
-					IJ.log(notes);
+
+				for (String note : template.getNotesList())
+					IJ.log(note);
 
 				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
-				if (template.isFitEngineConfiguration())
+				if (template.hasFitEngineSettings())
 				{
-					//System.out.println(template.getFitEngineConfiguration().getFitEngineSettings());
-					refreshSettings(template.getFitEngineConfiguration(), custom);
+					refreshSettings(template.getFitEngineSettings(), custom);
 				}
-				// TODO - Fix this
-				//				if (template.isCalibration())
-				//				{
-				//					refreshSettings(template.getCalibration());
-				//				}
-				//				if (template.isResultsSettings())
-				//				{
-				//					refreshSettings(template.getResultsSettings());
-				//				}
+				if (template.hasCalibration())
+				{
+					refreshSettings(template.getCalibration());
+				}
+				if (template.hasResultsSettings())
+				{
+					refreshSettings(template.getResultsSettings());
+				}
 			}
 		}
 		else if (e.getSource() instanceof Checkbox)
@@ -2609,18 +2605,18 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * If this is a custom template then use all the settings. If a default template then leave some existing spot
 	 * settings untouched as the user may have updated them (e.g. PSF width).
 	 *
-	 * @param pConfig
+	 * @param fitEngineSettings
 	 *            the config
 	 * @param isCustomTemplate
 	 *            True if a custom template.
 	 */
-	private void refreshSettings(FitEngineConfiguration pConfig, boolean isCustomTemplate)
+	private void refreshSettings(FitEngineSettings fitEngineSettings, boolean isCustomTemplate)
 	{
 		// Set the configuration
 		// Preserve the current settings for things we do not want to update
 		FitSettings current = fitConfig.getFitSettings();
 		// This will clear everything and merge the configuration
-		this.config.setFitEngineSettings(pConfig.getFitEngineSettings());
+		this.config.setFitEngineSettings(fitEngineSettings);
 		fitConfig = this.config.getFitConfiguration();
 		// Reset what we want to preserve
 		fitConfig.setCalibration(current.getCalibration());

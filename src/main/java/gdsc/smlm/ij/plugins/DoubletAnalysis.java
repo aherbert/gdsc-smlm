@@ -51,6 +51,7 @@ import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.PSFConfigHelper;
+import gdsc.smlm.data.config.TemplateConfig.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitWorker;
@@ -69,7 +70,6 @@ import gdsc.smlm.fitting.LSEFunctionSolver;
 import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -2883,10 +2883,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		if (filename != null)
 		{
 			templateFilename = filename;
-			GlobalSettings settings = new GlobalSettings();
-			settings.setNotes(getNotes(summary));
-			settings.setFitEngineConfiguration(config);
-			if (!SettingsManager.saveSettings(settings, filename, true))
+			TemplateSettings.Builder settings = TemplateSettings.newBuilder();
+			getNotes(settings, summary);
+			settings.setFitEngineSettings(config.getFitEngineSettings());
+			if (!SettingsManager.toJSON(settings.build(), filename, SettingsManager.FLAG_SILENT))
 				IJ.log("Unable to save the template configuration");
 		}
 	}
@@ -2904,24 +2904,22 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		return true;
 	}
 
-	private String getNotes(String summary)
+	private void getNotes(TemplateSettings.Builder settings, String summary)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("Benchmark template\n");
+		settings.addNotes("Benchmark template");
 		if (!Utils.isNullOrEmpty(analysisTitle))
-			BenchmarkFilterAnalysis.addField(sb, "Doublet Analysis Title", analysisTitle);
+			BenchmarkFilterAnalysis.addField(settings, "Doublet Analysis Title", analysisTitle);
 		// Add create data settings.
 		// Just add the columns and the data from the summary window
 		final String header = createAnalysisHeader();
-		BenchmarkFilterAnalysis.addField(sb, "Doublet Analysis Summary Fields", header);
-		BenchmarkFilterAnalysis.addField(sb, "Doublet Analysis Summary Values", summary);
+		BenchmarkFilterAnalysis.addField(settings, "Doublet Analysis Summary Fields", header);
+		BenchmarkFilterAnalysis.addField(settings, "Doublet Analysis Summary Values", summary);
 		// Now pick out key values...
-		BenchmarkFilterAnalysis.addKeyFields(sb, header, summary, new String[] { "Density", "s", "Selection", "Max J",
+		BenchmarkFilterAnalysis.addKeyFields(settings, header, summary, new String[] { "Density", "s", "Selection", "Max J",
 				"Residuals", "Area >90", "Range >90", "wMean >90" });
 
 		// Add any other settings that may be useful in the template
-		BenchmarkFilterAnalysis.addField(sb, "Created", BenchmarkFilterAnalysis.getCurrentTimeStamp());
-		return sb.toString();
+		BenchmarkFilterAnalysis.addField(settings, "Created", BenchmarkFilterAnalysis.getCurrentTimeStamp());
 	}
 
 	private void logFailure(Logger logger, int i, DoubletResult result, FitStatus fitStatus)
@@ -3227,46 +3225,37 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			String templateName = choice.getSelectedItem();
 
 			// Get the configuration template
-			GlobalSettings template = ConfigurationTemplate.getTemplate(templateName);
+			TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
 
 			if (textCoordinateShiftFactor != null)
 			{
+				FitConfiguration fitConfig;
 				if (template != null)
 				{
-					if (template.isFitEngineConfiguration())
-					{
-						FitConfiguration fitConfig = template.getFitEngineConfiguration().getFitConfiguration();
-						cbSmartFilter.setState(fitConfig.isSmartFilter());
-						textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
-						textSignalStrength.setText("" + fitConfig.getSignalStrength());
-						textMinPhotons.setText("" + fitConfig.getMinPhotons());
-						textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
-						textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
-						textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
-						cbLocalBackground.setState(fitConfig.isPrecisionUsingBackground());
-					}
+					fitConfig = new FitConfiguration(template.getFitEngineSettings().getFitSettings());
 				}
 				else
 				{
-					// Reset 
-					cbSmartFilter.setState(false);
-					textCoordinateShiftFactor.setText("0");
-					textSignalStrength.setText("0");
-					textMinPhotons.setText("0");
-					textMinWidthFactor.setText("0");
-					textWidthFactor.setText("0");
-					textPrecisionThreshold.setText("0");
-					cbLocalBackground.setState(false);
+					fitConfig = new FitConfiguration();
 				}
+				
+				cbSmartFilter.setState(fitConfig.isSmartFilter());
+				textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
+				textSignalStrength.setText("" + fitConfig.getSignalStrength());
+				textMinPhotons.setText("" + fitConfig.getMinPhotons());
+				textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
+				textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
+				textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+				cbLocalBackground.setState(fitConfig.isPrecisionUsingBackground());
 			}
 			else
 			{
 				if (template != null)
 				{
-					if (template.isFitEngineConfiguration())
+					if (template.hasFitEngineSettings())
 					{
 						boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
-						FitEngineConfiguration config2 = template.getFitEngineConfiguration();
+						FitEngineConfiguration config2 = new FitEngineConfiguration(template.getFitEngineSettings());
 						FitConfiguration fitConfig2 = config2.getFitConfiguration();
 						if (custom)
 							textPSF.select(PeakFit.getPSFTypeNames()[fitConfig2.getPSFType().ordinal()]);

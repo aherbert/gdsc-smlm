@@ -6,7 +6,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.EnumSet;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -1123,7 +1127,7 @@ public class SettingsManager
 	}
 
 	/**
-	 * Write the message to file.
+	 * Write the message.
 	 * <p>
 	 * If this fails then an error message is written to the ImageJ log
 	 *
@@ -1245,13 +1249,13 @@ public class SettingsManager
 	/**
 	 * Write the message to a JSON string.
 	 *
-	 * @param msg
-	 *            the msg
+	 * @param message
+	 *            the message
 	 * @return the JSON string
 	 */
-	public static String toJSON(Message msg)
+	public static String toJSON(Message message)
 	{
-		return toJSON(msg, 0);
+		return toJSON(message, 0);
 	}
 
 	/**
@@ -1263,7 +1267,78 @@ public class SettingsManager
 	 *            the flags
 	 * @return the JSON string
 	 */
-	public static String toJSON(Message msg, int flags)
+	public static String toJSON(Message message, int flags)
+	{
+		StringBuilder sb = new StringBuilder();
+		if (toJSON(message, sb, flags))
+			return sb.toString();
+		return null;
+	}
+
+	/**
+	 * Write the message to file in JSON text format.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
+	 * @param message
+	 *            the message
+	 * @param filename
+	 *            the filename
+	 * @param flags
+	 *            the flags
+	 * @return True if written
+	 */
+	public static boolean toJSON(Message message, String filename, int flags)
+	{
+		return toJSON(message, new File(filename), flags);
+	}
+
+	/**
+	 * Write the message to file in JSON text format.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
+	 * @param message
+	 *            the message
+	 * @param file
+	 *            the file
+	 * @param flags
+	 *            the flags
+	 * @return True if written
+	 */
+	public static boolean toJSON(Message message, File file, int flags)
+	{
+		PrintStream fs = null;
+		try
+		{
+			fs = new PrintStream(file);
+			return toJSON(message, fs, flags);
+		}
+		catch (FileNotFoundException e)
+		{
+			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+				IJ.log("Unable to write message: " + e.getMessage());
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				fs.close();
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Write the message to a JSON string.
+	 *
+	 * @param message
+	 *            the message
+	 * @param flags
+	 *            the flags
+	 * @return the JSON string
+	 */
+	public static boolean toJSON(Message message, Appendable output, int flags)
 	{
 		try
 		{
@@ -1274,14 +1349,15 @@ public class SettingsManager
 				p = p.omittingInsignificantWhitespace();
 			if (BitFlags.anySet(flags, FLAG_JSON_DEFAULT_VALUES))
 				p = p.includingDefaultValueFields();
-			return p.print(msg);
+			p.appendTo(message, output);
+			return true;
 		}
-		catch (InvalidProtocolBufferException e)
+		catch (IOException e)
 		{
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to write message: " + e.getMessage());
 		}
-		return null;
+		return false;
 	}
 
 	private static com.google.protobuf.util.JsonFormat.Parser parser = null;
@@ -1313,14 +1389,70 @@ public class SettingsManager
 	 */
 	public static boolean fromJSON(String json, Message.Builder builder, int flags)
 	{
+		return fromJSON(new StringReader(json), builder, flags);
+	}
+
+	/**
+	 * Read the message from a JSON string in a file.
+	 *
+	 * @param file
+	 *            the file
+	 * @param builder
+	 *            the builder
+	 * @param flags
+	 *            the flags
+	 * @return true, if successful
+	 */
+	public static boolean fromJSON(File file, Message.Builder builder, int flags)
+	{
+		Reader reader = null;
+		try
+		{
+			reader = new InputStreamReader(new FileInputStream(file));
+			return fromJSON(reader, builder, flags);
+		}
+		catch (FileNotFoundException e)
+		{
+			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+				IJ.log("Unable to read message: " + e.getMessage());
+		}
+		finally
+		{
+			if (reader != null)
+			{
+				try
+				{
+					reader.close();
+				}
+				catch (IOException e)
+				{
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Read the message from a JSON string.
+	 *
+	 * @param reader
+	 *            the reader
+	 * @param builder
+	 *            the builder
+	 * @param flags
+	 *            the flags
+	 * @return true, if successful
+	 */
+	public static boolean fromJSON(Reader reader, Message.Builder builder, int flags)
+	{
 		try
 		{
 			if (parser == null)
 				parser = JsonFormat.parser();
-			parser.merge(json, builder);
+			parser.merge(reader, builder);
 			return true;
 		}
-		catch (InvalidProtocolBufferException e)
+		catch (IOException e)
 		{
 			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to read message: " + e.getMessage());
