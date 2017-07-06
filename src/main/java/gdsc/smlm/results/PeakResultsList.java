@@ -1,5 +1,8 @@
 package gdsc.smlm.results;
 
+import java.awt.Rectangle;
+import java.util.Collection;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,6 +18,9 @@ package gdsc.smlm.results;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.PSFConfig.PSF;
 
 /**
  * Wrapper class to output to multiple results destinations
@@ -149,5 +155,63 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 			newList.addOutput(peakResults);
 		}
 		return newList;
+	}
+
+	// Pass through all the modifications to the list objects
+
+	public void addAll(Collection<PeakResult> results)
+	{
+		super.addAll(results);
+		for (PeakResults peakResults : this.results)
+			peakResults.addAll(results);
+	}
+
+	public void setSource(ImageSource source)
+	{
+		super.setSource(source);
+		for (PeakResults peakResults : results)
+			peakResults.setSource(source);
+	}
+
+	public void setBounds(Rectangle bounds)
+	{
+		super.setBounds(bounds);
+		for (PeakResults peakResults : results)
+			peakResults.setBounds(bounds);
+	}
+
+	public void setCalibration(Calibration calibration)
+	{
+		super.setCalibration(calibration);
+		for (PeakResults peakResults : results)
+			peakResults.setCalibration(calibration);
+	}
+
+	public void setPSF(PSF psf)
+	{
+		super.setPSF(psf);
+		for (PeakResults peakResults : results)
+			peakResults.setPSF(psf);
+	}
+
+	public void setConfiguration(String configuration)
+	{
+		super.setConfiguration(configuration);
+		for (PeakResults peakResults : results)
+			peakResults.setConfiguration(configuration);
+	}
+
+	public void setName(String name)
+	{
+		super.setName(name);
+		for (PeakResults peakResults : results)
+			peakResults.setName(name);
+	}
+
+	public void copySettings(PeakResults results)
+	{
+		super.copySettings(results);
+		for (PeakResults peakResults : this.results)
+			peakResults.copySettings(results);
 	}
 }
