@@ -2393,6 +2393,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		if (getFitSolver() == FitSolver.MLE)
 		{
+			// This requires the gain
+			checkCalibration();
+			
 			MaximumLikelihoodFitter.SearchMethod searchMethod = convertSearchMethod();
 
 			// Only the Poisson likelihood function supports gradients
@@ -2415,7 +2418,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			// Specify the likelihood function to use
 			if (isModelCamera())
 			{
-				// Set the camera read noise
+				// Set the camera read noise.
+				// Do not check if this is set as 0 is a valid option.
 				fitter.setSigma(calibration.getReadNoise());
 
 				if (emCCD)
