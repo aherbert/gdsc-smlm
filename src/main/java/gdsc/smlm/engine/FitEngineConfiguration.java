@@ -1,26 +1,21 @@
 package gdsc.smlm.engine;
 
-import java.util.List;
-
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Maths;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.FitConfig;
 import gdsc.smlm.data.config.FitConfig.DataFilter;
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
 import gdsc.smlm.data.config.FitConfig.DataFilterSettings;
 import gdsc.smlm.data.config.FitConfig.DataFilterType;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
-import gdsc.smlm.data.config.FitConfig.FitSettings;
-import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitConfig.RelativeParameter;
+import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
-import gdsc.smlm.data.config.FitConfigHelper;
-import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.filters.AverageDataProcessor;
 import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.CircularMeanDataProcessor;
