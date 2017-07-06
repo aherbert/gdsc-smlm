@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+// ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
+// Authors: Alex Herbert, 2017 
+// License: GPL V3
+package gdsc.smlm.data.config;
+
+option java_outer_classname = "GUIConfig";
+
+// Contain the settings for the result filtering
+message FilterSettings {
+	float maxDrift = 1;
+	float minSignal = 2;
+	float eminSNR = 3;
+	double maxPrecision = 4;
+	float maxWidth = 5;
+	float minWidth = 6;
+	string maskTitle = 7;
+	string freeFilter = 8;
+	string filterTemplate = 9;
+	string filterAnalysisDirectory = 10;
+	string filterSetFilename = 11;
+}
+
+/**
+ * Contain the settings for the PSF Calculator
+ */
+public class PSFCalculatorSettings
+{
+	public double pixelPitch = 6.45;
+	public double magnification = 63;
+	public double beamExpander = 1;
+	public double wavelength = 500;
+	public double numericalAperture = 1.4;
+	public boolean adjustForSquarePixels = true;
+	public double proportionalityFactor = 1.52;
+}
+
+/**
+ * Contain the settings for the PSF Estimator
+ */
+public class PSFEstimatorSettings
+{
+	public int numberOfPeaks = 1000;
+	public double pValue = 0.01;
+	public boolean updatePreferences = true;
+	public boolean debugPSFEstimator = false;
+	public boolean iterate = true;
+	public boolean showHistograms = false;
+	public int histogramBins = 100;
+}
+
+/**
+ * Contain the settings for the clustering algorithm
+ * 
+ * @author Alex Herbert
+ */
+public class OPTICSSettings implements Cloneable
+{
+
+}
