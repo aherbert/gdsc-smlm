@@ -3159,6 +3159,7306 @@ public final class GUIConfig {
 
   }
 
+  public interface CreateDataSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CreateDataSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int32 size = 1;</code>
+     */
+    int getSize();
+
+    /**
+     * <code>double depth = 2;</code>
+     */
+    double getDepth();
+
+    /**
+     * <code>bool fixed_Depth = 3;</code>
+     */
+    boolean getFixedDepth();
+
+    /**
+     * <code>double seconds = 4;</code>
+     */
+    double getSeconds();
+
+    /**
+     * <code>double exposure_time = 5;</code>
+     */
+    double getExposureTime();
+
+    /**
+     * <code>double steps_per_second = 6;</code>
+     */
+    double getStepsPerSecond();
+
+    /**
+     * <code>string illumination = 7;</code>
+     */
+    java.lang.String getIllumination();
+    /**
+     * <code>string illumination = 7;</code>
+     */
+    com.google.protobuf.ByteString
+        getIlluminationBytes();
+
+    /**
+     * <code>string background_image = 8;</code>
+     */
+    java.lang.String getBackgroundImage();
+    /**
+     * <code>string background_image = 8;</code>
+     */
+    com.google.protobuf.ByteString
+        getBackgroundImageBytes();
+
+    /**
+     * <code>string distribution = 9;</code>
+     */
+    java.lang.String getDistribution();
+    /**
+     * <code>string distribution = 9;</code>
+     */
+    com.google.protobuf.ByteString
+        getDistributionBytes();
+
+    /**
+     * <code>string distribution_mask = 10;</code>
+     */
+    java.lang.String getDistributionMask();
+    /**
+     * <code>string distribution_mask = 10;</code>
+     */
+    com.google.protobuf.ByteString
+        getDistributionMaskBytes();
+
+    /**
+     * <code>double distribution_mask_slice_depth = 11;</code>
+     */
+    double getDistributionMaskSliceDepth();
+
+    /**
+     * <code>bool poisson_noise = 12;</code>
+     */
+    boolean getPoissonNoise();
+
+    /**
+     * <code>double background = 13;</code>
+     */
+    double getBackground();
+
+    /**
+     * <code>double em_gain = 14;</code>
+     */
+    double getEmGain();
+
+    /**
+     * <code>double camera_gain = 15;</code>
+     */
+    double getCameraGain();
+
+    /**
+     * <code>double quantum_efficiency = 16;</code>
+     */
+    double getQuantumEfficiency();
+
+    /**
+     * <pre>
+     * The read noise (electrons).
+     * </pre>
+     *
+     * <code>double read_noise = 17;</code>
+     */
+    double getReadNoise();
+
+    /**
+     * <code>int32 bias = 18;</code>
+     */
+    int getBias();
+
+    /**
+     * <code>int32 particles = 19;</code>
+     */
+    int getParticles();
+
+    /**
+     * <code>bool sample_per_frame = 20;</code>
+     */
+    boolean getSamplePerFrame();
+
+    /**
+     * <pre>
+     * Photons are modelled using an emission rate (photon emission is constant when the fluorophore is on) sampled from
+     * a distribution. The rate (average of the distribution) is correlated to the total on time. Observations on real
+     * data indicate the correlation is around -0.35, i.e. shorter bursts are brighter.
+     * </pre>
+     *
+     * <code>double photons_per_second = 21;</code>
+     */
+    double getPhotonsPerSecond();
+
+    /**
+     * <pre>
+     * For a simple localisation model the photons are randomly selected between photonsPerSecond and
+     * photonsPerSecondMaximum
+     * </pre>
+     *
+     * <code>double photons_per_second_maximum = 22;</code>
+     */
+    double getPhotonsPerSecondMaximum();
+
+    /**
+     * <pre>
+     * Define the distribution for the random photon emission. The default is to use a gamma
+     * distribution with the defined shape parameter.
+     * </pre>
+     *
+     * <code>string photon_distribution = 23;</code>
+     */
+    java.lang.String getPhotonDistribution();
+    /**
+     * <pre>
+     * Define the distribution for the random photon emission. The default is to use a gamma
+     * distribution with the defined shape parameter.
+     * </pre>
+     *
+     * <code>string photon_distribution = 23;</code>
+     */
+    com.google.protobuf.ByteString
+        getPhotonDistributionBytes();
+
+    /**
+     * <code>string photon_distribution_file = 24;</code>
+     */
+    java.lang.String getPhotonDistributionFile();
+    /**
+     * <code>string photon_distribution_file = 24;</code>
+     */
+    com.google.protobuf.ByteString
+        getPhotonDistributionFileBytes();
+
+    /**
+     * <code>double photon_shape = 25;</code>
+     */
+    double getPhotonShape();
+
+    /**
+     * <code>double correlation = 26;</code>
+     */
+    double getCorrelation();
+
+    /**
+     * <code>string psf_model = 27;</code>
+     */
+    java.lang.String getPsfModel();
+    /**
+     * <code>string psf_model = 27;</code>
+     */
+    com.google.protobuf.ByteString
+        getPsfModelBytes();
+
+    /**
+     * <code>string psf_image_name = 28;</code>
+     */
+    java.lang.String getPsfImageName();
+    /**
+     * <code>string psf_image_name = 28;</code>
+     */
+    com.google.protobuf.ByteString
+        getPsfImageNameBytes();
+
+    /**
+     * <code>bool enter_width = 29;</code>
+     */
+    boolean getEnterWidth();
+
+    /**
+     * <code>double wavelength = 30;</code>
+     */
+    double getWavelength();
+
+    /**
+     * <code>double numerical_aperture = 31;</code>
+     */
+    double getNumericalAperture();
+
+    /**
+     * <code>double psf_sd = 32;</code>
+     */
+    double getPsfSd();
+
+    /**
+     * <code>double pixel_pitch = 33;</code>
+     */
+    double getPixelPitch();
+
+    /**
+     * <code>double density = 34;</code>
+     */
+    double getDensity();
+
+    /**
+     * <code>double diffusion_rate = 35;</code>
+     */
+    double getDiffusionRate();
+
+    /**
+     * <code>int32 diffusion_type = 36;</code>
+     */
+    int getDiffusionType();
+
+    /**
+     * <code>bool compound_molecules = 37;</code>
+     */
+    boolean getCompoundMolecules();
+
+    /**
+     * <code>string compound_text = 38;</code>
+     */
+    java.lang.String getCompoundText();
+    /**
+     * <code>string compound_text = 38;</code>
+     */
+    com.google.protobuf.ByteString
+        getCompoundTextBytes();
+
+    /**
+     * <code>bool diffuse_2D = 39;</code>
+     */
+    boolean getDiffuse2D();
+
+    /**
+     * <code>bool rotate_initial_orientation = 40;</code>
+     */
+    boolean getRotateInitialOrientation();
+
+    /**
+     * <code>bool rotate_during_simulation = 41;</code>
+     */
+    boolean getRotateDuringSimulation();
+
+    /**
+     * <code>bool rotate_2D = 42;</code>
+     */
+    boolean getRotate2D();
+
+    /**
+     * <code>double fixedFraction = 43;</code>
+     */
+    double getFixedFraction();
+
+    /**
+     * <code>string confinement = 44;</code>
+     */
+    java.lang.String getConfinement();
+    /**
+     * <code>string confinement = 44;</code>
+     */
+    com.google.protobuf.ByteString
+        getConfinementBytes();
+
+    /**
+     * <code>string confinement_mask = 45;</code>
+     */
+    java.lang.String getConfinementMask();
+    /**
+     * <code>string confinement_mask = 45;</code>
+     */
+    com.google.protobuf.ByteString
+        getConfinementMaskBytes();
+
+    /**
+     * <code>double confinement_mask_slice_depth = 46;</code>
+     */
+    double getConfinementMaskSliceDepth();
+
+    /**
+     * <code>double confinement_radius = 47;</code>
+     */
+    double getConfinementRadius();
+
+    /**
+     * <code>int32 pulse_interval = 48;</code>
+     */
+    int getPulseInterval();
+
+    /**
+     * <code>double pulse_ratio = 49;</code>
+     */
+    double getPulseRatio();
+
+    /**
+     * <pre>
+     * Average t-On in milliseconds
+     * </pre>
+     *
+     * <code>double t_on = 50;</code>
+     */
+    double getTOn();
+
+    /**
+     * <pre>
+     * Average t-Off for the short dark state in milliseconds
+     * </pre>
+     *
+     * <code>double t_off_short = 51;</code>
+     */
+    double getTOffShort();
+
+    /**
+     * <pre>
+     * Average t-Off for the long dark state in milliseconds
+     * </pre>
+     *
+     * <code>double t_off_long = 52;</code>
+     */
+    double getTOffLong();
+
+    /**
+     * <pre>
+     * Average number of short blinks, i.e. when transitioning from the on state to the short dark state
+     * </pre>
+     *
+     * <code>double n_blinks_short = 53;</code>
+     */
+    double getNBlinksShort();
+
+    /**
+     * <pre>
+     * Average number of long blinks, i.e. transitions to the long dark state
+     * </pre>
+     *
+     * <code>double n_blinks_long = 54;</code>
+     */
+    double getNBlinksLong();
+
+    /**
+     * <pre>
+     * Set to true to use a geometric distribution for the nBlinks. Default is to use a Poisson.
+     * </pre>
+     *
+     * <code>bool n_blinks_geometric_distribution = 55;</code>
+     */
+    boolean getNBlinksGeometricDistribution();
+
+    /**
+     * <code>double min_photons = 56;</code>
+     */
+    double getMinPhotons();
+
+    /**
+     * <code>double min_snr_t1 = 57;</code>
+     */
+    double getMinSnrT1();
+
+    /**
+     * <code>double min_snr_tN = 58;</code>
+     */
+    double getMinSnrTN();
+
+    /**
+     * <code>bool raw_image = 59;</code>
+     */
+    boolean getRawImage();
+
+    /**
+     * <code>bool save_image = 60;</code>
+     */
+    boolean getSaveImage();
+
+    /**
+     * <code>bool save_image_results = 61;</code>
+     */
+    boolean getSaveImageResults();
+
+    /**
+     * <code>bool save_localisations = 62;</code>
+     */
+    boolean getSaveLocalisations();
+
+    /**
+     * <code>bool save_fluorophores = 63;</code>
+     */
+    boolean getSaveFluorophores();
+
+    /**
+     * <code>string image_filename = 64;</code>
+     */
+    java.lang.String getImageFilename();
+    /**
+     * <code>string image_filename = 64;</code>
+     */
+    com.google.protobuf.ByteString
+        getImageFilenameBytes();
+
+    /**
+     * <code>string image_results_filename = 65;</code>
+     */
+    java.lang.String getImageResultsFilename();
+    /**
+     * <code>string image_results_filename = 65;</code>
+     */
+    com.google.protobuf.ByteString
+        getImageResultsFilenameBytes();
+
+    /**
+     * <code>string fluorophoresFilename = 66;</code>
+     */
+    java.lang.String getFluorophoresFilename();
+    /**
+     * <code>string fluorophoresFilename = 66;</code>
+     */
+    com.google.protobuf.ByteString
+        getFluorophoresFilenameBytes();
+
+    /**
+     * <code>int32 cell_size = 67;</code>
+     */
+    int getCellSize();
+
+    /**
+     * <code>double probability_binary = 68;</code>
+     */
+    double getProbabilityBinary();
+
+    /**
+     * <code>double min_binary_distance = 69;</code>
+     */
+    double getMinBinaryDistance();
+
+    /**
+     * <code>double max_binary_distance = 70;</code>
+     */
+    double getMaxBinaryDistance();
+
+    /**
+     * <code>bool show_histograms = 71;</code>
+     */
+    boolean getShowHistograms();
+
+    /**
+     * <code>bool choose_histograms = 72;</code>
+     */
+    boolean getChooseHistograms();
+
+    /**
+     * <code>int32 histogram_bins = 73;</code>
+     */
+    int getHistogramBins();
+
+    /**
+     * <code>bool remove_outliers = 74;</code>
+     */
+    boolean getRemoveOutliers();
+
+    /**
+     * <code>float density_radius = 75;</code>
+     */
+    float getDensityRadius();
+
+    /**
+     * <code>float depth_of_field = 76;</code>
+     */
+    float getDepthOfField();
+
+    /**
+     * <code>double x_position = 77;</code>
+     */
+    double getXPosition();
+
+    /**
+     * <code>double y_position = 78;</code>
+     */
+    double getYPosition();
+
+    /**
+     * <code>double z_position = 79;</code>
+     */
+    double getZPosition();
+  }
+  /**
+   * <pre>
+   * Contain the settings for the Create Data plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.CreateDataSettings}
+   */
+  public  static final class CreateDataSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CreateDataSettings)
+      CreateDataSettingsOrBuilder {
+    // Use CreateDataSettings.newBuilder() to construct.
+    private CreateDataSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CreateDataSettings() {
+      size_ = 0;
+      depth_ = 0D;
+      fixedDepth_ = false;
+      seconds_ = 0D;
+      exposureTime_ = 0D;
+      stepsPerSecond_ = 0D;
+      illumination_ = "";
+      backgroundImage_ = "";
+      distribution_ = "";
+      distributionMask_ = "";
+      distributionMaskSliceDepth_ = 0D;
+      poissonNoise_ = false;
+      background_ = 0D;
+      emGain_ = 0D;
+      cameraGain_ = 0D;
+      quantumEfficiency_ = 0D;
+      readNoise_ = 0D;
+      bias_ = 0;
+      particles_ = 0;
+      samplePerFrame_ = false;
+      photonsPerSecond_ = 0D;
+      photonsPerSecondMaximum_ = 0D;
+      photonDistribution_ = "";
+      photonDistributionFile_ = "";
+      photonShape_ = 0D;
+      correlation_ = 0D;
+      psfModel_ = "";
+      psfImageName_ = "";
+      enterWidth_ = false;
+      wavelength_ = 0D;
+      numericalAperture_ = 0D;
+      psfSd_ = 0D;
+      pixelPitch_ = 0D;
+      density_ = 0D;
+      diffusionRate_ = 0D;
+      diffusionType_ = 0;
+      compoundMolecules_ = false;
+      compoundText_ = "";
+      diffuse2D_ = false;
+      rotateInitialOrientation_ = false;
+      rotateDuringSimulation_ = false;
+      rotate2D_ = false;
+      fixedFraction_ = 0D;
+      confinement_ = "";
+      confinementMask_ = "";
+      confinementMaskSliceDepth_ = 0D;
+      confinementRadius_ = 0D;
+      pulseInterval_ = 0;
+      pulseRatio_ = 0D;
+      tOn_ = 0D;
+      tOffShort_ = 0D;
+      tOffLong_ = 0D;
+      nBlinksShort_ = 0D;
+      nBlinksLong_ = 0D;
+      nBlinksGeometricDistribution_ = false;
+      minPhotons_ = 0D;
+      minSnrT1_ = 0D;
+      minSnrTN_ = 0D;
+      rawImage_ = false;
+      saveImage_ = false;
+      saveImageResults_ = false;
+      saveLocalisations_ = false;
+      saveFluorophores_ = false;
+      imageFilename_ = "";
+      imageResultsFilename_ = "";
+      fluorophoresFilename_ = "";
+      cellSize_ = 0;
+      probabilityBinary_ = 0D;
+      minBinaryDistance_ = 0D;
+      maxBinaryDistance_ = 0D;
+      showHistograms_ = false;
+      chooseHistograms_ = false;
+      histogramBins_ = 0;
+      removeOutliers_ = false;
+      densityRadius_ = 0F;
+      depthOfField_ = 0F;
+      xPosition_ = 0D;
+      yPosition_ = 0D;
+      zPosition_ = 0D;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private CreateDataSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      int mutable_bitField1_ = 0;
+      int mutable_bitField2_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+
+              size_ = input.readInt32();
+              break;
+            }
+            case 17: {
+
+              depth_ = input.readDouble();
+              break;
+            }
+            case 24: {
+
+              fixedDepth_ = input.readBool();
+              break;
+            }
+            case 33: {
+
+              seconds_ = input.readDouble();
+              break;
+            }
+            case 41: {
+
+              exposureTime_ = input.readDouble();
+              break;
+            }
+            case 49: {
+
+              stepsPerSecond_ = input.readDouble();
+              break;
+            }
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              illumination_ = s;
+              break;
+            }
+            case 66: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              backgroundImage_ = s;
+              break;
+            }
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              distribution_ = s;
+              break;
+            }
+            case 82: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              distributionMask_ = s;
+              break;
+            }
+            case 89: {
+
+              distributionMaskSliceDepth_ = input.readDouble();
+              break;
+            }
+            case 96: {
+
+              poissonNoise_ = input.readBool();
+              break;
+            }
+            case 105: {
+
+              background_ = input.readDouble();
+              break;
+            }
+            case 113: {
+
+              emGain_ = input.readDouble();
+              break;
+            }
+            case 121: {
+
+              cameraGain_ = input.readDouble();
+              break;
+            }
+            case 129: {
+
+              quantumEfficiency_ = input.readDouble();
+              break;
+            }
+            case 137: {
+
+              readNoise_ = input.readDouble();
+              break;
+            }
+            case 144: {
+
+              bias_ = input.readInt32();
+              break;
+            }
+            case 152: {
+
+              particles_ = input.readInt32();
+              break;
+            }
+            case 160: {
+
+              samplePerFrame_ = input.readBool();
+              break;
+            }
+            case 169: {
+
+              photonsPerSecond_ = input.readDouble();
+              break;
+            }
+            case 177: {
+
+              photonsPerSecondMaximum_ = input.readDouble();
+              break;
+            }
+            case 186: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              photonDistribution_ = s;
+              break;
+            }
+            case 194: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              photonDistributionFile_ = s;
+              break;
+            }
+            case 201: {
+
+              photonShape_ = input.readDouble();
+              break;
+            }
+            case 209: {
+
+              correlation_ = input.readDouble();
+              break;
+            }
+            case 218: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              psfModel_ = s;
+              break;
+            }
+            case 226: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              psfImageName_ = s;
+              break;
+            }
+            case 232: {
+
+              enterWidth_ = input.readBool();
+              break;
+            }
+            case 241: {
+
+              wavelength_ = input.readDouble();
+              break;
+            }
+            case 249: {
+
+              numericalAperture_ = input.readDouble();
+              break;
+            }
+            case 257: {
+
+              psfSd_ = input.readDouble();
+              break;
+            }
+            case 265: {
+
+              pixelPitch_ = input.readDouble();
+              break;
+            }
+            case 273: {
+
+              density_ = input.readDouble();
+              break;
+            }
+            case 281: {
+
+              diffusionRate_ = input.readDouble();
+              break;
+            }
+            case 288: {
+
+              diffusionType_ = input.readInt32();
+              break;
+            }
+            case 296: {
+
+              compoundMolecules_ = input.readBool();
+              break;
+            }
+            case 306: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              compoundText_ = s;
+              break;
+            }
+            case 312: {
+
+              diffuse2D_ = input.readBool();
+              break;
+            }
+            case 320: {
+
+              rotateInitialOrientation_ = input.readBool();
+              break;
+            }
+            case 328: {
+
+              rotateDuringSimulation_ = input.readBool();
+              break;
+            }
+            case 336: {
+
+              rotate2D_ = input.readBool();
+              break;
+            }
+            case 345: {
+
+              fixedFraction_ = input.readDouble();
+              break;
+            }
+            case 354: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              confinement_ = s;
+              break;
+            }
+            case 362: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              confinementMask_ = s;
+              break;
+            }
+            case 369: {
+
+              confinementMaskSliceDepth_ = input.readDouble();
+              break;
+            }
+            case 377: {
+
+              confinementRadius_ = input.readDouble();
+              break;
+            }
+            case 384: {
+
+              pulseInterval_ = input.readInt32();
+              break;
+            }
+            case 393: {
+
+              pulseRatio_ = input.readDouble();
+              break;
+            }
+            case 401: {
+
+              tOn_ = input.readDouble();
+              break;
+            }
+            case 409: {
+
+              tOffShort_ = input.readDouble();
+              break;
+            }
+            case 417: {
+
+              tOffLong_ = input.readDouble();
+              break;
+            }
+            case 425: {
+
+              nBlinksShort_ = input.readDouble();
+              break;
+            }
+            case 433: {
+
+              nBlinksLong_ = input.readDouble();
+              break;
+            }
+            case 440: {
+
+              nBlinksGeometricDistribution_ = input.readBool();
+              break;
+            }
+            case 449: {
+
+              minPhotons_ = input.readDouble();
+              break;
+            }
+            case 457: {
+
+              minSnrT1_ = input.readDouble();
+              break;
+            }
+            case 465: {
+
+              minSnrTN_ = input.readDouble();
+              break;
+            }
+            case 472: {
+
+              rawImage_ = input.readBool();
+              break;
+            }
+            case 480: {
+
+              saveImage_ = input.readBool();
+              break;
+            }
+            case 488: {
+
+              saveImageResults_ = input.readBool();
+              break;
+            }
+            case 496: {
+
+              saveLocalisations_ = input.readBool();
+              break;
+            }
+            case 504: {
+
+              saveFluorophores_ = input.readBool();
+              break;
+            }
+            case 514: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              imageFilename_ = s;
+              break;
+            }
+            case 522: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              imageResultsFilename_ = s;
+              break;
+            }
+            case 530: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              fluorophoresFilename_ = s;
+              break;
+            }
+            case 536: {
+
+              cellSize_ = input.readInt32();
+              break;
+            }
+            case 545: {
+
+              probabilityBinary_ = input.readDouble();
+              break;
+            }
+            case 553: {
+
+              minBinaryDistance_ = input.readDouble();
+              break;
+            }
+            case 561: {
+
+              maxBinaryDistance_ = input.readDouble();
+              break;
+            }
+            case 568: {
+
+              showHistograms_ = input.readBool();
+              break;
+            }
+            case 576: {
+
+              chooseHistograms_ = input.readBool();
+              break;
+            }
+            case 584: {
+
+              histogramBins_ = input.readInt32();
+              break;
+            }
+            case 592: {
+
+              removeOutliers_ = input.readBool();
+              break;
+            }
+            case 605: {
+
+              densityRadius_ = input.readFloat();
+              break;
+            }
+            case 613: {
+
+              depthOfField_ = input.readFloat();
+              break;
+            }
+            case 617: {
+
+              xPosition_ = input.readDouble();
+              break;
+            }
+            case 625: {
+
+              yPosition_ = input.readDouble();
+              break;
+            }
+            case 633: {
+
+              zPosition_ = input.readDouble();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_CreateDataSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIConfig.CreateDataSettings.class, gdsc.smlm.data.config.GUIConfig.CreateDataSettings.Builder.class);
+    }
+
+    public static final int SIZE_FIELD_NUMBER = 1;
+    private int size_;
+    /**
+     * <code>int32 size = 1;</code>
+     */
+    public int getSize() {
+      return size_;
+    }
+
+    public static final int DEPTH_FIELD_NUMBER = 2;
+    private double depth_;
+    /**
+     * <code>double depth = 2;</code>
+     */
+    public double getDepth() {
+      return depth_;
+    }
+
+    public static final int FIXED_DEPTH_FIELD_NUMBER = 3;
+    private boolean fixedDepth_;
+    /**
+     * <code>bool fixed_Depth = 3;</code>
+     */
+    public boolean getFixedDepth() {
+      return fixedDepth_;
+    }
+
+    public static final int SECONDS_FIELD_NUMBER = 4;
+    private double seconds_;
+    /**
+     * <code>double seconds = 4;</code>
+     */
+    public double getSeconds() {
+      return seconds_;
+    }
+
+    public static final int EXPOSURE_TIME_FIELD_NUMBER = 5;
+    private double exposureTime_;
+    /**
+     * <code>double exposure_time = 5;</code>
+     */
+    public double getExposureTime() {
+      return exposureTime_;
+    }
+
+    public static final int STEPS_PER_SECOND_FIELD_NUMBER = 6;
+    private double stepsPerSecond_;
+    /**
+     * <code>double steps_per_second = 6;</code>
+     */
+    public double getStepsPerSecond() {
+      return stepsPerSecond_;
+    }
+
+    public static final int ILLUMINATION_FIELD_NUMBER = 7;
+    private volatile java.lang.Object illumination_;
+    /**
+     * <code>string illumination = 7;</code>
+     */
+    public java.lang.String getIllumination() {
+      java.lang.Object ref = illumination_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        illumination_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string illumination = 7;</code>
+     */
+    public com.google.protobuf.ByteString
+        getIlluminationBytes() {
+      java.lang.Object ref = illumination_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        illumination_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int BACKGROUND_IMAGE_FIELD_NUMBER = 8;
+    private volatile java.lang.Object backgroundImage_;
+    /**
+     * <code>string background_image = 8;</code>
+     */
+    public java.lang.String getBackgroundImage() {
+      java.lang.Object ref = backgroundImage_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        backgroundImage_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string background_image = 8;</code>
+     */
+    public com.google.protobuf.ByteString
+        getBackgroundImageBytes() {
+      java.lang.Object ref = backgroundImage_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        backgroundImage_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DISTRIBUTION_FIELD_NUMBER = 9;
+    private volatile java.lang.Object distribution_;
+    /**
+     * <code>string distribution = 9;</code>
+     */
+    public java.lang.String getDistribution() {
+      java.lang.Object ref = distribution_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        distribution_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string distribution = 9;</code>
+     */
+    public com.google.protobuf.ByteString
+        getDistributionBytes() {
+      java.lang.Object ref = distribution_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        distribution_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DISTRIBUTION_MASK_FIELD_NUMBER = 10;
+    private volatile java.lang.Object distributionMask_;
+    /**
+     * <code>string distribution_mask = 10;</code>
+     */
+    public java.lang.String getDistributionMask() {
+      java.lang.Object ref = distributionMask_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        distributionMask_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string distribution_mask = 10;</code>
+     */
+    public com.google.protobuf.ByteString
+        getDistributionMaskBytes() {
+      java.lang.Object ref = distributionMask_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        distributionMask_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DISTRIBUTION_MASK_SLICE_DEPTH_FIELD_NUMBER = 11;
+    private double distributionMaskSliceDepth_;
+    /**
+     * <code>double distribution_mask_slice_depth = 11;</code>
+     */
+    public double getDistributionMaskSliceDepth() {
+      return distributionMaskSliceDepth_;
+    }
+
+    public static final int POISSON_NOISE_FIELD_NUMBER = 12;
+    private boolean poissonNoise_;
+    /**
+     * <code>bool poisson_noise = 12;</code>
+     */
+    public boolean getPoissonNoise() {
+      return poissonNoise_;
+    }
+
+    public static final int BACKGROUND_FIELD_NUMBER = 13;
+    private double background_;
+    /**
+     * <code>double background = 13;</code>
+     */
+    public double getBackground() {
+      return background_;
+    }
+
+    public static final int EM_GAIN_FIELD_NUMBER = 14;
+    private double emGain_;
+    /**
+     * <code>double em_gain = 14;</code>
+     */
+    public double getEmGain() {
+      return emGain_;
+    }
+
+    public static final int CAMERA_GAIN_FIELD_NUMBER = 15;
+    private double cameraGain_;
+    /**
+     * <code>double camera_gain = 15;</code>
+     */
+    public double getCameraGain() {
+      return cameraGain_;
+    }
+
+    public static final int QUANTUM_EFFICIENCY_FIELD_NUMBER = 16;
+    private double quantumEfficiency_;
+    /**
+     * <code>double quantum_efficiency = 16;</code>
+     */
+    public double getQuantumEfficiency() {
+      return quantumEfficiency_;
+    }
+
+    public static final int READ_NOISE_FIELD_NUMBER = 17;
+    private double readNoise_;
+    /**
+     * <pre>
+     * The read noise (electrons).
+     * </pre>
+     *
+     * <code>double read_noise = 17;</code>
+     */
+    public double getReadNoise() {
+      return readNoise_;
+    }
+
+    public static final int BIAS_FIELD_NUMBER = 18;
+    private int bias_;
+    /**
+     * <code>int32 bias = 18;</code>
+     */
+    public int getBias() {
+      return bias_;
+    }
+
+    public static final int PARTICLES_FIELD_NUMBER = 19;
+    private int particles_;
+    /**
+     * <code>int32 particles = 19;</code>
+     */
+    public int getParticles() {
+      return particles_;
+    }
+
+    public static final int SAMPLE_PER_FRAME_FIELD_NUMBER = 20;
+    private boolean samplePerFrame_;
+    /**
+     * <code>bool sample_per_frame = 20;</code>
+     */
+    public boolean getSamplePerFrame() {
+      return samplePerFrame_;
+    }
+
+    public static final int PHOTONS_PER_SECOND_FIELD_NUMBER = 21;
+    private double photonsPerSecond_;
+    /**
+     * <pre>
+     * Photons are modelled using an emission rate (photon emission is constant when the fluorophore is on) sampled from
+     * a distribution. The rate (average of the distribution) is correlated to the total on time. Observations on real
+     * data indicate the correlation is around -0.35, i.e. shorter bursts are brighter.
+     * </pre>
+     *
+     * <code>double photons_per_second = 21;</code>
+     */
+    public double getPhotonsPerSecond() {
+      return photonsPerSecond_;
+    }
+
+    public static final int PHOTONS_PER_SECOND_MAXIMUM_FIELD_NUMBER = 22;
+    private double photonsPerSecondMaximum_;
+    /**
+     * <pre>
+     * For a simple localisation model the photons are randomly selected between photonsPerSecond and
+     * photonsPerSecondMaximum
+     * </pre>
+     *
+     * <code>double photons_per_second_maximum = 22;</code>
+     */
+    public double getPhotonsPerSecondMaximum() {
+      return photonsPerSecondMaximum_;
+    }
+
+    public static final int PHOTON_DISTRIBUTION_FIELD_NUMBER = 23;
+    private volatile java.lang.Object photonDistribution_;
+    /**
+     * <pre>
+     * Define the distribution for the random photon emission. The default is to use a gamma
+     * distribution with the defined shape parameter.
+     * </pre>
+     *
+     * <code>string photon_distribution = 23;</code>
+     */
+    public java.lang.String getPhotonDistribution() {
+      java.lang.Object ref = photonDistribution_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        photonDistribution_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Define the distribution for the random photon emission. The default is to use a gamma
+     * distribution with the defined shape parameter.
+     * </pre>
+     *
+     * <code>string photon_distribution = 23;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPhotonDistributionBytes() {
+      java.lang.Object ref = photonDistribution_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        photonDistribution_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PHOTON_DISTRIBUTION_FILE_FIELD_NUMBER = 24;
+    private volatile java.lang.Object photonDistributionFile_;
+    /**
+     * <code>string photon_distribution_file = 24;</code>
+     */
+    public java.lang.String getPhotonDistributionFile() {
+      java.lang.Object ref = photonDistributionFile_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        photonDistributionFile_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string photon_distribution_file = 24;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPhotonDistributionFileBytes() {
+      java.lang.Object ref = photonDistributionFile_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        photonDistributionFile_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PHOTON_SHAPE_FIELD_NUMBER = 25;
+    private double photonShape_;
+    /**
+     * <code>double photon_shape = 25;</code>
+     */
+    public double getPhotonShape() {
+      return photonShape_;
+    }
+
+    public static final int CORRELATION_FIELD_NUMBER = 26;
+    private double correlation_;
+    /**
+     * <code>double correlation = 26;</code>
+     */
+    public double getCorrelation() {
+      return correlation_;
+    }
+
+    public static final int PSF_MODEL_FIELD_NUMBER = 27;
+    private volatile java.lang.Object psfModel_;
+    /**
+     * <code>string psf_model = 27;</code>
+     */
+    public java.lang.String getPsfModel() {
+      java.lang.Object ref = psfModel_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        psfModel_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string psf_model = 27;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPsfModelBytes() {
+      java.lang.Object ref = psfModel_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        psfModel_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PSF_IMAGE_NAME_FIELD_NUMBER = 28;
+    private volatile java.lang.Object psfImageName_;
+    /**
+     * <code>string psf_image_name = 28;</code>
+     */
+    public java.lang.String getPsfImageName() {
+      java.lang.Object ref = psfImageName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        psfImageName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string psf_image_name = 28;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPsfImageNameBytes() {
+      java.lang.Object ref = psfImageName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        psfImageName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENTER_WIDTH_FIELD_NUMBER = 29;
+    private boolean enterWidth_;
+    /**
+     * <code>bool enter_width = 29;</code>
+     */
+    public boolean getEnterWidth() {
+      return enterWidth_;
+    }
+
+    public static final int WAVELENGTH_FIELD_NUMBER = 30;
+    private double wavelength_;
+    /**
+     * <code>double wavelength = 30;</code>
+     */
+    public double getWavelength() {
+      return wavelength_;
+    }
+
+    public static final int NUMERICAL_APERTURE_FIELD_NUMBER = 31;
+    private double numericalAperture_;
+    /**
+     * <code>double numerical_aperture = 31;</code>
+     */
+    public double getNumericalAperture() {
+      return numericalAperture_;
+    }
+
+    public static final int PSF_SD_FIELD_NUMBER = 32;
+    private double psfSd_;
+    /**
+     * <code>double psf_sd = 32;</code>
+     */
+    public double getPsfSd() {
+      return psfSd_;
+    }
+
+    public static final int PIXEL_PITCH_FIELD_NUMBER = 33;
+    private double pixelPitch_;
+    /**
+     * <code>double pixel_pitch = 33;</code>
+     */
+    public double getPixelPitch() {
+      return pixelPitch_;
+    }
+
+    public static final int DENSITY_FIELD_NUMBER = 34;
+    private double density_;
+    /**
+     * <code>double density = 34;</code>
+     */
+    public double getDensity() {
+      return density_;
+    }
+
+    public static final int DIFFUSION_RATE_FIELD_NUMBER = 35;
+    private double diffusionRate_;
+    /**
+     * <code>double diffusion_rate = 35;</code>
+     */
+    public double getDiffusionRate() {
+      return diffusionRate_;
+    }
+
+    public static final int DIFFUSION_TYPE_FIELD_NUMBER = 36;
+    private int diffusionType_;
+    /**
+     * <code>int32 diffusion_type = 36;</code>
+     */
+    public int getDiffusionType() {
+      return diffusionType_;
+    }
+
+    public static final int COMPOUND_MOLECULES_FIELD_NUMBER = 37;
+    private boolean compoundMolecules_;
+    /**
+     * <code>bool compound_molecules = 37;</code>
+     */
+    public boolean getCompoundMolecules() {
+      return compoundMolecules_;
+    }
+
+    public static final int COMPOUND_TEXT_FIELD_NUMBER = 38;
+    private volatile java.lang.Object compoundText_;
+    /**
+     * <code>string compound_text = 38;</code>
+     */
+    public java.lang.String getCompoundText() {
+      java.lang.Object ref = compoundText_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        compoundText_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string compound_text = 38;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCompoundTextBytes() {
+      java.lang.Object ref = compoundText_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        compoundText_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DIFFUSE_2D_FIELD_NUMBER = 39;
+    private boolean diffuse2D_;
+    /**
+     * <code>bool diffuse_2D = 39;</code>
+     */
+    public boolean getDiffuse2D() {
+      return diffuse2D_;
+    }
+
+    public static final int ROTATE_INITIAL_ORIENTATION_FIELD_NUMBER = 40;
+    private boolean rotateInitialOrientation_;
+    /**
+     * <code>bool rotate_initial_orientation = 40;</code>
+     */
+    public boolean getRotateInitialOrientation() {
+      return rotateInitialOrientation_;
+    }
+
+    public static final int ROTATE_DURING_SIMULATION_FIELD_NUMBER = 41;
+    private boolean rotateDuringSimulation_;
+    /**
+     * <code>bool rotate_during_simulation = 41;</code>
+     */
+    public boolean getRotateDuringSimulation() {
+      return rotateDuringSimulation_;
+    }
+
+    public static final int ROTATE_2D_FIELD_NUMBER = 42;
+    private boolean rotate2D_;
+    /**
+     * <code>bool rotate_2D = 42;</code>
+     */
+    public boolean getRotate2D() {
+      return rotate2D_;
+    }
+
+    public static final int FIXEDFRACTION_FIELD_NUMBER = 43;
+    private double fixedFraction_;
+    /**
+     * <code>double fixedFraction = 43;</code>
+     */
+    public double getFixedFraction() {
+      return fixedFraction_;
+    }
+
+    public static final int CONFINEMENT_FIELD_NUMBER = 44;
+    private volatile java.lang.Object confinement_;
+    /**
+     * <code>string confinement = 44;</code>
+     */
+    public java.lang.String getConfinement() {
+      java.lang.Object ref = confinement_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        confinement_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string confinement = 44;</code>
+     */
+    public com.google.protobuf.ByteString
+        getConfinementBytes() {
+      java.lang.Object ref = confinement_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        confinement_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CONFINEMENT_MASK_FIELD_NUMBER = 45;
+    private volatile java.lang.Object confinementMask_;
+    /**
+     * <code>string confinement_mask = 45;</code>
+     */
+    public java.lang.String getConfinementMask() {
+      java.lang.Object ref = confinementMask_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        confinementMask_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string confinement_mask = 45;</code>
+     */
+    public com.google.protobuf.ByteString
+        getConfinementMaskBytes() {
+      java.lang.Object ref = confinementMask_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        confinementMask_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CONFINEMENT_MASK_SLICE_DEPTH_FIELD_NUMBER = 46;
+    private double confinementMaskSliceDepth_;
+    /**
+     * <code>double confinement_mask_slice_depth = 46;</code>
+     */
+    public double getConfinementMaskSliceDepth() {
+      return confinementMaskSliceDepth_;
+    }
+
+    public static final int CONFINEMENT_RADIUS_FIELD_NUMBER = 47;
+    private double confinementRadius_;
+    /**
+     * <code>double confinement_radius = 47;</code>
+     */
+    public double getConfinementRadius() {
+      return confinementRadius_;
+    }
+
+    public static final int PULSE_INTERVAL_FIELD_NUMBER = 48;
+    private int pulseInterval_;
+    /**
+     * <code>int32 pulse_interval = 48;</code>
+     */
+    public int getPulseInterval() {
+      return pulseInterval_;
+    }
+
+    public static final int PULSE_RATIO_FIELD_NUMBER = 49;
+    private double pulseRatio_;
+    /**
+     * <code>double pulse_ratio = 49;</code>
+     */
+    public double getPulseRatio() {
+      return pulseRatio_;
+    }
+
+    public static final int T_ON_FIELD_NUMBER = 50;
+    private double tOn_;
+    /**
+     * <pre>
+     * Average t-On in milliseconds
+     * </pre>
+     *
+     * <code>double t_on = 50;</code>
+     */
+    public double getTOn() {
+      return tOn_;
+    }
+
+    public static final int T_OFF_SHORT_FIELD_NUMBER = 51;
+    private double tOffShort_;
+    /**
+     * <pre>
+     * Average t-Off for the short dark state in milliseconds
+     * </pre>
+     *
+     * <code>double t_off_short = 51;</code>
+     */
+    public double getTOffShort() {
+      return tOffShort_;
+    }
+
+    public static final int T_OFF_LONG_FIELD_NUMBER = 52;
+    private double tOffLong_;
+    /**
+     * <pre>
+     * Average t-Off for the long dark state in milliseconds
+     * </pre>
+     *
+     * <code>double t_off_long = 52;</code>
+     */
+    public double getTOffLong() {
+      return tOffLong_;
+    }
+
+    public static final int N_BLINKS_SHORT_FIELD_NUMBER = 53;
+    private double nBlinksShort_;
+    /**
+     * <pre>
+     * Average number of short blinks, i.e. when transitioning from the on state to the short dark state
+     * </pre>
+     *
+     * <code>double n_blinks_short = 53;</code>
+     */
+    public double getNBlinksShort() {
+      return nBlinksShort_;
+    }
+
+    public static final int N_BLINKS_LONG_FIELD_NUMBER = 54;
+    private double nBlinksLong_;
+    /**
+     * <pre>
+     * Average number of long blinks, i.e. transitions to the long dark state
+     * </pre>
+     *
+     * <code>double n_blinks_long = 54;</code>
+     */
+    public double getNBlinksLong() {
+      return nBlinksLong_;
+    }
+
+    public static final int N_BLINKS_GEOMETRIC_DISTRIBUTION_FIELD_NUMBER = 55;
+    private boolean nBlinksGeometricDistribution_;
+    /**
+     * <pre>
+     * Set to true to use a geometric distribution for the nBlinks. Default is to use a Poisson.
+     * </pre>
+     *
+     * <code>bool n_blinks_geometric_distribution = 55;</code>
+     */
+    public boolean getNBlinksGeometricDistribution() {
+      return nBlinksGeometricDistribution_;
+    }
+
+    public static final int MIN_PHOTONS_FIELD_NUMBER = 56;
+    private double minPhotons_;
+    /**
+     * <code>double min_photons = 56;</code>
+     */
+    public double getMinPhotons() {
+      return minPhotons_;
+    }
+
+    public static final int MIN_SNR_T1_FIELD_NUMBER = 57;
+    private double minSnrT1_;
+    /**
+     * <code>double min_snr_t1 = 57;</code>
+     */
+    public double getMinSnrT1() {
+      return minSnrT1_;
+    }
+
+    public static final int MIN_SNR_TN_FIELD_NUMBER = 58;
+    private double minSnrTN_;
+    /**
+     * <code>double min_snr_tN = 58;</code>
+     */
+    public double getMinSnrTN() {
+      return minSnrTN_;
+    }
+
+    public static final int RAW_IMAGE_FIELD_NUMBER = 59;
+    private boolean rawImage_;
+    /**
+     * <code>bool raw_image = 59;</code>
+     */
+    public boolean getRawImage() {
+      return rawImage_;
+    }
+
+    public static final int SAVE_IMAGE_FIELD_NUMBER = 60;
+    private boolean saveImage_;
+    /**
+     * <code>bool save_image = 60;</code>
+     */
+    public boolean getSaveImage() {
+      return saveImage_;
+    }
+
+    public static final int SAVE_IMAGE_RESULTS_FIELD_NUMBER = 61;
+    private boolean saveImageResults_;
+    /**
+     * <code>bool save_image_results = 61;</code>
+     */
+    public boolean getSaveImageResults() {
+      return saveImageResults_;
+    }
+
+    public static final int SAVE_LOCALISATIONS_FIELD_NUMBER = 62;
+    private boolean saveLocalisations_;
+    /**
+     * <code>bool save_localisations = 62;</code>
+     */
+    public boolean getSaveLocalisations() {
+      return saveLocalisations_;
+    }
+
+    public static final int SAVE_FLUOROPHORES_FIELD_NUMBER = 63;
+    private boolean saveFluorophores_;
+    /**
+     * <code>bool save_fluorophores = 63;</code>
+     */
+    public boolean getSaveFluorophores() {
+      return saveFluorophores_;
+    }
+
+    public static final int IMAGE_FILENAME_FIELD_NUMBER = 64;
+    private volatile java.lang.Object imageFilename_;
+    /**
+     * <code>string image_filename = 64;</code>
+     */
+    public java.lang.String getImageFilename() {
+      java.lang.Object ref = imageFilename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        imageFilename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string image_filename = 64;</code>
+     */
+    public com.google.protobuf.ByteString
+        getImageFilenameBytes() {
+      java.lang.Object ref = imageFilename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        imageFilename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int IMAGE_RESULTS_FILENAME_FIELD_NUMBER = 65;
+    private volatile java.lang.Object imageResultsFilename_;
+    /**
+     * <code>string image_results_filename = 65;</code>
+     */
+    public java.lang.String getImageResultsFilename() {
+      java.lang.Object ref = imageResultsFilename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        imageResultsFilename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string image_results_filename = 65;</code>
+     */
+    public com.google.protobuf.ByteString
+        getImageResultsFilenameBytes() {
+      java.lang.Object ref = imageResultsFilename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        imageResultsFilename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FLUOROPHORESFILENAME_FIELD_NUMBER = 66;
+    private volatile java.lang.Object fluorophoresFilename_;
+    /**
+     * <code>string fluorophoresFilename = 66;</code>
+     */
+    public java.lang.String getFluorophoresFilename() {
+      java.lang.Object ref = fluorophoresFilename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fluorophoresFilename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string fluorophoresFilename = 66;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFluorophoresFilenameBytes() {
+      java.lang.Object ref = fluorophoresFilename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fluorophoresFilename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CELL_SIZE_FIELD_NUMBER = 67;
+    private int cellSize_;
+    /**
+     * <code>int32 cell_size = 67;</code>
+     */
+    public int getCellSize() {
+      return cellSize_;
+    }
+
+    public static final int PROBABILITY_BINARY_FIELD_NUMBER = 68;
+    private double probabilityBinary_;
+    /**
+     * <code>double probability_binary = 68;</code>
+     */
+    public double getProbabilityBinary() {
+      return probabilityBinary_;
+    }
+
+    public static final int MIN_BINARY_DISTANCE_FIELD_NUMBER = 69;
+    private double minBinaryDistance_;
+    /**
+     * <code>double min_binary_distance = 69;</code>
+     */
+    public double getMinBinaryDistance() {
+      return minBinaryDistance_;
+    }
+
+    public static final int MAX_BINARY_DISTANCE_FIELD_NUMBER = 70;
+    private double maxBinaryDistance_;
+    /**
+     * <code>double max_binary_distance = 70;</code>
+     */
+    public double getMaxBinaryDistance() {
+      return maxBinaryDistance_;
+    }
+
+    public static final int SHOW_HISTOGRAMS_FIELD_NUMBER = 71;
+    private boolean showHistograms_;
+    /**
+     * <code>bool show_histograms = 71;</code>
+     */
+    public boolean getShowHistograms() {
+      return showHistograms_;
+    }
+
+    public static final int CHOOSE_HISTOGRAMS_FIELD_NUMBER = 72;
+    private boolean chooseHistograms_;
+    /**
+     * <code>bool choose_histograms = 72;</code>
+     */
+    public boolean getChooseHistograms() {
+      return chooseHistograms_;
+    }
+
+    public static final int HISTOGRAM_BINS_FIELD_NUMBER = 73;
+    private int histogramBins_;
+    /**
+     * <code>int32 histogram_bins = 73;</code>
+     */
+    public int getHistogramBins() {
+      return histogramBins_;
+    }
+
+    public static final int REMOVE_OUTLIERS_FIELD_NUMBER = 74;
+    private boolean removeOutliers_;
+    /**
+     * <code>bool remove_outliers = 74;</code>
+     */
+    public boolean getRemoveOutliers() {
+      return removeOutliers_;
+    }
+
+    public static final int DENSITY_RADIUS_FIELD_NUMBER = 75;
+    private float densityRadius_;
+    /**
+     * <code>float density_radius = 75;</code>
+     */
+    public float getDensityRadius() {
+      return densityRadius_;
+    }
+
+    public static final int DEPTH_OF_FIELD_FIELD_NUMBER = 76;
+    private float depthOfField_;
+    /**
+     * <code>float depth_of_field = 76;</code>
+     */
+    public float getDepthOfField() {
+      return depthOfField_;
+    }
+
+    public static final int X_POSITION_FIELD_NUMBER = 77;
+    private double xPosition_;
+    /**
+     * <code>double x_position = 77;</code>
+     */
+    public double getXPosition() {
+      return xPosition_;
+    }
+
+    public static final int Y_POSITION_FIELD_NUMBER = 78;
+    private double yPosition_;
+    /**
+     * <code>double y_position = 78;</code>
+     */
+    public double getYPosition() {
+      return yPosition_;
+    }
+
+    public static final int Z_POSITION_FIELD_NUMBER = 79;
+    private double zPosition_;
+    /**
+     * <code>double z_position = 79;</code>
+     */
+    public double getZPosition() {
+      return zPosition_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (size_ != 0) {
+        output.writeInt32(1, size_);
+      }
+      if (depth_ != 0D) {
+        output.writeDouble(2, depth_);
+      }
+      if (fixedDepth_ != false) {
+        output.writeBool(3, fixedDepth_);
+      }
+      if (seconds_ != 0D) {
+        output.writeDouble(4, seconds_);
+      }
+      if (exposureTime_ != 0D) {
+        output.writeDouble(5, exposureTime_);
+      }
+      if (stepsPerSecond_ != 0D) {
+        output.writeDouble(6, stepsPerSecond_);
+      }
+      if (!getIlluminationBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, illumination_);
+      }
+      if (!getBackgroundImageBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, backgroundImage_);
+      }
+      if (!getDistributionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, distribution_);
+      }
+      if (!getDistributionMaskBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, distributionMask_);
+      }
+      if (distributionMaskSliceDepth_ != 0D) {
+        output.writeDouble(11, distributionMaskSliceDepth_);
+      }
+      if (poissonNoise_ != false) {
+        output.writeBool(12, poissonNoise_);
+      }
+      if (background_ != 0D) {
+        output.writeDouble(13, background_);
+      }
+      if (emGain_ != 0D) {
+        output.writeDouble(14, emGain_);
+      }
+      if (cameraGain_ != 0D) {
+        output.writeDouble(15, cameraGain_);
+      }
+      if (quantumEfficiency_ != 0D) {
+        output.writeDouble(16, quantumEfficiency_);
+      }
+      if (readNoise_ != 0D) {
+        output.writeDouble(17, readNoise_);
+      }
+      if (bias_ != 0) {
+        output.writeInt32(18, bias_);
+      }
+      if (particles_ != 0) {
+        output.writeInt32(19, particles_);
+      }
+      if (samplePerFrame_ != false) {
+        output.writeBool(20, samplePerFrame_);
+      }
+      if (photonsPerSecond_ != 0D) {
+        output.writeDouble(21, photonsPerSecond_);
+      }
+      if (photonsPerSecondMaximum_ != 0D) {
+        output.writeDouble(22, photonsPerSecondMaximum_);
+      }
+      if (!getPhotonDistributionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 23, photonDistribution_);
+      }
+      if (!getPhotonDistributionFileBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 24, photonDistributionFile_);
+      }
+      if (photonShape_ != 0D) {
+        output.writeDouble(25, photonShape_);
+      }
+      if (correlation_ != 0D) {
+        output.writeDouble(26, correlation_);
+      }
+      if (!getPsfModelBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 27, psfModel_);
+      }
+      if (!getPsfImageNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 28, psfImageName_);
+      }
+      if (enterWidth_ != false) {
+        output.writeBool(29, enterWidth_);
+      }
+      if (wavelength_ != 0D) {
+        output.writeDouble(30, wavelength_);
+      }
+      if (numericalAperture_ != 0D) {
+        output.writeDouble(31, numericalAperture_);
+      }
+      if (psfSd_ != 0D) {
+        output.writeDouble(32, psfSd_);
+      }
+      if (pixelPitch_ != 0D) {
+        output.writeDouble(33, pixelPitch_);
+      }
+      if (density_ != 0D) {
+        output.writeDouble(34, density_);
+      }
+      if (diffusionRate_ != 0D) {
+        output.writeDouble(35, diffusionRate_);
+      }
+      if (diffusionType_ != 0) {
+        output.writeInt32(36, diffusionType_);
+      }
+      if (compoundMolecules_ != false) {
+        output.writeBool(37, compoundMolecules_);
+      }
+      if (!getCompoundTextBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 38, compoundText_);
+      }
+      if (diffuse2D_ != false) {
+        output.writeBool(39, diffuse2D_);
+      }
+      if (rotateInitialOrientation_ != false) {
+        output.writeBool(40, rotateInitialOrientation_);
+      }
+      if (rotateDuringSimulation_ != false) {
+        output.writeBool(41, rotateDuringSimulation_);
+      }
+      if (rotate2D_ != false) {
+        output.writeBool(42, rotate2D_);
+      }
+      if (fixedFraction_ != 0D) {
+        output.writeDouble(43, fixedFraction_);
+      }
+      if (!getConfinementBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 44, confinement_);
+      }
+      if (!getConfinementMaskBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 45, confinementMask_);
+      }
+      if (confinementMaskSliceDepth_ != 0D) {
+        output.writeDouble(46, confinementMaskSliceDepth_);
+      }
+      if (confinementRadius_ != 0D) {
+        output.writeDouble(47, confinementRadius_);
+      }
+      if (pulseInterval_ != 0) {
+        output.writeInt32(48, pulseInterval_);
+      }
+      if (pulseRatio_ != 0D) {
+        output.writeDouble(49, pulseRatio_);
+      }
+      if (tOn_ != 0D) {
+        output.writeDouble(50, tOn_);
+      }
+      if (tOffShort_ != 0D) {
+        output.writeDouble(51, tOffShort_);
+      }
+      if (tOffLong_ != 0D) {
+        output.writeDouble(52, tOffLong_);
+      }
+      if (nBlinksShort_ != 0D) {
+        output.writeDouble(53, nBlinksShort_);
+      }
+      if (nBlinksLong_ != 0D) {
+        output.writeDouble(54, nBlinksLong_);
+      }
+      if (nBlinksGeometricDistribution_ != false) {
+        output.writeBool(55, nBlinksGeometricDistribution_);
+      }
+      if (minPhotons_ != 0D) {
+        output.writeDouble(56, minPhotons_);
+      }
+      if (minSnrT1_ != 0D) {
+        output.writeDouble(57, minSnrT1_);
+      }
+      if (minSnrTN_ != 0D) {
+        output.writeDouble(58, minSnrTN_);
+      }
+      if (rawImage_ != false) {
+        output.writeBool(59, rawImage_);
+      }
+      if (saveImage_ != false) {
+        output.writeBool(60, saveImage_);
+      }
+      if (saveImageResults_ != false) {
+        output.writeBool(61, saveImageResults_);
+      }
+      if (saveLocalisations_ != false) {
+        output.writeBool(62, saveLocalisations_);
+      }
+      if (saveFluorophores_ != false) {
+        output.writeBool(63, saveFluorophores_);
+      }
+      if (!getImageFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 64, imageFilename_);
+      }
+      if (!getImageResultsFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 65, imageResultsFilename_);
+      }
+      if (!getFluorophoresFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 66, fluorophoresFilename_);
+      }
+      if (cellSize_ != 0) {
+        output.writeInt32(67, cellSize_);
+      }
+      if (probabilityBinary_ != 0D) {
+        output.writeDouble(68, probabilityBinary_);
+      }
+      if (minBinaryDistance_ != 0D) {
+        output.writeDouble(69, minBinaryDistance_);
+      }
+      if (maxBinaryDistance_ != 0D) {
+        output.writeDouble(70, maxBinaryDistance_);
+      }
+      if (showHistograms_ != false) {
+        output.writeBool(71, showHistograms_);
+      }
+      if (chooseHistograms_ != false) {
+        output.writeBool(72, chooseHistograms_);
+      }
+      if (histogramBins_ != 0) {
+        output.writeInt32(73, histogramBins_);
+      }
+      if (removeOutliers_ != false) {
+        output.writeBool(74, removeOutliers_);
+      }
+      if (densityRadius_ != 0F) {
+        output.writeFloat(75, densityRadius_);
+      }
+      if (depthOfField_ != 0F) {
+        output.writeFloat(76, depthOfField_);
+      }
+      if (xPosition_ != 0D) {
+        output.writeDouble(77, xPosition_);
+      }
+      if (yPosition_ != 0D) {
+        output.writeDouble(78, yPosition_);
+      }
+      if (zPosition_ != 0D) {
+        output.writeDouble(79, zPosition_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (size_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, size_);
+      }
+      if (depth_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, depth_);
+      }
+      if (fixedDepth_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, fixedDepth_);
+      }
+      if (seconds_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(4, seconds_);
+      }
+      if (exposureTime_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(5, exposureTime_);
+      }
+      if (stepsPerSecond_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(6, stepsPerSecond_);
+      }
+      if (!getIlluminationBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, illumination_);
+      }
+      if (!getBackgroundImageBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, backgroundImage_);
+      }
+      if (!getDistributionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, distribution_);
+      }
+      if (!getDistributionMaskBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, distributionMask_);
+      }
+      if (distributionMaskSliceDepth_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(11, distributionMaskSliceDepth_);
+      }
+      if (poissonNoise_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(12, poissonNoise_);
+      }
+      if (background_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(13, background_);
+      }
+      if (emGain_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(14, emGain_);
+      }
+      if (cameraGain_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(15, cameraGain_);
+      }
+      if (quantumEfficiency_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(16, quantumEfficiency_);
+      }
+      if (readNoise_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(17, readNoise_);
+      }
+      if (bias_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(18, bias_);
+      }
+      if (particles_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(19, particles_);
+      }
+      if (samplePerFrame_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(20, samplePerFrame_);
+      }
+      if (photonsPerSecond_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(21, photonsPerSecond_);
+      }
+      if (photonsPerSecondMaximum_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(22, photonsPerSecondMaximum_);
+      }
+      if (!getPhotonDistributionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, photonDistribution_);
+      }
+      if (!getPhotonDistributionFileBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(24, photonDistributionFile_);
+      }
+      if (photonShape_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(25, photonShape_);
+      }
+      if (correlation_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(26, correlation_);
+      }
+      if (!getPsfModelBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(27, psfModel_);
+      }
+      if (!getPsfImageNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(28, psfImageName_);
+      }
+      if (enterWidth_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(29, enterWidth_);
+      }
+      if (wavelength_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(30, wavelength_);
+      }
+      if (numericalAperture_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(31, numericalAperture_);
+      }
+      if (psfSd_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(32, psfSd_);
+      }
+      if (pixelPitch_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(33, pixelPitch_);
+      }
+      if (density_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(34, density_);
+      }
+      if (diffusionRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(35, diffusionRate_);
+      }
+      if (diffusionType_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(36, diffusionType_);
+      }
+      if (compoundMolecules_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(37, compoundMolecules_);
+      }
+      if (!getCompoundTextBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(38, compoundText_);
+      }
+      if (diffuse2D_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(39, diffuse2D_);
+      }
+      if (rotateInitialOrientation_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(40, rotateInitialOrientation_);
+      }
+      if (rotateDuringSimulation_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(41, rotateDuringSimulation_);
+      }
+      if (rotate2D_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(42, rotate2D_);
+      }
+      if (fixedFraction_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(43, fixedFraction_);
+      }
+      if (!getConfinementBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(44, confinement_);
+      }
+      if (!getConfinementMaskBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(45, confinementMask_);
+      }
+      if (confinementMaskSliceDepth_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(46, confinementMaskSliceDepth_);
+      }
+      if (confinementRadius_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(47, confinementRadius_);
+      }
+      if (pulseInterval_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(48, pulseInterval_);
+      }
+      if (pulseRatio_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(49, pulseRatio_);
+      }
+      if (tOn_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(50, tOn_);
+      }
+      if (tOffShort_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(51, tOffShort_);
+      }
+      if (tOffLong_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(52, tOffLong_);
+      }
+      if (nBlinksShort_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(53, nBlinksShort_);
+      }
+      if (nBlinksLong_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(54, nBlinksLong_);
+      }
+      if (nBlinksGeometricDistribution_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(55, nBlinksGeometricDistribution_);
+      }
+      if (minPhotons_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(56, minPhotons_);
+      }
+      if (minSnrT1_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(57, minSnrT1_);
+      }
+      if (minSnrTN_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(58, minSnrTN_);
+      }
+      if (rawImage_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(59, rawImage_);
+      }
+      if (saveImage_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(60, saveImage_);
+      }
+      if (saveImageResults_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(61, saveImageResults_);
+      }
+      if (saveLocalisations_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(62, saveLocalisations_);
+      }
+      if (saveFluorophores_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(63, saveFluorophores_);
+      }
+      if (!getImageFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(64, imageFilename_);
+      }
+      if (!getImageResultsFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(65, imageResultsFilename_);
+      }
+      if (!getFluorophoresFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(66, fluorophoresFilename_);
+      }
+      if (cellSize_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(67, cellSize_);
+      }
+      if (probabilityBinary_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(68, probabilityBinary_);
+      }
+      if (minBinaryDistance_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(69, minBinaryDistance_);
+      }
+      if (maxBinaryDistance_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(70, maxBinaryDistance_);
+      }
+      if (showHistograms_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(71, showHistograms_);
+      }
+      if (chooseHistograms_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(72, chooseHistograms_);
+      }
+      if (histogramBins_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(73, histogramBins_);
+      }
+      if (removeOutliers_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(74, removeOutliers_);
+      }
+      if (densityRadius_ != 0F) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFloatSize(75, densityRadius_);
+      }
+      if (depthOfField_ != 0F) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFloatSize(76, depthOfField_);
+      }
+      if (xPosition_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(77, xPosition_);
+      }
+      if (yPosition_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(78, yPosition_);
+      }
+      if (zPosition_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(79, zPosition_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIConfig.CreateDataSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIConfig.CreateDataSettings other = (gdsc.smlm.data.config.GUIConfig.CreateDataSettings) obj;
+
+      boolean result = true;
+      result = result && (getSize()
+          == other.getSize());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDepth())
+          == java.lang.Double.doubleToLongBits(
+              other.getDepth()));
+      result = result && (getFixedDepth()
+          == other.getFixedDepth());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSeconds())
+          == java.lang.Double.doubleToLongBits(
+              other.getSeconds()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getExposureTime())
+          == java.lang.Double.doubleToLongBits(
+              other.getExposureTime()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getStepsPerSecond())
+          == java.lang.Double.doubleToLongBits(
+              other.getStepsPerSecond()));
+      result = result && getIllumination()
+          .equals(other.getIllumination());
+      result = result && getBackgroundImage()
+          .equals(other.getBackgroundImage());
+      result = result && getDistribution()
+          .equals(other.getDistribution());
+      result = result && getDistributionMask()
+          .equals(other.getDistributionMask());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDistributionMaskSliceDepth())
+          == java.lang.Double.doubleToLongBits(
+              other.getDistributionMaskSliceDepth()));
+      result = result && (getPoissonNoise()
+          == other.getPoissonNoise());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getBackground())
+          == java.lang.Double.doubleToLongBits(
+              other.getBackground()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getEmGain())
+          == java.lang.Double.doubleToLongBits(
+              other.getEmGain()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getCameraGain())
+          == java.lang.Double.doubleToLongBits(
+              other.getCameraGain()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getQuantumEfficiency())
+          == java.lang.Double.doubleToLongBits(
+              other.getQuantumEfficiency()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getReadNoise())
+          == java.lang.Double.doubleToLongBits(
+              other.getReadNoise()));
+      result = result && (getBias()
+          == other.getBias());
+      result = result && (getParticles()
+          == other.getParticles());
+      result = result && (getSamplePerFrame()
+          == other.getSamplePerFrame());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPhotonsPerSecond())
+          == java.lang.Double.doubleToLongBits(
+              other.getPhotonsPerSecond()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPhotonsPerSecondMaximum())
+          == java.lang.Double.doubleToLongBits(
+              other.getPhotonsPerSecondMaximum()));
+      result = result && getPhotonDistribution()
+          .equals(other.getPhotonDistribution());
+      result = result && getPhotonDistributionFile()
+          .equals(other.getPhotonDistributionFile());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPhotonShape())
+          == java.lang.Double.doubleToLongBits(
+              other.getPhotonShape()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getCorrelation())
+          == java.lang.Double.doubleToLongBits(
+              other.getCorrelation()));
+      result = result && getPsfModel()
+          .equals(other.getPsfModel());
+      result = result && getPsfImageName()
+          .equals(other.getPsfImageName());
+      result = result && (getEnterWidth()
+          == other.getEnterWidth());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getWavelength())
+          == java.lang.Double.doubleToLongBits(
+              other.getWavelength()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getNumericalAperture())
+          == java.lang.Double.doubleToLongBits(
+              other.getNumericalAperture()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPsfSd())
+          == java.lang.Double.doubleToLongBits(
+              other.getPsfSd()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPixelPitch())
+          == java.lang.Double.doubleToLongBits(
+              other.getPixelPitch()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDensity())
+          == java.lang.Double.doubleToLongBits(
+              other.getDensity()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDiffusionRate())
+          == java.lang.Double.doubleToLongBits(
+              other.getDiffusionRate()));
+      result = result && (getDiffusionType()
+          == other.getDiffusionType());
+      result = result && (getCompoundMolecules()
+          == other.getCompoundMolecules());
+      result = result && getCompoundText()
+          .equals(other.getCompoundText());
+      result = result && (getDiffuse2D()
+          == other.getDiffuse2D());
+      result = result && (getRotateInitialOrientation()
+          == other.getRotateInitialOrientation());
+      result = result && (getRotateDuringSimulation()
+          == other.getRotateDuringSimulation());
+      result = result && (getRotate2D()
+          == other.getRotate2D());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getFixedFraction())
+          == java.lang.Double.doubleToLongBits(
+              other.getFixedFraction()));
+      result = result && getConfinement()
+          .equals(other.getConfinement());
+      result = result && getConfinementMask()
+          .equals(other.getConfinementMask());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getConfinementMaskSliceDepth())
+          == java.lang.Double.doubleToLongBits(
+              other.getConfinementMaskSliceDepth()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getConfinementRadius())
+          == java.lang.Double.doubleToLongBits(
+              other.getConfinementRadius()));
+      result = result && (getPulseInterval()
+          == other.getPulseInterval());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPulseRatio())
+          == java.lang.Double.doubleToLongBits(
+              other.getPulseRatio()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getTOn())
+          == java.lang.Double.doubleToLongBits(
+              other.getTOn()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getTOffShort())
+          == java.lang.Double.doubleToLongBits(
+              other.getTOffShort()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getTOffLong())
+          == java.lang.Double.doubleToLongBits(
+              other.getTOffLong()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getNBlinksShort())
+          == java.lang.Double.doubleToLongBits(
+              other.getNBlinksShort()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getNBlinksLong())
+          == java.lang.Double.doubleToLongBits(
+              other.getNBlinksLong()));
+      result = result && (getNBlinksGeometricDistribution()
+          == other.getNBlinksGeometricDistribution());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMinPhotons())
+          == java.lang.Double.doubleToLongBits(
+              other.getMinPhotons()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMinSnrT1())
+          == java.lang.Double.doubleToLongBits(
+              other.getMinSnrT1()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMinSnrTN())
+          == java.lang.Double.doubleToLongBits(
+              other.getMinSnrTN()));
+      result = result && (getRawImage()
+          == other.getRawImage());
+      result = result && (getSaveImage()
+          == other.getSaveImage());
+      result = result && (getSaveImageResults()
+          == other.getSaveImageResults());
+      result = result && (getSaveLocalisations()
+          == other.getSaveLocalisations());
+      result = result && (getSaveFluorophores()
+          == other.getSaveFluorophores());
+      result = result && getImageFilename()
+          .equals(other.getImageFilename());
+      result = result && getImageResultsFilename()
+          .equals(other.getImageResultsFilename());
+      result = result && getFluorophoresFilename()
+          .equals(other.getFluorophoresFilename());
+      result = result && (getCellSize()
+          == other.getCellSize());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getProbabilityBinary())
+          == java.lang.Double.doubleToLongBits(
+              other.getProbabilityBinary()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMinBinaryDistance())
+          == java.lang.Double.doubleToLongBits(
+              other.getMinBinaryDistance()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMaxBinaryDistance())
+          == java.lang.Double.doubleToLongBits(
+              other.getMaxBinaryDistance()));
+      result = result && (getShowHistograms()
+          == other.getShowHistograms());
+      result = result && (getChooseHistograms()
+          == other.getChooseHistograms());
+      result = result && (getHistogramBins()
+          == other.getHistogramBins());
+      result = result && (getRemoveOutliers()
+          == other.getRemoveOutliers());
+      result = result && (
+          java.lang.Float.floatToIntBits(getDensityRadius())
+          == java.lang.Float.floatToIntBits(
+              other.getDensityRadius()));
+      result = result && (
+          java.lang.Float.floatToIntBits(getDepthOfField())
+          == java.lang.Float.floatToIntBits(
+              other.getDepthOfField()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getXPosition())
+          == java.lang.Double.doubleToLongBits(
+              other.getXPosition()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getYPosition())
+          == java.lang.Double.doubleToLongBits(
+              other.getYPosition()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getZPosition())
+          == java.lang.Double.doubleToLongBits(
+              other.getZPosition()));
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + SIZE_FIELD_NUMBER;
+      hash = (53 * hash) + getSize();
+      hash = (37 * hash) + DEPTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDepth()));
+      hash = (37 * hash) + FIXED_DEPTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getFixedDepth());
+      hash = (37 * hash) + SECONDS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSeconds()));
+      hash = (37 * hash) + EXPOSURE_TIME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getExposureTime()));
+      hash = (37 * hash) + STEPS_PER_SECOND_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getStepsPerSecond()));
+      hash = (37 * hash) + ILLUMINATION_FIELD_NUMBER;
+      hash = (53 * hash) + getIllumination().hashCode();
+      hash = (37 * hash) + BACKGROUND_IMAGE_FIELD_NUMBER;
+      hash = (53 * hash) + getBackgroundImage().hashCode();
+      hash = (37 * hash) + DISTRIBUTION_FIELD_NUMBER;
+      hash = (53 * hash) + getDistribution().hashCode();
+      hash = (37 * hash) + DISTRIBUTION_MASK_FIELD_NUMBER;
+      hash = (53 * hash) + getDistributionMask().hashCode();
+      hash = (37 * hash) + DISTRIBUTION_MASK_SLICE_DEPTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDistributionMaskSliceDepth()));
+      hash = (37 * hash) + POISSON_NOISE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getPoissonNoise());
+      hash = (37 * hash) + BACKGROUND_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getBackground()));
+      hash = (37 * hash) + EM_GAIN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getEmGain()));
+      hash = (37 * hash) + CAMERA_GAIN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getCameraGain()));
+      hash = (37 * hash) + QUANTUM_EFFICIENCY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getQuantumEfficiency()));
+      hash = (37 * hash) + READ_NOISE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getReadNoise()));
+      hash = (37 * hash) + BIAS_FIELD_NUMBER;
+      hash = (53 * hash) + getBias();
+      hash = (37 * hash) + PARTICLES_FIELD_NUMBER;
+      hash = (53 * hash) + getParticles();
+      hash = (37 * hash) + SAMPLE_PER_FRAME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSamplePerFrame());
+      hash = (37 * hash) + PHOTONS_PER_SECOND_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPhotonsPerSecond()));
+      hash = (37 * hash) + PHOTONS_PER_SECOND_MAXIMUM_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPhotonsPerSecondMaximum()));
+      hash = (37 * hash) + PHOTON_DISTRIBUTION_FIELD_NUMBER;
+      hash = (53 * hash) + getPhotonDistribution().hashCode();
+      hash = (37 * hash) + PHOTON_DISTRIBUTION_FILE_FIELD_NUMBER;
+      hash = (53 * hash) + getPhotonDistributionFile().hashCode();
+      hash = (37 * hash) + PHOTON_SHAPE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPhotonShape()));
+      hash = (37 * hash) + CORRELATION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getCorrelation()));
+      hash = (37 * hash) + PSF_MODEL_FIELD_NUMBER;
+      hash = (53 * hash) + getPsfModel().hashCode();
+      hash = (37 * hash) + PSF_IMAGE_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getPsfImageName().hashCode();
+      hash = (37 * hash) + ENTER_WIDTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getEnterWidth());
+      hash = (37 * hash) + WAVELENGTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getWavelength()));
+      hash = (37 * hash) + NUMERICAL_APERTURE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getNumericalAperture()));
+      hash = (37 * hash) + PSF_SD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPsfSd()));
+      hash = (37 * hash) + PIXEL_PITCH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPixelPitch()));
+      hash = (37 * hash) + DENSITY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDensity()));
+      hash = (37 * hash) + DIFFUSION_RATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDiffusionRate()));
+      hash = (37 * hash) + DIFFUSION_TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getDiffusionType();
+      hash = (37 * hash) + COMPOUND_MOLECULES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCompoundMolecules());
+      hash = (37 * hash) + COMPOUND_TEXT_FIELD_NUMBER;
+      hash = (53 * hash) + getCompoundText().hashCode();
+      hash = (37 * hash) + DIFFUSE_2D_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getDiffuse2D());
+      hash = (37 * hash) + ROTATE_INITIAL_ORIENTATION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRotateInitialOrientation());
+      hash = (37 * hash) + ROTATE_DURING_SIMULATION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRotateDuringSimulation());
+      hash = (37 * hash) + ROTATE_2D_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRotate2D());
+      hash = (37 * hash) + FIXEDFRACTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getFixedFraction()));
+      hash = (37 * hash) + CONFINEMENT_FIELD_NUMBER;
+      hash = (53 * hash) + getConfinement().hashCode();
+      hash = (37 * hash) + CONFINEMENT_MASK_FIELD_NUMBER;
+      hash = (53 * hash) + getConfinementMask().hashCode();
+      hash = (37 * hash) + CONFINEMENT_MASK_SLICE_DEPTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getConfinementMaskSliceDepth()));
+      hash = (37 * hash) + CONFINEMENT_RADIUS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getConfinementRadius()));
+      hash = (37 * hash) + PULSE_INTERVAL_FIELD_NUMBER;
+      hash = (53 * hash) + getPulseInterval();
+      hash = (37 * hash) + PULSE_RATIO_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPulseRatio()));
+      hash = (37 * hash) + T_ON_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getTOn()));
+      hash = (37 * hash) + T_OFF_SHORT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getTOffShort()));
+      hash = (37 * hash) + T_OFF_LONG_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getTOffLong()));
+      hash = (37 * hash) + N_BLINKS_SHORT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getNBlinksShort()));
+      hash = (37 * hash) + N_BLINKS_LONG_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getNBlinksLong()));
+      hash = (37 * hash) + N_BLINKS_GEOMETRIC_DISTRIBUTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getNBlinksGeometricDistribution());
+      hash = (37 * hash) + MIN_PHOTONS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMinPhotons()));
+      hash = (37 * hash) + MIN_SNR_T1_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMinSnrT1()));
+      hash = (37 * hash) + MIN_SNR_TN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMinSnrTN()));
+      hash = (37 * hash) + RAW_IMAGE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRawImage());
+      hash = (37 * hash) + SAVE_IMAGE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveImage());
+      hash = (37 * hash) + SAVE_IMAGE_RESULTS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveImageResults());
+      hash = (37 * hash) + SAVE_LOCALISATIONS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveLocalisations());
+      hash = (37 * hash) + SAVE_FLUOROPHORES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveFluorophores());
+      hash = (37 * hash) + IMAGE_FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getImageFilename().hashCode();
+      hash = (37 * hash) + IMAGE_RESULTS_FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getImageResultsFilename().hashCode();
+      hash = (37 * hash) + FLUOROPHORESFILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFluorophoresFilename().hashCode();
+      hash = (37 * hash) + CELL_SIZE_FIELD_NUMBER;
+      hash = (53 * hash) + getCellSize();
+      hash = (37 * hash) + PROBABILITY_BINARY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getProbabilityBinary()));
+      hash = (37 * hash) + MIN_BINARY_DISTANCE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMinBinaryDistance()));
+      hash = (37 * hash) + MAX_BINARY_DISTANCE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMaxBinaryDistance()));
+      hash = (37 * hash) + SHOW_HISTOGRAMS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowHistograms());
+      hash = (37 * hash) + CHOOSE_HISTOGRAMS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getChooseHistograms());
+      hash = (37 * hash) + HISTOGRAM_BINS_FIELD_NUMBER;
+      hash = (53 * hash) + getHistogramBins();
+      hash = (37 * hash) + REMOVE_OUTLIERS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRemoveOutliers());
+      hash = (37 * hash) + DENSITY_RADIUS_FIELD_NUMBER;
+      hash = (53 * hash) + java.lang.Float.floatToIntBits(
+          getDensityRadius());
+      hash = (37 * hash) + DEPTH_OF_FIELD_FIELD_NUMBER;
+      hash = (53 * hash) + java.lang.Float.floatToIntBits(
+          getDepthOfField());
+      hash = (37 * hash) + X_POSITION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getXPosition()));
+      hash = (37 * hash) + Y_POSITION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getYPosition()));
+      hash = (37 * hash) + Z_POSITION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getZPosition()));
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIConfig.CreateDataSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contain the settings for the Create Data plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.CreateDataSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CreateDataSettings)
+        gdsc.smlm.data.config.GUIConfig.CreateDataSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_CreateDataSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIConfig.CreateDataSettings.class, gdsc.smlm.data.config.GUIConfig.CreateDataSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIConfig.CreateDataSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        size_ = 0;
+
+        depth_ = 0D;
+
+        fixedDepth_ = false;
+
+        seconds_ = 0D;
+
+        exposureTime_ = 0D;
+
+        stepsPerSecond_ = 0D;
+
+        illumination_ = "";
+
+        backgroundImage_ = "";
+
+        distribution_ = "";
+
+        distributionMask_ = "";
+
+        distributionMaskSliceDepth_ = 0D;
+
+        poissonNoise_ = false;
+
+        background_ = 0D;
+
+        emGain_ = 0D;
+
+        cameraGain_ = 0D;
+
+        quantumEfficiency_ = 0D;
+
+        readNoise_ = 0D;
+
+        bias_ = 0;
+
+        particles_ = 0;
+
+        samplePerFrame_ = false;
+
+        photonsPerSecond_ = 0D;
+
+        photonsPerSecondMaximum_ = 0D;
+
+        photonDistribution_ = "";
+
+        photonDistributionFile_ = "";
+
+        photonShape_ = 0D;
+
+        correlation_ = 0D;
+
+        psfModel_ = "";
+
+        psfImageName_ = "";
+
+        enterWidth_ = false;
+
+        wavelength_ = 0D;
+
+        numericalAperture_ = 0D;
+
+        psfSd_ = 0D;
+
+        pixelPitch_ = 0D;
+
+        density_ = 0D;
+
+        diffusionRate_ = 0D;
+
+        diffusionType_ = 0;
+
+        compoundMolecules_ = false;
+
+        compoundText_ = "";
+
+        diffuse2D_ = false;
+
+        rotateInitialOrientation_ = false;
+
+        rotateDuringSimulation_ = false;
+
+        rotate2D_ = false;
+
+        fixedFraction_ = 0D;
+
+        confinement_ = "";
+
+        confinementMask_ = "";
+
+        confinementMaskSliceDepth_ = 0D;
+
+        confinementRadius_ = 0D;
+
+        pulseInterval_ = 0;
+
+        pulseRatio_ = 0D;
+
+        tOn_ = 0D;
+
+        tOffShort_ = 0D;
+
+        tOffLong_ = 0D;
+
+        nBlinksShort_ = 0D;
+
+        nBlinksLong_ = 0D;
+
+        nBlinksGeometricDistribution_ = false;
+
+        minPhotons_ = 0D;
+
+        minSnrT1_ = 0D;
+
+        minSnrTN_ = 0D;
+
+        rawImage_ = false;
+
+        saveImage_ = false;
+
+        saveImageResults_ = false;
+
+        saveLocalisations_ = false;
+
+        saveFluorophores_ = false;
+
+        imageFilename_ = "";
+
+        imageResultsFilename_ = "";
+
+        fluorophoresFilename_ = "";
+
+        cellSize_ = 0;
+
+        probabilityBinary_ = 0D;
+
+        minBinaryDistance_ = 0D;
+
+        maxBinaryDistance_ = 0D;
+
+        showHistograms_ = false;
+
+        chooseHistograms_ = false;
+
+        histogramBins_ = 0;
+
+        removeOutliers_ = false;
+
+        densityRadius_ = 0F;
+
+        depthOfField_ = 0F;
+
+        xPosition_ = 0D;
+
+        yPosition_ = 0D;
+
+        zPosition_ = 0D;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.CreateDataSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIConfig.CreateDataSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.CreateDataSettings build() {
+        gdsc.smlm.data.config.GUIConfig.CreateDataSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.CreateDataSettings buildPartial() {
+        gdsc.smlm.data.config.GUIConfig.CreateDataSettings result = new gdsc.smlm.data.config.GUIConfig.CreateDataSettings(this);
+        result.size_ = size_;
+        result.depth_ = depth_;
+        result.fixedDepth_ = fixedDepth_;
+        result.seconds_ = seconds_;
+        result.exposureTime_ = exposureTime_;
+        result.stepsPerSecond_ = stepsPerSecond_;
+        result.illumination_ = illumination_;
+        result.backgroundImage_ = backgroundImage_;
+        result.distribution_ = distribution_;
+        result.distributionMask_ = distributionMask_;
+        result.distributionMaskSliceDepth_ = distributionMaskSliceDepth_;
+        result.poissonNoise_ = poissonNoise_;
+        result.background_ = background_;
+        result.emGain_ = emGain_;
+        result.cameraGain_ = cameraGain_;
+        result.quantumEfficiency_ = quantumEfficiency_;
+        result.readNoise_ = readNoise_;
+        result.bias_ = bias_;
+        result.particles_ = particles_;
+        result.samplePerFrame_ = samplePerFrame_;
+        result.photonsPerSecond_ = photonsPerSecond_;
+        result.photonsPerSecondMaximum_ = photonsPerSecondMaximum_;
+        result.photonDistribution_ = photonDistribution_;
+        result.photonDistributionFile_ = photonDistributionFile_;
+        result.photonShape_ = photonShape_;
+        result.correlation_ = correlation_;
+        result.psfModel_ = psfModel_;
+        result.psfImageName_ = psfImageName_;
+        result.enterWidth_ = enterWidth_;
+        result.wavelength_ = wavelength_;
+        result.numericalAperture_ = numericalAperture_;
+        result.psfSd_ = psfSd_;
+        result.pixelPitch_ = pixelPitch_;
+        result.density_ = density_;
+        result.diffusionRate_ = diffusionRate_;
+        result.diffusionType_ = diffusionType_;
+        result.compoundMolecules_ = compoundMolecules_;
+        result.compoundText_ = compoundText_;
+        result.diffuse2D_ = diffuse2D_;
+        result.rotateInitialOrientation_ = rotateInitialOrientation_;
+        result.rotateDuringSimulation_ = rotateDuringSimulation_;
+        result.rotate2D_ = rotate2D_;
+        result.fixedFraction_ = fixedFraction_;
+        result.confinement_ = confinement_;
+        result.confinementMask_ = confinementMask_;
+        result.confinementMaskSliceDepth_ = confinementMaskSliceDepth_;
+        result.confinementRadius_ = confinementRadius_;
+        result.pulseInterval_ = pulseInterval_;
+        result.pulseRatio_ = pulseRatio_;
+        result.tOn_ = tOn_;
+        result.tOffShort_ = tOffShort_;
+        result.tOffLong_ = tOffLong_;
+        result.nBlinksShort_ = nBlinksShort_;
+        result.nBlinksLong_ = nBlinksLong_;
+        result.nBlinksGeometricDistribution_ = nBlinksGeometricDistribution_;
+        result.minPhotons_ = minPhotons_;
+        result.minSnrT1_ = minSnrT1_;
+        result.minSnrTN_ = minSnrTN_;
+        result.rawImage_ = rawImage_;
+        result.saveImage_ = saveImage_;
+        result.saveImageResults_ = saveImageResults_;
+        result.saveLocalisations_ = saveLocalisations_;
+        result.saveFluorophores_ = saveFluorophores_;
+        result.imageFilename_ = imageFilename_;
+        result.imageResultsFilename_ = imageResultsFilename_;
+        result.fluorophoresFilename_ = fluorophoresFilename_;
+        result.cellSize_ = cellSize_;
+        result.probabilityBinary_ = probabilityBinary_;
+        result.minBinaryDistance_ = minBinaryDistance_;
+        result.maxBinaryDistance_ = maxBinaryDistance_;
+        result.showHistograms_ = showHistograms_;
+        result.chooseHistograms_ = chooseHistograms_;
+        result.histogramBins_ = histogramBins_;
+        result.removeOutliers_ = removeOutliers_;
+        result.densityRadius_ = densityRadius_;
+        result.depthOfField_ = depthOfField_;
+        result.xPosition_ = xPosition_;
+        result.yPosition_ = yPosition_;
+        result.zPosition_ = zPosition_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIConfig.CreateDataSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIConfig.CreateDataSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIConfig.CreateDataSettings other) {
+        if (other == gdsc.smlm.data.config.GUIConfig.CreateDataSettings.getDefaultInstance()) return this;
+        if (other.getSize() != 0) {
+          setSize(other.getSize());
+        }
+        if (other.getDepth() != 0D) {
+          setDepth(other.getDepth());
+        }
+        if (other.getFixedDepth() != false) {
+          setFixedDepth(other.getFixedDepth());
+        }
+        if (other.getSeconds() != 0D) {
+          setSeconds(other.getSeconds());
+        }
+        if (other.getExposureTime() != 0D) {
+          setExposureTime(other.getExposureTime());
+        }
+        if (other.getStepsPerSecond() != 0D) {
+          setStepsPerSecond(other.getStepsPerSecond());
+        }
+        if (!other.getIllumination().isEmpty()) {
+          illumination_ = other.illumination_;
+          onChanged();
+        }
+        if (!other.getBackgroundImage().isEmpty()) {
+          backgroundImage_ = other.backgroundImage_;
+          onChanged();
+        }
+        if (!other.getDistribution().isEmpty()) {
+          distribution_ = other.distribution_;
+          onChanged();
+        }
+        if (!other.getDistributionMask().isEmpty()) {
+          distributionMask_ = other.distributionMask_;
+          onChanged();
+        }
+        if (other.getDistributionMaskSliceDepth() != 0D) {
+          setDistributionMaskSliceDepth(other.getDistributionMaskSliceDepth());
+        }
+        if (other.getPoissonNoise() != false) {
+          setPoissonNoise(other.getPoissonNoise());
+        }
+        if (other.getBackground() != 0D) {
+          setBackground(other.getBackground());
+        }
+        if (other.getEmGain() != 0D) {
+          setEmGain(other.getEmGain());
+        }
+        if (other.getCameraGain() != 0D) {
+          setCameraGain(other.getCameraGain());
+        }
+        if (other.getQuantumEfficiency() != 0D) {
+          setQuantumEfficiency(other.getQuantumEfficiency());
+        }
+        if (other.getReadNoise() != 0D) {
+          setReadNoise(other.getReadNoise());
+        }
+        if (other.getBias() != 0) {
+          setBias(other.getBias());
+        }
+        if (other.getParticles() != 0) {
+          setParticles(other.getParticles());
+        }
+        if (other.getSamplePerFrame() != false) {
+          setSamplePerFrame(other.getSamplePerFrame());
+        }
+        if (other.getPhotonsPerSecond() != 0D) {
+          setPhotonsPerSecond(other.getPhotonsPerSecond());
+        }
+        if (other.getPhotonsPerSecondMaximum() != 0D) {
+          setPhotonsPerSecondMaximum(other.getPhotonsPerSecondMaximum());
+        }
+        if (!other.getPhotonDistribution().isEmpty()) {
+          photonDistribution_ = other.photonDistribution_;
+          onChanged();
+        }
+        if (!other.getPhotonDistributionFile().isEmpty()) {
+          photonDistributionFile_ = other.photonDistributionFile_;
+          onChanged();
+        }
+        if (other.getPhotonShape() != 0D) {
+          setPhotonShape(other.getPhotonShape());
+        }
+        if (other.getCorrelation() != 0D) {
+          setCorrelation(other.getCorrelation());
+        }
+        if (!other.getPsfModel().isEmpty()) {
+          psfModel_ = other.psfModel_;
+          onChanged();
+        }
+        if (!other.getPsfImageName().isEmpty()) {
+          psfImageName_ = other.psfImageName_;
+          onChanged();
+        }
+        if (other.getEnterWidth() != false) {
+          setEnterWidth(other.getEnterWidth());
+        }
+        if (other.getWavelength() != 0D) {
+          setWavelength(other.getWavelength());
+        }
+        if (other.getNumericalAperture() != 0D) {
+          setNumericalAperture(other.getNumericalAperture());
+        }
+        if (other.getPsfSd() != 0D) {
+          setPsfSd(other.getPsfSd());
+        }
+        if (other.getPixelPitch() != 0D) {
+          setPixelPitch(other.getPixelPitch());
+        }
+        if (other.getDensity() != 0D) {
+          setDensity(other.getDensity());
+        }
+        if (other.getDiffusionRate() != 0D) {
+          setDiffusionRate(other.getDiffusionRate());
+        }
+        if (other.getDiffusionType() != 0) {
+          setDiffusionType(other.getDiffusionType());
+        }
+        if (other.getCompoundMolecules() != false) {
+          setCompoundMolecules(other.getCompoundMolecules());
+        }
+        if (!other.getCompoundText().isEmpty()) {
+          compoundText_ = other.compoundText_;
+          onChanged();
+        }
+        if (other.getDiffuse2D() != false) {
+          setDiffuse2D(other.getDiffuse2D());
+        }
+        if (other.getRotateInitialOrientation() != false) {
+          setRotateInitialOrientation(other.getRotateInitialOrientation());
+        }
+        if (other.getRotateDuringSimulation() != false) {
+          setRotateDuringSimulation(other.getRotateDuringSimulation());
+        }
+        if (other.getRotate2D() != false) {
+          setRotate2D(other.getRotate2D());
+        }
+        if (other.getFixedFraction() != 0D) {
+          setFixedFraction(other.getFixedFraction());
+        }
+        if (!other.getConfinement().isEmpty()) {
+          confinement_ = other.confinement_;
+          onChanged();
+        }
+        if (!other.getConfinementMask().isEmpty()) {
+          confinementMask_ = other.confinementMask_;
+          onChanged();
+        }
+        if (other.getConfinementMaskSliceDepth() != 0D) {
+          setConfinementMaskSliceDepth(other.getConfinementMaskSliceDepth());
+        }
+        if (other.getConfinementRadius() != 0D) {
+          setConfinementRadius(other.getConfinementRadius());
+        }
+        if (other.getPulseInterval() != 0) {
+          setPulseInterval(other.getPulseInterval());
+        }
+        if (other.getPulseRatio() != 0D) {
+          setPulseRatio(other.getPulseRatio());
+        }
+        if (other.getTOn() != 0D) {
+          setTOn(other.getTOn());
+        }
+        if (other.getTOffShort() != 0D) {
+          setTOffShort(other.getTOffShort());
+        }
+        if (other.getTOffLong() != 0D) {
+          setTOffLong(other.getTOffLong());
+        }
+        if (other.getNBlinksShort() != 0D) {
+          setNBlinksShort(other.getNBlinksShort());
+        }
+        if (other.getNBlinksLong() != 0D) {
+          setNBlinksLong(other.getNBlinksLong());
+        }
+        if (other.getNBlinksGeometricDistribution() != false) {
+          setNBlinksGeometricDistribution(other.getNBlinksGeometricDistribution());
+        }
+        if (other.getMinPhotons() != 0D) {
+          setMinPhotons(other.getMinPhotons());
+        }
+        if (other.getMinSnrT1() != 0D) {
+          setMinSnrT1(other.getMinSnrT1());
+        }
+        if (other.getMinSnrTN() != 0D) {
+          setMinSnrTN(other.getMinSnrTN());
+        }
+        if (other.getRawImage() != false) {
+          setRawImage(other.getRawImage());
+        }
+        if (other.getSaveImage() != false) {
+          setSaveImage(other.getSaveImage());
+        }
+        if (other.getSaveImageResults() != false) {
+          setSaveImageResults(other.getSaveImageResults());
+        }
+        if (other.getSaveLocalisations() != false) {
+          setSaveLocalisations(other.getSaveLocalisations());
+        }
+        if (other.getSaveFluorophores() != false) {
+          setSaveFluorophores(other.getSaveFluorophores());
+        }
+        if (!other.getImageFilename().isEmpty()) {
+          imageFilename_ = other.imageFilename_;
+          onChanged();
+        }
+        if (!other.getImageResultsFilename().isEmpty()) {
+          imageResultsFilename_ = other.imageResultsFilename_;
+          onChanged();
+        }
+        if (!other.getFluorophoresFilename().isEmpty()) {
+          fluorophoresFilename_ = other.fluorophoresFilename_;
+          onChanged();
+        }
+        if (other.getCellSize() != 0) {
+          setCellSize(other.getCellSize());
+        }
+        if (other.getProbabilityBinary() != 0D) {
+          setProbabilityBinary(other.getProbabilityBinary());
+        }
+        if (other.getMinBinaryDistance() != 0D) {
+          setMinBinaryDistance(other.getMinBinaryDistance());
+        }
+        if (other.getMaxBinaryDistance() != 0D) {
+          setMaxBinaryDistance(other.getMaxBinaryDistance());
+        }
+        if (other.getShowHistograms() != false) {
+          setShowHistograms(other.getShowHistograms());
+        }
+        if (other.getChooseHistograms() != false) {
+          setChooseHistograms(other.getChooseHistograms());
+        }
+        if (other.getHistogramBins() != 0) {
+          setHistogramBins(other.getHistogramBins());
+        }
+        if (other.getRemoveOutliers() != false) {
+          setRemoveOutliers(other.getRemoveOutliers());
+        }
+        if (other.getDensityRadius() != 0F) {
+          setDensityRadius(other.getDensityRadius());
+        }
+        if (other.getDepthOfField() != 0F) {
+          setDepthOfField(other.getDepthOfField());
+        }
+        if (other.getXPosition() != 0D) {
+          setXPosition(other.getXPosition());
+        }
+        if (other.getYPosition() != 0D) {
+          setYPosition(other.getYPosition());
+        }
+        if (other.getZPosition() != 0D) {
+          setZPosition(other.getZPosition());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIConfig.CreateDataSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIConfig.CreateDataSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int size_ ;
+      /**
+       * <code>int32 size = 1;</code>
+       */
+      public int getSize() {
+        return size_;
+      }
+      /**
+       * <code>int32 size = 1;</code>
+       */
+      public Builder setSize(int value) {
+        
+        size_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 size = 1;</code>
+       */
+      public Builder clearSize() {
+        
+        size_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double depth_ ;
+      /**
+       * <code>double depth = 2;</code>
+       */
+      public double getDepth() {
+        return depth_;
+      }
+      /**
+       * <code>double depth = 2;</code>
+       */
+      public Builder setDepth(double value) {
+        
+        depth_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double depth = 2;</code>
+       */
+      public Builder clearDepth() {
+        
+        depth_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean fixedDepth_ ;
+      /**
+       * <code>bool fixed_Depth = 3;</code>
+       */
+      public boolean getFixedDepth() {
+        return fixedDepth_;
+      }
+      /**
+       * <code>bool fixed_Depth = 3;</code>
+       */
+      public Builder setFixedDepth(boolean value) {
+        
+        fixedDepth_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool fixed_Depth = 3;</code>
+       */
+      public Builder clearFixedDepth() {
+        
+        fixedDepth_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double seconds_ ;
+      /**
+       * <code>double seconds = 4;</code>
+       */
+      public double getSeconds() {
+        return seconds_;
+      }
+      /**
+       * <code>double seconds = 4;</code>
+       */
+      public Builder setSeconds(double value) {
+        
+        seconds_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double seconds = 4;</code>
+       */
+      public Builder clearSeconds() {
+        
+        seconds_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double exposureTime_ ;
+      /**
+       * <code>double exposure_time = 5;</code>
+       */
+      public double getExposureTime() {
+        return exposureTime_;
+      }
+      /**
+       * <code>double exposure_time = 5;</code>
+       */
+      public Builder setExposureTime(double value) {
+        
+        exposureTime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double exposure_time = 5;</code>
+       */
+      public Builder clearExposureTime() {
+        
+        exposureTime_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double stepsPerSecond_ ;
+      /**
+       * <code>double steps_per_second = 6;</code>
+       */
+      public double getStepsPerSecond() {
+        return stepsPerSecond_;
+      }
+      /**
+       * <code>double steps_per_second = 6;</code>
+       */
+      public Builder setStepsPerSecond(double value) {
+        
+        stepsPerSecond_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double steps_per_second = 6;</code>
+       */
+      public Builder clearStepsPerSecond() {
+        
+        stepsPerSecond_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object illumination_ = "";
+      /**
+       * <code>string illumination = 7;</code>
+       */
+      public java.lang.String getIllumination() {
+        java.lang.Object ref = illumination_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          illumination_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string illumination = 7;</code>
+       */
+      public com.google.protobuf.ByteString
+          getIlluminationBytes() {
+        java.lang.Object ref = illumination_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          illumination_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string illumination = 7;</code>
+       */
+      public Builder setIllumination(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        illumination_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string illumination = 7;</code>
+       */
+      public Builder clearIllumination() {
+        
+        illumination_ = getDefaultInstance().getIllumination();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string illumination = 7;</code>
+       */
+      public Builder setIlluminationBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        illumination_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object backgroundImage_ = "";
+      /**
+       * <code>string background_image = 8;</code>
+       */
+      public java.lang.String getBackgroundImage() {
+        java.lang.Object ref = backgroundImage_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          backgroundImage_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string background_image = 8;</code>
+       */
+      public com.google.protobuf.ByteString
+          getBackgroundImageBytes() {
+        java.lang.Object ref = backgroundImage_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          backgroundImage_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string background_image = 8;</code>
+       */
+      public Builder setBackgroundImage(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        backgroundImage_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string background_image = 8;</code>
+       */
+      public Builder clearBackgroundImage() {
+        
+        backgroundImage_ = getDefaultInstance().getBackgroundImage();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string background_image = 8;</code>
+       */
+      public Builder setBackgroundImageBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        backgroundImage_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object distribution_ = "";
+      /**
+       * <code>string distribution = 9;</code>
+       */
+      public java.lang.String getDistribution() {
+        java.lang.Object ref = distribution_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          distribution_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string distribution = 9;</code>
+       */
+      public com.google.protobuf.ByteString
+          getDistributionBytes() {
+        java.lang.Object ref = distribution_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          distribution_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string distribution = 9;</code>
+       */
+      public Builder setDistribution(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        distribution_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string distribution = 9;</code>
+       */
+      public Builder clearDistribution() {
+        
+        distribution_ = getDefaultInstance().getDistribution();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string distribution = 9;</code>
+       */
+      public Builder setDistributionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        distribution_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object distributionMask_ = "";
+      /**
+       * <code>string distribution_mask = 10;</code>
+       */
+      public java.lang.String getDistributionMask() {
+        java.lang.Object ref = distributionMask_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          distributionMask_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string distribution_mask = 10;</code>
+       */
+      public com.google.protobuf.ByteString
+          getDistributionMaskBytes() {
+        java.lang.Object ref = distributionMask_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          distributionMask_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string distribution_mask = 10;</code>
+       */
+      public Builder setDistributionMask(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        distributionMask_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string distribution_mask = 10;</code>
+       */
+      public Builder clearDistributionMask() {
+        
+        distributionMask_ = getDefaultInstance().getDistributionMask();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string distribution_mask = 10;</code>
+       */
+      public Builder setDistributionMaskBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        distributionMask_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double distributionMaskSliceDepth_ ;
+      /**
+       * <code>double distribution_mask_slice_depth = 11;</code>
+       */
+      public double getDistributionMaskSliceDepth() {
+        return distributionMaskSliceDepth_;
+      }
+      /**
+       * <code>double distribution_mask_slice_depth = 11;</code>
+       */
+      public Builder setDistributionMaskSliceDepth(double value) {
+        
+        distributionMaskSliceDepth_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double distribution_mask_slice_depth = 11;</code>
+       */
+      public Builder clearDistributionMaskSliceDepth() {
+        
+        distributionMaskSliceDepth_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean poissonNoise_ ;
+      /**
+       * <code>bool poisson_noise = 12;</code>
+       */
+      public boolean getPoissonNoise() {
+        return poissonNoise_;
+      }
+      /**
+       * <code>bool poisson_noise = 12;</code>
+       */
+      public Builder setPoissonNoise(boolean value) {
+        
+        poissonNoise_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool poisson_noise = 12;</code>
+       */
+      public Builder clearPoissonNoise() {
+        
+        poissonNoise_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double background_ ;
+      /**
+       * <code>double background = 13;</code>
+       */
+      public double getBackground() {
+        return background_;
+      }
+      /**
+       * <code>double background = 13;</code>
+       */
+      public Builder setBackground(double value) {
+        
+        background_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double background = 13;</code>
+       */
+      public Builder clearBackground() {
+        
+        background_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double emGain_ ;
+      /**
+       * <code>double em_gain = 14;</code>
+       */
+      public double getEmGain() {
+        return emGain_;
+      }
+      /**
+       * <code>double em_gain = 14;</code>
+       */
+      public Builder setEmGain(double value) {
+        
+        emGain_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double em_gain = 14;</code>
+       */
+      public Builder clearEmGain() {
+        
+        emGain_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double cameraGain_ ;
+      /**
+       * <code>double camera_gain = 15;</code>
+       */
+      public double getCameraGain() {
+        return cameraGain_;
+      }
+      /**
+       * <code>double camera_gain = 15;</code>
+       */
+      public Builder setCameraGain(double value) {
+        
+        cameraGain_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double camera_gain = 15;</code>
+       */
+      public Builder clearCameraGain() {
+        
+        cameraGain_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double quantumEfficiency_ ;
+      /**
+       * <code>double quantum_efficiency = 16;</code>
+       */
+      public double getQuantumEfficiency() {
+        return quantumEfficiency_;
+      }
+      /**
+       * <code>double quantum_efficiency = 16;</code>
+       */
+      public Builder setQuantumEfficiency(double value) {
+        
+        quantumEfficiency_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double quantum_efficiency = 16;</code>
+       */
+      public Builder clearQuantumEfficiency() {
+        
+        quantumEfficiency_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double readNoise_ ;
+      /**
+       * <pre>
+       * The read noise (electrons).
+       * </pre>
+       *
+       * <code>double read_noise = 17;</code>
+       */
+      public double getReadNoise() {
+        return readNoise_;
+      }
+      /**
+       * <pre>
+       * The read noise (electrons).
+       * </pre>
+       *
+       * <code>double read_noise = 17;</code>
+       */
+      public Builder setReadNoise(double value) {
+        
+        readNoise_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The read noise (electrons).
+       * </pre>
+       *
+       * <code>double read_noise = 17;</code>
+       */
+      public Builder clearReadNoise() {
+        
+        readNoise_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int bias_ ;
+      /**
+       * <code>int32 bias = 18;</code>
+       */
+      public int getBias() {
+        return bias_;
+      }
+      /**
+       * <code>int32 bias = 18;</code>
+       */
+      public Builder setBias(int value) {
+        
+        bias_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 bias = 18;</code>
+       */
+      public Builder clearBias() {
+        
+        bias_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int particles_ ;
+      /**
+       * <code>int32 particles = 19;</code>
+       */
+      public int getParticles() {
+        return particles_;
+      }
+      /**
+       * <code>int32 particles = 19;</code>
+       */
+      public Builder setParticles(int value) {
+        
+        particles_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 particles = 19;</code>
+       */
+      public Builder clearParticles() {
+        
+        particles_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean samplePerFrame_ ;
+      /**
+       * <code>bool sample_per_frame = 20;</code>
+       */
+      public boolean getSamplePerFrame() {
+        return samplePerFrame_;
+      }
+      /**
+       * <code>bool sample_per_frame = 20;</code>
+       */
+      public Builder setSamplePerFrame(boolean value) {
+        
+        samplePerFrame_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool sample_per_frame = 20;</code>
+       */
+      public Builder clearSamplePerFrame() {
+        
+        samplePerFrame_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double photonsPerSecond_ ;
+      /**
+       * <pre>
+       * Photons are modelled using an emission rate (photon emission is constant when the fluorophore is on) sampled from
+       * a distribution. The rate (average of the distribution) is correlated to the total on time. Observations on real
+       * data indicate the correlation is around -0.35, i.e. shorter bursts are brighter.
+       * </pre>
+       *
+       * <code>double photons_per_second = 21;</code>
+       */
+      public double getPhotonsPerSecond() {
+        return photonsPerSecond_;
+      }
+      /**
+       * <pre>
+       * Photons are modelled using an emission rate (photon emission is constant when the fluorophore is on) sampled from
+       * a distribution. The rate (average of the distribution) is correlated to the total on time. Observations on real
+       * data indicate the correlation is around -0.35, i.e. shorter bursts are brighter.
+       * </pre>
+       *
+       * <code>double photons_per_second = 21;</code>
+       */
+      public Builder setPhotonsPerSecond(double value) {
+        
+        photonsPerSecond_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Photons are modelled using an emission rate (photon emission is constant when the fluorophore is on) sampled from
+       * a distribution. The rate (average of the distribution) is correlated to the total on time. Observations on real
+       * data indicate the correlation is around -0.35, i.e. shorter bursts are brighter.
+       * </pre>
+       *
+       * <code>double photons_per_second = 21;</code>
+       */
+      public Builder clearPhotonsPerSecond() {
+        
+        photonsPerSecond_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double photonsPerSecondMaximum_ ;
+      /**
+       * <pre>
+       * For a simple localisation model the photons are randomly selected between photonsPerSecond and
+       * photonsPerSecondMaximum
+       * </pre>
+       *
+       * <code>double photons_per_second_maximum = 22;</code>
+       */
+      public double getPhotonsPerSecondMaximum() {
+        return photonsPerSecondMaximum_;
+      }
+      /**
+       * <pre>
+       * For a simple localisation model the photons are randomly selected between photonsPerSecond and
+       * photonsPerSecondMaximum
+       * </pre>
+       *
+       * <code>double photons_per_second_maximum = 22;</code>
+       */
+      public Builder setPhotonsPerSecondMaximum(double value) {
+        
+        photonsPerSecondMaximum_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * For a simple localisation model the photons are randomly selected between photonsPerSecond and
+       * photonsPerSecondMaximum
+       * </pre>
+       *
+       * <code>double photons_per_second_maximum = 22;</code>
+       */
+      public Builder clearPhotonsPerSecondMaximum() {
+        
+        photonsPerSecondMaximum_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object photonDistribution_ = "";
+      /**
+       * <pre>
+       * Define the distribution for the random photon emission. The default is to use a gamma
+       * distribution with the defined shape parameter.
+       * </pre>
+       *
+       * <code>string photon_distribution = 23;</code>
+       */
+      public java.lang.String getPhotonDistribution() {
+        java.lang.Object ref = photonDistribution_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          photonDistribution_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Define the distribution for the random photon emission. The default is to use a gamma
+       * distribution with the defined shape parameter.
+       * </pre>
+       *
+       * <code>string photon_distribution = 23;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPhotonDistributionBytes() {
+        java.lang.Object ref = photonDistribution_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          photonDistribution_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Define the distribution for the random photon emission. The default is to use a gamma
+       * distribution with the defined shape parameter.
+       * </pre>
+       *
+       * <code>string photon_distribution = 23;</code>
+       */
+      public Builder setPhotonDistribution(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        photonDistribution_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Define the distribution for the random photon emission. The default is to use a gamma
+       * distribution with the defined shape parameter.
+       * </pre>
+       *
+       * <code>string photon_distribution = 23;</code>
+       */
+      public Builder clearPhotonDistribution() {
+        
+        photonDistribution_ = getDefaultInstance().getPhotonDistribution();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Define the distribution for the random photon emission. The default is to use a gamma
+       * distribution with the defined shape parameter.
+       * </pre>
+       *
+       * <code>string photon_distribution = 23;</code>
+       */
+      public Builder setPhotonDistributionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        photonDistribution_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object photonDistributionFile_ = "";
+      /**
+       * <code>string photon_distribution_file = 24;</code>
+       */
+      public java.lang.String getPhotonDistributionFile() {
+        java.lang.Object ref = photonDistributionFile_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          photonDistributionFile_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string photon_distribution_file = 24;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPhotonDistributionFileBytes() {
+        java.lang.Object ref = photonDistributionFile_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          photonDistributionFile_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string photon_distribution_file = 24;</code>
+       */
+      public Builder setPhotonDistributionFile(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        photonDistributionFile_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string photon_distribution_file = 24;</code>
+       */
+      public Builder clearPhotonDistributionFile() {
+        
+        photonDistributionFile_ = getDefaultInstance().getPhotonDistributionFile();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string photon_distribution_file = 24;</code>
+       */
+      public Builder setPhotonDistributionFileBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        photonDistributionFile_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double photonShape_ ;
+      /**
+       * <code>double photon_shape = 25;</code>
+       */
+      public double getPhotonShape() {
+        return photonShape_;
+      }
+      /**
+       * <code>double photon_shape = 25;</code>
+       */
+      public Builder setPhotonShape(double value) {
+        
+        photonShape_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double photon_shape = 25;</code>
+       */
+      public Builder clearPhotonShape() {
+        
+        photonShape_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double correlation_ ;
+      /**
+       * <code>double correlation = 26;</code>
+       */
+      public double getCorrelation() {
+        return correlation_;
+      }
+      /**
+       * <code>double correlation = 26;</code>
+       */
+      public Builder setCorrelation(double value) {
+        
+        correlation_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double correlation = 26;</code>
+       */
+      public Builder clearCorrelation() {
+        
+        correlation_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object psfModel_ = "";
+      /**
+       * <code>string psf_model = 27;</code>
+       */
+      public java.lang.String getPsfModel() {
+        java.lang.Object ref = psfModel_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          psfModel_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string psf_model = 27;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPsfModelBytes() {
+        java.lang.Object ref = psfModel_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          psfModel_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string psf_model = 27;</code>
+       */
+      public Builder setPsfModel(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        psfModel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string psf_model = 27;</code>
+       */
+      public Builder clearPsfModel() {
+        
+        psfModel_ = getDefaultInstance().getPsfModel();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string psf_model = 27;</code>
+       */
+      public Builder setPsfModelBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        psfModel_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object psfImageName_ = "";
+      /**
+       * <code>string psf_image_name = 28;</code>
+       */
+      public java.lang.String getPsfImageName() {
+        java.lang.Object ref = psfImageName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          psfImageName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string psf_image_name = 28;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPsfImageNameBytes() {
+        java.lang.Object ref = psfImageName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          psfImageName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string psf_image_name = 28;</code>
+       */
+      public Builder setPsfImageName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        psfImageName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string psf_image_name = 28;</code>
+       */
+      public Builder clearPsfImageName() {
+        
+        psfImageName_ = getDefaultInstance().getPsfImageName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string psf_image_name = 28;</code>
+       */
+      public Builder setPsfImageNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        psfImageName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean enterWidth_ ;
+      /**
+       * <code>bool enter_width = 29;</code>
+       */
+      public boolean getEnterWidth() {
+        return enterWidth_;
+      }
+      /**
+       * <code>bool enter_width = 29;</code>
+       */
+      public Builder setEnterWidth(boolean value) {
+        
+        enterWidth_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool enter_width = 29;</code>
+       */
+      public Builder clearEnterWidth() {
+        
+        enterWidth_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double wavelength_ ;
+      /**
+       * <code>double wavelength = 30;</code>
+       */
+      public double getWavelength() {
+        return wavelength_;
+      }
+      /**
+       * <code>double wavelength = 30;</code>
+       */
+      public Builder setWavelength(double value) {
+        
+        wavelength_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double wavelength = 30;</code>
+       */
+      public Builder clearWavelength() {
+        
+        wavelength_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double numericalAperture_ ;
+      /**
+       * <code>double numerical_aperture = 31;</code>
+       */
+      public double getNumericalAperture() {
+        return numericalAperture_;
+      }
+      /**
+       * <code>double numerical_aperture = 31;</code>
+       */
+      public Builder setNumericalAperture(double value) {
+        
+        numericalAperture_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double numerical_aperture = 31;</code>
+       */
+      public Builder clearNumericalAperture() {
+        
+        numericalAperture_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double psfSd_ ;
+      /**
+       * <code>double psf_sd = 32;</code>
+       */
+      public double getPsfSd() {
+        return psfSd_;
+      }
+      /**
+       * <code>double psf_sd = 32;</code>
+       */
+      public Builder setPsfSd(double value) {
+        
+        psfSd_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double psf_sd = 32;</code>
+       */
+      public Builder clearPsfSd() {
+        
+        psfSd_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double pixelPitch_ ;
+      /**
+       * <code>double pixel_pitch = 33;</code>
+       */
+      public double getPixelPitch() {
+        return pixelPitch_;
+      }
+      /**
+       * <code>double pixel_pitch = 33;</code>
+       */
+      public Builder setPixelPitch(double value) {
+        
+        pixelPitch_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double pixel_pitch = 33;</code>
+       */
+      public Builder clearPixelPitch() {
+        
+        pixelPitch_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double density_ ;
+      /**
+       * <code>double density = 34;</code>
+       */
+      public double getDensity() {
+        return density_;
+      }
+      /**
+       * <code>double density = 34;</code>
+       */
+      public Builder setDensity(double value) {
+        
+        density_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double density = 34;</code>
+       */
+      public Builder clearDensity() {
+        
+        density_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double diffusionRate_ ;
+      /**
+       * <code>double diffusion_rate = 35;</code>
+       */
+      public double getDiffusionRate() {
+        return diffusionRate_;
+      }
+      /**
+       * <code>double diffusion_rate = 35;</code>
+       */
+      public Builder setDiffusionRate(double value) {
+        
+        diffusionRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double diffusion_rate = 35;</code>
+       */
+      public Builder clearDiffusionRate() {
+        
+        diffusionRate_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int diffusionType_ ;
+      /**
+       * <code>int32 diffusion_type = 36;</code>
+       */
+      public int getDiffusionType() {
+        return diffusionType_;
+      }
+      /**
+       * <code>int32 diffusion_type = 36;</code>
+       */
+      public Builder setDiffusionType(int value) {
+        
+        diffusionType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 diffusion_type = 36;</code>
+       */
+      public Builder clearDiffusionType() {
+        
+        diffusionType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean compoundMolecules_ ;
+      /**
+       * <code>bool compound_molecules = 37;</code>
+       */
+      public boolean getCompoundMolecules() {
+        return compoundMolecules_;
+      }
+      /**
+       * <code>bool compound_molecules = 37;</code>
+       */
+      public Builder setCompoundMolecules(boolean value) {
+        
+        compoundMolecules_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool compound_molecules = 37;</code>
+       */
+      public Builder clearCompoundMolecules() {
+        
+        compoundMolecules_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object compoundText_ = "";
+      /**
+       * <code>string compound_text = 38;</code>
+       */
+      public java.lang.String getCompoundText() {
+        java.lang.Object ref = compoundText_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          compoundText_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string compound_text = 38;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCompoundTextBytes() {
+        java.lang.Object ref = compoundText_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          compoundText_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string compound_text = 38;</code>
+       */
+      public Builder setCompoundText(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        compoundText_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string compound_text = 38;</code>
+       */
+      public Builder clearCompoundText() {
+        
+        compoundText_ = getDefaultInstance().getCompoundText();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string compound_text = 38;</code>
+       */
+      public Builder setCompoundTextBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        compoundText_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean diffuse2D_ ;
+      /**
+       * <code>bool diffuse_2D = 39;</code>
+       */
+      public boolean getDiffuse2D() {
+        return diffuse2D_;
+      }
+      /**
+       * <code>bool diffuse_2D = 39;</code>
+       */
+      public Builder setDiffuse2D(boolean value) {
+        
+        diffuse2D_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool diffuse_2D = 39;</code>
+       */
+      public Builder clearDiffuse2D() {
+        
+        diffuse2D_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean rotateInitialOrientation_ ;
+      /**
+       * <code>bool rotate_initial_orientation = 40;</code>
+       */
+      public boolean getRotateInitialOrientation() {
+        return rotateInitialOrientation_;
+      }
+      /**
+       * <code>bool rotate_initial_orientation = 40;</code>
+       */
+      public Builder setRotateInitialOrientation(boolean value) {
+        
+        rotateInitialOrientation_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool rotate_initial_orientation = 40;</code>
+       */
+      public Builder clearRotateInitialOrientation() {
+        
+        rotateInitialOrientation_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean rotateDuringSimulation_ ;
+      /**
+       * <code>bool rotate_during_simulation = 41;</code>
+       */
+      public boolean getRotateDuringSimulation() {
+        return rotateDuringSimulation_;
+      }
+      /**
+       * <code>bool rotate_during_simulation = 41;</code>
+       */
+      public Builder setRotateDuringSimulation(boolean value) {
+        
+        rotateDuringSimulation_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool rotate_during_simulation = 41;</code>
+       */
+      public Builder clearRotateDuringSimulation() {
+        
+        rotateDuringSimulation_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean rotate2D_ ;
+      /**
+       * <code>bool rotate_2D = 42;</code>
+       */
+      public boolean getRotate2D() {
+        return rotate2D_;
+      }
+      /**
+       * <code>bool rotate_2D = 42;</code>
+       */
+      public Builder setRotate2D(boolean value) {
+        
+        rotate2D_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool rotate_2D = 42;</code>
+       */
+      public Builder clearRotate2D() {
+        
+        rotate2D_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double fixedFraction_ ;
+      /**
+       * <code>double fixedFraction = 43;</code>
+       */
+      public double getFixedFraction() {
+        return fixedFraction_;
+      }
+      /**
+       * <code>double fixedFraction = 43;</code>
+       */
+      public Builder setFixedFraction(double value) {
+        
+        fixedFraction_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double fixedFraction = 43;</code>
+       */
+      public Builder clearFixedFraction() {
+        
+        fixedFraction_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object confinement_ = "";
+      /**
+       * <code>string confinement = 44;</code>
+       */
+      public java.lang.String getConfinement() {
+        java.lang.Object ref = confinement_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          confinement_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string confinement = 44;</code>
+       */
+      public com.google.protobuf.ByteString
+          getConfinementBytes() {
+        java.lang.Object ref = confinement_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          confinement_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string confinement = 44;</code>
+       */
+      public Builder setConfinement(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        confinement_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string confinement = 44;</code>
+       */
+      public Builder clearConfinement() {
+        
+        confinement_ = getDefaultInstance().getConfinement();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string confinement = 44;</code>
+       */
+      public Builder setConfinementBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        confinement_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object confinementMask_ = "";
+      /**
+       * <code>string confinement_mask = 45;</code>
+       */
+      public java.lang.String getConfinementMask() {
+        java.lang.Object ref = confinementMask_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          confinementMask_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string confinement_mask = 45;</code>
+       */
+      public com.google.protobuf.ByteString
+          getConfinementMaskBytes() {
+        java.lang.Object ref = confinementMask_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          confinementMask_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string confinement_mask = 45;</code>
+       */
+      public Builder setConfinementMask(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        confinementMask_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string confinement_mask = 45;</code>
+       */
+      public Builder clearConfinementMask() {
+        
+        confinementMask_ = getDefaultInstance().getConfinementMask();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string confinement_mask = 45;</code>
+       */
+      public Builder setConfinementMaskBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        confinementMask_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double confinementMaskSliceDepth_ ;
+      /**
+       * <code>double confinement_mask_slice_depth = 46;</code>
+       */
+      public double getConfinementMaskSliceDepth() {
+        return confinementMaskSliceDepth_;
+      }
+      /**
+       * <code>double confinement_mask_slice_depth = 46;</code>
+       */
+      public Builder setConfinementMaskSliceDepth(double value) {
+        
+        confinementMaskSliceDepth_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double confinement_mask_slice_depth = 46;</code>
+       */
+      public Builder clearConfinementMaskSliceDepth() {
+        
+        confinementMaskSliceDepth_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double confinementRadius_ ;
+      /**
+       * <code>double confinement_radius = 47;</code>
+       */
+      public double getConfinementRadius() {
+        return confinementRadius_;
+      }
+      /**
+       * <code>double confinement_radius = 47;</code>
+       */
+      public Builder setConfinementRadius(double value) {
+        
+        confinementRadius_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double confinement_radius = 47;</code>
+       */
+      public Builder clearConfinementRadius() {
+        
+        confinementRadius_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int pulseInterval_ ;
+      /**
+       * <code>int32 pulse_interval = 48;</code>
+       */
+      public int getPulseInterval() {
+        return pulseInterval_;
+      }
+      /**
+       * <code>int32 pulse_interval = 48;</code>
+       */
+      public Builder setPulseInterval(int value) {
+        
+        pulseInterval_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 pulse_interval = 48;</code>
+       */
+      public Builder clearPulseInterval() {
+        
+        pulseInterval_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double pulseRatio_ ;
+      /**
+       * <code>double pulse_ratio = 49;</code>
+       */
+      public double getPulseRatio() {
+        return pulseRatio_;
+      }
+      /**
+       * <code>double pulse_ratio = 49;</code>
+       */
+      public Builder setPulseRatio(double value) {
+        
+        pulseRatio_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double pulse_ratio = 49;</code>
+       */
+      public Builder clearPulseRatio() {
+        
+        pulseRatio_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double tOn_ ;
+      /**
+       * <pre>
+       * Average t-On in milliseconds
+       * </pre>
+       *
+       * <code>double t_on = 50;</code>
+       */
+      public double getTOn() {
+        return tOn_;
+      }
+      /**
+       * <pre>
+       * Average t-On in milliseconds
+       * </pre>
+       *
+       * <code>double t_on = 50;</code>
+       */
+      public Builder setTOn(double value) {
+        
+        tOn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Average t-On in milliseconds
+       * </pre>
+       *
+       * <code>double t_on = 50;</code>
+       */
+      public Builder clearTOn() {
+        
+        tOn_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double tOffShort_ ;
+      /**
+       * <pre>
+       * Average t-Off for the short dark state in milliseconds
+       * </pre>
+       *
+       * <code>double t_off_short = 51;</code>
+       */
+      public double getTOffShort() {
+        return tOffShort_;
+      }
+      /**
+       * <pre>
+       * Average t-Off for the short dark state in milliseconds
+       * </pre>
+       *
+       * <code>double t_off_short = 51;</code>
+       */
+      public Builder setTOffShort(double value) {
+        
+        tOffShort_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Average t-Off for the short dark state in milliseconds
+       * </pre>
+       *
+       * <code>double t_off_short = 51;</code>
+       */
+      public Builder clearTOffShort() {
+        
+        tOffShort_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double tOffLong_ ;
+      /**
+       * <pre>
+       * Average t-Off for the long dark state in milliseconds
+       * </pre>
+       *
+       * <code>double t_off_long = 52;</code>
+       */
+      public double getTOffLong() {
+        return tOffLong_;
+      }
+      /**
+       * <pre>
+       * Average t-Off for the long dark state in milliseconds
+       * </pre>
+       *
+       * <code>double t_off_long = 52;</code>
+       */
+      public Builder setTOffLong(double value) {
+        
+        tOffLong_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Average t-Off for the long dark state in milliseconds
+       * </pre>
+       *
+       * <code>double t_off_long = 52;</code>
+       */
+      public Builder clearTOffLong() {
+        
+        tOffLong_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double nBlinksShort_ ;
+      /**
+       * <pre>
+       * Average number of short blinks, i.e. when transitioning from the on state to the short dark state
+       * </pre>
+       *
+       * <code>double n_blinks_short = 53;</code>
+       */
+      public double getNBlinksShort() {
+        return nBlinksShort_;
+      }
+      /**
+       * <pre>
+       * Average number of short blinks, i.e. when transitioning from the on state to the short dark state
+       * </pre>
+       *
+       * <code>double n_blinks_short = 53;</code>
+       */
+      public Builder setNBlinksShort(double value) {
+        
+        nBlinksShort_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Average number of short blinks, i.e. when transitioning from the on state to the short dark state
+       * </pre>
+       *
+       * <code>double n_blinks_short = 53;</code>
+       */
+      public Builder clearNBlinksShort() {
+        
+        nBlinksShort_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double nBlinksLong_ ;
+      /**
+       * <pre>
+       * Average number of long blinks, i.e. transitions to the long dark state
+       * </pre>
+       *
+       * <code>double n_blinks_long = 54;</code>
+       */
+      public double getNBlinksLong() {
+        return nBlinksLong_;
+      }
+      /**
+       * <pre>
+       * Average number of long blinks, i.e. transitions to the long dark state
+       * </pre>
+       *
+       * <code>double n_blinks_long = 54;</code>
+       */
+      public Builder setNBlinksLong(double value) {
+        
+        nBlinksLong_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Average number of long blinks, i.e. transitions to the long dark state
+       * </pre>
+       *
+       * <code>double n_blinks_long = 54;</code>
+       */
+      public Builder clearNBlinksLong() {
+        
+        nBlinksLong_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean nBlinksGeometricDistribution_ ;
+      /**
+       * <pre>
+       * Set to true to use a geometric distribution for the nBlinks. Default is to use a Poisson.
+       * </pre>
+       *
+       * <code>bool n_blinks_geometric_distribution = 55;</code>
+       */
+      public boolean getNBlinksGeometricDistribution() {
+        return nBlinksGeometricDistribution_;
+      }
+      /**
+       * <pre>
+       * Set to true to use a geometric distribution for the nBlinks. Default is to use a Poisson.
+       * </pre>
+       *
+       * <code>bool n_blinks_geometric_distribution = 55;</code>
+       */
+      public Builder setNBlinksGeometricDistribution(boolean value) {
+        
+        nBlinksGeometricDistribution_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to true to use a geometric distribution for the nBlinks. Default is to use a Poisson.
+       * </pre>
+       *
+       * <code>bool n_blinks_geometric_distribution = 55;</code>
+       */
+      public Builder clearNBlinksGeometricDistribution() {
+        
+        nBlinksGeometricDistribution_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double minPhotons_ ;
+      /**
+       * <code>double min_photons = 56;</code>
+       */
+      public double getMinPhotons() {
+        return minPhotons_;
+      }
+      /**
+       * <code>double min_photons = 56;</code>
+       */
+      public Builder setMinPhotons(double value) {
+        
+        minPhotons_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double min_photons = 56;</code>
+       */
+      public Builder clearMinPhotons() {
+        
+        minPhotons_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double minSnrT1_ ;
+      /**
+       * <code>double min_snr_t1 = 57;</code>
+       */
+      public double getMinSnrT1() {
+        return minSnrT1_;
+      }
+      /**
+       * <code>double min_snr_t1 = 57;</code>
+       */
+      public Builder setMinSnrT1(double value) {
+        
+        minSnrT1_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double min_snr_t1 = 57;</code>
+       */
+      public Builder clearMinSnrT1() {
+        
+        minSnrT1_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double minSnrTN_ ;
+      /**
+       * <code>double min_snr_tN = 58;</code>
+       */
+      public double getMinSnrTN() {
+        return minSnrTN_;
+      }
+      /**
+       * <code>double min_snr_tN = 58;</code>
+       */
+      public Builder setMinSnrTN(double value) {
+        
+        minSnrTN_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double min_snr_tN = 58;</code>
+       */
+      public Builder clearMinSnrTN() {
+        
+        minSnrTN_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean rawImage_ ;
+      /**
+       * <code>bool raw_image = 59;</code>
+       */
+      public boolean getRawImage() {
+        return rawImage_;
+      }
+      /**
+       * <code>bool raw_image = 59;</code>
+       */
+      public Builder setRawImage(boolean value) {
+        
+        rawImage_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool raw_image = 59;</code>
+       */
+      public Builder clearRawImage() {
+        
+        rawImage_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean saveImage_ ;
+      /**
+       * <code>bool save_image = 60;</code>
+       */
+      public boolean getSaveImage() {
+        return saveImage_;
+      }
+      /**
+       * <code>bool save_image = 60;</code>
+       */
+      public Builder setSaveImage(boolean value) {
+        
+        saveImage_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool save_image = 60;</code>
+       */
+      public Builder clearSaveImage() {
+        
+        saveImage_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean saveImageResults_ ;
+      /**
+       * <code>bool save_image_results = 61;</code>
+       */
+      public boolean getSaveImageResults() {
+        return saveImageResults_;
+      }
+      /**
+       * <code>bool save_image_results = 61;</code>
+       */
+      public Builder setSaveImageResults(boolean value) {
+        
+        saveImageResults_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool save_image_results = 61;</code>
+       */
+      public Builder clearSaveImageResults() {
+        
+        saveImageResults_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean saveLocalisations_ ;
+      /**
+       * <code>bool save_localisations = 62;</code>
+       */
+      public boolean getSaveLocalisations() {
+        return saveLocalisations_;
+      }
+      /**
+       * <code>bool save_localisations = 62;</code>
+       */
+      public Builder setSaveLocalisations(boolean value) {
+        
+        saveLocalisations_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool save_localisations = 62;</code>
+       */
+      public Builder clearSaveLocalisations() {
+        
+        saveLocalisations_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean saveFluorophores_ ;
+      /**
+       * <code>bool save_fluorophores = 63;</code>
+       */
+      public boolean getSaveFluorophores() {
+        return saveFluorophores_;
+      }
+      /**
+       * <code>bool save_fluorophores = 63;</code>
+       */
+      public Builder setSaveFluorophores(boolean value) {
+        
+        saveFluorophores_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool save_fluorophores = 63;</code>
+       */
+      public Builder clearSaveFluorophores() {
+        
+        saveFluorophores_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object imageFilename_ = "";
+      /**
+       * <code>string image_filename = 64;</code>
+       */
+      public java.lang.String getImageFilename() {
+        java.lang.Object ref = imageFilename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          imageFilename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string image_filename = 64;</code>
+       */
+      public com.google.protobuf.ByteString
+          getImageFilenameBytes() {
+        java.lang.Object ref = imageFilename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          imageFilename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string image_filename = 64;</code>
+       */
+      public Builder setImageFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        imageFilename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string image_filename = 64;</code>
+       */
+      public Builder clearImageFilename() {
+        
+        imageFilename_ = getDefaultInstance().getImageFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string image_filename = 64;</code>
+       */
+      public Builder setImageFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        imageFilename_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object imageResultsFilename_ = "";
+      /**
+       * <code>string image_results_filename = 65;</code>
+       */
+      public java.lang.String getImageResultsFilename() {
+        java.lang.Object ref = imageResultsFilename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          imageResultsFilename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string image_results_filename = 65;</code>
+       */
+      public com.google.protobuf.ByteString
+          getImageResultsFilenameBytes() {
+        java.lang.Object ref = imageResultsFilename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          imageResultsFilename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string image_results_filename = 65;</code>
+       */
+      public Builder setImageResultsFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        imageResultsFilename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string image_results_filename = 65;</code>
+       */
+      public Builder clearImageResultsFilename() {
+        
+        imageResultsFilename_ = getDefaultInstance().getImageResultsFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string image_results_filename = 65;</code>
+       */
+      public Builder setImageResultsFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        imageResultsFilename_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object fluorophoresFilename_ = "";
+      /**
+       * <code>string fluorophoresFilename = 66;</code>
+       */
+      public java.lang.String getFluorophoresFilename() {
+        java.lang.Object ref = fluorophoresFilename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fluorophoresFilename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string fluorophoresFilename = 66;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFluorophoresFilenameBytes() {
+        java.lang.Object ref = fluorophoresFilename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fluorophoresFilename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string fluorophoresFilename = 66;</code>
+       */
+      public Builder setFluorophoresFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        fluorophoresFilename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string fluorophoresFilename = 66;</code>
+       */
+      public Builder clearFluorophoresFilename() {
+        
+        fluorophoresFilename_ = getDefaultInstance().getFluorophoresFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string fluorophoresFilename = 66;</code>
+       */
+      public Builder setFluorophoresFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        fluorophoresFilename_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int cellSize_ ;
+      /**
+       * <code>int32 cell_size = 67;</code>
+       */
+      public int getCellSize() {
+        return cellSize_;
+      }
+      /**
+       * <code>int32 cell_size = 67;</code>
+       */
+      public Builder setCellSize(int value) {
+        
+        cellSize_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 cell_size = 67;</code>
+       */
+      public Builder clearCellSize() {
+        
+        cellSize_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double probabilityBinary_ ;
+      /**
+       * <code>double probability_binary = 68;</code>
+       */
+      public double getProbabilityBinary() {
+        return probabilityBinary_;
+      }
+      /**
+       * <code>double probability_binary = 68;</code>
+       */
+      public Builder setProbabilityBinary(double value) {
+        
+        probabilityBinary_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double probability_binary = 68;</code>
+       */
+      public Builder clearProbabilityBinary() {
+        
+        probabilityBinary_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double minBinaryDistance_ ;
+      /**
+       * <code>double min_binary_distance = 69;</code>
+       */
+      public double getMinBinaryDistance() {
+        return minBinaryDistance_;
+      }
+      /**
+       * <code>double min_binary_distance = 69;</code>
+       */
+      public Builder setMinBinaryDistance(double value) {
+        
+        minBinaryDistance_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double min_binary_distance = 69;</code>
+       */
+      public Builder clearMinBinaryDistance() {
+        
+        minBinaryDistance_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double maxBinaryDistance_ ;
+      /**
+       * <code>double max_binary_distance = 70;</code>
+       */
+      public double getMaxBinaryDistance() {
+        return maxBinaryDistance_;
+      }
+      /**
+       * <code>double max_binary_distance = 70;</code>
+       */
+      public Builder setMaxBinaryDistance(double value) {
+        
+        maxBinaryDistance_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double max_binary_distance = 70;</code>
+       */
+      public Builder clearMaxBinaryDistance() {
+        
+        maxBinaryDistance_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean showHistograms_ ;
+      /**
+       * <code>bool show_histograms = 71;</code>
+       */
+      public boolean getShowHistograms() {
+        return showHistograms_;
+      }
+      /**
+       * <code>bool show_histograms = 71;</code>
+       */
+      public Builder setShowHistograms(boolean value) {
+        
+        showHistograms_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool show_histograms = 71;</code>
+       */
+      public Builder clearShowHistograms() {
+        
+        showHistograms_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean chooseHistograms_ ;
+      /**
+       * <code>bool choose_histograms = 72;</code>
+       */
+      public boolean getChooseHistograms() {
+        return chooseHistograms_;
+      }
+      /**
+       * <code>bool choose_histograms = 72;</code>
+       */
+      public Builder setChooseHistograms(boolean value) {
+        
+        chooseHistograms_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool choose_histograms = 72;</code>
+       */
+      public Builder clearChooseHistograms() {
+        
+        chooseHistograms_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int histogramBins_ ;
+      /**
+       * <code>int32 histogram_bins = 73;</code>
+       */
+      public int getHistogramBins() {
+        return histogramBins_;
+      }
+      /**
+       * <code>int32 histogram_bins = 73;</code>
+       */
+      public Builder setHistogramBins(int value) {
+        
+        histogramBins_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 histogram_bins = 73;</code>
+       */
+      public Builder clearHistogramBins() {
+        
+        histogramBins_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean removeOutliers_ ;
+      /**
+       * <code>bool remove_outliers = 74;</code>
+       */
+      public boolean getRemoveOutliers() {
+        return removeOutliers_;
+      }
+      /**
+       * <code>bool remove_outliers = 74;</code>
+       */
+      public Builder setRemoveOutliers(boolean value) {
+        
+        removeOutliers_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool remove_outliers = 74;</code>
+       */
+      public Builder clearRemoveOutliers() {
+        
+        removeOutliers_ = false;
+        onChanged();
+        return this;
+      }
+
+      private float densityRadius_ ;
+      /**
+       * <code>float density_radius = 75;</code>
+       */
+      public float getDensityRadius() {
+        return densityRadius_;
+      }
+      /**
+       * <code>float density_radius = 75;</code>
+       */
+      public Builder setDensityRadius(float value) {
+        
+        densityRadius_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>float density_radius = 75;</code>
+       */
+      public Builder clearDensityRadius() {
+        
+        densityRadius_ = 0F;
+        onChanged();
+        return this;
+      }
+
+      private float depthOfField_ ;
+      /**
+       * <code>float depth_of_field = 76;</code>
+       */
+      public float getDepthOfField() {
+        return depthOfField_;
+      }
+      /**
+       * <code>float depth_of_field = 76;</code>
+       */
+      public Builder setDepthOfField(float value) {
+        
+        depthOfField_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>float depth_of_field = 76;</code>
+       */
+      public Builder clearDepthOfField() {
+        
+        depthOfField_ = 0F;
+        onChanged();
+        return this;
+      }
+
+      private double xPosition_ ;
+      /**
+       * <code>double x_position = 77;</code>
+       */
+      public double getXPosition() {
+        return xPosition_;
+      }
+      /**
+       * <code>double x_position = 77;</code>
+       */
+      public Builder setXPosition(double value) {
+        
+        xPosition_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double x_position = 77;</code>
+       */
+      public Builder clearXPosition() {
+        
+        xPosition_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double yPosition_ ;
+      /**
+       * <code>double y_position = 78;</code>
+       */
+      public double getYPosition() {
+        return yPosition_;
+      }
+      /**
+       * <code>double y_position = 78;</code>
+       */
+      public Builder setYPosition(double value) {
+        
+        yPosition_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double y_position = 78;</code>
+       */
+      public Builder clearYPosition() {
+        
+        yPosition_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double zPosition_ ;
+      /**
+       * <code>double z_position = 79;</code>
+       */
+      public double getZPosition() {
+        return zPosition_;
+      }
+      /**
+       * <code>double z_position = 79;</code>
+       */
+      public Builder setZPosition(double value) {
+        
+        zPosition_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double z_position = 79;</code>
+       */
+      public Builder clearZPosition() {
+        
+        zPosition_ = 0D;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CreateDataSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CreateDataSettings)
+    private static final gdsc.smlm.data.config.GUIConfig.CreateDataSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIConfig.CreateDataSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIConfig.CreateDataSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CreateDataSettings>
+        PARSER = new com.google.protobuf.AbstractParser<CreateDataSettings>() {
+      public CreateDataSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new CreateDataSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CreateDataSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CreateDataSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIConfig.CreateDataSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface LoadLocalisationsSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.LoadLocalisationsSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string localisationsFilename = 1;</code>
+     */
+    java.lang.String getLocalisationsFilename();
+    /**
+     * <code>string localisationsFilename = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getLocalisationsFilenameBytes();
+  }
+  /**
+   * <pre>
+   * Settings for the Load Localisations plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.LoadLocalisationsSettings}
+   */
+  public  static final class LoadLocalisationsSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.LoadLocalisationsSettings)
+      LoadLocalisationsSettingsOrBuilder {
+    // Use LoadLocalisationsSettings.newBuilder() to construct.
+    private LoadLocalisationsSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private LoadLocalisationsSettings() {
+      localisationsFilename_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private LoadLocalisationsSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              localisationsFilename_ = s;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings.class, gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings.Builder.class);
+    }
+
+    public static final int LOCALISATIONSFILENAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object localisationsFilename_;
+    /**
+     * <code>string localisationsFilename = 1;</code>
+     */
+    public java.lang.String getLocalisationsFilename() {
+      java.lang.Object ref = localisationsFilename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        localisationsFilename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string localisationsFilename = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getLocalisationsFilenameBytes() {
+      java.lang.Object ref = localisationsFilename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        localisationsFilename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getLocalisationsFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, localisationsFilename_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getLocalisationsFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, localisationsFilename_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings other = (gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings) obj;
+
+      boolean result = true;
+      result = result && getLocalisationsFilename()
+          .equals(other.getLocalisationsFilename());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + LOCALISATIONSFILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getLocalisationsFilename().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Settings for the Load Localisations plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.LoadLocalisationsSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.LoadLocalisationsSettings)
+        gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings.class, gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        localisationsFilename_ = "";
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings build() {
+        gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings buildPartial() {
+        gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings result = new gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings(this);
+        result.localisationsFilename_ = localisationsFilename_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings other) {
+        if (other == gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings.getDefaultInstance()) return this;
+        if (!other.getLocalisationsFilename().isEmpty()) {
+          localisationsFilename_ = other.localisationsFilename_;
+          onChanged();
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object localisationsFilename_ = "";
+      /**
+       * <code>string localisationsFilename = 1;</code>
+       */
+      public java.lang.String getLocalisationsFilename() {
+        java.lang.Object ref = localisationsFilename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          localisationsFilename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string localisationsFilename = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getLocalisationsFilenameBytes() {
+        java.lang.Object ref = localisationsFilename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          localisationsFilename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string localisationsFilename = 1;</code>
+       */
+      public Builder setLocalisationsFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        localisationsFilename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string localisationsFilename = 1;</code>
+       */
+      public Builder clearLocalisationsFilename() {
+        
+        localisationsFilename_ = getDefaultInstance().getLocalisationsFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string localisationsFilename = 1;</code>
+       */
+      public Builder setLocalisationsFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        localisationsFilename_ = value;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.LoadLocalisationsSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.LoadLocalisationsSettings)
+    private static final gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<LoadLocalisationsSettings>
+        PARSER = new com.google.protobuf.AbstractParser<LoadLocalisationsSettings>() {
+      public LoadLocalisationsSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new LoadLocalisationsSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<LoadLocalisationsSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<LoadLocalisationsSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
   private static final 
@@ -3174,6 +10474,16 @@ public final class GUIConfig {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_PSFEstimatorSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CreateDataSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -3200,8 +10510,57 @@ public final class GUIConfig {
       "s\030\001 \001(\005\022\017\n\007p_value\030\002 \001(\001\022\032\n\022update_prefe" +
       "rences\030\003 \001(\010\022\033\n\023debug_psf_estimator\030\004 \001(" +
       "\010\022\017\n\007iterate\030\005 \001(\010\022\027\n\017show_histograms\030\006 " +
-      "\001(\010\022\026\n\016histogram_bins\030\007 \001(\005B\013B\tGUIConfig" +
-      "b\006proto3"
+      "\001(\010\022\026\n\016histogram_bins\030\007 \001(\005\"\367\016\n\022CreateDa" +
+      "taSettings\022\014\n\004size\030\001 \001(\005\022\r\n\005depth\030\002 \001(\001\022" +
+      "\023\n\013fixed_Depth\030\003 \001(\010\022\017\n\007seconds\030\004 \001(\001\022\025\n",
+      "\rexposure_time\030\005 \001(\001\022\030\n\020steps_per_second" +
+      "\030\006 \001(\001\022\024\n\014illumination\030\007 \001(\t\022\030\n\020backgrou" +
+      "nd_image\030\010 \001(\t\022\024\n\014distribution\030\t \001(\t\022\031\n\021" +
+      "distribution_mask\030\n \001(\t\022%\n\035distribution_" +
+      "mask_slice_depth\030\013 \001(\001\022\025\n\rpoisson_noise\030" +
+      "\014 \001(\010\022\022\n\nbackground\030\r \001(\001\022\017\n\007em_gain\030\016 \001" +
+      "(\001\022\023\n\013camera_gain\030\017 \001(\001\022\032\n\022quantum_effic" +
+      "iency\030\020 \001(\001\022\022\n\nread_noise\030\021 \001(\001\022\014\n\004bias\030" +
+      "\022 \001(\005\022\021\n\tparticles\030\023 \001(\005\022\030\n\020sample_per_f" +
+      "rame\030\024 \001(\010\022\032\n\022photons_per_second\030\025 \001(\001\022\"",
+      "\n\032photons_per_second_maximum\030\026 \001(\001\022\033\n\023ph" +
+      "oton_distribution\030\027 \001(\t\022 \n\030photon_distri" +
+      "bution_file\030\030 \001(\t\022\024\n\014photon_shape\030\031 \001(\001\022" +
+      "\023\n\013correlation\030\032 \001(\001\022\021\n\tpsf_model\030\033 \001(\t\022" +
+      "\026\n\016psf_image_name\030\034 \001(\t\022\023\n\013enter_width\030\035" +
+      " \001(\010\022\022\n\nwavelength\030\036 \001(\001\022\032\n\022numerical_ap" +
+      "erture\030\037 \001(\001\022\016\n\006psf_sd\030  \001(\001\022\023\n\013pixel_pi" +
+      "tch\030! \001(\001\022\017\n\007density\030\" \001(\001\022\026\n\016diffusion_" +
+      "rate\030# \001(\001\022\026\n\016diffusion_type\030$ \001(\005\022\032\n\022co" +
+      "mpound_molecules\030% \001(\010\022\025\n\rcompound_text\030",
+      "& \001(\t\022\022\n\ndiffuse_2D\030\' \001(\010\022\"\n\032rotate_init" +
+      "ial_orientation\030( \001(\010\022 \n\030rotate_during_s" +
+      "imulation\030) \001(\010\022\021\n\trotate_2D\030* \001(\010\022\025\n\rfi" +
+      "xedFraction\030+ \001(\001\022\023\n\013confinement\030, \001(\t\022\030" +
+      "\n\020confinement_mask\030- \001(\t\022$\n\034confinement_" +
+      "mask_slice_depth\030. \001(\001\022\032\n\022confinement_ra" +
+      "dius\030/ \001(\001\022\026\n\016pulse_interval\0300 \001(\005\022\023\n\013pu" +
+      "lse_ratio\0301 \001(\001\022\014\n\004t_on\0302 \001(\001\022\023\n\013t_off_s" +
+      "hort\0303 \001(\001\022\022\n\nt_off_long\0304 \001(\001\022\026\n\016n_blin" +
+      "ks_short\0305 \001(\001\022\025\n\rn_blinks_long\0306 \001(\001\022\'\n",
+      "\037n_blinks_geometric_distribution\0307 \001(\010\022\023" +
+      "\n\013min_photons\0308 \001(\001\022\022\n\nmin_snr_t1\0309 \001(\001\022" +
+      "\022\n\nmin_snr_tN\030: \001(\001\022\021\n\traw_image\030; \001(\010\022\022" +
+      "\n\nsave_image\030< \001(\010\022\032\n\022save_image_results" +
+      "\030= \001(\010\022\032\n\022save_localisations\030> \001(\010\022\031\n\021sa" +
+      "ve_fluorophores\030? \001(\010\022\026\n\016image_filename\030" +
+      "@ \001(\t\022\036\n\026image_results_filename\030A \001(\t\022\034\n" +
+      "\024fluorophoresFilename\030B \001(\t\022\021\n\tcell_size" +
+      "\030C \001(\005\022\032\n\022probability_binary\030D \001(\001\022\033\n\023mi" +
+      "n_binary_distance\030E \001(\001\022\033\n\023max_binary_di",
+      "stance\030F \001(\001\022\027\n\017show_histograms\030G \001(\010\022\031\n" +
+      "\021choose_histograms\030H \001(\010\022\026\n\016histogram_bi" +
+      "ns\030I \001(\005\022\027\n\017remove_outliers\030J \001(\010\022\026\n\016den" +
+      "sity_radius\030K \001(\002\022\026\n\016depth_of_field\030L \001(" +
+      "\002\022\022\n\nx_position\030M \001(\001\022\022\n\ny_position\030N \001(" +
+      "\001\022\022\n\nz_position\030O \001(\001\":\n\031LoadLocalisatio" +
+      "nsSettings\022\035\n\025localisationsFilename\030\001 \001(" +
+      "\tB\013B\tGUIConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -3233,6 +10592,18 @@ public final class GUIConfig {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFEstimatorSettings_descriptor,
         new java.lang.String[] { "NumberOfPeaks", "PValue", "UpdatePreferences", "DebugPsfEstimator", "Iterate", "ShowHistograms", "HistogramBins", });
+    internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor =
+      getDescriptor().getMessageTypes().get(3);
+    internal_static_gdsc_smlm_data_config_CreateDataSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor,
+        new java.lang.String[] { "Size", "Depth", "FixedDepth", "Seconds", "ExposureTime", "StepsPerSecond", "Illumination", "BackgroundImage", "Distribution", "DistributionMask", "DistributionMaskSliceDepth", "PoissonNoise", "Background", "EmGain", "CameraGain", "QuantumEfficiency", "ReadNoise", "Bias", "Particles", "SamplePerFrame", "PhotonsPerSecond", "PhotonsPerSecondMaximum", "PhotonDistribution", "PhotonDistributionFile", "PhotonShape", "Correlation", "PsfModel", "PsfImageName", "EnterWidth", "Wavelength", "NumericalAperture", "PsfSd", "PixelPitch", "Density", "DiffusionRate", "DiffusionType", "CompoundMolecules", "CompoundText", "Diffuse2D", "RotateInitialOrientation", "RotateDuringSimulation", "Rotate2D", "FixedFraction", "Confinement", "ConfinementMask", "ConfinementMaskSliceDepth", "ConfinementRadius", "PulseInterval", "PulseRatio", "TOn", "TOffShort", "TOffLong", "NBlinksShort", "NBlinksLong", "NBlinksGeometricDistribution", "MinPhotons", "MinSnrT1", "MinSnrTN", "RawImage", "SaveImage", "SaveImageResults", "SaveLocalisations", "SaveFluorophores", "ImageFilename", "ImageResultsFilename", "FluorophoresFilename", "CellSize", "ProbabilityBinary", "MinBinaryDistance", "MaxBinaryDistance", "ShowHistograms", "ChooseHistograms", "HistogramBins", "RemoveOutliers", "DensityRadius", "DepthOfField", "XPosition", "YPosition", "ZPosition", });
+    internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor,
+        new java.lang.String[] { "LocalisationsFilename", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

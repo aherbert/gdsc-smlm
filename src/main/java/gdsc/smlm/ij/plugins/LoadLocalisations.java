@@ -43,8 +43,7 @@ import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.UnitConfig.TimeUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitHelper;
-import gdsc.smlm.ij.settings.CreateDataSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.AttributePeakResult;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -215,18 +214,17 @@ public class LoadLocalisations implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		GlobalSettings globalSettings = SettingsManager.loadSettings();
-		CreateDataSettings settings = globalSettings.getCreateDataSettings();
+		LoadLocalisationsSettings.Builder settings = SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
 
-		String[] path = Utils.decodePath(settings.localisationsFilename);
+		String[] path = Utils.decodePath(settings.getLocalisationsFilename());
 		OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
 		if (chooser.getFileName() == null)
 			return;
 
-		settings.localisationsFilename = chooser.getDirectory() + chooser.getFileName();
-		SettingsManager.saveSettings(globalSettings);
+		settings.setLocalisationsFilename(chooser.getDirectory() + chooser.getFileName());
+		SettingsManager.writeSettings(settings.build());
 
-		LocalisationList localisations = loadLocalisations(settings.localisationsFilename);
+		LocalisationList localisations = loadLocalisations(settings.getLocalisationsFilename());
 
 		if (localisations == null)
 			// Cancelled

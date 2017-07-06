@@ -22,7 +22,7 @@ public class GUIConfigHelper
 {
 	/** The default GUIFilterSettings */
 	public static final GUIFilterSettings defaultGUIFilterSettings = GUIFilterSettings.getDefaultInstance();
-	
+
 	/** The default PSFCalculatorSettings */
 	public static final PSFCalculatorSettings defaultPSFCalculatorSettings;
 	static
@@ -37,7 +37,7 @@ public class GUIConfigHelper
 		builder.setProportionalityFactor(1.52);
 		defaultPSFCalculatorSettings = builder.build();
 	}
-	
+
 	/** The default PSFEstimatorSettings */
 	public static final PSFEstimatorSettings defaultPSFEstimatorSettings;
 	static
@@ -52,4 +52,54 @@ public class GUIConfigHelper
 		builder.setHistogramBins(100);
 		defaultPSFEstimatorSettings = builder.build();
 	}
+
+	/** The default CreateDataSettings */
+	public static final CreateDataSettings defaultCreateDataSettings;
+	static
+	{
+		CreateDataSettings.Builder builder = CreateDataSettings.newBuilder();
+		builder.setSize(512);
+		builder.setDepth(3000);
+		builder.setSeconds(100);
+		builder.setExposureTime(100);
+		builder.setStepsPerSecond(10);
+		builder.setDistributionMaskSliceDepth(25);
+		builder.setPoissonNoise(true);
+		builder.setBackground(1);
+		builder.setEmGain(255);
+		builder.setCameraGain(0.1557);
+		builder.setQuantumEfficiency(0.95);
+		builder.setReadNoise(46);
+		builder.setBias(500);
+		builder.setParticles(300);
+		builder.setSamplePerFrame(true);
+		builder.setPhotonsPerSecond(1000);
+		builder.setPhotonsPerSecondMaximum(2000);
+		builder.setPhotonShape(2.5);
+		builder.setCorrelation(-0.35);
+		builder.setWavelength(561);
+		builder.setNumericalAperture(1.4);
+		builder.setPsfSd(130);
+		builder.setPixelPitch(107);
+		builder.setDensity(1);
+		builder.setConfinementMaskSliceDepth(25);
+		builder.setConfinementRadius(10);
+		builder.setPulseRatio(100);
+		builder.setTOn(40);
+		builder.setTOffShort(25);
+		builder.setTOffLong(631);
+		builder.setNBlinksShort(6.3);
+		builder.setNBlinksLong(1.8);
+		builder.setMinPhotons(30);
+		builder.setCellSize(32);
+		builder.setProbabilityBinary(0.1);
+		builder.setMaxBinaryDistance(30);
+		builder.setDensityRadius(3);
+		builder.setDepthOfField(250);
+		defaultCreateDataSettings = builder.build();
+	}
+
+	/** The default LoadLocalisationsSettings */
+	public static final LoadLocalisationsSettings defaultLoadLocalisationsSettings = LoadLocalisationsSettings
+			.getDefaultInstance();
 }

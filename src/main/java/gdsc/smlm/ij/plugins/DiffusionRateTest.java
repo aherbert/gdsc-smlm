@@ -22,8 +22,9 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationHelper;
-import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.GUIConfig.CreateDataSettings;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.PSFHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -39,8 +40,7 @@ import gdsc.smlm.data.config.PSFConfig.PSFType;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
-import gdsc.smlm.ij.settings.CreateDataSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.CreateDataSettingsHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.DiffusionType;
 import gdsc.smlm.model.ImageModel;
@@ -127,7 +127,7 @@ public class DiffusionRateTest implements PlugIn
 		}
 	}
 
-	private CreateDataSettings settings;
+	private CreateDataSettings.Builder settings;
 	private static boolean useConfinement = false;
 	private static int confinementAttempts = 5;
 	private static int fitN = 20;
@@ -168,31 +168,32 @@ public class DiffusionRateTest implements PlugIn
 		lastSimulatedDataset[0] = lastSimulatedDataset[1] = "";
 		lastSimulatedPrecision = 0;
 
-		final int totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond);
+		final int totalSteps = (int) Math.ceil(settings.getSeconds() * settings.getStepsPerSecond());
 
-		conversionFactor = 1000000.0 / (settings.pixelPitch * settings.pixelPitch);
+		conversionFactor = 1000000.0 / (settings.getPixelPitch() * settings.getPixelPitch());
 
 		// Diffusion rate is um^2/sec. Convert to pixels per simulation frame.
-		final double diffusionRateInPixelsPerSecond = settings.diffusionRate * conversionFactor;
-		final double diffusionRateInPixelsPerStep = diffusionRateInPixelsPerSecond / settings.stepsPerSecond;
-		final double precisionInPixels = myPrecision / settings.pixelPitch;
+		final double diffusionRateInPixelsPerSecond = settings.getDiffusionRate() * conversionFactor;
+		final double diffusionRateInPixelsPerStep = diffusionRateInPixelsPerSecond / settings.getStepsPerSecond();
+		final double precisionInPixels = myPrecision / settings.getPixelPitch();
 		final boolean addError = myPrecision != 0;
 
-		Utils.log(TITLE + " : D = %s um^2/sec, Precision = %s nm", Utils.rounded(settings.diffusionRate, 4),
+		Utils.log(TITLE + " : D = %s um^2/sec, Precision = %s nm", Utils.rounded(settings.getDiffusionRate(), 4),
 				Utils.rounded(myPrecision, 4));
 		Utils.log("Mean-displacement per dimension = %s nm/sec",
-				Utils.rounded(1e3 * ImageModel.getRandomMoveDistance(settings.diffusionRate), 4));
+				Utils.rounded(1e3 * ImageModel.getRandomMoveDistance(settings.getDiffusionRate()), 4));
 		if (extraOptions)
 			Utils.log("Step size = %s, precision = %s",
 					Utils.rounded(ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep)),
 					Utils.rounded(precisionInPixels));
 
 		// Convert diffusion co-efficient into the standard deviation for the random walk
-		final double diffusionSigma = (settings.getDiffusionType() == DiffusionType.LINEAR_WALK)
+		DiffusionType diffusionType = CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType());
+		final double diffusionSigma = (diffusionType == DiffusionType.LINEAR_WALK)
 				// Q. What should this be? At the moment just do 1D diffusion on a random vector
 				? ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep)
 				: ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep);
-		Utils.log("Simulation step-size = %s nm", Utils.rounded(settings.pixelPitch * diffusionSigma, 4));
+		Utils.log("Simulation step-size = %s nm", Utils.rounded(settings.getPixelPitch() * diffusionSigma, 4));
 
 		// Move the molecules and get the diffusion rate
 		IJ.showStatus("Simulating ...");
@@ -214,27 +215,27 @@ public class DiffusionRateTest implements PlugIn
 			stats2D[j] = new Statistics();
 			stats3D[j] = new Statistics();
 		}
-		SphericalDistribution dist = new SphericalDistribution(settings.confinementRadius / settings.pixelPitch);
+		SphericalDistribution dist = new SphericalDistribution(settings.getConfinementRadius() / settings.getPixelPitch());
 		Statistics asymptote = new Statistics();
 
 		// Save results to memory
 		MemoryPeakResults results = new MemoryPeakResults(totalSteps);
-		results.setCalibration(CalibrationHelper.create(settings.pixelPitch, 1, 1000.0 / settings.stepsPerSecond));
+		results.setCalibration(CalibrationHelper.create(settings.getPixelPitch(), 1, 1000.0 / settings.getStepsPerSecond()));
 		results.setName(TITLE);
 		results.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		int peak = 0;
 		// Store raw coordinates
 		ArrayList<Point> points = new ArrayList<Point>(totalSteps);
 
-		StoredData totalJumpDistances1D = new StoredData(settings.particles);
-		StoredData totalJumpDistances2D = new StoredData(settings.particles);
-		StoredData totalJumpDistances3D = new StoredData(settings.particles);
+		StoredData totalJumpDistances1D = new StoredData(settings.getParticles());
+		StoredData totalJumpDistances2D = new StoredData(settings.getParticles());
+		StoredData totalJumpDistances3D = new StoredData(settings.getParticles());
 
-		for (int i = 0; i < settings.particles; i++)
+		for (int i = 0; i < settings.getParticles(); i++)
 		{
 			if (i % 16 == 0)
 			{
-				IJ.showProgress(i, settings.particles);
+				IJ.showProgress(i, settings.getParticles());
 				if (Utils.isInterrupted())
 					return;
 			}
@@ -254,16 +255,16 @@ public class DiffusionRateTest implements PlugIn
 				// this is a projection of the 3D position onto the plane and so the particles
 				// will not be evenly spread (there will be clustering at centre caused by the
 				// poles)
-				final double[] axis = (settings.getDiffusionType() == DiffusionType.LINEAR_WALK) ? nextVector() : null;
+				final double[] axis = (diffusionType == DiffusionType.LINEAR_WALK) ? nextVector() : null;
 				for (int j = 0; j < totalSteps; j++)
 				{
 					double[] xyz = m.getCoordinates();
 					double[] originalXyz = xyz.clone();
 					for (int n = confinementAttempts; n-- > 0;)
 					{
-						if (settings.getDiffusionType() == DiffusionType.GRID_WALK)
+						if (diffusionType == DiffusionType.GRID_WALK)
 							m.walk(diffusionSigma, random);
-						else if (settings.getDiffusionType() == DiffusionType.LINEAR_WALK)
+						else if (diffusionType == DiffusionType.LINEAR_WALK)
 							m.slide(diffusionSigma, axis, random[0]);
 						else
 							m.move(diffusionSigma, random);
@@ -293,7 +294,7 @@ public class DiffusionRateTest implements PlugIn
 			}
 			else
 			{
-				if (settings.getDiffusionType() == DiffusionType.GRID_WALK)
+				if (diffusionType == DiffusionType.GRID_WALK)
 				{
 					for (int j = 0; j < totalSteps; j++)
 					{
@@ -306,7 +307,7 @@ public class DiffusionRateTest implements PlugIn
 								results);
 					}
 				}
-				else if (settings.getDiffusionType() == DiffusionType.LINEAR_WALK)
+				else if (diffusionType == DiffusionType.LINEAR_WALK)
 				{
 					final double[] axis = nextVector();
 					for (int j = 0; j < totalSteps; j++)
@@ -357,7 +358,7 @@ public class DiffusionRateTest implements PlugIn
 				(results.getCalibrationReader().getExposureTime() / 1000);
 		Utils.log(
 				"Raw data D=%s um^2/s, Precision = %s nm, N=%d, step=%s s, mean2D=%s um^2, MSD 2D = %s um^2/s, mean3D=%s um^2, MSD 3D = %s um^2/s",
-				Utils.rounded(settings.diffusionRate), Utils.rounded(myPrecision), jumpDistances2D.getN(),
+				Utils.rounded(settings.getDiffusionRate()), Utils.rounded(myPrecision), jumpDistances2D.getN(),
 				Utils.rounded(results.getCalibrationReader().getExposureTime() / 1000),
 				Utils.rounded(jumpDistances2D.getMean() / conversionFactor), Utils.rounded(msd2D),
 				Utils.rounded(jumpDistances3D.getMean() / conversionFactor), Utils.rounded(msd3D));
@@ -387,7 +388,7 @@ public class DiffusionRateTest implements PlugIn
 		for (int j = 0; j < totalSteps; j++)
 		{
 			// Convert steps to seconds
-			xValues[j] = (double) (j + 1) / settings.stepsPerSecond;
+			xValues[j] = (double) (j + 1) / settings.getStepsPerSecond();
 
 			// Convert values in pixels^2 to um^2
 			final double mean2D = stats2D[j].getMean() / conversionFactor;
@@ -460,7 +461,7 @@ public class DiffusionRateTest implements PlugIn
 
 		if (useConfinement)
 			Utils.log("3D asymptote distance = %s nm (expected %.2f)",
-					Utils.rounded(asymptote.getMean() * settings.pixelPitch, 4), 3 * settings.confinementRadius / 4);
+					Utils.rounded(asymptote.getMean() * settings.getPixelPitch(), 4), 3 * settings.getConfinementRadius() / 4);
 	}
 
 	/**
@@ -489,7 +490,7 @@ public class DiffusionRateTest implements PlugIn
 		Plot2 plot = new Plot2(title, "Time (seconds)", "Mean-squared Distance (um^2)", xValues, yValues);
 		double[] limits = Maths.limits(upper);
 		limits = Maths.limits(limits, lower);
-		plot.setLimits(0, totalSteps / settings.stepsPerSecond, limits[0], limits[1]);
+		plot.setLimits(0, totalSteps / settings.getStepsPerSecond(), limits[0], limits[1]);
 		plot.setColor(Color.blue);
 		plot.addPoints(xValues, lower, Plot2.LINE);
 		plot.addPoints(xValues, upper, Plot2.LINE);
@@ -528,7 +529,8 @@ public class DiffusionRateTest implements PlugIn
 			values[i] /= factor;
 		String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
 		double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
-		if (settings.getDiffusionType() == DiffusionType.GRID_WALK)
+		DiffusionType diffusionType = CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType());
+		if (diffusionType == DiffusionType.GRID_WALK)
 		{
 			// In this case with a large simulation size the jumps are all 
 			// the same distance so the histogram is a single step. Check the plot
@@ -569,7 +571,7 @@ public class DiffusionRateTest implements PlugIn
 		// s^2 * Chi ~ Gamma(k/2, 2*s^2)
 		// So if s^2 = 2D:
 		// 2D * Chi  ~ Gamma(k/2, 4D)
-		double estimatedD = steps * settings.diffusionRate / settings.stepsPerSecond;
+		double estimatedD = steps * settings.getDiffusionRate() / settings.getStepsPerSecond();
 		if (myPrecision > 0)
 			estimatedD += myPrecision * myPrecision / 1e6;
 		double max = Maths.max(values);
@@ -685,29 +687,28 @@ public class DiffusionRateTest implements PlugIn
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 
-		GlobalSettings globalSettings = SettingsManager.loadSettings();
-		settings = globalSettings.getCreateDataSettings();
+		settings = SettingsManager.readCreateDataSettings(0).toBuilder();
 
-		if (settings.stepsPerSecond < 1)
-			settings.stepsPerSecond = 1;
+		if (settings.getStepsPerSecond() < 1)
+			settings.setStepsPerSecond(1);
 
-		gd.addNumericField("Pixel_pitch (nm)", settings.pixelPitch, 2);
-		gd.addNumericField("Seconds", settings.seconds, 1);
-		gd.addSlider("Steps_per_second", 1, 15, settings.stepsPerSecond);
+		gd.addNumericField("Pixel_pitch (nm)", settings.getPixelPitch(), 2);
+		gd.addNumericField("Seconds", settings.getSeconds(), 1);
+		gd.addSlider("Steps_per_second", 1, 15, settings.getStepsPerSecond());
 		if (extraOptions)
 		{
 			gd.addSlider("Aggregate_steps", 2, 20, aggregateSteps);
 			gd.addNumericField("MSD_analysis_steps", msdAnalysisSteps, 0);
 		}
-		gd.addNumericField("Particles", settings.particles, 0);
-		gd.addNumericField("Diffusion_rate (um^2/sec)", settings.diffusionRate, 2);
+		gd.addNumericField("Particles", settings.getParticles(), 0);
+		gd.addNumericField("Diffusion_rate (um^2/sec)", settings.getDiffusionRate(), 2);
 		if (extraOptions)
 			gd.addNumericField("Precision (nm)", precision, 2);
 		String[] diffusionTypes = SettingsManager.getNames((Object[]) DiffusionType.values());
-		gd.addChoice("Diffusion_type", diffusionTypes, diffusionTypes[settings.getDiffusionType().ordinal()]);
+		gd.addChoice("Diffusion_type", diffusionTypes, diffusionTypes[settings.getDiffusionType()]);
 		gd.addCheckbox("Use_confinement", useConfinement);
 		gd.addSlider("Confinement_attempts", 1, 20, confinementAttempts);
-		gd.addSlider("Confinement_radius (nm)", 0, 3000, settings.confinementRadius);
+		gd.addSlider("Confinement_radius (nm)", 0, 3000, settings.getConfinementRadius());
 		gd.addSlider("Fit_N", 5, 20, fitN);
 		gd.addCheckbox("Show_example", showDiffusionExample);
 		gd.addSlider("Magnification", 1, 10, magnification);
@@ -716,37 +717,37 @@ public class DiffusionRateTest implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
-		settings.pixelPitch = Math.abs(gd.getNextNumber());
-		settings.seconds = Math.abs(gd.getNextNumber());
-		settings.stepsPerSecond = Math.abs(gd.getNextNumber());
+		settings.setPixelPitch(Math.abs(gd.getNextNumber()));
+		settings.setSeconds(Math.abs(gd.getNextNumber()));
+		settings.setStepsPerSecond(Math.abs(gd.getNextNumber()));
 		if (extraOptions)
 		{
 			myAggregateSteps = aggregateSteps = Math.abs((int) gd.getNextNumber());
 			myMsdAnalysisSteps = msdAnalysisSteps = Math.abs((int) gd.getNextNumber());
 		}
-		settings.particles = Math.abs((int) gd.getNextNumber());
-		settings.diffusionRate = Math.abs(gd.getNextNumber());
+		settings.setParticles(Math.abs((int) gd.getNextNumber()));
+		settings.setDiffusionRate(Math.abs(gd.getNextNumber()));
 		if (extraOptions)
 			myPrecision = precision = Math.abs(gd.getNextNumber());
 		settings.setDiffusionType(gd.getNextChoiceIndex());
 		useConfinement = gd.getNextBoolean();
 		confinementAttempts = Math.abs((int) gd.getNextNumber());
-		settings.confinementRadius = Math.abs(gd.getNextNumber());
+		settings.setConfinementRadius(Math.abs(gd.getNextNumber()));
 		fitN = Math.abs((int) gd.getNextNumber());
 		showDiffusionExample = gd.getNextBoolean();
 		magnification = gd.getNextNumber();
 
 		// Save before validation so that the current values are preserved.
-		SettingsManager.saveSettings(globalSettings);
+		SettingsManager.writeSettings(settings.build());
 
 		// Check arguments
 		try
 		{
-			Parameters.isAboveZero("Pixel Pitch", settings.pixelPitch);
-			Parameters.isAboveZero("Seconds", settings.seconds);
-			Parameters.isAboveZero("Steps per second", settings.stepsPerSecond);
-			Parameters.isAboveZero("Particles", settings.particles);
-			Parameters.isPositive("Diffusion rate", settings.diffusionRate);
+			Parameters.isAboveZero("Pixel Pitch", settings.getPixelPitch());
+			Parameters.isAboveZero("Seconds", settings.getSeconds());
+			Parameters.isAboveZero("Steps per second", settings.getStepsPerSecond());
+			Parameters.isAboveZero("Particles", settings.getParticles());
+			Parameters.isPositive("Diffusion rate", settings.getDiffusionRate());
 			Parameters.isAboveZero("Magnification", magnification);
 			Parameters.isAboveZero("Confinement attempts", confinementAttempts);
 			Parameters.isAboveZero("Fit N", fitN);
@@ -757,13 +758,13 @@ public class DiffusionRateTest implements PlugIn
 			return false;
 		}
 
-		if (settings.diffusionRate == 0)
+		if (settings.getDiffusionRate() == 0)
 			IJ.error(TITLE, "Warning : Diffusion rate is zero");
 
 		if (gd.invalidNumber())
 			return false;
 
-		SettingsManager.saveSettings(globalSettings);
+		SettingsManager.writeSettings(settings.build());
 
 		return true;
 	}
@@ -803,18 +804,19 @@ public class DiffusionRateTest implements PlugIn
 		float[] xValues = new float[totalSteps];
 		float[] x = new float[totalSteps];
 		float[] y = new float[totalSteps];
-		final double[] axis = (settings.getDiffusionType() == DiffusionType.LINEAR_WALK) ? nextVector() : null;
+		DiffusionType diffusionType = CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType());
+		final double[] axis = (diffusionType == DiffusionType.LINEAR_WALK) ? nextVector() : null;
 		for (int j = 0; j < totalSteps; j++)
 		{
-			if (settings.getDiffusionType() == DiffusionType.GRID_WALK)
+			if (diffusionType == DiffusionType.GRID_WALK)
 				m.walk(diffusionSigma, random);
-			else if (settings.getDiffusionType() == DiffusionType.LINEAR_WALK)
+			else if (diffusionType == DiffusionType.LINEAR_WALK)
 				m.slide(diffusionSigma, axis, random[0]);
 			else
 				m.move(diffusionSigma, random);
 			x[j] = (float) (m.getX());
 			y[j] = (float) (m.getY());
-			xValues[j] = (float) ((j + 1) / settings.stepsPerSecond);
+			xValues[j] = (float) ((j + 1) / settings.getStepsPerSecond());
 		}
 
 		// Plot x and y coords on a timeline
@@ -824,7 +826,7 @@ public class DiffusionRateTest implements PlugIn
 		float[] yUm = convertToUm(y);
 		float[] limits = Maths.limits(xUm);
 		limits = Maths.limits(limits, yUm);
-		plot.setLimits(0, totalSteps / settings.stepsPerSecond, limits[0], limits[1]);
+		plot.setLimits(0, totalSteps / settings.getStepsPerSecond(), limits[0], limits[1]);
 		plot.setColor(Color.red);
 		plot.addPoints(xValues, xUm, Plot2.LINE);
 		plot.setColor(Color.blue);
@@ -887,7 +889,7 @@ public class DiffusionRateTest implements PlugIn
 
 	private float[] convertToUm(float[] x)
 	{
-		final float factor = (float) (settings.pixelPitch / 1000.0);
+		final float factor = (float) (settings.getPixelPitch() / 1000.0);
 		float[] newX = new float[x.length];
 		for (int i = 0; i < x.length; i++)
 			newX[i] = x[i] * factor;
@@ -914,7 +916,7 @@ public class DiffusionRateTest implements PlugIn
 			return;
 
 		MemoryPeakResults results = new MemoryPeakResults(points.size() / myAggregateSteps);
-		results.setCalibration(CalibrationHelper.create(settings.pixelPitch, 1, myAggregateSteps * 1000.0 / settings.stepsPerSecond));
+		results.setCalibration(CalibrationHelper.create(settings.getPixelPitch(), 1, myAggregateSteps * 1000.0 / settings.getStepsPerSecond()));
 		results.setName(TITLE + " Aggregated");
 		results.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		MemoryPeakResults.addResults(results);
@@ -986,7 +988,7 @@ public class DiffusionRateTest implements PlugIn
 		double msd = sum / count;
 		// Convert to um^2/second
 		Utils.log("Aggregated data D=%s um^2/s, Precision=%s nm, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s",
-				Utils.rounded(settings.diffusionRate), Utils.rounded(myPrecision), count,
+				Utils.rounded(settings.getDiffusionRate()), Utils.rounded(myPrecision), count,
 				Utils.rounded(results.getCalibrationReader().getExposureTime() / 1000), Utils.rounded(msd / conversionFactor),
 				Utils.rounded((msd / conversionFactor) / (results.getCalibrationReader().getExposureTime() / 1000)));
 
@@ -1028,7 +1030,7 @@ public class DiffusionRateTest implements PlugIn
 			}
 			count++;
 		}
-		createMsdTable((sum / count) * settings.stepsPerSecond / conversionFactor);
+		createMsdTable((sum / count) * settings.getStepsPerSecond() / conversionFactor);
 
 		// Create a new set of points that have coordinates that 
 		// are the rolling average over the number of aggregate steps
@@ -1055,11 +1057,11 @@ public class DiffusionRateTest implements PlugIn
 		}
 
 		// Q - is this useful?
-		final double p = myPrecision / settings.pixelPitch;
+		final double p = myPrecision / settings.getPixelPitch();
 		final long seed = System.currentTimeMillis() + System.identityHashCode(this);
 		RandomGenerator rand = new Well19937c(seed);
 
-		final int totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond - aggregateSteps);
+		final int totalSteps = (int) Math.ceil(settings.getSeconds() * settings.getStepsPerSecond() - aggregateSteps);
 		final int limit = Math.min(totalSteps, myMsdAnalysisSteps);
 		final int interval = Utils.getProgressInterval(limit);
 		final ArrayList<String> results = new ArrayList<String>(totalSteps);
@@ -1131,13 +1133,13 @@ public class DiffusionRateTest implements PlugIn
 	{
 		final double apparentD = baseMsd / 4;
 		StringBuilder sb = new StringBuilder();
-		sb.append(settings.diffusionRate).append('\t');
+		sb.append(settings.getDiffusionRate()).append('\t');
 		sb.append(myPrecision).append('\t');
 		sb.append(Utils.rounded(apparentD)).append('\t');
-		sb.append(Utils.rounded(1.0 / settings.stepsPerSecond)).append('\t');
+		sb.append(Utils.rounded(1.0 / settings.getStepsPerSecond())).append('\t');
 		sb.append(myAggregateSteps).append('\t');
 		// Exposure time is the aggregated frame time 
-		exposureTime = myAggregateSteps / settings.stepsPerSecond;
+		exposureTime = myAggregateSteps / settings.getStepsPerSecond();
 		sb.append(Utils.rounded(exposureTime)).append('\t');
 		prefix = sb.toString();
 		return "D (um^2/s)\tPrecision (nm)\tDsim (um^2/s)\tStep (s)\tResolution\tFrame (s)\tt (s)\tn\tN\tMSD (um^2)\tD (um^2/s)";
@@ -1149,7 +1151,7 @@ public class DiffusionRateTest implements PlugIn
 		// Exposure time is the aggregated frame time 
 		final double msd = (sum / count) / conversionFactor;
 		// Jump distance separation is the number of steps
-		final double t = step / settings.stepsPerSecond;
+		final double t = step / settings.getStepsPerSecond();
 		sb.append(prefix);
 		sb.append(Utils.rounded(t)).append('\t');
 		sb.append(Utils.rounded(t / exposureTime)).append('\t');

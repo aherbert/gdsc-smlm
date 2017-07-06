@@ -29,24 +29,13 @@ import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfigHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
-import gdsc.smlm.data.config.FitConfig.DataFilterType;
-import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
-import gdsc.smlm.data.config.FitConfig.FitSolver;
-import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitConfig.*;
 import gdsc.smlm.data.config.FitConfigHelper;
-import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
-import gdsc.smlm.data.config.GUIConfig.PSFCalculatorSettings;
-import gdsc.smlm.data.config.GUIConfig.PSFEstimatorSettings;
+import gdsc.smlm.data.config.GUIConfig.*;
 import gdsc.smlm.data.config.GUIConfigHelper;
-import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
-import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
+import gdsc.smlm.data.config.ResultsConfig.*;
 import gdsc.smlm.data.config.ResultsConfigHelper;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
-import gdsc.smlm.data.config.UnitConfig.TimeUnit;
+import gdsc.smlm.data.config.UnitConfig.*;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.engine.FitConfiguration;
 
@@ -869,10 +858,6 @@ public class SettingsManager
 		{
 			config = new GlobalSettings();
 		}
-		else
-		{
-			config.getCreateDataSettings().initialiseState();
-		}
 		return config;
 	}
 
@@ -1071,6 +1056,30 @@ public class SettingsManager
 	public static PSFEstimatorSettings readPSFEstimatorSettings(int flags)
 	{
 		return new ConfigurationReader<PSFEstimatorSettings>(GUIConfigHelper.defaultPSFEstimatorSettings).read(flags);
+	}
+
+	/**
+	 * Read the CreateDataSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the CreateDataSettings
+	 */
+	public static CreateDataSettings readCreateDataSettings(int flags)
+	{
+		return new ConfigurationReader<CreateDataSettings>(GUIConfigHelper.defaultCreateDataSettings).read(flags);
+	}
+
+	/**
+	 * Read the LoadLocalisationsSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the LoadLocalisationsSettings
+	 */
+	public static LoadLocalisationsSettings readLoadLocalisationsSettings(int flags)
+	{
+		return new ConfigurationReader<LoadLocalisationsSettings>(GUIConfigHelper.defaultLoadLocalisationsSettings).read(flags);
 	}
 	
 	/**
