@@ -26,7 +26,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public abstract class BaseFunctionSolver implements FunctionSolver
 {
-	protected FunctionSolverType type;
+	private FunctionSolverType type;
 	protected GradientFunction f;
 
 	private int maxEvaluations = 20;
@@ -47,13 +47,26 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * @param f
 	 *            the f
 	 * @throws NullPointerException
-	 *             if the function is null
+	 *             if the function or type is null
 	 */
 	public BaseFunctionSolver(FunctionSolverType type, GradientFunction f)
 	{
 		if (f == null)
 			throw new NullPointerException("Function must not be null");
 		this.f = f;
+		setType(type);
+	}
+
+	/**
+	 * Sets the type.
+	 *
+	 * @param type
+	 *            the new type
+	 */
+	protected void setType(FunctionSolverType type)
+	{
+		if (type == null)
+			throw new NullPointerException("Type must not be null");
 		this.type = type;
 	}
 
@@ -299,6 +312,33 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	{
 		return false;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.FunctionSolver#isStrictlyPositiveFunction()
+	 */
+	public boolean isStrictlyPositiveFunction()
+	{
+		// Provide a default implementation based on the type. 
+		// This can be overridden if the solver can handle negative function data.		
+		switch (type)
+		{
+			case LSE:
+				// Assume least-square estimation can handle any function data
+				return false;
+			case MLE:
+				// Assume maximum likelihood estimation requires a positive function value
+				// for computing the likelihood
+				return true;
+			case WLSE:
+				// Assume least-square estimation can handle any function data
+				return false;
+			default:
+				// Leave this as disabled by default
+				return false;
+		}
+	};
 
 	/*
 	 * (non-Javadoc)

@@ -26,7 +26,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class Gaussian2DFitter
 {
-	protected FitConfiguration fitConfiguration;
+	protected Gaussian2DFitConfiguration fitConfiguration;
 	protected FunctionSolver solver;
 
 	// The last successful fit. Used to compute the residuals.
@@ -40,7 +40,7 @@ public class Gaussian2DFitter
 	 * 
 	 * @param fitConfiguration
 	 */
-	public Gaussian2DFitter(FitConfiguration fitConfiguration)
+	public Gaussian2DFitter(Gaussian2DFitConfiguration fitConfiguration)
 	{
 		if (fitConfiguration == null)
 		{
@@ -495,7 +495,7 @@ public class Gaussian2DFitter
 			//double[] params2 = params.clone();
 
 			// Re-assemble all the parameters
-			if (!fitConfiguration.isWidth1Fitting() && fitConfiguration.isWidth0Fitting())
+			if (!fitConfiguration.isYSDFitting() && fitConfiguration.isXSDFitting())
 			{
 				// Ensure Y width is updated with the fitted X width
 				for (int i = Gaussian2DFunction.X_SD; i < params.length; i += paramsPerPeak)
@@ -573,9 +573,9 @@ public class Gaussian2DFitter
 
 			if (sx == 0)
 			{
-				if (fitConfiguration.getInitialPeakStdDev0() > 0)
+				if (fitConfiguration.getInitialXSD() > 0)
 				{
-					sx = fitConfiguration.getInitialPeakStdDev0();
+					sx = fitConfiguration.getInitialXSD();
 				}
 				else
 				{
@@ -589,11 +589,11 @@ public class Gaussian2DFitter
 
 			if (sy == 0)
 			{
-				if (fitConfiguration.isWidth1Fitting())
+				if (fitConfiguration.isYSDFitting())
 				{
-					if (fitConfiguration.getInitialPeakStdDev1() > 0)
+					if (fitConfiguration.getInitialYSD() > 0)
 					{
-						sy = fitConfiguration.getInitialPeakStdDev1();
+						sy = fitConfiguration.getInitialYSD();
 					}
 					else
 					{
@@ -744,7 +744,7 @@ public class Gaussian2DFitter
 			if (lower[0] < 0)
 			{
 				// This is a problem for MLE fitting
-				if (fitConfiguration.requireStrictlyPositiveFunction())
+				if (solver.isStrictlyPositiveFunction())
 					lower[0] = 0;
 			}
 		}
@@ -755,7 +755,7 @@ public class Gaussian2DFitter
 		final double max_wf = getMaxWidthFactor();
 		// Get the upper bounds for the width factor. This is just used to estimate the upper bounds for the signal
 		// So it does not matter if it is too wrong.
-		final double wf = (max_wf < Double.MAX_VALUE) ? fitConfiguration.getWidthFactor() : 3;
+		final double wf = (max_wf < Double.MAX_VALUE) ? fitConfiguration.getMaxWidthFactor() : 3;
 
 		if (npeaks == 1)
 		{
@@ -791,7 +791,7 @@ public class Gaussian2DFitter
 			if (lower[j + Gaussian2DFunction.SIGNAL] < 0)
 			{
 				// This is a problem for MLE fitting
-				if (fitConfiguration.requireStrictlyPositiveFunction())
+				if (solver.isStrictlyPositiveFunction())
 					lower[j + Gaussian2DFunction.SIGNAL] = 0;
 			}
 			if (params[j + Gaussian2DFunction.SIGNAL] > upper[j + Gaussian2DFunction.SIGNAL])
@@ -888,11 +888,11 @@ public class Gaussian2DFitter
 	 */
 	private double getMaxWidthFactor()
 	{
-		if (fitConfiguration.getWidthFactor() > 1)
+		if (fitConfiguration.getMaxWidthFactor() > 1)
 		{
 			// Add some buffer to allow fitting to go past then come back to the limit.
 			// This also allows fitting to fail if the spot is definitely bigger than the configured limits.  
-			return fitConfiguration.getWidthFactor() * 1.5;
+			return fitConfiguration.getMaxWidthFactor() * 1.5;
 		}
 		return Double.MAX_VALUE;
 	}

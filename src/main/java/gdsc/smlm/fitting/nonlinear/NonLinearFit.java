@@ -529,7 +529,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 */
 	public boolean isMLE()
 	{
-		return type == FunctionSolverType.MLE;
+		return getType() == FunctionSolverType.MLE;
 	}
 
 	/**
@@ -544,10 +544,10 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	public void setMLE(boolean mle)
 	{
 		if (mle)
-			type = FunctionSolverType.MLE;
+			setType(FunctionSolverType.MLE);
 		else
 		{
-			type = (func.canComputeWeights()) ? FunctionSolverType.WLSE : FunctionSolverType.LSE;
+			setType((func.canComputeWeights()) ? FunctionSolverType.WLSE : FunctionSolverType.LSE);
 		}
 	}
 
@@ -598,7 +598,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	@Override
 	public double getTotalSumOfSquares()
 	{
-		if (type == FunctionSolverType.LSE)
+		if (getType() == FunctionSolverType.LSE)
 			return super.getTotalSumOfSquares();
 		throw new IllegalStateException();
 	}
@@ -610,7 +610,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 */
 	public double getChiSquared()
 	{
-		if (type == FunctionSolverType.WLSE)
+		if (getType() == FunctionSolverType.WLSE)
 			// The weighted MLE will produce the chi-squared
 			return value;
 		throw new IllegalStateException();
@@ -623,7 +623,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 */
 	public double getLogLikelihood()
 	{
-		if (type == FunctionSolverType.MLE && lastY != null)
+		if (getType() == FunctionSolverType.MLE && lastY != null)
 		{
 			// The MLE version directly computes the log-likelihood ratio.
 			// We must compute the log likelihood for a Poisson MLE.
@@ -641,7 +641,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 */
 	public double getLogLikelihoodRatio()
 	{
-		if (type == FunctionSolverType.MLE)
+		if (getType() == FunctionSolverType.MLE)
 			// The MLE version directly computes the log-likelihood ratio
 			return value;
 		throw new IllegalStateException();
@@ -654,12 +654,12 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 */
 	public double getQ()
 	{
-		if (type == FunctionSolverType.MLE)
+		if (getType() == FunctionSolverType.MLE)
 			// Value will be the log-likelihood ratio for the MLE.
 			// Wilks theorum states the LLR approaches the chi-squared distribution for large n.
 			return ChiSquaredDistributionTable.computeQValue(value,
 					getNumberOfFittedPoints() - getNumberOfFittedParameters());
-		if (type == FunctionSolverType.WLSE)
+		if (getType() == FunctionSolverType.WLSE)
 			// Value will be the Chi-squared
 			return ChiSquaredDistributionTable.computeQValue(value,
 					getNumberOfFittedPoints() - getNumberOfFittedParameters());

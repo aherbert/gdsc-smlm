@@ -1416,8 +1416,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					return 1;
 
 				// Check if centre is within the region - Border allowing fit slightly outside
-				final double borderx = Gaussian2DFunction.SD_TO_HWHM_FACTOR * fitConfig.getInitialPeakStdDev0();
-				final double bordery = Gaussian2DFunction.SD_TO_HWHM_FACTOR * fitConfig.getInitialPeakStdDev1();
+				final double borderx = Gaussian2DFunction.SD_TO_HWHM_FACTOR * fitConfig.getInitialXSD();
+				final double bordery = Gaussian2DFunction.SD_TO_HWHM_FACTOR * fitConfig.getInitialYSD();
 				if ((params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] < -borderx ||
 						params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] > width +
 								borderx) ||
@@ -2717,7 +2717,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						// Set an upper limit on the shift that is not too far outside the fit window
 						final double maxShiftX, maxShiftY;
 						final double factor = Gaussian2DFunction.SD_TO_HWHM_FACTOR;
-						if (fitConfig.isWidth0Fitting())
+						if (fitConfig.isXSDFitting())
 						{
 							// Add the fitted standard deviation to the allowed shift
 							maxShiftX = regionBounds.width * 0.5 + factor * params[Gaussian2DFunction.X_SD];
@@ -2726,8 +2726,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						else
 						{
 							// Add the configured standard deviation to the allowed shift
-							maxShiftX = regionBounds.width * 0.5 + factor * fitConfig.getInitialPeakStdDev0();
-							maxShiftY = regionBounds.height * 0.5 + factor * fitConfig.getInitialPeakStdDev1();
+							maxShiftX = regionBounds.width * 0.5 + factor * fitConfig.getInitialXSD();
+							maxShiftY = regionBounds.height * 0.5 + factor * fitConfig.getInitialYSD();
 						}
 
 						for (int n = 0; n < 2; n++)
@@ -2827,7 +2827,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			sb.append(filterFitConfig.getSignalStrength()).append('\t');
 			sb.append(filterFitConfig.getMinPhotons()).append('\t');
 			sb.append(filterFitConfig.getMinWidthFactor()).append('\t');
-			sb.append(filterFitConfig.getWidthFactor()).append('\t');
+			sb.append(filterFitConfig.getMaxWidthFactor()).append('\t');
 			sb.append(filterFitConfig.getPrecisionThreshold()).append('\t');
 			sb.append(filterFitConfig.isPrecisionUsingBackground()).append('\t');
 		}
@@ -3078,7 +3078,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		StringBuilder sb = new StringBuilder("Filters the doublet fits and reports the performance increase\n");
 
 		// Show the fitting settings that will effect filters, i.e. fit standard deviation, fit width
-		sb.append("SD0 = ").append(Utils.rounded(fitConfig.getInitialPeakStdDev0())).append("\n");
+		sb.append("SD0 = ").append(Utils.rounded(fitConfig.getInitialXSD())).append("\n");
 		//sb.append("SD1 = ").append(Utils.rounded(fitConfig.getInitialPeakStdDev1())).append("\n");
 		sb.append("Fit Width = ").append(config.getRelativeFitting()).append("\n");
 
@@ -3101,7 +3101,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addNumericField("Signal_strength", filterFitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", filterFitConfig.getMinPhotons(), 0);
 		gd.addSlider("Min_width_factor", 0, 0.99, filterFitConfig.getMinWidthFactor());
-		gd.addSlider("Max_width_factor", 1.01, 5, filterFitConfig.getWidthFactor());
+		gd.addSlider("Max_width_factor", 1.01, 5, filterFitConfig.getMaxWidthFactor());
 		gd.addNumericField("Precision", filterFitConfig.getPrecisionThreshold(), 2);
 		gd.addCheckbox("Local_background", filterFitConfig.isPrecisionUsingBackground());
 
@@ -3241,7 +3241,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						textSignalStrength.setText("" + fitConfig.getSignalStrength());
 						textMinPhotons.setText("" + fitConfig.getMinPhotons());
 						textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
-						textWidthFactor.setText("" + fitConfig.getWidthFactor());
+						textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
 						textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
 						cbLocalBackground.setState(fitConfig.isPrecisionUsingBackground());
 					}
@@ -3306,7 +3306,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				textSignalStrength.setText("" + filterFitConfig.getSignalStrength());
 				textMinPhotons.setText("" + filterFitConfig.getMinPhotons());
 				textMinWidthFactor.setText("" + filterFitConfig.getMinWidthFactor());
-				textWidthFactor.setText("" + filterFitConfig.getWidthFactor());
+				textWidthFactor.setText("" + filterFitConfig.getMaxWidthFactor());
 				textPrecisionThreshold.setText("" + filterFitConfig.getPrecisionThreshold());
 				cbLocalBackground.setState(filterFitConfig.isPrecisionUsingBackground());
 			}

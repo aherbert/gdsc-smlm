@@ -19,9 +19,6 @@ import gdsc.smlm.data.config.PSFConfig.PSFParameter;
 import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.fitting.nonlinear.BacktrackingFastMLESteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.BaseFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
@@ -48,10 +45,23 @@ import gdsc.smlm.results.filter.MultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
 
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
 /**
- * Specifies the fitting configuration for Gaussian fitting
+ * Specifies the fitting configuration
  */
-public class FitConfiguration implements Cloneable, IDirectFilter
+public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFitConfiguration
 {
 	private FitSettings.Builder fitSettings;
 
@@ -704,14 +714,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public double getInitialPeakStdDev()
 	{
 		if (isTwoAxisGaussian2D)
-			return Gaussian2DPeakResultHelper.getStandardDeviation(getInitialPeakStdDev0(), getInitialPeakStdDev1());
-		return getInitialPeakStdDev0();
+			return Gaussian2DPeakResultHelper.getStandardDeviation(getInitialXSD(), getInitialYSD());
+		return getInitialXSD();
 	}
 
 	/**
 	 * @return An estimate for the peak standard deviation used to initialise the fit for dimension 0
 	 */
-	public double getInitialPeakStdDev0()
+	public double getInitialXSD()
 	{
 		return psf.getParameter(PSFHelper.INDEX_SX).getValue();
 	}
@@ -735,11 +745,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	/**
 	 * @return An estimate for the peak standard deviation used to initialise the fit for dimension 1
 	 */
-	public double getInitialPeakStdDev1()
+	public double getInitialYSD()
 	{
 		if (isTwoAxisGaussian2D)
 			return psf.getParameter(PSFHelper.INDEX_SY).getValue();
-		return getInitialPeakStdDev0();
+		return getInitialXSD();
 	}
 
 	/**
@@ -885,7 +895,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	/**
 	 * @return True if fitting the peak width in dimension 0
 	 */
-	public boolean isWidth0Fitting()
+	public boolean isXSDFitting()
 	{
 		return (flags & GaussianFunctionFactory.FIT_X_WIDTH) != 0;
 	}
@@ -893,7 +903,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	/**
 	 * @return True if fitting the peak width in dimension 1
 	 */
-	public boolean isWidth1Fitting()
+	public boolean isYSDFitting()
 	{
 		return (flags & GaussianFunctionFactory.FIT_Y_WIDTH) != 0;
 	}
@@ -969,9 +979,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		double shiftFactor = getCoordinateShiftFactor();
 		if (shiftFactor > 0)
 		{
-			double widthMax = getInitialPeakStdDev0();
+			double widthMax = getInitialXSD();
 			if (isTwoAxisGaussian2D)
-				widthMax = Math.max(widthMax, getInitialPeakStdDev1());
+				widthMax = Math.max(widthMax, getInitialYSD());
 			if (widthMax > 0)
 			{
 				setCoordinateShift(shiftFactor * widthMax);
@@ -1189,7 +1199,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	/**
 	 * @return the widthFactor (or zero if not configured)
 	 */
-	public double getWidthFactor()
+	public double getMaxWidthFactor()
 	{
 		double widthFactor = filterSettings.getMaxWidthFactor();
 		return (widthFactor > 1) ? widthFactor : 0;
@@ -1718,7 +1728,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 
 		// Check widths
-		if (isWidth0Fitting())
+		if (isXSDFitting())
 		{
 			boolean badWidth = false;
 			double xFactor = 0, yFactor = 0;
@@ -1727,7 +1737,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			badWidth = (xFactor > widthFactor || xFactor < minWidthFactor);
 
 			// Always do this (even if badWidth=true) since we need the factor for the return value
-			if (isWidth1Fitting())
+			if (isYSDFitting())
 			{
 				yFactor = params[Gaussian2DFunction.Y_SD + offset] / initialParams[Gaussian2DFunction.Y_SD + offset];
 				badWidth = (yFactor > widthFactor || yFactor < minWidthFactor);
@@ -2578,7 +2588,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		double signal = getMinPhotons();
 		float snr = (float) getSignalStrength();
 		double minWidth = getMinWidthFactor();
-		double maxWidth = getWidthFactor();
+		double maxWidth = getMaxWidthFactor();
 		double shift = getCoordinateShiftFactor();
 		double eshift = 0;
 		double precision = getPrecisionThreshold();

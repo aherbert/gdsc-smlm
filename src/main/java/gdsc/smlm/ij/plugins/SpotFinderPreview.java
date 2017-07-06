@@ -118,7 +118,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		gd.addStringField("Config_file", filename, 40);
 
-		gd.addNumericField("Initial_StdDev0", fitConfig.getInitialPeakStdDev0(), 3);
+		gd.addNumericField("Initial_StdDev0", fitConfig.getInitialXSD(), 3);
 		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
 				config.getDataFilterType().ordinal());
 		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
@@ -260,7 +260,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			List<PointPair> matches = new ArrayList<PointPair>(Math.min(actual.length, predicted.length));
 			List<Coordinate> FP = new ArrayList<Coordinate>(predicted.length);
 			MatchResult result = MatchCalculator.analyseResults2D(actual, predicted,
-					distance * fitConfig.getInitialPeakStdDev0(), null, FP, null, matches);
+					distance * fitConfig.getInitialXSD(), null, FP, null, matches);
 
 			// Show scores
 			setLabel(String.format("P=%s, R=%s, J=%s", Utils.rounded(result.getPrecision()),

@@ -1414,9 +1414,9 @@ public class PSFCreator implements PlugInFilter
 		nmPerPixel = new CalibrationReader(SettingsManager.readCalibration()).getNmPerPixel();
 		config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings());
 		fitConfig = config.getFitConfiguration();
-		if (radius < 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()))
+		if (radius < 5 * FastMath.max(fitConfig.getInitialXSD(), fitConfig.getInitialYSD()))
 		{
-			radius = 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+			radius = 5 * FastMath.max(fitConfig.getInitialXSD(), fitConfig.getInitialYSD());
 			Utils.log("Radius is less than 5 * PSF standard deviation, increasing to %s", Utils.rounded(radius));
 		}
 		boxRadius = (int) Math.ceil(radius);
@@ -1535,8 +1535,8 @@ public class PSFCreator implements PlugInFilter
 		final int y = boxRadius;
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		final double shift = fitConfig.getCoordinateShiftFactor();
-		fitConfig.setInitialPeakStdDev0(fitConfig.getInitialPeakStdDev0() * magnification);
-		fitConfig.setInitialPeakStdDev1(fitConfig.getInitialPeakStdDev1() * magnification);
+		fitConfig.setInitialPeakStdDev0(fitConfig.getInitialXSD() * magnification);
+		fitConfig.setInitialPeakStdDev1(fitConfig.getInitialYSD() * magnification);
 		// Need to be updated after the widths have been set
 		fitConfig.setCoordinateShiftFactor(shift);
 		fitConfig.setBackgroundFitting(false);
@@ -1559,8 +1559,8 @@ public class PSFCreator implements PlugInFilter
 		final double[] a = new double[z.length];
 
 		// Set limits for the fit
-		final float maxWidth = (float) (FastMath.max(fitConfig.getInitialPeakStdDev0(),
-				fitConfig.getInitialPeakStdDev1()) * magnification * 4);
+		final float maxWidth = (float) (FastMath.max(fitConfig.getInitialXSD(),
+				fitConfig.getInitialYSD()) * magnification * 4);
 		final float maxSignal = 2; // PSF is normalised to 1  
 
 		final WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);

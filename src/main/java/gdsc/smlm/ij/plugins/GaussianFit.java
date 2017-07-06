@@ -16,6 +16,7 @@ import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Sort;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.PSFConfigHelper;
+import gdsc.smlm.data.config.FitConfig.FitSolver;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -40,6 +41,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -156,7 +158,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			_PSFTypeNames[i] = PSFConfigHelper.getName(_PSFTypeValues[i]);
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -828,12 +830,13 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		// Convert coordinates with 0.5 pixel offset
 		// Convert radians to degrees (if elliptical fitting)
-		for (int i = Gaussian2DFunction.PARAMETERS_PER_PEAK; i < params.length; i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
+		int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
+		for (int i = 0, j = 0; i < n; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
-			params[i - 3] += 0.5;
-			params[i - 2] += 0.5;
+			params[j + Gaussian2DFunction.X_POSITION] += 0.5;
+			params[j + Gaussian2DFunction.Y_POSITION] += 0.5;
 			if (isEllipticalFitting())
-				params[i - 4] *= 180.0 / Math.PI;
+				params[j + Gaussian2DFunction.ANGLE] *= 180.0 / Math.PI;
 		}
 		return params;
 	}
@@ -845,12 +848,13 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		// Convert coordinates with 0.5 pixel offset
 		// Convert radians to degrees (if elliptical fitting)
-		for (int i = Gaussian2DFunction.PARAMETERS_PER_PEAK; i < params.length; i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
+		int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
+		for (int i = 0, j = 0; i < n; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
-			params[i - 3] -= 0.5;
-			params[i - 2] -= 0.5;
+			params[j + Gaussian2DFunction.X_POSITION] -= 0.5;
+			params[j + Gaussian2DFunction.Y_POSITION] -= 0.5;
 			if (isEllipticalFitting())
-				params[i - 4] /= 180.0 / Math.PI;
+				params[j + Gaussian2DFunction.ANGLE] *= Math.PI / 180.0;
 		}
 		return params;
 	}
@@ -902,6 +906,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	private Gaussian2DFitter createGaussianFitter(boolean simpleFiltering)
 	{
 		FitConfiguration config = new FitConfiguration();
+		config.setFitSolver(FitSolver.LVM_LSE);
 		config.setPSF(PSFConfigHelper.getDefaultPSF(getPSFType()));
 		config.setMaxIterations(getMaxIterations());
 		config.setRelativeThreshold(relativeThreshold);
@@ -939,7 +944,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * Fits a single 2D Gaussian to the image within the image processor. The fit is initialised at the highest pixel
 	 * value and then optimised.
 	 * <p>
-	 * The angle parameter is only returned if using elliptical Gaussian fitting.
+	 * The angle parameter is only set if using elliptical Gaussian fitting.
 	 * <p>
 	 * Note: The fitted coordinates are offset by 0.5, i.e. using the middle of the pixel. This equates to input data
 	 * 0,0 representing 0.5,0.5.
@@ -949,11 +954,16 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 */
 	public double[] fit(ImageProcessor ip)
 	{
+		// Note: This is a library function used in e.g. GDSC ImageJ plugins: FindFoci
+		
 		float[] data = (float[]) ip.toFloat(0, null).getPixels();
 
 		double[] result = fit(data, ip.getWidth(), ip.getHeight());
-		result[2] += 0.5;
-		result[3] += 0.5;
+		if (result != null)
+		{
+			result[2] += 0.5;
+			result[3] += 0.5;
+		}
 		return result;
 	}
 
@@ -963,15 +973,17 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * <p>
 	 * Data must be arranged in yx block order, i.e. height rows of width.
 	 * <p>
-	 * The angle parameter is only returned if using elliptical Gaussian fitting.
+	 * The angle parameter is only set if using elliptical Gaussian fitting.
 	 * <p>
-	 * Note: The fit coordinates should be offset by 0.5 if the input data represents pixels
+	 * Note: The returned fit coordinates should be offset by 0.5 if the input data represents pixels
 	 * 
 	 * @return Array containing the fitted curve data: Background, Amplitude, PosX, PosY, StdDevX, StdDevY, Angle. Null
 	 *         if no fit is possible.
 	 */
 	public double[] fit(float[] data, int width, int height)
 	{
+		// Note: This is a library function used in e.g. GDSC ImageJ plugins: FindFoci
+		
 		if (data == null || data.length != width * height)
 			return null;
 
@@ -1001,12 +1013,20 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			double[] params = fitResult.getParameters();
 
 			// Check bounds
-			if (params[3] < 0 || params[3] >= width || params[4] < 0 || params[4] >= height)
+			double x = params[Gaussian2DFunction.X_POSITION];
+			double y = params[Gaussian2DFunction.Y_POSITION];
+			if (x < 0 || x >= width || y < 0 || y >= height)
 				return null;
 
 			// Re-arrange order for backwards compatibility with old code.
-			return new double[] { params[0], params[1], params[3], params[4], Gaussian2DFitter.fwhm2sd(params[5]),
-					Gaussian2DFitter.fwhm2sd(params[6]), params[2] };
+			double background = params[Gaussian2DFunction.BACKGROUND];
+			double intensity = params[Gaussian2DFunction.SIGNAL];
+			double sx = params[Gaussian2DFunction.X_SD];
+			double sy = params[Gaussian2DFunction.Y_SD];
+			double angle = params[Gaussian2DFunction.ANGLE];
+			double amplitude = Gaussian2DPeakResultHelper.getAmplitude(intensity, sx, sy);
+
+			return new double[] { background, amplitude, x, y, sx, sy, angle };
 		}
 
 		return null;
@@ -1203,7 +1223,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	{
 		return fitFunction;
 	}
-	
+
 	/**
 	 * Gets the PSF type.
 	 *

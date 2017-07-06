@@ -94,6 +94,13 @@ public interface FunctionSolver
 	 * @return True if the function solver supports per observation weights
 	 */
 	public boolean isWeighted();
+	
+	/**
+	 * Checks if the function solver requires a strictly positive function.
+	 *
+	 * @return true, if the function solver requires a strictly positive function
+	 */
+	public boolean isStrictlyPositiveFunction();
 
 	/**
 	 * Set the bounds for each of the parameters. If a subset of the parameters are fitted then the bounds can be

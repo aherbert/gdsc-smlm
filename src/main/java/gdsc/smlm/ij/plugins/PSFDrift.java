@@ -148,7 +148,7 @@ public class PSFDrift implements PlugIn
 			this.jobs = jobs;
 			this.psf = psf.copy();
 			this.fitConfig = fitConfig.clone();
-			s = fitConfig.getInitialPeakStdDev0();
+			s = fitConfig.getInitialXSD();
 			a = psfSettings.nmPerPixel * scale;
 			xy = PSFDrift.getStartPoints(PSFDrift.this);
 			w = width;
@@ -346,7 +346,7 @@ public class PSFDrift implements PlugIn
 			//}
 
 			// Q. Should we do width bounds checking?
-			if (fitConfig.isWidth0Fitting())
+			if (fitConfig.isXSDFitting())
 			{
 				if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD] ||
 						params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])
@@ -355,7 +355,7 @@ public class PSFDrift implements PlugIn
 					return false;
 				}
 			}
-			if (fitConfig.isWidth1Fitting())
+			if (fitConfig.isYSDFitting())
 			{
 				if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD] ||
 						params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])
@@ -410,7 +410,7 @@ public class PSFDrift implements PlugIn
 				fitConfig.getFitSolver().ordinal());
 		// We need these to set bounds for any bounded fitters
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
+		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
 		gd.addCheckbox("Offset_fit", offsetFitting);
 		gd.addNumericField("Start_offset", startOffset, 3);
 		gd.addCheckbox("Include_CoM_fit", comFitting);

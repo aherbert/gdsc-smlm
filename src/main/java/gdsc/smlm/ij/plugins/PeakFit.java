@@ -828,7 +828,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						config.getNoiseMethod().ordinal());
 			}
 			gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-			gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
+			gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
 			gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
 		}
 
@@ -1133,7 +1133,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 
 		// Restore fitting to default settings but maintain the calibrated width
-		final double sd = fitConfig.getInitialPeakStdDev0();
+		final double sd = fitConfig.getInitialXSD();
 		config = new FitEngineConfiguration();
 		fitConfig = config.getFitConfiguration();
 		fitConfig.setInitialPeakStdDev(sd);
@@ -1164,7 +1164,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		Utils.log("Pixel pitch = %s", Utils.rounded(calibration.getNmPerPixel(), 4));
 		Utils.log("Exposure Time = %s", Utils.rounded(calibration.getExposureTime(), 4));
 		Utils.log("Gain = %s", Utils.rounded(calibration.getGain(), 4));
-		Utils.log("PSF width = %s", Utils.rounded(fitConfig.getInitialPeakStdDev0(), 4));
+		Utils.log("PSF width = %s", Utils.rounded(fitConfig.getInitialXSD(), 4));
 
 		// Save
 		saveFitEngineSettings();
@@ -1211,7 +1211,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			return true;
 
 		// Check for a PSF width
-		if (fitConfig.getInitialPeakStdDev0() <= 0)
+		if (fitConfig.getInitialXSD() <= 0)
 			return true;
 
 		return false;
@@ -1249,7 +1249,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
 			Parameters.isAboveZero("Gain", calibration.getGain());
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
-			Parameters.isAboveZero("Initial SD", fitConfig.getInitialPeakStdDev0());
+			Parameters.isAboveZero("Initial SD", fitConfig.getInitialXSD());
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -1323,7 +1323,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				"The peak width can be estimated using the wavelength of light emitted by the single molecules and the parameters of the microscope. Use a PSF calculator by clicking the checkbox below:");
 		// Add ability to run the PSF Calculator to get the width
 		gd.addCheckbox("Run_PSF_calculator", false);
-		gd.addNumericField("Gaussian_SD", fitConfig.getInitialPeakStdDev0(), 3);
+		gd.addNumericField("Gaussian_SD", fitConfig.getInitialXSD(), 3);
 		if (Utils.isShowGenericDialog())
 		{
 			final TextField textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
@@ -1523,10 +1523,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
 			Parameters.isAboveZero("Gain", calibration.getGain());
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
-			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialPeakStdDev0());
+			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
 			if (fitConfig.getPSF().getParameterCount() > 1)
 			{
-				Parameters.isAboveZero("Initial SD1", fitConfig.getInitialPeakStdDev1());
+				Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
 			}
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
@@ -1549,7 +1549,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				if (!fitConfig.isSmartFilter())
 				{
 					Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
-					Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
+					Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
 					Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
 				}
 			}
@@ -2403,8 +2403,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 			IJ.log("-=-=-=-");
 			IJ.log("Peak Fit");
 			IJ.log("-=-=-=-");
-			Utils.log("Initial Peak SD = %s,%s", Utils.rounded(fitConfig.getInitialPeakStdDev0()),
-					Utils.rounded(fitConfig.getInitialPeakStdDev1()));
+			Utils.log("Initial Peak SD = %s,%s", Utils.rounded(fitConfig.getInitialXSD()),
+					Utils.rounded(fitConfig.getInitialYSD()));
 			SpotFilter spotFilter = engine.getSpotFilter();
 			IJ.log("Spot Filter = " + spotFilter.getDescription());
 			int w = 2 * engine.getFitting() + 1;
@@ -2418,7 +2418,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				IJ.log("Smart filter = " + fitConfig.getSmartFilter().getDescription());
 			if (extraOptions)
 				IJ.log("Noise = " + Utils.rounded(fitConfig.getNoise()));
-			IJ.log("Width factor = " + Utils.rounded(fitConfig.getWidthFactor()));
+			IJ.log("Width factor = " + Utils.rounded(fitConfig.getMaxWidthFactor()));
 			IJ.log("-=-=-=-");
 		}
 
@@ -2657,7 +2657,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			{
 				textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
 				textSignalStrength.setText("" + fitConfig.getSignalStrength());
-				textWidthFactor.setText("" + fitConfig.getWidthFactor());
+				textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
 				textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
 			}
 			// These are used for settings the bounds so they are included

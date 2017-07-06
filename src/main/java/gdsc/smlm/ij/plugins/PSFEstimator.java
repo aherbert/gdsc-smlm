@@ -139,8 +139,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	{
 		// Keep class variables for the parameters we are fitting 
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		initialPeakStdDev0 = fitConfig.getInitialPeakStdDev0();
-		initialPeakStdDev1 = fitConfig.getInitialPeakStdDev1();
+		initialPeakStdDev0 = fitConfig.getInitialXSD();
+		initialPeakStdDev1 = fitConfig.getInitialYSD();
 		initialPeakAngle = fitConfig.getInitialAngle();
 
 		if (!extraOptions)
@@ -209,7 +209,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
+		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
 		gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
 
 		if (gd.getLayout() != null)
@@ -319,7 +319,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
 			Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
 			Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
-			Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
+			Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
 		}
 		catch (IllegalArgumentException e)
 		{

@@ -37,21 +37,21 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 	 * @throws IllegalArgumentException
 	 *             If the configuration is missing information, e.g. initial widths
 	 */
-	public FastGaussian2DFitter(FitConfiguration fitConfiguration)
+	public FastGaussian2DFitter(Gaussian2DFitConfiguration fitConfiguration)
 	{
 		super(fitConfiguration);
 
 		// Cache the estimate for the Gaussian
-		if (fitConfiguration.getInitialPeakStdDev0() > 0)
-			sx = fitConfiguration.getInitialPeakStdDev0();
+		if (fitConfiguration.getInitialXSD() > 0)
+			sx = fitConfiguration.getInitialXSD();
 		else
 			throw new IllegalArgumentException("No initial width0 estimate");
 
-		isWidth1Fitting = fitConfiguration.isWidth1Fitting();
+		isWidth1Fitting = fitConfiguration.isYSDFitting();
 		if (isWidth1Fitting)
 		{
-			if (fitConfiguration.getInitialPeakStdDev1() > 0)
-				sy = fitConfiguration.getInitialPeakStdDev1();
+			if (fitConfiguration.getInitialYSD() > 0)
+				sy = fitConfiguration.getInitialYSD();
 			else
 				throw new IllegalArgumentException("No initial width1 estimate");
 		}

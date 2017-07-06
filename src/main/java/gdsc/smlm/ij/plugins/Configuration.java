@@ -126,7 +126,7 @@ public class Configuration implements PlugIn, ItemListener
 		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
+		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
 		gd.addNumericField("Precision_threshold", fitConfig.getPrecisionThreshold(), 2);
 
 		// Add a mouse listener to the config file field
@@ -244,8 +244,8 @@ public class Configuration implements PlugIn, ItemListener
 			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
 			Parameters.isAboveZero("Gain", calibration.getGain());
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
-			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialPeakStdDev0());
-			Parameters.isAboveZero("Initial SD1", fitConfig.getInitialPeakStdDev1());
+			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
+			Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isPositive("Failures limit", config.getFailuresLimit());
@@ -256,7 +256,7 @@ public class Configuration implements PlugIn, ItemListener
 			Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
 			Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
 			Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
-			Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
+			Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
 			Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
 		}
 		catch (IllegalArgumentException e)

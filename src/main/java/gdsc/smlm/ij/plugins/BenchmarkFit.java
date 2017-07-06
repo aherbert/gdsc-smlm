@@ -255,8 +255,8 @@ public class BenchmarkFit implements PlugIn
 			double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
 			initialParams[Gaussian2DFunction.SIGNAL] = signal;
-			initialParams[Gaussian2DFunction.X_SD] = fitConfig.getInitialPeakStdDev0();
-			initialParams[Gaussian2DFunction.Y_SD] = fitConfig.getInitialPeakStdDev1();
+			initialParams[Gaussian2DFunction.X_SD] = fitConfig.getInitialXSD();
+			initialParams[Gaussian2DFunction.Y_SD] = fitConfig.getInitialYSD();
 
 			double[][] bounds = null;
 			double[][] result = new double[xy.length][];
@@ -432,7 +432,7 @@ public class BenchmarkFit implements PlugIn
 			}
 
 			// Q. Should we do width bounds checking?
-			if (fitConfig.isWidth0Fitting())
+			if (fitConfig.isXSDFitting())
 			{
 				if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD] ||
 						params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])
@@ -440,7 +440,7 @@ public class BenchmarkFit implements PlugIn
 					return false;
 				}
 			}
-			if (fitConfig.isWidth1Fitting())
+			if (fitConfig.isYSDFitting())
 			{
 				if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD] ||
 						params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])
@@ -1085,8 +1085,8 @@ public class BenchmarkFit implements PlugIn
 		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
 		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;
-		convert[Gaussian2DFunction.X_SD] = (fitConfig.isWidth0Fitting()) ? benchmarkParameters.a : 0;
-		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isWidth1Fitting()) ? benchmarkParameters.a : 0;
+		convert[Gaussian2DFunction.X_SD] = (fitConfig.isXSDFitting()) ? benchmarkParameters.a : 0;
+		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isYSDFitting()) ? benchmarkParameters.a : 0;
 		convert[TIME] = 1e-6;
 		convert[ACTUAL_SIGNAL] = convert[Gaussian2DFunction.SIGNAL];
 		convert[ADJUSTED_X_SD] = convert[Gaussian2DFunction.X_SD];

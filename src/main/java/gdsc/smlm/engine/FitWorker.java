@@ -446,8 +446,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		if (params != null && params.fitTask == FitTask.MAXIMA_IDENITIFICATION)
 		{
-			final float sd0 = (float) fitConfig.getInitialPeakStdDev0();
-			final float sd1 = (float) fitConfig.getInitialPeakStdDev1();
+			final float sd0 = (float) fitConfig.getInitialXSD();
+			final float sd1 = (float) fitConfig.getInitialYSD();
 			for (int n = 0; n < candidates.getSize(); n++)
 			{
 				// Find the background using the perimeter of the data.
@@ -906,8 +906,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// results are still valid.
 
 			final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
-			initialParams[Gaussian2DFunction.X_SD + offset] = fitConfig.getInitialPeakStdDev0();
-			initialParams[Gaussian2DFunction.Y_SD + offset] = fitConfig.getInitialPeakStdDev1();
+			initialParams[Gaussian2DFunction.X_SD + offset] = fitConfig.getInitialXSD();
+			initialParams[Gaussian2DFunction.Y_SD + offset] = fitConfig.getInitialYSD();
 			return createResult(candidateId, n, initialParams, params, localBackground, resultType);
 		}
 
@@ -1380,8 +1380,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			initialParams[Gaussian2DFunction.X_POSITION] = candidates.get(candidateId).x - regionBounds.x;
 			initialParams[Gaussian2DFunction.Y_POSITION] = candidates.get(candidateId).y - regionBounds.y;
-			initialParams[Gaussian2DFunction.X_SD] = fitConfig.getInitialPeakStdDev0();
-			initialParams[Gaussian2DFunction.Y_SD] = fitConfig.getInitialPeakStdDev1();
+			initialParams[Gaussian2DFunction.X_SD] = fitConfig.getInitialXSD();
+			initialParams[Gaussian2DFunction.Y_SD] = fitConfig.getInitialYSD();
 
 			// Perform validation of the candidate and existing peaks (other candidates are allowed to fail)
 			if (fitResult.getStatus() == FitStatus.OK)
