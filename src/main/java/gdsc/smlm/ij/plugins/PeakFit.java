@@ -34,7 +34,6 @@ import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfig.CameraType;
-import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
@@ -53,9 +52,7 @@ import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
 import gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings;
 import gdsc.smlm.data.config.ResultsConfigHelper;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -593,7 +590,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		results.setCalibration(fitConfig.getCalibration());
 		results.setPSF(fitConfig.getPSF());
-		results.setConfiguration(XmlUtils.toXML(config));
+		results.setConfiguration(SettingsManager.toJSON(config.getFitEngineSettings()));
 
 		addTableResults(results);
 		ResultsManager.addImageResults(results, resultsSettings.getResultsImageSettings(), bounds,

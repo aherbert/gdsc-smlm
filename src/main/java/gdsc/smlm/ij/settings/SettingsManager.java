@@ -12,15 +12,19 @@ import java.util.EnumSet;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Parser;
+import com.google.protobuf.util.JsonFormat;
+import com.google.protobuf.util.JsonFormat.Printer;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.BitFlags;
+import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfigHelper;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
 import gdsc.smlm.data.config.FitConfig.DataFilterType;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
@@ -69,6 +73,10 @@ public class SettingsManager
 	public static final int FLAG_SILENT = 0x00000001;
 	/** Use this flag to suppress returning a default instance. */
 	public static final int FLAG_NO_DEFAULT = 0x00000002;
+	/** Use this flag to include insignificant whitespace in JSON output. */
+	public static final int FLAG_JSON_WHITESPACE = 0x00000004;
+	/** Use this flag to include default values in JSON output. */
+	public static final int FLAG_JSON_DEFAULT_VALUES = 0x00000008;
 
 	/** The settings directory. */
 	private static File settingsDirectory;
@@ -1185,7 +1193,7 @@ public class SettingsManager
 		{
 			//e.printStackTrace();
 			if (!silent)
-				IJ.log("Unable to read message to: " + e.getMessage());
+				IJ.log("Unable to read message: " + e.getMessage());
 		}
 		finally
 		{
@@ -1227,8 +1235,96 @@ public class SettingsManager
 		{
 			//e.printStackTrace();
 			if (!silent)
-				IJ.log("Unable to read message to: " + e.getMessage());
+				IJ.log("Unable to read message: " + e.getMessage());
 		}
 		return null;
+	}
+
+	private static Printer printer = null;
+
+	/**
+	 * Write the message to a JSON string.
+	 *
+	 * @param msg
+	 *            the msg
+	 * @return the JSON string
+	 */
+	public static String toJSON(Message msg)
+	{
+		return toJSON(msg, 0);
+	}
+
+	/**
+	 * Write the message to a JSON string.
+	 *
+	 * @param message
+	 *            the message
+	 * @param flags
+	 *            the flags
+	 * @return the JSON string
+	 */
+	public static String toJSON(Message msg, int flags)
+	{
+		try
+		{
+			if (printer == null)
+				printer = JsonFormat.printer();
+			Printer p = printer;
+			if (BitFlags.anyNotSet(flags, FLAG_JSON_WHITESPACE))
+				p = p.omittingInsignificantWhitespace();
+			if (BitFlags.anySet(flags, FLAG_JSON_DEFAULT_VALUES))
+				p = p.includingDefaultValueFields();
+			return p.print(msg);
+		}
+		catch (InvalidProtocolBufferException e)
+		{
+			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+				IJ.log("Unable to write message: " + e.getMessage());
+		}
+		return null;
+	}
+
+	private static com.google.protobuf.util.JsonFormat.Parser parser = null;
+
+	/**
+	 * Read the message from a JSON string.
+	 *
+	 * @param json
+	 *            the JSON string
+	 * @param builder
+	 *            the builder
+	 * @return true, if successful
+	 */
+	public static boolean fromJSON(String json, Message.Builder builder)
+	{
+		return fromJSON(json, builder, 0);
+	}
+
+	/**
+	 * Read the message from a JSON string.
+	 *
+	 * @param json
+	 *            the JSON string
+	 * @param builder
+	 *            the builder
+	 * @param flags
+	 *            the flags
+	 * @return true, if successful
+	 */
+	public static boolean fromJSON(String json, Message.Builder builder, int flags)
+	{
+		try
+		{
+			if (parser == null)
+				parser = JsonFormat.parser();
+			parser.merge(json, builder);
+			return true;
+		}
+		catch (InvalidProtocolBufferException e)
+		{
+			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+				IJ.log("Unable to read message: " + e.getMessage());
+		}
+		return false;
 	}
 }
