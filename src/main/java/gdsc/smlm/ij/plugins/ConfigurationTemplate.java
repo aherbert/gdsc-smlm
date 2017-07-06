@@ -322,6 +322,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 				if (line.length() == 0 || line.charAt(0) == '#')
 					continue;
 
+				//System.out.println(line);
+
 				String template = line;
 				boolean optional = true;
 				// Mandatory templates have a '*' suffix 
@@ -378,7 +380,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			return 0;
 		int count = 0;
 		Class<ConfigurationTemplate> resourceClass = ConfigurationTemplate.class;
-		TemplateSettings.Builder builder = TemplateSettings.newBuilder(); 
+		TemplateSettings.Builder builder = TemplateSettings.newBuilder();
 		for (TemplateResource template : templates)
 		{
 			// Skip those already done
@@ -388,9 +390,27 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			InputStream templateStream = resourceClass.getResourceAsStream(template.path);
 			if (templateStream == null)
 				continue;
-			Reader reader = new InputStreamReader(templateStream);
+
+			//// Debug by printing the entire resource
+			//{
+			//	InputStreamReader reader = new InputStreamReader(resourceClass.getResourceAsStream(template.path));
+			//	BufferedReader input = new BufferedReader(reader);
+			//	String line;
+			//	try
+			//	{
+			//		while ((line = input.readLine()) != null)
+			//			System.out.println(line);
+			//	}
+			//	catch (Exception e)
+			//	{
+			//	}
+			//}
+
+			InputStreamReader reader = new InputStreamReader(templateStream);
 			builder.clear();
-			if (SettingsManager.fromJSON(reader, builder, SettingsManager.FLAG_SILENT))
+			if (SettingsManager.fromJSON(reader, builder, 0
+			//SettingsManager.FLAG_SILENT
+			))
 			{
 				count++;
 				addTemplate(template.name, builder.build(), false, null, template.tifPath);
@@ -626,7 +646,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		list = StringSorter.sortNumerically(list);
 
 		int count = 0;
-		TemplateSettings.Builder builder = TemplateSettings.newBuilder();		
+		TemplateSettings.Builder builder = TemplateSettings.newBuilder();
 		for (String path : list)
 		{
 			builder.clear();

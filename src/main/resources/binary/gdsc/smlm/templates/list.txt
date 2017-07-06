@@ -1,5 +1,5 @@
 # Mandatory
-MT0.N1.HD.xml*
+Dummy1.json.txt*
 # Optional
-MT0.N1.HDb.xml
-template.xml
+Dummy2.json.txt
+missing.txt

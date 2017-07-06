@@ -11,15 +11,51 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
+import gdsc.smlm.data.config.FitConfig.DataFilterType;
+import gdsc.smlm.data.config.TemplateConfig.TemplateSettings;
+import gdsc.smlm.engine.FitConfiguration;
+import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.ij.plugins.ConfigurationTemplate.TemplateResource;
-import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.filter.MultiFilter2;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.process.FloatProcessor;
 
-@SuppressWarnings("deprecation")
 public class ConfigurationTemplateTest
 {
+	@Test
+	public void canCreateResourceTemplate() throws IOException
+	{
+		// This is not really a test. 
+		// It creates some templates so that they can be put in the resources folder.
+		File tmpFile = File.createTempFile("template", ".json.txt");
+		tmpFile.deleteOnExit();
+
+		FitEngineConfiguration config = new FitEngineConfiguration();
+		FitConfiguration fitConfig = config.getFitConfiguration();
+		fitConfig.setMaxIterations(150);
+		fitConfig.setMinWidthFactor(0.2);
+		fitConfig.setMinWidthFactor(5);
+		fitConfig.setSmartFilter(true);
+		fitConfig.setDirectFilter(new MultiFilter2(0, 22, 0.56, 2.55, 3.3, 0, 31));
+		config.setSearch(0.607);
+		config.setBorder(1);
+		config.setFitting(3);
+		config.setFailuresLimit(3);
+		config.setIncludeNeighbours(true);
+		config.setNeighbourHeightThreshold(0.3);
+		config.setResidualsThreshold(0.4);
+		config.setDataFilterType(DataFilterType.SINGLE);
+		config.setDataFilter(DataFilterMethod.GAUSSIAN, 0.425, false, 0);
+
+		//System.out.println(tmpFile.getPath());
+		TemplateSettings.Builder builder = TemplateSettings.newBuilder();
+		builder.setFitEngineSettings(config.getFitEngineSettings());
+		Assert.assertTrue(SettingsManager.toJSON(builder.build(), tmpFile, SettingsManager.FLAG_JSON_WHITESPACE));
+	}
+
 	@Test
 	public void canLoadResourceTemplates()
 	{
@@ -63,7 +99,7 @@ public class ConfigurationTemplateTest
 		HashSet<String> set = new HashSet<String>(Arrays.asList(after));
 		set.removeAll(Arrays.asList(before));
 
-		Assert.assertEquals("Loaded incorrect number", set.size(), templates.length);
+		Assert.assertEquals("Loaded incorrect number", templates.length, set.size());
 
 		// Check all have been loaded
 		for (TemplateResource template : templates)
@@ -87,7 +123,7 @@ public class ConfigurationTemplateTest
 		{
 			String name = "Test" + i;
 			names[i] = name;
-			ConfigurationTemplate.saveTemplate(name, new GlobalSettings(), null);
+			ConfigurationTemplate.saveTemplate(name, TemplateSettings.getDefaultInstance(), null);
 		}
 
 		Assert.assertArrayEquals(names, ConfigurationTemplate.getTemplateNames());
@@ -113,7 +149,7 @@ public class ConfigurationTemplateTest
 
 		String name = "canLoadTemplateImageFromFile";
 		File file = new File(Utils.replaceExtension(tmpFile.getPath(), ".xml"));
-		ConfigurationTemplate.saveTemplate(name, new GlobalSettings(), file);
+		ConfigurationTemplate.saveTemplate(name, TemplateSettings.getDefaultInstance(), file);
 
 		Assert.assertEquals(1, ConfigurationTemplate.getTemplateNamesWithImage().length);
 
