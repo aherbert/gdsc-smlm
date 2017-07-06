@@ -6,6 +6,8 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.data.DataException;
 import gdsc.core.utils.Maths;
+import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIConfigHelper;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
@@ -22,8 +24,6 @@ import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.smlm.ij.settings.FilterSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.MaskDistribution;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -48,7 +48,7 @@ public class FilterResults implements PlugIn
 
 	private MemoryPeakResults results;
 
-	private FilterSettings filterSettings = new FilterSettings();
+	private GUIFilterSettings.Builder filterSettings = GUIConfigHelper.defaultGUIFilterSettings.toBuilder();
 
 	// Used to pass data from analyseResults() to checkLimits()
 	private float minDrift = Float.MAX_VALUE;
@@ -177,7 +177,7 @@ public class FilterResults implements PlugIn
 				if (minSignal > signal)
 					minSignal = signal;
 
-				final float snr = getSNR(result);
+				final float snr = getSnr(result);
 				if (maxSNR < snr)
 					maxSNR = snr;
 				if (minSNR > snr)
@@ -214,7 +214,7 @@ public class FilterResults implements PlugIn
 		return FastMath.max(Math.abs(result.origX - x), Math.abs(result.origY - y));
 	}
 
-	private float getSNR(PeakResult result)
+	private float getSnr(PeakResult result)
 	{
 		if (result.noise <= 0)
 			return 0;
@@ -226,29 +226,29 @@ public class FilterResults implements PlugIn
 	 */
 	private void checkLimits()
 	{
-		if (filterSettings.maxDrift > maxDrift || filterSettings.maxDrift < minDrift)
-			filterSettings.maxDrift = maxDrift;
+		if (filterSettings.getMaxDrift() > maxDrift || filterSettings.getMaxDrift() < minDrift)
+			filterSettings.setMaxDrift(maxDrift);
 
-		if (filterSettings.minSignal > maxSignal || filterSettings.minSignal < minSignal)
-			filterSettings.minSignal = minSignal;
+		if (filterSettings.getMinSignal() > maxSignal || filterSettings.getMinSignal() < minSignal)
+			filterSettings.setMinSignal(minSignal);
 
-		if (filterSettings.minSNR > maxSNR || filterSettings.minSNR < minSNR)
-			filterSettings.minSNR = minSNR;
+		if (filterSettings.getMinSnr() > maxSNR || filterSettings.getMinSnr() < minSNR)
+			filterSettings.setMinSnr(minSNR);
 
-		if (filterSettings.maxPrecision > maxPrecision || filterSettings.maxPrecision < minPrecision)
-			filterSettings.maxPrecision = maxPrecision;
+		if (filterSettings.getMaxPrecision() > maxPrecision || filterSettings.getMaxPrecision() < minPrecision)
+			filterSettings.setMaxPrecision(maxPrecision);
 
-		if (filterSettings.minWidth > maxWidth || filterSettings.minWidth < minWidth)
-			filterSettings.minWidth = minWidth;
+		if (filterSettings.getMinWidth() > maxWidth || filterSettings.getMinWidth() < minWidth)
+			filterSettings.setMinWidth(minWidth);
 
-		if (filterSettings.maxWidth > maxWidth || filterSettings.maxWidth < minWidth)
-			filterSettings.maxWidth = maxWidth;
+		if (filterSettings.getMaxWidth() > maxWidth || filterSettings.getMaxWidth() < minWidth)
+			filterSettings.setMaxWidth(maxWidth);
 
-		if (filterSettings.minWidth > filterSettings.maxWidth)
+		if (filterSettings.getMinWidth() > filterSettings.getMaxWidth())
 		{
-			float tmp = filterSettings.maxWidth;
-			filterSettings.maxWidth = filterSettings.minWidth;
-			filterSettings.minWidth = tmp;
+			float tmp = filterSettings.getMaxWidth();
+			filterSettings.setMaxWidth(filterSettings.getMinWidth());
+			filterSettings.setMinWidth(tmp);
 		}
 	}
 
@@ -264,7 +264,7 @@ public class FilterResults implements PlugIn
 		newResults.setName(results.getName() + " Filtered");
 
 		// Initialise the mask
-		ByteProcessor mask = getMask(filterSettings.maskTitle);
+		ByteProcessor mask = getMask(filterSettings.getMaskTitle());
 		MaskDistribution maskFilter = null;
 		final float centreX = results.getBounds().width / 2.0f;
 		final float centreY = results.getBounds().height / 2.0f;
@@ -284,13 +284,13 @@ public class FilterResults implements PlugIn
 			// sp will not be null
 
 			// We stored the drift=z, intensity=signal, background=snr 
-			if (sp.z[i] > filterSettings.maxDrift)
+			if (sp.z[i] > filterSettings.getMaxDrift())
 				continue;
 
-			if (sp.intensity[i] < filterSettings.minSignal)
+			if (sp.intensity[i] < filterSettings.getMinSignal())
 				continue;
 
-			if (sp.background[i] < filterSettings.minSNR)
+			if (sp.background[i] < filterSettings.getMinSnr())
 				continue;
 
 			if (maskFilter != null)
@@ -308,7 +308,7 @@ public class FilterResults implements PlugIn
 			if (wp != null)
 			{
 				final float width = wp.wx[i];
-				if (width < filterSettings.minWidth || width > filterSettings.maxWidth)
+				if (width < filterSettings.getMinWidth() || width > filterSettings.getMaxWidth())
 					continue;
 			}
 
@@ -336,40 +336,39 @@ public class FilterResults implements PlugIn
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		GlobalSettings gs = SettingsManager.loadSettings();
-		filterSettings = gs.getFilterSettings();
+		filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
 		checkLimits();
 
-		gd.addSlider("Max_drift", minDrift, maxDrift, filterSettings.maxDrift);
-		gd.addSlider("Min_Signal", minSignal, maxSignal, filterSettings.minSignal);
-		gd.addSlider("Min_SNR", minSNR, maxSNR, filterSettings.minSNR);
-		gd.addSlider("Min_Precision", minPrecision, maxPrecision, filterSettings.maxPrecision);
+		gd.addSlider("Max_drift", minDrift, maxDrift, filterSettings.getMaxDrift());
+		gd.addSlider("Min_Signal", minSignal, maxSignal, filterSettings.getMinSignal());
+		gd.addSlider("Min_SNR", minSNR, maxSNR, filterSettings.getMinSnr());
+		gd.addSlider("Min_Precision", minPrecision, maxPrecision, filterSettings.getMaxPrecision());
 
 		// TODO - If calibrated present the widths in nm
 		gd.addMessage("Average Width = " + IJ.d2s(averageWidth, 3));
 
-		gd.addSlider("Min_Width", minWidth, maxWidth, filterSettings.minWidth);
-		gd.addSlider("Max_Width", minWidth, maxWidth, filterSettings.maxWidth);
+		gd.addSlider("Min_Width", minWidth, maxWidth, filterSettings.getMinWidth());
+		gd.addSlider("Max_Width", minWidth, maxWidth, filterSettings.getMaxWidth());
 
 		// Get a list of potential mask images
 		String[] items = getImageList();
-		gd.addChoice("Mask", items, filterSettings.maskTitle);
+		gd.addChoice("Mask", items, filterSettings.getMaskTitle());
 
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return false;
 
-		filterSettings.maxDrift = (float) gd.getNextNumber();
-		filterSettings.minSignal = (float) gd.getNextNumber();
-		filterSettings.minSNR = (float) gd.getNextNumber();
-		filterSettings.maxPrecision = (float) gd.getNextNumber();
-		filterSettings.minWidth = (float) gd.getNextNumber();
-		filterSettings.maxWidth = (float) gd.getNextNumber();
-		filterSettings.maskTitle = gd.getNextChoice();
+		filterSettings.setMaxDrift((float) gd.getNextNumber());
+		filterSettings.setMinSignal((float) gd.getNextNumber());
+		filterSettings.setMinSnr((float) gd.getNextNumber());
+		filterSettings.setMaxPrecision((float) gd.getNextNumber());
+		filterSettings.setMinWidth((float) gd.getNextNumber());
+		filterSettings.setMaxWidth((float) gd.getNextNumber());
+		filterSettings.setMaskTitle(gd.getNextChoice());
 
-		return SettingsManager.saveSettings(gs);
+		return SettingsManager.writeSettings(filterSettings.build());
 	}
 
 	/**

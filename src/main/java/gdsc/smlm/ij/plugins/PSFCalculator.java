@@ -1,6 +1,9 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
+import gdsc.smlm.data.config.GUIConfig.PSFCalculatorSettings;
+import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -16,8 +19,6 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.ij.settings.GlobalSettings;
-import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.model.AiryPattern;
@@ -47,7 +48,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 */
 	public static final double AIRY_TO_GAUSSIAN = 1.323;
 
-	private PSFCalculatorSettings settings;
+	private PSFCalculatorSettings.Builder settings;
 	private GenericDialog gd;
 	private Label abbeLimitLabel;
 	private Label pixelPitchLabel;
@@ -63,19 +64,20 @@ public class PSFCalculator implements PlugIn, DialogListener
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
-		GlobalSettings globalSettings = SettingsManager.loadSettings();
-		settings = globalSettings.getPsfCalculatorSettings();
+
+		PSFCalculatorSettings settings = SettingsManager.readPSFCalculatorSettings(0);
 
 		double sd = calculate(settings, false);
 		if (sd < 0)
 			return;
 
-		globalSettings.getFitEngineConfiguration().getFitConfiguration().setInitialPeakStdDev((float) sd);
-		globalSettings.getFitEngineConfiguration().getFitConfiguration().setInitialAngle(0);
-		SettingsManager.saveSettings(globalSettings);
-		
-		CalibrationWriter cw = CalibrationWriter.create(SettingsManager.readCalibration());
+		FitEngineSettings fitEngineSettings = SettingsManager.readFitEngineSettings(0);
+		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings);
+		config.getFitConfiguration().setInitialPeakStdDev((float) sd);
+		config.getFitConfiguration().setInitialAngle(0);
+		SettingsManager.writeSettings(config.getFitEngineSettings());
+
+		CalibrationWriter cw = CalibrationWriter.create(SettingsManager.readCalibration(0));
 		cw.setNmPerPixel(getPixelPitch());
 		SettingsManager.writeSettings(cw.getCalibration());
 	}
@@ -94,41 +96,42 @@ public class PSFCalculator implements PlugIn, DialogListener
 		gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		this.settings = settings;
+		this.settings = settings.toBuilder();
 
 		if (!simpleMode)
 		{
-			gd.addNumericField("Pixel_pitch (um)", settings.pixelPitch, 2);
-			gd.addNumericField("Magnification", settings.magnification, 0);
-			gd.addNumericField("Beam_Expander", settings.beamExpander, 2);
+			gd.addNumericField("Pixel_pitch (um)", settings.getPixelPitch(), 2);
+			gd.addNumericField("Magnification", settings.getMagnification(), 0);
+			gd.addNumericField("Beam_Expander", settings.getBeamExpander(), 2);
 			gd.addMessage(getPixelPitchLabel());
 			pixelPitchLabel = (Label) gd.getMessage();
 			//pixelPitchLabel.setText(getPixelPitchLabel());
 		}
 
-		gd.addSlider("Wavelength (nm)", 400, 750, settings.wavelength);
-		gd.addSlider("Numerical_Aperture (NA)", 1, 1.5, settings.numericalAperture);
+		gd.addSlider("Wavelength (nm)", 400, 750, settings.getWavelength());
+		gd.addSlider("Numerical_Aperture (NA)", 1, 1.5, settings.getNumericalAperture());
 		gd.addMessage(getAbbeLimitLabel());
 		abbeLimitLabel = (Label) gd.getMessage();
 		//abbe.setText(getAbbeLimitLabel());
 		gd.addMessage("*** Account for optical aberations and focus error ***");
-		gd.addSlider("Proportionality_factor", 1, 2.5, settings.proportionalityFactor);
-		gd.addCheckbox("Adjust_for_square_pixels", settings.adjustForSquarePixels);
+		gd.addSlider("Proportionality_factor", 1, 2.5, settings.getProportionalityFactor());
+		gd.addCheckbox("Adjust_for_square_pixels", settings.getAdjustForSquarePixels());
 
 		if (!simpleMode)
 		{
-			gd.addNumericField("Airy Width (nm)", calculateAiryWidth(settings.wavelength, settings.numericalAperture),
+			gd.addNumericField("Airy Width (nm)",
+					calculateAiryWidth(settings.getWavelength(), settings.getNumericalAperture()), 3);
+			gd.addNumericField("Airy Width (pixels)",
+					calculateAiryWidth(settings.getPixelPitch(),
+							settings.getMagnification() * settings.getBeamExpander(), settings.getWavelength(),
+							settings.getNumericalAperture()),
 					3);
-			gd.addNumericField(
-					"Airy Width (pixels)",
-					calculateAiryWidth(settings.pixelPitch, settings.magnification * settings.beamExpander,
-							settings.wavelength, settings.numericalAperture), 3);
 		}
-		gd.addNumericField("StdDev (nm)",
-				calculateStdDev(settings.wavelength, settings.numericalAperture, settings.proportionalityFactor), 3);
-		double sd = calculateStdDev(settings.pixelPitch, settings.magnification * settings.beamExpander,
-				settings.wavelength, settings.numericalAperture, settings.proportionalityFactor,
-				settings.adjustForSquarePixels);
+		gd.addNumericField("StdDev (nm)", calculateStdDev(settings.getWavelength(), settings.getNumericalAperture(),
+				settings.getProportionalityFactor()), 3);
+		double sd = calculateStdDev(settings.getPixelPitch(), settings.getMagnification() * settings.getBeamExpander(),
+				settings.getWavelength(), settings.getNumericalAperture(), settings.getProportionalityFactor(),
+				settings.getAdjustForSquarePixels());
 		gd.addNumericField("StdDev (pixels)", sd, 3);
 		gd.addNumericField("HWHM (pixels)", sd * Gaussian2DFunction.SD_TO_HWHM_FACTOR, 3);
 
@@ -156,11 +159,12 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 		gd.addDialogListener(this);
 
-		double s = calculateStdDev(settings.pixelPitch, settings.magnification * settings.beamExpander, settings.wavelength,
-				settings.numericalAperture, 1, false);
+		double s = calculateStdDev(settings.getPixelPitch(), settings.getMagnification() * settings.getBeamExpander(),
+				settings.getWavelength(), settings.getNumericalAperture(), 1, false);
 		plotProfile(
-				calculateAiryWidth(settings.pixelPitch, settings.magnification * settings.beamExpander,
-						settings.wavelength, settings.numericalAperture), sd / s);
+				calculateAiryWidth(settings.getPixelPitch(), settings.getMagnification() * settings.getBeamExpander(),
+						settings.getWavelength(), settings.getNumericalAperture()),
+				sd / s);
 
 		gd.showDialog();
 
@@ -169,9 +173,9 @@ public class PSFCalculator implements PlugIn, DialogListener
 			return -1;
 		}
 
-		return calculateStdDev(settings.pixelPitch, settings.magnification * settings.beamExpander,
-				settings.wavelength, settings.numericalAperture, settings.proportionalityFactor,
-				settings.adjustForSquarePixels);
+		return calculateStdDev(settings.getPixelPitch(), settings.getMagnification() * settings.getBeamExpander(),
+				settings.getWavelength(), settings.getNumericalAperture(), settings.getProportionalityFactor(),
+				settings.getAdjustForSquarePixels());
 	}
 
 	private void disableEditing(TextField textField)
@@ -184,27 +188,27 @@ public class PSFCalculator implements PlugIn, DialogListener
 	{
 		if (widthNmText != null)
 		{
-			settings.pixelPitch = gd.getNextNumber();
-			settings.magnification = gd.getNextNumber();
-			settings.beamExpander = gd.getNextNumber();
+			settings.setPixelPitch(gd.getNextNumber());
+			settings.setMagnification(gd.getNextNumber());
+			settings.setBeamExpander(gd.getNextNumber());
 		}
-		settings.wavelength = gd.getNextNumber();
-		settings.numericalAperture = gd.getNextNumber();
-		settings.proportionalityFactor = gd.getNextNumber();
-		settings.adjustForSquarePixels = gd.getNextBoolean();
+		settings.setWavelength(gd.getNextNumber());
+		settings.setNumericalAperture(gd.getNextNumber());
+		settings.setProportionalityFactor(gd.getNextNumber());
+		settings.setAdjustForSquarePixels(gd.getNextBoolean());
 
 		// Check arguments
 		try
 		{
 			if (widthNmText != null)
 			{
-				Parameters.isAboveZero("Pixel pitch", settings.pixelPitch);
-				Parameters.isAboveZero("Magnification", settings.magnification);
-				Parameters.isEqualOrAbove("Beam expander", settings.beamExpander, 1);
+				Parameters.isAboveZero("Pixel pitch", settings.getPixelPitch());
+				Parameters.isAboveZero("Magnification", settings.getMagnification());
+				Parameters.isEqualOrAbove("Beam expander", settings.getBeamExpander(), 1);
 			}
-			Parameters.isAboveZero("Wavelength", settings.wavelength);
-			Parameters.isAboveZero("Numerical aperture", settings.numericalAperture);
-			Parameters.isAboveZero("Proportionality factor", settings.proportionalityFactor);
+			Parameters.isAboveZero("Wavelength", settings.getWavelength());
+			Parameters.isAboveZero("Numerical aperture", settings.getNumericalAperture());
+			Parameters.isAboveZero("Proportionality factor", settings.getProportionalityFactor());
 		}
 		catch (IllegalArgumentException ex)
 		{
@@ -374,41 +378,41 @@ public class PSFCalculator implements PlugIn, DialogListener
 						return false;
 
 					// Store the parameters to be processed
-					double pixelPitch = settings.pixelPitch;
-					double magnification = settings.magnification;
-					double beamExpander = settings.beamExpander;
-					double wavelength = settings.wavelength;
-					double numericalAperture = settings.numericalAperture;
-					boolean adjustForSquarePixels = settings.adjustForSquarePixels;
-					double proportionalityFactor = settings.proportionalityFactor;
+					double pixelPitch = settings.getPixelPitch();
+					double magnification = settings.getMagnification();
+					double beamExpander = settings.getBeamExpander();
+					double wavelength = settings.getWavelength();
+					double numericalAperture = settings.getNumericalAperture();
+					boolean adjustForSquarePixels = settings.getAdjustForSquarePixels();
+					double proportionalityFactor = settings.getProportionalityFactor();
 
 					// Do something with parameters
 					if (widthNmText != null)
 					{
 						pixelPitchLabel.setText(getPixelPitchLabel());
 						widthNmText.setText(IJ.d2s(calculateAiryWidth(wavelength, numericalAperture), 3));
-						widthPixelsText.setText(IJ.d2s(
-								calculateAiryWidth(pixelPitch, magnification * beamExpander, wavelength,
-										numericalAperture), 3));
+						widthPixelsText.setText(IJ.d2s(calculateAiryWidth(pixelPitch, magnification * beamExpander,
+								wavelength, numericalAperture), 3));
 					}
 					abbeLimitLabel.setText(getAbbeLimitLabel());
 					sdNmText.setText(IJ.d2s(calculateStdDev(wavelength, numericalAperture, proportionalityFactor), 3));
-					double sd = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength,
-							numericalAperture, proportionalityFactor, adjustForSquarePixels);
+					double sd = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength, numericalAperture,
+							proportionalityFactor, adjustForSquarePixels);
 					sdPixelsText.setText(IJ.d2s(sd, 3));
 					fwhmPixelsText.setText(IJ.d2s(sd * Gaussian2DFunction.SD_TO_HWHM_FACTOR, 3));
 
-					double s = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength,
-							numericalAperture, 1, false);
+					double s = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength, numericalAperture,
+							1, false);
 					plotProfile(
 							calculateAiryWidth(pixelPitch, magnification * beamExpander, wavelength, numericalAperture),
 							sd / s);
 
 					// Check if the parameters have changed again
-					parametersChanged = (pixelPitch != settings.pixelPitch) ||
-							(magnification != settings.magnification) || (beamExpander != settings.beamExpander) ||
-							(wavelength != settings.wavelength) || (numericalAperture != settings.numericalAperture) ||
-							(proportionalityFactor != settings.proportionalityFactor);
+					parametersChanged = (pixelPitch != settings.getPixelPitch()) ||
+							(magnification != settings.getMagnification()) ||
+							(beamExpander != settings.getBeamExpander()) || (wavelength != settings.getWavelength()) ||
+							(numericalAperture != settings.getNumericalAperture()) ||
+							(proportionalityFactor != settings.getProportionalityFactor());
 				}
 			}
 			finally
@@ -422,8 +426,10 @@ public class PSFCalculator implements PlugIn, DialogListener
 	}
 
 	/**
-	 * @param airyWidth The Airy width
-	 * @param factor Factor used to scale the Airy approximation using the Gaussian 
+	 * @param airyWidth
+	 *            The Airy width
+	 * @param factor
+	 *            Factor used to scale the Airy approximation using the Gaussian
 	 */
 	private void plotProfile(double airyWidth, double factor)
 	{
@@ -481,9 +487,9 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 	private double getPixelPitch()
 	{
-		return settings.pixelPitch * 1000 / (settings.magnification * settings.beamExpander);
+		return settings.getPixelPitch() * 1000 / (settings.getMagnification() * settings.getBeamExpander());
 	}
-	
+
 	private String getAbbeLimitLabel(double abbeLimit)
 	{
 		return "Abbe limit (nm) = " + IJ.d2s(abbeLimit, 3);
@@ -496,6 +502,6 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 	private double getAbbeLimit()
 	{
-		return settings.wavelength / (2 * settings.numericalAperture);
+		return settings.getWavelength() / (2 * settings.getNumericalAperture());
 	}
 }

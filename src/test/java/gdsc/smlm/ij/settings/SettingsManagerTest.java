@@ -33,7 +33,7 @@ public class SettingsManagerTest
 			o = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT);
 			Assert.assertTrue("Failed to read default", e.getDefaultInstanceForType().equals(o));
 			Assert.assertTrue("Failed to write", SettingsManager.writeSettings(e));
-			o = SettingsManager.readCalibration();
+			o = SettingsManager.readCalibration(0);
 			Assert.assertTrue("Not equal", e.equals(o));
 			SettingsManager.clearSettings(e.getClass());
 			o = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT | SettingsManager.FLAG_NO_DEFAULT);

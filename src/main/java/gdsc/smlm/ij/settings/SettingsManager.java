@@ -35,6 +35,10 @@ import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
 import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIConfig.PSFCalculatorSettings;
+import gdsc.smlm.data.config.GUIConfig.PSFEstimatorSettings;
+import gdsc.smlm.data.config.GUIConfigHelper;
 import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
@@ -867,7 +871,6 @@ public class SettingsManager
 		}
 		else
 		{
-			config.getFitEngineConfiguration().initialiseState();
 			config.getCreateDataSettings().initialiseState();
 		}
 		return config;
@@ -1001,16 +1004,6 @@ public class SettingsManager
 	/**
 	 * Read the Calibration from the settings file in the settings directory.
 	 *
-	 * @return the Calibration
-	 */
-	public static Calibration readCalibration()
-	{
-		return readCalibration(0);
-	}
-
-	/**
-	 * Read the Calibration from the settings file in the settings directory.
-	 *
 	 * @param flags
 	 *            the flags
 	 * @return the Calibration
@@ -1018,16 +1011,6 @@ public class SettingsManager
 	public static Calibration readCalibration(int flags)
 	{
 		return new ConfigurationReader<Calibration>(CalibrationConfigHelper.defaultCalibration).read(flags);
-	}
-
-	/**
-	 * Read the ResultsSettings from the settings file in the settings directory.
-	 *
-	 * @return the ResultsSettings
-	 */
-	public static ResultsSettings readResultsSettings()
-	{
-		return readResultsSettings(0);
 	}
 
 	/**
@@ -1045,16 +1028,6 @@ public class SettingsManager
 	/**
 	 * Read the FitEngineSettings from the settings file in the settings directory.
 	 *
-	 * @return the FitEngineSettings
-	 */
-	public static FitEngineSettings readFitEngineSettings()
-	{
-		return readFitEngineSettings(0);
-	}
-
-	/**
-	 * Read the FitEngineSettings from the settings file in the settings directory.
-	 *
 	 * @param flags
 	 *            the flags
 	 * @return the FitEngineSettings
@@ -1064,6 +1037,42 @@ public class SettingsManager
 		return new ConfigurationReader<FitEngineSettings>(FitConfigHelper.defaultFitEngineSettings).read(flags);
 	}
 
+	/**
+	 * Read the GUIFilterSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the GUIFilterSettings
+	 */
+	public static GUIFilterSettings readGUIFilterSettings(int flags)
+	{
+		return new ConfigurationReader<GUIFilterSettings>(GUIConfigHelper.defaultGUIFilterSettings).read(flags);
+	}
+	
+	/**
+	 * Read the PSFCalculatorSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the PSFCalculatorSettings
+	 */
+	public static PSFCalculatorSettings readPSFCalculatorSettings(int flags)
+	{
+		return new ConfigurationReader<PSFCalculatorSettings>(GUIConfigHelper.defaultPSFCalculatorSettings).read(flags);
+	}
+
+	/**
+	 * Read the PSFEstimatorSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the PSFEstimatorSettings
+	 */
+	public static PSFEstimatorSettings readPSFEstimatorSettings(int flags)
+	{
+		return new ConfigurationReader<PSFEstimatorSettings>(GUIConfigHelper.defaultPSFEstimatorSettings).read(flags);
+	}
+	
 	/**
 	 * Write the message to file.
 	 * <p>

@@ -8,54 +8,40 @@ package gdsc.smlm.data.config;
 option java_outer_classname = "GUIConfig";
 
 // Contain the settings for the result filtering
-message FilterSettings {
-	float maxDrift = 1;
-	float minSignal = 2;
-	float eminSNR = 3;
-	double maxPrecision = 4;
-	float maxWidth = 5;
-	float minWidth = 6;
-	string maskTitle = 7;
-	string freeFilter = 8;
-	string filterTemplate = 9;
-	string filterAnalysisDirectory = 10;
-	string filterSetFilename = 11;
+message GUIFilterSettings {
+	float max_drift = 1;
+	float min_signal = 2;
+	float min_snr = 3;
+	double max_precision = 4;
+	float max_width = 5;
+	float min_width = 6;
+	string mask_title = 7;
+	string free_filter = 8;
+	string filter_template = 9;
+	string filter_analysis_directory = 10;
+	string filter_set_filename = 11;
 }
 
-/**
- * Contain the settings for the PSF Calculator
- */
-public class PSFCalculatorSettings
+// Contain the settings for the PSF Calculator
+message PSFCalculatorSettings
 {
-	public double pixelPitch = 6.45;
-	public double magnification = 63;
-	public double beamExpander = 1;
-	public double wavelength = 500;
-	public double numericalAperture = 1.4;
-	public boolean adjustForSquarePixels = true;
-	public double proportionalityFactor = 1.52;
+	double pixel_pitch = 1;
+	double magnification = 2;
+	double beam_expander = 3;
+	double wavelength = 4;
+	double numerical_aperture = 5;
+	bool adjust_for_square_pixels = 6;
+	double proportionality_factor = 7;
 }
 
-/**
- * Contain the settings for the PSF Estimator
- */
-public class PSFEstimatorSettings
+// Contain the settings for the PSF Estimator
+message PSFEstimatorSettings
 {
-	public int numberOfPeaks = 1000;
-	public double pValue = 0.01;
-	public boolean updatePreferences = true;
-	public boolean debugPSFEstimator = false;
-	public boolean iterate = true;
-	public boolean showHistograms = false;
-	public int histogramBins = 100;
-}
-
-/**
- * Contain the settings for the clustering algorithm
- * 
- * @author Alex Herbert
- */
-public class OPTICSSettings implements Cloneable
-{
-
+	int32 number_of_peaks = 1;
+	double p_value = 2;
+	bool update_preferences = 3;
+	bool debug_psf_estimator = 4;
+	bool iterate = 5;
+	bool show_histograms = 6;
+	int32 histogram_bins = 7;
 }

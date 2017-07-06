@@ -1,9 +1,25 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Checkbox;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
-import gdsc.smlm.ij.settings.FilterSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.filter.ANRFilter;
@@ -34,23 +50,6 @@ import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;
 
-import java.awt.Checkbox;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-
 /**
  * Filters PeakFit results that are stored in memory using the configured filters.
  */
@@ -59,7 +58,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 	private static final String TITLE = "Free Filter Results";
 	private static String inputOption = "";
 
-	private FilterSettings filterSettings;
+	private GUIFilterSettings.Builder filterSettings;
 	private MemoryPeakResults results;
 
 	/*
@@ -96,7 +95,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		}
 
 		// Filter results
-		Filter filter = Filter.fromXML(filterSettings.freeFilter);
+		Filter filter = Filter.fromXML(filterSettings.getFreeFilter());
 		if (filter != null)
 		{
 			MemoryPeakResults newResults = filter.filter(results);
@@ -121,17 +120,16 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		gd.addMessage("Select a dataset to filter");
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
-		GlobalSettings gs = SettingsManager.loadSettings();
-		filterSettings = gs.getFilterSettings();
+		filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
 		String text;
 		try
 		{
-			text = XmlUtils.prettyPrintXml(filterSettings.freeFilter);
+			text = XmlUtils.prettyPrintXml(filterSettings.getFreeFilter());
 		}
 		catch (Exception e)
 		{
-			text = filterSettings.freeFilter;
+			text = filterSettings.getFreeFilter();
 		}
 		gd.addTextAreas(text, null, 20, 80);
 		gd.addCheckbox("Show_demo_filters", false);
@@ -147,7 +145,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 			return false;
 
 		inputOption = ResultsManager.getInputSource(gd);
-		filterSettings.freeFilter = gd.getNextText();
+		filterSettings.setFreeFilter(gd.getNextText());
 		boolean demoFilters = gd.getNextBoolean();
 
 		if (demoFilters)
@@ -156,7 +154,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 			return false;
 		}
 
-		return SettingsManager.saveSettings(gs);
+		return SettingsManager.writeSettings(filterSettings.build());
 	}
 
 	public void itemStateChanged(ItemEvent e)

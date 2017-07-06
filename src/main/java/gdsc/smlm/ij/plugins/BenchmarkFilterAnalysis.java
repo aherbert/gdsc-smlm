@@ -71,6 +71,7 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TurboList;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
 import gdsc.smlm.data.config.TemplateConfig.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -88,8 +89,6 @@ import gdsc.smlm.ga.SimpleSelectionStrategy;
 import gdsc.smlm.ga.ToleranceChecker;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFit.FilterCandidates;
 import gdsc.smlm.ij.results.ResultsImageSampler;
-import gdsc.smlm.ij.settings.FilterSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.FrameCounter;
@@ -1116,15 +1115,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 		}
 
-		// TODO - Refactor to use proto object
-		GlobalSettings gs = SettingsManager.loadSettings();
-		FilterSettings filterSettings = gs.getFilterSettings();
+		GUIFilterSettings filterSettings = SettingsManager.readGUIFilterSettings(0);
 
-		String filename = Utils.getFilename("Filter_File", filterSettings.filterSetFilename);
+		String filename = Utils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
 		if (filename != null)
 		{
 			IJ.showStatus("Reading filters ...");
-			filterSettings.filterSetFilename = filename;
+			filterSettings = filterSettings.toBuilder().setFilterSetFilename(filename).build();
 
 			// Allow the filters to be cached
 			if (isSameFile(filename))
@@ -1138,7 +1135,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				{
 					if ((reUseFilters = gd.getNextBoolean()))
 					{
-						SettingsManager.saveSettings(gs);
+						SettingsManager.writeSettings(filterSettings);
 						return filterList;
 					}
 				}
@@ -1153,7 +1150,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				Object o = XStreamWrapper.getInstance().fromXML(input);
 				if (o != null && o instanceof List<?>)
 				{
-					SettingsManager.saveSettings(gs);
+					SettingsManager.writeSettings(filterSettings);
 					List<FilterSet> filterSets = (List<FilterSet>) o;
 
 					if (containsStandardFilters(filterSets))

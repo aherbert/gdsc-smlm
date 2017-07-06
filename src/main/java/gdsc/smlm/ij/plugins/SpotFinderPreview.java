@@ -31,7 +31,6 @@ import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -104,9 +103,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	{
 		this.o = imp.getOverlay();
 		this.imp = imp;
-		String filename = SettingsManager.getSettingsFilename();
-		GlobalSettings settings = SettingsManager.loadSettings(filename);
-		config = settings.getFitEngineConfiguration();
+
+		config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings(0));
 		fitConfig = config.getFitConfiguration();
 
 		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
@@ -115,8 +113,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
-
-		gd.addStringField("Config_file", filename, 40);
 
 		gd.addNumericField("Initial_StdDev0", fitConfig.getInitialXSD(), 3);
 		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
@@ -160,11 +156,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		if (!gd.wasCanceled())
 		{
-			filename = gd.getNextString();
-			if (SettingsManager.saveSettings(settings, filename, true))
-				SettingsManager.saveSettingsFilename(filename);
-			else
-				IJ.error(TITLE, "Failed to save settings to file " + filename);
+			if (!SettingsManager.writeSettings(config.getFitEngineSettings(), SettingsManager.FLAG_SILENT))
+				IJ.error(TITLE, "Failed to save settings");
 		}
 
 		// Reset

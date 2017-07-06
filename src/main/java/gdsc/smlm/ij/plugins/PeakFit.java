@@ -41,6 +41,8 @@ import gdsc.smlm.data.config.FitConfig.FitSettings;
 import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.GUIConfig.PSFCalculatorSettings;
+import gdsc.smlm.data.config.GUIConfigHelper;
 import gdsc.smlm.data.config.PSFConfig.PSF;
 import gdsc.smlm.data.config.PSFConfig.PSFParameter;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
@@ -70,7 +72,6 @@ import gdsc.smlm.ij.SeriesImageSource;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
-import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.AggregatedImageSource;
@@ -172,7 +173,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private static String inputOption = "";
 	private static boolean showTable = true;
 	private static boolean showImage = true;
-	private static PSFCalculatorSettings calculatorSettings = new PSFCalculatorSettings();
+	private static PSFCalculatorSettings.Builder calculatorSettings = GUIConfigHelper.defaultPSFCalculatorSettings.toBuilder();
 
 	// All the fields that will be updated when reloading the configuration file
 	private TextField textNmPerPixel;
@@ -734,9 +735,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Executing as an ImageJ plugin.
 
 		// Load the settings
-		resultsSettings = SettingsManager.readResultsSettings().toBuilder();
+		resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
 		// Settings are within the FitEngineSettings
-		config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings());
+		config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings(0));
 		fitConfig = config.getFitConfiguration();
 
 		if (simpleFit)
@@ -1328,10 +1329,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 				{
 					// Run the PSF Calculator
 					PSFCalculator calculator = new PSFCalculator();
-					calculatorSettings.pixelPitch = calibration.getNmPerPixel() / 1000.0;
-					calculatorSettings.magnification = 1;
-					calculatorSettings.beamExpander = 1;
-					double sd = calculator.calculate(calculatorSettings, true);
+					calculatorSettings.setPixelPitch(calibration.getNmPerPixel() / 1000.0);
+					calculatorSettings.setMagnification(1);
+					calculatorSettings.setBeamExpander(1);
+					double sd = calculator.calculate(calculatorSettings.build(), true);
 					if (sd > 0)
 						textInitialPeakStdDev0.setText(Double.toString(sd));
 				}

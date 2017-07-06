@@ -437,7 +437,7 @@ public class ResultsManager implements PlugIn
 		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		resultsSettings = SettingsManager.readResultsSettings().toBuilder();
+		resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
 
 		gd.addMessage("Read the Peak Results and output to a new format");
 

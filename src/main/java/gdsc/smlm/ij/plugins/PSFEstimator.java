@@ -17,6 +17,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.GUIConfig.PSFEstimatorSettings;
 import gdsc.smlm.data.config.PSFConfig.PSF;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.engine.FitConfiguration;
@@ -25,8 +26,6 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitJob;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
-import gdsc.smlm.ij.settings.GlobalSettings;
-import gdsc.smlm.ij.settings.PSFEstimatorSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.AggregatedImageSource;
@@ -69,9 +68,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	private int dataBlock = 1;
 	private int dataSkip = 0;
 
-	private GlobalSettings globalSettings;
 	private FitEngineConfiguration config;
-	private PSFEstimatorSettings settings;
+	private PSFEstimatorSettings.Builder settings;
 
 	private int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 
@@ -107,9 +105,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			return DONE;
 		}
 
-		globalSettings = SettingsManager.loadSettings();
-		Calibration calibration = SettingsManager.readCalibration();
-		settings = globalSettings.getPsfEstimatorSettings();
+		Calibration calibration = SettingsManager.readCalibration(0);
+		settings = SettingsManager.readPSFEstimatorSettings(0).toBuilder();
 		// Reset
 		if (IJ.controlKeyDown())
 		{
@@ -117,7 +114,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		}
 		else
 		{
-			config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings());
+			config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings(0));
 		}
 		config.getFitConfiguration().setCalibration(calibration);
 
@@ -158,7 +155,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		gd.addNumericField("Initial_StdDev0", initialPeakStdDev0, 3);
 		gd.addNumericField("Initial_StdDev1", initialPeakStdDev1, 3);
 		gd.addNumericField("Initial_Angle", initialPeakAngle, 3);
-		gd.addNumericField("Number_of_peaks", settings.numberOfPeaks, 0);
+		gd.addNumericField("Number_of_peaks", settings.getNumberOfPeaks(), 0);
 
 		// pValue sets the smallest significance level probability level at which they are said to be different.
 		// i.e. p <= pValue they are different
@@ -166,12 +163,12 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		// lower pValue means harder to be found different.
 		// lower pValue means easier to be found the same.
 
-		gd.addNumericField("p-Value", settings.pValue, 4);
-		gd.addCheckbox("Update_preferences", settings.updatePreferences);
-		gd.addCheckbox("Log_progress", settings.debugPSFEstimator);
-		gd.addCheckbox("Iterate", settings.iterate);
-		gd.addCheckbox("Show_histograms", settings.showHistograms);
-		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
+		gd.addNumericField("p-Value", settings.getPValue(), 4);
+		gd.addCheckbox("Update_preferences", settings.getUpdatePreferences());
+		gd.addCheckbox("Log_progress", settings.getDebugPsfEstimator());
+		gd.addCheckbox("Iterate", settings.getIterate());
+		gd.addCheckbox("Show_histograms", settings.getShowHistograms());
+		gd.addNumericField("Histogram_bins", settings.getHistogramBins(), 0);
 
 		PeakFit.addPSFOptions(gd, fitConfig);
 
@@ -257,13 +254,13 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		initialPeakStdDev1 = gd.getNextNumber();
 		initialPeakAngle = gd.getNextNumber();
 
-		settings.numberOfPeaks = (int) gd.getNextNumber();
-		settings.pValue = gd.getNextNumber();
-		settings.updatePreferences = gd.getNextBoolean();
-		settings.debugPSFEstimator = gd.getNextBoolean();
-		settings.iterate = gd.getNextBoolean();
-		settings.showHistograms = gd.getNextBoolean();
-		settings.histogramBins = (int) gd.getNextNumber();
+		settings.setNumberOfPeaks((int) gd.getNextNumber());
+		settings.setPValue(gd.getNextNumber());
+		settings.setUpdatePreferences(gd.getNextBoolean());
+		settings.setDebugPsfEstimator(gd.getNextBoolean());
+		settings.setIterate(gd.getNextBoolean());
+		settings.setShowHistograms(gd.getNextBoolean());
+		settings.setHistogramBins((int) gd.getNextNumber());
 
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
@@ -305,11 +302,11 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			Parameters.isAboveZero("Initial SD0", initialPeakStdDev0);
 			Parameters.isAboveZero("Initial SD1", initialPeakStdDev1);
 			Parameters.isPositive("Initial angle", initialPeakAngle);
-			Parameters.isPositive("Number of peaks", settings.numberOfPeaks);
-			Parameters.isAboveZero("P-value", settings.pValue);
-			Parameters.isEqualOrBelow("P-value", settings.pValue, 0.5);
-			if (settings.showHistograms)
-				Parameters.isAboveZero("Histogram bins", settings.histogramBins);
+			Parameters.isPositive("Number of peaks", settings.getNumberOfPeaks());
+			Parameters.isAboveZero("P-value", settings.getPValue());
+			Parameters.isEqualOrBelow("P-value", settings.getPValue(), 0.5);
+			if (settings.getShowHistograms())
+				Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
 			Parameters.isAboveZero("Search width", config.getSearch());
 			Parameters.isAboveZero("Fitting width", config.getFitting());
 			Parameters.isPositive("Failures limit", config.getFailuresLimit());
@@ -396,7 +393,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		while (true)
 		{
 			result = estimatePSF();
-			if (settings.iterate && result == TRY_AGAIN)
+			if (settings.getIterate() && result == TRY_AGAIN)
 			{
 				continue;
 			}
@@ -407,9 +404,9 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			log("Finished. Check the table for final parameters");
 
 			// Only save if successful
-			if (settings.updatePreferences)
+			if (settings.getUpdatePreferences())
 			{
-				SettingsManager.saveSettings(globalSettings);
+				SettingsManager.writeSettings(settings.build());
 				SettingsManager.writeSettings(config.getFitEngineSettings());
 			}
 		}
@@ -484,7 +481,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 					initialPeakStdDev0 = (float) params[X];
 					initialPeakStdDev1 = (float) params[Y];
 
-					if (settings.updatePreferences)
+					if (settings.getUpdatePreferences())
 					{
 						config.getFitConfiguration().setInitialPeakStdDev0((float) params[X]);
 						config.getFitConfiguration().setInitialPeakStdDev1((float) params[Y]);
@@ -556,7 +553,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			}
 
 			final double p = TestUtils.tTest(testAngle, sampleStats);
-			if (p > settings.pValue)
+			if (p > settings.getPValue())
 			{
 				log("NOTE: Angle is not significant: %g ~ %g (p=%g) => Re-run with fixed zero angle",
 						sampleStats.getMean(), testAngle, p);
@@ -598,7 +595,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		// hypothesis that the mean of the paired differences is 0 in favor of the two-sided alternative 
 		// that the mean paired difference is not equal to 0. For a one-sided test, divide the returned value by 2
 		p[i] = TestUtils.tTest(sample1, sample2);
-		identical[i] = (p[i] > settings.pValue);
+		identical[i] = (p[i] > settings.getPValue());
 	}
 
 	private void getPairedP(DescriptiveStatistics sample1, DescriptiveStatistics sample2, int i, double[] p,
@@ -611,7 +608,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		// hypothesis that the mean of the paired differences is 0 in favor of the two-sided alternative 
 		// that the mean paired difference is not equal to 0. For a one-sided test, divide the returned value by 2
 		p[i] = TestUtils.pairedTTest(sample1.getValues(), sample2.getValues());
-		identical[i] = (p[i] > settings.pValue);
+		identical[i] = (p[i] > settings.getPValue());
 	}
 
 	private boolean calculateStatistics(PeakFit fitter, double[] params, double[] params_dev)
@@ -662,7 +659,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		{
 			int slice = slices[i];
 			//debug("  Processing slice = %d\n", slice);
-			IJ.showProgress(size(), settings.numberOfPeaks);
+			IJ.showProgress(size(), settings.getNumberOfPeaks());
 
 			ImageProcessor ip = stack.getProcessor(slice);
 			ip.setRoi(roi); // stack processor does not set the bounds required by ImageConverter
@@ -685,7 +682,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		// Wait until we have enough results
 		while (!sampleSizeReached() && !engine.isQueueEmpty())
 		{
-			IJ.showProgress(size(), settings.numberOfPeaks);
+			IJ.showProgress(size(), settings.getNumberOfPeaks());
 			try
 			{
 				Thread.sleep(50);
@@ -709,7 +706,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		setParams(X, params, params_dev, sampleNew[X]);
 		setParams(Y, params, params_dev, sampleNew[Y]);
 
-		if (settings.showHistograms)
+		if (settings.getShowHistograms())
 		{
 			int[] idList = new int[NAMES.length];
 			int count = 0;
@@ -719,7 +716,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 				if (sampleNew[ii].getN() == 0)
 					continue;
 				StoredDataStatistics stats = new StoredDataStatistics(sampleNew[ii].getValues());
-				idList[count++] = Utils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.histogramBins,
+				idList[count++] = Utils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.getHistogramBins(),
 						"Mean = " + Utils.rounded(stats.getMean()) + ". Median = " +
 								Utils.rounded(sampleNew[ii].getPercentile(50)));
 				requireRetile = requireRetile || Utils.isNewWindow();
@@ -812,7 +809,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	private void debug(String format, Object... args)
 	{
-		if (settings.debugPSFEstimator)
+		if (settings.getDebugPsfEstimator())
 			log(format, args);
 	}
 
@@ -849,7 +846,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	private boolean sampleSizeReached()
 	{
-		return size() >= settings.numberOfPeaks;
+		return size() >= settings.getNumberOfPeaks();
 	}
 
 	public void add(PeakResult result)

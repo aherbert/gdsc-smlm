@@ -34,8 +34,7 @@ import gdsc.core.utils.UnicodeReader;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.ij.settings.FilterSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -176,45 +175,43 @@ public class FilterAnalysis implements PlugIn
 
 	private String getInputDirectory()
 	{
-		GlobalSettings gs = SettingsManager.loadSettings();
-		FilterSettings filterSettings = gs.getFilterSettings();
+		GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
-		if (filterSettings.filterAnalysisDirectory != null)
-			OpenDialog.setDefaultDirectory(filterSettings.filterAnalysisDirectory);
-		filterSettings.filterAnalysisDirectory = IJ.getDirectory("Select results directory ...");
-		if (filterSettings.filterAnalysisDirectory == null)
+		if (filterSettings.getFilterAnalysisDirectory() != null)
+			OpenDialog.setDefaultDirectory(filterSettings.getFilterAnalysisDirectory());
+		filterSettings.setFilterAnalysisDirectory(IJ.getDirectory("Select results directory ..."));
+		if (filterSettings.getFilterAnalysisDirectory() == null)
 			return null;
 
-		SettingsManager.saveSettings(gs);
+		SettingsManager.writeSettings(filterSettings.build());
 
-		return inputDirectory = filterSettings.filterAnalysisDirectory;
+		return inputDirectory = filterSettings.getFilterAnalysisDirectory();
 	}
 
 	@SuppressWarnings("unchecked")
 	private List<FilterSet> readFilterSets()
 	{
-		GlobalSettings gs = SettingsManager.loadSettings();
-		FilterSettings filterSettings = gs.getFilterSettings();
+		GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
-		String[] path = Utils.decodePath(filterSettings.filterSetFilename);
+		String[] path = Utils.decodePath(filterSettings.getFilterSetFilename());
 		OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			IJ.showStatus("Reading filters ...");
-			filterSettings.filterSetFilename = chooser.getDirectory() + chooser.getFileName();
+			filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
 
 			BufferedReader input = null;
 			try
 			{
-				FileInputStream fis = new FileInputStream(filterSettings.filterSetFilename);
+				FileInputStream fis = new FileInputStream(filterSettings.getFilterSetFilename());
 				input = new BufferedReader(new UnicodeReader(fis, null));
 				Object o = XStreamWrapper.getInstance().fromXML(input);
 				if (o != null && o instanceof List<?>)
 				{
-					SettingsManager.saveSettings(gs);
+					SettingsManager.writeSettings(filterSettings.build());
 					return (List<FilterSet>) o;
 				}
-				IJ.log("No filter sets defined in the specified file: " + filterSettings.filterSetFilename);
+				IJ.log("No filter sets defined in the specified file: " + filterSettings.getFilterSetFilename());
 			}
 			catch (Exception e)
 			{
@@ -241,21 +238,20 @@ public class FilterAnalysis implements PlugIn
 
 	private void saveFilterSets(List<FilterSet> filterSets)
 	{
-		GlobalSettings gs = SettingsManager.loadSettings();
-		FilterSettings filterSettings = gs.getFilterSettings();
+		GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
-		String[] path = Utils.decodePath(filterSettings.filterSetFilename);
+		String[] path = Utils.decodePath(filterSettings.getFilterSetFilename());
 		OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
-			filterSettings.filterSetFilename = chooser.getDirectory() + chooser.getFileName();
+			filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
 			OutputStreamWriter out = null;
 			try
 			{
-				FileOutputStream fos = new FileOutputStream(filterSettings.filterSetFilename);
+				FileOutputStream fos = new FileOutputStream(filterSettings.getFilterSetFilename());
 				out = new OutputStreamWriter(fos, "UTF-8");
 				XStreamWrapper.getInstance().toXML(filterSets, out);
-				SettingsManager.saveSettings(gs);
+				SettingsManager.writeSettings(filterSettings.build());
 			}
 			catch (Exception e)
 			{

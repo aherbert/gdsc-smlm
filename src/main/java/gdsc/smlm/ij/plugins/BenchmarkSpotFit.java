@@ -59,6 +59,7 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.XmlUtils;
 import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
@@ -72,8 +73,6 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
-import gdsc.smlm.ij.settings.FilterSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -998,7 +997,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	private boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -2093,16 +2091,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		if (saveFilterRange)
 		{
-			GlobalSettings gs = SettingsManager.loadSettings();
-			FilterSettings filterSettings = gs.getFilterSettings();
+			GUIFilterSettings filterSettings = SettingsManager.readGUIFilterSettings(0);
 
-			String filename = (silent) ? filterSettings.filterSetFilename
-					: Utils.getFilename("Filter_range_file", filterSettings.filterSetFilename);
+			String filename = (silent) ? filterSettings.getFilterSetFilename()
+					: Utils.getFilename("Filter_range_file", filterSettings.getFilterSetFilename());
 			if (filename == null)
 				return;
 			// Remove extension to store the filename
 			filename = Utils.replaceExtension(filename, ".xml");
-			filterSettings.filterSetFilename = filename;
+			filterSettings = filterSettings.toBuilder().setFilterSetFilename(filename).build();
 
 			// Create a filter set using the ranges
 			ArrayList<Filter> filters = new ArrayList<Filter>(3);
@@ -2111,7 +2108,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			filters.add(new MultiFilter2(increment[0], (float) increment[1], increment[2], increment[3], increment[4],
 					increment[5], increment[6]));
 			if (saveFilters(filename, filters))
-				SettingsManager.saveSettings(gs);
+				SettingsManager.writeSettings(filterSettings);
 
 			// Create a filter set using the min/max and the initial bounds.
 			// Set sensible limits

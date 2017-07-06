@@ -1,34 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.ij.settings.FilterSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
-import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.TextUtils;
-import gdsc.smlm.utils.XmlUtils;
-import gdsc.smlm.results.filter.AndFilter;
-import gdsc.smlm.results.filter.Filter;
-import gdsc.smlm.results.filter.OrFilter;
-import gdsc.smlm.results.filter.PrecisionFilter;
-import gdsc.smlm.results.filter.SNRFilter;
-import gdsc.smlm.results.filter.WidthFilter;
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.plugin.PlugIn;
-
 import java.awt.Checkbox;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -57,6 +28,35 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.TextUtils;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.filter.AndFilter;
+import gdsc.smlm.results.filter.Filter;
+import gdsc.smlm.results.filter.OrFilter;
+import gdsc.smlm.results.filter.PrecisionFilter;
+import gdsc.smlm.results.filter.SNRFilter;
+import gdsc.smlm.results.filter.WidthFilter;
+import gdsc.smlm.utils.XmlUtils;
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.plugin.PlugIn;
+
 /**
  * Creates an XML file of configured filters from a template.
  */
@@ -65,8 +65,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	private static final String TITLE = "Create Filters";
 
 	private static boolean enumerateEarly = true;
-	private GlobalSettings gs;
-	private FilterSettings filterSettings;
+	private GUIFilterSettings.Builder filterSettings;
 
 	private Pattern pattern = Pattern.compile("(\\S+)=\"(\\S+):(\\S+):(\\S+)\"(\\S*)");
 
@@ -91,7 +90,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		// the output XML, replicating the element.
 
 		// Add a dummy root element to allow the XML to be loaded as a document
-		String xml = "<root>" + filterSettings.filterTemplate + "</root>";
+		String xml = "<root>" + filterSettings.getFilterTemplate() + "</root>";
 
 		// Load the XML as a document
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -238,22 +237,22 @@ public class CreateFilters implements PlugIn, ItemListener
 	{
 		// Save the output to file
 		IJ.showStatus("Saving filters");
-		String filename = Utils.getFilename("Filter_File", filterSettings.filterSetFilename);
+		String filename = Utils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
 		if (filename != null)
 		{
 			OutputStreamWriter out = null;
 			try
 			{
-				filterSettings.filterSetFilename = filename;
+				filterSettings.setFilterSetFilename(filename);
 				// Append .xml if no suffix
 				if (filename.lastIndexOf('.') < 0)
-					filterSettings.filterSetFilename += ".xml";
+					filterSettings.setFilterSetFilename(filterSettings.getFilterSetFilename() + ".xml");
 
-				FileOutputStream fos = new FileOutputStream(filterSettings.filterSetFilename);
+				FileOutputStream fos = new FileOutputStream(filterSettings.getFilterSetFilename());
 				out = new OutputStreamWriter(fos, "UTF-8");
 				out.write(XmlUtils.prettyPrintXml(sw.toString()));
-				SettingsManager.saveSettings(gs);
-				IJ.showStatus(total + " filters: " + filterSettings.filterSetFilename);
+				SettingsManager.writeSettings(filterSettings.build());
+				IJ.showStatus(total + " filters: " + filterSettings.getFilterSetFilename());
 			}
 			catch (Exception e)
 			{
@@ -285,10 +284,9 @@ public class CreateFilters implements PlugIn, ItemListener
 		gd.addMessage(
 				"Create a set of filters for use in the Filter Analysis plugin.\nAttributes will be enumerated if they are of the form 'min:max:increment'");
 
-		gs = SettingsManager.loadSettings();
-		filterSettings = gs.getFilterSettings();
+		filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
-		gd.addTextAreas(filterSettings.filterTemplate, null, 20, 80);
+		gd.addTextAreas(filterSettings.getFilterTemplate(), null, 20, 80);
 		gd.addCheckbox("Enumerate_early attributes first", enumerateEarly);
 		gd.addCheckbox("Show_demo_filters", false);
 
@@ -302,7 +300,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		if (gd.wasCanceled())
 			return false;
 
-		filterSettings.filterTemplate = gd.getNextText();
+		filterSettings.setFilterTemplate(gd.getNextText());
 		enumerateEarly = gd.getNextBoolean();
 		boolean demoFilters = gd.getNextBoolean();
 
@@ -312,7 +310,7 @@ public class CreateFilters implements PlugIn, ItemListener
 			return false;
 		}
 
-		return SettingsManager.saveSettings(gs);
+		return SettingsManager.writeSettings(filterSettings.build());
 	}
 
 	public void itemStateChanged(ItemEvent e)

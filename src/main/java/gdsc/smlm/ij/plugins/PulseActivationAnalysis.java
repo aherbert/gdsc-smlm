@@ -1032,7 +1032,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			gd.addSlider("Nonspecific_assignment_cutoff (%)", 0, 100, nonSpecificCorrectionCutoff);
 		}
 
-		resultsSettings = SettingsManager.readResultsSettings();
+		resultsSettings = SettingsManager.readResultsSettings(0);
 
 		gd.addMessage("--- Image output ---");
 		ResultsImageSettings s = resultsSettings.getResultsImageSettings();
