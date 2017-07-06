@@ -34,6 +34,7 @@ import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfig.CameraType;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
@@ -145,7 +146,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private ImageSource source = null;
 	private PeakResultsList results;
 	private long time, runTime;
-	private CalibrationWriter calibration;
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig;
 	private ResultsSettings.Builder resultsSettings;
@@ -219,30 +219,24 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	public PeakFit()
 	{
-		init(new FitEngineConfiguration(), null, null);
+		init(null, null);
 	}
 
 	public PeakFit(FitEngineConfiguration config)
 	{
-		init(config, null, null);
+		init(config, null);
 	}
 
 	public PeakFit(FitEngineConfiguration config, ResultsSettings resultsSettings)
 	{
-		init(config, resultsSettings, null);
+		init(config, resultsSettings);
 	}
 
-	public PeakFit(FitEngineConfiguration config, ResultsSettings resultsSettings, Calibration calibration)
+	private void init(FitEngineConfiguration config, ResultsSettings resultsSettings)
 	{
-		init(config, resultsSettings, calibration);
-	}
-
-	private void init(FitEngineConfiguration config, ResultsSettings resultsSettings, Calibration calibration)
-	{
-		this.config = config;
+		this.config = (config != null) ? config : new FitEngineConfiguration();
 		this.resultsSettings = (resultsSettings != null) ? ResultsSettings.newBuilder(resultsSettings)
 				: ResultsSettings.newBuilder();
-		this.calibration = CalibrationWriter.create(calibration);
 	}
 
 	/*
@@ -597,12 +591,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		//	cal.exposureTime *= ((double)dataBlock / (dataBlock + dataSkip));
 		//}
 
-		// Fitting is always done in the system preferred units
-		calibration.setDistanceUnit(MemoryPeakResults.PREFERRED_DISTANCE_UNIT);
-		calibration.setIntensityUnit(MemoryPeakResults.PREFERRED_INTENSITY_UNIT);
-		calibration.setAngleUnit(MemoryPeakResults.PREFERRED_ANGLE_UNIT);
-		
-		results.setCalibration(calibration.getCalibration());
+		results.setCalibration(fitConfig.getCalibration());
 		results.setPSF(fitConfig.getPSF());
 		results.setConfiguration(XmlUtils.toXML(config));
 
@@ -754,9 +743,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Settings are within the FitEngineSettings
 		config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings());
 		fitConfig = config.getFitConfiguration();
-		calibration = CalibrationWriter.create(fitConfig.getCalibration()
-		//SettingsManager.readCalibration()
-		);
 
 		if (simpleFit)
 		{
@@ -783,7 +769,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 
-		// TODO - change this to support camera type 
+		// TODO - change this to support camera type
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 		gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
 		gd.addCheckbox("EM-CCD", calibration.isEMCCD());
@@ -1111,10 +1098,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private int showSimpleDialog()
 	{
-		boolean requireCalibration = requireCalibration();
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		boolean requireCalibration = requireCalibration(calibration);
 		if (requireCalibration)
 		{
-			if (!showCalibrationWizard(true))
+			if (!showCalibrationWizard(calibration, true))
 				return DONE;
 		}
 
@@ -1140,7 +1128,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		if (!useCurrentCalibration)
 		{
-			if (!showCalibrationWizard(false))
+			if (!showCalibrationWizard(calibration, false))
 				return DONE;
 		}
 
@@ -1187,25 +1175,19 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private boolean saveFitEngineSettings()
 	{
-		return saveFitEngineSettings(config, calibration);
+		return saveFitEngineSettings(config);
 	}
 
 	private static boolean saveFitEngineSettings(FitEngineConfiguration config)
 	{
-		return saveFitEngineSettings(config, null);
-	}
-
-	private static boolean saveFitEngineSettings(FitEngineConfiguration config, CalibrationWriter calibration)
-	{
-		boolean ok = true;
-		if (calibration != null)
+		FitEngineSettings settings = config.getFitEngineSettings();
+		boolean ok = SettingsManager.writeSettings(settings);
+		// Write calibration separately as some plugins may just want to load that		
+		if (settings.hasFitSettings() && settings.getFitSettings().hasCalibration())
 		{
-			Calibration c = calibration.getCalibration();
-			config.getFitConfiguration().setCalibration(c);
-			// Write this separately as some plugins may just want to load that		
+			Calibration c = settings.getFitSettings().getCalibration();
 			ok &= SettingsManager.writeSettings(c);
 		}
-		ok &= SettingsManager.writeSettings(config.getFitEngineSettings());
 		return ok;
 	}
 
@@ -1214,9 +1196,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * <p>
 	 * Check the calibration is valid for fitting.
 	 *
+	 * @param calibration
+	 *            the calibration
 	 * @return True if additional calibration information is required, false if the system is calibrated
 	 */
-	private boolean requireCalibration()
+	private boolean requireCalibration(CalibrationWriter calibration)
 	{
 		// Check if the calibration contains: Pixel pitch, Gain (can be 1), Exposure time
 		if (!calibration.hasNmPerPixel())
@@ -1233,7 +1217,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return false;
 	}
 
-	private boolean showCalibrationWizard(boolean showIntroduction)
+	private boolean showCalibrationWizard(CalibrationWriter calibration, boolean showIntroduction)
 	{
 		if (showIntroduction)
 		{
@@ -1246,17 +1230,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		//Calibration defaultCalibration = new Calibration();
 		//if (calibration.nmPerPixel <= 0 || calibration.nmPerPixel == defaultCalibration.nmPerPixel)
-		if (!getPixelPitch())
+		if (!getPixelPitch(calibration))
 			return false;
 		//if (calibration.gain <= 0 || calibration.gain == defaultCalibration.gain)
-		if (!getGain())
+		if (!getGain(calibration))
 			return false;
 		//if (calibration.exposureTime <= 0 || calibration.exposureTime == defaultCalibration.exposureTime)
-		if (!getExposureTime())
+		if (!getExposureTime(calibration))
 			return false;
 		// Check for a PSF width other than the default
 		//if (fitConfig.getInitialPeakWidth0() == new FitConfiguration().getInitialPeakWidth0())
-		if (!getPeakWidth())
+		if (!getPeakWidth(calibration))
 			return false;
 
 		// Check parameters
@@ -1287,7 +1271,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return gd;
 	}
 
-	private boolean getPixelPitch()
+	private boolean getPixelPitch(CalibrationWriter calibration)
 	{
 		ExtendedGenericDialog gd = newWizardDialog(
 				"Enter the size of each pixel. This is required to ensure the dimensions of the image are calibrated.",
@@ -1301,7 +1285,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return true;
 	}
 
-	private boolean getGain()
+	private boolean getGain(CalibrationWriter calibration)
 	{
 		ExtendedGenericDialog gd = newWizardDialog("Enter the total gain.",
 				"This is usually supplied with your camera certificate. The gain indicates how many Analogue-to-Digital-Units (ADUs) are recorded at the pixel for each photon registered on the sensor.",
@@ -1318,7 +1302,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return true;
 	}
 
-	private boolean getExposureTime()
+	private boolean getExposureTime(CalibrationWriter calibration)
 	{
 		ExtendedGenericDialog gd = newWizardDialog(
 				"Enter the exposure time. Calibration of the exposure time allows correct reporting of on and off times.",
@@ -1331,7 +1315,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return true;
 	}
 
-	private boolean getPeakWidth()
+	private boolean getPeakWidth(final CalibrationWriter calibration)
 	{
 		ExtendedGenericDialog gd = newWizardDialog("Enter the expected peak width in pixels.",
 				"A point source of light will not be focussed perfectly by the microscope but will appear as a spread out peak. This Point Spread Function (PSF) can be modelled using a 2D Gaussian curve.",
@@ -1458,6 +1442,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Ignore the template
 		gd.getNextChoice();
 
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 		calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
 		calibration.setGain(Math.abs(gd.getNextNumber()));
 		calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
@@ -1826,7 +1811,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		boolean saveSettings = BitFlags.anyNotSet(flags, FLAG_NO_SAVE);
 
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		CalibrationWriter calibration = new CalibrationWriter(fitConfig.getCalibration());
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
 		FitSolver fitSolver = fitConfig.getFitSolver();
 
@@ -1865,7 +1850,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 				calibration.setReadNoise(Math.abs(gd.getNextNumber()));
 				calibration.setAmplification(Math.abs(gd.getNextNumber()));
 				calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
-				fitConfig.setCalibration(calibration.getCalibration());
 			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
 			fitConfig.setRelativeThreshold(getNumber(gd));
@@ -1879,7 +1863,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				fitConfig.setGradientLineMinimisation(false);
 
 			if (saveSettings)
-				saveFitEngineSettings(config, calibration);
+				saveFitEngineSettings(config);
 
 			try
 			{
@@ -1962,12 +1946,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (isFastMLE)
 				fitConfig.setFixedIterations(gd.getNextBoolean());
 
-			boolean saveCalibration = false;
 			if (requireCalibration)
 			{
 				calibration.setBias(Math.abs(gd.getNextNumber()));
 				calibration.setGain(Math.abs(gd.getNextNumber()));
-				saveCalibration = true;
 			}
 
 			fitConfig.setUseClamping(gd.getNextBoolean());
@@ -1993,10 +1975,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			if (saveSettings)
 			{
-				if (saveCalibration)
-					saveFitEngineSettings(config, calibration);
-				else
-					saveFitEngineSettings(config);
+				saveFitEngineSettings(config);
 			}
 
 			try
@@ -2462,11 +2441,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		fitConfig.setComputeDeviations(resultsSettings.getShowDeviations());
 
-		// Add the calibration for precision filtering
-		fitConfig.setNmPerPixel(calibration.getNmPerPixel());
-		fitConfig.setGain(calibration.getGain());
-		fitConfig.setBias(calibration.getBias());
-		fitConfig.setEmCCD(calibration.isEMCCD());
+		config.configureOutputUnits();
 	}
 
 	/**
@@ -2618,7 +2593,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (cal == null)
 			return;
 
-		this.calibration = new CalibrationWriter(cal);
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		// Do not use set() as we support merging a partial calibration
+		calibration.mergeCalibration(cal);
 
 		if (calibration.hasNmPerPixel())
 			textNmPerPixel.setText("" + calibration.getNmPerPixel());

@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Maths;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig;
 import gdsc.smlm.data.config.FitConfig.DataFilter;
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
@@ -12,8 +13,12 @@ import gdsc.smlm.data.config.FitConfig.DataFilterSettings;
 import gdsc.smlm.data.config.FitConfig.DataFilterType;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
 import gdsc.smlm.data.config.FitConfig.FitSettings;
+import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitConfig.RelativeParameter;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.data.config.FitConfigHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.filters.AverageDataProcessor;
@@ -775,5 +780,30 @@ public class FitEngineConfiguration implements Cloneable
 	public void copyDataFilter(FitEngineConfiguration config)
 	{
 		fitEngineSettings.setDataFilterSettings(config.fitEngineSettings.getDataFilterSettings());
+	}
+
+	/**
+	 * Configure the output units from fitting using the current calibration and fit solver settings.
+	 * <p>
+	 * This method should be called before the calibration is passed to any object that will handle the fitting output.
+	 */
+	public void configureOutputUnits()
+	{
+		getFitConfiguration();
+
+		// If there is no calibration then the writer will just have the defaults
+		CalibrationWriter calibration = fitConfiguration.getCalibrationWriter();
+
+		// Fitting is always done pixels and radians
+		calibration.setDistanceUnit(DistanceUnit.PIXEL);
+		calibration.setAngleUnit(AngleUnit.RADIAN);
+
+		// Most fitters fit in photons unless we have no calibration.
+		IntensityUnit intensityUnit = IntensityUnit.PHOTON;
+
+		if (calibration.getGain() == 0)
+			intensityUnit = IntensityUnit.COUNT;
+
+		calibration.setIntensityUnit(intensityUnit);
 	}
 }

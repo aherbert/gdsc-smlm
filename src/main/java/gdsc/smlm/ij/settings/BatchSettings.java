@@ -26,14 +26,14 @@ public class BatchSettings
 	public ArrayList<ParameterSettings> parameters = new ArrayList<ParameterSettings>();
 	public String resultsDirectory = null;
 	public boolean runPeakFit = true;
-	private Calibration calibration = Calibration.getDefaultInstance();
+	private Calibration calibration = null;
 
 	/**
 	 * @return the calibration
 	 */
 	public Calibration getCalibration()
 	{
-		return calibration;
+		return (calibration != null) ? calibration : Calibration.getDefaultInstance();
 	}
 
 	/**
@@ -42,6 +42,6 @@ public class BatchSettings
 	 */
 	public void setCalibration(Calibration calibration)
 	{
-		this.calibration = (calibration != null) ? calibration : Calibration.getDefaultInstance();
+		this.calibration = calibration;
 	}
 }

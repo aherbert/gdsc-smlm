@@ -35,6 +35,7 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
 
@@ -290,6 +291,7 @@ public class BatchPeakFit implements PlugIn
 
 		String statusSuffix = String.format(" / %d: %s", xmlSettings.size(), imp.getOriginalFileInfo().fileName);
 
+		Calibration calibration = settings.getCalibration();
 		for (int i = 0; i < xmlSettings.size(); i++)
 		{
 			IJ.showStatus((i + 1) + statusSuffix);
@@ -308,8 +310,10 @@ public class BatchPeakFit implements PlugIn
 				continue;
 
 			// No need to skip settings that do not make sense as we will catch exceptions.
-			// This relies on the fit engine throw exceptions for invalid settings.
+			// This relies on the fit engine to throw exceptions for invalid settings.
 
+			// Update the configuration
+			fitConfig.getFitConfiguration().setCalibration(calibration);
 			// Ensure the state is restored after XStream object reconstruction
 			fitConfig.getFitConfiguration().initialiseState();
 
@@ -324,7 +328,7 @@ public class BatchPeakFit implements PlugIn
 				ResultsSettings resultsSettings = createResultsSettings(fitConfig, prefix);
 				try
 				{
-					PeakFit peakFit = new PeakFit(fitConfig, resultsSettings, settings.getCalibration());
+					PeakFit peakFit = new PeakFit(fitConfig, resultsSettings);
 					peakFit.setSilent(true);
 					peakFit.run(imp, false);
 

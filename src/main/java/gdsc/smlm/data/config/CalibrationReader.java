@@ -30,14 +30,14 @@ public class CalibrationReader
 	private CalibrationOrBuilder calibrationOrBuilder;
 
 	/**
-	 * Instantiates a new calibration helper with no calibration.
+	 * Instantiates a new calibration reader with no calibration.
 	 */
 	protected CalibrationReader()
 	{
 	}
 
 	/**
-	 * Instantiates a new calibration helper.
+	 * Instantiates a new calibration reader.
 	 *
 	 * @param calibration
 	 *            the calibration

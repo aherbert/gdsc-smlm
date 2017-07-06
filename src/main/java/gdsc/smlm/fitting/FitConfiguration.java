@@ -19,6 +19,9 @@ import gdsc.smlm.data.config.PSFConfig.PSFParameter;
 import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.fitting.nonlinear.BacktrackingFastMLESteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.BaseFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
@@ -225,6 +228,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public Calibration getCalibration()
 	{
 		return calibration.getCalibration();
+	}
+
+	/**
+	 * Gets the calibration writer.
+	 *
+	 * @return the calibration writer
+	 */
+	public CalibrationWriter getCalibrationWriter()
+	{
+		return calibration;
 	}
 
 	/**
@@ -1252,7 +1265,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		calibration.setNmPerPixel(nmPerPixel);
 		updateCalibration();
 	}
-
+	
 	/**
 	 * @return the gain (or 1 if the gain is invalid)
 	 */

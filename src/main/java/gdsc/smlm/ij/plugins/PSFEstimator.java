@@ -70,7 +70,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	private int dataSkip = 0;
 
 	private GlobalSettings globalSettings;
-	private Calibration.Builder calibrationBuilder;
 	private FitEngineConfiguration config;
 	private PSFEstimatorSettings settings;
 
@@ -109,7 +108,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		}
 
 		globalSettings = SettingsManager.loadSettings();
-		calibrationBuilder = SettingsManager.readCalibration().toBuilder();
+		Calibration calibration = SettingsManager.readCalibration();
 		settings = globalSettings.getPsfEstimatorSettings();
 		// Reset
 		if (IJ.controlKeyDown())
@@ -120,6 +119,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		{
 			config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings());
 		}
+		config.getFitConfiguration().setCalibration(calibration);
 
 		Roi roi = imp.getRoi();
 		if (roi != null && roi.getType() != Roi.RECTANGLE)
@@ -756,7 +756,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	private PeakFit createFitter()
 	{
-		PeakFit fitter = new PeakFit(config, null, calibrationBuilder.build());
+		PeakFit fitter = new PeakFit(config, null);
 		return fitter;
 	}
 
