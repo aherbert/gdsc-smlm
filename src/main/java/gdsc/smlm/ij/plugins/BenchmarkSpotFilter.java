@@ -47,10 +47,10 @@ import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
 import gdsc.smlm.data.config.FitConfig.DataFilterType;
+import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;

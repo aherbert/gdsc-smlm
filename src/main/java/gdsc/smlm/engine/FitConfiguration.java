@@ -1,4 +1,4 @@
-package gdsc.smlm.fitting;
+package gdsc.smlm.engine;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
@@ -19,6 +19,9 @@ import gdsc.smlm.data.config.PSFConfig.PSFParameter;
 import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.fitting.FunctionSolver;
+import gdsc.smlm.fitting.Gaussian2DFitConfiguration;
 import gdsc.smlm.fitting.nonlinear.BacktrackingFastMLESteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.BaseFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;

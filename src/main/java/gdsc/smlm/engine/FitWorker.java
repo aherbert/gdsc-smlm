@@ -36,7 +36,6 @@ import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FastGaussian2DFitter;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;

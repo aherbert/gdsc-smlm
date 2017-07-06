@@ -19,6 +19,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
 import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -34,7 +35,6 @@ import gdsc.smlm.data.config.FitConfigHelper;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;

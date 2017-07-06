@@ -15,6 +15,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Sort;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.data.config.PSFConfigHelper;
 import gdsc.smlm.data.config.FitConfig.FitSolver;
 
@@ -32,7 +33,6 @@ import gdsc.smlm.data.config.FitConfig.FitSolver;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.filters.AverageFilter;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;

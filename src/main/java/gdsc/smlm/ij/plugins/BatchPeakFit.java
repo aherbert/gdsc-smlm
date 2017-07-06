@@ -38,6 +38,7 @@ import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
+import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -53,7 +54,6 @@ import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.ij.settings.BatchRun;
 import gdsc.smlm.ij.settings.BatchSettings;
 import gdsc.smlm.ij.settings.ParameterSettings;

@@ -14,8 +14,8 @@ import java.util.Vector;
 
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;

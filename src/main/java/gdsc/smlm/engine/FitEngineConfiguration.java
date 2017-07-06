@@ -31,7 +31,6 @@ import gdsc.smlm.filters.JurySpotFilter;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.MedianDataProcessor;
 import gdsc.smlm.filters.SingleSpotFilter;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**

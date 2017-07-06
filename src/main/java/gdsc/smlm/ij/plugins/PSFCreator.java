@@ -38,6 +38,7 @@ import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.data.config.FitConfigHelper;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -57,7 +58,6 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;

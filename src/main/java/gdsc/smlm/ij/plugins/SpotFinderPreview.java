@@ -13,6 +13,7 @@ import gdsc.core.match.Coordinate;
 import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.MatchResult;
 import gdsc.core.match.PointPair;
+import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -30,7 +31,6 @@ import gdsc.core.match.PointPair;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;

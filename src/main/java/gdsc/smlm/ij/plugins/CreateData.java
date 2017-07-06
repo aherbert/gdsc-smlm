@@ -63,6 +63,7 @@ import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.data.config.UnitHelper;
+import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -80,7 +81,6 @@ import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;

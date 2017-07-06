@@ -36,6 +36,7 @@ import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.data.config.UnitConfig.TimeUnit;
 import gdsc.smlm.data.config.UnitHelper;
+import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -51,7 +52,6 @@ import gdsc.smlm.data.config.UnitHelper;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.fitting.FitConfiguration;
 import ij.IJ;
 import ij.Prefs;
 

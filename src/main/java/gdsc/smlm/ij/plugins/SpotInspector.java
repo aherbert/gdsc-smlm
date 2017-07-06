@@ -15,6 +15,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -30,7 +31,6 @@ import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.results.Counter;
