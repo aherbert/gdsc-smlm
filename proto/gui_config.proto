@@ -154,3 +154,46 @@ message LoadLocalisationsSettings
 {
 	string localisationsFilename = 1;
 }
+
+// Contain the settings for the clustering algorithm
+message ClusteringSettings
+{
+	double distanceThreshold = 50;
+	double distanceExclusion = 0;
+	double timeThreshold = 1;
+	TimeUnit timeUnit = TimeUnit.SECOND;
+	int32 traceMode = TraceMode.LATEST_FORERUNNER.ordinal();
+	int32 clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE.ordinal();
+	int32 pulseInterval = 0;
+	int32 pulseWindow = 0;
+	bool splitPulses = false;
+	double blinkingRate = 1;
+	bool optimise = false;
+	double minDistanceThreshold = 0;
+	double maxDistanceThreshold = 500;
+	// The min time threshold for optimisation (time is in frames).
+	int32 minTimeThreshold = 0;
+	// The max time threshold for optimisation (time is in frames).
+	int32 maxTimeThreshold = 20;
+	int32 optimiserSteps = 10;
+	int32 optimiserPlot = OptimiserPlot.BILINEAR.ordinal();
+	bool saveTraces = false;
+	bool showHistograms = false;
+	bool saveTraceData = false;
+	string traceDataDirectory = "";
+	int32 histogramBins = 100;
+	bool removeOutliers = false;
+	bool refitOption = false;
+	// Options for tracing diffusion
+	int32 minimumTraceLength = 6;
+	bool truncate = false;
+	bool internalDistances = true;
+	bool subSampledDistances = false;
+	bool ignoreEnds = true;
+	bool precisionCorrection = true;
+	bool msdCorrection = true;
+	bool mle = true;
+	int32 fitLength = 6;
+	int32 fitRestarts = 3;
+	int32 jumpDistance = 1;
+}

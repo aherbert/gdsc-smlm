@@ -29,7 +29,8 @@ import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.ClusteringSettings;
-import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
+import gdsc.smlm.ij.settings.ClusteringSettingsHelper;
+import gdsc.smlm.ij.settings.ClusteringSettingsHelper.OptimiserPlot;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Cluster.CentroidMethod;
@@ -160,7 +161,8 @@ public class TraceMolecules implements PlugIn
 			if (!showClusterDialog())
 				return;
 
-			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), settings.getClusteringAlgorithm(),
+			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(),
+					ClusteringSettingsHelper.getClusteringAlgorithm(settings.getClusteringAlgorithm()),
 					new IJTrackProgress());
 
 			if (settings.splitPulses)
@@ -192,7 +194,7 @@ public class TraceMolecules implements PlugIn
 				return;
 
 			TraceManager manager = new TraceManager(results);
-			manager.setTraceMode(settings.getTraceMode());
+			manager.setTraceMode(ClusteringSettingsHelper.getTraceMode(settings.getTraceMode()));
 			manager.setActivationFrameInterval(settings.pulseInterval);
 			manager.setActivationFrameWindow(settings.pulseWindow);
 			manager.setDistanceExclusion(settings.distanceExclusion / results.getCalibrationReader().getNmPerPixel());
@@ -503,8 +505,9 @@ public class TraceMolecules implements PlugIn
 		// Add to the summary table
 		StringBuilder sb = new StringBuilder();
 		sb.append(results.getName()).append('\t');
-		sb.append(outputName.equals("Cluster") ? settings.getClusteringAlgorithm() : settings.getTraceMode())
-				.append('\t');
+		sb.append(outputName.equals("Cluster")
+				? ClusteringSettingsHelper.getClusteringAlgorithm(settings.getClusteringAlgorithm())
+				: ClusteringSettingsHelper.getTraceMode(settings.getTraceMode())).append('\t');
 		sb.append(Utils.rounded(exposureTime * 1000, 3)).append('\t');
 		sb.append(Utils.rounded(dThreshold, 3)).append('\t');
 		sb.append(Utils.rounded(tThreshold, 3));
@@ -663,7 +666,8 @@ public class TraceMolecules implements PlugIn
 		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
 		gd.addChoice("Time_unit", SettingsManager.getTimeUnitNames(), settings.getTimeUnit().ordinal());
 		String[] traceModes = SettingsManager.getNames((Object[]) TraceManager.TraceMode.values());
-		gd.addChoice("Trace_mode", traceModes, traceModes[settings.getTraceMode().ordinal()]);
+		gd.addChoice("Trace_mode", traceModes,
+				traceModes[ClusteringSettingsHelper.getTraceMode(settings.getTraceMode()).ordinal()]);
 		gd.addNumericField("Pulse_interval (frames)", settings.pulseInterval, 0);
 		gd.addNumericField("Pulse_window (frames)", settings.pulseWindow, 0);
 		gd.addCheckbox("Split_pulses", settings.splitPulses);
@@ -774,7 +778,8 @@ public class TraceMolecules implements PlugIn
 		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
 		gd.addChoice("Time_unit", SettingsManager.getTimeUnitNames(), settings.getTimeUnit().ordinal());
 		String[] algorithm = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
-		gd.addChoice("Clustering_algorithm", algorithm, algorithm[settings.getClusteringAlgorithm().ordinal()]);
+		gd.addChoice("Clustering_algorithm", algorithm, algorithm[ClusteringSettingsHelper
+				.getClusteringAlgorithm(settings.getClusteringAlgorithm()).ordinal()]);
 		gd.addNumericField("Pulse_interval (frames)", settings.pulseInterval, 0);
 		gd.addCheckbox("Split_pulses", settings.splitPulses);
 		gd.addCheckbox("Save_clusters", settings.saveTraces);
@@ -851,8 +856,10 @@ public class TraceMolecules implements PlugIn
 		try
 		{
 			Parameters.isAboveZero("Distance threshold", settings.distanceThreshold);
-			if (settings.getClusteringAlgorithm() == ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY ||
-					settings.getClusteringAlgorithm() == ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY)
+			ClusteringAlgorithm clusteringAlgorithm = ClusteringSettingsHelper
+					.getClusteringAlgorithm(settings.getClusteringAlgorithm());
+			if (clusteringAlgorithm == ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY ||
+					clusteringAlgorithm == ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY)
 			{
 				Parameters.isAboveZero("Time threshold", settings.getTimeThreshold());
 				Parameters.isPositive("Pulse interval", settings.pulseInterval);
@@ -962,8 +969,9 @@ public class TraceMolecules implements PlugIn
 		gd.addNumericField("Max_Time_Threshold (frames)", settings.maxTimeThreshold, 0);
 		gd.addSlider("Steps", 1, 20, settings.optimiserSteps);
 		gd.addNumericField("Blinking_rate", settings.blinkingRate, 2);
-		String[] plotNames = SettingsManager.getNames((Object[]) ClusteringSettings.OptimiserPlot.values());
-		gd.addChoice("Plot", plotNames, plotNames[settings.getOptimiserPlot().ordinal()]);
+		String[] plotNames = SettingsManager.getNames((Object[]) ClusteringSettingsHelper.OptimiserPlot.values());
+		gd.addChoice("Plot", plotNames,
+				plotNames[ClusteringSettingsHelper.getOptimiserPlot(settings.getOptimiserPlot()).ordinal()]);
 		if (altKeyDown)
 			gd.addCheckbox("Optimise_blinking", inputOptimiseBlinkingRate);
 
@@ -1387,7 +1395,7 @@ public class TraceMolecules implements PlugIn
 	private void createPlotResults(List<double[]> results)
 	{
 		int w = 400, h = 400;
-		switch (settings.getOptimiserPlot())
+		switch (ClusteringSettingsHelper.getOptimiserPlot(settings.getOptimiserPlot()))
 		{
 			case NONE:
 				return;
@@ -1417,7 +1425,7 @@ public class TraceMolecules implements PlugIn
 	 */
 	private void showPlot()
 	{
-		if (settings.getOptimiserPlot() == OptimiserPlot.NONE)
+		if (ClusteringSettingsHelper.getOptimiserPlot(settings.getOptimiserPlot()) == OptimiserPlot.NONE)
 			return;
 
 		// Display the image

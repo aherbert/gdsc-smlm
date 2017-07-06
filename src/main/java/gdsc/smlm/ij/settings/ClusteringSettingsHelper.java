@@ -2,7 +2,6 @@ package gdsc.smlm.ij.settings;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.smlm.data.config.UnitConfig.TimeUnit;
-import gdsc.smlm.ij.settings.ClusteringSettingsHelper.OptimiserPlot;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.results.TraceManager.TraceMode;
 
@@ -22,12 +21,34 @@ import gdsc.smlm.results.TraceManager.TraceMode;
 /**
  * Contain the settings for the clustering algorithm
  */
-public class ClusteringSettings
+public class ClusteringSettingsHelper
 {
+	public enum OptimiserPlot
+	{
+		//@formatter:off
+		NONE{ public String getName() { return "None"; }}, 
+		NEAREST_NEIGHBOUR{ public String getName() { return "Nearest neighbour"; }}, 
+		BILINEAR{ public String getName() { return "Bi-linear"; }};
+		//@formatter:on
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+	}
+
 	public double distanceThreshold = 50;
 	public double distanceExclusion = 0;
-	private double timeThreshold = 1;
-	private TimeUnit timeUnit = TimeUnit.SECOND;
+	public double timeThreshold = 1;
+	public TimeUnit timeUnit = TimeUnit.SECOND;
 	public int traceMode = TraceMode.LATEST_FORERUNNER.ordinal();
 	public int clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE.ordinal();
 	public int pulseInterval = 0;
@@ -63,78 +84,24 @@ public class ClusteringSettings
 	public int fitRestarts = 3;
 	public int jumpDistance = 1;
 
-	public int getOptimiserPlot()
+	public static OptimiserPlot getOptimiserPlot(int optimiserPlot)
 	{
-		return optimiserPlot;
+		if (optimiserPlot < 0 || optimiserPlot >= OptimiserPlot.values().length)
+			return OptimiserPlot.NONE;
+		return OptimiserPlot.values()[optimiserPlot];
 	}
 
-	public void setOptimiserPlot(int optimiserPlot)
+	public static TraceMode getTraceMode(int traceMode)
 	{
-		this.optimiserPlot = optimiserPlot;
+		if (traceMode < 0 || traceMode >= TraceMode.values().length)
+			return TraceMode.LATEST_FORERUNNER;
+		return TraceMode.values()[traceMode];
 	}
 
-	public int getTraceMode()
+	public static ClusteringAlgorithm getClusteringAlgorithm(int clusteringAlgorithm)
 	{
-		return traceMode;
-	}
-
-	public void setTraceMode(int traceMode)
-	{
-		this.traceMode = traceMode;
-	}
-
-	public TimeUnit getTimeUnit()
-	{
-		if (timeUnit == null)
-			timeUnit = TimeUnit.SECOND;
-		return timeUnit;
-	}
-
-	public void setTimeUnit(TimeUnit timeUnit)
-	{
-		this.timeUnit = timeUnit;
-	}
-
-	public void setTimeUnit(int timeUnit)
-	{
-		if (timeUnit < 0 || timeUnit >= TimeUnit.values().length)
-			this.timeUnit = TimeUnit.SECOND;
-		else
-			this.timeUnit = TimeUnit.values()[timeUnit];
-	}
-
-	public int getClusteringAlgorithm()
-	{
-		return clusteringAlgorithm;
-	}
-
-	public void setClusteringAlgorithm(int clusteringAlgorithm)
-	{
-		this.clusteringAlgorithm = clusteringAlgorithm;
-	}
-
-	/**
-	 * Gets the time threshold.
-	 * <p>
-	 * The units are specified in {@link #getTimeUnit()}
-	 *
-	 * @return the time threshold
-	 */
-	public double getTimeThreshold()
-	{
-		return timeThreshold;
-	}
-
-	/**
-	 * Sets the time threshold.
-	 * <p>
-	 * The units are specified in {@link #getTimeUnit()}
-	 *
-	 * @param timeThreshold
-	 *            the new time threshold
-	 */
-	public void setTimeThreshold(double timeThreshold)
-	{
-		this.timeThreshold = timeThreshold;
+		if (clusteringAlgorithm < 0 || clusteringAlgorithm >= ClusteringAlgorithm.values().length)
+			return ClusteringAlgorithm.PAIRWISE;
+		return ClusteringAlgorithm.values()[clusteringAlgorithm];
 	}
 }
