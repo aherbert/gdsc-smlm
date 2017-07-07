@@ -173,7 +173,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private static String inputOption = "";
 	private static boolean showTable = true;
 	private static boolean showImage = true;
-	private static PSFCalculatorSettings.Builder calculatorSettings = GUIConfigHelper.defaultPSFCalculatorSettings.toBuilder();
+	private static PSFCalculatorSettings.Builder calculatorSettings = GUIConfigHelper.defaultPSFCalculatorSettings
+			.toBuilder();
 
 	// All the fields that will be updated when reloading the configuration file
 	private TextField textNmPerPixel;
@@ -2046,22 +2047,26 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private void addFileResults(PeakResultsList resultsList)
 	{
 		ResultsFileSettings resultsSettings = this.resultsSettings.getResultsFileSettings();
-		String resultsFilename = null;
-		if (resultsSettings.getResultsDirectory() != null && new File(resultsSettings.getResultsDirectory()).exists())
+		if (resultsSettings.getFileFormat().getNumber() > 0)
 		{
-			resultsFilename = resultsSettings.getResultsDirectory() + File.separatorChar + source.getName() +
-					".results." + ResultsConfigHelper.getExtension(resultsSettings.getFileFormat());
-		}
-		else
-		{
-			resultsFilename = resultsSettings.getResultsFilename();
-		}
-		PeakResults r = ResultsManager.addFileResults(resultsList, resultsSettings, resultsFilename,
-				this.resultsSettings.getShowDeviations(), integrateFrames > 1, false);
-		if (r instanceof FilePeakResults)
-		{
-			FilePeakResults fr = (FilePeakResults) r;
-			fr.setSortAfterEnd(Prefs.getThreads() > 1);
+			String resultsFilename = null;
+			if (resultsSettings.getResultsDirectory() != null &&
+					new File(resultsSettings.getResultsDirectory()).exists())
+			{
+				resultsFilename = resultsSettings.getResultsDirectory() + File.separatorChar + source.getName() +
+						".results." + ResultsConfigHelper.getExtension(resultsSettings.getFileFormat());
+			}
+			else
+			{
+				resultsFilename = resultsSettings.getResultsFilename();
+			}
+			PeakResults r = ResultsManager.addFileResults(resultsList, resultsSettings, resultsFilename,
+					this.resultsSettings.getShowDeviations(), integrateFrames > 1, false);
+			if (r instanceof FilePeakResults)
+			{
+				FilePeakResults fr = (FilePeakResults) r;
+				fr.setSortAfterEnd(Prefs.getThreads() > 1);
+			}
 		}
 	}
 

@@ -103,6 +103,12 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 			peakResults.addAll(results);
 	}
 
+	public void addAll(Collection<PeakResult> results)
+	{
+		for (PeakResults peakResults : this.results)
+			peakResults.addAll(results);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -157,14 +163,8 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 		return newList;
 	}
 
-	// Pass through all the modifications to the list objects
-
-	public void addAll(Collection<PeakResult> results)
-	{
-		super.addAll(results);
-		for (PeakResults peakResults : this.results)
-			peakResults.addAll(results);
-	}
+	// Pass through all the modifications to the list objects as well as this 
+	// so that any new list objects can copy the settings.
 
 	public void setSource(ImageSource source)
 	{

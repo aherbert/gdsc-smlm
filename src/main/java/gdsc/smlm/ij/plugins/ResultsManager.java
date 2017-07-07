@@ -398,36 +398,39 @@ public class ResultsManager implements PlugIn
 	public static PeakResults addFileResults(PeakResultsList resultsList, ResultsFileSettings resultsSettings,
 			String resultsFilename, boolean showDeviations, boolean showEndFrame, boolean showId)
 	{
-		File file = new File(resultsFilename);
-		File parent = file.getParentFile();
-		if (parent != null && parent.exists())
+		if (resultsSettings.getFileFormat().getNumber() > 0)
 		{
-			PeakResults r;
-			switch (resultsSettings.getFileFormat())
+			File file = new File(resultsFilename);
+			File parent = file.getParentFile();
+			if (parent != null && parent.exists())
 			{
-				case BINARY:
-					r = new BinaryFilePeakResults(resultsFilename, showDeviations, showEndFrame, showId);
-					break;
-				case TEXT:
-					TextFilePeakResults f = new TextFilePeakResults(resultsFilename, showDeviations, showEndFrame,
-							showId);
-					f.setDistanceUnit(resultsSettings.getDistanceUnit());
-					f.setIntensityUnit(resultsSettings.getIntensityUnit());
-					f.setAngleUnit(resultsSettings.getAngleUnit());
-					f.setComputePrecision(resultsSettings.getComputePrecision());
-					r = f;
-					break;
-				case MALK:
-					r = new MALKFilePeakResults(resultsFilename);
-					break;
-				case TSF:
-					r = new TSFPeakResultsWriter(resultsFilename);
-					break;
-				default:
-					throw new RuntimeException("Unsupported file format: " + resultsSettings.getFileFormat());
+				PeakResults r;
+				switch (resultsSettings.getFileFormat())
+				{
+					case BINARY:
+						r = new BinaryFilePeakResults(resultsFilename, showDeviations, showEndFrame, showId);
+						break;
+					case TEXT:
+						TextFilePeakResults f = new TextFilePeakResults(resultsFilename, showDeviations, showEndFrame,
+								showId);
+						f.setDistanceUnit(resultsSettings.getDistanceUnit());
+						f.setIntensityUnit(resultsSettings.getIntensityUnit());
+						f.setAngleUnit(resultsSettings.getAngleUnit());
+						f.setComputePrecision(resultsSettings.getComputePrecision());
+						r = f;
+						break;
+					case MALK:
+						r = new MALKFilePeakResults(resultsFilename);
+						break;
+					case TSF:
+						r = new TSFPeakResultsWriter(resultsFilename);
+						break;
+					default:
+						throw new RuntimeException("Unsupported file format: " + resultsSettings.getFileFormat());
+				}
+				resultsList.addOutput(r);
+				return r;
 			}
-			resultsList.addOutput(r);
-			return r;
 		}
 		return null;
 	}
@@ -493,7 +496,7 @@ public class ResultsManager implements PlugIn
 		resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(gd.getNextBoolean());
 
 		gd.collectOptions();
-		
+
 		// Check arguments
 		try
 		{
@@ -633,7 +636,7 @@ public class ResultsManager implements PlugIn
 		final ResultsFileSettings.Builder fileSettings = resultsSettings.getResultsFileSettingsBuilder();
 		if (BitFlags.anySet(flags, FLAG_RESULTS_DIRECTORY))
 			gd.addDirectoryField("Results_directory", fileSettings.getResultsDirectory());
-		if (BitFlags.anySet(flags, FLAG_RESULTS_FILE))
+		else if (BitFlags.anySet(flags, FLAG_RESULTS_FILE))
 			gd.addFilenameField("Results_file", fileSettings.getResultsFilename());
 		else
 			// Do not add a results file to prevent constant overwrite messages

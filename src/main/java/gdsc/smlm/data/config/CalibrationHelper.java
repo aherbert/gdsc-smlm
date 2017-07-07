@@ -3,14 +3,14 @@ package gdsc.smlm.data.config;
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder;
-import gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration;
+import gdsc.smlm.data.config.CalibrationConfig.DistanceCalibrationOrBuilder;
+import gdsc.smlm.data.config.CalibrationConfig.IntensityCalibrationOrBuilder;
+import gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
-import gdsc.smlm.data.config.CalibrationConfig.PSFCalibration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -48,7 +48,7 @@ public class CalibrationHelper
 	{
 		if (calibration != null && toDistanceUnit != null && calibration.hasDistanceCalibration())
 		{
-			DistanceCalibration distanceCalibration = calibration.getDistanceCalibration();
+			DistanceCalibrationOrBuilder distanceCalibration = calibration.getDistanceCalibrationOrBuilder();
 			return UnitConverterFactory.createConverter(distanceCalibration.getDistanceUnit(), toDistanceUnit,
 					distanceCalibration.getNmPerPixel());
 		}
@@ -73,7 +73,7 @@ public class CalibrationHelper
 	{
 		if (calibration != null && toIntensityUnit != null && calibration.hasIntensityCalibration())
 		{
-			IntensityCalibration intensityCalibration = calibration.getIntensityCalibration();
+			IntensityCalibrationOrBuilder intensityCalibration = calibration.getIntensityCalibrationOrBuilder();
 			return UnitConverterFactory.createConverter(intensityCalibration.getIntensityUnit(), toIntensityUnit,
 					intensityCalibration.getGain());
 		}
@@ -98,7 +98,7 @@ public class CalibrationHelper
 	{
 		if (calibration != null && toAngleUnit != null && calibration.hasPsfCalibration())
 		{
-			PSFCalibration psfCalibration = calibration.getPsfCalibration();
+			PSFCalibrationOrBuilder psfCalibration = calibration.getPsfCalibrationOrBuilder();
 			return UnitConverterFactory.createConverter(psfCalibration.getAngleUnit(), toAngleUnit);
 		}
 		throw new ConversionException();
@@ -125,6 +125,9 @@ public class CalibrationHelper
 		}
 		catch (ConversionException e)
 		{
+			if (calibration != null && calibration.hasDistanceCalibration())
+				return new IdentityTypeConverter<DistanceUnit>(
+						calibration.getDistanceCalibrationOrBuilder().getDistanceUnit());
 			return new IdentityTypeConverter<DistanceUnit>(null);
 		}
 	}
@@ -150,6 +153,9 @@ public class CalibrationHelper
 		}
 		catch (ConversionException e)
 		{
+			if (calibration != null && calibration.hasIntensityCalibration())
+				return new IdentityTypeConverter<IntensityUnit>(
+						calibration.getIntensityCalibrationOrBuilder().getIntensityUnit());
 			return new IdentityTypeConverter<IntensityUnit>(null);
 		}
 	}
@@ -175,6 +181,9 @@ public class CalibrationHelper
 		}
 		catch (ConversionException e)
 		{
+			if (calibration != null && calibration.hasPsfCalibration())
+				return new IdentityTypeConverter<AngleUnit>(
+						calibration.getPsfCalibrationOrBuilder().getAngleUnit());
 			return new IdentityTypeConverter<AngleUnit>(null);
 		}
 	}

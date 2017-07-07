@@ -148,7 +148,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		helper.setAngleUnit(angleUnit);
 		converters = helper.getConverters();
 		ic = converters[PeakResult.INTENSITY];
-		outIndices = Utils.newArray(outIndices.length, 0, 1);
+		outIndices = Utils.newArray(converters.length, 0, 1);
 		if (!showZ)
 		{
 			TIntArrayList list = new TIntArrayList(outIndices);
@@ -340,15 +340,15 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			{
 				for (int i = 0; i < outIndices.length; i++)
 				{
-					add(sb, converters[outIndices[i]].convert(params[i]));
-					add(sb, converters[outIndices[i]].convert(paramsStdDev[i]));
+					add(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
+					add(sb, converters[outIndices[i]].convert(paramsStdDev[outIndices[i]]));
 				}
 			}
 			else
 			{
 				for (int i = 0; i < outIndices.length; i++)
 				{
-					add(sb, converters[outIndices[i]].convert(params[i]));
+					add(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
 					sb.append("\t0");
 				}
 			}
@@ -356,7 +356,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		else
 		{
 			for (int i = 0; i < outIndices.length; i++)
-				add(sb, converters[outIndices[i]].convert(params[i]));
+				add(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
 		}
 		if (canComputePrecision)
 		{
