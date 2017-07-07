@@ -430,13 +430,28 @@ public class SettingsManager
 		}
 	}
 
-	public final static String[] clusteringAlgorithmNames;
+	private static ClusteringAlgorithm[] _ClusteringAlgorithmValues;
 
-	static
+	public static ClusteringAlgorithm[] getClusteringAlgorithmValues()
 	{
-		// TODO Update these as the configuration objects are auto-generated
+		if (_ClusteringAlgorithmValues == null)
+			initClusteringAlgorithm();
+		return _ClusteringAlgorithmValues;
+	}
 
-		clusteringAlgorithmNames = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
+	private static String[] _ClusteringAlgorithmNames;
+
+	public static String[] getClusteringAlgorithmNames()
+	{
+		if (_ClusteringAlgorithmNames == null)
+			initClusteringAlgorithm();
+		return _ClusteringAlgorithmNames;
+	}
+
+	private static void initClusteringAlgorithm()
+	{
+		_ClusteringAlgorithmValues = ClusteringAlgorithm.values();
+		_ClusteringAlgorithmNames = getNames((Object[]) _ClusteringAlgorithmValues);
 	}
 
 	/**
@@ -547,7 +562,7 @@ public class SettingsManager
 	 */
 	public static boolean writeSettings(Message message, int flags)
 	{
-		return writeMessage(message, createSettingsFile(message.getClass()), BitFlags.anySet(flags, FLAG_SILENT));
+		return writeMessage(message, createSettingsFile(message.getClass()), flags);
 	}
 
 	/**
@@ -617,8 +632,7 @@ public class SettingsManager
 		@SuppressWarnings("unchecked")
 		public T read(int flags)
 		{
-			T c = (T) readMessage(t.getParserForType(), createSettingsFile(t.getClass()),
-					BitFlags.anySet(flags, FLAG_SILENT));
+			T c = (T) readMessage(t.getParserForType(), createSettingsFile(t.getClass()), flags);
 			if (c == null && BitFlags.anyNotSet(flags, FLAG_NO_DEFAULT))
 				c = t;
 			return c;
@@ -755,13 +769,13 @@ public class SettingsManager
 	 *            the message
 	 * @param filename
 	 *            the filename
-	 * @param silent
-	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @param flags
+	 *            the flags
 	 * @return True if written
 	 */
-	public static boolean writeMessage(Message message, String filename, boolean silent)
+	public static boolean writeMessage(Message message, String filename, int flags)
 	{
-		return writeMessage(message, new File(filename), silent);
+		return writeMessage(message, new File(filename), flags);
 	}
 
 	/**
@@ -773,22 +787,22 @@ public class SettingsManager
 	 *            the message
 	 * @param file
 	 *            the file
-	 * @param silent
-	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @param flags
+	 *            the flags
 	 * @return True if written
 	 */
-	public static boolean writeMessage(Message message, File file, boolean silent)
+	public static boolean writeMessage(Message message, File file, int flags)
 	{
 		FileOutputStream fs = null;
 		try
 		{
 			fs = new FileOutputStream(file);
-			return writeMessage(message, fs, silent);
+			return writeMessage(message, fs, flags);
 		}
 		catch (FileNotFoundException e)
 		{
 			//e.printStackTrace();
-			if (!silent)
+			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to write message: " + e.getMessage());
 		}
 		finally
@@ -817,11 +831,11 @@ public class SettingsManager
 	 *            the message
 	 * @param output
 	 *            the output
-	 * @param silent
-	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @param flags
+	 *            the flags
 	 * @return True if saved
 	 */
-	public static boolean writeMessage(Message message, OutputStream output, boolean silent)
+	public static boolean writeMessage(Message message, OutputStream output, int flags)
 	{
 		try
 		{
@@ -830,7 +844,7 @@ public class SettingsManager
 		}
 		catch (IOException e)
 		{
-			if (!silent)
+			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to write message: " + e.getMessage());
 		}
 		return false;
@@ -845,13 +859,13 @@ public class SettingsManager
 	 *            the parser
 	 * @param filename
 	 *            the filename
-	 * @param silent
-	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @param flags
+	 *            the flags
 	 * @return the message
 	 */
-	public static Message readMessage(Parser<? extends Message> parser, String filename, boolean silent)
+	public static Message readMessage(Parser<? extends Message> parser, String filename, int flags)
 	{
-		return readMessage(parser, new File(filename), silent);
+		return readMessage(parser, new File(filename), flags);
 	}
 
 	/**
@@ -863,22 +877,22 @@ public class SettingsManager
 	 *            the parser
 	 * @param file
 	 *            the file
-	 * @param silent
-	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @param flags
+	 *            the flags
 	 * @return the message
 	 */
-	public static Message readMessage(Parser<? extends Message> parser, File file, boolean silent)
+	public static Message readMessage(Parser<? extends Message> parser, File file, int flags)
 	{
 		FileInputStream fs = null;
 		try
 		{
 			fs = new FileInputStream(file);
-			return readMessage(parser, fs, silent);
+			return readMessage(parser, fs, flags);
 		}
 		catch (FileNotFoundException e)
 		{
 			//e.printStackTrace();
-			if (!silent)
+			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to read message: " + e.getMessage());
 		}
 		finally
@@ -911,7 +925,7 @@ public class SettingsManager
 	 *            Set to true to suppress writing an error message to the ImageJ log
 	 * @return the message
 	 */
-	public static Message readMessage(Parser<? extends Message> parser, InputStream input, boolean silent)
+	public static Message readMessage(Parser<? extends Message> parser, InputStream input, int flags)
 	{
 		try
 		{
@@ -920,7 +934,7 @@ public class SettingsManager
 		catch (InvalidProtocolBufferException e)
 		{
 			//e.printStackTrace();
-			if (!silent)
+			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
 				IJ.log("Unable to read message: " + e.getMessage());
 		}
 		return null;

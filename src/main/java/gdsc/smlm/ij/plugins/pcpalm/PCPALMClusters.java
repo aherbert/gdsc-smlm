@@ -675,8 +675,8 @@ public class PCPALMClusters implements PlugIn
 			gd.addMessage("Find clusters using centroid-linkage clustering.");
 
 			gd.addNumericField("Distance (nm)", distance, 0);
-			gd.addChoice("Algorithm", SettingsManager.clusteringAlgorithmNames,
-					SettingsManager.clusteringAlgorithmNames[sClusteringAlgorithm.ordinal()]);
+			gd.addChoice("Algorithm", SettingsManager.getClusteringAlgorithmNames(),
+					SettingsManager.getClusteringAlgorithmNames()[sClusteringAlgorithm.ordinal()]);
 			gd.addCheckbox("Multi_thread", multiThread);
 			if (haveWeights)
 				gd.addCheckbox("Weighted_clustering", sWeightedClustering);
