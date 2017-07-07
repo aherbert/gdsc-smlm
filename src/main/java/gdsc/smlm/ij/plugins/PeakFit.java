@@ -738,7 +738,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Load the settings
 		resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
 		// Settings are within the FitEngineSettings
-		config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings(0));
+		config = SettingsManager.readFitEngineConfiguration(0);
 		fitConfig = config.getFitConfiguration();
 
 		if (simpleFit)
@@ -1177,15 +1177,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private static boolean saveFitEngineSettings(FitEngineConfiguration config)
 	{
-		FitEngineSettings settings = config.getFitEngineSettings();
-		boolean ok = SettingsManager.writeSettings(settings);
-		// Write calibration separately as some plugins may just want to load that		
-		if (settings.hasFitSettings() && settings.getFitSettings().hasCalibration())
-		{
-			Calibration c = settings.getFitSettings().getCalibration();
-			ok &= SettingsManager.writeSettings(c);
-		}
-		return ok;
+		return SettingsManager.writeSettings(config, 0);
 	}
 
 	/**
@@ -1663,9 +1655,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public static boolean configureSmartFilter(FitEngineConfiguration config, int flags)
 	{
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		CalibrationWriter calibration = new CalibrationWriter(fitConfig.getCalibration());
 		if (!fitConfig.isSmartFilter())
 			return true;
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
@@ -1694,8 +1686,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
 		{
-			fitConfig.setCalibration(calibration.getCalibration());
-			SettingsManager.writeSettings(config.getFitEngineSettings());
+			SettingsManager.writeSettings(config, 0);
 		}
 		return true;
 	}
@@ -1969,9 +1960,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 
 			if (saveSettings)
-			{
 				saveFitEngineSettings(config);
-			}
 
 			try
 			{

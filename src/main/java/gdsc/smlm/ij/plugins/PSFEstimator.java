@@ -105,18 +105,18 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			return DONE;
 		}
 
-		Calibration calibration = SettingsManager.readCalibration(0);
 		settings = SettingsManager.readPSFEstimatorSettings(0).toBuilder();
 		// Reset
 		if (IJ.controlKeyDown())
 		{
 			config = new FitEngineConfiguration();
+			Calibration calibration = SettingsManager.readCalibration(0);
+			config.getFitConfiguration().setCalibration(calibration);
 		}
 		else
 		{
-			config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings(0));
+			config = SettingsManager.readFitEngineConfiguration(0);
 		}
-		config.getFitConfiguration().setCalibration(calibration);
 
 		Roi roi = imp.getRoi();
 		if (roi != null && roi.getType() != Roi.RECTANGLE)
@@ -332,7 +332,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			return false;
 		}
 
-		SettingsManager.writeSettings(config.getFitEngineSettings());
+		SettingsManager.writeSettings(config, 0);
 
 		if (!PeakFit.configureSmartFilter(config, 0))
 			return false;
@@ -407,7 +407,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			if (settings.getUpdatePreferences())
 			{
 				SettingsManager.writeSettings(settings.build());
-				SettingsManager.writeSettings(config.getFitEngineSettings());
+				SettingsManager.writeSettings(config, 0);
 			}
 		}
 	}

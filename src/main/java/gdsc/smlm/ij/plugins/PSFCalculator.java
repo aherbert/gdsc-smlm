@@ -1,7 +1,14 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Label;
+import java.awt.SystemColor;
+import java.awt.TextField;
+
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.GUIConfig.PSFCalculatorSettings;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -20,21 +27,12 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
 import gdsc.smlm.model.AiryPattern;
 import ij.IJ;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
-
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.Label;
-import java.awt.SystemColor;
-import java.awt.TextField;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Calculates the expected PSF width for a Gaussian approximation to the Airy disk.
@@ -71,15 +69,11 @@ public class PSFCalculator implements PlugIn, DialogListener
 		if (sd < 0)
 			return;
 
-		FitEngineSettings fitEngineSettings = SettingsManager.readFitEngineSettings(0);
-		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings);
+		FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
 		config.getFitConfiguration().setInitialPeakStdDev((float) sd);
 		config.getFitConfiguration().setInitialAngle(0);
-		SettingsManager.writeSettings(config.getFitEngineSettings());
-
-		CalibrationWriter cw = CalibrationWriter.create(SettingsManager.readCalibration(0));
-		cw.setNmPerPixel(getPixelPitch());
-		SettingsManager.writeSettings(cw.getCalibration());
+		config.getFitConfiguration().setNmPerPixel(getPixelPitch());
+		SettingsManager.writeSettings(config, 0);
 	}
 
 	/**

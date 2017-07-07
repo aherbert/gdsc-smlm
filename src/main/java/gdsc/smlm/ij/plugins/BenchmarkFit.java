@@ -544,7 +544,7 @@ public class BenchmarkFit implements PlugIn
 			fitConfig.setInitialPeakStdDev(sa);
 		}
 
-		FitEngineConfiguration config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings(0));
+		FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
 		fitConfig = config.getFitConfiguration();
 		fitConfig.setNmPerPixel(benchmarkParameters.a);
 

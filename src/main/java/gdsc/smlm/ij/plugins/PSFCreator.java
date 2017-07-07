@@ -1411,9 +1411,9 @@ public class PSFCreator implements PlugInFilter
 
 	private void loadConfiguration()
 	{
-		nmPerPixel = new CalibrationReader(SettingsManager.readCalibration(0)).getNmPerPixel();
-		config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings(0));
+		config = SettingsManager.readFitEngineConfiguration(0);
 		fitConfig = config.getFitConfiguration();
+		nmPerPixel = fitConfig.getCalibrationWriter().getNmPerPixel();
 		if (radius < 5 * FastMath.max(fitConfig.getInitialXSD(), fitConfig.getInitialYSD()))
 		{
 			radius = 5 * FastMath.max(fitConfig.getInitialXSD(), fitConfig.getInitialYSD());

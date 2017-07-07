@@ -78,9 +78,9 @@ public class Configuration implements PlugIn, ItemListener
 	{
 		configurationChanged = false;
 
-		FitEngineConfiguration config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings(0));
+		FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		CalibrationWriter calibration = CalibrationWriter.create(SettingsManager.readCalibration(0));
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -268,7 +268,7 @@ public class Configuration implements PlugIn, ItemListener
 		if (gd.invalidNumber())
 			return;
 
-		SettingsManager.writeSettings(config.getFitEngineSettings());
+		SettingsManager.writeSettings(config, 0);
 		configurationChanged = true;
 
 		int flags = 0;

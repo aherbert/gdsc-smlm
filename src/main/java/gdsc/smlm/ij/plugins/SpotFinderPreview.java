@@ -104,7 +104,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		this.o = imp.getOverlay();
 		this.imp = imp;
 
-		config = new FitEngineConfiguration(SettingsManager.readFitEngineSettings(0));
+		config = SettingsManager.readFitEngineConfiguration(0);
 		fitConfig = config.getFitConfiguration();
 
 		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
@@ -156,7 +156,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		if (!gd.wasCanceled())
 		{
-			if (!SettingsManager.writeSettings(config.getFitEngineSettings(), SettingsManager.FLAG_SILENT))
+			if (!SettingsManager.writeSettings(config, SettingsManager.FLAG_SILENT))
 				IJ.error(TITLE, "Failed to save settings");
 		}
 

@@ -19,7 +19,6 @@ import com.google.protobuf.Parser;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
-import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.BitFlags;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
@@ -38,6 +37,8 @@ import gdsc.smlm.data.config.GUIConfig.OpticsSettings;
 import gdsc.smlm.data.config.GUIConfig.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIConfig.PSFEstimatorSettings;
 import gdsc.smlm.data.config.GUIConfigHelper;
+import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.PSFConfigHelper;
 import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
 import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
@@ -47,6 +48,8 @@ import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.data.config.UnitConfig.TimeUnit;
 import gdsc.smlm.data.config.UnitHelper;
+import gdsc.smlm.engine.FitConfiguration;
+import gdsc.smlm.engine.FitEngineConfiguration;
 import ij.IJ;
 import ij.Prefs;
 
@@ -628,6 +631,18 @@ public class SettingsManager
 	}
 
 	/**
+	 * Read the PSF from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the PSF
+	 */
+	public static PSF readPSF(int flags)
+	{
+		return new ConfigurationReader<PSF>(PSFConfigHelper.defaultOneAxisGaussian2DPSF).read(flags);
+	}
+
+	/**
 	 * Read the ResultsSettings from the settings file in the settings directory.
 	 *
 	 * @param flags
@@ -646,7 +661,7 @@ public class SettingsManager
 	 *            the flags
 	 * @return the FitEngineSettings
 	 */
-	public static FitEngineSettings readFitEngineSettings(int flags)
+	private static FitEngineSettings readFitEngineSettings(int flags)
 	{
 		return new ConfigurationReader<FitEngineSettings>(FitConfigHelper.defaultFitEngineSettings).read(flags);
 	}
@@ -734,6 +749,41 @@ public class SettingsManager
 	public static OpticsSettings readOpticsSettings(int flags)
 	{
 		return new ConfigurationReader<OpticsSettings>(GUIConfigHelper.defaultOpticsSettings).read(flags);
+	}
+
+	/**
+	 * Read the FitEngineConfiguration from the settings file in the settings directory. This loads the current
+	 * Calibration, PSF and FitEngineSettings.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the FitEngineConfiguration
+	 */
+	public static FitEngineConfiguration readFitEngineConfiguration(int flags)
+	{
+		FitEngineSettings fitEngineSettings = readFitEngineSettings(flags);
+		Calibration calibration = readCalibration(flags);
+		PSF psf = readPSF(flags);
+		return new FitEngineConfiguration(fitEngineSettings);
+	}
+
+	/**
+	 * Write to a settings file in the settings directory.
+	 *
+	 * @param fitEngineConfiguration
+	 *            the fit engine configuration
+	 * @param flags
+	 *            the flags
+	 * @return true, if successful
+	 */
+	public static boolean writeSettings(FitEngineConfiguration fitEngineConfiguration, int flags)
+	{
+		FitConfiguration fitConfig = fitEngineConfiguration.getFitConfiguration();
+		// This is fail fast 
+		boolean result = writeSettings(fitEngineConfiguration.getFitEngineSettings(), flags);
+		result &= writeSettings(fitConfig.getCalibration(), flags);
+		result &= writeSettings(fitConfig.getPSF(), flags);
+		return result;
 	}
 
 	/**
