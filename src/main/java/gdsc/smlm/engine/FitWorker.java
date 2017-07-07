@@ -532,7 +532,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Debug where the fit config may be different between benchmarking and fitting
 			if (slice == -1)
 			{
-				SettingsManager.saveFitEngineConfiguration(config, String.format("/tmp/config.%b.xml", benchmarking));
+				SettingsManager.writeMessage(config.getFitEngineSettings(),
+						String.format("/tmp/config.%b.xml", benchmarking), 0);
 				Utils.write(String.format("/tmp/filter.%b.xml", benchmarking), filter.toXML());
 				//filter.setDebugFile(String.format("/tmp/fitWorker.%b.txt", benchmarking));
 				StringBuilder sb = new StringBuilder();
@@ -3661,7 +3662,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return;
 		}
 
-		final int currentSize = gridManager.getFittedCandidatesSize();
 		final int candidateId = dynamicMultiPathFitResult.candidateId;
 
 		final FitResult fitResult = (FitResult) selectedResult.fitResult.data;

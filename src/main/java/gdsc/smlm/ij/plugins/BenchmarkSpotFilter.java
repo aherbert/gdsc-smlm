@@ -55,7 +55,6 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
-import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
