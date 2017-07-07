@@ -229,12 +229,13 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 					indexT = i;
 					continue;
 				}
-				if (headings[i].equals("X") || headings[i].startsWith("X "))
+				// Allow for units
+				if (headings[i].equals("X") || headings[i].startsWith("X ("))
 				{
 					indexX = i;
 					continue;
 				}
-				if (headings[i].equals("Y") || headings[i].startsWith("Y "))
+				if (headings[i].equals("Y") || headings[i].startsWith("Y ("))
 				{
 					indexY = i;
 					continue;

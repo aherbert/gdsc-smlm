@@ -2036,8 +2036,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 				resultsSettings.getShowDeviations(), false, false);
 		if (r != null)
 		{
-			r.setShowFittingData(true);
-			r.setShowNoiseData(true);
 			r.setShowZ(PSFHelper.is3D(resultsList.getPSF()));
 			r.setClearAtStart(simpleFit);
 			r.setShowEndFrame(integrateFrames > 1);
