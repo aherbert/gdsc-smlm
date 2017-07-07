@@ -22,6 +22,7 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CreateDataSettingsHelper;
 import gdsc.smlm.data.config.GUIConfig.CreateDataSettings;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.PSFHelper;
@@ -40,7 +41,6 @@ import gdsc.smlm.data.config.PSFHelper;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
-import gdsc.smlm.ij.settings.CreateDataSettingsHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.DiffusionType;
 import gdsc.smlm.model.ImageModel;
