@@ -1,16 +1,6 @@
 {
   "fitEngineSettings": {
     "fitSettings": {
-      "calibration": {
-      },
-      "psf": {
-        "psfType": "ONE_AXIS_GAUSSIAN_2D",
-        "parameter": [{
-          "name": "S",
-          "unit": "DISTANCE",
-          "value": 1.0
-        }]
-      },
       "fitSolverSettings": {
         "maxIterations": 150,
         "relativeThreshold": 1.0E-6,
