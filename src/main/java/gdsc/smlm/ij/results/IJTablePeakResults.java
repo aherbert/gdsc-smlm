@@ -221,6 +221,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 			// Get the headings for extracting the coordinates 
 			String[] headings = tp.getColumnHeadings().split("\t");
+			indexT = indexX = indexY = -1;
 			for (int i = 0; i < headings.length; i++)
 			{
 				if (headings[i].equals(frameColumnName))
@@ -228,12 +229,12 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 					indexT = i;
 					continue;
 				}
-				if (headings[i].equals("X"))
+				if (headings[i].equals("X") || headings[i].startsWith("X "))
 				{
 					indexX = i;
 					continue;
 				}
-				if (headings[i].equals("Y"))
+				if (headings[i].equals("Y") || headings[i].startsWith("Y "))
 				{
 					indexY = i;
 					continue;
