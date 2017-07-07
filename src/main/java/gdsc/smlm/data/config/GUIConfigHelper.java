@@ -1,6 +1,9 @@
 package gdsc.smlm.data.config;
 
+import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.smlm.data.config.GUIConfig.*;
+import gdsc.smlm.data.config.UnitConfig.TimeUnit;
+import gdsc.smlm.results.TraceManager.TraceMode;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -102,4 +105,32 @@ public class GUIConfigHelper
 	/** The default LoadLocalisationsSettings */
 	public static final LoadLocalisationsSettings defaultLoadLocalisationsSettings = LoadLocalisationsSettings
 			.getDefaultInstance();
+	
+	/** The default ClusteringSettings */
+	public static final ClusteringSettings defaultClusteringSettings;
+	static
+	{
+		ClusteringSettings.Builder builder = ClusteringSettings.newBuilder();
+		builder.setDistanceThreshold(50);
+		builder.setDistanceExclusion(0);
+		builder.setTimeThreshold(1);
+		builder.setTimeUnit(TimeUnit.SECOND);
+		builder.setTraceMode(TraceMode.LATEST_FORERUNNER.ordinal());
+		builder.setClusteringAlgorithm(ClusteringAlgorithm.PAIRWISE.ordinal());
+		builder.setBlinkingRate(1);
+		builder.setMaxDistanceThreshold(500);
+		builder.setMaxTimeThreshold(20);
+		builder.setOptimiserSteps(10);
+		builder.setOptimiserPlot(2);
+		builder.setMinimumTraceLength(6);
+		builder.setInternalDistances(true);
+		builder.setIgnoreEnds(true);
+		builder.setPrecisionCorrection(true);
+		builder.setMsdCorrection(true);
+		builder.setMle(true);
+		builder.setFitLength(6);
+		builder.setFitRestarts(1);
+		builder.setJumpDistance(1);
+		defaultClusteringSettings = builder.build();
+	}
 }

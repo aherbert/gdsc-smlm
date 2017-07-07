@@ -24,11 +24,9 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.utils.BitFlags;
-import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfigHelper;
-import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.*;
 import gdsc.smlm.data.config.FitConfigHelper;
 import gdsc.smlm.data.config.GUIConfig.*;
@@ -1080,6 +1078,18 @@ public class SettingsManager
 	public static LoadLocalisationsSettings readLoadLocalisationsSettings(int flags)
 	{
 		return new ConfigurationReader<LoadLocalisationsSettings>(GUIConfigHelper.defaultLoadLocalisationsSettings).read(flags);
+	}
+
+	/**
+	 * Read the ClusteringSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the ClusteringSettings
+	 */
+	public static ClusteringSettings readClusteringSettings(int flags)
+	{
+		return new ConfigurationReader<ClusteringSettings>(GUIConfigHelper.defaultClusteringSettings).read(flags);
 	}
 	
 	/**

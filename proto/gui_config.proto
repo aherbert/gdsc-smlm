@@ -7,6 +7,8 @@ package gdsc.smlm.data.config;
 
 option java_outer_classname = "GUIConfig";
 
+import "unit_config.proto";
+
 // Contain the settings for the result filtering
 message GUIFilterSettings {
 	float max_drift = 1;
@@ -158,42 +160,42 @@ message LoadLocalisationsSettings
 // Contain the settings for the clustering algorithm
 message ClusteringSettings
 {
-	double distanceThreshold = 50;
-	double distanceExclusion = 0;
-	double timeThreshold = 1;
-	TimeUnit timeUnit = TimeUnit.SECOND;
-	int32 traceMode = TraceMode.LATEST_FORERUNNER.ordinal();
-	int32 clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE.ordinal();
-	int32 pulseInterval = 0;
-	int32 pulseWindow = 0;
-	bool splitPulses = false;
-	double blinkingRate = 1;
-	bool optimise = false;
-	double minDistanceThreshold = 0;
-	double maxDistanceThreshold = 500;
+	double distance_threshold = 1;
+	double distance_exclusion = 2;
+	double time_threshold = 3;
+	TimeUnit time_unit = 4;
+	int32 trace_mode = 5;
+	int32 clustering_algorithm = 6;
+	int32 pulse_interval = 7;
+	int32 pulse_window = 8;
+	bool split_pulses = 9;
+	double blinking_rate = 10;
+	bool optimise = 11;
+	double min_distance_threshold = 12;
+	double max_distance_threshold = 13;
 	// The min time threshold for optimisation (time is in frames).
-	int32 minTimeThreshold = 0;
+	int32 min_time_threshold = 14;
 	// The max time threshold for optimisation (time is in frames).
-	int32 maxTimeThreshold = 20;
-	int32 optimiserSteps = 10;
-	int32 optimiserPlot = OptimiserPlot.BILINEAR.ordinal();
-	bool saveTraces = false;
-	bool showHistograms = false;
-	bool saveTraceData = false;
-	string traceDataDirectory = "";
-	int32 histogramBins = 100;
-	bool removeOutliers = false;
-	bool refitOption = false;
+	int32 max_time_threshold = 15;
+	int32 optimiser_steps = 16;
+	int32 optimiser_plot = 17;
+	bool save_traces = 18;
+	bool show_histograms = 19;
+	bool save_trace_data = 20;
+	string trace_data_directory = 21;
+	int32 histogram_bins = 22;
+	bool remove_outliers = 23;
+	bool refit_option = 24;
 	// Options for tracing diffusion
-	int32 minimumTraceLength = 6;
-	bool truncate = false;
-	bool internalDistances = true;
-	bool subSampledDistances = false;
-	bool ignoreEnds = true;
-	bool precisionCorrection = true;
-	bool msdCorrection = true;
-	bool mle = true;
-	int32 fitLength = 6;
-	int32 fitRestarts = 3;
-	int32 jumpDistance = 1;
+	int32 minimum_trace_length = 25;
+	bool truncate = 26;
+	bool internal_distances = 27;
+	bool sub_sampled_distances = 28;
+	bool ignore_ends = 29;
+	bool precision_correction = 30;
+	bool msd_correction = 31;
+	bool mle = 32;
+	int32 fit_length = 33;
+	int32 fit_restarts = 34;
+	int32 jump_distance = 35;
 }

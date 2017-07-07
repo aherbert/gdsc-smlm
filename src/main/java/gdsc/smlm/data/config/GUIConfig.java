@@ -10459,6 +10459,2792 @@ public final class GUIConfig {
 
   }
 
+  public interface ClusteringSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.ClusteringSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>double distance_threshold = 1;</code>
+     */
+    double getDistanceThreshold();
+
+    /**
+     * <code>double distance_exclusion = 2;</code>
+     */
+    double getDistanceExclusion();
+
+    /**
+     * <code>double time_threshold = 3;</code>
+     */
+    double getTimeThreshold();
+
+    /**
+     * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
+     */
+    int getTimeUnitValue();
+    /**
+     * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
+     */
+    gdsc.smlm.data.config.UnitConfig.TimeUnit getTimeUnit();
+
+    /**
+     * <code>int32 trace_mode = 5;</code>
+     */
+    int getTraceMode();
+
+    /**
+     * <code>int32 clustering_algorithm = 6;</code>
+     */
+    int getClusteringAlgorithm();
+
+    /**
+     * <code>int32 pulse_interval = 7;</code>
+     */
+    int getPulseInterval();
+
+    /**
+     * <code>int32 pulse_window = 8;</code>
+     */
+    int getPulseWindow();
+
+    /**
+     * <code>bool split_pulses = 9;</code>
+     */
+    boolean getSplitPulses();
+
+    /**
+     * <code>double blinking_rate = 10;</code>
+     */
+    double getBlinkingRate();
+
+    /**
+     * <code>bool optimise = 11;</code>
+     */
+    boolean getOptimise();
+
+    /**
+     * <code>double min_distance_threshold = 12;</code>
+     */
+    double getMinDistanceThreshold();
+
+    /**
+     * <code>double max_distance_threshold = 13;</code>
+     */
+    double getMaxDistanceThreshold();
+
+    /**
+     * <pre>
+     * The min time threshold for optimisation (time is in frames).
+     * </pre>
+     *
+     * <code>int32 min_time_threshold = 14;</code>
+     */
+    int getMinTimeThreshold();
+
+    /**
+     * <pre>
+     * The max time threshold for optimisation (time is in frames).
+     * </pre>
+     *
+     * <code>int32 max_time_threshold = 15;</code>
+     */
+    int getMaxTimeThreshold();
+
+    /**
+     * <code>int32 optimiser_steps = 16;</code>
+     */
+    int getOptimiserSteps();
+
+    /**
+     * <code>int32 optimiser_plot = 17;</code>
+     */
+    int getOptimiserPlot();
+
+    /**
+     * <code>bool save_traces = 18;</code>
+     */
+    boolean getSaveTraces();
+
+    /**
+     * <code>bool show_histograms = 19;</code>
+     */
+    boolean getShowHistograms();
+
+    /**
+     * <code>bool save_trace_data = 20;</code>
+     */
+    boolean getSaveTraceData();
+
+    /**
+     * <code>string trace_data_directory = 21;</code>
+     */
+    java.lang.String getTraceDataDirectory();
+    /**
+     * <code>string trace_data_directory = 21;</code>
+     */
+    com.google.protobuf.ByteString
+        getTraceDataDirectoryBytes();
+
+    /**
+     * <code>int32 histogram_bins = 22;</code>
+     */
+    int getHistogramBins();
+
+    /**
+     * <code>bool remove_outliers = 23;</code>
+     */
+    boolean getRemoveOutliers();
+
+    /**
+     * <code>bool refit_option = 24;</code>
+     */
+    boolean getRefitOption();
+
+    /**
+     * <pre>
+     * Options for tracing diffusion
+     * </pre>
+     *
+     * <code>int32 minimum_trace_length = 25;</code>
+     */
+    int getMinimumTraceLength();
+
+    /**
+     * <code>bool truncate = 26;</code>
+     */
+    boolean getTruncate();
+
+    /**
+     * <code>bool internal_distances = 27;</code>
+     */
+    boolean getInternalDistances();
+
+    /**
+     * <code>bool sub_sampled_distances = 28;</code>
+     */
+    boolean getSubSampledDistances();
+
+    /**
+     * <code>bool ignore_ends = 29;</code>
+     */
+    boolean getIgnoreEnds();
+
+    /**
+     * <code>bool precision_correction = 30;</code>
+     */
+    boolean getPrecisionCorrection();
+
+    /**
+     * <code>bool msd_correction = 31;</code>
+     */
+    boolean getMsdCorrection();
+
+    /**
+     * <code>bool mle = 32;</code>
+     */
+    boolean getMle();
+
+    /**
+     * <code>int32 fit_length = 33;</code>
+     */
+    int getFitLength();
+
+    /**
+     * <code>int32 fit_restarts = 34;</code>
+     */
+    int getFitRestarts();
+
+    /**
+     * <code>int32 jump_distance = 35;</code>
+     */
+    int getJumpDistance();
+  }
+  /**
+   * <pre>
+   * Contain the settings for the clustering algorithm
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.ClusteringSettings}
+   */
+  public  static final class ClusteringSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.ClusteringSettings)
+      ClusteringSettingsOrBuilder {
+    // Use ClusteringSettings.newBuilder() to construct.
+    private ClusteringSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ClusteringSettings() {
+      distanceThreshold_ = 0D;
+      distanceExclusion_ = 0D;
+      timeThreshold_ = 0D;
+      timeUnit_ = 0;
+      traceMode_ = 0;
+      clusteringAlgorithm_ = 0;
+      pulseInterval_ = 0;
+      pulseWindow_ = 0;
+      splitPulses_ = false;
+      blinkingRate_ = 0D;
+      optimise_ = false;
+      minDistanceThreshold_ = 0D;
+      maxDistanceThreshold_ = 0D;
+      minTimeThreshold_ = 0;
+      maxTimeThreshold_ = 0;
+      optimiserSteps_ = 0;
+      optimiserPlot_ = 0;
+      saveTraces_ = false;
+      showHistograms_ = false;
+      saveTraceData_ = false;
+      traceDataDirectory_ = "";
+      histogramBins_ = 0;
+      removeOutliers_ = false;
+      refitOption_ = false;
+      minimumTraceLength_ = 0;
+      truncate_ = false;
+      internalDistances_ = false;
+      subSampledDistances_ = false;
+      ignoreEnds_ = false;
+      precisionCorrection_ = false;
+      msdCorrection_ = false;
+      mle_ = false;
+      fitLength_ = 0;
+      fitRestarts_ = 0;
+      jumpDistance_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private ClusteringSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      int mutable_bitField1_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 9: {
+
+              distanceThreshold_ = input.readDouble();
+              break;
+            }
+            case 17: {
+
+              distanceExclusion_ = input.readDouble();
+              break;
+            }
+            case 25: {
+
+              timeThreshold_ = input.readDouble();
+              break;
+            }
+            case 32: {
+              int rawValue = input.readEnum();
+
+              timeUnit_ = rawValue;
+              break;
+            }
+            case 40: {
+
+              traceMode_ = input.readInt32();
+              break;
+            }
+            case 48: {
+
+              clusteringAlgorithm_ = input.readInt32();
+              break;
+            }
+            case 56: {
+
+              pulseInterval_ = input.readInt32();
+              break;
+            }
+            case 64: {
+
+              pulseWindow_ = input.readInt32();
+              break;
+            }
+            case 72: {
+
+              splitPulses_ = input.readBool();
+              break;
+            }
+            case 81: {
+
+              blinkingRate_ = input.readDouble();
+              break;
+            }
+            case 88: {
+
+              optimise_ = input.readBool();
+              break;
+            }
+            case 97: {
+
+              minDistanceThreshold_ = input.readDouble();
+              break;
+            }
+            case 105: {
+
+              maxDistanceThreshold_ = input.readDouble();
+              break;
+            }
+            case 112: {
+
+              minTimeThreshold_ = input.readInt32();
+              break;
+            }
+            case 120: {
+
+              maxTimeThreshold_ = input.readInt32();
+              break;
+            }
+            case 128: {
+
+              optimiserSteps_ = input.readInt32();
+              break;
+            }
+            case 136: {
+
+              optimiserPlot_ = input.readInt32();
+              break;
+            }
+            case 144: {
+
+              saveTraces_ = input.readBool();
+              break;
+            }
+            case 152: {
+
+              showHistograms_ = input.readBool();
+              break;
+            }
+            case 160: {
+
+              saveTraceData_ = input.readBool();
+              break;
+            }
+            case 170: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              traceDataDirectory_ = s;
+              break;
+            }
+            case 176: {
+
+              histogramBins_ = input.readInt32();
+              break;
+            }
+            case 184: {
+
+              removeOutliers_ = input.readBool();
+              break;
+            }
+            case 192: {
+
+              refitOption_ = input.readBool();
+              break;
+            }
+            case 200: {
+
+              minimumTraceLength_ = input.readInt32();
+              break;
+            }
+            case 208: {
+
+              truncate_ = input.readBool();
+              break;
+            }
+            case 216: {
+
+              internalDistances_ = input.readBool();
+              break;
+            }
+            case 224: {
+
+              subSampledDistances_ = input.readBool();
+              break;
+            }
+            case 232: {
+
+              ignoreEnds_ = input.readBool();
+              break;
+            }
+            case 240: {
+
+              precisionCorrection_ = input.readBool();
+              break;
+            }
+            case 248: {
+
+              msdCorrection_ = input.readBool();
+              break;
+            }
+            case 256: {
+
+              mle_ = input.readBool();
+              break;
+            }
+            case 264: {
+
+              fitLength_ = input.readInt32();
+              break;
+            }
+            case 272: {
+
+              fitRestarts_ = input.readInt32();
+              break;
+            }
+            case 280: {
+
+              jumpDistance_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_ClusteringSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIConfig.ClusteringSettings.class, gdsc.smlm.data.config.GUIConfig.ClusteringSettings.Builder.class);
+    }
+
+    public static final int DISTANCE_THRESHOLD_FIELD_NUMBER = 1;
+    private double distanceThreshold_;
+    /**
+     * <code>double distance_threshold = 1;</code>
+     */
+    public double getDistanceThreshold() {
+      return distanceThreshold_;
+    }
+
+    public static final int DISTANCE_EXCLUSION_FIELD_NUMBER = 2;
+    private double distanceExclusion_;
+    /**
+     * <code>double distance_exclusion = 2;</code>
+     */
+    public double getDistanceExclusion() {
+      return distanceExclusion_;
+    }
+
+    public static final int TIME_THRESHOLD_FIELD_NUMBER = 3;
+    private double timeThreshold_;
+    /**
+     * <code>double time_threshold = 3;</code>
+     */
+    public double getTimeThreshold() {
+      return timeThreshold_;
+    }
+
+    public static final int TIME_UNIT_FIELD_NUMBER = 4;
+    private int timeUnit_;
+    /**
+     * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
+     */
+    public int getTimeUnitValue() {
+      return timeUnit_;
+    }
+    /**
+     * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
+     */
+    public gdsc.smlm.data.config.UnitConfig.TimeUnit getTimeUnit() {
+      gdsc.smlm.data.config.UnitConfig.TimeUnit result = gdsc.smlm.data.config.UnitConfig.TimeUnit.valueOf(timeUnit_);
+      return result == null ? gdsc.smlm.data.config.UnitConfig.TimeUnit.UNRECOGNIZED : result;
+    }
+
+    public static final int TRACE_MODE_FIELD_NUMBER = 5;
+    private int traceMode_;
+    /**
+     * <code>int32 trace_mode = 5;</code>
+     */
+    public int getTraceMode() {
+      return traceMode_;
+    }
+
+    public static final int CLUSTERING_ALGORITHM_FIELD_NUMBER = 6;
+    private int clusteringAlgorithm_;
+    /**
+     * <code>int32 clustering_algorithm = 6;</code>
+     */
+    public int getClusteringAlgorithm() {
+      return clusteringAlgorithm_;
+    }
+
+    public static final int PULSE_INTERVAL_FIELD_NUMBER = 7;
+    private int pulseInterval_;
+    /**
+     * <code>int32 pulse_interval = 7;</code>
+     */
+    public int getPulseInterval() {
+      return pulseInterval_;
+    }
+
+    public static final int PULSE_WINDOW_FIELD_NUMBER = 8;
+    private int pulseWindow_;
+    /**
+     * <code>int32 pulse_window = 8;</code>
+     */
+    public int getPulseWindow() {
+      return pulseWindow_;
+    }
+
+    public static final int SPLIT_PULSES_FIELD_NUMBER = 9;
+    private boolean splitPulses_;
+    /**
+     * <code>bool split_pulses = 9;</code>
+     */
+    public boolean getSplitPulses() {
+      return splitPulses_;
+    }
+
+    public static final int BLINKING_RATE_FIELD_NUMBER = 10;
+    private double blinkingRate_;
+    /**
+     * <code>double blinking_rate = 10;</code>
+     */
+    public double getBlinkingRate() {
+      return blinkingRate_;
+    }
+
+    public static final int OPTIMISE_FIELD_NUMBER = 11;
+    private boolean optimise_;
+    /**
+     * <code>bool optimise = 11;</code>
+     */
+    public boolean getOptimise() {
+      return optimise_;
+    }
+
+    public static final int MIN_DISTANCE_THRESHOLD_FIELD_NUMBER = 12;
+    private double minDistanceThreshold_;
+    /**
+     * <code>double min_distance_threshold = 12;</code>
+     */
+    public double getMinDistanceThreshold() {
+      return minDistanceThreshold_;
+    }
+
+    public static final int MAX_DISTANCE_THRESHOLD_FIELD_NUMBER = 13;
+    private double maxDistanceThreshold_;
+    /**
+     * <code>double max_distance_threshold = 13;</code>
+     */
+    public double getMaxDistanceThreshold() {
+      return maxDistanceThreshold_;
+    }
+
+    public static final int MIN_TIME_THRESHOLD_FIELD_NUMBER = 14;
+    private int minTimeThreshold_;
+    /**
+     * <pre>
+     * The min time threshold for optimisation (time is in frames).
+     * </pre>
+     *
+     * <code>int32 min_time_threshold = 14;</code>
+     */
+    public int getMinTimeThreshold() {
+      return minTimeThreshold_;
+    }
+
+    public static final int MAX_TIME_THRESHOLD_FIELD_NUMBER = 15;
+    private int maxTimeThreshold_;
+    /**
+     * <pre>
+     * The max time threshold for optimisation (time is in frames).
+     * </pre>
+     *
+     * <code>int32 max_time_threshold = 15;</code>
+     */
+    public int getMaxTimeThreshold() {
+      return maxTimeThreshold_;
+    }
+
+    public static final int OPTIMISER_STEPS_FIELD_NUMBER = 16;
+    private int optimiserSteps_;
+    /**
+     * <code>int32 optimiser_steps = 16;</code>
+     */
+    public int getOptimiserSteps() {
+      return optimiserSteps_;
+    }
+
+    public static final int OPTIMISER_PLOT_FIELD_NUMBER = 17;
+    private int optimiserPlot_;
+    /**
+     * <code>int32 optimiser_plot = 17;</code>
+     */
+    public int getOptimiserPlot() {
+      return optimiserPlot_;
+    }
+
+    public static final int SAVE_TRACES_FIELD_NUMBER = 18;
+    private boolean saveTraces_;
+    /**
+     * <code>bool save_traces = 18;</code>
+     */
+    public boolean getSaveTraces() {
+      return saveTraces_;
+    }
+
+    public static final int SHOW_HISTOGRAMS_FIELD_NUMBER = 19;
+    private boolean showHistograms_;
+    /**
+     * <code>bool show_histograms = 19;</code>
+     */
+    public boolean getShowHistograms() {
+      return showHistograms_;
+    }
+
+    public static final int SAVE_TRACE_DATA_FIELD_NUMBER = 20;
+    private boolean saveTraceData_;
+    /**
+     * <code>bool save_trace_data = 20;</code>
+     */
+    public boolean getSaveTraceData() {
+      return saveTraceData_;
+    }
+
+    public static final int TRACE_DATA_DIRECTORY_FIELD_NUMBER = 21;
+    private volatile java.lang.Object traceDataDirectory_;
+    /**
+     * <code>string trace_data_directory = 21;</code>
+     */
+    public java.lang.String getTraceDataDirectory() {
+      java.lang.Object ref = traceDataDirectory_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        traceDataDirectory_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string trace_data_directory = 21;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTraceDataDirectoryBytes() {
+      java.lang.Object ref = traceDataDirectory_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        traceDataDirectory_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int HISTOGRAM_BINS_FIELD_NUMBER = 22;
+    private int histogramBins_;
+    /**
+     * <code>int32 histogram_bins = 22;</code>
+     */
+    public int getHistogramBins() {
+      return histogramBins_;
+    }
+
+    public static final int REMOVE_OUTLIERS_FIELD_NUMBER = 23;
+    private boolean removeOutliers_;
+    /**
+     * <code>bool remove_outliers = 23;</code>
+     */
+    public boolean getRemoveOutliers() {
+      return removeOutliers_;
+    }
+
+    public static final int REFIT_OPTION_FIELD_NUMBER = 24;
+    private boolean refitOption_;
+    /**
+     * <code>bool refit_option = 24;</code>
+     */
+    public boolean getRefitOption() {
+      return refitOption_;
+    }
+
+    public static final int MINIMUM_TRACE_LENGTH_FIELD_NUMBER = 25;
+    private int minimumTraceLength_;
+    /**
+     * <pre>
+     * Options for tracing diffusion
+     * </pre>
+     *
+     * <code>int32 minimum_trace_length = 25;</code>
+     */
+    public int getMinimumTraceLength() {
+      return minimumTraceLength_;
+    }
+
+    public static final int TRUNCATE_FIELD_NUMBER = 26;
+    private boolean truncate_;
+    /**
+     * <code>bool truncate = 26;</code>
+     */
+    public boolean getTruncate() {
+      return truncate_;
+    }
+
+    public static final int INTERNAL_DISTANCES_FIELD_NUMBER = 27;
+    private boolean internalDistances_;
+    /**
+     * <code>bool internal_distances = 27;</code>
+     */
+    public boolean getInternalDistances() {
+      return internalDistances_;
+    }
+
+    public static final int SUB_SAMPLED_DISTANCES_FIELD_NUMBER = 28;
+    private boolean subSampledDistances_;
+    /**
+     * <code>bool sub_sampled_distances = 28;</code>
+     */
+    public boolean getSubSampledDistances() {
+      return subSampledDistances_;
+    }
+
+    public static final int IGNORE_ENDS_FIELD_NUMBER = 29;
+    private boolean ignoreEnds_;
+    /**
+     * <code>bool ignore_ends = 29;</code>
+     */
+    public boolean getIgnoreEnds() {
+      return ignoreEnds_;
+    }
+
+    public static final int PRECISION_CORRECTION_FIELD_NUMBER = 30;
+    private boolean precisionCorrection_;
+    /**
+     * <code>bool precision_correction = 30;</code>
+     */
+    public boolean getPrecisionCorrection() {
+      return precisionCorrection_;
+    }
+
+    public static final int MSD_CORRECTION_FIELD_NUMBER = 31;
+    private boolean msdCorrection_;
+    /**
+     * <code>bool msd_correction = 31;</code>
+     */
+    public boolean getMsdCorrection() {
+      return msdCorrection_;
+    }
+
+    public static final int MLE_FIELD_NUMBER = 32;
+    private boolean mle_;
+    /**
+     * <code>bool mle = 32;</code>
+     */
+    public boolean getMle() {
+      return mle_;
+    }
+
+    public static final int FIT_LENGTH_FIELD_NUMBER = 33;
+    private int fitLength_;
+    /**
+     * <code>int32 fit_length = 33;</code>
+     */
+    public int getFitLength() {
+      return fitLength_;
+    }
+
+    public static final int FIT_RESTARTS_FIELD_NUMBER = 34;
+    private int fitRestarts_;
+    /**
+     * <code>int32 fit_restarts = 34;</code>
+     */
+    public int getFitRestarts() {
+      return fitRestarts_;
+    }
+
+    public static final int JUMP_DISTANCE_FIELD_NUMBER = 35;
+    private int jumpDistance_;
+    /**
+     * <code>int32 jump_distance = 35;</code>
+     */
+    public int getJumpDistance() {
+      return jumpDistance_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (distanceThreshold_ != 0D) {
+        output.writeDouble(1, distanceThreshold_);
+      }
+      if (distanceExclusion_ != 0D) {
+        output.writeDouble(2, distanceExclusion_);
+      }
+      if (timeThreshold_ != 0D) {
+        output.writeDouble(3, timeThreshold_);
+      }
+      if (timeUnit_ != gdsc.smlm.data.config.UnitConfig.TimeUnit.TIME_UNIT_NA.getNumber()) {
+        output.writeEnum(4, timeUnit_);
+      }
+      if (traceMode_ != 0) {
+        output.writeInt32(5, traceMode_);
+      }
+      if (clusteringAlgorithm_ != 0) {
+        output.writeInt32(6, clusteringAlgorithm_);
+      }
+      if (pulseInterval_ != 0) {
+        output.writeInt32(7, pulseInterval_);
+      }
+      if (pulseWindow_ != 0) {
+        output.writeInt32(8, pulseWindow_);
+      }
+      if (splitPulses_ != false) {
+        output.writeBool(9, splitPulses_);
+      }
+      if (blinkingRate_ != 0D) {
+        output.writeDouble(10, blinkingRate_);
+      }
+      if (optimise_ != false) {
+        output.writeBool(11, optimise_);
+      }
+      if (minDistanceThreshold_ != 0D) {
+        output.writeDouble(12, minDistanceThreshold_);
+      }
+      if (maxDistanceThreshold_ != 0D) {
+        output.writeDouble(13, maxDistanceThreshold_);
+      }
+      if (minTimeThreshold_ != 0) {
+        output.writeInt32(14, minTimeThreshold_);
+      }
+      if (maxTimeThreshold_ != 0) {
+        output.writeInt32(15, maxTimeThreshold_);
+      }
+      if (optimiserSteps_ != 0) {
+        output.writeInt32(16, optimiserSteps_);
+      }
+      if (optimiserPlot_ != 0) {
+        output.writeInt32(17, optimiserPlot_);
+      }
+      if (saveTraces_ != false) {
+        output.writeBool(18, saveTraces_);
+      }
+      if (showHistograms_ != false) {
+        output.writeBool(19, showHistograms_);
+      }
+      if (saveTraceData_ != false) {
+        output.writeBool(20, saveTraceData_);
+      }
+      if (!getTraceDataDirectoryBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 21, traceDataDirectory_);
+      }
+      if (histogramBins_ != 0) {
+        output.writeInt32(22, histogramBins_);
+      }
+      if (removeOutliers_ != false) {
+        output.writeBool(23, removeOutliers_);
+      }
+      if (refitOption_ != false) {
+        output.writeBool(24, refitOption_);
+      }
+      if (minimumTraceLength_ != 0) {
+        output.writeInt32(25, minimumTraceLength_);
+      }
+      if (truncate_ != false) {
+        output.writeBool(26, truncate_);
+      }
+      if (internalDistances_ != false) {
+        output.writeBool(27, internalDistances_);
+      }
+      if (subSampledDistances_ != false) {
+        output.writeBool(28, subSampledDistances_);
+      }
+      if (ignoreEnds_ != false) {
+        output.writeBool(29, ignoreEnds_);
+      }
+      if (precisionCorrection_ != false) {
+        output.writeBool(30, precisionCorrection_);
+      }
+      if (msdCorrection_ != false) {
+        output.writeBool(31, msdCorrection_);
+      }
+      if (mle_ != false) {
+        output.writeBool(32, mle_);
+      }
+      if (fitLength_ != 0) {
+        output.writeInt32(33, fitLength_);
+      }
+      if (fitRestarts_ != 0) {
+        output.writeInt32(34, fitRestarts_);
+      }
+      if (jumpDistance_ != 0) {
+        output.writeInt32(35, jumpDistance_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (distanceThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1, distanceThreshold_);
+      }
+      if (distanceExclusion_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, distanceExclusion_);
+      }
+      if (timeThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, timeThreshold_);
+      }
+      if (timeUnit_ != gdsc.smlm.data.config.UnitConfig.TimeUnit.TIME_UNIT_NA.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(4, timeUnit_);
+      }
+      if (traceMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, traceMode_);
+      }
+      if (clusteringAlgorithm_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, clusteringAlgorithm_);
+      }
+      if (pulseInterval_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(7, pulseInterval_);
+      }
+      if (pulseWindow_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, pulseWindow_);
+      }
+      if (splitPulses_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(9, splitPulses_);
+      }
+      if (blinkingRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(10, blinkingRate_);
+      }
+      if (optimise_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(11, optimise_);
+      }
+      if (minDistanceThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(12, minDistanceThreshold_);
+      }
+      if (maxDistanceThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(13, maxDistanceThreshold_);
+      }
+      if (minTimeThreshold_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(14, minTimeThreshold_);
+      }
+      if (maxTimeThreshold_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(15, maxTimeThreshold_);
+      }
+      if (optimiserSteps_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(16, optimiserSteps_);
+      }
+      if (optimiserPlot_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(17, optimiserPlot_);
+      }
+      if (saveTraces_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(18, saveTraces_);
+      }
+      if (showHistograms_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(19, showHistograms_);
+      }
+      if (saveTraceData_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(20, saveTraceData_);
+      }
+      if (!getTraceDataDirectoryBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, traceDataDirectory_);
+      }
+      if (histogramBins_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(22, histogramBins_);
+      }
+      if (removeOutliers_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(23, removeOutliers_);
+      }
+      if (refitOption_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(24, refitOption_);
+      }
+      if (minimumTraceLength_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(25, minimumTraceLength_);
+      }
+      if (truncate_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(26, truncate_);
+      }
+      if (internalDistances_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(27, internalDistances_);
+      }
+      if (subSampledDistances_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(28, subSampledDistances_);
+      }
+      if (ignoreEnds_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(29, ignoreEnds_);
+      }
+      if (precisionCorrection_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(30, precisionCorrection_);
+      }
+      if (msdCorrection_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(31, msdCorrection_);
+      }
+      if (mle_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(32, mle_);
+      }
+      if (fitLength_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(33, fitLength_);
+      }
+      if (fitRestarts_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(34, fitRestarts_);
+      }
+      if (jumpDistance_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(35, jumpDistance_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIConfig.ClusteringSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIConfig.ClusteringSettings other = (gdsc.smlm.data.config.GUIConfig.ClusteringSettings) obj;
+
+      boolean result = true;
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDistanceThreshold())
+          == java.lang.Double.doubleToLongBits(
+              other.getDistanceThreshold()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDistanceExclusion())
+          == java.lang.Double.doubleToLongBits(
+              other.getDistanceExclusion()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getTimeThreshold())
+          == java.lang.Double.doubleToLongBits(
+              other.getTimeThreshold()));
+      result = result && timeUnit_ == other.timeUnit_;
+      result = result && (getTraceMode()
+          == other.getTraceMode());
+      result = result && (getClusteringAlgorithm()
+          == other.getClusteringAlgorithm());
+      result = result && (getPulseInterval()
+          == other.getPulseInterval());
+      result = result && (getPulseWindow()
+          == other.getPulseWindow());
+      result = result && (getSplitPulses()
+          == other.getSplitPulses());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getBlinkingRate())
+          == java.lang.Double.doubleToLongBits(
+              other.getBlinkingRate()));
+      result = result && (getOptimise()
+          == other.getOptimise());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMinDistanceThreshold())
+          == java.lang.Double.doubleToLongBits(
+              other.getMinDistanceThreshold()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMaxDistanceThreshold())
+          == java.lang.Double.doubleToLongBits(
+              other.getMaxDistanceThreshold()));
+      result = result && (getMinTimeThreshold()
+          == other.getMinTimeThreshold());
+      result = result && (getMaxTimeThreshold()
+          == other.getMaxTimeThreshold());
+      result = result && (getOptimiserSteps()
+          == other.getOptimiserSteps());
+      result = result && (getOptimiserPlot()
+          == other.getOptimiserPlot());
+      result = result && (getSaveTraces()
+          == other.getSaveTraces());
+      result = result && (getShowHistograms()
+          == other.getShowHistograms());
+      result = result && (getSaveTraceData()
+          == other.getSaveTraceData());
+      result = result && getTraceDataDirectory()
+          .equals(other.getTraceDataDirectory());
+      result = result && (getHistogramBins()
+          == other.getHistogramBins());
+      result = result && (getRemoveOutliers()
+          == other.getRemoveOutliers());
+      result = result && (getRefitOption()
+          == other.getRefitOption());
+      result = result && (getMinimumTraceLength()
+          == other.getMinimumTraceLength());
+      result = result && (getTruncate()
+          == other.getTruncate());
+      result = result && (getInternalDistances()
+          == other.getInternalDistances());
+      result = result && (getSubSampledDistances()
+          == other.getSubSampledDistances());
+      result = result && (getIgnoreEnds()
+          == other.getIgnoreEnds());
+      result = result && (getPrecisionCorrection()
+          == other.getPrecisionCorrection());
+      result = result && (getMsdCorrection()
+          == other.getMsdCorrection());
+      result = result && (getMle()
+          == other.getMle());
+      result = result && (getFitLength()
+          == other.getFitLength());
+      result = result && (getFitRestarts()
+          == other.getFitRestarts());
+      result = result && (getJumpDistance()
+          == other.getJumpDistance());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DISTANCE_THRESHOLD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDistanceThreshold()));
+      hash = (37 * hash) + DISTANCE_EXCLUSION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDistanceExclusion()));
+      hash = (37 * hash) + TIME_THRESHOLD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getTimeThreshold()));
+      hash = (37 * hash) + TIME_UNIT_FIELD_NUMBER;
+      hash = (53 * hash) + timeUnit_;
+      hash = (37 * hash) + TRACE_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getTraceMode();
+      hash = (37 * hash) + CLUSTERING_ALGORITHM_FIELD_NUMBER;
+      hash = (53 * hash) + getClusteringAlgorithm();
+      hash = (37 * hash) + PULSE_INTERVAL_FIELD_NUMBER;
+      hash = (53 * hash) + getPulseInterval();
+      hash = (37 * hash) + PULSE_WINDOW_FIELD_NUMBER;
+      hash = (53 * hash) + getPulseWindow();
+      hash = (37 * hash) + SPLIT_PULSES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSplitPulses());
+      hash = (37 * hash) + BLINKING_RATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getBlinkingRate()));
+      hash = (37 * hash) + OPTIMISE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getOptimise());
+      hash = (37 * hash) + MIN_DISTANCE_THRESHOLD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMinDistanceThreshold()));
+      hash = (37 * hash) + MAX_DISTANCE_THRESHOLD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMaxDistanceThreshold()));
+      hash = (37 * hash) + MIN_TIME_THRESHOLD_FIELD_NUMBER;
+      hash = (53 * hash) + getMinTimeThreshold();
+      hash = (37 * hash) + MAX_TIME_THRESHOLD_FIELD_NUMBER;
+      hash = (53 * hash) + getMaxTimeThreshold();
+      hash = (37 * hash) + OPTIMISER_STEPS_FIELD_NUMBER;
+      hash = (53 * hash) + getOptimiserSteps();
+      hash = (37 * hash) + OPTIMISER_PLOT_FIELD_NUMBER;
+      hash = (53 * hash) + getOptimiserPlot();
+      hash = (37 * hash) + SAVE_TRACES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveTraces());
+      hash = (37 * hash) + SHOW_HISTOGRAMS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowHistograms());
+      hash = (37 * hash) + SAVE_TRACE_DATA_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveTraceData());
+      hash = (37 * hash) + TRACE_DATA_DIRECTORY_FIELD_NUMBER;
+      hash = (53 * hash) + getTraceDataDirectory().hashCode();
+      hash = (37 * hash) + HISTOGRAM_BINS_FIELD_NUMBER;
+      hash = (53 * hash) + getHistogramBins();
+      hash = (37 * hash) + REMOVE_OUTLIERS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRemoveOutliers());
+      hash = (37 * hash) + REFIT_OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRefitOption());
+      hash = (37 * hash) + MINIMUM_TRACE_LENGTH_FIELD_NUMBER;
+      hash = (53 * hash) + getMinimumTraceLength();
+      hash = (37 * hash) + TRUNCATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getTruncate());
+      hash = (37 * hash) + INTERNAL_DISTANCES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getInternalDistances());
+      hash = (37 * hash) + SUB_SAMPLED_DISTANCES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSubSampledDistances());
+      hash = (37 * hash) + IGNORE_ENDS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getIgnoreEnds());
+      hash = (37 * hash) + PRECISION_CORRECTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getPrecisionCorrection());
+      hash = (37 * hash) + MSD_CORRECTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getMsdCorrection());
+      hash = (37 * hash) + MLE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getMle());
+      hash = (37 * hash) + FIT_LENGTH_FIELD_NUMBER;
+      hash = (53 * hash) + getFitLength();
+      hash = (37 * hash) + FIT_RESTARTS_FIELD_NUMBER;
+      hash = (53 * hash) + getFitRestarts();
+      hash = (37 * hash) + JUMP_DISTANCE_FIELD_NUMBER;
+      hash = (53 * hash) + getJumpDistance();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIConfig.ClusteringSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contain the settings for the clustering algorithm
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.ClusteringSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.ClusteringSettings)
+        gdsc.smlm.data.config.GUIConfig.ClusteringSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_ClusteringSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIConfig.ClusteringSettings.class, gdsc.smlm.data.config.GUIConfig.ClusteringSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIConfig.ClusteringSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        distanceThreshold_ = 0D;
+
+        distanceExclusion_ = 0D;
+
+        timeThreshold_ = 0D;
+
+        timeUnit_ = 0;
+
+        traceMode_ = 0;
+
+        clusteringAlgorithm_ = 0;
+
+        pulseInterval_ = 0;
+
+        pulseWindow_ = 0;
+
+        splitPulses_ = false;
+
+        blinkingRate_ = 0D;
+
+        optimise_ = false;
+
+        minDistanceThreshold_ = 0D;
+
+        maxDistanceThreshold_ = 0D;
+
+        minTimeThreshold_ = 0;
+
+        maxTimeThreshold_ = 0;
+
+        optimiserSteps_ = 0;
+
+        optimiserPlot_ = 0;
+
+        saveTraces_ = false;
+
+        showHistograms_ = false;
+
+        saveTraceData_ = false;
+
+        traceDataDirectory_ = "";
+
+        histogramBins_ = 0;
+
+        removeOutliers_ = false;
+
+        refitOption_ = false;
+
+        minimumTraceLength_ = 0;
+
+        truncate_ = false;
+
+        internalDistances_ = false;
+
+        subSampledDistances_ = false;
+
+        ignoreEnds_ = false;
+
+        precisionCorrection_ = false;
+
+        msdCorrection_ = false;
+
+        mle_ = false;
+
+        fitLength_ = 0;
+
+        fitRestarts_ = 0;
+
+        jumpDistance_ = 0;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.ClusteringSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIConfig.ClusteringSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.ClusteringSettings build() {
+        gdsc.smlm.data.config.GUIConfig.ClusteringSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.ClusteringSettings buildPartial() {
+        gdsc.smlm.data.config.GUIConfig.ClusteringSettings result = new gdsc.smlm.data.config.GUIConfig.ClusteringSettings(this);
+        result.distanceThreshold_ = distanceThreshold_;
+        result.distanceExclusion_ = distanceExclusion_;
+        result.timeThreshold_ = timeThreshold_;
+        result.timeUnit_ = timeUnit_;
+        result.traceMode_ = traceMode_;
+        result.clusteringAlgorithm_ = clusteringAlgorithm_;
+        result.pulseInterval_ = pulseInterval_;
+        result.pulseWindow_ = pulseWindow_;
+        result.splitPulses_ = splitPulses_;
+        result.blinkingRate_ = blinkingRate_;
+        result.optimise_ = optimise_;
+        result.minDistanceThreshold_ = minDistanceThreshold_;
+        result.maxDistanceThreshold_ = maxDistanceThreshold_;
+        result.minTimeThreshold_ = minTimeThreshold_;
+        result.maxTimeThreshold_ = maxTimeThreshold_;
+        result.optimiserSteps_ = optimiserSteps_;
+        result.optimiserPlot_ = optimiserPlot_;
+        result.saveTraces_ = saveTraces_;
+        result.showHistograms_ = showHistograms_;
+        result.saveTraceData_ = saveTraceData_;
+        result.traceDataDirectory_ = traceDataDirectory_;
+        result.histogramBins_ = histogramBins_;
+        result.removeOutliers_ = removeOutliers_;
+        result.refitOption_ = refitOption_;
+        result.minimumTraceLength_ = minimumTraceLength_;
+        result.truncate_ = truncate_;
+        result.internalDistances_ = internalDistances_;
+        result.subSampledDistances_ = subSampledDistances_;
+        result.ignoreEnds_ = ignoreEnds_;
+        result.precisionCorrection_ = precisionCorrection_;
+        result.msdCorrection_ = msdCorrection_;
+        result.mle_ = mle_;
+        result.fitLength_ = fitLength_;
+        result.fitRestarts_ = fitRestarts_;
+        result.jumpDistance_ = jumpDistance_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIConfig.ClusteringSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIConfig.ClusteringSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIConfig.ClusteringSettings other) {
+        if (other == gdsc.smlm.data.config.GUIConfig.ClusteringSettings.getDefaultInstance()) return this;
+        if (other.getDistanceThreshold() != 0D) {
+          setDistanceThreshold(other.getDistanceThreshold());
+        }
+        if (other.getDistanceExclusion() != 0D) {
+          setDistanceExclusion(other.getDistanceExclusion());
+        }
+        if (other.getTimeThreshold() != 0D) {
+          setTimeThreshold(other.getTimeThreshold());
+        }
+        if (other.timeUnit_ != 0) {
+          setTimeUnitValue(other.getTimeUnitValue());
+        }
+        if (other.getTraceMode() != 0) {
+          setTraceMode(other.getTraceMode());
+        }
+        if (other.getClusteringAlgorithm() != 0) {
+          setClusteringAlgorithm(other.getClusteringAlgorithm());
+        }
+        if (other.getPulseInterval() != 0) {
+          setPulseInterval(other.getPulseInterval());
+        }
+        if (other.getPulseWindow() != 0) {
+          setPulseWindow(other.getPulseWindow());
+        }
+        if (other.getSplitPulses() != false) {
+          setSplitPulses(other.getSplitPulses());
+        }
+        if (other.getBlinkingRate() != 0D) {
+          setBlinkingRate(other.getBlinkingRate());
+        }
+        if (other.getOptimise() != false) {
+          setOptimise(other.getOptimise());
+        }
+        if (other.getMinDistanceThreshold() != 0D) {
+          setMinDistanceThreshold(other.getMinDistanceThreshold());
+        }
+        if (other.getMaxDistanceThreshold() != 0D) {
+          setMaxDistanceThreshold(other.getMaxDistanceThreshold());
+        }
+        if (other.getMinTimeThreshold() != 0) {
+          setMinTimeThreshold(other.getMinTimeThreshold());
+        }
+        if (other.getMaxTimeThreshold() != 0) {
+          setMaxTimeThreshold(other.getMaxTimeThreshold());
+        }
+        if (other.getOptimiserSteps() != 0) {
+          setOptimiserSteps(other.getOptimiserSteps());
+        }
+        if (other.getOptimiserPlot() != 0) {
+          setOptimiserPlot(other.getOptimiserPlot());
+        }
+        if (other.getSaveTraces() != false) {
+          setSaveTraces(other.getSaveTraces());
+        }
+        if (other.getShowHistograms() != false) {
+          setShowHistograms(other.getShowHistograms());
+        }
+        if (other.getSaveTraceData() != false) {
+          setSaveTraceData(other.getSaveTraceData());
+        }
+        if (!other.getTraceDataDirectory().isEmpty()) {
+          traceDataDirectory_ = other.traceDataDirectory_;
+          onChanged();
+        }
+        if (other.getHistogramBins() != 0) {
+          setHistogramBins(other.getHistogramBins());
+        }
+        if (other.getRemoveOutliers() != false) {
+          setRemoveOutliers(other.getRemoveOutliers());
+        }
+        if (other.getRefitOption() != false) {
+          setRefitOption(other.getRefitOption());
+        }
+        if (other.getMinimumTraceLength() != 0) {
+          setMinimumTraceLength(other.getMinimumTraceLength());
+        }
+        if (other.getTruncate() != false) {
+          setTruncate(other.getTruncate());
+        }
+        if (other.getInternalDistances() != false) {
+          setInternalDistances(other.getInternalDistances());
+        }
+        if (other.getSubSampledDistances() != false) {
+          setSubSampledDistances(other.getSubSampledDistances());
+        }
+        if (other.getIgnoreEnds() != false) {
+          setIgnoreEnds(other.getIgnoreEnds());
+        }
+        if (other.getPrecisionCorrection() != false) {
+          setPrecisionCorrection(other.getPrecisionCorrection());
+        }
+        if (other.getMsdCorrection() != false) {
+          setMsdCorrection(other.getMsdCorrection());
+        }
+        if (other.getMle() != false) {
+          setMle(other.getMle());
+        }
+        if (other.getFitLength() != 0) {
+          setFitLength(other.getFitLength());
+        }
+        if (other.getFitRestarts() != 0) {
+          setFitRestarts(other.getFitRestarts());
+        }
+        if (other.getJumpDistance() != 0) {
+          setJumpDistance(other.getJumpDistance());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIConfig.ClusteringSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIConfig.ClusteringSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private double distanceThreshold_ ;
+      /**
+       * <code>double distance_threshold = 1;</code>
+       */
+      public double getDistanceThreshold() {
+        return distanceThreshold_;
+      }
+      /**
+       * <code>double distance_threshold = 1;</code>
+       */
+      public Builder setDistanceThreshold(double value) {
+        
+        distanceThreshold_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double distance_threshold = 1;</code>
+       */
+      public Builder clearDistanceThreshold() {
+        
+        distanceThreshold_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double distanceExclusion_ ;
+      /**
+       * <code>double distance_exclusion = 2;</code>
+       */
+      public double getDistanceExclusion() {
+        return distanceExclusion_;
+      }
+      /**
+       * <code>double distance_exclusion = 2;</code>
+       */
+      public Builder setDistanceExclusion(double value) {
+        
+        distanceExclusion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double distance_exclusion = 2;</code>
+       */
+      public Builder clearDistanceExclusion() {
+        
+        distanceExclusion_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double timeThreshold_ ;
+      /**
+       * <code>double time_threshold = 3;</code>
+       */
+      public double getTimeThreshold() {
+        return timeThreshold_;
+      }
+      /**
+       * <code>double time_threshold = 3;</code>
+       */
+      public Builder setTimeThreshold(double value) {
+        
+        timeThreshold_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double time_threshold = 3;</code>
+       */
+      public Builder clearTimeThreshold() {
+        
+        timeThreshold_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int timeUnit_ = 0;
+      /**
+       * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
+       */
+      public int getTimeUnitValue() {
+        return timeUnit_;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
+       */
+      public Builder setTimeUnitValue(int value) {
+        timeUnit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
+       */
+      public gdsc.smlm.data.config.UnitConfig.TimeUnit getTimeUnit() {
+        gdsc.smlm.data.config.UnitConfig.TimeUnit result = gdsc.smlm.data.config.UnitConfig.TimeUnit.valueOf(timeUnit_);
+        return result == null ? gdsc.smlm.data.config.UnitConfig.TimeUnit.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
+       */
+      public Builder setTimeUnit(gdsc.smlm.data.config.UnitConfig.TimeUnit value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        timeUnit_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.TimeUnit time_unit = 4;</code>
+       */
+      public Builder clearTimeUnit() {
+        
+        timeUnit_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int traceMode_ ;
+      /**
+       * <code>int32 trace_mode = 5;</code>
+       */
+      public int getTraceMode() {
+        return traceMode_;
+      }
+      /**
+       * <code>int32 trace_mode = 5;</code>
+       */
+      public Builder setTraceMode(int value) {
+        
+        traceMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 trace_mode = 5;</code>
+       */
+      public Builder clearTraceMode() {
+        
+        traceMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int clusteringAlgorithm_ ;
+      /**
+       * <code>int32 clustering_algorithm = 6;</code>
+       */
+      public int getClusteringAlgorithm() {
+        return clusteringAlgorithm_;
+      }
+      /**
+       * <code>int32 clustering_algorithm = 6;</code>
+       */
+      public Builder setClusteringAlgorithm(int value) {
+        
+        clusteringAlgorithm_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 clustering_algorithm = 6;</code>
+       */
+      public Builder clearClusteringAlgorithm() {
+        
+        clusteringAlgorithm_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int pulseInterval_ ;
+      /**
+       * <code>int32 pulse_interval = 7;</code>
+       */
+      public int getPulseInterval() {
+        return pulseInterval_;
+      }
+      /**
+       * <code>int32 pulse_interval = 7;</code>
+       */
+      public Builder setPulseInterval(int value) {
+        
+        pulseInterval_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 pulse_interval = 7;</code>
+       */
+      public Builder clearPulseInterval() {
+        
+        pulseInterval_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int pulseWindow_ ;
+      /**
+       * <code>int32 pulse_window = 8;</code>
+       */
+      public int getPulseWindow() {
+        return pulseWindow_;
+      }
+      /**
+       * <code>int32 pulse_window = 8;</code>
+       */
+      public Builder setPulseWindow(int value) {
+        
+        pulseWindow_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 pulse_window = 8;</code>
+       */
+      public Builder clearPulseWindow() {
+        
+        pulseWindow_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean splitPulses_ ;
+      /**
+       * <code>bool split_pulses = 9;</code>
+       */
+      public boolean getSplitPulses() {
+        return splitPulses_;
+      }
+      /**
+       * <code>bool split_pulses = 9;</code>
+       */
+      public Builder setSplitPulses(boolean value) {
+        
+        splitPulses_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool split_pulses = 9;</code>
+       */
+      public Builder clearSplitPulses() {
+        
+        splitPulses_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double blinkingRate_ ;
+      /**
+       * <code>double blinking_rate = 10;</code>
+       */
+      public double getBlinkingRate() {
+        return blinkingRate_;
+      }
+      /**
+       * <code>double blinking_rate = 10;</code>
+       */
+      public Builder setBlinkingRate(double value) {
+        
+        blinkingRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double blinking_rate = 10;</code>
+       */
+      public Builder clearBlinkingRate() {
+        
+        blinkingRate_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean optimise_ ;
+      /**
+       * <code>bool optimise = 11;</code>
+       */
+      public boolean getOptimise() {
+        return optimise_;
+      }
+      /**
+       * <code>bool optimise = 11;</code>
+       */
+      public Builder setOptimise(boolean value) {
+        
+        optimise_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool optimise = 11;</code>
+       */
+      public Builder clearOptimise() {
+        
+        optimise_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double minDistanceThreshold_ ;
+      /**
+       * <code>double min_distance_threshold = 12;</code>
+       */
+      public double getMinDistanceThreshold() {
+        return minDistanceThreshold_;
+      }
+      /**
+       * <code>double min_distance_threshold = 12;</code>
+       */
+      public Builder setMinDistanceThreshold(double value) {
+        
+        minDistanceThreshold_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double min_distance_threshold = 12;</code>
+       */
+      public Builder clearMinDistanceThreshold() {
+        
+        minDistanceThreshold_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double maxDistanceThreshold_ ;
+      /**
+       * <code>double max_distance_threshold = 13;</code>
+       */
+      public double getMaxDistanceThreshold() {
+        return maxDistanceThreshold_;
+      }
+      /**
+       * <code>double max_distance_threshold = 13;</code>
+       */
+      public Builder setMaxDistanceThreshold(double value) {
+        
+        maxDistanceThreshold_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double max_distance_threshold = 13;</code>
+       */
+      public Builder clearMaxDistanceThreshold() {
+        
+        maxDistanceThreshold_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int minTimeThreshold_ ;
+      /**
+       * <pre>
+       * The min time threshold for optimisation (time is in frames).
+       * </pre>
+       *
+       * <code>int32 min_time_threshold = 14;</code>
+       */
+      public int getMinTimeThreshold() {
+        return minTimeThreshold_;
+      }
+      /**
+       * <pre>
+       * The min time threshold for optimisation (time is in frames).
+       * </pre>
+       *
+       * <code>int32 min_time_threshold = 14;</code>
+       */
+      public Builder setMinTimeThreshold(int value) {
+        
+        minTimeThreshold_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The min time threshold for optimisation (time is in frames).
+       * </pre>
+       *
+       * <code>int32 min_time_threshold = 14;</code>
+       */
+      public Builder clearMinTimeThreshold() {
+        
+        minTimeThreshold_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int maxTimeThreshold_ ;
+      /**
+       * <pre>
+       * The max time threshold for optimisation (time is in frames).
+       * </pre>
+       *
+       * <code>int32 max_time_threshold = 15;</code>
+       */
+      public int getMaxTimeThreshold() {
+        return maxTimeThreshold_;
+      }
+      /**
+       * <pre>
+       * The max time threshold for optimisation (time is in frames).
+       * </pre>
+       *
+       * <code>int32 max_time_threshold = 15;</code>
+       */
+      public Builder setMaxTimeThreshold(int value) {
+        
+        maxTimeThreshold_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The max time threshold for optimisation (time is in frames).
+       * </pre>
+       *
+       * <code>int32 max_time_threshold = 15;</code>
+       */
+      public Builder clearMaxTimeThreshold() {
+        
+        maxTimeThreshold_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int optimiserSteps_ ;
+      /**
+       * <code>int32 optimiser_steps = 16;</code>
+       */
+      public int getOptimiserSteps() {
+        return optimiserSteps_;
+      }
+      /**
+       * <code>int32 optimiser_steps = 16;</code>
+       */
+      public Builder setOptimiserSteps(int value) {
+        
+        optimiserSteps_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 optimiser_steps = 16;</code>
+       */
+      public Builder clearOptimiserSteps() {
+        
+        optimiserSteps_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int optimiserPlot_ ;
+      /**
+       * <code>int32 optimiser_plot = 17;</code>
+       */
+      public int getOptimiserPlot() {
+        return optimiserPlot_;
+      }
+      /**
+       * <code>int32 optimiser_plot = 17;</code>
+       */
+      public Builder setOptimiserPlot(int value) {
+        
+        optimiserPlot_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 optimiser_plot = 17;</code>
+       */
+      public Builder clearOptimiserPlot() {
+        
+        optimiserPlot_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean saveTraces_ ;
+      /**
+       * <code>bool save_traces = 18;</code>
+       */
+      public boolean getSaveTraces() {
+        return saveTraces_;
+      }
+      /**
+       * <code>bool save_traces = 18;</code>
+       */
+      public Builder setSaveTraces(boolean value) {
+        
+        saveTraces_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool save_traces = 18;</code>
+       */
+      public Builder clearSaveTraces() {
+        
+        saveTraces_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean showHistograms_ ;
+      /**
+       * <code>bool show_histograms = 19;</code>
+       */
+      public boolean getShowHistograms() {
+        return showHistograms_;
+      }
+      /**
+       * <code>bool show_histograms = 19;</code>
+       */
+      public Builder setShowHistograms(boolean value) {
+        
+        showHistograms_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool show_histograms = 19;</code>
+       */
+      public Builder clearShowHistograms() {
+        
+        showHistograms_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean saveTraceData_ ;
+      /**
+       * <code>bool save_trace_data = 20;</code>
+       */
+      public boolean getSaveTraceData() {
+        return saveTraceData_;
+      }
+      /**
+       * <code>bool save_trace_data = 20;</code>
+       */
+      public Builder setSaveTraceData(boolean value) {
+        
+        saveTraceData_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool save_trace_data = 20;</code>
+       */
+      public Builder clearSaveTraceData() {
+        
+        saveTraceData_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object traceDataDirectory_ = "";
+      /**
+       * <code>string trace_data_directory = 21;</code>
+       */
+      public java.lang.String getTraceDataDirectory() {
+        java.lang.Object ref = traceDataDirectory_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          traceDataDirectory_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string trace_data_directory = 21;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTraceDataDirectoryBytes() {
+        java.lang.Object ref = traceDataDirectory_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          traceDataDirectory_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string trace_data_directory = 21;</code>
+       */
+      public Builder setTraceDataDirectory(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        traceDataDirectory_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string trace_data_directory = 21;</code>
+       */
+      public Builder clearTraceDataDirectory() {
+        
+        traceDataDirectory_ = getDefaultInstance().getTraceDataDirectory();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string trace_data_directory = 21;</code>
+       */
+      public Builder setTraceDataDirectoryBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        traceDataDirectory_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int histogramBins_ ;
+      /**
+       * <code>int32 histogram_bins = 22;</code>
+       */
+      public int getHistogramBins() {
+        return histogramBins_;
+      }
+      /**
+       * <code>int32 histogram_bins = 22;</code>
+       */
+      public Builder setHistogramBins(int value) {
+        
+        histogramBins_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 histogram_bins = 22;</code>
+       */
+      public Builder clearHistogramBins() {
+        
+        histogramBins_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean removeOutliers_ ;
+      /**
+       * <code>bool remove_outliers = 23;</code>
+       */
+      public boolean getRemoveOutliers() {
+        return removeOutliers_;
+      }
+      /**
+       * <code>bool remove_outliers = 23;</code>
+       */
+      public Builder setRemoveOutliers(boolean value) {
+        
+        removeOutliers_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool remove_outliers = 23;</code>
+       */
+      public Builder clearRemoveOutliers() {
+        
+        removeOutliers_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean refitOption_ ;
+      /**
+       * <code>bool refit_option = 24;</code>
+       */
+      public boolean getRefitOption() {
+        return refitOption_;
+      }
+      /**
+       * <code>bool refit_option = 24;</code>
+       */
+      public Builder setRefitOption(boolean value) {
+        
+        refitOption_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool refit_option = 24;</code>
+       */
+      public Builder clearRefitOption() {
+        
+        refitOption_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int minimumTraceLength_ ;
+      /**
+       * <pre>
+       * Options for tracing diffusion
+       * </pre>
+       *
+       * <code>int32 minimum_trace_length = 25;</code>
+       */
+      public int getMinimumTraceLength() {
+        return minimumTraceLength_;
+      }
+      /**
+       * <pre>
+       * Options for tracing diffusion
+       * </pre>
+       *
+       * <code>int32 minimum_trace_length = 25;</code>
+       */
+      public Builder setMinimumTraceLength(int value) {
+        
+        minimumTraceLength_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Options for tracing diffusion
+       * </pre>
+       *
+       * <code>int32 minimum_trace_length = 25;</code>
+       */
+      public Builder clearMinimumTraceLength() {
+        
+        minimumTraceLength_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean truncate_ ;
+      /**
+       * <code>bool truncate = 26;</code>
+       */
+      public boolean getTruncate() {
+        return truncate_;
+      }
+      /**
+       * <code>bool truncate = 26;</code>
+       */
+      public Builder setTruncate(boolean value) {
+        
+        truncate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool truncate = 26;</code>
+       */
+      public Builder clearTruncate() {
+        
+        truncate_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean internalDistances_ ;
+      /**
+       * <code>bool internal_distances = 27;</code>
+       */
+      public boolean getInternalDistances() {
+        return internalDistances_;
+      }
+      /**
+       * <code>bool internal_distances = 27;</code>
+       */
+      public Builder setInternalDistances(boolean value) {
+        
+        internalDistances_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool internal_distances = 27;</code>
+       */
+      public Builder clearInternalDistances() {
+        
+        internalDistances_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean subSampledDistances_ ;
+      /**
+       * <code>bool sub_sampled_distances = 28;</code>
+       */
+      public boolean getSubSampledDistances() {
+        return subSampledDistances_;
+      }
+      /**
+       * <code>bool sub_sampled_distances = 28;</code>
+       */
+      public Builder setSubSampledDistances(boolean value) {
+        
+        subSampledDistances_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool sub_sampled_distances = 28;</code>
+       */
+      public Builder clearSubSampledDistances() {
+        
+        subSampledDistances_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean ignoreEnds_ ;
+      /**
+       * <code>bool ignore_ends = 29;</code>
+       */
+      public boolean getIgnoreEnds() {
+        return ignoreEnds_;
+      }
+      /**
+       * <code>bool ignore_ends = 29;</code>
+       */
+      public Builder setIgnoreEnds(boolean value) {
+        
+        ignoreEnds_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool ignore_ends = 29;</code>
+       */
+      public Builder clearIgnoreEnds() {
+        
+        ignoreEnds_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean precisionCorrection_ ;
+      /**
+       * <code>bool precision_correction = 30;</code>
+       */
+      public boolean getPrecisionCorrection() {
+        return precisionCorrection_;
+      }
+      /**
+       * <code>bool precision_correction = 30;</code>
+       */
+      public Builder setPrecisionCorrection(boolean value) {
+        
+        precisionCorrection_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool precision_correction = 30;</code>
+       */
+      public Builder clearPrecisionCorrection() {
+        
+        precisionCorrection_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean msdCorrection_ ;
+      /**
+       * <code>bool msd_correction = 31;</code>
+       */
+      public boolean getMsdCorrection() {
+        return msdCorrection_;
+      }
+      /**
+       * <code>bool msd_correction = 31;</code>
+       */
+      public Builder setMsdCorrection(boolean value) {
+        
+        msdCorrection_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool msd_correction = 31;</code>
+       */
+      public Builder clearMsdCorrection() {
+        
+        msdCorrection_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean mle_ ;
+      /**
+       * <code>bool mle = 32;</code>
+       */
+      public boolean getMle() {
+        return mle_;
+      }
+      /**
+       * <code>bool mle = 32;</code>
+       */
+      public Builder setMle(boolean value) {
+        
+        mle_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool mle = 32;</code>
+       */
+      public Builder clearMle() {
+        
+        mle_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int fitLength_ ;
+      /**
+       * <code>int32 fit_length = 33;</code>
+       */
+      public int getFitLength() {
+        return fitLength_;
+      }
+      /**
+       * <code>int32 fit_length = 33;</code>
+       */
+      public Builder setFitLength(int value) {
+        
+        fitLength_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 fit_length = 33;</code>
+       */
+      public Builder clearFitLength() {
+        
+        fitLength_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int fitRestarts_ ;
+      /**
+       * <code>int32 fit_restarts = 34;</code>
+       */
+      public int getFitRestarts() {
+        return fitRestarts_;
+      }
+      /**
+       * <code>int32 fit_restarts = 34;</code>
+       */
+      public Builder setFitRestarts(int value) {
+        
+        fitRestarts_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 fit_restarts = 34;</code>
+       */
+      public Builder clearFitRestarts() {
+        
+        fitRestarts_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int jumpDistance_ ;
+      /**
+       * <code>int32 jump_distance = 35;</code>
+       */
+      public int getJumpDistance() {
+        return jumpDistance_;
+      }
+      /**
+       * <code>int32 jump_distance = 35;</code>
+       */
+      public Builder setJumpDistance(int value) {
+        
+        jumpDistance_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 jump_distance = 35;</code>
+       */
+      public Builder clearJumpDistance() {
+        
+        jumpDistance_ = 0;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.ClusteringSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.ClusteringSettings)
+    private static final gdsc.smlm.data.config.GUIConfig.ClusteringSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIConfig.ClusteringSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIConfig.ClusteringSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ClusteringSettings>
+        PARSER = new com.google.protobuf.AbstractParser<ClusteringSettings>() {
+      public ClusteringSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new ClusteringSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ClusteringSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ClusteringSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIConfig.ClusteringSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
   private static final 
@@ -10484,6 +13270,11 @@ public final class GUIConfig {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_ClusteringSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -10494,73 +13285,96 @@ public final class GUIConfig {
   static {
     java.lang.String[] descriptorData = {
       "\n\020gui_config.proto\022\025gdsc.smlm.data.confi" +
-      "g\"\212\002\n\021GUIFilterSettings\022\021\n\tmax_drift\030\001 \001" +
-      "(\002\022\022\n\nmin_signal\030\002 \001(\002\022\017\n\007min_snr\030\003 \001(\002\022" +
-      "\025\n\rmax_precision\030\004 \001(\001\022\021\n\tmax_width\030\005 \001(" +
-      "\002\022\021\n\tmin_width\030\006 \001(\002\022\022\n\nmask_title\030\007 \001(\t" +
-      "\022\023\n\013free_filter\030\010 \001(\t\022\027\n\017filter_template" +
-      "\030\t \001(\t\022!\n\031filter_analysis_directory\030\n \001(" +
-      "\t\022\033\n\023filter_set_filename\030\013 \001(\t\"\314\001\n\025PSFCa" +
-      "lculatorSettings\022\023\n\013pixel_pitch\030\001 \001(\001\022\025\n" +
-      "\rmagnification\030\002 \001(\001\022\025\n\rbeam_expander\030\003 ",
-      "\001(\001\022\022\n\nwavelength\030\004 \001(\001\022\032\n\022numerical_ape" +
-      "rture\030\005 \001(\001\022 \n\030adjust_for_square_pixels\030" +
-      "\006 \001(\010\022\036\n\026proportionality_factor\030\007 \001(\001\"\273\001" +
-      "\n\024PSFEstimatorSettings\022\027\n\017number_of_peak" +
-      "s\030\001 \001(\005\022\017\n\007p_value\030\002 \001(\001\022\032\n\022update_prefe" +
-      "rences\030\003 \001(\010\022\033\n\023debug_psf_estimator\030\004 \001(" +
-      "\010\022\017\n\007iterate\030\005 \001(\010\022\027\n\017show_histograms\030\006 " +
-      "\001(\010\022\026\n\016histogram_bins\030\007 \001(\005\"\367\016\n\022CreateDa" +
-      "taSettings\022\014\n\004size\030\001 \001(\005\022\r\n\005depth\030\002 \001(\001\022" +
-      "\023\n\013fixed_Depth\030\003 \001(\010\022\017\n\007seconds\030\004 \001(\001\022\025\n",
-      "\rexposure_time\030\005 \001(\001\022\030\n\020steps_per_second" +
-      "\030\006 \001(\001\022\024\n\014illumination\030\007 \001(\t\022\030\n\020backgrou" +
-      "nd_image\030\010 \001(\t\022\024\n\014distribution\030\t \001(\t\022\031\n\021" +
-      "distribution_mask\030\n \001(\t\022%\n\035distribution_" +
-      "mask_slice_depth\030\013 \001(\001\022\025\n\rpoisson_noise\030" +
-      "\014 \001(\010\022\022\n\nbackground\030\r \001(\001\022\017\n\007em_gain\030\016 \001" +
-      "(\001\022\023\n\013camera_gain\030\017 \001(\001\022\032\n\022quantum_effic" +
-      "iency\030\020 \001(\001\022\022\n\nread_noise\030\021 \001(\001\022\014\n\004bias\030" +
-      "\022 \001(\005\022\021\n\tparticles\030\023 \001(\005\022\030\n\020sample_per_f" +
-      "rame\030\024 \001(\010\022\032\n\022photons_per_second\030\025 \001(\001\022\"",
-      "\n\032photons_per_second_maximum\030\026 \001(\001\022\033\n\023ph" +
-      "oton_distribution\030\027 \001(\t\022 \n\030photon_distri" +
-      "bution_file\030\030 \001(\t\022\024\n\014photon_shape\030\031 \001(\001\022" +
-      "\023\n\013correlation\030\032 \001(\001\022\021\n\tpsf_model\030\033 \001(\t\022" +
-      "\026\n\016psf_image_name\030\034 \001(\t\022\023\n\013enter_width\030\035" +
-      " \001(\010\022\022\n\nwavelength\030\036 \001(\001\022\032\n\022numerical_ap" +
-      "erture\030\037 \001(\001\022\016\n\006psf_sd\030  \001(\001\022\023\n\013pixel_pi" +
-      "tch\030! \001(\001\022\017\n\007density\030\" \001(\001\022\026\n\016diffusion_" +
-      "rate\030# \001(\001\022\026\n\016diffusion_type\030$ \001(\005\022\032\n\022co" +
-      "mpound_molecules\030% \001(\010\022\025\n\rcompound_text\030",
-      "& \001(\t\022\022\n\ndiffuse_2D\030\' \001(\010\022\"\n\032rotate_init" +
-      "ial_orientation\030( \001(\010\022 \n\030rotate_during_s" +
-      "imulation\030) \001(\010\022\021\n\trotate_2D\030* \001(\010\022\025\n\rfi" +
-      "xedFraction\030+ \001(\001\022\023\n\013confinement\030, \001(\t\022\030" +
-      "\n\020confinement_mask\030- \001(\t\022$\n\034confinement_" +
-      "mask_slice_depth\030. \001(\001\022\032\n\022confinement_ra" +
-      "dius\030/ \001(\001\022\026\n\016pulse_interval\0300 \001(\005\022\023\n\013pu" +
-      "lse_ratio\0301 \001(\001\022\014\n\004t_on\0302 \001(\001\022\023\n\013t_off_s" +
-      "hort\0303 \001(\001\022\022\n\nt_off_long\0304 \001(\001\022\026\n\016n_blin" +
-      "ks_short\0305 \001(\001\022\025\n\rn_blinks_long\0306 \001(\001\022\'\n",
-      "\037n_blinks_geometric_distribution\0307 \001(\010\022\023" +
-      "\n\013min_photons\0308 \001(\001\022\022\n\nmin_snr_t1\0309 \001(\001\022" +
-      "\022\n\nmin_snr_tN\030: \001(\001\022\021\n\traw_image\030; \001(\010\022\022" +
-      "\n\nsave_image\030< \001(\010\022\032\n\022save_image_results" +
-      "\030= \001(\010\022\032\n\022save_localisations\030> \001(\010\022\031\n\021sa" +
-      "ve_fluorophores\030? \001(\010\022\026\n\016image_filename\030" +
-      "@ \001(\t\022\036\n\026image_results_filename\030A \001(\t\022\034\n" +
-      "\024fluorophoresFilename\030B \001(\t\022\021\n\tcell_size" +
-      "\030C \001(\005\022\032\n\022probability_binary\030D \001(\001\022\033\n\023mi" +
-      "n_binary_distance\030E \001(\001\022\033\n\023max_binary_di",
-      "stance\030F \001(\001\022\027\n\017show_histograms\030G \001(\010\022\031\n" +
-      "\021choose_histograms\030H \001(\010\022\026\n\016histogram_bi" +
-      "ns\030I \001(\005\022\027\n\017remove_outliers\030J \001(\010\022\026\n\016den" +
-      "sity_radius\030K \001(\002\022\026\n\016depth_of_field\030L \001(" +
-      "\002\022\022\n\nx_position\030M \001(\001\022\022\n\ny_position\030N \001(" +
-      "\001\022\022\n\nz_position\030O \001(\001\":\n\031LoadLocalisatio" +
-      "nsSettings\022\035\n\025localisationsFilename\030\001 \001(" +
-      "\tB\013B\tGUIConfigb\006proto3"
+      "g\032\021unit_config.proto\"\212\002\n\021GUIFilterSettin" +
+      "gs\022\021\n\tmax_drift\030\001 \001(\002\022\022\n\nmin_signal\030\002 \001(" +
+      "\002\022\017\n\007min_snr\030\003 \001(\002\022\025\n\rmax_precision\030\004 \001(" +
+      "\001\022\021\n\tmax_width\030\005 \001(\002\022\021\n\tmin_width\030\006 \001(\002\022" +
+      "\022\n\nmask_title\030\007 \001(\t\022\023\n\013free_filter\030\010 \001(\t" +
+      "\022\027\n\017filter_template\030\t \001(\t\022!\n\031filter_anal" +
+      "ysis_directory\030\n \001(\t\022\033\n\023filter_set_filen" +
+      "ame\030\013 \001(\t\"\314\001\n\025PSFCalculatorSettings\022\023\n\013p" +
+      "ixel_pitch\030\001 \001(\001\022\025\n\rmagnification\030\002 \001(\001\022",
+      "\025\n\rbeam_expander\030\003 \001(\001\022\022\n\nwavelength\030\004 \001" +
+      "(\001\022\032\n\022numerical_aperture\030\005 \001(\001\022 \n\030adjust" +
+      "_for_square_pixels\030\006 \001(\010\022\036\n\026proportional" +
+      "ity_factor\030\007 \001(\001\"\273\001\n\024PSFEstimatorSetting" +
+      "s\022\027\n\017number_of_peaks\030\001 \001(\005\022\017\n\007p_value\030\002 " +
+      "\001(\001\022\032\n\022update_preferences\030\003 \001(\010\022\033\n\023debug" +
+      "_psf_estimator\030\004 \001(\010\022\017\n\007iterate\030\005 \001(\010\022\027\n" +
+      "\017show_histograms\030\006 \001(\010\022\026\n\016histogram_bins" +
+      "\030\007 \001(\005\"\367\016\n\022CreateDataSettings\022\014\n\004size\030\001 " +
+      "\001(\005\022\r\n\005depth\030\002 \001(\001\022\023\n\013fixed_Depth\030\003 \001(\010\022",
+      "\017\n\007seconds\030\004 \001(\001\022\025\n\rexposure_time\030\005 \001(\001\022" +
+      "\030\n\020steps_per_second\030\006 \001(\001\022\024\n\014illuminatio" +
+      "n\030\007 \001(\t\022\030\n\020background_image\030\010 \001(\t\022\024\n\014dis" +
+      "tribution\030\t \001(\t\022\031\n\021distribution_mask\030\n \001" +
+      "(\t\022%\n\035distribution_mask_slice_depth\030\013 \001(" +
+      "\001\022\025\n\rpoisson_noise\030\014 \001(\010\022\022\n\nbackground\030\r" +
+      " \001(\001\022\017\n\007em_gain\030\016 \001(\001\022\023\n\013camera_gain\030\017 \001" +
+      "(\001\022\032\n\022quantum_efficiency\030\020 \001(\001\022\022\n\nread_n" +
+      "oise\030\021 \001(\001\022\014\n\004bias\030\022 \001(\005\022\021\n\tparticles\030\023 " +
+      "\001(\005\022\030\n\020sample_per_frame\030\024 \001(\010\022\032\n\022photons",
+      "_per_second\030\025 \001(\001\022\"\n\032photons_per_second_" +
+      "maximum\030\026 \001(\001\022\033\n\023photon_distribution\030\027 \001" +
+      "(\t\022 \n\030photon_distribution_file\030\030 \001(\t\022\024\n\014" +
+      "photon_shape\030\031 \001(\001\022\023\n\013correlation\030\032 \001(\001\022" +
+      "\021\n\tpsf_model\030\033 \001(\t\022\026\n\016psf_image_name\030\034 \001" +
+      "(\t\022\023\n\013enter_width\030\035 \001(\010\022\022\n\nwavelength\030\036 " +
+      "\001(\001\022\032\n\022numerical_aperture\030\037 \001(\001\022\016\n\006psf_s" +
+      "d\030  \001(\001\022\023\n\013pixel_pitch\030! \001(\001\022\017\n\007density\030" +
+      "\" \001(\001\022\026\n\016diffusion_rate\030# \001(\001\022\026\n\016diffusi" +
+      "on_type\030$ \001(\005\022\032\n\022compound_molecules\030% \001(",
+      "\010\022\025\n\rcompound_text\030& \001(\t\022\022\n\ndiffuse_2D\030\'" +
+      " \001(\010\022\"\n\032rotate_initial_orientation\030( \001(\010" +
+      "\022 \n\030rotate_during_simulation\030) \001(\010\022\021\n\tro" +
+      "tate_2D\030* \001(\010\022\025\n\rfixedFraction\030+ \001(\001\022\023\n\013" +
+      "confinement\030, \001(\t\022\030\n\020confinement_mask\030- " +
+      "\001(\t\022$\n\034confinement_mask_slice_depth\030. \001(" +
+      "\001\022\032\n\022confinement_radius\030/ \001(\001\022\026\n\016pulse_i" +
+      "nterval\0300 \001(\005\022\023\n\013pulse_ratio\0301 \001(\001\022\014\n\004t_" +
+      "on\0302 \001(\001\022\023\n\013t_off_short\0303 \001(\001\022\022\n\nt_off_l" +
+      "ong\0304 \001(\001\022\026\n\016n_blinks_short\0305 \001(\001\022\025\n\rn_b",
+      "links_long\0306 \001(\001\022\'\n\037n_blinks_geometric_d" +
+      "istribution\0307 \001(\010\022\023\n\013min_photons\0308 \001(\001\022\022" +
+      "\n\nmin_snr_t1\0309 \001(\001\022\022\n\nmin_snr_tN\030: \001(\001\022\021" +
+      "\n\traw_image\030; \001(\010\022\022\n\nsave_image\030< \001(\010\022\032\n" +
+      "\022save_image_results\030= \001(\010\022\032\n\022save_locali" +
+      "sations\030> \001(\010\022\031\n\021save_fluorophores\030? \001(\010" +
+      "\022\026\n\016image_filename\030@ \001(\t\022\036\n\026image_result" +
+      "s_filename\030A \001(\t\022\034\n\024fluorophoresFilename" +
+      "\030B \001(\t\022\021\n\tcell_size\030C \001(\005\022\032\n\022probability" +
+      "_binary\030D \001(\001\022\033\n\023min_binary_distance\030E \001",
+      "(\001\022\033\n\023max_binary_distance\030F \001(\001\022\027\n\017show_" +
+      "histograms\030G \001(\010\022\031\n\021choose_histograms\030H " +
+      "\001(\010\022\026\n\016histogram_bins\030I \001(\005\022\027\n\017remove_ou" +
+      "tliers\030J \001(\010\022\026\n\016density_radius\030K \001(\002\022\026\n\016" +
+      "depth_of_field\030L \001(\002\022\022\n\nx_position\030M \001(\001" +
+      "\022\022\n\ny_position\030N \001(\001\022\022\n\nz_position\030O \001(\001" +
+      "\":\n\031LoadLocalisationsSettings\022\035\n\025localis" +
+      "ationsFilename\030\001 \001(\t\"\220\007\n\022ClusteringSetti" +
+      "ngs\022\032\n\022distance_threshold\030\001 \001(\001\022\032\n\022dista" +
+      "nce_exclusion\030\002 \001(\001\022\026\n\016time_threshold\030\003 ",
+      "\001(\001\0222\n\ttime_unit\030\004 \001(\0162\037.gdsc.smlm.data." +
+      "config.TimeUnit\022\022\n\ntrace_mode\030\005 \001(\005\022\034\n\024c" +
+      "lustering_algorithm\030\006 \001(\005\022\026\n\016pulse_inter" +
+      "val\030\007 \001(\005\022\024\n\014pulse_window\030\010 \001(\005\022\024\n\014split" +
+      "_pulses\030\t \001(\010\022\025\n\rblinking_rate\030\n \001(\001\022\020\n\010" +
+      "optimise\030\013 \001(\010\022\036\n\026min_distance_threshold" +
+      "\030\014 \001(\001\022\036\n\026max_distance_threshold\030\r \001(\001\022\032" +
+      "\n\022min_time_threshold\030\016 \001(\005\022\032\n\022max_time_t" +
+      "hreshold\030\017 \001(\005\022\027\n\017optimiser_steps\030\020 \001(\005\022" +
+      "\026\n\016optimiser_plot\030\021 \001(\005\022\023\n\013save_traces\030\022",
+      " \001(\010\022\027\n\017show_histograms\030\023 \001(\010\022\027\n\017save_tr" +
+      "ace_data\030\024 \001(\010\022\034\n\024trace_data_directory\030\025" +
+      " \001(\t\022\026\n\016histogram_bins\030\026 \001(\005\022\027\n\017remove_o" +
+      "utliers\030\027 \001(\010\022\024\n\014refit_option\030\030 \001(\010\022\034\n\024m" +
+      "inimum_trace_length\030\031 \001(\005\022\020\n\010truncate\030\032 " +
+      "\001(\010\022\032\n\022internal_distances\030\033 \001(\010\022\035\n\025sub_s" +
+      "ampled_distances\030\034 \001(\010\022\023\n\013ignore_ends\030\035 " +
+      "\001(\010\022\034\n\024precision_correction\030\036 \001(\010\022\026\n\016msd" +
+      "_correction\030\037 \001(\010\022\013\n\003mle\030  \001(\010\022\022\n\nfit_le" +
+      "ngth\030! \001(\005\022\024\n\014fit_restarts\030\" \001(\005\022\025\n\rjump",
+      "_distance\030# \001(\005B\013B\tGUIConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -10573,6 +13387,7 @@ public final class GUIConfig {
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
+          gdsc.smlm.data.config.UnitConfig.getDescriptor(),
         }, assigner);
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -10604,6 +13419,13 @@ public final class GUIConfig {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor,
         new java.lang.String[] { "LocalisationsFilename", });
+    internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_gdsc_smlm_data_config_ClusteringSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor,
+        new java.lang.String[] { "DistanceThreshold", "DistanceExclusion", "TimeThreshold", "TimeUnit", "TraceMode", "ClusteringAlgorithm", "PulseInterval", "PulseWindow", "SplitPulses", "BlinkingRate", "Optimise", "MinDistanceThreshold", "MaxDistanceThreshold", "MinTimeThreshold", "MaxTimeThreshold", "OptimiserSteps", "OptimiserPlot", "SaveTraces", "ShowHistograms", "SaveTraceData", "TraceDataDirectory", "HistogramBins", "RemoveOutliers", "RefitOption", "MinimumTraceLength", "Truncate", "InternalDistances", "SubSampledDistances", "IgnoreEnds", "PrecisionCorrection", "MsdCorrection", "Mle", "FitLength", "FitRestarts", "JumpDistance", });
+    gdsc.smlm.data.config.UnitConfig.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

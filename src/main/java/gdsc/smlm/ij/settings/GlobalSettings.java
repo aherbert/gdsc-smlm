@@ -8,18 +8,7 @@ package gdsc.smlm.ij.settings;
 @Deprecated
 public class GlobalSettings
 {
-	private ClusteringSettings clusteringSettings = null;
 	private OPTICSSettings opticsSettings = null;
-
-	/**
-	 * @return the clusteringSettings
-	 */
-	public ClusteringSettings getClusteringSettings()
-	{
-		if (clusteringSettings == null)
-			clusteringSettings = new ClusteringSettings();
-		return clusteringSettings;
-	}
 
 	/**
 	 * @return the opticsSettings
@@ -29,17 +18,6 @@ public class GlobalSettings
 		if (opticsSettings == null)
 			opticsSettings = new OPTICSSettings();
 		return opticsSettings;
-	}
-
-	/**
-	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
-	 * default object.
-	 * 
-	 * @return true if the setting is not null
-	 */
-	public boolean isClusteringSettings()
-	{
-		return (clusteringSettings != null);
 	}
 
 	/**
