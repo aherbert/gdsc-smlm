@@ -430,30 +430,6 @@ public class SettingsManager
 		}
 	}
 
-	private static ClusteringAlgorithm[] _ClusteringAlgorithmValues;
-
-	public static ClusteringAlgorithm[] getClusteringAlgorithmValues()
-	{
-		if (_ClusteringAlgorithmValues == null)
-			initClusteringAlgorithm();
-		return _ClusteringAlgorithmValues;
-	}
-
-	private static String[] _ClusteringAlgorithmNames;
-
-	public static String[] getClusteringAlgorithmNames()
-	{
-		if (_ClusteringAlgorithmNames == null)
-			initClusteringAlgorithm();
-		return _ClusteringAlgorithmNames;
-	}
-
-	private static void initClusteringAlgorithm()
-	{
-		_ClusteringAlgorithmValues = ClusteringAlgorithm.values();
-		_ClusteringAlgorithmNames = getNames((Object[]) _ClusteringAlgorithmValues);
-	}
-
 	/**
 	 * Convert a list of objects into names (e.g. pass in (Object[])enum.getValues()). The first letter is capitalised.
 	 * The rest of the name is converted to lowercase if it is all uppercase. Remaining mixed case names are left
