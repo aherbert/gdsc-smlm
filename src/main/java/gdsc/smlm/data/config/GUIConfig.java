@@ -13245,6 +13245,2737 @@ public final class GUIConfig {
 
   }
 
+  public interface OpticsSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.OpticsSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The input results dataset to use
+     * </pre>
+     *
+     * <code>string input_option = 1;</code>
+     */
+    java.lang.String getInputOption();
+    /**
+     * <pre>
+     * The input results dataset to use
+     * </pre>
+     *
+     * <code>string input_option = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getInputOptionBytes();
+
+    /**
+     * <pre>
+     * The OPTICS algorithm to use.
+     * </pre>
+     *
+     * <code>int32 optics_mode = 2;</code>
+     */
+    int getOpticsMode();
+
+    /**
+     * <pre>
+     ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) 
+     * </pre>
+     *
+     * <code>int32 number_of_split_sets = 3;</code>
+     */
+    int getNumberOfSplitSets();
+
+    /**
+     * <pre>
+     * Set to true to use random vectors for the projections. The default is to uniformly create vectors on the
+     * semi-circle interval.
+     * </pre>
+     *
+     * <code>bool use_random_vectors = 4;</code>
+     */
+    boolean getUseRandomVectors();
+
+    /**
+     * <pre>
+     * Set to true to save all sets that are approximately min split size. The default is to only save sets smaller than
+     * min split size.
+     * </pre>
+     *
+     * <code>bool save_approximate_sets = 5;</code>
+     */
+    boolean getSaveApproximateSets();
+
+    /**
+     * <pre>
+     ** The sample mode. 
+     * </pre>
+     *
+     * <code>int32 sample_mode = 6;</code>
+     */
+    int getSampleMode();
+
+    /**
+     * <pre>
+     * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
+     * using the expected density of uniformly spread random points.
+     * </pre>
+     *
+     * <code>double generating_distance = 7;</code>
+     */
+    double getGeneratingDistance();
+
+    /**
+     * <pre>
+     * The minimum number of neighbours to define a core point.
+     * &lt;p&gt;
+     * Note that the minimum cardinality (i.e. count of the number of neighbours) in the paper discussing Generalised
+     * DBSCAN is recommended to be 2 x dimensions, so 4 for a 2D dataset.
+     * </pre>
+     *
+     * <code>int32 min_points = 8;</code>
+     */
+    int getMinPoints();
+
+    /**
+     * <pre>
+     * The clustering mode to use on the OPTICS results.
+     * </pre>
+     *
+     * <code>int32 clustering_mode = 9;</code>
+     */
+    int getClusteringMode();
+
+    /**
+     * <pre>
+     * The steepness parameter for the OPTICS hierarchical clustering algorithm using the reachability profile.
+     * </pre>
+     *
+     * <code>double xi = 10;</code>
+     */
+    double getXi();
+
+    /**
+     * <pre>
+     * Set to true to only show the top-level clusters, i.e. child clusters will be merged into their parents.
+     * </pre>
+     *
+     * <code>bool topLevel = 11;</code>
+     */
+    boolean getTopLevel();
+
+    /**
+     * <pre>
+     * The upper limit for reachability. The first and last reachable points within a cluster must have a
+     * reachability equal or below the upper limit. This prevents creating clusters with points associated above the
+     * upper limit.
+     * </pre>
+     *
+     * <code>double upper_limit = 12;</code>
+     */
+    double getUpperLimit();
+
+    /**
+     * <pre>
+     * The lower limit for reachability. The first and last reachable points within a cluster must have a reachability
+     * equal or above the lower limit. This prevents creating clusters that are only associated below the lower limit.
+     * </pre>
+     *
+     * <code>double lower_limit = 13;</code>
+     */
+    double getLowerLimit();
+
+    /**
+     * <pre>
+     * The number of samples to take for the k-distance plot. This should be 1-10% of the data.
+     * </pre>
+     *
+     * <code>int32 samples = 14;</code>
+     */
+    int getSamples();
+
+    /**
+     * <pre>
+     * The fraction of the data to sample for the k-distance plot. Recommended to be 1-10%.
+     * </pre>
+     *
+     * <code>double sample_fraction = 15;</code>
+     */
+    double getSampleFraction();
+
+    /**
+     * <pre>
+     * The fraction of noise in the k-distance plot. The clustering distance is set as the next distance after noise has
+     * been ignored.
+     * </pre>
+     *
+     * <code>double fraction_noise = 16;</code>
+     */
+    double getFractionNoise();
+
+    /**
+     * <pre>
+     * The clustering distance for DBSCAN.
+     * </pre>
+     *
+     * <code>double clustering_distance = 17;</code>
+     */
+    double getClusteringDistance();
+
+    /**
+     * <pre>
+     * Set to true to only include core point32 in clusters. Note: Non-core points can be assigned arbitrarily to clusters
+     * if they are on the border of two clusters due to the arbitrary processing order of input points.
+     * </pre>
+     *
+     * <code>bool core = 18;</code>
+     */
+    boolean getCore();
+
+    /**
+     * <pre>
+     * The magnification scale of the output image
+     * </pre>
+     *
+     * <code>double image_scale = 19;</code>
+     */
+    double getImageScale();
+
+    /**
+     * <pre>
+     * The output image mode
+     * </pre>
+     *
+     * <code>int32 image_mode = 20;</code>
+     */
+    int getImageMode();
+
+    /**
+     * <pre>
+     * Set to true to weight the image data over nearest neighbour pixels
+     * </pre>
+     *
+     * <code>bool weighted = 21;</code>
+     */
+    boolean getWeighted();
+
+    /**
+     * <pre>
+     * Set to true to equalise the image histogram (allowing viewing high dynamic range data)
+     * </pre>
+     *
+     * <code>bool equalised = 22;</code>
+     */
+    boolean getEqualised();
+
+    /**
+     * <pre>
+     * The plot mode for the reachability distance profile
+     * </pre>
+     *
+     * <code>int32 plot_mode = 23;</code>
+     */
+    int getPlotMode();
+
+    /**
+     * <pre>
+     * The outline mode for the reachability distance profile
+     * </pre>
+     *
+     * <code>int32 outline_mode = 24;</code>
+     */
+    int getOutlineMode();
+
+    /**
+     * <pre>
+     * The spanningTree mode for the reachability distance profile
+     * </pre>
+     *
+     * <code>int32 spanning_tree_mode = 25;</code>
+     */
+    int getSpanningTreeMode();
+
+    /**
+     * <pre>
+     * The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP).
+     * Note that scores are monotonic with respect to Lambda so this value just effects the local contrast of outlier
+     * scores, not the actual ranking of outliers.
+     * </pre>
+     *
+     * <code>double lambda = 26;</code>
+     */
+    double getLambda();
+  }
+  /**
+   * <pre>
+   * Contain the settings for the OPTICS clustering algorithm
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.OpticsSettings}
+   */
+  public  static final class OpticsSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.OpticsSettings)
+      OpticsSettingsOrBuilder {
+    // Use OpticsSettings.newBuilder() to construct.
+    private OpticsSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private OpticsSettings() {
+      inputOption_ = "";
+      opticsMode_ = 0;
+      numberOfSplitSets_ = 0;
+      useRandomVectors_ = false;
+      saveApproximateSets_ = false;
+      sampleMode_ = 0;
+      generatingDistance_ = 0D;
+      minPoints_ = 0;
+      clusteringMode_ = 0;
+      xi_ = 0D;
+      topLevel_ = false;
+      upperLimit_ = 0D;
+      lowerLimit_ = 0D;
+      samples_ = 0;
+      sampleFraction_ = 0D;
+      fractionNoise_ = 0D;
+      clusteringDistance_ = 0D;
+      core_ = false;
+      imageScale_ = 0D;
+      imageMode_ = 0;
+      weighted_ = false;
+      equalised_ = false;
+      plotMode_ = 0;
+      outlineMode_ = 0;
+      spanningTreeMode_ = 0;
+      lambda_ = 0D;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private OpticsSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              inputOption_ = s;
+              break;
+            }
+            case 16: {
+
+              opticsMode_ = input.readInt32();
+              break;
+            }
+            case 24: {
+
+              numberOfSplitSets_ = input.readInt32();
+              break;
+            }
+            case 32: {
+
+              useRandomVectors_ = input.readBool();
+              break;
+            }
+            case 40: {
+
+              saveApproximateSets_ = input.readBool();
+              break;
+            }
+            case 48: {
+
+              sampleMode_ = input.readInt32();
+              break;
+            }
+            case 57: {
+
+              generatingDistance_ = input.readDouble();
+              break;
+            }
+            case 64: {
+
+              minPoints_ = input.readInt32();
+              break;
+            }
+            case 72: {
+
+              clusteringMode_ = input.readInt32();
+              break;
+            }
+            case 81: {
+
+              xi_ = input.readDouble();
+              break;
+            }
+            case 88: {
+
+              topLevel_ = input.readBool();
+              break;
+            }
+            case 97: {
+
+              upperLimit_ = input.readDouble();
+              break;
+            }
+            case 105: {
+
+              lowerLimit_ = input.readDouble();
+              break;
+            }
+            case 112: {
+
+              samples_ = input.readInt32();
+              break;
+            }
+            case 121: {
+
+              sampleFraction_ = input.readDouble();
+              break;
+            }
+            case 129: {
+
+              fractionNoise_ = input.readDouble();
+              break;
+            }
+            case 137: {
+
+              clusteringDistance_ = input.readDouble();
+              break;
+            }
+            case 144: {
+
+              core_ = input.readBool();
+              break;
+            }
+            case 153: {
+
+              imageScale_ = input.readDouble();
+              break;
+            }
+            case 160: {
+
+              imageMode_ = input.readInt32();
+              break;
+            }
+            case 168: {
+
+              weighted_ = input.readBool();
+              break;
+            }
+            case 176: {
+
+              equalised_ = input.readBool();
+              break;
+            }
+            case 184: {
+
+              plotMode_ = input.readInt32();
+              break;
+            }
+            case 192: {
+
+              outlineMode_ = input.readInt32();
+              break;
+            }
+            case 200: {
+
+              spanningTreeMode_ = input.readInt32();
+              break;
+            }
+            case 209: {
+
+              lambda_ = input.readDouble();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_OpticsSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIConfig.OpticsSettings.class, gdsc.smlm.data.config.GUIConfig.OpticsSettings.Builder.class);
+    }
+
+    public static final int INPUT_OPTION_FIELD_NUMBER = 1;
+    private volatile java.lang.Object inputOption_;
+    /**
+     * <pre>
+     * The input results dataset to use
+     * </pre>
+     *
+     * <code>string input_option = 1;</code>
+     */
+    public java.lang.String getInputOption() {
+      java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        inputOption_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The input results dataset to use
+     * </pre>
+     *
+     * <code>string input_option = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getInputOptionBytes() {
+      java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        inputOption_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int OPTICS_MODE_FIELD_NUMBER = 2;
+    private int opticsMode_;
+    /**
+     * <pre>
+     * The OPTICS algorithm to use.
+     * </pre>
+     *
+     * <code>int32 optics_mode = 2;</code>
+     */
+    public int getOpticsMode() {
+      return opticsMode_;
+    }
+
+    public static final int NUMBER_OF_SPLIT_SETS_FIELD_NUMBER = 3;
+    private int numberOfSplitSets_;
+    /**
+     * <pre>
+     ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) 
+     * </pre>
+     *
+     * <code>int32 number_of_split_sets = 3;</code>
+     */
+    public int getNumberOfSplitSets() {
+      return numberOfSplitSets_;
+    }
+
+    public static final int USE_RANDOM_VECTORS_FIELD_NUMBER = 4;
+    private boolean useRandomVectors_;
+    /**
+     * <pre>
+     * Set to true to use random vectors for the projections. The default is to uniformly create vectors on the
+     * semi-circle interval.
+     * </pre>
+     *
+     * <code>bool use_random_vectors = 4;</code>
+     */
+    public boolean getUseRandomVectors() {
+      return useRandomVectors_;
+    }
+
+    public static final int SAVE_APPROXIMATE_SETS_FIELD_NUMBER = 5;
+    private boolean saveApproximateSets_;
+    /**
+     * <pre>
+     * Set to true to save all sets that are approximately min split size. The default is to only save sets smaller than
+     * min split size.
+     * </pre>
+     *
+     * <code>bool save_approximate_sets = 5;</code>
+     */
+    public boolean getSaveApproximateSets() {
+      return saveApproximateSets_;
+    }
+
+    public static final int SAMPLE_MODE_FIELD_NUMBER = 6;
+    private int sampleMode_;
+    /**
+     * <pre>
+     ** The sample mode. 
+     * </pre>
+     *
+     * <code>int32 sample_mode = 6;</code>
+     */
+    public int getSampleMode() {
+      return sampleMode_;
+    }
+
+    public static final int GENERATING_DISTANCE_FIELD_NUMBER = 7;
+    private double generatingDistance_;
+    /**
+     * <pre>
+     * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
+     * using the expected density of uniformly spread random points.
+     * </pre>
+     *
+     * <code>double generating_distance = 7;</code>
+     */
+    public double getGeneratingDistance() {
+      return generatingDistance_;
+    }
+
+    public static final int MIN_POINTS_FIELD_NUMBER = 8;
+    private int minPoints_;
+    /**
+     * <pre>
+     * The minimum number of neighbours to define a core point.
+     * &lt;p&gt;
+     * Note that the minimum cardinality (i.e. count of the number of neighbours) in the paper discussing Generalised
+     * DBSCAN is recommended to be 2 x dimensions, so 4 for a 2D dataset.
+     * </pre>
+     *
+     * <code>int32 min_points = 8;</code>
+     */
+    public int getMinPoints() {
+      return minPoints_;
+    }
+
+    public static final int CLUSTERING_MODE_FIELD_NUMBER = 9;
+    private int clusteringMode_;
+    /**
+     * <pre>
+     * The clustering mode to use on the OPTICS results.
+     * </pre>
+     *
+     * <code>int32 clustering_mode = 9;</code>
+     */
+    public int getClusteringMode() {
+      return clusteringMode_;
+    }
+
+    public static final int XI_FIELD_NUMBER = 10;
+    private double xi_;
+    /**
+     * <pre>
+     * The steepness parameter for the OPTICS hierarchical clustering algorithm using the reachability profile.
+     * </pre>
+     *
+     * <code>double xi = 10;</code>
+     */
+    public double getXi() {
+      return xi_;
+    }
+
+    public static final int TOPLEVEL_FIELD_NUMBER = 11;
+    private boolean topLevel_;
+    /**
+     * <pre>
+     * Set to true to only show the top-level clusters, i.e. child clusters will be merged into their parents.
+     * </pre>
+     *
+     * <code>bool topLevel = 11;</code>
+     */
+    public boolean getTopLevel() {
+      return topLevel_;
+    }
+
+    public static final int UPPER_LIMIT_FIELD_NUMBER = 12;
+    private double upperLimit_;
+    /**
+     * <pre>
+     * The upper limit for reachability. The first and last reachable points within a cluster must have a
+     * reachability equal or below the upper limit. This prevents creating clusters with points associated above the
+     * upper limit.
+     * </pre>
+     *
+     * <code>double upper_limit = 12;</code>
+     */
+    public double getUpperLimit() {
+      return upperLimit_;
+    }
+
+    public static final int LOWER_LIMIT_FIELD_NUMBER = 13;
+    private double lowerLimit_;
+    /**
+     * <pre>
+     * The lower limit for reachability. The first and last reachable points within a cluster must have a reachability
+     * equal or above the lower limit. This prevents creating clusters that are only associated below the lower limit.
+     * </pre>
+     *
+     * <code>double lower_limit = 13;</code>
+     */
+    public double getLowerLimit() {
+      return lowerLimit_;
+    }
+
+    public static final int SAMPLES_FIELD_NUMBER = 14;
+    private int samples_;
+    /**
+     * <pre>
+     * The number of samples to take for the k-distance plot. This should be 1-10% of the data.
+     * </pre>
+     *
+     * <code>int32 samples = 14;</code>
+     */
+    public int getSamples() {
+      return samples_;
+    }
+
+    public static final int SAMPLE_FRACTION_FIELD_NUMBER = 15;
+    private double sampleFraction_;
+    /**
+     * <pre>
+     * The fraction of the data to sample for the k-distance plot. Recommended to be 1-10%.
+     * </pre>
+     *
+     * <code>double sample_fraction = 15;</code>
+     */
+    public double getSampleFraction() {
+      return sampleFraction_;
+    }
+
+    public static final int FRACTION_NOISE_FIELD_NUMBER = 16;
+    private double fractionNoise_;
+    /**
+     * <pre>
+     * The fraction of noise in the k-distance plot. The clustering distance is set as the next distance after noise has
+     * been ignored.
+     * </pre>
+     *
+     * <code>double fraction_noise = 16;</code>
+     */
+    public double getFractionNoise() {
+      return fractionNoise_;
+    }
+
+    public static final int CLUSTERING_DISTANCE_FIELD_NUMBER = 17;
+    private double clusteringDistance_;
+    /**
+     * <pre>
+     * The clustering distance for DBSCAN.
+     * </pre>
+     *
+     * <code>double clustering_distance = 17;</code>
+     */
+    public double getClusteringDistance() {
+      return clusteringDistance_;
+    }
+
+    public static final int CORE_FIELD_NUMBER = 18;
+    private boolean core_;
+    /**
+     * <pre>
+     * Set to true to only include core point32 in clusters. Note: Non-core points can be assigned arbitrarily to clusters
+     * if they are on the border of two clusters due to the arbitrary processing order of input points.
+     * </pre>
+     *
+     * <code>bool core = 18;</code>
+     */
+    public boolean getCore() {
+      return core_;
+    }
+
+    public static final int IMAGE_SCALE_FIELD_NUMBER = 19;
+    private double imageScale_;
+    /**
+     * <pre>
+     * The magnification scale of the output image
+     * </pre>
+     *
+     * <code>double image_scale = 19;</code>
+     */
+    public double getImageScale() {
+      return imageScale_;
+    }
+
+    public static final int IMAGE_MODE_FIELD_NUMBER = 20;
+    private int imageMode_;
+    /**
+     * <pre>
+     * The output image mode
+     * </pre>
+     *
+     * <code>int32 image_mode = 20;</code>
+     */
+    public int getImageMode() {
+      return imageMode_;
+    }
+
+    public static final int WEIGHTED_FIELD_NUMBER = 21;
+    private boolean weighted_;
+    /**
+     * <pre>
+     * Set to true to weight the image data over nearest neighbour pixels
+     * </pre>
+     *
+     * <code>bool weighted = 21;</code>
+     */
+    public boolean getWeighted() {
+      return weighted_;
+    }
+
+    public static final int EQUALISED_FIELD_NUMBER = 22;
+    private boolean equalised_;
+    /**
+     * <pre>
+     * Set to true to equalise the image histogram (allowing viewing high dynamic range data)
+     * </pre>
+     *
+     * <code>bool equalised = 22;</code>
+     */
+    public boolean getEqualised() {
+      return equalised_;
+    }
+
+    public static final int PLOT_MODE_FIELD_NUMBER = 23;
+    private int plotMode_;
+    /**
+     * <pre>
+     * The plot mode for the reachability distance profile
+     * </pre>
+     *
+     * <code>int32 plot_mode = 23;</code>
+     */
+    public int getPlotMode() {
+      return plotMode_;
+    }
+
+    public static final int OUTLINE_MODE_FIELD_NUMBER = 24;
+    private int outlineMode_;
+    /**
+     * <pre>
+     * The outline mode for the reachability distance profile
+     * </pre>
+     *
+     * <code>int32 outline_mode = 24;</code>
+     */
+    public int getOutlineMode() {
+      return outlineMode_;
+    }
+
+    public static final int SPANNING_TREE_MODE_FIELD_NUMBER = 25;
+    private int spanningTreeMode_;
+    /**
+     * <pre>
+     * The spanningTree mode for the reachability distance profile
+     * </pre>
+     *
+     * <code>int32 spanning_tree_mode = 25;</code>
+     */
+    public int getSpanningTreeMode() {
+      return spanningTreeMode_;
+    }
+
+    public static final int LAMBDA_FIELD_NUMBER = 26;
+    private double lambda_;
+    /**
+     * <pre>
+     * The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP).
+     * Note that scores are monotonic with respect to Lambda so this value just effects the local contrast of outlier
+     * scores, not the actual ranking of outliers.
+     * </pre>
+     *
+     * <code>double lambda = 26;</code>
+     */
+    public double getLambda() {
+      return lambda_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getInputOptionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
+      }
+      if (opticsMode_ != 0) {
+        output.writeInt32(2, opticsMode_);
+      }
+      if (numberOfSplitSets_ != 0) {
+        output.writeInt32(3, numberOfSplitSets_);
+      }
+      if (useRandomVectors_ != false) {
+        output.writeBool(4, useRandomVectors_);
+      }
+      if (saveApproximateSets_ != false) {
+        output.writeBool(5, saveApproximateSets_);
+      }
+      if (sampleMode_ != 0) {
+        output.writeInt32(6, sampleMode_);
+      }
+      if (generatingDistance_ != 0D) {
+        output.writeDouble(7, generatingDistance_);
+      }
+      if (minPoints_ != 0) {
+        output.writeInt32(8, minPoints_);
+      }
+      if (clusteringMode_ != 0) {
+        output.writeInt32(9, clusteringMode_);
+      }
+      if (xi_ != 0D) {
+        output.writeDouble(10, xi_);
+      }
+      if (topLevel_ != false) {
+        output.writeBool(11, topLevel_);
+      }
+      if (upperLimit_ != 0D) {
+        output.writeDouble(12, upperLimit_);
+      }
+      if (lowerLimit_ != 0D) {
+        output.writeDouble(13, lowerLimit_);
+      }
+      if (samples_ != 0) {
+        output.writeInt32(14, samples_);
+      }
+      if (sampleFraction_ != 0D) {
+        output.writeDouble(15, sampleFraction_);
+      }
+      if (fractionNoise_ != 0D) {
+        output.writeDouble(16, fractionNoise_);
+      }
+      if (clusteringDistance_ != 0D) {
+        output.writeDouble(17, clusteringDistance_);
+      }
+      if (core_ != false) {
+        output.writeBool(18, core_);
+      }
+      if (imageScale_ != 0D) {
+        output.writeDouble(19, imageScale_);
+      }
+      if (imageMode_ != 0) {
+        output.writeInt32(20, imageMode_);
+      }
+      if (weighted_ != false) {
+        output.writeBool(21, weighted_);
+      }
+      if (equalised_ != false) {
+        output.writeBool(22, equalised_);
+      }
+      if (plotMode_ != 0) {
+        output.writeInt32(23, plotMode_);
+      }
+      if (outlineMode_ != 0) {
+        output.writeInt32(24, outlineMode_);
+      }
+      if (spanningTreeMode_ != 0) {
+        output.writeInt32(25, spanningTreeMode_);
+      }
+      if (lambda_ != 0D) {
+        output.writeDouble(26, lambda_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getInputOptionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
+      }
+      if (opticsMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, opticsMode_);
+      }
+      if (numberOfSplitSets_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, numberOfSplitSets_);
+      }
+      if (useRandomVectors_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, useRandomVectors_);
+      }
+      if (saveApproximateSets_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, saveApproximateSets_);
+      }
+      if (sampleMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, sampleMode_);
+      }
+      if (generatingDistance_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(7, generatingDistance_);
+      }
+      if (minPoints_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, minPoints_);
+      }
+      if (clusteringMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(9, clusteringMode_);
+      }
+      if (xi_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(10, xi_);
+      }
+      if (topLevel_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(11, topLevel_);
+      }
+      if (upperLimit_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(12, upperLimit_);
+      }
+      if (lowerLimit_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(13, lowerLimit_);
+      }
+      if (samples_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(14, samples_);
+      }
+      if (sampleFraction_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(15, sampleFraction_);
+      }
+      if (fractionNoise_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(16, fractionNoise_);
+      }
+      if (clusteringDistance_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(17, clusteringDistance_);
+      }
+      if (core_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(18, core_);
+      }
+      if (imageScale_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(19, imageScale_);
+      }
+      if (imageMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(20, imageMode_);
+      }
+      if (weighted_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(21, weighted_);
+      }
+      if (equalised_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(22, equalised_);
+      }
+      if (plotMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(23, plotMode_);
+      }
+      if (outlineMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(24, outlineMode_);
+      }
+      if (spanningTreeMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(25, spanningTreeMode_);
+      }
+      if (lambda_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(26, lambda_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIConfig.OpticsSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIConfig.OpticsSettings other = (gdsc.smlm.data.config.GUIConfig.OpticsSettings) obj;
+
+      boolean result = true;
+      result = result && getInputOption()
+          .equals(other.getInputOption());
+      result = result && (getOpticsMode()
+          == other.getOpticsMode());
+      result = result && (getNumberOfSplitSets()
+          == other.getNumberOfSplitSets());
+      result = result && (getUseRandomVectors()
+          == other.getUseRandomVectors());
+      result = result && (getSaveApproximateSets()
+          == other.getSaveApproximateSets());
+      result = result && (getSampleMode()
+          == other.getSampleMode());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getGeneratingDistance())
+          == java.lang.Double.doubleToLongBits(
+              other.getGeneratingDistance()));
+      result = result && (getMinPoints()
+          == other.getMinPoints());
+      result = result && (getClusteringMode()
+          == other.getClusteringMode());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getXi())
+          == java.lang.Double.doubleToLongBits(
+              other.getXi()));
+      result = result && (getTopLevel()
+          == other.getTopLevel());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getUpperLimit())
+          == java.lang.Double.doubleToLongBits(
+              other.getUpperLimit()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getLowerLimit())
+          == java.lang.Double.doubleToLongBits(
+              other.getLowerLimit()));
+      result = result && (getSamples()
+          == other.getSamples());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSampleFraction())
+          == java.lang.Double.doubleToLongBits(
+              other.getSampleFraction()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getFractionNoise())
+          == java.lang.Double.doubleToLongBits(
+              other.getFractionNoise()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getClusteringDistance())
+          == java.lang.Double.doubleToLongBits(
+              other.getClusteringDistance()));
+      result = result && (getCore()
+          == other.getCore());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getImageScale())
+          == java.lang.Double.doubleToLongBits(
+              other.getImageScale()));
+      result = result && (getImageMode()
+          == other.getImageMode());
+      result = result && (getWeighted()
+          == other.getWeighted());
+      result = result && (getEqualised()
+          == other.getEqualised());
+      result = result && (getPlotMode()
+          == other.getPlotMode());
+      result = result && (getOutlineMode()
+          == other.getOutlineMode());
+      result = result && (getSpanningTreeMode()
+          == other.getSpanningTreeMode());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getLambda())
+          == java.lang.Double.doubleToLongBits(
+              other.getLambda()));
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + INPUT_OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getInputOption().hashCode();
+      hash = (37 * hash) + OPTICS_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getOpticsMode();
+      hash = (37 * hash) + NUMBER_OF_SPLIT_SETS_FIELD_NUMBER;
+      hash = (53 * hash) + getNumberOfSplitSets();
+      hash = (37 * hash) + USE_RANDOM_VECTORS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getUseRandomVectors());
+      hash = (37 * hash) + SAVE_APPROXIMATE_SETS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveApproximateSets());
+      hash = (37 * hash) + SAMPLE_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getSampleMode();
+      hash = (37 * hash) + GENERATING_DISTANCE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getGeneratingDistance()));
+      hash = (37 * hash) + MIN_POINTS_FIELD_NUMBER;
+      hash = (53 * hash) + getMinPoints();
+      hash = (37 * hash) + CLUSTERING_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getClusteringMode();
+      hash = (37 * hash) + XI_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getXi()));
+      hash = (37 * hash) + TOPLEVEL_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getTopLevel());
+      hash = (37 * hash) + UPPER_LIMIT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getUpperLimit()));
+      hash = (37 * hash) + LOWER_LIMIT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getLowerLimit()));
+      hash = (37 * hash) + SAMPLES_FIELD_NUMBER;
+      hash = (53 * hash) + getSamples();
+      hash = (37 * hash) + SAMPLE_FRACTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSampleFraction()));
+      hash = (37 * hash) + FRACTION_NOISE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getFractionNoise()));
+      hash = (37 * hash) + CLUSTERING_DISTANCE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getClusteringDistance()));
+      hash = (37 * hash) + CORE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCore());
+      hash = (37 * hash) + IMAGE_SCALE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getImageScale()));
+      hash = (37 * hash) + IMAGE_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getImageMode();
+      hash = (37 * hash) + WEIGHTED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getWeighted());
+      hash = (37 * hash) + EQUALISED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getEqualised());
+      hash = (37 * hash) + PLOT_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getPlotMode();
+      hash = (37 * hash) + OUTLINE_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getOutlineMode();
+      hash = (37 * hash) + SPANNING_TREE_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getSpanningTreeMode();
+      hash = (37 * hash) + LAMBDA_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getLambda()));
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIConfig.OpticsSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contain the settings for the OPTICS clustering algorithm
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.OpticsSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.OpticsSettings)
+        gdsc.smlm.data.config.GUIConfig.OpticsSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_OpticsSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIConfig.OpticsSettings.class, gdsc.smlm.data.config.GUIConfig.OpticsSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIConfig.OpticsSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        inputOption_ = "";
+
+        opticsMode_ = 0;
+
+        numberOfSplitSets_ = 0;
+
+        useRandomVectors_ = false;
+
+        saveApproximateSets_ = false;
+
+        sampleMode_ = 0;
+
+        generatingDistance_ = 0D;
+
+        minPoints_ = 0;
+
+        clusteringMode_ = 0;
+
+        xi_ = 0D;
+
+        topLevel_ = false;
+
+        upperLimit_ = 0D;
+
+        lowerLimit_ = 0D;
+
+        samples_ = 0;
+
+        sampleFraction_ = 0D;
+
+        fractionNoise_ = 0D;
+
+        clusteringDistance_ = 0D;
+
+        core_ = false;
+
+        imageScale_ = 0D;
+
+        imageMode_ = 0;
+
+        weighted_ = false;
+
+        equalised_ = false;
+
+        plotMode_ = 0;
+
+        outlineMode_ = 0;
+
+        spanningTreeMode_ = 0;
+
+        lambda_ = 0D;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIConfig.internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.OpticsSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIConfig.OpticsSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.OpticsSettings build() {
+        gdsc.smlm.data.config.GUIConfig.OpticsSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIConfig.OpticsSettings buildPartial() {
+        gdsc.smlm.data.config.GUIConfig.OpticsSettings result = new gdsc.smlm.data.config.GUIConfig.OpticsSettings(this);
+        result.inputOption_ = inputOption_;
+        result.opticsMode_ = opticsMode_;
+        result.numberOfSplitSets_ = numberOfSplitSets_;
+        result.useRandomVectors_ = useRandomVectors_;
+        result.saveApproximateSets_ = saveApproximateSets_;
+        result.sampleMode_ = sampleMode_;
+        result.generatingDistance_ = generatingDistance_;
+        result.minPoints_ = minPoints_;
+        result.clusteringMode_ = clusteringMode_;
+        result.xi_ = xi_;
+        result.topLevel_ = topLevel_;
+        result.upperLimit_ = upperLimit_;
+        result.lowerLimit_ = lowerLimit_;
+        result.samples_ = samples_;
+        result.sampleFraction_ = sampleFraction_;
+        result.fractionNoise_ = fractionNoise_;
+        result.clusteringDistance_ = clusteringDistance_;
+        result.core_ = core_;
+        result.imageScale_ = imageScale_;
+        result.imageMode_ = imageMode_;
+        result.weighted_ = weighted_;
+        result.equalised_ = equalised_;
+        result.plotMode_ = plotMode_;
+        result.outlineMode_ = outlineMode_;
+        result.spanningTreeMode_ = spanningTreeMode_;
+        result.lambda_ = lambda_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIConfig.OpticsSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIConfig.OpticsSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIConfig.OpticsSettings other) {
+        if (other == gdsc.smlm.data.config.GUIConfig.OpticsSettings.getDefaultInstance()) return this;
+        if (!other.getInputOption().isEmpty()) {
+          inputOption_ = other.inputOption_;
+          onChanged();
+        }
+        if (other.getOpticsMode() != 0) {
+          setOpticsMode(other.getOpticsMode());
+        }
+        if (other.getNumberOfSplitSets() != 0) {
+          setNumberOfSplitSets(other.getNumberOfSplitSets());
+        }
+        if (other.getUseRandomVectors() != false) {
+          setUseRandomVectors(other.getUseRandomVectors());
+        }
+        if (other.getSaveApproximateSets() != false) {
+          setSaveApproximateSets(other.getSaveApproximateSets());
+        }
+        if (other.getSampleMode() != 0) {
+          setSampleMode(other.getSampleMode());
+        }
+        if (other.getGeneratingDistance() != 0D) {
+          setGeneratingDistance(other.getGeneratingDistance());
+        }
+        if (other.getMinPoints() != 0) {
+          setMinPoints(other.getMinPoints());
+        }
+        if (other.getClusteringMode() != 0) {
+          setClusteringMode(other.getClusteringMode());
+        }
+        if (other.getXi() != 0D) {
+          setXi(other.getXi());
+        }
+        if (other.getTopLevel() != false) {
+          setTopLevel(other.getTopLevel());
+        }
+        if (other.getUpperLimit() != 0D) {
+          setUpperLimit(other.getUpperLimit());
+        }
+        if (other.getLowerLimit() != 0D) {
+          setLowerLimit(other.getLowerLimit());
+        }
+        if (other.getSamples() != 0) {
+          setSamples(other.getSamples());
+        }
+        if (other.getSampleFraction() != 0D) {
+          setSampleFraction(other.getSampleFraction());
+        }
+        if (other.getFractionNoise() != 0D) {
+          setFractionNoise(other.getFractionNoise());
+        }
+        if (other.getClusteringDistance() != 0D) {
+          setClusteringDistance(other.getClusteringDistance());
+        }
+        if (other.getCore() != false) {
+          setCore(other.getCore());
+        }
+        if (other.getImageScale() != 0D) {
+          setImageScale(other.getImageScale());
+        }
+        if (other.getImageMode() != 0) {
+          setImageMode(other.getImageMode());
+        }
+        if (other.getWeighted() != false) {
+          setWeighted(other.getWeighted());
+        }
+        if (other.getEqualised() != false) {
+          setEqualised(other.getEqualised());
+        }
+        if (other.getPlotMode() != 0) {
+          setPlotMode(other.getPlotMode());
+        }
+        if (other.getOutlineMode() != 0) {
+          setOutlineMode(other.getOutlineMode());
+        }
+        if (other.getSpanningTreeMode() != 0) {
+          setSpanningTreeMode(other.getSpanningTreeMode());
+        }
+        if (other.getLambda() != 0D) {
+          setLambda(other.getLambda());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIConfig.OpticsSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIConfig.OpticsSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object inputOption_ = "";
+      /**
+       * <pre>
+       * The input results dataset to use
+       * </pre>
+       *
+       * <code>string input_option = 1;</code>
+       */
+      public java.lang.String getInputOption() {
+        java.lang.Object ref = inputOption_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          inputOption_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The input results dataset to use
+       * </pre>
+       *
+       * <code>string input_option = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getInputOptionBytes() {
+        java.lang.Object ref = inputOption_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          inputOption_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The input results dataset to use
+       * </pre>
+       *
+       * <code>string input_option = 1;</code>
+       */
+      public Builder setInputOption(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        inputOption_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The input results dataset to use
+       * </pre>
+       *
+       * <code>string input_option = 1;</code>
+       */
+      public Builder clearInputOption() {
+        
+        inputOption_ = getDefaultInstance().getInputOption();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The input results dataset to use
+       * </pre>
+       *
+       * <code>string input_option = 1;</code>
+       */
+      public Builder setInputOptionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        inputOption_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int opticsMode_ ;
+      /**
+       * <pre>
+       * The OPTICS algorithm to use.
+       * </pre>
+       *
+       * <code>int32 optics_mode = 2;</code>
+       */
+      public int getOpticsMode() {
+        return opticsMode_;
+      }
+      /**
+       * <pre>
+       * The OPTICS algorithm to use.
+       * </pre>
+       *
+       * <code>int32 optics_mode = 2;</code>
+       */
+      public Builder setOpticsMode(int value) {
+        
+        opticsMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The OPTICS algorithm to use.
+       * </pre>
+       *
+       * <code>int32 optics_mode = 2;</code>
+       */
+      public Builder clearOpticsMode() {
+        
+        opticsMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int numberOfSplitSets_ ;
+      /**
+       * <pre>
+       ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) 
+       * </pre>
+       *
+       * <code>int32 number_of_split_sets = 3;</code>
+       */
+      public int getNumberOfSplitSets() {
+        return numberOfSplitSets_;
+      }
+      /**
+       * <pre>
+       ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) 
+       * </pre>
+       *
+       * <code>int32 number_of_split_sets = 3;</code>
+       */
+      public Builder setNumberOfSplitSets(int value) {
+        
+        numberOfSplitSets_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       ** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) 
+       * </pre>
+       *
+       * <code>int32 number_of_split_sets = 3;</code>
+       */
+      public Builder clearNumberOfSplitSets() {
+        
+        numberOfSplitSets_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean useRandomVectors_ ;
+      /**
+       * <pre>
+       * Set to true to use random vectors for the projections. The default is to uniformly create vectors on the
+       * semi-circle interval.
+       * </pre>
+       *
+       * <code>bool use_random_vectors = 4;</code>
+       */
+      public boolean getUseRandomVectors() {
+        return useRandomVectors_;
+      }
+      /**
+       * <pre>
+       * Set to true to use random vectors for the projections. The default is to uniformly create vectors on the
+       * semi-circle interval.
+       * </pre>
+       *
+       * <code>bool use_random_vectors = 4;</code>
+       */
+      public Builder setUseRandomVectors(boolean value) {
+        
+        useRandomVectors_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to true to use random vectors for the projections. The default is to uniformly create vectors on the
+       * semi-circle interval.
+       * </pre>
+       *
+       * <code>bool use_random_vectors = 4;</code>
+       */
+      public Builder clearUseRandomVectors() {
+        
+        useRandomVectors_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean saveApproximateSets_ ;
+      /**
+       * <pre>
+       * Set to true to save all sets that are approximately min split size. The default is to only save sets smaller than
+       * min split size.
+       * </pre>
+       *
+       * <code>bool save_approximate_sets = 5;</code>
+       */
+      public boolean getSaveApproximateSets() {
+        return saveApproximateSets_;
+      }
+      /**
+       * <pre>
+       * Set to true to save all sets that are approximately min split size. The default is to only save sets smaller than
+       * min split size.
+       * </pre>
+       *
+       * <code>bool save_approximate_sets = 5;</code>
+       */
+      public Builder setSaveApproximateSets(boolean value) {
+        
+        saveApproximateSets_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to true to save all sets that are approximately min split size. The default is to only save sets smaller than
+       * min split size.
+       * </pre>
+       *
+       * <code>bool save_approximate_sets = 5;</code>
+       */
+      public Builder clearSaveApproximateSets() {
+        
+        saveApproximateSets_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int sampleMode_ ;
+      /**
+       * <pre>
+       ** The sample mode. 
+       * </pre>
+       *
+       * <code>int32 sample_mode = 6;</code>
+       */
+      public int getSampleMode() {
+        return sampleMode_;
+      }
+      /**
+       * <pre>
+       ** The sample mode. 
+       * </pre>
+       *
+       * <code>int32 sample_mode = 6;</code>
+       */
+      public Builder setSampleMode(int value) {
+        
+        sampleMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       ** The sample mode. 
+       * </pre>
+       *
+       * <code>int32 sample_mode = 6;</code>
+       */
+      public Builder clearSampleMode() {
+        
+        sampleMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double generatingDistance_ ;
+      /**
+       * <pre>
+       * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
+       * using the expected density of uniformly spread random points.
+       * </pre>
+       *
+       * <code>double generating_distance = 7;</code>
+       */
+      public double getGeneratingDistance() {
+        return generatingDistance_;
+      }
+      /**
+       * <pre>
+       * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
+       * using the expected density of uniformly spread random points.
+       * </pre>
+       *
+       * <code>double generating_distance = 7;</code>
+       */
+      public Builder setGeneratingDistance(double value) {
+        
+        generatingDistance_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
+       * using the expected density of uniformly spread random points.
+       * </pre>
+       *
+       * <code>double generating_distance = 7;</code>
+       */
+      public Builder clearGeneratingDistance() {
+        
+        generatingDistance_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int minPoints_ ;
+      /**
+       * <pre>
+       * The minimum number of neighbours to define a core point.
+       * &lt;p&gt;
+       * Note that the minimum cardinality (i.e. count of the number of neighbours) in the paper discussing Generalised
+       * DBSCAN is recommended to be 2 x dimensions, so 4 for a 2D dataset.
+       * </pre>
+       *
+       * <code>int32 min_points = 8;</code>
+       */
+      public int getMinPoints() {
+        return minPoints_;
+      }
+      /**
+       * <pre>
+       * The minimum number of neighbours to define a core point.
+       * &lt;p&gt;
+       * Note that the minimum cardinality (i.e. count of the number of neighbours) in the paper discussing Generalised
+       * DBSCAN is recommended to be 2 x dimensions, so 4 for a 2D dataset.
+       * </pre>
+       *
+       * <code>int32 min_points = 8;</code>
+       */
+      public Builder setMinPoints(int value) {
+        
+        minPoints_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The minimum number of neighbours to define a core point.
+       * &lt;p&gt;
+       * Note that the minimum cardinality (i.e. count of the number of neighbours) in the paper discussing Generalised
+       * DBSCAN is recommended to be 2 x dimensions, so 4 for a 2D dataset.
+       * </pre>
+       *
+       * <code>int32 min_points = 8;</code>
+       */
+      public Builder clearMinPoints() {
+        
+        minPoints_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int clusteringMode_ ;
+      /**
+       * <pre>
+       * The clustering mode to use on the OPTICS results.
+       * </pre>
+       *
+       * <code>int32 clustering_mode = 9;</code>
+       */
+      public int getClusteringMode() {
+        return clusteringMode_;
+      }
+      /**
+       * <pre>
+       * The clustering mode to use on the OPTICS results.
+       * </pre>
+       *
+       * <code>int32 clustering_mode = 9;</code>
+       */
+      public Builder setClusteringMode(int value) {
+        
+        clusteringMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The clustering mode to use on the OPTICS results.
+       * </pre>
+       *
+       * <code>int32 clustering_mode = 9;</code>
+       */
+      public Builder clearClusteringMode() {
+        
+        clusteringMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double xi_ ;
+      /**
+       * <pre>
+       * The steepness parameter for the OPTICS hierarchical clustering algorithm using the reachability profile.
+       * </pre>
+       *
+       * <code>double xi = 10;</code>
+       */
+      public double getXi() {
+        return xi_;
+      }
+      /**
+       * <pre>
+       * The steepness parameter for the OPTICS hierarchical clustering algorithm using the reachability profile.
+       * </pre>
+       *
+       * <code>double xi = 10;</code>
+       */
+      public Builder setXi(double value) {
+        
+        xi_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The steepness parameter for the OPTICS hierarchical clustering algorithm using the reachability profile.
+       * </pre>
+       *
+       * <code>double xi = 10;</code>
+       */
+      public Builder clearXi() {
+        
+        xi_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean topLevel_ ;
+      /**
+       * <pre>
+       * Set to true to only show the top-level clusters, i.e. child clusters will be merged into their parents.
+       * </pre>
+       *
+       * <code>bool topLevel = 11;</code>
+       */
+      public boolean getTopLevel() {
+        return topLevel_;
+      }
+      /**
+       * <pre>
+       * Set to true to only show the top-level clusters, i.e. child clusters will be merged into their parents.
+       * </pre>
+       *
+       * <code>bool topLevel = 11;</code>
+       */
+      public Builder setTopLevel(boolean value) {
+        
+        topLevel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to true to only show the top-level clusters, i.e. child clusters will be merged into their parents.
+       * </pre>
+       *
+       * <code>bool topLevel = 11;</code>
+       */
+      public Builder clearTopLevel() {
+        
+        topLevel_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double upperLimit_ ;
+      /**
+       * <pre>
+       * The upper limit for reachability. The first and last reachable points within a cluster must have a
+       * reachability equal or below the upper limit. This prevents creating clusters with points associated above the
+       * upper limit.
+       * </pre>
+       *
+       * <code>double upper_limit = 12;</code>
+       */
+      public double getUpperLimit() {
+        return upperLimit_;
+      }
+      /**
+       * <pre>
+       * The upper limit for reachability. The first and last reachable points within a cluster must have a
+       * reachability equal or below the upper limit. This prevents creating clusters with points associated above the
+       * upper limit.
+       * </pre>
+       *
+       * <code>double upper_limit = 12;</code>
+       */
+      public Builder setUpperLimit(double value) {
+        
+        upperLimit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The upper limit for reachability. The first and last reachable points within a cluster must have a
+       * reachability equal or below the upper limit. This prevents creating clusters with points associated above the
+       * upper limit.
+       * </pre>
+       *
+       * <code>double upper_limit = 12;</code>
+       */
+      public Builder clearUpperLimit() {
+        
+        upperLimit_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double lowerLimit_ ;
+      /**
+       * <pre>
+       * The lower limit for reachability. The first and last reachable points within a cluster must have a reachability
+       * equal or above the lower limit. This prevents creating clusters that are only associated below the lower limit.
+       * </pre>
+       *
+       * <code>double lower_limit = 13;</code>
+       */
+      public double getLowerLimit() {
+        return lowerLimit_;
+      }
+      /**
+       * <pre>
+       * The lower limit for reachability. The first and last reachable points within a cluster must have a reachability
+       * equal or above the lower limit. This prevents creating clusters that are only associated below the lower limit.
+       * </pre>
+       *
+       * <code>double lower_limit = 13;</code>
+       */
+      public Builder setLowerLimit(double value) {
+        
+        lowerLimit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The lower limit for reachability. The first and last reachable points within a cluster must have a reachability
+       * equal or above the lower limit. This prevents creating clusters that are only associated below the lower limit.
+       * </pre>
+       *
+       * <code>double lower_limit = 13;</code>
+       */
+      public Builder clearLowerLimit() {
+        
+        lowerLimit_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int samples_ ;
+      /**
+       * <pre>
+       * The number of samples to take for the k-distance plot. This should be 1-10% of the data.
+       * </pre>
+       *
+       * <code>int32 samples = 14;</code>
+       */
+      public int getSamples() {
+        return samples_;
+      }
+      /**
+       * <pre>
+       * The number of samples to take for the k-distance plot. This should be 1-10% of the data.
+       * </pre>
+       *
+       * <code>int32 samples = 14;</code>
+       */
+      public Builder setSamples(int value) {
+        
+        samples_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The number of samples to take for the k-distance plot. This should be 1-10% of the data.
+       * </pre>
+       *
+       * <code>int32 samples = 14;</code>
+       */
+      public Builder clearSamples() {
+        
+        samples_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double sampleFraction_ ;
+      /**
+       * <pre>
+       * The fraction of the data to sample for the k-distance plot. Recommended to be 1-10%.
+       * </pre>
+       *
+       * <code>double sample_fraction = 15;</code>
+       */
+      public double getSampleFraction() {
+        return sampleFraction_;
+      }
+      /**
+       * <pre>
+       * The fraction of the data to sample for the k-distance plot. Recommended to be 1-10%.
+       * </pre>
+       *
+       * <code>double sample_fraction = 15;</code>
+       */
+      public Builder setSampleFraction(double value) {
+        
+        sampleFraction_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The fraction of the data to sample for the k-distance plot. Recommended to be 1-10%.
+       * </pre>
+       *
+       * <code>double sample_fraction = 15;</code>
+       */
+      public Builder clearSampleFraction() {
+        
+        sampleFraction_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double fractionNoise_ ;
+      /**
+       * <pre>
+       * The fraction of noise in the k-distance plot. The clustering distance is set as the next distance after noise has
+       * been ignored.
+       * </pre>
+       *
+       * <code>double fraction_noise = 16;</code>
+       */
+      public double getFractionNoise() {
+        return fractionNoise_;
+      }
+      /**
+       * <pre>
+       * The fraction of noise in the k-distance plot. The clustering distance is set as the next distance after noise has
+       * been ignored.
+       * </pre>
+       *
+       * <code>double fraction_noise = 16;</code>
+       */
+      public Builder setFractionNoise(double value) {
+        
+        fractionNoise_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The fraction of noise in the k-distance plot. The clustering distance is set as the next distance after noise has
+       * been ignored.
+       * </pre>
+       *
+       * <code>double fraction_noise = 16;</code>
+       */
+      public Builder clearFractionNoise() {
+        
+        fractionNoise_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double clusteringDistance_ ;
+      /**
+       * <pre>
+       * The clustering distance for DBSCAN.
+       * </pre>
+       *
+       * <code>double clustering_distance = 17;</code>
+       */
+      public double getClusteringDistance() {
+        return clusteringDistance_;
+      }
+      /**
+       * <pre>
+       * The clustering distance for DBSCAN.
+       * </pre>
+       *
+       * <code>double clustering_distance = 17;</code>
+       */
+      public Builder setClusteringDistance(double value) {
+        
+        clusteringDistance_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The clustering distance for DBSCAN.
+       * </pre>
+       *
+       * <code>double clustering_distance = 17;</code>
+       */
+      public Builder clearClusteringDistance() {
+        
+        clusteringDistance_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean core_ ;
+      /**
+       * <pre>
+       * Set to true to only include core point32 in clusters. Note: Non-core points can be assigned arbitrarily to clusters
+       * if they are on the border of two clusters due to the arbitrary processing order of input points.
+       * </pre>
+       *
+       * <code>bool core = 18;</code>
+       */
+      public boolean getCore() {
+        return core_;
+      }
+      /**
+       * <pre>
+       * Set to true to only include core point32 in clusters. Note: Non-core points can be assigned arbitrarily to clusters
+       * if they are on the border of two clusters due to the arbitrary processing order of input points.
+       * </pre>
+       *
+       * <code>bool core = 18;</code>
+       */
+      public Builder setCore(boolean value) {
+        
+        core_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to true to only include core point32 in clusters. Note: Non-core points can be assigned arbitrarily to clusters
+       * if they are on the border of two clusters due to the arbitrary processing order of input points.
+       * </pre>
+       *
+       * <code>bool core = 18;</code>
+       */
+      public Builder clearCore() {
+        
+        core_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double imageScale_ ;
+      /**
+       * <pre>
+       * The magnification scale of the output image
+       * </pre>
+       *
+       * <code>double image_scale = 19;</code>
+       */
+      public double getImageScale() {
+        return imageScale_;
+      }
+      /**
+       * <pre>
+       * The magnification scale of the output image
+       * </pre>
+       *
+       * <code>double image_scale = 19;</code>
+       */
+      public Builder setImageScale(double value) {
+        
+        imageScale_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The magnification scale of the output image
+       * </pre>
+       *
+       * <code>double image_scale = 19;</code>
+       */
+      public Builder clearImageScale() {
+        
+        imageScale_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int imageMode_ ;
+      /**
+       * <pre>
+       * The output image mode
+       * </pre>
+       *
+       * <code>int32 image_mode = 20;</code>
+       */
+      public int getImageMode() {
+        return imageMode_;
+      }
+      /**
+       * <pre>
+       * The output image mode
+       * </pre>
+       *
+       * <code>int32 image_mode = 20;</code>
+       */
+      public Builder setImageMode(int value) {
+        
+        imageMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The output image mode
+       * </pre>
+       *
+       * <code>int32 image_mode = 20;</code>
+       */
+      public Builder clearImageMode() {
+        
+        imageMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean weighted_ ;
+      /**
+       * <pre>
+       * Set to true to weight the image data over nearest neighbour pixels
+       * </pre>
+       *
+       * <code>bool weighted = 21;</code>
+       */
+      public boolean getWeighted() {
+        return weighted_;
+      }
+      /**
+       * <pre>
+       * Set to true to weight the image data over nearest neighbour pixels
+       * </pre>
+       *
+       * <code>bool weighted = 21;</code>
+       */
+      public Builder setWeighted(boolean value) {
+        
+        weighted_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to true to weight the image data over nearest neighbour pixels
+       * </pre>
+       *
+       * <code>bool weighted = 21;</code>
+       */
+      public Builder clearWeighted() {
+        
+        weighted_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean equalised_ ;
+      /**
+       * <pre>
+       * Set to true to equalise the image histogram (allowing viewing high dynamic range data)
+       * </pre>
+       *
+       * <code>bool equalised = 22;</code>
+       */
+      public boolean getEqualised() {
+        return equalised_;
+      }
+      /**
+       * <pre>
+       * Set to true to equalise the image histogram (allowing viewing high dynamic range data)
+       * </pre>
+       *
+       * <code>bool equalised = 22;</code>
+       */
+      public Builder setEqualised(boolean value) {
+        
+        equalised_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to true to equalise the image histogram (allowing viewing high dynamic range data)
+       * </pre>
+       *
+       * <code>bool equalised = 22;</code>
+       */
+      public Builder clearEqualised() {
+        
+        equalised_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int plotMode_ ;
+      /**
+       * <pre>
+       * The plot mode for the reachability distance profile
+       * </pre>
+       *
+       * <code>int32 plot_mode = 23;</code>
+       */
+      public int getPlotMode() {
+        return plotMode_;
+      }
+      /**
+       * <pre>
+       * The plot mode for the reachability distance profile
+       * </pre>
+       *
+       * <code>int32 plot_mode = 23;</code>
+       */
+      public Builder setPlotMode(int value) {
+        
+        plotMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The plot mode for the reachability distance profile
+       * </pre>
+       *
+       * <code>int32 plot_mode = 23;</code>
+       */
+      public Builder clearPlotMode() {
+        
+        plotMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int outlineMode_ ;
+      /**
+       * <pre>
+       * The outline mode for the reachability distance profile
+       * </pre>
+       *
+       * <code>int32 outline_mode = 24;</code>
+       */
+      public int getOutlineMode() {
+        return outlineMode_;
+      }
+      /**
+       * <pre>
+       * The outline mode for the reachability distance profile
+       * </pre>
+       *
+       * <code>int32 outline_mode = 24;</code>
+       */
+      public Builder setOutlineMode(int value) {
+        
+        outlineMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The outline mode for the reachability distance profile
+       * </pre>
+       *
+       * <code>int32 outline_mode = 24;</code>
+       */
+      public Builder clearOutlineMode() {
+        
+        outlineMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int spanningTreeMode_ ;
+      /**
+       * <pre>
+       * The spanningTree mode for the reachability distance profile
+       * </pre>
+       *
+       * <code>int32 spanning_tree_mode = 25;</code>
+       */
+      public int getSpanningTreeMode() {
+        return spanningTreeMode_;
+      }
+      /**
+       * <pre>
+       * The spanningTree mode for the reachability distance profile
+       * </pre>
+       *
+       * <code>int32 spanning_tree_mode = 25;</code>
+       */
+      public Builder setSpanningTreeMode(int value) {
+        
+        spanningTreeMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The spanningTree mode for the reachability distance profile
+       * </pre>
+       *
+       * <code>int32 spanning_tree_mode = 25;</code>
+       */
+      public Builder clearSpanningTreeMode() {
+        
+        spanningTreeMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double lambda_ ;
+      /**
+       * <pre>
+       * The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP).
+       * Note that scores are monotonic with respect to Lambda so this value just effects the local contrast of outlier
+       * scores, not the actual ranking of outliers.
+       * </pre>
+       *
+       * <code>double lambda = 26;</code>
+       */
+      public double getLambda() {
+        return lambda_;
+      }
+      /**
+       * <pre>
+       * The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP).
+       * Note that scores are monotonic with respect to Lambda so this value just effects the local contrast of outlier
+       * scores, not the actual ranking of outliers.
+       * </pre>
+       *
+       * <code>double lambda = 26;</code>
+       */
+      public Builder setLambda(double value) {
+        
+        lambda_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP).
+       * Note that scores are monotonic with respect to Lambda so this value just effects the local contrast of outlier
+       * scores, not the actual ranking of outliers.
+       * </pre>
+       *
+       * <code>double lambda = 26;</code>
+       */
+      public Builder clearLambda() {
+        
+        lambda_ = 0D;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.OpticsSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.OpticsSettings)
+    private static final gdsc.smlm.data.config.GUIConfig.OpticsSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIConfig.OpticsSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIConfig.OpticsSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<OpticsSettings>
+        PARSER = new com.google.protobuf.AbstractParser<OpticsSettings>() {
+      public OpticsSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new OpticsSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<OpticsSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<OpticsSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIConfig.OpticsSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
   private static final 
@@ -13275,6 +16006,11 @@ public final class GUIConfig {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_ClusteringSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_OpticsSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -13374,7 +16110,22 @@ public final class GUIConfig {
       "\001(\010\022\034\n\024precision_correction\030\036 \001(\010\022\026\n\016msd" +
       "_correction\030\037 \001(\010\022\013\n\003mle\030  \001(\010\022\022\n\nfit_le" +
       "ngth\030! \001(\005\022\024\n\014fit_restarts\030\" \001(\005\022\025\n\rjump",
-      "_distance\030# \001(\005B\013B\tGUIConfigb\006proto3"
+      "_distance\030# \001(\005\"\313\004\n\016OpticsSettings\022\024\n\014in" +
+      "put_option\030\001 \001(\t\022\023\n\013optics_mode\030\002 \001(\005\022\034\n" +
+      "\024number_of_split_sets\030\003 \001(\005\022\032\n\022use_rando" +
+      "m_vectors\030\004 \001(\010\022\035\n\025save_approximate_sets" +
+      "\030\005 \001(\010\022\023\n\013sample_mode\030\006 \001(\005\022\033\n\023generatin" +
+      "g_distance\030\007 \001(\001\022\022\n\nmin_points\030\010 \001(\005\022\027\n\017" +
+      "clustering_mode\030\t \001(\005\022\n\n\002xi\030\n \001(\001\022\020\n\010top" +
+      "Level\030\013 \001(\010\022\023\n\013upper_limit\030\014 \001(\001\022\023\n\013lowe" +
+      "r_limit\030\r \001(\001\022\017\n\007samples\030\016 \001(\005\022\027\n\017sample" +
+      "_fraction\030\017 \001(\001\022\026\n\016fraction_noise\030\020 \001(\001\022",
+      "\033\n\023clustering_distance\030\021 \001(\001\022\014\n\004core\030\022 \001" +
+      "(\010\022\023\n\013image_scale\030\023 \001(\001\022\022\n\nimage_mode\030\024 " +
+      "\001(\005\022\020\n\010weighted\030\025 \001(\010\022\021\n\tequalised\030\026 \001(\010" +
+      "\022\021\n\tplot_mode\030\027 \001(\005\022\024\n\014outline_mode\030\030 \001(" +
+      "\005\022\032\n\022spanning_tree_mode\030\031 \001(\005\022\016\n\006lambda\030" +
+      "\032 \001(\001B\013B\tGUIConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -13425,6 +16176,12 @@ public final class GUIConfig {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor,
         new java.lang.String[] { "DistanceThreshold", "DistanceExclusion", "TimeThreshold", "TimeUnit", "TraceMode", "ClusteringAlgorithm", "PulseInterval", "PulseWindow", "SplitPulses", "BlinkingRate", "Optimise", "MinDistanceThreshold", "MaxDistanceThreshold", "MinTimeThreshold", "MaxTimeThreshold", "OptimiserSteps", "OptimiserPlot", "SaveTraces", "ShowHistograms", "SaveTraceData", "TraceDataDirectory", "HistogramBins", "RemoveOutliers", "RefitOption", "MinimumTraceLength", "Truncate", "InternalDistances", "SubSampledDistances", "IgnoreEnds", "PrecisionCorrection", "MsdCorrection", "Mle", "FitLength", "FitRestarts", "JumpDistance", });
+    internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_gdsc_smlm_data_config_OpticsSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor,
+        new java.lang.String[] { "InputOption", "OpticsMode", "NumberOfSplitSets", "UseRandomVectors", "SaveApproximateSets", "SampleMode", "GeneratingDistance", "MinPoints", "ClusteringMode", "Xi", "TopLevel", "UpperLimit", "LowerLimit", "Samples", "SampleFraction", "FractionNoise", "ClusteringDistance", "Core", "ImageScale", "ImageMode", "Weighted", "Equalised", "PlotMode", "OutlineMode", "SpanningTreeMode", "Lambda", });
     gdsc.smlm.data.config.UnitConfig.getDescriptor();
   }
 

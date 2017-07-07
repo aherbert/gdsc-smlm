@@ -1093,6 +1093,18 @@ public class SettingsManager
 	}
 	
 	/**
+	 * Read the OpticsSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the OpticsSettings
+	 */
+	public static OpticsSettings readOpticsSettings(int flags)
+	{
+		return new ConfigurationReader<OpticsSettings>(GUIConfigHelper.defaultOpticsSettings).read(flags);
+	}
+	
+	/**
 	 * Write the message to file.
 	 * <p>
 	 * If this fails then an error message is written to the ImageJ log

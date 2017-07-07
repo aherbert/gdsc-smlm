@@ -33,21 +33,29 @@ public class Workflow<S, R>
 	private class Work
 	{
 		public final long timeout;
-		public final S settings;
-		public final R results;
+		public final Pair<S,R> work;
 
-		Work(long time, S settings, R results)
+		Work(long time, Pair<S,R> work)
 		{
-			if (settings == null)
+			if (work.s == null)
 				throw new NullPointerException("Settings cannot be null");
 			this.timeout = time;
-			this.settings = settings;
-			this.results = results;
+			this.work = work;
 		}
 
-		Work(S settings, R results)
+		Work(Pair<S,R> work)
 		{
-			this(0, settings, results);
+			this(0, work);
+		}
+		
+		S getSettings()
+		{
+			return work.s;
+		}
+		
+		R getResults()
+		{
+			return work.r;
 		}
 	}
 
@@ -159,14 +167,14 @@ public class Workflow<S, R>
 					{
 						// Create a new result
 						debug(" Creating new result");
-						R results = worker.createResults(work.settings, work.results);
-						result = new Work(work.settings, results);
+						Pair<S, R> results = worker.doWork(work.work);
+						result = new Work(results);
 					}
 					else
 					{
 						// Pass through the new settings with the existing results
 						debug(" Updating existing result");
-						result = new Work(work.settings, result.results);
+						result = new Work(work.work);
 					}
 					lastWork = work;
 					// Add the result to the output
@@ -182,7 +190,7 @@ public class Workflow<S, R>
 					debug(" Interrupted, stopping");
 					break;
 				}
-				
+
 				if (!running)
 				{
 					debug(" Shutdown");
@@ -203,14 +211,14 @@ public class Workflow<S, R>
 				return false;
 
 			// We must selectively compare this as not all settings changes matter.
-			if (compareNulls(work.settings, lastWork.settings))
+			if (compareNulls(work.getSettings(), lastWork.getSettings()))
 				return false;
-			if (!worker.equalSettings(work.settings, lastWork.settings))
+			if (!worker.equalSettings(work.getSettings(), lastWork.getSettings()))
 				return false;
 
 			// We can compare these here using object references. 
 			// Any new results passed in will trigger equals to fail.
-			boolean result = worker.equalResults(work.results, lastWork.results);
+			boolean result = worker.equalResults(work.getResults(), lastWork.getResults());
 			if (!result)
 				worker.newResults();
 			return result;
@@ -413,7 +421,7 @@ public class Workflow<S, R>
 	 */
 	public void run(S settings, R results)
 	{
-		inputStack.addWork(new Work(getTimeout(), settings, results));
+		inputStack.addWork(new Work(getTimeout(), new Pair<S,R>(settings, results)));
 	}
 
 	/**
@@ -437,7 +445,7 @@ public class Workflow<S, R>
 	 */
 	public void stage(S settings, R results)
 	{
-		inputStack.setWork(new Work(getTimeout(), settings, results));
+		inputStack.setWork(new Work(getTimeout(), new Pair<S,R>(settings, results)));
 	}
 
 	/**

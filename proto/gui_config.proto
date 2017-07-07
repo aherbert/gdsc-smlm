@@ -199,3 +199,100 @@ message ClusteringSettings
 	int32 fit_restarts = 34;
 	int32 jump_distance = 35;
 }
+
+// Contain the settings for the OPTICS clustering algorithm
+message OpticsSettings
+{
+	// Affect creating the OPTICS manager
+
+	// The input results dataset to use
+	string input_option = 1;
+
+	// Affect running OPTICS
+
+	// The OPTICS algorithm to use.
+	int32 optics_mode = 2;
+
+	/** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) */
+	int32 number_of_split_sets = 3;
+
+	// Set to true to use random vectors for the projections. The default is to uniformly create vectors on the
+	// semi-circle interval.
+	bool use_random_vectors = 4;
+
+	// Set to true to save all sets that are approximately min split size. The default is to only save sets smaller than
+	// min split size.
+	bool save_approximate_sets = 5;
+
+	/** The sample mode. */
+	int32 sample_mode = 6;
+
+	// The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
+	// using the expected density of uniformly spread random points.
+	double generating_distance = 7;
+
+	// The minimum number of neighbours to define a core point.
+	// <p>
+	// Note that the minimum cardinality (i.e. count of the number of neighbours) in the paper discussing Generalised
+	// DBSCAN is recommended to be 2 x dimensions, so 4 for a 2D dataset.
+	int32 min_points = 8;
+
+	// OPTICS clustering
+
+	// The clustering mode to use on the OPTICS results.
+	int32 clustering_mode = 9;
+
+	// Affect running OPTICS Xi
+
+	// The steepness parameter for the OPTICS hierarchical clustering algorithm using the reachability profile.
+	double xi = 10;
+	// Set to true to only show the top-level clusters, i.e. child clusters will be merged into their parents.
+	bool topLevel = 11;
+	// The upper limit for reachability. The first and last reachable points within a cluster must have a
+	// reachability equal or below the upper limit. This prevents creating clusters with points associated above the
+	// upper limit.
+	double upper_limit = 12;
+	// The lower limit for reachability. The first and last reachable points within a cluster must have a reachability
+	// equal or above the lower limit. This prevents creating clusters that are only associated below the lower limit.
+	double lower_limit = 13;
+
+	// Affect DBSCAN clustering
+
+	// The number of samples to take for the k-distance plot. This should be 1-10% of the data.
+	int32 samples = 14;
+	// The fraction of the data to sample for the k-distance plot. Recommended to be 1-10%.
+	double sample_fraction = 15;
+	// The fraction of noise in the k-distance plot. The clustering distance is set as the next distance after noise has
+	// been ignored.
+	double fraction_noise = 16;
+	// The clustering distance for DBSCAN.
+	double clustering_distance = 17;
+	// Set to true to only include core point32 in clusters. Note: Non-core points can be assigned arbitrarily to clusters
+	// if they are on the border of two clusters due to the arbitrary processing order of input points.
+	bool core = 18;
+
+	// Affect display of results
+
+	// The magnification scale of the output image
+	double image_scale = 19;
+	// The output image mode
+	int32 image_mode = 20;
+	// Set to true to weight the image data over nearest neighbour pixels
+	bool weighted = 21;
+	// Set to true to equalise the image histogram (allowing viewing high dynamic range data)
+	bool equalised = 22;
+
+	// The plot mode for the reachability distance profile
+	int32 plot_mode = 23;
+
+	// The outline mode for the reachability distance profile
+	int32 outline_mode = 24;
+
+	// The spanningTree mode for the reachability distance profile
+	int32 spanning_tree_mode = 25;
+
+	// The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP).
+	// Note that scores are monotonic with respect to Lambda so this value just effects the local contrast of outlier
+	// scores, not the actual ranking of outliers.
+	double lambda = 26;	
+}

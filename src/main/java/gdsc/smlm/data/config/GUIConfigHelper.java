@@ -1,8 +1,15 @@
 package gdsc.smlm.data.config;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
+import gdsc.core.clustering.optics.SampleMode;
 import gdsc.smlm.data.config.GUIConfig.*;
 import gdsc.smlm.data.config.UnitConfig.TimeUnit;
+import gdsc.smlm.ij.plugins.OPTICS.ClusteringMode;
+import gdsc.smlm.ij.plugins.OPTICS.ImageMode;
+import gdsc.smlm.ij.plugins.OPTICS.OpticsMode;
+import gdsc.smlm.ij.plugins.OPTICS.OutlineMode;
+import gdsc.smlm.ij.plugins.OPTICS.PlotMode;
+import gdsc.smlm.ij.plugins.OPTICS.SpanningTreeMode;
 import gdsc.smlm.results.TraceManager.TraceMode;
 
 /*----------------------------------------------------------------------------- 
@@ -132,5 +139,28 @@ public class GUIConfigHelper
 		builder.setFitRestarts(1);
 		builder.setJumpDistance(1);
 		defaultClusteringSettings = builder.build();
+	}
+	/** The default OpticsSettings */
+	public static final OpticsSettings defaultOpticsSettings;
+	static
+	{
+		OpticsSettings.Builder builder = OpticsSettings.newBuilder();
+		builder.setOpticsMode(OpticsMode.FAST_OPTICS.ordinal());
+		builder.setSampleMode(SampleMode.RANDOM.ordinal());
+		builder.setMinPoints(4);
+		builder.setClusteringMode(ClusteringMode.XI.ordinal());
+		builder.setXi(0.03);
+		builder.setSamples(100);
+		builder.setSampleFraction(0.05);
+		builder.setFractionNoise(0.05);
+		builder.setImageScale(2);
+		builder.setImageMode(ImageMode.VALUE.ordinal());
+		builder.setWeighted(true);
+		builder.setEqualised(true);
+		builder.setPlotMode(PlotMode.COLOURED_BY_DEPTH_WITH_CLUSTERS.ordinal());
+		builder.setOutlineMode(OutlineMode.COLOURED_BY_CLUSTER.ordinal());
+		builder.setSpanningTreeMode(SpanningTreeMode.OFF.ordinal());
+		builder.setLambda(3);
+		defaultOpticsSettings = builder.build();
 	}
 }

@@ -49,17 +49,15 @@ public abstract class WorkflowWorker<S, R>
 	/**
 	 * Creates the results.
 	 *
-	 * @param settings
-	 *            the settings
-	 * @param results
-	 *            the results
-	 * @return the results
+	 * @param work
+	 *            the work (the current settings and results)
+	 * @return the updated settings and results
 	 */
-	public abstract R createResults(S settings, R results);
+	public abstract Pair<S, R> doWork(Pair<S, R> work);
 
 	/**
 	 * Called when there are new results in the current work. This can be used to reset the worker before
-	 * {@link #createResult(Work)} is called.
+	 * {@link #doWork(Object, Object)} is called.
 	 */
 	protected void newResults()
 	{

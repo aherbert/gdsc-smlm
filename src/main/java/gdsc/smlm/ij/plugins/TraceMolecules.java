@@ -82,13 +82,13 @@ public class TraceMolecules implements PlugIn
 		 * @return the name
 		 */
 		abstract public String getName();
-	}
-
-	public static OptimiserPlot getOptimiserPlot(int optimiserPlot)
-	{
-		if (optimiserPlot < 0 || optimiserPlot >= OptimiserPlot.values().length)
-			return OptimiserPlot.NONE;
-		return OptimiserPlot.values()[optimiserPlot];
+		
+		public static OptimiserPlot get(int ordinal)
+		{
+			if (ordinal < 0 || ordinal >= values().length)
+				ordinal = 0;
+			return values()[ordinal];
+		}
 	}
 
 	public static TraceMode getTraceMode(int traceMode)
@@ -1007,7 +1007,7 @@ public class TraceMolecules implements PlugIn
 		gd.addSlider("Steps", 1, 20, settings.getOptimiserSteps());
 		gd.addNumericField("Blinking_rate", settings.getBlinkingRate(), 2);
 		String[] plotNames = SettingsManager.getNames((Object[]) OptimiserPlot.values());
-		gd.addChoice("Plot", plotNames, plotNames[getOptimiserPlot(settings.getOptimiserPlot()).ordinal()]);
+		gd.addChoice("Plot", plotNames, plotNames[OptimiserPlot.get(settings.getOptimiserPlot()).ordinal()]);
 		if (altKeyDown)
 			gd.addCheckbox("Optimise_blinking", inputOptimiseBlinkingRate);
 
@@ -1431,7 +1431,7 @@ public class TraceMolecules implements PlugIn
 	private void createPlotResults(List<double[]> results)
 	{
 		int w = 400, h = 400;
-		switch (getOptimiserPlot(settings.getOptimiserPlot()))
+		switch (OptimiserPlot.get(settings.getOptimiserPlot()))
 		{
 			case NONE:
 				return;
@@ -1461,7 +1461,7 @@ public class TraceMolecules implements PlugIn
 	 */
 	private void showPlot()
 	{
-		if (getOptimiserPlot(settings.getOptimiserPlot()) == OptimiserPlot.NONE)
+		if (OptimiserPlot.get(settings.getOptimiserPlot()) == OptimiserPlot.NONE)
 			return;
 
 		// Display the image

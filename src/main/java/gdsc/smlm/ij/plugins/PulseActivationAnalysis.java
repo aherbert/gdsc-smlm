@@ -975,10 +975,10 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			}
 
 			@Override
-			public Object createResults(RunSettings settings, Object results)
+			public Pair<RunSettings, Object> doWork(Pair<RunSettings, Object> work)
 			{
-				PulseActivationAnalysis.this.run(settings);
-				return null;
+				PulseActivationAnalysis.this.run(work.s);
+				return work;
 			}
 		});
 

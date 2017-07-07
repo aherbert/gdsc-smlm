@@ -2850,9 +2850,9 @@ public class FIRE implements PlugIn
 		}
 
 		@Override
-		public Object createResults(WorkSettings settings, Object results)
+		public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work)
 		{
-			return null;
+			return work;
 		}
 	}
 
@@ -2867,11 +2867,11 @@ public class FIRE implements PlugIn
 		}
 
 		@Override
-		public Object createResults(WorkSettings settings, Object results)
+		public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work)
 		{
 			// Plot the histogram
-			wo.add(histogram.plot(settings.mean, settings.sigma));
-			return null;
+			wo.add(histogram.plot(work.s.mean, work.s.sigma));
+			return work;
 		}
 	}
 
@@ -2894,12 +2894,13 @@ public class FIRE implements PlugIn
 		}
 
 		@Override
-		public Object createResults(WorkSettings settings, Object results)
+		public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work)
 		{
 			// Compute Q and then plot the scaled FRC numerator
+			WorkSettings settings = work.s;
 			for (PlotWindow pw : qplot.plot(settings.mean, settings.sigma, settings.qValue))
 				wo.add(pw);
-			return null;
+			return work;
 		}
 	}
 
