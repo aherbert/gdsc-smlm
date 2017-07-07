@@ -97,9 +97,6 @@ public class FitConfigHelper
 	static
 	{
 		FitSettings.Builder builder = FitSettings.newBuilder();
-		// No calibration by default 
-		//builder.setCalibration(CalibrationConfigHelper.defaultCalibration);
-		builder.setPsf(PSFConfigHelper.defaultOneAxisGaussian2DPSF);
 		builder.setFitSolverSettings(defaultFitSolverSettings);
 		builder.setFilterSettings(defaultFilterSettings);
 		defaultFitSettings = builder.build();

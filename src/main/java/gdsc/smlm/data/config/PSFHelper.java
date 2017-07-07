@@ -3,6 +3,7 @@ package gdsc.smlm.data.config;
 import java.util.List;
 
 import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.PSFConfig.PSFOrBuilder;
 import gdsc.smlm.data.config.PSFConfig.PSFParameter;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.results.PeakResult;
@@ -68,7 +69,7 @@ public class PSFHelper
 	 * @throws ConfigurationException
 	 *             if the psf is null
 	 */
-	public static boolean isGaussian2D(PSF psf) throws ConfigurationException
+	public static boolean isGaussian2D(PSFOrBuilder psf) throws ConfigurationException
 	{
 		if (psf == null)
 			throw new ConfigurationException("psf is null");
@@ -99,7 +100,7 @@ public class PSFHelper
 	 * @throws ConfigurationException
 	 *             if the psf is null, or not a Gaussian 2D function
 	 */
-	public static int[] getGaussian2DWxWyIndices(PSF psf) throws ConfigurationException
+	public static int[] getGaussian2DWxWyIndices(PSFOrBuilder psf) throws ConfigurationException
 	{
 		if (psf == null)
 			throw new ConfigurationException("psf is null");
@@ -130,7 +131,7 @@ public class PSFHelper
 	 * @throws ConfigurationException
 	 *             if the psf is null, or not a Gaussian 2D function
 	 */
-	public static double[] getGaussian2DWxWy(PSF psf) throws ConfigurationException
+	public static double[] getGaussian2DWxWy(PSFOrBuilder psf) throws ConfigurationException
 	{
 		if (psf == null)
 			throw new ConfigurationException("psf is null");
@@ -154,7 +155,7 @@ public class PSFHelper
 		throw new ConfigurationException("psf is not Gaussian2D");
 	}
 
-	private static double getParameterValue(PSF psf, int i, double defaultValue)
+	private static double getParameterValue(PSFOrBuilder psf, int i, double defaultValue)
 	{
 		if (psf.getParameterCount() > i)
 		{
@@ -177,7 +178,7 @@ public class PSFHelper
 	 * @throws ConfigurationException
 	 *             if the psf is null, or not a rotated two axis Gaussian 2D function
 	 */
-	public static int getGaussian2DAngleIndex(PSF psf) throws ConfigurationException
+	public static int getGaussian2DAngleIndex(PSFOrBuilder psf) throws ConfigurationException
 	{
 		if (psf == null)
 			throw new ConfigurationException("psf is null");
@@ -201,7 +202,7 @@ public class PSFHelper
 	 * @throws ConfigurationException
 	 *             if the psf is null, or not recognised
 	 */
-	public static List<PSFParameter> getParameters(PSF psf) throws ConfigurationException
+	public static List<PSFParameter> getParameters(PSFOrBuilder psf) throws ConfigurationException
 	{
 		if (psf == null)
 			throw new ConfigurationException("psf is null");
@@ -239,7 +240,7 @@ public class PSFHelper
 	 * @throws ConfigurationException
 	 *             if the psf is null, or not recognised
 	 */
-	public static int getParameterCount(PSF psf) throws ConfigurationException
+	public static int getParameterCount(PSFOrBuilder psf) throws ConfigurationException
 	{
 		if (psf == null)
 			throw new ConfigurationException("psf is null");
@@ -272,7 +273,7 @@ public class PSFHelper
 	 *            the psf
 	 * @return the parameter count (may be zero if the PSF is not configured)
 	 */
-	public static int getParameterCountSafe(PSF psf)
+	public static int getParameterCountSafe(PSFOrBuilder psf)
 	{
 		try
 		{
@@ -343,7 +344,7 @@ public class PSFHelper
 	 *            the psf
 	 * @return true, if is 3D
 	 */
-	public static boolean is3D(PSF psf)
+	public static boolean is3D(PSFOrBuilder psf)
 	{
 		if (psf != null)
 		{

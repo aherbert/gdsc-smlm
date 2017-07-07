@@ -3,7 +3,7 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unchecked", "unused", "deprecation"})
 public final class GUIConfig {
   private GUIConfig() {}
   public static void registerAllExtensions(

@@ -410,7 +410,7 @@ public class CalibrationReader
 	public AngleUnit getAngleUnit()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasPsfCalibration()) ? c.getPsfCalibration().getAngleUnit() : AngleUnit.ANGLE_UNIT_NA;
+		return (c.hasAngleCalibration()) ? c.getAngleCalibration().getAngleUnit() : AngleUnit.ANGLE_UNIT_NA;
 	}
 
 	/**

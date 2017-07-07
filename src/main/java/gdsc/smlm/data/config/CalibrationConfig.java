@@ -1970,6 +1970,519 @@ public final class CalibrationConfig {
 
   }
 
+  public interface AngleCalibrationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.AngleCalibration)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The angle units, e.g. for a rotated point spread function.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
+     */
+    int getAngleUnitValue();
+    /**
+     * <pre>
+     * The angle units, e.g. for a rotated point spread function.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
+     */
+    gdsc.smlm.data.config.UnitConfig.AngleUnit getAngleUnit();
+  }
+  /**
+   * <pre>
+   * Define the calibration for angles
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.AngleCalibration}
+   */
+  public  static final class AngleCalibration extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.AngleCalibration)
+      AngleCalibrationOrBuilder {
+    // Use AngleCalibration.newBuilder() to construct.
+    private AngleCalibration(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AngleCalibration() {
+      angleUnit_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private AngleCalibration(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              int rawValue = input.readEnum();
+
+              angleUnit_ = rawValue;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.CalibrationConfig.internal_static_gdsc_smlm_data_config_AngleCalibration_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.CalibrationConfig.internal_static_gdsc_smlm_data_config_AngleCalibration_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.class, gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.Builder.class);
+    }
+
+    public static final int ANGLE_UNIT_FIELD_NUMBER = 1;
+    private int angleUnit_;
+    /**
+     * <pre>
+     * The angle units, e.g. for a rotated point spread function.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
+     */
+    public int getAngleUnitValue() {
+      return angleUnit_;
+    }
+    /**
+     * <pre>
+     * The angle units, e.g. for a rotated point spread function.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
+     */
+    public gdsc.smlm.data.config.UnitConfig.AngleUnit getAngleUnit() {
+      gdsc.smlm.data.config.UnitConfig.AngleUnit result = gdsc.smlm.data.config.UnitConfig.AngleUnit.valueOf(angleUnit_);
+      return result == null ? gdsc.smlm.data.config.UnitConfig.AngleUnit.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (angleUnit_ != gdsc.smlm.data.config.UnitConfig.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
+        output.writeEnum(1, angleUnit_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (angleUnit_ != gdsc.smlm.data.config.UnitConfig.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, angleUnit_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.CalibrationConfig.AngleCalibration)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.CalibrationConfig.AngleCalibration other = (gdsc.smlm.data.config.CalibrationConfig.AngleCalibration) obj;
+
+      boolean result = true;
+      result = result && angleUnit_ == other.angleUnit_;
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ANGLE_UNIT_FIELD_NUMBER;
+      hash = (53 * hash) + angleUnit_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.CalibrationConfig.AngleCalibration prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define the calibration for angles
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.AngleCalibration}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.AngleCalibration)
+        gdsc.smlm.data.config.CalibrationConfig.AngleCalibrationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.CalibrationConfig.internal_static_gdsc_smlm_data_config_AngleCalibration_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.CalibrationConfig.internal_static_gdsc_smlm_data_config_AngleCalibration_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.class, gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        angleUnit_ = 0;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.CalibrationConfig.internal_static_gdsc_smlm_data_config_AngleCalibration_descriptor;
+      }
+
+      public gdsc.smlm.data.config.CalibrationConfig.AngleCalibration getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.CalibrationConfig.AngleCalibration build() {
+        gdsc.smlm.data.config.CalibrationConfig.AngleCalibration result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.CalibrationConfig.AngleCalibration buildPartial() {
+        gdsc.smlm.data.config.CalibrationConfig.AngleCalibration result = new gdsc.smlm.data.config.CalibrationConfig.AngleCalibration(this);
+        result.angleUnit_ = angleUnit_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.CalibrationConfig.AngleCalibration) {
+          return mergeFrom((gdsc.smlm.data.config.CalibrationConfig.AngleCalibration)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.CalibrationConfig.AngleCalibration other) {
+        if (other == gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.getDefaultInstance()) return this;
+        if (other.angleUnit_ != 0) {
+          setAngleUnitValue(other.getAngleUnitValue());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.CalibrationConfig.AngleCalibration parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.CalibrationConfig.AngleCalibration) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int angleUnit_ = 0;
+      /**
+       * <pre>
+       * The angle units, e.g. for a rotated point spread function.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
+       */
+      public int getAngleUnitValue() {
+        return angleUnit_;
+      }
+      /**
+       * <pre>
+       * The angle units, e.g. for a rotated point spread function.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
+       */
+      public Builder setAngleUnitValue(int value) {
+        angleUnit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The angle units, e.g. for a rotated point spread function.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
+       */
+      public gdsc.smlm.data.config.UnitConfig.AngleUnit getAngleUnit() {
+        gdsc.smlm.data.config.UnitConfig.AngleUnit result = gdsc.smlm.data.config.UnitConfig.AngleUnit.valueOf(angleUnit_);
+        return result == null ? gdsc.smlm.data.config.UnitConfig.AngleUnit.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The angle units, e.g. for a rotated point spread function.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
+       */
+      public Builder setAngleUnit(gdsc.smlm.data.config.UnitConfig.AngleUnit value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        angleUnit_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The angle units, e.g. for a rotated point spread function.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
+       */
+      public Builder clearAngleUnit() {
+        
+        angleUnit_ = 0;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.AngleCalibration)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.AngleCalibration)
+    private static final gdsc.smlm.data.config.CalibrationConfig.AngleCalibration DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.CalibrationConfig.AngleCalibration();
+    }
+
+    public static gdsc.smlm.data.config.CalibrationConfig.AngleCalibration getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AngleCalibration>
+        PARSER = new com.google.protobuf.AbstractParser<AngleCalibration>() {
+      public AngleCalibration parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new AngleCalibration(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AngleCalibration> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AngleCalibration> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.CalibrationConfig.AngleCalibration getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface CameraCalibrationOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CameraCalibration)
       com.google.protobuf.MessageOrBuilder {
@@ -2756,519 +3269,6 @@ public final class CalibrationConfig {
 
   }
 
-  public interface PSFCalibrationOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.PSFCalibration)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * The angle units, e.g. for a rotated point spread function
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
-     */
-    int getAngleUnitValue();
-    /**
-     * <pre>
-     * The angle units, e.g. for a rotated point spread function
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
-     */
-    gdsc.smlm.data.config.UnitConfig.AngleUnit getAngleUnit();
-  }
-  /**
-   * <pre>
-   * Define additional calibration required for the Point Spread Function (PSF) parameters
-   * </pre>
-   *
-   * Protobuf type {@code gdsc.smlm.data.config.PSFCalibration}
-   */
-  public  static final class PSFCalibration extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.PSFCalibration)
-      PSFCalibrationOrBuilder {
-    // Use PSFCalibration.newBuilder() to construct.
-    private PSFCalibration(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private PSFCalibration() {
-      angleUnit_ = 0;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private PSFCalibration(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              int rawValue = input.readEnum();
-
-              angleUnit_ = rawValue;
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.CalibrationConfig.internal_static_gdsc_smlm_data_config_PSFCalibration_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.CalibrationConfig.internal_static_gdsc_smlm_data_config_PSFCalibration_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.class, gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder.class);
-    }
-
-    public static final int ANGLE_UNIT_FIELD_NUMBER = 1;
-    private int angleUnit_;
-    /**
-     * <pre>
-     * The angle units, e.g. for a rotated point spread function
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
-     */
-    public int getAngleUnitValue() {
-      return angleUnit_;
-    }
-    /**
-     * <pre>
-     * The angle units, e.g. for a rotated point spread function
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
-     */
-    public gdsc.smlm.data.config.UnitConfig.AngleUnit getAngleUnit() {
-      gdsc.smlm.data.config.UnitConfig.AngleUnit result = gdsc.smlm.data.config.UnitConfig.AngleUnit.valueOf(angleUnit_);
-      return result == null ? gdsc.smlm.data.config.UnitConfig.AngleUnit.UNRECOGNIZED : result;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (angleUnit_ != gdsc.smlm.data.config.UnitConfig.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
-        output.writeEnum(1, angleUnit_);
-      }
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (angleUnit_ != gdsc.smlm.data.config.UnitConfig.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, angleUnit_);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.CalibrationConfig.PSFCalibration)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.CalibrationConfig.PSFCalibration other = (gdsc.smlm.data.config.CalibrationConfig.PSFCalibration) obj;
-
-      boolean result = true;
-      result = result && angleUnit_ == other.angleUnit_;
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ANGLE_UNIT_FIELD_NUMBER;
-      hash = (53 * hash) + angleUnit_;
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.CalibrationConfig.PSFCalibration prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Define additional calibration required for the Point Spread Function (PSF) parameters
-     * </pre>
-     *
-     * Protobuf type {@code gdsc.smlm.data.config.PSFCalibration}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.PSFCalibration)
-        gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.CalibrationConfig.internal_static_gdsc_smlm_data_config_PSFCalibration_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.CalibrationConfig.internal_static_gdsc_smlm_data_config_PSFCalibration_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.class, gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        angleUnit_ = 0;
-
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.CalibrationConfig.internal_static_gdsc_smlm_data_config_PSFCalibration_descriptor;
-      }
-
-      public gdsc.smlm.data.config.CalibrationConfig.PSFCalibration getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.CalibrationConfig.PSFCalibration build() {
-        gdsc.smlm.data.config.CalibrationConfig.PSFCalibration result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.CalibrationConfig.PSFCalibration buildPartial() {
-        gdsc.smlm.data.config.CalibrationConfig.PSFCalibration result = new gdsc.smlm.data.config.CalibrationConfig.PSFCalibration(this);
-        result.angleUnit_ = angleUnit_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.CalibrationConfig.PSFCalibration) {
-          return mergeFrom((gdsc.smlm.data.config.CalibrationConfig.PSFCalibration)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.CalibrationConfig.PSFCalibration other) {
-        if (other == gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.getDefaultInstance()) return this;
-        if (other.angleUnit_ != 0) {
-          setAngleUnitValue(other.getAngleUnitValue());
-        }
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.CalibrationConfig.PSFCalibration parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.CalibrationConfig.PSFCalibration) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private int angleUnit_ = 0;
-      /**
-       * <pre>
-       * The angle units, e.g. for a rotated point spread function
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
-       */
-      public int getAngleUnitValue() {
-        return angleUnit_;
-      }
-      /**
-       * <pre>
-       * The angle units, e.g. for a rotated point spread function
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
-       */
-      public Builder setAngleUnitValue(int value) {
-        angleUnit_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The angle units, e.g. for a rotated point spread function
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
-       */
-      public gdsc.smlm.data.config.UnitConfig.AngleUnit getAngleUnit() {
-        gdsc.smlm.data.config.UnitConfig.AngleUnit result = gdsc.smlm.data.config.UnitConfig.AngleUnit.valueOf(angleUnit_);
-        return result == null ? gdsc.smlm.data.config.UnitConfig.AngleUnit.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * The angle units, e.g. for a rotated point spread function
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
-       */
-      public Builder setAngleUnit(gdsc.smlm.data.config.UnitConfig.AngleUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        
-        angleUnit_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The angle units, e.g. for a rotated point spread function
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.AngleUnit angle_unit = 1;</code>
-       */
-      public Builder clearAngleUnit() {
-        
-        angleUnit_ = 0;
-        onChanged();
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.PSFCalibration)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.PSFCalibration)
-    private static final gdsc.smlm.data.config.CalibrationConfig.PSFCalibration DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.CalibrationConfig.PSFCalibration();
-    }
-
-    public static gdsc.smlm.data.config.CalibrationConfig.PSFCalibration getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<PSFCalibration>
-        PARSER = new com.google.protobuf.AbstractParser<PSFCalibration>() {
-      public PSFCalibration parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new PSFCalibration(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<PSFCalibration> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<PSFCalibration> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.CalibrationConfig.PSFCalibration getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
   public interface CalibrationOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Calibration)
       com.google.protobuf.MessageOrBuilder {
@@ -3350,10 +3350,35 @@ public final class CalibrationConfig {
 
     /**
      * <pre>
+     * The angle calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+     */
+    boolean hasAngleCalibration();
+    /**
+     * <pre>
+     * The angle calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+     */
+    gdsc.smlm.data.config.CalibrationConfig.AngleCalibration getAngleCalibration();
+    /**
+     * <pre>
+     * The angle calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+     */
+    gdsc.smlm.data.config.CalibrationConfig.AngleCalibrationOrBuilder getAngleCalibrationOrBuilder();
+
+    /**
+     * <pre>
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
      */
     boolean hasCameraCalibration();
     /**
@@ -3361,7 +3386,7 @@ public final class CalibrationConfig {
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.CameraCalibration getCameraCalibration();
     /**
@@ -3369,34 +3394,9 @@ public final class CalibrationConfig {
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
      */
     gdsc.smlm.data.config.CalibrationConfig.CameraCalibrationOrBuilder getCameraCalibrationOrBuilder();
-
-    /**
-     * <pre>
-     * The PSF calibration.
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-     */
-    boolean hasPsfCalibration();
-    /**
-     * <pre>
-     * The PSF calibration.
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-     */
-    gdsc.smlm.data.config.CalibrationConfig.PSFCalibration getPsfCalibration();
-    /**
-     * <pre>
-     * The PSF calibration.
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-     */
-    gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder getPsfCalibrationOrBuilder();
   }
   /**
    * <pre>
@@ -3483,6 +3483,19 @@ public final class CalibrationConfig {
               break;
             }
             case 34: {
+              gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.Builder subBuilder = null;
+              if (angleCalibration_ != null) {
+                subBuilder = angleCalibration_.toBuilder();
+              }
+              angleCalibration_ = input.readMessage(gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(angleCalibration_);
+                angleCalibration_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 42: {
               gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.Builder subBuilder = null;
               if (cameraCalibration_ != null) {
                 subBuilder = cameraCalibration_.toBuilder();
@@ -3491,19 +3504,6 @@ public final class CalibrationConfig {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(cameraCalibration_);
                 cameraCalibration_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 42: {
-              gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder subBuilder = null;
-              if (psfCalibration_ != null) {
-                subBuilder = psfCalibration_.toBuilder();
-              }
-              psfCalibration_ = input.readMessage(gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(psfCalibration_);
-                psfCalibration_ = subBuilder.buildPartial();
               }
 
               break;
@@ -3630,14 +3630,47 @@ public final class CalibrationConfig {
       return getIntensityCalibration();
     }
 
-    public static final int CAMERA_CALIBRATION_FIELD_NUMBER = 4;
+    public static final int ANGLE_CALIBRATION_FIELD_NUMBER = 4;
+    private gdsc.smlm.data.config.CalibrationConfig.AngleCalibration angleCalibration_;
+    /**
+     * <pre>
+     * The angle calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+     */
+    public boolean hasAngleCalibration() {
+      return angleCalibration_ != null;
+    }
+    /**
+     * <pre>
+     * The angle calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+     */
+    public gdsc.smlm.data.config.CalibrationConfig.AngleCalibration getAngleCalibration() {
+      return angleCalibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.getDefaultInstance() : angleCalibration_;
+    }
+    /**
+     * <pre>
+     * The angle calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+     */
+    public gdsc.smlm.data.config.CalibrationConfig.AngleCalibrationOrBuilder getAngleCalibrationOrBuilder() {
+      return getAngleCalibration();
+    }
+
+    public static final int CAMERA_CALIBRATION_FIELD_NUMBER = 5;
     private gdsc.smlm.data.config.CalibrationConfig.CameraCalibration cameraCalibration_;
     /**
      * <pre>
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
      */
     public boolean hasCameraCalibration() {
       return cameraCalibration_ != null;
@@ -3647,7 +3680,7 @@ public final class CalibrationConfig {
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.CameraCalibration getCameraCalibration() {
       return cameraCalibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.getDefaultInstance() : cameraCalibration_;
@@ -3657,43 +3690,10 @@ public final class CalibrationConfig {
      * The camera calibration.
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
      */
     public gdsc.smlm.data.config.CalibrationConfig.CameraCalibrationOrBuilder getCameraCalibrationOrBuilder() {
       return getCameraCalibration();
-    }
-
-    public static final int PSF_CALIBRATION_FIELD_NUMBER = 5;
-    private gdsc.smlm.data.config.CalibrationConfig.PSFCalibration psfCalibration_;
-    /**
-     * <pre>
-     * The PSF calibration.
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-     */
-    public boolean hasPsfCalibration() {
-      return psfCalibration_ != null;
-    }
-    /**
-     * <pre>
-     * The PSF calibration.
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-     */
-    public gdsc.smlm.data.config.CalibrationConfig.PSFCalibration getPsfCalibration() {
-      return psfCalibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.getDefaultInstance() : psfCalibration_;
-    }
-    /**
-     * <pre>
-     * The PSF calibration.
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-     */
-    public gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder getPsfCalibrationOrBuilder() {
-      return getPsfCalibration();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -3717,11 +3717,11 @@ public final class CalibrationConfig {
       if (intensityCalibration_ != null) {
         output.writeMessage(3, getIntensityCalibration());
       }
-      if (cameraCalibration_ != null) {
-        output.writeMessage(4, getCameraCalibration());
+      if (angleCalibration_ != null) {
+        output.writeMessage(4, getAngleCalibration());
       }
-      if (psfCalibration_ != null) {
-        output.writeMessage(5, getPsfCalibration());
+      if (cameraCalibration_ != null) {
+        output.writeMessage(5, getCameraCalibration());
       }
     }
 
@@ -3742,13 +3742,13 @@ public final class CalibrationConfig {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getIntensityCalibration());
       }
+      if (angleCalibration_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getAngleCalibration());
+      }
       if (cameraCalibration_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, getCameraCalibration());
-      }
-      if (psfCalibration_ != null) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, getPsfCalibration());
+          .computeMessageSize(5, getCameraCalibration());
       }
       memoizedSize = size;
       return size;
@@ -3781,15 +3781,15 @@ public final class CalibrationConfig {
         result = result && getIntensityCalibration()
             .equals(other.getIntensityCalibration());
       }
+      result = result && (hasAngleCalibration() == other.hasAngleCalibration());
+      if (hasAngleCalibration()) {
+        result = result && getAngleCalibration()
+            .equals(other.getAngleCalibration());
+      }
       result = result && (hasCameraCalibration() == other.hasCameraCalibration());
       if (hasCameraCalibration()) {
         result = result && getCameraCalibration()
             .equals(other.getCameraCalibration());
-      }
-      result = result && (hasPsfCalibration() == other.hasPsfCalibration());
-      if (hasPsfCalibration()) {
-        result = result && getPsfCalibration()
-            .equals(other.getPsfCalibration());
       }
       return result;
     }
@@ -3813,13 +3813,13 @@ public final class CalibrationConfig {
         hash = (37 * hash) + INTENSITY_CALIBRATION_FIELD_NUMBER;
         hash = (53 * hash) + getIntensityCalibration().hashCode();
       }
+      if (hasAngleCalibration()) {
+        hash = (37 * hash) + ANGLE_CALIBRATION_FIELD_NUMBER;
+        hash = (53 * hash) + getAngleCalibration().hashCode();
+      }
       if (hasCameraCalibration()) {
         hash = (37 * hash) + CAMERA_CALIBRATION_FIELD_NUMBER;
         hash = (53 * hash) + getCameraCalibration().hashCode();
-      }
-      if (hasPsfCalibration()) {
-        hash = (37 * hash) + PSF_CALIBRATION_FIELD_NUMBER;
-        hash = (53 * hash) + getPsfCalibration().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -3974,17 +3974,17 @@ public final class CalibrationConfig {
           intensityCalibration_ = null;
           intensityCalibrationBuilder_ = null;
         }
+        if (angleCalibrationBuilder_ == null) {
+          angleCalibration_ = null;
+        } else {
+          angleCalibration_ = null;
+          angleCalibrationBuilder_ = null;
+        }
         if (cameraCalibrationBuilder_ == null) {
           cameraCalibration_ = null;
         } else {
           cameraCalibration_ = null;
           cameraCalibrationBuilder_ = null;
-        }
-        if (psfCalibrationBuilder_ == null) {
-          psfCalibration_ = null;
-        } else {
-          psfCalibration_ = null;
-          psfCalibrationBuilder_ = null;
         }
         return this;
       }
@@ -4023,15 +4023,15 @@ public final class CalibrationConfig {
         } else {
           result.intensityCalibration_ = intensityCalibrationBuilder_.build();
         }
+        if (angleCalibrationBuilder_ == null) {
+          result.angleCalibration_ = angleCalibration_;
+        } else {
+          result.angleCalibration_ = angleCalibrationBuilder_.build();
+        }
         if (cameraCalibrationBuilder_ == null) {
           result.cameraCalibration_ = cameraCalibration_;
         } else {
           result.cameraCalibration_ = cameraCalibrationBuilder_.build();
-        }
-        if (psfCalibrationBuilder_ == null) {
-          result.psfCalibration_ = psfCalibration_;
-        } else {
-          result.psfCalibration_ = psfCalibrationBuilder_.build();
         }
         onBuilt();
         return result;
@@ -4083,11 +4083,11 @@ public final class CalibrationConfig {
         if (other.hasIntensityCalibration()) {
           mergeIntensityCalibration(other.getIntensityCalibration());
         }
+        if (other.hasAngleCalibration()) {
+          mergeAngleCalibration(other.getAngleCalibration());
+        }
         if (other.hasCameraCalibration()) {
           mergeCameraCalibration(other.getCameraCalibration());
-        }
-        if (other.hasPsfCalibration()) {
-          mergePsfCalibration(other.getPsfCalibration());
         }
         onChanged();
         return this;
@@ -4574,6 +4574,159 @@ public final class CalibrationConfig {
         return intensityCalibrationBuilder_;
       }
 
+      private gdsc.smlm.data.config.CalibrationConfig.AngleCalibration angleCalibration_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.CalibrationConfig.AngleCalibration, gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.AngleCalibrationOrBuilder> angleCalibrationBuilder_;
+      /**
+       * <pre>
+       * The angle calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+       */
+      public boolean hasAngleCalibration() {
+        return angleCalibrationBuilder_ != null || angleCalibration_ != null;
+      }
+      /**
+       * <pre>
+       * The angle calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+       */
+      public gdsc.smlm.data.config.CalibrationConfig.AngleCalibration getAngleCalibration() {
+        if (angleCalibrationBuilder_ == null) {
+          return angleCalibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.getDefaultInstance() : angleCalibration_;
+        } else {
+          return angleCalibrationBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The angle calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+       */
+      public Builder setAngleCalibration(gdsc.smlm.data.config.CalibrationConfig.AngleCalibration value) {
+        if (angleCalibrationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          angleCalibration_ = value;
+          onChanged();
+        } else {
+          angleCalibrationBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The angle calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+       */
+      public Builder setAngleCalibration(
+          gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.Builder builderForValue) {
+        if (angleCalibrationBuilder_ == null) {
+          angleCalibration_ = builderForValue.build();
+          onChanged();
+        } else {
+          angleCalibrationBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The angle calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+       */
+      public Builder mergeAngleCalibration(gdsc.smlm.data.config.CalibrationConfig.AngleCalibration value) {
+        if (angleCalibrationBuilder_ == null) {
+          if (angleCalibration_ != null) {
+            angleCalibration_ =
+              gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.newBuilder(angleCalibration_).mergeFrom(value).buildPartial();
+          } else {
+            angleCalibration_ = value;
+          }
+          onChanged();
+        } else {
+          angleCalibrationBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The angle calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+       */
+      public Builder clearAngleCalibration() {
+        if (angleCalibrationBuilder_ == null) {
+          angleCalibration_ = null;
+          onChanged();
+        } else {
+          angleCalibration_ = null;
+          angleCalibrationBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The angle calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+       */
+      public gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.Builder getAngleCalibrationBuilder() {
+        
+        onChanged();
+        return getAngleCalibrationFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The angle calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+       */
+      public gdsc.smlm.data.config.CalibrationConfig.AngleCalibrationOrBuilder getAngleCalibrationOrBuilder() {
+        if (angleCalibrationBuilder_ != null) {
+          return angleCalibrationBuilder_.getMessageOrBuilder();
+        } else {
+          return angleCalibration_ == null ?
+              gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.getDefaultInstance() : angleCalibration_;
+        }
+      }
+      /**
+       * <pre>
+       * The angle calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AngleCalibration angle_calibration = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.CalibrationConfig.AngleCalibration, gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.AngleCalibrationOrBuilder> 
+          getAngleCalibrationFieldBuilder() {
+        if (angleCalibrationBuilder_ == null) {
+          angleCalibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              gdsc.smlm.data.config.CalibrationConfig.AngleCalibration, gdsc.smlm.data.config.CalibrationConfig.AngleCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.AngleCalibrationOrBuilder>(
+                  getAngleCalibration(),
+                  getParentForChildren(),
+                  isClean());
+          angleCalibration_ = null;
+        }
+        return angleCalibrationBuilder_;
+      }
+
       private gdsc.smlm.data.config.CalibrationConfig.CameraCalibration cameraCalibration_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.CalibrationConfig.CameraCalibration, gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.CameraCalibrationOrBuilder> cameraCalibrationBuilder_;
@@ -4582,7 +4735,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
        */
       public boolean hasCameraCalibration() {
         return cameraCalibrationBuilder_ != null || cameraCalibration_ != null;
@@ -4592,7 +4745,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.CameraCalibration getCameraCalibration() {
         if (cameraCalibrationBuilder_ == null) {
@@ -4606,7 +4759,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
        */
       public Builder setCameraCalibration(gdsc.smlm.data.config.CalibrationConfig.CameraCalibration value) {
         if (cameraCalibrationBuilder_ == null) {
@@ -4626,7 +4779,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
        */
       public Builder setCameraCalibration(
           gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.Builder builderForValue) {
@@ -4644,7 +4797,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
        */
       public Builder mergeCameraCalibration(gdsc.smlm.data.config.CalibrationConfig.CameraCalibration value) {
         if (cameraCalibrationBuilder_ == null) {
@@ -4666,7 +4819,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
        */
       public Builder clearCameraCalibration() {
         if (cameraCalibrationBuilder_ == null) {
@@ -4684,7 +4837,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.Builder getCameraCalibrationBuilder() {
         
@@ -4696,7 +4849,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationConfig.CameraCalibrationOrBuilder getCameraCalibrationOrBuilder() {
         if (cameraCalibrationBuilder_ != null) {
@@ -4711,7 +4864,7 @@ public final class CalibrationConfig {
        * The camera calibration.
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.CalibrationConfig.CameraCalibration, gdsc.smlm.data.config.CalibrationConfig.CameraCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.CameraCalibrationOrBuilder> 
@@ -4725,159 +4878,6 @@ public final class CalibrationConfig {
           cameraCalibration_ = null;
         }
         return cameraCalibrationBuilder_;
-      }
-
-      private gdsc.smlm.data.config.CalibrationConfig.PSFCalibration psfCalibration_ = null;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.CalibrationConfig.PSFCalibration, gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder> psfCalibrationBuilder_;
-      /**
-       * <pre>
-       * The PSF calibration.
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-       */
-      public boolean hasPsfCalibration() {
-        return psfCalibrationBuilder_ != null || psfCalibration_ != null;
-      }
-      /**
-       * <pre>
-       * The PSF calibration.
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-       */
-      public gdsc.smlm.data.config.CalibrationConfig.PSFCalibration getPsfCalibration() {
-        if (psfCalibrationBuilder_ == null) {
-          return psfCalibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.getDefaultInstance() : psfCalibration_;
-        } else {
-          return psfCalibrationBuilder_.getMessage();
-        }
-      }
-      /**
-       * <pre>
-       * The PSF calibration.
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-       */
-      public Builder setPsfCalibration(gdsc.smlm.data.config.CalibrationConfig.PSFCalibration value) {
-        if (psfCalibrationBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          psfCalibration_ = value;
-          onChanged();
-        } else {
-          psfCalibrationBuilder_.setMessage(value);
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The PSF calibration.
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-       */
-      public Builder setPsfCalibration(
-          gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder builderForValue) {
-        if (psfCalibrationBuilder_ == null) {
-          psfCalibration_ = builderForValue.build();
-          onChanged();
-        } else {
-          psfCalibrationBuilder_.setMessage(builderForValue.build());
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The PSF calibration.
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-       */
-      public Builder mergePsfCalibration(gdsc.smlm.data.config.CalibrationConfig.PSFCalibration value) {
-        if (psfCalibrationBuilder_ == null) {
-          if (psfCalibration_ != null) {
-            psfCalibration_ =
-              gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.newBuilder(psfCalibration_).mergeFrom(value).buildPartial();
-          } else {
-            psfCalibration_ = value;
-          }
-          onChanged();
-        } else {
-          psfCalibrationBuilder_.mergeFrom(value);
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The PSF calibration.
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-       */
-      public Builder clearPsfCalibration() {
-        if (psfCalibrationBuilder_ == null) {
-          psfCalibration_ = null;
-          onChanged();
-        } else {
-          psfCalibration_ = null;
-          psfCalibrationBuilder_ = null;
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The PSF calibration.
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-       */
-      public gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder getPsfCalibrationBuilder() {
-        
-        onChanged();
-        return getPsfCalibrationFieldBuilder().getBuilder();
-      }
-      /**
-       * <pre>
-       * The PSF calibration.
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-       */
-      public gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder getPsfCalibrationOrBuilder() {
-        if (psfCalibrationBuilder_ != null) {
-          return psfCalibrationBuilder_.getMessageOrBuilder();
-        } else {
-          return psfCalibration_ == null ?
-              gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.getDefaultInstance() : psfCalibration_;
-        }
-      }
-      /**
-       * <pre>
-       * The PSF calibration.
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFCalibration psf_calibration = 5;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.CalibrationConfig.PSFCalibration, gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder> 
-          getPsfCalibrationFieldBuilder() {
-        if (psfCalibrationBuilder_ == null) {
-          psfCalibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.CalibrationConfig.PSFCalibration, gdsc.smlm.data.config.CalibrationConfig.PSFCalibration.Builder, gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder>(
-                  getPsfCalibration(),
-                  getParentForChildren(),
-                  isClean());
-          psfCalibration_ = null;
-        }
-        return psfCalibrationBuilder_;
       }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -4944,15 +4944,15 @@ public final class CalibrationConfig {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_IntensityCalibration_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_AngleCalibration_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_AngleCalibration_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_CameraCalibration_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_CameraCalibration_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_PSFCalibration_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_PSFCalibration_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_Calibration_descriptor;
   private static final 
@@ -4976,23 +4976,23 @@ public final class CalibrationConfig {
       "Unit\022\025\n\rexposure_time\030\002 \001(\001\"b\n\024Intensity" +
       "Calibration\022<\n\016intensity_unit\030\001 \001(\0162$.gd" +
       "sc.smlm.data.config.IntensityUnit\022\014\n\004gai" +
-      "n\030\002 \001(\001\"\204\001\n\021CameraCalibration\0226\n\013camera_",
-      "type\030\001 \001(\0162!.gdsc.smlm.data.config.Camer" +
-      "aType\022\022\n\nread_noise\030\002 \001(\001\022\014\n\004bias\030\003 \001(\001\022" +
-      "\025\n\ramplification\030\004 \001(\001\"F\n\016PSFCalibration" +
-      "\0224\n\nangle_unit\030\001 \001(\0162 .gdsc.smlm.data.co" +
-      "nfig.AngleUnit\"\353\002\n\013Calibration\022H\n\024distan" +
-      "ce_calibration\030\001 \001(\0132*.gdsc.smlm.data.co" +
-      "nfig.DistanceCalibration\022@\n\020time_calibra" +
-      "tion\030\002 \001(\0132&.gdsc.smlm.data.config.TimeC" +
-      "alibration\022J\n\025intensity_calibration\030\003 \001(" +
-      "\0132+.gdsc.smlm.data.config.IntensityCalib",
-      "ration\022D\n\022camera_calibration\030\004 \001(\0132(.gds" +
-      "c.smlm.data.config.CameraCalibration\022>\n\017" +
-      "psf_calibration\030\005 \001(\0132%.gdsc.smlm.data.c" +
-      "onfig.PSFCalibration*?\n\nCameraType\022\022\n\016CA" +
-      "MERA_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t\n\005SC" +
-      "MOS\020\003B\023B\021CalibrationConfigb\006proto3"
+      "n\030\002 \001(\001\"H\n\020AngleCalibration\0224\n\nangle_uni",
+      "t\030\001 \001(\0162 .gdsc.smlm.data.config.AngleUni" +
+      "t\"\204\001\n\021CameraCalibration\0226\n\013camera_type\030\001" +
+      " \001(\0162!.gdsc.smlm.data.config.CameraType\022" +
+      "\022\n\nread_noise\030\002 \001(\001\022\014\n\004bias\030\003 \001(\001\022\025\n\ramp" +
+      "lification\030\004 \001(\001\"\357\002\n\013Calibration\022H\n\024dist" +
+      "ance_calibration\030\001 \001(\0132*.gdsc.smlm.data." +
+      "config.DistanceCalibration\022@\n\020time_calib" +
+      "ration\030\002 \001(\0132&.gdsc.smlm.data.config.Tim" +
+      "eCalibration\022J\n\025intensity_calibration\030\003 " +
+      "\001(\0132+.gdsc.smlm.data.config.IntensityCal",
+      "ibration\022B\n\021angle_calibration\030\004 \001(\0132\'.gd" +
+      "sc.smlm.data.config.AngleCalibration\022D\n\022" +
+      "camera_calibration\030\005 \001(\0132(.gdsc.smlm.dat" +
+      "a.config.CameraCalibration*?\n\nCameraType" +
+      "\022\022\n\016CAMERA_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002" +
+      "\022\t\n\005SCMOS\020\003B\023B\021CalibrationConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5025,24 +5025,24 @@ public final class CalibrationConfig {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_IntensityCalibration_descriptor,
         new java.lang.String[] { "IntensityUnit", "Gain", });
-    internal_static_gdsc_smlm_data_config_CameraCalibration_descriptor =
+    internal_static_gdsc_smlm_data_config_AngleCalibration_descriptor =
       getDescriptor().getMessageTypes().get(3);
+    internal_static_gdsc_smlm_data_config_AngleCalibration_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_AngleCalibration_descriptor,
+        new java.lang.String[] { "AngleUnit", });
+    internal_static_gdsc_smlm_data_config_CameraCalibration_descriptor =
+      getDescriptor().getMessageTypes().get(4);
     internal_static_gdsc_smlm_data_config_CameraCalibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CameraCalibration_descriptor,
         new java.lang.String[] { "CameraType", "ReadNoise", "Bias", "Amplification", });
-    internal_static_gdsc_smlm_data_config_PSFCalibration_descriptor =
-      getDescriptor().getMessageTypes().get(4);
-    internal_static_gdsc_smlm_data_config_PSFCalibration_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_PSFCalibration_descriptor,
-        new java.lang.String[] { "AngleUnit", });
     internal_static_gdsc_smlm_data_config_Calibration_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_gdsc_smlm_data_config_Calibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_Calibration_descriptor,
-        new java.lang.String[] { "DistanceCalibration", "TimeCalibration", "IntensityCalibration", "CameraCalibration", "PsfCalibration", });
+        new java.lang.String[] { "DistanceCalibration", "TimeCalibration", "IntensityCalibration", "AngleCalibration", "CameraCalibration", });
     gdsc.smlm.data.config.UnitConfig.getDescriptor();
   }
 

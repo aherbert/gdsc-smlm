@@ -6,6 +6,7 @@ import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.CalibrationConfigHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.FilterSettings;
 import gdsc.smlm.data.config.FitConfig.FitSettings;
@@ -18,6 +19,7 @@ import gdsc.smlm.data.config.PSFConfig.PSF;
 import gdsc.smlm.data.config.PSFConfig.PSFParameter;
 import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.PSFConfigHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
@@ -70,7 +72,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	// Extract the settings for convenience
 	private CalibrationWriter calibration;
-	private PSF.Builder psf;
+	PSF.Builder psf;
 	private FilterSettings.Builder filterSettings;
 	private FitSolverSettings.Builder fitSolverSettings;
 
@@ -166,11 +168,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private double varianceThreshold;
 
 	/**
-	 * Default constructor
+	 * Instantiates a new fit configuration.
 	 */
 	public FitConfiguration()
 	{
-		this(FitConfigHelper.defaultFitSettings.toBuilder());
+		this(FitConfigHelper.defaultFitSettings, CalibrationConfigHelper.defaultCalibration,
+				PSFConfigHelper.defaultOneAxisGaussian2DPSF);
 	}
 
 	/**
@@ -178,25 +181,110 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *
 	 * @param fitSettings
 	 *            the fit settings
+	 * @param calibration
+	 *            the calibration
+	 * @param psf
+	 *            the psf
 	 */
-	public FitConfiguration(FitSettings fitSettings)
-	{
-		this((fitSettings == null) ? null : fitSettings.toBuilder());
-	}
-
-	public FitConfiguration(FitSettings.Builder fitSettings)
+	public FitConfiguration(FitSettings fitSettings, Calibration calibration, PSF psf)
 	{
 		if (fitSettings == null)
 			throw new IllegalArgumentException("FitSettings is null");
+		if (calibration == null)
+			throw new IllegalArgumentException("Calibration is null");
+		if (psf == null)
+			throw new IllegalArgumentException("PSF is null");
+		init(fitSettings.toBuilder(), calibration.toBuilder(), psf.toBuilder());
+	}
+
+	/**
+	 * Instantiates a new fit configuration.
+	 *
+	 * @param fitSettings
+	 *            the fit settings
+	 * @param calibration
+	 *            the calibration
+	 * @param psf
+	 *            the psf
+	 */
+	public FitConfiguration(FitSettings.Builder fitSettings, Calibration.Builder calibration, PSF.Builder psf)
+	{
+		if (fitSettings == null)
+			throw new IllegalArgumentException("FitSettings is null");
+		if (calibration == null)
+			throw new IllegalArgumentException("Calibration is null");
+		if (psf == null)
+			throw new IllegalArgumentException("PSF is null");
+		init(fitSettings, calibration, psf);
+	}
+
+	/**
+	 * Instantiates a new fit configuration. Does not check for null objects.
+	 *
+	 * @param fitSettings
+	 *            the fit settings
+	 * @param calibration
+	 *            the calibration
+	 * @param psf
+	 *            the psf
+	 * @param dummy
+	 *            the dummy parameter
+	 */
+	FitConfiguration(FitSettings.Builder fitSettings, Calibration.Builder calibration, PSF.Builder psf, boolean dummy)
+	{
+		init(fitSettings, calibration, psf);
+	}
+
+	/**
+	 * Initialise the instance.
+	 *
+	 * @param fitSettings
+	 *            the fit settings
+	 * @param calibration
+	 *            the calibration
+	 * @param psf
+	 *            the psf
+	 */
+	private void init(FitSettings.Builder fitSettings, Calibration.Builder calibration, PSF.Builder psf)
+	{
 		this.fitSettings = fitSettings;
 
 		// Extract for convenience
-		calibration = new CalibrationWriter(fitSettings.getCalibrationBuilder());
-		psf = fitSettings.getPsfBuilder();
+		this.calibration = new CalibrationWriter(calibration);
+		this.psf = psf;
 		fitSolverSettings = fitSettings.getFitSolverSettingsBuilder();
 		filterSettings = fitSettings.getFilterSettingsBuilder();
 
 		initialiseState();
+	}
+
+	/**
+	 * Update the fit settings.
+	 *
+	 * @param fitSettings
+	 *            the fit settings
+	 */
+	void updateFitSettings(FitSettings.Builder fitSettings)
+	{
+		fitSolverSettings = fitSettings.getFitSolverSettingsBuilder();
+		filterSettings = fitSettings.getFilterSettingsBuilder();
+		updateFitSolverSettings();
+		updateFilterSettings();
+	}
+
+	/**
+	 * Ensure that the internal state of the object is initialised. This is used after deserialisation since some state
+	 * is not saved but restored from other property values.
+	 */
+	public void initialiseState()
+	{
+		// Create the state using the settings
+		if (dynamicPeakResult == null)
+			dynamicPeakResult = new DynamicPeakResult();
+		updateCalibration();
+		updatePSF();
+		updateFitSolverSettings();
+		updateFilterSettings();
 	}
 
 	/**
@@ -293,7 +381,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			signalToPhotons = 1;
 			signalToCount = gain;
 		}
-
+		
+		updateSignalThreshold();
 		updatePrecisionThreshold();
 	}
 
@@ -424,7 +513,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setFitSolverSettings(FitSolverSettings fitSolverSettings)
 	{
-		this.fitSolverSettings.clear().mergeFrom(fitSolverSettings);
+		fitSettings.setFitSolverSettings(fitSolverSettings);
+		this.fitSolverSettings = fitSettings.getFitSolverSettingsBuilder();
+		//this.fitSolverSettings.clear().mergeFrom(fitSolverSettings);
 		updateFitSolverSettings();
 	}
 
@@ -455,7 +546,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void mergeFilterSettings(FilterSettings filterSettings)
 	{
 		this.filterSettings.clear().mergeFrom(filterSettings);
-		updateDataFilterSettings();
+		updateFilterSettings();
 	}
 
 	/**
@@ -466,29 +557,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setFilterSettings(FilterSettings filterSettings)
 	{
-		this.filterSettings.mergeFrom(filterSettings);
-		updateDataFilterSettings();
+		fitSettings.setFilterSettings(filterSettings);
+		this.filterSettings = fitSettings.getFilterSettingsBuilder();
+		//this.filterSettings.mergeFrom(filterSettings);
+		updateFilterSettings();
 	}
 
-	private void updateDataFilterSettings()
+	private void updateFilterSettings()
 	{
 		updateSignalThreshold();
-	}
-
-	/**
-	 * Ensure that the internal state of the object is initialised. This is used after deserialisation since some state
-	 * is not saved but restored from other property values.
-	 */
-	public void initialiseState()
-	{
-		// Create the state using the settings
-		if (dynamicPeakResult == null)
-			dynamicPeakResult = new DynamicPeakResult();
-
-		updateCalibration();
-		updatePSF();
-		updateFitSolverSettings();
-		updateDataFilterSettings();
+		updatePrecisionThreshold();
+		updateCoordinateShift();
 	}
 
 	/*
@@ -1278,7 +1357,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		calibration.setNmPerPixel(nmPerPixel);
 		updateCalibration();
 	}
-	
+
 	/**
 	 * @return the gain (or 1 if the gain is invalid)
 	 */
@@ -2395,7 +2474,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			// This requires the gain
 			checkCalibration();
-			
+
 			MaximumLikelihoodFitter.SearchMethod searchMethod = convertSearchMethod();
 
 			// Only the Poisson likelihood function supports gradients

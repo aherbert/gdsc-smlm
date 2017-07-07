@@ -10,6 +10,7 @@ option java_outer_classname = "TemplateConfig";
 import "calibration_config.proto";
 import "fit_config.proto";
 import "results_config.proto";
+import "psf_config.proto";
 
 // Define the settings for the template.
 message TemplateSettings {
@@ -24,4 +25,7 @@ message TemplateSettings {
 	
 	// The results settings
 	ResultsSettings results_settings = 4;
+	
+	// The Point Spread Function (PSF)
+	PSF psf = 5;
 }

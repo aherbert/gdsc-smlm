@@ -13,4 +13,4 @@ perl suppress.pl $DIR/gdsc/smlm/data/config/ResultsConfig.java --unchecked --unu
 perl suppress.pl $DIR/gdsc/smlm/data/config/TestConfig.java --unchecked --unused
 perl suppress.pl $DIR/gdsc/smlm/data/config/FitConfig.java --unchecked --unused
 perl suppress.pl $DIR/gdsc/smlm/data/config/TemplateConfig.java --unchecked --unused
-perl suppress.pl $DIR/gdsc/smlm/data/config/GUIConfig.java --unchecked --unused
+perl suppress.pl $DIR/gdsc/smlm/data/config/GUIConfig.java --unchecked --unused --deprecation

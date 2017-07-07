@@ -37,7 +37,6 @@ import gdsc.smlm.data.config.CalibrationConfig.CameraType;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
-import gdsc.smlm.data.config.FitConfig.FitSettings;
 import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitConfigHelper;
@@ -1358,13 +1357,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 					IJ.log(note);
 
 				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
-				if (template.hasFitEngineSettings())
-				{
-					refreshSettings(template.getFitEngineSettings(), custom);
-				}
 				if (template.hasCalibration())
 				{
 					refreshSettings(template.getCalibration());
+				}
+				if (template.hasPsf())
+				{
+					refreshSettings(template.getPsf(), custom);
+				}
+				if (template.hasFitEngineSettings())
+				{
+					refreshSettings(template.getFitEngineSettings(), custom);
 				}
 				if (template.hasResultsSettings())
 				{
@@ -2579,9 +2582,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (cal == null)
 			return;
 
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 		// Do not use set() as we support merging a partial calibration
-		calibration.mergeCalibration(cal);
+		fitConfig.mergeCalibration(cal);
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
 		if (calibration.hasNmPerPixel())
 			textNmPerPixel.setText("" + calibration.getNmPerPixel());
@@ -2590,6 +2593,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 		textEMCCD.setState(calibration.isEMCCD());
 		if (calibration.hasExposureTime())
 			textExposure.setText("" + calibration.getExposureTime());
+	}
+
+	private void refreshSettings(PSF psf, boolean isCustomTemplate)
+	{
+		if (!isCustomTemplate || psf == null)
+			return;
+
+		// Do not use set() as we support merging a partial PSF
+		fitConfig.mergePSF(psf);
+
+		textPSF.select(getPSFTypeNames()[fitConfig.getPSFType().ordinal()]);
 	}
 
 	/**
@@ -2606,14 +2620,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private void refreshSettings(FitEngineSettings fitEngineSettings, boolean isCustomTemplate)
 	{
 		// Set the configuration
-		// Preserve the current settings for things we do not want to update
-		FitSettings current = fitConfig.getFitSettings();
 		// This will clear everything and merge the configuration
 		this.config.setFitEngineSettings(fitEngineSettings);
 		fitConfig = this.config.getFitConfiguration();
-		// Reset what we want to preserve
-		fitConfig.setCalibration(current.getCalibration());
-		fitConfig.setPSF(current.getPsf());
 
 		if (isCustomTemplate)
 			textPSF.select(getPSFTypeNames()[fitConfig.getPSFType().ordinal()]);

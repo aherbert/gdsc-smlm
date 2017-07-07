@@ -4452,60 +4452,10 @@ public final class FitConfig {
 
     /**
      * <pre>
-     * The calibration of the input data
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-     */
-    boolean hasCalibration();
-    /**
-     * <pre>
-     * The calibration of the input data
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-     */
-    gdsc.smlm.data.config.CalibrationConfig.Calibration getCalibration();
-    /**
-     * <pre>
-     * The calibration of the input data
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-     */
-    gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder getCalibrationOrBuilder();
-
-    /**
-     * <pre>
-     * The point spread function (PSF)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-     */
-    boolean hasPsf();
-    /**
-     * <pre>
-     * The point spread function (PSF)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-     */
-    gdsc.smlm.data.config.PSFConfig.PSF getPsf();
-    /**
-     * <pre>
-     * The point spread function (PSF)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-     */
-    gdsc.smlm.data.config.PSFConfig.PSFOrBuilder getPsfOrBuilder();
-
-    /**
-     * <pre>
      * The fit solver settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
     boolean hasFitSolverSettings();
     /**
@@ -4513,7 +4463,7 @@ public final class FitConfig {
      * The fit solver settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
     gdsc.smlm.data.config.FitConfig.FitSolverSettings getFitSolverSettings();
     /**
@@ -4521,7 +4471,7 @@ public final class FitConfig {
      * The fit solver settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
     gdsc.smlm.data.config.FitConfig.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder();
 
@@ -4530,7 +4480,7 @@ public final class FitConfig {
      * The filter settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
     boolean hasFilterSettings();
     /**
@@ -4538,7 +4488,7 @@ public final class FitConfig {
      * The filter settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
     gdsc.smlm.data.config.FitConfig.FilterSettings getFilterSettings();
     /**
@@ -4546,7 +4496,7 @@ public final class FitConfig {
      * The filter settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
     gdsc.smlm.data.config.FitConfig.FilterSettingsOrBuilder getFilterSettingsOrBuilder();
   }
@@ -4595,32 +4545,6 @@ public final class FitConfig {
               break;
             }
             case 10: {
-              gdsc.smlm.data.config.CalibrationConfig.Calibration.Builder subBuilder = null;
-              if (calibration_ != null) {
-                subBuilder = calibration_.toBuilder();
-              }
-              calibration_ = input.readMessage(gdsc.smlm.data.config.CalibrationConfig.Calibration.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(calibration_);
-                calibration_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              gdsc.smlm.data.config.PSFConfig.PSF.Builder subBuilder = null;
-              if (psf_ != null) {
-                subBuilder = psf_.toBuilder();
-              }
-              psf_ = input.readMessage(gdsc.smlm.data.config.PSFConfig.PSF.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(psf_);
-                psf_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 26: {
               gdsc.smlm.data.config.FitConfig.FitSolverSettings.Builder subBuilder = null;
               if (fitSolverSettings_ != null) {
                 subBuilder = fitSolverSettings_.toBuilder();
@@ -4633,7 +4557,7 @@ public final class FitConfig {
 
               break;
             }
-            case 34: {
+            case 18: {
               gdsc.smlm.data.config.FitConfig.FilterSettings.Builder subBuilder = null;
               if (filterSettings_ != null) {
                 subBuilder = filterSettings_.toBuilder();
@@ -4669,80 +4593,14 @@ public final class FitConfig {
               gdsc.smlm.data.config.FitConfig.FitSettings.class, gdsc.smlm.data.config.FitConfig.FitSettings.Builder.class);
     }
 
-    public static final int CALIBRATION_FIELD_NUMBER = 1;
-    private gdsc.smlm.data.config.CalibrationConfig.Calibration calibration_;
-    /**
-     * <pre>
-     * The calibration of the input data
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-     */
-    public boolean hasCalibration() {
-      return calibration_ != null;
-    }
-    /**
-     * <pre>
-     * The calibration of the input data
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-     */
-    public gdsc.smlm.data.config.CalibrationConfig.Calibration getCalibration() {
-      return calibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.Calibration.getDefaultInstance() : calibration_;
-    }
-    /**
-     * <pre>
-     * The calibration of the input data
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-     */
-    public gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder getCalibrationOrBuilder() {
-      return getCalibration();
-    }
-
-    public static final int PSF_FIELD_NUMBER = 2;
-    private gdsc.smlm.data.config.PSFConfig.PSF psf_;
-    /**
-     * <pre>
-     * The point spread function (PSF)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-     */
-    public boolean hasPsf() {
-      return psf_ != null;
-    }
-    /**
-     * <pre>
-     * The point spread function (PSF)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-     */
-    public gdsc.smlm.data.config.PSFConfig.PSF getPsf() {
-      return psf_ == null ? gdsc.smlm.data.config.PSFConfig.PSF.getDefaultInstance() : psf_;
-    }
-    /**
-     * <pre>
-     * The point spread function (PSF)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-     */
-    public gdsc.smlm.data.config.PSFConfig.PSFOrBuilder getPsfOrBuilder() {
-      return getPsf();
-    }
-
-    public static final int FIT_SOLVER_SETTINGS_FIELD_NUMBER = 3;
+    public static final int FIT_SOLVER_SETTINGS_FIELD_NUMBER = 1;
     private gdsc.smlm.data.config.FitConfig.FitSolverSettings fitSolverSettings_;
     /**
      * <pre>
      * The fit solver settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
     public boolean hasFitSolverSettings() {
       return fitSolverSettings_ != null;
@@ -4752,7 +4610,7 @@ public final class FitConfig {
      * The fit solver settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
     public gdsc.smlm.data.config.FitConfig.FitSolverSettings getFitSolverSettings() {
       return fitSolverSettings_ == null ? gdsc.smlm.data.config.FitConfig.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
@@ -4762,20 +4620,20 @@ public final class FitConfig {
      * The fit solver settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+     * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
     public gdsc.smlm.data.config.FitConfig.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
       return getFitSolverSettings();
     }
 
-    public static final int FILTER_SETTINGS_FIELD_NUMBER = 4;
+    public static final int FILTER_SETTINGS_FIELD_NUMBER = 2;
     private gdsc.smlm.data.config.FitConfig.FilterSettings filterSettings_;
     /**
      * <pre>
      * The filter settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
     public boolean hasFilterSettings() {
       return filterSettings_ != null;
@@ -4785,7 +4643,7 @@ public final class FitConfig {
      * The filter settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
     public gdsc.smlm.data.config.FitConfig.FilterSettings getFilterSettings() {
       return filterSettings_ == null ? gdsc.smlm.data.config.FitConfig.FilterSettings.getDefaultInstance() : filterSettings_;
@@ -4795,7 +4653,7 @@ public final class FitConfig {
      * The filter settings
      * </pre>
      *
-     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+     * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
     public gdsc.smlm.data.config.FitConfig.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
       return getFilterSettings();
@@ -4813,17 +4671,11 @@ public final class FitConfig {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (calibration_ != null) {
-        output.writeMessage(1, getCalibration());
-      }
-      if (psf_ != null) {
-        output.writeMessage(2, getPsf());
-      }
       if (fitSolverSettings_ != null) {
-        output.writeMessage(3, getFitSolverSettings());
+        output.writeMessage(1, getFitSolverSettings());
       }
       if (filterSettings_ != null) {
-        output.writeMessage(4, getFilterSettings());
+        output.writeMessage(2, getFilterSettings());
       }
     }
 
@@ -4832,21 +4684,13 @@ public final class FitConfig {
       if (size != -1) return size;
 
       size = 0;
-      if (calibration_ != null) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, getCalibration());
-      }
-      if (psf_ != null) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, getPsf());
-      }
       if (fitSolverSettings_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, getFitSolverSettings());
+          .computeMessageSize(1, getFitSolverSettings());
       }
       if (filterSettings_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, getFilterSettings());
+          .computeMessageSize(2, getFilterSettings());
       }
       memoizedSize = size;
       return size;
@@ -4864,16 +4708,6 @@ public final class FitConfig {
       gdsc.smlm.data.config.FitConfig.FitSettings other = (gdsc.smlm.data.config.FitConfig.FitSettings) obj;
 
       boolean result = true;
-      result = result && (hasCalibration() == other.hasCalibration());
-      if (hasCalibration()) {
-        result = result && getCalibration()
-            .equals(other.getCalibration());
-      }
-      result = result && (hasPsf() == other.hasPsf());
-      if (hasPsf()) {
-        result = result && getPsf()
-            .equals(other.getPsf());
-      }
       result = result && (hasFitSolverSettings() == other.hasFitSolverSettings());
       if (hasFitSolverSettings()) {
         result = result && getFitSolverSettings()
@@ -4894,14 +4728,6 @@ public final class FitConfig {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasCalibration()) {
-        hash = (37 * hash) + CALIBRATION_FIELD_NUMBER;
-        hash = (53 * hash) + getCalibration().hashCode();
-      }
-      if (hasPsf()) {
-        hash = (37 * hash) + PSF_FIELD_NUMBER;
-        hash = (53 * hash) + getPsf().hashCode();
-      }
       if (hasFitSolverSettings()) {
         hash = (37 * hash) + FIT_SOLVER_SETTINGS_FIELD_NUMBER;
         hash = (53 * hash) + getFitSolverSettings().hashCode();
@@ -5044,18 +4870,6 @@ public final class FitConfig {
       }
       public Builder clear() {
         super.clear();
-        if (calibrationBuilder_ == null) {
-          calibration_ = null;
-        } else {
-          calibration_ = null;
-          calibrationBuilder_ = null;
-        }
-        if (psfBuilder_ == null) {
-          psf_ = null;
-        } else {
-          psf_ = null;
-          psfBuilder_ = null;
-        }
         if (fitSolverSettingsBuilder_ == null) {
           fitSolverSettings_ = null;
         } else {
@@ -5090,16 +4904,6 @@ public final class FitConfig {
 
       public gdsc.smlm.data.config.FitConfig.FitSettings buildPartial() {
         gdsc.smlm.data.config.FitConfig.FitSettings result = new gdsc.smlm.data.config.FitConfig.FitSettings(this);
-        if (calibrationBuilder_ == null) {
-          result.calibration_ = calibration_;
-        } else {
-          result.calibration_ = calibrationBuilder_.build();
-        }
-        if (psfBuilder_ == null) {
-          result.psf_ = psf_;
-        } else {
-          result.psf_ = psfBuilder_.build();
-        }
         if (fitSolverSettingsBuilder_ == null) {
           result.fitSolverSettings_ = fitSolverSettings_;
         } else {
@@ -5151,12 +4955,6 @@ public final class FitConfig {
 
       public Builder mergeFrom(gdsc.smlm.data.config.FitConfig.FitSettings other) {
         if (other == gdsc.smlm.data.config.FitConfig.FitSettings.getDefaultInstance()) return this;
-        if (other.hasCalibration()) {
-          mergeCalibration(other.getCalibration());
-        }
-        if (other.hasPsf()) {
-          mergePsf(other.getPsf());
-        }
         if (other.hasFitSolverSettings()) {
           mergeFitSolverSettings(other.getFitSolverSettings());
         }
@@ -5189,312 +4987,6 @@ public final class FitConfig {
         return this;
       }
 
-      private gdsc.smlm.data.config.CalibrationConfig.Calibration calibration_ = null;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.CalibrationConfig.Calibration, gdsc.smlm.data.config.CalibrationConfig.Calibration.Builder, gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder> calibrationBuilder_;
-      /**
-       * <pre>
-       * The calibration of the input data
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-       */
-      public boolean hasCalibration() {
-        return calibrationBuilder_ != null || calibration_ != null;
-      }
-      /**
-       * <pre>
-       * The calibration of the input data
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-       */
-      public gdsc.smlm.data.config.CalibrationConfig.Calibration getCalibration() {
-        if (calibrationBuilder_ == null) {
-          return calibration_ == null ? gdsc.smlm.data.config.CalibrationConfig.Calibration.getDefaultInstance() : calibration_;
-        } else {
-          return calibrationBuilder_.getMessage();
-        }
-      }
-      /**
-       * <pre>
-       * The calibration of the input data
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-       */
-      public Builder setCalibration(gdsc.smlm.data.config.CalibrationConfig.Calibration value) {
-        if (calibrationBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          calibration_ = value;
-          onChanged();
-        } else {
-          calibrationBuilder_.setMessage(value);
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The calibration of the input data
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-       */
-      public Builder setCalibration(
-          gdsc.smlm.data.config.CalibrationConfig.Calibration.Builder builderForValue) {
-        if (calibrationBuilder_ == null) {
-          calibration_ = builderForValue.build();
-          onChanged();
-        } else {
-          calibrationBuilder_.setMessage(builderForValue.build());
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The calibration of the input data
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-       */
-      public Builder mergeCalibration(gdsc.smlm.data.config.CalibrationConfig.Calibration value) {
-        if (calibrationBuilder_ == null) {
-          if (calibration_ != null) {
-            calibration_ =
-              gdsc.smlm.data.config.CalibrationConfig.Calibration.newBuilder(calibration_).mergeFrom(value).buildPartial();
-          } else {
-            calibration_ = value;
-          }
-          onChanged();
-        } else {
-          calibrationBuilder_.mergeFrom(value);
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The calibration of the input data
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-       */
-      public Builder clearCalibration() {
-        if (calibrationBuilder_ == null) {
-          calibration_ = null;
-          onChanged();
-        } else {
-          calibration_ = null;
-          calibrationBuilder_ = null;
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The calibration of the input data
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-       */
-      public gdsc.smlm.data.config.CalibrationConfig.Calibration.Builder getCalibrationBuilder() {
-        
-        onChanged();
-        return getCalibrationFieldBuilder().getBuilder();
-      }
-      /**
-       * <pre>
-       * The calibration of the input data
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-       */
-      public gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder getCalibrationOrBuilder() {
-        if (calibrationBuilder_ != null) {
-          return calibrationBuilder_.getMessageOrBuilder();
-        } else {
-          return calibration_ == null ?
-              gdsc.smlm.data.config.CalibrationConfig.Calibration.getDefaultInstance() : calibration_;
-        }
-      }
-      /**
-       * <pre>
-       * The calibration of the input data
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 1;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.CalibrationConfig.Calibration, gdsc.smlm.data.config.CalibrationConfig.Calibration.Builder, gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder> 
-          getCalibrationFieldBuilder() {
-        if (calibrationBuilder_ == null) {
-          calibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.CalibrationConfig.Calibration, gdsc.smlm.data.config.CalibrationConfig.Calibration.Builder, gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder>(
-                  getCalibration(),
-                  getParentForChildren(),
-                  isClean());
-          calibration_ = null;
-        }
-        return calibrationBuilder_;
-      }
-
-      private gdsc.smlm.data.config.PSFConfig.PSF psf_ = null;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.PSFConfig.PSF, gdsc.smlm.data.config.PSFConfig.PSF.Builder, gdsc.smlm.data.config.PSFConfig.PSFOrBuilder> psfBuilder_;
-      /**
-       * <pre>
-       * The point spread function (PSF)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-       */
-      public boolean hasPsf() {
-        return psfBuilder_ != null || psf_ != null;
-      }
-      /**
-       * <pre>
-       * The point spread function (PSF)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-       */
-      public gdsc.smlm.data.config.PSFConfig.PSF getPsf() {
-        if (psfBuilder_ == null) {
-          return psf_ == null ? gdsc.smlm.data.config.PSFConfig.PSF.getDefaultInstance() : psf_;
-        } else {
-          return psfBuilder_.getMessage();
-        }
-      }
-      /**
-       * <pre>
-       * The point spread function (PSF)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-       */
-      public Builder setPsf(gdsc.smlm.data.config.PSFConfig.PSF value) {
-        if (psfBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          psf_ = value;
-          onChanged();
-        } else {
-          psfBuilder_.setMessage(value);
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The point spread function (PSF)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-       */
-      public Builder setPsf(
-          gdsc.smlm.data.config.PSFConfig.PSF.Builder builderForValue) {
-        if (psfBuilder_ == null) {
-          psf_ = builderForValue.build();
-          onChanged();
-        } else {
-          psfBuilder_.setMessage(builderForValue.build());
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The point spread function (PSF)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-       */
-      public Builder mergePsf(gdsc.smlm.data.config.PSFConfig.PSF value) {
-        if (psfBuilder_ == null) {
-          if (psf_ != null) {
-            psf_ =
-              gdsc.smlm.data.config.PSFConfig.PSF.newBuilder(psf_).mergeFrom(value).buildPartial();
-          } else {
-            psf_ = value;
-          }
-          onChanged();
-        } else {
-          psfBuilder_.mergeFrom(value);
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The point spread function (PSF)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-       */
-      public Builder clearPsf() {
-        if (psfBuilder_ == null) {
-          psf_ = null;
-          onChanged();
-        } else {
-          psf_ = null;
-          psfBuilder_ = null;
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * The point spread function (PSF)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-       */
-      public gdsc.smlm.data.config.PSFConfig.PSF.Builder getPsfBuilder() {
-        
-        onChanged();
-        return getPsfFieldBuilder().getBuilder();
-      }
-      /**
-       * <pre>
-       * The point spread function (PSF)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-       */
-      public gdsc.smlm.data.config.PSFConfig.PSFOrBuilder getPsfOrBuilder() {
-        if (psfBuilder_ != null) {
-          return psfBuilder_.getMessageOrBuilder();
-        } else {
-          return psf_ == null ?
-              gdsc.smlm.data.config.PSFConfig.PSF.getDefaultInstance() : psf_;
-        }
-      }
-      /**
-       * <pre>
-       * The point spread function (PSF)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSF psf = 2;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.PSFConfig.PSF, gdsc.smlm.data.config.PSFConfig.PSF.Builder, gdsc.smlm.data.config.PSFConfig.PSFOrBuilder> 
-          getPsfFieldBuilder() {
-        if (psfBuilder_ == null) {
-          psfBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.PSFConfig.PSF, gdsc.smlm.data.config.PSFConfig.PSF.Builder, gdsc.smlm.data.config.PSFConfig.PSFOrBuilder>(
-                  getPsf(),
-                  getParentForChildren(),
-                  isClean());
-          psf_ = null;
-        }
-        return psfBuilder_;
-      }
-
       private gdsc.smlm.data.config.FitConfig.FitSolverSettings fitSolverSettings_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitConfig.FitSolverSettings, gdsc.smlm.data.config.FitConfig.FitSolverSettings.Builder, gdsc.smlm.data.config.FitConfig.FitSolverSettingsOrBuilder> fitSolverSettingsBuilder_;
@@ -5503,7 +4995,7 @@ public final class FitConfig {
        * The fit solver settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       public boolean hasFitSolverSettings() {
         return fitSolverSettingsBuilder_ != null || fitSolverSettings_ != null;
@@ -5513,7 +5005,7 @@ public final class FitConfig {
        * The fit solver settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       public gdsc.smlm.data.config.FitConfig.FitSolverSettings getFitSolverSettings() {
         if (fitSolverSettingsBuilder_ == null) {
@@ -5527,7 +5019,7 @@ public final class FitConfig {
        * The fit solver settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       public Builder setFitSolverSettings(gdsc.smlm.data.config.FitConfig.FitSolverSettings value) {
         if (fitSolverSettingsBuilder_ == null) {
@@ -5547,7 +5039,7 @@ public final class FitConfig {
        * The fit solver settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       public Builder setFitSolverSettings(
           gdsc.smlm.data.config.FitConfig.FitSolverSettings.Builder builderForValue) {
@@ -5565,7 +5057,7 @@ public final class FitConfig {
        * The fit solver settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       public Builder mergeFitSolverSettings(gdsc.smlm.data.config.FitConfig.FitSolverSettings value) {
         if (fitSolverSettingsBuilder_ == null) {
@@ -5587,7 +5079,7 @@ public final class FitConfig {
        * The fit solver settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       public Builder clearFitSolverSettings() {
         if (fitSolverSettingsBuilder_ == null) {
@@ -5605,7 +5097,7 @@ public final class FitConfig {
        * The fit solver settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       public gdsc.smlm.data.config.FitConfig.FitSolverSettings.Builder getFitSolverSettingsBuilder() {
         
@@ -5617,7 +5109,7 @@ public final class FitConfig {
        * The fit solver settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       public gdsc.smlm.data.config.FitConfig.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
         if (fitSolverSettingsBuilder_ != null) {
@@ -5632,7 +5124,7 @@ public final class FitConfig {
        * The fit solver settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 3;</code>
+       * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitConfig.FitSolverSettings, gdsc.smlm.data.config.FitConfig.FitSolverSettings.Builder, gdsc.smlm.data.config.FitConfig.FitSolverSettingsOrBuilder> 
@@ -5656,7 +5148,7 @@ public final class FitConfig {
        * The filter settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       public boolean hasFilterSettings() {
         return filterSettingsBuilder_ != null || filterSettings_ != null;
@@ -5666,7 +5158,7 @@ public final class FitConfig {
        * The filter settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       public gdsc.smlm.data.config.FitConfig.FilterSettings getFilterSettings() {
         if (filterSettingsBuilder_ == null) {
@@ -5680,7 +5172,7 @@ public final class FitConfig {
        * The filter settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       public Builder setFilterSettings(gdsc.smlm.data.config.FitConfig.FilterSettings value) {
         if (filterSettingsBuilder_ == null) {
@@ -5700,7 +5192,7 @@ public final class FitConfig {
        * The filter settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       public Builder setFilterSettings(
           gdsc.smlm.data.config.FitConfig.FilterSettings.Builder builderForValue) {
@@ -5718,7 +5210,7 @@ public final class FitConfig {
        * The filter settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       public Builder mergeFilterSettings(gdsc.smlm.data.config.FitConfig.FilterSettings value) {
         if (filterSettingsBuilder_ == null) {
@@ -5740,7 +5232,7 @@ public final class FitConfig {
        * The filter settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       public Builder clearFilterSettings() {
         if (filterSettingsBuilder_ == null) {
@@ -5758,7 +5250,7 @@ public final class FitConfig {
        * The filter settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       public gdsc.smlm.data.config.FitConfig.FilterSettings.Builder getFilterSettingsBuilder() {
         
@@ -5770,7 +5262,7 @@ public final class FitConfig {
        * The filter settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       public gdsc.smlm.data.config.FitConfig.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
         if (filterSettingsBuilder_ != null) {
@@ -5785,7 +5277,7 @@ public final class FitConfig {
        * The filter settings
        * </pre>
        *
-       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 4;</code>
+       * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitConfig.FilterSettings, gdsc.smlm.data.config.FitConfig.FilterSettings.Builder, gdsc.smlm.data.config.FitConfig.FilterSettingsOrBuilder> 
@@ -10851,77 +10343,74 @@ public final class FitConfig {
   static {
     java.lang.String[] descriptorData = {
       "\n\020fit_config.proto\022\025gdsc.smlm.data.confi" +
-      "g\032\020psf_config.proto\032\030calibration_config." +
-      "proto\"\307\004\n\021FitSolverSettings\022\021\n\tfixed_psf" +
-      "\030\001 \001(\010\022\"\n\032disable_background_fitting\030\002 \001" +
-      "(\010\022\036\n\026disable_signal_fitting\030\003 \001(\010\0224\n\nfi" +
-      "t_solver\030\004 \001(\0162 .gdsc.smlm.data.config.F" +
-      "itSolver\022\030\n\020fixed_iterations\030\005 \001(\010\022\026\n\016ma" +
-      "x_iterations\030\006 \001(\005\022\032\n\022relative_threshold" +
-      "\030\007 \001(\001\022\032\n\022absolute_threshold\030\010 \001(\001\022$\n\034pa" +
-      "rameter_relative_threshold\030\t \001(\001\022$\n\034para",
-      "meter_absolute_threshold\030\n \001(\001\022\016\n\006lambda" +
-      "\030\013 \001(\001\022:\n\rsearch_method\030\014 \001(\0162#.gdsc.sml" +
-      "m.data.config.SearchMethod\022\"\n\032gradient_l" +
-      "ine_minimisation\030\r \001(\010\022\024\n\014model_camera\030\016" +
-      " \001(\010\022 \n\030max_function_evaluations\030\017 \001(\005\022\024" +
-      "\n\014use_clamping\030\020 \001(\010\022\034\n\024use_dynamic_clam" +
-      "ping\030\021 \001(\010\022\023\n\013clamp_value\030\022 \003(\001\"\233\002\n\016Filt" +
-      "erSettings\022\024\n\014shift_factor\030\001 \001(\001\022\027\n\017sign" +
-      "al_strength\030\002 \001(\001\022\023\n\013min_photons\030\003 \001(\001\022\033" +
-      "\n\023precision_threshold\030\004 \001(\001\022\"\n\032precision",
-      "_using_background\030\005 \001(\010\022\030\n\020min_width_fac" +
-      "tor\030\006 \001(\001\022\030\n\020max_width_factor\030\007 \001(\001\022\035\n\025d" +
-      "isable_simple_filter\030\010 \001(\010\022\024\n\014smart_filt" +
-      "er\030\t \001(\010\022\033\n\023smart_filter_string\030\n \001(\t\"\366\001" +
-      "\n\013FitSettings\0227\n\013calibration\030\001 \001(\0132\".gds" +
-      "c.smlm.data.config.Calibration\022\'\n\003psf\030\002 " +
-      "\001(\0132\032.gdsc.smlm.data.config.PSF\022E\n\023fit_s" +
-      "olver_settings\030\003 \001(\0132(.gdsc.smlm.data.co" +
-      "nfig.FitSolverSettings\022>\n\017filter_setting" +
-      "s\030\004 \001(\0132%.gdsc.smlm.data.config.FilterSe",
-      "ttings\"4\n\021RelativeParameter\022\r\n\005value\030\001 \001" +
-      "(\001\022\020\n\010absolute\030\002 \001(\010\"\216\001\n\nDataFilter\022C\n\022d" +
-      "ata_filter_method\030\001 \001(\0162\'.gdsc.smlm.data" +
-      ".config.DataFilterMethod\022;\n\tparameter\030\002 " +
-      "\003(\0132(.gdsc.smlm.data.config.RelativePara" +
-      "meter\"\215\001\n\022DataFilterSettings\022?\n\020data_fil" +
-      "ter_type\030\001 \001(\0162%.gdsc.smlm.data.config.D" +
-      "ataFilterType\0226\n\013data_filter\030\002 \003(\0132!.gds" +
-      "c.smlm.data.config.DataFilter\"\303\004\n\021FitEng" +
-      "ineSettings\0228\n\014fit_settings\030\001 \001(\0132\".gdsc",
-      ".smlm.data.config.FitSettings\022A\n\014noise_m" +
-      "ethod\030\002 \001(\0162+.gdsc.smlm.data.config.Nois" +
-      "eEstimatorMethod\022G\n\024data_filter_settings" +
-      "\030\003 \001(\0132).gdsc.smlm.data.config.DataFilte" +
-      "rSettings\0228\n\006search\030\004 \001(\0132(.gdsc.smlm.da" +
-      "ta.config.RelativeParameter\0228\n\006border\030\005 " +
+      "g\"\307\004\n\021FitSolverSettings\022\021\n\tfixed_psf\030\001 \001" +
+      "(\010\022\"\n\032disable_background_fitting\030\002 \001(\010\022\036" +
+      "\n\026disable_signal_fitting\030\003 \001(\010\0224\n\nfit_so" +
+      "lver\030\004 \001(\0162 .gdsc.smlm.data.config.FitSo" +
+      "lver\022\030\n\020fixed_iterations\030\005 \001(\010\022\026\n\016max_it" +
+      "erations\030\006 \001(\005\022\032\n\022relative_threshold\030\007 \001" +
+      "(\001\022\032\n\022absolute_threshold\030\010 \001(\001\022$\n\034parame" +
+      "ter_relative_threshold\030\t \001(\001\022$\n\034paramete" +
+      "r_absolute_threshold\030\n \001(\001\022\016\n\006lambda\030\013 \001",
+      "(\001\022:\n\rsearch_method\030\014 \001(\0162#.gdsc.smlm.da" +
+      "ta.config.SearchMethod\022\"\n\032gradient_line_" +
+      "minimisation\030\r \001(\010\022\024\n\014model_camera\030\016 \001(\010" +
+      "\022 \n\030max_function_evaluations\030\017 \001(\005\022\024\n\014us" +
+      "e_clamping\030\020 \001(\010\022\034\n\024use_dynamic_clamping" +
+      "\030\021 \001(\010\022\023\n\013clamp_value\030\022 \003(\001\"\233\002\n\016FilterSe" +
+      "ttings\022\024\n\014shift_factor\030\001 \001(\001\022\027\n\017signal_s" +
+      "trength\030\002 \001(\001\022\023\n\013min_photons\030\003 \001(\001\022\033\n\023pr" +
+      "ecision_threshold\030\004 \001(\001\022\"\n\032precision_usi" +
+      "ng_background\030\005 \001(\010\022\030\n\020min_width_factor\030",
+      "\006 \001(\001\022\030\n\020max_width_factor\030\007 \001(\001\022\035\n\025disab" +
+      "le_simple_filter\030\010 \001(\010\022\024\n\014smart_filter\030\t" +
+      " \001(\010\022\033\n\023smart_filter_string\030\n \001(\t\"\224\001\n\013Fi" +
+      "tSettings\022E\n\023fit_solver_settings\030\001 \001(\0132(" +
+      ".gdsc.smlm.data.config.FitSolverSettings" +
+      "\022>\n\017filter_settings\030\002 \001(\0132%.gdsc.smlm.da" +
+      "ta.config.FilterSettings\"4\n\021RelativePara" +
+      "meter\022\r\n\005value\030\001 \001(\001\022\020\n\010absolute\030\002 \001(\010\"\216" +
+      "\001\n\nDataFilter\022C\n\022data_filter_method\030\001 \001(" +
+      "\0162\'.gdsc.smlm.data.config.DataFilterMeth",
+      "od\022;\n\tparameter\030\002 \003(\0132(.gdsc.smlm.data.c" +
+      "onfig.RelativeParameter\"\215\001\n\022DataFilterSe" +
+      "ttings\022?\n\020data_filter_type\030\001 \001(\0162%.gdsc." +
+      "smlm.data.config.DataFilterType\0226\n\013data_" +
+      "filter\030\002 \003(\0132!.gdsc.smlm.data.config.Dat" +
+      "aFilter\"\303\004\n\021FitEngineSettings\0228\n\014fit_set" +
+      "tings\030\001 \001(\0132\".gdsc.smlm.data.config.FitS" +
+      "ettings\022A\n\014noise_method\030\002 \001(\0162+.gdsc.sml" +
+      "m.data.config.NoiseEstimatorMethod\022G\n\024da" +
+      "ta_filter_settings\030\003 \001(\0132).gdsc.smlm.dat",
+      "a.config.DataFilterSettings\0228\n\006search\030\004 " +
       "\001(\0132(.gdsc.smlm.data.config.RelativePara" +
-      "meter\0229\n\007fitting\030\006 \001(\0132(.gdsc.smlm.data." +
-      "config.RelativeParameter\022\032\n\022include_neig" +
-      "hbours\030\007 \001(\010\022\"\n\032neighbour_height_thresho",
-      "ld\030\010 \001(\001\022\033\n\023residuals_threshold\030\t \001(\001\022D\n" +
-      "\022duplicate_distance\030\n \001(\0132(.gdsc.smlm.da" +
-      "ta.config.RelativeParameter\022\026\n\016failures_" +
-      "limit\030\013 \001(\005*e\n\tFitSolver\022\013\n\007LVM_LSE\020\000\022\013\n" +
-      "\007LVM_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010FAS" +
-      "T_MLE\020\004\022\031\n\025BACKTRACKING_FAST_MLE\020\005*\231\001\n\014S" +
-      "earchMethod\022\022\n\016POWELL_BOUNDED\020\000\022\n\n\006POWEL" +
-      "L\020\001\022\022\n\016POWELL_ADAPTER\020\002\022\n\n\006BOBYQA\020\003\022\t\n\005C" +
-      "MAES\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022\031\n\025CON" +
-      "JUGATE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*6\n\016DataFi",
-      "lterType\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENCE\020\001\022\010\n\004" +
-      "JURY\020\002*Y\n\020DataFilterMethod\022\010\n\004MEAN\020\000\022\016\n\n" +
-      "BLOCK_MEAN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014\n\010GAUSS" +
-      "IAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024NoiseEstimatorMeth" +
-      "od\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWEST_PIXELS\020\001\022%\n" +
-      "!RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\002\022&\n\"" +
-      "RESIDUALS_LEAST_TRIMMED_OF_SQUARES\020\003\022#\n\037" +
-      "RESIDUALS_LEAST_MEAN_OF_SQUARES\020\004\022+\n\'QUI" +
-      "CK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\005\022," +
-      "\n(QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUAR",
-      "ES\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEAN_OF_SQ" +
-      "UARES\020\007B\013B\tFitConfigb\006proto3"
+      "meter\0228\n\006border\030\005 \001(\0132(.gdsc.smlm.data.c" +
+      "onfig.RelativeParameter\0229\n\007fitting\030\006 \001(\013" +
+      "2(.gdsc.smlm.data.config.RelativeParamet" +
+      "er\022\032\n\022include_neighbours\030\007 \001(\010\022\"\n\032neighb" +
+      "our_height_threshold\030\010 \001(\001\022\033\n\023residuals_" +
+      "threshold\030\t \001(\001\022D\n\022duplicate_distance\030\n " +
+      "\001(\0132(.gdsc.smlm.data.config.RelativePara" +
+      "meter\022\026\n\016failures_limit\030\013 \001(\005*e\n\tFitSolv",
+      "er\022\013\n\007LVM_LSE\020\000\022\013\n\007LVM_MLE\020\001\022\014\n\010LVM_WLSE" +
+      "\020\002\022\007\n\003MLE\020\003\022\014\n\010FAST_MLE\020\004\022\031\n\025BACKTRACKIN" +
+      "G_FAST_MLE\020\005*\231\001\n\014SearchMethod\022\022\n\016POWELL_" +
+      "BOUNDED\020\000\022\n\n\006POWELL\020\001\022\022\n\016POWELL_ADAPTER\020" +
+      "\002\022\n\n\006BOBYQA\020\003\022\t\n\005CMAES\020\004\022\031\n\025CONJUGATE_GR" +
+      "ADIENT_FR\020\005\022\031\n\025CONJUGATE_GRADIENT_PR\020\006\022\010" +
+      "\n\004BFGS\020\007*6\n\016DataFilterType\022\n\n\006SINGLE\020\000\022\016" +
+      "\n\nDIFFERENCE\020\001\022\010\n\004JURY\020\002*Y\n\020DataFilterMe" +
+      "thod\022\010\n\004MEAN\020\000\022\016\n\nBLOCK_MEAN\020\001\022\021\n\rCIRCUL" +
+      "AR_MEAN\020\002\022\014\n\010GAUSSIAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024",
+      "NoiseEstimatorMethod\022\016\n\nALL_PIXELS\020\000\022\021\n\r" +
+      "LOWEST_PIXELS\020\001\022%\n!RESIDUALS_LEAST_MEDIA" +
+      "N_OF_SQUARES\020\002\022&\n\"RESIDUALS_LEAST_TRIMME" +
+      "D_OF_SQUARES\020\003\022#\n\037RESIDUALS_LEAST_MEAN_O" +
+      "F_SQUARES\020\004\022+\n\'QUICK_RESIDUALS_LEAST_MED" +
+      "IAN_OF_SQUARES\020\005\022,\n(QUICK_RESIDUALS_LEAS" +
+      "T_TRIMMED_OF_SQUARES\020\006\022)\n%QUICK_RESIDUAL" +
+      "S_LEAST_MEAN_OF_SQUARES\020\007B\013B\tFitConfigb\006" +
+      "proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -10934,8 +10423,6 @@ public final class FitConfig {
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          gdsc.smlm.data.config.PSFConfig.getDescriptor(),
-          gdsc.smlm.data.config.CalibrationConfig.getDescriptor(),
         }, assigner);
     internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -10954,7 +10441,7 @@ public final class FitConfig {
     internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FitSettings_descriptor,
-        new java.lang.String[] { "Calibration", "Psf", "FitSolverSettings", "FilterSettings", });
+        new java.lang.String[] { "FitSolverSettings", "FilterSettings", });
     internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable = new
@@ -10979,8 +10466,6 @@ public final class FitConfig {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor,
         new java.lang.String[] { "FitSettings", "NoiseMethod", "DataFilterSettings", "Search", "Border", "Fitting", "IncludeNeighbours", "NeighbourHeightThreshold", "ResidualsThreshold", "DuplicateDistance", "FailuresLimit", });
-    gdsc.smlm.data.config.PSFConfig.getDescriptor();
-    gdsc.smlm.data.config.CalibrationConfig.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

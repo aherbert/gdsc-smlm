@@ -764,7 +764,7 @@ public class SettingsManager
 		FitEngineSettings fitEngineSettings = readFitEngineSettings(flags);
 		Calibration calibration = readCalibration(flags);
 		PSF psf = readPSF(flags);
-		return new FitEngineConfiguration(fitEngineSettings);
+		return new FitEngineConfiguration(fitEngineSettings, calibration, psf);
 	}
 
 	/**

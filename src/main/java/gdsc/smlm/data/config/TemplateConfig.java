@@ -128,6 +128,31 @@ public final class TemplateConfig {
      * <code>.gdsc.smlm.data.config.ResultsSettings results_settings = 4;</code>
      */
     gdsc.smlm.data.config.ResultsConfig.ResultsSettingsOrBuilder getResultsSettingsOrBuilder();
+
+    /**
+     * <pre>
+     * The Point Spread Function (PSF)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+     */
+    boolean hasPsf();
+    /**
+     * <pre>
+     * The Point Spread Function (PSF)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+     */
+    gdsc.smlm.data.config.PSFConfig.PSF getPsf();
+    /**
+     * <pre>
+     * The Point Spread Function (PSF)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+     */
+    gdsc.smlm.data.config.PSFConfig.PSFOrBuilder getPsfOrBuilder();
   }
   /**
    * <pre>
@@ -217,6 +242,19 @@ public final class TemplateConfig {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(resultsSettings_);
                 resultsSettings_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 42: {
+              gdsc.smlm.data.config.PSFConfig.PSF.Builder subBuilder = null;
+              if (psf_ != null) {
+                subBuilder = psf_.toBuilder();
+              }
+              psf_ = input.readMessage(gdsc.smlm.data.config.PSFConfig.PSF.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(psf_);
+                psf_ = subBuilder.buildPartial();
               }
 
               break;
@@ -392,6 +430,39 @@ public final class TemplateConfig {
       return getResultsSettings();
     }
 
+    public static final int PSF_FIELD_NUMBER = 5;
+    private gdsc.smlm.data.config.PSFConfig.PSF psf_;
+    /**
+     * <pre>
+     * The Point Spread Function (PSF)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+     */
+    public boolean hasPsf() {
+      return psf_ != null;
+    }
+    /**
+     * <pre>
+     * The Point Spread Function (PSF)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+     */
+    public gdsc.smlm.data.config.PSFConfig.PSF getPsf() {
+      return psf_ == null ? gdsc.smlm.data.config.PSFConfig.PSF.getDefaultInstance() : psf_;
+    }
+    /**
+     * <pre>
+     * The Point Spread Function (PSF)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+     */
+    public gdsc.smlm.data.config.PSFConfig.PSFOrBuilder getPsfOrBuilder() {
+      return getPsf();
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -415,6 +486,9 @@ public final class TemplateConfig {
       }
       if (resultsSettings_ != null) {
         output.writeMessage(4, getResultsSettings());
+      }
+      if (psf_ != null) {
+        output.writeMessage(5, getPsf());
       }
     }
 
@@ -442,6 +516,10 @@ public final class TemplateConfig {
       if (resultsSettings_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getResultsSettings());
+      }
+      if (psf_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, getPsf());
       }
       memoizedSize = size;
       return size;
@@ -476,6 +554,11 @@ public final class TemplateConfig {
         result = result && getResultsSettings()
             .equals(other.getResultsSettings());
       }
+      result = result && (hasPsf() == other.hasPsf());
+      if (hasPsf()) {
+        result = result && getPsf()
+            .equals(other.getPsf());
+      }
       return result;
     }
 
@@ -501,6 +584,10 @@ public final class TemplateConfig {
       if (hasResultsSettings()) {
         hash = (37 * hash) + RESULTS_SETTINGS_FIELD_NUMBER;
         hash = (53 * hash) + getResultsSettings().hashCode();
+      }
+      if (hasPsf()) {
+        hash = (37 * hash) + PSF_FIELD_NUMBER;
+        hash = (53 * hash) + getPsf().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -655,6 +742,12 @@ public final class TemplateConfig {
           resultsSettings_ = null;
           resultsSettingsBuilder_ = null;
         }
+        if (psfBuilder_ == null) {
+          psf_ = null;
+        } else {
+          psf_ = null;
+          psfBuilder_ = null;
+        }
         return this;
       }
 
@@ -698,6 +791,11 @@ public final class TemplateConfig {
           result.resultsSettings_ = resultsSettings_;
         } else {
           result.resultsSettings_ = resultsSettingsBuilder_.build();
+        }
+        if (psfBuilder_ == null) {
+          result.psf_ = psf_;
+        } else {
+          result.psf_ = psfBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -759,6 +857,9 @@ public final class TemplateConfig {
         }
         if (other.hasResultsSettings()) {
           mergeResultsSettings(other.getResultsSettings());
+        }
+        if (other.hasPsf()) {
+          mergePsf(other.getPsf());
         }
         onChanged();
         return this;
@@ -1375,6 +1476,159 @@ public final class TemplateConfig {
         }
         return resultsSettingsBuilder_;
       }
+
+      private gdsc.smlm.data.config.PSFConfig.PSF psf_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.PSFConfig.PSF, gdsc.smlm.data.config.PSFConfig.PSF.Builder, gdsc.smlm.data.config.PSFConfig.PSFOrBuilder> psfBuilder_;
+      /**
+       * <pre>
+       * The Point Spread Function (PSF)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+       */
+      public boolean hasPsf() {
+        return psfBuilder_ != null || psf_ != null;
+      }
+      /**
+       * <pre>
+       * The Point Spread Function (PSF)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+       */
+      public gdsc.smlm.data.config.PSFConfig.PSF getPsf() {
+        if (psfBuilder_ == null) {
+          return psf_ == null ? gdsc.smlm.data.config.PSFConfig.PSF.getDefaultInstance() : psf_;
+        } else {
+          return psfBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The Point Spread Function (PSF)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+       */
+      public Builder setPsf(gdsc.smlm.data.config.PSFConfig.PSF value) {
+        if (psfBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          psf_ = value;
+          onChanged();
+        } else {
+          psfBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The Point Spread Function (PSF)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+       */
+      public Builder setPsf(
+          gdsc.smlm.data.config.PSFConfig.PSF.Builder builderForValue) {
+        if (psfBuilder_ == null) {
+          psf_ = builderForValue.build();
+          onChanged();
+        } else {
+          psfBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The Point Spread Function (PSF)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+       */
+      public Builder mergePsf(gdsc.smlm.data.config.PSFConfig.PSF value) {
+        if (psfBuilder_ == null) {
+          if (psf_ != null) {
+            psf_ =
+              gdsc.smlm.data.config.PSFConfig.PSF.newBuilder(psf_).mergeFrom(value).buildPartial();
+          } else {
+            psf_ = value;
+          }
+          onChanged();
+        } else {
+          psfBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The Point Spread Function (PSF)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+       */
+      public Builder clearPsf() {
+        if (psfBuilder_ == null) {
+          psf_ = null;
+          onChanged();
+        } else {
+          psf_ = null;
+          psfBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The Point Spread Function (PSF)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+       */
+      public gdsc.smlm.data.config.PSFConfig.PSF.Builder getPsfBuilder() {
+        
+        onChanged();
+        return getPsfFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The Point Spread Function (PSF)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+       */
+      public gdsc.smlm.data.config.PSFConfig.PSFOrBuilder getPsfOrBuilder() {
+        if (psfBuilder_ != null) {
+          return psfBuilder_.getMessageOrBuilder();
+        } else {
+          return psf_ == null ?
+              gdsc.smlm.data.config.PSFConfig.PSF.getDefaultInstance() : psf_;
+        }
+      }
+      /**
+       * <pre>
+       * The Point Spread Function (PSF)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.PSFConfig.PSF, gdsc.smlm.data.config.PSFConfig.PSF.Builder, gdsc.smlm.data.config.PSFConfig.PSFOrBuilder> 
+          getPsfFieldBuilder() {
+        if (psfBuilder_ == null) {
+          psfBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              gdsc.smlm.data.config.PSFConfig.PSF, gdsc.smlm.data.config.PSFConfig.PSF.Builder, gdsc.smlm.data.config.PSFConfig.PSFOrBuilder>(
+                  getPsf(),
+                  getParentForChildren(),
+                  isClean());
+          psf_ = null;
+        }
+        return psfBuilder_;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -1440,14 +1694,15 @@ public final class TemplateConfig {
     java.lang.String[] descriptorData = {
       "\n\025template_config.proto\022\025gdsc.smlm.data." +
       "config\032\030calibration_config.proto\032\020fit_co" +
-      "nfig.proto\032\024results_config.proto\"\343\001\n\020Tem" +
-      "plateSettings\022\r\n\005notes\030\001 \003(\t\0227\n\013calibrat" +
-      "ion\030\002 \001(\0132\".gdsc.smlm.data.config.Calibr" +
-      "ation\022E\n\023fit_engine_settings\030\003 \001(\0132(.gds" +
-      "c.smlm.data.config.FitEngineSettings\022@\n\020" +
-      "results_settings\030\004 \001(\0132&.gdsc.smlm.data." +
-      "config.ResultsSettingsB\020B\016TemplateConfig" +
-      "b\006proto3"
+      "nfig.proto\032\024results_config.proto\032\020psf_co" +
+      "nfig.proto\"\214\002\n\020TemplateSettings\022\r\n\005notes" +
+      "\030\001 \003(\t\0227\n\013calibration\030\002 \001(\0132\".gdsc.smlm." +
+      "data.config.Calibration\022E\n\023fit_engine_se" +
+      "ttings\030\003 \001(\0132(.gdsc.smlm.data.config.Fit" +
+      "EngineSettings\022@\n\020results_settings\030\004 \001(\013" +
+      "2&.gdsc.smlm.data.config.ResultsSettings" +
+      "\022\'\n\003psf\030\005 \001(\0132\032.gdsc.smlm.data.config.PS",
+      "FB\020B\016TemplateConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1463,16 +1718,18 @@ public final class TemplateConfig {
           gdsc.smlm.data.config.CalibrationConfig.getDescriptor(),
           gdsc.smlm.data.config.FitConfig.getDescriptor(),
           gdsc.smlm.data.config.ResultsConfig.getDescriptor(),
+          gdsc.smlm.data.config.PSFConfig.getDescriptor(),
         }, assigner);
     internal_static_gdsc_smlm_data_config_TemplateSettings_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_gdsc_smlm_data_config_TemplateSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_TemplateSettings_descriptor,
-        new java.lang.String[] { "Notes", "Calibration", "FitEngineSettings", "ResultsSettings", });
+        new java.lang.String[] { "Notes", "Calibration", "FitEngineSettings", "ResultsSettings", "Psf", });
     gdsc.smlm.data.config.CalibrationConfig.getDescriptor();
     gdsc.smlm.data.config.FitConfig.getDescriptor();
     gdsc.smlm.data.config.ResultsConfig.getDescriptor();
+    gdsc.smlm.data.config.PSFConfig.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

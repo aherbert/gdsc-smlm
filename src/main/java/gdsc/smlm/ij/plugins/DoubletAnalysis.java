@@ -47,6 +47,7 @@ import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.CalibrationConfigHelper;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
@@ -3229,14 +3230,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 			if (textCoordinateShiftFactor != null)
 			{
-				FitConfiguration fitConfig;
+				// Start with a default. This will cause a reset.
+				FitConfiguration fitConfig = new FitConfiguration();
 				if (template != null)
 				{
-					fitConfig = new FitConfiguration(template.getFitEngineSettings().getFitSettings());
-				}
-				else
-				{
-					fitConfig = new FitConfiguration();
+					fitConfig.setFitSettings(template.getFitEngineSettings().getFitSettings());
 				}
 				
 				cbSmartFilter.setState(fitConfig.isSmartFilter());
@@ -3255,9 +3253,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					if (template.hasFitEngineSettings())
 					{
 						boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
-						FitEngineConfiguration config2 = new FitEngineConfiguration(template.getFitEngineSettings());
+						FitEngineConfiguration config2 = new FitEngineConfiguration(template.getFitEngineSettings(),
+								template.getCalibration(), template.getPsf());
+						fitConfig = new FitConfiguration();
 						FitConfiguration fitConfig2 = config2.getFitConfiguration();
-						if (custom)
+						if (custom && template.hasPsf())
 							textPSF.select(PeakFit.getPSFTypeNames()[fitConfig2.getPSFType().ordinal()]);
 						textDataFilterType.select(config2.getDataFilterType().ordinal());
 						textDataFilter.select(config2.getDataFilterMethod(0).ordinal());

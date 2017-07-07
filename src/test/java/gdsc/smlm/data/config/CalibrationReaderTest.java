@@ -4,13 +4,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.CalibrationConfig.AngleCalibration;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration;
+import gdsc.smlm.data.config.UnitConfig.AngleUnit;
+import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
-import gdsc.smlm.data.config.CalibrationConfig.PSFCalibration;
 
 public class CalibrationReaderTest
 {
@@ -71,7 +71,7 @@ public class CalibrationReaderTest
 	public void canGetAngleConverter()
 	{
 		Calibration.Builder builder = Calibration.newBuilder();
-		PSFCalibration.Builder psfBuilder = builder.getPsfCalibrationBuilder();
+		AngleCalibration.Builder psfBuilder = builder.getAngleCalibrationBuilder();
 
 		psfBuilder.setAngleUnit(AngleUnit.RADIAN);
 

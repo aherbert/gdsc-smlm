@@ -3,11 +3,11 @@ package gdsc.smlm.data.config;
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.smlm.data.config.CalibrationConfig.AngleCalibrationOrBuilder;
 import gdsc.smlm.data.config.CalibrationConfig.Calibration;
 import gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder;
 import gdsc.smlm.data.config.CalibrationConfig.DistanceCalibrationOrBuilder;
 import gdsc.smlm.data.config.CalibrationConfig.IntensityCalibrationOrBuilder;
-import gdsc.smlm.data.config.CalibrationConfig.PSFCalibrationOrBuilder;
 import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
@@ -96,9 +96,9 @@ public class CalibrationHelper
 	public static TypeConverter<AngleUnit> getAngleConverter(CalibrationOrBuilder calibration, AngleUnit toAngleUnit)
 			throws ConversionException
 	{
-		if (calibration != null && toAngleUnit != null && calibration.hasPsfCalibration())
+		if (calibration != null && toAngleUnit != null && calibration.hasAngleCalibration())
 		{
-			PSFCalibrationOrBuilder psfCalibration = calibration.getPsfCalibrationOrBuilder();
+			AngleCalibrationOrBuilder psfCalibration = calibration.getAngleCalibrationOrBuilder();
 			return UnitConverterFactory.createConverter(psfCalibration.getAngleUnit(), toAngleUnit);
 		}
 		throw new ConversionException();
@@ -181,9 +181,9 @@ public class CalibrationHelper
 		}
 		catch (ConversionException e)
 		{
-			if (calibration != null && calibration.hasPsfCalibration())
+			if (calibration != null && calibration.hasAngleCalibration())
 				return new IdentityTypeConverter<AngleUnit>(
-						calibration.getPsfCalibrationOrBuilder().getAngleUnit());
+						calibration.getAngleCalibrationOrBuilder().getAngleUnit());
 			return new IdentityTypeConverter<AngleUnit>(null);
 		}
 	}

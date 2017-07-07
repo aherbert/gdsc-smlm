@@ -270,8 +270,8 @@ public class CalibrationWriter extends CalibrationReader
 	public void setAngleUnit(AngleUnit angleUnit)
 	{
 		if (angleUnit == null)
-			getBuilder().getPsfCalibrationBuilder().clearAngleUnit();
+			getBuilder().getAngleCalibrationBuilder().clearAngleUnit();
 		else
-			getBuilder().getPsfCalibrationBuilder().setAngleUnit(angleUnit);
+			getBuilder().getAngleCalibrationBuilder().setAngleUnit(angleUnit);
 	}
 }

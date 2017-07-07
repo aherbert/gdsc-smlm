@@ -7,9 +7,6 @@ package gdsc.smlm.data.config;
 
 option java_outer_classname = "FitConfig";
 
-import "psf_config.proto";
-import "calibration_config.proto";
-
 // Define the fitting solver.
 enum FitSolver {
 	// Custom Levenberg-Marquardt least-squares estimation.
@@ -135,17 +132,11 @@ message FilterSettings {
 // Define the settings for fitting. These settings are used to fit a PSF to an 
 // extracted region from the input data and validate the fit.
 message FitSettings {
-	// The calibration of the input data
-	Calibration calibration = 1;
-	
-	// The point spread function (PSF)
-	PSF psf = 2;
-	
 	// The fit solver settings
-	FitSolverSettings fit_solver_settings = 3;
+	FitSolverSettings fit_solver_settings = 1;
 	
 	// The filter settings
-	FilterSettings filter_settings = 4;
+	FilterSettings filter_settings = 2;
 }
 
 // Define the type of filter used for identifying candidate peaks.

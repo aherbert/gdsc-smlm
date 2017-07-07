@@ -3,6 +3,8 @@ package gdsc.smlm.engine;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Maths;
+import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.CalibrationConfigHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.DataFilter;
 import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
@@ -12,6 +14,8 @@ import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitConfig.RelativeParameter;
 import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.PSFConfigHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.UnitConfig.AngleUnit;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
@@ -37,39 +41,61 @@ public class FitEngineConfiguration implements Cloneable
 	private FitConfiguration fitConfiguration = null;
 
 	/**
-	 * Constructor.
+	 * Instantiates a new fit engine configuration.
 	 */
 	public FitEngineConfiguration()
 	{
-		this(FitConfigHelper.defaultFitEngineSettings);
+		this(FitConfigHelper.defaultFitEngineSettings, CalibrationConfigHelper.defaultCalibration,
+				PSFConfigHelper.defaultOneAxisGaussian2DPSF);
 	}
 
 	/**
-	 * Constructor.
+	 * Instantiates a new fit engine configuration.
 	 *
 	 * @param fitEngineSettings
 	 *            the fit engine settings
+	 * @param calibration
+	 *            the calibration
+	 * @param psf
+	 *            the psf
 	 */
-	public FitEngineConfiguration(FitEngineSettings fitEngineSettings)
+	public FitEngineConfiguration(FitEngineSettings fitEngineSettings, Calibration calibration, PSF psf)
 	{
 		if (fitEngineSettings == null)
 			throw new IllegalArgumentException("FitEngineSettings is null");
-		this.fitEngineSettings = fitEngineSettings.toBuilder();
-		initialiseState();
+		if (calibration == null)
+			throw new IllegalArgumentException("Calibration is null");
+		if (psf == null)
+			throw new IllegalArgumentException("PSF is null");
+		init(fitEngineSettings.toBuilder(), calibration.toBuilder(), psf.toBuilder());
 	}
 
 	/**
-	 * Constructor.
+	 * Instantiates a new fit engine configuration.
 	 *
 	 * @param fitEngineSettings
 	 *            the fit engine settings
+	 * @param calibration
+	 *            the calibration
+	 * @param psf
+	 *            the psf
 	 */
-	public FitEngineConfiguration(FitEngineSettings.Builder fitEngineSettings)
+	public FitEngineConfiguration(FitEngineSettings.Builder fitEngineSettings, Calibration.Builder calibration,
+			PSF.Builder psf)
 	{
 		if (fitEngineSettings == null)
 			throw new IllegalArgumentException("FitEngineSettings is null");
+		if (calibration == null)
+			throw new IllegalArgumentException("Calibration is null");
+		if (psf == null)
+			throw new IllegalArgumentException("PSF is null");
+		init(fitEngineSettings, calibration, psf);
+	}
+
+	private void init(FitEngineSettings.Builder fitEngineSettings, Calibration.Builder calibration, PSF.Builder psf)
+	{
 		this.fitEngineSettings = fitEngineSettings;
-		initialiseState();
+		fitConfiguration = new FitConfiguration(fitEngineSettings.getFitSettingsBuilder(), calibration, psf, false);
 	}
 
 	/**
@@ -102,8 +128,8 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setFitEngineSettings(FitEngineSettings fitEngineSettings)
 	{
-		fitConfiguration = null;
 		this.fitEngineSettings.clear().mergeFrom(fitEngineSettings);
+		fitConfiguration.updateFitSettings(this.fitEngineSettings.getFitSettingsBuilder());
 	}
 
 	/**
@@ -113,8 +139,6 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public FitConfiguration getFitConfiguration()
 	{
-		if (fitConfiguration == null)
-			fitConfiguration = new FitConfiguration(fitEngineSettings.getFitSettingsBuilder());
 		return fitConfiguration;
 	}
 
@@ -321,21 +345,6 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * Ensure that the internal state of the object is initialised. This is used after deserialisation since some state
-	 * is not saved but restored from other property values.
-	 */
-	public void initialiseState()
-	{
-		//		if (noiseMethod == null)
-		//			noiseMethod = Method.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
-		//		if (dataFilter == null || smooth == null)
-		//			setDataFilter(DataFilter.MEAN, 1.2, 0);
-		//		// Do this last as it resizes the dataFilter and smooth arrays
-		//		if (dataFilterType == null)
-		//			setDataFilterType(DataFilterType.SINGLE);
-	}
-
-	/**
 	 * @return the type of filter to apply to the data before identifying local maxima
 	 */
 	public DataFilterType getDataFilterType()
@@ -531,7 +540,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public int getRelativeFitting()
 	{
-		double[] w = PSFHelper.getGaussian2DWxWy(fitEngineSettings.getFitSettings().getPsf());
+		double[] w = PSFHelper.getGaussian2DWxWy(getFitConfiguration().getPSF());
 
 		final double initialPeakStdDev0 = w[0];
 		final double initialPeakStdDev1 = w[1];
@@ -640,7 +649,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getHWHMMin()
 	{
-		double[] w = PSFHelper.getGaussian2DWxWy(fitEngineSettings.getFitSettings().getPsf());
+		double[] w = PSFHelper.getGaussian2DWxWy(fitConfiguration.psf);
 
 		final double initialPeakStdDev0 = w[0];
 		final double initialPeakStdDev1 = w[1];
@@ -667,7 +676,7 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getHWHMMax()
 	{
-		double[] w = PSFHelper.getGaussian2DWxWy(fitEngineSettings.getFitSettings().getPsf());
+		double[] w = PSFHelper.getGaussian2DWxWy(fitConfiguration.psf);
 
 		final double initialPeakStdDev0 = w[0];
 		final double initialPeakStdDev1 = w[1];

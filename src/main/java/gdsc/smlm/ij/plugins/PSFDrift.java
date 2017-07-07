@@ -19,6 +19,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
 import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.PSFConfigHelper;
 import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
@@ -406,8 +407,7 @@ public class PSFDrift implements PlugIn
 		gd.addSlider("Region_size", 2, 20, regionSize);
 		gd.addCheckbox("Background_fitting", backgroundFitting);
 		PeakFit.addPSFOptions(gd, fitConfig);
-		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
-				fitConfig.getFitSolver().ordinal());
+		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 		// We need these to set bounds for any bounded fitters
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
@@ -444,7 +444,7 @@ public class PSFDrift implements PlugIn
 		smoothing = Math.abs(gd.getNextNumber());
 
 		gd.collectOptions();
-		
+
 		if (!comFitting && !offsetFitting)
 		{
 			IJ.error(TITLE, "No initial fitting positions");
@@ -458,15 +458,15 @@ public class PSFDrift implements PlugIn
 			return;
 
 		// Configure the fit solver. We must wrap the settings with a 
-		// FitEngineConfiguration and Calibration 
-		FitEngineSettings.Builder fitEngineSettings = FitConfigHelper.defaultFitEngineSettings.toBuilder();
-		fitConfig.setCalibration(SettingsManager.readCalibration(0));
-		fitEngineSettings.setFitSettings(fitConfig.getFitSettings());
-		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings);
+		// FitEngineConfiguration to pass to the PeakFit method
+		FitEngineSettings fitEngineSettings = FitConfigHelper.defaultFitEngineSettings;
+		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
+				SettingsManager.readCalibration(0), PSFConfigHelper.defaultOneAxisGaussian2DPSF);
+		config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
 		if (!PeakFit.configureFitSolver(config, PeakFit.FLAG_NO_SAVE))
 			return;
 		fitConfig = config.getFitConfiguration();
-		
+
 		imp = WindowManager.getImage(title);
 		if (imp == null)
 		{
