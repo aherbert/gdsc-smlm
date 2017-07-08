@@ -15,7 +15,9 @@ package gdsc.smlm.ij.settings;
 
 /**
  * Contain the settings for the centre offset of a PSF
+ * @deprecated This will be replaced with a proto object
  */
+@Deprecated
 public class Offset
 {
 	private final double cx;

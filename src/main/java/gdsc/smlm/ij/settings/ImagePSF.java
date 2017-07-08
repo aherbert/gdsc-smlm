@@ -17,7 +17,9 @@ import java.util.HashMap;
 
 /**
  * Contain the settings for the PSF Creator plugin
+ * @deprecated This will be replaced with a proto object
  */
+@Deprecated
 public class ImagePSF
 {
 	private int zCentre = 1;
