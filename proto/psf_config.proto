@@ -44,3 +44,32 @@ message PSF {
 	// parameters array. The names of the non-standard parameters, in order, can be defined here.
 	repeated PSFParameter parameter = 2;
 }
+
+// Define the offset for slice alignment correction
+message Offset
+{
+	double cx = 2;
+	double cy = 3;
+}
+
+// Define the settings of an observed Point Spread Function (PSF) represented as an image stack.
+message ImagePSF
+{
+	// The number of images in the PSF
+	int32 image_count = 1;
+    // The image containing the focal plane of the PSF
+	int32 centre_image = 2;
+	// The size of the PSF pixel in nanometers
+	double pixel_size = 3;
+	// The depth of the PSF pixel in nanometers
+	double pixel_depth = 4;
+	// The Full Width at Half Maxima (FWHM) in nanometers
+	double fwhm = 5;
+	// Notes about the PSF, added as Key-Value pairs.
+	map<string, string> notes = 6;
+	// The alignment correction for each slice in pixels. This is the shift required to 
+	// move the centre of the image to the centre of the PSF. The PSF centre may be 
+	// determined by PSF fitting.
+	// If missing then the alignment is assumed to be 0,0.
+	map<int32, Offset> offset = 7;
+}

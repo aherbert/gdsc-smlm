@@ -2086,6 +2086,2098 @@ public final class PSFConfig {
 
   }
 
+  public interface OffsetOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Offset)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>double cx = 2;</code>
+     */
+    double getCx();
+
+    /**
+     * <code>double cy = 3;</code>
+     */
+    double getCy();
+  }
+  /**
+   * <pre>
+   * Define the offset for slice alignment correction
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.Offset}
+   */
+  public  static final class Offset extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.Offset)
+      OffsetOrBuilder {
+    // Use Offset.newBuilder() to construct.
+    private Offset(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private Offset() {
+      cx_ = 0D;
+      cy_ = 0D;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private Offset(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 17: {
+
+              cx_ = input.readDouble();
+              break;
+            }
+            case 25: {
+
+              cy_ = input.readDouble();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_Offset_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.PSFConfig.Offset.class, gdsc.smlm.data.config.PSFConfig.Offset.Builder.class);
+    }
+
+    public static final int CX_FIELD_NUMBER = 2;
+    private double cx_;
+    /**
+     * <code>double cx = 2;</code>
+     */
+    public double getCx() {
+      return cx_;
+    }
+
+    public static final int CY_FIELD_NUMBER = 3;
+    private double cy_;
+    /**
+     * <code>double cy = 3;</code>
+     */
+    public double getCy() {
+      return cy_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (cx_ != 0D) {
+        output.writeDouble(2, cx_);
+      }
+      if (cy_ != 0D) {
+        output.writeDouble(3, cy_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (cx_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, cx_);
+      }
+      if (cy_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, cy_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.PSFConfig.Offset)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.PSFConfig.Offset other = (gdsc.smlm.data.config.PSFConfig.Offset) obj;
+
+      boolean result = true;
+      result = result && (
+          java.lang.Double.doubleToLongBits(getCx())
+          == java.lang.Double.doubleToLongBits(
+              other.getCx()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getCy())
+          == java.lang.Double.doubleToLongBits(
+              other.getCy()));
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getCx()));
+      hash = (37 * hash) + CY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getCy()));
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.Offset parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.PSFConfig.Offset prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define the offset for slice alignment correction
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.Offset}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.Offset)
+        gdsc.smlm.data.config.PSFConfig.OffsetOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_Offset_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.PSFConfig.Offset.class, gdsc.smlm.data.config.PSFConfig.Offset.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.PSFConfig.Offset.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        cx_ = 0D;
+
+        cy_ = 0D;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_Offset_descriptor;
+      }
+
+      public gdsc.smlm.data.config.PSFConfig.Offset getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.PSFConfig.Offset.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.PSFConfig.Offset build() {
+        gdsc.smlm.data.config.PSFConfig.Offset result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.PSFConfig.Offset buildPartial() {
+        gdsc.smlm.data.config.PSFConfig.Offset result = new gdsc.smlm.data.config.PSFConfig.Offset(this);
+        result.cx_ = cx_;
+        result.cy_ = cy_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.PSFConfig.Offset) {
+          return mergeFrom((gdsc.smlm.data.config.PSFConfig.Offset)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.PSFConfig.Offset other) {
+        if (other == gdsc.smlm.data.config.PSFConfig.Offset.getDefaultInstance()) return this;
+        if (other.getCx() != 0D) {
+          setCx(other.getCx());
+        }
+        if (other.getCy() != 0D) {
+          setCy(other.getCy());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.PSFConfig.Offset parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.PSFConfig.Offset) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private double cx_ ;
+      /**
+       * <code>double cx = 2;</code>
+       */
+      public double getCx() {
+        return cx_;
+      }
+      /**
+       * <code>double cx = 2;</code>
+       */
+      public Builder setCx(double value) {
+        
+        cx_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double cx = 2;</code>
+       */
+      public Builder clearCx() {
+        
+        cx_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double cy_ ;
+      /**
+       * <code>double cy = 3;</code>
+       */
+      public double getCy() {
+        return cy_;
+      }
+      /**
+       * <code>double cy = 3;</code>
+       */
+      public Builder setCy(double value) {
+        
+        cy_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double cy = 3;</code>
+       */
+      public Builder clearCy() {
+        
+        cy_ = 0D;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.Offset)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.Offset)
+    private static final gdsc.smlm.data.config.PSFConfig.Offset DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFConfig.Offset();
+    }
+
+    public static gdsc.smlm.data.config.PSFConfig.Offset getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Offset>
+        PARSER = new com.google.protobuf.AbstractParser<Offset>() {
+      public Offset parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Offset(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<Offset> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Offset> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.PSFConfig.Offset getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ImagePSFOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.ImagePSF)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The number of images in the PSF
+     * </pre>
+     *
+     * <code>int32 image_count = 1;</code>
+     */
+    int getImageCount();
+
+    /**
+     * <pre>
+     * The image containing the focal plane of the PSF
+     * </pre>
+     *
+     * <code>int32 centre_image = 2;</code>
+     */
+    int getCentreImage();
+
+    /**
+     * <pre>
+     * The size of the PSF pixel in nanometers
+     * </pre>
+     *
+     * <code>double pixel_size = 3;</code>
+     */
+    double getPixelSize();
+
+    /**
+     * <pre>
+     * The depth of the PSF pixel in nanometers
+     * </pre>
+     *
+     * <code>double pixel_depth = 4;</code>
+     */
+    double getPixelDepth();
+
+    /**
+     * <pre>
+     * The Full Width at Half Maxima (FWHM) in nanometers
+     * </pre>
+     *
+     * <code>double fwhm = 5;</code>
+     */
+    double getFwhm();
+
+    /**
+     * <pre>
+     * Notes about the PSF, added as Key-Value pairs.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; notes = 6;</code>
+     */
+    int getNotesCount();
+    /**
+     * <pre>
+     * Notes about the PSF, added as Key-Value pairs.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; notes = 6;</code>
+     */
+    boolean containsNotes(
+        java.lang.String key);
+    /**
+     * Use {@link #getNotesMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, java.lang.String>
+    getNotes();
+    /**
+     * <pre>
+     * Notes about the PSF, added as Key-Value pairs.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; notes = 6;</code>
+     */
+    java.util.Map<java.lang.String, java.lang.String>
+    getNotesMap();
+    /**
+     * <pre>
+     * Notes about the PSF, added as Key-Value pairs.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; notes = 6;</code>
+     */
+
+    java.lang.String getNotesOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue);
+    /**
+     * <pre>
+     * Notes about the PSF, added as Key-Value pairs.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; notes = 6;</code>
+     */
+
+    java.lang.String getNotesOrThrow(
+        java.lang.String key);
+
+    /**
+     * <pre>
+     * The alignment correction for each slice in pixels. This is the shift required to 
+     * move the centre of the image to the centre of the PSF. The PSF centre may be 
+     * determined by PSF fitting.
+     * If missing then the alignment is assumed to be 0,0.
+     * </pre>
+     *
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     */
+    int getOffsetCount();
+    /**
+     * <pre>
+     * The alignment correction for each slice in pixels. This is the shift required to 
+     * move the centre of the image to the centre of the PSF. The PSF centre may be 
+     * determined by PSF fitting.
+     * If missing then the alignment is assumed to be 0,0.
+     * </pre>
+     *
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     */
+    boolean containsOffset(
+        int key);
+    /**
+     * Use {@link #getOffsetMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
+    getOffset();
+    /**
+     * <pre>
+     * The alignment correction for each slice in pixels. This is the shift required to 
+     * move the centre of the image to the centre of the PSF. The PSF centre may be 
+     * determined by PSF fitting.
+     * If missing then the alignment is assumed to be 0,0.
+     * </pre>
+     *
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     */
+    java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
+    getOffsetMap();
+    /**
+     * <pre>
+     * The alignment correction for each slice in pixels. This is the shift required to 
+     * move the centre of the image to the centre of the PSF. The PSF centre may be 
+     * determined by PSF fitting.
+     * If missing then the alignment is assumed to be 0,0.
+     * </pre>
+     *
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     */
+
+    gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrDefault(
+        int key,
+        gdsc.smlm.data.config.PSFConfig.Offset defaultValue);
+    /**
+     * <pre>
+     * The alignment correction for each slice in pixels. This is the shift required to 
+     * move the centre of the image to the centre of the PSF. The PSF centre may be 
+     * determined by PSF fitting.
+     * If missing then the alignment is assumed to be 0,0.
+     * </pre>
+     *
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     */
+
+    gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrThrow(
+        int key);
+  }
+  /**
+   * <pre>
+   * Define the settings of an observed Point Spread Function (PSF) represented as an image stack.
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.ImagePSF}
+   */
+  public  static final class ImagePSF extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.ImagePSF)
+      ImagePSFOrBuilder {
+    // Use ImagePSF.newBuilder() to construct.
+    private ImagePSF(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ImagePSF() {
+      imageCount_ = 0;
+      centreImage_ = 0;
+      pixelSize_ = 0D;
+      pixelDepth_ = 0D;
+      fwhm_ = 0D;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private ImagePSF(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+
+              imageCount_ = input.readInt32();
+              break;
+            }
+            case 16: {
+
+              centreImage_ = input.readInt32();
+              break;
+            }
+            case 25: {
+
+              pixelSize_ = input.readDouble();
+              break;
+            }
+            case 33: {
+
+              pixelDepth_ = input.readDouble();
+              break;
+            }
+            case 41: {
+
+              fwhm_ = input.readDouble();
+              break;
+            }
+            case 50: {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+                notes_ = com.google.protobuf.MapField.newMapField(
+                    NotesDefaultEntryHolder.defaultEntry);
+                mutable_bitField0_ |= 0x00000020;
+              }
+              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+              notes__ = input.readMessage(
+                  NotesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              notes_.getMutableMap().put(
+                  notes__.getKey(), notes__.getValue());
+              break;
+            }
+            case 58: {
+              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+                offset_ = com.google.protobuf.MapField.newMapField(
+                    OffsetDefaultEntryHolder.defaultEntry);
+                mutable_bitField0_ |= 0x00000040;
+              }
+              com.google.protobuf.MapEntry<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
+              offset__ = input.readMessage(
+                  OffsetDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              offset_.getMutableMap().put(
+                  offset__.getKey(), offset__.getValue());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 6:
+          return internalGetNotes();
+        case 7:
+          return internalGetOffset();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.PSFConfig.ImagePSF.class, gdsc.smlm.data.config.PSFConfig.ImagePSF.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int IMAGE_COUNT_FIELD_NUMBER = 1;
+    private int imageCount_;
+    /**
+     * <pre>
+     * The number of images in the PSF
+     * </pre>
+     *
+     * <code>int32 image_count = 1;</code>
+     */
+    public int getImageCount() {
+      return imageCount_;
+    }
+
+    public static final int CENTRE_IMAGE_FIELD_NUMBER = 2;
+    private int centreImage_;
+    /**
+     * <pre>
+     * The image containing the focal plane of the PSF
+     * </pre>
+     *
+     * <code>int32 centre_image = 2;</code>
+     */
+    public int getCentreImage() {
+      return centreImage_;
+    }
+
+    public static final int PIXEL_SIZE_FIELD_NUMBER = 3;
+    private double pixelSize_;
+    /**
+     * <pre>
+     * The size of the PSF pixel in nanometers
+     * </pre>
+     *
+     * <code>double pixel_size = 3;</code>
+     */
+    public double getPixelSize() {
+      return pixelSize_;
+    }
+
+    public static final int PIXEL_DEPTH_FIELD_NUMBER = 4;
+    private double pixelDepth_;
+    /**
+     * <pre>
+     * The depth of the PSF pixel in nanometers
+     * </pre>
+     *
+     * <code>double pixel_depth = 4;</code>
+     */
+    public double getPixelDepth() {
+      return pixelDepth_;
+    }
+
+    public static final int FWHM_FIELD_NUMBER = 5;
+    private double fwhm_;
+    /**
+     * <pre>
+     * The Full Width at Half Maxima (FWHM) in nanometers
+     * </pre>
+     *
+     * <code>double fwhm = 5;</code>
+     */
+    public double getFwhm() {
+      return fwhm_;
+    }
+
+    public static final int NOTES_FIELD_NUMBER = 6;
+    private static final class NotesDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, java.lang.String> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, java.lang.String>newDefaultInstance(
+                  gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "");
+    }
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> notes_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetNotes() {
+      if (notes_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            NotesDefaultEntryHolder.defaultEntry);
+      }
+      return notes_;
+    }
+
+    public int getNotesCount() {
+      return internalGetNotes().getMap().size();
+    }
+    /**
+     * <pre>
+     * Notes about the PSF, added as Key-Value pairs.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; notes = 6;</code>
+     */
+
+    public boolean containsNotes(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetNotes().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getNotesMap()} instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getNotes() {
+      return getNotesMap();
+    }
+    /**
+     * <pre>
+     * Notes about the PSF, added as Key-Value pairs.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; notes = 6;</code>
+     */
+
+    public java.util.Map<java.lang.String, java.lang.String> getNotesMap() {
+      return internalGetNotes().getMap();
+    }
+    /**
+     * <pre>
+     * Notes about the PSF, added as Key-Value pairs.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; notes = 6;</code>
+     */
+
+    public java.lang.String getNotesOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetNotes().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Notes about the PSF, added as Key-Value pairs.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; notes = 6;</code>
+     */
+
+    public java.lang.String getNotesOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetNotes().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public static final int OFFSET_FIELD_NUMBER = 7;
+    private static final class OffsetDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>newDefaultInstance(
+                  gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.INT32,
+                  0,
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  gdsc.smlm.data.config.PSFConfig.Offset.getDefaultInstance());
+    }
+    private com.google.protobuf.MapField<
+        java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> offset_;
+    private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
+    internalGetOffset() {
+      if (offset_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            OffsetDefaultEntryHolder.defaultEntry);
+      }
+      return offset_;
+    }
+
+    public int getOffsetCount() {
+      return internalGetOffset().getMap().size();
+    }
+    /**
+     * <pre>
+     * The alignment correction for each slice in pixels. This is the shift required to 
+     * move the centre of the image to the centre of the PSF. The PSF centre may be 
+     * determined by PSF fitting.
+     * If missing then the alignment is assumed to be 0,0.
+     * </pre>
+     *
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     */
+
+    public boolean containsOffset(
+        int key) {
+      
+      return internalGetOffset().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getOffsetMap()} instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffset() {
+      return getOffsetMap();
+    }
+    /**
+     * <pre>
+     * The alignment correction for each slice in pixels. This is the shift required to 
+     * move the centre of the image to the centre of the PSF. The PSF centre may be 
+     * determined by PSF fitting.
+     * If missing then the alignment is assumed to be 0,0.
+     * </pre>
+     *
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     */
+
+    public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffsetMap() {
+      return internalGetOffset().getMap();
+    }
+    /**
+     * <pre>
+     * The alignment correction for each slice in pixels. This is the shift required to 
+     * move the centre of the image to the centre of the PSF. The PSF centre may be 
+     * determined by PSF fitting.
+     * If missing then the alignment is assumed to be 0,0.
+     * </pre>
+     *
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     */
+
+    public gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrDefault(
+        int key,
+        gdsc.smlm.data.config.PSFConfig.Offset defaultValue) {
+      
+      java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> map =
+          internalGetOffset().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * The alignment correction for each slice in pixels. This is the shift required to 
+     * move the centre of the image to the centre of the PSF. The PSF centre may be 
+     * determined by PSF fitting.
+     * If missing then the alignment is assumed to be 0,0.
+     * </pre>
+     *
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     */
+
+    public gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrThrow(
+        int key) {
+      
+      java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> map =
+          internalGetOffset().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (imageCount_ != 0) {
+        output.writeInt32(1, imageCount_);
+      }
+      if (centreImage_ != 0) {
+        output.writeInt32(2, centreImage_);
+      }
+      if (pixelSize_ != 0D) {
+        output.writeDouble(3, pixelSize_);
+      }
+      if (pixelDepth_ != 0D) {
+        output.writeDouble(4, pixelDepth_);
+      }
+      if (fwhm_ != 0D) {
+        output.writeDouble(5, fwhm_);
+      }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetNotes(),
+          NotesDefaultEntryHolder.defaultEntry,
+          6);
+      com.google.protobuf.GeneratedMessageV3
+        .serializeIntegerMapTo(
+          output,
+          internalGetOffset(),
+          OffsetDefaultEntryHolder.defaultEntry,
+          7);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (imageCount_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, imageCount_);
+      }
+      if (centreImage_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, centreImage_);
+      }
+      if (pixelSize_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, pixelSize_);
+      }
+      if (pixelDepth_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(4, pixelDepth_);
+      }
+      if (fwhm_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(5, fwhm_);
+      }
+      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+           : internalGetNotes().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+        notes__ = NotesDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(6, notes__);
+      }
+      for (java.util.Map.Entry<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> entry
+           : internalGetOffset().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
+        offset__ = OffsetDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(7, offset__);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.PSFConfig.ImagePSF)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.PSFConfig.ImagePSF other = (gdsc.smlm.data.config.PSFConfig.ImagePSF) obj;
+
+      boolean result = true;
+      result = result && (getImageCount()
+          == other.getImageCount());
+      result = result && (getCentreImage()
+          == other.getCentreImage());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPixelSize())
+          == java.lang.Double.doubleToLongBits(
+              other.getPixelSize()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPixelDepth())
+          == java.lang.Double.doubleToLongBits(
+              other.getPixelDepth()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getFwhm())
+          == java.lang.Double.doubleToLongBits(
+              other.getFwhm()));
+      result = result && internalGetNotes().equals(
+          other.internalGetNotes());
+      result = result && internalGetOffset().equals(
+          other.internalGetOffset());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + IMAGE_COUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getImageCount();
+      hash = (37 * hash) + CENTRE_IMAGE_FIELD_NUMBER;
+      hash = (53 * hash) + getCentreImage();
+      hash = (37 * hash) + PIXEL_SIZE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPixelSize()));
+      hash = (37 * hash) + PIXEL_DEPTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPixelDepth()));
+      hash = (37 * hash) + FWHM_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getFwhm()));
+      if (!internalGetNotes().getMap().isEmpty()) {
+        hash = (37 * hash) + NOTES_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetNotes().hashCode();
+      }
+      if (!internalGetOffset().getMap().isEmpty()) {
+        hash = (37 * hash) + OFFSET_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetOffset().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.PSFConfig.ImagePSF prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define the settings of an observed Point Spread Function (PSF) represented as an image stack.
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.ImagePSF}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.ImagePSF)
+        gdsc.smlm.data.config.PSFConfig.ImagePSFOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMapField(
+          int number) {
+        switch (number) {
+          case 6:
+            return internalGetNotes();
+          case 7:
+            return internalGetOffset();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMutableMapField(
+          int number) {
+        switch (number) {
+          case 6:
+            return internalGetMutableNotes();
+          case 7:
+            return internalGetMutableOffset();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.PSFConfig.ImagePSF.class, gdsc.smlm.data.config.PSFConfig.ImagePSF.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.PSFConfig.ImagePSF.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        imageCount_ = 0;
+
+        centreImage_ = 0;
+
+        pixelSize_ = 0D;
+
+        pixelDepth_ = 0D;
+
+        fwhm_ = 0D;
+
+        internalGetMutableNotes().clear();
+        internalGetMutableOffset().clear();
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
+      }
+
+      public gdsc.smlm.data.config.PSFConfig.ImagePSF getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.PSFConfig.ImagePSF.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.PSFConfig.ImagePSF build() {
+        gdsc.smlm.data.config.PSFConfig.ImagePSF result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.PSFConfig.ImagePSF buildPartial() {
+        gdsc.smlm.data.config.PSFConfig.ImagePSF result = new gdsc.smlm.data.config.PSFConfig.ImagePSF(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        result.imageCount_ = imageCount_;
+        result.centreImage_ = centreImage_;
+        result.pixelSize_ = pixelSize_;
+        result.pixelDepth_ = pixelDepth_;
+        result.fwhm_ = fwhm_;
+        result.notes_ = internalGetNotes();
+        result.notes_.makeImmutable();
+        result.offset_ = internalGetOffset();
+        result.offset_.makeImmutable();
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.PSFConfig.ImagePSF) {
+          return mergeFrom((gdsc.smlm.data.config.PSFConfig.ImagePSF)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.PSFConfig.ImagePSF other) {
+        if (other == gdsc.smlm.data.config.PSFConfig.ImagePSF.getDefaultInstance()) return this;
+        if (other.getImageCount() != 0) {
+          setImageCount(other.getImageCount());
+        }
+        if (other.getCentreImage() != 0) {
+          setCentreImage(other.getCentreImage());
+        }
+        if (other.getPixelSize() != 0D) {
+          setPixelSize(other.getPixelSize());
+        }
+        if (other.getPixelDepth() != 0D) {
+          setPixelDepth(other.getPixelDepth());
+        }
+        if (other.getFwhm() != 0D) {
+          setFwhm(other.getFwhm());
+        }
+        internalGetMutableNotes().mergeFrom(
+            other.internalGetNotes());
+        internalGetMutableOffset().mergeFrom(
+            other.internalGetOffset());
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.PSFConfig.ImagePSF parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.PSFConfig.ImagePSF) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private int imageCount_ ;
+      /**
+       * <pre>
+       * The number of images in the PSF
+       * </pre>
+       *
+       * <code>int32 image_count = 1;</code>
+       */
+      public int getImageCount() {
+        return imageCount_;
+      }
+      /**
+       * <pre>
+       * The number of images in the PSF
+       * </pre>
+       *
+       * <code>int32 image_count = 1;</code>
+       */
+      public Builder setImageCount(int value) {
+        
+        imageCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The number of images in the PSF
+       * </pre>
+       *
+       * <code>int32 image_count = 1;</code>
+       */
+      public Builder clearImageCount() {
+        
+        imageCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int centreImage_ ;
+      /**
+       * <pre>
+       * The image containing the focal plane of the PSF
+       * </pre>
+       *
+       * <code>int32 centre_image = 2;</code>
+       */
+      public int getCentreImage() {
+        return centreImage_;
+      }
+      /**
+       * <pre>
+       * The image containing the focal plane of the PSF
+       * </pre>
+       *
+       * <code>int32 centre_image = 2;</code>
+       */
+      public Builder setCentreImage(int value) {
+        
+        centreImage_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The image containing the focal plane of the PSF
+       * </pre>
+       *
+       * <code>int32 centre_image = 2;</code>
+       */
+      public Builder clearCentreImage() {
+        
+        centreImage_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double pixelSize_ ;
+      /**
+       * <pre>
+       * The size of the PSF pixel in nanometers
+       * </pre>
+       *
+       * <code>double pixel_size = 3;</code>
+       */
+      public double getPixelSize() {
+        return pixelSize_;
+      }
+      /**
+       * <pre>
+       * The size of the PSF pixel in nanometers
+       * </pre>
+       *
+       * <code>double pixel_size = 3;</code>
+       */
+      public Builder setPixelSize(double value) {
+        
+        pixelSize_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The size of the PSF pixel in nanometers
+       * </pre>
+       *
+       * <code>double pixel_size = 3;</code>
+       */
+      public Builder clearPixelSize() {
+        
+        pixelSize_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double pixelDepth_ ;
+      /**
+       * <pre>
+       * The depth of the PSF pixel in nanometers
+       * </pre>
+       *
+       * <code>double pixel_depth = 4;</code>
+       */
+      public double getPixelDepth() {
+        return pixelDepth_;
+      }
+      /**
+       * <pre>
+       * The depth of the PSF pixel in nanometers
+       * </pre>
+       *
+       * <code>double pixel_depth = 4;</code>
+       */
+      public Builder setPixelDepth(double value) {
+        
+        pixelDepth_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The depth of the PSF pixel in nanometers
+       * </pre>
+       *
+       * <code>double pixel_depth = 4;</code>
+       */
+      public Builder clearPixelDepth() {
+        
+        pixelDepth_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double fwhm_ ;
+      /**
+       * <pre>
+       * The Full Width at Half Maxima (FWHM) in nanometers
+       * </pre>
+       *
+       * <code>double fwhm = 5;</code>
+       */
+      public double getFwhm() {
+        return fwhm_;
+      }
+      /**
+       * <pre>
+       * The Full Width at Half Maxima (FWHM) in nanometers
+       * </pre>
+       *
+       * <code>double fwhm = 5;</code>
+       */
+      public Builder setFwhm(double value) {
+        
+        fwhm_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Full Width at Half Maxima (FWHM) in nanometers
+       * </pre>
+       *
+       * <code>double fwhm = 5;</code>
+       */
+      public Builder clearFwhm() {
+        
+        fwhm_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.MapField<
+          java.lang.String, java.lang.String> notes_;
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+      internalGetNotes() {
+        if (notes_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              NotesDefaultEntryHolder.defaultEntry);
+        }
+        return notes_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+      internalGetMutableNotes() {
+        onChanged();;
+        if (notes_ == null) {
+          notes_ = com.google.protobuf.MapField.newMapField(
+              NotesDefaultEntryHolder.defaultEntry);
+        }
+        if (!notes_.isMutable()) {
+          notes_ = notes_.copy();
+        }
+        return notes_;
+      }
+
+      public int getNotesCount() {
+        return internalGetNotes().getMap().size();
+      }
+      /**
+       * <pre>
+       * Notes about the PSF, added as Key-Value pairs.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; notes = 6;</code>
+       */
+
+      public boolean containsNotes(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        return internalGetNotes().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getNotesMap()} instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String> getNotes() {
+        return getNotesMap();
+      }
+      /**
+       * <pre>
+       * Notes about the PSF, added as Key-Value pairs.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; notes = 6;</code>
+       */
+
+      public java.util.Map<java.lang.String, java.lang.String> getNotesMap() {
+        return internalGetNotes().getMap();
+      }
+      /**
+       * <pre>
+       * Notes about the PSF, added as Key-Value pairs.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; notes = 6;</code>
+       */
+
+      public java.lang.String getNotesOrDefault(
+          java.lang.String key,
+          java.lang.String defaultValue) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetNotes().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Notes about the PSF, added as Key-Value pairs.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; notes = 6;</code>
+       */
+
+      public java.lang.String getNotesOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetNotes().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearNotes() {
+        internalGetMutableNotes().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Notes about the PSF, added as Key-Value pairs.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; notes = 6;</code>
+       */
+
+      public Builder removeNotes(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableNotes().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String>
+      getMutableNotes() {
+        return internalGetMutableNotes().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Notes about the PSF, added as Key-Value pairs.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; notes = 6;</code>
+       */
+      public Builder putNotes(
+          java.lang.String key,
+          java.lang.String value) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (value == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableNotes().getMutableMap()
+            .put(key, value);
+        return this;
+      }
+      /**
+       * <pre>
+       * Notes about the PSF, added as Key-Value pairs.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; notes = 6;</code>
+       */
+
+      public Builder putAllNotes(
+          java.util.Map<java.lang.String, java.lang.String> values) {
+        internalGetMutableNotes().getMutableMap()
+            .putAll(values);
+        return this;
+      }
+
+      private com.google.protobuf.MapField<
+          java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> offset_;
+      private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
+      internalGetOffset() {
+        if (offset_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              OffsetDefaultEntryHolder.defaultEntry);
+        }
+        return offset_;
+      }
+      private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
+      internalGetMutableOffset() {
+        onChanged();;
+        if (offset_ == null) {
+          offset_ = com.google.protobuf.MapField.newMapField(
+              OffsetDefaultEntryHolder.defaultEntry);
+        }
+        if (!offset_.isMutable()) {
+          offset_ = offset_.copy();
+        }
+        return offset_;
+      }
+
+      public int getOffsetCount() {
+        return internalGetOffset().getMap().size();
+      }
+      /**
+       * <pre>
+       * The alignment correction for each slice in pixels. This is the shift required to 
+       * move the centre of the image to the centre of the PSF. The PSF centre may be 
+       * determined by PSF fitting.
+       * If missing then the alignment is assumed to be 0,0.
+       * </pre>
+       *
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       */
+
+      public boolean containsOffset(
+          int key) {
+        
+        return internalGetOffset().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getOffsetMap()} instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffset() {
+        return getOffsetMap();
+      }
+      /**
+       * <pre>
+       * The alignment correction for each slice in pixels. This is the shift required to 
+       * move the centre of the image to the centre of the PSF. The PSF centre may be 
+       * determined by PSF fitting.
+       * If missing then the alignment is assumed to be 0,0.
+       * </pre>
+       *
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       */
+
+      public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffsetMap() {
+        return internalGetOffset().getMap();
+      }
+      /**
+       * <pre>
+       * The alignment correction for each slice in pixels. This is the shift required to 
+       * move the centre of the image to the centre of the PSF. The PSF centre may be 
+       * determined by PSF fitting.
+       * If missing then the alignment is assumed to be 0,0.
+       * </pre>
+       *
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       */
+
+      public gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrDefault(
+          int key,
+          gdsc.smlm.data.config.PSFConfig.Offset defaultValue) {
+        
+        java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> map =
+            internalGetOffset().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * The alignment correction for each slice in pixels. This is the shift required to 
+       * move the centre of the image to the centre of the PSF. The PSF centre may be 
+       * determined by PSF fitting.
+       * If missing then the alignment is assumed to be 0,0.
+       * </pre>
+       *
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       */
+
+      public gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrThrow(
+          int key) {
+        
+        java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> map =
+            internalGetOffset().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearOffset() {
+        internalGetMutableOffset().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * The alignment correction for each slice in pixels. This is the shift required to 
+       * move the centre of the image to the centre of the PSF. The PSF centre may be 
+       * determined by PSF fitting.
+       * If missing then the alignment is assumed to be 0,0.
+       * </pre>
+       *
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       */
+
+      public Builder removeOffset(
+          int key) {
+        
+        internalGetMutableOffset().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
+      getMutableOffset() {
+        return internalGetMutableOffset().getMutableMap();
+      }
+      /**
+       * <pre>
+       * The alignment correction for each slice in pixels. This is the shift required to 
+       * move the centre of the image to the centre of the PSF. The PSF centre may be 
+       * determined by PSF fitting.
+       * If missing then the alignment is assumed to be 0,0.
+       * </pre>
+       *
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       */
+      public Builder putOffset(
+          int key,
+          gdsc.smlm.data.config.PSFConfig.Offset value) {
+        
+        if (value == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableOffset().getMutableMap()
+            .put(key, value);
+        return this;
+      }
+      /**
+       * <pre>
+       * The alignment correction for each slice in pixels. This is the shift required to 
+       * move the centre of the image to the centre of the PSF. The PSF centre may be 
+       * determined by PSF fitting.
+       * If missing then the alignment is assumed to be 0,0.
+       * </pre>
+       *
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       */
+
+      public Builder putAllOffset(
+          java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> values) {
+        internalGetMutableOffset().getMutableMap()
+            .putAll(values);
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.ImagePSF)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.ImagePSF)
+    private static final gdsc.smlm.data.config.PSFConfig.ImagePSF DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFConfig.ImagePSF();
+    }
+
+    public static gdsc.smlm.data.config.PSFConfig.ImagePSF getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ImagePSF>
+        PARSER = new com.google.protobuf.AbstractParser<ImagePSF>() {
+      public ImagePSF parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new ImagePSF(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ImagePSF> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ImagePSF> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.PSFConfig.ImagePSF getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_PSFParameter_descriptor;
   private static final 
@@ -2096,6 +4188,26 @@ public final class PSFConfig {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_Offset_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -2111,13 +4223,23 @@ public final class PSFConfig {
       "erUnit\022\r\n\005value\030\003 \001(\001\"o\n\003PSF\0220\n\010psf_type" +
       "\030\001 \001(\0162\036.gdsc.smlm.data.config.PSFType\0226" +
       "\n\tparameter\030\002 \003(\0132#.gdsc.smlm.data.confi" +
-      "g.PSFParameter*\232\001\n\007PSFType\022\017\n\013PSF_TYPE_N" +
-      "A\020\000\022\030\n\024ONE_AXIS_GAUSSIAN_2D\020\001\022\030\n\024TWO_AXI" +
-      "S_GAUSSIAN_2D\020\002\022\"\n\036TWO_AXIS_AND_THETA_GA" +
-      "USSIAN_2D\020\003\022\032\n\026ASTIGMATIC_GAUSSIAN_2D\020\004\022",
-      "\n\n\006CUSTOM\020\005*U\n\020PSFParameterUnit\022\031\n\025PSF_P" +
-      "ARAMETER_UNIT_NA\020\000\022\014\n\010DISTANCE\020\001\022\r\n\tINTE" +
-      "NSITY\020\002\022\t\n\005ANGLE\020\003B\013B\tPSFConfigb\006proto3"
+      "g.PSFParameter\" \n\006Offset\022\n\n\002cx\030\002 \001(\001\022\n\n\002" +
+      "cy\030\003 \001(\001\"\340\002\n\010ImagePSF\022\023\n\013image_count\030\001 \001" +
+      "(\005\022\024\n\014centre_image\030\002 \001(\005\022\022\n\npixel_size\030\003" +
+      " \001(\001\022\023\n\013pixel_depth\030\004 \001(\001\022\014\n\004fwhm\030\005 \001(\001\022",
+      "9\n\005notes\030\006 \003(\0132*.gdsc.smlm.data.config.I" +
+      "magePSF.NotesEntry\022;\n\006offset\030\007 \003(\0132+.gds" +
+      "c.smlm.data.config.ImagePSF.OffsetEntry\032" +
+      ",\n\nNotesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(" +
+      "\t:\0028\001\032L\n\013OffsetEntry\022\013\n\003key\030\001 \001(\005\022,\n\005val" +
+      "ue\030\002 \001(\0132\035.gdsc.smlm.data.config.Offset:" +
+      "\0028\001*\232\001\n\007PSFType\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_" +
+      "AXIS_GAUSSIAN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_" +
+      "2D\020\002\022\"\n\036TWO_AXIS_AND_THETA_GAUSSIAN_2D\020\003" +
+      "\022\032\n\026ASTIGMATIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005",
+      "*U\n\020PSFParameterUnit\022\031\n\025PSF_PARAMETER_UN" +
+      "IT_NA\020\000\022\014\n\010DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005" +
+      "ANGLE\020\003B\013B\tPSFConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2143,6 +4265,30 @@ public final class PSFConfig {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSF_descriptor,
         new java.lang.String[] { "PsfType", "Parameter", });
+    internal_static_gdsc_smlm_data_config_Offset_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_Offset_descriptor,
+        new java.lang.String[] { "Cx", "Cy", });
+    internal_static_gdsc_smlm_data_config_ImagePSF_descriptor =
+      getDescriptor().getMessageTypes().get(3);
+    internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_ImagePSF_descriptor,
+        new java.lang.String[] { "ImageCount", "CentreImage", "PixelSize", "PixelDepth", "Fwhm", "Notes", "Offset", });
+    internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor =
+      internal_static_gdsc_smlm_data_config_ImagePSF_descriptor.getNestedTypes().get(0);
+    internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_descriptor =
+      internal_static_gdsc_smlm_data_config_ImagePSF_descriptor.getNestedTypes().get(1);
+    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

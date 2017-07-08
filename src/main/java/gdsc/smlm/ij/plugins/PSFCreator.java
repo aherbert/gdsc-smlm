@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -33,7 +34,6 @@ import gdsc.core.utils.Sort;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.FitConfig.FitSolver;
 import gdsc.smlm.data.config.FitConfigHelper;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
@@ -58,7 +58,8 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
-import gdsc.smlm.ij.settings.PSFSettings;
+import gdsc.smlm.ij.settings.ImagePSF;
+import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Counter;
@@ -68,7 +69,6 @@ import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.results.procedures.HeightResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.WidthResultProcedure;
-import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -556,8 +556,8 @@ public class PSFCreator implements PlugInFilter
 
 		// Add Image properties containing the PSF details
 		final double fwhm = getFWHM(psf, maxz);
-		psfImp.setProperty("Info", XmlUtils.toXML(
-				new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, stats.getN(), fwhm, createNote())));
+		psfImp.setProperty("Info", ImagePSFHelper.toString(
+				new ImagePSF(maxz, nmPerPixel / magnification, nmPerSlice, stats.getN(), fwhm, createNote())));
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm, FWHM = %s px\n",
 				psfImp.getTitle(), maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3),
@@ -1559,8 +1559,8 @@ public class PSFCreator implements PlugInFilter
 		final double[] a = new double[z.length];
 
 		// Set limits for the fit
-		final float maxWidth = (float) (FastMath.max(fitConfig.getInitialXSD(),
-				fitConfig.getInitialYSD()) * magnification * 4);
+		final float maxWidth = (float) (FastMath.max(fitConfig.getInitialXSD(), fitConfig.getInitialYSD()) *
+				magnification * 4);
 		final float maxSignal = 2; // PSF is normalised to 1  
 
 		final WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
@@ -2215,20 +2215,20 @@ public class PSFCreator implements PlugInFilter
 		return p2 - p1;
 	}
 
-	private String createNote()
+	private HashMap<String, String> createNote()
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(new SimpleDateFormat("'Created:' d-MMM-yyyy HH:mm").format(new Date())).append("\n");
+		HashMap<String, String> note = new HashMap<String, String>();
+		note.put("Created", new SimpleDateFormat("d-MMM-yyyy HH:mm").format(new Date()));
 		FileInfo info = imp.getOriginalFileInfo();
 		if (info != null)
 		{
-			sb.append("File: ").append(info.fileName).append("\nDir: ").append(info.directory);
+			note.put("File", info.fileName);
+			note.put("Dir", info.directory);
 		}
 		else
 		{
-			sb.append("Title: ").append(imp.getTitle());
+			note.put("Title", imp.getTitle());
 		}
-		sb.append("\n");
-		return sb.toString();
+		return note;
 	}
 }

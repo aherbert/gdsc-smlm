@@ -1,12 +1,13 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -17,6 +18,7 @@ import org.apache.commons.math3.random.Well19937c;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
 import gdsc.smlm.data.config.FitConfigHelper;
 import gdsc.smlm.data.config.PSFConfigHelper;
@@ -40,11 +42,11 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.settings.PSFOffset;
-import gdsc.smlm.ij.settings.PSFSettings;
+import gdsc.smlm.ij.settings.ImagePSF;
+import gdsc.smlm.ij.settings.ImagePSFHelper;
+import gdsc.smlm.ij.settings.Offset;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.ImagePSFModel;
-import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -84,7 +86,7 @@ public class PSFDrift implements PlugIn
 	private static double smoothing = 0.1;
 
 	private ImagePlus imp;
-	private PSFSettings psfSettings;
+	private ImagePSF psfSettings;
 	private static FitConfiguration fitConfig;
 
 	static
@@ -150,7 +152,7 @@ public class PSFDrift implements PlugIn
 			this.psf = psf.copy();
 			this.fitConfig = fitConfig.clone();
 			s = fitConfig.getInitialXSD();
-			a = psfSettings.nmPerPixel * scale;
+			a = psfSettings.getPixelSize() * scale;
 			xy = PSFDrift.getStartPoints(PSFDrift.this);
 			w = width;
 			w2 = w * w;
@@ -500,9 +502,9 @@ public class PSFDrift implements PlugIn
 			Utils.log(TITLE + ": Fitted region size (%d) is smaller than the scaled PSF (%.1f)", w, newPsfWidth);
 
 		// Create robust PSF fitting settings
-		final double a = psfSettings.nmPerPixel * scale;
+		final double a = psfSettings.getPixelSize() * scale;
 		final double sa = PSFCalculator.squarePixelAdjustment(
-				psfSettings.nmPerPixel * (psfSettings.fwhm / Gaussian2DFunction.SD_TO_FWHM_FACTOR), a);
+				psfSettings.getPixelSize() * (psfSettings.getFwhm() / Gaussian2DFunction.SD_TO_FWHM_FACTOR), a);
 		fitConfig.setInitialPeakStdDev(sa / a);
 		fitConfig.setBackgroundFitting(backgroundFitting);
 		fitConfig.setNotSignalFitting(false);
@@ -510,17 +512,17 @@ public class PSFDrift implements PlugIn
 		fitConfig.setDisableSimpleFilter(true);
 
 		// Create the PSF over the desired z-depth
-		int depth = (int) Math.round(zDepth / psfSettings.nmPerSlice);
-		int startSlice = psfSettings.zCentre - depth;
-		int endSlice = psfSettings.zCentre + depth;
+		int depth = (int) Math.round(zDepth / psfSettings.getPixelDepth());
+		int startSlice = psfSettings.getCentreImage() - depth;
+		int endSlice = psfSettings.getCentreImage() + depth;
 		int nSlices = imp.getStackSize();
 		startSlice = (startSlice < 1) ? 1 : (startSlice > nSlices) ? nSlices : startSlice;
 		endSlice = (endSlice < 1) ? 1 : (endSlice > nSlices) ? nSlices : endSlice;
 
 		ImagePSFModel psf = createImagePSF(startSlice, endSlice);
 
-		int minz = startSlice - psfSettings.zCentre;
-		int maxz = endSlice - psfSettings.zCentre;
+		int minz = startSlice - psfSettings.getCentreImage();
+		int maxz = endSlice - psfSettings.getCentreImage();
 
 		final int nZ = maxz - minz + 1;
 		final int gridSize2 = grid.length * grid.length;
@@ -623,7 +625,7 @@ public class PSFDrift implements PlugIn
 					resultPosition++;
 				}
 			}
-			zPosition[i] = z * psfSettings.nmPerSlice;
+			zPosition[i] = z * psfSettings.getPixelDepth();
 			avX[i] = statsX.getMean();
 			seX[i] = statsX.getStandardError();
 			avY[i] = statsY.getMean();
@@ -635,7 +637,7 @@ public class PSFDrift implements PlugIn
 		int centre = 0;
 		for (int slice = startSlice, i = 0; slice <= endSlice; slice++, i++)
 		{
-			if (slice == psfSettings.zCentre)
+			if (slice == psfSettings.getCentreImage())
 			{
 				centre = i;
 				break;
@@ -673,8 +675,8 @@ public class PSFDrift implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.enableYesNoCancel();
 		gd.hideCancelButton();
-		startSlice = psfSettings.zCentre - (centre - start);
-		endSlice = psfSettings.zCentre + (end - centre);
+		startSlice = psfSettings.getCentreImage() - (centre - start);
+		endSlice = psfSettings.getCentreImage() + (end - centre);
 		gd.addMessage(String.format("Save the drift to the PSF?\n \nSlices %d (%s nm) - %d (%s nm) above recall limit",
 				startSlice, Utils.rounded(zPosition[start]), endSlice, Utils.rounded(zPosition[end])));
 		gd.addMessage("Optionally average the end points to set drift outside the limits.\n(Select zero to ignore)");
@@ -683,9 +685,10 @@ public class PSFDrift implements PlugIn
 		if (gd.wasOKed())
 		{
 			positionsToAverage = Math.abs((int) gd.getNextNumber());
-			ArrayList<PSFOffset> offset = new ArrayList<PSFOffset>();
-			final double pitch = psfSettings.nmPerPixel;
-			int j = 0, jj = 0;
+			HashMap<Integer, Offset> oldOffset = psfSettings.getOffset();
+			TurboList<double[]> offset = new TurboList<double[]>();
+			final double pitch = psfSettings.getPixelSize();
+			int j = 0;
 			for (int i = start, slice = startSlice; i <= end; slice++, i++)
 			{
 				j = findCentre(zPosition[i], smoothx, j);
@@ -697,19 +700,22 @@ public class PSFDrift implements PlugIn
 				// The offset should store the difference to the centre in pixels so divide by the pixel pitch
 				double cx = smoothx[1][j] / pitch;
 				double cy = smoothy[1][j] / pitch;
-				jj = findOffset(slice, jj);
-				if (jj != -1)
+				Offset o = oldOffset.get(slice);
+				if (o != null)
 				{
-					cx += psfSettings.offset[jj].cx;
-					cy += psfSettings.offset[jj].cy;
+					cx += o.getCx();
+					cy += o.getCy();
 				}
-				offset.add(new PSFOffset(slice, cx, cy));
+				offset.add(new double[] { slice, cx, cy });
 			}
 			addMissingOffsets(startSlice, endSlice, nSlices, offset);
-			psfSettings.offset = offset.toArray(new PSFOffset[offset.size()]);
+			HashMap<Integer, Offset> newOffset = new HashMap<Integer, Offset>();
+			for (double[] o : offset)
+				newOffset.put((int) o[0], new Offset(o[1], o[2]));
+			psfSettings.setOffset(newOffset);
 			psfSettings.addNote(TITLE,
 					String.format("Solver=%s, Region=%d", PeakFit.getSolverName(fitConfig), regionSize));
-			imp.setProperty("Info", XmlUtils.toXML(psfSettings));
+			imp.setProperty("Info", ImagePSFHelper.toString(psfSettings));
 		}
 	}
 
@@ -724,21 +730,7 @@ public class PSFDrift implements PlugIn
 		return -1;
 	}
 
-	private int findOffset(int slice, int i)
-	{
-		if (useOffset)
-		{
-			while (i < psfSettings.offset.length)
-			{
-				if (psfSettings.offset[i].slice == slice)
-					return i;
-				i++;
-			}
-		}
-		return -1;
-	}
-
-	private void addMissingOffsets(int startSlice, int endSlice, int nSlices, ArrayList<PSFOffset> offset)
+	private void addMissingOffsets(int startSlice, int endSlice, int nSlices, TurboList<double[]> offset)
 	{
 		// Add an offset for the remaining slices 
 		if (positionsToAverage > 0)
@@ -747,8 +739,8 @@ public class PSFDrift implements PlugIn
 			int n = 0;
 			for (int i = 0; n < positionsToAverage && i < offset.size(); i++)
 			{
-				cx += offset.get(i).cx;
-				cy += offset.get(i).cy;
+				cx += offset.get(i)[1];
+				cy += offset.get(i)[2];
 				n++;
 			}
 			cx /= n;
@@ -757,22 +749,26 @@ public class PSFDrift implements PlugIn
 			double n2 = 0;
 			for (int i = offset.size(); n2 < positionsToAverage && i-- > 0;)
 			{
-				cx2 += offset.get(i).cx;
-				cy2 += offset.get(i).cy;
+				cx2 += offset.get(i)[1];
+				cy2 += offset.get(i)[2];
 				n2++;
 			}
 			cx2 /= n2;
 			cy2 /= n2;
 
 			for (int slice = 1; slice < startSlice; slice++)
-				offset.add(new PSFOffset(slice, cx, cy));
+				offset.add(new double[] { slice, cx, cy });
 			for (int slice = endSlice + 1; slice <= nSlices; slice++)
-				offset.add(new PSFOffset(slice, cx2, cy2));
-			Collections.sort(offset, new Comparator<PSFOffset>()
+				offset.add(new double[] { slice, cx2, cy2 });
+			Collections.sort(offset, new Comparator<double[]>()
 			{
-				public int compare(PSFOffset arg0, PSFOffset arg1)
+				public int compare(double[] arg0, double[] arg1)
 				{
-					return arg0.slice - arg1.slice;
+					if (arg0[0] < arg1[0])
+						return -1;
+					if (arg0[0] > arg1[0])
+						return 1;
+					return 0;
 				}
 			});
 		}
@@ -897,7 +893,7 @@ public class PSFDrift implements PlugIn
 
 	private ImagePSFModel createImagePSF(int lower, int upper)
 	{
-		int zCentre = psfSettings.zCentre;
+		int zCentre = psfSettings.getCentreImage();
 
 		final double unitsPerPixel = 1.0 / scale;
 		final double unitsPerSlice = 1; // So we can move from -depth to depth
@@ -905,15 +901,16 @@ public class PSFDrift implements PlugIn
 		// Extract data uses index not slice number as arguments so subtract 1
 		double noiseFraction = 1e-3;
 		ImagePSFModel model = new ImagePSFModel(CreateData.extractImageStack(imp, lower - 1, upper - 1),
-				zCentre - lower, unitsPerPixel, unitsPerSlice, psfSettings.fwhm, noiseFraction);
+				zCentre - lower, unitsPerPixel, unitsPerSlice, psfSettings.getFwhm(), noiseFraction);
 
 		// Add the calibrated centres
-		if (psfSettings.offset != null && useOffset)
+		if (psfSettings.getOffset() != null && useOffset)
 		{
 			int sliceOffset = lower;
-			for (PSFOffset offset : psfSettings.offset)
+			for (Entry<Integer, Offset> entry : psfSettings.getOffset().entrySet())
 			{
-				model.setRelativeCentre(offset.slice - sliceOffset, offset.cx, offset.cy);
+				model.setRelativeCentre(entry.getKey() - sliceOffset, entry.getValue().getCx(),
+						entry.getValue().getCy());
 			}
 		}
 
@@ -992,25 +989,25 @@ public class PSFDrift implements PlugIn
 						if (imp.getWidth() == imp.getHeight() && imp.getNChannels() == 1)
 						{
 							// Check if these are PSF images created by the SMLM plugins
-							PSFSettings psfSettings = getPSFSettings(imp);
+							ImagePSF psfSettings = getPSFSettings(imp);
 							if (psfSettings != null)
 							{
-								if (psfSettings.zCentre <= 0)
+								if (psfSettings.getCentreImage() <= 0)
 								{
 									Utils.log(TITLE + ": Unknown PSF z-centre setting for image: " + imp.getTitle());
 									continue;
 								}
-								if (psfSettings.nmPerPixel <= 0)
+								if (psfSettings.getPixelSize() <= 0)
 								{
 									Utils.log(TITLE + ": Unknown PSF nm/pixel setting for image: " + imp.getTitle());
 									continue;
 								}
-								if (psfSettings.nmPerSlice <= 0)
+								if (psfSettings.getPixelDepth() <= 0)
 								{
 									Utils.log(TITLE + ": Unknown PSF nm/slice setting for image: " + imp.getTitle());
 									continue;
 								}
-								if (psfSettings.fwhm <= 0)
+								if (psfSettings.getFwhm() <= 0)
 								{
 									Utils.log(TITLE + ": Unknown PSF FWHM setting for image: " + imp.getTitle());
 									continue;
@@ -1026,16 +1023,12 @@ public class PSFDrift implements PlugIn
 		return titles;
 	}
 
-	private static PSFSettings getPSFSettings(ImagePlus imp)
+	private static ImagePSF getPSFSettings(ImagePlus imp)
 	{
 		Object info = imp.getProperty("Info");
 		if (info != null)
 		{
-			Object o = XmlUtils.fromXML(info.toString());
-			if (o != null && o instanceof PSFSettings)
-			{
-				return (PSFSettings) o;
-			}
+			return ImagePSFHelper.fromString(info.toString());
 		}
 		return null;
 	}

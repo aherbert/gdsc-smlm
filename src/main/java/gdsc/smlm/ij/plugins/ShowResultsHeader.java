@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import com.google.protobuf.Message;
+
 import gdsc.core.ij.Utils;
 import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.results.PeakResultsReader;
@@ -68,7 +70,9 @@ public class ShowResultsHeader implements PlugIn
 		found |= show("Format", reader.getFormat().toString());
 		found |= show("Name", reader.getName());
 		found |= show("Bounds", reader.getBounds());
+		found |= show("Source", reader.getSource());
 		found |= show("Calibration", reader.getCalibration());
+		found |= show("PSF", reader.getPSF());
 		found |= show("Configuration", reader.getConfiguration());
 		if (!found)
 			IJ.error(TITLE, "No header information found in file: " + inputFilename);
@@ -84,4 +88,12 @@ public class ShowResultsHeader implements PlugIn
 		Utils.log("%s: %s", title, text);
 		return true;
 	}
+
+	private boolean show(String title, Message data)
+	{
+		if (data == null)
+			return false;
+		Utils.log("%s: %s", title, data.toString());
+		return true;
+	}	
 }

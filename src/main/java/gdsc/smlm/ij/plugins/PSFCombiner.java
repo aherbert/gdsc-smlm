@@ -13,7 +13,8 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.ij.settings.PSFSettings;
+import gdsc.smlm.ij.settings.ImagePSF;
+import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.utils.XmlUtils;
 import gdsc.core.ij.Utils;
@@ -53,7 +54,7 @@ public class PSFCombiner implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		// Build a list of suitable images
 		titles = createImageList();
 
@@ -133,8 +134,7 @@ public class PSFCombiner implements PlugIn
 		Object info = imp.getProperty("Info");
 		if (info != null)
 		{
-			Object o = XmlUtils.fromXML(info.toString());
-			return (o != null && o instanceof PSFSettings);
+			return ImagePSFHelper.fromString(info.toString()) != null;
 		}
 		return false;
 	}
@@ -205,7 +205,7 @@ public class PSFCombiner implements PlugIn
 		for (PSF psf : input)
 		{
 			psf.start += shift;
-			totalImages += psf.psfSettings.nImages;
+			totalImages += psf.psfSettings.getImageCount();
 			if (max < psf.getEnd())
 				max = psf.getEnd();
 			if (size < psf.getSize())
@@ -228,7 +228,7 @@ public class PSFCombiner implements PlugIn
 			final int offsetXY = (psf.getSize() - size) / 2;
 			final int offsetZ = psf.start;
 			final int w = psf.getSize();
-			final double weight = (1.0 * psf.psfSettings.nImages) / totalImages;
+			final double weight = (1.0 * psf.psfSettings.getImageCount()) / totalImages;
 			final double increment = fraction / psfStack.getSize();
 			for (int n = 1; n <= psfStack.getSize(); n++)
 			{
@@ -259,7 +259,7 @@ public class PSFCombiner implements PlugIn
 
 		final double fwhm = getFWHM();
 		imp.setProperty("Info",
-				XmlUtils.toXML(new PSFSettings(imp.getSlice(), nmPerPixel, nmPerSlice, totalImages, fwhm)));
+				ImagePSFHelper.toString(new ImagePSF(imp.getSlice(), nmPerPixel, nmPerSlice, totalImages, fwhm)));
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, FWHM = %s\n", imp.getTitle(),
 				imp.getSlice(), Utils.rounded(nmPerPixel), Utils.rounded(nmPerSlice), totalImages, Utils.rounded(fwhm));
@@ -267,11 +267,11 @@ public class PSFCombiner implements PlugIn
 
 	private double getNmPerPixel()
 	{
-		final double nmPerPixel = input.get(0).psfSettings.nmPerPixel;
+		final double nmPerPixel = input.get(0).psfSettings.getPixelSize();
 		for (PSF psf : input)
-			if (psf.psfSettings.nmPerPixel != nmPerPixel)
+			if (psf.psfSettings.getPixelSize() != nmPerPixel)
 			{
-				IJ.error(TITLE, "Different nm/pixel resolutions for the input PSFs");
+				IJ.error(TITLE, "Different pixel size resolutions for the input PSFs");
 				return -1;
 			}
 		return nmPerPixel;
@@ -279,11 +279,11 @@ public class PSFCombiner implements PlugIn
 
 	private double getNmPerSlice()
 	{
-		final double nmPerSlice = input.get(0).psfSettings.nmPerSlice;
+		final double nmPerSlice = input.get(0).psfSettings.getPixelDepth();
 		for (PSF psf : input)
-			if (psf.psfSettings.nmPerSlice != nmPerSlice)
+			if (psf.psfSettings.getPixelDepth() != nmPerSlice)
 			{
-				IJ.error(TITLE, "Different nm/slice resolutions for the input PSFs");
+				IJ.error(TITLE, "Different pixel depth resolutions for the input PSFs");
 				return -1;
 			}
 		return nmPerSlice;
@@ -294,7 +294,7 @@ public class PSFCombiner implements PlugIn
 		double fwhm = 0;
 		for (PSF psf : input)
 		{
-			fwhm += psf.psfSettings.fwhm;
+			fwhm += psf.psfSettings.getFwhm();
 		}
 		return fwhm / input.size();
 	}
@@ -302,7 +302,7 @@ public class PSFCombiner implements PlugIn
 	private class PSF
 	{
 		private ImagePlus imp;
-		PSFSettings psfSettings;
+		ImagePSF psfSettings;
 		int start;
 		ImageStack psfStack;
 
@@ -313,10 +313,10 @@ public class PSFCombiner implements PlugIn
 				throw new RuntimeException("No image with title: " + title);
 
 			Object o = XmlUtils.fromXML(imp.getProperty("Info").toString());
-			if (!(o != null && o instanceof PSFSettings))
+			if (!(o != null && o instanceof ImagePSF))
 				throw new RuntimeException("Unknown PSF settings for image: " + title);
-			this.psfSettings = (PSFSettings) o;
-			int zCentre = psfSettings.zCentre;
+			this.psfSettings = (ImagePSF) o;
+			int zCentre = psfSettings.getCentreImage();
 			if (zCentre < 1 || zCentre > imp.getStackSize())
 				throw new RuntimeException("z-centre must be within the stack size: " + imp.getStackSize());
 			start = 1 - zCentre;
@@ -330,8 +330,8 @@ public class PSFCombiner implements PlugIn
 		 */
 		public void crop(int zDepth)
 		{
-			int minZ = FastMath.max(1, psfSettings.zCentre - zDepth);
-			int maxZ = FastMath.min(psfStack.getSize(), psfSettings.zCentre + zDepth);
+			int minZ = FastMath.max(1, psfSettings.getCentreImage() - zDepth);
+			int maxZ = FastMath.min(psfStack.getSize(), psfSettings.getCentreImage() + zDepth);
 			psfStack = psfStack.crop(0, 0, minZ, psfStack.getWidth(), psfStack.getHeight(), maxZ - minZ + 1);
 
 			// Update range

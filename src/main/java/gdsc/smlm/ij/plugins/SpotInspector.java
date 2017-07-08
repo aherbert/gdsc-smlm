@@ -12,25 +12,13 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
 import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
 import gdsc.smlm.engine.FitConfiguration;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.results.Counter;
@@ -43,7 +31,6 @@ import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.WidthResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
-import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -348,17 +335,12 @@ public class SpotInspector implements PlugIn, MouseListener
 		// Standard deviation is only needed for the width filtering
 		if (sortOrderIndex != 8)
 			return 0;
-		// XXX - This should be refactored out to the results configuration (i.e. store the PSF type)
-		FitEngineConfiguration config = (FitEngineConfiguration) XmlUtils.fromXML(results.getConfiguration());
-		if (config == null || config.getFitConfiguration() == null)
-		{
+		PSF psf = results2.getPSF();
+		if (!PSFHelper.isGaussian2D(psf))
 			return -1;
-		}
-		FitConfiguration fitConfig = config.getFitConfiguration();
-		float stdDevMax = (float) ((fitConfig.getInitialXSD() > 0) ? fitConfig.getInitialXSD() : 1);
-		if (fitConfig.getInitialYSD() > 0)
-			stdDevMax = (float) FastMath.max(fitConfig.getInitialYSD(), stdDevMax);
-		return stdDevMax;
+		FitConfiguration fitConfig = new FitConfiguration();
+		fitConfig.setPSF(psf);
+		return (float) Maths.max(1, fitConfig.getInitialXSD(), fitConfig.getInitialYSD());
 	}
 
 	private void plotScore(float[] xValues, float[] yValues, double yMin, double yMax)

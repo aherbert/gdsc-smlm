@@ -16,15 +16,24 @@ package gdsc.smlm.ij.settings;
 /**
  * Contain the settings for the centre offset of a PSF
  */
-public class PSFOffset
+public class Offset
 {
-	public final int slice;
-	public final double cx, cy;
+	private final double cx;
+	private final double cy;
 
-	public PSFOffset(int slice, double cx, double cy)
+	public Offset(double cx, double cy)
 	{
-		this.slice = slice;
 		this.cx = cx;
 		this.cy = cy;
+	}
+
+	public double getCx()
+	{
+		return cx;
+	}
+
+	public double getCy()
+	{
+		return cy;
 	}
 }
