@@ -93,7 +93,7 @@ public class ShowResultsHeader implements PlugIn
 	{
 		if (data == null)
 			return false;
-		Utils.log("%s: %s", title, data.toString());
+		Utils.log("%s:\n%s", title, data.toString());
 		return true;
 	}	
 }
