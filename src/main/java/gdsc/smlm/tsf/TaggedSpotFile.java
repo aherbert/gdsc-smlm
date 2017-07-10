@@ -8152,25 +8152,25 @@ public final class TaggedSpotFile {
      * fitting origin (x_position,y_position)
      * </pre>
      *
-     * <code>repeated float params_std_dev = 1505;</code>
+     * <code>repeated float param_std_devs = 1505;</code>
      */
-    java.util.List<java.lang.Float> getParamsStdDevList();
+    java.util.List<java.lang.Float> getParamStdDevsList();
     /**
      * <pre>
      * fitting origin (x_position,y_position)
      * </pre>
      *
-     * <code>repeated float params_std_dev = 1505;</code>
+     * <code>repeated float param_std_devs = 1505;</code>
      */
-    int getParamsStdDevCount();
+    int getParamStdDevsCount();
     /**
      * <pre>
      * fitting origin (x_position,y_position)
      * </pre>
      *
-     * <code>repeated float params_std_dev = 1505;</code>
+     * <code>repeated float param_std_devs = 1505;</code>
      */
-    float getParamsStdDev(int index);
+    float getParamStdDevs(int index);
   }
   /**
    * Protobuf type {@code TSF.Spot}
@@ -8214,7 +8214,7 @@ public final class TaggedSpotFile {
       noise_ = 0F;
       endFrame_ = 0;
       originalValue_ = 0F;
-      paramsStdDev_ = java.util.Collections.emptyList();
+      paramStdDevs_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -8404,21 +8404,21 @@ public final class TaggedSpotFile {
             }
             case 12045: {
               if (!((mutable_bitField0_ & 0x20000000) == 0x20000000)) {
-                paramsStdDev_ = new java.util.ArrayList<java.lang.Float>();
+                paramStdDevs_ = new java.util.ArrayList<java.lang.Float>();
                 mutable_bitField0_ |= 0x20000000;
               }
-              paramsStdDev_.add(input.readFloat());
+              paramStdDevs_.add(input.readFloat());
               break;
             }
             case 12042: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x20000000) == 0x20000000) && input.getBytesUntilLimit() > 0) {
-                paramsStdDev_ = new java.util.ArrayList<java.lang.Float>();
+                paramStdDevs_ = new java.util.ArrayList<java.lang.Float>();
                 mutable_bitField0_ |= 0x20000000;
               }
               while (input.getBytesUntilLimit() > 0) {
-                paramsStdDev_.add(input.readFloat());
+                paramStdDevs_.add(input.readFloat());
               }
               input.popLimit(limit);
               break;
@@ -8432,7 +8432,7 @@ public final class TaggedSpotFile {
             e).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x20000000) == 0x20000000)) {
-          paramsStdDev_ = java.util.Collections.unmodifiableList(paramsStdDev_);
+          paramStdDevs_ = java.util.Collections.unmodifiableList(paramStdDevs_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -9144,38 +9144,38 @@ public final class TaggedSpotFile {
       return originalValue_;
     }
 
-    public static final int PARAMS_STD_DEV_FIELD_NUMBER = 1505;
-    private java.util.List<java.lang.Float> paramsStdDev_;
+    public static final int PARAM_STD_DEVS_FIELD_NUMBER = 1505;
+    private java.util.List<java.lang.Float> paramStdDevs_;
     /**
      * <pre>
      * fitting origin (x_position,y_position)
      * </pre>
      *
-     * <code>repeated float params_std_dev = 1505;</code>
+     * <code>repeated float param_std_devs = 1505;</code>
      */
     public java.util.List<java.lang.Float>
-        getParamsStdDevList() {
-      return paramsStdDev_;
+        getParamStdDevsList() {
+      return paramStdDevs_;
     }
     /**
      * <pre>
      * fitting origin (x_position,y_position)
      * </pre>
      *
-     * <code>repeated float params_std_dev = 1505;</code>
+     * <code>repeated float param_std_devs = 1505;</code>
      */
-    public int getParamsStdDevCount() {
-      return paramsStdDev_.size();
+    public int getParamStdDevsCount() {
+      return paramStdDevs_.size();
     }
     /**
      * <pre>
      * fitting origin (x_position,y_position)
      * </pre>
      *
-     * <code>repeated float params_std_dev = 1505;</code>
+     * <code>repeated float param_std_devs = 1505;</code>
      */
-    public float getParamsStdDev(int index) {
-      return paramsStdDev_.get(index);
+    public float getParamStdDevs(int index) {
+      return paramStdDevs_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
@@ -9308,8 +9308,8 @@ public final class TaggedSpotFile {
       if (((bitField0_ & 0x10000000) == 0x10000000)) {
         output.writeFloat(1504, originalValue_);
       }
-      for (int i = 0; i < paramsStdDev_.size(); i++) {
-        output.writeFloat(1505, paramsStdDev_.get(i));
+      for (int i = 0; i < paramStdDevs_.size(); i++) {
+        output.writeFloat(1505, paramStdDevs_.get(i));
       }
       extensionWriter.writeUntil(2048, output);
       unknownFields.writeTo(output);
@@ -9438,9 +9438,9 @@ public final class TaggedSpotFile {
       }
       {
         int dataSize = 0;
-        dataSize = 4 * getParamsStdDevList().size();
+        dataSize = 4 * getParamStdDevsList().size();
         size += dataSize;
-        size += 2 * getParamsStdDevList().size();
+        size += 2 * getParamStdDevsList().size();
       }
       size += extensionsSerializedSize();
       size += unknownFields.getSerializedSize();
@@ -9637,8 +9637,8 @@ public final class TaggedSpotFile {
             == java.lang.Float.floatToIntBits(
                 other.getOriginalValue()));
       }
-      result = result && getParamsStdDevList()
-          .equals(other.getParamsStdDevList());
+      result = result && getParamStdDevsList()
+          .equals(other.getParamStdDevsList());
       result = result && unknownFields.equals(other.unknownFields);
       result = result &&
           getExtensionFields().equals(other.getExtensionFields());
@@ -9785,9 +9785,9 @@ public final class TaggedSpotFile {
         hash = (53 * hash) + java.lang.Float.floatToIntBits(
             getOriginalValue());
       }
-      if (getParamsStdDevCount() > 0) {
-        hash = (37 * hash) + PARAMS_STD_DEV_FIELD_NUMBER;
-        hash = (53 * hash) + getParamsStdDevList().hashCode();
+      if (getParamStdDevsCount() > 0) {
+        hash = (37 * hash) + PARAM_STD_DEVS_FIELD_NUMBER;
+        hash = (53 * hash) + getParamStdDevsList().hashCode();
       }
       hash = hashFields(hash, getExtensionFields());
       hash = (29 * hash) + unknownFields.hashCode();
@@ -9978,7 +9978,7 @@ public final class TaggedSpotFile {
         bitField0_ = (bitField0_ & ~0x08000000);
         originalValue_ = 0F;
         bitField0_ = (bitField0_ & ~0x10000000);
-        paramsStdDev_ = java.util.Collections.emptyList();
+        paramStdDevs_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x20000000);
         return this;
       }
@@ -10121,10 +10121,10 @@ public final class TaggedSpotFile {
         }
         result.originalValue_ = originalValue_;
         if (((bitField0_ & 0x20000000) == 0x20000000)) {
-          paramsStdDev_ = java.util.Collections.unmodifiableList(paramsStdDev_);
+          paramStdDevs_ = java.util.Collections.unmodifiableList(paramStdDevs_);
           bitField0_ = (bitField0_ & ~0x20000000);
         }
-        result.paramsStdDev_ = paramsStdDev_;
+        result.paramStdDevs_ = paramStdDevs_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -10277,13 +10277,13 @@ public final class TaggedSpotFile {
         if (other.hasOriginalValue()) {
           setOriginalValue(other.getOriginalValue());
         }
-        if (!other.paramsStdDev_.isEmpty()) {
-          if (paramsStdDev_.isEmpty()) {
-            paramsStdDev_ = other.paramsStdDev_;
+        if (!other.paramStdDevs_.isEmpty()) {
+          if (paramStdDevs_.isEmpty()) {
+            paramStdDevs_ = other.paramStdDevs_;
             bitField0_ = (bitField0_ & ~0x20000000);
           } else {
-            ensureParamsStdDevIsMutable();
-            paramsStdDev_.addAll(other.paramsStdDev_);
+            ensureParamStdDevsIsMutable();
+            paramStdDevs_.addAll(other.paramStdDevs_);
           }
           onChanged();
         }
@@ -11785,10 +11785,10 @@ public final class TaggedSpotFile {
         return this;
       }
 
-      private java.util.List<java.lang.Float> paramsStdDev_ = java.util.Collections.emptyList();
-      private void ensureParamsStdDevIsMutable() {
+      private java.util.List<java.lang.Float> paramStdDevs_ = java.util.Collections.emptyList();
+      private void ensureParamStdDevsIsMutable() {
         if (!((bitField0_ & 0x20000000) == 0x20000000)) {
-          paramsStdDev_ = new java.util.ArrayList<java.lang.Float>(paramsStdDev_);
+          paramStdDevs_ = new java.util.ArrayList<java.lang.Float>(paramStdDevs_);
           bitField0_ |= 0x20000000;
          }
       }
@@ -11797,43 +11797,43 @@ public final class TaggedSpotFile {
        * fitting origin (x_position,y_position)
        * </pre>
        *
-       * <code>repeated float params_std_dev = 1505;</code>
+       * <code>repeated float param_std_devs = 1505;</code>
        */
       public java.util.List<java.lang.Float>
-          getParamsStdDevList() {
-        return java.util.Collections.unmodifiableList(paramsStdDev_);
+          getParamStdDevsList() {
+        return java.util.Collections.unmodifiableList(paramStdDevs_);
       }
       /**
        * <pre>
        * fitting origin (x_position,y_position)
        * </pre>
        *
-       * <code>repeated float params_std_dev = 1505;</code>
+       * <code>repeated float param_std_devs = 1505;</code>
        */
-      public int getParamsStdDevCount() {
-        return paramsStdDev_.size();
+      public int getParamStdDevsCount() {
+        return paramStdDevs_.size();
       }
       /**
        * <pre>
        * fitting origin (x_position,y_position)
        * </pre>
        *
-       * <code>repeated float params_std_dev = 1505;</code>
+       * <code>repeated float param_std_devs = 1505;</code>
        */
-      public float getParamsStdDev(int index) {
-        return paramsStdDev_.get(index);
+      public float getParamStdDevs(int index) {
+        return paramStdDevs_.get(index);
       }
       /**
        * <pre>
        * fitting origin (x_position,y_position)
        * </pre>
        *
-       * <code>repeated float params_std_dev = 1505;</code>
+       * <code>repeated float param_std_devs = 1505;</code>
        */
-      public Builder setParamsStdDev(
+      public Builder setParamStdDevs(
           int index, float value) {
-        ensureParamsStdDevIsMutable();
-        paramsStdDev_.set(index, value);
+        ensureParamStdDevsIsMutable();
+        paramStdDevs_.set(index, value);
         onChanged();
         return this;
       }
@@ -11842,11 +11842,11 @@ public final class TaggedSpotFile {
        * fitting origin (x_position,y_position)
        * </pre>
        *
-       * <code>repeated float params_std_dev = 1505;</code>
+       * <code>repeated float param_std_devs = 1505;</code>
        */
-      public Builder addParamsStdDev(float value) {
-        ensureParamsStdDevIsMutable();
-        paramsStdDev_.add(value);
+      public Builder addParamStdDevs(float value) {
+        ensureParamStdDevsIsMutable();
+        paramStdDevs_.add(value);
         onChanged();
         return this;
       }
@@ -11855,13 +11855,13 @@ public final class TaggedSpotFile {
        * fitting origin (x_position,y_position)
        * </pre>
        *
-       * <code>repeated float params_std_dev = 1505;</code>
+       * <code>repeated float param_std_devs = 1505;</code>
        */
-      public Builder addAllParamsStdDev(
+      public Builder addAllParamStdDevs(
           java.lang.Iterable<? extends java.lang.Float> values) {
-        ensureParamsStdDevIsMutable();
+        ensureParamStdDevsIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, paramsStdDev_);
+            values, paramStdDevs_);
         onChanged();
         return this;
       }
@@ -11870,10 +11870,10 @@ public final class TaggedSpotFile {
        * fitting origin (x_position,y_position)
        * </pre>
        *
-       * <code>repeated float params_std_dev = 1505;</code>
+       * <code>repeated float param_std_devs = 1505;</code>
        */
-      public Builder clearParamsStdDev() {
-        paramsStdDev_ = java.util.Collections.emptyList();
+      public Builder clearParamStdDevs() {
+        paramStdDevs_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x20000000);
         onChanged();
         return this;
@@ -11993,7 +11993,7 @@ public final class TaggedSpotFile {
       "\013z_precision\030j \001(\002\022\022\n\nx_position\030k \001(\005\022\022" +
       "\n\ny_position\030l \001(\005\022\016\n\005error\030\334\013 \001(\001\022\016\n\005no" +
       "ise\030\335\013 \001(\002\022\022\n\tend_frame\030\337\013 \001(\005\022\027\n\016origin" +
-      "al_value\030\340\013 \001(\002\022\027\n\016params_std_dev\030\341\013 \003(\002" +
+      "al_value\030\340\013 \001(\002\022\027\n\016param_std_devs\030\341\013 \003(\002" +
       "*\006\010\244\r\020\200\020*8\n\007FitMode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOA" +
       "XIS\020\001\022\023\n\017TWOAXISANDTHETA\020\002*&\n\nThetaUnits",
       "\022\013\n\007DEGREES\020\000\022\013\n\007RADIANS\020\001*)\n\016IntensityU" +
@@ -12037,7 +12037,7 @@ public final class TaggedSpotFile {
     internal_static_TSF_Spot_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_Spot_descriptor,
-        new java.lang.String[] { "Molecule", "Channel", "Frame", "Slice", "Pos", "FluorophoreType", "Cluster", "LocationUnits", "X", "Y", "Z", "IntensityUnits", "Intensity", "Background", "Width", "A", "Theta", "XOriginal", "YOriginal", "ZOriginal", "XPrecision", "YPrecision", "ZPrecision", "XPosition", "YPosition", "Error", "Noise", "EndFrame", "OriginalValue", "ParamsStdDev", });
+        new java.lang.String[] { "Molecule", "Channel", "Frame", "Slice", "Pos", "FluorophoreType", "Cluster", "LocationUnits", "X", "Y", "Z", "IntensityUnits", "Intensity", "Background", "Width", "A", "Theta", "XOriginal", "YOriginal", "ZOriginal", "XPrecision", "YPrecision", "ZPrecision", "XPosition", "YPosition", "Error", "Noise", "EndFrame", "OriginalValue", "ParamStdDevs", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

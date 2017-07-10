@@ -381,8 +381,8 @@ public class FitEngineConfiguration implements Cloneable
 
 	private void truncateFilters(DataFilterSettings.Builder b, int n)
 	{
-		while (b.getDataFilterCount() > n)
-			b.removeDataFilter(b.getDataFilterCount() - 1);
+		while (b.getDataFiltersCount() > n)
+			b.removeDataFilters(b.getDataFiltersCount() - 1);
 	}
 
 	/**
@@ -405,7 +405,7 @@ public class FitEngineConfiguration implements Cloneable
 	//	 */
 	//	public DataFilter getDataFilter(int n)
 	//	{
-	//		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFilterCount())
+	//		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFiltersCount())
 	//			return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n);
 	//		return null;
 	//	}
@@ -415,9 +415,9 @@ public class FitEngineConfiguration implements Cloneable
 	 *
 	 * @return the data filter count
 	 */
-	public int getDataFilterCount()
+	public int getDataFiltersCount()
 	{
-		return this.fitEngineSettings.getDataFilterSettings().getDataFilterCount();
+		return this.fitEngineSettings.getDataFilterSettings().getDataFiltersCount();
 	}
 
 	/**
@@ -427,9 +427,9 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public DataFilterMethod getDataFilterMethod(int n)
 	{
-		if (n < getDataFilterCount())
-			return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n).getDataFilterMethod();
-		throw new IndexOutOfBoundsException(n + " >= " + getDataFilterCount());
+		if (n < getDataFiltersCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getDataFilterMethod();
+		throw new IndexOutOfBoundsException(n + " >= " + getDataFiltersCount());
 	}
 
 	/**
@@ -439,9 +439,9 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public boolean getDataFilterAbsolute(int n)
 	{
-		if (n < getDataFilterCount())
-			return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n).getParameter(0).getAbsolute();
-		throw new IndexOutOfBoundsException(n + " >= " + getDataFilterCount());
+		if (n < getDataFiltersCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getAbsolute();
+		throw new IndexOutOfBoundsException(n + " >= " + getDataFiltersCount());
 	}
 
 	/**
@@ -451,9 +451,9 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public double getSmooth(int n)
 	{
-		if (n < getDataFilterCount())
-			return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n).getParameter(0).getValue();
-		throw new IndexOutOfBoundsException(n + " >= " + getDataFilterCount());
+		if (n < getDataFiltersCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getValue();
+		throw new IndexOutOfBoundsException(n + " >= " + getDataFiltersCount());
 	}
 
 	/**
@@ -463,9 +463,9 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public boolean getAbsolute(int n)
 	{
-		if (n < getDataFilterCount())
-			return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n).getParameter(0).getAbsolute();
-		throw new IndexOutOfBoundsException(n + " >= " + getDataFilterCount());
+		if (n < getDataFiltersCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getAbsolute();
+		throw new IndexOutOfBoundsException(n + " >= " + getDataFiltersCount());
 	}
 
 	/**
@@ -485,10 +485,10 @@ public class FitEngineConfiguration implements Cloneable
 	{
 		DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
 		truncateFilters(b, n + 1);
-		DataFilter.Builder b2 = (b.getDataFilterCount() == n) ? b.addDataFilterBuilder() : b.getDataFilterBuilder(n);
+		DataFilter.Builder b2 = (b.getDataFiltersCount() == n) ? b.addDataFiltersBuilder() : b.getDataFiltersBuilder(n);
 		b2.setDataFilterMethod(dataFilterMethod);
-		b2.clearParameter();
-		RelativeParameter.Builder b3 = b2.addParameterBuilder();
+		b2.clearParameters();
+		RelativeParameter.Builder b3 = b2.addParametersBuilder();
 		b3.setValue(smooth);
 		b3.setAbsolute(absolute);
 	}
@@ -603,7 +603,7 @@ public class FitEngineConfiguration implements Cloneable
 
 		DataProcessor processor0 = createDataProcessor(border, 0, hwhmMin);
 		DataFilterSettings f = fitEngineSettings.getDataFilterSettings();
-		final int nFilters = f.getDataFilterCount();
+		final int nFilters = f.getDataFiltersCount();
 
 		final MaximaSpotFilter spotFilter;
 		switch (f.getDataFilterType())
@@ -701,7 +701,7 @@ public class FitEngineConfiguration implements Cloneable
 	public int getNumberOfFilters()
 	{
 		DataFilterSettings f = fitEngineSettings.getDataFilterSettings();
-		final int nFilters = f.getDataFilterCount();
+		final int nFilters = f.getDataFiltersCount();
 		switch (f.getDataFilterType())
 		{
 			case JURY:
@@ -725,7 +725,7 @@ public class FitEngineConfiguration implements Cloneable
 	private double getSmoothingWindow(DataFilter f, double hwhmMin)
 	{
 		//return BlockAverageDataProcessor.convert(smoothingParameter * hwhmMin);
-		RelativeParameter rp = f.getParameter(0);
+		RelativeParameter rp = f.getParameters(0);
 		double p = rp.getValue();
 		if (!rp.getAbsolute())
 			p *= hwhmMin;
@@ -734,9 +734,9 @@ public class FitEngineConfiguration implements Cloneable
 
 	private DataProcessor createDataProcessor(int border, int n, double hwhm)
 	{
-		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFilterCount())
+		if (n < this.fitEngineSettings.getDataFilterSettings().getDataFiltersCount())
 		{
-			DataFilter f = fitEngineSettings.getDataFilterSettings().getDataFilter(n);
+			DataFilter f = fitEngineSettings.getDataFilterSettings().getDataFilters(n);
 			return createDataProcessor(border, f.getDataFilterMethod(), getSmoothingWindow(f, hwhm));
 		}
 		return null;

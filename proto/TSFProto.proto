@@ -258,7 +258,7 @@ message Spot {
       // average across multiple frames)
    optional float original_value = 1504; // The original pixel value at the
       // fitting origin (x_position,y_position)
-   repeated float params_std_dev = 1505; // The estimated standard deviations of
+   repeated float param_std_devs = 1505; // The estimated standard deviations of
       // each of the fitted parameters. The GDSC SMLM code uses a fixed array of
       // size 7 for fitted parameters:
       // [Background,Signal,Theta,X,Y,X-width,Y-width].

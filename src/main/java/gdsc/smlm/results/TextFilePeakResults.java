@@ -302,7 +302,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		final float[] params = result.params;
 		if (isShowDeviations())
 		{
-			final float[] paramsStdDev = result.paramsStdDev;
+			final float[] paramsStdDev = result.paramStdDevs;
 			if (paramsStdDev != null)
 			{
 				for (int i = 0; i < converters.length; i++)
@@ -400,7 +400,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				else
 				{
 					results2.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue,
-							result.error, result.noise, result.params, result.paramsStdDev, result.getEndFrame(), id));
+							result.error, result.noise, result.params, result.paramStdDevs, result.getEndFrame(), id));
 				}
 			}
 			addAll(results2);

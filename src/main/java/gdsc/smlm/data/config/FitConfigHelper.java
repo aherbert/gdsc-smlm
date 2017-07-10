@@ -61,15 +61,15 @@ public class FitConfigHelper
 		builder.setUseDynamicClamping(false);
 		// Add defaults for a two-axis and theta Gaussian 2D function.
 		// The units are photons and pixels.
-		builder.addClampValue(10); // B (3D DAOSTORM uses 100 which is high compared to the expected background of a 'clean' image)
-		builder.addClampValue(1000); // I
-		builder.addClampValue(1); // X
-		builder.addClampValue(1); // Y
+		builder.addClampValues(10); // B (3D DAOSTORM uses 100 which is high compared to the expected background of a 'clean' image)
+		builder.addClampValues(1000); // I
+		builder.addClampValues(1); // X
+		builder.addClampValues(1); // Y
 		// TODO: determine what this should be
-		builder.addClampValue(10); // Z
-		builder.addClampValue(3); // Sx
-		builder.addClampValue(3); // Sy
-		builder.addClampValue(Math.PI); // A
+		builder.addClampValues(10); // Z
+		builder.addClampValues(3); // Sx
+		builder.addClampValues(3); // Sy
+		builder.addClampValues(Math.PI); // A
 		
 		defaultFitSolverSettings = builder.build();
 	}
@@ -128,11 +128,11 @@ public class FitConfigHelper
 		
 		DataFilterSettings.Builder dfs = builder.getDataFilterSettingsBuilder();
 		dfs.setDataFilterType(DataFilterType.SINGLE);
-		DataFilter.Builder dfb =  dfs.addDataFilterBuilder();
+		DataFilter.Builder dfb =  dfs.addDataFiltersBuilder();
 		dfb.setDataFilterMethod(DataFilterMethod.MEAN);
 		rp.setAbsolute(false);
 		rp.setValue(1.2);
-		dfb.addParameter(rp.build());
+		dfb.addParameters(rp.build());
 		
 		rp.setAbsolute(false);
 		rp.setValue(1);

@@ -2916,12 +2916,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (clampValues == null)
 		{
 			int n = PeakResult.STANDARD_PARAMETERS + 3;
-			if (fitSolverSettings.getClampValueCount() != n)
+			if (fitSolverSettings.getClampValuesCount() != n)
 				throw new IllegalStateException("Require clamp values for all the Gaussian 2D parameters");
 
 			clampValues = new double[n];
 			for (int i = 0; i < n; i++)
-				clampValues[i] = fitSolverSettings.getClampValue(i);
+				clampValues[i] = fitSolverSettings.getClampValues(i);
 		}
 		return clampValues;
 	}
@@ -2950,7 +2950,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setClampBackground(double value)
 	{
-		updateClampValue(Gaussian2DFunction.BACKGROUND, value);
+		updateClampValues(Gaussian2DFunction.BACKGROUND, value);
 	}
 
 	/**
@@ -2969,7 +2969,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setClampSignal(double value)
 	{
-		updateClampValue(Gaussian2DFunction.SIGNAL, value);
+		updateClampValues(Gaussian2DFunction.SIGNAL, value);
 	}
 
 	/**
@@ -2988,7 +2988,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setClampX(double value)
 	{
-		updateClampValue(Gaussian2DFunction.X_POSITION, value);
+		updateClampValues(Gaussian2DFunction.X_POSITION, value);
 	}
 
 	/**
@@ -3007,7 +3007,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setClampY(double value)
 	{
-		updateClampValue(Gaussian2DFunction.Y_POSITION, value);
+		updateClampValues(Gaussian2DFunction.Y_POSITION, value);
 	}
 
 	/**
@@ -3026,7 +3026,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setClampZ(double value)
 	{
-		updateClampValue(Gaussian2DFunction.Z_POSITION, value);
+		updateClampValues(Gaussian2DFunction.Z_POSITION, value);
 	}
 
 	/**
@@ -3045,7 +3045,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setClampXSD(double value)
 	{
-		updateClampValue(Gaussian2DFunction.X_SD, value);
+		updateClampValues(Gaussian2DFunction.X_SD, value);
 	}
 
 	/**
@@ -3064,7 +3064,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setClampYSD(double value)
 	{
-		updateClampValue(Gaussian2DFunction.Y_SD, value);
+		updateClampValues(Gaussian2DFunction.Y_SD, value);
 	}
 
 	/**
@@ -3083,10 +3083,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setClampAngle(double value)
 	{
-		updateClampValue(Gaussian2DFunction.ANGLE, value);
+		updateClampValues(Gaussian2DFunction.ANGLE, value);
 	}
 
-	private void updateClampValue(int index, double value)
+	private void updateClampValues(int index, double value)
 	{
 		invalidateFunctionSolver();
 		getClampValues()[index] = value;

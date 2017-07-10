@@ -786,7 +786,7 @@ public class PeakResultsReader
 				public void execute(PeakResult peakResult)
 				{
 					peakResult.params = Arrays.copyOf(peakResult.params, newLength);
-					peakResult.paramsStdDev = Arrays.copyOf(peakResult.paramsStdDev, newLength);
+					peakResult.paramStdDevs = Arrays.copyOf(peakResult.paramStdDevs, newLength);
 				}
 			});
 		}

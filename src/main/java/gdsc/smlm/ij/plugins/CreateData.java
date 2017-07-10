@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
@@ -62,6 +63,8 @@ import gdsc.smlm.data.config.CreateDataSettingsHelper;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.GUIConfig.CreateDataSettings;
 import gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings;
+import gdsc.smlm.data.config.PSFConfig.ImagePSF;
+import gdsc.smlm.data.config.PSFConfig.Offset;
 import gdsc.smlm.data.config.PSFConfig.PSF;
 import gdsc.smlm.data.config.PSFConfig.PSFType;
 import gdsc.smlm.data.config.PSFHelper;
@@ -75,9 +78,7 @@ import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;
 import gdsc.smlm.ij.settings.Atom;
 import gdsc.smlm.ij.settings.Compound;
-import gdsc.smlm.ij.settings.ImagePSF;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
-import gdsc.smlm.ij.settings.Offset;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.ActivationEnergyImageModel;
 import gdsc.smlm.model.AiryPSFModel;
@@ -2098,10 +2099,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					noiseFraction);
 
 			// Add the calibrated centres
-			if (psfSettings.getOffset() != null)
+			Map<Integer, Offset> map = psfSettings.getOffsetsMap();
+			if (map != null)
 			{
 				final int sliceOffset = lower + 1;
-				for (Entry<Integer, Offset> entry : psfSettings.getOffset().entrySet())
+				for (Entry<Integer, Offset> entry : map.entrySet())
 				{
 					model.setRelativeCentre(entry.getKey() - sliceOffset, entry.getValue().getCx(),
 							entry.getValue().getCy());

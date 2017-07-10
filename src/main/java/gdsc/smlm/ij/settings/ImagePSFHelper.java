@@ -1,6 +1,9 @@
 package gdsc.smlm.ij.settings;
 
-import gdsc.smlm.utils.XmlUtils;
+import java.util.HashMap;
+
+import gdsc.smlm.data.config.PSFConfig.ImagePSF;
+import gdsc.smlm.data.config.PSFConfig.ImagePSFOrBuilder;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -27,9 +30,9 @@ public class ImagePSFHelper
 	 *            the image psf
 	 * @return the string
 	 */
-	public static String toString(ImagePSF imagePsf)
+	public static String toString(ImagePSFOrBuilder imagePsf)
 	{
-		return XmlUtils.toXML(imagePsf);
+		return SettingsManager.toJSON(imagePsf, SettingsManager.FLAG_JSON_WHITESPACE);
 	}
 
 	/**
@@ -41,9 +44,60 @@ public class ImagePSFHelper
 	 */
 	public static ImagePSF fromString(String string)
 	{
-		Object o = XmlUtils.fromXML(string);
-		if (o != null && o instanceof ImagePSF)
-			return (ImagePSF) o;
+		ImagePSF.Builder builder = ImagePSF.newBuilder();
+		if (SettingsManager.fromJSON(string, builder))
+			return builder.build();
 		return null;
+	}
+
+	/**
+	 * Creates the ImagePSF.
+	 *
+	 * @param centreImage
+	 *            the centre image
+	 * @param pixelSize
+	 *            the pixel size
+	 * @param pixelDepth
+	 *            the pixel depth
+	 * @param imageCount
+	 *            the image count
+	 * @param fwhm
+	 *            the fwhm
+	 * @return the image PSF
+	 */
+	public static ImagePSF create(int centreImage, double pixelSize, double pixelDepth, int imageCount, double fwhm)
+	{
+		return create(centreImage, pixelSize, pixelDepth, imageCount, fwhm, null);
+	}
+
+	/**
+	 * Creates the ImagePSF.
+	 *
+	 * @param centreImage
+	 *            the centre image
+	 * @param pixelSize
+	 *            the pixel size
+	 * @param pixelDepth
+	 *            the pixel depth
+	 * @param imageCount
+	 *            the image count
+	 * @param fwhm
+	 *            the fwhm
+	 * @param notes
+	 *            the notes
+	 * @return the image PSF
+	 */
+	public static ImagePSF create(int centreImage, double pixelSize, double pixelDepth, int imageCount, double fwhm,
+			HashMap<String, String> notes)
+	{
+		ImagePSF.Builder builder = ImagePSF.newBuilder();
+		builder.setCentreImage(centreImage);
+		builder.setPixelSize(pixelSize);
+		builder.setPixelDepth(pixelDepth);
+		builder.setImageCount(imageCount);
+		builder.setFwhm(fwhm);
+		if (notes != null)
+			builder.putAllNotes(notes);
+		return builder.build();
 	}
 }

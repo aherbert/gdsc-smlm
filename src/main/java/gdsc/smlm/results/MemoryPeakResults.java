@@ -431,7 +431,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		long memorySize = 0;
 		if (r != null && r.size() > 0)
 		{
-			boolean includeDeviations = r.getf(0).paramsStdDev != null;
+			boolean includeDeviations = r.getf(0).paramStdDevs != null;
 			memorySize = MemoryPeakResults.estimateMemorySize(r.size(), includeDeviations);
 		}
 		return memorySize;
@@ -879,7 +879,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (getf(i).paramsStdDev == null)
+			if (getf(i).paramStdDevs == null)
 				return false;
 		}
 		return !isEmpty();
@@ -1154,7 +1154,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			PeakResult p = getf(i);
 			p.noise = noiseConverter.convert(p.noise);
 			final float[] params = p.params;
-			final float[] paramsStdDev = p.paramsStdDev;
+			final float[] paramsStdDev = p.paramStdDevs;
 			if (paramsStdDev == null)
 			{
 				for (int j = 0; j < converters.length; j++)

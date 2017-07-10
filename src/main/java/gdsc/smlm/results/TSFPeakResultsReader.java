@@ -361,11 +361,11 @@ public class TSFPeakResultsReader
 					id = spot.getCluster();
 					origValue = spot.getOriginalValue();
 					endFrame = spot.getEndFrame();
-					if (spot.getParamsStdDevCount() != 0)
+					if (spot.getParamStdDevsCount() != 0)
 					{
-						paramsStdDev = new float[spot.getParamsStdDevCount()];
+						paramsStdDev = new float[spot.getParamStdDevsCount()];
 						for (int i = 0; i < paramsStdDev.length; i++)
-							paramsStdDev[i] = spot.getParamsStdDev(i);
+							paramsStdDev[i] = spot.getParamStdDevs(i);
 					}
 				}
 				// Use the standard cluster field for the ID

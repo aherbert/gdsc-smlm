@@ -185,13 +185,13 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setXPosition(origX);
 		builder.setYPosition(origY);
 
-		setParams(params, builder);
+		setParam(params, builder);
 
 		builder.setError(error);
 		builder.setNoise(noise);
 		builder.setOriginalValue(origValue);
 		if (paramsStdDev != null)
-			addNewParamsStdDev(builder, paramsStdDev);
+			addNewParamStdDevs(builder, paramsStdDev);
 
 		Spot spot = builder.build();
 
@@ -210,7 +210,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setXPosition(result.origX);
 		builder.setYPosition(result.origY);
 
-		setParams(params, builder);
+		setParam(params, builder);
 
 		if (result.hasPrecision())
 		{
@@ -228,8 +228,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		if (result.hasEndFrame())
 			builder.setEndFrame(result.getEndFrame());
 		builder.setOriginalValue(result.origValue);
-		if (result.paramsStdDev != null)
-			addNewParamsStdDev(builder, result.paramsStdDev);
+		if (result.paramStdDevs != null)
+			addNewParamStdDevs(builder, result.paramStdDevs);
 
 		Spot spot = builder.build();
 
@@ -244,7 +244,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 * @param builder
 	 *            the builder
 	 */
-	private void setParams(float[] params, Spot.Builder builder)
+	private void setParam(float[] params, Spot.Builder builder)
 	{
 		builder.setBackground(params[PeakResult.BACKGROUND]);
 		builder.setIntensity(params[PeakResult.INTENSITY]);
@@ -278,14 +278,14 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 *
 	 * @param builder
 	 *            the builder
-	 * @param paramsStdDev
+	 * @param paramStdDev
 	 *            the params std dev
 	 */
-	private void addNewParamsStdDev(Builder builder, float[] paramsStdDev)
+	private void addNewParamStdDevs(Builder builder, float[] paramStdDev)
 	{
 		// Note: paramsStdDev for X/Y could be set into the X/Y Precision field.
-		for (int i = 0; i < paramsStdDev.length; i++)
-			builder.addParamsStdDev(paramsStdDev[i]);
+		for (int i = 0; i < paramStdDev.length; i++)
+			builder.addParamStdDevs(paramStdDev[i]);
 	}
 
 	public void addAll(PeakResult[] results)
@@ -307,7 +307,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			builder.setXPosition(result.origX);
 			builder.setYPosition(result.origY);
 
-			setParams(params, builder);
+			setParam(params, builder);
 
 			if (result.hasPrecision())
 			{
@@ -329,7 +329,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			else
 				builder.clearEndFrame();
 			builder.setOriginalValue(result.origValue);
-			addParamsStdDev(builder, result.paramsStdDev);
+			addParamStdDevs(builder, result.paramStdDevs);
 
 			spots[count++] = builder.build();
 
@@ -350,29 +350,29 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 *
 	 * @param builder
 	 *            the builder
-	 * @param paramsStdDev
+	 * @param paramStdDev
 	 *            the params std dev
 	 */
-	private void addParamsStdDev(Builder builder, float[] paramsStdDev)
+	private void addParamStdDevs(Builder builder, float[] paramStdDev)
 	{
 		// Note: paramsStdDev for X/Y could be set into the X/Y Precision field.
-		if (paramsStdDev == null)
+		if (paramStdDev == null)
 		{
-			if (builder.getParamsStdDevCount() != 0)
-				builder.clearParamsStdDev();
+			if (builder.getParamStdDevsCount() != 0)
+				builder.clearParamStdDevs();
 			return;
 		}
 
 		// Reuse the space
-		if (builder.getParamsStdDevCount() == paramsStdDev.length)
+		if (builder.getParamStdDevsCount() == paramStdDev.length)
 		{
-			for (int i = 0; i < paramsStdDev.length; i++)
-				builder.setParamsStdDev(i, paramsStdDev[i]);
+			for (int i = 0; i < paramStdDev.length; i++)
+				builder.setParamStdDevs(i, paramStdDev[i]);
 		}
 		else
 		{
-			builder.clearParamsStdDev();
-			addNewParamsStdDev(builder, paramsStdDev);
+			builder.clearParamStdDevs();
+			addNewParamStdDevs(builder, paramStdDev);
 		}
 	}
 

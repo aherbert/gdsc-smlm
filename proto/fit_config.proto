@@ -102,7 +102,7 @@ message FitSolverSettings {
 	// Set to true to use dynamic parameter clamping, i.e. update the clamp values when the step direction changes
 	bool use_dynamic_clamping = 17;
 	// The initial clamp values for each of the PSF parameters.
-	repeated double clamp_value = 18;	
+	repeated double clamp_values = 18;	
 }
 
 // Define the settings for filtering fit results.
@@ -179,7 +179,7 @@ message DataFilter {
 	DataFilterMethod data_filter_method = 1;
 	// Any parameters used by the data filter. These can be in pixels
 	// or relative to the PSF width.
-	repeated RelativeParameter parameter = 2;
+	repeated RelativeParameter parameters = 2;
 }
 
 // Define the settings for filtering data to identify candidates.
@@ -187,7 +187,7 @@ message DataFilterSettings {
 	// The type of data filter
 	DataFilterType data_filter_type = 1;
 	// The data filter
-	repeated DataFilter data_filter = 2;
+	repeated DataFilter data_filters = 2;
 }
 
 // Define the methods for noise estimation.

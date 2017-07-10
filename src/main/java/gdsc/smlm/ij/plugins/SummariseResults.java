@@ -20,7 +20,6 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import gdsc.core.data.DataException;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.CalibrationConfigHelper;
-import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.results.MemoryPeakResults;

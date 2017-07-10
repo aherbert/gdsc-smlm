@@ -744,8 +744,8 @@ public class PeakResultsReaderTest
 			Assert.assertArrayEquals("Params mismatch @ " + i, p1.params, p2.params, delta);
 			if (showDeviations)
 			{
-				Assert.assertNotNull(p2.paramsStdDev);
-				Assert.assertArrayEquals("Params StdDev mismatch @ " + i, p1.paramsStdDev, p2.paramsStdDev, delta);
+				Assert.assertNotNull(p2.paramStdDevs);
+				Assert.assertArrayEquals("Params StdDev mismatch @ " + i, p1.paramStdDevs, p2.paramStdDevs, delta);
 			}
 			if (showEndFrame)
 			{
@@ -917,7 +917,7 @@ public class PeakResultsReaderTest
 				public void execute(PeakResult peak)
 				{
 					out.add(peak.getFrame(), peak.origX, peak.origY, peak.origValue, peak.error, peak.noise,
-							peak.params, peak.paramsStdDev);
+							peak.params, peak.paramStdDevs);
 				}
 			});
 		}

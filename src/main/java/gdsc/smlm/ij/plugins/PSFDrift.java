@@ -4,9 +4,9 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -21,6 +21,8 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
 import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.PSFConfig.ImagePSF;
+import gdsc.smlm.data.config.PSFConfig.Offset;
 import gdsc.smlm.data.config.PSFConfigHelper;
 import gdsc.smlm.engine.FitConfiguration;
 
@@ -42,9 +44,7 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.settings.ImagePSF;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
-import gdsc.smlm.ij.settings.Offset;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.ImagePSFModel;
 import ij.IJ;
@@ -685,7 +685,7 @@ public class PSFDrift implements PlugIn
 		if (gd.wasOKed())
 		{
 			positionsToAverage = Math.abs((int) gd.getNextNumber());
-			HashMap<Integer, Offset> oldOffset = psfSettings.getOffset();
+			Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
 			TurboList<double[]> offset = new TurboList<double[]>();
 			final double pitch = psfSettings.getPixelSize();
 			int j = 0;
@@ -709,13 +709,18 @@ public class PSFDrift implements PlugIn
 				offset.add(new double[] { slice, cx, cy });
 			}
 			addMissingOffsets(startSlice, endSlice, nSlices, offset);
-			HashMap<Integer, Offset> newOffset = new HashMap<Integer, Offset>();
+			Offset.Builder offsetBuilder = Offset.newBuilder();
+			ImagePSF.Builder imagePSFBuilder = psfSettings.toBuilder();
 			for (double[] o : offset)
-				newOffset.put((int) o[0], new Offset(o[1], o[2]));
-			psfSettings.setOffset(newOffset);
-			psfSettings.addNote(TITLE,
+			{
+				int slice = (int) o[0];
+				offsetBuilder.setCx(o[1]);
+				offsetBuilder.setCx(o[2]);
+				imagePSFBuilder.putOffsets(slice, offsetBuilder.build());
+			}
+			imagePSFBuilder.putNotes(TITLE,
 					String.format("Solver=%s, Region=%d", PeakFit.getSolverName(fitConfig), regionSize));
-			imp.setProperty("Info", ImagePSFHelper.toString(psfSettings));
+			imp.setProperty("Info", ImagePSFHelper.toString(imagePSFBuilder));
 		}
 	}
 
@@ -904,10 +909,10 @@ public class PSFDrift implements PlugIn
 				zCentre - lower, unitsPerPixel, unitsPerSlice, psfSettings.getFwhm(), noiseFraction);
 
 		// Add the calibrated centres
-		if (psfSettings.getOffset() != null && useOffset)
+		if (psfSettings.getOffsetsMap() != null && useOffset)
 		{
 			int sliceOffset = lower;
-			for (Entry<Integer, Offset> entry : psfSettings.getOffset().entrySet())
+			for (Entry<Integer, Offset> entry : psfSettings.getOffsetsMap().entrySet())
 			{
 				model.setRelativeCentre(entry.getKey() - sliceOffset, entry.getValue().getCx(),
 						entry.getValue().getCy());

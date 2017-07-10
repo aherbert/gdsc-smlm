@@ -58,7 +58,6 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
-import gdsc.smlm.ij.settings.ImagePSF;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -557,7 +556,7 @@ public class PSFCreator implements PlugInFilter
 		// Add Image properties containing the PSF details
 		final double fwhm = getFWHM(psf, maxz);
 		psfImp.setProperty("Info", ImagePSFHelper.toString(
-				new ImagePSF(maxz, nmPerPixel / magnification, nmPerSlice, stats.getN(), fwhm, createNote())));
+				ImagePSFHelper.create(maxz, nmPerPixel / magnification, nmPerSlice, stats.getN(), fwhm, createNote())));
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm, FWHM = %s px\n",
 				psfImp.getTitle(), maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3),

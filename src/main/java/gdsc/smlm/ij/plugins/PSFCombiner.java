@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.data.config.PSFConfig.ImagePSF;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -13,7 +15,6 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.ij.settings.ImagePSF;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.utils.XmlUtils;
@@ -258,8 +259,8 @@ public class PSFCombiner implements PlugIn
 		imp.updateAndDraw();
 
 		final double fwhm = getFWHM();
-		imp.setProperty("Info",
-				ImagePSFHelper.toString(new ImagePSF(imp.getSlice(), nmPerPixel, nmPerSlice, totalImages, fwhm)));
+		imp.setProperty("Info", ImagePSFHelper
+				.toString(ImagePSFHelper.create(imp.getSlice(), nmPerPixel, nmPerSlice, totalImages, fwhm)));
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, FWHM = %s\n", imp.getTitle(),
 				imp.getSlice(), Utils.rounded(nmPerPixel), Utils.rounded(nmPerSlice), totalImages, Utils.rounded(fwhm));

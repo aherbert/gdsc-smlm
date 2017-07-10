@@ -15,6 +15,7 @@ import java.util.EnumSet;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Parser;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
@@ -975,7 +976,7 @@ public class SettingsManager
 	 *            the message
 	 * @return the JSON string
 	 */
-	public static String toJSON(Message message)
+	public static String toJSON(MessageOrBuilder message)
 	{
 		return toJSON(message, 0);
 	}
@@ -989,7 +990,7 @@ public class SettingsManager
 	 *            the flags
 	 * @return the JSON string
 	 */
-	public static String toJSON(Message message, int flags)
+	public static String toJSON(MessageOrBuilder message, int flags)
 	{
 		StringBuilder sb = new StringBuilder();
 		if (toJSON(message, sb, flags))
@@ -1010,7 +1011,7 @@ public class SettingsManager
 	 *            the flags
 	 * @return True if written
 	 */
-	public static boolean toJSON(Message message, String filename, int flags)
+	public static boolean toJSON(MessageOrBuilder message, String filename, int flags)
 	{
 		return toJSON(message, new File(filename), flags);
 	}
@@ -1028,7 +1029,7 @@ public class SettingsManager
 	 *            the flags
 	 * @return True if written
 	 */
-	public static boolean toJSON(Message message, File file, int flags)
+	public static boolean toJSON(MessageOrBuilder message, File file, int flags)
 	{
 		PrintStream fs = null;
 		try
@@ -1060,7 +1061,7 @@ public class SettingsManager
 	 *            the flags
 	 * @return the JSON string
 	 */
-	public static boolean toJSON(Message message, Appendable output, int flags)
+	public static boolean toJSON(MessageOrBuilder message, Appendable output, int flags)
 	{
 		try
 		{

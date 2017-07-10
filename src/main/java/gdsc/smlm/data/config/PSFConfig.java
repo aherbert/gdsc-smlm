@@ -2714,9 +2714,9 @@ public final class PSFConfig {
      * If missing then the alignment is assumed to be 0,0.
      * </pre>
      *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
      */
-    int getOffsetCount();
+    int getOffsetsCount();
     /**
      * <pre>
      * The alignment correction for each slice in pixels. This is the shift required to 
@@ -2725,16 +2725,16 @@ public final class PSFConfig {
      * If missing then the alignment is assumed to be 0,0.
      * </pre>
      *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
      */
-    boolean containsOffset(
+    boolean containsOffsets(
         int key);
     /**
-     * Use {@link #getOffsetMap()} instead.
+     * Use {@link #getOffsetsMap()} instead.
      */
     @java.lang.Deprecated
     java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
-    getOffset();
+    getOffsets();
     /**
      * <pre>
      * The alignment correction for each slice in pixels. This is the shift required to 
@@ -2743,10 +2743,10 @@ public final class PSFConfig {
      * If missing then the alignment is assumed to be 0,0.
      * </pre>
      *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
      */
     java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
-    getOffsetMap();
+    getOffsetsMap();
     /**
      * <pre>
      * The alignment correction for each slice in pixels. This is the shift required to 
@@ -2755,10 +2755,10 @@ public final class PSFConfig {
      * If missing then the alignment is assumed to be 0,0.
      * </pre>
      *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
      */
 
-    gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrDefault(
+    gdsc.smlm.data.config.PSFConfig.Offset getOffsetsOrDefault(
         int key,
         gdsc.smlm.data.config.PSFConfig.Offset defaultValue);
     /**
@@ -2769,10 +2769,10 @@ public final class PSFConfig {
      * If missing then the alignment is assumed to be 0,0.
      * </pre>
      *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
      */
 
-    gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrThrow(
+    gdsc.smlm.data.config.PSFConfig.Offset getOffsetsOrThrow(
         int key);
   }
   /**
@@ -2863,15 +2863,15 @@ public final class PSFConfig {
             }
             case 58: {
               if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
-                offset_ = com.google.protobuf.MapField.newMapField(
-                    OffsetDefaultEntryHolder.defaultEntry);
+                offsets_ = com.google.protobuf.MapField.newMapField(
+                    OffsetsDefaultEntryHolder.defaultEntry);
                 mutable_bitField0_ |= 0x00000040;
               }
               com.google.protobuf.MapEntry<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
-              offset__ = input.readMessage(
-                  OffsetDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              offset_.getMutableMap().put(
-                  offset__.getKey(), offset__.getValue());
+              offsets__ = input.readMessage(
+                  OffsetsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              offsets_.getMutableMap().put(
+                  offsets__.getKey(), offsets__.getValue());
               break;
             }
           }
@@ -2897,7 +2897,7 @@ public final class PSFConfig {
         case 6:
           return internalGetNotes();
         case 7:
-          return internalGetOffset();
+          return internalGetOffsets();
         default:
           throw new RuntimeException(
               "Invalid map field number: " + number);
@@ -3068,31 +3068,31 @@ public final class PSFConfig {
       return map.get(key);
     }
 
-    public static final int OFFSET_FIELD_NUMBER = 7;
-    private static final class OffsetDefaultEntryHolder {
+    public static final int OFFSETS_FIELD_NUMBER = 7;
+    private static final class OffsetsDefaultEntryHolder {
       static final com.google.protobuf.MapEntry<
           java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> defaultEntry =
               com.google.protobuf.MapEntry
               .<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>newDefaultInstance(
-                  gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_descriptor, 
+                  gdsc.smlm.data.config.PSFConfig.internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor, 
                   com.google.protobuf.WireFormat.FieldType.INT32,
                   0,
                   com.google.protobuf.WireFormat.FieldType.MESSAGE,
                   gdsc.smlm.data.config.PSFConfig.Offset.getDefaultInstance());
     }
     private com.google.protobuf.MapField<
-        java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> offset_;
+        java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> offsets_;
     private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
-    internalGetOffset() {
-      if (offset_ == null) {
+    internalGetOffsets() {
+      if (offsets_ == null) {
         return com.google.protobuf.MapField.emptyMapField(
-            OffsetDefaultEntryHolder.defaultEntry);
+            OffsetsDefaultEntryHolder.defaultEntry);
       }
-      return offset_;
+      return offsets_;
     }
 
-    public int getOffsetCount() {
-      return internalGetOffset().getMap().size();
+    public int getOffsetsCount() {
+      return internalGetOffsets().getMap().size();
     }
     /**
      * <pre>
@@ -3102,20 +3102,20 @@ public final class PSFConfig {
      * If missing then the alignment is assumed to be 0,0.
      * </pre>
      *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
      */
 
-    public boolean containsOffset(
+    public boolean containsOffsets(
         int key) {
       
-      return internalGetOffset().getMap().containsKey(key);
+      return internalGetOffsets().getMap().containsKey(key);
     }
     /**
-     * Use {@link #getOffsetMap()} instead.
+     * Use {@link #getOffsetsMap()} instead.
      */
     @java.lang.Deprecated
-    public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffset() {
-      return getOffsetMap();
+    public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffsets() {
+      return getOffsetsMap();
     }
     /**
      * <pre>
@@ -3125,11 +3125,11 @@ public final class PSFConfig {
      * If missing then the alignment is assumed to be 0,0.
      * </pre>
      *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
      */
 
-    public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffsetMap() {
-      return internalGetOffset().getMap();
+    public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffsetsMap() {
+      return internalGetOffsets().getMap();
     }
     /**
      * <pre>
@@ -3139,15 +3139,15 @@ public final class PSFConfig {
      * If missing then the alignment is assumed to be 0,0.
      * </pre>
      *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
      */
 
-    public gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrDefault(
+    public gdsc.smlm.data.config.PSFConfig.Offset getOffsetsOrDefault(
         int key,
         gdsc.smlm.data.config.PSFConfig.Offset defaultValue) {
       
       java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> map =
-          internalGetOffset().getMap();
+          internalGetOffsets().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
     /**
@@ -3158,14 +3158,14 @@ public final class PSFConfig {
      * If missing then the alignment is assumed to be 0,0.
      * </pre>
      *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
      */
 
-    public gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrThrow(
+    public gdsc.smlm.data.config.PSFConfig.Offset getOffsetsOrThrow(
         int key) {
       
       java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> map =
-          internalGetOffset().getMap();
+          internalGetOffsets().getMap();
       if (!map.containsKey(key)) {
         throw new java.lang.IllegalArgumentException();
       }
@@ -3208,8 +3208,8 @@ public final class PSFConfig {
       com.google.protobuf.GeneratedMessageV3
         .serializeIntegerMapTo(
           output,
-          internalGetOffset(),
-          OffsetDefaultEntryHolder.defaultEntry,
+          internalGetOffsets(),
+          OffsetsDefaultEntryHolder.defaultEntry,
           7);
     }
 
@@ -3249,14 +3249,14 @@ public final class PSFConfig {
             .computeMessageSize(6, notes__);
       }
       for (java.util.Map.Entry<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> entry
-           : internalGetOffset().getMap().entrySet()) {
+           : internalGetOffsets().getMap().entrySet()) {
         com.google.protobuf.MapEntry<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
-        offset__ = OffsetDefaultEntryHolder.defaultEntry.newBuilderForType()
+        offsets__ = OffsetsDefaultEntryHolder.defaultEntry.newBuilderForType()
             .setKey(entry.getKey())
             .setValue(entry.getValue())
             .build();
         size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(7, offset__);
+            .computeMessageSize(7, offsets__);
       }
       memoizedSize = size;
       return size;
@@ -3292,8 +3292,8 @@ public final class PSFConfig {
               other.getFwhm()));
       result = result && internalGetNotes().equals(
           other.internalGetNotes());
-      result = result && internalGetOffset().equals(
-          other.internalGetOffset());
+      result = result && internalGetOffsets().equals(
+          other.internalGetOffsets());
       return result;
     }
 
@@ -3321,9 +3321,9 @@ public final class PSFConfig {
         hash = (37 * hash) + NOTES_FIELD_NUMBER;
         hash = (53 * hash) + internalGetNotes().hashCode();
       }
-      if (!internalGetOffset().getMap().isEmpty()) {
-        hash = (37 * hash) + OFFSET_FIELD_NUMBER;
-        hash = (53 * hash) + internalGetOffset().hashCode();
+      if (!internalGetOffsets().getMap().isEmpty()) {
+        hash = (37 * hash) + OFFSETS_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetOffsets().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -3441,7 +3441,7 @@ public final class PSFConfig {
           case 6:
             return internalGetNotes();
           case 7:
-            return internalGetOffset();
+            return internalGetOffsets();
           default:
             throw new RuntimeException(
                 "Invalid map field number: " + number);
@@ -3454,7 +3454,7 @@ public final class PSFConfig {
           case 6:
             return internalGetMutableNotes();
           case 7:
-            return internalGetMutableOffset();
+            return internalGetMutableOffsets();
           default:
             throw new RuntimeException(
                 "Invalid map field number: " + number);
@@ -3495,7 +3495,7 @@ public final class PSFConfig {
         fwhm_ = 0D;
 
         internalGetMutableNotes().clear();
-        internalGetMutableOffset().clear();
+        internalGetMutableOffsets().clear();
         return this;
       }
 
@@ -3527,8 +3527,8 @@ public final class PSFConfig {
         result.fwhm_ = fwhm_;
         result.notes_ = internalGetNotes();
         result.notes_.makeImmutable();
-        result.offset_ = internalGetOffset();
-        result.offset_.makeImmutable();
+        result.offsets_ = internalGetOffsets();
+        result.offsets_.makeImmutable();
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -3588,8 +3588,8 @@ public final class PSFConfig {
         }
         internalGetMutableNotes().mergeFrom(
             other.internalGetNotes());
-        internalGetMutableOffset().mergeFrom(
-            other.internalGetOffset());
+        internalGetMutableOffsets().mergeFrom(
+            other.internalGetOffsets());
         onChanged();
         return this;
       }
@@ -3959,30 +3959,30 @@ public final class PSFConfig {
       }
 
       private com.google.protobuf.MapField<
-          java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> offset_;
+          java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> offsets_;
       private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
-      internalGetOffset() {
-        if (offset_ == null) {
+      internalGetOffsets() {
+        if (offsets_ == null) {
           return com.google.protobuf.MapField.emptyMapField(
-              OffsetDefaultEntryHolder.defaultEntry);
+              OffsetsDefaultEntryHolder.defaultEntry);
         }
-        return offset_;
+        return offsets_;
       }
       private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
-      internalGetMutableOffset() {
+      internalGetMutableOffsets() {
         onChanged();;
-        if (offset_ == null) {
-          offset_ = com.google.protobuf.MapField.newMapField(
-              OffsetDefaultEntryHolder.defaultEntry);
+        if (offsets_ == null) {
+          offsets_ = com.google.protobuf.MapField.newMapField(
+              OffsetsDefaultEntryHolder.defaultEntry);
         }
-        if (!offset_.isMutable()) {
-          offset_ = offset_.copy();
+        if (!offsets_.isMutable()) {
+          offsets_ = offsets_.copy();
         }
-        return offset_;
+        return offsets_;
       }
 
-      public int getOffsetCount() {
-        return internalGetOffset().getMap().size();
+      public int getOffsetsCount() {
+        return internalGetOffsets().getMap().size();
       }
       /**
        * <pre>
@@ -3992,20 +3992,20 @@ public final class PSFConfig {
        * If missing then the alignment is assumed to be 0,0.
        * </pre>
        *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
        */
 
-      public boolean containsOffset(
+      public boolean containsOffsets(
           int key) {
         
-        return internalGetOffset().getMap().containsKey(key);
+        return internalGetOffsets().getMap().containsKey(key);
       }
       /**
-       * Use {@link #getOffsetMap()} instead.
+       * Use {@link #getOffsetsMap()} instead.
        */
       @java.lang.Deprecated
-      public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffset() {
-        return getOffsetMap();
+      public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffsets() {
+        return getOffsetsMap();
       }
       /**
        * <pre>
@@ -4015,11 +4015,11 @@ public final class PSFConfig {
        * If missing then the alignment is assumed to be 0,0.
        * </pre>
        *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
        */
 
-      public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffsetMap() {
-        return internalGetOffset().getMap();
+      public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> getOffsetsMap() {
+        return internalGetOffsets().getMap();
       }
       /**
        * <pre>
@@ -4029,15 +4029,15 @@ public final class PSFConfig {
        * If missing then the alignment is assumed to be 0,0.
        * </pre>
        *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
        */
 
-      public gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrDefault(
+      public gdsc.smlm.data.config.PSFConfig.Offset getOffsetsOrDefault(
           int key,
           gdsc.smlm.data.config.PSFConfig.Offset defaultValue) {
         
         java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> map =
-            internalGetOffset().getMap();
+            internalGetOffsets().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
       }
       /**
@@ -4048,22 +4048,22 @@ public final class PSFConfig {
        * If missing then the alignment is assumed to be 0,0.
        * </pre>
        *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
        */
 
-      public gdsc.smlm.data.config.PSFConfig.Offset getOffsetOrThrow(
+      public gdsc.smlm.data.config.PSFConfig.Offset getOffsetsOrThrow(
           int key) {
         
         java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> map =
-            internalGetOffset().getMap();
+            internalGetOffsets().getMap();
         if (!map.containsKey(key)) {
           throw new java.lang.IllegalArgumentException();
         }
         return map.get(key);
       }
 
-      public Builder clearOffset() {
-        internalGetMutableOffset().getMutableMap()
+      public Builder clearOffsets() {
+        internalGetMutableOffsets().getMutableMap()
             .clear();
         return this;
       }
@@ -4075,13 +4075,13 @@ public final class PSFConfig {
        * If missing then the alignment is assumed to be 0,0.
        * </pre>
        *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
        */
 
-      public Builder removeOffset(
+      public Builder removeOffsets(
           int key) {
         
-        internalGetMutableOffset().getMutableMap()
+        internalGetMutableOffsets().getMutableMap()
             .remove(key);
         return this;
       }
@@ -4090,8 +4090,8 @@ public final class PSFConfig {
        */
       @java.lang.Deprecated
       public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset>
-      getMutableOffset() {
-        return internalGetMutableOffset().getMutableMap();
+      getMutableOffsets() {
+        return internalGetMutableOffsets().getMutableMap();
       }
       /**
        * <pre>
@@ -4101,14 +4101,14 @@ public final class PSFConfig {
        * If missing then the alignment is assumed to be 0,0.
        * </pre>
        *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
        */
-      public Builder putOffset(
+      public Builder putOffsets(
           int key,
           gdsc.smlm.data.config.PSFConfig.Offset value) {
         
         if (value == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableOffset().getMutableMap()
+        internalGetMutableOffsets().getMutableMap()
             .put(key, value);
         return this;
       }
@@ -4120,12 +4120,12 @@ public final class PSFConfig {
        * If missing then the alignment is assumed to be 0,0.
        * </pre>
        *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offset = 7;</code>
+       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
        */
 
-      public Builder putAllOffset(
+      public Builder putAllOffsets(
           java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFConfig.Offset> values) {
-        internalGetMutableOffset().getMutableMap()
+        internalGetMutableOffsets().getMutableMap()
             .putAll(values);
         return this;
       }
@@ -4204,10 +4204,10 @@ public final class PSFConfig {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_descriptor;
+    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_fieldAccessorTable;
+      internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -4224,22 +4224,22 @@ public final class PSFConfig {
       "\030\001 \001(\0162\036.gdsc.smlm.data.config.PSFType\0226" +
       "\n\tparameter\030\002 \003(\0132#.gdsc.smlm.data.confi" +
       "g.PSFParameter\" \n\006Offset\022\n\n\002cx\030\002 \001(\001\022\n\n\002" +
-      "cy\030\003 \001(\001\"\340\002\n\010ImagePSF\022\023\n\013image_count\030\001 \001" +
+      "cy\030\003 \001(\001\"\343\002\n\010ImagePSF\022\023\n\013image_count\030\001 \001" +
       "(\005\022\024\n\014centre_image\030\002 \001(\005\022\022\n\npixel_size\030\003" +
       " \001(\001\022\023\n\013pixel_depth\030\004 \001(\001\022\014\n\004fwhm\030\005 \001(\001\022",
       "9\n\005notes\030\006 \003(\0132*.gdsc.smlm.data.config.I" +
-      "magePSF.NotesEntry\022;\n\006offset\030\007 \003(\0132+.gds" +
-      "c.smlm.data.config.ImagePSF.OffsetEntry\032" +
-      ",\n\nNotesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(" +
-      "\t:\0028\001\032L\n\013OffsetEntry\022\013\n\003key\030\001 \001(\005\022,\n\005val" +
-      "ue\030\002 \001(\0132\035.gdsc.smlm.data.config.Offset:" +
-      "\0028\001*\232\001\n\007PSFType\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_" +
-      "AXIS_GAUSSIAN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_" +
-      "2D\020\002\022\"\n\036TWO_AXIS_AND_THETA_GAUSSIAN_2D\020\003" +
-      "\022\032\n\026ASTIGMATIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005",
-      "*U\n\020PSFParameterUnit\022\031\n\025PSF_PARAMETER_UN" +
-      "IT_NA\020\000\022\014\n\010DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005" +
-      "ANGLE\020\003B\013B\tPSFConfigb\006proto3"
+      "magePSF.NotesEntry\022=\n\007offsets\030\007 \003(\0132,.gd" +
+      "sc.smlm.data.config.ImagePSF.OffsetsEntr" +
+      "y\032,\n\nNotesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 " +
+      "\001(\t:\0028\001\032M\n\014OffsetsEntry\022\013\n\003key\030\001 \001(\005\022,\n\005" +
+      "value\030\002 \001(\0132\035.gdsc.smlm.data.config.Offs" +
+      "et:\0028\001*\232\001\n\007PSFType\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024O" +
+      "NE_AXIS_GAUSSIAN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSI" +
+      "AN_2D\020\002\022\"\n\036TWO_AXIS_AND_THETA_GAUSSIAN_2" +
+      "D\020\003\022\032\n\026ASTIGMATIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTO",
+      "M\020\005*U\n\020PSFParameterUnit\022\031\n\025PSF_PARAMETER" +
+      "_UNIT_NA\020\000\022\014\n\010DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022" +
+      "\t\n\005ANGLE\020\003B\013B\tPSFConfigb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -4276,18 +4276,18 @@ public final class PSFConfig {
     internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImagePSF_descriptor,
-        new java.lang.String[] { "ImageCount", "CentreImage", "PixelSize", "PixelDepth", "Fwhm", "Notes", "Offset", });
+        new java.lang.String[] { "ImageCount", "CentreImage", "PixelSize", "PixelDepth", "Fwhm", "Notes", "Offsets", });
     internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor =
       internal_static_gdsc_smlm_data_config_ImagePSF_descriptor.getNestedTypes().get(0);
     internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
-    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_descriptor =
+    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor =
       internal_static_gdsc_smlm_data_config_ImagePSF_descriptor.getNestedTypes().get(1);
-    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_fieldAccessorTable = new
+    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_ImagePSF_OffsetEntry_descriptor,
+        internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
   }
 

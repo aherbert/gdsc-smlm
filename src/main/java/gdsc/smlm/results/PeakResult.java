@@ -44,7 +44,7 @@ public class PeakResult implements Comparable<PeakResult>
 	 * The parameter standard deviations (for the standard parameters plus any PSF specific parameters). This may be
 	 * null or the same length as {@link #params}.
 	 */
-	float[] paramsStdDev;
+	float[] paramStdDevs;
 
 	/**
 	 * Instantiates a new peak result.
@@ -84,7 +84,7 @@ public class PeakResult implements Comparable<PeakResult>
 		this.error = error;
 		this.noise = noise;
 		this.params = params;
-		this.paramsStdDev = paramsStdDev;
+		this.paramStdDevs = paramsStdDev;
 	}
 
 	/**
@@ -226,15 +226,15 @@ public class PeakResult implements Comparable<PeakResult>
 			return false;
 
 		// Check parameters deviations. Do this last as they are not often used.
-		if (r1.paramsStdDev != null)
+		if (r1.paramStdDevs != null)
 		{
-			if (r2.paramsStdDev == null)
+			if (r2.paramStdDevs == null)
 				return false;
-			for (int i = 0; i < r1.paramsStdDev.length; i++)
-				if (r1.paramsStdDev[i] != r2.paramsStdDev[i])
+			for (int i = 0; i < r1.paramStdDevs.length; i++)
+				if (r1.paramStdDevs[i] != r2.paramStdDevs[i])
 					return false;
 		}
-		else if (r2.paramsStdDev != null)
+		else if (r2.paramStdDevs != null)
 			return false;
 		
 		return true;
@@ -561,7 +561,7 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public float[] getParameterDeviations()
 	{
-		return paramsStdDev;
+		return paramStdDevs;
 	}
 
 	/**
@@ -595,6 +595,6 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public float getParameterDeviation(int i)
 	{
-		return paramsStdDev[i];
+		return paramStdDevs[i];
 	}
 }

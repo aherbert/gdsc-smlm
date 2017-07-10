@@ -47,7 +47,6 @@ import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.data.config.CalibrationConfigHelper;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
