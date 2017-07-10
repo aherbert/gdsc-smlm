@@ -45,7 +45,6 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
 
 import com.google.protobuf.TextFormat;
-import com.thoughtworks.xstream.XStream;
 
 import gdsc.core.clustering.DensityManager;
 import gdsc.core.data.DataException;
