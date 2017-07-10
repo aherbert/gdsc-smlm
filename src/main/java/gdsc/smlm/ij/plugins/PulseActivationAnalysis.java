@@ -577,7 +577,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		// Store specific activations
 		int sum = (int) Maths.sum(count);
 		specificActivations = new Activation[sum];
-		nonSpecificActivations = new Activation[list.size() - sum];
+		int nonSpecificActivationsSize = list.size() - sum;
+		nonSpecificActivations = new Activation[nonSpecificActivationsSize];
 		for (int i = list.size(), c1 = 0, c2 = 0; i-- > 0;)
 		{
 			Activation result = list.getf(i);
@@ -586,12 +587,36 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			else
 				nonSpecificActivations[c2++] = result;
 		}
+
+		// Output activation rates
+		int firstFrame = results.getFirstFrame();
+		int lastFrame = results.getLastFrame();
+		// Make this smarter using the repeat interval
+		int[] frameCount = new int[channels + 1];
+		for (int t = firstFrame; t <= lastFrame; t++)
+		{
+			frameCount[getChannel(t)]++;
+		}
+		Utils.log("Activation rate");
+		printRate("Background", nonSpecificActivationsSize, frameCount[0]);
+		for (int c = 1; c <= channels; c++)
+			printRate("Channel " + c, count[c - 1], frameCount[c]);
+	}
+
+	private void printRate(String title, int count, int numberOfFrames)
+	{
+		Utils.log("%s = %d in %d = %s", title, count, numberOfFrames, Utils.rounded((double) count / numberOfFrames));
 	}
 
 	private int getChannel(PeakResult p)
 	{
+		return getChannel(p.getFrame());
+	}
+
+	private int getChannel(int frame)
+	{
 		// Classify if within a channel activation start frame
-		final int mod = p.getFrame() % repeatInterval;
+		final int mod = frame % repeatInterval;
 		for (int i = 0; i < channels; i++)
 			if (mod == startFrame[i])
 				return i + 1;
