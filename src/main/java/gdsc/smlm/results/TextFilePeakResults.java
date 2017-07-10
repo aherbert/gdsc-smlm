@@ -208,8 +208,6 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		if (fos == null)
 			return;
-		
-		checkSize(converters.length, params, paramsStdDev);
 
 		StringBuilder sb = new StringBuilder();
 		addStandardData(sb, 0, peak, peak, origX, origY, origValue, error, noise);
