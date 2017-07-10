@@ -5,7 +5,7 @@ syntax = "proto3";
 // License: GPL V3
 package gdsc.smlm.data.config;
 
-option java_outer_classname = "TemplateConfig";
+option java_outer_classname = "TemplateProtos";
 
 import "calibration_config.proto";
 import "fit_config.proto";

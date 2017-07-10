@@ -5,14 +5,14 @@ IF EXIST %DIR%\NUL GOTO HAVEDIR
     mkdir %DIR%
 :HAVEDIR
 
-protoc --java_out=%DIR% TSFProto.proto
-perl suppress.pl %DIR%\gdsc\smlm\tsf\TaggedSpotFile.java --unchecked --unused
+protoc --java_out=%DIR% tsf.proto
+perl suppress.pl %DIR%\gdsc\smlm\tsf\TSFProtos.java --unchecked --unused
 
-protoc --java_out=%DIR% unit_config.proto psf_config.proto calibration_config.proto results_config.proto test_config.proto fit_config.proto template_config.proto gui_config.proto
-perl suppress.pl %DIR%\gdsc\smlm\data\config\PSFConfig.java --unchecked --unused
-perl suppress.pl %DIR%\gdsc\smlm\data\config\CalibrationConfig.java --unchecked --unused --deprecation
-perl suppress.pl %DIR%\gdsc\smlm\data\config\ResultsConfig.java --unchecked --unused --deprecation
-perl suppress.pl %DIR%\gdsc\smlm\data\config\TestConfig.java --unchecked --unused
-perl suppress.pl %DIR%\gdsc\smlm\data\config\FitConfig.java --unchecked --unused
-perl suppress.pl %DIR%\gdsc\smlm\data\config\TemplateConfig.java --unchecked --unused
-perl suppress.pl %DIR%\gdsc\smlm\data\config\GUIConfig.java --unchecked --unused --deprecation
+protoc --java_out=%DIR% unit.proto psf.proto calibration.proto results.proto test.proto fit.proto template.proto gui.proto
+perl suppress.pl %DIR%\gdsc\smlm\data\config\PSFProtos.java --unchecked --unused
+perl suppress.pl %DIR%\gdsc\smlm\data\config\CalibrationProtos.java --unchecked --unused --deprecation
+perl suppress.pl %DIR%\gdsc\smlm\data\config\ResultsProtos.java --unchecked --unused --deprecation
+perl suppress.pl %DIR%\gdsc\smlm\data\config\TestProtos.java --unchecked --unused
+perl suppress.pl %DIR%\gdsc\smlm\data\config\FitProtos.java --unchecked --unused
+perl suppress.pl %DIR%\gdsc\smlm\data\config\TemplateProtos.java --unchecked --unused
+perl suppress.pl %DIR%\gdsc\smlm\data\config\GUIProtos.java --unchecked --unused --deprecation

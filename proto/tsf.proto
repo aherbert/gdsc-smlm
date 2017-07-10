@@ -20,7 +20,7 @@ syntax = "proto2";
 package TSF;
 
 option java_package = "gdsc.smlm.tsf";
-option java_outer_classname = "TaggedSpotFile";
+option java_outer_classname = "TSFProtos";
 
 enum FitMode {
    ONEAXIS = 0;

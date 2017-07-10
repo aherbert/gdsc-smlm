@@ -5,7 +5,7 @@ syntax = "proto3";
 // License: GPL V3
 package gdsc.smlm.data.config;
 
-option java_outer_classname = "PSFConfig";
+option java_outer_classname = "PSFProtos";
 
 // enums that are used for optional units have [enum_name]_NA as the first entry as the 
 // proto definition will use this as the default

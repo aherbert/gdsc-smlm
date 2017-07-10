@@ -5,7 +5,7 @@ syntax = "proto3";
 // License: GPL V3
 package gdsc.smlm.data.config;
 
-option java_outer_classname = "FitConfig";
+option java_outer_classname = "FitProtos";
 
 // Define the fitting solver.
 enum FitSolver {
