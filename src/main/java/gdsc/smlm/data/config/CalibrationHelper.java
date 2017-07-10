@@ -182,14 +182,13 @@ public class CalibrationHelper
 		catch (ConversionException e)
 		{
 			if (calibration != null && calibration.hasAngleCalibration())
-				return new IdentityTypeConverter<AngleUnit>(
-						calibration.getAngleCalibrationOrBuilder().getAngleUnit());
+				return new IdentityTypeConverter<AngleUnit>(calibration.getAngleCalibrationOrBuilder().getAngleUnit());
 			return new IdentityTypeConverter<AngleUnit>(null);
 		}
 	}
 
 	/**
-	 * Create a new calibration using the given properties.
+	 * Create a new calibration using the given properties. Distance unit is set to pixel and intensity unit to photon.
 	 *
 	 * @param nmPerPixel
 	 *            the nm per pixel
@@ -202,6 +201,8 @@ public class CalibrationHelper
 	public static Calibration create(double nmPerPixel, double gain, double exposureTime)
 	{
 		CalibrationWriter cw = new CalibrationWriter();
+		cw.setIntensityUnit(IntensityUnit.PHOTON);
+		cw.setDistanceUnit(DistanceUnit.PIXEL);
 		if (nmPerPixel > 0)
 			cw.setNmPerPixel(nmPerPixel);
 		if (gain > 0)

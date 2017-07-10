@@ -993,10 +993,12 @@ public class ResultsManager implements PlugIn
 	 * @param checkCalibration
 	 *            Set to true to ensure the results have a valid calibration
 	 * @return the results
+	 * @deprecated Plugins should specify if they require results in a specific unit
 	 */
+	@Deprecated
 	public static MemoryPeakResults loadInputResults(String inputOption, boolean checkCalibration)
 	{
-		return loadInputResults(inputOption, checkCalibration, DistanceUnit.PIXEL, IntensityUnit.COUNT);
+		return loadInputResults(inputOption, checkCalibration, DistanceUnit.PIXEL, IntensityUnit.PHOTON);
 	}
 
 	/**
@@ -1063,9 +1065,15 @@ public class ResultsManager implements PlugIn
 					return null;
 			}
 			if (distanceUnit != null && results.getDistanceUnit() != distanceUnit)
+			{
+				Utils.log("Incorrect distance unit: "+ results.getDistanceUnit());
 				return null;
+			}
 			if (intensityUnit != null && results.getIntensityUnit() != intensityUnit)
+			{
+				Utils.log("Incorrect intensity unit: "+ results.getDistanceUnit());
 				return null;
+			}
 		}
 		finally
 		{

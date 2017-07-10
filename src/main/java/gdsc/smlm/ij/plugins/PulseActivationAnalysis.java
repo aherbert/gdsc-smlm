@@ -24,6 +24,7 @@ import gdsc.core.utils.Random;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
@@ -42,6 +43,7 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
@@ -400,7 +402,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			return;
 
 		// Load the results
-		results = ResultsManager.loadInputResults(inputOption, false);
+		results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -589,15 +591,32 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		}
 
 		// Output activation rates
-		int firstFrame = results.getFirstFrame();
-		int lastFrame = results.getLastFrame();
-		// Make this smarter using the repeat interval
 		int[] frameCount = new int[channels + 1];
-		for (int t = firstFrame; t <= lastFrame; t++)
-		{
-			frameCount[getChannel(t)]++;
-		}
-		Utils.log("Activation rate");
+		int firstFrame = results.getMinFrame();
+		int lastFrame = results.getMaxFrame();
+
+		//		if (false)
+		//		{
+		//			for (int t = firstFrame; t <= lastFrame; t++)
+		//			{
+		//				frameCount[getChannel(t)]++;
+		//			}
+		//		}
+		//		else
+		//		{
+		// Move the ends to the repeat interval
+		while (firstFrame % repeatInterval != 1)
+			frameCount[getChannel(firstFrame++)]++;
+		while (lastFrame % repeatInterval != 0)
+			frameCount[getChannel(lastFrame--)]++;
+		int total = lastFrame - firstFrame + 1;
+		int cycles = total / repeatInterval;
+		for (int c = 1; c <= channels; c++)
+			frameCount[c] += cycles;
+		int remaining = (total - channels * cycles);
+		frameCount[0] += remaining;
+		//		}
+
 		printRate("Background", nonSpecificActivationsSize, frameCount[0]);
 		for (int c = 1; c <= channels; c++)
 			printRate("Channel " + c, count[c - 1], frameCount[c]);
@@ -605,7 +624,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 	private void printRate(String title, int count, int numberOfFrames)
 	{
-		Utils.log("%s = %d in %d = %s", title, count, numberOfFrames, Utils.rounded((double) count / numberOfFrames));
+		Utils.log("Activation rate : %s = %d/%d = %s per frame", title, count, numberOfFrames, Utils.rounded((double) count / numberOfFrames));
 	}
 
 	private int getChannel(PeakResult p)
@@ -1874,6 +1893,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		Utils.showStatus("Simulating molecules ...");
 		float[][][] molecules = new float[3][][];
 		MemoryPeakResults[] results = new MemoryPeakResults[3];
+		Calibration calibration = CalibrationHelper.create(sim_nmPerPixel, 1, 100);
 		Rectangle bounds = new Rectangle(0, 0, sim_size, sim_size);
 		for (int c = 0; c < 3; c++)
 		{
@@ -1881,7 +1901,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 			// Create a dataset to store the activations
 			MemoryPeakResults r = new MemoryPeakResults();
-			r.setCalibration(CalibrationHelper.create(sim_nmPerPixel, 1, 100));
+			r.setCalibration(calibration);
 			r.setBounds(bounds);
 			r.setName(TITLE + " C" + (c + 1));
 			results[c] = r;
@@ -1895,8 +1915,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		// Combine
 		Utils.showStatus("Producing simulation output ...");
 		MemoryPeakResults r = new MemoryPeakResults();
-		r.setCalibration(CalibrationHelper.create(sim_nmPerPixel, 1, 100));
-		r.setBounds(new Rectangle(0, 0, sim_size, sim_size));
+		r.setCalibration(calibration);
+		r.setBounds((Rectangle) bounds.clone());
 		r.setName(TITLE);
 
 		ImageProcessor[] images = new ImageProcessor[3];
@@ -1909,6 +1929,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
 					ResultsImageType.DRAW_LOCALISATIONS, true, true, TITLE, bounds, sim_nmPerPixel, 1,
 					1024.0 / sim_size, 0, ResultsImageMode.IMAGE_ADD);
+			image.setCalibration(calibration);
 			image.setLiveImage(false);
 			image.setDisplayImage(false);
 			image.begin();
@@ -2146,7 +2167,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	{
 		// We add them as if tracing is perfect. So each peak result has a new ID.
 		// This allows the output of the simulation to be used directly by the pulse analysis code.
-		IdPeakResult r = new IdPeakResult(t, x, y, ++id);
+		IdPeakResult r = new IdPeakResult(t, x, y, 1, ++id);
 		r.noise = 1; // So it appears calibrated
 		return r;
 	}
