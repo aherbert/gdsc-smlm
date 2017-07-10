@@ -7,7 +7,7 @@ package gdsc.smlm.data.config;
 
 option java_outer_classname = "GUIProtos";
 
-import "unit_config.proto";
+import "unit.proto";
 
 // Contain the settings for the result filtering
 message GUIFilterSettings {

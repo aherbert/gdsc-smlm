@@ -7,7 +7,7 @@ package gdsc.smlm.data.config;
 
 option java_outer_classname = "ResultsProtos";
 
-import "unit_config.proto";
+import "unit.proto";
 
 // The type of results image
 enum ResultsImageType {
