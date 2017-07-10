@@ -208,6 +208,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		if (fos == null)
 			return;
+		
+		checkSize(converters.length, params, paramsStdDev);
 
 		StringBuilder sb = new StringBuilder();
 		addStandardData(sb, 0, peak, peak, origX, origY, origValue, error, noise);
@@ -217,6 +219,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			if (paramsStdDev != null)
 			{
+				checkSize(converters.length, params, paramsStdDev);
 				for (int i = 0; i < converters.length; i++)
 				{
 					add(sb, converters[i].convert(params[i]));
@@ -225,6 +228,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			}
 			else
 			{
+				checkSize(converters.length, params);
 				for (int i = 0; i < converters.length; i++)
 				{
 					add(sb, converters[i].convert(params[i]));
@@ -234,6 +238,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		}
 		else
 		{
+			checkSize(converters.length, params);
 			for (int i = 0; i < converters.length; i++)
 			{
 				add(sb, converters[i].convert(params[i]));
@@ -305,6 +310,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			final float[] paramsStdDev = result.paramStdDevs;
 			if (paramsStdDev != null)
 			{
+				checkSize(converters.length, params, paramsStdDev);
 				for (int i = 0; i < converters.length; i++)
 				{
 					add(sb, converters[i].convert(params[i]));
@@ -313,6 +319,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			}
 			else
 			{
+				checkSize(converters.length, params);
 				for (int i = 0; i < converters.length; i++)
 				{
 					add(sb, converters[i].convert(params[i]));
@@ -322,6 +329,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		}
 		else
 		{
+			checkSize(converters.length, params);
 			for (int i = 0; i < converters.length; i++)
 			{
 				add(sb, converters[i].convert(params[i]));

@@ -212,6 +212,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		buffer.writeDouble(error);
 		buffer.writeFloat(noise);
 
+		checkSize(nFields, params);
 		for (int i = 0; i < nFields; i++)
 			buffer.writeFloat(params[i]);
 		if (isShowDeviations())
@@ -223,6 +224,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			}
 			else
 			{
+				checkSize(nFields, paramsStdDev);
 				for (int i = 0; i < nFields; i++)
 					buffer.writeFloat(paramsStdDev[i]);
 			}

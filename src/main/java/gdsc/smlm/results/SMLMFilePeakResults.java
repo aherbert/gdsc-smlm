@@ -1,5 +1,7 @@
 package gdsc.smlm.results;
 
+import gdsc.smlm.data.config.PSFHelper;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -48,7 +50,42 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 		this.showEndFrame = showEndFrame;
 		this.showId = showId;
 	}
-	
+
+	/**
+	 * Check size of the parameter arrays. The array size must match the number of parameters
+	 *
+	 * @param numberOfParams
+	 *            the number of params
+	 * @param params
+	 *            the params
+	 * @param paramsStdDevs
+	 *            the params std devs
+	 * @throws IllegalArgumentException
+	 *             if the parameter arrays are the wrong size
+	 */
+	protected static void checkSize(int numberOfParams, float[] params, float[] paramsStdDevs)
+			throws IllegalArgumentException
+	{
+		checkSize(numberOfParams, params);
+		checkSize(numberOfParams, paramsStdDevs);
+	}
+
+	/**
+	 * Check size of the parameter arrays. The array size must match the number of parameters
+	 *
+	 * @param numberOfParams
+	 *            the number of params
+	 * @param a
+	 *            the a
+	 * @throws IllegalArgumentException
+	 *             if the parameter array is the wrong size
+	 */
+	protected static void checkSize(int numberOfParams, float[] a) throws IllegalArgumentException
+	{
+		if (a.length < numberOfParams)
+			throw new IllegalArgumentException("Incorrect number of parameters " + a.length);
+	}
+
 	/**
 	 * @return A line containing the file format version
 	 */
