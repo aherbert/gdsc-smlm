@@ -35,9 +35,9 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.ij.Utils;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
-import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
-import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
+import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 

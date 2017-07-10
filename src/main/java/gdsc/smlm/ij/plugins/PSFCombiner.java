@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.data.config.PSFConfig.ImagePSF;
+import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

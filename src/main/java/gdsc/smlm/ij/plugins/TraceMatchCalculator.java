@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ

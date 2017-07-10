@@ -6,7 +6,7 @@ import java.awt.event.ItemListener;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
-import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 

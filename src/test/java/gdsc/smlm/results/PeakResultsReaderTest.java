@@ -14,14 +14,14 @@ import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
-import gdsc.smlm.data.config.CalibrationConfig.CameraType;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
-import gdsc.smlm.data.config.PSFConfig.PSF;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
-import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
+import gdsc.smlm.data.config.UnitProtos.AngleUnit;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
+import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
 public class PeakResultsReaderTest

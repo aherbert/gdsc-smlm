@@ -19,11 +19,11 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
-import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
-import gdsc.smlm.data.config.FitConfigHelper;
-import gdsc.smlm.data.config.PSFConfig.ImagePSF;
-import gdsc.smlm.data.config.PSFConfig.Offset;
-import gdsc.smlm.data.config.PSFConfigHelper;
+import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.PSFProtos.ImagePSF;
+import gdsc.smlm.data.config.PSFProtos.Offset;
+import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
@@ -461,9 +461,9 @@ public class PSFDrift implements PlugIn
 
 		// Configure the fit solver. We must wrap the settings with a 
 		// FitEngineConfiguration to pass to the PeakFit method
-		FitEngineSettings fitEngineSettings = FitConfigHelper.defaultFitEngineSettings;
+		FitEngineSettings fitEngineSettings = FitProtosHelper.defaultFitEngineSettings;
 		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
-				SettingsManager.readCalibration(0), PSFConfigHelper.defaultOneAxisGaussian2DPSF);
+				SettingsManager.readCalibration(0), PSFProtosHelper.defaultOneAxisGaussian2DPSF);
 		config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
 		if (!PeakFit.configureFitSolver(config, PeakFit.FLAG_NO_SAVE))
 			return;

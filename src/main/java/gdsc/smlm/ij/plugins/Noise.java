@@ -1,7 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
-import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.core.ij.Utils;
@@ -130,8 +130,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	private void drawPlot()
 	{
 		NoiseEstimatorMethod[] values = SettingsManager.getNoiseEstimatorMethodValues();
-		NoiseEstimator.Method method1 = FitConfigHelper.convertNoiseEstimatorMethod(values[algorithm]);
-		NoiseEstimator.Method method2 = FitConfigHelper.convertNoiseEstimatorMethod(values[algorithm2]);
+		NoiseEstimator.Method method1 = FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm]);
+		NoiseEstimator.Method method2 = FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm2]);
 		IJ.showStatus("Estimating noise ...");
 
 		boolean twoMethods = method1 != method2;

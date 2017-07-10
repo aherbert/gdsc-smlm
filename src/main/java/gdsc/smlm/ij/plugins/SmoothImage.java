@@ -3,7 +3,7 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Rectangle;
 
-import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
+import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

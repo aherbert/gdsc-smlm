@@ -14,10 +14,10 @@ import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Sort;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.engine.FitConfiguration;
-import gdsc.smlm.data.config.PSFConfigHelper;
-import gdsc.smlm.data.config.FitConfig.FitSolver;
+import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.FitProtos.FitSolver;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -155,7 +155,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		_PSFTypeNames = new String[_PSFTypeValues.length];
 		for (int i = 0; i < _PSFTypeValues.length; i++)
 		{
-			_PSFTypeNames[i] = PSFConfigHelper.getName(_PSFTypeValues[i]);
+			_PSFTypeNames[i] = PSFProtosHelper.getName(_PSFTypeValues[i]);
 		}
 	}
 
@@ -197,7 +197,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		gd.addMessage("--- Gaussian fitting ---");
 		Component splitLabel = gd.getMessage();
-		gd.addChoice("PSF", getPSFTypeNames(), PSFConfigHelper.getName(getPSFType()));
+		gd.addChoice("PSF", getPSFTypeNames(), PSFProtosHelper.getName(getPSFType()));
 		gd.addCheckbox("Fit_background", fitBackground);
 		gd.addNumericField("Max_iterations", maxIterations, 0);
 		gd.addStringField("Relative_threshold", "" + relativeThreshold);
@@ -907,7 +907,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	{
 		FitConfiguration config = new FitConfiguration();
 		config.setFitSolver(FitSolver.LVM_LSE);
-		config.setPSF(PSFConfigHelper.getDefaultPSF(getPSFType()));
+		config.setPSF(PSFProtosHelper.getDefaultPSF(getPSFType()));
 		config.setMaxIterations(getMaxIterations());
 		config.setRelativeThreshold(relativeThreshold);
 		config.setAbsoluteThreshold(absoluteThreshold);

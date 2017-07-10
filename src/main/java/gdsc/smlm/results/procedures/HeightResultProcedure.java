@@ -1,7 +1,7 @@
 package gdsc.smlm.results.procedures;
 
 import gdsc.core.data.DataException;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.results.MemoryPeakResults;
 
 /*----------------------------------------------------------------------------- 

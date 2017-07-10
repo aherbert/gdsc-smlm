@@ -23,8 +23,8 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CreateDataSettingsHelper;
-import gdsc.smlm.data.config.GUIConfig.CreateDataSettings;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFHelper;
 
 /*----------------------------------------------------------------------------- 

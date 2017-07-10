@@ -1,6 +1,6 @@
 package gdsc.smlm.data.config;
 
-import gdsc.smlm.data.config.GUIConfig.CreateDataSettingsOrBuilder;
+import gdsc.smlm.data.config.GUIProtos.CreateDataSettingsOrBuilder;
 import gdsc.smlm.model.DiffusionType;
 
 /*----------------------------------------------------------------------------- 

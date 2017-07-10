@@ -2,8 +2,8 @@ package gdsc.smlm.data.config;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.clustering.optics.SampleMode;
-import gdsc.smlm.data.config.GUIConfig.*;
-import gdsc.smlm.data.config.UnitConfig.TimeUnit;
+import gdsc.smlm.data.config.GUIProtos.*;
+import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.ij.plugins.OPTICS.ClusteringMode;
 import gdsc.smlm.ij.plugins.OPTICS.ImageMode;
 import gdsc.smlm.ij.plugins.OPTICS.OpticsMode;
@@ -26,9 +26,9 @@ import gdsc.smlm.results.TraceManager.TraceMode;
  *---------------------------------------------------------------------------*/
 
 /**
- * Contains helper functions for the GUIConfig class.
+ * Contains helper functions for the GUIProtos class.
  */
-public class GUIConfigHelper
+public class GUIProtosHelper
 {
 	/** The default GUIFilterSettings */
 	public static final GUIFilterSettings defaultGUIFilterSettings = GUIFilterSettings.getDefaultInstance();

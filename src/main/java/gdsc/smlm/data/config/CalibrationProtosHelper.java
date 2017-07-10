@@ -1,7 +1,7 @@
 package gdsc.smlm.data.config;
 
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
-import gdsc.smlm.data.config.CalibrationConfig.CameraType;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -17,9 +17,9 @@ import gdsc.smlm.data.config.CalibrationConfig.CameraType;
  *---------------------------------------------------------------------------*/
 
 /**
- * Contains helper functions for the CalibrationConfig class.
+ * Contains helper functions for the CalibrationProtos class.
  */
-public class CalibrationConfigHelper
+public class CalibrationProtosHelper
 {
 	/** The default Calibration */
 	public static final Calibration defaultCalibration;

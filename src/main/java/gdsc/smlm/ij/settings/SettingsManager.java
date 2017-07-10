@@ -22,32 +22,32 @@ import com.google.protobuf.util.JsonFormat.Printer;
 
 import gdsc.core.utils.BitFlags;
 import gdsc.smlm.data.NamedObject;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
-import gdsc.smlm.data.config.CalibrationConfigHelper;
-import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
-import gdsc.smlm.data.config.FitConfig.DataFilterType;
-import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
-import gdsc.smlm.data.config.FitConfig.FitSolver;
-import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
-import gdsc.smlm.data.config.FitConfigHelper;
-import gdsc.smlm.data.config.GUIConfig.ClusteringSettings;
-import gdsc.smlm.data.config.GUIConfig.CreateDataSettings;
-import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
-import gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings;
-import gdsc.smlm.data.config.GUIConfig.OpticsSettings;
-import gdsc.smlm.data.config.GUIConfig.PSFCalculatorSettings;
-import gdsc.smlm.data.config.GUIConfig.PSFEstimatorSettings;
-import gdsc.smlm.data.config.GUIConfigHelper;
-import gdsc.smlm.data.config.PSFConfig.PSF;
-import gdsc.smlm.data.config.PSFConfigHelper;
-import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
-import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
-import gdsc.smlm.data.config.ResultsConfigHelper;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
-import gdsc.smlm.data.config.UnitConfig.TimeUnit;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtosHelper;
+import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
+import gdsc.smlm.data.config.FitProtos.DataFilterType;
+import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
+import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
+import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
+import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
+import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
+import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
+import gdsc.smlm.data.config.GUIProtosHelper;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
+import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
+import gdsc.smlm.data.config.ResultsProtosHelper;
+import gdsc.smlm.data.config.UnitProtos.AngleUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -280,7 +280,7 @@ public class SettingsManager
 		_ResultsImageTypeNames = new String[_ResultsImageTypeValues.length];
 		for (int i = 0; i < _ResultsImageTypeValues.length; i++)
 		{
-			_ResultsImageTypeNames[i] = ResultsConfigHelper.getName(_ResultsImageTypeValues[i]);
+			_ResultsImageTypeNames[i] = ResultsProtosHelper.getName(_ResultsImageTypeValues[i]);
 		}
 	}
 
@@ -310,7 +310,7 @@ public class SettingsManager
 		_ResultsFileFormatNames = new String[_ResultsFileFormatValues.length];
 		for (int i = 0; i < _ResultsFileFormatValues.length; i++)
 		{
-			_ResultsFileFormatNames[i] = ResultsConfigHelper.getName(_ResultsFileFormatValues[i]);
+			_ResultsFileFormatNames[i] = ResultsProtosHelper.getName(_ResultsFileFormatValues[i]);
 		}
 	}
 
@@ -340,7 +340,7 @@ public class SettingsManager
 		_DataFilterTypeNames = new String[_DataFilterTypeValues.length];
 		for (int i = 0; i < _DataFilterTypeValues.length; i++)
 		{
-			_DataFilterTypeNames[i] = FitConfigHelper.getName(_DataFilterTypeValues[i]);
+			_DataFilterTypeNames[i] = FitProtosHelper.getName(_DataFilterTypeValues[i]);
 		}
 	}
 
@@ -370,7 +370,7 @@ public class SettingsManager
 		_DataFilterMethodNames = new String[_DataFilterMethodValues.length];
 		for (int i = 0; i < _DataFilterMethodValues.length; i++)
 		{
-			_DataFilterMethodNames[i] = FitConfigHelper.getName(_DataFilterMethodValues[i]);
+			_DataFilterMethodNames[i] = FitProtosHelper.getName(_DataFilterMethodValues[i]);
 		}
 	}
 
@@ -400,7 +400,7 @@ public class SettingsManager
 		_FitSolverNames = new String[_FitSolverValues.length];
 		for (int i = 0; i < _FitSolverValues.length; i++)
 		{
-			_FitSolverNames[i] = FitConfigHelper.getName(_FitSolverValues[i]);
+			_FitSolverNames[i] = FitProtosHelper.getName(_FitSolverValues[i]);
 		}
 	}
 
@@ -430,7 +430,7 @@ public class SettingsManager
 		_NoiseEstimatorMethodNames = new String[_NoiseEstimatorMethodValues.length];
 		for (int i = 0; i < _NoiseEstimatorMethodValues.length; i++)
 		{
-			_NoiseEstimatorMethodNames[i] = FitConfigHelper.getName(_NoiseEstimatorMethodValues[i]);
+			_NoiseEstimatorMethodNames[i] = FitProtosHelper.getName(_NoiseEstimatorMethodValues[i]);
 		}
 	}
 
@@ -628,7 +628,7 @@ public class SettingsManager
 	 */
 	public static Calibration readCalibration(int flags)
 	{
-		return new ConfigurationReader<Calibration>(CalibrationConfigHelper.defaultCalibration).read(flags);
+		return new ConfigurationReader<Calibration>(CalibrationProtosHelper.defaultCalibration).read(flags);
 	}
 
 	/**
@@ -640,7 +640,7 @@ public class SettingsManager
 	 */
 	public static PSF readPSF(int flags)
 	{
-		return new ConfigurationReader<PSF>(PSFConfigHelper.defaultOneAxisGaussian2DPSF).read(flags);
+		return new ConfigurationReader<PSF>(PSFProtosHelper.defaultOneAxisGaussian2DPSF).read(flags);
 	}
 
 	/**
@@ -652,7 +652,7 @@ public class SettingsManager
 	 */
 	public static ResultsSettings readResultsSettings(int flags)
 	{
-		return new ConfigurationReader<ResultsSettings>(ResultsConfigHelper.defaultResultsSettings).read(flags);
+		return new ConfigurationReader<ResultsSettings>(ResultsProtosHelper.defaultResultsSettings).read(flags);
 	}
 
 	/**
@@ -664,7 +664,7 @@ public class SettingsManager
 	 */
 	private static FitEngineSettings readFitEngineSettings(int flags)
 	{
-		return new ConfigurationReader<FitEngineSettings>(FitConfigHelper.defaultFitEngineSettings).read(flags);
+		return new ConfigurationReader<FitEngineSettings>(FitProtosHelper.defaultFitEngineSettings).read(flags);
 	}
 
 	/**
@@ -676,7 +676,7 @@ public class SettingsManager
 	 */
 	public static GUIFilterSettings readGUIFilterSettings(int flags)
 	{
-		return new ConfigurationReader<GUIFilterSettings>(GUIConfigHelper.defaultGUIFilterSettings).read(flags);
+		return new ConfigurationReader<GUIFilterSettings>(GUIProtosHelper.defaultGUIFilterSettings).read(flags);
 	}
 
 	/**
@@ -688,7 +688,7 @@ public class SettingsManager
 	 */
 	public static PSFCalculatorSettings readPSFCalculatorSettings(int flags)
 	{
-		return new ConfigurationReader<PSFCalculatorSettings>(GUIConfigHelper.defaultPSFCalculatorSettings).read(flags);
+		return new ConfigurationReader<PSFCalculatorSettings>(GUIProtosHelper.defaultPSFCalculatorSettings).read(flags);
 	}
 
 	/**
@@ -700,7 +700,7 @@ public class SettingsManager
 	 */
 	public static PSFEstimatorSettings readPSFEstimatorSettings(int flags)
 	{
-		return new ConfigurationReader<PSFEstimatorSettings>(GUIConfigHelper.defaultPSFEstimatorSettings).read(flags);
+		return new ConfigurationReader<PSFEstimatorSettings>(GUIProtosHelper.defaultPSFEstimatorSettings).read(flags);
 	}
 
 	/**
@@ -712,7 +712,7 @@ public class SettingsManager
 	 */
 	public static CreateDataSettings readCreateDataSettings(int flags)
 	{
-		return new ConfigurationReader<CreateDataSettings>(GUIConfigHelper.defaultCreateDataSettings).read(flags);
+		return new ConfigurationReader<CreateDataSettings>(GUIProtosHelper.defaultCreateDataSettings).read(flags);
 	}
 
 	/**
@@ -724,7 +724,7 @@ public class SettingsManager
 	 */
 	public static LoadLocalisationsSettings readLoadLocalisationsSettings(int flags)
 	{
-		return new ConfigurationReader<LoadLocalisationsSettings>(GUIConfigHelper.defaultLoadLocalisationsSettings)
+		return new ConfigurationReader<LoadLocalisationsSettings>(GUIProtosHelper.defaultLoadLocalisationsSettings)
 				.read(flags);
 	}
 
@@ -737,7 +737,7 @@ public class SettingsManager
 	 */
 	public static ClusteringSettings readClusteringSettings(int flags)
 	{
-		return new ConfigurationReader<ClusteringSettings>(GUIConfigHelper.defaultClusteringSettings).read(flags);
+		return new ConfigurationReader<ClusteringSettings>(GUIProtosHelper.defaultClusteringSettings).read(flags);
 	}
 
 	/**
@@ -749,7 +749,7 @@ public class SettingsManager
 	 */
 	public static OpticsSettings readOpticsSettings(int flags)
 	{
-		return new ConfigurationReader<OpticsSettings>(GUIConfigHelper.defaultOpticsSettings).read(flags);
+		return new ConfigurationReader<OpticsSettings>(GUIProtosHelper.defaultOpticsSettings).read(flags);
 	}
 
 	/**

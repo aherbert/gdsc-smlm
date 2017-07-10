@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 @SuppressWarnings("unchecked")
 public class DistanceUnitTest

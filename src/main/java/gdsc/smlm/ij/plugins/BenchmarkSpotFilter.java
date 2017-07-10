@@ -29,8 +29,8 @@ import gdsc.core.utils.Settings;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.smlm.data.config.ConfigurationException;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -45,8 +45,8 @@ import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
-import gdsc.smlm.data.config.FitConfig.DataFilterType;
+import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
+import gdsc.smlm.data.config.FitProtos.DataFilterType;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;

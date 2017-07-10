@@ -4,13 +4,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.CalibrationConfig.AngleCalibration;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
-import gdsc.smlm.data.config.CalibrationConfig.DistanceCalibration;
-import gdsc.smlm.data.config.CalibrationConfig.IntensityCalibration;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.CalibrationProtos.AngleCalibration;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.DistanceCalibration;
+import gdsc.smlm.data.config.CalibrationProtos.IntensityCalibration;
+import gdsc.smlm.data.config.UnitProtos.AngleUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 public class CalibrationReaderTest
 {

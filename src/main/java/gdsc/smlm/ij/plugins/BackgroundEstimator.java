@@ -16,8 +16,8 @@ import gdsc.core.threshold.AutoThreshold;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Statistics;
-import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
-import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.engine.DataEstimator;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -133,7 +133,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 	{
 		percentile = gd.getNextNumber();
 		noiseMethod = SettingsManager.getNoiseEstimatorMethodValues()[gd.getNextChoiceIndex()];
-		myNoiseMethod = FitConfigHelper.convertNoiseEstimatorMethod(noiseMethod);
+		myNoiseMethod = FitProtosHelper.convertNoiseEstimatorMethod(noiseMethod);
 		thresholdMethod = AutoThreshold.getMethod(gd.getNextChoiceIndex(), true);
 		fraction = (float) gd.getNextNumber();
 		histogramSize = (int) gd.getNextNumber();

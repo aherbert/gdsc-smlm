@@ -34,7 +34,7 @@ import gdsc.core.utils.UnicodeReader;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;

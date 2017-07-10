@@ -1,18 +1,18 @@
 package gdsc.smlm.data.config;
 
 import gdsc.core.utils.NoiseEstimator.Method;
-import gdsc.smlm.data.config.FitConfig.DataFilter;
-import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
-import gdsc.smlm.data.config.FitConfig.DataFilterSettings;
-import gdsc.smlm.data.config.FitConfig.DataFilterType;
-import gdsc.smlm.data.config.FitConfig.FilterSettings;
-import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
-import gdsc.smlm.data.config.FitConfig.FitSettings;
-import gdsc.smlm.data.config.FitConfig.FitSolver;
-import gdsc.smlm.data.config.FitConfig.FitSolverSettings;
-import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
-import gdsc.smlm.data.config.FitConfig.RelativeParameter;
-import gdsc.smlm.data.config.FitConfig.SearchMethod;
+import gdsc.smlm.data.config.FitProtos.DataFilter;
+import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
+import gdsc.smlm.data.config.FitProtos.DataFilterSettings;
+import gdsc.smlm.data.config.FitProtos.DataFilterType;
+import gdsc.smlm.data.config.FitProtos.FilterSettings;
+import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import gdsc.smlm.data.config.FitProtos.FitSettings;
+import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.FitProtos.FitSolverSettings;
+import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtos.RelativeParameter;
+import gdsc.smlm.data.config.FitProtos.SearchMethod;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 
 /*----------------------------------------------------------------------------- 
@@ -29,9 +29,9 @@ import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
  *---------------------------------------------------------------------------*/
 
 /**
- * Contains helper functions for the FitConfig class.
+ * Contains helper functions for the FitProtos class.
  */
-public class FitConfigHelper
+public class FitProtosHelper
 {
 	/** The default FitSolverSettings */
 	public static final FitSolverSettings defaultFitSolverSettings;

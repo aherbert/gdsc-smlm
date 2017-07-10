@@ -1,8 +1,8 @@
 package gdsc.smlm.data.config;
 
-import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
-import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
+import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -18,9 +18,9 @@ import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
  *---------------------------------------------------------------------------*/
 
 /**
- * Contains helper functions for the ResultsConfig class.
+ * Contains helper functions for the ResultsProtos class.
  */
-public class ResultsConfigHelper
+public class ResultsProtosHelper
 {
 	/** The default ResultsSettings */
 	public static final ResultsSettings defaultResultsSettings;

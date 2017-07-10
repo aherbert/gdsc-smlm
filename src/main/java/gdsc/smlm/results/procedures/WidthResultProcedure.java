@@ -1,7 +1,7 @@
 package gdsc.smlm.results.procedures;
 
 import gdsc.core.data.DataException;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.results.MemoryPeakResults;
 
 /*----------------------------------------------------------------------------- 

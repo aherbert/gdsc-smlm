@@ -7,7 +7,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.Maths;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

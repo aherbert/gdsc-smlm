@@ -34,10 +34,10 @@ import gdsc.core.utils.Sort;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.data.config.FitConfig.FitSolver;
-import gdsc.smlm.data.config.FitConfigHelper;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
@@ -1517,7 +1517,7 @@ public class PSFCreator implements PlugInFilter
 		// is not appropriate for a normalised PSF. 
 		if (fitConfig.getFitSolver() != FitSolver.LVM_LSE)
 		{
-			Utils.log("  " + FitConfigHelper.getName(fitConfig.getFitSolver()) +
+			Utils.log("  " + FitProtosHelper.getName(fitConfig.getFitSolver()) +
 					" is not appropriate for final PSF fitting.");
 			Utils.log("  Switching to Least Square Estimation");
 			fitConfig.setFitSolver(FitSolver.LVM_LSE);

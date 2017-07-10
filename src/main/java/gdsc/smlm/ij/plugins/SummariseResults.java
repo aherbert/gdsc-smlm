@@ -19,7 +19,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import gdsc.core.data.DataException;
 import gdsc.core.ij.Utils;
-import gdsc.smlm.data.config.CalibrationConfigHelper;
+import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -212,7 +212,7 @@ public class SummariseResults implements PlugIn
 			sb.append('\t').append(calibration.hasNmPerPixel() ? Utils.rounded(calibration.getNmPerPixel()) : '-');
 			sb.append('\t').append(calibration.hasGain() ? Utils.rounded(calibration.getGain()) : '-');
 			sb.append('\t').append(calibration.hasExposureTime() ? Utils.rounded(calibration.getExposureTime()) : '-');
-			sb.append('\t').append(calibration.hasCameraType() ? CalibrationConfigHelper.getName(calibration.getCameraType()) : '-');
+			sb.append('\t').append(calibration.hasCameraType() ? CalibrationProtosHelper.getName(calibration.getCameraType()) : '-');
 			sb.append('\t').append(calibration.hasDistanceUnit() ? UnitHelper.getShortName(calibration.getDistanceUnit()) : '-');
 			sb.append('\t').append(calibration.hasIntensityUnit() ? UnitHelper.getShortName(calibration.getIntensityUnit()) : '-');
 			//@formatter:on

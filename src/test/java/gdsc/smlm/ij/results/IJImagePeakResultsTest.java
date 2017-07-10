@@ -10,12 +10,12 @@ import org.junit.Test;
 
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.PSFConfig.PSF;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
 import ij.process.FloatProcessor;

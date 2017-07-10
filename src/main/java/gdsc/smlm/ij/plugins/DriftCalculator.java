@@ -15,12 +15,12 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.core.ij.AlignImagesFFT;
 import gdsc.core.ij.IJTrackProgress;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageMode;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import gdsc.core.ij.Utils;
 import gdsc.core.ij.AlignImagesFFT.SubPixelMethod;
 import gdsc.core.ij.AlignImagesFFT.WindowMethod;

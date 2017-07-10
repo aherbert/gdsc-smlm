@@ -32,29 +32,29 @@ import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.TextUtils;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
-import gdsc.smlm.data.config.CalibrationConfig.CameraType;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
-import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
-import gdsc.smlm.data.config.FitConfig.FitSolver;
-import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
-import gdsc.smlm.data.config.FitConfigHelper;
-import gdsc.smlm.data.config.GUIConfig.PSFCalculatorSettings;
-import gdsc.smlm.data.config.GUIConfigHelper;
-import gdsc.smlm.data.config.PSFConfig.PSF;
-import gdsc.smlm.data.config.PSFConfig.PSFParameter;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
-import gdsc.smlm.data.config.PSFConfigHelper;
+import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
+import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
+import gdsc.smlm.data.config.GUIProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.ResultsConfig.ResultsFileSettings;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageSettings;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
-import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
-import gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings;
-import gdsc.smlm.data.config.ResultsConfigHelper;
-import gdsc.smlm.data.config.TemplateConfig.TemplateSettings;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
+import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
+import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
+import gdsc.smlm.data.config.ResultsProtosHelper;
+import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -172,7 +172,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private static String inputOption = "";
 	private static boolean showTable = true;
 	private static boolean showImage = true;
-	private static PSFCalculatorSettings.Builder calculatorSettings = GUIConfigHelper.defaultPSFCalculatorSettings
+	private static PSFCalculatorSettings.Builder calculatorSettings = GUIProtosHelper.defaultPSFCalculatorSettings
 			.toBuilder();
 
 	// All the fields that will be updated when reloading the configuration file
@@ -624,9 +624,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public static String getSolverName(FitConfiguration fitConfig)
 	{
 		FitSolver solver = fitConfig.getFitSolver();
-		String name = FitConfigHelper.getName(solver);
+		String name = FitProtosHelper.getName(solver);
 		if (solver == FitSolver.MLE)
-			name += " " + FitConfigHelper.getName(fitConfig.getSearchMethod());
+			name += " " + FitProtosHelper.getName(fitConfig.getSearchMethod());
 		return name;
 	}
 
@@ -725,7 +725,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		_PSFTypeNames = new String[_PSFTypeValues.length];
 		for (int i = 0; i < _PSFTypeValues.length; i++)
 		{
-			_PSFTypeNames[i] = PSFConfigHelper.getName(_PSFTypeValues[i]);
+			_PSFTypeNames[i] = PSFProtosHelper.getName(_PSFTypeValues[i]);
 		}
 	}
 
@@ -1054,7 +1054,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	public static void addPSFOptions(final ExtendedGenericDialog gd, final FitConfiguration fitConfig)
 	{
-		gd.addChoice("PSF", getPSFTypeNames(), PSFConfigHelper.getName(fitConfig.getPSFType()),
+		gd.addChoice("PSF", getPSFTypeNames(), PSFProtosHelper.getName(fitConfig.getPSFType()),
 				new OptionListener<Choice>()
 				{
 					public void collectOptions(Choice field)
@@ -1068,7 +1068,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						PSFType psfType = fitConfig.getPSFType();
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						PSF psf = fitConfig.getPSF();
-						for (PSFParameter p : psf.getParameterList())
+						for (PSFParameter p : psf.getParametersList())
 							egd.addNumericField(p.getName(), p.getValue(), 3);
 						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
 							egd.addCheckbox("Fixed", fitConfig.isFixedPSF());
@@ -1076,9 +1076,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 						if (egd.wasCanceled())
 							return;
 						PSF.Builder b = psf.toBuilder();
-						int n = b.getParameterCount();
+						int n = b.getParametersCount();
 						for (int i = 0; i < n; i++)
-							b.getParameterBuilder(i).setValue(egd.getNextNumber());
+							b.getParametersBuilder(i).setValue(egd.getNextNumber());
 						fitConfig.setPSF(b.build());
 						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
 							fitConfig.setFixedPSF(egd.getNextBoolean());
@@ -1514,7 +1514,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			Parameters.isAboveZero("Gain", calibration.getGain());
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
-			if (fitConfig.getPSF().getParameterCount() > 1)
+			if (fitConfig.getPSF().getParametersCount() > 1)
 			{
 				Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
 			}
@@ -1733,7 +1733,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			gd.enableYesNoCancel("Add", "Continue");
 			gd.addMessage(
 					String.format("Configure the %s filter.\nClick continue to proceed with the current set of %d.",
-							FitConfigHelper.getName(config.getDataFilterType()), i));
+							FitProtosHelper.getName(config.getDataFilterType()), i));
 			String fieldName = "Spot_filter" + filter;
 			if (IJ.isMacro())
 				// Use blank default value so bad macro parameters return nothing
@@ -1874,7 +1874,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			// Collect options for LVM fitting
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-			gd.addMessage(FitConfigHelper.getName(fitSolver) + " requires additional parameters");
+			gd.addMessage(FitProtosHelper.getName(fitSolver) + " requires additional parameters");
 			gd.addStringField("Relative_threshold", Utils.rounded(fitConfig.getRelativeThreshold()));
 			gd.addStringField("Absolute_threshold", Utils.rounded(fitConfig.getAbsoluteThreshold()));
 			gd.addStringField("Parameter_relative_threshold", Utils.rounded(fitConfig.getParameterRelativeThreshold()));
@@ -2044,7 +2044,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 					new File(resultsSettings.getResultsDirectory()).exists())
 			{
 				resultsFilename = resultsSettings.getResultsDirectory() + File.separatorChar + source.getName() +
-						".results." + ResultsConfigHelper.getExtension(resultsSettings.getFileFormat());
+						".results." + ResultsProtosHelper.getExtension(resultsSettings.getFileFormat());
 			}
 			else
 			{

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import gdsc.core.ij.Utils;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.results.PeakResult;
 import ij.ImagePlus;
 import ij.ImageStack;

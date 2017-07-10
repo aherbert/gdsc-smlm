@@ -28,8 +28,8 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ConfigurationException;
-import gdsc.smlm.data.config.GUIConfig.ClusteringSettings;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

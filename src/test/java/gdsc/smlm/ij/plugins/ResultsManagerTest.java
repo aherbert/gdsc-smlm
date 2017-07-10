@@ -12,7 +12,7 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.Random;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;

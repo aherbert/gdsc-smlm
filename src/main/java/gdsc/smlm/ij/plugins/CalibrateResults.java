@@ -2,7 +2,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

@@ -44,7 +44,7 @@ import gdsc.core.utils.TextUtils;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.filter.AndFilter;
 import gdsc.smlm.results.filter.Filter;

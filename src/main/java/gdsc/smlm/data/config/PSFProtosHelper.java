@@ -1,9 +1,9 @@
 package gdsc.smlm.data.config;
 
-import gdsc.smlm.data.config.PSFConfig.PSF;
-import gdsc.smlm.data.config.PSFConfig.PSFParameter;
-import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -19,9 +19,9 @@ import gdsc.smlm.data.config.PSFConfig.PSFType;
  *---------------------------------------------------------------------------*/
 
 /**
- * Contains helper functions for the PSFConfig class.
+ * Contains helper functions for the PSFProtos class.
  */
-public class PSFConfigHelper
+public class PSFProtosHelper
 {
 	/** The default one-axis Gaussian 2D PSF */
 	public static final PSF defaultOneAxisGaussian2DPSF;
@@ -39,22 +39,22 @@ public class PSFConfigHelper
 		paramBuilder.setName("S");
 		paramBuilder.setValue(1);
 		paramBuilder.setUnit(PSFParameterUnit.DISTANCE);
-		builder.addParameter(paramBuilder.build());
+		builder.addParameters(paramBuilder.build());
 		defaultOneAxisGaussian2DPSF = builder.build();
 
 		builder.clear();
 		builder.setPsfType(PSFType.TWO_AXIS_GAUSSIAN_2D);
 		paramBuilder.setName("Sx");
-		builder.addParameter(paramBuilder.build());
+		builder.addParameters(paramBuilder.build());
 		paramBuilder.setName("Sy");
-		builder.addParameter(paramBuilder.build());
+		builder.addParameters(paramBuilder.build());
 		defaultTwoAxisGaussian2DPSF = builder.build();
 
 		builder.setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
 		paramBuilder.setName("Angle");
 		paramBuilder.setUnit(PSFParameterUnit.ANGLE);
 		paramBuilder.setValue(0);
-		builder.addParameter(paramBuilder.build());
+		builder.addParameters(paramBuilder.build());
 		defaultTwoAxisAndThetaGaussian2DPSF = builder.build();
 	}
 

@@ -3,23 +3,23 @@ package gdsc.smlm.engine;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Maths;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
-import gdsc.smlm.data.config.CalibrationConfigHelper;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.FitConfig.DataFilter;
-import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
-import gdsc.smlm.data.config.FitConfig.DataFilterSettings;
-import gdsc.smlm.data.config.FitConfig.DataFilterType;
-import gdsc.smlm.data.config.FitConfig.FitEngineSettings;
-import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
-import gdsc.smlm.data.config.FitConfig.RelativeParameter;
-import gdsc.smlm.data.config.FitConfigHelper;
-import gdsc.smlm.data.config.PSFConfig.PSF;
-import gdsc.smlm.data.config.PSFConfigHelper;
+import gdsc.smlm.data.config.FitProtos.DataFilter;
+import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
+import gdsc.smlm.data.config.FitProtos.DataFilterSettings;
+import gdsc.smlm.data.config.FitProtos.DataFilterType;
+import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtos.RelativeParameter;
+import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.AngleUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.filters.AverageDataProcessor;
 import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.CircularMeanDataProcessor;
@@ -45,8 +45,8 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public FitEngineConfiguration()
 	{
-		this(FitConfigHelper.defaultFitEngineSettings, CalibrationConfigHelper.defaultCalibration,
-				PSFConfigHelper.defaultOneAxisGaussian2DPSF);
+		this(FitProtosHelper.defaultFitEngineSettings, CalibrationProtosHelper.defaultCalibration,
+				PSFProtosHelper.defaultOneAxisGaussian2DPSF);
 	}
 
 	/**

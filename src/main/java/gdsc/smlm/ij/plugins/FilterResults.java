@@ -6,9 +6,9 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.data.DataException;
 import gdsc.core.utils.Maths;
-import gdsc.smlm.data.config.GUIConfig.GUIFilterSettings;
-import gdsc.smlm.data.config.GUIConfigHelper;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
+import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIProtosHelper;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -48,7 +48,7 @@ public class FilterResults implements PlugIn
 
 	private MemoryPeakResults results;
 
-	private GUIFilterSettings.Builder filterSettings = GUIConfigHelper.defaultGUIFilterSettings.toBuilder();
+	private GUIFilterSettings.Builder filterSettings = GUIProtosHelper.defaultGUIFilterSettings.toBuilder();
 
 	// Used to pass data from analyseResults() to checkLimits()
 	private float minDrift = Float.MAX_VALUE;

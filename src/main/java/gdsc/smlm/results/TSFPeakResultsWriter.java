@@ -413,20 +413,20 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	static
 	{
 		// These should have 1:1 mapping. We can extends the TSF proto if necessary.		
-		cameraTypeMap = new CameraType[gdsc.smlm.data.config.CalibrationConfig.CameraType.values().length];
-		cameraTypeMap[gdsc.smlm.data.config.CalibrationConfig.CameraType.CCD.ordinal()] = CameraType.CCD;
-		cameraTypeMap[gdsc.smlm.data.config.CalibrationConfig.CameraType.EMCCD.ordinal()] = CameraType.EMCCD;
-		cameraTypeMap[gdsc.smlm.data.config.CalibrationConfig.CameraType.SCMOS.ordinal()] = CameraType.SCMOS;
-		thetaUnitsMap = new ThetaUnits[gdsc.smlm.data.config.UnitConfig.AngleUnit.values().length];
-		thetaUnitsMap[gdsc.smlm.data.config.UnitConfig.AngleUnit.RADIAN.ordinal()] = ThetaUnits.RADIANS;
-		thetaUnitsMap[gdsc.smlm.data.config.UnitConfig.AngleUnit.DEGREE.ordinal()] = ThetaUnits.DEGREES;
-		locationUnitsMap = new LocationUnits[gdsc.smlm.data.config.UnitConfig.DistanceUnit.values().length];
-		locationUnitsMap[gdsc.smlm.data.config.UnitConfig.DistanceUnit.NM.ordinal()] = LocationUnits.NM;
-		locationUnitsMap[gdsc.smlm.data.config.UnitConfig.DistanceUnit.UM.ordinal()] = LocationUnits.UM;
-		locationUnitsMap[gdsc.smlm.data.config.UnitConfig.DistanceUnit.PIXEL.ordinal()] = LocationUnits.PIXELS;
-		intensityUnitsMap = new IntensityUnits[gdsc.smlm.data.config.UnitConfig.IntensityUnit.values().length];
-		intensityUnitsMap[gdsc.smlm.data.config.UnitConfig.IntensityUnit.COUNT.ordinal()] = IntensityUnits.COUNTS;
-		intensityUnitsMap[gdsc.smlm.data.config.UnitConfig.IntensityUnit.PHOTON.ordinal()] = IntensityUnits.PHOTONS;
+		cameraTypeMap = new CameraType[gdsc.smlm.data.config.CalibrationProtos.CameraType.values().length];
+		cameraTypeMap[gdsc.smlm.data.config.CalibrationProtos.CameraType.CCD.ordinal()] = CameraType.CCD;
+		cameraTypeMap[gdsc.smlm.data.config.CalibrationProtos.CameraType.EMCCD.ordinal()] = CameraType.EMCCD;
+		cameraTypeMap[gdsc.smlm.data.config.CalibrationProtos.CameraType.SCMOS.ordinal()] = CameraType.SCMOS;
+		thetaUnitsMap = new ThetaUnits[gdsc.smlm.data.config.UnitProtos.AngleUnit.values().length];
+		thetaUnitsMap[gdsc.smlm.data.config.UnitProtos.AngleUnit.RADIAN.ordinal()] = ThetaUnits.RADIANS;
+		thetaUnitsMap[gdsc.smlm.data.config.UnitProtos.AngleUnit.DEGREE.ordinal()] = ThetaUnits.DEGREES;
+		locationUnitsMap = new LocationUnits[gdsc.smlm.data.config.UnitProtos.DistanceUnit.values().length];
+		locationUnitsMap[gdsc.smlm.data.config.UnitProtos.DistanceUnit.NM.ordinal()] = LocationUnits.NM;
+		locationUnitsMap[gdsc.smlm.data.config.UnitProtos.DistanceUnit.UM.ordinal()] = LocationUnits.UM;
+		locationUnitsMap[gdsc.smlm.data.config.UnitProtos.DistanceUnit.PIXEL.ordinal()] = LocationUnits.PIXELS;
+		intensityUnitsMap = new IntensityUnits[gdsc.smlm.data.config.UnitProtos.IntensityUnit.values().length];
+		intensityUnitsMap[gdsc.smlm.data.config.UnitProtos.IntensityUnit.COUNT.ordinal()] = IntensityUnits.COUNTS;
+		intensityUnitsMap[gdsc.smlm.data.config.UnitProtos.IntensityUnit.PHOTON.ordinal()] = IntensityUnits.PHOTONS;
 	}
 
 	/*

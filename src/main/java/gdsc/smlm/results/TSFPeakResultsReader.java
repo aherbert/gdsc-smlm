@@ -13,8 +13,8 @@ import com.google.protobuf.util.JsonFormat.Parser;
 
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.PSFConfig.PSF;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -437,27 +437,27 @@ public class TSFPeakResultsReader
 		return 0;
 	}
 
-	private static gdsc.smlm.data.config.CalibrationConfig.CameraType[] cameraTypeMap;
-	private static gdsc.smlm.data.config.UnitConfig.AngleUnit[] thetaUnitsMap;
-	private static gdsc.smlm.data.config.UnitConfig.DistanceUnit[] locationUnitsMap;
-	private static gdsc.smlm.data.config.UnitConfig.IntensityUnit[] intensityUnitsMap;
+	private static gdsc.smlm.data.config.CalibrationProtos.CameraType[] cameraTypeMap;
+	private static gdsc.smlm.data.config.UnitProtos.AngleUnit[] thetaUnitsMap;
+	private static gdsc.smlm.data.config.UnitProtos.DistanceUnit[] locationUnitsMap;
+	private static gdsc.smlm.data.config.UnitProtos.IntensityUnit[] intensityUnitsMap;
 	static
 	{
 		// These should have 1:1 mapping. We can extends the TSF proto if necessary.		
-		cameraTypeMap = new gdsc.smlm.data.config.CalibrationConfig.CameraType[CameraType.values().length];
-		cameraTypeMap[CameraType.CCD.ordinal()] = gdsc.smlm.data.config.CalibrationConfig.CameraType.CCD;
-		cameraTypeMap[CameraType.EMCCD.ordinal()] = gdsc.smlm.data.config.CalibrationConfig.CameraType.EMCCD;
-		cameraTypeMap[CameraType.SCMOS.ordinal()] = gdsc.smlm.data.config.CalibrationConfig.CameraType.SCMOS;
-		thetaUnitsMap = new gdsc.smlm.data.config.UnitConfig.AngleUnit[ThetaUnits.values().length];
-		thetaUnitsMap[ThetaUnits.RADIANS.ordinal()] = gdsc.smlm.data.config.UnitConfig.AngleUnit.RADIAN;
-		thetaUnitsMap[ThetaUnits.DEGREES.ordinal()] = gdsc.smlm.data.config.UnitConfig.AngleUnit.DEGREE;
-		locationUnitsMap = new gdsc.smlm.data.config.UnitConfig.DistanceUnit[LocationUnits.values().length];
-		locationUnitsMap[LocationUnits.NM.ordinal()] = gdsc.smlm.data.config.UnitConfig.DistanceUnit.NM;
-		locationUnitsMap[LocationUnits.UM.ordinal()] = gdsc.smlm.data.config.UnitConfig.DistanceUnit.UM;
-		locationUnitsMap[LocationUnits.PIXELS.ordinal()] = gdsc.smlm.data.config.UnitConfig.DistanceUnit.PIXEL;
-		intensityUnitsMap = new gdsc.smlm.data.config.UnitConfig.IntensityUnit[IntensityUnits.values().length];
-		intensityUnitsMap[IntensityUnits.COUNTS.ordinal()] = gdsc.smlm.data.config.UnitConfig.IntensityUnit.COUNT;
-		intensityUnitsMap[IntensityUnits.PHOTONS.ordinal()] = gdsc.smlm.data.config.UnitConfig.IntensityUnit.PHOTON;
+		cameraTypeMap = new gdsc.smlm.data.config.CalibrationProtos.CameraType[CameraType.values().length];
+		cameraTypeMap[CameraType.CCD.ordinal()] = gdsc.smlm.data.config.CalibrationProtos.CameraType.CCD;
+		cameraTypeMap[CameraType.EMCCD.ordinal()] = gdsc.smlm.data.config.CalibrationProtos.CameraType.EMCCD;
+		cameraTypeMap[CameraType.SCMOS.ordinal()] = gdsc.smlm.data.config.CalibrationProtos.CameraType.SCMOS;
+		thetaUnitsMap = new gdsc.smlm.data.config.UnitProtos.AngleUnit[ThetaUnits.values().length];
+		thetaUnitsMap[ThetaUnits.RADIANS.ordinal()] = gdsc.smlm.data.config.UnitProtos.AngleUnit.RADIAN;
+		thetaUnitsMap[ThetaUnits.DEGREES.ordinal()] = gdsc.smlm.data.config.UnitProtos.AngleUnit.DEGREE;
+		locationUnitsMap = new gdsc.smlm.data.config.UnitProtos.DistanceUnit[LocationUnits.values().length];
+		locationUnitsMap[LocationUnits.NM.ordinal()] = gdsc.smlm.data.config.UnitProtos.DistanceUnit.NM;
+		locationUnitsMap[LocationUnits.UM.ordinal()] = gdsc.smlm.data.config.UnitProtos.DistanceUnit.UM;
+		locationUnitsMap[LocationUnits.PIXELS.ordinal()] = gdsc.smlm.data.config.UnitProtos.DistanceUnit.PIXEL;
+		intensityUnitsMap = new gdsc.smlm.data.config.UnitProtos.IntensityUnit[IntensityUnits.values().length];
+		intensityUnitsMap[IntensityUnits.COUNTS.ordinal()] = gdsc.smlm.data.config.UnitProtos.IntensityUnit.COUNT;
+		intensityUnitsMap[IntensityUnits.PHOTONS.ordinal()] = gdsc.smlm.data.config.UnitProtos.IntensityUnit.PHOTON;
 	}
 
 	private MemoryPeakResults createResults()

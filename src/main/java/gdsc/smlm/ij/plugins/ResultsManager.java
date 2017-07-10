@@ -35,18 +35,18 @@ import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.BitFlags;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.ResultsConfig.ResultsFileFormat;
-import gdsc.smlm.data.config.ResultsConfig.ResultsFileSettings;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageMode;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageSettings;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
-import gdsc.smlm.data.config.ResultsConfig.ResultsInMemorySettings;
-import gdsc.smlm.data.config.ResultsConfig.ResultsSettings;
-import gdsc.smlm.data.config.ResultsConfig.ResultsSettings.Builder;
-import gdsc.smlm.data.config.ResultsConfig.ResultsTableSettings;
-import gdsc.smlm.data.config.ResultsConfigHelper;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
+import gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
+import gdsc.smlm.data.config.ResultsProtos.ResultsInMemorySettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsSettings.Builder;
+import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
+import gdsc.smlm.data.config.ResultsProtosHelper;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
@@ -369,7 +369,7 @@ public class ResultsManager implements PlugIn
 		{
 			// Remove extension
 			String resultsFilename = Utils.replaceExtension(resultsSettings.getResultsFilename(),
-					ResultsConfigHelper.getExtension(resultsSettings.getFileFormat()));
+					ResultsProtosHelper.getExtension(resultsSettings.getFileFormat()));
 
 			if (fileInput && inputFilename.equals(resultsFilename))
 			{
@@ -653,7 +653,7 @@ public class ResultsManager implements PlugIn
 					public void collectOptions()
 					{
 						ResultsFileFormat resultsFileFormat = fileSettings.getFileFormat();
-						if (!ResultsConfigHelper.isGDSC(resultsFileFormat))
+						if (!ResultsProtosHelper.isGDSC(resultsFileFormat))
 						{
 							return;
 						}

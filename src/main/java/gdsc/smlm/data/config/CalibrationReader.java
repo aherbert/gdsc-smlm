@@ -2,11 +2,11 @@ package gdsc.smlm.data.config;
 
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.UnitConfig.AngleUnit;
-import gdsc.smlm.data.config.CalibrationConfig.CalibrationOrBuilder;
-import gdsc.smlm.data.config.CalibrationConfig.CameraType;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.AngleUnit;
+import gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

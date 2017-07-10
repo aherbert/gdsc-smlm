@@ -1,8 +1,8 @@
 package gdsc.smlm.ij.results;
 
 import java.awt.Rectangle;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageType;
-import gdsc.smlm.data.config.ResultsConfig.ResultsImageMode;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

@@ -60,16 +60,16 @@ import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.CreateDataSettingsHelper;
-import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
-import gdsc.smlm.data.config.GUIConfig.CreateDataSettings;
-import gdsc.smlm.data.config.GUIConfig.LoadLocalisationsSettings;
-import gdsc.smlm.data.config.PSFConfig.ImagePSF;
-import gdsc.smlm.data.config.PSFConfig.Offset;
-import gdsc.smlm.data.config.PSFConfig.PSF;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
+import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
+import gdsc.smlm.data.config.PSFProtos.ImagePSF;
+import gdsc.smlm.data.config.PSFProtos.Offset;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.UnitConfig.DistanceUnit;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
@@ -2001,7 +2001,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setBounds(new Rectangle(0, 0, settings.getSize(), settings.getSize()));
 		// Set the PSF as a Gaussian for now. In future this could be improved for other PSFs.
 		PSF.Builder psf = PSFHelper.createBuilder(PSFType.ONE_AXIS_GAUSSIAN_2D);
-		psf.getParameterBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
+		psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
 		results.setPSF(psf.build());
 		MemoryPeakResults.addResults(results);
 

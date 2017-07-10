@@ -11,9 +11,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.ij.Utils;
-import gdsc.smlm.data.config.FitConfig.DataFilterMethod;
-import gdsc.smlm.data.config.FitConfig.DataFilterType;
-import gdsc.smlm.data.config.TemplateConfig.TemplateSettings;
+import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
+import gdsc.smlm.data.config.FitProtos.DataFilterType;
+import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.ij.plugins.ConfigurationTemplate.TemplateResource;

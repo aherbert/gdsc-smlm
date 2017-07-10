@@ -9,7 +9,7 @@ import java.awt.TextField;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
-import gdsc.smlm.data.config.GUIConfig.PSFCalculatorSettings;
+import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 

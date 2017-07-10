@@ -19,8 +19,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
-import gdsc.smlm.data.config.PSFConfig.PSF;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.PSFProtos.PSF;
 
 /**
  * Wrapper class to output to multiple results destinations

@@ -2,10 +2,10 @@ package gdsc.smlm.data.config;
 
 import java.util.List;
 
-import gdsc.smlm.data.config.PSFConfig.PSF;
-import gdsc.smlm.data.config.PSFConfig.PSFOrBuilder;
-import gdsc.smlm.data.config.PSFConfig.PSFParameter;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFOrBuilder;
+import gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 
@@ -157,9 +157,9 @@ public class PSFHelper
 
 	private static double getParameterValue(PSFOrBuilder psf, int i, double defaultValue)
 	{
-		if (psf.getParameterCount() > i)
+		if (psf.getParametersCount() > i)
 		{
-			double v = psf.getParameter(i).getValue();
+			double v = psf.getParameters(i).getValue();
 			if (v > 0)
 				return v;
 		}
@@ -207,18 +207,18 @@ public class PSFHelper
 		if (psf == null)
 			throw new ConfigurationException("psf is null");
 
-		List<PSFParameter> list = psf.getParameterList();
+		List<PSFParameter> list = psf.getParametersList();
 		switch (psf.getPsfType())
 		{
 			case ONE_AXIS_GAUSSIAN_2D:
-				return checkParameters(PSFConfigHelper.defaultOneAxisGaussian2DPSF.getParameterList(), list);
+				return checkParameters(PSFProtosHelper.defaultOneAxisGaussian2DPSF.getParametersList(), list);
 
 			case ASTIGMATIC_GAUSSIAN_2D:
 			case TWO_AXIS_GAUSSIAN_2D:
-				return checkParameters(PSFConfigHelper.defaultTwoAxisGaussian2DPSF.getParameterList(), list);
+				return checkParameters(PSFProtosHelper.defaultTwoAxisGaussian2DPSF.getParametersList(), list);
 
 			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
-				return checkParameters(PSFConfigHelper.defaultTwoAxisAndThetaGaussian2DPSF.getParameterList(), list);
+				return checkParameters(PSFProtosHelper.defaultTwoAxisAndThetaGaussian2DPSF.getParametersList(), list);
 
 			case UNRECOGNIZED:
 				throw new ConfigurationException("psf is not recognised");
@@ -262,7 +262,7 @@ public class PSFHelper
 
 			case CUSTOM:
 			default:
-				return psf.getParameterCount();
+				return psf.getParametersCount();
 		}
 	}
 

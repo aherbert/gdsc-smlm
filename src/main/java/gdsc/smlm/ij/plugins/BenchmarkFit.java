@@ -18,8 +18,8 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
-import gdsc.smlm.data.config.PSFConfigHelper;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
+import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitStatus;
@@ -556,7 +556,7 @@ public class BenchmarkFit implements PlugIn
 		gd.addCheckbox("Include_CoM_fit", comFitting);
 		gd.addCheckbox("Background_fitting", backgroundFitting);
 		gd.addMessage("Signal fitting can be disabled for " + 
-				PSFConfigHelper.getName(PSFType.ONE_AXIS_GAUSSIAN_2D) + " function");
+				PSFProtosHelper.getName(PSFType.ONE_AXIS_GAUSSIAN_2D) + " function");
 		gd.addCheckbox("Signal_fitting", signalFitting);
 		gd.addCheckbox("Show_histograms", showHistograms);
 		gd.addCheckbox("Save_raw_data", saveRawData);
@@ -1003,7 +1003,7 @@ public class BenchmarkFit implements PlugIn
 		sb.append(region.width).append("x");
 		sb.append(region.height).append('\t');
 		sb.append(Utils.rounded(fitConfig.getInitialPeakStdDev() * benchmarkParameters.a)).append('\t');
-		sb.append(PSFConfigHelper.getName(fitConfig.getPSF().getPsfType()));
+		sb.append(PSFProtosHelper.getName(fitConfig.getPSF().getPsfType()));
 		if (fitConfig.isFixedPSF())
 		{
 			// Only fixed fitting can ignore the signal

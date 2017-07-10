@@ -5,21 +5,21 @@ import gdsc.core.logging.Logger;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
-import gdsc.smlm.data.config.CalibrationConfig.Calibration;
-import gdsc.smlm.data.config.CalibrationConfigHelper;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.FitConfig.FilterSettings;
-import gdsc.smlm.data.config.FitConfig.FitSettings;
-import gdsc.smlm.data.config.FitConfig.FitSolver;
-import gdsc.smlm.data.config.FitConfig.FitSolverSettings;
-import gdsc.smlm.data.config.FitConfig.FitSolverSettingsOrBuilder;
-import gdsc.smlm.data.config.FitConfig.SearchMethod;
-import gdsc.smlm.data.config.FitConfigHelper;
-import gdsc.smlm.data.config.PSFConfig.PSF;
-import gdsc.smlm.data.config.PSFConfig.PSFParameter;
-import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
-import gdsc.smlm.data.config.PSFConfigHelper;
+import gdsc.smlm.data.config.FitProtos.FilterSettings;
+import gdsc.smlm.data.config.FitProtos.FitSettings;
+import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.FitProtos.FitSolverSettings;
+import gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder;
+import gdsc.smlm.data.config.FitProtos.SearchMethod;
+import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
+import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
@@ -172,8 +172,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public FitConfiguration()
 	{
-		this(FitConfigHelper.defaultFitSettings, CalibrationConfigHelper.defaultCalibration,
-				PSFConfigHelper.defaultOneAxisGaussian2DPSF);
+		this(FitProtosHelper.defaultFitSettings, CalibrationProtosHelper.defaultCalibration,
+				PSFProtosHelper.defaultOneAxisGaussian2DPSF);
 	}
 
 	/**
@@ -452,30 +452,30 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 		isTwoAxisGaussian2D = PSFHelper.isTwoAxisGaussian2D(psfType);
 
-		while (psf.getParameterCount() > nParams)
-			psf.removeParameter(psf.getParameterCount() - 1);
+		while (psf.getParametersCount() > nParams)
+			psf.removeParameters(psf.getParametersCount() - 1);
 
 		// Ensure we have enough parameters
-		if (psf.getParameterCount() == 0)
+		if (psf.getParametersCount() == 0)
 		{
 			// Create a dummy Sx
-			PSFParameter.Builder p = psf.addParameterBuilder(PSFHelper.INDEX_SX);
+			PSFParameter.Builder p = psf.addParametersBuilder(PSFHelper.INDEX_SX);
 			p.setName("Sx");
 			p.setValue(1);
 			p.setUnit(PSFParameterUnit.DISTANCE);
 		}
-		if (psf.getParameterCount() == 1 && nParams > 1)
+		if (psf.getParametersCount() == 1 && nParams > 1)
 		{
 			// Duplicate the Sx to Sy
-			PSFParameter.Builder p = psf.addParameterBuilder(PSFHelper.INDEX_SY);
+			PSFParameter.Builder p = psf.addParametersBuilder(PSFHelper.INDEX_SY);
 			p.setName("Sy");
-			p.setValue(psf.getParameter(PSFHelper.INDEX_SX).getValue());
+			p.setValue(psf.getParameters(PSFHelper.INDEX_SX).getValue());
 			p.setUnit(PSFParameterUnit.DISTANCE);
 		}
-		if (psf.getParameterCount() == 2 && nParams > 2)
+		if (psf.getParametersCount() == 2 && nParams > 2)
 		{
 			// Create a dummy angle
-			PSFParameter.Builder p = psf.addParameterBuilder(PSFHelper.INDEX_THETA);
+			PSFParameter.Builder p = psf.addParametersBuilder(PSFHelper.INDEX_THETA);
 			p.setName("Angle");
 			p.setUnit(PSFParameterUnit.ANGLE);
 		}
@@ -728,7 +728,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// Provide backward compatibility
 		if (psf.getPsfType() != PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D)
 			throw new IllegalStateException("Not a 2 axis and theta Gaussian 2D PSF");
-		psf.getParameterBuilder(PSFHelper.INDEX_THETA).setValue(initialAngle);
+		psf.getParametersBuilder(PSFHelper.INDEX_THETA).setValue(initialAngle);
 	}
 
 	/**
@@ -739,7 +739,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// Provide backward compatibility
 		if (psf.getPsfType() != PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D)
 			throw new IllegalStateException("Not a 2 axis and theta Gaussian 2D PSF");
-		return psf.getParameter(PSFHelper.INDEX_THETA).getValue();
+		return psf.getParameters(PSFHelper.INDEX_THETA).getValue();
 	}
 
 	/**
@@ -770,9 +770,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setInitialPeakStdDev(double initialPeakStdDev)
 	{
-		psf.getParameterBuilder(PSFHelper.INDEX_SX).setValue(initialPeakStdDev);
+		psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(initialPeakStdDev);
 		if (isTwoAxisGaussian2D)
-			psf.getParameterBuilder(PSFHelper.INDEX_SY).setValue(initialPeakStdDev);
+			psf.getParametersBuilder(PSFHelper.INDEX_SY).setValue(initialPeakStdDev);
 		updateCoordinateShift();
 	}
 
@@ -786,7 +786,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setInitialPeakStdDev0(double initialPeakStdDev0)
 	{
-		psf.getParameterBuilder(PSFHelper.INDEX_SX).setValue(initialPeakStdDev0);
+		psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(initialPeakStdDev0);
 		updateCoordinateShift();
 	}
 
@@ -805,7 +805,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public double getInitialXSD()
 	{
-		return psf.getParameter(PSFHelper.INDEX_SX).getValue();
+		return psf.getParameters(PSFHelper.INDEX_SX).getValue();
 	}
 
 	/**
@@ -820,7 +820,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		if (!isTwoAxisGaussian2D)
 			throw new IllegalStateException("Not a 2 axis Gaussian 2D PSF");
-		psf.getParameterBuilder(PSFHelper.INDEX_SY).setValue(initialPeakStdDev1);
+		psf.getParametersBuilder(PSFHelper.INDEX_SY).setValue(initialPeakStdDev1);
 		updateCoordinateShift();
 	}
 
@@ -830,7 +830,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public double getInitialYSD()
 	{
 		if (isTwoAxisGaussian2D)
-			return psf.getParameter(PSFHelper.INDEX_SY).getValue();
+			return psf.getParameters(PSFHelper.INDEX_SY).getValue();
 		return getInitialXSD();
 	}
 
@@ -2583,7 +2583,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod convertSearchMethod()
 	{
-		return FitConfigHelper.convertSearchMethod(getSearchMethod());
+		return FitProtosHelper.convertSearchMethod(getSearchMethod());
 	}
 
 	private void checkCalibration()

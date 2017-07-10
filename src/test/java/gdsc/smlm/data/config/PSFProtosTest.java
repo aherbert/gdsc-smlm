@@ -9,35 +9,35 @@ import com.google.protobuf.TextFormat.ParseException;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
-import gdsc.smlm.data.config.PSFConfig.PSFParameter;
-import gdsc.smlm.data.config.PSFConfig.PSFParameterUnit;
-import gdsc.smlm.data.config.PSFConfig.PSFType;
+import gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.utils.JSONUtils;
 
-public class PSFConfigTest
+public class PSFProtosTest
 {
 	@Test
 	public void canWriteAndReadString() throws ParseException, InvalidProtocolBufferException
 	{
-		PSFConfig.PSF.Builder psfBuilder = PSFConfig.PSF.newBuilder();
-		PSFParameter.Builder psfParamBuilder = PSFConfig.PSFParameter.newBuilder();
+		PSFProtos.PSF.Builder psfBuilder = PSFProtos.PSF.newBuilder();
+		PSFParameter.Builder psfParamBuilder = PSFProtos.PSFParameter.newBuilder();
 		psfBuilder.setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
 		psfParamBuilder.setName("X\"SD");
 		psfParamBuilder.setUnit(PSFParameterUnit.DISTANCE);
 		psfParamBuilder.setValue(1.1);
-		psfBuilder.addParameter(psfParamBuilder);
+		psfBuilder.addParameters(psfParamBuilder);
 		psfParamBuilder.setName("Y SD");
 		psfParamBuilder.setUnit(PSFParameterUnit.DISTANCE);
 		psfParamBuilder.setValue(1.2);
-		psfBuilder.addParameter(psfParamBuilder);
+		psfBuilder.addParameters(psfParamBuilder);
 		psfParamBuilder.setName("'Angle");
 		psfParamBuilder.setUnit(PSFParameterUnit.ANGLE);
 		psfParamBuilder.clearValue();
-		psfBuilder.addParameter(psfParamBuilder);
+		psfBuilder.addParameters(psfParamBuilder);
 
 		// Standard string
 		String e = psfBuilder.toString();
-		PSFConfig.PSF psf = psfBuilder.build();
+		PSFProtos.PSF psf = psfBuilder.build();
 		String o = psf.toString();
 		System.out.printf(o);
 		Assert.assertEquals(e, o);

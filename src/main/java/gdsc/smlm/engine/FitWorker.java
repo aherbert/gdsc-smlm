@@ -15,8 +15,8 @@ import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationReader;
-import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
-import gdsc.smlm.data.config.FitConfigHelper;
+import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtosHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -3182,7 +3182,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private float estimateNoise(int width, int height)
 	{
 		createDataEstimator();
-		return estimateNoise(dataEstimator, FitConfigHelper.convertNoiseEstimatorMethod(config.getNoiseMethod()));
+		return estimateNoise(dataEstimator, FitProtosHelper.convertNoiseEstimatorMethod(config.getNoiseMethod()));
 	}
 
 	/**
@@ -3202,7 +3202,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		// Do the same logic as the non-static method 
 		DataEstimator dataEstimator = newDataEstimator(data, width, height);
-		return estimateNoise(dataEstimator, FitConfigHelper.convertNoiseEstimatorMethod(method));
+		return estimateNoise(dataEstimator, FitProtosHelper.convertNoiseEstimatorMethod(method));
 	}
 
 	private static float estimateNoise(DataEstimator dataEstimator, NoiseEstimator.Method method)

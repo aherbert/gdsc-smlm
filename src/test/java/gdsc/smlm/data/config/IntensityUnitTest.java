@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.smlm.data.config.UnitConfig.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 @SuppressWarnings("unchecked")
 public class IntensityUnitTest

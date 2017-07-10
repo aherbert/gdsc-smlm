@@ -2,8 +2,8 @@ package gdsc.smlm.ij.settings;
 
 import java.util.HashMap;
 
-import gdsc.smlm.data.config.PSFConfig.ImagePSF;
-import gdsc.smlm.data.config.PSFConfig.ImagePSFOrBuilder;
+import gdsc.smlm.data.config.PSFProtos.ImagePSF;
+import gdsc.smlm.data.config.PSFProtos.ImagePSFOrBuilder;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

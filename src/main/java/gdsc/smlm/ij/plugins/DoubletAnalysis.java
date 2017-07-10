@@ -49,9 +49,9 @@ import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.FitConfig.NoiseEstimatorMethod;
-import gdsc.smlm.data.config.PSFConfigHelper;
-import gdsc.smlm.data.config.TemplateConfig.TemplateSettings;
+import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitWorker;
@@ -2044,7 +2044,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append(Utils.rounded(density)).append('\t');
 		sb.append(Utils.rounded(getSa())).append('\t');
 		sb.append(config.getRelativeFitting()).append('\t');
-		sb.append(PSFConfigHelper.getName(fitConfig.getPSFType()));
+		sb.append(PSFProtosHelper.getName(fitConfig.getPSFType()));
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
 		if (fitConfig.isModelCameraMLE())
 		{
@@ -2092,7 +2092,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append(Utils.rounded(noise)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.signalPerFrame / noise)).append('\t');
 		sb.append(config.getRelativeFitting()).append('\t');
-		sb.append(PSFConfigHelper.getName(fitConfig.getPSFType()));
+		sb.append(PSFProtosHelper.getName(fitConfig.getPSFType()));
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
 		if (fitConfig.isModelCameraMLE())
 		{
