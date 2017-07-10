@@ -44,8 +44,8 @@ import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
 
+import com.google.protobuf.TextFormat;
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.clustering.DensityManager;
 import gdsc.core.data.DataException;
@@ -63,21 +63,23 @@ import gdsc.smlm.data.config.CreateDataSettingsHelper;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
+import gdsc.smlm.data.config.MoleculeProtos.Atom;
+import gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder;
+import gdsc.smlm.data.config.MoleculeProtos.Mixture;
+import gdsc.smlm.data.config.MoleculeProtos.Molecule;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.Offset;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
-import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
-import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;
-import gdsc.smlm.ij.settings.Atom;
-import gdsc.smlm.ij.settings.Compound;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.ActivationEnergyImageModel;
@@ -243,7 +245,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	// Used by the ImageGenerator to show progress when the thread starts
 	private int frame, maxT, totalFrames;
 
-	private XStream xs = null;
 	private boolean simpleMode = false;
 	private boolean benchmarkMode = false;
 	private boolean spotMode = false;
@@ -4400,7 +4401,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isPositive("Min photons", settings.getMinPhotons());
 			Parameters.isPositive("Min SNR t1", settings.getMinSnrT1());
 			Parameters.isPositive("Min SNR tN", settings.getMinSnrTN());
-			Parameters.isAbove("Histogram bins", settings.getHistogramBins(), 1);
+			Parameters.isPositive("Histogram bins", settings.getHistogramBins());
 			Parameters.isPositive("Density radius", settings.getDensityRadius());
 		}
 		catch (IllegalArgumentException e)
@@ -4682,71 +4683,79 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		comment(TITLE + " example compounds");
 		IJ.log("");
-		comment("Compounds are described using XML");
-		comment("Multiple compounds can be combined using fractional ratios");
-		comment("Coordinates are specified in nanometres");
-		comment("Coordinates describe the relative positions of molecules in the compound. Compounds will have a randomly assigned XYZ position for their centre-of-mass. Rotation will be about the centre of mass");
+		comment("Compounds are described using parseable text.");
+		comment("Missing fields are initialised to the default (0).");
+		comment("Multiple compounds can be combined using fractional ratios.");
+		comment("Coordinates are specified in nanometres.");
+		comment("Coordinates describe the relative positions of atoms in the molecule; the molcule will have a randomly assigned XYZ position for its centre-of-mass. Rotation will be about the centre-of-mass.");
 		IJ.log("");
 
-		Atom a1 = new Atom(10, 0, 0, 0);
-		Atom a2 = new Atom(30, 0, 0, 0);
-		Atom a3 = new Atom(20, 1000, 0, 0);
-		Compound m1 = new Compound(1, 0, DiffusionType.RANDOM_WALK.toString(), a1);
-		Compound m2 = new Compound(1, 1, DiffusionType.GRID_WALK.toString(), a2, a3);
+		Molecule.Builder mb = Molecule.newBuilder();
+		addAtom(mb, 10, 1, 1, 1);
+		mb.setDiffusionRate(0.5);
+		mb.setDiffusionType(DiffusionType.RANDOM_WALK.toString());
+		Molecule m1 = mb.build();
+
+		mb.clear();
+		addAtom(mb, 30, 0, 0, 0);
+		addAtom(mb, 20, 1000, 0, 0);
+		mb.setDiffusionRate(1);
+		mb.setDiffusionType(DiffusionType.GRID_WALK.toString());
+		Molecule m2 = mb.build();
 
 		// Create a hexamer big enough to see with the default pixel pitch
-		Atom b1 = new Atom(1, 0, 0, 0);
-		Atom b2 = new Atom(1, 1000, 0, 0);
-		Atom b3 = new Atom(1, 1500, 866, 0);
-		Atom b4 = new Atom(1, 1000, 1732, 0);
-		Atom b5 = new Atom(1, 0, 1732, 0);
-		Atom b6 = new Atom(1, -500, 866, 0);
-		Compound m3 = new Compound(1, 2, DiffusionType.RANDOM_WALK.toString(), b1, b2, b3, b4, b5, b6);
+		mb.clear();
+		addAtom(mb, 1, 0, 0, 0);
+		addAtom(mb, 1, 1000, 0, 0);
+		addAtom(mb, 1, 1500, 866, 0);
+		addAtom(mb, 1, 1000, 1732, 0);
+		addAtom(mb, 1, 0, 1732, 0);
+		addAtom(mb, 1, -500, 866, 0);
+		Molecule m3 = mb.build();
 
-		comment("Single compounds");
+		comment("Single molecules");
 		IJ.log("");
-		comment("Monomer");
+		comment("Moving Monomer");
 		demo(m1);
-		comment("Dimer");
+		comment("Moving Dimer");
 		demo(m2);
-		comment("Hexamer");
+		comment("Fixed Hexamer");
 		demo(m3);
 
-		comment("Combined compounds");
+		comment("Mixtures of molecules");
 		IJ.log("");
-		comment("Two compounds with a ratio of 2:1");
-		m1.fraction = 2;
+		comment("Two molecules with a ratio of 2:1");
+		m1 = m1.toBuilder().setFraction(2).build();
+		m2 = m2.toBuilder().setFraction(1).build();
 		demo(m1, m2);
 	}
 
-	private void demo(Compound... compounds)
+	private void addAtom(Molecule.Builder mb, double mass, double x, double y, double z)
 	{
-		List<Compound> list = new LinkedList<Compound>();
-		for (Compound c : compounds)
-			list.add(c);
-
-		IJ.log(createXStream().toXML(list));
-		IJ.log("");
+		Atom.Builder ab = mb.addAtomBuilder();
+		ab.setMass(mass);
+		ab.setX(x);
+		ab.setY(y);
+		ab.setZ(z);
 	}
 
-	private XStream createXStream()
+	private void demo(Molecule... molecules)
 	{
-		if (xs == null)
-		{
-			xs = new XStream(new DomDriver());
-			xs.autodetectAnnotations(true);
-			xs.alias("Compound", Compound.class);
-			xs.alias("Atom", Atom.class);
-		}
-		return xs;
+		Mixture.Builder builder = Mixture.newBuilder();
+		for (Molecule m : molecules)
+			builder.addMolecule(m);
+
+		// The toString() method is more verbose than JSON but easier to read
+		IJ.log(builder.toString()
+		);
+		IJ.log("");
 	}
 
 	private void comment(String text)
 	{
-		IJ.log(TextUtils.wrap("<!-- " + text + " -->", 80));
+		IJ.log(TextUtils.wrap("# " + text, 80, "\n# ", false));
 	}
 
-	@SuppressWarnings("unchecked")
 	private List<CompoundMoleculeModel> createCompoundMolecules()
 	{
 		// Diffusion rate is um^2/sec. Convert to pixels per simulation frame.
@@ -4759,26 +4768,26 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Try and load the compounds from the XML specification
 			try
 			{
-				Object fromXML = createXStream().fromXML(settings.getCompoundText());
-				List<Compound> rawCompounds = (List<Compound>) fromXML;
+				// Convert from the serialised objects to the compound model
+				String text = settings.getCompoundText();
+				Mixture.Builder builder = Mixture.newBuilder();
+				TextFormat.merge(text, builder);
 
-				// Convert from the XML serialised objects to the compound model
-
-				compounds = new ArrayList<CompoundMoleculeModel>(rawCompounds.size());
+				compounds = new ArrayList<CompoundMoleculeModel>(builder.getMoleculeCount());
 				int id = 1;
-				for (Compound c : rawCompounds)
+				for (Molecule m : builder.getMoleculeList())
 				{
-					MoleculeModel[] molecules = new MoleculeModel[c.atoms.length];
-					for (int i = 0; i < c.atoms.length; i++)
+					MoleculeModel[] molecules = new MoleculeModel[m.getAtomCount()];
+					for (int i = 0; i < molecules.length; i++)
 					{
-						Atom a = c.atoms[i];
-						molecules[i] = new MoleculeModel(a.mass, a.x, a.y, a.z);
+						AtomOrBuilder a = m.getAtomOrBuilder(i);
+						molecules[i] = new MoleculeModel(a.getMass(), a.getX(), a.getY(), a.getZ());
 					}
-					CompoundMoleculeModel m = new CompoundMoleculeModel(id++, 0, 0, 0, Arrays.asList(molecules));
-					m.setFraction(c.fraction);
-					m.setDiffusionRate(c.D * diffusionFactor);
-					m.setDiffusionType(DiffusionType.fromString(c.diffusionType));
-					compounds.add(m);
+					CompoundMoleculeModel cm = new CompoundMoleculeModel(id++, 0, 0, 0, Arrays.asList(molecules));
+					cm.setFraction(cm.getFraction());
+					cm.setDiffusionRate(cm.getDiffusionRate() * diffusionFactor);
+					cm.setDiffusionType(DiffusionType.fromString(m.getDiffusionType()));
+					compounds.add(cm);
 				}
 
 				// Convert coordinates from nm to pixels
@@ -4788,7 +4797,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					c.scale(scaleFactor);
 				}
 			}
-			catch (Exception e)
+			catch (IOException e)
 			{
 				IJ.error(TITLE, "Unable to create compound molecules");
 				return null;
