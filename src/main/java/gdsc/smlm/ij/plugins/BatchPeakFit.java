@@ -30,12 +30,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.FitProtos.FitSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.engine.FitConfiguration;
@@ -70,7 +73,7 @@ import ij.plugin.PlugIn;
  * the fitting parameters. The Peak Fit plugin is then run for each combination of parameters and the results of each
  * run saved to file.
  * 
- * @deprecated This should be updated to use JSON and methods from the Google Proto Buffers library 
+ * @deprecated This should be updated to use JSON and methods from the Google Proto Buffers library
  */
 @Deprecated
 public class BatchPeakFit implements PlugIn
@@ -184,6 +187,16 @@ public class BatchPeakFit implements PlugIn
 	private void setParameters(ArrayList<ParameterSettings> parameters, int i, Document doc,
 			ArrayList<String> xmlSettings)
 	{
+		// For all the fields within Calibration, PSF, FitEngineSettings
+		// print out the field name and default value. The FitEngineSettings has to
+		// extract the FitSettings separately.
+		// The user can then set any field to a list of comma-separated values and the 
+		// plugin will produce a functional fit configuration for each combination. 
+		//FitSettings  s = FitSettings.getDefaultInstance();
+		//Descriptor d = s.getDescriptorForType();
+		//FieldDescriptor fd = d.findFieldByNumber(0);
+		//fd.
+
 		if (i < parameters.size())
 		{
 			ParameterSettings param = parameters.get(i);
