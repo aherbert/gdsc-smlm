@@ -238,7 +238,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			{
 				public void executeXYR(float x, float y, PeakResult r)
 				{
-					if (r.getFrame() != currentSlice)
+					if (r.getFrame() == currentSlice)
 					{
 						ox.add(x);
 						oy.add(y);
