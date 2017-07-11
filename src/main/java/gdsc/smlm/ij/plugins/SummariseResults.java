@@ -89,7 +89,7 @@ public class SummariseResults implements PlugIn
 		{
 			StringBuilder sb = new StringBuilder("Dataset\tN\tFrames\tTime\tMemory\tBounds");
 			// Calibration
-			sb.append("\tnm/pixel\tGain\tms/frame\tCamera\tDUnit\tIUnit");
+			sb.append("\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit");
 			for (String statName : new String[] { "Precision (nm)", "SNR" })
 			{
 				sb.append("\tAv ").append(statName);
@@ -210,16 +210,29 @@ public class SummariseResults implements PlugIn
 		{
 			//@formatter:off
 			sb.append('\t').append(calibration.hasNmPerPixel() ? Utils.rounded(calibration.getNmPerPixel()) : '-');
-			sb.append('\t').append(calibration.hasGain() ? Utils.rounded(calibration.getGain()) : '-');
 			sb.append('\t').append(calibration.hasExposureTime() ? Utils.rounded(calibration.getExposureTime()) : '-');
-			sb.append('\t').append(calibration.hasCameraType() ? CalibrationProtosHelper.getName(calibration.getCameraType()) : '-');
+			
+			if (calibration.hasCameraType())
+			{
+				sb.append('\t').append(CalibrationProtosHelper.getName(calibration.getCameraType()));
+				if (calibration.isCCDCamera())
+				{
+					sb.append(" bias=").append(calibration.getBias());
+					sb.append(" gain=").append(calibration.getGain());
+				}
+			}
+			else
+			{
+				sb.append("\t-");
+			}
+			
 			sb.append('\t').append(calibration.hasDistanceUnit() ? UnitHelper.getShortName(calibration.getDistanceUnit()) : '-');
 			sb.append('\t').append(calibration.hasIntensityUnit() ? UnitHelper.getShortName(calibration.getIntensityUnit()) : '-');
 			//@formatter:on
 		}
 		else
 		{
-			sb.append("\t\t\t\t\t\t");
+			sb.append("\t\t\t\t\t");
 		}
 		for (int i = 0; i < stats.length; i++)
 		{
