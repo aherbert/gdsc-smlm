@@ -582,25 +582,25 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public FitConfiguration clone()
 	{
 		return new FitConfiguration(getFitSettings(), getCalibration(), getPSF());
-		
-//		// This is not a complete duplicate. The settings builder objects with the 
-//		// underlying configuration will be the same between all instances. 
-//		try
-//		{
-//			FitConfiguration f = (FitConfiguration) super.clone();
-//			// Reset instance specific objects
-//			f.toleranceChecker = null;
-//			f.gaussianFunction = null;
-//			f.functionSolver = null;
-//			f.setValidationResult(null, null);
-//			f.dynamicPeakResult = new DynamicPeakResult();
-//			return f;
-//		}
-//		catch (CloneNotSupportedException e)
-//		{
-//			// Ignore
-//		}
-//		return null;
+
+		//		// This is not a complete duplicate. The settings builder objects with the 
+		//		// underlying configuration will be the same between all instances. 
+		//		try
+		//		{
+		//			FitConfiguration f = (FitConfiguration) super.clone();
+		//			// Reset instance specific objects
+		//			f.toleranceChecker = null;
+		//			f.gaussianFunction = null;
+		//			f.functionSolver = null;
+		//			f.setValidationResult(null, null);
+		//			f.dynamicPeakResult = new DynamicPeakResult();
+		//			return f;
+		//		}
+		//		catch (CloneNotSupportedException e)
+		//		{
+		//			// Ignore
+		//		}
+		//		return null;
 	}
 
 	/**
@@ -617,6 +617,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void initialise(int npeaks, int maxx, int maxy, double[] params)
 	{
+		{
+			// XXX: For debugging thread safety require new objects for each fit
+			invalidateGaussianFunction();
+			invalidateToleranceChecker();
+		}
+
 		// Check if the Gaussian function is invalid
 		if (gaussianFunction != null && (gaussianFunction.getNPeaks() != npeaks || gaussianFunction.getMaxX() != maxx ||
 				gaussianFunction.getMaxY() != maxy))
