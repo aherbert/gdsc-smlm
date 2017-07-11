@@ -1,6 +1,7 @@
 package gdsc.smlm.engine;
 
 import java.awt.Rectangle;
+import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
@@ -40,6 +41,7 @@ import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.FunctionSolverType;
+import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.fitting.LSEFunctionSolver;
 import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.fitting.WLSEFunctionSolver;
@@ -103,7 +105,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	private PeakResults results;
 	private BlockingQueue<FitJob> jobs;
-	private FastGaussian2DFitter gf;
+	private Gaussian2DFitter gf;
 
 	// Used for fitting methods
 	private TurboList<PeakResult> sliceResults;
@@ -308,6 +310,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		this.jobs = jobs;
 		this.logger = fitConfig.getLog();
 		gf = new FastGaussian2DFitter(fitConfig);
+		//gf = new Gaussian2DFitter(fitConfig);
 		//duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		// Used for duplicate checking
 		coordinateStore = CoordinateStoreFactory.create(0, 0, config.getDuplicateDistance());
@@ -379,7 +382,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		borderLimitX = width - border;
 		borderLimitY = height - border;
 		data = job.data;
-
+		dataEstimator = null; // This is tied to the input data 
+		
 		FitParameters params = job.getFitParameters();
 		this.endT = (params != null) ? params.endT : -1;
 
@@ -532,13 +536,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Debug where the fit config may be different between benchmarking and fitting
 			if (slice == -1)
 			{
-				SettingsManager.writeMessage(config.getFitEngineSettings(),
-						String.format("/tmp/config.%b.xml", benchmarking), 0);
-				Utils.write(String.format("/tmp/filter.%b.xml", benchmarking), filter.toXML());
+				fitConfig.initialise(1, 1, 1, null);
+
+				SettingsManager.toJSON(config.getFitEngineSettings(),
+						new File(String.format("/tmp/config.%d.txt", slice)), SettingsManager.FLAG_JSON_WHITESPACE);
+				Utils.write(String.format("/tmp/filter.%d.xml", slice), filter.toXML());
 				//filter.setDebugFile(String.format("/tmp/fitWorker.%b.txt", benchmarking));
 				StringBuilder sb = new StringBuilder();
 				sb.append((benchmarking) ? ((gdsc.smlm.results.filter.Filter) filter.getFilter()).toXML()
-						: fitConfig.getSmartFilter().toXML()).append("\n");
+						: fitConfig.getSmartFilterString()).append("\n");
 				sb.append(((gdsc.smlm.results.filter.Filter) filter.getMinimalFilter()).toXML()).append("\n");
 				sb.append(filter.residualsThreshold).append("\n");
 				sb.append(config.getFailuresLimit()).append("\n");
@@ -551,7 +557,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					sb.append(String.format("Fit %d [%d,%d = %.1f]\n", i, candidates.get(i).x, candidates.get(i).y,
 							candidates.get(i).intensity));
 				}
-				Utils.write(String.format("/tmp/candidates.%b.xml", benchmarking), sb.toString());
+				Utils.write(String.format("/tmp/candidates.%d.xml", slice), sb.toString());
 			}
 
 			filter.select(multiPathResults, config.getFailuresLimit(), true, store, coordinateStore);
@@ -958,7 +964,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	private class CandidateSpotFitter
 	{
-		final FastGaussian2DFitter gf;
+		final Gaussian2DFitter gf;
 		final ResultFactory resultFactory;
 		final double[] region, region2;
 		final Rectangle regionBounds;
@@ -985,8 +991,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean computedDoublet = false;
 		QuadrantAnalysis singleQA = null;
 
-		public CandidateSpotFitter(FastGaussian2DFitter gf, ResultFactory resultFactory, double[] region,
-				double[] region2, Rectangle regionBounds, int n)
+		public CandidateSpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
+				Rectangle regionBounds, int n)
 		{
 			this.gf = gf;
 			this.resultFactory = resultFactory;
@@ -1865,8 +1871,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			//					break;
 			//				}
 
-			resultMultiDoublet = fitAsDoublet(fitResult, region, regionBounds, residualsThreshold, neighbours,
-					peakNeighbours2, multiQA, singleValue);
+			resultMultiDoublet = fitAsDoublet(fitResult, region, residualsThreshold, neighbours, peakNeighbours2,
+					multiQA, singleValue);
 
 			//			if (resultMultiDoublet != null && resultMultiDoublet.status == FitStatus.BAD_PARAMETERS.ordinal())
 			//			{
@@ -2353,8 +2359,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Use the region from the single fit which had fitted peaks subtracted
 			final double[] region = singleRegion;
 
-			resultDoublet = fitAsDoublet((FitResult) resultSingle.data, region, regionBounds, residualsThreshold,
-					neighbours, peakNeighbours, singleQA, singleValue);
+			resultDoublet = fitAsDoublet((FitResult) resultSingle.data, region, residualsThreshold, neighbours,
+					peakNeighbours, singleQA, singleValue);
 
 			return resultDoublet;
 		}
@@ -2408,8 +2414,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		 *            the fit result
 		 * @param region
 		 *            the region
-		 * @param regionBounds
-		 *            the region bounds
 		 * @param residualsThreshold
 		 *            the residuals threshold
 		 * @param neighbours
@@ -2422,12 +2426,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		 *            the objective function value from fitting a single peak
 		 * @return the multi path fit result. fit result
 		 */
-		private MultiPathFitResult.FitResult fitAsDoublet(FitResult fitResult, double[] region, Rectangle regionBounds,
+		private MultiPathFitResult.FitResult fitAsDoublet(FitResult fitResult, double[] region,
 				double residualsThreshold, CandidateList neighbours, CandidateList peakNeighbours, QuadrantAnalysis qa,
 				double singleValue)
 		{
-			final int width = regionBounds.width;
-			final int height = regionBounds.height;
 			final double[] params = fitResult.getParameters();
 			// Use rounding since the fit coords are not yet offset by 0.5 pixel to centre them
 			final int cx = (int) Math.round(params[Gaussian2DFunction.X_POSITION]);
