@@ -32,9 +32,8 @@ public class Configuration implements PlugIn, ItemListener
 	private boolean configurationChanged = false;
 
 	// All the fields that will be updated when reloading the configuration file
+	private Choice textCameraType;
 	private TextField textNmPerPixel;
-	private TextField textGain;
-	private Checkbox textEMCCD;
 	private TextField textExposure;
 	private Choice textPSF;
 	private Choice textDataFilterType;
@@ -86,9 +85,8 @@ public class Configuration implements PlugIn, ItemListener
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 
+		PeakFit.addCameraOptions(gd, calibration);
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
-		gd.addNumericField("Gain", calibration.getGain(), 2);
-		gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 
 		gd.addMessage("--- Gaussian parameters ---");
@@ -140,9 +138,8 @@ public class Configuration implements PlugIn, ItemListener
 			int b = 0;
 			int ch = 0;
 
+			textCameraType = choices.get(n++);
 			textNmPerPixel = numerics.get(n++);
-			textGain = numerics.get(n++);
-			textEMCCD = checkboxes.get(b++);
 			textExposure = numerics.get(n++);
 			textPSF = choices.get(n++);
 			textDataFilterType = choices.get(ch++);
@@ -207,9 +204,8 @@ public class Configuration implements PlugIn, ItemListener
 		if (gd.wasCanceled())
 			return;
 
+		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		calibration.setNmPerPixel(gd.getNextNumber());
-		calibration.setGain(gd.getNextNumber());
-		calibration.setEmCCD(gd.getNextBoolean());
 		calibration.setExposureTime(gd.getNextNumber());
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		config.setDataFilterType(gd.getNextChoiceIndex());

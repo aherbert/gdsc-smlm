@@ -1012,6 +1012,44 @@ public class ResultsManager implements PlugIn
 	 *            Set to true to ensure the results have a valid calibration
 	 * @param distanceUnit
 	 *            the required distance unit for the results
+	 * @return the results
+	 */
+	public static MemoryPeakResults loadInputResults(String inputOption, boolean checkCalibration,
+			DistanceUnit distanceUnit)
+	{
+		return loadInputResults(inputOption, checkCalibration, distanceUnit, null);
+	}
+
+	/**
+	 * Load the results from the named input option. If the results are not empty then a check can be made for
+	 * calibration, and data using the specified units. If the calibration cannot be obtained or the units are incorrect
+	 * then the null will be returned.
+	 *
+	 * @param inputOption
+	 *            the input option
+	 * @param checkCalibration
+	 *            Set to true to ensure the results have a valid calibration
+	 * @param intensityUnit
+	 *            the required intensity unit for the results
+	 * @return the results
+	 */
+	public static MemoryPeakResults loadInputResults(String inputOption, boolean checkCalibration,
+			IntensityUnit intensityUnit)
+	{
+		return loadInputResults(inputOption, checkCalibration, null, intensityUnit);
+	}
+
+	/**
+	 * Load the results from the named input option. If the results are not empty then a check can be made for
+	 * calibration, and data using the specified units. If the calibration cannot be obtained or the units are incorrect
+	 * then the null will be returned.
+	 *
+	 * @param inputOption
+	 *            the input option
+	 * @param checkCalibration
+	 *            Set to true to ensure the results have a valid calibration
+	 * @param distanceUnit
+	 *            the required distance unit for the results
 	 * @param intensityUnit
 	 *            the required intensity unit for the results
 	 * @return the results
@@ -1066,12 +1104,12 @@ public class ResultsManager implements PlugIn
 			}
 			if (distanceUnit != null && results.getDistanceUnit() != distanceUnit)
 			{
-				Utils.log("Incorrect distance unit: "+ results.getDistanceUnit());
+				Utils.log("Incorrect distance unit: " + results.getDistanceUnit());
 				return null;
 			}
 			if (intensityUnit != null && results.getIntensityUnit() != intensityUnit)
 			{
-				Utils.log("Incorrect intensity unit: "+ results.getDistanceUnit());
+				Utils.log("Incorrect intensity unit: " + results.getDistanceUnit());
 				return null;
 			}
 		}

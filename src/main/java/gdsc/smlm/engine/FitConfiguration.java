@@ -367,6 +367,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private void updateCalibration()
 	{
+		// This uses the camera calibration
+		invalidateFunctionSolver();
+
 		nmPerPixel = calibration.getNmPerPixel();
 		gain = calibration.getGain();
 		emCCD = calibration.isEMCCD();
@@ -381,7 +384,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			signalToPhotons = 1;
 			signalToCount = gain;
 		}
-		
+
 		updateSignalThreshold();
 		updatePrecisionThreshold();
 	}
@@ -1204,7 +1207,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private void updatePrecisionThreshold()
 	{
 		// Store the squared threshold for speed
-		if (nmPerPixel > 0 && gain > 0 && calibration.isCCD())
+		if (nmPerPixel > 0 && gain > 0 && calibration.isCCDCamera())
 			this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
 		else
 			this.precisionThreshold = 0;
@@ -2470,6 +2473,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			gaussianFunction = createGaussianFunction(1, 1, 1, null);
 		}
 
+		// Only support CCD/EM-CCD at the moment
+		if (!calibration.isCCDCamera())
+		{
+			throw new IllegalArgumentException("CCD camera type is required for fit solver: " + getFitSolver());
+		}
+		
 		if (getFitSolver() == FitSolver.MLE)
 		{
 			// This requires the gain

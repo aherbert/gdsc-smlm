@@ -537,17 +537,17 @@ public class BenchmarkFit implements PlugIn
 				String.format("Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
 						Utils.rounded(benchmarkParameters.s / benchmarkParameters.a), Utils.rounded(sa)));
 
+		FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
+		fitConfig = config.getFitConfiguration();
+		fitConfig.setNmPerPixel(benchmarkParameters.a);
+
 		// For each new benchmark width, reset the PSF width to the square pixel adjustment
 		if (lastS != benchmarkParameters.s)
 		{
 			lastS = benchmarkParameters.s;
 			fitConfig.setInitialPeakStdDev(sa);
 		}
-
-		FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
-		fitConfig = config.getFitConfiguration();
-		fitConfig.setNmPerPixel(benchmarkParameters.a);
-
+		
 		gd.addSlider("Region_size", 2, 20, regionSize);
 		PeakFit.addPSFOptions(gd, fitConfig);
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());

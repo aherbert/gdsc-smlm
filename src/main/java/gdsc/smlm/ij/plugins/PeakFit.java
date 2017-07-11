@@ -34,6 +34,7 @@ import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
@@ -176,9 +177,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 			.toBuilder();
 
 	// All the fields that will be updated when reloading the configuration file
+	private Choice textCameraType;
 	private TextField textNmPerPixel;
-	private TextField textGain;
-	private Checkbox textEMCCD;
 	private TextField textExposure;
 	private Choice textPSF;
 	private Choice textDataFilterType;
@@ -261,7 +261,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (!showMaximaDialog())
 				return DONE;
 
-			MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+			MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
 			if (results == null || results.size() == 0)
 			{
 				IJ.error(TITLE, "No results could be loaded");
@@ -765,17 +765,27 @@ public class PeakFit implements PlugInFilter, ItemListener
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 
-		// TODO - change this to support camera type
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		addCameraOptions(gd, new CalibrationProvider()
+		{
+			public CalibrationWriter getCalibrationWriter()
+			{
+				return fitConfig.getCalibrationWriter();
+			}
+		});
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
-		gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
-		gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 
 		if (isCrop)
 			gd.addCheckbox("Ignore_bounds_for_noise", optionIgnoreBoundsForNoise);
 
-		addPSFOptions(gd, fitConfig);
+		addPSFOptions(gd, new FitConfigurationProvider()
+		{
+			public FitConfiguration getFitConfiguration()
+			{
+				return fitConfig;
+			}
+		});
 
 		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
 				config.getDataFilterType().ordinal());
@@ -896,9 +906,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 			Choice textTemplate = choices.get(ch++);
 			textTemplate.addItemListener(this);
 
+			textCameraType = choices.get(ch++);
 			textNmPerPixel = numerics.get(n++);
-			textGain = numerics.get(n++);
-			textEMCCD = checkboxes.get(b++);
 			textExposure = numerics.get(n++);
 			if (isCrop)
 				b++;
@@ -1052,19 +1061,151 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return plugin_flags;
 	}
 
-	public static void addPSFOptions(final ExtendedGenericDialog gd, final FitConfiguration fitConfig)
+	/**
+	 * Allow the latest calibration to be provided for update
+	 */
+	public interface CalibrationProvider
 	{
+		/**
+		 * Gets the calibration writer.
+		 *
+		 * @return the calibration writer
+		 */
+		public CalibrationWriter getCalibrationWriter();
+	}
+
+	/**
+	 * Adds the camera options.
+	 *
+	 * @param gd
+	 *            the gd
+	 * @param calibration
+	 *            the calibration
+	 */
+	public static void addCameraOptions(final ExtendedGenericDialog gd, final CalibrationWriter calibration)
+	{
+		addCameraOptions(gd, new CalibrationProvider()
+		{
+			public CalibrationWriter getCalibrationWriter()
+			{
+				return calibration;
+			}
+		});
+	}
+
+	/**
+	 * Adds the camera options.
+	 *
+	 * @param gd
+	 *            the gd
+	 * @param calibrationProvider
+	 *            the calibration provider
+	 */
+	public static void addCameraOptions(final ExtendedGenericDialog gd, final CalibrationProvider calibrationProvider)
+	{
+		CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
+
+		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
+				CalibrationProtosHelper.getName(calibration.getCameraType()), new OptionListener<Choice>()
+				{
+					public void collectOptions(Choice field)
+					{
+						CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
+						calibration.setCameraType(SettingsManager.getCameraTypeValues()[field.getSelectedIndex()]);
+						collectOptions();
+					}
+
+					public void collectOptions()
+					{
+						CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
+						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						if (calibration.isCCDCamera())
+						{
+							egd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
+							egd.addNumericField("Gain (Count/photon)", calibration.getGain(), 2);
+						}
+						else
+						{
+							// TODO - Support sCMOS camera
+
+							IJ.error("Unsupported camera type " +
+									CalibrationProtosHelper.getName(calibration.getCameraType()));
+							return;
+						}
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
+							return;
+						if (calibration.isCCDCamera())
+						{
+							calibration.setBias(Math.abs(gd.getNextNumber()));
+							calibration.setGain(Math.abs(gd.getNextNumber()));
+						}
+					}
+				});
+	}
+
+	public FitConfiguration getFitConfiguration()
+	{
+		return fitConfig;
+	}
+
+	/**
+	 * Allow the latest fitConfiguration to be provided for update
+	 */
+	public interface FitConfigurationProvider
+	{
+		/**
+		 * Gets the fitConfiguration writer.
+		 *
+		 * @return the fitConfiguration writer
+		 */
+		public FitConfiguration getFitConfiguration();
+	}
+
+	/**
+	 * Adds the PSF options.
+	 *
+	 * @param gd
+	 *            the gd
+	 * @param fitConfiguration
+	 *            the fit configuration
+	 */
+	public static void addPSFOptions(final ExtendedGenericDialog gd, final FitConfiguration fitConfiguration)
+	{
+		addPSFOptions(gd, new FitConfigurationProvider()
+		{
+			public FitConfiguration getFitConfiguration()
+			{
+				return fitConfiguration;
+			}
+		});
+	}
+
+	/**
+	 * Adds the PSF options.
+	 *
+	 * @param gd
+	 *            the gd
+	 * @param fitConfigurationProvider
+	 *            the fit configuration provider
+	 */
+	public static void addPSFOptions(final ExtendedGenericDialog gd,
+			final FitConfigurationProvider fitConfigurationProvider)
+	{
+		FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 		gd.addChoice("PSF", getPSFTypeNames(), PSFProtosHelper.getName(fitConfig.getPSFType()),
 				new OptionListener<Choice>()
 				{
 					public void collectOptions(Choice field)
 					{
+						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						fitConfig.setPSFType(PeakFit.getPSFTypeValues()[field.getSelectedIndex()]);
 						collectOptions();
 					}
 
 					public void collectOptions()
 					{
+						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						PSFType psfType = fitConfig.getPSFType();
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						PSF psf = fitConfig.getPSF();
@@ -1094,6 +1235,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private int showSimpleDialog()
 	{
+		// Just support circular fitting
+		fitConfig.setPSF(PSFProtosHelper.defaultOneAxisGaussian2DPSF);
+		fitConfig.setFixedPSF(false);
+
+		// TODO - Support sCMOS camera. This may be 'too difficult' as the 
+		// user will need to have created a per-pixel calibration image
+
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 		boolean requireCalibration = requireCalibration(calibration);
 		if (requireCalibration)
@@ -1190,6 +1338,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	private boolean requireCalibration(CalibrationWriter calibration)
 	{
+		// Check for a supported camera
+		if (!calibration.isCCDCamera())
+			return true;
 		// Check if the calibration contains: Pixel pitch, Gain (can be 1), Exposure time
 		if (!calibration.hasNmPerPixel())
 			return true;
@@ -1217,6 +1368,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 
 		//Calibration defaultCalibration = new Calibration();
+		if (!getCameraType(calibration))
+			return false;
 		//if (calibration.nmPerPixel <= 0 || calibration.nmPerPixel == defaultCalibration.nmPerPixel)
 		if (!getPixelPitch(calibration))
 			return false;
@@ -1259,6 +1412,25 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return gd;
 	}
 
+	private boolean getCameraType(CalibrationWriter calibration)
+	{
+		ExtendedGenericDialog gd = newWizardDialog("Enter the type of camera.");
+		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
+				CalibrationProtosHelper.getName(calibration.getCameraType()));
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
+		if (!calibration.isCCDCamera())
+		{
+			// TODO - Support sCMOS camera
+
+			IJ.error("Unsupported camera type " + CalibrationProtosHelper.getName(calibration.getCameraType()));
+			return false;
+		}
+		return true;
+	}
+
 	private boolean getPixelPitch(CalibrationWriter calibration)
 	{
 		ExtendedGenericDialog gd = newWizardDialog(
@@ -1276,17 +1448,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private boolean getGain(CalibrationWriter calibration)
 	{
 		ExtendedGenericDialog gd = newWizardDialog("Enter the total gain.",
-				"This is usually supplied with your camera certificate. The gain indicates how many Analogue-to-Digital-Units (ADUs) are recorded at the pixel for each photon registered on the sensor.",
+				"This is usually supplied with your camera certificate. The gain indicates how many Analogue-to-Digital-Units (Count) are recorded at the pixel for each photon registered on the sensor.",
 				"The gain is usually expressed using the product of the EM-gain (if applicable), the camera gain and the sensor quantum efficiency.",
 				"A value of 1 means no conversion to photons will occur.");
 		// TODO - Add a wizard to allow calculation of total gain from EM-gain, camera gain and QE
-		gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
-		gd.addCheckbox("EM-CCD", calibration.isEMCCD());
+		gd.addNumericField("Gain (Count/photon)", calibration.getGain(), 2);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
 		calibration.setGain(Math.abs(gd.getNextNumber()));
-		calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 		return true;
 	}
 
@@ -1573,7 +1743,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				gd.addMessage(
 						"Precision filtering can use global noise estimate or local background level.\n \nLocal background requires the camera bias:");
 				gd.addCheckbox("Local_background", fitConfig.isPrecisionUsingBackground());
-				gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
+				gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
 				gd.showDialog();
 				if (gd.wasCanceled())
 					return false;
@@ -1673,7 +1843,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Currently we just collect it here even if not needed
 		gd.addMessage(
 				"Smart filters using precision filtering may require a local background level.\n \nLocal background requires the camera bias:");
-		gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
+		gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -1815,10 +1985,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
 			if (!ignoreCalibration)
 			{
-				gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
+				gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
 				gd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
-				gd.addNumericField("Read_noise (ADUs)", calibration.getReadNoise(), 2);
-				gd.addNumericField("Amplification (ADU/electron)", calibration.getAmplification(), 2);
+				gd.addNumericField("Read_noise (Count)", calibration.getReadNoise(), 2);
+				gd.addNumericField("Amplification (Count/electron)", calibration.getAmplification(), 2);
 				gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 			}
 			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
@@ -1893,8 +2063,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 				{
 
 				}
-				gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
-				gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
+				gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
+				gd.addNumericField("Gain (Count/photon)", calibration.getGain(), 2);
 			}
 
 			gd.addCheckbox("Use_clamping", fitConfig.isUseClamping());
@@ -2435,12 +2605,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/**
 	 * Load the selected results from memory. All multiple frame results are added directly to the results. All single
-	 * frame
-	 * results are added to a list of candidate maxima per frame and fitted using the configured parameters.
+	 * frame results are added to a list of candidate maxima per frame and fitted using the configured parameters.
 	 */
 	private void runMaximaFitting()
 	{
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
 		if (results == null || results.size() == 0)
 		{
 			log("No results for maxima fitting");
@@ -2586,11 +2755,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		fitConfig.mergeCalibration(cal);
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
+		textCameraType.select(CalibrationProtosHelper.getName(calibration.getCameraType()));
 		if (calibration.hasNmPerPixel())
 			textNmPerPixel.setText("" + calibration.getNmPerPixel());
-		if (calibration.hasGain())
-			textGain.setText("" + calibration.getGain());
-		textEMCCD.setState(calibration.isEMCCD());
 		if (calibration.hasExposureTime())
 			textExposure.setText("" + calibration.getExposureTime());
 	}
@@ -2603,7 +2770,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Do not use set() as we support merging a partial PSF
 		fitConfig.mergePSF(psf);
 
-		textPSF.select(getPSFTypeNames()[fitConfig.getPSFType().ordinal()]);
+		textPSF.select(PSFProtosHelper.getName(fitConfig.getPSFType()));
 	}
 
 	/**
@@ -2623,9 +2790,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// This will clear everything and merge the configuration
 		this.config.setFitEngineSettings(fitEngineSettings);
 		fitConfig = this.config.getFitConfiguration();
-
-		if (isCustomTemplate)
-			textPSF.select(getPSFTypeNames()[fitConfig.getPSFType().ordinal()]);
 
 		textDataFilterType.select(SettingsManager.getDataFilterTypeNames()[config.getDataFilterType().ordinal()]);
 		textDataFilterMethod

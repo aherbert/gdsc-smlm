@@ -135,7 +135,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	private int showDialog(ImagePlus imp)
 	{
 		// Keep class variables for the parameters we are fitting 
-		FitConfiguration fitConfig = config.getFitConfiguration();
+		final FitConfiguration fitConfig = config.getFitConfiguration();
 		initialPeakStdDev0 = fitConfig.getInitialXSD();
 		initialPeakStdDev1 = fitConfig.getInitialYSD();
 		initialPeakAngle = fitConfig.getInitialAngle();
@@ -170,6 +170,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		gd.addCheckbox("Show_histograms", settings.getShowHistograms());
 		gd.addNumericField("Histogram_bins", settings.getHistogramBins(), 0);
 
+		PeakFit.addCameraOptions(gd, fitConfig.getCalibrationWriter());
 		PeakFit.addPSFOptions(gd, fitConfig);
 
 		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),

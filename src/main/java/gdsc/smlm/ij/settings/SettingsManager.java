@@ -23,6 +23,7 @@ import com.google.protobuf.util.JsonFormat.Printer;
 import gdsc.core.utils.BitFlags;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
@@ -431,6 +432,36 @@ public class SettingsManager
 		for (int i = 0; i < _NoiseEstimatorMethodValues.length; i++)
 		{
 			_NoiseEstimatorMethodNames[i] = FitProtosHelper.getName(_NoiseEstimatorMethodValues[i]);
+		}
+	}
+
+	private static CameraType[] _CameraTypeValues;
+
+	public static CameraType[] getCameraTypeValues()
+	{
+		if (_CameraTypeValues == null)
+			initCameraType();
+		return _CameraTypeValues;
+	}
+
+	private static String[] _CameraTypeNames;
+
+	public static String[] getCameraTypeNames()
+	{
+		if (_CameraTypeNames == null)
+			initCameraType();
+		return _CameraTypeNames;
+	}
+
+	private static void initCameraType()
+	{
+		EnumSet<CameraType> d = EnumSet.allOf(CameraType.class);
+		d.remove(CameraType.UNRECOGNIZED);
+		_CameraTypeValues = d.toArray(new CameraType[d.size()]);
+		_CameraTypeNames = new String[_CameraTypeValues.length];
+		for (int i = 0; i < _CameraTypeValues.length; i++)
+		{
+			_CameraTypeNames[i] = CalibrationProtosHelper.getName(_CameraTypeValues[i]);
 		}
 	}
 
