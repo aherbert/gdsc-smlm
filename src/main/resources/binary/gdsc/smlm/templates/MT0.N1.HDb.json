@@ -1,0 +1,67 @@
+{
+  "notes": [
+	"Benchmark template",
+	"Filter Analysis Summary Fields: Frames	W	H	Molecules	Density (um^-2)	N	s (nm)	a (nm)	Depth (nm)	Fixed	Gain	ReadNoise (ADUs)	B (photons)	b2 (photons)	SNR	s (px)	Filter	Spots	nP	nN	fP	fN	Solver	Fitting	Title	Name	Fail	Res	Dup D	Lower D (nm)	Upper D (nm)	Lower factor	Upper factor	TP	FP	FN	Precision	Recall	F1	Jaccard	fTP	fFP	fFN	fPrecision	fRecall	fF1	fJaccard	Depth Recall	Distance	Signal Factor	RMSD	Slope	At limit	Evolve	Time	Search	Time",
+	"Filter Analysis Summary Values: 2500	64	64	31612	0.3087	4621.0	137.0	100.0	1335.0	false	6.0	0.0222	100.0	100.0	326.8	1.37	Single: [search = 1, border = 1, Filter = Gaussian: [border = 1, sigma = 0.7, width = 2.0]]	500339	20623	479716	23177.76	480948.95	BLSE	3.0		Multi2: Signal=0.0, SNR=22.0, Width=0.56-2.55, Shift=3.30, EShift=0.00, Precision2=31.0	3	0.4	0.5	69.3	210.0	1.0	2.0	20082	449	11530	0.9781	0.6353	0.7703	0.6264	19540.48	990.52	12071.52	0.9518	0.6181	0.7495	0.5994	0.6991	30.57	-0.2369	41.55	1.061	-------",
+	"Molecules: 31612",
+	"Density (um^-2): 0.3087",
+	"SNR: 326.8",
+	"s (nm): 137.0",
+	"a (nm): 100.0",
+	"Lower D (nm): 69.3",
+	"Upper D (nm): 210.0",
+	"Lower factor: 1.0",
+	"Upper factor: 2.0",
+	"Created: 2016-12-20 12:55:49"
+	],
+  "fitEngineSettings": {
+    "fitSettings": {
+      "fitSolverSettings": {
+        "maxIterations": 150,
+        "relativeThreshold": 1.0E-6,
+        "absoluteThreshold": 1.0E-16,
+        "parameterRelativeThreshold": 0,
+        "parameterAbsoluteThreshold": 0,
+        "lambda": 10.0,
+        "maxFunctionEvaluations": 2000,
+        "clampValues": [10.0, 1000.0, 1.0, 1.0, 10.0, 3.0, 3.0, 3.141592653589793]
+      },
+      "filterSettings": {
+        "shiftFactor": 0,
+        "signalStrength": 0.0,
+        "minPhotons": 15.0,
+        "precisionThreshold": 0.0,
+        "minWidthFactor": 0.2,
+        "maxWidthFactor": 5.0,
+        "smartFilter": true,
+        "smartFilterString": "<MultiFilter2 signal=\"0.0\" snr=\"22.0\" minWidth=\"0.56\" maxWidth=\"2.55\" shift=\"3.3\" eshift=\"0.0\" precision=\"31.0\"/>"
+      }
+    },
+    "noiseMethod": "QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES",
+    "dataFilterSettings": {
+      "dataFilters": [{
+        "dataFilterMethod": "GAUSSIAN",
+        "parameters": [{
+          "value": 0.425
+        }]
+      }]
+    },
+    "search": {
+      "value": 0.607
+    },
+    "border": {
+      "value": 1.0
+    },
+    "fitting": {
+      "value": 3.0
+    },
+    "includeNeighbours": true,
+    "neighbourHeightThreshold": 0.3,
+    "residualsThreshold": 0.4,
+    "duplicateDistance": {
+      "value": 0.5,
+      "absolute": true
+    },
+    "failuresLimit": 3
+  }
+}

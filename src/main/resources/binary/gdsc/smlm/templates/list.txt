@@ -1,5 +1,5 @@
 # Mandatory
-Dummy1.json.txt*
+MT0.N1.HD.json*
 # Optional
-Dummy2.json.txt
+MT0.N1.HDb.json
 missing.txt
