@@ -491,8 +491,8 @@ public class ResultsManager implements PlugIn
 		inputFilename = gd.getNextString();
 		resultsSettings.getResultsTableSettingsBuilder().setShowTable(gd.getNextBoolean());
 		resultsSettings.getResultsImageSettingsBuilder().setImageTypeValue(gd.getNextChoiceIndex());
-		resultsSettings.getResultsFileSettingsBuilder().setResultsFilename(gd.getNextString());
 		resultsSettings.getResultsFileSettingsBuilder().setFileFormatValue(gd.getNextChoiceIndex());
+		resultsSettings.getResultsFileSettingsBuilder().setResultsFilename(gd.getNextString());
 		resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(gd.getNextBoolean());
 
 		gd.collectOptions();
@@ -634,13 +634,6 @@ public class ResultsManager implements PlugIn
 	{
 		gd.addMessage("--- File output ---");
 		final ResultsFileSettings.Builder fileSettings = resultsSettings.getResultsFileSettingsBuilder();
-		if (BitFlags.anySet(flags, FLAG_RESULTS_DIRECTORY))
-			gd.addDirectoryField("Results_directory", fileSettings.getResultsDirectory());
-		else if (BitFlags.anySet(flags, FLAG_RESULTS_FILE))
-			gd.addFilenameField("Results_file", fileSettings.getResultsFilename());
-		else
-			// Do not add a results file to prevent constant overwrite messages
-			gd.addFilenameField("Results_file", "");
 		gd.addChoice("Results_format", SettingsManager.getResultsFileFormatNames(),
 				fileSettings.getFileFormat().getNumber(), new OptionListener<Choice>()
 				{
@@ -679,6 +672,13 @@ public class ResultsManager implements PlugIn
 						resultsSettings.setShowDeviations(egd.getNextBoolean());
 					}
 				});
+		if (BitFlags.anySet(flags, FLAG_RESULTS_DIRECTORY))
+			gd.addDirectoryField("Results_directory", fileSettings.getResultsDirectory());
+		else if (BitFlags.anySet(flags, FLAG_RESULTS_FILE))
+			gd.addFilenameField("Results_file", fileSettings.getResultsFilename());
+		else
+			// Do not add a results file to prevent constant overwrite messages
+			gd.addFilenameField("Results_file", "");
 	}
 
 	public static void addInMemoryResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)

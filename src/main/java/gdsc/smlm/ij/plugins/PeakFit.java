@@ -1658,8 +1658,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		resultsSettings.getResultsImageSettingsBuilder().setImageTypeValue(gd.getNextChoiceIndex());
 		if (extraOptions)
 			showProcessedFrames = optionShowProcessedFrames = gd.getNextBoolean();
-		resultsSettings.getResultsFileSettingsBuilder().setResultsDirectory(gd.getNextString());
 		resultsSettings.getResultsFileSettingsBuilder().setFileFormatValue(gd.getNextChoiceIndex());
+		resultsSettings.getResultsFileSettingsBuilder().setResultsDirectory(gd.getNextString());
 		resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(gd.getNextBoolean());
 		if (extraOptions)
 			fractionOfThreads = Math.abs(gd.getNextNumber());
