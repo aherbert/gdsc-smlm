@@ -327,21 +327,24 @@ public class FitEngineConfiguration implements Cloneable
 	public FitEngineConfiguration clone()
 	{
 		// This is not a complete duplicate. The settings builder objects with the 
-		// underlying configuration will be the same between all instances. 
-		try
-		{
-			FitEngineConfiguration f = (FitEngineConfiguration) super.clone();
-			// Ensure the object is duplicated and not passed by reference.
-			if (fitConfiguration != null)
-				f.fitConfiguration = fitConfiguration.clone();
-			return f;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
+		// underlying configuration will be the same between all instances.
 
+		return new FitEngineConfiguration(getFitEngineSettings(), getFitConfiguration().getCalibration(),
+				getFitConfiguration().getPSF());
+
+		//		try
+		//		{
+		//			FitEngineConfiguration f = (FitEngineConfiguration) super.clone();
+		//			// Ensure the object is duplicated and not passed by reference.
+		//			if (fitConfiguration != null)
+		//				f.fitConfiguration = fitConfiguration.clone();
+		//			return f;
+		//		}
+		//		catch (CloneNotSupportedException e)
+		//		{
+		//			// Ignore
+		//		}
+		//		return null;
 	}
 
 	/**
@@ -792,10 +795,8 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void configureOutputUnits()
 	{
-		getFitConfiguration();
-
 		// If there is no calibration then the writer will just have the defaults
-		CalibrationWriter calibration = fitConfiguration.getCalibrationWriter();
+		CalibrationWriter calibration = getFitConfiguration().getCalibrationWriter();
 
 		// Fitting is always done pixels and radians
 		calibration.setDistanceUnit(DistanceUnit.PIXEL);

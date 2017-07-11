@@ -1137,8 +1137,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 							return;
 						if (calibration.isCCDCamera())
 						{
-							calibration.setBias(Math.abs(gd.getNextNumber()));
-							calibration.setGain(Math.abs(gd.getNextNumber()));
+							calibration.setBias(Math.abs(egd.getNextNumber()));
+							calibration.setGain(Math.abs(egd.getNextNumber()));
 						}
 					}
 				});
@@ -1307,7 +1307,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 		IJ.log("-=-=-=-");
 		Utils.log("Pixel pitch = %s", Utils.rounded(calibration.getNmPerPixel(), 4));
 		Utils.log("Exposure Time = %s", Utils.rounded(calibration.getExposureTime(), 4));
-		Utils.log("Gain = %s", Utils.rounded(calibration.getGain(), 4));
 		Utils.log("PSF width = %s", Utils.rounded(fitConfig.getInitialXSD(), 4));
 
 		// Save
@@ -1344,7 +1343,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Check if the calibration contains: Pixel pitch, Gain (can be 1), Exposure time
 		if (!calibration.hasNmPerPixel())
 			return true;
-		if (!calibration.hasGain())
+		// Bias can be zero (but this is unlikely)
+		if (!calibration.hasGain() || !(calibration.getBias() > 0))
 			return true;
 		if (!calibration.hasExposureTime())
 			return true;
@@ -1367,20 +1367,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 				return false;
 		}
 
-		//Calibration defaultCalibration = new Calibration();
 		if (!getCameraType(calibration))
 			return false;
-		//if (calibration.nmPerPixel <= 0 || calibration.nmPerPixel == defaultCalibration.nmPerPixel)
 		if (!getPixelPitch(calibration))
 			return false;
-		//if (calibration.gain <= 0 || calibration.gain == defaultCalibration.gain)
 		if (!getGain(calibration))
 			return false;
-		//if (calibration.exposureTime <= 0 || calibration.exposureTime == defaultCalibration.exposureTime)
 		if (!getExposureTime(calibration))
 			return false;
-		// Check for a PSF width other than the default
-		//if (fitConfig.getInitialPeakWidth0() == new FitConfiguration().getInitialPeakWidth0())
 		if (!getPeakWidth(calibration))
 			return false;
 
@@ -1388,6 +1382,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		try
 		{
 			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
+			// We allow bias to be zero
 			Parameters.isAboveZero("Gain", calibration.getGain());
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD", fitConfig.getInitialXSD());
@@ -1447,15 +1442,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private boolean getGain(CalibrationWriter calibration)
 	{
-		ExtendedGenericDialog gd = newWizardDialog("Enter the total gain.",
-				"This is usually supplied with your camera certificate. The gain indicates how many Analogue-to-Digital-Units (Count) are recorded at the pixel for each photon registered on the sensor.",
+		ExtendedGenericDialog gd = newWizardDialog("Enter the bias and total gain.",
+				"This is usually supplied with your camera certificate. The bias is a fixed offset added to the camera counts. The gain indicates how many Analogue-to-Digital-Units (Count) are recorded at the pixel for each photon registered on the sensor.",
 				"The gain is usually expressed using the product of the EM-gain (if applicable), the camera gain and the sensor quantum efficiency.",
 				"A value of 1 means no conversion to photons will occur.");
 		// TODO - Add a wizard to allow calculation of total gain from EM-gain, camera gain and QE
+		gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
 		gd.addNumericField("Gain (Count/photon)", calibration.getGain(), 2);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
+		calibration.setBias(Math.abs(gd.getNextNumber()));
 		calibration.setGain(Math.abs(gd.getNextNumber()));
 		return true;
 	}
@@ -1603,9 +1600,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.getNextChoice();
 
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
-		calibration.setGain(Math.abs(gd.getNextNumber()));
-		calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 		calibration.setExposureTime(Math.abs(gd.getNextNumber()));
 
 		// Note: The bias and read noise will just end up being what was in the configuration file
@@ -1680,8 +1676,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Check arguments
 		try
 		{
+			// No check on camera calibration. This is left to the FitConfiguration to
+			// error if the settings are incorrect
+
 			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
-			Parameters.isAboveZero("Gain", calibration.getGain());
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
 			if (fitConfig.getPSF().getParametersCount() > 1)
@@ -2546,10 +2544,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public FitEngine createFitEngine(int numberOfThreads, FitQueue queue, int queueSize)
 	{
 		// Ensure thread safety
-		PeakResults r = (numberOfThreads > 1) ? results.getThreadSafeList() : results;
-		if (results.numberOfOutputs() == 1)
-			// Reduce to single object for speed
-			r = results.toArray()[0];
+		PeakResultsList list = (numberOfThreads > 1) ? results.getThreadSafeList() : results;
+		
+		// Reduce to single object for speed
+		PeakResults r = (results.numberOfOutputs() == 1) ?
+				list.toArray()[0] : list;
 
 		// Update the configuration
 		updateFitConfiguration(config);

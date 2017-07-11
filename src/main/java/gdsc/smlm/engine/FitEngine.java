@@ -21,6 +21,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import gdsc.core.logging.FileLogger;
 import gdsc.core.logging.Logger;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.results.PeakResults;
 
@@ -144,10 +147,20 @@ public class FitEngine
 			counter = new FitTypeCounter();
 
 		// Create the workers
+		
+		// Note - Clone the configuration for each worker.
+		// Set up for a direct copy of the settings
+		FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
+		Calibration calibration = config.getFitConfiguration().getCalibration();
+		PSF psf = config.getFitConfiguration().getPSF();		
+		
 		for (int i = 0; i < threads; i++)
 		{
-			// Note - Clone the configuration and spot filter for each worker
-			FitWorker worker = new FitWorker(config.clone(), results, jobs);
+			FitWorker worker = new FitWorker(
+					//config.clone(),
+					new FitEngineConfiguration(fitEngineSettings, calibration, psf),
+					results, jobs);
+			// Note - Clone the spot filter for each worker.
 			worker.setSearchParameters(getSpotFilter(), fitting);
 			worker.setLogger2(fileLogger);
 			worker.setCounter(counter);

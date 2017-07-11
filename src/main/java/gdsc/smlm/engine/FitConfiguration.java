@@ -6,6 +6,7 @@ import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.FilterSettings;
@@ -580,24 +581,26 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public FitConfiguration clone()
 	{
-		// This is not a complete duplicate. The settings builder objects with the 
-		// underlying configuration will be the same between all instances. 
-		try
-		{
-			FitConfiguration f = (FitConfiguration) super.clone();
-			// Reset instance specific objects
-			f.toleranceChecker = null;
-			f.gaussianFunction = null;
-			f.functionSolver = null;
-			f.setValidationResult(null, null);
-			f.dynamicPeakResult = new DynamicPeakResult();
-			return f;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
+		return new FitConfiguration(getFitSettings(), getCalibration(), getPSF());
+		
+//		// This is not a complete duplicate. The settings builder objects with the 
+//		// underlying configuration will be the same between all instances. 
+//		try
+//		{
+//			FitConfiguration f = (FitConfiguration) super.clone();
+//			// Reset instance specific objects
+//			f.toleranceChecker = null;
+//			f.gaussianFunction = null;
+//			f.functionSolver = null;
+//			f.setValidationResult(null, null);
+//			f.dynamicPeakResult = new DynamicPeakResult();
+//			return f;
+//		}
+//		catch (CloneNotSupportedException e)
+//		{
+//			// Ignore
+//		}
+//		return null;
 	}
 
 	/**
@@ -1382,15 +1385,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * Specify if an EM-CCD camera is used. This is relevant when validating results using the localisation precision.
-	 * 
-	 * @param emCCD
-	 *            Set to true if using an EM-CCD camera
+	 * Specify the camera type used.
+	 * <p>
+	 * Specifying a CCD camera is relevant when validating results using the localisation precision.
+	 *
+	 * @param cameraType
+	 *            the new camera type
 	 */
-	public void setEmCCD(boolean emCCD)
+	public void setCameraType(CameraType cameraType)
 	{
 		invalidateFunctionSolver();
-		calibration.setEmCCD(emCCD);
+		calibration.setCameraType(cameraType);
 		updateCalibration();
 	}
 
@@ -2476,9 +2481,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// Only support CCD/EM-CCD at the moment
 		if (!calibration.isCCDCamera())
 		{
-			throw new IllegalArgumentException("CCD camera type is required for fit solver: " + getFitSolver());
+			throw new IllegalArgumentException("CCD/EM-CCD camera is required for fit solver: " + getFitSolver());
 		}
-		
+
 		if (getFitSolver() == FitSolver.MLE)
 		{
 			// This requires the gain

@@ -152,13 +152,20 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public PeakResultsList getThreadSafeList()
 	{
 		PeakResultsList newList = new PeakResultsList();
+		newList.copySettings(this);
 		for (PeakResults peakResults : this.results)
 		{
 			if (!(peakResults instanceof ThreadSafePeakResults))
 			{
 				peakResults = new SynchronizedPeakResults(peakResults);
 			}
-			newList.addOutput(peakResults);
+			
+			// This will copy the settings
+			//newList.addOutput(peakResults);
+			
+			// This assumes the settings are OK, i.e. the result was added
+			// using addOutput(...). 
+			newList.results.add(peakResults);
 		}
 		return newList;
 	}

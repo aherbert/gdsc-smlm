@@ -57,6 +57,7 @@ import gdsc.core.utils.Settings;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.XmlUtils;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
@@ -1209,7 +1210,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitConfig.setAmplification(simulationParameters.amplification);
 			fitConfig.setReadNoise(simulationParameters.readNoise);
 			fitConfig.setBias(simulationParameters.bias);
-			fitConfig.setEmCCD(simulationParameters.emCCD);
+			fitConfig.setCameraType((simulationParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
 		}
 		if (!PeakFit.configureFitSolver(config, (extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
 			return false;
