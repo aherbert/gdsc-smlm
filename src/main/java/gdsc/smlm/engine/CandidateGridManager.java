@@ -133,7 +133,7 @@ class CandidateGridManager
 	 */
 	public int getFittedCandidatesSize()
 	{
-		return fitted.size;
+		return fitted.getSize();
 	}
 
 	/**
@@ -287,7 +287,7 @@ class CandidateGridManager
 		{
 			for (int yy = ymin; yy < ymax; yy++)
 			{
-				size += grid[xx][yy].size;
+				size += grid[xx][yy].getSize();
 			}
 		}
 		final Candidate[] list = new Candidate[size];
@@ -298,10 +298,10 @@ class CandidateGridManager
 			{
 				for (int yy = ymin; yy < ymax; yy++)
 				{
-					if (grid[xx][yy].size == 0)
+					if (grid[xx][yy].getSize() == 0)
 						continue;
-					System.arraycopy(grid[xx][yy].list, 0, list, size, grid[xx][yy].size);
-					size += grid[xx][yy].size;
+					grid[xx][yy].copyTo(list, size);
+					size += grid[xx][yy].getSize();
 				}
 			}
 		}

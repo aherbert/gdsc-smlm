@@ -619,8 +619,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		{
 			// XXX: For debugging thread safety require new objects for each fit
-			invalidateGaussianFunction();
-			invalidateToleranceChecker();
+			//invalidateGaussianFunction();
+			//invalidateToleranceChecker();
 		}
 
 		// Check if the Gaussian function is invalid

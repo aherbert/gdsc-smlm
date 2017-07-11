@@ -17,10 +17,15 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * Stores a list of candidates
+ * Stores a list of candidates.
  */
 class CandidateList
 {
+	public interface Predicate
+	{
+		boolean test(Candidate candidate);
+	}
+
 	private static class CandidateComparator implements Comparator<Candidate>
 	{
 		/*
@@ -40,8 +45,8 @@ class CandidateList
 		comp = new CandidateComparator();
 	}
 
-	int size = 0;
-	Candidate[] list = null;
+	private int size = 0;
+	private Candidate[] list = null;
 
 	/**
 	 * Instantiates a new candidate list.
@@ -60,6 +65,17 @@ class CandidateList
 	 */
 	CandidateList(int size, Candidate[] list)
 	{
+		if (list != null)
+		{
+			if (list.length < size)
+				throw new IllegalArgumentException("List is smaller than size");
+		}
+		else
+		{
+			if (size != 0)
+				throw new IllegalArgumentException("List is null and size is not zero");
+		}
+
 		this.size = size;
 		this.list = list;
 	}
@@ -72,7 +88,8 @@ class CandidateList
 	 */
 	CandidateList(Candidate[] list)
 	{
-		this.size = list.length;
+		if (list != null)
+			size = list.length;
 		this.list = list;
 	}
 
@@ -84,10 +101,15 @@ class CandidateList
 	public void add(Candidate candidate)
 	{
 		if (list == null)
+		{
 			list = new Candidate[4];
+		}
+		// This assumes that the list is never created with length less than size
+		// and that the 
 		else if (list.length == size)
 		{
-			final Candidate[] list2 = new Candidate[size * 2];
+			// Allow creating a new list even if size is currently zero
+			final Candidate[] list2 = new Candidate[1 + size * 2];
 			System.arraycopy(list, 0, list2, 0, size);
 			list = list2;
 		}
@@ -119,7 +141,7 @@ class CandidateList
 	 *
 	 * @return the length of the list
 	 */
-	int getlength()
+	int getLength()
 	{
 		return (list != null) ? list.length : 0;
 	}
@@ -143,6 +165,41 @@ class CandidateList
 	 */
 	public CandidateList copy()
 	{
+		if (size == 0)
+			return new CandidateList();
 		return new CandidateList(size, Arrays.copyOf(list, size));
+	}
+
+	/**
+	 * Removes candidates from the list if they fail the filter.
+	 *
+	 * @param filter
+	 *            the filter
+	 */
+	public void removeIf(Predicate filter)
+	{
+		final int oldSize = size;
+		// This in place resizes the list
+		size = 0;
+		for (int i = 0; i < oldSize; i++)
+		{
+			if (!filter.test(list[i]))
+			{
+				list[size++] = list[i];
+			}
+		}
+	}
+
+	/**
+	 * Copy to the destination list.
+	 *
+	 * @param list
+	 *            the list
+	 * @param position
+	 *            the position
+	 */
+	public void copyTo(Candidate[] list, int position)
+	{
+		System.arraycopy(this.list, 0, list, position, size);
 	}
 }
