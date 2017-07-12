@@ -273,7 +273,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 				duda[2] = du_dtx[x] * deltaEy;
 				duda[3] = du_dty * deltaEx[x];
 				duda[4] = du_dtsx[x] * deltaEy + du_dtsy * deltaEx[x];
-				invalidGradients(duda);
+				//invalidGradients(duda);
 				procedure.execute(tB + tI * duda[1], duda);
 			}
 		}

@@ -286,7 +286,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 					duda[a++] = du_dty[yy] * deltaEx[xx];
 					duda[a++] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
 				}
-				invalidGradients(duda);
+				//invalidGradients(duda);
 				procedure.execute(I, duda);
 			}
 		}
