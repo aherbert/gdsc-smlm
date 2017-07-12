@@ -82,7 +82,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleFreeCircularErfGauss
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double s = a[Gaussian2DFunction.X_SD];
+		final double s = abs(a[Gaussian2DFunction.X_SD]);
 
 		final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
 		createDeltaETable(one_sSqrt2, deltaEx, tx);
@@ -102,7 +102,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleFreeCircularErfGauss
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double s = a[Gaussian2DFunction.X_SD];
+		final double s = abs(a[Gaussian2DFunction.X_SD]);
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
@@ -127,7 +127,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleFreeCircularErfGauss
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double s = a[Gaussian2DFunction.X_SD];
+		final double s = abs(a[Gaussian2DFunction.X_SD]);
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable

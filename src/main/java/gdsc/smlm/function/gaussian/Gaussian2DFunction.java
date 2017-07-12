@@ -1,5 +1,7 @@
 package gdsc.smlm.function.gaussian;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.util.Pair;
 
 import gdsc.smlm.function.ExtendedNonLinearFunction;
@@ -490,5 +492,23 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	public void initialise1(double[] a)
 	{
 		initialise(a);
+	}
+
+	/**
+	 * Check if NaN (invalid) gradients.
+	 *
+	 * @param a
+	 *            the gradients
+	 * @return true, if successful
+	 */
+	protected static boolean invalidGradients(double[] a)
+	{
+		for (int i = 0; i < a.length; i++)
+			if (Double.isNaN(a[i]))
+			{
+				System.out.println(Arrays.toString(a));
+				return true;
+			}
+		return false;
 	}
 }

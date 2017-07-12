@@ -64,8 +64,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = a[Gaussian2DFunction.X_SD];
-		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
+		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 
 		createDeltaETable(ONE_OVER_ROOT2 / tsx, deltaEx, tx);
 		createDeltaETable(ONE_OVER_ROOT2 / tsy, deltaEy, ty);
@@ -84,8 +84,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = a[Gaussian2DFunction.X_SD];
-		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
+		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
@@ -106,8 +106,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = a[Gaussian2DFunction.X_SD];
-		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
+		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
@@ -128,8 +128,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = a[Gaussian2DFunction.X_SD];
-		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
+		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable

@@ -69,8 +69,8 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = a[Gaussian2DFunction.X_SD];
-		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
+		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
 
 		final double sx = tsx * zModel.getSx(tz);
@@ -92,8 +92,8 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = a[Gaussian2DFunction.X_SD];
-		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
+		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
@@ -120,8 +120,8 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = a[Gaussian2DFunction.X_SD];
-		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
+		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
@@ -145,8 +145,8 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = a[Gaussian2DFunction.X_SD];
-		final double tsy = a[Gaussian2DFunction.Y_SD];
+		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
+		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 

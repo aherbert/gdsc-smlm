@@ -153,4 +153,17 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	// Force new implementation from the base Gaussian2DFunction
 	@Override
 	public abstract void initialise1(double[] a);
+
+	/**
+	 * Get the absolute of a value
+	 *
+	 * @param value
+	 *            the value
+	 * @return the absolute value
+	 */
+	protected static double abs(double value)
+	{
+		//return Math.abs(d);
+		return (value <= 0.0D) ? 0.0d - value : value;
+	}
 }
