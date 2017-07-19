@@ -57,6 +57,7 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.CreateDataSettingsHelper;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
@@ -1804,7 +1805,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		c.setNmPerPixel(settings.getPixelPitch());
 		c.setCountPerPhoton(helper.getTotalGain());
 		c.setExposureTime(settings.getExposureTime());
-		c.setEmCCD((settings.getEmGain() > 1));
+		c.setCameraType((settings.getEmGain() > 1) ? CameraType.EMCCD : CameraType.CCD);
 		c.setBias(settings.getBias());
 		c.setReadNoise(settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1));
 		c.setCountPerElectron(helper.getAmplification());
@@ -4745,8 +4746,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			builder.addMolecule(m);
 
 		// The toString() method is more verbose than JSON but easier to read
-		IJ.log(builder.toString()
-		);
+		IJ.log(builder.toString());
 		IJ.log("");
 	}
 
@@ -5116,7 +5116,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (!cal.hasReadNoise())
 				cal.setReadNoise(simulationParameters.readNoise);
 			if (!cal.isCCDCamera())
-				cal.setEmCCD(simulationParameters.emCCD);
+				cal.setCameraType((simulationParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
 			if (!cal.hasNmPerPixel())
 				cal.setNmPerPixel(simulationParameters.a);
 		}
@@ -5157,7 +5157,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		b = gd.getNextNumber();
 		cal.setCountPerPhoton(gd.getNextNumber());
 		cal.setCountPerElectron(gd.getNextNumber());
-		cal.setEmCCD(gd.getNextBoolean());
+		cal.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 		cal.setReadNoise(gd.getNextNumber());
 		cal.setBias(gd.getNextNumber());
 		float myDepth = depth;

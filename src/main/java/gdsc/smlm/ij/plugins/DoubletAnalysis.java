@@ -51,6 +51,7 @@ import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -1598,7 +1599,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			cal.setExposureTime(100);
 			cal.setReadNoise(simulationParameters.readNoise);
 			cal.setBias(simulationParameters.bias);
-			cal.setEmCCD(simulationParameters.emCCD);
+			cal.setCameraType((simulationParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
 
 			fitConfig.setCalibration(cal.getCalibration());
 		}
@@ -1699,7 +1700,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		matching = gd.getNextChoiceIndex();
 
 		gd.collectOptions();
-		
+
 		if (gd.invalidNumber())
 			return false;
 
@@ -1761,7 +1762,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		cal.setExposureTime(100);
 		cal.setReadNoise(simulationParameters.readNoise);
 		cal.setBias(simulationParameters.bias);
-		cal.setEmCCD(simulationParameters.emCCD);
+		cal.setCameraType((simulationParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
 
 		fitConfig.setCalibration(cal.getCalibration());
 
@@ -2915,8 +2916,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		BenchmarkFilterAnalysis.addField(settings, "Doublet Analysis Summary Fields", header);
 		BenchmarkFilterAnalysis.addField(settings, "Doublet Analysis Summary Values", summary);
 		// Now pick out key values...
-		BenchmarkFilterAnalysis.addKeyFields(settings, header, summary, new String[] { "Density", "s", "Selection", "Max J",
-				"Residuals", "Area >90", "Range >90", "wMean >90" });
+		BenchmarkFilterAnalysis.addKeyFields(settings, header, summary, new String[] { "Density", "s", "Selection",
+				"Max J", "Residuals", "Area >90", "Range >90", "wMean >90" });
 
 		// Add any other settings that may be useful in the template
 		BenchmarkFilterAnalysis.addField(settings, "Created", BenchmarkFilterAnalysis.getCurrentTimeStamp());
@@ -3235,7 +3236,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				{
 					fitConfig.setFitSettings(template.getFitEngineSettings().getFitSettings());
 				}
-				
+
 				cbSmartFilter.setState(fitConfig.isSmartFilter());
 				textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
 				textSignalStrength.setText("" + fitConfig.getSignalStrength());

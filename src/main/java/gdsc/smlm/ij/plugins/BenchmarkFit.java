@@ -20,6 +20,7 @@ import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitStatus;
@@ -547,7 +548,7 @@ public class BenchmarkFit implements PlugIn
 			lastS = benchmarkParameters.s;
 			fitConfig.setInitialPeakStdDev(sa);
 		}
-		
+
 		gd.addSlider("Region_size", 2, 20, regionSize);
 		PeakFit.addPSFOptions(gd, fitConfig);
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
@@ -555,8 +556,8 @@ public class BenchmarkFit implements PlugIn
 		gd.addNumericField("Start_offset", startOffset, 3);
 		gd.addCheckbox("Include_CoM_fit", comFitting);
 		gd.addCheckbox("Background_fitting", backgroundFitting);
-		gd.addMessage("Signal fitting can be disabled for " + 
-				PSFProtosHelper.getName(PSFType.ONE_AXIS_GAUSSIAN_2D) + " function");
+		gd.addMessage("Signal fitting can be disabled for " + PSFProtosHelper.getName(PSFType.ONE_AXIS_GAUSSIAN_2D) +
+				" function");
 		gd.addCheckbox("Signal_fitting", signalFitting);
 		gd.addCheckbox("Show_histograms", showHistograms);
 		gd.addCheckbox("Save_raw_data", saveRawData);
@@ -576,7 +577,7 @@ public class BenchmarkFit implements PlugIn
 		signalFitting = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
 		saveRawData = gd.getNextBoolean();
-		
+
 		gd.collectOptions();
 
 		if (!comFitting && !offsetFitting)
@@ -597,7 +598,7 @@ public class BenchmarkFit implements PlugIn
 		calibration.setCountPerPhoton(benchmarkParameters.gain);
 		calibration.setCountPerElectron(benchmarkParameters.amplification);
 		calibration.setBias(benchmarkParameters.bias);
-		calibration.setEmCCD(benchmarkParameters.emCCD);
+		calibration.setCameraType((benchmarkParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
 		calibration.setReadNoise(benchmarkParameters.readNoise);
 		calibration.setExposureTime(1000);
 		fitConfig.setCalibration(calibration.getCalibration());
