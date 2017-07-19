@@ -1,8 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.data.config.CalibrationReader;
-import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationWriter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -18,10 +17,10 @@ import gdsc.smlm.data.config.CalibrationProtos.Calibration;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
+import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
-import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
 /**
@@ -46,7 +45,7 @@ public class CalibrateResults implements PlugIn
 		if (!showInputDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -86,7 +85,7 @@ public class CalibrateResults implements PlugIn
 
 	private boolean showDialog(MemoryPeakResults results)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		Calibration oldCalibration = results.getCalibration();
@@ -96,19 +95,15 @@ public class CalibrateResults implements PlugIn
 		{
 			gd.addMessage("No calibration found, using defaults");
 		}
-		
-		CalibrationReader cr = results.getCalibrationReader();
+
+		CalibrationWriter cw = results.getCalibrationWriterSafe();
 
 		gd.addStringField("Name", results.getName(), Math.max(Math.min(results.getName().length(), 60), 20));
 		if (existingCalibration)
 			gd.addCheckbox("Update_all_linked_results", updateAll);
-		gd.addNumericField("Calibration (nm/px)", cr.getNmPerPixel(), 2);
-		gd.addNumericField("Gain (ADU/photon)", cr.getCountPerPhoton(), 2);
-		gd.addCheckbox("EM-CCD", cr.isEMCCD());
-		gd.addNumericField("Exposure_time (ms)", cr.getExposureTime(), 2);
-		gd.addNumericField("Camera_bias (ADUs)", cr.getBias(), 2);
-		gd.addNumericField("Read_noise (ADUs)", cr.getReadNoise(), 2);
-		gd.addNumericField("Amplification (ADUs/electron)", cr.getCountPerElectron(), 2);
+		PeakFit.addCameraOptions(gd, true, cw);
+		gd.addNumericField("Calibration (nm/px)", cw.getNmPerPixel(), 2);
+		gd.addNumericField("Exposure_time (ms)", cw.getExposureTime(), 2);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -131,14 +126,11 @@ public class CalibrateResults implements PlugIn
 			updateAll = gd.getNextBoolean();
 		}
 
-		CalibrationWriter cw = results.getCalibrationWriterSafe();
+		cw.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		cw.setNmPerPixel(Math.abs(gd.getNextNumber()));
-		cw.setCountPerPhoton(Math.abs(gd.getNextNumber()));
-		cw.setEmCCD(gd.getNextBoolean());
 		cw.setExposureTime(Math.abs(gd.getNextNumber()));
-		cw.setBias(Math.abs(gd.getNextNumber()));
-		cw.setReadNoise(Math.abs(gd.getNextNumber()));
-		cw.setCountPerElectron(Math.abs(gd.getNextNumber()));
+		
+		gd.collectOptions();
 
 		Calibration newCalibration = cw.getCalibration();
 		results.setCalibration(newCalibration);

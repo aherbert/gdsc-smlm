@@ -766,7 +766,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addChoice("Template", templates, templates[0]);
 
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
-		addCameraOptions(gd, new CalibrationProvider()
+		addCameraOptions(gd, false, new CalibrationProvider()
 		{
 			public CalibrationWriter getCalibrationWriter()
 			{
@@ -1081,10 +1081,33 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 *            the gd
 	 * @param calibration
 	 *            the calibration
+	 * @param b
 	 */
 	public static void addCameraOptions(final ExtendedGenericDialog gd, final CalibrationWriter calibration)
 	{
-		addCameraOptions(gd, new CalibrationProvider()
+		addCameraOptions(gd, false, new CalibrationProvider()
+		{
+			public CalibrationWriter getCalibrationWriter()
+			{
+				return calibration;
+			}
+		});
+	}
+
+	/**
+	 * Adds the camera options.
+	 *
+	 * @param gd
+	 *            the gd
+	 * @param allOptions
+	 *            the all options flag
+	 * @param calibration
+	 *            the calibration
+	 */
+	public static void addCameraOptions(final ExtendedGenericDialog gd, final boolean allOptions,
+			final CalibrationWriter calibration)
+	{
+		addCameraOptions(gd, allOptions, new CalibrationProvider()
 		{
 			public CalibrationWriter getCalibrationWriter()
 			{
@@ -1101,7 +1124,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * @param calibrationProvider
 	 *            the calibration provider
 	 */
-	public static void addCameraOptions(final ExtendedGenericDialog gd, final CalibrationProvider calibrationProvider)
+	public static void addCameraOptions(final ExtendedGenericDialog gd, final boolean allOptions,
+			final CalibrationProvider calibrationProvider)
 	{
 		CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
 
@@ -1123,6 +1147,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 						{
 							egd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
 							egd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
+							if (allOptions)
+							{
+								egd.addNumericField("Read_noise (Count)", calibration.getReadNoise(), 2);
+								egd.addNumericField("Amplification (Count/electron)", calibration.getCountPerElectron(),
+										2);
+							}
 						}
 						else
 						{
@@ -1139,6 +1169,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 						{
 							calibration.setBias(Math.abs(egd.getNextNumber()));
 							calibration.setCountPerPhoton(Math.abs(egd.getNextNumber()));
+							if (allOptions)
+							{
+								calibration.setReadNoise(Math.abs(egd.getNextNumber()));
+								calibration.setCountPerElectron(Math.abs(egd.getNextNumber()));
+							}
 						}
 					}
 				});
@@ -2545,10 +2580,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		// Ensure thread safety
 		PeakResultsList list = (numberOfThreads > 1) ? results.getThreadSafeList() : results;
-		
+
 		// Reduce to single object for speed
-		PeakResults r = (results.numberOfOutputs() == 1) ?
-				list.toArray()[0] : list;
+		PeakResults r = (results.numberOfOutputs() == 1) ? list.toArray()[0] : list;
 
 		// Update the configuration
 		updateFitConfiguration(config);
