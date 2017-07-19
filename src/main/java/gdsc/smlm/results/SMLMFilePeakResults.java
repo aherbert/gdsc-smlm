@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.data.config.PSFHelper;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 

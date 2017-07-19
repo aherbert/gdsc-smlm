@@ -30,15 +30,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
-import gdsc.smlm.data.config.FitProtos.FitSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.engine.FitConfiguration;
