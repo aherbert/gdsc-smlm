@@ -1593,8 +1593,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			CalibrationWriter cal = new CalibrationWriter(fitConfig.getCalibration());
 
 			cal.setNmPerPixel(simulationParameters.a);
-			cal.setGain(simulationParameters.gain);
-			cal.setAmplification(simulationParameters.amplification);
+			cal.setCountPerPhoton(simulationParameters.gain);
+			cal.setCountPerElectron(simulationParameters.amplification);
 			cal.setExposureTime(100);
 			cal.setReadNoise(simulationParameters.readNoise);
 			cal.setBias(simulationParameters.bias);
@@ -1756,8 +1756,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		CalibrationWriter cal = new CalibrationWriter(fitConfig.getCalibration());
 
 		cal.setNmPerPixel(simulationParameters.a);
-		cal.setGain(simulationParameters.gain);
-		cal.setAmplification(simulationParameters.amplification);
+		cal.setCountPerPhoton(simulationParameters.gain);
+		cal.setCountPerElectron(simulationParameters.amplification);
 		cal.setExposureTime(100);
 		cal.setReadNoise(simulationParameters.readNoise);
 		cal.setBias(simulationParameters.bias);
@@ -2053,7 +2053,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			// Add details of the noise model for the MLE
 			CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
 			sb.append("EM=").append(r.isEMCCD());
-			sb.append(":A=").append(Utils.rounded(r.getAmplification()));
+			sb.append(":A=").append(Utils.rounded(r.getCountPerElectron()));
 			sb.append(":N=").append(Utils.rounded(r.getReadNoise()));
 			sb.append('\t');
 		}
@@ -2101,7 +2101,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			// Add details of the noise model for the MLE
 			CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
 			sb.append("EM=").append(r.isEMCCD());
-			sb.append(":A=").append(Utils.rounded(r.getAmplification()));
+			sb.append(":A=").append(Utils.rounded(r.getCountPerElectron()));
 			sb.append(":N=").append(Utils.rounded(r.getReadNoise()));
 			sb.append('\t');
 		}

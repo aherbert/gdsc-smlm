@@ -35,16 +35,16 @@ public class CalibrationWriterTest
 
 		CalibrationWriter writer = new CalibrationWriter();
 
-		Assert.assertEquals(writer.getAmplification(), 0, 0);
+		Assert.assertEquals(writer.getCountPerElectron(), 0, 0);
 		Assert.assertEquals(writer.getBias(), 0, 0);
 		Assert.assertEquals(writer.getExposureTime(), 0, 0);
-		Assert.assertEquals(writer.getGain(), 0, 0);
+		Assert.assertEquals(writer.getCountPerPhoton(), 0, 0);
 		Assert.assertEquals(writer.getNmPerPixel(), 0, 0);
 		Assert.assertEquals(writer.getReadNoise(), 0, 0);
-		Assert.assertFalse(writer.hasAmplification());
+		Assert.assertFalse(writer.hasCountPerElectron());
 		Assert.assertFalse(writer.hasBias());
 		Assert.assertFalse(writer.hasExposureTime());
-		Assert.assertFalse(writer.hasGain());
+		Assert.assertFalse(writer.hasCountPerPhoton());
 		Assert.assertFalse(writer.hasNmPerPixel());
 		Assert.assertFalse(writer.hasReadNoise());
 		Assert.assertEquals(writer.getAngleUnit(), AngleUnit.ANGLE_UNIT_NA);
@@ -52,10 +52,10 @@ public class CalibrationWriterTest
 		Assert.assertEquals(writer.getDistanceUnit(), DistanceUnit.DISTANCE_UNIT_NA);
 		Assert.assertEquals(writer.getIntensityUnit(), IntensityUnit.INTENSITY_UNIT_NA);
 
-		writer.setAmplification(amplification);
+		writer.setCountPerElectron(amplification);
 		writer.setBias(bias);
 		writer.setExposureTime(exposureTime);
-		writer.setGain(gain);
+		writer.setCountPerPhoton(gain);
 		writer.setNmPerPixel(nmPerPixel);
 		writer.setReadNoise(readNoise);
 		writer.setAngleUnit(angleUnit);
@@ -63,16 +63,16 @@ public class CalibrationWriterTest
 		writer.setDistanceUnit(distanceUnit);
 		writer.setIntensityUnit(intensityUnit);
 
-		Assert.assertEquals(writer.getAmplification(), amplification, 0);
+		Assert.assertEquals(writer.getCountPerElectron(), amplification, 0);
 		Assert.assertEquals(writer.getBias(), bias, 0);
 		Assert.assertEquals(writer.getExposureTime(), exposureTime, 0);
-		Assert.assertEquals(writer.getGain(), gain, 0);
+		Assert.assertEquals(writer.getCountPerPhoton(), gain, 0);
 		Assert.assertEquals(writer.getNmPerPixel(), nmPerPixel, 0);
 		Assert.assertEquals(writer.getReadNoise(), readNoise, 0);
-		Assert.assertTrue(writer.hasAmplification());
+		Assert.assertTrue(writer.hasCountPerElectron());
 		Assert.assertTrue(writer.hasBias());
 		Assert.assertTrue(writer.hasExposureTime());
-		Assert.assertTrue(writer.hasGain());
+		Assert.assertTrue(writer.hasCountPerPhoton());
 		Assert.assertTrue(writer.hasNmPerPixel());
 		Assert.assertTrue(writer.hasReadNoise());
 		Assert.assertEquals(writer.getAngleUnit(), angleUnit);
@@ -82,16 +82,16 @@ public class CalibrationWriterTest
 
 		CalibrationReader reader = new CalibrationReader(writer.getCalibration());
 
-		Assert.assertEquals(reader.getAmplification(), amplification, 0);
+		Assert.assertEquals(reader.getCountPerElectron(), amplification, 0);
 		Assert.assertEquals(reader.getBias(), bias, 0);
 		Assert.assertEquals(reader.getExposureTime(), exposureTime, 0);
-		Assert.assertEquals(reader.getGain(), gain, 0);
+		Assert.assertEquals(reader.getCountPerPhoton(), gain, 0);
 		Assert.assertEquals(reader.getNmPerPixel(), nmPerPixel, 0);
 		Assert.assertEquals(reader.getReadNoise(), readNoise, 0);
-		Assert.assertTrue(reader.hasAmplification());
+		Assert.assertTrue(reader.hasCountPerElectron());
 		Assert.assertTrue(reader.hasBias());
 		Assert.assertTrue(reader.hasExposureTime());
-		Assert.assertTrue(reader.hasGain());
+		Assert.assertTrue(reader.hasCountPerPhoton());
 		Assert.assertTrue(reader.hasNmPerPixel());
 		Assert.assertTrue(reader.hasReadNoise());
 		Assert.assertEquals(reader.getAngleUnit(), angleUnit);

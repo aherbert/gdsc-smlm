@@ -103,12 +103,12 @@ public class CalibrateResults implements PlugIn
 		if (existingCalibration)
 			gd.addCheckbox("Update_all_linked_results", updateAll);
 		gd.addNumericField("Calibration (nm/px)", cr.getNmPerPixel(), 2);
-		gd.addNumericField("Gain (ADU/photon)", cr.getGain(), 2);
+		gd.addNumericField("Gain (ADU/photon)", cr.getCountPerPhoton(), 2);
 		gd.addCheckbox("EM-CCD", cr.isEMCCD());
 		gd.addNumericField("Exposure_time (ms)", cr.getExposureTime(), 2);
 		gd.addNumericField("Camera_bias (ADUs)", cr.getBias(), 2);
 		gd.addNumericField("Read_noise (ADUs)", cr.getReadNoise(), 2);
-		gd.addNumericField("Amplification (ADUs/electron)", cr.getAmplification(), 2);
+		gd.addNumericField("Amplification (ADUs/electron)", cr.getCountPerElectron(), 2);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -133,12 +133,12 @@ public class CalibrateResults implements PlugIn
 
 		CalibrationWriter cw = results.getCalibrationWriterSafe();
 		cw.setNmPerPixel(Math.abs(gd.getNextNumber()));
-		cw.setGain(Math.abs(gd.getNextNumber()));
+		cw.setCountPerPhoton(Math.abs(gd.getNextNumber()));
 		cw.setEmCCD(gd.getNextBoolean());
 		cw.setExposureTime(Math.abs(gd.getNextNumber()));
 		cw.setBias(Math.abs(gd.getNextNumber()));
 		cw.setReadNoise(Math.abs(gd.getNextNumber()));
-		cw.setAmplification(Math.abs(gd.getNextNumber()));
+		cw.setCountPerElectron(Math.abs(gd.getNextNumber()));
 
 		Calibration newCalibration = cw.getCalibration();
 		results.setCalibration(newCalibration);

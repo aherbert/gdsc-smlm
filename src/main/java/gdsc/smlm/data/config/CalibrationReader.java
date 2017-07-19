@@ -181,20 +181,20 @@ public class CalibrationReader
 	 *
 	 * @return the gain
 	 */
-	public double getGain()
+	public double getCountPerPhoton()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getCountPerPhoton() : 0;
 	}
 
 	/**
-	 * Checks for gain.
+	 * Checks for gain (Count/photon).
 	 *
 	 * @return true, if successful
 	 */
-	public boolean hasGain()
+	public boolean hasCountPerPhoton()
 	{
-		return getGain() > 0;
+		return getCountPerPhoton() > 0;
 	}
 
 	/**
@@ -344,20 +344,20 @@ public class CalibrationReader
 	 *
 	 * @return the amplification
 	 */
-	public double getAmplification()
+	public double getCountPerElectron()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCountPerElectron() : 0;
 	}
 
 	/**
-	 * Checks for amplification.
+	 * Checks for amplification (count/electron).
 	 *
 	 * @return true, if successful
 	 */
-	public boolean hasAmplification()
+	public boolean hasCountPerElectron()
 	{
-		return getAmplification() > 0;
+		return getCountPerElectron() > 0;
 	}
 
 	/**

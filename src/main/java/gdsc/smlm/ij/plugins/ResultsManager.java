@@ -1249,14 +1249,14 @@ public class ResultsManager implements PlugIn
 		}
 
 		// Only check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification)
-		if (!calibration.hasNmPerPixel() || !calibration.hasGain() || !calibration.hasExposureTime())
+		if (!calibration.hasNmPerPixel() || !calibration.hasCountPerPhoton() || !calibration.hasExposureTime())
 		{
 			final float noise = getNoise(results);
 
 			if (!calibration.hasNmPerPixel())
 				calibration.setNmPerPixel(input_nmPerPixel);
-			if (!calibration.hasGain())
-				calibration.setGain(input_gain);
+			if (!calibration.hasCountPerPhoton())
+				calibration.setCountPerPhoton(input_gain);
 			if (!calibration.hasExposureTime())
 				calibration.setExposureTime(input_exposureTime);
 
@@ -1268,7 +1268,7 @@ public class ResultsManager implements PlugIn
 							Utils.rounded(dataBounds.y), Utils.rounded(dataBounds.y + dataBounds.getWidth()),
 							Utils.rounded(dataBounds.x + dataBounds.getHeight())));
 			gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
-			gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
+			gd.addNumericField("Gain (ADU/photon)", calibration.getCountPerPhoton(), 2);
 			gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 			if (noise <= 0)
 				gd.addNumericField("Noise (ADU)", input_noise, 2);
@@ -1287,7 +1287,7 @@ public class ResultsManager implements PlugIn
 			Prefs.set(Constants.inputNoise, input_noise);
 
 			calibration.setNmPerPixel(input_nmPerPixel);
-			calibration.setGain(input_gain);
+			calibration.setCountPerPhoton(input_gain);
 			calibration.setExposureTime(input_exposureTime);
 
 			results.setCalibration(calibration.getCalibration());

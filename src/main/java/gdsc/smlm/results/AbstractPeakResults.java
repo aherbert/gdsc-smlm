@@ -248,7 +248,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public double getGain()
 	{
-		return (calibration != null) ? calibrationReader.getGain() : DEFAULT_GAIN;
+		return (calibration != null) ? calibrationReader.getCountPerPhoton() : DEFAULT_GAIN;
 	}
 
 	/**
@@ -307,7 +307,7 @@ public abstract class AbstractPeakResults implements PeakResults
 			IntensityUnit iu = calibrationReader.getIntensityUnit();
 			//@formatter:off
 			return (du != null && calibrationReader.getNmPerPixel() > 0) &&
-				   (iu != null && calibrationReader.getGain() > 0);
+				   (iu != null && calibrationReader.getCountPerPhoton() > 0);
 			//@formatter:on
 		}
 		return false;

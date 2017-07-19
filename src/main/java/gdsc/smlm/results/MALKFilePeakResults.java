@@ -180,9 +180,9 @@ public class MALKFilePeakResults extends FilePeakResults
 			{
 				comments[count++] = String.format("Pixel pitch %s (nm)", Utils.rounded(cr.getNmPerPixel()));
 			}
-			if (cr.hasGain())
+			if (cr.hasCountPerPhoton())
 			{
-				comments[count++] = String.format("Gain %s (Count/photon)", Utils.rounded(cr.getGain()));
+				comments[count++] = String.format("Gain %s (Count/photon)", Utils.rounded(cr.getCountPerPhoton()));
 			}
 			if (cr.hasExposureTime())
 			{

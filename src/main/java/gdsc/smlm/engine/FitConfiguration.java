@@ -372,7 +372,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		invalidateFunctionSolver();
 
 		nmPerPixel = calibration.getNmPerPixel();
-		gain = calibration.getGain();
+		gain = calibration.getCountPerPhoton();
 		emCCD = calibration.isEMCCD();
 
 		if (isFitCameraCounts())
@@ -1385,7 +1385,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setGain(double gain)
 	{
 		invalidateFunctionSolver();
-		calibration.setGain(gain);
+		calibration.setCountPerPhoton(gain);
 		updateCalibration();
 		//updateSignalThreshold();
 	}
@@ -1453,7 +1453,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setAmplification(double amplification)
 	{
 		invalidateFunctionSolver();
-		calibration.setAmplification(amplification);
+		calibration.setCountPerElectron(amplification);
 	}
 
 	/**
@@ -2538,13 +2538,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			}
 
 			// All models use the amplification gain (i.e. how many ADUs/electron)
-			if (!calibration.hasAmplification())
+			if (!calibration.hasCountPerElectron())
 			{
 				throw new IllegalArgumentException(
 						"The amplification is required for the fit solver: " + getFitSolver());
 			}
 
-			fitter.setAlpha(1.0 / calibration.getAmplification());
+			fitter.setAlpha(1.0 / calibration.getCountPerElectron());
 
 			// TODO - Configure better stopping criteria ...
 

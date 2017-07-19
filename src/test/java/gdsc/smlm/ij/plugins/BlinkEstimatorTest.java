@@ -237,7 +237,7 @@ public class BlinkEstimatorTest
 		CalibrationWriter calibration = new CalibrationWriter();
 		calibration.setNmPerPixel(pixelPitch);
 		calibration.setExposureTime(msPerFrame);
-		calibration.setGain(1);
+		calibration.setCountPerPhoton(1);
 		results.setCalibration(calibration.getCalibration());
 		results.setPSF(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
 		float b = 0, intensity, z = 0;

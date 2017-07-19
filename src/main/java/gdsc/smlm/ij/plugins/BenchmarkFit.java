@@ -594,8 +594,8 @@ public class BenchmarkFit implements PlugIn
 		// Initialise the correct calibration
 		CalibrationWriter calibration = CalibrationWriter.create(fitConfig.getCalibration());
 		calibration.setNmPerPixel(benchmarkParameters.a);
-		calibration.setGain(benchmarkParameters.gain);
-		calibration.setAmplification(benchmarkParameters.amplification);
+		calibration.setCountPerPhoton(benchmarkParameters.gain);
+		calibration.setCountPerElectron(benchmarkParameters.amplification);
 		calibration.setBias(benchmarkParameters.bias);
 		calibration.setEmCCD(benchmarkParameters.emCCD);
 		calibration.setReadNoise(benchmarkParameters.readNoise);
@@ -1020,7 +1020,7 @@ public class BenchmarkFit implements PlugIn
 			// Add details of the noise model for the MLE
 			CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
 			sb.append("EM=").append(r.isEMCCD());
-			sb.append(":G=").append(r.getGain());
+			sb.append(":G=").append(r.getCountPerPhoton());
 			sb.append(":N=").append(r.getReadNoise());
 		}
 		else

@@ -1802,12 +1802,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		CalibrationWriter c = new CalibrationWriter();
 		CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
 		c.setNmPerPixel(settings.getPixelPitch());
-		c.setGain(helper.getTotalGain());
+		c.setCountPerPhoton(helper.getTotalGain());
 		c.setExposureTime(settings.getExposureTime());
 		c.setEmCCD((settings.getEmGain() > 1));
 		c.setBias(settings.getBias());
 		c.setReadNoise(settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1));
-		c.setAmplification(helper.getAmplification());
+		c.setCountPerElectron(helper.getAmplification());
 		results.setCalibration(c.getCalibration());
 		results.setSortAfterEnd(true);
 		results.begin();
@@ -5109,10 +5109,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			b = simulationParameters.b;
 			if (!cal.hasBias())
 				cal.setBias(simulationParameters.bias);
-			if (!cal.hasGain())
-				cal.setGain(simulationParameters.gain);
-			if (!cal.hasAmplification())
-				cal.setAmplification(simulationParameters.amplification);
+			if (!cal.hasCountPerPhoton())
+				cal.setCountPerPhoton(simulationParameters.gain);
+			if (!cal.hasCountPerElectron())
+				cal.setCountPerElectron(simulationParameters.amplification);
 			if (!cal.hasReadNoise())
 				cal.setReadNoise(simulationParameters.readNoise);
 			if (!cal.isCCDCamera())
@@ -5136,8 +5136,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Gaussian_SD", s, 3, 8, "nm");
 		gd.addNumericField("Pixel_pitch", cal.getNmPerPixel(), 3, 8, "nm");
 		gd.addNumericField("Background", b, 3, 8, "photon");
-		gd.addNumericField("Total_gain", cal.getGain(), 3, 8, "ADU/photon");
-		gd.addNumericField("Amplification", cal.getAmplification(), 3, 8, "ADU/e-");
+		gd.addNumericField("Total_gain", cal.getCountPerPhoton(), 3, 8, "ADU/photon");
+		gd.addNumericField("Amplification", cal.getCountPerElectron(), 3, 8, "ADU/e-");
 		gd.addCheckbox("EM-CCD", cal.isEMCCD());
 		gd.addNumericField("Read_noise", cal.getReadNoise(), 3, 8, "ADU");
 		gd.addNumericField("Bias", cal.getBias(), 3, 8, "pixel");
@@ -5155,8 +5155,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		s = gd.getNextNumber();
 		cal.setNmPerPixel(gd.getNextNumber());
 		b = gd.getNextNumber();
-		cal.setGain(gd.getNextNumber());
-		cal.setAmplification(gd.getNextNumber());
+		cal.setCountPerPhoton(gd.getNextNumber());
+		cal.setCountPerElectron(gd.getNextNumber());
 		cal.setEmCCD(gd.getNextBoolean());
 		cal.setReadNoise(gd.getNextNumber());
 		cal.setBias(gd.getNextNumber());
@@ -5179,8 +5179,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isAboveZero("Gaussian_SD", s);
 			Parameters.isAboveZero("Pixel_pitch", cal.getNmPerPixel());
 			Parameters.isPositive("Background", b);
-			Parameters.isAboveZero("Total_gain", cal.getGain());
-			Parameters.isAboveZero("Amplification", cal.getAmplification());
+			Parameters.isAboveZero("Total_gain", cal.getCountPerPhoton());
+			Parameters.isAboveZero("Amplification", cal.getCountPerElectron());
 			Parameters.isPositive("Read_noise", cal.getReadNoise());
 			Parameters.isPositive("Bias", cal.getBias());
 		}
@@ -5193,11 +5193,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Store calibration
 		results.setCalibration(cal.getCalibration());
 
-		double gain = cal.getGain();
+		double gain = cal.getCountPerPhoton();
 		double a = cal.getNmPerPixel();
 		double bias = cal.getBias();
 		double readNoise = cal.getReadNoise();
-		double amplification = cal.getAmplification();
+		double amplification = cal.getCountPerElectron();
 		boolean emCCD = cal.isEMCCD();
 
 		// Note: The calibration will throw an exception if the converter cannot be created.

@@ -117,7 +117,7 @@ public class LoadLocalisations implements PlugIn
 			results.setName(name);
 			CalibrationWriter calibration = new CalibrationWriter();
 			calibration.setNmPerPixel(pixelPitch);
-			calibration.setGain(gain);
+			calibration.setCountPerPhoton(gain);
 			calibration.setExposureTime(timeConverter.convert(exposureTime));
 			calibration.setDistanceUnit(distanceUnit);
 			calibration.setIntensityUnit(intensityUnit);

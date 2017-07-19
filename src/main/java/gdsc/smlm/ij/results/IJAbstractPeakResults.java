@@ -26,7 +26,7 @@ public abstract class IJAbstractPeakResults extends AbstractPeakResults implemen
 	{
 		CalibrationWriter cw = getCalibrationWriterSafe();
 		cw.setNmPerPixel(nmPerPixel);
-		cw.setGain(gain);
+		cw.setCountPerPhoton(gain);
 		setCalibration(cw.getCalibration());
 	}
 }

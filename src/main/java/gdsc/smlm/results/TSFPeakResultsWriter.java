@@ -497,8 +497,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				builder.setBias(cr.getBias());
 			if (cr.hasCameraType())
 				builder.setCameraType(cameraTypeMap[cr.getCameraType().ordinal()]);
-			if (cr.hasAmplification())
-				builder.setAmplification(cr.getAmplification());
+			if (cr.hasCountPerElectron())
+				builder.setAmplification(cr.getCountPerElectron());
 
 			if (cr.hasDistanceUnit())
 			{
@@ -514,21 +514,21 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			}
 
 			// We can use some logic here to get the QE
-			if (cr.hasGain())
+			if (cr.hasCountPerPhoton())
 			{
-				builder.setGain(cr.getGain());
+				builder.setGain(cr.getCountPerPhoton());
 
 				// Use amplification if present (as this is the correct electrons/count value), otherwise use gain
-				if (cr.hasAmplification())
+				if (cr.hasCountPerElectron())
 				{
-					double ecf = cr.getAmplification();
-					double qe = cr.getGain() / ecf;
+					double ecf = cr.getCountPerElectron();
+					double qe = cr.getCountPerPhoton() / ecf;
 					builder.addEcf(ecf);
 					builder.addQe(qe);
 				}
 				else
 				{
-					builder.addEcf(cr.getGain());
+					builder.addEcf(cr.getCountPerPhoton());
 					builder.addQe(1);
 				}
 			}

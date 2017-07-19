@@ -49,7 +49,7 @@ public class CalibrationReaderTest
 		IntensityCalibration.Builder intensityBuilder = builder.getIntensityCalibrationBuilder();
 
 		intensityBuilder.setIntensityUnit(IntensityUnit.PHOTON);
-		intensityBuilder.setGain(gain);
+		intensityBuilder.setCountPerPhoton(gain);
 
 		Calibration c = builder.build();
 

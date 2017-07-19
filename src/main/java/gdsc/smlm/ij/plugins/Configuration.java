@@ -238,7 +238,7 @@ public class Configuration implements PlugIn, ItemListener
 		try
 		{
 			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
-			Parameters.isAboveZero("Gain", calibration.getGain());
+			Parameters.isAboveZero("Gain", calibration.getCountPerPhoton());
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
 			Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());

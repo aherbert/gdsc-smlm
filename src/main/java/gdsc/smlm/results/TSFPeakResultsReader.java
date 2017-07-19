@@ -523,8 +523,8 @@ public class TSFPeakResultsReader
 			double ecf = spotList.getEcf(channel - 1);
 			// QE is per fluorophore type
 			double qe = (spotList.getQeCount() >= fluorophoreType) ? spotList.getQe(fluorophoreType - 1) : 1;
-			cal.setGain(ecf * qe);
-			cal.setAmplification(ecf);
+			cal.setCountPerPhoton(ecf * qe);
+			cal.setCountPerElectron(ecf);
 		}
 
 		if (isGDSC)
@@ -546,7 +546,7 @@ public class TSFPeakResultsReader
 			}
 
 			if (spotList.hasGain())
-				cal.setGain(spotList.getGain());
+				cal.setCountPerPhoton(spotList.getGain());
 			if (spotList.hasExposureTime())
 				cal.setExposureTime(spotList.getExposureTime());
 			if (spotList.hasReadNoise())
@@ -558,7 +558,7 @@ public class TSFPeakResultsReader
 			else
 				cal.setCameraType(null);
 			if (spotList.hasAmplification())
-				cal.setAmplification(spotList.getAmplification());
+				cal.setCountPerElectron(spotList.getAmplification());
 
 			if (spotList.hasConfiguration())
 			{

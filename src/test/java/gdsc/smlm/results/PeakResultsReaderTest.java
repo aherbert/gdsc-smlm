@@ -841,11 +841,11 @@ public class PeakResultsReaderTest
 				(int) (100 * rand.next())));
 		CalibrationWriter cal = new CalibrationWriter();
 		cal.setNmPerPixel(rand.next());
-		cal.setGain(rand.next());
+		cal.setCountPerPhoton(rand.next());
 		cal.setExposureTime(rand.next());
 		cal.setReadNoise(rand.next());
 		cal.setBias(bias);
-		cal.setAmplification(rand.next());
+		cal.setCountPerElectron(rand.next());
 		// Subtract 1 to avoid the additional UNRECOGNISED enum value
 		cal.setCameraType(CameraType.values()[rand.nextInt(CameraType.values().length - 1)]);
 		cal.setDistanceUnit(DistanceUnit.values()[rand.nextInt(DistanceUnit.values().length - 1)]);

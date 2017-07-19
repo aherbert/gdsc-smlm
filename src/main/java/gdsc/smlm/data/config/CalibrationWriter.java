@@ -153,7 +153,7 @@ public class CalibrationWriter extends CalibrationReader
 	 * @param gain
 	 *            the new gain
 	 */
-	public void setGain(double gain)
+	public void setCountPerPhoton(double gain)
 	{
 		getBuilder().getIntensityCalibrationBuilder().setCountPerPhoton(gain);
 	}
@@ -225,12 +225,12 @@ public class CalibrationWriter extends CalibrationReader
 	 * perfect (i.e. it has noise). The amplification is equal to the gain (Count/photon) divided by the quantum
 	 * efficiency (e-/photon).
 	 *
-	 * @param amplification
+	 * @param countPerElectron
 	 *            the new amplification
 	 */
-	public void setAmplification(double amplification)
+	public void setCountPerElectron(double countPerElectron)
 	{
-		getBuilder().getCameraCalibrationBuilder().setCountPerElectron(amplification);
+		getBuilder().getCameraCalibrationBuilder().setCountPerElectron(countPerElectron);
 	}
 
 	/**

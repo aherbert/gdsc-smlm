@@ -206,7 +206,7 @@ public class CalibrationHelper
 		if (nmPerPixel > 0)
 			cw.setNmPerPixel(nmPerPixel);
 		if (gain > 0)
-			cw.setGain(gain);
+			cw.setCountPerPhoton(gain);
 		if (exposureTime > 0)
 			cw.setExposureTime(exposureTime);
 		return cw.getCalibration();

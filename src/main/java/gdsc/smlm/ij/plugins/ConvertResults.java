@@ -100,7 +100,7 @@ public class ConvertResults implements PlugIn
 		gd.addNumericField("Calibration (nm/px)", cr.getNmPerPixel(), 2);
 		gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(),
 				UnitHelper.getName(cr.getIntensityUnit()));
-		gd.addNumericField("Gain (Count/photon)", cr.getGain(), 2);
+		gd.addNumericField("Gain (Count/photon)", cr.getCountPerPhoton(), 2);
 		gd.addChoice("Angle_unit", SettingsManager.getAngleUnitNames(), UnitHelper.getName(cr.getAngleUnit()));
 
 		gd.showDialog();
@@ -111,7 +111,7 @@ public class ConvertResults implements PlugIn
 		DistanceUnit distanceUnit = SettingsManager.getDistanceUnitValues()[gd.getNextChoiceIndex()];
 		cw.setNmPerPixel(Math.abs(gd.getNextNumber()));
 		IntensityUnit intensityUnit = SettingsManager.getIntensityUnitValues()[gd.getNextChoiceIndex()];
-		cw.setGain(Math.abs(gd.getNextNumber()));
+		cw.setCountPerPhoton(Math.abs(gd.getNextNumber()));
 		AngleUnit angleUnit = SettingsManager.getAngleUnitValues()[gd.getNextChoiceIndex()];
 
 		// Don't set the calibration with bad values
@@ -120,7 +120,7 @@ public class ConvertResults implements PlugIn
 			IJ.error(TITLE, "Require positive nm/pixel for conversion");
 			return false;
 		}
-		if (intensityUnit.getNumber() > 0 && !(cw.getGain() > 0))
+		if (intensityUnit.getNumber() > 0 && !(cw.getCountPerPhoton() > 0))
 		{
 			IJ.error(TITLE, "Require positive Count/photon for conversion");
 			return false;

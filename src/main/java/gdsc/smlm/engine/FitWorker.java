@@ -2934,7 +2934,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Initial guess using the noise (assuming all noise is from Poisson background).
 				// EMCCD will have increase noise by a factor of sqrt(2)
 				CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
-				double gain = (fitConfig.isFitCameraCounts()) ? r.getGain() : 1;
+				double gain = (fitConfig.isFitCameraCounts()) ? r.getCountPerPhoton() : 1;
 				background = (float) (PeakResultHelper.noiseToLocalBackground(noise, gain, r.isEMCCD()));
 			}
 			else

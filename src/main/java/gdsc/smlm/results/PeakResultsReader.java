@@ -434,7 +434,7 @@ public class PeakResultsReader
 								if (cal.hasNmPerPixel())
 									calibration.setNmPerPixel(cal.getNmPerPixel());
 								if (cal.hasGain())
-									calibration.setGain(cal.getGain());
+									calibration.setCountPerPhoton(cal.getGain());
 								if (cal.hasExposureTime())
 									calibration.setExposureTime(cal.getExposureTime());
 								if (cal.hasReadNoise())
@@ -444,7 +444,7 @@ public class PeakResultsReader
 								if (cal.emCCD)
 									calibration.setCameraType(CameraType.EMCCD);
 								if (cal.hasAmplification())
-									calibration.setAmplification(cal.getAmplification());
+									calibration.setCountPerElectron(cal.getAmplification());
 
 								// Previous version were always in fixed units
 								calibration.setDistanceUnit(DistanceUnit.PIXEL);

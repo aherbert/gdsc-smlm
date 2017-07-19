@@ -1122,7 +1122,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						if (calibration.isCCDCamera())
 						{
 							egd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
-							egd.addNumericField("Gain (Count/photon)", calibration.getGain(), 2);
+							egd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
 						}
 						else
 						{
@@ -1138,7 +1138,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						if (calibration.isCCDCamera())
 						{
 							calibration.setBias(Math.abs(egd.getNextNumber()));
-							calibration.setGain(Math.abs(egd.getNextNumber()));
+							calibration.setCountPerPhoton(Math.abs(egd.getNextNumber()));
 						}
 					}
 				});
@@ -1344,7 +1344,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (!calibration.hasNmPerPixel())
 			return true;
 		// Bias can be zero (but this is unlikely)
-		if (!calibration.hasGain() || !(calibration.getBias() > 0))
+		if (!calibration.hasCountPerPhoton() || !(calibration.getBias() > 0))
 			return true;
 		if (!calibration.hasExposureTime())
 			return true;
@@ -1383,7 +1383,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		{
 			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
 			// We allow bias to be zero
-			Parameters.isAboveZero("Gain", calibration.getGain());
+			Parameters.isAboveZero("Gain", calibration.getCountPerPhoton());
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD", fitConfig.getInitialXSD());
 		}
@@ -1448,12 +1448,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 				"A value of 1 means no conversion to photons will occur.");
 		// TODO - Add a wizard to allow calculation of total gain from EM-gain, camera gain and QE
 		gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
-		gd.addNumericField("Gain (Count/photon)", calibration.getGain(), 2);
+		gd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
 		calibration.setBias(Math.abs(gd.getNextNumber()));
-		calibration.setGain(Math.abs(gd.getNextNumber()));
+		calibration.setCountPerPhoton(Math.abs(gd.getNextNumber()));
 		return true;
 	}
 
@@ -1986,7 +1986,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
 				gd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
 				gd.addNumericField("Read_noise (Count)", calibration.getReadNoise(), 2);
-				gd.addNumericField("Amplification (Count/electron)", calibration.getAmplification(), 2);
+				gd.addNumericField("Amplification (Count/electron)", calibration.getCountPerElectron(), 2);
 				gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 			}
 			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
@@ -2005,7 +2005,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				calibration.setBias(Math.abs(gd.getNextNumber()));
 				fitConfig.setModelCamera(gd.getNextBoolean());
 				calibration.setReadNoise(Math.abs(gd.getNextNumber()));
-				calibration.setAmplification(Math.abs(gd.getNextNumber()));
+				calibration.setCountPerElectron(Math.abs(gd.getNextNumber()));
 				calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
@@ -2062,7 +2062,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 				}
 				gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
-				gd.addNumericField("Gain (Count/photon)", calibration.getGain(), 2);
+				gd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
 			}
 
 			gd.addCheckbox("Use_clamping", fitConfig.isUseClamping());
@@ -2106,7 +2106,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (requireCalibration)
 			{
 				calibration.setBias(Math.abs(gd.getNextNumber()));
-				calibration.setGain(Math.abs(gd.getNextNumber()));
+				calibration.setCountPerPhoton(Math.abs(gd.getNextNumber()));
 			}
 
 			fitConfig.setUseClamping(gd.getNextBoolean());

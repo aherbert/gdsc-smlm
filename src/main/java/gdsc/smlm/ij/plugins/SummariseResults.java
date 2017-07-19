@@ -218,7 +218,7 @@ public class SummariseResults implements PlugIn
 				if (calibration.isCCDCamera())
 				{
 					sb.append(" bias=").append(calibration.getBias());
-					sb.append(" gain=").append(calibration.getGain());
+					sb.append(" gain=").append(calibration.getCountPerPhoton());
 				}
 			}
 			else
