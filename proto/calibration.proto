@@ -31,7 +31,7 @@ message IntensityCalibration {
 	IntensityUnit intensity_unit = 1;
 	// The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital
 	// count units (Counts) to photons.
-	double gain = 2;
+	double count_per_photon = 2;
 }
 	
 // Define the calibration for angles
@@ -60,10 +60,10 @@ message CameraCalibration {
 	double bias = 3;
 
 	// The camera amplification (Count/electron) used when modelling a microscope camera.
-	// Note that the camera noise model assumes that electrons are converted to ADUs by 
+	// Note that the camera noise model assumes that electrons are converted to counts by 
 	// amplification that is not perfect (i.e. it has noise). The amplification is equal 
 	// to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
-	double amplification = 4;
+	double count_per_electron = 4;
 }
 
 // Define the calibration for the results. The calibration contains details of the 

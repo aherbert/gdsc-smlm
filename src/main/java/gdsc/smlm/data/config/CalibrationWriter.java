@@ -155,7 +155,7 @@ public class CalibrationWriter extends CalibrationReader
 	 */
 	public void setGain(double gain)
 	{
-		getBuilder().getIntensityCalibrationBuilder().setGain(gain);
+		getBuilder().getIntensityCalibrationBuilder().setCountPerPhoton(gain);
 	}
 
 	/**
@@ -230,7 +230,7 @@ public class CalibrationWriter extends CalibrationReader
 	 */
 	public void setAmplification(double amplification)
 	{
-		getBuilder().getCameraCalibrationBuilder().setAmplification(amplification);
+		getBuilder().getCameraCalibrationBuilder().setCountPerElectron(amplification);
 	}
 
 	/**

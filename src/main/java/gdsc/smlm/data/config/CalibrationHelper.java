@@ -75,7 +75,7 @@ public class CalibrationHelper
 		{
 			IntensityCalibrationOrBuilder intensityCalibration = calibration.getIntensityCalibrationOrBuilder();
 			return UnitConverterFactory.createConverter(intensityCalibration.getIntensityUnit(), toIntensityUnit,
-					intensityCalibration.getGain());
+					intensityCalibration.getCountPerPhoton());
 		}
 		throw new ConversionException();
 	}

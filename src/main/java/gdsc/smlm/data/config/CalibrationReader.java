@@ -184,7 +184,7 @@ public class CalibrationReader
 	public double getGain()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getGain() : 0;
+		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getCountPerPhoton() : 0;
 	}
 
 	/**
@@ -347,7 +347,7 @@ public class CalibrationReader
 	public double getAmplification()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getAmplification() : 0;
+		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCountPerElectron() : 0;
 	}
 
 	/**

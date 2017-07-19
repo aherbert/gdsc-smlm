@@ -1401,9 +1401,9 @@ public final class CalibrationProtos {
      * count units (Counts) to photons.
      * </pre>
      *
-     * <code>double gain = 2;</code>
+     * <code>double count_per_photon = 2;</code>
      */
-    double getGain();
+    double getCountPerPhoton();
   }
   /**
    * Protobuf type {@code gdsc.smlm.data.config.IntensityCalibration}
@@ -1418,7 +1418,7 @@ public final class CalibrationProtos {
     }
     private IntensityCalibration() {
       intensityUnit_ = 0;
-      gain_ = 0D;
+      countPerPhoton_ = 0D;
     }
 
     @java.lang.Override
@@ -1454,7 +1454,7 @@ public final class CalibrationProtos {
             }
             case 17: {
 
-              gain_ = input.readDouble();
+              countPerPhoton_ = input.readDouble();
               break;
             }
           }
@@ -1504,18 +1504,18 @@ public final class CalibrationProtos {
       return result == null ? gdsc.smlm.data.config.UnitProtos.IntensityUnit.UNRECOGNIZED : result;
     }
 
-    public static final int GAIN_FIELD_NUMBER = 2;
-    private double gain_;
+    public static final int COUNT_PER_PHOTON_FIELD_NUMBER = 2;
+    private double countPerPhoton_;
     /**
      * <pre>
      * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital
      * count units (Counts) to photons.
      * </pre>
      *
-     * <code>double gain = 2;</code>
+     * <code>double count_per_photon = 2;</code>
      */
-    public double getGain() {
-      return gain_;
+    public double getCountPerPhoton() {
+      return countPerPhoton_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1533,8 +1533,8 @@ public final class CalibrationProtos {
       if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
         output.writeEnum(1, intensityUnit_);
       }
-      if (gain_ != 0D) {
-        output.writeDouble(2, gain_);
+      if (countPerPhoton_ != 0D) {
+        output.writeDouble(2, countPerPhoton_);
       }
     }
 
@@ -1547,9 +1547,9 @@ public final class CalibrationProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, intensityUnit_);
       }
-      if (gain_ != 0D) {
+      if (countPerPhoton_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(2, gain_);
+          .computeDoubleSize(2, countPerPhoton_);
       }
       memoizedSize = size;
       return size;
@@ -1569,9 +1569,9 @@ public final class CalibrationProtos {
       boolean result = true;
       result = result && intensityUnit_ == other.intensityUnit_;
       result = result && (
-          java.lang.Double.doubleToLongBits(getGain())
+          java.lang.Double.doubleToLongBits(getCountPerPhoton())
           == java.lang.Double.doubleToLongBits(
-              other.getGain()));
+              other.getCountPerPhoton()));
       return result;
     }
 
@@ -1584,9 +1584,9 @@ public final class CalibrationProtos {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + INTENSITY_UNIT_FIELD_NUMBER;
       hash = (53 * hash) + intensityUnit_;
-      hash = (37 * hash) + GAIN_FIELD_NUMBER;
+      hash = (37 * hash) + COUNT_PER_PHOTON_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getGain()));
+          java.lang.Double.doubleToLongBits(getCountPerPhoton()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1718,7 +1718,7 @@ public final class CalibrationProtos {
         super.clear();
         intensityUnit_ = 0;
 
-        gain_ = 0D;
+        countPerPhoton_ = 0D;
 
         return this;
       }
@@ -1743,7 +1743,7 @@ public final class CalibrationProtos {
       public gdsc.smlm.data.config.CalibrationProtos.IntensityCalibration buildPartial() {
         gdsc.smlm.data.config.CalibrationProtos.IntensityCalibration result = new gdsc.smlm.data.config.CalibrationProtos.IntensityCalibration(this);
         result.intensityUnit_ = intensityUnit_;
-        result.gain_ = gain_;
+        result.countPerPhoton_ = countPerPhoton_;
         onBuilt();
         return result;
       }
@@ -1788,8 +1788,8 @@ public final class CalibrationProtos {
         if (other.intensityUnit_ != 0) {
           setIntensityUnitValue(other.getIntensityUnitValue());
         }
-        if (other.getGain() != 0D) {
-          setGain(other.getGain());
+        if (other.getCountPerPhoton() != 0D) {
+          setCountPerPhoton(other.getCountPerPhoton());
         }
         onChanged();
         return this;
@@ -1881,17 +1881,17 @@ public final class CalibrationProtos {
         return this;
       }
 
-      private double gain_ ;
+      private double countPerPhoton_ ;
       /**
        * <pre>
        * The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital
        * count units (Counts) to photons.
        * </pre>
        *
-       * <code>double gain = 2;</code>
+       * <code>double count_per_photon = 2;</code>
        */
-      public double getGain() {
-        return gain_;
+      public double getCountPerPhoton() {
+        return countPerPhoton_;
       }
       /**
        * <pre>
@@ -1899,11 +1899,11 @@ public final class CalibrationProtos {
        * count units (Counts) to photons.
        * </pre>
        *
-       * <code>double gain = 2;</code>
+       * <code>double count_per_photon = 2;</code>
        */
-      public Builder setGain(double value) {
+      public Builder setCountPerPhoton(double value) {
         
-        gain_ = value;
+        countPerPhoton_ = value;
         onChanged();
         return this;
       }
@@ -1913,11 +1913,11 @@ public final class CalibrationProtos {
        * count units (Counts) to photons.
        * </pre>
        *
-       * <code>double gain = 2;</code>
+       * <code>double count_per_photon = 2;</code>
        */
-      public Builder clearGain() {
+      public Builder clearCountPerPhoton() {
         
-        gain_ = 0D;
+        countPerPhoton_ = 0D;
         onChanged();
         return this;
       }
@@ -2525,14 +2525,14 @@ public final class CalibrationProtos {
     /**
      * <pre>
      * The camera amplification (Count/electron) used when modelling a microscope camera.
-     * Note that the camera noise model assumes that electrons are converted to ADUs by 
+     * Note that the camera noise model assumes that electrons are converted to counts by 
      * amplification that is not perfect (i.e. it has noise). The amplification is equal 
      * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
      * </pre>
      *
-     * <code>double amplification = 4;</code>
+     * <code>double count_per_electron = 4;</code>
      */
-    double getAmplification();
+    double getCountPerElectron();
   }
   /**
    * <pre>
@@ -2553,7 +2553,7 @@ public final class CalibrationProtos {
       cameraType_ = 0;
       readNoise_ = 0D;
       bias_ = 0D;
-      amplification_ = 0D;
+      countPerElectron_ = 0D;
     }
 
     @java.lang.Override
@@ -2599,7 +2599,7 @@ public final class CalibrationProtos {
             }
             case 33: {
 
-              amplification_ = input.readDouble();
+              countPerElectron_ = input.readDouble();
               break;
             }
           }
@@ -2675,20 +2675,20 @@ public final class CalibrationProtos {
       return bias_;
     }
 
-    public static final int AMPLIFICATION_FIELD_NUMBER = 4;
-    private double amplification_;
+    public static final int COUNT_PER_ELECTRON_FIELD_NUMBER = 4;
+    private double countPerElectron_;
     /**
      * <pre>
      * The camera amplification (Count/electron) used when modelling a microscope camera.
-     * Note that the camera noise model assumes that electrons are converted to ADUs by 
+     * Note that the camera noise model assumes that electrons are converted to counts by 
      * amplification that is not perfect (i.e. it has noise). The amplification is equal 
      * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
      * </pre>
      *
-     * <code>double amplification = 4;</code>
+     * <code>double count_per_electron = 4;</code>
      */
-    public double getAmplification() {
-      return amplification_;
+    public double getCountPerElectron() {
+      return countPerElectron_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -2712,8 +2712,8 @@ public final class CalibrationProtos {
       if (bias_ != 0D) {
         output.writeDouble(3, bias_);
       }
-      if (amplification_ != 0D) {
-        output.writeDouble(4, amplification_);
+      if (countPerElectron_ != 0D) {
+        output.writeDouble(4, countPerElectron_);
       }
     }
 
@@ -2734,9 +2734,9 @@ public final class CalibrationProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, bias_);
       }
-      if (amplification_ != 0D) {
+      if (countPerElectron_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(4, amplification_);
+          .computeDoubleSize(4, countPerElectron_);
       }
       memoizedSize = size;
       return size;
@@ -2764,9 +2764,9 @@ public final class CalibrationProtos {
           == java.lang.Double.doubleToLongBits(
               other.getBias()));
       result = result && (
-          java.lang.Double.doubleToLongBits(getAmplification())
+          java.lang.Double.doubleToLongBits(getCountPerElectron())
           == java.lang.Double.doubleToLongBits(
-              other.getAmplification()));
+              other.getCountPerElectron()));
       return result;
     }
 
@@ -2785,9 +2785,9 @@ public final class CalibrationProtos {
       hash = (37 * hash) + BIAS_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getBias()));
-      hash = (37 * hash) + AMPLIFICATION_FIELD_NUMBER;
+      hash = (37 * hash) + COUNT_PER_ELECTRON_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getAmplification()));
+          java.lang.Double.doubleToLongBits(getCountPerElectron()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2927,7 +2927,7 @@ public final class CalibrationProtos {
 
         bias_ = 0D;
 
-        amplification_ = 0D;
+        countPerElectron_ = 0D;
 
         return this;
       }
@@ -2954,7 +2954,7 @@ public final class CalibrationProtos {
         result.cameraType_ = cameraType_;
         result.readNoise_ = readNoise_;
         result.bias_ = bias_;
-        result.amplification_ = amplification_;
+        result.countPerElectron_ = countPerElectron_;
         onBuilt();
         return result;
       }
@@ -3005,8 +3005,8 @@ public final class CalibrationProtos {
         if (other.getBias() != 0D) {
           setBias(other.getBias());
         }
-        if (other.getAmplification() != 0D) {
-          setAmplification(other.getAmplification());
+        if (other.getCountPerElectron() != 0D) {
+          setCountPerElectron(other.getCountPerElectron());
         }
         onChanged();
         return this;
@@ -3174,49 +3174,49 @@ public final class CalibrationProtos {
         return this;
       }
 
-      private double amplification_ ;
+      private double countPerElectron_ ;
       /**
        * <pre>
        * The camera amplification (Count/electron) used when modelling a microscope camera.
-       * Note that the camera noise model assumes that electrons are converted to ADUs by 
+       * Note that the camera noise model assumes that electrons are converted to counts by 
        * amplification that is not perfect (i.e. it has noise). The amplification is equal 
        * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
        * </pre>
        *
-       * <code>double amplification = 4;</code>
+       * <code>double count_per_electron = 4;</code>
        */
-      public double getAmplification() {
-        return amplification_;
+      public double getCountPerElectron() {
+        return countPerElectron_;
       }
       /**
        * <pre>
        * The camera amplification (Count/electron) used when modelling a microscope camera.
-       * Note that the camera noise model assumes that electrons are converted to ADUs by 
+       * Note that the camera noise model assumes that electrons are converted to counts by 
        * amplification that is not perfect (i.e. it has noise). The amplification is equal 
        * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
        * </pre>
        *
-       * <code>double amplification = 4;</code>
+       * <code>double count_per_electron = 4;</code>
        */
-      public Builder setAmplification(double value) {
+      public Builder setCountPerElectron(double value) {
         
-        amplification_ = value;
+        countPerElectron_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * The camera amplification (Count/electron) used when modelling a microscope camera.
-       * Note that the camera noise model assumes that electrons are converted to ADUs by 
+       * Note that the camera noise model assumes that electrons are converted to counts by 
        * amplification that is not perfect (i.e. it has noise). The amplification is equal 
        * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
        * </pre>
        *
-       * <code>double amplification = 4;</code>
+       * <code>double count_per_electron = 4;</code>
        */
-      public Builder clearAmplification() {
+      public Builder clearCountPerElectron() {
         
-        amplification_ = 0D;
+        countPerElectron_ = 0D;
         onChanged();
         return this;
       }
@@ -4973,26 +4973,27 @@ public final class CalibrationProtos {
       "nfig.DistanceUnit\022\024\n\014nm_per_pixel\030\002 \001(\001\"" +
       "\\\n\017TimeCalibration\0222\n\ttime_unit\030\001 \001(\0162\037." +
       "gdsc.smlm.data.config.TimeUnit\022\025\n\rexposu" +
-      "re_time\030\002 \001(\001\"b\n\024IntensityCalibration\022<\n" +
+      "re_time\030\002 \001(\001\"n\n\024IntensityCalibration\022<\n" +
       "\016intensity_unit\030\001 \001(\0162$.gdsc.smlm.data.c" +
-      "onfig.IntensityUnit\022\014\n\004gain\030\002 \001(\001\"H\n\020Ang" +
-      "leCalibration\0224\n\nangle_unit\030\001 \001(\0162 .gdsc",
-      ".smlm.data.config.AngleUnit\"\204\001\n\021CameraCa" +
-      "libration\0226\n\013camera_type\030\001 \001(\0162!.gdsc.sm" +
-      "lm.data.config.CameraType\022\022\n\nread_noise\030" +
-      "\002 \001(\001\022\014\n\004bias\030\003 \001(\001\022\025\n\ramplification\030\004 \001" +
-      "(\001\"\357\002\n\013Calibration\022H\n\024distance_calibrati" +
-      "on\030\001 \001(\0132*.gdsc.smlm.data.config.Distanc" +
-      "eCalibration\022@\n\020time_calibration\030\002 \001(\0132&" +
-      ".gdsc.smlm.data.config.TimeCalibration\022J" +
-      "\n\025intensity_calibration\030\003 \001(\0132+.gdsc.sml" +
-      "m.data.config.IntensityCalibration\022B\n\021an",
-      "gle_calibration\030\004 \001(\0132\'.gdsc.smlm.data.c" +
-      "onfig.AngleCalibration\022D\n\022camera_calibra" +
-      "tion\030\005 \001(\0132(.gdsc.smlm.data.config.Camer" +
-      "aCalibration*?\n\nCameraType\022\022\n\016CAMERA_TYP" +
-      "E_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t\n\005SCMOS\020\003B\023B" +
-      "\021CalibrationProtosb\006proto3"
+      "onfig.IntensityUnit\022\030\n\020count_per_photon\030" +
+      "\002 \001(\001\"H\n\020AngleCalibration\0224\n\nangle_unit\030",
+      "\001 \001(\0162 .gdsc.smlm.data.config.AngleUnit\"" +
+      "\211\001\n\021CameraCalibration\0226\n\013camera_type\030\001 \001" +
+      "(\0162!.gdsc.smlm.data.config.CameraType\022\022\n" +
+      "\nread_noise\030\002 \001(\001\022\014\n\004bias\030\003 \001(\001\022\032\n\022count" +
+      "_per_electron\030\004 \001(\001\"\357\002\n\013Calibration\022H\n\024d" +
+      "istance_calibration\030\001 \001(\0132*.gdsc.smlm.da" +
+      "ta.config.DistanceCalibration\022@\n\020time_ca" +
+      "libration\030\002 \001(\0132&.gdsc.smlm.data.config." +
+      "TimeCalibration\022J\n\025intensity_calibration" +
+      "\030\003 \001(\0132+.gdsc.smlm.data.config.Intensity",
+      "Calibration\022B\n\021angle_calibration\030\004 \001(\0132\'" +
+      ".gdsc.smlm.data.config.AngleCalibration\022" +
+      "D\n\022camera_calibration\030\005 \001(\0132(.gdsc.smlm." +
+      "data.config.CameraCalibration*?\n\nCameraT" +
+      "ype\022\022\n\016CAMERA_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CC" +
+      "D\020\002\022\t\n\005SCMOS\020\003B\023B\021CalibrationProtosb\006pro" +
+      "to3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5024,7 +5025,7 @@ public final class CalibrationProtos {
     internal_static_gdsc_smlm_data_config_IntensityCalibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_IntensityCalibration_descriptor,
-        new java.lang.String[] { "IntensityUnit", "Gain", });
+        new java.lang.String[] { "IntensityUnit", "CountPerPhoton", });
     internal_static_gdsc_smlm_data_config_AngleCalibration_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_gdsc_smlm_data_config_AngleCalibration_fieldAccessorTable = new
@@ -5036,7 +5037,7 @@ public final class CalibrationProtos {
     internal_static_gdsc_smlm_data_config_CameraCalibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CameraCalibration_descriptor,
-        new java.lang.String[] { "CameraType", "ReadNoise", "Bias", "Amplification", });
+        new java.lang.String[] { "CameraType", "ReadNoise", "Bias", "CountPerElectron", });
     internal_static_gdsc_smlm_data_config_Calibration_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_gdsc_smlm_data_config_Calibration_fieldAccessorTable = new
