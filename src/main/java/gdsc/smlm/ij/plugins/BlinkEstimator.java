@@ -15,6 +15,7 @@ import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 
+import gdsc.core.data.DataException;
 import gdsc.core.ij.Utils;
 
 /*----------------------------------------------------------------------------- 
@@ -97,7 +98,7 @@ public class BlinkEstimator implements PlugIn
 		if (!showDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true);
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -382,11 +383,20 @@ public class BlinkEstimator implements PlugIn
 
 	private double calculateAveragePrecision(MemoryPeakResults results, boolean verbose)
 	{
-		PCPALMMolecules fitter = new PCPALMMolecules();
-		ArrayList<Molecule> molecules = fitter.extractLocalisations(results);
-		String title = (verbose) ? TITLE + " Localisation Precision" : null;
+		double fittedAverage = 0;
 
-		double fittedAverage = fitter.calculateAveragePrecision(molecules, title, histogramBins, true, true);
+		try
+		{
+			PCPALMMolecules fitter = new PCPALMMolecules();
+			ArrayList<Molecule> molecules = fitter.extractLocalisations(results);
+			String title = (verbose) ? TITLE + " Localisation Precision" : null;
+
+			fittedAverage = fitter.calculateAveragePrecision(molecules, title, histogramBins, true, true);
+		}
+		catch (DataException e)
+		{
+			// This is thrown when the data cannot be converted for precision computation
+		}
 
 		// Sense check the precision
 		if (fittedAverage < 5 || fittedAverage > 60)

@@ -50,6 +50,7 @@ import gdsc.core.clustering.Cluster;
 import gdsc.core.clustering.ClusterPoint;
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.clustering.ClusteringEngine;
+import gdsc.core.data.DataException;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
@@ -60,9 +61,9 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
-import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.function.SkewNormalFunction;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
@@ -188,7 +189,7 @@ public class PCPALMMolecules implements PlugIn
 
 		if (runMode != 3)
 		{
-			results = ResultsManager.loadInputResults(inputOption, true);
+			results = ResultsManager.loadInputResults(inputOption, true, null, null);
 			if (results == null || results.size() == 0)
 			{
 				IJ.error(TITLE, "No results could be loaded");
@@ -558,11 +559,14 @@ public class PCPALMMolecules implements PlugIn
 	 * <p>
 	 * Estimate the localisation uncertainty (precision) of each molecule using the formula of Mortensen, et al (2010),
 	 * Nature Methods 7, 377-381. Store distance in nm and signal in photons using the calibration
-	 * 
+	 *
 	 * @param results
-	 * @return
+	 *            the results
+	 * @return the array list
+	 * @throws DataException
+	 *             If conversion to nm and photons with computed precision is not possible
 	 */
-	public ArrayList<Molecule> extractLocalisations(MemoryPeakResults results)
+	public ArrayList<Molecule> extractLocalisations(MemoryPeakResults results) throws DataException
 	{
 		ArrayList<Molecule> molecules = new ArrayList<Molecule>(results.size());
 
