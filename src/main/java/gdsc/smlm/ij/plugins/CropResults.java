@@ -66,7 +66,7 @@ public class CropResults implements PlugIn
 		if (gd.wasCanceled())
 			return;
 		inputOption = ResultsManager.getInputSource(gd);
-		results = ResultsManager.loadInputResults(inputOption, false);
+		results = ResultsManager.loadInputResults(inputOption, false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -84,9 +84,6 @@ public class CropResults implements PlugIn
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
-
-		// TODO - add option to crop using the bounding rectangle of an ROI on an open image.
-		// See PC-PALM Molecules.
 
 		// Build a list of all images with a region ROI
 		TurboList<String> titles = new TurboList<String>(WindowManager.getWindowCount());
@@ -185,7 +182,7 @@ public class CropResults implements PlugIn
 		}
 
 		final Rectangle2D bounds = pixelBounds;
-		
+
 		if (bounds.getWidth() > 0 && bounds.getHeight() > 0)
 		{
 			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()

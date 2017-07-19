@@ -233,7 +233,8 @@ public class ResultsManagerTest
 						Macro.setOptions(sb.toString());
 
 						ResultsManager.setInputFilename(filename);
-						MemoryPeakResults in = ResultsManager.loadInputResults(ResultsManager.INPUT_FILE, false);
+						MemoryPeakResults in = ResultsManager.loadInputResults(ResultsManager.INPUT_FILE, false, null,
+								null);
 						checkEqual(spots, channel, slice, position, type, in);
 					}
 	}

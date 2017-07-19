@@ -72,7 +72,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "No localisations in memory");
@@ -83,13 +83,28 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 			return;
 
 		// Load the results
-		MemoryPeakResults results1 = ResultsManager.loadInputResults(inputOption1, false);
-		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false);
-		MemoryPeakResults results3 = ResultsManager.loadInputResults(inputOption3, false);
-		if (results1 == null || results1.size() == 0 || results2 == null || results2.size() == 0)
+		MemoryPeakResults results1 = ResultsManager.loadInputResults(inputOption1, false, null, null);
+		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false, null, null);
+		MemoryPeakResults results3 = ResultsManager.loadInputResults(inputOption3, false, null, null);
+		IJ.showStatus("");
+		if (results1 == null || results1.size() == 0)
 		{
-			IJ.error(TITLE, "No results could be loaded");
-			IJ.showStatus("");
+			IJ.error(TITLE, "No results 1 could be loaded");
+			return;
+		}
+		if (results2 == null || results2.size() == 0)
+		{
+			IJ.error(TITLE, "No results 2 could be loaded");
+			return;
+		}
+		if (results1.getDistanceUnit() != results2.getDistanceUnit())
+		{
+			IJ.error(TITLE, "Distance unit should be the same for the results 1 & 2");
+			return;
+		}
+		if (results3 != null && results1.getDistanceUnit() != results3.getDistanceUnit())
+		{
+			IJ.error(TITLE, "Distance unit should be the same for the results 1 & 3");
 			return;
 		}
 
@@ -108,7 +123,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.MEMORY_MULTI_FRAME);
 		ResultsManager.addInput(gd, "Results2", inputOption2, InputSource.MEMORY_MULTI_FRAME);
 		ResultsManager.addInput(gd, "Results3", inputOption3, InputSource.NONE, InputSource.MEMORY_MULTI_FRAME);
-		gd.addNumericField("Distance", dThreshold, 2);
+		gd.addNumericField("Distance", dThreshold, 2, 6, "px");
 
 		gd.addNumericField("Beta", beta, 2);
 		gd.addCheckbox("Show_pairs", showPairs);
@@ -138,7 +153,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 			IJ.error(TITLE, e.getMessage());
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -190,8 +205,8 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 						Point p = resultsWindow.getLocation();
 						p.y += resultsWindow.getHeight();
 						pairsWindow.setLocation(p);
-						pairPainter = new ImageROIPainter(pairsWindow.getTextPanel(), results1.getSource().getOriginal().getName(),
-								this);
+						pairPainter = new ImageROIPainter(pairsWindow.getTextPanel(),
+								results1.getSource().getOriginal().getName(), this);
 					}
 					pairsWindow.getTextPanel().clear();
 					pairPainter.setTitle(results1.getSource().getOriginal().getName());
@@ -216,8 +231,8 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 						Point p = resultsWindow.getLocation();
 						p.y += resultsWindow.getHeight();
 						triplesWindow.setLocation(p);
-						triplePainter = new ImageROIPainter(triplesWindow.getTextPanel(), results1.getSource()
-								.getName(), this);
+						triplePainter = new ImageROIPainter(triplesWindow.getTextPanel(),
+								results1.getSource().getName(), this);
 					}
 					triplesWindow.getTextPanel().clear();
 					triplePainter.setTitle(results1.getSource().getOriginal().getName());

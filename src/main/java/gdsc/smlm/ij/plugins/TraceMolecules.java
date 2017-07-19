@@ -19,14 +19,18 @@ import gdsc.core.clustering.Cluster;
 import gdsc.core.clustering.ClusterPoint;
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.clustering.ClusteringEngine;
+import gdsc.core.data.utils.Converter;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
-import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -82,7 +86,7 @@ public class TraceMolecules implements PlugIn
 		 * @return the name
 		 */
 		abstract public String getName();
-		
+
 		public static OptimiserPlot get(int ordinal)
 		{
 			if (ordinal < 0 || ordinal >= values().length)
@@ -211,7 +215,7 @@ public class TraceMolecules implements PlugIn
 			}
 
 			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(),
-					settings.getDistanceThreshold() / results.getCalibrationReader().getNmPerPixel(), timeInFrames());
+					getDistance(settings.getDistanceThreshold(), results.getCalibration()), timeThresholdInFrames());
 
 			if (clusters == null)
 			{
@@ -235,8 +239,7 @@ public class TraceMolecules implements PlugIn
 			manager.setTraceMode(getTraceMode(settings.getTraceMode()));
 			manager.setActivationFrameInterval(settings.getPulseInterval());
 			manager.setActivationFrameWindow(settings.getPulseWindow());
-			manager.setDistanceExclusion(
-					settings.getDistanceExclusion() / results.getCalibrationReader().getNmPerPixel());
+			manager.setDistanceExclusion(getDistance(settings.getDistanceExclusion(), results.getCalibration()));
 
 			if (settings.getOptimise())
 			{
@@ -251,8 +254,8 @@ public class TraceMolecules implements PlugIn
 			}
 
 			manager.setTracker(new IJTrackProgress());
-			manager.traceMolecules(settings.getDistanceThreshold() / results.getCalibrationReader().getNmPerPixel(),
-					timeInFrames());
+			manager.traceMolecules(getDistance(settings.getDistanceThreshold(), results.getCalibration()),
+					timeThresholdInFrames());
 			traces = manager.getTraces();
 			totalFiltered = manager.getTotalFiltered();
 		}
@@ -283,7 +286,7 @@ public class TraceMolecules implements PlugIn
 		if (settings.getSaveTraces())
 			saveTraces(traces);
 
-		summarise(traces, totalFiltered, settings.getDistanceThreshold(), timeInSeconds());
+		summarise(traces, totalFiltered, settings.getDistanceThreshold(), timeThresholdInSeconds());
 
 		IJ.showStatus(String.format("%d localisations => %d traces (%d filtered)", results.size(), tracedResults.size(),
 				totalFiltered));
@@ -291,6 +294,13 @@ public class TraceMolecules implements PlugIn
 		//// Provide option to refit the traces as single peaks and save to memory
 		//if (settings.refitOption)
 		//	fitTraces(results, traces);
+	}
+
+	private double getDistance(double distanceThreshold, CalibrationOrBuilder calibration)
+	{
+		// Convert from NM to native units
+		Converter c = CalibrationHelper.getDistanceConverter(calibration, DistanceUnit.NM);
+		return c.convertBack(distanceThreshold);
 	}
 
 	/**
@@ -494,7 +504,7 @@ public class TraceMolecules implements PlugIn
 	private String createSettingsComment()
 	{
 		return String.format("Molecule tracing : distance-threshold = %f : time-threshold = %f (%d frames)",
-				settings.getDistanceThreshold(), timeInSeconds(), timeInFrames());
+				settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames());
 	}
 
 	private void summarise(Trace[] traces, int filtered, double dThreshold, double tThreshold)
@@ -552,7 +562,7 @@ public class TraceMolecules implements PlugIn
 		if (settings.getSplitPulses())
 			sb.append(" *");
 		sb.append('\t');
-		sb.append(timeInFrames2(tThreshold)).append('\t');
+		sb.append(convertSecondsTotFrames(tThreshold)).append('\t');
 		sb.append(traces.length).append('\t');
 		sb.append(filtered).append('\t');
 		sb.append(singles).append('\t');
@@ -700,14 +710,14 @@ public class TraceMolecules implements PlugIn
 
 		settings = SettingsManager.readClusteringSettings(0).toBuilder();
 
-		gd.addNumericField("Distance_Threshold (nm)", settings.getDistanceThreshold(), 2);
-		gd.addNumericField("Distance_Exclusion (nm)", settings.getDistanceExclusion(), 2);
+		gd.addNumericField("Distance_Threshold", settings.getDistanceThreshold(), 2, 6, "nm");
+		gd.addNumericField("Distance_Exclusion", settings.getDistanceExclusion(), 2, 6, "nm");
 		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
 		gd.addChoice("Time_unit", SettingsManager.getTimeUnitNames(), settings.getTimeUnit().ordinal());
 		String[] traceModes = SettingsManager.getNames((Object[]) TraceManager.TraceMode.values());
 		gd.addChoice("Trace_mode", traceModes, traceModes[getTraceMode(settings.getTraceMode()).ordinal()]);
-		gd.addNumericField("Pulse_interval (frames)", settings.getPulseInterval(), 0);
-		gd.addNumericField("Pulse_window (frames)", settings.getPulseWindow(), 0);
+		gd.addNumericField("Pulse_interval", settings.getPulseInterval(), 0, 6, "Frames");
+		gd.addNumericField("Pulse_window", settings.getPulseWindow(), 0, 6, "Frames");
 		gd.addCheckbox("Split_pulses", settings.getSplitPulses());
 		gd.addCheckbox("Optimise", settings.getOptimise());
 		gd.addCheckbox("Save_traces", settings.getSaveTraces());
@@ -728,7 +738,7 @@ public class TraceMolecules implements PlugIn
 		SettingsManager.writeSettings(settings.build());
 
 		// Load the results
-		results = ResultsManager.loadInputResults(inputOption, true);
+		results = ResultsManager.loadInputResults(inputOption, true, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -811,13 +821,13 @@ public class TraceMolecules implements PlugIn
 
 		settings = SettingsManager.readClusteringSettings(0).toBuilder();
 
-		gd.addNumericField("Distance_Threshold (nm)", settings.getDistanceThreshold(), 2);
+		gd.addNumericField("Distance_Threshold", settings.getDistanceThreshold(), 2, 6, "nm");
 		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
 		gd.addChoice("Time_unit", SettingsManager.getTimeUnitNames(), settings.getTimeUnit().ordinal());
 		String[] algorithm = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
 		gd.addChoice("Clustering_algorithm", algorithm,
 				algorithm[getClusteringAlgorithm(settings.getClusteringAlgorithm()).ordinal()]);
-		gd.addNumericField("Pulse_interval (frames)", settings.getPulseInterval(), 0);
+		gd.addNumericField("Pulse_interval", settings.getPulseInterval(), 0, 6, "Frames");
 		gd.addCheckbox("Split_pulses", settings.getSplitPulses());
 		gd.addCheckbox("Save_clusters", settings.getSaveTraces());
 		gd.addCheckbox("Show_histograms", settings.getShowHistograms());
@@ -837,7 +847,7 @@ public class TraceMolecules implements PlugIn
 		SettingsManager.writeSettings(settings.build());
 
 		// Load the results
-		results = ResultsManager.loadInputResults(inputOption, true);
+		results = ResultsManager.loadInputResults(inputOption, true, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -989,7 +999,7 @@ public class TraceMolecules implements PlugIn
 		settings.setTimeThreshold(convert.convert(best[1]));
 
 		IJ.log(String.format("Optimal fractional difference @ D-threshold=%g, T-threshold=%f (%d frames)",
-				settings.getDistanceThreshold(), timeInSeconds(), timeInFrames()));
+				settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames()));
 		SettingsManager.writeSettings(settings.build());
 	}
 
@@ -1059,22 +1069,22 @@ public class TraceMolecules implements PlugIn
 		return true;
 	}
 
-	private int timeInFrames2(double timeInSeconds)
+	private int convertSecondsTotFrames(double timeInSeconds)
 	{
 		return (int) Math.round(timeInSeconds / exposureTime);
 	}
 
-	private int timeInFrames()
+	private int timeThresholdInFrames()
 	{
-		return (int) Math.round(timeIn(TimeUnit.FRAME));
+		return (int) Math.round(timeThresholdIn(TimeUnit.FRAME));
 	}
 
-	private double timeInSeconds()
+	private double timeThresholdInSeconds()
 	{
-		return timeIn(TimeUnit.SECOND);
+		return timeThresholdIn(TimeUnit.SECOND);
 	}
 
-	private double timeIn(TimeUnit timeUnit)
+	private double timeThresholdIn(TimeUnit timeUnit)
 	{
 		return UnitConverterFactory.createConverter(settings.getTimeUnit(), timeUnit, exposureTime)
 				.convert(settings.getTimeThreshold());

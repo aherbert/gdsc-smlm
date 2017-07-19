@@ -19,12 +19,14 @@ import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.data.utils.Converter;
 import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ConfigurationException;
@@ -172,7 +174,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		Utils.log(TITLE + "...");
 
-		// This optionally collects additional datasets then gets the traces:
 		// - Trace each single dataset (and store in memory)
 		// - Combine trace results held in memory
 		Trace[] traces = getTraces(allResults);
@@ -972,7 +973,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Load the results
 		if (!multiMode)
 		{
-			MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true);
+			MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, null, null);
 			if (results == null || results.size() == 0)
 			{
 				IJ.error(TITLE, "No results could be loaded");
@@ -1054,7 +1055,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Results should be checked for calibration by this point
 		exposureTime = results.getCalibrationReader().getExposureTime() / 1000;
 
-		final double nmPerPixel = results.getCalibrationReader().getNmPerPixel();
+		// Convert from NM to the native units of the results
+		Converter c = CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
+		double distanceThreshold = c.convertBack(settings.getDistanceThreshold());
+		double distanceExclusion = c.convertBack(settings.getDistanceExclusion());
 
 		ArrayList<Trace> allTraces = new ArrayList<Trace>();
 		additionalDatasets = -1;
@@ -1066,8 +1070,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			// Run the tracing
 			manager.setTracker(new IJTrackProgress());
-			manager.setDistanceExclusion(settings.getDistanceExclusion() / nmPerPixel);
-			manager.traceMolecules(settings.getDistanceThreshold() / nmPerPixel, 1);
+			// convert from 
+			manager.setDistanceExclusion(distanceExclusion);
+			manager.traceMolecules(distanceThreshold, 1);
 			Trace[] traces = manager.getTraces();
 
 			traces = filterTraces(r.getName(), traces, settings.getMinimumTraceLength(), settings.getIgnoreEnds());
@@ -1996,7 +2001,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			if (!results.hasCalibration() || results.getCalibrationReader().getExposureTime() != exposureTime ||
 					results.getNmPerPixel() != nmPerPixel || results.getDistanceUnit() != distanceUnit)
 			{
-				IJ.error(TITLE, "The exposure time and pixel pitch must match across all the results");
+				IJ.error(TITLE, "The exposure time, pixel pitch and distance unit must match across all the results");
 				return false;
 			}
 		}

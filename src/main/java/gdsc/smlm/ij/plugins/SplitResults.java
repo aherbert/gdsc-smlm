@@ -50,7 +50,7 @@ public class SplitResults implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
@@ -79,7 +79,7 @@ public class SplitResults implements PlugIn
 		showObjectMask = gd.getNextBoolean();
 		nonMaskDataset = gd.getNextBoolean();
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -124,8 +124,8 @@ public class SplitResults implements PlugIn
 
 		if (showObjectMask)
 		{
-			ImageProcessor objectIp = (maxObject <= 255) ? new ByteProcessor(maxx, maxy) : new ShortProcessor(maxx,
-					maxy);
+			ImageProcessor objectIp = (maxObject <= 255) ? new ByteProcessor(maxx, maxy)
+					: new ShortProcessor(maxx, maxy);
 			for (int i = 0; i < mask.length; i++)
 				objectIp.set(i, mask[i]);
 			ImagePlus imp = Utils.display(objectMask + " Objects", objectIp);
@@ -178,6 +178,7 @@ public class SplitResults implements PlugIn
 			}
 		}
 
-		IJ.showStatus("Split " + Utils.pleural(results.size(), "result") + " into " + Utils.pleural(i.getCount(), "set"));
+		IJ.showStatus(
+				"Split " + Utils.pleural(results.size(), "result") + " into " + Utils.pleural(i.getCount(), "set"));
 	}
 }

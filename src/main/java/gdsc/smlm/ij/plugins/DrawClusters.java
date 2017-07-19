@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Sort;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
@@ -69,7 +70,7 @@ public class DrawClusters implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "No localisations in memory");
@@ -80,7 +81,7 @@ public class DrawClusters implements PlugIn
 			return;
 
 		// Load the results
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -336,7 +337,7 @@ public class DrawClusters implements PlugIn
 
 		return true;
 	}
-	
+
 	private void addToOverlay(Overlay o, Roi roi, boolean isHyperStack, int frame)
 	{
 		if (isHyperStack)

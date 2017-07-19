@@ -14,6 +14,7 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.core.ij.IJTrackProgress;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.results.TextFilePeakResults;
@@ -47,7 +48,7 @@ public class NeighbourAnalysis implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "No localisations in memory");
@@ -120,7 +121,7 @@ public class NeighbourAnalysis implements PlugIn
 			return false;
 
 		// Load the results
-		results = ResultsManager.loadInputResults(inputOption, false);
+		results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");

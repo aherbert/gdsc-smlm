@@ -26,6 +26,7 @@ import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.Trace;
@@ -47,7 +48,8 @@ public class DarkTimeAnalysis implements PlugIn
 	private static String[] METHOD;
 	private static ClusteringAlgorithm[] algorithms = new ClusteringAlgorithm[] {
 			ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY, ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY,
-			ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_TIME_PRIORITY, ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_DISTANCE_PRIORITY };
+			ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_TIME_PRIORITY,
+			ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_DISTANCE_PRIORITY };
 	static
 	{
 		ArrayList<String> methods = new ArrayList<String>();
@@ -59,7 +61,7 @@ public class DarkTimeAnalysis implements PlugIn
 
 	private static String inputOption = "";
 	private static int method = 0;
-	private static double msPerFrame = 50;
+	private double msPerFrame;
 	private static double searchDistance = 100;
 	private static double maxDarkTime = 0;
 	private static double percentile = 99;
@@ -73,7 +75,7 @@ public class DarkTimeAnalysis implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		// Require some fit results and selected regions
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
@@ -84,21 +86,26 @@ public class DarkTimeAnalysis implements PlugIn
 		if (!showDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true);
+		// Assume pixels for now
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, DistanceUnit.PIXEL);
+		IJ.showStatus("");
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
-			IJ.showStatus("");
+			return;
+		}
+		if (!results.hasCalibration())
+		{
+			IJ.error(TITLE, "Results are not calibrated");
 			return;
 		}
 		msPerFrame = results.getCalibrationReader().getExposureTime();
-		Utils.log("%s: %d localisations", TITLE, results.size());
-
-		if (results.size() == 0)
+		if (!(msPerFrame > 0))
 		{
-			IJ.error(TITLE, "No results were loaded");
+			IJ.error(TITLE, "ms/frame must be strictly positive: " + msPerFrame);
 			return;
 		}
+		Utils.log("%s: %d localisations", TITLE, results.size());
 
 		analyse(results);
 	}
@@ -150,7 +157,8 @@ public class DarkTimeAnalysis implements PlugIn
 		int min = results.getFirstFrame();
 		int max = results.getLastFrame();
 
-		// Trace results
+		// Trace results:
+		// TODO - The search distance could have units to avoid assuming the results are in pixels
 		double d = searchDistance / results.getCalibrationReader().getNmPerPixel();
 		int range = max - min + 1;
 		if (maxDarkTime > 0)
@@ -172,8 +180,7 @@ public class DarkTimeAnalysis implements PlugIn
 		else
 		{
 			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), algorithms[method - 1], tracker);
-			ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(results), d,
-					range);
+			ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(results), d, range);
 			traces = TraceMolecules.convertToTraces(results, clusters);
 		}
 
@@ -247,7 +254,7 @@ public class DarkTimeAnalysis implements PlugIn
 			double[] xValues = stats.getValues();
 			for (int i = 0; i < xValues.length; i++)
 				xValues[i] *= msPerFrame;
-			
+
 			// Ensure the bin width is never less than 1
 			Utils.showHistogram("Dark-time", new StoredDataStatistics(xValues), "Time (ms)", 1, 0, nBins);
 		}

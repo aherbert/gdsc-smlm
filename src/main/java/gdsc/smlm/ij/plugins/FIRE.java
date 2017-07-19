@@ -381,13 +381,13 @@ public class FIRE implements PlugIn
 		if (!showInputDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
 			return;
 		}
-		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false);
+		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false, null, null);
 
 		results = cropToRoi(results);
 		if (results.size() < 2)
@@ -613,7 +613,8 @@ public class FIRE implements PlugIn
 		});
 		newResults.end();
 		newResults.copySettings(results);
-		newResults.setBounds(new Rectangle((int) minX, (int) minY, (int) (maxX - minX), (int) (maxY - minY)));
+		newResults.setBounds(
+				new Rectangle((int) minX, (int) minY, (int) Math.ceil(maxX - minX), (int) Math.ceil(maxY - minY)));
 		return newResults;
 	}
 
@@ -1485,7 +1486,7 @@ public class FIRE implements PlugIn
 		if (!showQEstimationInputDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");

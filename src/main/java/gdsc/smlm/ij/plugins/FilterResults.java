@@ -90,7 +90,7 @@ public class FilterResults implements PlugIn
 		if (gd.wasCanceled())
 			return;
 		inputOption = ResultsManager.getInputSource(gd);
-		results = ResultsManager.loadInputResults(inputOption, false);
+		results = ResultsManager.loadInputResults(inputOption, false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");

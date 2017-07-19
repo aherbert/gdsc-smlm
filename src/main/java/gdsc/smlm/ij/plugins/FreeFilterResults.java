@@ -86,7 +86,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		if (!showDialog())
 			return;
 
-		results = ResultsManager.loadInputResults(inputOption, false);
+		results = ResultsManager.loadInputResults(inputOption, false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");

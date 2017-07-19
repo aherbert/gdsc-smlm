@@ -85,12 +85,22 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			return;
 
 		// Load the results
-		MemoryPeakResults results1 = ResultsManager.loadInputResults(inputOption1, false);
-		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false);
-		if (results1 == null || results1.size() == 0 || results2 == null || results2.size() == 0)
+		MemoryPeakResults results1 = ResultsManager.loadInputResults(inputOption1, false, null, null);
+		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false, null, null);
+		IJ.showStatus("");
+		if (results1 == null || results1.size() == 0)
 		{
-			IJ.error(TITLE, "No results could be loaded");
-			IJ.showStatus("");
+			IJ.error(TITLE, "No results 1 could be loaded");
+			return;
+		}
+		if (results2 == null || results2.size() == 0)
+		{
+			IJ.error(TITLE, "No results 2 could be loaded");
+			return;
+		}
+		if (results1.getDistanceUnit() != results2.getDistanceUnit())
+		{
+			IJ.error(TITLE, "Distance unit should be the same for the results");
 			return;
 		}
 

@@ -53,7 +53,7 @@ public class ResequenceResults implements PlugIn
 		if (!showDialog())
 			return;
 
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true);
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -116,17 +116,17 @@ public class ResequenceResults implements PlugIn
 		ResequencePeakResultProcedure(int start, TrackProgress tracker)
 		{
 			this.start = start;
-			this.tracker= tracker;
+			this.tracker = tracker;
 		}
-		
+
 		public void execute(PeakResult r)
 		{
 			int t = 1; // The current frame in the results
 			int mapped = start; // The mapped frame in the results
 			int b = 1; // The current block size
-			
+
 			boolean print = (tracker != null);
-			
+
 			if (t != r.getFrame())
 			{
 				// Update the mapped position
@@ -159,7 +159,7 @@ public class ResequenceResults implements PlugIn
 			}
 		}
 	}
-	
+
 	/**
 	 * Resequence the results for the original imaging sequence provided. Results are assumed to be continuous from 1.
 	 * 
