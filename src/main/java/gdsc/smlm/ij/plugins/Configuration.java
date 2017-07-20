@@ -138,10 +138,10 @@ public class Configuration implements PlugIn, ItemListener
 			int b = 0;
 			int ch = 0;
 
-			textCameraType = choices.get(n++);
+			textCameraType = choices.get(ch++);
 			textNmPerPixel = numerics.get(n++);
 			textExposure = numerics.get(n++);
-			textPSF = choices.get(n++);
+			textPSF = choices.get(ch++);
 			textDataFilterType = choices.get(ch++);
 			textDataFilter = choices.get(ch++);
 			textSmooth = numerics.get(n++);
