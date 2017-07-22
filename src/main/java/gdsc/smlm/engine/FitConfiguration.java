@@ -16,12 +16,12 @@ import gdsc.smlm.data.config.FitProtos.FitSolverSettings;
 import gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder;
 import gdsc.smlm.data.config.FitProtos.SearchMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
-import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitConfiguration;
@@ -37,6 +37,8 @@ import gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.ToleranceChecker;
 import gdsc.smlm.fitting.nonlinear.WLSELVMSteppingFunctionSolver;
 import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.GradientFunction;
+import gdsc.smlm.function.PrecomputedFunctionFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -112,6 +114,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private boolean widthEnabled;
 	private float offset;
 	private double varianceThreshold;
+
+	private double[] precomputedFunction = null;
 
 	/**
 	 * Instantiates a new fit configuration.
@@ -2408,6 +2412,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 					setClampValues(bounds);
 			}
 		}
+
+		if (precomputedFunction != null)
+		{
+			functionSolver.setGradientFunction(
+					(GradientFunction) PrecomputedFunctionFactory.wrapFunction(gaussianFunction, precomputedFunction));
+			precomputedFunction = null;
+		}
+
 		return functionSolver;
 	}
 
@@ -3055,5 +3067,28 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		invalidateFunctionSolver();
 		getClampValues()[index] = value;
+	}
+
+	/**
+	 * Gets the precomputed function.
+	 *
+	 * @return the precomputed function
+	 */
+	public double[] getPrecomputedFunction()
+	{
+		return precomputedFunction;
+	}
+
+	/**
+	 * Sets the precomputed function. This is combined with the configured Gaussian function add passed to the function
+	 * solver returned from {@link #getFunctionSolver()}. The precomputed function is then reset to null so it must be
+	 * reset each time the function solver is accessed.
+	 *
+	 * @param precomputedFunction
+	 *            the new precomputed function
+	 */
+	public void setPrecomputedFunction(double[] precomputedFunction)
+	{
+		this.precomputedFunction = precomputedFunction;
 	}
 }
