@@ -77,77 +77,28 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private FilterSettings.Builder filterSettings;
 	private FitSolverSettings.Builder fitSolverSettings;
 
-	//	private FitCriteria fitCriteria;
 	private Logger log = null;
-	//	private double delta = 0.0001;
-	//	private double initialAngle = 0; // Radians
-	//	private double initialSD0 = 1;
-	//	private double initialSD1 = 1;
 	private boolean computeDeviations = false;
-	//	private FitSolver fitSolver;
-	//	private int minIterations = 0;
-	//	private int maxIterations = 20;
-	//	private int significantDigits = 5;
-	//	private FitFunction fitFunction;
 	private int flags;
-	//	private boolean backgroundFitting = true;
-	//	private boolean notSignalFitting = false;
 	private double coordinateShift = 1;
-	//	private double shiftFactor = 1;
 	private int fitRegionWidth = 0, fitRegionHeight = 0;
 	private double coordinateOffset = 0.5;
 	private double signalThreshold = 0;
-	//	private double signalStrength = 0;
-	//	private double minPhotons = 30;
 	private double precisionThreshold = 0;
 	private boolean isTwoAxisGaussian2D;
-	//	private boolean precisionUsingBackground = false;
 	private double nmPerPixel = 0;
 	private double gain = 0;
 	private double signalToPhotons, signalToCount;
 	private boolean emCCD = false;
-	//	private boolean modelCamera = false;
 	private double noise = 0;
 	private double minWidthFactor = 0.5;
 	private double widthFactor = 2;
-	//	private double lambda = 10;
 	private boolean computeResiduals = true;
-	//	private double duplicateDistance = 0.5;
-	//	private double bias = 0;
-	//	private double readNoise = 0;
-	//	private double amplification = 0;
-	//	private int maxFunctionEvaluations;
-	//	private SearchMethod searchMethod;
-	//	private boolean gradientLineMinimisation = false;
-	//	private double relativeThreshold = 1e-6;
-	//	private double absoluteThreshold = 1e-16;
 
 	// Options for clamping
-	//	private boolean useClamping = false;
-	//	private boolean useDynamicClamping = false;
 	private double[] clampValues;
 	private int nClampPeaks;
 	private ParameterBounds bounds = null;
-
-	//	private static double[] defaultClampValues;
-	//	static
-	//	{
-	//		defaultClampValues = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-	//		// Taken from the 3D-DAO-STORM paper:
-	//		// (Babcock et al. 2012) A high-density 3D localization algorithm for stochastic optical 
-	//		// reconstruction microscopy. Optical Nanoscopy. 2012 1:6
-	//		// DOI: 10.1186/2192-2853-1-6
-	//		// Page 3
-	//		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
-	//		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
-	//		defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
-	//		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
-	//		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
-	//		defaultClampValues[Gaussian2DFunction.Z_POSITION] = 1; // This depends on calibration
-	//		defaultClampValues[Gaussian2DFunction.X_SD] = 3;
-	//		defaultClampValues[Gaussian2DFunction.Y_SD] = 3;
-	//		defaultClampValues[Gaussian2DFunction.ANGLE] = Math.PI;
-	//	}
 
 	private ToleranceChecker toleranceChecker = null;
 	private Gaussian2DFunction gaussianFunction = null;
@@ -155,13 +106,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private DynamicPeakResult dynamicPeakResult = new DynamicPeakResult();
 
-	// Flag to indicate simple filtering is enabled
-	//private boolean simpleFilter = true;
-
 	// Support using a smart filter and disabling the simple filtering
-	//	private boolean disableSimpleFilter = false;
-	//	private boolean smartFilter = false;
-	//	private String smartFilterXML = "";
 	private DirectFilter directFilter = null;
 	private int filterResult = 0;
 	private boolean widthEnabled;
