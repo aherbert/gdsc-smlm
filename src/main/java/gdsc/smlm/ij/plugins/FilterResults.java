@@ -135,7 +135,7 @@ public class FilterResults implements PlugIn
 		try
 		{
 			pp = new PrecisionResultProcedure(results);
-			pp.getPrecision();
+			pp.getLSEPrecision();
 
 			double[] limits = Maths.limits(pp.precision);
 			maxPrecision = limits[1];

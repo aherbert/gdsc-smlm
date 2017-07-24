@@ -138,7 +138,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-				Gaussian2DPeakResultHelper.PRECISION);
+				Gaussian2DPeakResultHelper.LSE_PRECISION);
 
 		// Set the signal limit using the gain
 		strictSignalThreshold = (float) (strictSignal);
@@ -187,7 +187,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 			return PeakStatus.REJECT;
 		if (Math.abs(result.getXPosition()) > weakOffset || Math.abs(result.getYPosition()) > weakOffset)
 			return PeakStatus.REJECT;
-		final double variance = calculator.getVariance(result.getParameters(), result.noise);
+		final double variance = calculator.getLSEVariance(result.getParameters(), result.noise);
 		if (variance > weakVariance)
 			return PeakStatus.REJECT;
 

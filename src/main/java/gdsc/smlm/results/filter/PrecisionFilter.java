@@ -47,7 +47,7 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-				Gaussian2DPeakResultHelper.PRECISION);
+				Gaussian2DPeakResultHelper.LSE_PRECISION);
 		variance = Filter.getDUpperSquaredLimit(precision);
 	}
 
@@ -55,7 +55,7 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 	public boolean accept(PeakResult peak)
 	{
 		// Use the background noise to estimate precision 
-		return calculator.getVariance(peak.getParameters(), peak.noise) <= variance;
+		return calculator.getLSEVariance(peak.getParameters(), peak.noise) <= variance;
 	}
 
 	@Override

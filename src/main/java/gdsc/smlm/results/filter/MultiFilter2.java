@@ -109,13 +109,13 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 		try
 		{
 			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-					Gaussian2DPeakResultHelper.PRECISION_X);
+					Gaussian2DPeakResultHelper.LSE_PRECISION_X);
 			useBackground = true;
 		}
 		catch (ConfigurationException e)
 		{
 			calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-					Gaussian2DPeakResultHelper.PRECISION);
+					Gaussian2DPeakResultHelper.LSE_PRECISION);
 			useBackground = false;
 		}
 		
@@ -242,12 +242,12 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 		// Precision
 		if (useBackground)
 		{
-			if (calculator.getVarianceX(peak.getParameters()) > variance)
+			if (calculator.getLSEVariance(peak.getParameters()) > variance)
 				return false;
 		}
 		else
 		{
-			if (calculator.getVariance(peak.getParameters(), peak.noise) > variance)
+			if (calculator.getLSEVariance(peak.getParameters(), peak.noise) > variance)
 				return false;
 		}
 

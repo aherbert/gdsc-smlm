@@ -122,7 +122,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 				try
 				{
 					calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(),
-							Gaussian2DPeakResultHelper.PRECISION);
+							Gaussian2DPeakResultHelper.LSE_PRECISION);
 					canComputePrecision = true;
 				}
 				catch (ConfigurationException e)
@@ -362,7 +362,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		}
 		if (canComputePrecision)
 		{
-			add(sb, calculator.getPrecision(params, noise));
+			add(sb, calculator.getLSEPrecision(params, noise));
 		}
 
 		append(sb.toString());

@@ -19,7 +19,13 @@ import gdsc.smlm.results.MemoryPeakResults;
 /**
  * Contains functionality to obtain the localisation precision for results.
  */
-public class PrecisionResultProcedure extends AbstractResultProcedure implements LSEPrecisionProcedure
+//@formatter:off
+public class PrecisionResultProcedure extends AbstractResultProcedure implements 
+	LSEPrecisionProcedure, 
+	LSEPrecisionBProcedure, 
+	MLEPrecisionProcedure, 
+	MLEPrecisionBProcedure
+//@formatter:on
 {
 	/** The precision. */
 	public double[] precision;
@@ -36,25 +42,97 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	}
 
 	/**
-	 * Gets the precision.
+	 * Gets the precision assuming a Least Squares Estimator and a local noise estimate.
 	 *
 	 * @return the precision
 	 * @throws DataException
 	 *             if conversion to the required units for precision is not possible
 	 */
-	public void getPrecision() throws DataException
+	public void getLSEPrecision() throws DataException
 	{
 		i = 0;
 		precision = allocate(precision);
-		results.forEach(this);
+		results.forEach((LSEPrecisionProcedure) this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.procedures.LSEPrecisionProcedure#getLSEPrecision(double)
+	 * @see gdsc.smlm.results.procedures.LSEPrecisionProcedure#executeLSEPrecision(double)
 	 */
 	public void executeLSEPrecision(double precision)
+	{
+		this.precision[i++] = precision;
+	}
+
+	/**
+	 * Gets the precision assuming a Least Squares Estimator and a local background estimate.
+	 *
+	 * @return the precision
+	 * @throws DataException
+	 *             if conversion to the required units for precision is not possible
+	 */
+	public void getLSEPrecisionB() throws DataException
+	{
+		i = 0;
+		precision = allocate(precision);
+		results.forEach((LSEPrecisionBProcedure) this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.procedures.LSEPrecisionBProcedure#executeLSEPrecisionB(double)
+	 */
+	public void executeLSEPrecisionB(double precision)
+	{
+		this.precision[i++] = precision;
+	}
+
+	/**
+	 * Gets the precision assuming a Maximum Likelihood Estimator and a local noise estimate.
+	 *
+	 * @return the precision
+	 * @throws DataException
+	 *             if conversion to the required units for precision is not possible
+	 */
+	public void getMLEPrecision() throws DataException
+	{
+		i = 0;
+		precision = allocate(precision);
+		results.forEach((MLEPrecisionProcedure) this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.procedures.MLEPrecisionProcedure#executeMLEPrecision(double)
+	 */
+	public void executeMLEPrecision(double precision)
+	{
+		this.precision[i++] = precision;
+	}
+
+	/**
+	 * Gets the precision assuming a Maximum Likelihood Estimator and a local background estimate.
+	 *
+	 * @return the precision
+	 * @throws DataException
+	 *             if conversion to the required units for precision is not possible
+	 */
+	public void getMLEPrecisionB() throws DataException
+	{
+		i = 0;
+		precision = allocate(precision);
+		results.forEach((MLEPrecisionBProcedure) this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.procedures.MLEPrecisionBProcedure#executeMLEPrecisionB(double)
+	 */
+	public void executeMLEPrecisionB(double precision)
 	{
 		this.precision[i++] = precision;
 	}

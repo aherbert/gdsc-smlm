@@ -85,7 +85,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		{
 			if (calculatedPrecision)
 			{
-				flags |= Gaussian2DPeakResultHelper.PRECISION;
+				flags |= Gaussian2DPeakResultHelper.LSE_PRECISION;
 
 				// To convert the precision to pixels
 				if (!hasCalibration())
@@ -237,7 +237,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 			if (calculatedPrecision)
 			{
 				t = 0.0;
-				final double precision = calculator.getPrecision(params, noise);
+				final double precision = calculator.getLSEPrecision(params, noise);
 				sx = sy = dc.convert(precision);
 			}
 			else

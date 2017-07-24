@@ -574,7 +574,7 @@ public class PCPALMMolecules implements PlugIn
 		StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.NM, IntensityUnit.PHOTON);
 		sp.getXY();
 		PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
-		pp.getPrecision();
+		pp.getLSEPrecision();
 
 		for (int i = 0, size = pp.size(); i < size; i++)
 		{

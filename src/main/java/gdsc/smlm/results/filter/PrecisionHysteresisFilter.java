@@ -68,7 +68,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-				Gaussian2DPeakResultHelper.PRECISION);
+				Gaussian2DPeakResultHelper.LSE_PRECISION);
 		lowerVariance = Filter.getDUpperSquaredLimit(strictPrecision);
 		upperVariance = Filter.getDUpperSquaredLimit(strictPrecision + range);
 		super.setup(peakResults);
@@ -78,7 +78,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	protected PeakStatus getStatus(PeakResult result)
 	{
 		// Use the background noise to estimate precision 
-		final double variance = calculator.getVariance(result.getParameters(), result.noise);
+		final double variance = calculator.getLSEVariance(result.getParameters(), result.noise);
 		if (variance <= lowerVariance)
 			return PeakStatus.OK;
 		else if (variance <= upperVariance)

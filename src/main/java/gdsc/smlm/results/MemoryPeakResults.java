@@ -13,20 +13,22 @@ import gdsc.core.data.utils.Converter;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.CalibrationHelper;
-import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
-import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import gdsc.smlm.results.procedures.HResultProcedure;
 import gdsc.smlm.results.procedures.IResultProcedure;
 import gdsc.smlm.results.procedures.IXYResultProcedure;
 import gdsc.smlm.results.procedures.IXYZResultProcedure;
+import gdsc.smlm.results.procedures.LSEPrecisionBProcedure;
 import gdsc.smlm.results.procedures.LSEPrecisionProcedure;
+import gdsc.smlm.results.procedures.MLEPrecisionBProcedure;
+import gdsc.smlm.results.procedures.MLEPrecisionProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.results.procedures.TResultProcedure;
@@ -676,7 +678,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 			bounds.width = maxX - bounds.x;
 			bounds.height = maxY - bounds.y;
-			
+
 			setBounds(bounds);
 		}
 		return bounds;
@@ -1769,43 +1771,92 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (!hasCalibration())
 			throw new ConfigurationException("No calibration");
 
-		// Check if this is a Gaussian2DFunction and throw an error if not.
-		// Otherwise determine the PSF fields to obtain the distance
-		int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
+		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
+				Gaussian2DPeakResultHelper.LSE_PRECISION);
 
-		final int ix = indices[0];
-		final int iy = indices[1];
-
-		CalibrationReader cr = getCalibrationReader();
-		if (!cr.isCCDCamera())
-			throw new ConfigurationException("Not a CCD camera");
-		final boolean emCCD = cr.isEMCCD();
-
-		TypeConverter<IntensityUnit> ic = cr.getIntensityConverter(IntensityUnit.PHOTON);
-		TypeConverter<DistanceUnit> dc = cr.getDistanceConverter(DistanceUnit.NM);
-
-		// This will be fine if the intensity converter was created
-		final double nmPerPixel = getNmPerPixel();
-
-		if (ix == iy)
+		for (int i = 0, size = size(); i < size; i++)
 		{
-			for (int i = 0, size = size(); i < size; i++)
-			{
-				final PeakResult r = getf(i);
-				double s = r.getParameter(ix);
-				procedure.executeLSEPrecision(Gaussian2DPeakResultHelper.getPrecision(nmPerPixel, dc.convert(s),
-						ic.convert(r.getSignal()), ic.convert(r.getBackground()), emCCD));
-			}
+			final PeakResult r = getf(i);
+			procedure.executeLSEPrecision(calculator.getLSEPrecision(r.params, r.noise));
 		}
-		else
+	}
+
+	/**
+	 * For each result execute the procedure
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(LSEPrecisionBProcedure procedure) throws ConversionException, ConfigurationException
+	{
+		if (!hasCalibration())
+			throw new ConfigurationException("No calibration");
+
+		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
+				Gaussian2DPeakResultHelper.LSE_PRECISION_X);
+
+		for (int i = 0, size = size(); i < size; i++)
 		{
-			for (int i = 0, size = size(); i < size; i++)
-			{
-				final PeakResult r = getf(i);
-				double s = Gaussian2DPeakResultHelper.getStandardDeviation(r.getParameter(ix), r.getParameter(iy));
-				procedure.executeLSEPrecision(Gaussian2DPeakResultHelper.getPrecision(nmPerPixel, dc.convert(s),
-						ic.convert(r.getSignal()), ic.convert(r.getBackground()), emCCD));
-			}
+			procedure.executeLSEPrecisionB(calculator.getLSEPrecision(getf(i).params));
+		}
+	}
+
+	/**
+	 * For each result execute the procedure
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(MLEPrecisionProcedure procedure) throws ConversionException, ConfigurationException
+	{
+		if (!hasCalibration())
+			throw new ConfigurationException("No calibration");
+
+		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
+				Gaussian2DPeakResultHelper.MLE_PRECISION);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getf(i);
+			procedure.executeMLEPrecision(calculator.getMLEPrecision(r.params, r.noise));
+		}
+	}
+
+	/**
+	 * For each result execute the procedure
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(MLEPrecisionBProcedure procedure) throws ConversionException, ConfigurationException
+	{
+		if (!hasCalibration())
+			throw new ConfigurationException("No calibration");
+
+		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
+				Gaussian2DPeakResultHelper.MLE_PRECISION_X);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			procedure.executeMLEPrecisionB(calculator.getMLEPrecision(getf(i).params));
 		}
 	}
 

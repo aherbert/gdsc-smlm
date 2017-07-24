@@ -927,7 +927,7 @@ public class TraceMolecules implements PlugIn
 		Statistics stats = new Statistics();
 		final double nmPerPixel = this.results.getNmPerPixel();
 		PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
-		pp.getPrecision();
+		pp.getLSEPrecision();
 		stats.add(pp.precision);
 		// Use twice the precision to get the initial distance threshold
 

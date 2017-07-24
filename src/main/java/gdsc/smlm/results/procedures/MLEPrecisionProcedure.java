@@ -15,11 +15,11 @@ package gdsc.smlm.results.procedures;
 
 /**
  * Interface for accessing the localisation precision of Gaussian 2D fitting computed using the Mortensen formula for
- * Least Squares Estimation using a local noise estimate.
+ * Maximum Likelihood Estimation using a local noise estimate.
  * <p>
  * See Mortensen, et al (2010) Nature Methods 7, 377-383, equation 6.
  */
-public interface LSEPrecisionProcedure
+public interface MLEPrecisionProcedure
 {
 	/**
 	 * Executes this procedure.
@@ -27,5 +27,5 @@ public interface LSEPrecisionProcedure
 	 * @param precision
 	 *            the precision
 	 */
-	void executeLSEPrecision(double precision);
+	void executeMLEPrecision(double precision);
 }

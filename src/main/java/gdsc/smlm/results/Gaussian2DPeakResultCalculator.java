@@ -39,8 +39,7 @@ public interface Gaussian2DPeakResultCalculator
 
 	/**
 	 * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
-	 * an
-	 * approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
+	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * <p>
 	 * This method will use the background noise to approximate the expected background value of each pixel.
@@ -51,24 +50,22 @@ public interface Gaussian2DPeakResultCalculator
 	 *            the noise
 	 * @return The location precision in nm in each dimension (X/Y)
 	 */
-	public double getPrecision(float[] params, float noise);
+	public double getLSEPrecision(float[] params, float noise);
 
 	/**
 	 * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
-	 * an
-	 * approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
+	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 *
 	 * @param params
 	 *            the params
 	 * @return The location precision in nm in each dimension (X/Y)
 	 */
-	public double getPrecisionX(float[] params);
+	public double getLSEPrecision(float[] params);
 
 	/**
 	 * Calculate the localisation variance for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
-	 * an
-	 * approximation of the variance of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
+	 * an approximation of the variance of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * <p>
 	 * This method will use the background noise to approximate the expected background value of each pixel.
@@ -79,17 +76,68 @@ public interface Gaussian2DPeakResultCalculator
 	 *            the noise
 	 * @return The location variance in nm in each dimension (X/Y)
 	 */
-	public double getVariance(float[] params, float noise);
+	public double getLSEVariance(float[] params, float noise);
 
 	/**
 	 * Calculate the localisation variance for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
-	 * an
-	 * approximation of the variance of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
+	 * an approximation of the variance of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 *
 	 * @param params
 	 *            the params
 	 * @return The location variance in nm in each dimension (X/Y)
 	 */
-	public double getVarianceX(float[] params);
+	public double getLSEVariance(float[] params);
+
+	/**
+	 * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
+	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 * <p>
+	 * This method will use the background noise to approximate the expected background value of each pixel.
+	 *
+	 * @param params
+	 *            the params
+	 * @param noise
+	 *            the noise
+	 * @return The location precision in nm in each dimension (X/Y)
+	 */
+	public double getMLEPrecision(float[] params, float noise);
+
+	/**
+	 * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
+	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 *
+	 * @param params
+	 *            the params
+	 * @return The location precision in nm in each dimension (X/Y)
+	 */
+	public double getMLEPrecision(float[] params);
+
+	/**
+	 * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
+	 * an approximation of the variance of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 * <p>
+	 * This method will use the background noise to approximate the expected background value of each pixel.
+	 *
+	 * @param params
+	 *            the params
+	 * @param noise
+	 *            the noise
+	 * @return The location variance in nm in each dimension (X/Y)
+	 */
+	public double getMLEVariance(float[] params, float noise);
+
+	/**
+	 * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
+	 * an approximation of the variance of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 *
+	 * @param params
+	 *            the params
+	 * @return The location variance in nm in each dimension (X/Y)
+	 */
+	public double getMLEVariance(float[] params);
 }

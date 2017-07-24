@@ -2703,7 +2703,7 @@ public class FIRE implements PlugIn
 		try
 		{
 			pp = new PrecisionResultProcedure(results);
-			pp.getPrecision();
+			pp.getLSEPrecision();
 		}
 		catch (DataException e)
 		{

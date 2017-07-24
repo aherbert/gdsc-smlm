@@ -154,8 +154,11 @@ public class SummariseResults implements PlugIn
 			{
 				try
 				{
+					// We use the LSE precision even if the results are fit using MLE.
+					// This is just a rough indicator of the result precision so it doesn't matter
+					// that much anyway.
 					PrecisionResultProcedure pp = new PrecisionResultProcedure(result);
-					pp.getPrecision();
+					pp.getLSEPrecision();
 					for (double v : pp.precision)
 						stats[0].addValue(v);
 				}

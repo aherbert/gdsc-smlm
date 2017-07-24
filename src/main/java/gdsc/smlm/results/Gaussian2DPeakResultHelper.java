@@ -40,7 +40,7 @@ public class Gaussian2DPeakResultHelper
 
 		final CalibrationReader calibration;
 		final int isx, isy;
-		boolean oneAxisSD;
+		private boolean oneAxisSD;
 
 		// Set dynamically when needed
 		double nmPerPixel;
@@ -115,7 +115,7 @@ public class Gaussian2DPeakResultHelper
 			return calibration.isCCDCamera();
 		}
 
-		public double getPrecision(float[] params, float noise) throws ConfigurationException
+		public double getLSEPrecision(float[] params, float noise) throws ConfigurationException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -132,7 +132,7 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
-		public double getPrecisionX(float[] params) throws ConfigurationException
+		public double getLSEPrecision(float[] params) throws ConfigurationException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -150,7 +150,7 @@ public class Gaussian2DPeakResultHelper
 					emCCD);
 		}
 
-		public double getVariance(float[] params, float noise) throws ConfigurationException
+		public double getLSEVariance(float[] params, float noise) throws ConfigurationException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -167,7 +167,7 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
-		public double getVarianceX(float[] params) throws ConfigurationException
+		public double getLSEVariance(float[] params) throws ConfigurationException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -181,6 +181,76 @@ public class Gaussian2DPeakResultHelper
 			}
 
 			return Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
+					emCCD);
+		}
+
+		public double getMLEPrecision(float[] params, float noise) throws ConfigurationException
+		{
+			// Try to create the converter
+			if (toPhoton == null)
+			{
+				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
+					throw new ConfigurationException("Not a valid calibration");
+				nmPerPixel = calibration.getNmPerPixel();
+				emCCD = calibration.getCameraType() == CameraType.EMCCD;
+				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
+				toNM = calibration.getDistanceConverter(DistanceUnit.NM);
+			}
+
+			return Gaussian2DPeakResultHelper.getMLPrecision(nmPerPixel, toNM.convert(getStandardDeviation(params)),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
+		}
+
+		public double getMLEPrecision(float[] params) throws ConfigurationException
+		{
+			// Try to create the converter
+			if (toPhoton == null)
+			{
+				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
+					throw new ConfigurationException("Not a valid calibration");
+				nmPerPixel = calibration.getNmPerPixel();
+				emCCD = calibration.getCameraType() == CameraType.EMCCD;
+				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
+				toNM = calibration.getDistanceConverter(DistanceUnit.NM);
+			}
+
+			return Gaussian2DPeakResultHelper.getMLPrecisionX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
+					emCCD);
+		}
+
+		public double getMLEVariance(float[] params, float noise) throws ConfigurationException
+		{
+			// Try to create the converter
+			if (toPhoton == null)
+			{
+				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
+					throw new ConfigurationException("Not a valid calibration");
+				nmPerPixel = calibration.getNmPerPixel();
+				emCCD = calibration.getCameraType() == CameraType.EMCCD;
+				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
+				toNM = calibration.getDistanceConverter(DistanceUnit.NM);
+			}
+
+			return Gaussian2DPeakResultHelper.getMLVariance(nmPerPixel, toNM.convert(getStandardDeviation(params)),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
+		}
+
+		public double getMLEVariance(float[] params) throws ConfigurationException
+		{
+			// Try to create the converter
+			if (toPhoton == null)
+			{
+				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
+					throw new ConfigurationException("Not a valid calibration");
+				nmPerPixel = calibration.getNmPerPixel();
+				emCCD = calibration.getCameraType() == CameraType.EMCCD;
+				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
+				toNM = calibration.getDistanceConverter(DistanceUnit.NM);
+			}
+
+			return Gaussian2DPeakResultHelper.getMLVarianceX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
 					emCCD);
 		}
@@ -205,14 +275,14 @@ public class Gaussian2DPeakResultHelper
 		}
 
 		@Override
-		public double getPrecision(float[] params, float noise) throws ConfigurationException
+		public double getLSEPrecision(float[] params, float noise) throws ConfigurationException
 		{
 			return Gaussian2DPeakResultHelper.getPrecision(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
 		@Override
-		public double getPrecisionX(float[] params) throws ConfigurationException
+		public double getLSEPrecision(float[] params) throws ConfigurationException
 		{
 			return Gaussian2DPeakResultHelper.getPrecisionX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
@@ -220,16 +290,46 @@ public class Gaussian2DPeakResultHelper
 		}
 
 		@Override
-		public double getVariance(float[] params, float noise) throws ConfigurationException
+		public double getLSEVariance(float[] params, float noise) throws ConfigurationException
 		{
 			return Gaussian2DPeakResultHelper.getVariance(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
 		@Override
-		public double getVarianceX(float[] params) throws ConfigurationException
+		public double getLSEVariance(float[] params) throws ConfigurationException
 		{
 			return Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
+					emCCD);
+		}
+
+		@Override
+		public double getMLEPrecision(float[] params, float noise) throws ConfigurationException
+		{
+			return Gaussian2DPeakResultHelper.getMLPrecision(nmPerPixel, toNM.convert(getStandardDeviation(params)),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
+		}
+
+		@Override
+		public double getMLEPrecision(float[] params) throws ConfigurationException
+		{
+			return Gaussian2DPeakResultHelper.getMLPrecisionX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
+					emCCD);
+		}
+
+		@Override
+		public double getMLEVariance(float[] params, float noise) throws ConfigurationException
+		{
+			return Gaussian2DPeakResultHelper.getMLVariance(nmPerPixel, toNM.convert(getStandardDeviation(params)),
+					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
+		}
+
+		@Override
+		public double getMLEVariance(float[] params) throws ConfigurationException
+		{
+			return Gaussian2DPeakResultHelper.getMLVarianceX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
 					emCCD);
 		}
@@ -273,10 +373,14 @@ public class Gaussian2DPeakResultHelper
 
 	/** Flag for the {@link Gaussian2DPeakResultCalculator#getAmplitude(float[])} function. */
 	public static final int AMPLITUDE = 0x00000001;
-	/** Flag for the {@link Gaussian2DPeakResultCalculator#getPrecision(float[], float)} function. */
-	public static final int PRECISION = 0x00000002;
-	/** Flag for the {@link Gaussian2DPeakResultCalculator#getPrecisionX(float[])} function. */
-	public static final int PRECISION_X = 0x00000004;
+	/** Flag for the {@link Gaussian2DPeakResultCalculator#getLSEPrecision(float[], float)} function. */
+	public static final int LSE_PRECISION = 0x00000002;
+	/** Flag for the {@link Gaussian2DPeakResultCalculator#getLSEPrecision(float[])} function. */
+	public static final int LSE_PRECISION_X = 0x00000004;
+	/** Flag for the {@link Gaussian2DPeakResultCalculator#getMLEPrecision(float[], float)} function. */
+	public static final int MLE_PRECISION = 0x00000008;
+	/** Flag for the {@link Gaussian2DPeakResultCalculator#getMLEPrecision(float[])} function. */
+	public static final int MLE_PRECISION_X = 0x00000010;
 
 	/** Dummy Gaussian 2D parameters */
 	private static final float[] PARAMS = new float[7];
@@ -333,10 +437,14 @@ public class Gaussian2DPeakResultHelper
 		// Try the desired methods
 		if (BitFlags.anySet(flags, AMPLITUDE))
 			helper.getAmplitude(PARAMS);
-		if (BitFlags.anySet(flags, PRECISION))
-			helper.getPrecision(PARAMS, 0);
-		if (BitFlags.anySet(flags, PRECISION_X))
-			helper.getPrecisionX(PARAMS);
+		if (BitFlags.anySet(flags, LSE_PRECISION))
+			helper.getLSEPrecision(PARAMS, 0);
+		if (BitFlags.anySet(flags, LSE_PRECISION_X))
+			helper.getLSEPrecision(PARAMS);
+		if (BitFlags.anySet(flags, MLE_PRECISION))
+			helper.getMLEPrecision(PARAMS, 0);
+		if (BitFlags.anySet(flags, MLE_PRECISION_X))
+			helper.getMLEPrecision(PARAMS);
 
 		// Get a fast implementation
 		return (helper.oneAxisSD) ? new OneAxisFastGaussian2DPeakResultCalculator(helper)

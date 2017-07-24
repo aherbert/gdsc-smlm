@@ -511,14 +511,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			try
 			{
 				Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(results.getPSF(),
-						results.getCalibration(), Gaussian2DPeakResultHelper.PRECISION);
+						results.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
 				// Get the average precision of the localisations
 				precision = 0;
 				int n = 0;
 				for (Trace trace : traces)
 				{
 					for (PeakResult r : trace.getPoints())
-						precision += calculator.getPrecision(r.getParameters(), r.noise);
+						precision += calculator.getLSEPrecision(r.getParameters(), r.noise);
 					n += trace.size();
 				}
 				precision /= n;

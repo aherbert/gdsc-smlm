@@ -103,7 +103,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-				Gaussian2DPeakResultHelper.PRECISION);
+				Gaussian2DPeakResultHelper.LSE_PRECISION);
 
 		signalThreshold = (float) (signal);
 
@@ -239,7 +239,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			return false;
 
 		// Precision
-		if (calculator.getVariance(peak.getParameters(), peak.noise) > variance)
+		if (calculator.getLSEVariance(peak.getParameters(), peak.noise) > variance)
 			return false;
 
 		// Shift

@@ -136,7 +136,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				try
 				{
 					calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
-							Gaussian2DPeakResultHelper.PRECISION);
+							Gaussian2DPeakResultHelper.LSE_PRECISION);
 					canComputePrecision = true;
 				}
 				catch (ConfigurationException e)
@@ -245,7 +245,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 		if (canComputePrecision)
 		{
-			add(sb, calculator.getPrecision(params, noise));
+			add(sb, calculator.getLSEPrecision(params, noise));
 		}
 
 		sb.append('\n');
@@ -335,7 +335,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		}
 		if (canComputePrecision)
 		{
-			addResult(sb, (float) calculator.getPrecision(params, result.noise));
+			addResult(sb, (float) calculator.getLSEPrecision(params, result.noise));
 		}
 		sb.append('\n');
 	}
