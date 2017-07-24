@@ -79,7 +79,8 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 		if (fixedWidth)
 		{
-			requirePSFParameters = flags == 0;
+			// Check if we need the amplitude for the fixed width PSF
+			requirePSFParameters = flags != 0;
 		}
 		else
 		{
@@ -210,8 +211,8 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	private void addPeak(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
 			float[] params, float[] paramsDev)
 	{
-		float x = (params[3] - ox) * scale;
-		float y = (params[4] - oy) * scale;
+		float x = mapX(params[PeakResult.X]);
+		float y = mapY(params[PeakResult.Y]);
 
 		// Check bounds
 		if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
@@ -350,9 +351,9 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#addAll(java.util.Collection)
+	 * @see gdsc.smlm.ij.results.IJImagePeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
-	public void addAll(Collection<PeakResult> results)
+	public void addAll(PeakResult[] results)
 	{
 		if (!imageActive)
 			return;

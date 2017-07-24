@@ -83,6 +83,7 @@ public class ImagePeakResultsFactory
 		{
 			case DRAW_INTENSITY:
 			case DRAW_INTENSITY_PRECISION:
+			case DRAW_INTENSITY_AVERAGE_PRECISION:
 			case DRAW_FITTED_PSF:
 				flags |= IJImagePeakResults.DISPLAY_SIGNAL;
 				break;
