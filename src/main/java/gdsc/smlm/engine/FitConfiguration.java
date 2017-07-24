@@ -115,7 +115,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private float offset;
 	private double varianceThreshold;
 
-	private double[] precomputedFunction = null;
+	private double[] precomputedFunctionValues = null;
 
 	/**
 	 * Instantiates a new fit configuration.
@@ -2413,11 +2413,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			}
 		}
 
-		if (precomputedFunction != null)
+		if (precomputedFunctionValues != null)
 		{
-			functionSolver.setGradientFunction(
-					(GradientFunction) PrecomputedFunctionFactory.wrapFunction(gaussianFunction, precomputedFunction));
-			precomputedFunction = null;
+			functionSolver.setGradientFunction((GradientFunction) PrecomputedFunctionFactory
+					.wrapFunction(gaussianFunction, precomputedFunctionValues));
+			precomputedFunctionValues = null;
 		}
 
 		return functionSolver;
@@ -3070,25 +3070,27 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * Gets the precomputed function.
+	 * Gets the precomputed function values.
 	 *
-	 * @return the precomputed function
+	 * @return the precomputed function values
 	 */
-	public double[] getPrecomputedFunction()
+	public double[] getPrecomputedFunctionValues()
 	{
-		return precomputedFunction;
+		return precomputedFunctionValues;
 	}
 
 	/**
-	 * Sets the precomputed function. This is combined with the configured Gaussian function add passed to the function
-	 * solver returned from {@link #getFunctionSolver()}. The precomputed function is then reset to null so it must be
-	 * reset each time the function solver is accessed.
+	 * Sets the precomputed function values. This is combined with the configured Gaussian function add passed to the
+	 * function
+	 * solver returned from {@link #getFunctionSolver()}. The precomputed function values are then reset to null so it
+	 * must be
+	 * set each time the function solver is accessed.
 	 *
-	 * @param precomputedFunction
-	 *            the new precomputed function
+	 * @param precomputedFunctionValues
+	 *            the new precomputed function values
 	 */
-	public void setPrecomputedFunction(double[] precomputedFunction)
+	public void setPrecomputedFunctionValues(double[] precomputedFunctionValues)
 	{
-		this.precomputedFunction = precomputedFunction;
+		this.precomputedFunctionValues = precomputedFunctionValues;
 	}
 }
