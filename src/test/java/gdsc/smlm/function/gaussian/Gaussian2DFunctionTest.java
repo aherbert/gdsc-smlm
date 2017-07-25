@@ -195,7 +195,7 @@ public abstract class Gaussian2DFunctionTest
 									f1.initialise(a);
 
 									// Test the frozen version
-									int flags = GaussianFunctionFactory.freeze(1, this.flags, zModel, a);
+									int flags = GaussianFunctionFactory.freeze(this.flags, zModel, a);
 									Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, f1.getMaxX(),
 											f1.getMaxY(), flags, zModel);
 									f.initialise(a);
@@ -380,7 +380,7 @@ public abstract class Gaussian2DFunctionTest
 															f2.initialise(a);
 
 															// Test the frozen version
-															int flags = GaussianFunctionFactory.freeze(2, this.flags,
+															int flags = GaussianFunctionFactory.freeze(this.flags,
 																	zModel, a);
 															Gaussian2DFunction f = GaussianFunctionFactory.create2D(2,
 																	f2.getMaxX(), f2.getMaxY(), flags, zModel);
@@ -426,7 +426,8 @@ public abstract class Gaussian2DFunctionTest
 		if (f2.evaluatesSignal())
 		{
 			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL + Gaussian2DFunction.PARAMETERS_PER_PEAK);
+			functionComputesTargetGradientWith2Peaks(
+					Gaussian2DFunction.SIGNAL + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 		}
 	}
 
@@ -435,7 +436,8 @@ public abstract class Gaussian2DFunctionTest
 	{
 		org.junit.Assume.assumeNotNull(f2);
 		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION);
-		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
+		functionComputesTargetGradientWith2Peaks(
+				Gaussian2DFunction.X_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	@Test
@@ -443,7 +445,8 @@ public abstract class Gaussian2DFunctionTest
 	{
 		org.junit.Assume.assumeNotNull(f2);
 		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION);
-		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
+		functionComputesTargetGradientWith2Peaks(
+				Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	@Test
@@ -584,40 +587,40 @@ public abstract class Gaussian2DFunctionTest
 		boolean zDepth = (flags & GaussianFunctionFactory.FIT_Z) != 0;
 
 		for (double signal1 : testsignal1)
-				for (double cx1 : new double[] { maxx / 2 + 0.373f })
-					for (double cy1 : new double[] { maxx / 2 + 0.876f })
-						for (double cz1 : testcz1)
+			for (double cx1 : new double[] { maxx / 2 + 0.373f })
+				for (double cy1 : new double[] { maxx / 2 + 0.876f })
+					for (double cz1 : testcz1)
 						for (double[] w1 : testw1)
 							for (double angle1 : testangle1)
-						{
-							double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
-
-							f.initialise(a);
-							if (zDepth)
 							{
-								// Change to a standard free circular function
-								a[Gaussian2DFunction.X_SD] *= zModel.getSx(a[Gaussian2DFunction.Z_POSITION]);
-								a[Gaussian2DFunction.Y_SD] *= zModel.getSy(a[Gaussian2DFunction.Z_POSITION]);
-								a[Gaussian2DFunction.Z_POSITION] = 0;
-							}
-							f2.initialise(a);
-							double sum = 0;
-							for (int index = maxx * maxx; index-- > 0;)
-							{
-								double r1 = f.eval(index);
-								double r2 = f2.eval(index);
-								//System.out.printf("%d,%d r1=%f\n", index%maxx, index/maxx, r1);
-								sum += r1;
-								final boolean ok = eq2.almostEqualRelativeOrAbsolute(r1, r2);
-								if (!ok)
-									Assert.assertTrue(
-											String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx),
-											ok);
-							}
+								double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
-							Assert.assertTrue(sum + " != " + signal1,
-									eq3.almostEqualRelativeOrAbsolute((double) sum, signal1));
-						}
+								f.initialise(a);
+								if (zDepth)
+								{
+									// Change to a standard free circular function
+									a[Gaussian2DFunction.X_SD] *= zModel.getSx(a[Gaussian2DFunction.Z_POSITION]);
+									a[Gaussian2DFunction.Y_SD] *= zModel.getSy(a[Gaussian2DFunction.Z_POSITION]);
+									a[Gaussian2DFunction.Z_POSITION] = 0;
+								}
+								f2.initialise(a);
+								double sum = 0;
+								for (int index = maxx * maxx; index-- > 0;)
+								{
+									double r1 = f.eval(index);
+									double r2 = f2.eval(index);
+									//System.out.printf("%d,%d r1=%f\n", index%maxx, index/maxx, r1);
+									sum += r1;
+									final boolean ok = eq2.almostEqualRelativeOrAbsolute(r1, r2);
+									if (!ok)
+										Assert.assertTrue(
+												String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx),
+												ok);
+								}
+
+								Assert.assertTrue(sum + " != " + signal1,
+										eq3.almostEqualRelativeOrAbsolute((double) sum, signal1));
+							}
 	}
 
 	protected double[] createParameters(double... args)

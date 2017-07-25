@@ -305,6 +305,35 @@ public class GaussianFunctionFactory
 	 * widths of the input parameters may be modified. The shape will remain unchanged even if the function flags are
 	 * altered.
 	 *
+	 * @param flags
+	 *            The function flags (defines the type of function)
+	 * @param zModel
+	 *            the z model
+	 * @param a
+	 *            the parameters of the function (modified in place)
+	 * @return the flags for the new function
+	 * @throws IllegalArgumentException
+	 *             If the input array is null or not the correct size for a multiple of Gaussian peak parameters.
+	 */
+	public static int freeze(int flags, AstigmatismZModel zModel, double[] a) throws IllegalArgumentException
+	{
+		if (a == null)
+			throw new IllegalArgumentException("Parameter array is null");
+		int nPeaks = a.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
+		// Check the array length is correct (including the background at position 0)
+		if (a.length != 1 + nPeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK)
+			throw new IllegalArgumentException("Incorrect array size for the number of peaks");
+		if (nPeaks == 1)
+			return freezeSingle(flags, zModel, a);
+		// This supports zero peaks too
+		return freezeMulti(nPeaks, flags, zModel, a);
+	}
+
+	/**
+	 * Freeze the Gaussian function parameters to a set of parameters and function flags that will evaluate faster. The
+	 * widths of the input parameters may be modified. The shape will remain unchanged even if the function flags are
+	 * altered.
+	 *
 	 * @param nPeaks
 	 *            The number of peaks (N)
 	 * @param flags
@@ -315,7 +344,7 @@ public class GaussianFunctionFactory
 	 *            the parameters of the function (modified in place)
 	 * @return the flags for the new function
 	 */
-	public static int freeze(int nPeaks, int flags, AstigmatismZModel zModel, double[] a)
+	private static int freezeMulti(int nPeaks, int flags, AstigmatismZModel zModel, double[] a)
 	{
 		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
 		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
@@ -373,12 +402,8 @@ public class GaussianFunctionFactory
 	 *            the parameters of the function (modified in place)
 	 * @return the flags for the new function
 	 */
-	public static int freeze(int flags, AstigmatismZModel zModel, double[] a)
+	private static int freezeSingle(int flags, AstigmatismZModel zModel, double[] a)
 	{
-		int nPeaks = a.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
-		if (nPeaks > 1)
-			return freeze(nPeaks, flags, zModel, a);
-
 		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
 		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
 		{
