@@ -97,8 +97,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	}
 
 	/**
-	 * Gets the peak number of the parameter assuming a 2D Gaussian function packed as: background + n * [signal, shape,
-	 * position0, position1, sd0, sd1].
+	 * Gets the peak number (zero-based index) of the parameter assuming a 2D Gaussian function.
 	 *
 	 * @param index
 	 *            the index (zero or above)
@@ -109,6 +108,23 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 		if (index < 1)
 			return 0;
 		return (index - 1) / PARAMETERS_PER_PEAK;
+	}
+
+	/**
+	 * Gets the index of the parameter in a multi-peak parameter array assuming a 2D Gaussian function.
+	 *
+	 * @param peak
+	 *            the peak number (zero-based index)
+	 * @param parameterIndex
+	 *            the parameter index for a single peak (this can use the class constants, e.g.
+	 *            {@link Gaussian2DFunction#SIGNAL})
+	 * @return the index
+	 */
+	public static int getIndex(int peak, int parameterIndex)
+	{
+		if (parameterIndex < 1)
+			return 0;
+		return peak * PARAMETERS_PER_PEAK + parameterIndex;
 	}
 
 	protected final int maxx, maxy;
