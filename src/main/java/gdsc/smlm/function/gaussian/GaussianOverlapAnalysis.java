@@ -36,7 +36,7 @@ public class GaussianOverlapAnalysis
 	}
 
 	private final int flags;
-	private final AstimatismZModel zModel;
+	private final AstigmatismZModel zModel;
 	private final double[] params0;
 	private final double range;
 
@@ -47,16 +47,19 @@ public class GaussianOverlapAnalysis
 	private boolean[] mask = null;
 
 	/**
-	 * Create a new overlap analysis object
-	 * 
+	 * Create a new overlap analysis object.
+	 *
 	 * @param flags
 	 *            The flags describing the Gaussian2DFunction function (see GaussianFunctionFactory)
+	 * @param zModel
+	 *            the z model
 	 * @param params
 	 *            The parameters for the Gaussian (assumes a single peak)
 	 * @param range
-	 *            The range over which to compute the function (factor of the standard deviation)
+	 *            The range over which to compute the function (factor of the standard deviation). The standard
+	 *            deviation for the range will be expended by the z-model if provided.
 	 */
-	public GaussianOverlapAnalysis(int flags, AstimatismZModel zModel, double[] params, double range)
+	public GaussianOverlapAnalysis(int flags, AstigmatismZModel zModel, double[] params, double range)
 	{
 		this.flags = flags;
 		this.zModel = zModel;
@@ -66,7 +69,15 @@ public class GaussianOverlapAnalysis
 		double sx = (params[Gaussian2DFunction.X_SD] == 0) ? 1 : params[Gaussian2DFunction.X_SD];
 		double sy = (params[Gaussian2DFunction.Y_SD] == 0) ? sx : params[Gaussian2DFunction.Y_SD];
 
-		// Note that this does not use the z-model to expand the widths
+		// Use the z-model to expand the widths
+		if (zModel != null)
+		{
+			final double z = params[Gaussian2DFunction.Z_POSITION];
+			// Limit this to prevent a massive function range (in-case the z-model is bad)
+			sx = sx * Math.min(3, zModel.getSx(z));
+			sy = sy * Math.min(3, zModel.getSy(z));
+		}
+
 		maxx = 2 * ((int) Math.ceil(sx * range)) + 1;
 		maxy = 2 * ((int) Math.ceil(sy * range)) + 1;
 		size = maxx * maxy;
@@ -166,8 +177,10 @@ public class GaussianOverlapAnalysis
 		params = params.clone();
 		for (int n = 0; n < nPeaks; n++)
 		{
-			params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] += centrex - params0[Gaussian2DFunction.X_POSITION];
-			params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] += centrey - params0[Gaussian2DFunction.Y_POSITION];
+			params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] += centrex -
+					params0[Gaussian2DFunction.X_POSITION];
+			params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] += centrey -
+					params0[Gaussian2DFunction.Y_POSITION];
 		}
 		f.initialise(params);
 		if (mask == null || !withinMask)

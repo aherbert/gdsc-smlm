@@ -188,7 +188,7 @@ public class GaussianFunctionFactory
 	 *            the z model
 	 * @return The function
 	 */
-	public static Gaussian2DFunction create2D(int nPeaks, int maxx, int maxy, int flags, AstimatismZModel zModel)
+	public static Gaussian2DFunction create2D(int nPeaks, int maxx, int maxy, int flags, AstigmatismZModel zModel)
 	{
 		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
 		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
@@ -315,10 +315,8 @@ public class GaussianFunctionFactory
 	 *            the parameters of the function (modified in place)
 	 * @return the flags for the new function
 	 */
-	public static int freeze(int nPeak, int flags, AstimatismZModel zModel, double[] a)
+	public static int freeze(int nPeaks, int flags, AstigmatismZModel zModel, double[] a)
 	{
-		int nPeaks = a.length / 6;
-
 		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
 		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
 		{
@@ -375,9 +373,9 @@ public class GaussianFunctionFactory
 	 *            the parameters of the function (modified in place)
 	 * @return the flags for the new function
 	 */
-	public static int freeze(int flags, AstimatismZModel zModel, double[] a)
+	public static int freeze(int flags, AstigmatismZModel zModel, double[] a)
 	{
-		int nPeaks = a.length / 6;
+		int nPeaks = a.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		if (nPeaks > 1)
 			return freeze(nPeaks, flags, zModel, a);
 

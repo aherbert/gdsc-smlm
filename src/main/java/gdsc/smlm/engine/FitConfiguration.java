@@ -39,6 +39,7 @@ import gdsc.smlm.fitting.nonlinear.WLSELVMSteppingFunctionSolver;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.PrecomputedFunctionFactory;
+import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -82,6 +83,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private Logger log = null;
 	private boolean computeDeviations = false;
 	private int flags;
+	private AstigmatismZModel astigmatismZModel = null;
 	private double coordinateShift = 1;
 	private int fitRegionWidth = 0, fitRegionHeight = 0;
 	private double coordinateOffset = 0.5;
@@ -586,7 +588,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			// TODO : See if this works ...
 			// We can update the function solver with the new function so do not invalidate the solver
 			//invalidateFunctionSolver();
-			gaussianFunction = createGaussianFunction(npeaks, maxx, maxy, params);
+			gaussianFunction = createGaussianFunction(npeaks, maxx, maxy);
 		}
 		if (toleranceChecker == null)
 		{
@@ -619,25 +621,19 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * Creates the appropriate 2D Gaussian function for the configuration
-	 * 
+	 * Creates the appropriate 2D Gaussian function for the configuration.
+	 *
 	 * @param npeaks
 	 *            The number of peaks to fit
 	 * @param maxx
 	 *            The width of the XY data
-	 * @param maxx
+	 * @param maxy
 	 *            The height of the XY data
-	 * @param params
-	 *            The Gaussian parameters
 	 * @return The function
 	 */
-	public Gaussian2DFunction createGaussianFunction(int npeaks, int maxx, int maxy, double[] params)
+	public Gaussian2DFunction createGaussianFunction(int npeaks, int maxx, int maxy)
 	{
-		final int flags = getFunctionFlags();
-
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxy, flags, null);
-		//f.initialise(params);
-		return f;
+		return GaussianFunctionFactory.create2D(npeaks, maxx, maxy, getFunctionFlags(), getAstigmatismZModel());
 	}
 
 	/**
@@ -648,7 +644,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public int getFunctionFlags()
 	{
 		int flags = this.flags;
-
 		if (!isBackgroundFitting())
 		{
 			// Remove background fitting (on by default)
@@ -661,6 +656,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			flags |= GaussianFunctionFactory.FIT_SIMPLE;
 		}
 		return flags;
+	}
+
+	/**
+	 * Gets the astigmatism Z model.
+	 *
+	 * @return the astigmatism Z model
+	 */
+	public AstigmatismZModel getAstigmatismZModel()
+	{
+		if (astigmatismZModel == null)
+		{
+			// TODO - support this within the configuration proto object
+			astigmatismZModel = null;
+		}
+		return astigmatismZModel;
 	}
 
 	/**
@@ -2438,7 +2448,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			// Other code may want to call getFunctionSolver() to see if exceptions are thrown
 			// so create a dummy function so we can return a function solver.
-			gaussianFunction = createGaussianFunction(1, 1, 1, null);
+			gaussianFunction = createGaussianFunction(1, 1, 1);
 		}
 
 		// Only support CCD/EM-CCD at the moment
