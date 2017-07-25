@@ -1,7 +1,6 @@
 package gdsc.smlm.ij.results;
 
 import java.awt.Rectangle;
-import java.util.Collection;
 
 import org.apache.commons.math3.util.FastMath;
 
@@ -9,8 +8,8 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
