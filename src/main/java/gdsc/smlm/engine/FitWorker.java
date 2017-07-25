@@ -901,6 +901,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
 				double[] params, double localBackground, ResultType resultType)
 		{
+			// XXX- should this use frozen parameters in the instance where we have a z-model?
+			// Note that estimates are stored by converting PreprocessedPeakResult to Gaussian params
+			// These will then be incorrect for use with the function returned by the fit config.
+			
+			
 			//if (dynamicMultiPathFitResult.candidateId < candidateId && resultType == ResultType.NEW)
 			//	System.out.println("WTF");
 

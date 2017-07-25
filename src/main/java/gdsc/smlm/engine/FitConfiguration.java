@@ -667,7 +667,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		if (astigmatismZModel == null)
 		{
-			// TODO - support this within the configuration proto object
+			// TODO - support this within the configuration proto object. 
+			// This could be added to the PSF proto.
 			astigmatismZModel = null;
 		}
 		return astigmatismZModel;
