@@ -16,7 +16,7 @@ package gdsc.smlm.function.gaussian;
 /**
  * Implements a astigmatism model of a 2D Gaussian function, where z-depth determines the x and y width.
  */
-public interface AstimatismZModel extends Cloneable
+public interface AstigmatismZModel extends Cloneable
 {
 	/**
 	 * Gets the standard deviation in dimension x for the given z-depth.

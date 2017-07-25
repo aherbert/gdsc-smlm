@@ -1,7 +1,7 @@
 package gdsc.smlm.function.gaussian.erf;
 
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import gdsc.smlm.function.gaussian.HoltzerAstimatismZModel;
+import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 
 public class SingleAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
 {
@@ -15,7 +15,7 @@ public class SingleAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFun
 		double Bx = -0.073;
 		double Ay = 0.164;
 		double By = 0.0417;
-		zModel = HoltzerAstimatismZModel.create(gamma, d, Ax, Bx, Ay, By);
+		zModel = HoltzerAstigmatismZModel.create(gamma, d, Ax, Bx, Ay, By);
 		f1 = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
 	}
 

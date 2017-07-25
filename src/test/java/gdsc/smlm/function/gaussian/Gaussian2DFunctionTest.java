@@ -51,7 +51,7 @@ public abstract class Gaussian2DFunctionTest
 	protected Gaussian2DFunction f1;
 	protected Gaussian2DFunction f2 = null;
 	protected int flags;
-	protected AstimatismZModel zModel = null;
+	protected AstigmatismZModel zModel = null;
 
 	public Gaussian2DFunctionTest()
 	{

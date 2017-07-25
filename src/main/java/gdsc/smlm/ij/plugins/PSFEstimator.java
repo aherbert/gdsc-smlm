@@ -427,8 +427,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		PeakFit fitter = createFitter();
 
 		// Use the fit configuration to generate a Gaussian function to test what is being evaluated
-		Gaussian2DFunction gf = config.getFitConfiguration().createGaussianFunction(1, 1, 1,
-				new double[] { 0, 10, initialPeakAngle, 0, 0, initialPeakStdDev0, initialPeakStdDev1 });
+		Gaussian2DFunction gf = config.getFitConfiguration().createGaussianFunction(1, 1, 1);
 		createResultsWindow();
 		int iteration = 0;
 		ignore[ANGLE] = !gf.evaluatesAngle();

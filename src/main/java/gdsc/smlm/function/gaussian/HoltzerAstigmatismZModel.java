@@ -22,7 +22,7 @@ package gdsc.smlm.function.gaussian;
  * Ref: Holtzer, L., Meckel, T. & Schmidt, T. Nanometric three-dimensional tracking of individual quantum dots in cells.
  *      Applied Physics Letters 90, 1–3 (2007).
  */
-public class HoltzerAstimatismZModel implements AstimatismZModel
+public class HoltzerAstigmatismZModel implements AstigmatismZModel
 {
 	public final double gamma, one_d2, Ax, Bx, Ay, By;
 
@@ -43,10 +43,10 @@ public class HoltzerAstimatismZModel implements AstimatismZModel
 	 *            Empirical constant B for the y-astigmatism of the PSF
 	 * @return the holtzer astimatism Z model
 	 */
-	public static HoltzerAstimatismZModel create(double gamma, double d, double Ax, double Bx, double Ay, double By)
+	public static HoltzerAstigmatismZModel create(double gamma, double d, double Ax, double Bx, double Ay, double By)
 	{
 		final double d2 = d * d;
-		return new HoltzerAstimatismZModel(gamma, 1.0 / d2, Ax, Bx, Ay, By);
+		return new HoltzerAstigmatismZModel(gamma, 1.0 / d2, Ax, Bx, Ay, By);
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class HoltzerAstimatismZModel implements AstimatismZModel
 	 * @param By
 	 *            Empirical constant B for the y-astigmatism of the PSF
 	 */
-	public HoltzerAstimatismZModel(double gamma, double one_d2, double Ax, double Bx, double Ay, double By)
+	public HoltzerAstigmatismZModel(double gamma, double one_d2, double Ax, double Bx, double Ay, double By)
 	{
 		this.gamma = gamma;
 		this.one_d2 = one_d2;

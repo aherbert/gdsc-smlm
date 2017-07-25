@@ -13,7 +13,7 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.FakeGradientFunction;
-import gdsc.smlm.function.gaussian.HoltzerAstimatismZModel;
+import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
@@ -109,7 +109,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 		double Bx = -0.073;
 		double Ay = 0.164;
 		double By = 0.0417;
-		HoltzerAstimatismZModel zModel = HoltzerAstimatismZModel.create(gamma, d, Ax, Bx, Ay, By);
+		HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(gamma, d, Ax, Bx, Ay, By);
 
 		gradientCalculatorComputesGradient(1, new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
 	}

@@ -19,7 +19,7 @@ import gdsc.smlm.function.PrecomputedGradient2Function;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import gdsc.smlm.function.gaussian.HoltzerAstimatismZModel;
+import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
@@ -441,7 +441,7 @@ public class FastMLEGradient2ProcedureTest
 		double Bx = -0.073;
 		double Ay = 0.164;
 		double By = 0.0417;
-		HoltzerAstimatismZModel zModel = HoltzerAstimatismZModel.create(gamma, d, Ax, Bx, Ay, By);
+		HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(gamma, d, Ax, Bx, Ay, By);
 		gradientCalculatorComputesGradient(new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
 	}
 

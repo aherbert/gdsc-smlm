@@ -39,9 +39,9 @@ public class HoltzerAstigmatismZModelTest
 		double[] ds_dlz = new double[1];
 		for (double z = -0.5; z < 0.5; z += 0.01)
 		{
-			double s0 = HoltzerAstimatismZModel.getS(z, one_d2, Ax, Bx);
-			double s1 = HoltzerAstimatismZModel.getS1(z, one_d2, Ax, Bx, ds_dz);
-			double s2 = HoltzerAstimatismZModel.getS2(z, one_d2, Ax, Bx, ds_dz2);
+			double s0 = HoltzerAstigmatismZModel.getS(z, one_d2, Ax, Bx);
+			double s1 = HoltzerAstigmatismZModel.getS1(z, one_d2, Ax, Bx, ds_dz);
+			double s2 = HoltzerAstigmatismZModel.getS2(z, one_d2, Ax, Bx, ds_dz2);
 
 			Assert.assertEquals(s0, s1, 0);
 			Assert.assertEquals(s0, s2, 0);
@@ -49,8 +49,8 @@ public class HoltzerAstigmatismZModelTest
 
 			double uz = z + h_;
 			double lz = z - h_;
-			double upper = HoltzerAstimatismZModel.getS1(uz, one_d2, Ax, Bx, ds_duz);
-			double lower = HoltzerAstimatismZModel.getS1(lz, one_d2, Ax, Bx, ds_dlz);
+			double upper = HoltzerAstigmatismZModel.getS1(uz, one_d2, Ax, Bx, ds_duz);
+			double lower = HoltzerAstigmatismZModel.getS1(lz, one_d2, Ax, Bx, ds_dlz);
 
 			double e1 = (upper - lower) / (uz - lz);
 			double o1 = ds_dz[0];

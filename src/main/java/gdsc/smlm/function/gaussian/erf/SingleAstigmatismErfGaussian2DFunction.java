@@ -3,7 +3,7 @@ package gdsc.smlm.function.gaussian.erf;
 import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
-import gdsc.smlm.function.gaussian.AstimatismZModel;
+import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -30,7 +30,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		gradientIndices = createGradientIndices(1, new SingleAstigmatismErfGaussian2DFunction(1, 1, null));
 	}
 
-	protected final AstimatismZModel zModel;
+	protected final AstigmatismZModel zModel;
 
 	// Required for the z-depth gradients
 	protected double dtsx_dtz, d2tsx_dtz2, dtsy_dtz, d2tsy_dtz2;
@@ -45,7 +45,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 	 * @param zModel
 	 *            the z model
 	 */
-	public SingleAstigmatismErfGaussian2DFunction(int maxx, int maxy, AstimatismZModel zModel)
+	public SingleAstigmatismErfGaussian2DFunction(int maxx, int maxy, AstigmatismZModel zModel)
 	{
 		super(maxx, maxy);
 		this.zModel = zModel;
