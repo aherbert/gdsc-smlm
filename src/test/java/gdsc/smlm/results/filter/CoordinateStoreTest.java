@@ -32,7 +32,7 @@ public class CoordinateStoreTest
 		double[] datax = { 0.1, 4.1 };
 		double[] datay = { 3.1, 7.1 };
 		double[] dataz = { 0, 0.1 };
-		double[] resolution = { 0.3, 0.5, 1.5 };
+		double[] resolution = { 0, 0.3, 0.5, 1.5 };
 
 		for (int i = 0; i < resolution.length; i++)
 		{
@@ -47,11 +47,16 @@ public class CoordinateStoreTest
 				Assert.assertTrue(msg, s.contains(datax[j], datay[j], dataz[j]));
 				Assert.assertTrue(msg, s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]));
 				Assert.assertTrue(msg, s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i] * 1.01, datay[j] + resolution[i], dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i], datay[j] + resolution[i] * 1.01, dataz[j]));
+				Assert.assertFalse(msg,	s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]));
+				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]));
 				//@formatter:on
 			}
 		}
+	}
+
+	private double increase(double value, double delta)
+	{
+		return (value == 0) ? delta : value * delta;
 	}
 
 	@Test
@@ -93,8 +98,8 @@ public class CoordinateStoreTest
 			Assert.assertTrue(msg, s.contains(x, y, z));
 			Assert.assertTrue(msg, s.contains(x, y, z + zResolution));
 			Assert.assertTrue(msg, s.contains(x, y, z - zResolution));
-			Assert.assertFalse(msg, s.contains(x, y, z + zResolution*1.01));
-			Assert.assertFalse(msg, s.contains(x, y, z - zResolution*1.01));
+			Assert.assertFalse(msg, s.contains(x, y, z + zResolution * 1.01));
+			Assert.assertFalse(msg, s.contains(x, y, z - zResolution * 1.01));
 		}
 	}
 
@@ -235,7 +240,7 @@ public class CoordinateStoreTest
 		double[] datax = { 0.1, 4.1 };
 		double[] datay = { 3.1, 7.1 };
 		double[] dataz = { 0, 0.1 };
-		double[] resolution = { 0.3, 0.5, 1.5 };
+		double[] resolution = { 0, 0.3, 0.5, 1.5 };
 
 		GridCoordinateStore s = new GridCoordinateStore(10, 10, 0, 0.0);
 		for (int i = 0; i < resolution.length; i++)
@@ -252,8 +257,8 @@ public class CoordinateStoreTest
 				Assert.assertTrue(msg, s.contains(datax[j], datay[j], dataz[j]));
 				Assert.assertTrue(msg, s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]));
 				Assert.assertTrue(msg, s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i] * 1.01, datay[j] + resolution[i], dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i], datay[j] + resolution[i] * 1.01, dataz[j]));
+				Assert.assertFalse(msg,	s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]));
+				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]));
 				//@formatter:on
 			}
 		}
@@ -265,7 +270,7 @@ public class CoordinateStoreTest
 		double[] datax = { 0.1, 4.1 };
 		double[] datay = { 3.1, 7.1 };
 		double[] dataz = { 0, 0.1 };
-		double[] resolution = { 0.3, 0.5 };
+		double[] resolution = { 0, 0.3, 0.5 };
 
 		GridCoordinateStore1 s = new GridCoordinateStore1(10, 10, 0, 0.0);
 		for (int i = 0; i < resolution.length; i++)
@@ -282,8 +287,8 @@ public class CoordinateStoreTest
 				Assert.assertTrue(msg, s.contains(datax[j], datay[j], dataz[j]));
 				Assert.assertTrue(msg, s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]));
 				Assert.assertTrue(msg, s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i] * 1.01, datay[j] + resolution[i], dataz[j]));
-				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i], datay[j] + resolution[i] * 1.01, dataz[j]));
+				Assert.assertFalse(msg,	s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]));
+				Assert.assertFalse(msg,	s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]));
 				//@formatter:on
 			}
 		}
