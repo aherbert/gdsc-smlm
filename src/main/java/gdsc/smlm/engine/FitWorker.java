@@ -969,6 +969,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	private class CandidateSpotFitter
 	{
+		// TODO: When using an astigmatism z-model it is possible to fit two spots that are colocated.
+		// So the colocation checks to existing peaks should be refined to allow both spots if they 
+		// have suitably different z-depths (i.e. X/Y widths). 
+		
 		final Gaussian2DFitter gf;
 		final ResultFactory resultFactory;
 		final double[] region, region2;
@@ -2864,7 +2868,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	private void storeEstimate(int i, PreprocessedPeakResult peak, byte filterRank)
 	{
-		double[] params = peak.toGaussian2DParameters();
+		final double[] params = peak.toGaussian2DParameters();
 		// Reset the width params if using an astigmatism z-model
 		if (fitConfig.getAstigmatismZModel() != null)
 		{

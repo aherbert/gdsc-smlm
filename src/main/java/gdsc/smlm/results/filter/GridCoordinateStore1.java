@@ -23,49 +23,45 @@ public class GridCoordinateStore1 extends GridCoordinateStore
 	// Note: We have package level constructors so that the factory must be used to create an instance.
 
 	/**
-	 * Create an empty grid for coordinates. The grid should be resized to the max dimensions of the data using
-	 * {@link #resize(int, int)}
-	 *
-	 * @param resolution
-	 *            the resolution
-	 */
-	GridCoordinateStore1(double resolution)
-	{
-		this(Math.max(0, resolution) * Math.max(0, resolution), 1, 1);
-	}
-
-	/**
 	 * Create a grid for coordinates.
 	 *
 	 * @param maxx
 	 *            the max x coordinate value
 	 * @param maxy
 	 *            the max y coordinate value
-	 * @param resolution
-	 *            the resolution
+	 * @param xyResolution
+	 *            the xy resolution
+	 * @param zResolution
+	 *            the z resolution
 	 */
-	GridCoordinateStore1(int maxx, int maxy, double resolution)
+	GridCoordinateStore1(int maxx, int maxy, double xyResolution, double zResolution)
 	{
-		// Number of blocks is just the max dimensions since we have a block resolution of 1
-		this(Math.max(0, resolution) * Math.max(0, resolution), Math.max(0, maxx) + 1, Math.max(0, maxy) + 1);
+		super(maxx, maxy, xyResolution, zResolution);
+		checkResolution(xyResolution);
+	}
+
+	private void checkResolution(double xyResolution)
+	{
+		if (xyResolution > 1)
+			throw new IllegalArgumentException("XY Resolution must be <= 1");
 	}
 
 	/**
 	 * Create a grid for coordinates.
 	 *
-	 * @param d2
-	 *            the d 2
+	 * @param xyResolution
+	 *            the xy resolution
+	 * @param zResolution
+	 *            the z resolution
 	 * @param xBlocks
 	 *            the x blocks
 	 * @param yBlocks
 	 *            the y blocks
 	 */
-	private GridCoordinateStore1(double d2, int xBlocks, int yBlocks)
+	private GridCoordinateStore1(double xyResolution, double zResolution, int xBlocks, int yBlocks)
 	{
-		// Use a block resolution of 1
-		super(1, d2, xBlocks, yBlocks);
-		if (d2 > 1)
-			throw new IllegalArgumentException("Resolution must be less than 1");
+		super(xyResolution, zResolution, xBlocks, yBlocks);
+		checkResolution(xyResolution);
 	}
 
 	/*
@@ -76,7 +72,7 @@ public class GridCoordinateStore1 extends GridCoordinateStore
 	@Override
 	protected GridCoordinateStore newInstance(int xBlocks, int yBlocks)
 	{
-		return new GridCoordinateStore1(getSquaredDistance(), xBlocks, yBlocks);
+		return new GridCoordinateStore1(getXYResolution(), getZResolution(), xBlocks, yBlocks);
 	}
 
 	/*
@@ -98,14 +94,13 @@ public class GridCoordinateStore1 extends GridCoordinateStore
 	@Override
 	protected int getCoordinate(int blocks)
 	{
-		return (int) Math.round(blocks);
+		return blocks;
 	}
 
 	@Override
-	public void changeResolution(double resolution)
+	public void changeXYResolution(double xyResolution)
 	{
-		if (resolution > 1)
-			throw new IllegalArgumentException("Resolution must be less than 1");
-		super.changeResolution(resolution);
+		checkResolution(xyResolution);
+		super.changeXYResolution(xyResolution);
 	}
 }

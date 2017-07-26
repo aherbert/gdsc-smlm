@@ -14,16 +14,24 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 /**
- * Stores a set of results within a grid arrangement at a given resolution. Allows checking for duplicates.
+ * Stores a set of results within a grid arrangement at a given resolution. Allows checking for duplicates. The XY and Z
+ * resolution can be different.
  */
 public interface CoordinateStore
 {
 	/**
-	 * Gets the resolution of the store.
+	 * Gets the XY resolution of the store. If negative then nothing is stored.  
 	 *
-	 * @return the resolution
+	 * @return the XY resolution
 	 */
-	public double getResolution();
+	public double getXYResolution();
+
+	/**
+	 * Gets the Z resolution of the store. If negative then this is ignored and the store behaves as if processing 2D coordinates. 
+	 *
+	 * @return the Z resolution
+	 */
+	public double getZResolution();
 
 	/**
 	 * Queue a coordinate to the store.
@@ -34,8 +42,10 @@ public interface CoordinateStore
 	 *            the x
 	 * @param y
 	 *            the y
+	 * @param z
+	 *            the z
 	 */
-	public void addToQueue(double x, double y);
+	public void addToQueue(double x, double y, double z);
 
 	/**
 	 * Flush the queue to the store
@@ -43,14 +53,17 @@ public interface CoordinateStore
 	public void flush();
 
 	/**
-	 * Add a coordinate to the store. Assumes that the coordinates are within the size of the grid otherwise they will be ignored.
+	 * Add a coordinate to the store. Assumes that the coordinates are within the size of the grid otherwise they will
+	 * be ignored.
 	 *
 	 * @param x
 	 *            the x
 	 * @param y
 	 *            the y
+	 * @param z
+	 *            the z
 	 */
-	public void add(double x, double y);
+	public void add(double x, double y, double z);
 
 	/**
 	 * Clear to the store.
@@ -64,9 +77,11 @@ public interface CoordinateStore
 	 *            the x
 	 * @param y
 	 *            the y
+	 * @param z
+	 *            the z
 	 * @return true, if the store contains another coordinate closer than the resolution
 	 */
-	public boolean contains(double x, double y);
+	public boolean contains(double x, double y, double z);
 
 	/**
 	 * Find the closest coordinate within the configured resolution.
@@ -75,17 +90,19 @@ public interface CoordinateStore
 	 *            the x
 	 * @param y
 	 *            the y
+	 * @param z
+	 *            the z
 	 * @return the coordinate closer than the resolution (or null)
 	 */
-	public double[] find(double x, double y);
-	
+	public double[] find(double x, double y, double z);
+
 	/**
 	 * Create a new instance.
 	 *
 	 * @return the new coordinate store
 	 */
 	public CoordinateStore newInstance();
-	
+
 	/**
 	 * Resize to the given dimensions. If these match the existing dimensions the current store is returned. Otherwise a
 	 * new store is returned.

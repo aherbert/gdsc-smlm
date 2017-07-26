@@ -562,12 +562,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					}
 
 					// Flag if it is possible to be a duplicate
-					final boolean notDuplicate = !coordinateStore.contains(peak.getX(), peak.getY());
+					final boolean notDuplicate = !coordinateStore.contains(peak.getX(), peak.getY(), peak.getZ());
 					if (notDuplicate)
 						notDuplicateCount++;
 					newResultCount++;
 					peak.setNotDuplicate(notDuplicate);
-					coordinateStore.addToQueue(peak.getX(), peak.getY());
+					coordinateStore.addToQueue(peak.getX(), peak.getY(), peak.getZ());
 
 					// Compare to actual results
 					// We do this using the PeakResultGridManager to generate a sublist to score against
@@ -4591,7 +4591,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		residualsThreshold = sResidualsThreshold = point[1];
 		duplicateDistance = point[2];
 		// Refresh the coordinate store
-		if (coordinateStore == null || duplicateDistance != coordinateStore.getResolution())
+		if (coordinateStore == null || duplicateDistance != coordinateStore.getXYResolution())
 		{
 			coordinateStore = createCoordinateStore();
 		}
@@ -6562,7 +6562,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			this.filter = (DirectFilter) ss_filter.clone();
 			this.minFilter = (minimalFilter != null) ? (DirectFilter) minimalFilter.clone() : null;
 			int[] bounds = getBounds();
-			this.gridCoordinateStore = new GridCoordinateStore(bounds[0], bounds[1], 0);
+			this.gridCoordinateStore = new GridCoordinateStore(bounds[0], bounds[1], 0, 0);
 		}
 
 		/*
@@ -6611,7 +6611,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			CoordinateStore coordinateStore2;
 
 			// Re-use
-			gridCoordinateStore.changeResolution(duplicateDistance);
+			gridCoordinateStore.changeXYResolution(duplicateDistance);
 			coordinateStore2 = gridCoordinateStore;
 
 			// New

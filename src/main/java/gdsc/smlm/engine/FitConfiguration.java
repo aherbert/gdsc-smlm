@@ -2370,6 +2370,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * Unmap the width parameters using the Z model. This assumes the parameters are for a single peak.
+	 * <p>
+	 * Note that this is unnecessary if the original widths are known (i.e. at z=0) since they should be identical to
+	 * the current widths unmapped using the current z.
 	 *
 	 * @param params
 	 *            the params

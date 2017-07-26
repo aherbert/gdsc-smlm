@@ -18,29 +18,49 @@ package gdsc.smlm.results.filter;
  */
 public class CoordinateStoreFactory
 {
+
 	/**
-	 * Creates the coordinate store
+	 * Creates the coordinate store.
 	 *
 	 * @param maxx
 	 *            the max x coordinate value
 	 * @param maxy
 	 *            the max y coordinate value
-	 * @param resolution
-	 *            the resolution
+	 * @param xyResolution
+	 *            the xy resolution (if negative then nothing is stored)
 	 * @return the coordinate store
 	 */
-	public static CoordinateStore create(int maxx, int maxy, double resolution)
+	public static CoordinateStore create(int maxx, int maxy, double xyResolution)
 	{
-		if (resolution <= 0)
+		return create(maxx, maxy, xyResolution, -1);
+	}
+
+	/**
+	 * Creates the coordinate store.
+	 *
+	 * @param maxx
+	 *            the max x coordinate value
+	 * @param maxy
+	 *            the max y coordinate value
+	 * @param xyResolution
+	 *            the xy resolution (if negative then nothing is stored)
+	 * @param zResolution
+	 *            the z resolution (if negative then this is ignored and the store behaves as if processing 2D
+	 *            coordinates)
+	 * @return the coordinate store
+	 */
+	public static CoordinateStore create(int maxx, int maxy, double xyResolution, double zResolution)
+	{
+		if (xyResolution < 0)
 			return new NullCoordinateStore();
-		
+
 		// This should be faster (for additions and block lookup) as it has a fixed block resolution of 1.
 		// However it may be slower if the distance is much lower than 1 and there are many points close 
 		// to the resolution distance as it will have to compute the distance for each. As a compromise
 		// we only use it when the resolution is above the min block size of the default store.
-		if (resolution >= GridCoordinateStore.MINIMUM_BLOCK_SIZE && resolution <= 1)
-			return new GridCoordinateStore1(maxx, maxy, resolution);
-		
-		return new GridCoordinateStore(maxx, maxy, resolution);
+		if (xyResolution >= GridCoordinateStore.MINIMUM_BLOCK_SIZE && xyResolution <= 1)
+			return new GridCoordinateStore1(maxx, maxy, xyResolution, zResolution);
+
+		return new GridCoordinateStore(maxx, maxy, xyResolution, zResolution);
 	}
 }

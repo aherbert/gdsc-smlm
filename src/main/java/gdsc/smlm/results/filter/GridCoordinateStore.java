@@ -1,5 +1,7 @@
 package gdsc.smlm.results.filter;
 
+import gdsc.core.utils.Maths;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -28,7 +30,7 @@ public class GridCoordinateStore implements CoordinateStore
 	{
 		int timestamp = 0;
 		int size = 0;
-		double[] list = new double[4];
+		double[] list = new double[3];
 
 		// Not needed as we only create lists in the constructor when the timestamp is zero
 		//CoordinateList()
@@ -36,7 +38,7 @@ public class GridCoordinateStore implements CoordinateStore
 		//	refresh();
 		//}
 
-		void add(double x, double y)
+		void add(double x, double y, double z)
 		{
 			if (list.length == size)
 			{
@@ -46,7 +48,8 @@ public class GridCoordinateStore implements CoordinateStore
 			}
 			list[size] = x;
 			list[size + 1] = y;
-			size += 2;
+			list[size + 2] = z;
+			size += 3;
 		}
 
 		void refresh()
@@ -68,23 +71,27 @@ public class GridCoordinateStore implements CoordinateStore
 	private CoordinateList[][] grid;
 	private final CoordinateList queue = new CoordinateList();
 	private double blockResolution;
-	private double d2;
-	private int xBlocks, yBlocks;
-
+	private double xyResolution;
 	/**
-	 * Create an empty grid for coordinates. The grid should be resized to the max dimensions of the data using
-	 * {@link #resize(int, int)}
-	 *
-	 * @param resolution
-	 *            the resolution
+	 * The squared XY resolution. If the XY resolution is negative then this should never be used as the store is not
+	 * active.
 	 */
-	GridCoordinateStore(double resolution)
-	{
-		this(0, 0, resolution);
-	}
+	private double xy2;
+	/**
+	 * The z resolution. If this is negative then this is ignored and the store behaves as if processing 2D coordinates.
+	 */
+	private double zResolution;
+	private int xBlocks, yBlocks;
+	/**
+	 * Flag to indicate that the store is active (i.e. storing coordinates). It is not active if the XY resolution is
+	 * negative.
+	 */
+	private boolean isActive;
+	/** Flag to indicate that the store is ignoring the z coordinate. This is true if the z resolution is negative. */
+	private boolean is2D;
 
 	// Note: This is a public constructor so this can be used without the factory
-	
+
 	/**
 	 * Create a grid for coordinates.
 	 *
@@ -92,34 +99,64 @@ public class GridCoordinateStore implements CoordinateStore
 	 *            the max x coordinate value
 	 * @param maxy
 	 *            the max y coordinate value
-	 * @param resolution
-	 *            the resolution
+	 * @param xyResolution
+	 *            the xy resolution
+	 * @param zResolution
+	 *            the z resolution
 	 */
-	public GridCoordinateStore(int maxx, int maxy, double resolution)
+	public GridCoordinateStore(int maxx, int maxy, double xyResolution, double zResolution)
 	{
 		if (maxx < 0)
 			maxx = 0;
 		if (maxy < 0)
 			maxy = 0;
-		if (resolution < 0)
-			resolution = 0;
-		this.blockResolution = Math.max(MINIMUM_BLOCK_SIZE, resolution);
-		this.d2 = resolution * resolution;
+
+		setXYResolution(xyResolution);
+		setZResolution(zResolution);
 		this.xBlocks = getBlock(maxx) + 1;
 		this.yBlocks = getBlock(maxy) + 1;
 
 		createGrid();
 	}
 
+	private void setXYResolution(double xyResolution)
+	{
+		this.xyResolution = xyResolution;
+		this.blockResolution = Math.max(MINIMUM_BLOCK_SIZE, xyResolution);
+		this.xy2 = xyResolution * xyResolution;
+		isActive = xyResolution >= 0;
+	}
+
+	private void setZResolution(double zResolution)
+	{
+		this.zResolution = zResolution;
+		is2D = zResolution < 0;
+	}
+
+	/**
+	 * Gets the block for the coordinate.
+	 *
+	 * @param x
+	 *            the coordinate
+	 * @return the block
+	 */
+	protected int getBlock(final double x)
+	{
+		return (int) (x / blockResolution);
+	}
+
 	private void createGrid()
 	{
-		grid = new CoordinateList[xBlocks][yBlocks];
-		for (int x = 0; x < xBlocks; x++)
+		if (isActive)
 		{
-			final CoordinateList[] list = grid[x];
-			for (int y = 0; y < yBlocks; y++)
+			grid = new CoordinateList[xBlocks][yBlocks];
+			for (int x = 0; x < xBlocks; x++)
 			{
-				list[y] = new CoordinateList();
+				final CoordinateList[] list = grid[x];
+				for (int y = 0; y < yBlocks; y++)
+				{
+					list[y] = new CoordinateList();
+				}
 			}
 		}
 	}
@@ -129,17 +166,19 @@ public class GridCoordinateStore implements CoordinateStore
 	 *
 	 * @param blockResolution
 	 *            the block resolution
-	 * @param d2
-	 *            the d 2
+	 * @param xy2
+	 *            the xy resolution squared
+	 * @param zResolution
+	 *            the z resolution
 	 * @param xBlocks
 	 *            the x blocks
 	 * @param yBlocks
 	 *            the y blocks
 	 */
-	protected GridCoordinateStore(double blockResolution, double d2, int xBlocks, int yBlocks)
+	protected GridCoordinateStore(double xyResolution, double zResolution, int xBlocks, int yBlocks)
 	{
-		this.blockResolution = blockResolution;
-		this.d2 = d2;
+		setXYResolution(xyResolution);
+		setZResolution(zResolution);
 		this.xBlocks = xBlocks;
 		this.yBlocks = yBlocks;
 
@@ -164,7 +203,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 */
 	protected GridCoordinateStore newInstance(int xBlocks, int yBlocks)
 	{
-		return new GridCoordinateStore(blockResolution, d2, xBlocks, yBlocks);
+		return new GridCoordinateStore(xyResolution, zResolution, xBlocks, yBlocks);
 	}
 
 	/*
@@ -181,33 +220,33 @@ public class GridCoordinateStore implements CoordinateStore
 		int xBlocks = getBlock(maxx) + 1;
 		int yBlocks = getBlock(maxy) + 1;
 		if (this.xBlocks == xBlocks && this.yBlocks == yBlocks)
+		{
+			clear(); // For consistency with a new instance also being empty.
 			return this;
+		}
 		return newInstance(xBlocks, yBlocks);
 	}
 
 	/**
-	 * Change the resolution of the store. The max dimensions are unchanged.
+	 * Change the XY resolution of the store. The max dimensions are unchanged. Changing the resolution clears the
+	 * store.
 	 * 
-	 * @param resolution
-	 *            The new resolution
+	 * @param xyResolution
+	 *            The new XY resolution
 	 */
-	public void changeResolution(double resolution)
+	public void changeXYResolution(double xyResolution)
 	{
 		clear();
-		
-		if (resolution < 0)
-			resolution = 0;
-		double new_d2 = resolution * resolution;
-		if (new_d2 == d2)
+
+		if (xyResolution == this.xyResolution || xyResolution < 0 && this.xyResolution < 0)
 			// No size change
 			return;
-		
+
 		int maxx = getCoordinate(xBlocks - 1);
 		int maxy = getCoordinate(yBlocks - 1);
-		
-		this.blockResolution = Math.max(MINIMUM_BLOCK_SIZE, resolution);
-		this.d2 = new_d2;
-		
+
+		setXYResolution(xyResolution);
+
 		this.xBlocks = getBlock(maxx) + 1;
 		this.yBlocks = getBlock(maxy) + 1;
 
@@ -217,15 +256,17 @@ public class GridCoordinateStore implements CoordinateStore
 	}
 
 	/**
-	 * Gets the block for the coordinate.
+	 * Change Z resolution. Changing the resolution clears the store.
 	 *
-	 * @param x
-	 *            the coordinate
-	 * @return the block
+	 * @param zResolution
+	 *            the z resolution
 	 */
-	protected int getBlock(final double x)
+	public void changeZResolution(double zResolution)
 	{
-		return (int) (x / blockResolution);
+		// This is not strictly necessary since we use a 2D grid but is 
+		// done for consistency with changeXYResolution(...).
+		clear();
+		setZResolution(zResolution);
 	}
 
 	/**
@@ -243,31 +284,34 @@ public class GridCoordinateStore implements CoordinateStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#getResolution()
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getXYResolution()
 	 */
-	public double getResolution()
+	public double getXYResolution()
 	{
-		return Math.sqrt(d2);
+		return xyResolution;
 	}
 
-	/**
-	 * Gets the squared distance. This is equal to the resolution squared.
-	 *
-	 * @return the squared distance
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getZResolution()
 	 */
-	public double getSquaredDistance()
+	public double getZResolution()
 	{
-		return d2;
+		return zResolution;
 	}
 
 	/**
 	 * Note: This does not check that the x,y coordinates are within the correct bounds.
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double, double)
 	 */
-	public void addToQueue(double x, double y)
+	public void addToQueue(double x, double y, double z)
 	{
-		queue.add(x, y);
+		if (isActive)
+		{
+			queue.add(x, y, z);
+		}
 	}
 
 	/*
@@ -277,8 +321,8 @@ public class GridCoordinateStore implements CoordinateStore
 	 */
 	public void flush()
 	{
-		for (int i = 0; i < queue.size; i += 2)
-			add(queue.list[i], queue.list[i + 1]);
+		for (int i = 0; i < queue.size; i += 3)
+			addf(queue.list[i], queue.list[i + 1], queue.list[i + 2]);
 		//queue.clear(); // Avoid the timestamp refresh
 		queue.size = 0;
 	}
@@ -287,14 +331,21 @@ public class GridCoordinateStore implements CoordinateStore
 	 * Note: This does not check that the x,y coordinates are within the correct bounds. Use
 	 * {@link #safeAdd(double, double)} to do a bounds check.
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#add(double, double)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#add(double, double, double)
 	 */
-	public void add(final double x, final double y)
+	public void add(final double x, final double y, final double z)
+	{
+		if (isActive)
+		{
+			addf(x, y, z);
+		}
+	}
+
+	private void addf(final double x, final double y, final double z)
 	{
 		// Note: A bounds check is not currently necessary since the this code is only used
 		// by the MultiPathFilter on results that are inside the bounds
-
-		getList(getBlock(x), getBlock(y)).add(x, y);
+		getList(getBlock(x), getBlock(y)).add(x, y, z);
 	}
 
 	/**
@@ -305,17 +356,22 @@ public class GridCoordinateStore implements CoordinateStore
 	 *            the x
 	 * @param y
 	 *            the y
+	 * @param z
+	 *            the z
 	 */
-	public void safeAdd(final double x, final double y)
+	public void safeAdd(final double x, final double y, final double z)
 	{
-		// Check bounds 
-		final int xBlock = getBlock(x);
-		if (xBlock < 0 || xBlock >= xBlocks)
-			return;
-		final int yBlock = getBlock(y);
-		if (yBlock < 0 || yBlock >= yBlocks)
-			return;
-		getList(xBlock, yBlock).add(x, y);
+		if (isActive)
+		{
+			// Check bounds 
+			final int xBlock = getBlock(x);
+			if (xBlock < 0 || xBlock >= xBlocks)
+				return;
+			final int yBlock = getBlock(y);
+			if (yBlock < 0 || yBlock >= yBlocks)
+				return;
+			getList(xBlock, yBlock).add(x, y, z);
+		}
 	}
 
 	/**
@@ -345,7 +401,7 @@ public class GridCoordinateStore implements CoordinateStore
 		// So store a timestamp for the clear and we refresh each list when we next use it.
 		timestamp++;
 		queue.size = 0;
-		
+
 		// Reset after an entire cycle of timestamps
 		if (timestamp == 0)
 		{
@@ -363,10 +419,14 @@ public class GridCoordinateStore implements CoordinateStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#contains(double, double)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#contains(double, double, double)
 	 */
-	public boolean contains(final double x, final double y)
+	public boolean contains(final double x, final double y, final double z)
 	{
+		// If not active then nothing could have been added
+		if (!isActive)
+			return false;
+
 		final int xBlock = getBlock(x);
 		final int yBlock = getBlock(y);
 
@@ -384,10 +444,16 @@ public class GridCoordinateStore implements CoordinateStore
 				if (size == 0)
 					continue;
 				final double[] list = l.list;
-				for (int i = 0; i < size; i += 2)
+				for (int i = 0; i < size; i += 3)
 				{
-					if (distance2(x, y, list[i], list[i + 1]) < d2)
-						return true;
+					if (distance2(x, y, list[i], list[i + 1]) <= xy2)
+					{
+						if (is2D)
+							return true;
+						// Otherwise z resolution is not negative and we check that
+						if (distance(z, list[i + 2]) <= zResolution)
+							return true;
+					}
 				}
 			}
 		}
@@ -408,20 +474,42 @@ public class GridCoordinateStore implements CoordinateStore
 	 *            the y2 coordinate
 	 * @return the squared distance
 	 */
-	private double distance2(final double x, final double y, final double x2, final double y2)
+	private static double distance2(final double x, final double y, final double x2, final double y2)
 	{
 		final double dx = x - x2;
 		final double dy = y - y2;
 		return dx * dx + dy * dy;
 	}
 
-	public double[] find(final double x, final double y)
+	/**
+	 * Get the absolute distance.
+	 *
+	 * @param x
+	 *            the x coordinate
+	 * @param x2
+	 *            the x2 coordinate
+	 * @return the absolute distance
+	 */
+	private static double distance(final double x, final double x2)
 	{
+		return (x > x2) ? x - x2 : x2 - x;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#find(double, double, double)
+	 */
+	public double[] find(final double x, final double y, final double z)
+	{
+		if (!isActive)
+			return null;
+
 		final int xBlock = getBlock(x);
 		final int yBlock = getBlock(y);
 
-		double[] match = new double[2];
-		double min = d2;
+		double[] match = new double[3];
+		double min = Double.POSITIVE_INFINITY;
 
 		final int xmin = Math.max(0, xBlock - 1);
 		final int ymin = Math.max(0, yBlock - 1);
@@ -437,19 +525,33 @@ public class GridCoordinateStore implements CoordinateStore
 				if (size == 0)
 					continue;
 				final double[] list = l.list;
-				for (int i = 0; i < size; i += 2)
+				for (int i = 0; i < size; i += 3)
 				{
-					final double d = distance2(x, y, list[i], list[i + 1]);
-					if (d < min)
+					double d = distance2(x, y, list[i], list[i + 1]);
+					if (d <= xy2)
 					{
-						min = d;
-						match[0] = list[i];
-						match[1] = list[i + 1];
+						if (!is2D)
+						{
+							// z resolution is not negative and we check that
+							final double dd = distance(z, list[i + 2]);
+							if (dd > zResolution)
+								continue;
+							// Get a combined Euclidean squared distance
+							d += Maths.pow2(dd);
+						}
+
+						if (d < min)
+						{
+							min = d;
+							match[0] = list[i];
+							match[1] = list[i + 1];
+							match[2] = list[i + 2];
+						}
 					}
 				}
 			}
 		}
 
-		return (min < d2) ? match : null;
+		return (min < Double.POSITIVE_INFINITY) ? match : null;
 	}
 }

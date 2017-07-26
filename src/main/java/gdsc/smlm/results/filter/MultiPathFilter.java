@@ -242,7 +242,6 @@ public class MultiPathFilter implements Cloneable
 	 */
 	private static class NullSelectedResultStore implements SelectedResultStore
 	{
-
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -1119,9 +1118,9 @@ public class MultiPathFilter implements Cloneable
 
 							// TODO - Check for duplicates
 							if (result[i].isNotDuplicate() ||
-									!coordinateStore.contains(result[i].getX(), result[i].getY()))
+									!coordinateStore.contains(result[i].getX(), result[i].getY(), result[i].getZ()))
 							{
-								coordinateStore.addToQueue(result[i].getX(), result[i].getY());
+								coordinateStore.addToQueue(result[i].getX(), result[i].getY(), result[i].getZ());
 								ok[size++] = i;
 							}
 							//							else
@@ -1763,9 +1762,9 @@ public class MultiPathFilter implements Cloneable
 
 								// TODO - Check for duplicates
 								if (result[i].isNotDuplicate() ||
-										!coordinateStore.contains(result[i].getX(), result[i].getY()))
+										!coordinateStore.contains(result[i].getX(), result[i].getY(), result[i].getZ()))
 								{
-									coordinateStore.addToQueue(result[i].getX(), result[i].getY());
+									coordinateStore.addToQueue(result[i].getX(), result[i].getY(), result[i].getZ());
 									//									if (store.isFit[result[i].getCandidateId()] &&
 									//											result[i].getCandidateId() != multiPathResult.candidateId)
 									//										System.out.printf("Fitted candidate %d [%d] %f,%f ([%d])\n",
@@ -2404,9 +2403,9 @@ public class MultiPathFilter implements Cloneable
 								{
 									// TODO - Check for duplicates
 									if (result[i].isNotDuplicate() ||
-											!coordinateStore.contains(result[i].getX(), result[i].getY()))
+											!coordinateStore.contains(result[i].getX(), result[i].getY(), result[i].getZ()))
 									{
-										coordinateStore.addToQueue(result[i].getX(), result[i].getY());
+										coordinateStore.addToQueue(result[i].getX(), result[i].getY(), result[i].getZ());
 										scoreStore.add(result[i].getUniqueId());
 										final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
 										if (a != null && a.length > 0)

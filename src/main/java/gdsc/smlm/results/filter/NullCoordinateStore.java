@@ -19,7 +19,7 @@ package gdsc.smlm.results.filter;
 public class NullCoordinateStore implements CoordinateStore
 {
 	// Note: We have package level constructors so that the factory must be used to create an instance.
-	
+
 	/**
 	 * Instantiates a new null coordinate store.
 	 */
@@ -32,7 +32,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getResolution()
 	 */
-	public double getResolution()
+	public double getXYResolution()
 	{
 		return 0;
 	}
@@ -40,9 +40,19 @@ public class NullCoordinateStore implements CoordinateStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getZResolution()
 	 */
-	public void addToQueue(double x, double y)
+	public double getZResolution()
+	{
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double, double)
+	 */
+	public void addToQueue(double x, double y, double z)
 	{
 	}
 
@@ -58,9 +68,9 @@ public class NullCoordinateStore implements CoordinateStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#add(double, double)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#add(double, double, double)
 	 */
-	public void add(double x, double y)
+	public void add(double x, double y, double z)
 	{
 	}
 
@@ -76,9 +86,9 @@ public class NullCoordinateStore implements CoordinateStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#contains(double, double)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#contains(double, double, double)
 	 */
-	public boolean contains(double x, double y)
+	public boolean contains(double x, double y, double z)
 	{
 		return false;
 	}
@@ -86,9 +96,9 @@ public class NullCoordinateStore implements CoordinateStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#find(double, double)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#find(double, double, double)
 	 */
-	public double[] find(double x, double y)
+	public double[] find(double x, double y, double z)
 	{
 		return null;
 	}
