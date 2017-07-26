@@ -10,19 +10,19 @@ public class CoordinateStoreTest
 	public void canCreateStore()
 	{
 		CoordinateStore s;
-		s = CoordinateStoreFactory.create(10, 10, -1);
+		s = CoordinateStoreFactory.create(10, 10, -1, -1);
 		Assert.assertTrue(s instanceof NullCoordinateStore);
-		s = CoordinateStoreFactory.create(10, 10, 0);
+		s = CoordinateStoreFactory.create(10, 10, 0, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore);
-		s = CoordinateStoreFactory.create(10, 10, 0.2);
+		s = CoordinateStoreFactory.create(10, 10, 0.2, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore);
-		s = CoordinateStoreFactory.create(10, 10, 0.5);
+		s = CoordinateStoreFactory.create(10, 10, 0.5, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore1);
-		s = CoordinateStoreFactory.create(10, 10, 1);
+		s = CoordinateStoreFactory.create(10, 10, 1, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore1);
-		s = CoordinateStoreFactory.create(10, 10, 1.5);
+		s = CoordinateStoreFactory.create(10, 10, 1.5, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore);
-		s = CoordinateStoreFactory.create(10, 10, 2);
+		s = CoordinateStoreFactory.create(10, 10, 2, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore);
 	}
 
@@ -36,7 +36,7 @@ public class CoordinateStoreTest
 
 		for (int i = 0; i < resolution.length; i++)
 		{
-			CoordinateStore s = CoordinateStoreFactory.create(10, 10, resolution[i]);
+			CoordinateStore s = CoordinateStoreFactory.create(10, 10, resolution[i], -1);
 			for (int j = 0; j < datax.length; j++)
 				s.add(datax[j], datay[j], dataz[j]);
 
@@ -113,7 +113,7 @@ public class CoordinateStoreTest
 
 		for (int i = 0; i < resolution.length; i++)
 		{
-			CoordinateStore s = CoordinateStoreFactory.create(10, 10, resolution[i]);
+			CoordinateStore s = CoordinateStoreFactory.create(10, 10, resolution[i], -1);
 			for (int j = 0; j < datax.length; j++)
 			{
 				s.addToQueue(datax[j], datay[j], dataz[j]);
@@ -137,7 +137,7 @@ public class CoordinateStoreTest
 
 		for (int i = 0; i < resolution.length; i++)
 		{
-			CoordinateStore s = CoordinateStoreFactory.create(10, 10, resolution[i]);
+			CoordinateStore s = CoordinateStoreFactory.create(10, 10, resolution[i], -1);
 
 			// Add then clear
 			for (int j = 0; j < datax.length; j++)
