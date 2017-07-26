@@ -108,6 +108,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private PeakResults results;
 	private BlockingQueue<FitJob> jobs;
 	private Gaussian2DFitter gf;
+	private final double xsd, ysd;
 
 	// Used for fitting methods
 	private TurboList<PeakResult> sliceResults;
@@ -312,6 +313,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		this.jobs = jobs;
 		this.logger = fitConfig.getLog();
 		gf = new FastGaussian2DFitter(fitConfig);
+		// Cache for convenience
+		xsd = fitConfig.getInitialXSD();
+		ysd = fitConfig.getInitialYSD();
+		
 		//gf = new Gaussian2DFitter(fitConfig);
 		//duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		// Used for duplicate checking
@@ -451,8 +456,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		if (params != null && params.fitTask == FitTask.MAXIMA_IDENITIFICATION)
 		{
-			final float sd0 = (float) fitConfig.getInitialXSD();
-			final float sd1 = (float) fitConfig.getInitialYSD();
+			final float sd0 = (float) xsd;
+			final float sd1 = (float) ysd;
 			for (int n = 0; n < candidates.getSize(); n++)
 			{
 				// Find the background using the perimeter of the data.
@@ -825,8 +830,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		float value = data[y * cc.dataBounds.width + x];
 
 		// Update to the global bounds.
-		// (Note the global bounds will be added to the params at the end of processing the frame
-		// so we leave those untouched)
 		x += offsetx;
 		y += offsety;
 
@@ -901,11 +904,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
 				double[] params, double localBackground, ResultType resultType)
 		{
-			// XXX- should this use frozen parameters in the instance where we have a z-model?
-			// Note that estimates are stored by converting PreprocessedPeakResult to Gaussian params
-			// These will then be incorrect for use with the function returned by the fit config.
-			
-			
 			//if (dynamicMultiPathFitResult.candidateId < candidateId && resultType == ResultType.NEW)
 			//	System.out.println("WTF");
 
@@ -919,8 +917,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// results are still valid.
 
 			final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
-			initialParams[Gaussian2DFunction.X_SD + offset] = fitConfig.getInitialXSD();
-			initialParams[Gaussian2DFunction.Y_SD + offset] = fitConfig.getInitialYSD();
+			initialParams[Gaussian2DFunction.X_SD + offset] = xsd;
+			initialParams[Gaussian2DFunction.Y_SD + offset] = ysd;
 			return createResult(candidateId, n, initialParams, params, localBackground, resultType);
 		}
 
@@ -1394,8 +1392,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			initialParams[Gaussian2DFunction.X_POSITION] = candidates.get(candidateId).x - regionBounds.x;
 			initialParams[Gaussian2DFunction.Y_POSITION] = candidates.get(candidateId).y - regionBounds.y;
-			initialParams[Gaussian2DFunction.X_SD] = fitConfig.getInitialXSD();
-			initialParams[Gaussian2DFunction.Y_SD] = fitConfig.getInitialYSD();
+			initialParams[Gaussian2DFunction.X_SD] = xsd;
+			initialParams[Gaussian2DFunction.Y_SD] = ysd;
 
 			// Perform validation of the candidate and existing peaks (other candidates are allowed to fail)
 			if (fitResult.getStatus() == FitStatus.OK)
@@ -1813,6 +1811,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				}
 				// Create a new dummy fitted neighbour
 				// (Use similar logic to when we create the actual results in #add(SelectedResult))
+				// Note that we do not unfreeze the parameters (i.e. the widths of from astigmatism z-model)
+				// since we are only interested in the coordinates.
 				final double[] p = fitResults[j].toGaussian2DParameters();
 				final float[] params = new float[p.length];
 				params[Gaussian2DFunction.BACKGROUND] = background;
@@ -2865,6 +2865,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private void storeEstimate(int i, PreprocessedPeakResult peak, byte filterRank)
 	{
 		double[] params = peak.toGaussian2DParameters();
+		// Reset the width params if using an astigmatism z-model
+		if (fitConfig.getAstigmatismZModel() != null)
+		{
+			params[Gaussian2DFunction.X_SD] = xsd;
+			params[Gaussian2DFunction.Y_SD] = ysd;
+		}
 		double precision = (fitConfig.isPrecisionUsingBackground()) ? peak.getLocationVariance2()
 				: peak.getLocationVariance();
 		storeEstimate(i, params, precision, filterRank);

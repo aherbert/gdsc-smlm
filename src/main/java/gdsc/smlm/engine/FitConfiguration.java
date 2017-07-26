@@ -1783,19 +1783,29 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return setValidationResult(FitStatus.INSUFFICIENT_SIGNAL, signal);
 		}
 
+		double xsd = params[Gaussian2DFunction.X_SD + offset];
+		double ysd = params[Gaussian2DFunction.Y_SD + offset];
+		// Map the width parameters using the z-model
+		if (getAstigmatismZModel() != null)
+		{
+			double z = params[Gaussian2DFunction.Z_POSITION + offset];
+			xsd *= astigmatismZModel.getSx(z);
+			ysd *= astigmatismZModel.getSy(z);
+		}
+
 		// Check widths
 		if (isXSDFitting())
 		{
 			boolean badWidth = false;
 			double xFactor = 0, yFactor = 0;
 
-			xFactor = params[Gaussian2DFunction.X_SD + offset] / initialParams[Gaussian2DFunction.X_SD + offset];
+			xFactor = xsd / initialParams[Gaussian2DFunction.X_SD + offset];
 			badWidth = (xFactor > widthFactor || xFactor < minWidthFactor);
 
 			// Always do this (even if badWidth=true) since we need the factor for the return value
 			if (isYSDFitting())
 			{
-				yFactor = params[Gaussian2DFunction.Y_SD + offset] / initialParams[Gaussian2DFunction.Y_SD + offset];
+				yFactor = ysd / initialParams[Gaussian2DFunction.Y_SD + offset];
 				badWidth = (yFactor > widthFactor || yFactor < minWidthFactor);
 			}
 			else
@@ -1816,10 +1826,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// Check precision
 		if (precisionThreshold > 0)
 		{
-			final double sd = (isTwoAxisGaussian2D)
-					? Gaussian2DPeakResultHelper.getStandardDeviation(params[Gaussian2DFunction.X_SD + offset],
-							params[Gaussian2DFunction.Y_SD + offset])
-					: params[Gaussian2DFunction.X_SD + offset];
+			final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd) : xsd;
 			final double variance = getVariance(params[Gaussian2DFunction.BACKGROUND],
 					params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, sd, isPrecisionUsingBackground());
 
@@ -1919,6 +1926,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		int offset;
 		double[] initialParams;
 		double[] params;
+		double xsd, ysd;
 		double localBackground;
 		boolean existingResult;
 		boolean newResult;
@@ -1971,6 +1979,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			this.offsetx = offsetx;
 			this.offsety = offsety;
 			var = var2 = -1;
+			xsd = params[Gaussian2DFunction.X_SD + offset];
+			ysd = params[Gaussian2DFunction.Y_SD + offset];
+			// Map the width parameters using the z-model
+			if (getAstigmatismZModel() != null)
+			{
+				double z = getZ();
+				xsd *= astigmatismZModel.getSx(z);
+				ysd *= astigmatismZModel.getSy(z);
+			}
 		}
 
 		public int getFrame()
@@ -2047,9 +2064,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		public float getSD()
 		{
 			if (isTwoAxisGaussian2D)
-				return (float) Gaussian2DPeakResultHelper.getStandardDeviation(params[Gaussian2DFunction.X_SD + offset],
-						params[Gaussian2DFunction.Y_SD + offset]);
-			return (float) params[Gaussian2DFunction.X_SD + offset];
+				return (float) Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd);
+			return (float) xsd;
 		}
 
 		public float getBackground()
@@ -2059,8 +2075,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		public float getAmplitude()
 		{
-			return (float) (params[Gaussian2DFunction.SIGNAL + offset] / (2 * Math.PI *
-					params[Gaussian2DFunction.X_SD + offset] * params[Gaussian2DFunction.Y_SD + offset]));
+			return (float) (params[Gaussian2DFunction.SIGNAL + offset] / (2 * Math.PI * xsd * ysd));
 		}
 
 		public float getAngle()
@@ -2101,22 +2116,22 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		public float getXSD()
 		{
-			return (float) params[Gaussian2DFunction.X_SD + offset];
+			return (float) xsd;
 		}
 
 		public float getYSD()
 		{
-			return (float) params[Gaussian2DFunction.Y_SD + offset];
+			return (float) ysd;
 		}
 
 		public float getXSDFactor()
 		{
-			return (float) (params[Gaussian2DFunction.X_SD + offset] / initialParams[Gaussian2DFunction.X_SD + offset]);
+			return (float) (xsd / initialParams[Gaussian2DFunction.X_SD + offset]);
 		}
 
 		public float getYSDFactor()
 		{
-			return (float) (params[Gaussian2DFunction.Y_SD + offset] / initialParams[Gaussian2DFunction.Y_SD + offset]);
+			return (float) (ysd / initialParams[Gaussian2DFunction.Y_SD + offset]);
 		}
 
 		public boolean isExistingResult()
@@ -2328,8 +2343,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		final double z = parameters[offset + Gaussian2DFunction.Z_POSITION];
 		final double x0 = initialParameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
 		final double y0 = initialParameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
-		final double xsd = parameters[offset + Gaussian2DFunction.X_SD];
-		final double ysd = parameters[offset + Gaussian2DFunction.Y_SD];
+		double xsd = parameters[offset + Gaussian2DFunction.X_SD];
+		double ysd = parameters[offset + Gaussian2DFunction.Y_SD];
+		// Map the width parameters using the z-model
+		if (getAstigmatismZModel() != null)
+		{
+			xsd *= astigmatismZModel.getSx(z);
+			ysd *= astigmatismZModel.getSy(z);
+		}
 		final double xsd0 = initialParameters[offset + Gaussian2DFunction.X_SD];
 		final double ysd0 = initialParameters[offset + Gaussian2DFunction.Y_SD];
 		final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd) : xsd;
@@ -2345,6 +2366,22 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		final double noise = (b > 0) ? PeakResultHelper.localBackgroundToNoise(b, 1.0, this.emCCD) : this.noise;
 		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, noise, b, angle, x, y, z, x0, y0,
 				xsd, ysd, xsd0, ysd0, variance, variance2, resultType);
+	}
+
+	/**
+	 * Unmap the width parameters using the Z model. This assumes the parameters are for a single peak.
+	 *
+	 * @param params
+	 *            the params
+	 */
+	public void unmapZModel(double[] params)
+	{
+		if (getAstigmatismZModel() != null)
+		{
+			final double z = params[Gaussian2DFunction.Z_POSITION];
+			params[Gaussian2DFunction.X_SD] /= astigmatismZModel.getSx(z);
+			params[Gaussian2DFunction.Y_SD] /= astigmatismZModel.getSy(z);
+		}
 	}
 
 	/**
