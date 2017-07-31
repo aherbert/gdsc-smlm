@@ -22,7 +22,6 @@ import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
-import gdsc.smlm.data.config.PSFProtosHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -408,19 +407,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		data = job.data;
 		dataEstimator = null; // This is tied to the input data 
 
-		FitParameters params = job.getFitParameters();
-		this.endT = (params != null) ? params.endT : -1;
-
-		candidates = indentifySpots(job, width, height, params);
-
-		if (candidates.getSize() == 0)
-		{
-			finish(job, start);
-			return;
-		}
-
-		fittedBackground = new Statistics();
-
 		// 06-Jun-2017
 		// The data model was changed to store the signal in photons.
 		// This allows support for per-pixel bias and gain (sCMOS cameras).
@@ -440,6 +426,21 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			for (int i = 0; i < size; i++)
 				data[i] *= f;
 		}
+		
+		FitParameters params = job.getFitParameters();
+		this.endT = (params != null) ? params.endT : -1;
+
+		// TODO - Update this to support filtering using per pixel read noise as a weight as 
+		// per the Fast MLE method of Smith, et al (2010).
+		candidates = indentifySpots(job, width, height, params);
+
+		if (candidates.getSize() == 0)
+		{
+			finish(job, start);
+			return;
+		}
+
+		fittedBackground = new Statistics();
 
 		// TODO - Better estimate of the background and the noise. Using all the image pixels
 		// results in an estimate that is too high when there are many spots in the image.
@@ -2157,13 +2158,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				}
 				if (signal > 0)
 				{
+					amplitudeEstimate[0] = false;
 					params[Gaussian2DFunction.SIGNAL] = signal;
 				}
 				else
 				{
-					// Resort to default amplitude estimate
-					amplitudeEstimate[0] = true;
-
+					// Resort to default amplitude estimate. Ensure this is above zero.
 					if (params[Gaussian2DFunction.SIGNAL] <= 0)
 					{
 						// Reset to the single fitting background

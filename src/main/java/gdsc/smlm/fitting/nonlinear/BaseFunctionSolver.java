@@ -105,7 +105,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 			postProcess();
 		}
 		return status;
-
 	}
 
 	/**

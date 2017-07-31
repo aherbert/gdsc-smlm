@@ -13,7 +13,6 @@ import gdsc.smlm.data.config.FitProtos.FilterSettings;
 import gdsc.smlm.data.config.FitProtos.FitSettings;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.FitSolverSettings;
-import gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder;
 import gdsc.smlm.data.config.FitProtos.SearchMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
@@ -610,30 +609,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			// Requires a new function solver
 			invalidateFunctionSolver();
-			toleranceChecker = createToleranceChecker(gaussianFunction, params);
 		}
-	}
-
-	/**
-	 * Creates the appropriate stopping criteria for the configuration
-	 * 
-	 * @param func
-	 *            The Gaussian function
-	 * @param params
-	 *            The Gaussian parameters
-	 * @return The stopping criteria
-	 */
-	public ToleranceChecker createToleranceChecker(Gaussian2DFunction func, double[] params)
-	{
-		FitSolverSettingsOrBuilder s = getFitSolverSettings();
-		double relativeValue = s.getRelativeThreshold();
-		double absoluteValue = s.getAbsoluteThreshold();
-		double relativeParameters = s.getParameterRelativeThreshold();
-		double absoluteParameters = s.getParameterAbsoluteThreshold();
-		int maxIterations = s.getMaxIterations();
-		ToleranceChecker toleranceChecker = new ToleranceChecker(relativeValue, absoluteValue, relativeParameters,
-				absoluteParameters, maxIterations);
-		return toleranceChecker;
 	}
 
 	/**
@@ -2603,7 +2579,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 			case FAST_MLE:
 				checkCalibration();
-				// This may throw a class cast exception is the function does not support
+				// This may throw a class cast exception if the function does not support
 				// the Gradient2Function interface
 				solver = new FastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc, bounds);
 				break;
