@@ -408,7 +408,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	{
 		if (f instanceof Gaussian2DFunction)
 		{
-			return ((Gaussian2DFunction) f).getName(i);
+			return Gaussian2DFunction.getName(i);
 		}
 		return "Unknown";
 	}
