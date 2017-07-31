@@ -47,12 +47,12 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function
 	public void initialise2(double[] a)
 	{
 		f2.initialise2(a);
-		i = 0;
 	}
 
 	public void forEach(Gradient2Procedure procedure)
 	{
 		this.procedure = procedure;
+		i = 0;
 		f2.forEach((Gradient2Procedure) this);
 	}
 

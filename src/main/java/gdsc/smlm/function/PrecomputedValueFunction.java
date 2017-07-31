@@ -59,12 +59,12 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 	public void initialise0(double[] a)
 	{
 		f.initialise0(a);
-		i = 0;
 	}
 
 	public void forEach(ValueProcedure procedure)
 	{
 		this.procedure = procedure;
+		i = 0;
 		f.forEach(this);
 	}
 

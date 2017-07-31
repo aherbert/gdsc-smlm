@@ -63,12 +63,12 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 	public void initialise1(double[] a)
 	{
 		f1.initialise1(a);
-		i = 0;
 	}
 
 	public void forEach(Gradient1Procedure procedure)
 	{
 		this.procedure = procedure;
+		i = 0;
 		f1.forEach((Gradient1Procedure) this);
 	}
 

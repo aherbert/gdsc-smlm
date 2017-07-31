@@ -47,12 +47,12 @@ public class PrecomputedExtendedGradient2Function extends PrecomputedGradient2Fu
 	public void initialiseExtended2(double[] a)
 	{
 		ef2.initialiseExtended2(a);
-		i = 0;
 	}
 
 	public void forEach(ExtendedGradient2Procedure procedure)
 	{
 		this.procedure = procedure;
+		i = 0;
 		ef2.forEach((ExtendedGradient2Procedure) this);
 	}
 
