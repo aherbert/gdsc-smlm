@@ -16,8 +16,13 @@ import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationReader;
+import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
+import gdsc.smlm.data.config.PSFProtosHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -51,6 +56,7 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultHelper;
@@ -106,6 +112,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private FitConfiguration fitConfig;
 
 	private PeakResults results;
+	private PSFType psfType;
 	private BlockingQueue<FitJob> jobs;
 	private Gaussian2DFitter gf;
 	private final double xsd, ysd;
@@ -304,11 +311,21 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 *            the results
 	 * @param jobs
 	 *            the jobs
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
 	public FitWorker(FitEngineConfiguration config, PeakResults results, BlockingQueue<FitJob> jobs)
+			throws ConfigurationException
 	{
 		this.config = config;
 		this.fitConfig = config.getFitConfiguration();
+		
+		// The fitting method is current tied to a Gaussian 2D function
+		PSF psf = fitConfig.getPSF();
+		if (!PSFHelper.isGaussian2D(psf))
+			throw new ConfigurationException("Gaussian 2D PSF required");
+		psfType = psf.getPsfType();
+		
 		this.results = results;
 		this.jobs = jobs;
 		this.logger = fitConfig.getLog();
@@ -316,7 +333,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Cache for convenience
 		xsd = fitConfig.getInitialXSD();
 		ysd = fitConfig.getInitialYSD();
-		
+
 		//gf = new Gaussian2DFitter(fitConfig);
 		//duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		// Used for duplicate checking
@@ -479,8 +496,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				x += offsetx;
 				y += offsety;
-				final float[] peakParams = new float[] { b, signal, 0, x + 0.5f, y + 0.5f, sd0, sd1 };
-
+				final float[] peakParams = new float[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+				peakParams[Gaussian2DFunction.BACKGROUND] = b;
+				peakParams[Gaussian2DFunction.SIGNAL] = signal;
+				peakParams[Gaussian2DFunction.X_POSITION] = x + 0.5f;
+				peakParams[Gaussian2DFunction.Y_POSITION] = y + 0.5f;
+				//peakParams[Gaussian2DFunction.Z_POSITION] = 0;
+				peakParams[Gaussian2DFunction.X_SD] = sd0;
+				peakParams[Gaussian2DFunction.Y_SD] = sd1;
+				//peakParams[Gaussian2DFunction.ANGLE] = 0;
 				sliceResults.add(createResult(x, y, data[index], 0, noise, peakParams, null, n));
 			}
 		}
@@ -856,7 +880,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private PeakResult createResult(int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev, int id)
 	{
-		// TODO - Change to support the new BIXYZ data format with additional PSF parameters
+		// Convert to a variable PSF parameter PeakResult
+		params = Gaussian2DPeakResultHelper.createParams(psfType, params);
+		if (paramsStdDev != null)
+			paramsStdDev = Gaussian2DPeakResultHelper.createParams(psfType, paramsStdDev);
 
 		if (endT >= 0 && slice != endT)
 		{
@@ -972,7 +999,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// TODO: When using an astigmatism z-model it is possible to fit two spots that are colocated.
 		// So the colocation checks to existing peaks should be refined to allow both spots if they 
 		// have suitably different z-depths (i.e. X/Y widths). 
-		
+
 		final Gaussian2DFitter gf;
 		final ResultFactory resultFactory;
 		final double[] region, region2;
@@ -1077,7 +1104,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		private double getDefaultBackground(double[] region, int width, int height)
 		{
 			// Use the minimum in the data.
-			// This is what is done in the in the fitter if the background is zero.
+			// This is what is done in the fitter if the background is zero.
 			return limitBackground(FastGaussian2DFitter.getBackground(region, width, height, 2));
 		}
 
@@ -1107,15 +1134,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (neighbours == 0 || !config.isIncludeNeighbours())
 				return null;
 
+			// -=-=-=-
 			// TODO
-
+			//
 			// If we have fitted neighbours:
-			// subtract them from the region and then try a single fit. It should work if
+			// Precompute them and then try a single fit. It should work if
 			// something is there. This can be used as an initial estimate for one of the
 			// peaks in the multiple fit (i.e. the closest one)
-
+			//
 			// If the fits fails then we can guess that the region has no good peaks and 
 			// it is not worth doing a multiple fit.			
+			// -=-=-=-
 
 			// Flag each peak that is precomputed
 			boolean[] precomputed = null;
@@ -1167,7 +1196,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			neighbours = candidateNeighbourCount + fittedNeighbourCount - precomputedFittedNeighbourCount;
 			if (neighbours == 0)
 			{
-				// There are no neighbours after subtraction.
+				// There are no neighbours after precomputation.
 				// This will be the same result as the single result so return.
 				return null;
 			}
@@ -1177,7 +1206,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Multiple-fit ...
 			if (logger != null)
-				logger.info("Slice %d: Multiple-fit (%d peaks : neighbours [%d + %d - %d])", slice, neighbours + 1,
+				logger.info("Slice %d: Multiple-fit (%d peaks : neighbours [%d + %d - %d])", slice, npeaks,
 						candidateNeighbourCount, fittedNeighbourCount, precomputedFittedNeighbourCount);
 
 			double[] params = new double[1 + npeaks * parametersPerPeak];
@@ -1224,7 +1253,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			}
 
 			// The fitted neighbours
-			// TODO - Test which is better: (1) subtracting fitted peaks; or (2) including them
+			// TODO - Test which is better: (1) precomputing fitted peaks; or (2) including them.
 			// Initial tests show that Chi-squared is much lower when including them in the fit.
 
 			if (fittedNeighbourCount > 0)
@@ -1242,11 +1271,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					{
 						if (!precomputed[i])
 							continue;
-						final float[] fittedParams = fittedNeighbours[i].params;
-
-						// Copy Signal,Angle,Xpos,Ypos,Xwidth,Ywidth
-						for (int k = 1; k <= parametersPerPeak; k++)
-							funcParams[j + k] = fittedParams[k];
+						getFittedParams(i, funcParams, j);
 						// Adjust position relative to extracted region
 						funcParams[j + Gaussian2DFunction.X_POSITION] -= xOffset;
 						funcParams[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
@@ -1258,7 +1283,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 							width, height);
 					precomputedFittedNeighboursMulti = new StandardValueProcedure().getValues(func, funcParams);
 
-					//gdsc.core.ij.Utils.display("precomputedFunctionValues", precomputedFunctionValues, width, height);
+					//gdsc.core.ij.Utils.display("precomputedFunctionValues", precomputedFittedNeighboursMulti, width, height);
 				}
 
 				// Add the details of the already fitted peaks
@@ -1266,11 +1291,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					if (precomputed[i])
 						continue;
-					final float[] fittedParams = fittedNeighbours[i].params;
-
-					// Copy Signal,Angle,Xpos,Ypos,Xwidth,Ywidth
-					for (int k = 1; k <= parametersPerPeak; k++)
-						params[j + k] = fittedParams[k];
+					getFittedParams(i, params, j);
 
 					// Adjust position relative to extracted region
 					params[j + Gaussian2DFunction.X_POSITION] -= xOffset;
@@ -1661,8 +1682,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				params[j + Gaussian2DFunction.Y_POSITION] = estimatedParams[Gaussian2DFunction.Y_POSITION] -
 						regionBounds.y;
 				params[j + Gaussian2DFunction.Z_POSITION] = estimatedParams[Gaussian2DFunction.Z_POSITION];
-				params[j + Gaussian2DFunction.X_SD] = estimatedParams[Gaussian2DFunction.X_SD];
-				params[j + Gaussian2DFunction.Y_SD] = estimatedParams[Gaussian2DFunction.Y_SD];
+				// Reset the width params if using an astigmatism z-model
+				if (fitConfig.getAstigmatismZModel() != null)
+				{
+					params[j + Gaussian2DFunction.X_SD] = xsd;
+					params[j + Gaussian2DFunction.Y_SD] = ysd;
+				}
+				else
+				{
+					params[j + Gaussian2DFunction.X_SD] = estimatedParams[Gaussian2DFunction.X_SD];
+					params[j + Gaussian2DFunction.Y_SD] = estimatedParams[Gaussian2DFunction.Y_SD];
+				}
 				params[j + Gaussian2DFunction.ANGLE] = estimatedParams[Gaussian2DFunction.ANGLE];
 				return false;
 			}
@@ -1697,6 +1727,27 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return (close || estimates2[i] == null) ? null : estimates2[i].params;
 		}
 
+		private void getFittedParams(int i, double[] params, int j)
+		{
+			float[] fittedParams = fittedNeighbours[i].params;
+			params[j + Gaussian2DFunction.SIGNAL] = fittedParams[Gaussian2DFunction.SIGNAL];
+			params[j + Gaussian2DFunction.X_POSITION] = fittedParams[Gaussian2DFunction.X_POSITION];
+			params[j + Gaussian2DFunction.Y_POSITION] = fittedParams[Gaussian2DFunction.Y_POSITION];
+			params[j + Gaussian2DFunction.Z_POSITION] = fittedParams[Gaussian2DFunction.Z_POSITION];
+			// Reset the width params if using an astigmatism z-model
+			if (fitConfig.getAstigmatismZModel() != null)
+			{
+				params[j + Gaussian2DFunction.X_SD] = xsd;
+				params[j + Gaussian2DFunction.Y_SD] = ysd;
+			}
+			else
+			{
+				params[j + Gaussian2DFunction.X_SD] = fittedParams[Gaussian2DFunction.X_SD];
+				params[j + Gaussian2DFunction.Y_SD] = fittedParams[Gaussian2DFunction.Y_SD];
+			}
+			params[j + Gaussian2DFunction.ANGLE] = fittedParams[Gaussian2DFunction.ANGLE];
+		}
+		
 		/**
 		 * Update error to the coefficient of determination (so that the error describes how much of the data is
 		 * encapsulated in the fit)
@@ -2035,33 +2086,33 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// The fitted result will be relative to (0,0) in the fit data and already 
 				// have an offset applied so that 0.5 is the centre of a pixel. We can test 
 				// the coordinates exactly against the fit frame.
-				final float xmin = regionBounds.x;
-				final float xmax = xmin + regionBounds.width;
-				final float ymin = regionBounds.y;
-				final float ymax = ymin + regionBounds.height;
+				final double xmin = regionBounds.x;
+				final double xmax = xmin + regionBounds.width;
+				final double ymin = regionBounds.y;
+				final double ymax = ymin + regionBounds.height;
 
 				final double[] funcParams = new double[1 + parametersPerPeak * fittedNeighbourCount];
 				for (int i = 0, j = 0; i < fittedNeighbourCount; i++)
 				{
-					final float[] fittedParams = fittedNeighbours[i].params;
-					// Copy Signal,Angle,Xpos,Ypos,Xwidth,Ywidth
-					for (int k = 1; k <= parametersPerPeak; k++)
-						funcParams[j + k] = fittedParams[k];
+					getFittedParams(i, funcParams, j);
+					
+					// Get the coordinates before adjusting
+					final double x = funcParams[j + Gaussian2DFunction.X_POSITION];
+					final double y = funcParams[j + Gaussian2DFunction.Y_POSITION];
+					
 					// Adjust position relative to extracted region
 					funcParams[j + Gaussian2DFunction.X_POSITION] -= xOffset;
 					funcParams[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
 					j += parametersPerPeak;
 
 					// Check if within the region
-					final float x = fittedParams[Gaussian2DFunction.X_POSITION];
-					final float y = fittedParams[Gaussian2DFunction.Y_POSITION];
 					if (x < xmin || x > xmax || y < ymin || y > ymax)
 					{
 						// Do nothing
 					}
 					else
 					{
-						background += fittedParams[Gaussian2DFunction.BACKGROUND];
+						background += fittedNeighbours[i].params[Gaussian2DFunction.BACKGROUND];
 						backgroundCount++;
 					}
 				}
@@ -2085,10 +2136,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Re-use an estimate if we have it. Note that this may be quite far from the candidate.
 			amplitudeEstimate[0] = getEstimate(candidates.get(candidateId), params, 0, false);
-			boolean usingEstimate = getEstimate(candidates.get(candidateId).index, false) != null;
-			if (!usingEstimate)
+			// If we have no estimate the default will be an amplitude estimate.
+			final boolean usingEstimate = !amplitudeEstimate[0];
+			if (amplitudeEstimate[0])
 			{
-				// If we have no estimate the default will be an amplitude estimate.
 				// We can estimate the signal here instead of using the amplitude.
 				// Do this when the fitting window covers enough of the Gaussian (e.g. 2.5xSD).
 				float signal = 0;
@@ -2869,12 +2920,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private void storeEstimate(int i, PreprocessedPeakResult peak, byte filterRank)
 	{
 		final double[] params = peak.toGaussian2DParameters();
-		// Reset the width params if using an astigmatism z-model
-		if (fitConfig.getAstigmatismZModel() != null)
-		{
-			params[Gaussian2DFunction.X_SD] = xsd;
-			params[Gaussian2DFunction.Y_SD] = ysd;
-		}
 		double precision = (fitConfig.isPrecisionUsingBackground()) ? peak.getLocationVariance2()
 				: peak.getLocationVariance();
 		storeEstimate(i, params, precision, filterRank);
@@ -2971,7 +3016,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private float getSingleFittingBackground()
 	{
 		final float background;
-		if (useFittedBackground && !sliceResults.isEmpty())
+		if (useFittedBackground && fittedBackground.getN() != 0)
 		{
 			// Use the average background from all results
 			background = (float) (fittedBackground.getMean());
@@ -3097,7 +3142,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Check all existing maxima. 
 
 		fittedNeighbourCount = 0;
-		if (!sliceResults.isEmpty())
+		if (fittedBackground.getN() != 0)
 		{
 			// Since these will be higher than the current peak it is prudent to extend the range that should be considered.
 			// Use 2x the configured peak standard deviation.
