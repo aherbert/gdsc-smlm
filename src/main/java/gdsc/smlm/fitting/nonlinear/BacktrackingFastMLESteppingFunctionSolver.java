@@ -3,6 +3,7 @@ package gdsc.smlm.fitting.nonlinear;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -238,12 +239,29 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				}
 			}
 
+			// XXX
+			// Note that the gradient is raw but the search direction may be after clamping
+			// and bounds have been applied. This should be fixed.
+			
 			double slope = 0.0;
 			final int[] gradientIndices = BacktrackingFastMLESteppingFunctionSolver.this.f.gradientIndices();
 			for (int i = 0; i < gradient.length; i++)
 				slope += gradient[i] * searchDirection[gradientIndices[i]];
 			if (slope <= 0.0)
 			{
+				for (int i = 0; i < gradient.length; i++)
+				{
+					System.out.printf("[%d:%g %s] %g (%g/-(%g)=%g) x %g = %g\n", i, 
+							xOld[gradientIndices[i]],
+							Gaussian2DFunction.getName(gradientIndices[i]),
+							gradient[i], 
+							gradientProcedure.d1[i],
+							gradientProcedure.d2[i],
+							gradientProcedure.d1[i]/-gradientProcedure.d2[i],
+							searchDirection[gradientIndices[i]],
+							gradient[i] * searchDirection[gradientIndices[i]]);
+					slope += gradient[i] * searchDirection[gradientIndices[i]];
+				}
 				throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "Slope is negative: " + slope);
 			}
 
