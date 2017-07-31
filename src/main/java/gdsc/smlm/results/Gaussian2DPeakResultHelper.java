@@ -1,5 +1,7 @@
 package gdsc.smlm.results;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
@@ -7,14 +9,15 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.BitFlags;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
-import gdsc.smlm.data.config.PSFProtos.PSF;
-import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -1073,5 +1076,40 @@ public class Gaussian2DPeakResultHelper
 		params[INDEX_SY] = sy;
 		params[INDEX_A] = a;
 		return params;
+	}
+
+	/**
+	 * Creates the params array for a Gaussian 2D peak result using the PSF type.
+	 *
+	 * @param psfType
+	 *            the psf type
+	 * @param gaussian2DParams
+	 *            the full gaussian 2D function parameters
+	 * @return the PeakResult params
+	 * @throws IllegalArgumentException
+	 *             if the psf is not a Gaussian 2D or the input parameters are not the correct length for a Gaussian 2D
+	 *             function
+	 */
+	public static float[] createParams(PSFType psfType, float[] gaussian2DParams) throws IllegalArgumentException
+	{
+		if (gaussian2DParams.length != PeakResult.STANDARD_PARAMETERS + 3)
+			throw new IllegalArgumentException("Parameters must be a full Gaussian 2D parameters array of length " +
+					(PeakResult.STANDARD_PARAMETERS + 3));
+
+		switch (psfType)
+		{
+			case ONE_AXIS_GAUSSIAN_2D:
+				return Arrays.copyOf(gaussian2DParams, PeakResult.STANDARD_PARAMETERS + 1);
+
+			case ASTIGMATIC_GAUSSIAN_2D:
+			case TWO_AXIS_GAUSSIAN_2D:
+				return Arrays.copyOf(gaussian2DParams, PeakResult.STANDARD_PARAMETERS + 2);
+
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
+				return gaussian2DParams;
+
+			default:
+				throw new IllegalArgumentException("PSF type must be a Gaussian 2D PSF");
+		}
 	}
 }
