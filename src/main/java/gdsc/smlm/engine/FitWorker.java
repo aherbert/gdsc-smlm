@@ -318,13 +318,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		this.config = config;
 		this.fitConfig = config.getFitConfiguration();
-		
+
 		// The fitting method is current tied to a Gaussian 2D function
 		PSF psf = fitConfig.getPSF();
 		if (!PSFHelper.isGaussian2D(psf))
 			throw new ConfigurationException("Gaussian 2D PSF required");
 		psfType = psf.getPsfType();
-		
+
 		this.results = results;
 		this.jobs = jobs;
 		this.logger = fitConfig.getLog();
@@ -426,7 +426,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			for (int i = 0; i < size; i++)
 				data[i] *= f;
 		}
-		
+
 		FitParameters params = job.getFitParameters();
 		this.endT = (params != null) ? params.endT : -1;
 
@@ -1748,7 +1748,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			}
 			params[j + Gaussian2DFunction.ANGLE] = fittedParams[Gaussian2DFunction.ANGLE];
 		}
-		
+
 		/**
 		 * Update error to the coefficient of determination (so that the error describes how much of the data is
 		 * encapsulated in the fit)
@@ -1924,25 +1924,25 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// The resulting function value are used in the doublet fit
 			double singleValue = valueMulti;
 
-			// XXX: These should be the same
-			{
-				try
-				{
-					gf.setComputeResiduals(false);
-					fitConfig.setPrecomputedFunctionValues(precomputedFunctionValues);
-					if (!gf.evaluate(region, regionBounds.width, regionBounds.height, 1, parameters))
-						return null;
-				}
-				finally
-				{
-					gf.setComputeResiduals(true);
-					fitConfig.setPrecomputedFunctionValues(null);
-				}
-
-				singleValue = getFitValue();
-				if (singleValue != valueMulti)
-					System.err.printf("Not same value: %f != %f\n", singleValue, valueMulti);
-			}
+			//// XXX: These should be the same
+			//{
+			//	try
+			//	{
+			//		gf.setComputeResiduals(false);
+			//		fitConfig.setPrecomputedFunctionValues(precomputedFunctionValues);
+			//		if (!gf.evaluate(region, regionBounds.width, regionBounds.height, 1, parameters))
+			//			return null;
+			//	}
+			//	finally
+			//	{
+			//		gf.setComputeResiduals(true);
+			//		fitConfig.setPrecomputedFunctionValues(null);
+			//	}
+			//
+			//	singleValue = getFitValue();
+			//	if (singleValue != valueMulti)
+			//		System.err.printf("Not same value: %f != %f\n", singleValue, valueMulti);
+			//}
 
 			//          // Debugging:
 			//			// The evaluate computes the residuals. These should be similar to the original residuals
@@ -2096,11 +2096,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				for (int i = 0, j = 0; i < fittedNeighbourCount; i++)
 				{
 					getFittedParams(i, funcParams, j);
-					
+
 					// Get the coordinates before adjusting
 					final double x = funcParams[j + Gaussian2DFunction.X_POSITION];
 					final double y = funcParams[j + Gaussian2DFunction.Y_POSITION];
-					
+
 					// Adjust position relative to extracted region
 					funcParams[j + Gaussian2DFunction.X_POSITION] -= xOffset;
 					funcParams[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
