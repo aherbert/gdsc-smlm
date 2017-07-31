@@ -170,7 +170,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 										}
 								}
 		System.out.printf("functionComputesSecondTargetGradient %s %s (error %s +/- %s)\n",
-				f1.getClass().getSimpleName(), f1.getName(targetParameter), Utils.rounded(s.getMean()),
+				f1.getClass().getSimpleName(), Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
 				Utils.rounded(s.getStandardDeviation()));
 	}
 
@@ -337,8 +337,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																}
 														}
 		System.out.printf("functionComputesSecondTargetGradient %s [%d] %s (error %s +/- %s)\n",
-				f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter), f2.getName(targetParameter),
-				Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+				f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
+				Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
+				Utils.rounded(s.getStandardDeviation()));
 	}
 
 	private class FunctionTimingTask extends BaseTimingTask

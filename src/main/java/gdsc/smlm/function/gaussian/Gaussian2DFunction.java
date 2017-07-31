@@ -70,14 +70,13 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	public static final int PARAMETERS_PER_PEAK = 7;
 
 	/**
-	 * Gets the name of the parameter assuming a 2D Gaussian function packed as: background + n * [signal, shape,
-	 * position0, position1, sd0, sd1].
+	 * Gets the name of the parameter assuming a 2D Gaussian function.
 	 *
 	 * @param index
 	 *            the index (zero or above)
 	 * @return the name
 	 */
-	public String getName(int index)
+	public static String getName(int index)
 	{
 		final int i = 1 + (index - 1) % PARAMETERS_PER_PEAK;
 		switch (i)
@@ -360,6 +359,18 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 		}
 
 		return indices;
+	}
+
+	/**
+	 * Gets the name of the gradient parameter.
+	 *
+	 * @param index
+	 *            the index (must be within the array returned from {@link #gradientIndices()})
+	 * @return the name
+	 */
+	public String getGradientParameterName(int index)
+	{
+		return getName(gradientIndices()[index]);
 	}
 
 	/**

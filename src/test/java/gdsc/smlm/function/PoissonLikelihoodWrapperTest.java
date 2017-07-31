@@ -28,10 +28,9 @@ public class PoissonLikelihoodWrapperTest
 	static String[] NAME;
 	static
 	{
-		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, 1, 1, GaussianFunctionFactory.FIT_FIXED, null);
 		NAME = new String[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		for (int i = 0; i < 7; i++)
-			NAME[i] = f1.getName(i);
+		for (int i = 0; i < NAME.length; i++)
+			NAME[i] = Gaussian2DFunction.getName(i);
 	}
 
 	// Compute as per Numerical Recipes 5.7.

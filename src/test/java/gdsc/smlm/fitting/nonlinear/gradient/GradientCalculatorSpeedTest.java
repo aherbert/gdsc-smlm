@@ -535,7 +535,7 @@ public class GradientCalculatorSpeedTest
 				for (int j = 0; j < nparams; j++)
 				{
 					if (Math.abs(beta[j]) < 1e-6)
-						System.out.printf("[%d] Tiny beta %s %g\n", i, func.getName(j), beta[j]);
+						System.out.printf("[%d] Tiny beta %s %g\n", i, func.getGradientParameterName(j), beta[j]);
 				}
 				// Solve
 				if (!solver.solve(alpha, beta))
@@ -586,9 +586,9 @@ public class GradientCalculatorSpeedTest
 				}
 
 				for (int i = 0; i < nparams; i++)
-					System.out.printf("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b, func.getName(i),
-							rel[i].getMean(), rel[i].getStandardDeviation(), abs[i].getMean(),
-							abs[i].getStandardDeviation());
+					System.out.printf("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
+							func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
+							abs[i].getMean(), abs[i].getStandardDeviation());
 			}
 		}
 		finally

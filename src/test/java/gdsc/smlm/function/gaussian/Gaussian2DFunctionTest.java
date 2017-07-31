@@ -139,20 +139,20 @@ public abstract class Gaussian2DFunctionTest
 		for (int peak = 1, i = 1; peak <= npeaks; peak++, i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
 			if (gf.evaluatesSignal())
-				Assert.assertEquals(gf.getName(i), i, gradientIndices[p++]);
+				Assert.assertEquals(Gaussian2DFunction.getName(i), i, gradientIndices[p++]);
 			if (gf.evaluatesPosition())
 			{
-				Assert.assertEquals(gf.getName(i + 1), i + 1, gradientIndices[p++]);
-				Assert.assertEquals(gf.getName(i + 2), i + 2, gradientIndices[p++]);
+				Assert.assertEquals(Gaussian2DFunction.getName(i + 1), i + 1, gradientIndices[p++]);
+				Assert.assertEquals(Gaussian2DFunction.getName(i + 2), i + 2, gradientIndices[p++]);
 			}
 			if (gf.evaluatesZ())
-				Assert.assertEquals(gf.getName(i + 3), i + 3, gradientIndices[p++]);
+				Assert.assertEquals(Gaussian2DFunction.getName(i + 3), i + 3, gradientIndices[p++]);
 			if (gf.evaluatesSD0())
-				Assert.assertEquals(gf.getName(i + 4), i + 4, gradientIndices[p++]);
+				Assert.assertEquals(Gaussian2DFunction.getName(i + 4), i + 4, gradientIndices[p++]);
 			if (gf.evaluatesSD1())
-				Assert.assertEquals(gf.getName(i + 5), i + 5, gradientIndices[p++]);
+				Assert.assertEquals(Gaussian2DFunction.getName(i + 5), i + 5, gradientIndices[p++]);
 			if (gf.evaluatesAngle())
-				Assert.assertEquals(gf.getName(i + 1), i + 6, gradientIndices[p++]);
+				Assert.assertEquals(Gaussian2DFunction.getName(i + 6), i + 6, gradientIndices[p++]);
 		}
 	}
 
@@ -336,7 +336,8 @@ public abstract class Gaussian2DFunctionTest
 										}
 								}
 		System.out.printf("functionComputesTargetGradient %s %s (error %s +/- %s)\n", f1.getClass().getSimpleName(),
-				f1.getName(targetParameter), Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+				Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
+				Utils.rounded(s.getStandardDeviation()));
 	}
 
 	protected int findGradientIndex(Gaussian2DFunction f, int targetParameter)
@@ -567,8 +568,9 @@ public abstract class Gaussian2DFunctionTest
 																}
 														}
 		System.out.printf("functionComputesTargetGradientWith2Peaks %s [%d] %s (error %s +/- %s)\n",
-				f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter), f2.getName(targetParameter),
-				Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+				f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
+				Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
+				Utils.rounded(s.getStandardDeviation()));
 	}
 
 	@Test

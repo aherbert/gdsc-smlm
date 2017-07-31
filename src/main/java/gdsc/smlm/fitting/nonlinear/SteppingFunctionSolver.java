@@ -189,7 +189,11 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		catch (FunctionSolverException e)
 		{
 			// XXX - debugging
-			System.out.printf("%s failed: %s\n", getClass().getSimpleName(), e.fitStatus.getName());
+			String msg = e.getMessage();
+			if (msg != null)
+				System.out.printf("%s failed: %s - %s\n", getClass().getSimpleName(), e.fitStatus.getName(), msg);
+			else
+				System.out.printf("%s failed: %s\n", getClass().getSimpleName(), e.fitStatus.getName());
 			return e.fitStatus;
 		}
 		finally
