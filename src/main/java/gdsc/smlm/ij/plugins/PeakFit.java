@@ -2044,8 +2044,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 				calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
-			fitConfig.setRelativeThreshold(getNumber(gd));
-			fitConfig.setAbsoluteThreshold(getNumber(gd));
+			fitConfig.setRelativeThreshold(getThresholdNumber(gd));
+			fitConfig.setAbsoluteThreshold(getThresholdNumber(gd));
 			fitConfig.setMaxIterations((int) gd.getNextNumber());
 			fitConfig.setMaxFunctionEvaluations((int) gd.getNextNumber());
 			if (extraOptions)
@@ -2128,10 +2128,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (gd.wasCanceled())
 				return false;
 
-			fitConfig.setRelativeThreshold(getNumber(gd));
-			fitConfig.setAbsoluteThreshold(getNumber(gd));
-			fitConfig.setParameterRelativeThreshold(getNumber(gd));
-			fitConfig.setParameterAbsoluteThreshold(getNumber(gd));
+			fitConfig.setRelativeThreshold(getThresholdNumber(gd));
+			fitConfig.setAbsoluteThreshold(getThresholdNumber(gd));
+			fitConfig.setParameterRelativeThreshold(getThresholdNumber(gd));
+			fitConfig.setParameterAbsoluteThreshold(getThresholdNumber(gd));
 			fitConfig.setMaxIterations((int) gd.getNextNumber());
 			if (isLVM)
 				fitConfig.setLambda(gd.getNextNumber());
@@ -2199,15 +2199,23 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return true;
 	}
 
-	private static double getNumber(ExtendedGenericDialog gd)
+	/**
+	 * Gets the threshold number from the next string field. If invalid then -1 is returned (which deactivates the
+	 * threshold).
+	 *
+	 * @param gd
+	 *            the generic dialog
+	 * @return the number
+	 */
+	private static double getThresholdNumber(ExtendedGenericDialog gd)
 	{
 		try
 		{
-			return Math.abs(Double.parseDouble(gd.getNextString()));
+			return Double.parseDouble(gd.getNextString());
 		}
 		catch (NumberFormatException e)
 		{
-			return 0;
+			return -1;
 		}
 	}
 
