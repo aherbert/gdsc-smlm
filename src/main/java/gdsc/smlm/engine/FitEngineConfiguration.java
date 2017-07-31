@@ -14,9 +14,9 @@ import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtos.RelativeParameter;
 import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtosHelper;
-import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -326,12 +326,15 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public FitEngineConfiguration clone()
 	{
-		// This is not a complete duplicate. The settings builder objects with the 
-		// underlying configuration will be the same between all instances.
+		// Manual copy using the current proto objects
+		FitEngineConfiguration clone = new FitEngineConfiguration(getFitEngineSettings(),
+				getFitConfiguration().getCalibration(), getFitConfiguration().getPSF());
+		// Copy anything else not in a proto object
+		clone.getFitConfiguration().copySettings(getFitConfiguration());
+		return clone;
 
-		return new FitEngineConfiguration(getFitEngineSettings(), getFitConfiguration().getCalibration(),
-				getFitConfiguration().getPSF());
-
+		//		// This is not a complete duplicate. The settings builder objects with the 
+		//		// underlying configuration will be the same between all instances.
 		//		try
 		//		{
 		//			FitEngineConfiguration f = (FitEngineConfiguration) super.clone();

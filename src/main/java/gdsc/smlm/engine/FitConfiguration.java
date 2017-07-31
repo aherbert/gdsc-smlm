@@ -81,6 +81,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private FitSolverSettings.Builder fitSolverSettings;
 
 	private Logger log = null;
+	
 	private boolean computeDeviations = false;
 	private int flags;
 	private AstigmatismZModel astigmatismZModel = null;
@@ -532,7 +533,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public FitConfiguration clone()
 	{
-		return new FitConfiguration(getFitSettings(), getCalibration(), getPSF());
+		return copySettings(new FitConfiguration(getFitSettings(), getCalibration(), getPSF()));
 
 		//		// This is not a complete duplicate. The settings builder objects with the 
 		//		// underlying configuration will be the same between all instances. 
@@ -552,6 +553,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		//			// Ignore
 		//		}
 		//		return null;
+	}
+
+	/**
+	 * Copy settings from the other configuration. This copies all the instance fields not stored in settings objects
+	 * that can be shared between instances. It is used in the {@link #clone()} method after a new instance has been
+	 * created with the current settings objects.
+	 *
+	 * @param other
+	 *            the other configuration
+	 * @return the fit configuration
+	 */
+	FitConfiguration copySettings(FitConfiguration other)
+	{
+		log = other.log;
+		return this;
 	}
 
 	/**

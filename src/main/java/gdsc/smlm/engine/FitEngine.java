@@ -147,19 +147,23 @@ public class FitEngine
 			counter = new FitTypeCounter();
 
 		// Create the workers
-		
-		// Note - Clone the configuration for each worker.
-		// Set up for a direct copy of the settings
+
+		// Note - Copy the configuration for each worker.
+		// Set up for a direct copy of the settings.
 		FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
-		Calibration calibration = config.getFitConfiguration().getCalibration();
-		PSF psf = config.getFitConfiguration().getPSF();		
-		
+		FitConfiguration fitConfiguration = config.getFitConfiguration();
+		Calibration calibration = fitConfiguration.getCalibration();
+		PSF psf = fitConfiguration.getPSF();
+
 		for (int i = 0; i < threads; i++)
 		{
+			FitEngineConfiguration copy = new FitEngineConfiguration(fitEngineSettings, calibration, psf);
+			// Copy anything else not in a proto object
+			copy.getFitConfiguration().copySettings(fitConfiguration);
+
 			FitWorker worker = new FitWorker(
 					//config.clone(),
-					new FitEngineConfiguration(fitEngineSettings, calibration, psf),
-					results, jobs);
+					copy, results, jobs);
 			// Note - Clone the spot filter for each worker.
 			worker.setSearchParameters(getSpotFilter(), fitting);
 			worker.setLogger2(fileLogger);
@@ -281,7 +285,7 @@ public class FitEngine
 		if (counter != null)
 		{
 			// Get the stats we want...
-			
+
 			//System.out.println(results.getName()); // Dataset name
 			logger.info("Fitting paths...");
 			final int total = counter.getTotal();
