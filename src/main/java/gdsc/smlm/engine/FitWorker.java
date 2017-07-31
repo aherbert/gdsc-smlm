@@ -2624,7 +2624,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 							fitResult.getNumberOfFittedParameters());
 					ic2 = Maths.getBayesianInformationCriterion(doubleValue, length,
 							newFitResult.getNumberOfFittedParameters());
-					improvement = ic2 > ic1;
+					// IC should be lower
+					improvement = ic2 < ic1;
 					if (logger != null)
 						logger.info("Model improvement - Log likelihood (IC) : %f (%f) => %f (%f) : %f", singleValue,
 								ic1, doubleValue, ic2, ic1 - ic2);
@@ -2636,13 +2637,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 							fitResult.getNumberOfFittedParameters());
 					ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleValue, length,
 							newFitResult.getNumberOfFittedParameters());
-					improvement = ic2 > ic1;
+					// IC should be lower
+					improvement = ic2 < ic1;
 					if (logger != null)
 						logger.info("Model improvement - Chi-squared (IC) : %f (%f) => %f (%f) : %f", singleValue, ic1,
 								doubleValue, ic2, ic1 - ic2);
 				}
 				else if (solver.getType() == FunctionSolverType.LSE)
 				{
+					// Adjusted r^2 should be higher
 					improvement = doubleValue > singleValue;
 					if (logger != null)
 						logger.info("Model improvement - Adjusted R^2 : %f => %f", singleValue, doubleValue);
@@ -2675,8 +2678,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				}
 
 				// Check if the predictive power of the model is better with two peaks:
-				// IC should be lower
-				if (improvement)
+				if (!improvement)
 				{
 					return createResult(newFitResult, null, FitStatus.NO_MODEL_IMPROVEMENT);
 				}
