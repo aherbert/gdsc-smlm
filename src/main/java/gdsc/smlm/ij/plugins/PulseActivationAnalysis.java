@@ -1,8 +1,17 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Label;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
@@ -25,6 +34,11 @@ import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
+import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
@@ -42,11 +56,6 @@ import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
-import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
-import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
-import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
-import gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Cluster.CentroidMethod;
 import gdsc.smlm.results.IdPeakResult;
@@ -56,6 +65,7 @@ import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -66,9 +76,14 @@ import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.NonBlockingExtendedGenericDialog;
+import ij.gui.Overlay;
 import ij.gui.Plot2;
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+import ij.gui.ShapeRoi;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
+import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 
@@ -79,7 +94,7 @@ import ij.process.ImageStatistics;
  * Multicolor Super-Resolution Imaging with Photo-Switchable Fluorescent Probes. Science 317, 1749. DOI:
  * 10.1126/science.1146598.
  */
-public class PulseActivationAnalysis implements PlugIn, DialogListener
+public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionListener
 {
 	private String TITLE = "Activation Analysis";
 
@@ -293,6 +308,20 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 	private ResultsSettings.Builder resultsSettingsBuilder;
 	private MemoryPeakResults results;
 	private Trace[] traces;
+
+	// The output. Used for the loop functionality
+	private PeakResultsList[] output = null;
+	private static Color[] colors = new Color[] { Color.RED, Color.GREEN, Color.BLUE };
+	private static String[] MAGNIFICATION;
+	static
+	{
+		ArrayList<String> list = new ArrayList<String>();
+		for (int i = 1; i <= 256; i *= 2)
+			list.add(Integer.toString(i));
+		MAGNIFICATION = list.toArray(new String[list.size()]);
+	}
+	private static String magnification = MAGNIFICATION[1];
+	private Choice magnificationChoice;
 
 	private class Activation implements Molecule
 	{
@@ -624,7 +653,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 	private void printRate(String title, int count, int numberOfFrames)
 	{
-		Utils.log("Activation rate : %s = %d/%d = %s per frame", title, count, numberOfFrames, Utils.rounded((double) count / numberOfFrames));
+		Utils.log("Activation rate : %s = %d/%d = %s per frame", title, count, numberOfFrames,
+				Utils.rounded((double) count / numberOfFrames));
 	}
 
 	private int getChannel(PeakResult p)
@@ -1079,6 +1109,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		resultsSettings = SettingsManager.readResultsSettings(0);
 
 		gd.addMessage("--- Image output ---");
+		Label label = gd.getLastLabel();
 		ResultsImageSettings s = resultsSettings.getResultsImageSettings();
 		gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(),
 				SettingsManager.getResultsImageTypeNames()[s.getImageTypeValue()]);
@@ -1088,8 +1119,45 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		gd.addSlider("Image_Scale", 1, 15, s.getScale());
 
 		gd.addCheckbox("Preview", false);
+
+		gd.addMessage("Click 'Draw loop' to draw the current ROIs in a loop");
+		gd.addAndGetButton("Draw loop", this);
+		magnificationChoice = gd.addAndGetChoice("Magnification", MAGNIFICATION, magnification);
+
 		gd.addDialogListener(this);
 
+		// Layout over 2 columns
+		if (gd.getLayout() != null)
+		{
+			GridBagLayout grid = (GridBagLayout) gd.getLayout();
+
+			int xOffset = 0, yOffset = 0;
+			int lastY = -1, rowCount = 0;
+			for (Component comp : gd.getComponents())
+			{
+				// Check if this should be the second major column
+				if (comp == label)
+				{
+					xOffset += 2;
+					yOffset -= rowCount;
+				}
+				// Reposition the field
+				GridBagConstraints c = grid.getConstraints(comp);
+				if (lastY != c.gridy)
+					rowCount++;
+				lastY = c.gridy;
+				c.gridx = c.gridx + xOffset;
+				c.gridy = c.gridy + yOffset;
+				c.insets.left = c.insets.left + 10 * xOffset;
+				c.insets.top = 0;
+				c.insets.bottom = 0;
+				grid.setConstraints(comp, c);
+			}
+
+			if (IJ.isLinux())
+				gd.setBackground(new Color(238, 238, 238));
+		}
+		
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -1375,7 +1443,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 
 		// Set-up outputs for each channel
 		IJ.showStatus("Creating outputs");
-		PeakResultsList[] output = new PeakResultsList[channels];
+		output = new PeakResultsList[channels];
 		for (int c = 0; c < channels; c++)
 			output[c] = createOutput(c + 1);
 
@@ -2237,5 +2305,119 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener
 		}
 
 		return true;
+	}
+
+	public void actionPerformed(ActionEvent e)
+	{
+		ImagePlus imp = WindowManager.getImage(results.getName() + " " + TITLE);
+		if (imp == null || output == null)
+			return;
+
+		// List the ROIs
+		Roi imageRoi = imp.getRoi();
+		if (imageRoi == null || !imageRoi.isArea())
+			return;
+		Roi[] rois;
+		if (imageRoi instanceof ShapeRoi)
+			rois = ((ShapeRoi) imageRoi).getRois();
+		else
+			rois = new Roi[] { imageRoi };
+
+		for (int i = 0; i < rois.length; i++)
+		{
+			drawLoop(imp, rois[i], i + 1);
+		}
+	}
+
+	private void drawLoop(ImagePlus imp, Roi roi, int number)
+	{
+		if (!roi.isArea())
+			return;
+		//System.out.println(roi);
+
+		// Map the ROI to a crop of the results set
+		Rectangle roiBounds = roi.getBounds();
+		Rectangle resultsBounds = results.getBounds(true);
+
+		//@formatter:off
+		final Rectangle2D.Double r = new Rectangle2D.Double(
+				resultsBounds.width * (double)roiBounds.x / imp.getWidth(), 
+				resultsBounds.height * (double)roiBounds.y / imp.getHeight(), 
+				resultsBounds.width * (double)roiBounds.width / imp.getWidth(), 
+				resultsBounds.height * (double)roiBounds.height / imp.getHeight());
+		//@formatter:on
+		//System.out.println(r);
+
+		final int x = (int) r.getX();
+		final int y = (int) r.getY();
+
+		final int magnification = getMagnification();
+
+		// For each result set crop out the localisation and construct an overlay
+		final Overlay o = new Overlay();
+		for (int i = 0; i < output.length; i++)
+		{
+			final Color color = colors[i];
+
+			// The first result is the memory results
+			MemoryPeakResults results = (MemoryPeakResults) output[i].getOutput(0);
+			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
+			{
+				public void executeXYR(float xx, float yy, PeakResult result)
+				{
+					if (r.contains(xx, yy))
+					{
+						add(o, (xx - x) * magnification, (yy - y) * magnification, color);
+					}
+				}
+			});
+		}
+
+		// This results in a change of shape depending on where the roi is positioned
+		//int w = (int) Math.ceil(r.getMaxX()) - x;
+		//int h = (int) Math.ceil(r.getMaxY()) - y;
+		int w = (int) Math.ceil(r.getWidth());
+		int h = (int) Math.ceil(r.getHeight());
+		w *= magnification;
+		h *= magnification;
+		ImageProcessor ip = new ByteProcessor(w, h);
+
+		String title = imp.getTitle() + " Loop " + number;
+		imp = WindowManager.getImage(title);
+		if (imp == null)
+		{
+			imp = new ImagePlus(title, ip);
+			imp.show();
+			//ImageCanvas ic = imp.getWindow().getCanvas();
+			//for (int i = 10; i-- > 0;)
+			//	ic.zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
+			//ic.setMagnification(32);
+		}
+		else
+			imp.setProcessor(ip);
+		imp.setOverlay(o);
+	}
+
+	private int getMagnification()
+	{
+		magnification = magnificationChoice.getSelectedItem();
+		try
+		{
+			return Integer.parseInt(magnification);
+		}
+		catch (NumberFormatException e)
+		{
+			return 1;
+		}
+	}
+
+	private void add(Overlay o, float x, float y, Color color)
+	{
+		PointRoi p = new PointRoi(x, y);
+		p.setStrokeColor(color);
+		p.setFillColor(color);
+		p.setPointType(1); //PointRoi.CROSSHAIR);
+		p.setSize(1); //PointRoi.TINY);
+		o.add(p);
 	}
 }
