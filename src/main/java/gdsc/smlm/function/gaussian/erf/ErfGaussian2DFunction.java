@@ -166,4 +166,25 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 		//return Math.abs(d);
 		return (value <= 0.0D) ? 0.0d - value : value;
 	}
+
+	/**
+	 * Safe divide the numerator by the denominator. If the numerator is zero then zero is returned avoiding a potential
+	 * divide by zero producing a NaN. This can happen when computing gradients if the numerator and denominator are
+	 * both zero.
+	 *
+	 * @param numerator
+	 *            the numerator
+	 * @param denominator
+	 *            the denominator
+	 * @return the double
+	 */
+	protected static double safeDivide(double numerator, double denominator)
+	{
+		// Note: This could be used when computing gradients:
+		// e.g. final double du_dty_tI = du_dty / tI;
+		// => final double du_dty_tI = safeDivide(du_dty, tI);
+		// Currently this is not performed as the ERF functions are used in the context 
+		// of bounded parameters so avoiding bad parameters, e.g. tI being zero.
+		return (numerator == 0) ? 0 : numerator / denominator;
+	}
 }
