@@ -1,9 +1,10 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.Sort;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.Gradient2Function;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -31,6 +32,28 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFunctionSolver
 {
+	/**
+	 * Define the method to use when the line search direction is not in the same direction as
+	 * that defined by the first derivative gradient.
+	 */
+	public enum LineSearchMethod
+	{
+		/** Error since the line search is not correctly orientated */
+		ERROR,
+
+		/**
+		 * Ignore any search direction that is in the opposite direction to the first derivative gradient.
+		 */
+		IGNORE,
+
+		/**
+		 * Progressively ignore any search direction that is in the opposite direction to the first derivative gradient.
+		 * Do this in order of the magnitude of the error
+		 */
+		PARTIAL_IGNORE;
+	}
+
+	private LineSearchMethod lineSearchMethod = LineSearchMethod.ERROR;
 	private LineStepSearch lineSearch = new LineStepSearch();
 	/** Maximum step length used in line search. */
 	private double[] maximumStepLength = null;
@@ -239,31 +262,79 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				}
 			}
 
-			// XXX
-			// Note that the gradient is raw but the search direction may be after clamping
-			// and bounds have been applied. This should be fixed.
-			
 			double slope = 0.0;
 			final int[] gradientIndices = BacktrackingFastMLESteppingFunctionSolver.this.f.gradientIndices();
 			for (int i = 0; i < gradient.length; i++)
 				slope += gradient[i] * searchDirection[gradientIndices[i]];
 			if (slope <= 0.0)
 			{
-				for (int i = 0; i < gradient.length; i++)
+				//System.out.printf("Slope is negative: %g f=%g\n", slope, fOld);
+				//for (int i = 0; i < gradient.length; i++)
+				//{
+				//	System.out.printf("[%d:%g %s] (%g/-(%g)=%g) x %g = %g\n", i, xOld[gradientIndices[i]],
+				//			BacktrackingFastMLESteppingFunctionSolver.this.getName(gradientIndices[i]),
+				//			gradientProcedure.d1[i], gradientProcedure.d2[i],
+				//			gradientProcedure.d1[i] / -gradientProcedure.d2[i], searchDirection[gradientIndices[i]],
+				//			gradient[i] * searchDirection[gradientIndices[i]]);
+				//}
+
+				// The search direction for the NR step is the (first derivative / -second derivative).
+				// If there are sign errors in the second derivative (it should be the same sign as the 
+				// first derivative) then the step will be in the 'wrong' direction.
+				// Handle this with different options:
+				switch (lineSearchMethod)
 				{
-					System.out.printf("[%d:%g %s] %g (%g/-(%g)=%g) x %g = %g\n", i, 
-							xOld[gradientIndices[i]],
-							Gaussian2DFunction.getName(gradientIndices[i]),
-							gradient[i], 
-							gradientProcedure.d1[i],
-							gradientProcedure.d2[i],
-							gradientProcedure.d1[i]/-gradientProcedure.d2[i],
-							searchDirection[gradientIndices[i]],
-							gradient[i] * searchDirection[gradientIndices[i]]);
-					slope += gradient[i] * searchDirection[gradientIndices[i]];
+					case ERROR:
+						throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "Slope is negative: " + slope);
+
+					case IGNORE:
+						// Ignore any search direction that is in the opposite direction to the
+						// first derivative gradient.
+						slope = 0.0;
+						for (int i = 0; i < gradient.length; i++)
+						{
+							double slopeComponent = gradient[i] * searchDirection[gradientIndices[i]];
+							if (slopeComponent < 0)
+							{
+								searchDirection[gradientIndices[i]] = 0;
+							}
+							else
+							{
+								slope += slopeComponent;
+							}
+						}
+						if (slope == 0)
+							throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
+						break;
+
+					case PARTIAL_IGNORE:
+						// Progressively ignore any search direction that is in the opposite direction to 
+						// the first derivative gradient. Do this in order of the magnitude of the error
+						double[] slopeComponents = new double[gradient.length];
+						for (int i = 0; i < slopeComponents.length; i++)
+							slopeComponents[i] = gradient[i] * searchDirection[gradientIndices[i]];
+						int[] indices = Utils.newArray(slopeComponents.length, 0, 1);
+						Sort.sort(indices, slopeComponents);
+						Sort.reverse(indices);
+						int j = 0;
+						while (slope <= 0 && j < slopeComponents.length && slopeComponents[indices[j]] <= 0)
+						{
+							int i = indices[j];
+							// Ignore this component
+							slope -= slopeComponents[i];
+							searchDirection[gradientIndices[i]] = 0;
+							j++;
+						}
+						if (j == slopeComponents.length)
+							// All components have been removed so error
+							throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
+						break;
+
+					default:
+						throw new IllegalStateException("Unknown line search method: " + lineSearchMethod);
 				}
-				throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "Slope is negative: " + slope);
 			}
+			//System.out.printf("New slope: %g f=%g  %s\n", slope, fOld, Arrays.toString(xOld));
 
 			// Compute lambda min
 			double test = 0.0;
@@ -387,6 +458,16 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	public void setMaximumStepSize(double maximumStepSize)
 	{
 		this.maximumStepSize = (maximumStepSize >= 1) ? 0 : maximumStepSize;
+	}
+
+	public LineSearchMethod getLineSearchMethod()
+	{
+		return lineSearchMethod;
+	}
+
+	public void setLineSearchMethod(LineSearchMethod lineSearchMethod)
+	{
+		this.lineSearchMethod = lineSearchMethod;
 	}
 
 }

@@ -35,6 +35,7 @@ import gdsc.smlm.fitting.nonlinear.ParameterBounds;
 import gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.ToleranceChecker;
 import gdsc.smlm.fitting.nonlinear.WLSELVMSteppingFunctionSolver;
+import gdsc.smlm.fitting.nonlinear.BacktrackingFastMLESteppingFunctionSolver.LineSearchMethod;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.PrecomputedFunctionFactory;
@@ -2586,8 +2587,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 			case BACKTRACKING_FAST_MLE:
 				checkCalibration();
-				solver = new BacktrackingFastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc,
+				BacktrackingFastMLESteppingFunctionSolver s = new BacktrackingFastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc,
 						bounds);
+				// We can do this since the line search validates against the likelihood function
+				s.setLineSearchMethod(LineSearchMethod.PARTIAL_IGNORE);
+				solver = s;
 				break;
 
 			default:
