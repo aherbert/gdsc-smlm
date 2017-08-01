@@ -1,22 +1,8 @@
 package gdsc.smlm.results;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Collection;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import java.util.LinkedList;
 import java.util.List;
 
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -27,7 +13,7 @@ import gdsc.smlm.data.config.PSFProtos.PSF;
  */
 public class PeakResultsList extends AbstractPeakResults implements PeakResults
 {
-	private List<PeakResults> results = new LinkedList<PeakResults>();
+	private List<PeakResults> results = new ArrayList<PeakResults>();
 
 	/**
 	 * Add a result format to the output. If a PeakResultsList is passed then it will be
@@ -58,6 +44,18 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	public int numberOfOutputs()
 	{
 		return results.size();
+	}
+
+	/**
+	 * Gets the output.
+	 *
+	 * @param index
+	 *            the index
+	 * @return the output
+	 */
+	public PeakResults getOutput(int index)
+	{
+		return results.get(index);
 	}
 
 	/**
@@ -108,7 +106,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 		for (PeakResults peakResults : this.results)
 			peakResults.addAll(results);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -159,10 +157,10 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 			{
 				peakResults = new SynchronizedPeakResults(peakResults);
 			}
-			
+
 			// This will copy the settings
 			//newList.addOutput(peakResults);
-			
+
 			// This assumes the settings are OK, i.e. the result was added
 			// using addOutput(...). 
 			newList.results.add(peakResults);
