@@ -108,6 +108,8 @@ public class Erf
 	 */
 	public static double erf(double x)
 	{
+		//return org.apache.commons.math3.special.Erf.erf(x);
+
 		final boolean negative = (x < 0);
 		if (negative)
 			x = -x;
