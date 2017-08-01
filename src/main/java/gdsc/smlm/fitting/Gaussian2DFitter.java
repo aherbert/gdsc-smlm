@@ -795,7 +795,7 @@ public class Gaussian2DFitter
 				{
 					// If this is zero it causes problems when computing gradients since the 
 					// Gaussian function may not exist. So use a small value instead.
-					lower[j + Gaussian2DFunction.SIGNAL] = 0.1;
+					lower[j + Gaussian2DFunction.SIGNAL] = 0; //.1;
 				}
 			}
 			if (params[j + Gaussian2DFunction.SIGNAL] > upper[j + Gaussian2DFunction.SIGNAL])
@@ -820,7 +820,7 @@ public class Gaussian2DFitter
 				lower[j + Gaussian2DFunction.ANGLE] = -Math.PI;
 				upper[j + Gaussian2DFunction.ANGLE] = Math.PI;
 			}
-			// TODO - Add support for z-depth fitting in the shape parameter			
+			// TODO - Add support for z-depth fitting			
 			if (fitConfiguration.isZFitting())
 			{
 				lower[j + Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
@@ -831,6 +831,23 @@ public class Gaussian2DFitter
 			upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * max_wf;
 			lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * min_wf;
 			upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * max_wf;
+		}
+
+		if (solver.isStrictlyPositiveFunction())
+		{
+			// This is a problem for MLE fitting
+			
+			// If the lower bounds are zero it causes problems when computing gradients since 
+			// the Gaussian function may not exist. So use a small value instead.
+			for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
+			{
+				if (lower[j + Gaussian2DFunction.SIGNAL] <= 0)
+					lower[j + Gaussian2DFunction.SIGNAL] = 0.1;
+				if (lower[j + Gaussian2DFunction.X_SD] <= 0)
+					lower[j + Gaussian2DFunction.X_SD] = 0.01;
+				if (lower[j + Gaussian2DFunction.Y_SD] <= 0)
+					lower[j + Gaussian2DFunction.Y_SD] = 0.01;
+			}
 		}
 
 		// Check against the configured bounds
