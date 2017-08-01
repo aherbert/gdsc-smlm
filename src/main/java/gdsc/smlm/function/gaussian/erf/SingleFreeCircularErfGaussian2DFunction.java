@@ -3,6 +3,7 @@ package gdsc.smlm.function.gaussian.erf;
 //import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.utils.Maths;
 import gdsc.smlm.function.Erf;
 import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
@@ -339,9 +340,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 			final double G31 = one_sssSqrt2pi * pre2;
 
 			// Compute G53(xk)
-			x_u_m12 = x_u_m12 * x_u_m12 * x_u_m12;
-			final double ux = x_u_p12 * x_u_p12 * x_u_p12;
-			final double G53 = one_sssssSqrt2pi * (x_u_m12 * exp_x_minus - ux * exp_x_plus);
+			final double G53 = one_sssssSqrt2pi *
+					(Maths.pow3(x_u_m12) * exp_x_minus - Maths.pow3(x_u_p12) * exp_x_plus);
 			d2u_ds2[i] = tI * (G53 - 2 * G31);
 
 			exp_x_minus = exp_x_plus;
@@ -465,9 +465,8 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
 					x_u_p12 * x_u_p12 * exp_x_plus / ss);
 
 			// Compute G53(xk)
-			x_u_m12 = x_u_m12 * x_u_m12 * x_u_m12;
-			final double ux = x_u_p12 * x_u_p12 * x_u_p12;
-			final double G53 = one_sssssSqrt2pi * (x_u_m12 * exp_x_minus - ux * exp_x_plus);
+			final double G53 = one_sssssSqrt2pi *
+					(Maths.pow3(x_u_m12) * exp_x_minus - Maths.pow3(x_u_p12) * exp_x_plus);
 			d2u_ds2[i] = tI * (G53 - 2 * G31);
 
 			exp_x_minus = exp_x_plus;
