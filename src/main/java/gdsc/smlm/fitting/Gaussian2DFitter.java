@@ -788,11 +788,15 @@ public class Gaussian2DFitter
 			if (params[j + Gaussian2DFunction.SIGNAL] < lower[j + Gaussian2DFunction.SIGNAL])
 				lower[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL] -
 						(lower[j + Gaussian2DFunction.SIGNAL] - params[j + Gaussian2DFunction.SIGNAL]);
-			if (lower[j + Gaussian2DFunction.SIGNAL] < 0)
+			if (lower[j + Gaussian2DFunction.SIGNAL] <= 0)
 			{
 				// This is a problem for MLE fitting
 				if (solver.isStrictlyPositiveFunction())
-					lower[j + Gaussian2DFunction.SIGNAL] = 0;
+				{
+					// If this is zero it causes problems when computing gradients since the 
+					// Gaussian function may not exist. So use a small value instead.
+					lower[j + Gaussian2DFunction.SIGNAL] = 0.1;
+				}
 			}
 			if (params[j + Gaussian2DFunction.SIGNAL] > upper[j + Gaussian2DFunction.SIGNAL])
 				upper[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL] +
