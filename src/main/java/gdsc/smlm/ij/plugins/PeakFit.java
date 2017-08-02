@@ -2528,10 +2528,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return false;
 	}
 
-	private FitJob createJob(int slice, int endFrame, float[] data, Rectangle bounds2, float noise)
+	private FitJob createJob(int startFrame, int endFrame, float[] data, Rectangle bounds, float noise)
 	{
 		FitParameters fitParams = null;
-		if (slice != endFrame)
+		if (startFrame != endFrame)
 		{
 			fitParams = new FitParameters();
 			fitParams.endT = endFrame;
@@ -2553,9 +2553,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 
 		if (fitParams != null)
-			return new ParameterisedFitJob(fitParams, slice, data, bounds);
+			return new ParameterisedFitJob(fitParams, startFrame, data, bounds);
 		else
-			return new FitJob(slice, data, bounds);
+			return new FitJob(startFrame, data, bounds);
 	}
 
 	private boolean escapePressed()
