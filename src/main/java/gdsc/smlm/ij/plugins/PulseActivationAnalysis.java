@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
+import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Component;
@@ -74,6 +75,8 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
+import ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import ij.gui.GenericDialog;
 import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Overlay;
@@ -94,7 +97,7 @@ import ij.process.ImageStatistics;
  * Multicolor Super-Resolution Imaging with Photo-Switchable Fluorescent Probes. Science 317, 1749. DOI:
  * 10.1126/science.1146598.
  */
-public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionListener
+public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionListener, OptionCollectedListener
 {
 	private String TITLE = "Activation Analysis";
 
@@ -322,6 +325,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	}
 	private static String magnification = MAGNIFICATION[1];
 	private Choice magnificationChoice;
+	private Checkbox previewCheckBox;
 
 	private class Activation implements Molecule
 	{
@@ -956,7 +960,6 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		Correction nonSpecificCorrection = Correction.NONE;
 		double nonSpecificCorrectionCutoff;
 
-		@SuppressWarnings("unused")
 		ResultsSettings resultsSettings;
 
 		RunSettings()
@@ -1108,23 +1111,27 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		resultsSettings = SettingsManager.readResultsSettings(0);
 
-		gd.addMessage("--- Image output ---");
-		Label label = gd.getLastLabel();
-		ResultsImageSettings s = resultsSettings.getResultsImageSettings();
-		gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(),
-				SettingsManager.getResultsImageTypeNames()[s.getImageTypeValue()]);
-		gd.addCheckbox("Weighted", s.getWeighted());
-		gd.addCheckbox("Equalised", s.getEqualised());
-		gd.addSlider("Image_Precision (nm)", 5, 30, s.getAveragePrecision());
-		gd.addSlider("Image_Scale", 1, 15, s.getScale());
+		resultsSettingsBuilder = resultsSettings.toBuilder();
+		ResultsManager.addImageResultsOptions(gd, resultsSettingsBuilder, 0);
+		Label markerLabel = gd.getLastLabel();
 
-		gd.addCheckbox("Preview", false);
+		//		ResultsImageSettings s = resultsSettings.getResultsImageSettings();
+		//		gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(),
+		//				SettingsManager.getResultsImageTypeNames()[s.getImageTypeValue()]);
+		//		gd.addCheckbox("Weighted", s.getWeighted());
+		//		gd.addCheckbox("Equalised", s.getEqualised());
+		//		gd.addSlider("Image_Precision (nm)", 5, 30, s.getAveragePrecision());
+		//		gd.addSlider("Image_Scale", 1, 15, s.getScale());
 
-		gd.addMessage("Click 'Draw loop' to draw the current ROIs in a loop");
-		gd.addAndGetButton("Draw loop", this);
+		previewCheckBox = gd.addAndGetCheckbox("Preview", false);
+
+		String buttonLabel = "Draw loop";
+		gd.addMessage("Click '" + buttonLabel + "' to draw the current ROIs in a loop");
+		gd.addAndGetButton(buttonLabel, this);
 		magnificationChoice = gd.addAndGetChoice("Magnification", MAGNIFICATION, magnification);
 
 		gd.addDialogListener(this);
+		gd.addOptionCollectedListener(this);
 
 		// Layout over 2 columns
 		if (gd.getLayout() != null)
@@ -1136,7 +1143,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			for (Component comp : gd.getComponents())
 			{
 				// Check if this should be the second major column
-				if (comp == label)
+				if (comp == markerLabel)
 				{
 					xOffset += 2;
 					yOffset -= rowCount;
@@ -1157,7 +1164,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			if (IJ.isLinux())
 				gd.setBackground(new Color(238, 238, 238));
 		}
-		
+
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -1196,7 +1203,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 						Double.toString(nonSpecificCorrectionCutoff));
 			}
 
-			s = resultsSettings.getResultsImageSettings();
+			ResultsImageSettings s = resultsSettings.getResultsImageSettings();
 			Recorder.recordOption("Image", SettingsManager.getResultsImageTypeNames()[s.getImageTypeValue()]);
 			if (s.getWeighted())
 				Recorder.recordOption("Weighted");
@@ -1269,18 +1276,21 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			return false;
 		}
 
-		if (resultsSettingsBuilder == null)
-			resultsSettingsBuilder = resultsSettings.toBuilder();
-		ResultsImageSettings.Builder s = resultsSettingsBuilder.getResultsImageSettingsBuilder();
-		s.setImageTypeValue(gd.getNextChoiceIndex());
-		s.setWeighted(gd.getNextBoolean());
-		s.setEqualised(gd.getNextBoolean());
-		s.setAveragePrecision(gd.getNextNumber());
-		s.setScale(gd.getNextNumber());
+		resultsSettingsBuilder.getResultsImageSettingsBuilder().setImageTypeValue(gd.getNextChoiceIndex());
+
+		//		ResultsImageSettings.Builder s = resultsSettingsBuilder.getResultsImageSettingsBuilder();
+		//		s.setImageTypeValue(gd.getNextChoiceIndex());
+		//		s.setWeighted(gd.getNextBoolean());
+		//		s.setEqualised(gd.getNextBoolean());
+		//		s.setAveragePrecision(gd.getNextNumber());
+		//		s.setScale(gd.getNextNumber());
+
 		boolean preview = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
 			return false;
+
+		((NonBlockingExtendedGenericDialog) gd).collectOptions();
 
 		resultsSettings = resultsSettingsBuilder.build();
 
@@ -1299,6 +1309,34 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		}
 
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.gui.ExtendedGenericDialog.OptionCollectedListener#optionCollected(ij.gui.ExtendedGenericDialog.
+	 * OptionCollectedEvent)
+	 */
+	public void optionCollected(OptionCollectedEvent e)
+	{
+		resultsSettings = resultsSettingsBuilder.build();
+
+		if (lastRunSettings != null && resultsSettings.equals(lastRunSettings.resultsSettings))
+			return;
+
+		RunSettings settings = new RunSettings();
+		if (previewCheckBox.getState())
+		{
+			// Run the settings
+			workflow.run(settings);
+			workflow.startPreview();
+		}
+		else
+		{
+			workflow.stopPreview();
+			// Stage the work but do not run
+			workflow.stage(settings);
+		}
 	}
 
 	private void validateCrosstalk(int index)
