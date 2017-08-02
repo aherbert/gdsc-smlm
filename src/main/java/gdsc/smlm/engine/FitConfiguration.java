@@ -35,7 +35,7 @@ import gdsc.smlm.fitting.nonlinear.ParameterBounds;
 import gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.ToleranceChecker;
 import gdsc.smlm.fitting.nonlinear.WLSELVMSteppingFunctionSolver;
-import gdsc.smlm.fitting.nonlinear.BacktrackingFastMLESteppingFunctionSolver.LineSearchMethod;
+import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver.LineSearchMethod;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.PrecomputedFunctionFactory;
@@ -81,7 +81,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private FitSolverSettings.Builder fitSolverSettings;
 
 	private Logger log = null;
-	
+
 	private boolean computeDeviations = false;
 	private int flags;
 	private AstigmatismZModel astigmatismZModel = null;
@@ -2587,11 +2587,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 			case BACKTRACKING_FAST_MLE:
 				checkCalibration();
-				BacktrackingFastMLESteppingFunctionSolver s = new BacktrackingFastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc,
+				solver = new BacktrackingFastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc,
 						bounds);
-				// We can do this since the line search validates against the likelihood function
-				s.setLineSearchMethod(LineSearchMethod.PARTIAL_IGNORE);
-				solver = s;
 				break;
 
 			default:
@@ -2601,6 +2598,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (solver instanceof LVMSteppingFunctionSolver)
 		{
 			((LVMSteppingFunctionSolver) solver).setInitialLambda(getLambda());
+		}
+		else if (solver instanceof FastMLESteppingFunctionSolver)
+		{
+			// This should be configurable
+			((FastMLESteppingFunctionSolver) solver).setLineSearchMethod(LineSearchMethod.PARTIAL_IGNORE);
 		}
 		return solver;
 	}

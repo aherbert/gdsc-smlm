@@ -32,35 +32,10 @@ import gdsc.smlm.function.Gradient2Function;
  */
 public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFunctionSolver
 {
-	/**
-	 * Define the method to use when the line search direction is not in the same direction as
-	 * that defined by the first derivative gradient.
-	 */
-	public enum LineSearchMethod
-	{
-		/** Error since the line search is not correctly orientated */
-		ERROR,
-
-		/**
-		 * Ignore any search direction that is in the opposite direction to the first derivative gradient.
-		 */
-		IGNORE,
-
-		/**
-		 * Progressively ignore any search direction that is in the opposite direction to the first derivative gradient.
-		 * Do this in order of the magnitude of the error
-		 */
-		PARTIAL_IGNORE;
-	}
-
-	private LineSearchMethod lineSearchMethod = LineSearchMethod.ERROR;
 	private LineStepSearch lineSearch = new LineStepSearch();
 	/** Maximum step length used in line search. */
 	private double[] maximumStepLength = null;
 	private double maximumStepSize = 0;
-
-	private double[] aOld, searchDirection;
-	private boolean firstEvaluation;
 
 	/**
 	 * The minimum value between two doubles.
@@ -124,7 +99,6 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		y = super.prepareFitValue(y, a);
 		// We always compute the pseudolikelihood
 		isPseudoLogLikelihood = true;
-		firstEvaluation = true;
 
 		// Configure maximum step length for each dimension using the bounds.
 		// This is a simple check that can prevent wild Newton Raphson steps 
@@ -207,12 +181,6 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	private class LineStepSearch
 	{
 		/**
-		 * Set to true when the the new point is too close to the old point. In a minimisation algorithm this signifies
-		 * convergence.
-		 */
-		@SuppressWarnings("unused")
-		boolean check;
-		/**
 		 * The function value at the new point
 		 */
 		double f;
@@ -243,7 +211,6 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 			double[] x = new double[xOld.length];
 
 			final int n = xOld.length;
-			check = false;
 
 			// Limit the search step size for each dimension
 			if (maximumStepLength != null)
@@ -284,7 +251,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				// Handle this with different options:
 				switch (lineSearchMethod)
 				{
-					case ERROR:
+					case NONE:
 						throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "Slope is negative: " + slope);
 
 					case IGNORE:
@@ -304,7 +271,10 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 							}
 						}
 						if (slope == 0)
-							throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
+						{
+							return setInsignificantStep(xOld, fOld);
+							//throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
+						}
 						break;
 
 					case PARTIAL_IGNORE:
@@ -321,13 +291,19 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 						{
 							int i = indices[j];
 							// Ignore this component
-							slope -= slopeComponents[i];
 							searchDirection[gradientIndices[i]] = 0;
 							j++;
+							// Recompute slope
+							slope = 0;
+							for (int k = j; k < slopeComponents.length; k++)
+								slope += slopeComponents[indices[k]];
 						}
-						if (j == slopeComponents.length)
-							// All components have been removed so error
-							throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
+						if (slope == 0)
+						{
+							// All components have been removed so handle no slope
+							return setInsignificantStep(xOld, fOld);
+							//throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
+						}
 						break;
 
 					default:
@@ -355,11 +331,8 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				if (alam < alamin)
 				{
 					// Convergence (insignificant step).
-					// Since we use the old f and x then we do not need to compute the objective value
-					check = true;
-					f = fOld;
-					//System.out.printf("alam %f < alamin %f\n", alam, alamin);
-					return xOld;
+					//System.out.printf("alam %g < alamin %g\n", alam, alamin);
+					return setInsignificantStep(xOld, fOld);
 				}
 
 				for (int i = 0; i < n; i++)
@@ -417,17 +390,25 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 							else
 								tmplam = -slope / (b + Math.sqrt(disc));
 						}
-						// Ensure the lambda is <= 0.5 lamda1, i.e. we take a step smaller than last time
+						// Ensure the lambda is <= 0.5 lambda1, i.e. we take a step smaller than last time
 						if (tmplam > 0.5 * alam)
 							tmplam = 0.5 * alam;
 					}
 
 					alam2 = alam;
 					f2 = f;
-					// Ensure the lambda is >= 0.1 lamda1, i.e. we take reasonable step
+					// Ensure the lambda is >= 0.1 lambda1, i.e. we take reasonable step
 					alam = max(tmplam, 0.1 * alam);
 				}
 			}
+		}
+
+		private double[] setInsignificantStep(double[] xOld, final double fOld)
+		{
+			// Since we use the old f and x then we do not need to compute the objective value
+			tc.setConverged();
+			f = fOld;
+			return xOld;
 		}
 	}
 
@@ -459,15 +440,4 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	{
 		this.maximumStepSize = (maximumStepSize >= 1) ? 0 : maximumStepSize;
 	}
-
-	public LineSearchMethod getLineSearchMethod()
-	{
-		return lineSearchMethod;
-	}
-
-	public void setLineSearchMethod(LineSearchMethod lineSearchMethod)
-	{
-		this.lineSearchMethod = lineSearchMethod;
-	}
-
 }

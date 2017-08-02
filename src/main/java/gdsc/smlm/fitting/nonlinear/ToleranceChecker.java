@@ -31,8 +31,11 @@ public class ToleranceChecker
 	public static final int STATUS_PARAMETERS = 0x00000004;
 	/** Flag to indicate convergence on the target number of iterations. */
 	public static final int STATUS_TARGET_ITERATIONS = 0x00000008;
+	/** Flag to indicate convergence was set manually. */
+	public static final int STATUS_MANUAL_CONVERGENCE = 0x00000010;
 	/** Flag to indicate all valid convergence flags. */
-	public static final int STATUS_CONVERGED = STATUS_VALUE | STATUS_PARAMETERS | STATUS_TARGET_ITERATIONS;
+	public static final int STATUS_CONVERGED = STATUS_VALUE | STATUS_PARAMETERS | STATUS_TARGET_ITERATIONS |
+			STATUS_MANUAL_CONVERGENCE;
 
 	/** The relative tolerance threshold for the value. Set to negative to disable. */
 	public final double relativeValue;
@@ -66,6 +69,7 @@ public class ToleranceChecker
 	public final int maxIterations;
 
 	private int iterations = 0;
+	private boolean manualConvergence = false;
 
 	/**
 	 * Build an instance with specified thresholds. This only checks convergence using the parameters.
@@ -239,6 +243,8 @@ public class ToleranceChecker
 			status |= STATUS_PARAMETERS;
 		if (maxIterations != 0 && iterations >= Math.abs(maxIterations))
 			status |= (maxIterations < 0) ? STATUS_TARGET_ITERATIONS : STATUS_MAX_ITERATIONS;
+		if (manualConvergence)
+			status |= STATUS_MANUAL_CONVERGENCE;
 		return status;
 	}
 
@@ -287,5 +293,15 @@ public class ToleranceChecker
 	public void reset()
 	{
 		iterations = 0;
+		manualConvergence = false;
+	}
+
+	/**
+	 * Sets the converged flag to true. This can be used to manually set convergence, for example in the event that
+	 * further computation is not needed.
+	 */
+	public void setConverged()
+	{
+		manualConvergence = true;
 	}
 }

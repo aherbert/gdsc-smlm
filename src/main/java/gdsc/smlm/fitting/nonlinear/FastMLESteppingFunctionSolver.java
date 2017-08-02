@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import org.ejml.data.DenseMatrix64F;
 
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Sort;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
@@ -46,6 +48,32 @@ import gdsc.smlm.function.PrecomputedGradient2Function;
  */
 public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implements MLEFunctionSolver
 {
+	/**
+	 * Define the method to use when the line search direction is not in the same direction as
+	 * that defined by the first derivative gradient.
+	 */
+	public enum LineSearchMethod
+	{
+		/**
+		 * Do nothing to handle the incorrect orientation. The default solver action is taken. This may cause the search
+		 * to take an invalid move or it may error.
+		 */
+		NONE,
+
+		/**
+		 * Ignore any search direction that is in the opposite direction to the first derivative gradient.
+		 */
+		IGNORE,
+
+		/**
+		 * Progressively ignore any search direction that is in the opposite direction to the first derivative gradient.
+		 * Do this in order of the magnitude of the error
+		 */
+		PARTIAL_IGNORE;
+	}
+
+	protected LineSearchMethod lineSearchMethod = LineSearchMethod.NONE;
+
 	/** The log-likelihood. */
 	protected double ll = Double.NaN;
 	/** Flag if the log-likelihood is the pseudo log-likelihood. */
@@ -71,6 +99,9 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 	public static final double DEFAULT_MAX_RELATIVE_ERROR = LVMSteppingFunctionSolver.DEFAULT_MAX_RELATIVE_ERROR;
 	public static final double DEFAULT_MAX_ABSOLUTE_ERROR = LVMSteppingFunctionSolver.DEFAULT_MAX_ABSOLUTE_ERROR;
+
+	protected double[] aOld, searchDirection;
+	protected boolean firstEvaluation;
 
 	/**
 	 * Create a new stepping function solver.
@@ -171,6 +202,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	@Override
 	protected double[] prepareFitValue(double[] y, double[] a)
 	{
+		firstEvaluation = true;
 		// Ensure the gradient procedure is created
 		y = prepareY(y);
 		gradientProcedure = createGradientProcedure(y);
@@ -247,6 +279,97 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	@Override
 	protected double computeFitValue(double[] a)
 	{
+		if (lineSearchMethod != LineSearchMethod.NONE)
+		{
+			// The code below will adjust the search direction
+			if (firstEvaluation)
+			{
+				// For the first evaluation we store the old value and initialise
+				firstEvaluation = false;
+				aOld = a.clone();
+				searchDirection = new double[a.length];
+			}
+			else
+			{
+				// All subsequent calls to computeFitValue() must check the search direction
+				for (int i = 0; i < searchDirection.length; i++)
+					// Configure the search direction with the full Newton step
+					searchDirection[i] = a[i] - aOld[i];
+				
+				double[] gradient = gradientProcedure.d1;
+				final int[] gradientIndices = f.gradientIndices();
+				
+				double slope = 0.0;
+				for (int i = 0; i < gradient.length; i++)
+					slope += gradient[i] * searchDirection[gradientIndices[i]];
+
+				if (slope <= 0.0)
+				{
+					// The slope is invalid so update the position by removing bad 
+					// search direction components
+					
+					switch (lineSearchMethod)
+					{
+						case IGNORE:
+							// Ignore any search direction that is in the opposite direction to the
+							// first derivative gradient.
+							slope = 0.0;
+							for (int i = 0; i < gradient.length; i++)
+							{
+								double slopeComponent = gradient[i] * searchDirection[gradientIndices[i]];
+								if (slopeComponent < 0)
+								{
+									// Ignore this component
+									a[gradientIndices[i]] = aOld[gradientIndices[i]];
+								}
+								else
+								{
+									slope += slopeComponent;
+								}
+							}
+							if (slope == 0)
+							{
+								// No move so just set converged
+								tc.setConverged();
+								return ll;
+								//throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
+							}
+							break;
+							
+						case PARTIAL_IGNORE:
+							// Progressively ignore any search direction that is in the opposite direction to 
+							// the first derivative gradient. Do this in order of the magnitude of the error
+							double[] slopeComponents = new double[gradient.length];
+							for (int i = 0; i < slopeComponents.length; i++)
+								slopeComponents[i] = gradient[i] * searchDirection[gradientIndices[i]];
+							int[] indices = Utils.newArray(slopeComponents.length, 0, 1);
+							Sort.sort(indices, slopeComponents);
+							Sort.reverse(indices);
+							int j = 0;
+							while (slope <= 0 && j < slopeComponents.length && slopeComponents[indices[j]] <= 0)
+							{
+								int i = indices[j];
+								// Ignore this component
+								slope -= slopeComponents[i];
+								a[gradientIndices[i]] = aOld[gradientIndices[i]];
+								j++;
+							}
+							if (j == slopeComponents.length)
+							{
+								// No move so just set converged
+								tc.setConverged();
+								return ll;
+								//throw new FunctionSolverException(FitStatus.LINE_SEARCH_ERROR, "No slope");
+							}
+							break;
+							
+						default:
+							throw new IllegalStateException("Unknown line search method: " + lineSearchMethod);
+					}
+				}
+			}
+		}
+
 		computeGradients(a);
 
 		// Log-likelihood only needs to be computed if the tolerance checker 
@@ -468,5 +591,15 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		// Wilks theorum states the LLR approaches the chi-squared distribution for large n.
 		return ChiSquaredDistributionTable.computeQValue(getLogLikelihoodRatio(),
 				getNumberOfFittedPoints() - getNumberOfFittedParameters());
+	}
+
+	public LineSearchMethod getLineSearchMethod()
+	{
+		return lineSearchMethod;
+	}
+
+	public void setLineSearchMethod(LineSearchMethod lineSearchMethod)
+	{
+		this.lineSearchMethod = lineSearchMethod;
 	}
 }
