@@ -10,9 +10,11 @@ import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.FitProtos.FitSettings;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.FitSolverSettings;
+import gdsc.smlm.data.config.FitProtos.LineSearchMethod;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtos.RelativeParameter;
 import gdsc.smlm.data.config.FitProtos.SearchMethod;
+import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 
 /*----------------------------------------------------------------------------- 
@@ -70,6 +72,8 @@ public class FitProtosHelper
 		builder.addClampValues(3); // Sx
 		builder.addClampValues(3); // Sy
 		builder.addClampValues(Math.PI); // A
+		
+		builder.setLineSearchMethod(LineSearchMethod.PARTIAL_IGNORE);
 		
 		defaultFitSolverSettings = builder.build();
 	}
@@ -318,6 +322,22 @@ public class FitProtosHelper
 			case UNRECOGNIZED:
 			default:
 				throw new IllegalStateException("Unknown method: " + searchMethod);
+		}
+	}
+	
+	public static gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver.LineSearchMethod convertLineSearchMethod(LineSearchMethod lineSearchMethod)
+	{
+		switch (lineSearchMethod)
+		{
+			case IGNORE:
+				return FastMLESteppingFunctionSolver.LineSearchMethod.IGNORE;
+			case NONE:
+				return FastMLESteppingFunctionSolver.LineSearchMethod.NONE;
+			case PARTIAL_IGNORE:
+				return FastMLESteppingFunctionSolver.LineSearchMethod.PARTIAL_IGNORE;
+			case UNRECOGNIZED:
+			default:
+				throw new IllegalStateException("Unknown method: " + lineSearchMethod);
 		}
 	}
 }

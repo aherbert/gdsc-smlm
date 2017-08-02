@@ -59,6 +59,20 @@ enum SearchMethod
 	BFGS = 7;
 }
 
+// Define the method to use when the Fast MLE line search direction is not in the same direction as
+// that defined by the first derivative gradient.
+enum LineSearchMethod
+{
+	// Do nothing to handle the incorrect orientation. The default solver action is taken. 
+	// This may cause the search to take an invalid move or it may error.
+	NONE = 0;	
+	// Ignore any search direction that is in the opposite direction to the first derivative gradient.
+	IGNORE = 1;	
+	// Progressively ignore any search direction that is in the opposite direction to the 
+	// first derivative gradient. Do this in order of the magnitude of the error.
+	PARTIAL_IGNORE = 2;
+}
+
 // Define settings for the fit solver.
 message FitSolverSettings {
 	// Set to true to fix the PSF using the initial parameters
@@ -102,7 +116,10 @@ message FitSolverSettings {
 	// Set to true to use dynamic parameter clamping, i.e. update the clamp values when the step direction changes
 	bool use_dynamic_clamping = 17;
 	// The initial clamp values for each of the PSF parameters.
-	repeated double clamp_values = 18;	
+	repeated double clamp_values = 18;
+		
+	// The line search method to use for the Fast MLE estimator
+	LineSearchMethod line_search_method = 19;
 }
 
 // Define the settings for filtering fit results.

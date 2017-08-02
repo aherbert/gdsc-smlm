@@ -66,6 +66,7 @@ import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.filters.SpotFilter;
+import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.SeriesImageSource;
@@ -2024,8 +2025,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 				gd.addNumericField("Amplification (Count/electron)", calibration.getCountPerElectron(), 2);
 				gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 			}
+			// This works because the proto configuration enum matches the named enum
 			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
-			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
+			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().getNumber()]);
 			gd.addStringField("Relative_threshold", Utils.rounded(fitConfig.getRelativeThreshold()));
 			gd.addStringField("Absolute_threshold", Utils.rounded(fitConfig.getAbsoluteThreshold()));
 			gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
@@ -2086,7 +2088,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (isLVM)
 				gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
 			if (isFastMLE)
+			{
 				gd.addCheckbox("Fixed_iterations", fitConfig.isFixedIterations());
+				// This works because the proto configuration enum matches the named enum
+				String[] lineSearchNames = SettingsManager.getNames((Object[]) FastMLESteppingFunctionSolver.LineSearchMethod.values());
+				gd.addChoice("Line_search_method", lineSearchNames, lineSearchNames[fitConfig.getLineSearchMethod().getNumber()]);
+			}
 
 			// Extra parameters are needed for calibrated fit solvers
 			if (requireCalibration)
@@ -2136,7 +2143,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (isLVM)
 				fitConfig.setLambda(gd.getNextNumber());
 			if (isFastMLE)
+			{
 				fitConfig.setFixedIterations(gd.getNextBoolean());
+				fitConfig.setLineSearchMethod(gd.getNextChoiceIndex());
+			}
 
 			if (requireCalibration)
 			{

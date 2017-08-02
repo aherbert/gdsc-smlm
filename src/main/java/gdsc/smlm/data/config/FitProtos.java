@@ -453,6 +453,146 @@ public final class FitProtos {
 
   /**
    * <pre>
+   * Define the method to use when the Fast MLE line search direction is not in the same direction as
+   * that defined by the first derivative gradient.
+   * </pre>
+   *
+   * Protobuf enum {@code gdsc.smlm.data.config.LineSearchMethod}
+   */
+  public enum LineSearchMethod
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     * Do nothing to handle the incorrect orientation. The default solver action is taken. 
+     * This may cause the search to take an invalid move or it may error.
+     * </pre>
+     *
+     * <code>NONE = 0;</code>
+     */
+    NONE(0),
+    /**
+     * <pre>
+     * Ignore any search direction that is in the opposite direction to the first derivative gradient.
+     * </pre>
+     *
+     * <code>IGNORE = 1;</code>
+     */
+    IGNORE(1),
+    /**
+     * <pre>
+     * Progressively ignore any search direction that is in the opposite direction to the 
+     * first derivative gradient. Do this in order of the magnitude of the error.
+     * </pre>
+     *
+     * <code>PARTIAL_IGNORE = 2;</code>
+     */
+    PARTIAL_IGNORE(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * Do nothing to handle the incorrect orientation. The default solver action is taken. 
+     * This may cause the search to take an invalid move or it may error.
+     * </pre>
+     *
+     * <code>NONE = 0;</code>
+     */
+    public static final int NONE_VALUE = 0;
+    /**
+     * <pre>
+     * Ignore any search direction that is in the opposite direction to the first derivative gradient.
+     * </pre>
+     *
+     * <code>IGNORE = 1;</code>
+     */
+    public static final int IGNORE_VALUE = 1;
+    /**
+     * <pre>
+     * Progressively ignore any search direction that is in the opposite direction to the 
+     * first derivative gradient. Do this in order of the magnitude of the error.
+     * </pre>
+     *
+     * <code>PARTIAL_IGNORE = 2;</code>
+     */
+    public static final int PARTIAL_IGNORE_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static LineSearchMethod valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static LineSearchMethod forNumber(int value) {
+      switch (value) {
+        case 0: return NONE;
+        case 1: return IGNORE;
+        case 2: return PARTIAL_IGNORE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<LineSearchMethod>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        LineSearchMethod> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<LineSearchMethod>() {
+            public LineSearchMethod findValueByNumber(int number) {
+              return LineSearchMethod.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(2);
+    }
+
+    private static final LineSearchMethod[] VALUES = values();
+
+    public static LineSearchMethod valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private LineSearchMethod(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.LineSearchMethod)
+  }
+
+  /**
+   * <pre>
    * Define the type of filter used for identifying candidate peaks.
    * </pre>
    *
@@ -560,7 +700,7 @@ public final class FitProtos {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(2);
+      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(3);
     }
 
     private static final DataFilterType[] VALUES = values();
@@ -729,7 +869,7 @@ public final class FitProtos {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(3);
+      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(4);
     }
 
     private static final DataFilterMethod[] VALUES = values();
@@ -949,7 +1089,7 @@ public final class FitProtos {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(4);
+      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(5);
     }
 
     private static final NoiseEstimatorMethod[] VALUES = values();
@@ -1174,6 +1314,23 @@ public final class FitProtos {
      * <code>repeated double clamp_values = 18;</code>
      */
     double getClampValues(int index);
+
+    /**
+     * <pre>
+     * The line search method to use for the Fast MLE estimator
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
+     */
+    int getLineSearchMethodValue();
+    /**
+     * <pre>
+     * The line search method to use for the Fast MLE estimator
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
+     */
+    gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod();
   }
   /**
    * <pre>
@@ -1209,6 +1366,7 @@ public final class FitProtos {
       useClamping_ = false;
       useDynamicClamping_ = false;
       clampValues_ = java.util.Collections.emptyList();
+      lineSearchMethod_ = 0;
     }
 
     @java.lang.Override
@@ -1342,6 +1500,12 @@ public final class FitProtos {
                 clampValues_.add(input.readDouble());
               }
               input.popLimit(limit);
+              break;
+            }
+            case 152: {
+              int rawValue = input.readEnum();
+
+              lineSearchMethod_ = rawValue;
               break;
             }
           }
@@ -1651,6 +1815,30 @@ public final class FitProtos {
     }
     private int clampValuesMemoizedSerializedSize = -1;
 
+    public static final int LINE_SEARCH_METHOD_FIELD_NUMBER = 19;
+    private int lineSearchMethod_;
+    /**
+     * <pre>
+     * The line search method to use for the Fast MLE estimator
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
+     */
+    public int getLineSearchMethodValue() {
+      return lineSearchMethod_;
+    }
+    /**
+     * <pre>
+     * The line search method to use for the Fast MLE estimator
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
+     */
+    public gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
+      gdsc.smlm.data.config.FitProtos.LineSearchMethod result = gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
+      return result == null ? gdsc.smlm.data.config.FitProtos.LineSearchMethod.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -1721,6 +1909,9 @@ public final class FitProtos {
       }
       for (int i = 0; i < clampValues_.size(); i++) {
         output.writeDoubleNoTag(clampValues_.get(i));
+      }
+      if (lineSearchMethod_ != gdsc.smlm.data.config.FitProtos.LineSearchMethod.NONE.getNumber()) {
+        output.writeEnum(19, lineSearchMethod_);
       }
     }
 
@@ -1808,6 +1999,10 @@ public final class FitProtos {
         }
         clampValuesMemoizedSerializedSize = dataSize;
       }
+      if (lineSearchMethod_ != gdsc.smlm.data.config.FitProtos.LineSearchMethod.NONE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(19, lineSearchMethod_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -1868,6 +2063,7 @@ public final class FitProtos {
           == other.getUseDynamicClamping());
       result = result && getClampValuesList()
           .equals(other.getClampValuesList());
+      result = result && lineSearchMethod_ == other.lineSearchMethod_;
       return result;
     }
 
@@ -1929,6 +2125,8 @@ public final class FitProtos {
         hash = (37 * hash) + CLAMP_VALUES_FIELD_NUMBER;
         hash = (53 * hash) + getClampValuesList().hashCode();
       }
+      hash = (37 * hash) + LINE_SEARCH_METHOD_FIELD_NUMBER;
+      hash = (53 * hash) + lineSearchMethod_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2098,6 +2296,8 @@ public final class FitProtos {
 
         clampValues_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00020000);
+        lineSearchMethod_ = 0;
+
         return this;
       }
 
@@ -2144,6 +2344,7 @@ public final class FitProtos {
           bitField0_ = (bitField0_ & ~0x00020000);
         }
         result.clampValues_ = clampValues_;
+        result.lineSearchMethod_ = lineSearchMethod_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2246,6 +2447,9 @@ public final class FitProtos {
             clampValues_.addAll(other.clampValues_);
           }
           onChanged();
+        }
+        if (other.lineSearchMethod_ != 0) {
+          setLineSearchMethodValue(other.getLineSearchMethodValue());
         }
         onChanged();
         return this;
@@ -3068,6 +3272,70 @@ public final class FitProtos {
       public Builder clearClampValues() {
         clampValues_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00020000);
+        onChanged();
+        return this;
+      }
+
+      private int lineSearchMethod_ = 0;
+      /**
+       * <pre>
+       * The line search method to use for the Fast MLE estimator
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
+       */
+      public int getLineSearchMethodValue() {
+        return lineSearchMethod_;
+      }
+      /**
+       * <pre>
+       * The line search method to use for the Fast MLE estimator
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
+       */
+      public Builder setLineSearchMethodValue(int value) {
+        lineSearchMethod_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The line search method to use for the Fast MLE estimator
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
+       */
+      public gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
+        gdsc.smlm.data.config.FitProtos.LineSearchMethod result = gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
+        return result == null ? gdsc.smlm.data.config.FitProtos.LineSearchMethod.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The line search method to use for the Fast MLE estimator
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
+       */
+      public Builder setLineSearchMethod(gdsc.smlm.data.config.FitProtos.LineSearchMethod value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        lineSearchMethod_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The line search method to use for the Fast MLE estimator
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
+       */
+      public Builder clearLineSearchMethod() {
+        
+        lineSearchMethod_ = 0;
         onChanged();
         return this;
       }
@@ -10342,7 +10610,7 @@ public final class FitProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\tfit.proto\022\025gdsc.smlm.data.config\"\310\004\n\021F" +
+      "\n\tfit.proto\022\025gdsc.smlm.data.config\"\215\005\n\021F" +
       "itSolverSettings\022\021\n\tfixed_psf\030\001 \001(\010\022\"\n\032d" +
       "isable_background_fitting\030\002 \001(\010\022\036\n\026disab" +
       "le_signal_fitting\030\003 \001(\010\0224\n\nfit_solver\030\004 " +
@@ -10357,60 +10625,63 @@ public final class FitProtos {
       "ation\030\r \001(\010\022\024\n\014model_camera\030\016 \001(\010\022 \n\030max" +
       "_function_evaluations\030\017 \001(\005\022\024\n\014use_clamp" +
       "ing\030\020 \001(\010\022\034\n\024use_dynamic_clamping\030\021 \001(\010\022" +
-      "\024\n\014clamp_values\030\022 \003(\001\"\233\002\n\016FilterSettings" +
-      "\022\024\n\014shift_factor\030\001 \001(\001\022\027\n\017signal_strengt" +
-      "h\030\002 \001(\001\022\023\n\013min_photons\030\003 \001(\001\022\033\n\023precisio" +
-      "n_threshold\030\004 \001(\001\022\"\n\032precision_using_bac" +
-      "kground\030\005 \001(\010\022\030\n\020min_width_factor\030\006 \001(\001\022",
-      "\030\n\020max_width_factor\030\007 \001(\001\022\035\n\025disable_sim" +
-      "ple_filter\030\010 \001(\010\022\024\n\014smart_filter\030\t \001(\010\022\033" +
-      "\n\023smart_filter_string\030\n \001(\t\"\224\001\n\013FitSetti" +
-      "ngs\022E\n\023fit_solver_settings\030\001 \001(\0132(.gdsc." +
-      "smlm.data.config.FitSolverSettings\022>\n\017fi" +
-      "lter_settings\030\002 \001(\0132%.gdsc.smlm.data.con" +
-      "fig.FilterSettings\"4\n\021RelativeParameter\022" +
-      "\r\n\005value\030\001 \001(\001\022\020\n\010absolute\030\002 \001(\010\"\217\001\n\nDat" +
-      "aFilter\022C\n\022data_filter_method\030\001 \001(\0162\'.gd" +
-      "sc.smlm.data.config.DataFilterMethod\022<\n\n",
-      "parameters\030\002 \003(\0132(.gdsc.smlm.data.config" +
-      ".RelativeParameter\"\216\001\n\022DataFilterSetting" +
-      "s\022?\n\020data_filter_type\030\001 \001(\0162%.gdsc.smlm." +
-      "data.config.DataFilterType\0227\n\014data_filte" +
-      "rs\030\002 \003(\0132!.gdsc.smlm.data.config.DataFil" +
-      "ter\"\303\004\n\021FitEngineSettings\0228\n\014fit_setting" +
-      "s\030\001 \001(\0132\".gdsc.smlm.data.config.FitSetti" +
-      "ngs\022A\n\014noise_method\030\002 \001(\0162+.gdsc.smlm.da" +
-      "ta.config.NoiseEstimatorMethod\022G\n\024data_f" +
-      "ilter_settings\030\003 \001(\0132).gdsc.smlm.data.co",
-      "nfig.DataFilterSettings\0228\n\006search\030\004 \001(\0132" +
-      "(.gdsc.smlm.data.config.RelativeParamete" +
-      "r\0228\n\006border\030\005 \001(\0132(.gdsc.smlm.data.confi" +
-      "g.RelativeParameter\0229\n\007fitting\030\006 \001(\0132(.g" +
-      "dsc.smlm.data.config.RelativeParameter\022\032" +
-      "\n\022include_neighbours\030\007 \001(\010\022\"\n\032neighbour_" +
-      "height_threshold\030\010 \001(\001\022\033\n\023residuals_thre" +
-      "shold\030\t \001(\001\022D\n\022duplicate_distance\030\n \001(\0132" +
-      "(.gdsc.smlm.data.config.RelativeParamete" +
-      "r\022\026\n\016failures_limit\030\013 \001(\005*e\n\tFitSolver\022\013",
-      "\n\007LVM_LSE\020\000\022\013\n\007LVM_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007" +
-      "\n\003MLE\020\003\022\014\n\010FAST_MLE\020\004\022\031\n\025BACKTRACKING_FA" +
-      "ST_MLE\020\005*\231\001\n\014SearchMethod\022\022\n\016POWELL_BOUN" +
-      "DED\020\000\022\n\n\006POWELL\020\001\022\022\n\016POWELL_ADAPTER\020\002\022\n\n" +
-      "\006BOBYQA\020\003\022\t\n\005CMAES\020\004\022\031\n\025CONJUGATE_GRADIE" +
-      "NT_FR\020\005\022\031\n\025CONJUGATE_GRADIENT_PR\020\006\022\010\n\004BF" +
-      "GS\020\007*6\n\016DataFilterType\022\n\n\006SINGLE\020\000\022\016\n\nDI" +
-      "FFERENCE\020\001\022\010\n\004JURY\020\002*Y\n\020DataFilterMethod" +
-      "\022\010\n\004MEAN\020\000\022\016\n\nBLOCK_MEAN\020\001\022\021\n\rCIRCULAR_M" +
-      "EAN\020\002\022\014\n\010GAUSSIAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024Nois",
-      "eEstimatorMethod\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWE" +
-      "ST_PIXELS\020\001\022%\n!RESIDUALS_LEAST_MEDIAN_OF" +
-      "_SQUARES\020\002\022&\n\"RESIDUALS_LEAST_TRIMMED_OF" +
-      "_SQUARES\020\003\022#\n\037RESIDUALS_LEAST_MEAN_OF_SQ" +
-      "UARES\020\004\022+\n\'QUICK_RESIDUALS_LEAST_MEDIAN_" +
-      "OF_SQUARES\020\005\022,\n(QUICK_RESIDUALS_LEAST_TR" +
-      "IMMED_OF_SQUARES\020\006\022)\n%QUICK_RESIDUALS_LE" +
-      "AST_MEAN_OF_SQUARES\020\007B\013B\tFitProtosb\006prot" +
-      "o3"
+      "\024\n\014clamp_values\030\022 \003(\001\022C\n\022line_search_met" +
+      "hod\030\023 \001(\0162\'.gdsc.smlm.data.config.LineSe" +
+      "archMethod\"\233\002\n\016FilterSettings\022\024\n\014shift_f" +
+      "actor\030\001 \001(\001\022\027\n\017signal_strength\030\002 \001(\001\022\023\n\013" +
+      "min_photons\030\003 \001(\001\022\033\n\023precision_threshold",
+      "\030\004 \001(\001\022\"\n\032precision_using_background\030\005 \001" +
+      "(\010\022\030\n\020min_width_factor\030\006 \001(\001\022\030\n\020max_widt" +
+      "h_factor\030\007 \001(\001\022\035\n\025disable_simple_filter\030" +
+      "\010 \001(\010\022\024\n\014smart_filter\030\t \001(\010\022\033\n\023smart_fil" +
+      "ter_string\030\n \001(\t\"\224\001\n\013FitSettings\022E\n\023fit_" +
+      "solver_settings\030\001 \001(\0132(.gdsc.smlm.data.c" +
+      "onfig.FitSolverSettings\022>\n\017filter_settin" +
+      "gs\030\002 \001(\0132%.gdsc.smlm.data.config.FilterS" +
+      "ettings\"4\n\021RelativeParameter\022\r\n\005value\030\001 " +
+      "\001(\001\022\020\n\010absolute\030\002 \001(\010\"\217\001\n\nDataFilter\022C\n\022",
+      "data_filter_method\030\001 \001(\0162\'.gdsc.smlm.dat" +
+      "a.config.DataFilterMethod\022<\n\nparameters\030" +
+      "\002 \003(\0132(.gdsc.smlm.data.config.RelativePa" +
+      "rameter\"\216\001\n\022DataFilterSettings\022?\n\020data_f" +
+      "ilter_type\030\001 \001(\0162%.gdsc.smlm.data.config" +
+      ".DataFilterType\0227\n\014data_filters\030\002 \003(\0132!." +
+      "gdsc.smlm.data.config.DataFilter\"\303\004\n\021Fit" +
+      "EngineSettings\0228\n\014fit_settings\030\001 \001(\0132\".g" +
+      "dsc.smlm.data.config.FitSettings\022A\n\014nois" +
+      "e_method\030\002 \001(\0162+.gdsc.smlm.data.config.N",
+      "oiseEstimatorMethod\022G\n\024data_filter_setti" +
+      "ngs\030\003 \001(\0132).gdsc.smlm.data.config.DataFi" +
+      "lterSettings\0228\n\006search\030\004 \001(\0132(.gdsc.smlm" +
+      ".data.config.RelativeParameter\0228\n\006border" +
+      "\030\005 \001(\0132(.gdsc.smlm.data.config.RelativeP" +
+      "arameter\0229\n\007fitting\030\006 \001(\0132(.gdsc.smlm.da" +
+      "ta.config.RelativeParameter\022\032\n\022include_n" +
+      "eighbours\030\007 \001(\010\022\"\n\032neighbour_height_thre" +
+      "shold\030\010 \001(\001\022\033\n\023residuals_threshold\030\t \001(\001" +
+      "\022D\n\022duplicate_distance\030\n \001(\0132(.gdsc.smlm",
+      ".data.config.RelativeParameter\022\026\n\016failur" +
+      "es_limit\030\013 \001(\005*e\n\tFitSolver\022\013\n\007LVM_LSE\020\000" +
+      "\022\013\n\007LVM_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010" +
+      "FAST_MLE\020\004\022\031\n\025BACKTRACKING_FAST_MLE\020\005*\231\001" +
+      "\n\014SearchMethod\022\022\n\016POWELL_BOUNDED\020\000\022\n\n\006PO" +
+      "WELL\020\001\022\022\n\016POWELL_ADAPTER\020\002\022\n\n\006BOBYQA\020\003\022\t" +
+      "\n\005CMAES\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022\031\n\025" +
+      "CONJUGATE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*<\n\020Lin" +
+      "eSearchMethod\022\010\n\004NONE\020\000\022\n\n\006IGNORE\020\001\022\022\n\016P" +
+      "ARTIAL_IGNORE\020\002*6\n\016DataFilterType\022\n\n\006SIN",
+      "GLE\020\000\022\016\n\nDIFFERENCE\020\001\022\010\n\004JURY\020\002*Y\n\020DataF" +
+      "ilterMethod\022\010\n\004MEAN\020\000\022\016\n\nBLOCK_MEAN\020\001\022\021\n" +
+      "\rCIRCULAR_MEAN\020\002\022\014\n\010GAUSSIAN\020\003\022\n\n\006MEDIAN" +
+      "\020\004*\263\002\n\024NoiseEstimatorMethod\022\016\n\nALL_PIXEL" +
+      "S\020\000\022\021\n\rLOWEST_PIXELS\020\001\022%\n!RESIDUALS_LEAS" +
+      "T_MEDIAN_OF_SQUARES\020\002\022&\n\"RESIDUALS_LEAST" +
+      "_TRIMMED_OF_SQUARES\020\003\022#\n\037RESIDUALS_LEAST" +
+      "_MEAN_OF_SQUARES\020\004\022+\n\'QUICK_RESIDUALS_LE" +
+      "AST_MEDIAN_OF_SQUARES\020\005\022,\n(QUICK_RESIDUA" +
+      "LS_LEAST_TRIMMED_OF_SQUARES\020\006\022)\n%QUICK_R",
+      "ESIDUALS_LEAST_MEAN_OF_SQUARES\020\007B\013B\tFitP" +
+      "rotosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -10429,7 +10700,7 @@ public final class FitProtos {
     internal_static_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor,
-        new java.lang.String[] { "FixedPsf", "DisableBackgroundFitting", "DisableSignalFitting", "FitSolver", "FixedIterations", "MaxIterations", "RelativeThreshold", "AbsoluteThreshold", "ParameterRelativeThreshold", "ParameterAbsoluteThreshold", "Lambda", "SearchMethod", "GradientLineMinimisation", "ModelCamera", "MaxFunctionEvaluations", "UseClamping", "UseDynamicClamping", "ClampValues", });
+        new java.lang.String[] { "FixedPsf", "DisableBackgroundFitting", "DisableSignalFitting", "FitSolver", "FixedIterations", "MaxIterations", "RelativeThreshold", "AbsoluteThreshold", "ParameterRelativeThreshold", "ParameterAbsoluteThreshold", "Lambda", "SearchMethod", "GradientLineMinimisation", "ModelCamera", "MaxFunctionEvaluations", "UseClamping", "UseDynamicClamping", "ClampValues", "LineSearchMethod", });
     internal_static_gdsc_smlm_data_config_FilterSettings_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable = new

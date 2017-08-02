@@ -58,18 +58,31 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		 * Do nothing to handle the incorrect orientation. The default solver action is taken. This may cause the search
 		 * to take an invalid move or it may error.
 		 */
-		NONE,
+		NONE("None"),
 
 		/**
 		 * Ignore any search direction that is in the opposite direction to the first derivative gradient.
 		 */
-		IGNORE,
+		IGNORE("Ignore"),
 
 		/**
 		 * Progressively ignore any search direction that is in the opposite direction to the first derivative gradient.
 		 * Do this in order of the magnitude of the error
 		 */
-		PARTIAL_IGNORE;
+		PARTIAL_IGNORE("Partial ignore");
+		
+		private final String name;
+
+		private LineSearchMethod(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 
 	protected LineSearchMethod lineSearchMethod = LineSearchMethod.NONE;

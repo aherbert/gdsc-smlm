@@ -13,6 +13,7 @@ import gdsc.smlm.data.config.FitProtos.FilterSettings;
 import gdsc.smlm.data.config.FitProtos.FitSettings;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.FitSolverSettings;
+import gdsc.smlm.data.config.FitProtos.LineSearchMethod;
 import gdsc.smlm.data.config.FitProtos.SearchMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
@@ -35,7 +36,6 @@ import gdsc.smlm.fitting.nonlinear.ParameterBounds;
 import gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.ToleranceChecker;
 import gdsc.smlm.fitting.nonlinear.WLSELVMSteppingFunctionSolver;
-import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver.LineSearchMethod;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.PrecomputedFunctionFactory;
@@ -830,6 +830,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setFitSolver(FitSolver fitSolver)
 	{
+		invalidateFunctionSolver();
 		fitSolverSettings.setFitSolver(fitSolver);
 	}
 
@@ -1455,7 +1456,38 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setSearchMethod(SearchMethod searchMethod)
 	{
 		invalidateFunctionSolver();
-		fitSolverSettings.getSearchMethod();
+		fitSolverSettings.setSearchMethodValue(searchMethod.getNumber());
+	}
+
+	/**
+	 * @return the line search for the Fast MLE
+	 */
+	public LineSearchMethod getLineSearchMethod()
+	{
+		return fitSolverSettings.getLineSearchMethod();
+	}
+
+	/**
+	 * @param lineSearchMethod
+	 *            the line search for the Fast MLE
+	 */
+	public void setLineSearchMethod(int lineSearchMethod)
+	{
+		LineSearchMethod sm = LineSearchMethod.forNumber(lineSearchMethod);
+		if (sm != null)
+		{
+			setLineSearchMethod(sm);
+		}
+	}
+
+	/**
+	 * @param lineSearchMethod
+	 *            the line search for the Fast MLE
+	 */
+	public void setLineSearchMethod(LineSearchMethod lineSearchMethod)
+	{
+		invalidateFunctionSolver();
+		fitSolverSettings.setLineSearchMethodValue(lineSearchMethod.getNumber());
 	}
 
 	/**
@@ -2601,8 +2633,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 		else if (solver instanceof FastMLESteppingFunctionSolver)
 		{
-			// This should be configurable
-			((FastMLESteppingFunctionSolver) solver).setLineSearchMethod(LineSearchMethod.PARTIAL_IGNORE);
+			((FastMLESteppingFunctionSolver) solver).setLineSearchMethod(convertLineSearchMethod());
 		}
 		return solver;
 	}
@@ -2612,6 +2643,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		return FitProtosHelper.convertSearchMethod(getSearchMethod());
 	}
 
+	private gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver.LineSearchMethod convertLineSearchMethod()
+	{
+		return FitProtosHelper.convertLineSearchMethod(getLineSearchMethod());
+	}
+	
 	private void checkCalibration()
 	{
 		if (gain <= 0)
