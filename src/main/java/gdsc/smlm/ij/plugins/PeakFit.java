@@ -1133,14 +1133,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
 				CalibrationProtosHelper.getName(calibration.getCameraType()), new OptionListener<Choice>()
 				{
-					public void collectOptions(Choice field)
+					public boolean collectOptions(Choice field)
 					{
 						CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
 						calibration.setCameraType(SettingsManager.getCameraTypeValues()[field.getSelectedIndex()]);
-						collectOptions();
+						boolean result = collectOptions();
+						return result;
 					}
 
-					public void collectOptions()
+					public boolean collectOptions()
 					{
 						CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
@@ -1161,11 +1162,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 							IJ.error("Unsupported camera type " +
 									CalibrationProtosHelper.getName(calibration.getCameraType()));
-							return;
+							return false;
 						}
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
-							return;
+							return false;
 						if (calibration.isCCDCamera())
 						{
 							calibration.setBias(Math.abs(egd.getNextNumber()));
@@ -1176,6 +1177,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 								calibration.setCountPerElectron(Math.abs(egd.getNextNumber()));
 							}
 						}
+						return true;
 					}
 				});
 	}
@@ -1232,14 +1234,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addChoice("PSF", getPSFTypeNames(), PSFProtosHelper.getName(fitConfig.getPSFType()),
 				new OptionListener<Choice>()
 				{
-					public void collectOptions(Choice field)
+					public boolean collectOptions(Choice field)
 					{
 						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						fitConfig.setPSFType(PeakFit.getPSFTypeValues()[field.getSelectedIndex()]);
-						collectOptions();
+						boolean result = collectOptions();
+						return result;
 					}
 
-					public void collectOptions()
+					public boolean collectOptions()
 					{
 						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						PSFType psfType = fitConfig.getPSFType();
@@ -1251,7 +1254,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 							egd.addCheckbox("Fixed", fitConfig.isFixedPSF());
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
-							return;
+							return false;
 						PSF.Builder b = psf.toBuilder();
 						int n = b.getParametersCount();
 						for (int i = 0; i < n; i++)
@@ -1259,6 +1262,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						fitConfig.setPSF(b.build());
 						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
 							fitConfig.setFixedPSF(egd.getNextBoolean());
+						return true;
 					}
 				});
 	}
@@ -2091,8 +2095,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			{
 				gd.addCheckbox("Fixed_iterations", fitConfig.isFixedIterations());
 				// This works because the proto configuration enum matches the named enum
-				String[] lineSearchNames = SettingsManager.getNames((Object[]) FastMLESteppingFunctionSolver.LineSearchMethod.values());
-				gd.addChoice("Line_search_method", lineSearchNames, lineSearchNames[fitConfig.getLineSearchMethod().getNumber()]);
+				String[] lineSearchNames = SettingsManager
+						.getNames((Object[]) FastMLESteppingFunctionSolver.LineSearchMethod.values());
+				gd.addChoice("Line_search_method", lineSearchNames,
+						lineSearchNames[fitConfig.getLineSearchMethod().getNumber()]);
 			}
 
 			// Extra parameters are needed for calibrated fit solvers

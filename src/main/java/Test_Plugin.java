@@ -41,28 +41,32 @@ public class Test_Plugin implements PlugIn
 		gd.addStringField("Another", textFields[0]);
 		gd.addStringField("Testing", textFields[1], 15, new OptionListener<TextField>()
 		{
-			public void collectOptions(TextField field)
+			public boolean collectOptions(TextField field)
 			{
 				IJ.log(field.getText());
+				return true;
 			}
 
-			public void collectOptions()
+			public boolean collectOptions()
 			{
 				IJ.log(textFields[1]);
+				return true;
 			}
 		});
 		gd.addFilenameField("File", "", 30);
 		gd.addDirectoryField("Dir", "", 30);
 		gd.addChoice("Select3", new String[] { "Five", "Six" }, optionFields[2], new OptionListener<Choice>()
 		{
-			public void collectOptions(Choice field)
+			public boolean collectOptions(Choice field)
 			{
 				IJ.log(field.getSelectedItem());
+				return true;
 			}
 
-			public void collectOptions()
+			public boolean collectOptions()
 			{
 				IJ.log(optionFields[2]);
+				return true;
 			}
 		});
 		gd.showDialog();

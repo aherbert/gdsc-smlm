@@ -529,17 +529,18 @@ public class ResultsManager implements PlugIn
 		final ResultsTableSettings.Builder tableSettings = resultsSettings.getResultsTableSettingsBuilder();
 		gd.addCheckbox("Show_results_table", tableSettings.getShowTable(), new OptionListener<Checkbox>()
 		{
-			public void collectOptions(Checkbox field)
+			public boolean collectOptions(Checkbox field)
 			{
 				tableSettings.setShowTable(field.getState());
-				collectOptions();
+				boolean result = collectOptions();
+				return result;
 			}
 
-			public void collectOptions()
+			public boolean collectOptions()
 			{
 				if (!tableSettings.getShowTable())
 				{
-					return;
+					return false;
 				}
 				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 				egd.addChoice("Table_distance_unit", SettingsManager.getDistanceUnitNames(),
@@ -554,7 +555,7 @@ public class ResultsManager implements PlugIn
 				egd.addSlider("Table_precision", 0, 10, tableSettings.getRoundingPrecision());
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
-					return;
+					return false;
 				tableSettings.setDistanceUnitValue(egd.getNextChoiceIndex());
 				tableSettings.setIntensityUnitValue(egd.getNextChoiceIndex());
 				tableSettings.setAngleUnitValue(egd.getNextChoiceIndex());
@@ -562,6 +563,7 @@ public class ResultsManager implements PlugIn
 				tableSettings.setShowNoiseData(egd.getNextBoolean());
 				tableSettings.setComputePrecision(egd.getNextBoolean());
 				tableSettings.setRoundingPrecision((int) egd.getNextNumber());
+				return true;
 			}
 		});
 	}
@@ -591,18 +593,19 @@ public class ResultsManager implements PlugIn
 		gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(), imageSettings.getImageType().getNumber(),
 				new OptionListener<Choice>()
 				{
-					public void collectOptions(Choice field)
+					public boolean collectOptions(Choice field)
 					{
 						imageSettings.setImageTypeValue(field.getSelectedIndex());
-						collectOptions();
+						boolean result = collectOptions();
+						return result;
 					}
 
-					public void collectOptions()
+					public boolean collectOptions()
 					{
 						ResultsImageType resultsImage = imageSettings.getImageType();
 						if (resultsImage.getNumber() <= 0)
 						{
-							return;
+							return false;
 						}
 						boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
@@ -616,7 +619,7 @@ public class ResultsManager implements PlugIn
 							egd.addNumericField("Image_Window", imageSettings.getRollingWindowSize(), 0);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
-							return;
+							return false;
 						if (requireWeighted.contains(resultsImage))
 							imageSettings.setWeighted(egd.getNextBoolean());
 						imageSettings.setEqualised(egd.getNextBoolean());
@@ -625,6 +628,7 @@ public class ResultsManager implements PlugIn
 						imageSettings.setScale(egd.getNextNumber());
 						if (extraOptions)
 							imageSettings.setRollingWindowSize((int) egd.getNextNumber());
+						return true;
 					}
 				});
 	}
@@ -637,18 +641,19 @@ public class ResultsManager implements PlugIn
 		gd.addChoice("Results_format", SettingsManager.getResultsFileFormatNames(),
 				fileSettings.getFileFormat().getNumber(), new OptionListener<Choice>()
 				{
-					public void collectOptions(Choice field)
+					public boolean collectOptions(Choice field)
 					{
 						fileSettings.setFileFormatValue(field.getSelectedIndex());
-						collectOptions();
+						boolean result = collectOptions();
+						return result;
 					}
 
-					public void collectOptions()
+					public boolean collectOptions()
 					{
 						ResultsFileFormat resultsFileFormat = fileSettings.getFileFormat();
 						if (!ResultsProtosHelper.isGDSC(resultsFileFormat))
 						{
-							return;
+							return false;
 						}
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (resultsFileFormat == ResultsFileFormat.TEXT)
@@ -664,12 +669,13 @@ public class ResultsManager implements PlugIn
 						egd.addCheckbox("Show_deviations", resultsSettings.getShowDeviations());
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
-							return;
+							return false;
 						fileSettings.setDistanceUnitValue(egd.getNextChoiceIndex());
 						fileSettings.setIntensityUnitValue(egd.getNextChoiceIndex());
 						fileSettings.setAngleUnitValue(egd.getNextChoiceIndex());
 						fileSettings.setComputePrecision(egd.getNextBoolean());
 						resultsSettings.setShowDeviations(egd.getNextBoolean());
+						return true;
 					}
 				});
 		if (BitFlags.anySet(flags, FLAG_RESULTS_DIRECTORY))
