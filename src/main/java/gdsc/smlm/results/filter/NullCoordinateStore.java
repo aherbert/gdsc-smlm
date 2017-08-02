@@ -116,9 +116,9 @@ public class NullCoordinateStore implements CoordinateStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#resize(int, int)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#resize(int, int, int, int)
 	 */
-	public CoordinateStore resize(int maxx, int maxy)
+	public CoordinateStore resize(int minx, int miny, int maxx, int maxy)
 	{
 		return this;
 	}

@@ -81,6 +81,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * The z resolution. If this is negative then this is ignored and the store behaves as if processing 2D coordinates.
 	 */
 	private double zResolution;
+	private int minx, miny, width, height;
 	private int xBlocks, yBlocks;
 	/**
 	 * Flag to indicate that the store is active (i.e. storing coordinates). It is not active if the XY resolution is
@@ -95,26 +96,34 @@ public class GridCoordinateStore implements CoordinateStore
 	/**
 	 * Create a grid for coordinates.
 	 *
-	 * @param maxx
-	 *            the max x coordinate value
-	 * @param maxy
-	 *            the max y coordinate value
+	 * @param minx
+	 *            the min x coordinate value
+	 * @param miny
+	 *            the min y coordinate value
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
 	 * @param xyResolution
 	 *            the xy resolution
 	 * @param zResolution
 	 *            the z resolution
 	 */
-	public GridCoordinateStore(int maxx, int maxy, double xyResolution, double zResolution)
+	public GridCoordinateStore(int minx, int miny, int width, int height, double xyResolution, double zResolution)
 	{
-		if (maxx < 0)
-			maxx = 0;
-		if (maxy < 0)
-			maxy = 0;
+		if (width < 0)
+			width = 0;
+		if (height < 0)
+			height = 0;
 
 		setXYResolution(xyResolution);
 		setZResolution(zResolution);
-		this.xBlocks = getBlock(maxx) + 1;
-		this.yBlocks = getBlock(maxy) + 1;
+		this.minx = minx;
+		this.miny = miny;
+		this.width = width;
+		this.height = height;
+		this.xBlocks = getBlock(width) + 1;
+		this.yBlocks = getBlock(height) + 1;
 
 		createGrid();
 	}
@@ -134,7 +143,31 @@ public class GridCoordinateStore implements CoordinateStore
 	}
 
 	/**
-	 * Gets the block for the coordinate.
+	 * Gets the block for the x-coordinate.
+	 *
+	 * @param x
+	 *            the coordinate
+	 * @return the block
+	 */
+	private int getBlockX(final double x)
+	{
+		return getBlock(x - minx);
+	}
+
+	/**
+	 * Gets the block for the x-coordinate.
+	 *
+	 * @param y
+	 *            the coordinate
+	 * @return the block
+	 */
+	private int getBlockY(final double y)
+	{
+		return getBlock(y - miny);
+	}
+
+	/**
+	 * Gets the block for the coordinate (offset by the minimum).
 	 *
 	 * @param x
 	 *            the coordinate
@@ -162,30 +195,6 @@ public class GridCoordinateStore implements CoordinateStore
 	}
 
 	/**
-	 * Create a grid for coordinates.
-	 *
-	 * @param blockResolution
-	 *            the block resolution
-	 * @param xy2
-	 *            the xy resolution squared
-	 * @param zResolution
-	 *            the z resolution
-	 * @param xBlocks
-	 *            the x blocks
-	 * @param yBlocks
-	 *            the y blocks
-	 */
-	protected GridCoordinateStore(double xyResolution, double zResolution, int xBlocks, int yBlocks)
-	{
-		setXYResolution(xyResolution);
-		setZResolution(zResolution);
-		this.xBlocks = xBlocks;
-		this.yBlocks = yBlocks;
-
-		createGrid();
-	}
-
-	/**
 	 * Create a new instance with the same settings
 	 *
 	 * @return the grid coordinate store
@@ -193,38 +202,44 @@ public class GridCoordinateStore implements CoordinateStore
 	 */
 	public GridCoordinateStore newInstance()
 	{
-		return newInstance(xBlocks, yBlocks);
+		return newInstance(minx, miny, width, height);
 	}
 
 	/**
-	 * Create a new instance with the same settings but different number of blocks
+	 * Create a new instance with the given dimensions and the same resolution
 	 *
+	 * @param minx
+	 *            the min x coordinate value
+	 * @param miny
+	 *            the min y coordinate value
+	 * @param width
+	 *            the max x coordinate value
+	 * @param height
+	 *            the max y coordinate value
 	 * @return the grid coordinate store
 	 */
-	protected GridCoordinateStore newInstance(int xBlocks, int yBlocks)
+	public GridCoordinateStore newInstance(int minx, int miny, int width, int height)
 	{
-		return new GridCoordinateStore(xyResolution, zResolution, xBlocks, yBlocks);
+		return new GridCoordinateStore(minx, miny, width, height, xyResolution, zResolution);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#resize(int, int)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#resize(int, int, int, int)
 	 */
-	public GridCoordinateStore resize(int maxx, int maxy)
+	public GridCoordinateStore resize(int minx, int miny, int width, int height)
 	{
-		if (maxx < 0)
-			maxx = 0;
-		if (maxy < 0)
-			maxy = 0;
-		int xBlocks = getBlock(maxx) + 1;
-		int yBlocks = getBlock(maxy) + 1;
-		if (this.xBlocks == xBlocks && this.yBlocks == yBlocks)
+		if (width < 0)
+			width = 0;
+		if (height < 0)
+			height = 0;
+		if (this.minx == minx && this.width == width && this.miny == miny && this.height == height)
 		{
 			clear(); // For consistency with a new instance also being empty.
 			return this;
 		}
-		return newInstance(xBlocks, yBlocks);
+		return newInstance(minx, miny, width, height);
 	}
 
 	/**
@@ -242,13 +257,10 @@ public class GridCoordinateStore implements CoordinateStore
 			// No size change
 			return;
 
-		int maxx = getCoordinate(xBlocks - 1);
-		int maxy = getCoordinate(yBlocks - 1);
-
 		setXYResolution(xyResolution);
 
-		this.xBlocks = getBlock(maxx) + 1;
-		this.yBlocks = getBlock(maxy) + 1;
+		this.xBlocks = getBlock(width) + 1;
+		this.yBlocks = getBlock(height) + 1;
 
 		if (grid.length < xBlocks || grid[0].length < yBlocks)
 			// The grid is larger so recreate
@@ -267,18 +279,6 @@ public class GridCoordinateStore implements CoordinateStore
 		// done for consistency with changeXYResolution(...).
 		clear();
 		setZResolution(zResolution);
-	}
-
-	/**
-	 * Gets the coordinate for the block.
-	 *
-	 * @param blocks
-	 *            the blocks
-	 * @return the coordinate
-	 */
-	protected int getCoordinate(final int blocks)
-	{
-		return (int) Math.round(blocks * this.blockResolution);
 	}
 
 	/*
@@ -345,7 +345,7 @@ public class GridCoordinateStore implements CoordinateStore
 	{
 		// Note: A bounds check is not currently necessary since the this code is only used
 		// by the MultiPathFilter on results that are inside the bounds
-		getList(getBlock(x), getBlock(y)).add(x, y, z);
+		getList(getBlockX(x), getBlockY(y)).add(x, y, z);
 	}
 
 	/**
@@ -364,10 +364,10 @@ public class GridCoordinateStore implements CoordinateStore
 		if (isActive)
 		{
 			// Check bounds 
-			final int xBlock = getBlock(x);
+			final int xBlock = getBlockX(x);
 			if (xBlock < 0 || xBlock >= xBlocks)
 				return;
-			final int yBlock = getBlock(y);
+			final int yBlock = getBlockY(y);
 			if (yBlock < 0 || yBlock >= yBlocks)
 				return;
 			getList(xBlock, yBlock).add(x, y, z);
@@ -427,8 +427,8 @@ public class GridCoordinateStore implements CoordinateStore
 		if (!isActive)
 			return false;
 
-		final int xBlock = getBlock(x);
-		final int yBlock = getBlock(y);
+		final int xBlock = getBlockX(x);
+		final int yBlock = getBlockY(y);
 
 		final int xmin = Math.max(0, xBlock - 1);
 		final int ymin = Math.max(0, yBlock - 1);
@@ -505,8 +505,8 @@ public class GridCoordinateStore implements CoordinateStore
 		if (!isActive)
 			return null;
 
-		final int xBlock = getBlock(x);
-		final int yBlock = getBlock(y);
+		final int xBlock = getBlockX(x);
+		final int yBlock = getBlockY(y);
 
 		double[] match = new double[3];
 		double min = Double.POSITIVE_INFINITY;

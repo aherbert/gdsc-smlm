@@ -1722,7 +1722,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		MultiPathFilter mpf = new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
 		FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults, Integer.MAX_VALUE,
 				this.results.size(), assignments, scoreStore,
-				CoordinateStoreFactory.create(imp.getWidth(), imp.getHeight(), config.getDuplicateDistance()));
+				CoordinateStoreFactory.create(0, 0, imp.getWidth(), imp.getHeight(), config.getDuplicateDistance()));
 		double nPredicted = fractionResult.getTP() + fractionResult.getFP();
 
 		final double[][] matchScores = new double[set.size()][];

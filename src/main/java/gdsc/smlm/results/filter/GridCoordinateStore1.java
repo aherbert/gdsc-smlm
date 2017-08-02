@@ -25,18 +25,22 @@ public class GridCoordinateStore1 extends GridCoordinateStore
 	/**
 	 * Create a grid for coordinates.
 	 *
-	 * @param maxx
-	 *            the max x coordinate value
-	 * @param maxy
-	 *            the max y coordinate value
+	 * @param minx
+	 *            the min x coordinate value
+	 * @param miny
+	 *            the min y coordinate value
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
 	 * @param xyResolution
 	 *            the xy resolution
 	 * @param zResolution
 	 *            the z resolution
 	 */
-	GridCoordinateStore1(int maxx, int maxy, double xyResolution, double zResolution)
+	GridCoordinateStore1(int minx, int miny, int width, int height, double xyResolution, double zResolution)
 	{
-		super(maxx, maxy, xyResolution, zResolution);
+		super(minx, miny, width, height, xyResolution, zResolution);
 		checkResolution(xyResolution);
 	}
 
@@ -46,33 +50,15 @@ public class GridCoordinateStore1 extends GridCoordinateStore
 			throw new IllegalArgumentException("XY Resolution must be <= 1");
 	}
 
-	/**
-	 * Create a grid for coordinates.
-	 *
-	 * @param xyResolution
-	 *            the xy resolution
-	 * @param zResolution
-	 *            the z resolution
-	 * @param xBlocks
-	 *            the x blocks
-	 * @param yBlocks
-	 *            the y blocks
-	 */
-	private GridCoordinateStore1(double xyResolution, double zResolution, int xBlocks, int yBlocks)
-	{
-		super(xyResolution, zResolution, xBlocks, yBlocks);
-		checkResolution(xyResolution);
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.GridCoordinateStore#newInstance(int, int)
+	 * @see gdsc.smlm.results.filter.GridCoordinateStore#newInstance(int, int, int, int)
 	 */
 	@Override
-	protected GridCoordinateStore newInstance(int xBlocks, int yBlocks)
+	public GridCoordinateStore newInstance(int minx, int miny, int width, int height)
 	{
-		return new GridCoordinateStore1(getXYResolution(), getZResolution(), xBlocks, yBlocks);
+		return new GridCoordinateStore1(minx, miny, width, height, getXYResolution(), getZResolution());
 	}
 
 	/*
@@ -83,18 +69,8 @@ public class GridCoordinateStore1 extends GridCoordinateStore
 	@Override
 	protected int getBlock(final double x)
 	{
+		// blockResolution is always 1
 		return (int) x;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.filter.GridCoordinateStore#getCoordinate(int)
-	 */
-	@Override
-	protected int getCoordinate(int blocks)
-	{
-		return blocks;
 	}
 
 	@Override

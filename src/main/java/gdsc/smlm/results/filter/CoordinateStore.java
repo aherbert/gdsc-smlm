@@ -20,14 +20,15 @@ package gdsc.smlm.results.filter;
 public interface CoordinateStore
 {
 	/**
-	 * Gets the XY resolution of the store. If negative then nothing is stored.  
+	 * Gets the XY resolution of the store. If negative then nothing is stored.
 	 *
 	 * @return the XY resolution
 	 */
 	public double getXYResolution();
 
 	/**
-	 * Gets the Z resolution of the store. If negative then this is ignored and the store behaves as if processing 2D coordinates. 
+	 * Gets the Z resolution of the store. If negative then this is ignored and the store behaves as if processing 2D
+	 * coordinates.
 	 *
 	 * @return the Z resolution
 	 */
@@ -107,11 +108,15 @@ public interface CoordinateStore
 	 * Resize to the given dimensions. If these match the existing dimensions the current store is returned. Otherwise a
 	 * new store is returned.
 	 *
-	 * @param maxx
-	 *            the max x coordinate value
-	 * @param maxy
-	 *            the max y coordinate value
+	 * @param minx
+	 *            the min x coordinate value
+	 * @param miny
+	 *            the min y coordinate value
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
 	 * @return the coordinate store
 	 */
-	public CoordinateStore resize(int maxx, int maxy);
+	public CoordinateStore resize(int minx, int miny, int width, int height);
 }

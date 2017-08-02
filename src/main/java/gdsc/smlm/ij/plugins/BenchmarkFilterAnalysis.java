@@ -6561,8 +6561,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			this.createTextResult = createTextResult;
 			this.filter = (DirectFilter) ss_filter.clone();
 			this.minFilter = (minimalFilter != null) ? (DirectFilter) minimalFilter.clone() : null;
-			int[] bounds = getBounds();
-			this.gridCoordinateStore = new GridCoordinateStore(bounds[0], bounds[1], 0, 0);
+			getBounds();
+			this.gridCoordinateStore = new GridCoordinateStore(bounds.x, bounds.y, bounds.width, bounds.height, 0, 0);
 		}
 
 		/*
@@ -7906,9 +7906,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			updateAllConfiguration(config);
 			MaximaSpotFilter spotFilter = config.createSpotFilter(true);
 			final int border = spotFilter.getBorder();
-			int[] bounds = getBounds();
-			final int borderLimitX = bounds[0] - border;
-			final int borderLimitY = bounds[1] - border;
+			Rectangle bounds = getBounds();
+			final int borderLimitX = bounds.x + bounds.width - border;
+			final int borderLimitY = bounds.y + bounds.height - border;
 
 			for (PreprocessedPeakResult spot : filterResults)
 			{
@@ -7958,32 +7958,29 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private CoordinateStore createCoordinateStore(double duplicateDistance)
 	{
-		int[] bounds = getBounds();
-		return CoordinateStoreFactory.create(bounds[0], bounds[1], duplicateDistance);
+		getBounds();
+		return CoordinateStoreFactory.create(bounds.x, bounds.y, bounds.width, bounds.height, duplicateDistance);
 	}
 
-	private int[] bounds;
+	private Rectangle bounds;
 
-	private int[] getBounds()
+	private Rectangle getBounds()
 	{
 		if (bounds == null)
 			bounds = createBounds();
 		return bounds;
 	}
 
-	private synchronized int[] createBounds()
+	private synchronized Rectangle createBounds()
 	{
 		if (bounds == null)
 		{
 			ImagePlus imp = CreateData.getImage();
 			if (imp != null)
 			{
-				return new int[] { imp.getWidth(), imp.getHeight() };
+				return new Rectangle(0, 0, imp.getWidth(), imp.getHeight());
 			}
-			Rectangle bounds = results.getBounds(true);
-			int maxx = bounds.x + bounds.width;
-			int maxy = bounds.y + bounds.height;
-			return new int[] { maxx, maxy };
+			return results.getBounds(true);
 		}
 		return bounds;
 	}

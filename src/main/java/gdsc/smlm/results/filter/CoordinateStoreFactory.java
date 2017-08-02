@@ -18,32 +18,39 @@ package gdsc.smlm.results.filter;
  */
 public class CoordinateStoreFactory
 {
-
 	/**
 	 * Creates the coordinate store.
 	 *
-	 * @param maxx
-	 *            the max x coordinate value
-	 * @param maxy
-	 *            the max y coordinate value
+	 * @param minx
+	 *            the min x coordinate value
+	 * @param miny
+	 *            the min y coordinate value
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
 	 * @param xyResolution
 	 *            the xy resolution (if negative then nothing is stored)
 	 * @return the coordinate store
 	 * @deprecated The z resolution should be specified using {@link #create(int, int, double, double)}
 	 */
 	@Deprecated
-	public static CoordinateStore create(int maxx, int maxy, double xyResolution)
+	public static CoordinateStore create(int minx, int miny, int width, int height, double xyResolution)
 	{
-		return create(maxx, maxy, xyResolution, -1);
+		return create(minx, miny, width, height, xyResolution, -1);
 	}
 
 	/**
 	 * Creates the coordinate store.
 	 *
-	 * @param maxx
-	 *            the max x coordinate value
-	 * @param maxy
-	 *            the max y coordinate value
+	 * @param minx
+	 *            the min x coordinate value
+	 * @param miny
+	 *            the min y coordinate value
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
 	 * @param xyResolution
 	 *            the xy resolution (if negative then nothing is stored)
 	 * @param zResolution
@@ -51,7 +58,8 @@ public class CoordinateStoreFactory
 	 *            coordinates)
 	 * @return the coordinate store
 	 */
-	public static CoordinateStore create(int maxx, int maxy, double xyResolution, double zResolution)
+	public static CoordinateStore create(int minx, int miny, int width, int height, double xyResolution,
+			double zResolution)
 	{
 		if (xyResolution < 0)
 			return new NullCoordinateStore();
@@ -61,8 +69,8 @@ public class CoordinateStoreFactory
 		// to the resolution distance as it will have to compute the distance for each. As a compromise
 		// we only use it when the resolution is above the min block size of the default store.
 		if (xyResolution >= GridCoordinateStore.MINIMUM_BLOCK_SIZE && xyResolution <= 1)
-			return new GridCoordinateStore1(maxx, maxy, xyResolution, zResolution);
+			return new GridCoordinateStore1(minx, miny, width, height, xyResolution, zResolution);
 
-		return new GridCoordinateStore(maxx, maxy, xyResolution, zResolution);
+		return new GridCoordinateStore(minx, miny, width, height, xyResolution, zResolution);
 	}
 }

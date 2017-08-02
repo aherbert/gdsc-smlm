@@ -336,7 +336,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		//gf = new Gaussian2DFitter(fitConfig);
 		//duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		// Used for duplicate checking
-		coordinateStore = CoordinateStoreFactory.create(0, 0, config.getDuplicateDistance());
+		coordinateStore = CoordinateStoreFactory.create(0, 0, 0, 0, config.getDuplicateDistance());
 		calculateNoise = fitConfig.getNoise() <= 0;
 		if (!calculateNoise)
 		{
@@ -530,7 +530,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			MultiPathFilter filter;
 			IMultiPathFitResults multiPathResults = this;
 			SelectedResultStore store = this;
-			coordinateStore = coordinateStore.resize(width, height);
+			coordinateStore = coordinateStore.resize(cc.dataBounds.x, cc.dataBounds.y, width, height);
 
 			// TODO - Test if duplicate distance is now obsolete ...
 
