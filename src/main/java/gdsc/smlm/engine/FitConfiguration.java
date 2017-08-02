@@ -2526,7 +2526,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (getFitSolver() == FitSolver.MLE)
 		{
 			// This requires the gain
-			checkCalibration();
+			if (gain <= 0)
+			{
+				throw new IllegalArgumentException("The gain is required for fit solver: " + getFitSolver());
+			}
 
 			MaximumLikelihoodFitter.SearchMethod searchMethod = convertSearchMethod();
 
@@ -2650,6 +2653,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	
 	private void checkCalibration()
 	{
+		// TODO - update this to check the camera calibration:
+		// CCD/EMCCD requires gain and bias (but bias could be zero)
+		// sCMOS requires crop region, and per-pixel bias, gain and read noise (var/gain^2)
+		
 		if (gain <= 0)
 		{
 			throw new IllegalArgumentException("The gain is required for fit solver: " + getFitSolver());
