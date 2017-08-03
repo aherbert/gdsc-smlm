@@ -284,6 +284,16 @@ public class CalibrationReader
 	}
 
 	/**
+	 * Checks for camera calibration.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasCameraCalibration()
+	{
+		return getCalibrationOrBuilder().hasCameraCalibration();
+	}
+	
+	/**
 	 * Checks for a CCD camera.
 	 *
 	 * @return true, if successful
