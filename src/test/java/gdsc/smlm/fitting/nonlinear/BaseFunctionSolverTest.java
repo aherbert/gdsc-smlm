@@ -112,7 +112,7 @@ public abstract class BaseFunctionSolverTest
 	private static double gainSD = 0.2;
 
 	// Other noise models
-	private static double noiseCCD = Math.sqrt(variance / gain); // Same as sCMOS
+	private static double noiseCCD = Math.sqrt(variance / (gain * gain)); // Same as sCMOS
 	private static double emGain = 300;
 	private static double noiseEMCCD = 0.02;
 
