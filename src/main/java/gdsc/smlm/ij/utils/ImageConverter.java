@@ -82,11 +82,9 @@ public class ImageConverter
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
-				for (int ys = bounds.y; ys < bounds.y + bounds.height; ys++)
+				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
 				{
-					int offset1 = (ys - bounds.y) * bounds.width;
-					int offset2 = ys * width + bounds.x;
-					for (int xs = 0; xs < bounds.width; xs++)
+					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++];
 				}
 				return pixels2;
@@ -104,11 +102,9 @@ public class ImageConverter
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
-				for (int ys = bounds.y; ys < bounds.y + bounds.height; ys++)
+				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
 				{
-					int offset1 = (ys - bounds.y) * bounds.width;
-					int offset2 = ys * width + bounds.x;
-					for (int xs = 0; xs < bounds.width; xs++)
+					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++] & 0xffff;
 				}
 				return pixels2;
@@ -127,11 +123,9 @@ public class ImageConverter
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
-				for (int ys = bounds.y; ys < bounds.y + bounds.height; ys++)
+				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
 				{
-					int offset1 = (ys - bounds.y) * bounds.width;
-					int offset2 = ys * width + bounds.x;
-					for (int xs = 0; xs < bounds.width; xs++)
+					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++] & 0xff;
 				}
 				return pixels2;
@@ -209,11 +203,9 @@ public class ImageConverter
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
-				for (int ys = bounds.y; ys < bounds.y + bounds.height; ys++)
+				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
 				{
-					int offset1 = (ys - bounds.y) * bounds.width;
-					int offset2 = ys * width + bounds.x;
-					for (int xs = 0; xs < bounds.width; xs++)
+					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++];
 				}
 				return pixels2;
@@ -232,11 +224,9 @@ public class ImageConverter
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
-				for (int ys = bounds.y; ys < bounds.y + bounds.height; ys++)
+				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
 				{
-					int offset1 = (ys - bounds.y) * bounds.width;
-					int offset2 = ys * width + bounds.x;
-					for (int xs = 0; xs < bounds.width; xs++)
+					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++] & 0xffff;
 				}
 				return pixels2;
@@ -255,11 +245,9 @@ public class ImageConverter
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
-				for (int ys = bounds.y; ys < bounds.y + bounds.height; ys++)
+				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
 				{
-					int offset1 = (ys - bounds.y) * bounds.width;
-					int offset2 = ys * width + bounds.x;
-					for (int xs = 0; xs < bounds.width; xs++)
+					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
 						pixels2[offset1++] = pixels[offset2++] & 0xff;
 				}
 				return pixels2;
