@@ -9,8 +9,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.function.DummyGradientFunction;
@@ -236,7 +236,7 @@ public class PoissonGradientProcedureTest
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
 		if (precomputed)
-			func = PrecomputedGradient1Function.wrapGradient1Function(func, Utils.newArray(func.size(), 0.1, 1.3));
+			func = PrecomputedGradient1Function.wrapGradient1Function(func, SimpleArrayUtils.newArray(func.size(), 0.1, 1.3));
 
 		String name = String.format("[%d]", nparams);
 		for (int i = 0; i < paramsList.size(); i++)
@@ -287,7 +287,7 @@ public class PoissonGradientProcedureTest
 		// Remove the timing of the function call by creating a dummy function
 		FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
 		final Gradient1Function func = (precomputed)
-				? PrecomputedGradient1Function.wrapGradient1Function(f, Utils.newArray(f.size(), 0.1, 1.3)) : f;
+				? PrecomputedGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3)) : f;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{

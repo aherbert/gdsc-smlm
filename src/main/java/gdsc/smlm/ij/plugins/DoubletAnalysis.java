@@ -46,7 +46,9 @@ import gdsc.core.match.PointPair;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
@@ -1996,7 +1998,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		Plot2 plot = new Plot2(labels[0], labels[1], "Count");
 		double max = Maths.max(histogram);
 		plot.setLimits(0, histogram.length, 0, max * 1.05);
-		plot.addPoints(Utils.newArray(histogram.length, 0, 1.0), histogram, Plot2.BAR);
+		plot.addPoints(SimpleArrayUtils.newArray(histogram.length, 0, 1.0), histogram, Plot2.BAR);
 		PlotWindow pw = Utils.display(labels[0], plot);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw.getImagePlus().getID());
@@ -2908,7 +2910,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private void getNotes(TemplateSettings.Builder settings, String summary)
 	{
 		settings.addNotes("Benchmark template");
-		if (!Utils.isNullOrEmpty(analysisTitle))
+		if (!TextUtils.isNullOrEmpty(analysisTitle))
 			BenchmarkFilterAnalysis.addField(settings, "Doublet Analysis Title", analysisTitle);
 		// Add create data settings.
 		// Just add the columns and the data from the summary window

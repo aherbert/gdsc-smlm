@@ -54,8 +54,10 @@ import gdsc.core.utils.FastCorrelator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.XmlUtils;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
@@ -1543,8 +1545,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		int added = total - target;
 
 		if (extraOptions && added > target)
-			Utils.log("Added %s to %s (total = %d)", Utils.pleural(added, "neighbour"),
-					Utils.pleural(target, "candidate"), total);
+			Utils.log("Added %s to %s (total = %d)", TextUtils.pleural(added, "neighbour"),
+					TextUtils.pleural(target, "candidate"), total);
 
 		return subset;
 	}
@@ -1925,7 +1927,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		add(sb, median);
 
 		// Sort by spot intensity and produce correlation
-		int[] indices = Utils.newArray(i1.length, 0, 1);
+		int[] indices = SimpleArrayUtils.newArray(i1.length, 0, 1);
 		if (showCorrelation)
 			Sort.sort(indices, is, rankByIntensity);
 		double[] r = (showCorrelation) ? new double[i1.length] : null;

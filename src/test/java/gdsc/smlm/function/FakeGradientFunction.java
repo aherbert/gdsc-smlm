@@ -4,15 +4,9 @@ package gdsc.smlm.function;
 
 import org.apache.commons.math3.random.Well19937c;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.PseudoRandomSequence;
-import gdsc.smlm.function.Gradient1Procedure;
-import gdsc.smlm.function.Gradient2Function;
-import gdsc.smlm.function.Gradient2Procedure;
-import gdsc.smlm.function.Gradient1Function;
-import gdsc.smlm.function.NonLinearFunction;
-import gdsc.smlm.function.ValueProcedure;
+import gdsc.core.utils.SimpleArrayUtils;
 
 public class FakeGradientFunction
 		implements ExtendedGradient2Function, Gradient2Function, Gradient1Function, NonLinearFunction
@@ -82,7 +76,7 @@ public class FakeGradientFunction
 
 	public int[] gradientIndices()
 	{
-		return Utils.newArray(nparams, 0, 1);
+		return SimpleArrayUtils.newArray(nparams, 0, 1);
 	}
 
 	public int getNumberOfGradients()

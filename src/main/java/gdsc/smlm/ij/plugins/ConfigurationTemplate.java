@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.core.utils.TurboList.SimplePredicate;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
@@ -608,7 +609,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			}
 		});
 		int count = loadTemplates(list.toArray(new TemplateResource[list.size()]));
-		IJ.showMessage("Loaded " + Utils.pleural(count, "standard template"));
+		IJ.showMessage("Loaded " + TextUtils.pleural(count, "standard template"));
 	}
 
 	private void loadTemplatesFromDirectory()
@@ -657,7 +658,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 				addTemplate(name, builder.build(), true, file, null);
 			}
 		}
-		IJ.showMessage("Loaded " + Utils.pleural(count, "custom template"));
+		IJ.showMessage("Loaded " + TextUtils.pleural(count, "custom template"));
 	}
 
 	private void showTemplateImages()
@@ -849,7 +850,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		resultsWindow.getTextPanel().clear();
 		String data = text.get(slice);
-		if (!Utils.isNullOrEmpty(data))
+		if (!TextUtils.isNullOrEmpty(data))
 			resultsWindow.append(data);
 		return resultsWindow;
 	}

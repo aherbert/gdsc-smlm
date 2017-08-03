@@ -67,8 +67,10 @@ import gdsc.core.match.MatchResult;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
@@ -689,7 +691,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// Score using Jaccard
 		scoreIndex = COLUMNS.length - 1;
 
-		if (Utils.isNullOrEmpty(templateFilename))
+		if (TextUtils.isNullOrEmpty(templateFilename))
 		{
 			String currentUsersHomeDir = System.getProperty("user.home");
 			templateFilename = currentUsersHomeDir + File.separator + "gdsc.smlm" + File.separator + "template";
@@ -1285,7 +1287,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			if (expanded[c] > 0)
 			{
 				sb.append("Expand set [").append((c + 1)).append("]");
-				if (!Utils.isNullOrEmpty(name[c]))
+				if (!TextUtils.isNullOrEmpty(name[c]))
 					sb.append(" ").append(name[c]);
 				sb.append(" to ").append(expanded[c]).append(" filters\n");
 			}
@@ -1334,7 +1336,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		filterList = filterList2;
 		Utils.log("Expanded input to %d filters in %s", countFilters(filterList),
-				Utils.pleural(filterList.size(), "set"));
+				TextUtils.pleural(filterList.size(), "set"));
 	}
 
 	/**
@@ -2099,7 +2101,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private void createResultsPrefix2(int failCount, double residualsThreshold, double duplicateDistance)
 	{
 		resultsPrefix2 = buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance);
-		if (!Utils.isNullOrEmpty(resultsTitle))
+		if (!TextUtils.isNullOrEmpty(resultsTitle))
 			limitFailCount = resultsTitle + ", ";
 		else
 			limitFailCount = "";
@@ -4105,7 +4107,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	@SuppressWarnings("unused")
 	private Chromosome<FilterScore> enumerateMinInterval(Chromosome<FilterScore> best, boolean[] enabled)
 	{
-		return enumerateMinInterval(best, enabled, Utils.newArray(enabled.length, 0, 1));
+		return enumerateMinInterval(best, enabled, SimpleArrayUtils.newArray(enabled.length, 0, 1));
 	}
 
 	/**
@@ -5368,7 +5370,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private void getNotes(TemplateSettings.Builder settings, String topFilterSummary)
 	{
 		settings.addNotes("Benchmark template");
-		if (!Utils.isNullOrEmpty(resultsTitle))
+		if (!TextUtils.isNullOrEmpty(resultsTitle))
 			addField(settings, "Filter Analysis Title", resultsTitle);
 		// Add create data settings.
 		// Just add the columns and the data from the summary window

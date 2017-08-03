@@ -32,17 +32,17 @@ import java.util.regex.Pattern;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
+import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
-import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -250,7 +250,7 @@ public class PeakResultsReader
 			}
 
 			// We cannot continue guess if there is no non-header data
-			if (Utils.isNullOrEmpty(firstLine))
+			if (TextUtils.isNullOrEmpty(firstLine))
 				return;
 		}
 
@@ -2390,7 +2390,7 @@ public class PeakResultsReader
 	private MemoryPeakResults readMALK()
 	{
 		MemoryPeakResults results = createResults();
-		if (Utils.isNullOrEmpty(name))
+		if (TextUtils.isNullOrEmpty(name))
 			results.setName(new File(filename).getName());
 
 		BufferedReader input = null;

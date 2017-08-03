@@ -42,6 +42,7 @@ import gdsc.core.utils.ConvexHull;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Settings;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
@@ -833,7 +834,7 @@ public class OPTICS implements PlugIn
 				// We created a new clustering
 				clusterCount++;
 				Utils.log("Clustering mode: %s = %s", settings.getClusteringMode(),
-						Utils.pleural(nClusters, "Cluster"));
+						TextUtils.pleural(nClusters, "Cluster"));
 			}
 			return new Pair<OpticsSettings, Settings>(settings,
 					new Settings(results, opticsManager, opticsResult, clusterCount));
@@ -1064,7 +1065,7 @@ public class OPTICS implements PlugIn
 						profile[i] *= nmPerPixel;
 				}
 
-				double[] order = Utils.newArray(profile.length, 1.0, 1.0);
+				double[] order = SimpleArrayUtils.newArray(profile.length, 1.0, 1.0);
 				String title = TITLE + " Reachability Distance";
 				Plot2 plot = new Plot2(title, "Order", "Reachability" + units);
 				double[] limits = Maths.limits(profile);
@@ -1592,7 +1593,7 @@ public class OPTICS implements PlugIn
 						}
 
 						max2 = max;
-						map = Utils.newArray(max + 1, 0, 1);
+						map = SimpleArrayUtils.newArray(max + 1, 0, 1);
 
 						LUT lut = clusterLut;
 
@@ -1682,7 +1683,7 @@ public class OPTICS implements PlugIn
 						if (map == null)
 						{
 							max2 = max;
-							map = Utils.newArray(max + 1, 0, 1);
+							map = SimpleArrayUtils.newArray(max + 1, 0, 1);
 						}
 
 						LUT lut = clusterLut;
@@ -1909,7 +1910,7 @@ public class OPTICS implements PlugIn
 
 			String units = (nmPerPixel != 1) ? " (nm)" : " (px)";
 
-			double[] order = Utils.newArray(profile.length, 1.0, 1.0);
+			double[] order = SimpleArrayUtils.newArray(profile.length, 1.0, 1.0);
 			String title = TITLE + " KNN Distance";
 			Plot2 plot = new Plot2(title, "Sample", k + "-NN Distance" + units);
 			double[] limits = new double[] { profile[profile.length - 1], profile[0] };

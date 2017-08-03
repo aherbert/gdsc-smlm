@@ -17,8 +17,8 @@ import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
@@ -586,7 +586,7 @@ public class SCMOSLikelihoodWrapperTest
 		int n = (int) Math.ceil(max / step);
 
 		// Evaluate all values from (zero+offset) to large n
-		double[] k = Utils.newArray(n, O, step);
+		double[] k = SimpleArrayUtils.newArray(n, O, step);
 		double[] a = new double[0];
 		double[] gradient = new double[0];
 
@@ -781,7 +781,7 @@ public class SCMOSLikelihoodWrapperTest
 		// Simulate sCMOS camera
 		nlf.initialise(a);
 		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
-		double[] k = Utils.newArray(n, 0, 1.0);
+		double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
 		for (int i = 0; i < n; i++)
 		{
 			double u = nlf.eval(i);

@@ -33,6 +33,7 @@ import gdsc.core.data.utils.TypeConverter;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
+import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
@@ -349,7 +350,7 @@ public class LoadLocalisations implements PlugIn
 		LocalisationList localisations = new LocalisationList(timeUnit, distanceUnit, intensityUnit, gain, pixelPitch,
 				exposureTime);
 
-		final boolean hasComment = !Utils.isNullOrEmpty(comment);
+		final boolean hasComment = !TextUtils.isNullOrEmpty(comment);
 		int errors = 0;
 		int count = 0;
 		int h = Math.max(0, header);
@@ -575,7 +576,7 @@ public class LoadLocalisations implements PlugIn
 	private static String getNextString(GenericDialog gd, String defaultValue)
 	{
 		String value = gd.getNextString();
-		if (Utils.isNullOrEmpty(value))
+		if (TextUtils.isNullOrEmpty(value))
 			return defaultValue;
 		return value;
 	}

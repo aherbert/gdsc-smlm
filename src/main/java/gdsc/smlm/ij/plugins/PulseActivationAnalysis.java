@@ -31,6 +31,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationHelper;
@@ -738,7 +739,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			crosstalk[i] /= sum;
 
 		// Plot a histogram
-		double[] x = Utils.newArray(channels, 0.5, 1);
+		double[] x = SimpleArrayUtils.newArray(channels, 0.5, 1);
 		double[] y = crosstalk;
 		Plot2 plot = new Plot2(TITLE, "Channel", "Fraction activations");
 		plot.setLimits(0, channels + 1, 0, 1);
@@ -1508,8 +1509,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		lastRunSettings = runSettings;
 		runSettings = null;
 
-		IJ.showStatus(String.format("%d/%s, %d/%s", count, Utils.pleural(traces.length, "Trace"), size,
-				Utils.pleural(results.size(), "Result")));
+		IJ.showStatus(String.format("%d/%s, %d/%s", count, TextUtils.pleural(traces.length, "Trace"), size,
+				TextUtils.pleural(results.size(), "Result")));
 	}
 
 	private void displayComposite(ImageProcessor[] images, String name)

@@ -531,7 +531,7 @@ public class PSFCreator implements PlugInFilter
 		// - express relative to the average centre
 
 		double[][] com = calculateCentreOfMass(psf, fitCom, nmPerPixel / magnification);
-		double[] slice = Utils.newArray(psf.getSize(), 1, 1.0);
+		double[] slice = SimpleArrayUtils.newArray(psf.getSize(), 1, 1.0);
 		String title = TITLE + " CoM Drift";
 		Plot2 plot = new Plot2(title, "Slice", "Drift (nm)");
 		plot.addLabel(0, 0, "Red = X; Blue = Y");
@@ -1392,7 +1392,7 @@ public class PSFCreator implements PlugInFilter
 
 		// Smooth the curve ...
 		//		LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
-		//		double[] slice = Utils.newArray(psf.getSize(), 1, 1.0);
+		//		double[] slice = SimpleArrayUtils.newArray(psf.getSize(), 1, 1.0);
 		//		com[0] = loess.smooth(slice, com[0]);
 		//		com[1] = loess.smooth(slice, com[1]);
 
@@ -2035,7 +2035,7 @@ public class PSFCreator implements PlugInFilter
 			}
 
 			// Sort
-			int[] indices = Utils.newArray(d.length, 0, 1);
+			int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
 			Sort.sort(indices, d, true);
 
 			// The sort is made in descending order so invert

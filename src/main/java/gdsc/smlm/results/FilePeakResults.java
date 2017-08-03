@@ -8,8 +8,8 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
+import gdsc.core.utils.TextUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -107,7 +107,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		Printer printer = null;
 
 		// Add the standard details
-		if (!Utils.isNullOrEmpty(getName()))
+		if (!TextUtils.isNullOrEmpty(getName()))
 			sb.append(String.format("#Name %s\n", singleLine(getName())));
 		if (getSource() != null)
 			sb.append(String.format("#Source %s\n", singleLine(getSource().toXML())));
@@ -115,7 +115,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 			sb.append(String.format("#Bounds x%d y%d w%d h%d\n", getBounds().x, getBounds().y, getBounds().width, getBounds().height));
 		if (getCalibration() != null)
 			printer = addMessage(sb, printer, "Calibration", getCalibration());
-		if (!Utils.isNullOrEmpty(getConfiguration()))
+		if (!TextUtils.isNullOrEmpty(getConfiguration()))
 			sb.append(String.format("#Configuration %s\n", singleLine(getConfiguration())));
 		if (getPSF() != null)
 			printer = addMessage(sb, printer, "PSF", getPSF());

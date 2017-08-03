@@ -8,12 +8,12 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Statistics;
+import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.ConfigurationException;
@@ -572,7 +572,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				SettingsManager.toJSON(config.getFitEngineSettings(),
 						new File(String.format("/tmp/config.%d.txt", slice)), SettingsManager.FLAG_JSON_WHITESPACE);
-				Utils.write(String.format("/tmp/filter.%d.xml", slice), filter.toXML());
+				TextUtils.write(String.format("/tmp/filter.%d.xml", slice), filter.toXML());
 				//filter.setDebugFile(String.format("/tmp/fitWorker.%b.txt", benchmarking));
 				StringBuilder sb = new StringBuilder();
 				sb.append((benchmarking) ? ((gdsc.smlm.results.filter.Filter) filter.getFilter()).toXML()
@@ -589,7 +589,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					sb.append(String.format("Fit %d [%d,%d = %.1f]\n", i, candidates.get(i).x, candidates.get(i).y,
 							candidates.get(i).intensity));
 				}
-				Utils.write(String.format("/tmp/candidates.%d.xml", slice), sb.toString());
+				TextUtils.write(String.format("/tmp/candidates.%d.xml", slice), sb.toString());
 			}
 
 			filter.select(multiPathResults, config.getFailuresLimit(), true, store, coordinateStore);
@@ -612,7 +612,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			if (logger != null)
 				logger.info("Slice %d: %d / %d = %s", slice, success, candidates.getSize(),
-						Utils.pleural(fitted.getSize(), "result"));
+						TextUtils.pleural(fitted.getSize(), "result"));
 		}
 
 		this.results.addAll(sliceResults);

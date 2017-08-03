@@ -9,6 +9,7 @@ import java.awt.TextField;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -429,7 +430,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	{
 		if (x == null)
 		{
-			x = Utils.newArray(200, -10, 0.1);
+			x = SimpleArrayUtils.newArray(200, -10, 0.1);
 			y = new double[x.length];
 			y2 = new double[x.length];
 			for (int i = 0; i < x.length; i++)

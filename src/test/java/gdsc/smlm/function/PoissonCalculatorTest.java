@@ -21,6 +21,7 @@ import gdsc.core.test.BaseTimingTask;
 import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.TestSettings;
 
 public class PoissonCalculatorTest
@@ -294,7 +295,7 @@ public class PoissonCalculatorTest
 		nlf2.initialise(a);
 		nlf3.initialise(a);
 		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
-		double[] x = Utils.newArray(n, 0, 1.0);
+		double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
 		double[] u = new double[x.length];
 		double[] b1 = new double[x.length];
 		double[] b2 = new double[x.length];

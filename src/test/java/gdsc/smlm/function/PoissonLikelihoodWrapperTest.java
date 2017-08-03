@@ -10,8 +10,8 @@ import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
@@ -563,7 +563,7 @@ public class PoissonLikelihoodWrapperTest
 		int n = (int) Math.ceil(limit / alpha);
 
 		// Evaluate all values from zero to large n
-		double[] k = Utils.newArray(n, 0, 1.0);
+		double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
 		double[] a = new double[0];
 		double[] g = new double[0];
 

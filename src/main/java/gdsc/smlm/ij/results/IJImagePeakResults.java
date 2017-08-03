@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.results.PeakResult;
 import ij.ImagePlus;
@@ -280,7 +281,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			sb.append("Calibration:\n").append(getCalibration()).append("\n");
 		if (getCalibration() != null)
 			sb.append("PSF:\n").append(getCalibration()).append("\n");
-		if (!Utils.isNullOrEmpty(getConfiguration()))
+		if (!TextUtils.isNullOrEmpty(getConfiguration()))
 			sb.append("Configuration:\n").append(getConfiguration()).append("\n");
 		return (sb.length() > 0) ? sb.toString() : null;
 	}

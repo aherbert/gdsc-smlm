@@ -1,7 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.Gradient2Function;
@@ -283,7 +283,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 						double[] slopeComponents = new double[gradient.length];
 						for (int i = 0; i < slopeComponents.length; i++)
 							slopeComponents[i] = gradient[i] * searchDirection[gradientIndices[i]];
-						int[] indices = Utils.newArray(slopeComponents.length, 0, 1);
+						int[] indices = SimpleArrayUtils.newArray(slopeComponents.length, 0, 1);
 						Sort.sort(indices, slopeComponents);
 						Sort.reverse(indices);
 						int j = 0;

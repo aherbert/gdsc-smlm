@@ -17,6 +17,7 @@ import org.apache.commons.math3.random.Well19937c;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
@@ -1077,7 +1078,7 @@ public class PSFDrift implements PlugIn
 
 		double[] w0 = psf.getAllHWHM0();
 		double[] w1 = psf.getAllHWHM1();
-		double[] slice = Utils.newArray(w0.length, 1, 1.0);
+		double[] slice = SimpleArrayUtils.newArray(w0.length, 1, 1.0);
 
 		// Widths are in pixels
 		String title = TITLE + " HWHM";

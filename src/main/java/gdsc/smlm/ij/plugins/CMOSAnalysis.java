@@ -28,6 +28,7 @@ import gdsc.core.math.RollingArrayMoment;
 import gdsc.core.math.SimpleArrayMoment;
 import gdsc.core.utils.DoubleData;
 import gdsc.core.utils.PseudoRandomGenerator;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.TextUtils;
@@ -389,7 +390,7 @@ public class CMOSAnalysis implements PlugIn
 		//@formatter:on
 
 		String dir = Utils.getDirectory(TITLE, directory);
-		if (Utils.isNullOrEmpty(dir))
+		if (TextUtils.isNullOrEmpty(dir))
 			return;
 		directory = dir;
 
@@ -507,7 +508,7 @@ public class CMOSAnalysis implements PlugIn
 
 		for (int p : photons)
 		{
-			statusLine.setText("Simulating " + Utils.pleural(p, "photon"));
+			statusLine.setText("Simulating " + TextUtils.pleural(p, "photon"));
 
 			// Create the directory
 			File out = new File(directory, String.format("photon%03d", p));
@@ -772,8 +773,8 @@ public class CMOSAnalysis implements PlugIn
 
 				// TODO - optionally save
 				ImageStack stack = new ImageStack(source.getWidth(), source.getHeight());
-				stack.addSlice("Mean", Utils.toFloat(data[n][0]));
-				stack.addSlice("Variance", Utils.toFloat(data[n][1]));
+				stack.addSlice("Mean", SimpleArrayUtils.toFloat(data[n][0]));
+				stack.addSlice("Variance", SimpleArrayUtils.toFloat(data[n][1]));
 				IJ.save(new ImagePlus("PerPixel", stack), new File(directory, "perPixel" + sd.name + ".tif").getPath());
 			}
 			else
@@ -832,9 +833,9 @@ public class CMOSAnalysis implements PlugIn
 
 		// Save
 		measuredStack = new ImageStack(size, size);
-		measuredStack.addSlice("Offset", Utils.toFloat(pixelOffset));
-		measuredStack.addSlice("Variance", Utils.toFloat(pixelVariance));
-		measuredStack.addSlice("Gain", Utils.toFloat(pixelGain));
+		measuredStack.addSlice("Offset", SimpleArrayUtils.toFloat(pixelOffset));
+		measuredStack.addSlice("Variance", SimpleArrayUtils.toFloat(pixelVariance));
+		measuredStack.addSlice("Gain", SimpleArrayUtils.toFloat(pixelGain));
 		IJ.save(new ImagePlus("PerPixel", measuredStack), new File(directory, "perPixel.tif").getPath());
 		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
 
@@ -899,7 +900,7 @@ public class CMOSAnalysis implements PlugIn
 		result.append(" +/- ").append(Utils.rounded(s.getStandardDeviation()));
 
 		// Do statistical tests
-		double[] x = Utils.toDouble(e), y = Utils.toDouble(o);
+		double[] x = SimpleArrayUtils.toDouble(e), y = SimpleArrayUtils.toDouble(o);
 
 		PearsonsCorrelation c = new PearsonsCorrelation();
 		result.append(" : R=").append(Utils.rounded(c.correlation(x, y)));

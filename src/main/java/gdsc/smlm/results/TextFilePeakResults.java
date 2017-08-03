@@ -27,7 +27,7 @@ import java.util.Scanner;
  *---------------------------------------------------------------------------*/
 
 import gdsc.core.data.utils.Converter;
-import gdsc.core.ij.Utils;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -177,7 +177,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		names.add("origValue");
 		names.add("Error");
 		String noiseField = "Noise";
-		if (!Utils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
+		if (!TextUtils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
 			noiseField += " (" + (unitNames[PeakResult.INTENSITY] + ")");
 		names.add(noiseField);
 
@@ -187,7 +187,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			String f = fields[i];
 			// Add units
-			if (!Utils.isNullOrEmpty(unitNames[i]))
+			if (!TextUtils.isNullOrEmpty(unitNames[i]))
 				f += " (" + unitNames[i] + ")";
 			names.add(f);
 			if (isShowDeviations())

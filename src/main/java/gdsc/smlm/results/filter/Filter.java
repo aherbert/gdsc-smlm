@@ -1,20 +1,20 @@
 package gdsc.smlm.results.filter;
 
-import gdsc.smlm.ga.Chromosome;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.ClassificationResult;
-import gdsc.core.match.FractionClassificationResult;
-import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.procedures.PeakResultProcedure;
-import gdsc.smlm.results.Counter;
-import gdsc.smlm.results.FrameCounter;
-import gdsc.smlm.results.MemoryPeakResults;
-
 import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.core.match.ClassificationResult;
+import gdsc.core.match.FractionClassificationResult;
+import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.smlm.ga.Chromosome;
+import gdsc.smlm.results.Counter;
+import gdsc.smlm.results.FrameCounter;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -1625,7 +1625,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	public int[] getChromosomeParameters()
 	{
 		// Assume all the parameters are included in the Chromosome
-		return Utils.newArray(getNumberOfParameters(), 0, 1);
+		return SimpleArrayUtils.newArray(getNumberOfParameters(), 0, 1);
 	}
 
 	/**

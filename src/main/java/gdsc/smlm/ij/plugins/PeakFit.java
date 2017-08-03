@@ -371,7 +371,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 					// TODO - Find out why XStream does not serialise the inherited name field in 
 					// all ImageSource subclasses. Thjs means that some of the ImageSource details
 					// are missing
-					if (!Utils.isNullOrEmpty(tmpImageSource.getName()))
+					if (!TextUtils.isNullOrEmpty(tmpImageSource.getName()))
 						message += " of: \n \n" + tmpImageSource.getName();
 					message += " \n \nFit the parent?";
 				}
@@ -658,7 +658,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			String textRunTime = Utils.timeToString(runTime / 1000000.0);
 
 			int size = getSize();
-			String message = String.format("%s. Fitting Time = %s. Run time = %s", Utils.pleural(size, "localisation"),
+			String message = String.format("%s. Fitting Time = %s. Run time = %s", TextUtils.pleural(size, "localisation"),
 					textTime, textRunTime);
 			if (resultsSettings.getLogProgress())
 				IJ.log("-=-=-=-");
@@ -1873,7 +1873,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		String xml = fitConfig.getSmartFilterString();
-		if (Utils.isNullOrEmpty(xml))
+		if (TextUtils.isNullOrEmpty(xml))
 			xml = fitConfig.getDefaultSmartFilterXML();
 
 		gd.addMessage("Smart filter (used to pick optimum results during fitting)");

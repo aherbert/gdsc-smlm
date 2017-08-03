@@ -4970,7 +4970,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			setBackground(results);
 			setNoise(results, imp);
 			setBenchmarkResults(imp, results);
-			IJ.showStatus("Loaded " + Utils.pleural(results.size(), "result"));
+			IJ.showStatus("Loaded " + TextUtils.pleural(results.size(), "result"));
 		}
 		else
 		{
@@ -5124,7 +5124,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Show a dialog to confirm settings
 		GenericDialog gd = new GenericDialog(TITLE);
 		StringBuilder sb = new StringBuilder();
-		sb.append("Results contain ").append(Utils.pleural(molecules, "molecule")).append('\n');
+		sb.append("Results contain ").append(TextUtils.pleural(molecules, "molecule")).append('\n');
 		sb.append("Min signal = ").append(Utils.rounded(minSignal)).append(iUnits).append('\n');
 		sb.append("Max signal = ").append(Utils.rounded(maxSignal)).append(iUnits).append('\n');
 		sb.append("Av signal = ").append(Utils.rounded(signalPerFrame)).append(iUnits).append('\n');

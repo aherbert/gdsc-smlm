@@ -18,6 +18,7 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.ObjectAnalyzer;
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -98,7 +99,7 @@ public class SplitResults implements PlugIn
 
 	private void splitResults(MemoryPeakResults results, ImageProcessor ip)
 	{
-		IJ.showStatus("Splitting " + Utils.pleural(results.size(), "result"));
+		IJ.showStatus("Splitting " + TextUtils.pleural(results.size(), "result"));
 
 		// Create an object mask
 		ObjectAnalyzer objectAnalyzer = new ObjectAnalyzer(ip, false);
@@ -179,6 +180,6 @@ public class SplitResults implements PlugIn
 		}
 
 		IJ.showStatus(
-				"Split " + Utils.pleural(results.size(), "result") + " into " + Utils.pleural(i.getCount(), "set"));
+				"Split " + TextUtils.pleural(results.size(), "result") + " into " + TextUtils.pleural(i.getCount(), "set"));
 	}
 }

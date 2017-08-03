@@ -18,6 +18,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleData;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RollingArray;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
@@ -575,7 +576,7 @@ public class DiffusionRateTest implements PlugIn
 		if (myPrecision > 0)
 			estimatedD += myPrecision * myPrecision / 1e6;
 		double max = Maths.max(values);
-		double[] x = Utils.newArray(1000, 0, max / 1000);
+		double[] x = SimpleArrayUtils.newArray(1000, 0, max / 1000);
 		double k = dimensions / 2.0;
 		double mean = 4 * estimatedD;
 
@@ -1302,7 +1303,7 @@ public class DiffusionRateTest implements PlugIn
 		// 2D * Chi  ~ Gamma(k/2, 4D)
 		double estimatedD = simpleD * simpleSteps;
 		double max = Maths.max(values);
-		double[] x = Utils.newArray(1000, 0, max / 1000);
+		double[] x = SimpleArrayUtils.newArray(1000, 0, max / 1000);
 		double k = dimensions / 2.0;
 		double mean = 4 * estimatedD;
 

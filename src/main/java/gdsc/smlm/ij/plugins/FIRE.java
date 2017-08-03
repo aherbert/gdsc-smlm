@@ -59,6 +59,7 @@ import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.MedianWindow;
 import gdsc.core.utils.Random;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
@@ -1122,7 +1123,7 @@ public class FIRE implements PlugIn
 			// Truncate last block
 			blocks[block.getCount()] = Arrays.copyOf(blocks[block.getCount()], i.getCount());
 
-			final int[] indices = Utils.newArray(nBlocks, 0, 1);
+			final int[] indices = SimpleArrayUtils.newArray(nBlocks, 0, 1);
 			if (randomSplit)
 				MathArrays.shuffle(indices);
 

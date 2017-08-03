@@ -11,9 +11,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory.Type;
 import gdsc.smlm.function.DummyGradientFunction;
@@ -346,7 +346,7 @@ public class LVMGradientProcedureTest
 
 		if (precomputed)
 		{
-			double[] b = Utils.newArray(func.size(), 0.1, 1.3);
+			double[] b = SimpleArrayUtils.newArray(func.size(), 0.1, 1.3);
 			func = PrecomputedGradient1Function.wrapGradient1Function(func, b);
 		}
 
@@ -447,7 +447,7 @@ public class LVMGradientProcedureTest
 		final Gradient1Function func;
 		if (precomputed)
 		{
-			final double[] b = Utils.newArray(fgf.size(), 0.1, 1.3);
+			final double[] b = SimpleArrayUtils.newArray(fgf.size(), 0.1, 1.3);
 			func = PrecomputedGradient1Function.wrapGradient1Function(fgf, b);
 		}
 		else

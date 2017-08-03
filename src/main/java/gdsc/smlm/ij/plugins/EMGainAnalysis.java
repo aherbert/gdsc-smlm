@@ -24,6 +24,7 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.function.Bessel;
 import gdsc.smlm.function.LikelihoodFunction;
@@ -168,7 +169,7 @@ public class EMGainAnalysis implements PlugInFilter
 		final double[] g = pdf(0, _photons, _gain, _noise, (int) _bias);
 
 		// Debug this
-		double[] x = Utils.newArray(g.length, 0, 1.0);
+		double[] x = SimpleArrayUtils.newArray(g.length, 0, 1.0);
 		Utils.display(TITLE + " PDF", new Plot(TITLE + " PDF", "ADU", "P", x, Arrays.copyOf(g, g.length)));
 
 		// Get cumulative probability
@@ -805,7 +806,7 @@ public class EMGainAnalysis implements PlugInFilter
 		int dummyBias = (int) Math.max(500, gaussWidth * _noise + 1);
 
 		double[] pmf = pdf(0, _photons, _gain, _noise, dummyBias);
-		double[] x = Utils.newArray(pmf.length, 0, 1.0);
+		double[] x = SimpleArrayUtils.newArray(pmf.length, 0, 1.0);
 		double yMax = Maths.max(pmf);
 
 		// Truncate x

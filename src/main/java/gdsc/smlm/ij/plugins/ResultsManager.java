@@ -34,6 +34,7 @@ import javax.swing.JFileChooser;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.BitFlags;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings;
@@ -183,8 +184,8 @@ public class ResultsManager implements PlugIn
 				size += results.size();
 			}
 			String memory = MemoryPeakResults.memorySizeString(memorySize);
-			String count = Utils.pleural(size, "result");
-			String sets = Utils.pleural(allResults.size(), "set");
+			String count = TextUtils.pleural(size, "result");
+			String sets = TextUtils.pleural(allResults.size(), "set");
 
 			GenericDialog gd = new GenericDialog(TITLE);
 
@@ -219,7 +220,7 @@ public class ResultsManager implements PlugIn
 			return;
 		}
 
-		IJ.showStatus("Loaded " + Utils.pleural(results.size(), "result"));
+		IJ.showStatus("Loaded " + TextUtils.pleural(results.size(), "result"));
 
 		boolean saved = false;
 		if (resultsSettings.getResultsInMemorySettings().getInMemory() && fileInput)
@@ -230,7 +231,7 @@ public class ResultsManager implements PlugIn
 
 		if (!resultsSettings.getResultsTableSettings().getShowTable() &&
 				resultsSettings.getResultsImageSettings().getImageType().getNumber() <= 0 &&
-				Utils.isNullOrEmpty(resultsSettings.getResultsFileSettings().getResultsFilename()))
+				TextUtils.isNullOrEmpty(resultsSettings.getResultsFileSettings().getResultsFilename()))
 		{
 			// No outputs. Error if results were not saved to memory
 			if (!saved)
@@ -304,9 +305,9 @@ public class ResultsManager implements PlugIn
 		output.end();
 
 		if (output.size() == results.size())
-			IJ.showStatus("Processed " + Utils.pleural(results.size(), "result"));
+			IJ.showStatus("Processed " + TextUtils.pleural(results.size(), "result"));
 		else
-			IJ.showStatus(String.format("A %d/%s", output.size(), Utils.pleural(results.size(), "result")));
+			IJ.showStatus(String.format("A %d/%s", output.size(), TextUtils.pleural(results.size(), "result")));
 	}
 
 	private boolean canShowDeviations(MemoryPeakResults results)
@@ -365,7 +366,7 @@ public class ResultsManager implements PlugIn
 			boolean showId)
 	{
 		ResultsFileSettings resultsSettings = this.resultsSettings.getResultsFileSettings();
-		if (!Utils.isNullOrEmpty(resultsSettings.getResultsFilename()))
+		if (!TextUtils.isNullOrEmpty(resultsSettings.getResultsFilename()))
 		{
 			// Remove extension
 			String resultsFilename = Utils.replaceExtension(resultsSettings.getResultsFilename(),

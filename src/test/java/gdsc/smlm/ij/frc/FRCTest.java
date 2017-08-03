@@ -9,10 +9,10 @@ import org.apache.commons.math3.util.MathArrays;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.test.BaseTimingTask;
 import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -51,7 +51,7 @@ public class FRCTest
 		Rectangle bounds = new Rectangle(0, 0, size, size);
 		IJImagePeakResults i1 = createImage(bounds);
 		IJImagePeakResults i2 = createImage(bounds);
-		int[] indices = Utils.newArray(data.length, 0, 1);
+		int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
 		MathArrays.shuffle(indices, r);
 		for (int i : indices)
 		{
@@ -203,7 +203,7 @@ public class FRCTest
 		Rectangle bounds = new Rectangle(0, 0, size, size);
 		IJImagePeakResults i1 = createImage(bounds);
 		IJImagePeakResults i2 = createImage(bounds);
-		int[] indices = Utils.newArray(data.length, 0, 1);
+		int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
 		MathArrays.shuffle(indices, r);
 		for (int i : indices)
 		{

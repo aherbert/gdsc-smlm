@@ -3,20 +3,20 @@ package gdsc.smlm.results;
 import gdsc.core.data.utils.Converter;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.core.ij.Utils;
+import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.UnitProtos.AngleUnit;
-import gdsc.smlm.data.config.CalibrationProtos.Calibration;
-import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import gdsc.smlm.data.config.UnitHelper;
+import gdsc.smlm.data.config.UnitProtos.AngleUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -306,7 +306,7 @@ public class PeakResultsHelper
 				for (PSFParameter p : PSFHelper.getParameters(psf))
 				{
 					String name = p.getName();
-					list.add(Utils.isNullOrEmpty(name) ? "unknown" : name);
+					list.add(TextUtils.isNullOrEmpty(name) ? "unknown" : name);
 				}
 			}
 			catch (ConfigurationException e)

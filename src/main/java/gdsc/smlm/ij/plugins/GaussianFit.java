@@ -13,11 +13,13 @@ import gdsc.core.filters.FilteredNonMaximumSuppression;
 import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
-import gdsc.smlm.data.config.PSFProtos.PSFType;
-import gdsc.smlm.engine.FitConfiguration;
-import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
+import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -615,7 +617,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			{
 				if (isLogProgress())
 				{
-					IJ.log("Failed to fit " + Utils.pleural(maxIndices.length, "peak") + getReason(fitResult));
+					IJ.log("Failed to fit " + TextUtils.pleural(maxIndices.length, "peak") + getReason(fitResult));
 				}
 				imp.setOverlay(null);
 			}
@@ -718,7 +720,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		y += bounds.y;
 		params[3] += bounds.x + regionBounds.x;
 		params[4] += bounds.y + regionBounds.y;
-		results.add(n + 1, x, y, value, chiSquared, 0f, Utils.toFloat(params), Utils.toFloat(paramsDev));
+		results.add(n + 1, x, y, value, chiSquared, 0f, SimpleArrayUtils.toFloat(params), SimpleArrayUtils.toFloat(paramsDev));
 	}
 
 	/**
@@ -811,7 +813,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			return null;
 
 		Gaussian2DFitter gf = createGaussianFitter(false);
-		this.fitResult = gf.fit(Utils.toDouble(data), width, height, maxIndices, estimatedHeights);
+		this.fitResult = gf.fit(SimpleArrayUtils.toDouble(data), width, height, maxIndices, estimatedHeights);
 		if (fitResult.getStatus() == FitStatus.OK)
 		{
 			chiSquared = fitResult.getError();
@@ -879,7 +881,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	private double[] fitSingle(Gaussian2DFitter gf, float[] data, int width, int height, int index,
 			double estimatedHeight)
 	{
-		this.fitResult = gf.fit(Utils.toDouble(data), width, height, new int[] { index },
+		this.fitResult = gf.fit(SimpleArrayUtils.toDouble(data), width, height, new int[] { index },
 				new double[] { estimatedHeight });
 		if (fitResult.getStatus() == FitStatus.OK)
 		{
@@ -1006,7 +1008,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		}
 
 		Gaussian2DFitter gf = createGaussianFitter(false);
-		FitResult fitResult = gf.fit(Utils.toDouble(data), width, height, new int[] { maxIndex });
+		FitResult fitResult = gf.fit(SimpleArrayUtils.toDouble(data), width, height, new int[] { maxIndex });
 		if (fitResult.getStatus() == FitStatus.OK)
 		{
 			chiSquared = fitResult.getError();

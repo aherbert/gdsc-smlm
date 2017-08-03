@@ -1,10 +1,10 @@
 package gdsc.smlm.engine;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
@@ -404,7 +404,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				nParams = 2;
 				break;
 			default:
-				throw new IllegalArgumentException("FitSettings must be a Gaussian 2D PSF");
+				throw new IllegalStateException("FitSettings must be a Gaussian 2D PSF");
 		}
 		isTwoAxisGaussian2D = PSFHelper.isTwoAxisGaussian2D(psfType);
 
@@ -567,6 +567,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	FitConfiguration copySettings(FitConfiguration other)
 	{
 		log = other.log;
+		// Copy the per-pixel camera model 
 		return this;
 	}
 
@@ -2520,7 +2521,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// Only support CCD/EM-CCD at the moment
 		if (!calibration.isCCDCamera())
 		{
-			throw new IllegalArgumentException("CCD/EM-CCD camera is required for fit solver: " + getFitSolver());
+			throw new IllegalStateException("CCD/EM-CCD camera is required for fit solver: " + getFitSolver());
 		}
 
 		if (getFitSolver() == FitSolver.MLE)
@@ -2528,7 +2529,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			// This requires the gain
 			if (gain <= 0)
 			{
-				throw new IllegalArgumentException("The gain is required for fit solver: " + getFitSolver());
+				throw new IllegalStateException("The gain is required for fit solver: " + getFitSolver());
 			}
 
 			MaximumLikelihoodFitter.SearchMethod searchMethod = convertSearchMethod();
@@ -2536,7 +2537,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			// Only the Poisson likelihood function supports gradients
 			if (searchMethod.usesGradients() && isModelCamera())
 			{
-				throw new IllegalArgumentException(String.format(
+				throw new IllegalStateException(String.format(
 						"The derivative based search method '%s' can only be used with the " +
 								"'%s' likelihood function, i.e. no model camera noise",
 						searchMethod, MaximumLikelihoodFitter.LikelihoodFunction.POISSON));
@@ -2576,8 +2577,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			// All models use the amplification gain (i.e. how many ADUs/electron)
 			if (!calibration.hasCountPerElectron())
 			{
-				throw new IllegalArgumentException(
-						"The amplification is required for the fit solver: " + getFitSolver());
+				throw new IllegalStateException("The amplification is required for the fit solver: " + getFitSolver());
 			}
 
 			fitter.setAlpha(1.0 / calibration.getCountPerElectron());
@@ -2604,30 +2604,30 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				break;
 
 			case LVM_MLE:
-				checkCalibration();
+				checkCameraCalibration();
 				solver = new MLELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
 				break;
 
 			case LVM_WLSE:
-				checkCalibration();
+				checkCameraCalibration();
 				solver = new WLSELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
 				break;
 
 			case FAST_MLE:
-				checkCalibration();
+				checkCameraCalibration();
 				// This may throw a class cast exception if the function does not support
 				// the Gradient2Function interface
 				solver = new FastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc, bounds);
 				break;
 
 			case BACKTRACKING_FAST_MLE:
-				checkCalibration();
+				checkCameraCalibration();
 				solver = new BacktrackingFastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc,
 						bounds);
 				break;
 
 			default:
-				throw new IllegalArgumentException("Unknown fit solver: " + getFitSolver());
+				throw new IllegalStateException("Unknown fit solver: " + getFitSolver());
 		}
 
 		if (solver instanceof LVMSteppingFunctionSolver)
@@ -2650,16 +2650,30 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		return FitProtosHelper.convertLineSearchMethod(getLineSearchMethod());
 	}
-	
-	private void checkCalibration()
+
+	private void checkCameraCalibration()
 	{
-		// TODO - update this to check the camera calibration:
-		// CCD/EMCCD requires gain and bias (but bias could be zero)
-		// sCMOS requires crop region, and per-pixel bias, gain and read noise (var/gain^2)
-		
-		if (gain <= 0)
+		if (!calibration.hasCameraCalibration())
+			throw new IllegalStateException("The camera calibration is required for fit solver: " + getFitSolver());
+
+		switch (calibration.getCameraType())
 		{
-			throw new IllegalArgumentException("The gain is required for fit solver: " + getFitSolver());
+			// CCD/EMCCD requires gain and bias (but bias could be zero)
+			case CCD:
+			case EMCCD:
+				if (gain <= 0)
+					throw new IllegalStateException("The gain is required for fit solver: " + getFitSolver());
+				break;
+
+			// sCMOS requires per-pixel bias, gain and read noise (var/gain^2)
+			case SCMOS:
+				//break;
+
+			case CAMERA_TYPE_NA:
+			case UNRECOGNIZED:
+			default:
+				throw new IllegalStateException("Unrecognised camera type for for fit solver: " + getFitSolver() +
+						": " + calibration.getCameraType());
 		}
 	}
 
@@ -2729,7 +2743,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public String getSmartFilterString()
 	{
 		String s = filterSettings.getSmartFilterString();
-		return (Utils.isNullOrEmpty(s)) ? "" : s;
+		return (TextUtils.isNullOrEmpty(s)) ? "" : s;
 	}
 
 	/**

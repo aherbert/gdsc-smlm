@@ -28,6 +28,7 @@ import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationHelper;
 
@@ -838,7 +839,7 @@ public class PCPALMClusters implements PlugIn
 				cumulativeHistogram[i] = sum;
 			}
 
-			double[] values = Utils.newArray(histogram.length, 0.0, 1.0);
+			double[] values = SimpleArrayUtils.newArray(histogram.length, 0.0, 1.0);
 			plot = new Plot2(title, "N", "Cumulative Probability", values, cumulativeHistogram);
 			plot.setLimits(0, histogram.length - 1, 0, 1.05);
 			plot.addPoints(values, cumulativeHistogram, Plot2.CIRCLE);

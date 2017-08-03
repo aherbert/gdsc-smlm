@@ -9,7 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
+import gdsc.core.utils.SimpleArrayUtils;
 
 public class ChiSquaredDistributionTableTest
 {
@@ -98,7 +98,7 @@ public class ChiSquaredDistributionTableTest
 		ChiSquareTest test = new ChiSquareTest();
 		for (int n : new int[] { 10, 50, 100 })
 		{
-			double[] x = Utils.newArray(n, 0.5, 1.0);
+			double[] x = SimpleArrayUtils.newArray(n, 0.5, 1.0);
 			long[] l = new long[x.length];
 			RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
 			for (int i = 0; i < x.length; i++)

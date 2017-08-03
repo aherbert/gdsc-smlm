@@ -49,6 +49,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -1394,7 +1395,7 @@ public class SpotAnalysis extends PlugInFrame
 
 			// Fit the PSF using a Gaussian
 			float[] data2 = (float[]) rawImp.getImageStack().getProcessor(slice).getPixels();
-			double[] data = Utils.toDouble(data2);
+			double[] data = SimpleArrayUtils.toDouble(data2);
 			FitConfiguration fitConfiguration = new FitConfiguration();
 			fitConfiguration.setPSF(PSFProtosHelper.defaultOneAxisGaussian2DPSF);
 			fitConfiguration.setFixedPSF(true);
@@ -1432,7 +1433,7 @@ public class SpotAnalysis extends PlugInFrame
 				return;
 
 			data2 = (float[]) blurImp.getImageStack().getProcessor(slice).getPixels();
-			data = Utils.toDouble(data2);
+			data = SimpleArrayUtils.toDouble(data2);
 			params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			//float psfWidth = Float.parseFloat(widthTextField.getText());
 			params[Gaussian2DFunction.BACKGROUND] = (float) smoothMean[slice - 1];

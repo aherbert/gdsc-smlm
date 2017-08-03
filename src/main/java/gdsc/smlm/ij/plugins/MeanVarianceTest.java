@@ -17,6 +17,7 @@ import org.apache.commons.math3.util.MathArrays;
 import gdsc.core.ij.SeriesOpener;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
@@ -410,7 +411,7 @@ public class MeanVarianceTest implements PlugIn
 			{
 				// Plot the gain over time
 				String title = TITLE + " Gain vs Frame";
-				Plot2 plot = new Plot2(title, "Slice", "Gain", Utils.newArray(gainStats.getN(), 1, 1.0),
+				Plot2 plot = new Plot2(title, "Slice", "Gain", SimpleArrayUtils.newArray(gainStats.getN(), 1, 1.0),
 						stats.getValues());
 				PlotWindow pw = Utils.display(title, plot);
 

@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
@@ -273,7 +274,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		private void clearError()
 		{
 			error[currentIndex] = false;
-			if (!Utils.isNullOrEmpty(label.getText()))
+			if (!TextUtils.isNullOrEmpty(label.getText()))
 				label.setText("");
 		}
 	}

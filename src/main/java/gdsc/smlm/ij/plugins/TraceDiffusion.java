@@ -24,8 +24,10 @@ import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
@@ -230,7 +232,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			}
 			else
 			{
-				factors = Utils.newArray(length, 0.0, 1.0);
+				factors = SimpleArrayUtils.newArray(length, 0.0, 1.0);
 			}
 
 			// Extract the mean-squared distance statistics
@@ -797,7 +799,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 
 		Utils.log("Filtered results '%s' : %s filtered to %d using minimum length %d (Ignore ends = %b)", name,
-				Utils.pleural(traces.length, "trace"), count, minimumTraceLength, ignoreEnds);
+				TextUtils.pleural(traces.length, "trace"), count, minimumTraceLength, ignoreEnds);
 		return Arrays.copyOf(traces, count);
 	}
 
@@ -1116,7 +1118,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private String createCombinedName()
 	{
 		if (additionalDatasets > 0)
-			return results.getName() + " + " + Utils.pleural(additionalDatasets, "other");
+			return results.getName() + " + " + TextUtils.pleural(additionalDatasets, "other");
 		return results.getName();
 	}
 

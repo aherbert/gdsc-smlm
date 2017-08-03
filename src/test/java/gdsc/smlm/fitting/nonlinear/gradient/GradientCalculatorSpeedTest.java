@@ -9,8 +9,8 @@ import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
@@ -470,8 +470,8 @@ public class GradientCalculatorSpeedTest
 		};
 		//@formatter:on
 
-		int[] xx = Utils.newArray(100, 0, 1);
-		double[] xxx = Utils.newArray(100, 0, 1.0);
+		int[] xx = SimpleArrayUtils.newArray(100, 0, 1);
+		double[] xxx = SimpleArrayUtils.newArray(100, 0, 1.0);
 		for (double u : new double[] { 0.79, 2.5, 5.32 })
 		{
 			double ll = 0;
@@ -624,7 +624,7 @@ public class GradientCalculatorSpeedTest
 
 			// Simulate Poisson process
 			func.initialise(a);
-			double[] x = Utils.newArray(n, 0, 1.0);
+			double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
 			double[] u = new double[x.length];
 			for (int i = 0; i < n; i++)
 			{

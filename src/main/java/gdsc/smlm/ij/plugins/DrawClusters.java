@@ -5,7 +5,9 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
@@ -120,8 +122,8 @@ public class DrawClusters implements PlugIn
 			return;
 		}
 
-		String msg = String.format(TITLE + ": %d / %s (%s)", count, Utils.pleural(traces.length, "trace"),
-				Utils.pleural(results.size(), "localisation"));
+		String msg = String.format(TITLE + ": %d / %s (%s)", count, TextUtils.pleural(traces.length, "trace"),
+				TextUtils.pleural(results.size(), "localisation"));
 		IJ.showStatus(msg);
 		//Utils.log(msg);
 
@@ -183,7 +185,7 @@ public class DrawClusters implements PlugIn
 		// Create ROIs and store data to sort them
 		Roi[] rois = new Roi[count];
 		int[][] frames = (isUseStackPosition) ? new int[count][] : null;
-		int[] indices = Utils.newArray(count, 0, 1);
+		int[] indices = SimpleArrayUtils.newArray(count, 0, 1);
 		double[] values = new double[count];
 		for (int i = 0; i < count; i++)
 		{

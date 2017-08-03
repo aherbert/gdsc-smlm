@@ -28,7 +28,6 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.logging.NullLogger;
 
@@ -47,6 +46,7 @@ import gdsc.core.logging.NullLogger;
 
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Sort;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 
 /**
@@ -245,8 +245,8 @@ public class JumpDistanceAnalysis
 
 		if (best > -1)
 		{
-			logger.info("Best fit achieved using %s: %s, %s = %s", Utils.pleural(best + 1, "population"),
-					formatD(coefficients[best]), Utils.pleural(best + 1, "Fraction"), format(fractions[best]));
+			logger.info("Best fit achieved using %s: %s, %s = %s", TextUtils.pleural(best + 1, "population"),
+					formatD(coefficients[best]), TextUtils.pleural(best + 1, "Fraction"), format(fractions[best]));
 			lastFitValue = fitValue[best];
 			return new double[][] { coefficients[best], fractions[best] };
 		}
@@ -769,8 +769,8 @@ public class JumpDistanceAnalysis
 
 		if (best > -1)
 		{
-			logger.info("Best fit achieved using %s: %s, %s = %s", Utils.pleural(best + 1, "population"),
-					formatD(coefficients[best]), Utils.pleural(best + 1, "Fraction"), format(fractions[best]));
+			logger.info("Best fit achieved using %s: %s, %s = %s", TextUtils.pleural(best + 1, "population"),
+					formatD(coefficients[best]), TextUtils.pleural(best + 1, "Fraction"), format(fractions[best]));
 			lastFitValue = fitValue[best];
 			return new double[][] { coefficients[best], fractions[best] };
 		}

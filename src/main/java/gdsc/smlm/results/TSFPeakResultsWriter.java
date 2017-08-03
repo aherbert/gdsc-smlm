@@ -11,8 +11,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
@@ -462,7 +462,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setNrSpots(size);
 
 		// Add the standard details the TSF supports. We use extensions to add GDSC SMLM data.
-		if (!Utils.isNullOrEmpty(getName()))
+		if (!TextUtils.isNullOrEmpty(getName()))
 		{
 			builder.setName(getName());
 		}
@@ -533,7 +533,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				}
 			}
 		}
-		if (!Utils.isNullOrEmpty(getConfiguration()))
+		if (!TextUtils.isNullOrEmpty(getConfiguration()))
 		{
 			builder.setConfiguration(singleLine(getConfiguration()));
 		}

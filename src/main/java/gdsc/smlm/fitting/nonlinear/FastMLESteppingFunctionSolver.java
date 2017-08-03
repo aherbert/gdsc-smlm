@@ -4,8 +4,9 @@ import java.util.Arrays;
 
 import org.ejml.data.DenseMatrix64F;
 
-import gdsc.core.ij.Utils;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
+import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
@@ -52,7 +53,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	 * Define the method to use when the line search direction is not in the same direction as
 	 * that defined by the first derivative gradient.
 	 */
-	public enum LineSearchMethod
+	public enum LineSearchMethod implements NamedObject
 	{
 		/**
 		 * Do nothing to handle the incorrect orientation. The default solver action is taken. This may cause the search
@@ -80,6 +81,16 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 
 		@Override
 		public String toString()
+		{
+			return name;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public String getShortName()
 		{
 			return name;
 		}
@@ -355,7 +366,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 							double[] slopeComponents = new double[gradient.length];
 							for (int i = 0; i < slopeComponents.length; i++)
 								slopeComponents[i] = gradient[i] * searchDirection[gradientIndices[i]];
-							int[] indices = Utils.newArray(slopeComponents.length, 0, 1);
+							int[] indices = SimpleArrayUtils.newArray(slopeComponents.length, 0, 1);
 							Sort.sort(indices, slopeComponents);
 							Sort.reverse(indices);
 							int j = 0;

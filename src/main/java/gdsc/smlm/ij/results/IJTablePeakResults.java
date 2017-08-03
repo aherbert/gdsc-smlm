@@ -10,7 +10,8 @@ import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.core.ij.Utils;
+import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -148,7 +149,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		helper.setAngleUnit(angleUnit);
 		converters = helper.getConverters();
 		ic = converters[PeakResult.INTENSITY];
-		outIndices = Utils.newArray(converters.length, 0, 1);
+		outIndices = SimpleArrayUtils.newArray(converters.length, 0, 1);
 		if (!showZ)
 		{
 			TIntArrayList list = new TIntArrayList(outIndices);
@@ -267,7 +268,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		if (showNoiseData)
 		{
 			sb.append("\tNoise");
-			if (!Utils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
+			if (!TextUtils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
 				sb.append(" (").append(unitNames[PeakResult.INTENSITY]).append(')');
 			sb.append("\tSNR");
 		}
@@ -275,7 +276,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		for (int i = 0; i < outIndices.length; i++)
 		{
 			sb.append('\t').append(names[outIndices[i]]);
-			if (!Utils.isNullOrEmpty(unitNames[outIndices[i]]))
+			if (!TextUtils.isNullOrEmpty(unitNames[outIndices[i]]))
 				sb.append(" (").append(unitNames[outIndices[i]]).append(')');
 			addDeviation(sb);
 		}
