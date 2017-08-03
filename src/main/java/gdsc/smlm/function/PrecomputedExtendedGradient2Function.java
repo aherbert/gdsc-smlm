@@ -37,11 +37,16 @@ public class PrecomputedExtendedGradient2Function extends PrecomputedGradient2Fu
 		super(f, values);
 		ef2 = f;
 	}
-	
-	private PrecomputedExtendedGradient2Function(PrecomputedExtendedGradient2Function pre, double[] values2)
+
+	protected PrecomputedExtendedGradient2Function(PrecomputedExtendedGradient2Function pre, double[] values2)
 	{
 		super(pre, values2);
 		ef2 = (ExtendedGradient2Function) f;
+	}
+
+	public ExtendedGradient2Function getExtendedGradient2Function()
+	{
+		return ef2;
 	}
 
 	public void initialiseExtended2(double[] a)
@@ -70,14 +75,15 @@ public class PrecomputedExtendedGradient2Function extends PrecomputedGradient2Fu
 	 *            Baseline pre-computed y-values
 	 * @return the wrapped function (or the original if pre-computed values are null or wrong length)
 	 */
-	public static ExtendedGradient2Function wrapExtendedGradient2Function(final ExtendedGradient2Function func, final double[] b)
+	public static ExtendedGradient2Function wrapExtendedGradient2Function(final ExtendedGradient2Function func,
+			final double[] b)
 	{
 		if (b != null && b.length == func.size())
 		{
 			// Avoid multiple wrapping
 			if (func instanceof PrecomputedExtendedGradient2Function)
 			{
-				return new PrecomputedExtendedGradient2Function((PrecomputedExtendedGradient2Function)func, b);
+				return new PrecomputedExtendedGradient2Function((PrecomputedExtendedGradient2Function) func, b);
 			}
 			return new PrecomputedExtendedGradient2Function(func, b);
 		}

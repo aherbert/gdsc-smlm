@@ -38,10 +38,15 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function
 		f2 = f;
 	}
 	
-	private PrecomputedGradient2Function(PrecomputedGradient2Function pre, double[] values2)
+	protected PrecomputedGradient2Function(PrecomputedGradient2Function pre, double[] values2)
 	{
 		super(pre, values2);
 		f2 = (Gradient2Function) f;
+	}
+	
+	public Gradient2Function getGradient2Function()
+	{
+		return f2;
 	}
 
 	public void initialise2(double[] a)

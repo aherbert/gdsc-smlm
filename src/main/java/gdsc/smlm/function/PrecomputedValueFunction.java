@@ -41,7 +41,7 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 		this.values = values;
 	}
 
-	private PrecomputedValueFunction(PrecomputedValueFunction pre, double[] values2)
+	protected PrecomputedValueFunction(PrecomputedValueFunction pre, double[] values2)
 	{
 		this.f = pre.f;
 		final int n = f.size();
@@ -49,6 +49,11 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 		values = new double[n];
 		for (int i = 0; i < n; i++)
 			values[i] = values1[i] + values2[i];
+	}
+	
+	public ValueFunction getValueFunction()
+	{
+		return f;
 	}
 
 	public int size()
