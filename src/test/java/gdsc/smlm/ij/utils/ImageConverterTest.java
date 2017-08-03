@@ -7,8 +7,8 @@ import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.SimpleArrayUtils;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 
@@ -42,7 +42,7 @@ public class ImageConverterTest
 		Assert.assertArrayEquals(fe, ImageConverter.getData(sdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(fe, ImageConverter.getData(fdata, w, h, bounds, null), 0);
 		// Check the double format
-		double[] de = Utils.toDouble(fe);
+		double[] de = SimpleArrayUtils.toDouble(fe);
 		Assert.assertArrayEquals(de, ImageConverter.getDoubleData(bdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(de, ImageConverter.getDoubleData(sdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(de, ImageConverter.getDoubleData(fdata, w, h, bounds, null), 0);
@@ -57,7 +57,7 @@ public class ImageConverterTest
 		Assert.assertArrayEquals(fe, ImageConverter.getData(sdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(fe, ImageConverter.getData(fdata, w, h, bounds, null), 0);
 		// Check the double format
-		double[] de = Utils.toDouble(fe);
+		double[] de = SimpleArrayUtils.toDouble(fe);
 		Assert.assertArrayEquals(de, ImageConverter.getDoubleData(bdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(de, ImageConverter.getDoubleData(sdata, w, h, bounds, null), 0);
 		Assert.assertArrayEquals(de, ImageConverter.getDoubleData(fdata, w, h, bounds, null), 0);
@@ -79,7 +79,7 @@ public class ImageConverterTest
 			Assert.assertArrayEquals(fe, ImageConverter.getData(sdata, w, h, bounds, null), 0);
 			Assert.assertArrayEquals(fe, ImageConverter.getData(fdata, w, h, bounds, null), 0);
 			// Check the double format
-			double[] de = Utils.toDouble(fe);
+			double[] de = SimpleArrayUtils.toDouble(fe);
 			Assert.assertArrayEquals(de, ImageConverter.getDoubleData(bdata, w, h, bounds, null), 0);
 			Assert.assertArrayEquals(de, ImageConverter.getDoubleData(sdata, w, h, bounds, null), 0);
 			Assert.assertArrayEquals(de, ImageConverter.getDoubleData(fdata, w, h, bounds, null), 0);
