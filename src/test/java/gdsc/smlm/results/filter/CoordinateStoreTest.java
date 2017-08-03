@@ -6,37 +6,39 @@ import org.junit.Assert;
 
 public class CoordinateStoreTest
 {
+	// TODO - test for a crop store ...
+
 	@Test
 	public void canCreateStore()
 	{
 		CoordinateStore s;
-		s = CoordinateStoreFactory.create(0, 0, 10, 10, -1, -1);
+		s = CoordinateStoreFactory.create(1, 2, 10, 11, -1, -1);
 		Assert.assertTrue(s instanceof NullCoordinateStore);
-		s = CoordinateStoreFactory.create(0, 0, 10, 10, 0, -1);
+		s = CoordinateStoreFactory.create(1, 2, 10, 11, 0, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore);
-		s = CoordinateStoreFactory.create(0, 0, 10, 10, 0.2, -1);
+		s = CoordinateStoreFactory.create(1, 2, 10, 11, 0.2, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore);
-		s = CoordinateStoreFactory.create(0, 0, 10, 10, 0.5, -1);
+		s = CoordinateStoreFactory.create(1, 2, 10, 11, 0.5, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore1);
-		s = CoordinateStoreFactory.create(0, 0, 10, 10, 1, -1);
+		s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore1);
-		s = CoordinateStoreFactory.create(0, 0, 10, 10, 1.5, -1);
+		s = CoordinateStoreFactory.create(1, 2, 10, 11, 1.5, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore);
-		s = CoordinateStoreFactory.create(0, 0, 10, 10, 2, -1);
+		s = CoordinateStoreFactory.create(1, 2, 10, 11, 2, -1);
 		Assert.assertTrue(s instanceof GridCoordinateStore);
 	}
 
 	@Test
 	public void canDetectXYDuplicates()
 	{
-		double[] datax = { 0.1, 4.1 };
+		double[] datax = { 1.1, 4.1 };
 		double[] datay = { 3.1, 7.1 };
 		double[] dataz = { 0, 0.1 };
 		double[] resolution = { 0, 0.3, 0.5, 1.5 };
 
 		for (int i = 0; i < resolution.length; i++)
 		{
-			CoordinateStore s = CoordinateStoreFactory.create(0, 0, 10, 10, resolution[i], -1);
+			CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], -1);
 			for (int j = 0; j < datax.length; j++)
 				s.add(datax[j], datay[j], dataz[j]);
 
@@ -73,7 +75,7 @@ public class CoordinateStoreTest
 		{
 			// No 3D
 			zResolution = -1;
-			s = CoordinateStoreFactory.create(0, 0, 10, 10, resolution[i], zResolution);
+			s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution);
 			s.add(x, y, z);
 
 			msg = resolution[i] + "," + zResolution;
@@ -81,7 +83,7 @@ public class CoordinateStoreTest
 
 			// 3D exact match
 			zResolution = 0;
-			s = CoordinateStoreFactory.create(0, 0, 10, 10, resolution[i], zResolution);
+			s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution);
 			s.add(x, y, z);
 
 			msg = resolution[i] + "," + zResolution;
@@ -91,7 +93,7 @@ public class CoordinateStoreTest
 
 			// 3D match within z-resolution
 			zResolution = 1;
-			s = CoordinateStoreFactory.create(0, 0, 10, 10, resolution[i], zResolution);
+			s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution);
 			s.add(x, y, z);
 
 			msg = resolution[i] + "," + zResolution;
@@ -106,14 +108,14 @@ public class CoordinateStoreTest
 	@Test
 	public void canQueueToGrid()
 	{
-		double[] datax = { 0.1, 4.1 };
+		double[] datax = { 1.1, 4.1 };
 		double[] datay = { 3.1, 7.1 };
 		double[] dataz = { 0, 0.1 };
 		double[] resolution = { 0.3, 0.5, 1.5 };
 
 		for (int i = 0; i < resolution.length; i++)
 		{
-			CoordinateStore s = CoordinateStoreFactory.create(0, 0, 10, 10, resolution[i], -1);
+			CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], -1);
 			for (int j = 0; j < datax.length; j++)
 			{
 				s.addToQueue(datax[j], datay[j], dataz[j]);
@@ -130,14 +132,14 @@ public class CoordinateStoreTest
 	@Test
 	public void canClearGrid()
 	{
-		double[] datax = { 0.1, 4.1 };
+		double[] datax = { 1.1, 4.1 };
 		double[] datay = { 3.1, 7.1 };
 		double[] dataz = { 0, 0.1 };
 		double[] resolution = { 0.3, 0.5, 1.5 };
 
 		for (int i = 0; i < resolution.length; i++)
 		{
-			CoordinateStore s = CoordinateStoreFactory.create(0, 0, 10, 10, resolution[i], -1);
+			CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], -1);
 
 			// Add then clear
 			for (int j = 0; j < datax.length; j++)
@@ -171,59 +173,61 @@ public class CoordinateStoreTest
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGrid1XLow()
 	{
-		CoordinateStore s = CoordinateStoreFactory.create(0, 0, 10, 10, 1, 0);
-		s.add(-1, 0, 0);
+		CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
+		s.add(s.getMinX() - 1, s.getMinY(), 0);
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGridXHigh()
 	{
-		CoordinateStore s = CoordinateStoreFactory.create(0, 0, 10, 10, 1, 0);
-		s.add(11, 0, 0);
+		CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
+		s.add(s.getMinX() + s.getWidth() + 1, s.getMinY(), 0);
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGrid1YLow()
 	{
-		CoordinateStore s = CoordinateStoreFactory.create(0, 0, 10, 10, 1, 0);
-		s.add(0, -1, 0);
+		CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
+		s.add(s.getMinX(), s.getMinY() - 1, 0);
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGridYHigh()
 	{
-		CoordinateStore s = CoordinateStoreFactory.create(0, 0, 10, 10, 1, 0);
-		s.add(0, 11, 0);
+		CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
+		s.add(s.getMinX(), s.getMinY() + s.getHeight() + 1, 0);
 	}
 
 	@Test
 	public void canSafeAddOutsideGrid()
 	{
-		GridCoordinateStore s = new GridCoordinateStore(0, 0, 10, 10, 1, 0.0);
-		s.safeAdd(-1, 0, 0);
-		s.safeAdd(11, 0, 0);
-		s.safeAdd(-1, 0, 0);
-		s.safeAdd(0, 11, 0);
+		GridCoordinateStore s = new GridCoordinateStore(1, 2, 10, 11, 1, 0.0);
+		s.safeAdd(s.getMinX() - 1, s.getMinY(), 0);
+		s.safeAdd(s.getMinX() + s.getWidth() + 1, s.getMinY(), 0);
+		s.safeAdd(s.getMinX(), s.getMinY() - 1, 0);
+		s.safeAdd(s.getMinX(), s.getMinY() + s.getHeight() + 1, 0);
 	}
 
 	@Test
 	public void containsOutsideGridIsFalse()
 	{
-		GridCoordinateStore s = new GridCoordinateStore(0, 0, 10, 10, 1, 0.0);
-		s.safeAdd(-1, 0, 0);
-		s.safeAdd(11, 0, 0);
-		s.safeAdd(-1, 0, 0);
-		s.safeAdd(0, 11, 0);
-		Assert.assertFalse(s.contains(-1, 0, 0));
-		Assert.assertFalse(s.contains(11, 0, 0));
-		Assert.assertFalse(s.contains(-1, 0, 0));
-		Assert.assertFalse(s.contains(0, 11, 0));
+		GridCoordinateStore s = new GridCoordinateStore(1, 2, 10, 11, 1, 0.0);
+		Assert.assertFalse(addAndFind(s, s.getMinX() - 1, s.getMinY(), 0));
+		Assert.assertFalse(addAndFind(s, s.getMinX() + s.getWidth() + 1, s.getMinY(), 0));
+		Assert.assertFalse(addAndFind(s, s.getMinX(), s.getMinY() - 1, 0));
+		Assert.assertFalse(addAndFind(s, s.getMinX(), s.getMinY() + s.getHeight() + 1, 0));
+	}
+
+	private boolean addAndFind(GridCoordinateStore s, double x, double y, double z)
+	{
+		s.safeAdd(x, y, z);
+		return s.contains(x, y, z);
 	}
 
 	@Test
 	public void findOutsideGridIsNull()
 	{
-		GridCoordinateStore s = new GridCoordinateStore(0, 0, 10, 10, 1, 0.0);
+		GridCoordinateStore s = new GridCoordinateStore(1, 2, 10, 11, 1, 0.0);
 		s.safeAdd(-1, 0, 0);
 		s.safeAdd(11, 0, 0);
 		s.safeAdd(-1, 0, 0);
@@ -237,12 +241,12 @@ public class CoordinateStoreTest
 	@Test
 	public void canChangeXYResolution()
 	{
-		double[] datax = { 0.1, 4.1 };
+		double[] datax = { 1.1, 4.1 };
 		double[] datay = { 3.1, 7.1 };
 		double[] dataz = { 0, 0.1 };
 		double[] resolution = { 0, 0.3, 0.5, 1.5 };
 
-		GridCoordinateStore s = new GridCoordinateStore(0, 0, 10, 10, 0, 0.0);
+		GridCoordinateStore s = new GridCoordinateStore(1, 2, 10, 11, 0, 0.0);
 		for (int i = 0; i < resolution.length; i++)
 		{
 			s.changeXYResolution(resolution[i]);
@@ -267,12 +271,12 @@ public class CoordinateStoreTest
 	@Test
 	public void canChangeXYResolutionOnFixedStore()
 	{
-		double[] datax = { 0.1, 4.1 };
+		double[] datax = { 1.1, 4.1 };
 		double[] datay = { 3.1, 7.1 };
 		double[] dataz = { 0, 0.1 };
 		double[] resolution = { 0, 0.3, 0.5 };
 
-		GridCoordinateStore1 s = new GridCoordinateStore1(0,0,10, 10, 0, 0.0);
+		GridCoordinateStore1 s = new GridCoordinateStore1(1, 2, 10, 11, 0, 0.0);
 		for (int i = 0; i < resolution.length; i++)
 		{
 			s.changeXYResolution(resolution[i]);
@@ -297,7 +301,7 @@ public class CoordinateStoreTest
 	@Test(expected = IllegalArgumentException.class)
 	public void cannotChangeToBadXYResolutionOnFixedStore()
 	{
-		GridCoordinateStore1 s = new GridCoordinateStore1(0, 0, 10, 10, 0, 0.0);
+		GridCoordinateStore1 s = new GridCoordinateStore1(1, 2, 10, 11, 0, 0.0);
 		s.changeXYResolution(1.1);
 	}
 }

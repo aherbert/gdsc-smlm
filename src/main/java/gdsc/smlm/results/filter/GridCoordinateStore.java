@@ -554,4 +554,44 @@ public class GridCoordinateStore implements CoordinateStore
 
 		return (min < Double.POSITIVE_INFINITY) ? match : null;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getMinX()
+	 */
+	public int getMinX()
+	{
+		return minx;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getMinY()
+	 */
+	public int getMinY()
+	{
+		return miny;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getWidth()
+	 */
+	public int getWidth()
+	{
+		return width;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getHeight()
+	 */
+	public int getHeight()
+	{
+		return height;
+	}
 }

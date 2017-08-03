@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 /**
- * Null implementation of the CoordinateStore interface
+ * Null implementation of the CoordinateStore interface.
  */
 public class NullCoordinateStore implements CoordinateStore
 {
@@ -121,5 +121,45 @@ public class NullCoordinateStore implements CoordinateStore
 	public CoordinateStore resize(int minx, int miny, int maxx, int maxy)
 	{
 		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getMinX()
+	 */
+	public int getMinX()
+	{
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getMinY()
+	 */
+	public int getMinY()
+	{
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getWidth()
+	 */
+	public int getWidth()
+	{
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#getHeight()
+	 */
+	public int getHeight()
+	{
+		return 0;
 	}
 }

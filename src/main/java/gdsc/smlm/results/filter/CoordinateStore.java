@@ -119,4 +119,32 @@ public interface CoordinateStore
 	 * @return the coordinate store
 	 */
 	public CoordinateStore resize(int minx, int miny, int width, int height);
+
+	/**
+	 * Gets the the min x coordinate value
+	 *
+	 * @return the min X
+	 */
+	public int getMinX();
+
+	/**
+	 * Gets the the min y coordinate value
+	 *
+	 * @return the min Y
+	 */
+	public int getMinY();
+
+	/**
+	 * Gets the width.
+	 *
+	 * @return the width
+	 */
+	public int getWidth();
+
+	/**
+	 * Gets the height.
+	 *
+	 * @return the height
+	 */
+	public int getHeight();
 }
