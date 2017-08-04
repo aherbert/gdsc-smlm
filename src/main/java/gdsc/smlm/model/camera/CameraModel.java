@@ -29,7 +29,20 @@ public interface CameraModel
 	 * @return the bounds
 	 */
 	public Rectangle getBounds();
-	
+
+	/**
+	 * Crop the camera to the given bounds. The bounds are expected to fit within the camera bounds.
+	 * <p>
+	 * This can be used to create a more efficient representation if no data outside the bounds are required. 
+	 * <p>
+	 * Note: If the bounds match the current bounds then the returned model may not be a copy.
+	 *
+	 * @param bounds
+	 *            the bounds
+	 * @return the camera model
+	 */
+	public CameraModel crop(Rectangle bounds);
+
 	/**
 	 * Checks if is per pixel model. If false then all pixels are treated equally.
 	 *

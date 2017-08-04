@@ -35,6 +35,16 @@ public class NullCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle)
+	 */
+	public CameraModel crop(Rectangle bounds)
+	{
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#isPerPixelModel()
 	 */
 	public boolean isPerPixelModel()

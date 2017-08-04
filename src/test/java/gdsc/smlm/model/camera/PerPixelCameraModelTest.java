@@ -69,19 +69,36 @@ public class PerPixelCameraModelTest
 	}
 
 	@Test
+	public void canCropAndGetData()
+	{
+		RandomGenerator rand = new Well19937c(30051977);
+		ImageExtractor ie = new ImageExtractor(bias, w, h);
+		for (int i = 0; i < 10; i++)
+		{
+			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
+					5 + rand.nextInt(5));
+			CameraModel model2 = model.crop(bounds);
+			Assert.assertEquals(model2.getBounds(), bounds);
+			check(bias, bounds, model2.getBias(bounds));
+			check(gain, bounds, model2.getGain(bounds));
+			check(var_g2, bounds, model2.getNormalisedVariance(bounds));
+		}
+	}
+	
+	@Test
 	public void canConvertDataWithFullBounds()
 	{
-		checkConversion(new Rectangle(0, 0, w, h));
+		checkConversion(new Rectangle(0, 0, w, h), model);
 	}
 
-	private void checkConversion(Rectangle bounds)
+	private void checkConversion(Rectangle bounds, CameraModel model)
 	{
 		FloatProcessor ip = new FloatProcessor(w, h, image.clone());
 		ip.setRoi(bounds);
 		float[] e = (float[]) (ip.crop().getPixels());
 		float[] o = e.clone();
 		float[] o2 = e.clone();
-		
+
 		ip.setPixels(bias);
 		float[] bias = (float[]) (ip.crop().getPixels());
 
@@ -112,7 +129,20 @@ public class PerPixelCameraModelTest
 		{
 			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
 					5 + rand.nextInt(5));
-			checkConversion(bounds);
+			checkConversion(bounds, model);
+		}
+	}
+	
+	@Test
+	public void canCropAndConvertDataWithCropBounds()
+	{
+		RandomGenerator rand = new Well19937c(30051977);
+		ImageExtractor ie = new ImageExtractor(bias, w, h);
+		for (int j = 0; j < 10; j++)
+		{
+			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
+					5 + rand.nextInt(5));
+			checkConversion(bounds, model.crop(bounds));
 		}
 	}
 }

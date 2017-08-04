@@ -196,7 +196,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	{
 		return true;
 	}
-	
+
 	/**
 	 * Gets the x origin.
 	 *
@@ -413,6 +413,24 @@ public class PerPixelCameraModel extends BaseCameraModel
 		float[] gain = getData(this.gain, intersection, false);
 		for (int i = 0; i < data.length; i++)
 			data[i] = (data[i] - bias[i]) / gain[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle)
+	 */
+	public CameraModel crop(Rectangle bounds)
+	{
+		if (bounds == null)
+			throw new IllegalArgumentException("Bounds are null");
+		if (equal(bounds))
+			return this;
+		Rectangle intersection = getIntersection(bounds);
+		float[] bias = getData(this.bias, intersection, true);
+		float[] gain = getData(this.gain, intersection, true);
+		float[] var_g2 = getData(this.var_g2, intersection, true);	
+		return new PerPixelCameraModel(true, bounds, bias, gain, var_g2);
 	}
 
 	/*
