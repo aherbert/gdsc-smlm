@@ -64,6 +64,10 @@ message CameraCalibration {
 	// amplification that is not perfect (i.e. it has noise). The amplification is equal 
 	// to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
 	double count_per_electron = 4;
+	
+	// The camera model name. This should contain all the information required to 
+	// load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+	string camera_model_name = 5;
 }
 
 // Define the calibration for the results. The calibration contains details of the 

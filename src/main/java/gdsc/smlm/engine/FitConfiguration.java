@@ -42,6 +42,9 @@ import gdsc.smlm.function.PrecomputedFunctionFactory;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.smlm.model.camera.CameraModel;
+import gdsc.smlm.model.camera.FixedPixelCameraModel;
+import gdsc.smlm.model.camera.NullCameraModel;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultHelper;
@@ -118,7 +121,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private float offset;
 	private double varianceThreshold;
 
-	private double[] precomputedFunctionValues = null;
+	private double[] precomputedFunctionValues = null, observationWeights = null;
+	private CameraModel cameraModel = null;
 
 	/**
 	 * Instantiates a new fit configuration.
@@ -304,6 +308,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		this.calibration.mergeCalibration(calibration);
 		updateCalibration();
+		invalidateCameraModel();
 	}
 
 	/**
@@ -316,8 +321,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		this.calibration.setCalibration(calibration);
 		updateCalibration();
+		invalidateCameraModel();
 	}
 
+	/**
+	 * Update calibration used for signal and precision filtering (i.e. nmPerPixel, gain, emCCD (camera type)).
+	 */
 	private void updateCalibration()
 	{
 		// This uses the camera calibration
@@ -567,7 +576,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	FitConfiguration copySettings(FitConfiguration other)
 	{
 		log = other.log;
-		// Copy the per-pixel camera model 
+		cameraModel = other.cameraModel;
 		return this;
 	}
 
@@ -1340,6 +1349,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setGain(double gain)
 	{
 		invalidateFunctionSolver();
+		invalidateCameraModel();
 		calibration.setCountPerPhoton(gain);
 		updateCalibration();
 		//updateSignalThreshold();
@@ -1356,8 +1366,19 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setCameraType(CameraType cameraType)
 	{
 		invalidateFunctionSolver();
+		invalidateCameraModel();
 		calibration.setCameraType(cameraType);
 		updateCalibration();
+	}
+
+	/**
+	 * Gets the camera type.
+	 *
+	 * @return the camera type
+	 */
+	private CameraType getCameraType()
+	{
+		return calibration.getCameraType();
 	}
 
 	/**
@@ -1388,6 +1409,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setBias(double bias)
 	{
+		invalidateCameraModel();
 		calibration.setBias(bias);
 	}
 
@@ -1398,6 +1420,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setReadNoise(double readNoise)
 	{
 		invalidateFunctionSolver();
+		invalidateCameraModel();
 		calibration.setReadNoise(readNoise);
 	}
 
@@ -2420,8 +2443,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public boolean isFitCameraCounts()
 	{
 		// Only the legacy MLE solvers that explicitly model the camera noise require the data
-		// and estimate to be in ADUs.
-		if (getFitSolver() == FitSolver.MLE)
+		// and estimate to be in ADUs. This is also true if there is no camera calibration.
+		if (getFitSolver() == FitSolver.MLE || getCameraType() == CameraType.CAMERA_TYPE_NA)
 			return true;
 		return false;
 	}
@@ -2495,6 +2518,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			functionSolver.setGradientFunction((GradientFunction) PrecomputedFunctionFactory
 					.wrapFunction(gaussianFunction, precomputedFunctionValues));
 			precomputedFunctionValues = null;
+		}
+		if (functionSolver.isWeighted())
+		{
+			functionSolver.setWeights(observationWeights);
 		}
 
 		return functionSolver;
@@ -2656,24 +2683,25 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (!calibration.hasCameraCalibration())
 			throw new IllegalStateException("The camera calibration is required for fit solver: " + getFitSolver());
 
-		switch (calibration.getCameraType())
+		switch (getCameraType())
 		{
 			// CCD/EMCCD requires gain and bias (but bias could be zero)
 			case CCD:
 			case EMCCD:
-				if (gain <= 0)
-					throw new IllegalStateException("The gain is required for fit solver: " + getFitSolver());
-				break;
 
-			// sCMOS requires per-pixel bias, gain and read noise (var/gain^2)
+				// sCMOS requires per-pixel bias, gain and read noise (var/gain^2)
 			case SCMOS:
-				//break;
+
+				// Handle the camera checks within getCameraModel(). This throws if the 
+				// camera model is invalid
+				getCameraModel();
+				break;
 
 			case CAMERA_TYPE_NA:
 			case UNRECOGNIZED:
 			default:
-				throw new IllegalStateException("Unrecognised camera type for for fit solver: " + getFitSolver() +
-						": " + calibration.getCameraType());
+				throw new IllegalStateException(
+						"Unrecognised camera type for for fit solver: " + getFitSolver() + ": " + getCameraType());
 		}
 	}
 
@@ -3186,11 +3214,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * Sets the precomputed function values. This is combined with the configured Gaussian function add passed to the
-	 * function
-	 * solver returned from {@link #getFunctionSolver()}. The precomputed function values are then reset to null so it
-	 * must be
-	 * set each time the function solver is accessed.
+	 * Sets the precomputed function values. This is combined with the configured Gaussian function and passed to the
+	 * function solver returned from {@link #getFunctionSolver()}. The precomputed function values are then reset to
+	 * null so it must be set each time the function solver is accessed.
 	 *
 	 * @param precomputedFunctionValues
 	 *            the new precomputed function values
@@ -3198,5 +3224,108 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setPrecomputedFunctionValues(double[] precomputedFunctionValues)
 	{
 		this.precomputedFunctionValues = precomputedFunctionValues;
+	}
+
+	/**
+	 * Sets the observation weights. These are passed to the function solver if it supports weights. These must be set
+	 * each time the function solver from {@link #getFunctionSolver()} will be used on new data.
+	 *
+	 * @param observationWeights
+	 *            the new observation weights
+	 */
+	public void setObservationWeights(double[] observationWeights)
+	{
+		this.observationWeights = observationWeights;
+	}
+
+	/**
+	 * Gets the observation weights.
+	 *
+	 * @return the observation weights
+	 */
+	public double[] getObservationWeights()
+	{
+		return observationWeights;
+	}
+
+	/**
+	 * Call this when a property changes that will change the camera model, e.g. bias, gain, read noise, camera type.
+	 */
+	private void invalidateCameraModel()
+	{
+		setCameraModel(null);
+	}
+
+	/**
+	 * Sets the camera model. This must be set if a sCMOS camera type is used.
+	 *
+	 * @param cameraModel
+	 *            the new camera model
+	 */
+	public void setCameraModel(CameraModel cameraModel)
+	{
+		invalidateFunctionSolver();
+		this.cameraModel = cameraModel;
+	}
+
+	/**
+	 * Gets the camera model.
+	 *
+	 * @return the camera model
+	 */
+	public CameraModel getCameraModel()
+	{
+		if (cameraModel == null)
+		{
+			switch (getCameraType())
+			{
+				case CAMERA_TYPE_NA:
+					// We can support this by doing nothing to pixels values
+					cameraModel = new NullCameraModel();
+					break;
+
+				case CCD:
+				case EMCCD:
+					float bias = (float) calibration.getBias();
+					float gain = (float) calibration.getCountPerPhoton();
+					float variance = (float) Maths.pow2(calibration.getReadNoise());
+					// This will throw an exception if the calibration is invalid
+					cameraModel = new FixedPixelCameraModel(bias, gain, variance);
+					break;
+
+				case SCMOS:
+				case UNRECOGNIZED:
+				default:
+					throw new IllegalStateException("No camera model for camera type: " + getCameraType());
+			}
+		}
+		return cameraModel;
+	}
+
+	/**
+	 * Sets the camera model name. This should contain all the information required to load the camera model, e.g. in
+	 * the case of a per-pixel camera model for sCMOS cameras.
+	 * <p>
+	 * This settings is saved to the underlying configuration. If a camera model is used (e.g. for sCMOS camera) then
+	 * {@link #setCameraModel(CameraModel)} should be called after setting the new camera model name.
+	 *
+	 * @param cameraModelName
+	 *            the new camera model name
+	 */
+	public void setCameraModelName(String cameraModelName)
+	{
+		if (cameraModelName == null || !cameraModelName.equals(getCameraModelName()))
+			invalidateCameraModel();
+		calibration.setCameraModelName(cameraModelName);
+	}
+
+	/**
+	 * Gets the camera model name.
+	 *
+	 * @return the camera model name
+	 */
+	public String getCameraModelName()
+	{
+		return calibration.getCameraModelName();
 	}
 }

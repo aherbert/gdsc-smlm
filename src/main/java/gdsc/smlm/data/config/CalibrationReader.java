@@ -2,6 +2,7 @@ package gdsc.smlm.data.config;
 
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
@@ -60,7 +61,6 @@ public class CalibrationReader
 	{
 		return calibrationOrBuilder;
 	}
-
 
 	/**
 	 * Gets a distance converter to update values.
@@ -292,7 +292,7 @@ public class CalibrationReader
 	{
 		return getCalibrationOrBuilder().hasCameraCalibration();
 	}
-	
+
 	/**
 	 * Checks for a CCD camera.
 	 *
@@ -371,6 +371,28 @@ public class CalibrationReader
 	}
 
 	/**
+	 * Gets the camera model name. This should contain all the information required to load the camera model, e.g. in
+	 * the case of a per-pixel camera model for sCMOS cameras.
+	 *
+	 * @return the camera model name
+	 */
+	public String getCameraModelName()
+	{
+		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraModelName() : null;
+	}
+	
+	/**
+	 * Checks for camera model name.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasCameraModelName()
+	{
+		return !TextUtils.isNullOrEmpty(getCameraModelName());
+	}
+
+	/**
 	 * Get the distance unit used for the results.
 	 *
 	 * @return the distanceUnit
@@ -378,7 +400,8 @@ public class CalibrationReader
 	public DistanceUnit getDistanceUnit()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getDistanceUnit() : DistanceUnit.DISTANCE_UNIT_NA;
+		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getDistanceUnit()
+				: DistanceUnit.DISTANCE_UNIT_NA;
 	}
 
 	/**
@@ -399,7 +422,8 @@ public class CalibrationReader
 	public IntensityUnit getIntensityUnit()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getIntensityUnit() : IntensityUnit.INTENSITY_UNIT_NA;
+		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getIntensityUnit()
+				: IntensityUnit.INTENSITY_UNIT_NA;
 	}
 
 	/**

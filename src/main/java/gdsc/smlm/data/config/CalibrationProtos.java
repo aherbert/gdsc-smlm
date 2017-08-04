@@ -2533,6 +2533,26 @@ public final class CalibrationProtos {
      * <code>double count_per_electron = 4;</code>
      */
     double getCountPerElectron();
+
+    /**
+     * <pre>
+     * The camera model name. This should contain all the information required to 
+     * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+     * </pre>
+     *
+     * <code>string camera_model_name = 5;</code>
+     */
+    java.lang.String getCameraModelName();
+    /**
+     * <pre>
+     * The camera model name. This should contain all the information required to 
+     * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+     * </pre>
+     *
+     * <code>string camera_model_name = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getCameraModelNameBytes();
   }
   /**
    * <pre>
@@ -2554,6 +2574,7 @@ public final class CalibrationProtos {
       readNoise_ = 0D;
       bias_ = 0D;
       countPerElectron_ = 0D;
+      cameraModelName_ = "";
     }
 
     @java.lang.Override
@@ -2600,6 +2621,12 @@ public final class CalibrationProtos {
             case 33: {
 
               countPerElectron_ = input.readDouble();
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              cameraModelName_ = s;
               break;
             }
           }
@@ -2691,6 +2718,50 @@ public final class CalibrationProtos {
       return countPerElectron_;
     }
 
+    public static final int CAMERA_MODEL_NAME_FIELD_NUMBER = 5;
+    private volatile java.lang.Object cameraModelName_;
+    /**
+     * <pre>
+     * The camera model name. This should contain all the information required to 
+     * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+     * </pre>
+     *
+     * <code>string camera_model_name = 5;</code>
+     */
+    public java.lang.String getCameraModelName() {
+      java.lang.Object ref = cameraModelName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cameraModelName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The camera model name. This should contain all the information required to 
+     * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+     * </pre>
+     *
+     * <code>string camera_model_name = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCameraModelNameBytes() {
+      java.lang.Object ref = cameraModelName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cameraModelName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -2715,6 +2786,9 @@ public final class CalibrationProtos {
       if (countPerElectron_ != 0D) {
         output.writeDouble(4, countPerElectron_);
       }
+      if (!getCameraModelNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, cameraModelName_);
+      }
     }
 
     public int getSerializedSize() {
@@ -2737,6 +2811,9 @@ public final class CalibrationProtos {
       if (countPerElectron_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, countPerElectron_);
+      }
+      if (!getCameraModelNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, cameraModelName_);
       }
       memoizedSize = size;
       return size;
@@ -2767,6 +2844,8 @@ public final class CalibrationProtos {
           java.lang.Double.doubleToLongBits(getCountPerElectron())
           == java.lang.Double.doubleToLongBits(
               other.getCountPerElectron()));
+      result = result && getCameraModelName()
+          .equals(other.getCameraModelName());
       return result;
     }
 
@@ -2788,6 +2867,8 @@ public final class CalibrationProtos {
       hash = (37 * hash) + COUNT_PER_ELECTRON_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getCountPerElectron()));
+      hash = (37 * hash) + CAMERA_MODEL_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getCameraModelName().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2929,6 +3010,8 @@ public final class CalibrationProtos {
 
         countPerElectron_ = 0D;
 
+        cameraModelName_ = "";
+
         return this;
       }
 
@@ -2955,6 +3038,7 @@ public final class CalibrationProtos {
         result.readNoise_ = readNoise_;
         result.bias_ = bias_;
         result.countPerElectron_ = countPerElectron_;
+        result.cameraModelName_ = cameraModelName_;
         onBuilt();
         return result;
       }
@@ -3007,6 +3091,10 @@ public final class CalibrationProtos {
         }
         if (other.getCountPerElectron() != 0D) {
           setCountPerElectron(other.getCountPerElectron());
+        }
+        if (!other.getCameraModelName().isEmpty()) {
+          cameraModelName_ = other.cameraModelName_;
+          onChanged();
         }
         onChanged();
         return this;
@@ -3217,6 +3305,100 @@ public final class CalibrationProtos {
       public Builder clearCountPerElectron() {
         
         countPerElectron_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cameraModelName_ = "";
+      /**
+       * <pre>
+       * The camera model name. This should contain all the information required to 
+       * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+       * </pre>
+       *
+       * <code>string camera_model_name = 5;</code>
+       */
+      public java.lang.String getCameraModelName() {
+        java.lang.Object ref = cameraModelName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cameraModelName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The camera model name. This should contain all the information required to 
+       * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+       * </pre>
+       *
+       * <code>string camera_model_name = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCameraModelNameBytes() {
+        java.lang.Object ref = cameraModelName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cameraModelName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The camera model name. This should contain all the information required to 
+       * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+       * </pre>
+       *
+       * <code>string camera_model_name = 5;</code>
+       */
+      public Builder setCameraModelName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        cameraModelName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The camera model name. This should contain all the information required to 
+       * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+       * </pre>
+       *
+       * <code>string camera_model_name = 5;</code>
+       */
+      public Builder clearCameraModelName() {
+        
+        cameraModelName_ = getDefaultInstance().getCameraModelName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The camera model name. This should contain all the information required to 
+       * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+       * </pre>
+       *
+       * <code>string camera_model_name = 5;</code>
+       */
+      public Builder setCameraModelNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        cameraModelName_ = value;
         onChanged();
         return this;
       }
@@ -4978,22 +5160,22 @@ public final class CalibrationProtos {
       "onfig.IntensityUnit\022\030\n\020count_per_photon\030" +
       "\002 \001(\001\"H\n\020AngleCalibration\0224\n\nangle_unit\030",
       "\001 \001(\0162 .gdsc.smlm.data.config.AngleUnit\"" +
-      "\211\001\n\021CameraCalibration\0226\n\013camera_type\030\001 \001" +
+      "\244\001\n\021CameraCalibration\0226\n\013camera_type\030\001 \001" +
       "(\0162!.gdsc.smlm.data.config.CameraType\022\022\n" +
       "\nread_noise\030\002 \001(\001\022\014\n\004bias\030\003 \001(\001\022\032\n\022count" +
-      "_per_electron\030\004 \001(\001\"\357\002\n\013Calibration\022H\n\024d" +
-      "istance_calibration\030\001 \001(\0132*.gdsc.smlm.da" +
-      "ta.config.DistanceCalibration\022@\n\020time_ca" +
-      "libration\030\002 \001(\0132&.gdsc.smlm.data.config." +
-      "TimeCalibration\022J\n\025intensity_calibration" +
-      "\030\003 \001(\0132+.gdsc.smlm.data.config.Intensity",
-      "Calibration\022B\n\021angle_calibration\030\004 \001(\0132\'" +
-      ".gdsc.smlm.data.config.AngleCalibration\022" +
-      "D\n\022camera_calibration\030\005 \001(\0132(.gdsc.smlm." +
-      "data.config.CameraCalibration*?\n\nCameraT" +
-      "ype\022\022\n\016CAMERA_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CC" +
-      "D\020\002\022\t\n\005SCMOS\020\003B\023B\021CalibrationProtosb\006pro" +
-      "to3"
+      "_per_electron\030\004 \001(\001\022\031\n\021camera_model_name" +
+      "\030\005 \001(\t\"\357\002\n\013Calibration\022H\n\024distance_calib" +
+      "ration\030\001 \001(\0132*.gdsc.smlm.data.config.Dis" +
+      "tanceCalibration\022@\n\020time_calibration\030\002 \001" +
+      "(\0132&.gdsc.smlm.data.config.TimeCalibrati" +
+      "on\022J\n\025intensity_calibration\030\003 \001(\0132+.gdsc",
+      ".smlm.data.config.IntensityCalibration\022B" +
+      "\n\021angle_calibration\030\004 \001(\0132\'.gdsc.smlm.da" +
+      "ta.config.AngleCalibration\022D\n\022camera_cal" +
+      "ibration\030\005 \001(\0132(.gdsc.smlm.data.config.C" +
+      "ameraCalibration*?\n\nCameraType\022\022\n\016CAMERA" +
+      "_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t\n\005SCMOS\020" +
+      "\003B\023B\021CalibrationProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5037,7 +5219,7 @@ public final class CalibrationProtos {
     internal_static_gdsc_smlm_data_config_CameraCalibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CameraCalibration_descriptor,
-        new java.lang.String[] { "CameraType", "ReadNoise", "Bias", "CountPerElectron", });
+        new java.lang.String[] { "CameraType", "ReadNoise", "Bias", "CountPerElectron", "CameraModelName", });
     internal_static_gdsc_smlm_data_config_Calibration_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_gdsc_smlm_data_config_Calibration_fieldAccessorTable = new

@@ -1,6 +1,7 @@
 package gdsc.smlm.data.config;
 
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
@@ -231,6 +232,21 @@ public class CalibrationWriter extends CalibrationReader
 	public void setCountPerElectron(double countPerElectron)
 	{
 		getBuilder().getCameraCalibrationBuilder().setCountPerElectron(countPerElectron);
+	}
+
+	/**
+	 * Sets the camera model name. This should contain all the information required to load the camera model, e.g. in
+	 * the case of a per-pixel camera model for sCMOS cameras.
+	 *
+	 * @param cameraModelName
+	 *            the new camera model name
+	 */
+	public void setCameraModelName(String cameraModelName)
+	{
+		if (TextUtils.isNullOrEmpty(cameraModelName))
+			getBuilder().getCameraCalibrationBuilder().clearCameraModelName();
+		else
+			getBuilder().getCameraCalibrationBuilder().setCameraModelName(cameraModelName);
 	}
 
 	/**

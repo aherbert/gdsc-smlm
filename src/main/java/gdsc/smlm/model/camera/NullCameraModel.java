@@ -20,43 +20,8 @@ import java.awt.Rectangle;
  *
  * @author Alex Herbert
  */
-public class FixedPixelCameraModel extends BaseCameraModel
+public class NullCameraModel extends BaseCameraModel
 {
-	private final float bias, gain, var_g2;
-
-	/**
-	 * Instantiates a new fixed pixel camera model.
-	 *
-	 * @param bias
-	 *            the bias (in counts)
-	 * @param gain
-	 *            the gain (count/photon)
-	 */
-	public FixedPixelCameraModel(float bias, float gain)
-	{
-		this(bias, gain, 0);
-	}
-
-	/**
-	 * Instantiates a new fixed pixel camera model.
-	 *
-	 * @param bias
-	 *            the bias (in counts)
-	 * @param gain
-	 *            the gain (count/photon)
-	 * @param variance
-	 *            the variance (in counts)
-	 */
-	public FixedPixelCameraModel(float bias, float gain, float variance)
-	{
-		checkBias(bias);
-		checkGain(gain);
-		checkVariance(variance);
-		this.bias = bias;
-		this.gain = gain;
-		this.var_g2 = variance / (gain * gain);
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -84,7 +49,7 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 */
 	public float[] getBias(Rectangle bounds)
 	{
-		return newArray(bounds, bias);
+		return newArray(bounds, 0);
 	}
 
 	/*
@@ -94,7 +59,7 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 */
 	public float[] getGain(Rectangle bounds)
 	{
-		return newArray(bounds, gain);
+		return newArray(bounds, 1f);
 	}
 
 	/*
@@ -104,7 +69,7 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 */
 	public float[] getNormalisedVariance(Rectangle bounds)
 	{
-		return newArray(bounds, var_g2);
+		return newArray(bounds, 0);
 	}
 
 	/*
@@ -114,8 +79,6 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 */
 	public void removeBias(Rectangle bounds, float[] data)
 	{
-		for (int i = 0; i < data.length; i++)
-			data[i] -= bias;
 	}
 
 	/*
@@ -125,8 +88,6 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 */
 	public void removeGain(Rectangle bounds, float[] data)
 	{
-		for (int i = 0; i < data.length; i++)
-			data[i] /= gain;
 	}
 
 	/*
@@ -136,8 +97,6 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 */
 	public void removeBiasAndGain(Rectangle bounds, float[] data)
 	{
-		for (int i = 0; i < data.length; i++)
-			data[i] = (data[i] - bias) / gain;
 	}
 
 	/*
@@ -146,7 +105,7 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 * @see gdsc.smlm.model.camera.BaseCameraModel#copy()
 	 */
 	@Override
-	public FixedPixelCameraModel copy()
+	public NullCameraModel copy()
 	{
 		return clone();
 	}
@@ -157,11 +116,11 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
-	protected FixedPixelCameraModel clone()
+	protected NullCameraModel clone()
 	{
 		try
 		{
-			return (FixedPixelCameraModel) super.clone();
+			return (NullCameraModel) super.clone();
 		}
 		catch (CloneNotSupportedException e)
 		{

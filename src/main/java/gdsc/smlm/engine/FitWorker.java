@@ -12,6 +12,7 @@ import gdsc.core.logging.Logger;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
@@ -54,6 +55,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
@@ -155,8 +157,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private static byte FILTER_RANK_MINIMAL = (byte) 0;
 	private static byte FILTER_RANK_PRIMARY = (byte) 1;
 
-	private final double gain;
 	private final boolean isFitCameraCounts;
+	private final CameraModel cameraModel;
 
 	/**
 	 * Encapsulate all conversion of coordinates between the frame of data (data bounds) and the sub-section currently
@@ -351,11 +353,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		workerId = WORKER_ID++;
 
-		// The FitWorker should compute results in photons. All downstream code expects it to be in
-		// ADU count.
-		// A quick fix while the code is updated is to apply the gain back to fit results.
-		gain = fitConfig.getGainSafe();
+		// Store this flag so we know how to process the data
 		isFitCameraCounts = fitConfig.isFitCameraCounts();
+		cameraModel = fitConfig.getCameraModel();
 	}
 
 	/**
@@ -401,7 +401,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		cc = new CoordinateConverter(job.bounds);
 		final int width = cc.dataBounds.width;
 		final int height = cc.dataBounds.height;
-		final int size = width * height;
 		borderLimitX = width - border;
 		borderLimitY = height - border;
 		data = job.data;
@@ -411,20 +410,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// The data model was changed to store the signal in photons.
 		// This allows support for per-pixel bias and gain (sCMOS cameras).
 
-		// Remove the bias
-		// TODO - update this to use the camera calibration (e.g. sCMOS) to remove per-pixel bias
-		final double bias = new CalibrationReader(fitConfig.getCalibration()).getBias();
-		for (int i = 0; i < size; i++)
-			data[i] -= bias;
-
-		// Remove the gain. This is done for all solvers except the legacy MLE solvers which 
-		// model camera amplification.
-		// TODO - update this to use the camera calibration (e.g. sCMOS) to remove per-pixel gain
-		if (!isFitCameraCounts)
+		// Remove the bias and gain. This is done for all solvers except:
+		// - the legacy MLE solvers which model camera amplification
+		// - the basic LVM solver without a camera calibration
+		if (isFitCameraCounts)
 		{
-			final double f = 1.0 / gain;
-			for (int i = 0; i < size; i++)
-				data[i] *= f;
+			cameraModel.removeBias(cc.dataBounds, data);
+		}
+		else
+		{
+			cameraModel.removeBiasAndGain(cc.dataBounds, data);
 		}
 
 		FitParameters params = job.getFitParameters();
@@ -862,19 +857,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		params[Gaussian2DFunction.X_POSITION] += offsetx;
 		params[Gaussian2DFunction.Y_POSITION] += offsety;
 
-		if (isFitCameraCounts)
-		{
-			// Convert to photons
-			params[Gaussian2DFunction.BACKGROUND] /= gain;
-			params[Gaussian2DFunction.SIGNAL] /= gain;
-			fitted.noise /= gain;
-			if (fitted.paramsDev != null)
-			{
-				fitted.paramsDev[Gaussian2DFunction.BACKGROUND] /= gain;
-				fitted.paramsDev[Gaussian2DFunction.SIGNAL] /= gain;
-			}
-		}
-
 		return createResult(x, y, value, fitted.error, fitted.noise, params, fitted.paramsDev, candidateId);
 	}
 
@@ -1003,7 +985,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		final Gaussian2DFitter gf;
 		final ResultFactory resultFactory;
-		final double[] region, region2;
+		final double[] region, region2; //, var_g2;
 		final Rectangle regionBounds;
 		final int candidateId;
 		final int width;
@@ -1031,12 +1013,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		QuadrantAnalysis qaSingle = null;
 
 		public CandidateSpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
-				Rectangle regionBounds, int candidateId)
+				double[] var_g2, Rectangle regionBounds, int candidateId)
 		{
 			this.gf = gf;
 			this.resultFactory = resultFactory;
 			this.region = region;
 			this.region2 = region2;
+			//this.var_g2 = var_g2;
 			this.regionBounds = regionBounds;
 			this.candidateId = candidateId;
 
@@ -1045,6 +1028,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			height = regionBounds.height;
 
 			fitConfig.setFitRegion(width, height, 0.5);
+			// The variance is always needed in each fit of the same data 
+			fitConfig.setObservationWeights(var_g2);
 
 			// Analyse neighbours and include them in the fit if they are within a set height of this peak.
 			resetNeighbours();
@@ -3493,7 +3478,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		final ImageExtractor ie, ie2;
 		boolean dynamic;
 		Rectangle regionBounds;
-		double[] region, region2;
+		double[] region, region2, var_g2;
 		CandidateSpotFitter spotFitter;
 		FitType fitType;
 		boolean isValid;
@@ -3544,6 +3529,27 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				cc.setRegionBounds(regionBounds);
 
+				// Set up per-pixel noise
+				if (cameraModel.isPerPixelModel())
+				{
+					// Note: The region bounds are relative to the data bounds origin so 
+					// convert them to absolute
+					Rectangle bounds = new Rectangle(regionBounds);
+					bounds.x += cc.dataBounds.x;
+					bounds.y += cc.dataBounds.y;
+					float[] v = cameraModel.getNormalisedVariance(bounds);
+					// Convert to double
+					if (var_g2 == null || var_g2.length != v.length)
+					{
+						var_g2 = SimpleArrayUtils.toDouble(v);
+					}
+					else
+					{
+						for (int i = 0; i < v.length; i++)
+							var_g2[i] = v[i];
+					}
+				}
+
 				// Offsets to convert fit coordinates to the global reference frame
 				final float offsetx = cc.dataBounds.x + regionBounds.x + 0.5f;
 				final float offsety = cc.dataBounds.y + regionBounds.y + 0.5f;
@@ -3557,7 +3563,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				final ResultFactory factory = (dynamic) ? new DynamicResultFactory(offsetx, offsety)
 						: new FixedResultFactory(offsetx, offsety);
-				spotFitter = new CandidateSpotFitter(gf, factory, region, region2, regionBounds, candidateId);
+				spotFitter = new CandidateSpotFitter(gf, factory, region, region2, var_g2, regionBounds, candidateId);
 			}
 		}
 

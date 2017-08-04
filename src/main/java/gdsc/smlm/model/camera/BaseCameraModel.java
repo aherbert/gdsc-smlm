@@ -1,5 +1,8 @@
 package gdsc.smlm.model.camera;
 
+import java.awt.Rectangle;
+import java.util.Arrays;
+
 import gdsc.core.utils.Maths;
 
 /*----------------------------------------------------------------------------- 
@@ -46,4 +49,23 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable
 	 * @return the base camera model
 	 */
 	public abstract BaseCameraModel copy();
+	
+
+	/**
+	 * Create a new array.
+	 *
+	 * @param bounds
+	 *            the bounds
+	 * @param value
+	 *            the value
+	 * @return the float[]
+	 */
+	protected static float[] newArray(Rectangle bounds, float value)
+	{
+		if (bounds == null || bounds.width <= 0 || bounds.height <= 0)
+			return new float[0];
+		float[] data = new float[bounds.width * bounds.height];
+		Arrays.fill(data, value);
+		return data;
+	}
 }
