@@ -23,6 +23,7 @@ import com.google.protobuf.util.JsonFormat.Printer;
 import gdsc.core.utils.BitFlags;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
@@ -797,6 +798,18 @@ public class SettingsManager
 		Calibration calibration = readCalibration(flags);
 		PSF psf = readPSF(flags);
 		return new FitEngineConfiguration(fitEngineSettings, calibration, psf);
+	}
+
+	/**
+	 * Read the CameraModelSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the CameraModelSettings
+	 */
+	public static CameraModelSettings readCameraModelSettings(int flags)
+	{
+		return new ConfigurationReader<CameraModelSettings>(CameraModelSettings.getDefaultInstance()).read(flags);
 	}
 
 	/**

@@ -90,3 +90,24 @@ message Calibration
 	// The camera calibration.
 	CameraCalibration camera_calibration = 5;
 }
+
+// Define a camera model resource that can be loaded
+message CameraModelResource
+{
+	// The x origin of the camera pixel data
+	int32 x = 1;
+	// The y origin of the camera pixel data
+	int32 y = 2;
+	// The width of the camera pixel data
+	int32 width = 3;
+	// The height of the camera pixel data
+	int32 height = 4;
+	// The filename where the model data is stored
+	string filename = 5;
+}
+
+// Define the camera model settings
+message CameraModelSettings
+{
+	map<string, CameraModelResource> camera_model_resources = 1;
+}

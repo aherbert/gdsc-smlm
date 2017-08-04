@@ -5110,6 +5110,1589 @@ public final class CalibrationProtos {
 
   }
 
+  public interface CameraModelResourceOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CameraModelResource)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The x origin of the camera pixel data
+     * </pre>
+     *
+     * <code>int32 x = 1;</code>
+     */
+    int getX();
+
+    /**
+     * <pre>
+     * The y origin of the camera pixel data
+     * </pre>
+     *
+     * <code>int32 y = 2;</code>
+     */
+    int getY();
+
+    /**
+     * <pre>
+     * The width of the camera pixel data
+     * </pre>
+     *
+     * <code>int32 width = 3;</code>
+     */
+    int getWidth();
+
+    /**
+     * <pre>
+     * The height of the camera pixel data
+     * </pre>
+     *
+     * <code>int32 height = 4;</code>
+     */
+    int getHeight();
+
+    /**
+     * <pre>
+     * The filename where the model data is stored
+     * </pre>
+     *
+     * <code>string filename = 5;</code>
+     */
+    java.lang.String getFilename();
+    /**
+     * <pre>
+     * The filename where the model data is stored
+     * </pre>
+     *
+     * <code>string filename = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getFilenameBytes();
+  }
+  /**
+   * <pre>
+   * Define a camera model resource that can be loaded
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.CameraModelResource}
+   */
+  public  static final class CameraModelResource extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CameraModelResource)
+      CameraModelResourceOrBuilder {
+    // Use CameraModelResource.newBuilder() to construct.
+    private CameraModelResource(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CameraModelResource() {
+      x_ = 0;
+      y_ = 0;
+      width_ = 0;
+      height_ = 0;
+      filename_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private CameraModelResource(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+
+              x_ = input.readInt32();
+              break;
+            }
+            case 16: {
+
+              y_ = input.readInt32();
+              break;
+            }
+            case 24: {
+
+              width_ = input.readInt32();
+              break;
+            }
+            case 32: {
+
+              height_ = input.readInt32();
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              filename_ = s;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelResource_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelResource_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.CalibrationProtos.CameraModelResource.class, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource.Builder.class);
+    }
+
+    public static final int X_FIELD_NUMBER = 1;
+    private int x_;
+    /**
+     * <pre>
+     * The x origin of the camera pixel data
+     * </pre>
+     *
+     * <code>int32 x = 1;</code>
+     */
+    public int getX() {
+      return x_;
+    }
+
+    public static final int Y_FIELD_NUMBER = 2;
+    private int y_;
+    /**
+     * <pre>
+     * The y origin of the camera pixel data
+     * </pre>
+     *
+     * <code>int32 y = 2;</code>
+     */
+    public int getY() {
+      return y_;
+    }
+
+    public static final int WIDTH_FIELD_NUMBER = 3;
+    private int width_;
+    /**
+     * <pre>
+     * The width of the camera pixel data
+     * </pre>
+     *
+     * <code>int32 width = 3;</code>
+     */
+    public int getWidth() {
+      return width_;
+    }
+
+    public static final int HEIGHT_FIELD_NUMBER = 4;
+    private int height_;
+    /**
+     * <pre>
+     * The height of the camera pixel data
+     * </pre>
+     *
+     * <code>int32 height = 4;</code>
+     */
+    public int getHeight() {
+      return height_;
+    }
+
+    public static final int FILENAME_FIELD_NUMBER = 5;
+    private volatile java.lang.Object filename_;
+    /**
+     * <pre>
+     * The filename where the model data is stored
+     * </pre>
+     *
+     * <code>string filename = 5;</code>
+     */
+    public java.lang.String getFilename() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        filename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The filename where the model data is stored
+     * </pre>
+     *
+     * <code>string filename = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFilenameBytes() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        filename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (x_ != 0) {
+        output.writeInt32(1, x_);
+      }
+      if (y_ != 0) {
+        output.writeInt32(2, y_);
+      }
+      if (width_ != 0) {
+        output.writeInt32(3, width_);
+      }
+      if (height_ != 0) {
+        output.writeInt32(4, height_);
+      }
+      if (!getFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, filename_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (x_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, x_);
+      }
+      if (y_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, y_);
+      }
+      if (width_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, width_);
+      }
+      if (height_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, height_);
+      }
+      if (!getFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, filename_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.CalibrationProtos.CameraModelResource)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.CalibrationProtos.CameraModelResource other = (gdsc.smlm.data.config.CalibrationProtos.CameraModelResource) obj;
+
+      boolean result = true;
+      result = result && (getX()
+          == other.getX());
+      result = result && (getY()
+          == other.getY());
+      result = result && (getWidth()
+          == other.getWidth());
+      result = result && (getHeight()
+          == other.getHeight());
+      result = result && getFilename()
+          .equals(other.getFilename());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + X_FIELD_NUMBER;
+      hash = (53 * hash) + getX();
+      hash = (37 * hash) + Y_FIELD_NUMBER;
+      hash = (53 * hash) + getY();
+      hash = (37 * hash) + WIDTH_FIELD_NUMBER;
+      hash = (53 * hash) + getWidth();
+      hash = (37 * hash) + HEIGHT_FIELD_NUMBER;
+      hash = (53 * hash) + getHeight();
+      hash = (37 * hash) + FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFilename().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.CalibrationProtos.CameraModelResource prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define a camera model resource that can be loaded
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.CameraModelResource}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CameraModelResource)
+        gdsc.smlm.data.config.CalibrationProtos.CameraModelResourceOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelResource_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelResource_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.CalibrationProtos.CameraModelResource.class, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.CalibrationProtos.CameraModelResource.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        x_ = 0;
+
+        y_ = 0;
+
+        width_ = 0;
+
+        height_ = 0;
+
+        filename_ = "";
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelResource_descriptor;
+      }
+
+      public gdsc.smlm.data.config.CalibrationProtos.CameraModelResource getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.CalibrationProtos.CameraModelResource.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.CalibrationProtos.CameraModelResource build() {
+        gdsc.smlm.data.config.CalibrationProtos.CameraModelResource result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.CalibrationProtos.CameraModelResource buildPartial() {
+        gdsc.smlm.data.config.CalibrationProtos.CameraModelResource result = new gdsc.smlm.data.config.CalibrationProtos.CameraModelResource(this);
+        result.x_ = x_;
+        result.y_ = y_;
+        result.width_ = width_;
+        result.height_ = height_;
+        result.filename_ = filename_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.CalibrationProtos.CameraModelResource) {
+          return mergeFrom((gdsc.smlm.data.config.CalibrationProtos.CameraModelResource)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.CalibrationProtos.CameraModelResource other) {
+        if (other == gdsc.smlm.data.config.CalibrationProtos.CameraModelResource.getDefaultInstance()) return this;
+        if (other.getX() != 0) {
+          setX(other.getX());
+        }
+        if (other.getY() != 0) {
+          setY(other.getY());
+        }
+        if (other.getWidth() != 0) {
+          setWidth(other.getWidth());
+        }
+        if (other.getHeight() != 0) {
+          setHeight(other.getHeight());
+        }
+        if (!other.getFilename().isEmpty()) {
+          filename_ = other.filename_;
+          onChanged();
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.CalibrationProtos.CameraModelResource parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.CalibrationProtos.CameraModelResource) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int x_ ;
+      /**
+       * <pre>
+       * The x origin of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 x = 1;</code>
+       */
+      public int getX() {
+        return x_;
+      }
+      /**
+       * <pre>
+       * The x origin of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 x = 1;</code>
+       */
+      public Builder setX(int value) {
+        
+        x_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The x origin of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 x = 1;</code>
+       */
+      public Builder clearX() {
+        
+        x_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int y_ ;
+      /**
+       * <pre>
+       * The y origin of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 y = 2;</code>
+       */
+      public int getY() {
+        return y_;
+      }
+      /**
+       * <pre>
+       * The y origin of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 y = 2;</code>
+       */
+      public Builder setY(int value) {
+        
+        y_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The y origin of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 y = 2;</code>
+       */
+      public Builder clearY() {
+        
+        y_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int width_ ;
+      /**
+       * <pre>
+       * The width of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 width = 3;</code>
+       */
+      public int getWidth() {
+        return width_;
+      }
+      /**
+       * <pre>
+       * The width of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 width = 3;</code>
+       */
+      public Builder setWidth(int value) {
+        
+        width_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The width of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 width = 3;</code>
+       */
+      public Builder clearWidth() {
+        
+        width_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int height_ ;
+      /**
+       * <pre>
+       * The height of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 height = 4;</code>
+       */
+      public int getHeight() {
+        return height_;
+      }
+      /**
+       * <pre>
+       * The height of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 height = 4;</code>
+       */
+      public Builder setHeight(int value) {
+        
+        height_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The height of the camera pixel data
+       * </pre>
+       *
+       * <code>int32 height = 4;</code>
+       */
+      public Builder clearHeight() {
+        
+        height_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object filename_ = "";
+      /**
+       * <pre>
+       * The filename where the model data is stored
+       * </pre>
+       *
+       * <code>string filename = 5;</code>
+       */
+      public java.lang.String getFilename() {
+        java.lang.Object ref = filename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          filename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The filename where the model data is stored
+       * </pre>
+       *
+       * <code>string filename = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFilenameBytes() {
+        java.lang.Object ref = filename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          filename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The filename where the model data is stored
+       * </pre>
+       *
+       * <code>string filename = 5;</code>
+       */
+      public Builder setFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        filename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The filename where the model data is stored
+       * </pre>
+       *
+       * <code>string filename = 5;</code>
+       */
+      public Builder clearFilename() {
+        
+        filename_ = getDefaultInstance().getFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The filename where the model data is stored
+       * </pre>
+       *
+       * <code>string filename = 5;</code>
+       */
+      public Builder setFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        filename_ = value;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CameraModelResource)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CameraModelResource)
+    private static final gdsc.smlm.data.config.CalibrationProtos.CameraModelResource DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.CalibrationProtos.CameraModelResource();
+    }
+
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelResource getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CameraModelResource>
+        PARSER = new com.google.protobuf.AbstractParser<CameraModelResource>() {
+      public CameraModelResource parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new CameraModelResource(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CameraModelResource> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CameraModelResource> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.CalibrationProtos.CameraModelResource getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CameraModelSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CameraModelSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+     */
+    int getCameraModelResourcesCount();
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+     */
+    boolean containsCameraModelResources(
+        java.lang.String key);
+    /**
+     * Use {@link #getCameraModelResourcesMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource>
+    getCameraModelResources();
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+     */
+    java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource>
+    getCameraModelResourcesMap();
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+     */
+
+    gdsc.smlm.data.config.CalibrationProtos.CameraModelResource getCameraModelResourcesOrDefault(
+        java.lang.String key,
+        gdsc.smlm.data.config.CalibrationProtos.CameraModelResource defaultValue);
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+     */
+
+    gdsc.smlm.data.config.CalibrationProtos.CameraModelResource getCameraModelResourcesOrThrow(
+        java.lang.String key);
+  }
+  /**
+   * <pre>
+   * Define the camera model settings
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.CameraModelSettings}
+   */
+  public  static final class CameraModelSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CameraModelSettings)
+      CameraModelSettingsOrBuilder {
+    // Use CameraModelSettings.newBuilder() to construct.
+    private CameraModelSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CameraModelSettings() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private CameraModelSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                cameraModelResources_ = com.google.protobuf.MapField.newMapField(
+                    CameraModelResourcesDefaultEntryHolder.defaultEntry);
+                mutable_bitField0_ |= 0x00000001;
+              }
+              com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource>
+              cameraModelResources__ = input.readMessage(
+                  CameraModelResourcesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              cameraModelResources_.getMutableMap().put(
+                  cameraModelResources__.getKey(), cameraModelResources__.getValue());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelSettings_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 1:
+          return internalGetCameraModelResources();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings.class, gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings.Builder.class);
+    }
+
+    public static final int CAMERA_MODEL_RESOURCES_FIELD_NUMBER = 1;
+    private static final class CameraModelResourcesDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource>newDefaultInstance(
+                  gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelSettings_CameraModelResourcesEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  gdsc.smlm.data.config.CalibrationProtos.CameraModelResource.getDefaultInstance());
+    }
+    private com.google.protobuf.MapField<
+        java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> cameraModelResources_;
+    private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource>
+    internalGetCameraModelResources() {
+      if (cameraModelResources_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            CameraModelResourcesDefaultEntryHolder.defaultEntry);
+      }
+      return cameraModelResources_;
+    }
+
+    public int getCameraModelResourcesCount() {
+      return internalGetCameraModelResources().getMap().size();
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+     */
+
+    public boolean containsCameraModelResources(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetCameraModelResources().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getCameraModelResourcesMap()} instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> getCameraModelResources() {
+      return getCameraModelResourcesMap();
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+     */
+
+    public java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> getCameraModelResourcesMap() {
+      return internalGetCameraModelResources().getMap();
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+     */
+
+    public gdsc.smlm.data.config.CalibrationProtos.CameraModelResource getCameraModelResourcesOrDefault(
+        java.lang.String key,
+        gdsc.smlm.data.config.CalibrationProtos.CameraModelResource defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> map =
+          internalGetCameraModelResources().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+     */
+
+    public gdsc.smlm.data.config.CalibrationProtos.CameraModelResource getCameraModelResourcesOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> map =
+          internalGetCameraModelResources().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetCameraModelResources(),
+          CameraModelResourcesDefaultEntryHolder.defaultEntry,
+          1);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (java.util.Map.Entry<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> entry
+           : internalGetCameraModelResources().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource>
+        cameraModelResources__ = CameraModelResourcesDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, cameraModelResources__);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings other = (gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings) obj;
+
+      boolean result = true;
+      result = result && internalGetCameraModelResources().equals(
+          other.internalGetCameraModelResources());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (!internalGetCameraModelResources().getMap().isEmpty()) {
+        hash = (37 * hash) + CAMERA_MODEL_RESOURCES_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetCameraModelResources().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define the camera model settings
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.CameraModelSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CameraModelSettings)
+        gdsc.smlm.data.config.CalibrationProtos.CameraModelSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelSettings_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMapField(
+          int number) {
+        switch (number) {
+          case 1:
+            return internalGetCameraModelResources();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMutableMapField(
+          int number) {
+        switch (number) {
+          case 1:
+            return internalGetMutableCameraModelResources();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings.class, gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        internalGetMutableCameraModelResources().clear();
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_CameraModelSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings build() {
+        gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings buildPartial() {
+        gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings result = new gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings(this);
+        int from_bitField0_ = bitField0_;
+        result.cameraModelResources_ = internalGetCameraModelResources();
+        result.cameraModelResources_.makeImmutable();
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings) {
+          return mergeFrom((gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings other) {
+        if (other == gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings.getDefaultInstance()) return this;
+        internalGetMutableCameraModelResources().mergeFrom(
+            other.internalGetCameraModelResources());
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.MapField<
+          java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> cameraModelResources_;
+      private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource>
+      internalGetCameraModelResources() {
+        if (cameraModelResources_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              CameraModelResourcesDefaultEntryHolder.defaultEntry);
+        }
+        return cameraModelResources_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource>
+      internalGetMutableCameraModelResources() {
+        onChanged();;
+        if (cameraModelResources_ == null) {
+          cameraModelResources_ = com.google.protobuf.MapField.newMapField(
+              CameraModelResourcesDefaultEntryHolder.defaultEntry);
+        }
+        if (!cameraModelResources_.isMutable()) {
+          cameraModelResources_ = cameraModelResources_.copy();
+        }
+        return cameraModelResources_;
+      }
+
+      public int getCameraModelResourcesCount() {
+        return internalGetCameraModelResources().getMap().size();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+       */
+
+      public boolean containsCameraModelResources(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        return internalGetCameraModelResources().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getCameraModelResourcesMap()} instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> getCameraModelResources() {
+        return getCameraModelResourcesMap();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+       */
+
+      public java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> getCameraModelResourcesMap() {
+        return internalGetCameraModelResources().getMap();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+       */
+
+      public gdsc.smlm.data.config.CalibrationProtos.CameraModelResource getCameraModelResourcesOrDefault(
+          java.lang.String key,
+          gdsc.smlm.data.config.CalibrationProtos.CameraModelResource defaultValue) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> map =
+            internalGetCameraModelResources().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+       */
+
+      public gdsc.smlm.data.config.CalibrationProtos.CameraModelResource getCameraModelResourcesOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> map =
+            internalGetCameraModelResources().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearCameraModelResources() {
+        internalGetMutableCameraModelResources().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+       */
+
+      public Builder removeCameraModelResources(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableCameraModelResources().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource>
+      getMutableCameraModelResources() {
+        return internalGetMutableCameraModelResources().getMutableMap();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+       */
+      public Builder putCameraModelResources(
+          java.lang.String key,
+          gdsc.smlm.data.config.CalibrationProtos.CameraModelResource value) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (value == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableCameraModelResources().getMutableMap()
+            .put(key, value);
+        return this;
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CameraModelResource&gt; camera_model_resources = 1;</code>
+       */
+
+      public Builder putAllCameraModelResources(
+          java.util.Map<java.lang.String, gdsc.smlm.data.config.CalibrationProtos.CameraModelResource> values) {
+        internalGetMutableCameraModelResources().getMutableMap()
+            .putAll(values);
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CameraModelSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CameraModelSettings)
+    private static final gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings();
+    }
+
+    public static gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CameraModelSettings>
+        PARSER = new com.google.protobuf.AbstractParser<CameraModelSettings>() {
+      public CameraModelSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new CameraModelSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CameraModelSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CameraModelSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_DistanceCalibration_descriptor;
   private static final 
@@ -5140,6 +6723,21 @@ public final class CalibrationProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_Calibration_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CameraModelResource_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CameraModelResource_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CameraModelSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CameraModelSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CameraModelSettings_CameraModelResourcesEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CameraModelSettings_CameraModelResourcesEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -5173,9 +6771,17 @@ public final class CalibrationProtos {
       "\n\021angle_calibration\030\004 \001(\0132\'.gdsc.smlm.da" +
       "ta.config.AngleCalibration\022D\n\022camera_cal" +
       "ibration\030\005 \001(\0132(.gdsc.smlm.data.config.C" +
-      "ameraCalibration*?\n\nCameraType\022\022\n\016CAMERA" +
-      "_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t\n\005SCMOS\020" +
-      "\003B\023B\021CalibrationProtosb\006proto3"
+      "ameraCalibration\"\\\n\023CameraModelResource\022" +
+      "\t\n\001x\030\001 \001(\005\022\t\n\001y\030\002 \001(\005\022\r\n\005width\030\003 \001(\005\022\016\n\006" +
+      "height\030\004 \001(\005\022\020\n\010filename\030\005 \001(\t\"\344\001\n\023Camer" +
+      "aModelSettings\022d\n\026camera_model_resources" +
+      "\030\001 \003(\0132D.gdsc.smlm.data.config.CameraMod" +
+      "elSettings.CameraModelResourcesEntry\032g\n\031",
+      "CameraModelResourcesEntry\022\013\n\003key\030\001 \001(\t\0229" +
+      "\n\005value\030\002 \001(\0132*.gdsc.smlm.data.config.Ca" +
+      "meraModelResource:\0028\001*?\n\nCameraType\022\022\n\016C" +
+      "AMERA_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t\n\005S" +
+      "CMOS\020\003B\023B\021CalibrationProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5226,6 +6832,24 @@ public final class CalibrationProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_Calibration_descriptor,
         new java.lang.String[] { "DistanceCalibration", "TimeCalibration", "IntensityCalibration", "AngleCalibration", "CameraCalibration", });
+    internal_static_gdsc_smlm_data_config_CameraModelResource_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_gdsc_smlm_data_config_CameraModelResource_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CameraModelResource_descriptor,
+        new java.lang.String[] { "X", "Y", "Width", "Height", "Filename", });
+    internal_static_gdsc_smlm_data_config_CameraModelSettings_descriptor =
+      getDescriptor().getMessageTypes().get(7);
+    internal_static_gdsc_smlm_data_config_CameraModelSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CameraModelSettings_descriptor,
+        new java.lang.String[] { "CameraModelResources", });
+    internal_static_gdsc_smlm_data_config_CameraModelSettings_CameraModelResourcesEntry_descriptor =
+      internal_static_gdsc_smlm_data_config_CameraModelSettings_descriptor.getNestedTypes().get(0);
+    internal_static_gdsc_smlm_data_config_CameraModelSettings_CameraModelResourcesEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CameraModelSettings_CameraModelResourcesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
   }
 
