@@ -808,7 +808,8 @@ public class FitEngineConfiguration implements Cloneable
 		// Most fitters fit in photons unless we have no calibration.
 		IntensityUnit intensityUnit = IntensityUnit.PHOTON;
 
-		if (calibration.getCountPerPhoton() == 0 || getFitConfiguration().isFitCameraCounts())
+		if (//calibration.getCountPerPhoton() == 0 || 
+		getFitConfiguration().isFitCameraCounts())
 			intensityUnit = IntensityUnit.COUNT;
 
 		calibration.setIntensityUnit(intensityUnit);

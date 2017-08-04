@@ -1179,8 +1179,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private void updatePrecisionThreshold()
 	{
-		// Store the squared threshold for speed
-		if (nmPerPixel > 0 && gain > 0 && calibration.isCCDCamera())
+		// Store the squared threshold for speed. 
+		// XXX - Determine if precision filtering for SCMOS is valid.
+		// For now we leave this in but it may have to be changed to have a precision
+		// computed during the fit which is stored for validation.
+		if (nmPerPixel > 0 && gain > 0 &&
+				//calibration.isCCDCamera()
+				(calibration.isCCDCamera() || calibration.isSCMOS())
+				)
 			this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
 		else
 			this.precisionThreshold = 0;
@@ -3265,6 +3271,29 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setCameraModel(CameraModel cameraModel)
 	{
 		invalidateFunctionSolver();
+		// Use this to set the bias and gain
+		if (cameraModel != null && cameraModel.isPerPixelModel())
+		{
+			// Remove global calibration
+
+			calibration.setBias(0);
+			calibration.setCountPerElectron(0);
+			calibration.setReadNoise(0);
+			// Note that we could use an average gain here but the concept
+			// of converting the photons back to per-pixel counts is invalid
+			// so for clarity this is set to 1
+			calibration.setCountPerPhoton(1.0);
+
+			// These update the state, so we directly set the calibration 
+			// and then update the state.
+			//setBias(0);
+			//setAmplification(0);
+			//setReadNoise(0);
+			//setGain(1.0);
+
+			// Trigger an update to the calibration used for validation.
+			updateCalibration();
+		}
 		this.cameraModel = cameraModel;
 	}
 
