@@ -29,6 +29,13 @@ public interface CameraModel
 	 * @return the bounds
 	 */
 	public Rectangle getBounds();
+	
+	/**
+	 * Checks if is per pixel model. If false then all pixels are treated equally.
+	 *
+	 * @return true, if is per pixel model
+	 */
+	public boolean isPerPixelModel();
 
 	/**
 	 * Gets the per-pixel camera bias (offset). The bounds are expected to fit within the camera bounds.

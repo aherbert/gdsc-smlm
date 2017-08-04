@@ -187,6 +187,16 @@ public class PerPixelCameraModel extends BaseCameraModel
 		return new Rectangle(cameraBounds);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#isPerPixelModel()
+	 */
+	public boolean isPerPixelModel()
+	{
+		return true;
+	}
+	
 	/**
 	 * Gets the x origin.
 	 *

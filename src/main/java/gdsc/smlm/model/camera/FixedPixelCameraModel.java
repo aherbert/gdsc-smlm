@@ -71,6 +71,16 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#isPerPixelModel()
+	 */
+	public boolean isPerPixelModel()
+	{
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getBias(java.awt.Rectangle)
 	 */
 	public float[] getBias(Rectangle bounds)
