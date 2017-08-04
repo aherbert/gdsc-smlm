@@ -34,11 +34,13 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.ij.SeriesImageSource;
+import gdsc.smlm.model.camera.PerPixelCameraModel;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.gui.ProgressBar;
@@ -284,6 +286,8 @@ public class CMOSAnalysis implements PlugIn
 	private static final String TITLE = "sCMOS Analysis";
 
 	private static String directory = "";
+	private static String modelDirectory = null;
+	private static String modelName = null;
 	private static boolean rollingAlgorithm = false;
 
 	// The simulation can default roughly to the values displayed 
@@ -692,6 +696,7 @@ public class CMOSAnalysis implements PlugIn
 		// For each sub-directory compute the mean and variance
 		final int nSubDirs = subDirs.size();
 		boolean error = false;
+		int width = 0, height = 0;
 		for (int n = 0; n < nSubDirs; n++)
 		{
 			SubDir sd = subDirs.getf(n);
@@ -705,6 +710,21 @@ public class CMOSAnalysis implements PlugIn
 				error = true;
 				IJ.error(TITLE, "Failed to open image series: " + sd.path.getPath());
 				break;
+			}
+
+			if (n == 0)
+			{
+				width = source.getWidth();
+				height = source.getHeight();
+			}
+			else
+			{
+				if (width != source.getWidth() || height != source.getHeight())
+				{
+					error = true;
+					IJ.error(TITLE, "Image width/hieght mismatch in image series: " + sd.path.getPath());
+					break;
+				}
 			}
 
 			totalProgress = source.getFrames() + 1; // So the bar remains at 99% when workers have finished
@@ -832,11 +852,32 @@ public class CMOSAnalysis implements PlugIn
 		wo.tile();
 
 		// Save
-		measuredStack = new ImageStack(size, size);
-		measuredStack.addSlice("Offset", SimpleArrayUtils.toFloat(pixelOffset));
-		measuredStack.addSlice("Variance", SimpleArrayUtils.toFloat(pixelVariance));
-		measuredStack.addSlice("Gain", SimpleArrayUtils.toFloat(pixelGain));
-		IJ.save(new ImagePlus("PerPixel", measuredStack), new File(directory, "perPixel.tif").getPath());
+		float[] bias = SimpleArrayUtils.toFloat(pixelOffset);
+		float[] variance = SimpleArrayUtils.toFloat(pixelVariance);
+		float[] gain = SimpleArrayUtils.toFloat(pixelGain);
+		measuredStack = new ImageStack(width, height);
+		measuredStack.addSlice("Offset", bias);
+		measuredStack.addSlice("Variance", variance);
+		measuredStack.addSlice("Gain", gain);
+
+		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+		egd.addMessage("Save the sCMOS camera model?");
+		if (modelDirectory == null)
+		{
+			modelDirectory = directory;
+			modelName = "sCMOS Camera";
+		}
+		egd.addStringField("Model_name", modelName);
+		egd.addDirectoryField("Model_directory", modelDirectory);
+		egd.showDialog();
+		if (!egd.wasCanceled())
+		{
+			modelName = egd.getNextString();
+			modelDirectory = egd.getNextString();
+			PerPixelCameraModel cameraModel = new PerPixelCameraModel(width, height, bias, gain, variance);
+			if (!CameraModelManager.save(cameraModel, new File(directory, modelName).getPath()))
+				IJ.error(TITLE, "Failed to save model to file");
+		}
 		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
 
 		Utils.log("Analysis time = " + Utils.timeToString(System.currentTimeMillis() - start));

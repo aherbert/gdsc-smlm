@@ -88,7 +88,7 @@ public class CameraModelManager implements PlugIn
 			resource.setFilename(filename);
 
 			CameraModelSettings.Builder settings = getSettings();
-			settings.getCameraModelResourcesMap().put(name, resource.build());
+			settings.putCameraModelResources(name, resource.build());
 			SettingsManager.writeSettings(settings.build());
 
 			// Cache this
