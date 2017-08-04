@@ -2,6 +2,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Rectangle;
 import java.io.File;
+import java.io.FileFilter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import gdsc.smlm.model.camera.PerPixelCameraModel;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.io.FileSaver;
 import ij.measure.Calibration;
@@ -28,6 +30,8 @@ public class CameraModelManager implements PlugIn
 {
 	private static final String TITLE = "Camera Model Manager";
 	private static final String INFO_TAG = "Per-pixel camera model data";
+	private static String directory = "";
+	private static String filename = "";
 
 	private static CameraModelSettings.Builder settings = null;
 	// Cache camera models for speed
@@ -62,8 +66,7 @@ public class CameraModelManager implements PlugIn
 
 		// Try to save to file
 		//filename = Utils.replaceExtension(filename, ".tif");
-		File file = new File(filename);
-		String name = Utils.removeExtension(file.getName());
+		String name = getName(filename);
 
 		ImageStack stack = new ImageStack(cameraModel.getWidth(), cameraModel.getHeight());
 		stack.addSlice("Bias", cameraModel.getBias());
@@ -79,23 +82,33 @@ public class CameraModelManager implements PlugIn
 		boolean ok = new FileSaver(imp).saveAsTiffStack(filename);
 
 		if (ok)
-		{
-			CameraModelResource.Builder resource = CameraModelResource.newBuilder();
-			resource.setX(cameraModel.getXOrigin());
-			resource.setY(cameraModel.getYOrigin());
-			resource.setWidth(cameraModel.getWidth());
-			resource.setHeight(cameraModel.getHeight());
-			resource.setFilename(filename);
-
-			CameraModelSettings.Builder settings = getSettings();
-			settings.putCameraModelResources(name, resource.build());
-			SettingsManager.writeSettings(settings.build());
-
-			// Cache this
-			map.put(name, cameraModel);
-		}
+			saveResource(cameraModel, filename, name);
 
 		return ok;
+	}
+
+	private static String getName(String filename)
+	{
+		File file = new File(filename);
+		String name = Utils.removeExtension(file.getName());
+		return name;
+	}
+
+	private static void saveResource(PerPixelCameraModel cameraModel, String filename, String name)
+	{
+		CameraModelResource.Builder resource = CameraModelResource.newBuilder();
+		resource.setX(cameraModel.getXOrigin());
+		resource.setY(cameraModel.getYOrigin());
+		resource.setWidth(cameraModel.getWidth());
+		resource.setHeight(cameraModel.getHeight());
+		resource.setFilename(filename);
+
+		CameraModelSettings.Builder settings = getSettings();
+		settings.putCameraModelResources(name, resource.build());
+		SettingsManager.writeSettings(settings.build());
+
+		// Cache this
+		map.put(name, cameraModel);
 	}
 
 	/**
@@ -116,40 +129,46 @@ public class CameraModelManager implements PlugIn
 			CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
 			if (resource == null)
 				return null;
-			// Try and load the resource
-			ImagePlus imp = IJ.openImage(resource.getFilename());
-			if (imp == null)
-			{
-				IJ.log("Failed to load camera data for model: " + name);
-				return null;
-			}
-			// Check stack size
-			ImageStack stack = imp.getImageStack();
-			if (stack.getSize() != 3)
-			{
-				IJ.log("Camera model requires 3 image stack for model: " + name);
-				return null;
-			}
-			// Get the origin
-			imp.setIgnoreGlobalCalibration(true);
-			Calibration cal = imp.getCalibration();
-			Rectangle bounds = new Rectangle((int) cal.xOrigin, (int) cal.yOrigin, stack.getWidth(), stack.getHeight());
-			try
-			{
-				float[] bias = (float[]) stack.getPixels(1);
-				float[] gain = (float[]) stack.getPixels(2);
-				float[] normalisedVariance = (float[]) stack.getPixels(3);
-				model = PerPixelCameraModel.create(bounds, bias, gain, normalisedVariance);
-			}
-			catch (Exception e)
-			{
-				IJ.log("Failed to load camera model: " + name + ". " + e.getMessage());
-			}
+			model = loadFromFile(name, resource.getFilename());
 
 			// Cache this
 			map.put(name, model);
 		}
 		return model;
+	}
+
+	private static PerPixelCameraModel loadFromFile(String name, String filename)
+	{
+		// Try and load the resource
+		ImagePlus imp = IJ.openImage(filename);
+		if (imp == null)
+		{
+			Utils.log("Failed to load camera model %s data from file: ", name, filename);
+			return null;
+		}
+		// Check stack size
+		ImageStack stack = imp.getImageStack();
+		if (stack.getSize() != 3)
+		{
+			Utils.log("Camera model %s requires 3 image stack from file: %s", name, filename);
+			return null;
+		}
+		// Get the origin
+		imp.setIgnoreGlobalCalibration(true);
+		Calibration cal = imp.getCalibration();
+		Rectangle bounds = new Rectangle((int) cal.xOrigin, (int) cal.yOrigin, stack.getWidth(), stack.getHeight());
+		try
+		{
+			float[] bias = (float[]) stack.getPixels(1);
+			float[] gain = (float[]) stack.getPixels(2);
+			float[] normalisedVariance = (float[]) stack.getPixels(3);
+			return PerPixelCameraModel.create(bounds, bias, gain, normalisedVariance);
+		}
+		catch (Exception e)
+		{
+			Utils.log("Failed to load camera model %s from file: %s. %s", name, filename, e.getMessage());
+		}
+		return null;
 	}
 
 	/**
@@ -199,7 +218,8 @@ public class CameraModelManager implements PlugIn
 		return list.toArray(new String[list.size()]);
 	}
 
-	private static String[] OPTIONS = { "Print model details", "View a camera model" };
+	private static String[] OPTIONS = { "Print model details", "View a camera model", "Load a camera model",
+			"Load from directory" };
 	private static int option = 0;
 	private static String selected = "";
 
@@ -228,12 +248,66 @@ public class CameraModelManager implements PlugIn
 
 		switch (option)
 		{
+			case 3:
+				loadFromDirectory();
+				break;
+			case 2:
+				loadFromFile();
+				break;
 			case 1:
 				viewCameraModel();
 				break;
 			default:
 				printCameraModels();
 		}
+	}
+
+	private void loadFromDirectory()
+	{
+		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+		egd.addMessage("Load camera models from a directory.");
+		egd.addFilenameField("Directory", directory);
+		egd.showDialog();
+		if (egd.wasCanceled())
+			return;
+
+		directory = egd.getNextString();
+
+		File[] fileList = (new File(directory)).listFiles(new FileFilter()
+		{
+			public boolean accept(File pathname)
+			{
+				return pathname.isFile();
+			}
+		});
+		
+		for (File file : fileList)
+		{
+			loadFromFileAndSaveResource(file.getPath());
+		}
+	}
+
+	private void loadFromFile()
+	{
+		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+		egd.addMessage("Load a camera model from file.");
+		egd.addFilenameField("Filename", filename);
+		egd.showDialog();
+		if (egd.wasCanceled())
+			return;
+
+		filename = egd.getNextString();
+		
+		loadFromFileAndSaveResource(filename);
+	}
+
+	private static void loadFromFileAndSaveResource(String filename)
+	{
+		String name = getName(filename);
+		PerPixelCameraModel model = loadFromFile(name, filename);
+
+		if (model != null)
+			saveResource(model, filename, name);
 	}
 
 	private void viewCameraModel()
@@ -245,7 +319,7 @@ public class CameraModelManager implements PlugIn
 		if (gd.wasCanceled())
 			return;
 		String name = selected = gd.getNextChoice();
-		
+
 		// Try and get the named resource
 		CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
 		if (resource == null)
@@ -266,6 +340,6 @@ public class CameraModelManager implements PlugIn
 
 	private void printCameraModels()
 	{
-		IJ.log(settings.toString());		
+		IJ.log(settings.toString());
 	}
 }
