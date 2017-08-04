@@ -141,6 +141,8 @@ public class CameraModelManager implements PlugIn
 	{
 		// Try and load the resource
 		ImagePlus imp = IJ.openImage(filename);
+		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
+		
 		if (imp == null)
 		{
 			Utils.log("Failed to load camera model %s data from file: ", name, filename);
@@ -327,8 +329,11 @@ public class CameraModelManager implements PlugIn
 			IJ.log("Failed to find camera data for model: " + name);
 			return;
 		}
-		// Try and load the resource
+		// Try and load the resource. 
+		// Do not use loadFromFile as that vaidates the model data. We just want 
+		// to view the raw image.
 		ImagePlus imp = IJ.openImage(resource.getFilename());
+		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
 		if (imp == null)
 		{
 			IJ.log("Failed to load camera data for model: " + name);
