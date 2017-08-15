@@ -460,16 +460,6 @@ public class PSFDrift implements PlugIn
 		if (gd.invalidNumber())
 			return;
 
-		// Configure the fit solver. We must wrap the settings with a 
-		// FitEngineConfiguration to pass to the PeakFit method
-		FitEngineSettings fitEngineSettings = FitProtosHelper.defaultFitEngineSettings;
-		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
-				SettingsManager.readCalibration(0), PSFProtosHelper.defaultOneAxisGaussian2DPSF);
-		config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
-		if (!PeakFit.configureFitSolver(config, PeakFit.FLAG_NO_SAVE))
-			return;
-		fitConfig = config.getFitConfiguration();
-
 		imp = WindowManager.getImage(title);
 		if (imp == null)
 		{
@@ -482,6 +472,16 @@ public class PSFDrift implements PlugIn
 			IJ.error(TITLE, "No PSF settings for image: " + title);
 			return;
 		}
+		
+		// Configure the fit solver. We must wrap the settings with a 
+		// FitEngineConfiguration to pass to the PeakFit method
+		FitEngineSettings fitEngineSettings = FitProtosHelper.defaultFitEngineSettings;
+		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
+				SettingsManager.readCalibration(0), PSFProtosHelper.defaultOneAxisGaussian2DPSF);
+		config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
+		if (!PeakFit.configureFitSolver(config, imp.getProcessor().getRoi(), PeakFit.FLAG_NO_SAVE))
+			return;
+		fitConfig = config.getFitConfiguration();
 
 		computeDrift();
 	}

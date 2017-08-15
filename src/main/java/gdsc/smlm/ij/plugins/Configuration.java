@@ -272,7 +272,7 @@ public class Configuration implements PlugIn, ItemListener
 			return;
 		if (!PeakFit.configureDataFilter(config, flags))
 			return;
-		PeakFit.configureFitSolver(config, flags);
+		PeakFit.configureFitSolver(config, null, flags);
 	}
 
 	public boolean isConfigurationChanged()

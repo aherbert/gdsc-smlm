@@ -1723,7 +1723,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			// Only configure the fit solver if not in a macro
 			configure = Macro.getOptions() == null;
 		}
-		if (configure && !PeakFit.configureFitSolver(config, PeakFit.FLAG_NO_SAVE))
+		if (configure && !PeakFit.configureFitSolver(config, imp.getProcessor().getRoi(), PeakFit.FLAG_NO_SAVE))
 			return false;
 
 		lastId = simulationParameters.id;

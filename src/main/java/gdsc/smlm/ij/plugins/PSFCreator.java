@@ -1524,7 +1524,7 @@ public class PSFCreator implements PlugInFilter
 			if (interactiveMode)
 			{
 				// This assumes the LVM does not need the calibration
-				PeakFit.configureFitSolver(config, 0);
+				PeakFit.configureFitSolver(config, null, 0);
 			}
 		}
 
@@ -1539,7 +1539,10 @@ public class PSFCreator implements PlugInFilter
 		// Need to be updated after the widths have been set
 		fitConfig.setCoordinateShiftFactor(shift);
 		fitConfig.setBackgroundFitting(false);
-		fitConfig.setMinPhotons(0); // Since the PSF will be normalised
+		// Since the PSF will be normalised
+		fitConfig.setMinPhotons(0); 
+		fitConfig.setBias(0);
+		fitConfig.setGain(1);
 		//fitConfig.setLog(new IJLogger());
 
 		MemoryPeakResults results = fitSpot(psf, psf.getWidth(), psf.getHeight(), x, y);

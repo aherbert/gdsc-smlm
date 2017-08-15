@@ -339,7 +339,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			return false;
 		if (!PeakFit.configureDataFilter(config, 0))
 			return false;
-		if (!PeakFit.configureFitSolver(config, 0))
+		if (!PeakFit.configureFitSolver(config, imp.getProcessor().getRoi(), 0))
 			return false;
 
 		// Extra parameters are needed for interlaced data

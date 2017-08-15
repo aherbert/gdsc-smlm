@@ -1813,7 +1813,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Second dialog for solver dependent parameters
 		if (!maximaIdentification)
 		{
-			if (!configureFitSolver(config, flags))
+			if (!configureFitSolver(config, bounds, flags))
 				return false;
 		}
 
@@ -2014,11 +2014,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 *
 	 * @param config
 	 *            the config
+	 * @param bounds
+	 *            the source image bounds (used to validate the camera model dimensions)
 	 * @param flags
 	 *            the flags
 	 * @return True if the configuration succeeded
 	 */
-	public static boolean configureFitSolver(FitEngineConfiguration config, int flags)
+	public static boolean configureFitSolver(FitEngineConfiguration config, Rectangle bounds, int flags)
 	{
 		boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
 		boolean ignoreCalibration = BitFlags.anySet(flags, FLAG_IGNORE_CALIBRATION);
@@ -2193,6 +2195,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (calibration.isSCMOS())
 			{
 				fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
+				if (!checkCameraModel(fitConfig, bounds))
+					return false;
 			}
 
 			fitConfig.setUseClamping(gd.getNextBoolean());
@@ -2283,6 +2287,55 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 	}
 
+	private static boolean checkCameraModel(FitConfiguration fitConfig, Rectangle bounds)
+	{
+		if (fitConfig.getCalibrationWriter().isSCMOS() && bounds != null)
+		{
+			CameraModel cameraModel = fitConfig.getCameraModel();
+			if (cameraModel == null)
+			{
+				throw new IllegalStateException(
+						"No camera model for camera type: " + fitConfig.getCalibrationWriter().getCameraType());
+			}
+
+			// Check the camera model supports the target bounds
+			Rectangle modelBounds = cameraModel.getBounds();
+			if (!modelBounds.contains(bounds))
+			{
+				//@formatter:off
+				throw new IllegalStateException(String.format(
+						"Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
+						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
+						bounds.x, bounds.y, bounds.width, bounds.height 
+						));
+				//@formatter:off
+			}
+			
+			// Warn if the model bounds are bigger than the image as this may be an incorrect
+			// selection for the camera model
+			if (modelBounds.width > bounds.width || modelBounds.height > bounds.height)
+			{
+				GenericDialog gd = new GenericDialog(TITLE);
+				//@formatter:off
+				gd.addMessage(String.format(
+						"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image image target bounds\n[x=%d,y=%d,width=%d,height=%d].\n \nThis is probably an incorrect camera model.\n \nDo you wish to continue?",
+						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
+						bounds.x, bounds.y, bounds.width, bounds.height 
+						));
+				//@formatter:off
+				gd.enableYesNoCancel();
+				gd.hideCancelButton();
+				gd.showDialog();
+				if (!gd.wasOKed())
+					return false;
+			}
+			
+			// Crop for efficiency
+			fitConfig.setCameraModel(cameraModel.crop(bounds));
+		}
+		return true;
+	}
+	
 	/**
 	 * Add a result output.
 	 * <p>
@@ -2710,51 +2763,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		config.configureOutputUnits();
 
-		if (fitConfig.getCalibrationWriter().isSCMOS())
-		{
-			CameraModel cameraModel = fitConfig.getCameraModel();
-			if (cameraModel == null)
-			{
-				throw new IllegalStateException(
-						"No camera model for camera type: " + fitConfig.getCalibrationWriter().getCameraType());
-			}
+		if (!checkCameraModel(fitConfig, bounds))
+			return false;
 
-			// Check the camera model supports the target bounds
-			Rectangle modelBounds = cameraModel.getBounds();
-			if (!modelBounds.contains(bounds))
-			{
-				//@formatter:off
-				throw new IllegalStateException(String.format(
-						"Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
-						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
-						bounds.x, bounds.y, bounds.width, bounds.height 
-						));
-				//@formatter:off
-			}
-			
-			// Warn if the model bounds are bigger than the image as this may be an incorrect
-			// selection for the camera model
-			if (modelBounds.width > bounds.width || modelBounds.height > bounds.height)
-			{
-				GenericDialog gd = new GenericDialog(TITLE);
-				//@formatter:off
-				gd.addMessage(String.format(
-						"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image image target bounds\n[x=%d,y=%d,width=%d,height=%d].\n \nThis is probably an incorrect camera model.\n \nDo you wish to continue?",
-						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
-						bounds.x, bounds.y, bounds.width, bounds.height 
-						));
-				//@formatter:off
-				gd.enableYesNoCancel();
-				gd.hideCancelButton();
-				gd.showDialog();
-				if (!gd.wasOKed())
-					return false;
-			}
-			
-			// Crop for efficiency
-			fitConfig.setCameraModel(cameraModel.crop(bounds));
-		}
-		
 		return true;
 	}
 
