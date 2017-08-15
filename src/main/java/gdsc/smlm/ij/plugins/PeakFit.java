@@ -75,6 +75,7 @@ import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.ExtendedPeakResult;
@@ -658,8 +659,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 			String textRunTime = Utils.timeToString(runTime / 1000000.0);
 
 			int size = getSize();
-			String message = String.format("%s. Fitting Time = %s. Run time = %s", TextUtils.pleural(size, "localisation"),
-					textTime, textRunTime);
+			String message = String.format("%s. Fitting Time = %s. Run time = %s",
+					TextUtils.pleural(size, "localisation"), textTime, textRunTime);
 			if (resultsSettings.getLogProgress())
 				IJ.log("-=-=-=-");
 			IJ.log(message);
@@ -1156,10 +1157,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 										2);
 							}
 						}
+						else if (calibration.isSCMOS())
+						{
+							String[] models = CameraModelManager.listCameraModels(true);
+							gd.addChoice("Camera_model_name", models, calibration.getCameraModelName());
+						}
 						else
 						{
-							// TODO - Support sCMOS camera
-
 							IJ.error("Unsupported camera type " +
 									CalibrationProtosHelper.getName(calibration.getCameraType()));
 							return false;
@@ -1176,6 +1180,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 								calibration.setReadNoise(Math.abs(egd.getNextNumber()));
 								calibration.setCountPerElectron(Math.abs(egd.getNextNumber()));
 							}
+						}
+						else if (calibration.isSCMOS())
+						{
+							// Note: Since this does not go through the FitConfiguration object the
+							// camera model is not invalidated. However any code using this function
+							// should later call configureFitSolver(...) which will set the camera model
+							// using the camera model name.
+							calibration.setCameraModelName(egd.getNextChoice());
 						}
 						return true;
 					}
@@ -2079,7 +2091,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 		else if (isSteppingFunctionSolver)
 		{
-			boolean requireCalibration = fitSolver != FitSolver.LVM_LSE;
+			boolean requireCalibration = !ignoreCalibration && fitSolver != FitSolver.LVM_LSE;
 
 			// Collect options for LVM fitting
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -2104,13 +2116,16 @@ public class PeakFit implements PlugInFilter, ItemListener
 			// Extra parameters are needed for calibrated fit solvers
 			if (requireCalibration)
 			{
-				// TODO - this must be refactored to get a camera calibration
-				if (calibration.getCalibrationOrBuilder().hasCameraCalibration())
+				if (calibration.isSCMOS())
 				{
-
+					String[] models = CameraModelManager.listCameraModels(true);
+					gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
 				}
-				gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
-				gd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
+				else
+				{
+					gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
+					gd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
+				}
 			}
 
 			gd.addCheckbox("Use_clamping", fitConfig.isUseClamping());
@@ -2156,8 +2171,22 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			if (requireCalibration)
 			{
-				calibration.setBias(Math.abs(gd.getNextNumber()));
-				calibration.setCountPerPhoton(Math.abs(gd.getNextNumber()));
+				if (calibration.isSCMOS())
+				{
+					fitConfig.setCameraModelName(gd.getNextChoice());
+				}
+				else
+				{
+					calibration.setBias(Math.abs(gd.getNextNumber()));
+					calibration.setCountPerPhoton(Math.abs(gd.getNextNumber()));
+				}
+			}
+
+			// Do this even if collection of calibration settings was ignored. This ensures the 
+			// camera model is set.
+			if (calibration.isSCMOS())
+			{
+				fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
 			}
 
 			fitConfig.setUseClamping(gd.getNextBoolean());
@@ -2188,7 +2217,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			{
 				if (isLVM)
 					Parameters.isAboveZero("Lambda", fitConfig.getLambda());
-				// This call will check if the convergence criteria are OK
+				// This call will check if the configuration is OK (including convergence criteria)
 				fitConfig.getFunctionSolver();
 			}
 			catch (IllegalArgumentException e)
@@ -2658,6 +2687,31 @@ public class PeakFit implements PlugInFilter, ItemListener
 		fitConfig.setComputeDeviations(resultsSettings.getShowDeviations());
 
 		config.configureOutputUnits();
+
+		if (fitConfig.getCalibrationWriter().isSCMOS())
+		{
+			CameraModel cameraModel = fitConfig.getCameraModel();
+			if (cameraModel == null)
+			{
+				throw new IllegalStateException(
+						"No camera model for camera type: " + fitConfig.getCalibrationWriter().getCameraType());
+			}
+
+			// Check the camera model supports the target bounds
+			Rectangle modelBounds = cameraModel.getBounds();
+			if (!modelBounds.contains(bounds))
+			{
+				//@formatter:off
+				throw new IllegalStateException(String.format(
+						"Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
+						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
+						bounds.x, bounds.y, bounds.width, bounds.height 
+						));
+				//@formatter:off
+			}
+			// Crop for efficiency
+			fitConfig.setCameraModel(cameraModel.crop(bounds));
+		}
 	}
 
 	/**
