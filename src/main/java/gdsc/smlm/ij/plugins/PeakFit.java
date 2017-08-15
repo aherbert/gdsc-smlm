@@ -1160,7 +1160,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						else if (calibration.isSCMOS())
 						{
 							String[] models = CameraModelManager.listCameraModels(true);
-							gd.addChoice("Camera_model_name", models, calibration.getCameraModelName());
+							egd.addChoice("Camera_model_name", models, calibration.getCameraModelName());
 						}
 						else
 						{
@@ -1791,14 +1791,19 @@ public class PeakFit implements PlugInFilter, ItemListener
 			{
 				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage(
-						"Precision filtering can use global noise estimate or local background level.\n \nLocal background requires the camera bias:");
+						"Precision filtering can use global noise estimate or local background level");
 				gd.addCheckbox("Local_background", fitConfig.isPrecisionUsingBackground());
-				gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
+				if (calibration.isCCDCamera())
+				{
+					gd.addMessage("Local background requires the camera bias");
+					gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
+				}
 				gd.showDialog();
 				if (gd.wasCanceled())
 					return false;
 				fitConfig.setPrecisionUsingBackground(gd.getNextBoolean());
-				calibration.setBias(Math.abs(gd.getNextNumber()));
+				if (calibration.isCCDCamera())
+					calibration.setBias(Math.abs(gd.getNextNumber()));
 			}
 		}
 
@@ -2095,7 +2100,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			// Collect options for LVM fitting
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-			gd.addMessage(FitProtosHelper.getName(fitSolver) + " requires additional parameters");
+			String fitSolverName = FitProtosHelper.getName(fitSolver);
+			gd.addMessage(fitSolverName + " requires additional parameters");
 			gd.addStringField("Relative_threshold", Utils.rounded(fitConfig.getRelativeThreshold()));
 			gd.addStringField("Absolute_threshold", Utils.rounded(fitConfig.getAbsoluteThreshold()));
 			gd.addStringField("Parameter_relative_threshold", Utils.rounded(fitConfig.getParameterRelativeThreshold()));
@@ -2111,21 +2117,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 						.getNames((Object[]) FastMLESteppingFunctionSolver.LineSearchMethod.values());
 				gd.addChoice("Line_search_method", lineSearchNames,
 						lineSearchNames[fitConfig.getLineSearchMethod().getNumber()]);
-			}
-
-			// Extra parameters are needed for calibrated fit solvers
-			if (requireCalibration)
-			{
-				if (calibration.isSCMOS())
-				{
-					String[] models = CameraModelManager.listCameraModels(true);
-					gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
-				}
-				else
-				{
-					gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
-					gd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
-				}
 			}
 
 			gd.addCheckbox("Use_clamping", fitConfig.isUseClamping());
@@ -2152,6 +2143,34 @@ public class PeakFit implements PlugInFilter, ItemListener
 				}
 			}
 
+			// Extra parameters are needed for calibrated fit solvers
+			if (requireCalibration)
+			{
+				switch (calibration.getCameraType())
+				{
+					case CCD:
+					case EMCCD:
+					case SCMOS:
+						break;
+					default:
+						IJ.error(TITLE, fitSolverName + " requires camera calibration");
+						return false;
+				}
+				
+				gd.addMessage(fitSolverName + " requires calibration for camera: " + 
+					CalibrationProtosHelper.getName(calibration.getCameraType()));
+				if (calibration.isSCMOS())
+				{
+					String[] models = CameraModelManager.listCameraModels(true);
+					gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
+				}
+				else
+				{
+					gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
+					gd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
+				}
+			}
+			
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
@@ -2167,19 +2186,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 			{
 				fitConfig.setFixedIterations(gd.getNextBoolean());
 				fitConfig.setLineSearchMethod(gd.getNextChoiceIndex());
-			}
-
-			if (requireCalibration)
-			{
-				if (calibration.isSCMOS())
-				{
-					fitConfig.setCameraModelName(gd.getNextChoice());
-				}
-				else
-				{
-					calibration.setBias(Math.abs(gd.getNextNumber()));
-					calibration.setCountPerPhoton(Math.abs(gd.getNextNumber()));
-				}
 			}
 
 			// Do this even if collection of calibration settings was ignored. This ensures the 
@@ -2210,6 +2216,19 @@ public class PeakFit implements PlugInFilter, ItemListener
 				}
 			}
 
+			if (requireCalibration)
+			{
+				if (calibration.isSCMOS())
+				{
+					fitConfig.setCameraModelName(gd.getNextChoice());
+				}
+				else
+				{
+					calibration.setBias(Math.abs(gd.getNextNumber()));
+					calibration.setCountPerPhoton(Math.abs(gd.getNextNumber()));
+				}
+			}
+			
 			if (saveSettings)
 				saveFitEngineSettings(config);
 
