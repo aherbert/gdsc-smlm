@@ -99,6 +99,7 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionListener;
+import ij.gui.GenericDialog;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
@@ -1790,8 +1791,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (!fitConfig.isSmartFilter() && fitConfig.getPrecisionThreshold() > 0)
 			{
 				gd = new ExtendedGenericDialog(TITLE);
-				gd.addMessage(
-						"Precision filtering can use global noise estimate or local background level");
+				gd.addMessage("Precision filtering can use global noise estimate or local background level");
 				gd.addCheckbox("Local_background", fitConfig.isPrecisionUsingBackground());
 				if (calibration.isCCDCamera())
 				{
@@ -2156,9 +2156,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 						IJ.error(TITLE, fitSolverName + " requires camera calibration");
 						return false;
 				}
-				
-				gd.addMessage(fitSolverName + " requires calibration for camera: " + 
-					CalibrationProtosHelper.getName(calibration.getCameraType()));
+
+				gd.addMessage(fitSolverName + " requires calibration for camera: " +
+						CalibrationProtosHelper.getName(calibration.getCameraType()));
 				if (calibration.isSCMOS())
 				{
 					String[] models = CameraModelManager.listCameraModels(true);
@@ -2170,7 +2170,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 					gd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
 				}
 			}
-			
+
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
@@ -2228,7 +2228,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 					calibration.setCountPerPhoton(Math.abs(gd.getNextNumber()));
 				}
 			}
-			
+
 			if (saveSettings)
 				saveFitEngineSettings(config);
 
@@ -2487,6 +2487,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		// Use the FitEngine to allow multi-threading.
 		FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
+		if (engine == null)
+			return;
 
 		final int step = Utils.getProgressInterval(totalFrames);
 
@@ -2657,7 +2659,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		PeakResults r = (results.numberOfOutputs() == 1) ? list.toArray()[0] : list;
 
 		// Update the configuration
-		updateFitConfiguration(config);
+		if (!updateFitConfiguration(config))
+			return null;
 
 		FitEngine engine = new FitEngine(config, r, numberOfThreads, queue, queueSize);
 
@@ -2694,7 +2697,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * 
 	 * @return
 	 */
-	private void updateFitConfiguration(FitEngineConfiguration config)
+	private boolean updateFitConfiguration(FitEngineConfiguration config)
 	{
 		FitConfiguration fitConfig = config.getFitConfiguration();
 
@@ -2728,9 +2731,31 @@ public class PeakFit implements PlugInFilter, ItemListener
 						));
 				//@formatter:off
 			}
+			
+			// Warn if the model bounds are bigger than the image as this may be an incorrect
+			// selection for the camera model
+			if (modelBounds.width > bounds.width || modelBounds.height > bounds.height)
+			{
+				GenericDialog gd = new GenericDialog(TITLE);
+				//@formatter:off
+				gd.addMessage(String.format(
+						"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image image target bounds\n[x=%d,y=%d,width=%d,height=%d].\n \nThis is probably an incorrect camera model.\n \nDo you wish to continue?",
+						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
+						bounds.x, bounds.y, bounds.width, bounds.height 
+						));
+				//@formatter:off
+				gd.enableYesNoCancel();
+				gd.hideCancelButton();
+				gd.showDialog();
+				if (!gd.wasOKed())
+					return false;
+			}
+			
 			// Crop for efficiency
 			fitConfig.setCameraModel(cameraModel.crop(bounds));
 		}
+		
+		return true;
 	}
 
 	/**
@@ -2754,6 +2779,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		// Use the FitEngine to allow multi-threading.
 		final FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
+		if (engine==null)
+			return;
 
 		final int step = Utils.getProgressInterval(totalFrames);
 
