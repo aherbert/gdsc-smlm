@@ -2551,14 +2551,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			gaussianFunction = createGaussianFunction(1, 1, 1);
 		}
 
-		// Only support CCD/EM-CCD at the moment
-		if (!calibration.isCCDCamera())
-		{
-			throw new IllegalStateException("CCD/EM-CCD camera is required for fit solver: " + getFitSolver());
-		}
-
 		if (getFitSolver() == FitSolver.MLE)
 		{
+			// Only support CCD/EM-CCD at the moment
+			if (!calibration.isCCDCamera())
+			{
+				throw new IllegalStateException("CCD/EM-CCD camera is required for fit solver: " + getFitSolver());
+			}
+			
 			// This requires the gain
 			if (gain <= 0)
 			{
