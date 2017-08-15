@@ -517,7 +517,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 		float[] bias = getData(this.bias, intersection, true);
 		float[] gain = getData(this.gain, intersection, true);
 		float[] var_g2 = getData(this.var_g2, intersection, true);
-		return new PerPixelCameraModel(true, bounds, bias, gain, var_g2);
+		return new PerPixelCameraModel(false, bounds, bias, gain, var_g2);
 	}
 
 	/*
