@@ -23,6 +23,7 @@ import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import gdsc.smlm.results.procedures.HResultProcedure;
 import gdsc.smlm.results.procedures.IResultProcedure;
+import gdsc.smlm.results.procedures.IXYRResultProcedure;
 import gdsc.smlm.results.procedures.IXYResultProcedure;
 import gdsc.smlm.results.procedures.IXYZResultProcedure;
 import gdsc.smlm.results.procedures.LSEPrecisionBProcedure;
@@ -216,7 +217,25 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void removeNullResults()
 	{
-		this.results.removeNullResults();
+		this.results.removeIf(new PeakResultPredicate()
+		{
+			public boolean test(PeakResult t)
+			{
+				return t==null;
+			}
+		});
+	}
+
+	/**
+	 * Removes the result if it matches the filter. If objects are removed then the order of elements may change.
+	 *
+	 * @param filter
+	 *            the filter
+	 * @return true, if any were removed
+	 */
+	public boolean removeIf(PeakResultPredicate filter)
+	{
+		return this.results.removeIf(filter);
 	}
 
 	/////////////////////////////////////////////////////////////////
@@ -1451,6 +1470,44 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 					ic.convert(r.getSignal()), 
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()));
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYRResultProcedure procedure)
+			throws ConversionException, ConfigurationException
+	{
+		if (!hasCalibration())
+			throw new ConfigurationException("No calibration");
+
+		TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
+		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getf(i);
+			//@formatter:off
+			procedure.executeIXYR(
+					ic.convert(r.getSignal()), 
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()),
+					r);
 			//@formatter:on
 		}
 	}

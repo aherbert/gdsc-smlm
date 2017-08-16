@@ -48,14 +48,16 @@ public interface PeakResultStore
 	/**
 	 * Add all results.
 	 *
-	 * @param results the results
+	 * @param results
+	 *            the results
 	 */
 	public void addCollection(Collection<PeakResult> results);
 
 	/**
 	 * Add all results.
 	 *
-	 * @param results the results
+	 * @param results
+	 *            the results
 	 */
 	public void addArray(PeakResult[] results);
 
@@ -104,7 +106,11 @@ public interface PeakResultStore
 	public PeakResultStore copy();
 
 	/**
-	 * Removes the null results from the store.
+	 * Removes the result if it matches the filter. If objects are removed then the order of elements may change.
+	 *
+	 * @param filter
+	 *            the filter
+	 * @return true, if any were removed
 	 */
-	public void removeNullResults();
+	public boolean removeIf(PeakResultPredicate filter);
 }

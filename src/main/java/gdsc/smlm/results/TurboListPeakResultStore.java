@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import gdsc.core.utils.TurboList;
+import gdsc.core.utils.TurboList.SimplePredicate;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -42,13 +43,14 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/**
 	 * Instantiates a new array list peak result store.
 	 *
-	 * @param store the store to copy
+	 * @param store
+	 *            the store to copy
 	 */
 	public TurboListPeakResultStore(TurboListPeakResultStore store)
 	{
 		this.results = new TurboList<PeakResult>(store.results);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -179,23 +181,17 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#removeNullResults()
+	 * @see gdsc.smlm.results.PeakResultStore#removeIf(gdsc.smlm.results.PeakResultPredicate)
 	 */
-	public void removeNullResults()
+	public boolean removeIf(final PeakResultPredicate filter)
 	{
-		PeakResult[] list = toArray();
-		int newSize = 0;
-		for (int i = 0, size = list.length; i < size; i++)
+		// Delegate to the list implementation
+		return this.results.removeIf(new SimplePredicate<PeakResult>()
 		{
-			if (list[i] != null)
-				list[newSize++] = list[i];
-		}
-		if (newSize < list.length)
-		{
-			if (newSize == 0)
-				clear();
-			else
-				this.results = new TurboList<PeakResult>(Arrays.asList(Arrays.copyOf(list, newSize)));
-		}
+			public boolean test(PeakResult t)
+			{
+				return filter.test(t);
+			}
+		});
 	}
 }

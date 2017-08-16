@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package gdsc.smlm.ij.plugins;
 
 /*----------------------------------------------------------------------------- 
@@ -115,6 +118,29 @@ public class MultiDialog extends Dialog
 	}
 
 	/**
+	 * Interface to allow resulst to populate the items in the multi dialog
+	 */
+	public interface MemoryResultsFilter
+	{
+		/**
+		 * Accept the results.
+		 *
+		 * @param results
+		 *            the results
+		 * @return true, if successful
+		 */
+		public boolean accept(MemoryPeakResults results);
+	}
+
+	private static class NullMemoryResultsFilter implements MemoryResultsFilter
+	{
+		public boolean accept(MemoryPeakResults results)
+		{
+			return true;
+		}
+	}
+
+	/**
 	 * Class that allows the current results held in memory to be shown in the dialog
 	 * 
 	 * @author Alex Herbert
@@ -122,19 +148,26 @@ public class MultiDialog extends Dialog
 	public static class MemoryResultsItems implements Items
 	{
 		private String[] names;
+		private int size;
 
 		public MemoryResultsItems()
 		{
+			this(new NullMemoryResultsFilter());
+		}
+
+		public MemoryResultsItems(MemoryResultsFilter filter)
+		{
 			Collection<MemoryPeakResults> allResults = MemoryPeakResults.getAllResults();
 			names = new String[allResults.size()];
-			int i = 0;
+			size = 0;
 			for (MemoryPeakResults results : allResults)
-				names[i++] = ResultsManager.getName(results);
+				if (filter.accept(results))
+					names[size++] = ResultsManager.getName(results);
 		}
 
 		public int size()
 		{
-			return names.length;
+			return size;
 		}
 
 		public String getFormattedName(int i)

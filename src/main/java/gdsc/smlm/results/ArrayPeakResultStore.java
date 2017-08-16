@@ -1,8 +1,10 @@
 package gdsc.smlm.results;
 
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Objects;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -50,6 +52,18 @@ public class ArrayPeakResultStore implements PeakResultStore
 	{
 		this.results = store.toArray();
 		this.size = store.size;
+	}
+
+	/**
+	 * Instantiates a new array peak result store.
+	 *
+	 * @param results
+	 *            the results
+	 */
+	ArrayPeakResultStore(PeakResult[] results)
+	{
+		this.results = results;
+		this.size = results.length;
 	}
 
 	/**
@@ -215,19 +229,52 @@ public class ArrayPeakResultStore implements PeakResultStore
 		return new ArrayPeakResultStore(this);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Note: This does not remove the references to the underlying data or reallocate storage thus {@link #get(int)} can
+	 * return stale data.
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#removeNullResults()
+	 * @see gdsc.smlm.results.PeakResultStore#removeIf(gdsc.smlm.results.PeakResultPredicate)
 	 */
-	public void removeNullResults()
+	public boolean removeIf(PeakResultPredicate filter)
 	{
-		int newSize = 0;
+		Objects.requireNonNull(filter);
+
+		// Adapted from java.util.ArrayList (Java 1.8)
+
+		// figure out which elements are to be removed
+		// any exception thrown from the filter predicate at this stage
+		// will leave the collection unmodified
+		int removeCount = 0;
+		final int size = this.size;
+		final BitSet removeSet = new BitSet(size);
 		for (int i = 0; i < size; i++)
 		{
-			if (results[i] != null)
-				results[newSize++] = results[i];
+			if (filter.test(results[i]))
+			{
+				removeSet.set(i);
+				removeCount++;
+			}
 		}
-		size = newSize;
+
+		// shift surviving elements left over the spaces left by removed elements
+		final boolean anyToRemove = removeCount > 0;
+		if (anyToRemove)
+		{
+			final int newSize = size - removeCount;
+			for (int i = 0, j = 0; (i < size) && (j < newSize); i++, j++)
+			{
+				i = removeSet.nextClearBit(i);
+				results[j] = results[i];
+			}
+			//for (int k = newSize; k < size; k++)
+			//{
+			//	results[k] = null; // Let gc do its work
+			//}
+			this.size = newSize;
+		}
+
+		return anyToRemove;
 	}
 }

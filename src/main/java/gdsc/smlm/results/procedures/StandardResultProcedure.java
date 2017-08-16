@@ -28,6 +28,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
         BIXYZResultProcedure, 
         IResultProcedure, 
         IXYResultProcedure, 
+        IXYRResultProcedure, 
         IXYZResultProcedure,
 		TResultProcedure, 
 		TXYResultProcedure, 
@@ -215,6 +216,31 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		this.intensity[i] = intensity;
 		this.x[i] = x;
 		this.y[i] = y;
+		i++;
+	}
+
+	/**
+	 * Gets the IXYR data in the configured units.
+	 * 
+	 * @throws DataException
+	 *             if conversion to the required units is not possible
+	 */
+	public void getIXYR() throws DataException
+	{
+		i = 0;
+		allocateI();
+		allocateX();
+		allocateY();
+		allocateR();
+		results.forEach(getIntensityUnit(), getDistanceUnit(), (IXYRResultProcedure) this);
+	}
+
+	public void executeIXYR(float intensity, float x, float y, PeakResult result)
+	{
+		this.intensity[i] = intensity;
+		this.x[i] = x;
+		this.y[i] = y;
+		peakResults[i] = result;
 		i++;
 	}
 
