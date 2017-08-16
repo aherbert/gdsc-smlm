@@ -124,7 +124,7 @@ public class TraceExporter implements PlugIn
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Export traces to a directory");
 		gd.addDirectoryField("Directory", directory, 30);
-		gd.addSlider("Min_length", 2, 20, minLength);
+		gd.addNumericField("Min_length", minLength, 0);
 		gd.addChoice("Format", FORMAT_NAMES, FORMAT_NAMES[format]);
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -201,6 +201,9 @@ public class TraceExporter implements PlugIn
 			}
 			count++;
 		}
+		// Final ID
+		if (count < minLength)
+			remove.add(id);
 
 		if (!remove.isEmpty())
 		{
