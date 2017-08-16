@@ -173,6 +173,7 @@ public class TraceExporter implements PlugIn
 	private void exportSptPALM(MemoryPeakResults results)
 	{
 		// Simple sptPALM CSV file format:
+		// TODO - check this format
 		// id, time, x, y
 
 		BufferedWriter out = null;
@@ -191,8 +192,14 @@ public class TraceExporter implements PlugIn
 				{
 					try
 					{
-						// TODO
+						writer.write(result.getId());
+						writer.write(",");
+						writer.write(result.getFrame());
+						writer.write(",");
 						writer.write(Float.toString(x));
+						writer.write(",");
+						writer.write(Float.toString(y));
+						writer.write(",");
 						writer.newLine();
 					}
 					catch (IOException e)
