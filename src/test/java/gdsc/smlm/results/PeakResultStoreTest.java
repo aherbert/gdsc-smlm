@@ -38,7 +38,7 @@ public class PeakResultStoreTest
 		PeakResult[] list = new PeakResult[20];
 		int size = 0;
 
-		Assert.assertEquals(size, store.size());		
+		Assert.assertEquals(size, store.size());
 		Assert.assertEquals(size, store.toArray().length);
 
 		// Can store data in order
@@ -98,7 +98,13 @@ public class PeakResultStoreTest
 			store.add(result);
 		}
 		Assert.assertNotEquals(size, store.size());
-		store.removeNullResults();
+		store.removeIf(new PeakResultPredicate()
+		{
+			public boolean test(PeakResult t)
+			{
+				return t == null;
+			}
+		});
 		Assert.assertEquals(size, store.size());
 
 		for (int i = 0; i < size; i++)
@@ -132,7 +138,7 @@ public class PeakResultStoreTest
 		Assert.assertEquals(size, store.size());
 		for (int i = 0; i < size; i++)
 			Assert.assertTrue(list[i] == store.get(i));
-		
+
 		// Can copy
 		PeakResultStore copy = store.copy();
 		Assert.assertNotEquals(copy, store);
