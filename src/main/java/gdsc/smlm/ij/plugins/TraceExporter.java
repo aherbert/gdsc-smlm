@@ -8,13 +8,17 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import gdsc.core.data.utils.TypeConverter;
+import gdsc.smlm.data.NamedObject;
+import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.ij.plugins.MultiDialog.MemoryResultsItems;
+import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultPredicate;
-import gdsc.smlm.results.procedures.IXYRResultProcedure;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
@@ -25,12 +29,38 @@ import ij.plugin.PlugIn;
  */
 public class TraceExporter implements PlugIn
 {
+	private enum ExportFormat implements NamedObject
+	{
+		SPOT_ON("Spot-On");
+
+		private String name;
+
+		ExportFormat(String name)
+		{
+			this.name = name;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public String getShortName()
+		{
+			return name;
+		}
+	}
+
 	private static final String TITLE = "Trace Exporter";
 	private static ArrayList<String> selected;
 	private static String directory = "";
 	private static int minLength = 2;
 
-	private Comparator<PeakResult> comp;
+	private static Comparator<PeakResult> comp;
+	private static String[] FORMAT_NAMES;
+	private static int format = 0;
+
+	private ExportFormat exportFormat;
 
 	/*
 	 * (non-Javadoc)
@@ -65,19 +95,44 @@ public class TraceExporter implements PlugIn
 		if (!showMultiDialog(allResults, items))
 			return;
 
-		comp = new Comparator<PeakResult>()
+		if (comp == null)
 		{
-			public int compare(PeakResult o1, PeakResult o2)
+			comp = new Comparator<PeakResult>()
 			{
-				int result = o1.getId() - o2.getId();
-				if (result != 0)
-					return result;
-				return o1.getFrame() - o2.getFrame();
-			}
-		};
+				public int compare(PeakResult o1, PeakResult o2)
+				{
+					int result = o1.getId() - o2.getId();
+					if (result != 0)
+						return result;
+					return o1.getFrame() - o2.getFrame();
+				}
+			};
+		}
+
+		exportFormat = getExportFormat();
 
 		for (MemoryPeakResults results : allResults)
 			export(results);
+	}
+
+	private boolean showDialog()
+	{
+		if (FORMAT_NAMES == null)
+		{
+			FORMAT_NAMES = SettingsManager.getNames((Object[]) ExportFormat.values());
+		}
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addMessage("Export traces to a directory");
+		gd.addDirectoryField("Directory", directory, 30);
+		gd.addSlider("Min_length", 2, 20, minLength);
+		gd.addChoice("Format", FORMAT_NAMES, FORMAT_NAMES[format]);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+		directory = gd.getNextString();
+		minLength = (int) Math.abs(gd.getNextNumber());
+		format = gd.getNextChoiceIndex();
+		return true;
 	}
 
 	private boolean showMultiDialog(ArrayList<MemoryPeakResults> allResults, MemoryResultsItems items)
@@ -108,18 +163,11 @@ public class TraceExporter implements PlugIn
 		return !allResults.isEmpty();
 	}
 
-	private boolean showDialog()
+	private ExportFormat getExportFormat()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addMessage("Export traces to a directory");
-		gd.addDirectoryField("Directory", directory, 30);
-		gd.addSlider("Min_length", 2, 20, minLength);
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return false;
-		directory = gd.getNextString();
-		minLength = (int) Math.abs(gd.getNextNumber());
-		return true;
+		if (format >= 0 && format < FORMAT_NAMES.length)
+			return ExportFormat.values()[format];
+		return ExportFormat.SPOT_ON;
 	}
 
 	private void export(MemoryPeakResults results)
@@ -166,15 +214,19 @@ public class TraceExporter implements PlugIn
 			results.sort(comp);
 		}
 
-		// TODO - options to support different formats
-		exportSptPALM(results);
+		switch (exportFormat)
+		{
+			case SPOT_ON:
+			default:
+				exportSpotOn(results);
+		}
 	}
 
-	private void exportSptPALM(MemoryPeakResults results)
+	private void exportSpotOn(MemoryPeakResults results)
 	{
-		// Simple sptPALM CSV file format:
-		// TODO - check this format
-		// id, time, x, y
+		// Simple Spot-On CSV file format:
+		// https://spoton.berkeley.edu/SPTGUI/docs/latest#input-formats
+		// frame, t (seconds), trajectory (trace id), x (um), y (um)
 
 		BufferedWriter out = null;
 		try
@@ -182,29 +234,33 @@ public class TraceExporter implements PlugIn
 			File file = new File(directory, results.getName() + ".csv");
 			FileOutputStream fos = new FileOutputStream(file);
 			out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
-			out.write("id,time,x,y");
+			out.write("frame,t,trajectory,x,y");
 			out.newLine();
-			
+
+			final TypeConverter<TimeUnit> converter = UnitConverterFactory.createConverter(TimeUnit.FRAME,
+					TimeUnit.SECOND, results.getCalibrationReader().getExposureTime());
+
 			final BufferedWriter writer = out;
-			results.forEach(IntensityUnit.PHOTON, DistanceUnit.UM, new IXYRResultProcedure()
+			results.forEach(DistanceUnit.UM, new XYRResultProcedure()
 			{
-				public void executeIXYR(float intensity, float x, float y, PeakResult result)
+				public void executeXYR(float x, float y, PeakResult result)
 				{
 					try
 					{
-						writer.write(result.getId());
+						writer.write(Integer.toString(result.getFrame()));
 						writer.write(",");
-						writer.write(result.getFrame());
+						writer.write(Float.toString(converter.convert(result.getFrame())));
+						writer.write(",");
+						writer.write(Integer.toString(result.getId()));
 						writer.write(",");
 						writer.write(Float.toString(x));
 						writer.write(",");
 						writer.write(Float.toString(y));
-						writer.write(",");
 						writer.newLine();
 					}
 					catch (IOException e)
 					{
-						// Allow clean-up
+						// Allow clean-up by passing the exception up
 						throw new RuntimeException(e);
 					}
 				}
