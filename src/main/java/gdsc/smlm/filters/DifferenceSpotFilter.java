@@ -65,6 +65,29 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.filters.SpotFilter#isWeighted()
+	 */
+	@Override
+	public boolean isWeighted()
+	{
+		return processor1.isWeighted() || processor2.isWeighted();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.SpotFilter#setWeights(float[], int, int)
+	 */
+	@Override
+	public void setWeights(float[] weights, int width, int height)
+	{
+		processor1.setWeights(weights, width, height);
+		processor2.setWeights(weights, width, height);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.filters.MaximaSpotFilter#preprocessData(float[], int, int)
 	 */
 	@Override

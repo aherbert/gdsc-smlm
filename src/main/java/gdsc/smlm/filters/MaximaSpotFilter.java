@@ -28,7 +28,6 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	private final int search;
 	private final int border;
 	private NonMaximumSuppression nms;
-	private DataProcessor scoreDataProcessor = null;
 	private float[] data2 = null;
 
 	/**
@@ -69,26 +68,13 @@ public abstract class MaximaSpotFilter extends SpotFilter
 		if (maxIndices.length == 0)
 			return null;
 
-		// Use a data processor to generate a ranking score
-		final float[] scoreData;
-		if (scoreDataProcessor != null)
-		{
-			scoreData = data.clone();
-			scoreDataProcessor.process(scoreData, width, height);
-		}
-		else
-		{
-			scoreData = data2;
-		}
-
 		final Spot[] spots = new Spot[maxIndices.length];
 		for (int n = 0; n < maxIndices.length; n++)
 		{
 			final int y = maxIndices[n] / width;
 			final int x = maxIndices[n] % width;
 			final float intensity = data2[maxIndices[n]];
-			final float score = scoreData[maxIndices[n]];
-			spots[n] = new Spot(x, y, intensity, score);
+			spots[n] = new Spot(x, y, intensity);
 		}
 		return spots;
 	}
@@ -154,8 +140,6 @@ public abstract class MaximaSpotFilter extends SpotFilter
 		ArrayList<String> list = new ArrayList<String>();
 		list.add("search = " + search);
 		list.add("border = " + border);
-		if (scoreDataProcessor != null)
-			list.add("score = " + scoreDataProcessor.getDescription());
 		return list;
 	}
 
@@ -170,30 +154,6 @@ public abstract class MaximaSpotFilter extends SpotFilter
 		// Ensure the object is duplicated and not passed by reference.
 		f.nms = nms.clone();
 		f.data2 = null;
-		if (scoreDataProcessor != null)
-			f.scoreDataProcessor = scoreDataProcessor.clone();
 		return f;
-	}
-
-	/**
-	 * @return the score data processor
-	 */
-	public DataProcessor getScoreDataProcessor()
-	{
-		return scoreDataProcessor;
-	}
-
-	/**
-	 * Set a data processor to use to generate a score for each spot that is used to rank them. If null then the score
-	 * is the same as the intensity score of the spot.
-	 * <p>
-	 * This allows the spots to be ranked independently of the intensity estimate that will be used for fitting.
-	 * 
-	 * @param scoreDataProcessor
-	 *            the score data processor
-	 */
-	public void setScoreDataProcessor(DataProcessor scoreDataProcessor)
-	{
-		this.scoreDataProcessor = scoreDataProcessor;
 	}
 }

@@ -106,6 +106,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private long time = 0;
 
 	private MaximaSpotFilter spotFilter = null;
+	private Rectangle lastBounds = null;
 	private int fitting = 1;
 
 	// Used for fitting
@@ -370,6 +371,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	public void setSearchParameters(MaximaSpotFilter spotFilter, int fitting)
 	{
 		this.spotFilter = spotFilter;
+		lastBounds = null;
 		this.border = spotFilter.getBorder();
 		this.fitting = fitting;
 		this.relativeIntensity = !spotFilter.isAbsoluteIntensity();
@@ -652,7 +654,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					maxCandidate = maxIndices.length;
 				else
 					maxIndices = Arrays.copyOf(maxIndices, maxCandidate);
-				float[] data2 = spotFilter.preprocessData(data, width, height);
+				float[] data2 = initialiseSpotFilter().preprocessData(data, width, height);
 				spots = new Spot[maxIndices.length];
 				for (int n = 0; n < maxIndices.length; n++)
 				{
@@ -669,7 +671,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		if (spots == null)
 		{
 			// Run the filter to get the spot
-			spots = spotFilter.rank(data, width, height);
+			spots = initialiseSpotFilter().rank(data, width, height);
 			maxCandidate = spots.length;
 			//filteredData = spotFilter.getPreprocessedData();
 			// Extract the indices
@@ -697,6 +699,21 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		for (int i = 0; i < spots.length; i++)
 			list[i] = new Candidate(spots[i], i);
 		return new CandidateList(maxCandidate, list);
+	}
+
+	private MaximaSpotFilter initialiseSpotFilter()
+	{
+		if (cameraModel.isPerPixelModel())
+		{
+			// Use a per-pixel variance for weighting. 
+			// Only get this if the bounds have changed to enable efficient caching.
+			if (!cc.dataBounds.equals(lastBounds))
+			{
+				lastBounds = cc.dataBounds;
+				spotFilter.setWeights(cameraModel.getVariance(cc.dataBounds), lastBounds.width, lastBounds.height);
+			}
+		}
+		return spotFilter;
 	}
 
 	private void finish(FitJob job, final long start)

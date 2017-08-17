@@ -34,6 +34,28 @@ public abstract class DataProcessor implements Cloneable
 	}
 
 	/**
+	 * Checks if the data processor is weighted, i.e. supports {@link #setWeights(float[], int, int)}.
+	 *
+	 * @return true, if is weighted
+	 */
+	public abstract boolean isWeighted();
+	
+	/**
+	 * Sets the weights of the data. This should be called before {@link #process(float[], int, int)} is called with
+	 * data samples.
+	 * <p>
+	 * Calling this in advance allows efficient caching of pre-computed weightings.
+	 *
+	 * @param weights
+	 *            the weights of the data (can be null)
+	 * @param width
+	 *            The width of the data
+	 * @param height
+	 *            The height of the data
+	 */
+	public abstract void setWeights(final float[] weights, final int width, final int height);
+
+	/**
 	 * Process the data
 	 * 
 	 * @param data

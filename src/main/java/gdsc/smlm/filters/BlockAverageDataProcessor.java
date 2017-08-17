@@ -58,6 +58,28 @@ public class BlockAverageDataProcessor extends DataProcessor
 		return (int) smooth;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#isWeighted()
+	 */
+	@Override
+	public boolean isWeighted()
+	{
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#setWeights(float[], int, int)
+	 */
+	@Override
+	public void setWeights(float[] weights, int width, int height)
+	{
+
+	}
+
 	/**
 	 * @param data
 	 * @param width
