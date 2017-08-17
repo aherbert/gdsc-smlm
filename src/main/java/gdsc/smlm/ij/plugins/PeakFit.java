@@ -2309,9 +2309,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
 						bounds.x, bounds.y, bounds.width, bounds.height 
 						));
-				//@formatter:off
+				//@formatter:on
 			}
-			
+
 			// Warn if the model bounds are bigger than the image as this may be an incorrect
 			// selection for the camera model
 			if (modelBounds.width > bounds.width || modelBounds.height > bounds.height)
