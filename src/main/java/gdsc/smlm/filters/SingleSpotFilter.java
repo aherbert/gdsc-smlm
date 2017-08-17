@@ -77,6 +77,17 @@ public class SingleSpotFilter extends MaximaSpotFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.filters.SpotFilter#hasWeights()
+	 */
+	@Override
+	public boolean hasWeights()
+	{
+		return processor.hasWeights();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.filters.MaximaSpotFilter#preprocessData(float[], int, int)
 	 */
 	@Override

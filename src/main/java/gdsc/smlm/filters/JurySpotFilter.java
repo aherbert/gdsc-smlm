@@ -86,6 +86,20 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.filters.SpotFilter#hasWeights()
+	 */
+	@Override
+	public boolean hasWeights()
+	{
+		for (DataProcessor processor : processors)
+			if (processor.hasWeights())
+				return true;
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.filters.MaximaSpotFilter#find(float[], int, int)
 	 */
 	@Override

@@ -88,6 +88,17 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.filters.SpotFilter#hasWeights()
+	 */
+	@Override
+	public boolean hasWeights()
+	{
+		return processor1.hasWeights() || processor2.hasWeights();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.filters.MaximaSpotFilter#preprocessData(float[], int, int)
 	 */
 	@Override
