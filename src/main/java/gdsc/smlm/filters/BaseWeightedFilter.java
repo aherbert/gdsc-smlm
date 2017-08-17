@@ -1,5 +1,6 @@
 package gdsc.smlm.filters;
 
+// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -16,9 +17,13 @@ package gdsc.smlm.filters;
 /**
  * Contains common functionality for weighted filters.
  */
-public abstract class BaseWeightedFilter implements Cloneable
+public abstract class BaseWeightedFilter extends BaseFilter
 {
+
+	/** The weights. */
 	protected float[] weights;
+
+	/** The height. */
 	protected int width, height;
 
 	/**
@@ -40,6 +45,16 @@ public abstract class BaseWeightedFilter implements Cloneable
 	}
 
 	/**
+	 * Checks for weights.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasWeights()
+	{
+		return weights != null;
+	}
+
+	/**
 	 * Signal that new weight parameters have been set. Sub-classes can re-initialise for the new weights.
 	 */
 	protected abstract void newWeights();
@@ -51,14 +66,6 @@ public abstract class BaseWeightedFilter implements Cloneable
 	 */
 	public BaseWeightedFilter clone()
 	{
-		try
-		{
-			return (BaseWeightedFilter) super.clone();
-		}
-		catch (CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
+		return (BaseWeightedFilter) super.clone();
 	}
 }

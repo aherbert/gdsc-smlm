@@ -119,6 +119,17 @@ public class AverageDataProcessor extends DataProcessor
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#hasWeights()
+	 */
+	@Override
+	public boolean hasWeights()
+	{
+		return false;
+	}
+
 	/**
 	 * @param data
 	 * @param width

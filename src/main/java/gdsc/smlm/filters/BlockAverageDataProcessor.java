@@ -66,7 +66,7 @@ public class BlockAverageDataProcessor extends DataProcessor
 	@Override
 	public boolean isWeighted()
 	{
-		return false;
+		return true;
 	}
 
 	/*
@@ -77,7 +77,19 @@ public class BlockAverageDataProcessor extends DataProcessor
 	@Override
 	public void setWeights(float[] weights, int width, int height)
 	{
+		if (smooth > 0)
+			filter.setWeights(weights, width, height);
+	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#hasWeights()
+	 */
+	@Override
+	public boolean hasWeights()
+	{
+		return filter.hasWeights();
 	}
 
 	/**

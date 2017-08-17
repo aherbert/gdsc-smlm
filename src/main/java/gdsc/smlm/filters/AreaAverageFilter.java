@@ -28,7 +28,7 @@ package gdsc.smlm.filters;
  * Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less than 2. All routines
  * are OK for 3x3 images and larger.
  */
-public class AreaAverageFilter implements Cloneable
+public class AreaAverageFilter extends BaseFilter
 {
 	private SumFilter filter = new SumFilter();
 	private AverageFilter avFilter = new AverageFilter();
@@ -328,18 +328,10 @@ public class AreaAverageFilter implements Cloneable
 	 */
 	public AreaAverageFilter clone()
 	{
-		try
-		{
-			AreaAverageFilter o = (AreaAverageFilter) super.clone();
-			o.filter = filter.clone();
-			o.avFilter = avFilter.clone();
-			return o;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
+		AreaAverageFilter o = (AreaAverageFilter) super.clone();
+		o.filter = filter.clone();
+		o.avFilter = avFilter.clone();
+		return o;
 	}
 
 	/**

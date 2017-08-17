@@ -20,7 +20,7 @@ import java.awt.Rectangle;
  * <p>
  * Adapted from ij.plugin.filter.GaussianBlur
  */
-public class GaussianFilter implements Cloneable
+public class GaussianFilter extends BaseFilter
 {
 	private final double accuracy;
 
@@ -177,8 +177,7 @@ public class GaussianFilter implements Cloneable
 		/* large radius (sigma): scale down, then convolve, then scale up */
 		final boolean doDownscaling = sigma > 2 * MIN_DOWNSCALED_SIGMA + 0.5;
 		final int reduceBy = doDownscaling ? //downscale by this factor
-		Math.min((int) Math.floor(sigma / MIN_DOWNSCALED_SIGMA), length)
-				: 1;
+				Math.min((int) Math.floor(sigma / MIN_DOWNSCALED_SIGMA), length) : 1;
 		/*
 		 * Downscaling and upscaling blur the image a bit - we have to correct the standard
 		 * deviation for this:
@@ -188,14 +187,13 @@ public class GaussianFilter implements Cloneable
 		final double sigmaGauss = doDownscaling ? Math.sqrt(sigma * sigma / (reduceBy * reduceBy) - 1. / 3. - 1. / 4.)
 				: sigma;
 		final int maxLength = doDownscaling ? (length + reduceBy - 1) / reduceBy + 2 * (UPSCALE_K_RADIUS + 1) //downscaled line can't be longer
-		: length;
+				: length;
 		final float[][] gaussKernel = makeGaussianKernel(sigmaGauss, maxLength);
 		final int kRadius = gaussKernel[0].length * reduceBy; //Gaussian kernel radius after upscaling
 		final int readFrom = (writeFrom - kRadius < 0) ? 0 : writeFrom - kRadius; //not including broadening by downscale&upscale
 		final int readTo = (writeTo + kRadius > length) ? length : writeTo + kRadius;
 		final int newLength = doDownscaling ? //line length for convolution
-		(readTo - readFrom + reduceBy - 1) / reduceBy + 2 * (UPSCALE_K_RADIUS + 1)
-				: length;
+				(readTo - readFrom + reduceBy - 1) / reduceBy + 2 * (UPSCALE_K_RADIUS + 1) : length;
 		final int unscaled0 = readFrom - (UPSCALE_K_RADIUS + 1) * reduceBy; //input point corresponding to cache index 0
 		//the following is relevant for upscaling only
 		if (doDownscaling)
@@ -209,7 +207,8 @@ public class GaussianFilter implements Cloneable
 		{
 			if (doDownscaling)
 			{
-				downscaleLine(pixels, cache1, downscaleKernel, reduceBy, pixel0, unscaled0, length, pointInc, newLength);
+				downscaleLine(pixels, cache1, downscaleKernel, reduceBy, pixel0, unscaled0, length, pointInc,
+						newLength);
 				convolveLine(cache1, cache2, gaussKernel, 0, newLength, 1, newLength - 1, 0, 1);
 				upscaleLine(cache2, pixels, upscaleKernel, reduceBy, pixel0, unscaled0, writeFrom, writeTo, pointInc);
 			}
@@ -327,8 +326,8 @@ public class GaussianFilter implements Cloneable
 		{
 			final int xin = (xout - unscaled0 + reduceBy - 1) / reduceBy; //the corresponding point in the cache (if exact) or the one above
 			final int x = reduceBy - 1 - (xout - unscaled0 + reduceBy - 1) % reduceBy;
-			pixels[p] = cache[xin - 2] * kernel[x] + cache[xin - 1] * kernel[x + reduceBy] + cache[xin] *
-					kernel[x + 2 * reduceBy] + cache[xin + 1] * kernel[x + 3 * reduceBy];
+			pixels[p] = cache[xin - 2] * kernel[x] + cache[xin - 1] * kernel[x + reduceBy] +
+					cache[xin] * kernel[x + 2 * reduceBy] + cache[xin + 1] * kernel[x + 3 * reduceBy];
 		}
 	}
 
@@ -540,16 +539,8 @@ public class GaussianFilter implements Cloneable
 	 */
 	public GaussianFilter clone()
 	{
-		try
-		{
-			GaussianFilter o = (GaussianFilter) super.clone();
-			return o;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
+		GaussianFilter o = (GaussianFilter) super.clone();
+		return o;
 	}
 
 	/**

@@ -22,7 +22,7 @@ import java.awt.Rectangle;
  * <p>
  * Adapted from ij.plugin.filter.RankFilters
  */
-public class CircularMeanFilter implements Cloneable
+public class CircularMeanFilter extends BaseFilter
 {
 	private int[] kernel = null;
 	private double lastRadius = 0;
@@ -162,8 +162,8 @@ public class CircularMeanFilter implements Cloneable
 		}
 	}
 
-	private void filterLine(float[] values, int width, float[] cache, int[] cachePointers, int kNPoints,
-			int cacheLineP, Rectangle roi, int y, double[] sums, float maxValue, boolean smallKernel)
+	private void filterLine(float[] values, int width, float[] cache, int[] cachePointers, int kNPoints, int cacheLineP,
+			Rectangle roi, int y, double[] sums, float maxValue, boolean smallKernel)
 	{
 		int valuesP = roi.x + y * width;
 
@@ -273,16 +273,8 @@ public class CircularMeanFilter implements Cloneable
 	 */
 	public CircularMeanFilter clone()
 	{
-		try
-		{
-			CircularMeanFilter o = (CircularMeanFilter) super.clone();
-			return o;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
+		CircularMeanFilter o = (CircularMeanFilter) super.clone();
+		return o;
 	}
 
 	/**
@@ -292,7 +284,7 @@ public class CircularMeanFilter implements Cloneable
 	 *            Radius = 0.5 includes the 4 neighbors of the pixel in the center,
 	 *            radius = 1 corresponds to a 3x3 kernel size.
 	 * @return:
-	 *          The output is an array that gives the length of each line of the structuring element
+	 * 		 The output is an array that gives the length of each line of the structuring element
 	 *          (kernel) to the left (negative) and to the right (positive):
 	 *          [0] left in line 0, [1] right in line 0,
 	 *          [2] left in line 2, ...

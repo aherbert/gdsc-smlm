@@ -1,6 +1,10 @@
 package gdsc.smlm.filters;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.utils.Maths;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -31,10 +35,52 @@ import org.apache.commons.math3.util.FastMath;
  * Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less than 2. All routines
  * are OK for 3x3 images and larger.
  */
-public class AverageFilter implements Cloneable
+public class AverageFilter extends BaseWeightedFilter
 {
 	private float[] floatDataBuffer = null;
 	private float[] floatRowBuffer = null;
+
+	private float[] sumWeights = null;
+	private int sumN = 0;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.BaseWeightedFilter#newWeights()
+	 */
+	@Override
+	protected void newWeights()
+	{
+		sumWeights = null;
+	}
+
+	/**
+	 * Compute the block sum of the weights within a 2n+1 size block around each point.
+	 * 
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param n
+	 *            The block size
+	 */
+	private void computeSumWeights(final int maxx, final int maxy, final int n)
+	{
+		// Cache the sum of the weights
+		if (sumWeights == null || sumN != n)
+		{
+			sumN = n;
+			sumWeights = weights.clone();
+			// Use a sum filter
+			SumFilter sum = new SumFilter();
+			sum.rollingBlockSum(sumWeights, maxx, maxy, n);
+		}
+	}
+
+	private static int pow2(int i)
+	{
+		return i * i;
+	}
 
 	/**
 	 * Compute the block average within a 2n+1 size block around each point.
@@ -54,12 +100,20 @@ public class AverageFilter implements Cloneable
 	 */
 	public void rollingBlockAverageInternal(float[] data, final int maxx, final int maxy, final int n)
 	{
-		// Note: Speed tests show that this method is only marginally faster than rollingBlockAverageNxNInternal.
-		// Sometimes it is slower. The intricacies of the java optimiser escape me.
-		if (n == 1)
-			rollingBlockAverage3x3Internal(data, maxx, maxy);
+		if (hasWeights())
+		{
+			// TODO
+			// Create weighted versions of the routines below
+		}
 		else
-			rollingBlockAverageNxNInternal(data, maxx, maxy, n);
+		{
+			// Note: Speed tests show that this method is only marginally faster than rollingBlockAverageNxNInternal.
+			// Sometimes it is slower. The intricacies of the java optimiser escape me.
+			if (n == 1)
+				rollingBlockAverage3x3Internal(data, maxx, maxy);
+			else
+				rollingBlockAverageNxNInternal(data, maxx, maxy, n);
+		}
 	}
 
 	/**
@@ -654,8 +708,8 @@ public class AverageFilter implements Cloneable
 			int index2 = x + 2 * maxx;
 			for (int y = 0; y <= maxy - 5; y++, index++)
 			{
-				data[index2] = (w1 * (newData[index] + newData[index + 4]) + newData[index + 1] + newData[index + 2] + newData[index + 3]) *
-						divisor;
+				data[index2] = (w1 * (newData[index] + newData[index + 4]) + newData[index + 1] + newData[index + 2] +
+						newData[index + 3]) * divisor;
 				index2 += maxx;
 			}
 		}
@@ -774,8 +828,7 @@ public class AverageFilter implements Cloneable
 			for (int y = 0; y <= maxy - 7; y++, index++)
 			{
 				data[index2] = (w1 * (newData[index] + newData[index + 6]) + newData[index + 1] + newData[index + 2] +
-						newData[index + 3] + newData[index + 4] + newData[index + 5]) *
-						divisor;
+						newData[index + 3] + newData[index + 4] + newData[index + 5]) * divisor;
 				index2 += maxx;
 			}
 		}
@@ -1157,8 +1210,9 @@ public class AverageFilter implements Cloneable
 			int index2 = (y + 1) * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++)
 			{
-				float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 2 * data[index1 - 1] + 4 *
-						data[index1] + 2 * data[index1 + 1] + data[index2 - 1] + 2 * data[index2] + data[index2 + 1];
+				float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 2 * data[index1 - 1] +
+						4 * data[index1] + 2 * data[index1 + 1] + data[index2 - 1] + 2 * data[index2] +
+						data[index2 + 1];
 				newData[index1] = sum * divisor;
 				index0++;
 				index1++;
@@ -1179,6 +1233,24 @@ public class AverageFilter implements Cloneable
 
 	private float[] floatBuffer(int size)
 	{
+		return floatBuffer(size, true);
+	}
+
+	private float[] floatBuffer(int size, boolean unweighted)
+	{
+		if (unweighted)
+		{
+			if (hasWeights())
+				throw new IllegalStateException("Weights have been set for an algorithm that does not support weights");
+		}
+		else
+		{
+			if (!hasWeights())
+				throw new IllegalStateException("Weights have not been set for an algorithm that requires weights");
+			if (weights.length != size)
+				throw new IllegalStateException("Weights are not the correct size");
+		}
+
 		if (floatDataBuffer == null || floatDataBuffer.length < size)
 		{
 			floatDataBuffer = new float[size];
@@ -1202,10 +1274,18 @@ public class AverageFilter implements Cloneable
 	 */
 	public void rollingBlockAverage(float[] data, final int maxx, final int maxy, final int n)
 	{
-		if (n == 1)
-			rollingBlockAverage3x3(data, maxx, maxy);
+		if (hasWeights())
+		{
+			// TODO
+
+		}
 		else
-			rollingBlockAverageNxN(data, maxx, maxy, n);
+		{
+			if (n == 1)
+				rollingBlockAverage3x3(data, maxx, maxy);
+			else
+				rollingBlockAverageNxN(data, maxx, maxy, n);
+		}
 	}
 
 	/**
@@ -1956,8 +2036,8 @@ public class AverageFilter implements Cloneable
 			{
 				// Sum strips
 				// Store result in transpose
-				outData[centreIndex] = (row[x] + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4] + row[x + 5] + row[x + 6]) *
-						divisor;
+				outData[centreIndex] = (row[x] + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4] + row[x + 5] +
+						row[x + 6]) * divisor;
 				centreIndex += height;
 			}
 		}
@@ -2030,8 +2110,8 @@ public class AverageFilter implements Cloneable
 			{
 				// Sum strips
 				// Store result in transpose
-				outData[centreIndex] = (w1 * (row[x] + row[x + 6]) + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4] + row[x + 5]) *
-						divisor;
+				outData[centreIndex] = (w1 * (row[x] + row[x + 6]) + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4] +
+						row[x + 5]) * divisor;
 				centreIndex += height;
 			}
 		}
@@ -2632,8 +2712,8 @@ public class AverageFilter implements Cloneable
 				// Sweep neighbourhood
 				if (isInnerXY)
 				{
-					float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 2 * data[index1 - 1] + 4 *
-							data[index1] + 2 * data[index1 + 1] + data[index2 - 1] + 2 * data[index2] +
+					float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 2 * data[index1 - 1] +
+							4 * data[index1] + 2 * data[index1 + 1] + data[index2 - 1] + 2 * data[index2] +
 							data[index2 + 1];
 					newData[index1] = sum * divisor;
 				}
@@ -2665,10 +2745,7 @@ public class AverageFilter implements Cloneable
 		}
 
 		// Copy back
-		for (int index = data.length; index-- > 0;)
-		{
-			data[index] = newData[index];
-		}
+		System.arraycopy(newData, 0, data, 0, data.length);
 	}
 
 	/*
@@ -2678,17 +2755,9 @@ public class AverageFilter implements Cloneable
 	 */
 	public AverageFilter clone()
 	{
-		try
-		{
-			AverageFilter o = (AverageFilter) super.clone();
-			o.floatDataBuffer = null;
-			o.floatRowBuffer = null;
-			return o;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
+		AverageFilter o = (AverageFilter) super.clone();
+		o.floatDataBuffer = null;
+		o.floatRowBuffer = null;
+		return o;
 	}
 }

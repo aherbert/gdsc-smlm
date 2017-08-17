@@ -18,11 +18,11 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Computes the block sum for each point within the array.
  */
-public class SumFilter implements Cloneable
+public class SumFilter extends BaseFilter
 {
 	private float[] floatDataBuffer = null;
 	private float[] floatRowBuffer = null;
-	
+
 	/**
 	 * Compute the block sum within a 2n+1 size block around each point.
 	 * Only pixels with a full block are processed. Pixels within border regions
@@ -1056,10 +1056,7 @@ public class SumFilter implements Cloneable
 		}
 
 		// Copy back
-		for (index = data.length; index-- > 0;)
-		{
-			data[index] = newData[index];
-		}
+		System.arraycopy(newData, 0, data, 0, data.length);
 	}
 
 	/**
@@ -1144,10 +1141,7 @@ public class SumFilter implements Cloneable
 		}
 
 		// Copy back
-		for (int index = data.length; index-- > 0;)
-		{
-			data[index] = newData[index];
-		}
+		System.arraycopy(newData, 0, data, 0, data.length);
 	}
 
 	// ----------------------------------------------------
@@ -1158,7 +1152,7 @@ public class SumFilter implements Cloneable
 	// ----------------------------------------------------
 	private int[] intDataBuffer = null;
 	private int[] intRowBuffer = null;
-	
+
 	/**
 	 * Compute the block sum within a 2n+1 size block around each point.
 	 * Only pixels with a full block are processed. Pixels within border regions
@@ -2192,10 +2186,7 @@ public class SumFilter implements Cloneable
 		}
 
 		// Copy back
-		for (index = data.length; index-- > 0;)
-		{
-			data[index] = newData[index];
-		}
+		System.arraycopy(newData, 0, data, 0, data.length);
 	}
 
 	/**
@@ -2280,12 +2271,9 @@ public class SumFilter implements Cloneable
 		}
 
 		// Copy back
-		for (int index = data.length; index-- > 0;)
-		{
-			data[index] = newData[index];
-		}
+		System.arraycopy(newData, 0, data, 0, data.length);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2293,17 +2281,9 @@ public class SumFilter implements Cloneable
 	 */
 	public SumFilter clone()
 	{
-		try
-		{
-			SumFilter o = (SumFilter) super.clone();
-			o.floatDataBuffer = null;
-			o.floatRowBuffer = null;
-			return o;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
+		SumFilter o = (SumFilter) super.clone();
+		o.floatDataBuffer = null;
+		o.floatRowBuffer = null;
+		return o;
 	}
 }

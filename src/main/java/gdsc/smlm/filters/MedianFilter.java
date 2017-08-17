@@ -27,7 +27,7 @@ import gdsc.core.utils.MedianWindowDLLFloat;
  * Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less than 2. All routines
  * are OK for 3x3 images and larger.
  */
-public class MedianFilter implements Cloneable
+public class MedianFilter extends BaseFilter
 {
 	private float[] floatDataBuffer = null;
 	private int nAbove, nBelow, half;
@@ -852,17 +852,9 @@ public class MedianFilter implements Cloneable
 	 */
 	public MedianFilter clone()
 	{
-		try
-		{
-			MedianFilter o = (MedianFilter) super.clone();
-			o.floatDataBuffer = null;
-			o.aboveBuf = o.belowBuf = null;
-			return o;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			// Ignore
-		}
-		return null;
+		MedianFilter o = (MedianFilter) super.clone();
+		o.floatDataBuffer = null;
+		o.aboveBuf = o.belowBuf = null;
+		return o;
 	}
 }

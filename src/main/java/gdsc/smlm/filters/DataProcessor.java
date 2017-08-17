@@ -39,7 +39,7 @@ public abstract class DataProcessor implements Cloneable
 	 * @return true, if is weighted
 	 */
 	public abstract boolean isWeighted();
-	
+
 	/**
 	 * Sets the weights of the data. This should be called before {@link #process(float[], int, int)} is called with
 	 * data samples.
@@ -54,6 +54,13 @@ public abstract class DataProcessor implements Cloneable
 	 *            The height of the data
 	 */
 	public abstract void setWeights(final float[] weights, final int width, final int height);
+
+	/**
+	 * Checks for weights. Weights are set using {@link #setWeights(float[], int, int)}.
+	 *
+	 * @return true, if successful
+	 */
+	public abstract boolean hasWeights();
 
 	/**
 	 * Process the data
@@ -113,6 +120,8 @@ public abstract class DataProcessor implements Cloneable
 	{
 		ArrayList<String> list = new ArrayList<String>();
 		list.add("border = " + border);
+		if (hasWeights())
+			list.add("weighted");
 		return list;
 	}
 
