@@ -710,7 +710,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (!cc.dataBounds.equals(lastBounds))
 			{
 				lastBounds = cc.dataBounds;
-				spotFilter.setWeights(cameraModel.getVariance(cc.dataBounds), lastBounds.width, lastBounds.height);
+				// Invert the variance to get the weights
+				float[] w = cameraModel.getVariance(cc.dataBounds);
+				for (int i = 0; i < w.length; i++)
+					w[i] = (float) (1.0 / w[i]);
+				spotFilter.setWeights(w, lastBounds.width, lastBounds.height);
 			}
 		}
 		return spotFilter;
