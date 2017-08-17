@@ -110,6 +110,8 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 *            the variance (in counts)
 	 * @param cloneBounds
 	 *            Set to true to clone the bounds
+	 * @param cloneData
+	 *            Set to true to clone the data
 	 * @throws IllegalArgumentException
 	 *             If the data is not valid
 	 */
@@ -287,7 +289,16 @@ public class PerPixelCameraModel extends BaseCameraModel
 	{
 		return createNormalisedVariance().clone();
 	}
-	
+
+	/**
+	 * Initialise the model. This allows caching of precomputed values but it is not required to call this method before
+	 * using the model.
+	 */
+	public void initialise()
+	{
+		createNormalisedVariance();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

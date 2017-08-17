@@ -76,6 +76,7 @@ import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.model.camera.CameraModel;
+import gdsc.smlm.model.camera.PerPixelCameraModel;
 import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.ExtendedPeakResult;
@@ -2331,12 +2332,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 			
 			// Crop for efficiency
-			fitConfig.setCameraModel(cameraModel.crop(bounds));
-			if (initialise)
+			cameraModel = cameraModel.crop(bounds);
+			if (initialise && cameraModel instanceof PerPixelCameraModel)
 			{
-				// Initialise the normalised variance
-				cameraModel.getNormalisedVariance(bounds);
+				((PerPixelCameraModel)cameraModel).initialise();
 			}
+			fitConfig.setCameraModel(cameraModel);
 		}
 		return true;
 	}

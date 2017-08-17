@@ -76,7 +76,7 @@ public class PerPixelCameraModelTest
 	{
 		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
 		if (initialise)
-			model.getNormalisedVariance();
+			model.initialise();
 		return model;
 	}
 
