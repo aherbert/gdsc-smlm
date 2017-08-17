@@ -25,18 +25,33 @@ import gdsc.core.utils.Maths;
  */
 public abstract class BaseCameraModel implements CameraModel, Cloneable
 {
+	/**
+	 * Check bias is finite.
+	 *
+	 * @param bias the bias
+	 */
 	public void checkBias(float bias)
 	{
 		if (!Maths.isFinite(bias))
 			throw new IllegalArgumentException("Bias must be a finite number");
 	}
 	
+	/**
+	 * Check gain is strictly positive.
+	 *
+	 * @param gain the gain
+	 */
 	public void checkGain(float gain)
 	{
 		if (!(gain <= Double.MAX_VALUE && gain > 0))
 			throw new IllegalArgumentException("Gain must be strictly positive");
 	}
 	
+	/**
+	 * Check variance is positive.
+	 *
+	 * @param variance the variance
+	 */
 	public void checkVariance(float variance)
 	{
 		if (!(variance <= Double.MAX_VALUE && variance >= 0))

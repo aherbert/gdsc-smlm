@@ -22,7 +22,7 @@ import java.awt.Rectangle;
  */
 public class FixedPixelCameraModel extends BaseCameraModel
 {
-	private final float bias, gain, var_g2;
+	private final float bias, gain, variance, var_g2;
 
 	/**
 	 * Instantiates a new fixed pixel camera model.
@@ -54,6 +54,7 @@ public class FixedPixelCameraModel extends BaseCameraModel
 		checkVariance(variance);
 		this.bias = bias;
 		this.gain = gain;
+		this.variance = variance;
 		this.var_g2 = variance / (gain * gain);
 	}
 
@@ -105,6 +106,16 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	public float[] getGain(Rectangle bounds)
 	{
 		return newArray(bounds, gain);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#getVariance(java.awt.Rectangle)
+	 */
+	public float[] getVariance(Rectangle bounds)
+	{
+		return newArray(bounds, variance);
 	}
 
 	/*

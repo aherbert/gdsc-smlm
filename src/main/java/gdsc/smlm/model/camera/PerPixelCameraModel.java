@@ -24,7 +24,9 @@ public class PerPixelCameraModel extends BaseCameraModel
 {
 	private final Rectangle cameraBounds;
 
-	private final float[] bias, gain, var_g2;
+	private final float[] bias, gain, variance;
+	// This is computed when required
+	private float[] var_g2;
 
 	/**
 	 * Instantiates a new per pixel camera model.
@@ -71,7 +73,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	public PerPixelCameraModel(int xorigin, int yorigin, int width, int height, float[] bias, float[] gain,
 			float[] variance) throws IllegalArgumentException
 	{
-		this(new Rectangle(xorigin, yorigin, width, height), bias, gain, variance, false);
+		this(new Rectangle(xorigin, yorigin, width, height), bias, gain, variance, false, true);
 	}
 
 	/**
@@ -91,7 +93,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	public PerPixelCameraModel(Rectangle bounds, float[] bias, float[] gain, float[] variance)
 			throws IllegalArgumentException
 	{
-		this(bounds, bias, gain, variance, true);
+		this(bounds, bias, gain, variance, true, true);
 
 	}
 
@@ -111,8 +113,8 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * @throws IllegalArgumentException
 	 *             If the data is not valid
 	 */
-	private PerPixelCameraModel(Rectangle bounds, float[] bias, float[] gain, float[] variance, boolean cloneBounds)
-			throws IllegalArgumentException
+	private PerPixelCameraModel(Rectangle bounds, float[] bias, float[] gain, float[] variance, boolean cloneBounds,
+			boolean cloneData) throws IllegalArgumentException
 	{
 		if (bounds == null)
 			throw new IllegalArgumentException("Bounds must not be null");
@@ -122,15 +124,23 @@ public class PerPixelCameraModel extends BaseCameraModel
 		checkArray(bias, size);
 		checkArray(gain, size);
 		checkArray(variance, size);
-		this.bias = bias.clone();
-		this.gain = gain.clone();
-		this.var_g2 = new float[size];
+		if (cloneData)
+		{
+			this.bias = bias.clone();
+			this.gain = gain.clone();
+			this.variance = variance.clone();
+		}
+		else
+		{
+			this.bias = bias;
+			this.gain = gain;
+			this.variance = variance;
+		}
 		for (int i = 0; i < size; i++)
 		{
 			checkBias(bias[i]);
 			checkGain(gain[i]);
 			checkVariance(variance[i]);
-			var_g2[i] = variance[i] / (gain[i] * gain[i]);
 		}
 	}
 
@@ -156,6 +166,8 @@ public class PerPixelCameraModel extends BaseCameraModel
 
 	/**
 	 * Instantiates a new per pixel camera model, copying all input fields.
+	 * <p>
+	 * This is an internally used copy constructor.
 	 *
 	 * @param duplicate
 	 *            a flag to indicate the data should be duplicated
@@ -165,42 +177,34 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 *            the bias
 	 * @param gain
 	 *            the gain
+	 * @param variance
+	 *            the variance array
 	 * @param var_g2
-	 *            the var_g2 array
+	 *            the normalised variance array
 	 */
-	private PerPixelCameraModel(boolean duplicate, Rectangle bounds, float[] bias, float[] gain, float[] var_g2)
+	private PerPixelCameraModel(boolean duplicate, Rectangle bounds, float[] bias, float[] gain, float[] variance,
+			float[] var_g2)
 	{
 		if (duplicate)
 		{
-			// This is used privately so we just copy the input
 			cameraBounds = new Rectangle(bounds);
 			this.bias = bias.clone();
 			this.gain = gain.clone();
-			this.var_g2 = var_g2.clone();
+			this.variance = variance.clone();
+			this.var_g2 = (var_g2 == null) ? null : var_g2.clone();
 		}
 		else
 		{
-			// This is used publicly so we check the input data
-			checkBounds(bounds);
 			cameraBounds = bounds;
-			int size = bounds.width * bounds.height;
-			checkArray(bias, size);
-			checkArray(gain, size);
-			checkArray(var_g2, size);
 			this.bias = bias;
 			this.gain = gain;
+			this.variance = variance;
 			this.var_g2 = var_g2;
-			for (int i = 0; i < size; i++)
-			{
-				checkBias(bias[i]);
-				checkGain(gain[i]);
-				checkVariance(var_g2[i]);
-			}
 		}
 	}
 
 	/**
-	 * Creates a new per pixel camera model.
+	 * Creates a new per pixel camera model. The input arguments are not cloned.
 	 *
 	 * @param bounds
 	 *            the bounds
@@ -208,16 +212,16 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 *            the bias (in counts)
 	 * @param gain
 	 *            the gain (count/photon)
-	 * @param normalisedVariance
-	 *            the normalised variance (in photons)
+	 * @param variance
+	 *            the variance (in counts)
 	 * @return the per pixel camera model
 	 * @throws IllegalArgumentException
 	 *             If the data is not valid
 	 */
-	public static PerPixelCameraModel create(Rectangle bounds, float[] bias, float[] gain, float[] normalisedVariance)
+	public static PerPixelCameraModel create(Rectangle bounds, float[] bias, float[] gain, float[] variance)
 			throws IllegalArgumentException
 	{
-		return new PerPixelCameraModel(false, bounds, bias, gain, normalisedVariance);
+		return new PerPixelCameraModel(bounds, bias, gain, variance, false, false);
 	}
 
 	/**
@@ -265,15 +269,25 @@ public class PerPixelCameraModel extends BaseCameraModel
 	}
 
 	/**
+	 * Gets a copy of the variance for the current bounds.
+	 *
+	 * @return the variance
+	 */
+	public float[] getVariance()
+	{
+		return variance.clone();
+	}
+
+	/**
 	 * Gets a copy of the normalised variance for the current bounds.
 	 *
 	 * @return the normalised variance
 	 */
 	public float[] getNormalisedVariance()
 	{
-		return var_g2.clone();
+		return createNormalisedVariance().clone();
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -347,11 +361,35 @@ public class PerPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#getVariance(java.awt.Rectangle)
+	 */
+	public float[] getVariance(Rectangle bounds)
+	{
+		return getData(bounds, variance);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedVariance(java.awt.Rectangle)
 	 */
 	public float[] getNormalisedVariance(Rectangle bounds)
 	{
-		return getData(bounds, var_g2);
+		return getData(bounds, createNormalisedVariance());
+	}
+
+	private float[] createNormalisedVariance()
+	{
+		if (var_g2 == null)
+		{
+			int size = variance.length;
+			var_g2 = new float[size];
+			for (int i = 0; i < size; i++)
+			{
+				var_g2[i] = variance[i] / (gain[i] * gain[i]);
+			}
+		}
+		return var_g2;
 	}
 
 	/**
@@ -516,8 +554,9 @@ public class PerPixelCameraModel extends BaseCameraModel
 		Rectangle intersection = getIntersection(bounds);
 		float[] bias = getData(this.bias, intersection, true);
 		float[] gain = getData(this.gain, intersection, true);
-		float[] var_g2 = getData(this.var_g2, intersection, true);
-		return new PerPixelCameraModel(false, bounds, bias, gain, var_g2);
+		float[] variance = getData(this.variance, intersection, true);
+		float[] var_g2 = (this.var_g2 == null) ? null : getData(this.var_g2, intersection, true);
+		return new PerPixelCameraModel(false, bounds, bias, gain, variance, var_g2);
 	}
 
 	/*
@@ -527,7 +566,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 */
 	public PerPixelCameraModel copy()
 	{
-		return new PerPixelCameraModel(true, cameraBounds, bias, gain, var_g2);
+		return new PerPixelCameraModel(true, cameraBounds, bias, gain, variance, var_g2);
 	}
 
 	/*

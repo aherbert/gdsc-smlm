@@ -2195,7 +2195,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (calibration.isSCMOS())
 			{
 				fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
-				if (!checkCameraModel(fitConfig, bounds))
+				if (!checkCameraModel(fitConfig, bounds, false))
 					return false;
 			}
 
@@ -2287,7 +2287,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 	}
 
-	private static boolean checkCameraModel(FitConfiguration fitConfig, Rectangle bounds)
+	private static boolean checkCameraModel(FitConfiguration fitConfig, Rectangle bounds, boolean initialise)
 	{
 		if (fitConfig.getCalibrationWriter().isSCMOS() && bounds != null)
 		{
@@ -2332,6 +2332,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 			
 			// Crop for efficiency
 			fitConfig.setCameraModel(cameraModel.crop(bounds));
+			if (initialise)
+			{
+				// Initialise the normalised variance
+				cameraModel.getNormalisedVariance(bounds);
+			}
 		}
 		return true;
 	}
@@ -2763,7 +2768,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		config.configureOutputUnits();
 
-		if (!checkCameraModel(fitConfig, bounds))
+		if (!checkCameraModel(fitConfig, bounds, true))
 			return false;
 
 		return true;

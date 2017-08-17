@@ -33,7 +33,7 @@ public interface CameraModel
 	/**
 	 * Crop the camera to the given bounds. The bounds are expected to fit within the camera bounds.
 	 * <p>
-	 * This can be used to create a more efficient representation if no data outside the bounds are required. 
+	 * This can be used to create a more efficient representation if no data outside the bounds are required.
 	 * <p>
 	 * Note: If the bounds match the current bounds then the returned model may not be a copy.
 	 *
@@ -67,6 +67,16 @@ public interface CameraModel
 	 * @return the gain
 	 */
 	public float[] getGain(Rectangle bounds);
+
+	/**
+	 * Gets the per-pixel variance. This is the variance of the pixel in camera counts. The bounds are expected to fit
+	 * within the camera bounds.
+	 *
+	 * @param bounds
+	 *            the bounds
+	 * @return the variance
+	 */
+	public float[] getVariance(Rectangle bounds);
 
 	/**
 	 * Gets the per-pixel normalised variance. This is the variance of the pixel in camera counts divided by the squared

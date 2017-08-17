@@ -71,7 +71,7 @@ public class CameraModelManager implements PlugIn
 		ImageStack stack = new ImageStack(cameraModel.getWidth(), cameraModel.getHeight());
 		stack.addSlice("Bias", cameraModel.getBias());
 		stack.addSlice("Gain", cameraModel.getGain());
-		stack.addSlice("Normalised Variance", cameraModel.getNormalisedVariance());
+		stack.addSlice("Variance", cameraModel.getVariance());
 		ImagePlus imp = new ImagePlus(name, stack);
 		imp.setIgnoreGlobalCalibration(true);
 		Calibration cal = imp.getCalibration();
@@ -163,8 +163,8 @@ public class CameraModelManager implements PlugIn
 		{
 			float[] bias = (float[]) stack.getPixels(1);
 			float[] gain = (float[]) stack.getPixels(2);
-			float[] normalisedVariance = (float[]) stack.getPixels(3);
-			return PerPixelCameraModel.create(bounds, bias, gain, normalisedVariance);
+			float[] variance = (float[]) stack.getPixels(3);
+			return PerPixelCameraModel.create(bounds, bias, gain, variance);
 		}
 		catch (Exception e)
 		{
