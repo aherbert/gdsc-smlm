@@ -809,35 +809,7 @@ public class EMGainAnalysis implements PlugInFilter
 		double[] x = SimpleArrayUtils.newArray(pmf.length, 0, 1.0);
 		double yMax = Maths.max(pmf);
 
-		// Truncate x
-		int max = 0;
-		double sum = 0;
-		double p = 1 - tail;
-		while (sum < p && max < pmf.length)
-		{
-			sum += pmf[max];
-			if (sum > 0.5 && pmf[max] == 0)
-				break;
-			max++;
-		}
-
-		int min = pmf.length;
-		sum = 0;
-		p = 1 - head;
-		while (sum < p && min > 0)
-		{
-			min--;
-			sum += pmf[min];
-			if (sum > 0.5 && pmf[min] == 0)
-				break;
-		}
-
-		//int min = (int) (dummyBias - gaussWidth * _noise);
-		pmf = Arrays.copyOfRange(pmf, min, max);
-		x = Arrays.copyOfRange(x, min, max);
-
 		// Get the approximation
-		double[] f = new double[x.length];
 		LikelihoodFunction fun;
 		double myNoise = _noise;
 		switch (approximation)
@@ -861,18 +833,52 @@ public class EMGainAnalysis implements PlugInFilter
 		if (offset != 0)
 			expected += offset * expected / 100.0;
 		expected *= _gain;
-		//sum = 0;
-		//double sum2 = 0;
-		for (int i = 0; i < f.length; i++)
+		
+		// Get CDF
+		double sum = 0;
+		double sum2 = 0;
+		double[] f = new double[x.length];
+		double[] cdf1 = new double[pmf.length];
+		double[] cdf2 = new double[pmf.length];
+		for (int i = 0; i < cdf1.length; i++)
 		{
+			sum += pmf[i];
+			cdf1[i] = sum;
 			// Adjust the x-values to remove the dummy bias
 			x[i] -= dummyBias;
-			f[i] = fun.likelihood(x[i], expected);
-			//sum += pmf[i];
-			//sum2 += f[i];
+			f[i] =  fun.likelihood(x[i], expected);
+			sum2 += f[i];
+			cdf2[i] = sum2;
+		}
+		
+		// Truncate x for plotting
+		int max = 0;
+		sum = 0;
+		double p = 1 - tail;
+		while (sum < p && max < pmf.length)
+		{
+			sum += pmf[max];
+			if (sum > 0.5 && pmf[max] == 0)
+				break;
+			max++;
 		}
 
-		//System.out.printf("Approximation sum = %f : %f\n", sum ,sum2);
+		int min = pmf.length;
+		sum = 0;
+		p = 1 - head;
+		while (sum < p && min > 0)
+		{
+			min--;
+			sum += pmf[min];
+			if (sum > 0.5 && pmf[min] == 0)
+				break;
+		}
+
+		//int min = (int) (dummyBias - gaussWidth * _noise);
+		pmf = Arrays.copyOfRange(pmf, min, max);
+		x = Arrays.copyOfRange(x, min, max);
+		f = Arrays.copyOfRange(f, min, max);
+
 		if (showApproximation)
 			yMax = Maths.maxDefault(yMax, f);
 
@@ -920,9 +926,50 @@ public class EMGainAnalysis implements PlugInFilter
 
 		if (Utils.isNewWindow())
 		{
-			Point p2 = win2.getLocation();
+			Point p2 = win1.getLocation();
 			p2.y += win1.getHeight();
 			win2.setLocation(p2);
+		}
+
+		// Plot the CDF of each distribution.
+		// Compute the Kolmogorov distance as the supremum (maximum) 
+		// difference between the two cumulative probability distributions.
+		// https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test
+		double kolmogorovDistance = 0;
+		int xd = 0;
+		for (int i = 0; i < cdf1.length; i++)
+		{
+			double dist = Math.abs(cdf1[i] - cdf2[i]);
+			if (kolmogorovDistance < dist)
+			{
+				kolmogorovDistance = dist;
+				xd = i;
+			}
+		}
+		xd -= dummyBias;
+		cdf1 = Arrays.copyOfRange(cdf1, min, max);
+		cdf2 = Arrays.copyOfRange(cdf2, min, max);
+		
+		Plot2 plot3 = new Plot2("CDF", "ADUs", "p");
+		yMax = 1.05;
+		plot3.setLimits(x[0], x[x.length - 1], 0, yMax);
+		plot3.setColor(Color.red);
+		plot3.addPoints(x, cdf1, Plot2.LINE);
+		plot3.setColor(Color.blue);
+		plot3.addPoints(x, cdf2, Plot2.LINE);
+
+		plot3.setColor(Color.magenta);
+		plot3.drawLine(_photons * _gain, 0, _photons * _gain, yMax);
+		plot3.drawDottedLine(xd, 0, xd, yMax, 2);
+		plot3.setColor(Color.black);
+		plot3.addLabel(0, 0, label + ", Kolmogorov distance = " + Utils.rounded(kolmogorovDistance) + " @ " + xd);
+		PlotWindow win3 = Utils.display("CDF", plot3);
+		
+		if (Utils.isNewWindow())
+		{
+			Point p2 = win1.getLocation();
+			p2.x += win1.getWidth();
+			win3.setLocation(p2);
 		}
 	}
 
