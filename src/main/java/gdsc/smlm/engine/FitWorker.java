@@ -703,7 +703,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	private MaximaSpotFilter initialiseSpotFilter()
 	{
-		if (cameraModel.isPerPixelModel())
+		if (cameraModel.isPerPixelModel() && spotFilter.isWeighted())
 		{
 			// Use a per-pixel variance for weighting. 
 			// Only get this if the bounds have changed to enable efficient caching.

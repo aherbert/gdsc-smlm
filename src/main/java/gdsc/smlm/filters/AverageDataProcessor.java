@@ -105,7 +105,8 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public boolean isWeighted()
 	{
-		return false;
+		BaseFilter f = getFilter();
+		return f != null && f instanceof BaseWeightedFilter;
 	}
 
 	/*
@@ -116,7 +117,9 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public void setWeights(float[] weights, int width, int height)
 	{
-
+		BaseFilter f = getFilter();
+		if (f != null)
+			((BaseWeightedFilter) f).setWeights(weights, width, height);
 	}
 
 	/*
@@ -127,7 +130,8 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public boolean hasWeights()
 	{
-		return false;
+		BaseFilter f = getFilter();
+		return (f != null) ? ((BaseWeightedFilter) f).hasWeights() : false;
 	}
 
 	/**
@@ -189,6 +193,29 @@ public class AverageDataProcessor extends DataProcessor
 			}
 		}
 		return smoothData;
+	}
+
+	private BaseFilter getFilter()
+	{
+		if (smooth > 0)
+		{
+			if (iSmooth > 1)
+			{
+				return filter;
+			}
+			else
+			{
+				if (areaFilter != null)
+				{
+					return areaFilter;
+				}
+				else
+				{
+					return filter;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

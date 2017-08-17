@@ -41,7 +41,7 @@ public class AverageFilter extends BaseWeightedFilter
 	private float[] floatRowBuffer = null;
 
 	private float[] sumWeights = null;
-	private int sumN = 0;
+	private float sumN = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -64,7 +64,7 @@ public class AverageFilter extends BaseWeightedFilter
 	 * @param n
 	 *            The block size
 	 */
-	private void computeSumWeights(final int maxx, final int maxy, final int n)
+	private void computeSumWeights(final int maxx, final int maxy, final float n)
 	{
 		// Cache the sum of the weights
 		if (sumWeights == null || sumN != n)
@@ -73,7 +73,13 @@ public class AverageFilter extends BaseWeightedFilter
 			sumWeights = weights.clone();
 			// Use a sum filter
 			SumFilter sum = new SumFilter();
-			sum.rollingBlockSum(sumWeights, maxx, maxy, n);
+			if ((int) n == n)
+				sum.rollingBlockSum(sumWeights, maxx, maxy, (int) n);
+			else
+			{
+				// TODO - support this method
+				//sum.stripedBlockSum(sumWeights, maxx, maxy, n);
+			}
 		}
 	}
 
@@ -328,14 +334,22 @@ public class AverageFilter extends BaseWeightedFilter
 	 */
 	public void stripedBlockAverageInternal(float[] data, final int maxx, final int maxy, final float w)
 	{
-		if (w <= 1)
-			stripedBlockAverage3x3Internal(data, maxx, maxy, w);
-		else if (w <= 2)
-			stripedBlockAverage5x5Internal(data, maxx, maxy, w);
-		else if (w <= 3)
-			stripedBlockAverage7x7Internal(data, maxx, maxy, w);
+		if (hasWeights())
+		{
+			// TODO
+			// Create weighted versions of the routines below
+		}
 		else
-			stripedBlockAverageNxNInternal(data, maxx, maxy, w);
+		{
+			if (w <= 1)
+				stripedBlockAverage3x3Internal(data, maxx, maxy, w);
+			else if (w <= 2)
+				stripedBlockAverage5x5Internal(data, maxx, maxy, w);
+			else if (w <= 3)
+				stripedBlockAverage7x7Internal(data, maxx, maxy, w);
+			else
+				stripedBlockAverageNxNInternal(data, maxx, maxy, w);
+		}
 	}
 
 	/**
@@ -1498,14 +1512,22 @@ public class AverageFilter extends BaseWeightedFilter
 	 */
 	public void stripedBlockAverage(float[] data, final int maxx, final int maxy, final float w)
 	{
-		if (w <= 1)
-			stripedBlockAverage3x3(data, maxx, maxy, w);
-		else if (w <= 2)
-			stripedBlockAverage5x5(data, maxx, maxy, w);
-		else if (w <= 3)
-			stripedBlockAverage7x7(data, maxx, maxy, w);
+		if (hasWeights())
+		{
+			// TODO
+			// Create weighted versions of the routines below
+		}
 		else
-			stripedBlockAverageNxN(data, maxx, maxy, w);
+		{
+			if (w <= 1)
+				stripedBlockAverage3x3(data, maxx, maxy, w);
+			else if (w <= 2)
+				stripedBlockAverage5x5(data, maxx, maxy, w);
+			else if (w <= 3)
+				stripedBlockAverage7x7(data, maxx, maxy, w);
+			else
+				stripedBlockAverageNxN(data, maxx, maxy, w);
+		}
 	}
 
 	/**
