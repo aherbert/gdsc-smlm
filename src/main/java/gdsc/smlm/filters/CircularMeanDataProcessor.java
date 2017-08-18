@@ -61,7 +61,7 @@ public class CircularMeanDataProcessor extends DataProcessor
 	@Override
 	public boolean isWeighted()
 	{
-		return false;
+		return true;
 	}
 
 	/*
@@ -72,7 +72,7 @@ public class CircularMeanDataProcessor extends DataProcessor
 	@Override
 	public void setWeights(float[] weights, int width, int height)
 	{
-
+		filter.setWeights(weights, width, height);
 	}
 
 	/*
@@ -83,7 +83,7 @@ public class CircularMeanDataProcessor extends DataProcessor
 	@Override
 	public boolean hasWeights()
 	{
-		return false;
+		return filter.hasWeights();
 	}
 
 	/**
