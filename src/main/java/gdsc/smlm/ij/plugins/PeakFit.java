@@ -2191,15 +2191,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 				fitConfig.setLineSearchMethod(gd.getNextChoiceIndex());
 			}
 
-			// Do this even if collection of calibration settings was ignored. This ensures the 
-			// camera model is set.
-			if (calibration.isSCMOS())
-			{
-				fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
-				if (!checkCameraModel(fitConfig, bounds, false))
-					return false;
-			}
-
 			fitConfig.setUseClamping(gd.getNextBoolean());
 			fitConfig.setUseDynamicClamping(gd.getNextBoolean());
 			if (extraOptions)
@@ -2234,6 +2225,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 				}
 			}
 
+			// Do this even if collection of calibration settings was ignored. This ensures the 
+			// camera model is set.
+			if (calibration.isSCMOS())
+			{
+				fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
+				if (!checkCameraModel(fitConfig, bounds, false))
+					return false;
+			}
+			
 			if (saveSettings)
 				saveFitEngineSettings(config);
 

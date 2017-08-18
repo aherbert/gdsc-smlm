@@ -419,9 +419,11 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		return count;
 	}
 
-	private static void addTemplate(String name, TemplateSettings settings, boolean custom, File file, String tifPath)
+	private static Template addTemplate(String name, TemplateSettings settings, boolean custom, File file, String tifPath)
 	{
-		map.put(name, new Template(settings, custom, file, tifPath));
+		Template template = new Template(settings, custom, file, tifPath);
+		map.put(name, template);
+		return template;
 	}
 
 	/**
@@ -472,10 +474,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		Template template = map.get(name);
 		if (template == null)
 		{
-			addTemplate(name, settings, true, file, null);
-			return true;
+			template = addTemplate(name, settings, true, file, null);
 		}
-		template.settings = settings;
+		else
+		{
+			template.settings = settings;
+		}
 		if (file != null)
 			return template.save(file);
 		if (template.file != null)

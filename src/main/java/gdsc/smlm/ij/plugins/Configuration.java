@@ -10,10 +10,17 @@ import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.util.Vector;
 
 import gdsc.core.ij.Utils;
+import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -24,10 +31,13 @@ import ij.plugin.PlugIn;
 /**
  * Adjust the configuration used for fitting.
  */
-@SuppressWarnings("unused")
 public class Configuration implements PlugIn, ItemListener
 {
 	private static final String TITLE = "Fit Configuration";
+	private static String templateFilename = "";
+
+	private FitEngineConfiguration config;
+	private FitConfiguration fitConfig;
 
 	private boolean configurationChanged = false;
 
@@ -37,7 +47,7 @@ public class Configuration implements PlugIn, ItemListener
 	private TextField textExposure;
 	private Choice textPSF;
 	private Choice textDataFilterType;
-	private Choice textDataFilter;
+	private Choice textDataFilterMethod;
 	private TextField textSmooth;
 	private TextField textSearch;
 	private TextField textBorder;
@@ -77,13 +87,16 @@ public class Configuration implements PlugIn, ItemListener
 	{
 		configurationChanged = false;
 
-		FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
-		FitConfiguration fitConfig = config.getFitConfiguration();
+		config = SettingsManager.readFitEngineConfiguration(0);
+		fitConfig = config.getFitConfiguration();
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
+
+		String[] templates = ConfigurationTemplate.getTemplateNames(true);
+		gd.addChoice("Template", templates, templates[0]);
 
 		PeakFit.addCameraOptions(gd, calibration);
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
@@ -138,12 +151,15 @@ public class Configuration implements PlugIn, ItemListener
 			int b = 0;
 			int ch = 0;
 
+			Choice textTemplate = choices.get(ch++);
+			textTemplate.addItemListener(this);
+
 			textCameraType = choices.get(ch++);
 			textNmPerPixel = numerics.get(n++);
 			textExposure = numerics.get(n++);
 			textPSF = choices.get(ch++);
 			textDataFilterType = choices.get(ch++);
-			textDataFilter = choices.get(ch++);
+			textDataFilterMethod = choices.get(ch++);
 			textSmooth = numerics.get(n++);
 			textSearch = numerics.get(n++);
 			textBorder = numerics.get(n++);
@@ -199,11 +215,20 @@ public class Configuration implements PlugIn, ItemListener
 				gd.setBackground(new Color(238, 238, 238));
 		}
 
+		gd.enableYesNoCancel("Save", "Save template");
+		//gd.setCancelLabel("Close");
+
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return;
 
+		// In case a template update the calibration
+		calibration = fitConfig.getCalibrationWriter();
+		
+		// Ignore the template
+		gd.getNextChoice();
+		
 		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		calibration.setNmPerPixel(gd.getNextNumber());
 		calibration.setExposureTime(gd.getNextNumber());
@@ -233,7 +258,7 @@ public class Configuration implements PlugIn, ItemListener
 		fitConfig.setPrecisionThreshold(gd.getNextNumber());
 
 		gd.collectOptions();
-		
+
 		// Check arguments
 		try
 		{
@@ -264,15 +289,44 @@ public class Configuration implements PlugIn, ItemListener
 		if (gd.invalidNumber())
 			return;
 
-		SettingsManager.writeSettings(config, 0);
-		configurationChanged = true;
+		boolean saveToFile = !gd.wasOKed();
 
-		int flags = 0;
+		int flags = PeakFit.FLAG_NO_SAVE;
 		if (!PeakFit.configureSmartFilter(config, flags))
 			return;
 		if (!PeakFit.configureDataFilter(config, flags))
 			return;
 		PeakFit.configureFitSolver(config, null, flags);
+
+		if (saveToFile)
+		{
+			gd = new ExtendedGenericDialog(TITLE);
+			gd.addFilenameField("Template_filename", templateFilename);
+			gd.addMessage("Add notes to the template ...");
+			gd.addTextAreas("", null, 10, 60);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return;
+			String filename = gd.getNextString();
+			String notes = gd.getNextText();
+
+			if (filename != null)
+			{
+				templateFilename = Utils.replaceExtension(filename, ".txt");
+				File file = new File(templateFilename);
+				String name = Utils.removeExtension(file.getName());
+				TemplateSettings.Builder settings = TemplateSettings.newBuilder();
+				settings.setFitEngineSettings(config.getFitEngineSettings());
+				settings.addNotes(notes);
+				if (!ConfigurationTemplate.saveTemplate(name, settings.build(), file))
+					IJ.error(TITLE, "Failed to save to file: " + templateFilename);
+			}
+		}
+		else
+		{
+			SettingsManager.writeSettings(config, 0);
+			configurationChanged = true;
+		}
 	}
 
 	public boolean isConfigurationChanged()
@@ -287,7 +341,39 @@ public class Configuration implements PlugIn, ItemListener
 	 */
 	public void itemStateChanged(ItemEvent e)
 	{
-		if (e.getSource() instanceof Checkbox)
+		if (e.getSource() instanceof Choice)
+		{
+			// Update the settings from the template
+			Choice choice = (Choice) e.getSource();
+			String templateName = choice.getSelectedItem();
+			//System.out.println("Update to " + templateName);
+
+			// Get the configuration template
+			TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
+
+			if (template != null)
+			{
+				IJ.log("Applying template: " + templateName);
+
+				for (String note : template.getNotesList())
+					IJ.log(note);
+
+				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
+				if (template.hasCalibration())
+				{
+					refreshSettings(template.getCalibration());
+				}
+				if (template.hasPsf())
+				{
+					refreshSettings(template.getPsf(), custom);
+				}
+				if (template.hasFitEngineSettings())
+				{
+					refreshSettings(template.getFitEngineSettings(), custom);
+				}
+			}
+		}
+		else if (e.getSource() instanceof Checkbox)
 		{
 			if (e.getSource() == textSmartFilter)
 			{
@@ -330,5 +416,80 @@ public class Configuration implements PlugIn, ItemListener
 	{
 		textField.setEditable(true);
 		textField.setBackground(SystemColor.white);
+	}
+
+	private void refreshSettings(Calibration cal)
+	{
+		if (cal == null)
+			return;
+
+		// Do not use set() as we support merging a partial calibration
+		fitConfig.mergeCalibration(cal);
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+
+		textCameraType.select(CalibrationProtosHelper.getName(calibration.getCameraType()));
+		if (calibration.hasNmPerPixel())
+			textNmPerPixel.setText("" + calibration.getNmPerPixel());
+		if (calibration.hasExposureTime())
+			textExposure.setText("" + calibration.getExposureTime());
+	}
+
+	private void refreshSettings(PSF psf, boolean isCustomTemplate)
+	{
+		if (!isCustomTemplate || psf == null)
+			return;
+
+		// Do not use set() as we support merging a partial PSF
+		fitConfig.mergePSF(psf);
+
+		textPSF.select(PSFProtosHelper.getName(fitConfig.getPSFType()));
+	}
+
+	/**
+	 * Refresh settings.
+	 * <p>
+	 * If this is a custom template then use all the settings. If a default template then leave some existing spot
+	 * settings untouched as the user may have updated them (e.g. PSF width).
+	 *
+	 * @param fitEngineSettings
+	 *            the config
+	 * @param isCustomTemplate
+	 *            True if a custom template.
+	 */
+	private void refreshSettings(FitEngineSettings fitEngineSettings, boolean isCustomTemplate)
+	{
+		// Set the configuration
+		// This will clear everything and merge the configuration
+		this.config.setFitEngineSettings(fitEngineSettings);
+		fitConfig = this.config.getFitConfiguration();
+
+		textDataFilterType.select(SettingsManager.getDataFilterTypeNames()[config.getDataFilterType().ordinal()]);
+		textDataFilterMethod
+				.select(SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(0).ordinal()]);
+		textSmooth.setText("" + config.getSmooth(0));
+		textSearch.setText("" + config.getSearch());
+		textBorder.setText("" + config.getBorder());
+		textFitting.setText("" + config.getFitting());
+		textFitSolver.select(SettingsManager.getFitSolverNames()[fitConfig.getFitSolver().ordinal()]);
+		textFailuresLimit.setText("" + config.getFailuresLimit());
+		textIncludeNeighbours.setState(config.isIncludeNeighbours());
+		textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
+		textResidualsThreshold.setText("" + config.getResidualsThreshold());
+		textDuplicateDistance.setText("" + config.getDuplicateDistance());
+
+		// Filtering
+		textSmartFilter.setState(fitConfig.isSmartFilter());
+		textDisableSimpleFilter.setState(fitConfig.isDisableSimpleFilter());
+		if (!fitConfig.isDisableSimpleFilter())
+		{
+			textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
+			textSignalStrength.setText("" + fitConfig.getSignalStrength());
+			textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
+			textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+		}
+		// These are used for settings the bounds so they are included
+		textMinPhotons.setText("" + fitConfig.getMinPhotons());
+		textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
+		updateFilterInput();
 	}
 }
