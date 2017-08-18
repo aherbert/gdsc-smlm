@@ -34,10 +34,10 @@ public class BlockMeanFilter extends BlockFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.filters.BlockFilter#computeWeightedDivisor(int, int, float)
+	 * @see gdsc.smlm.filters.BlockFilter#computeWeightedDivisor(float)
 	 */
 	@Override
-	protected float[] computeWeightedDivisor(final int maxx, final int maxy, final float n)
+	protected float[] computeWeightedDivisor(final float n)
 	{
 		float[] divisor = weights.clone();
 		
@@ -45,11 +45,11 @@ public class BlockMeanFilter extends BlockFilter
 		BlockSumFilter sum = new BlockSumFilter();
 		if ((int) n == n)
 		{
-			sum.rollingBlockFilter(divisor, maxx, maxy, (int) n);
+			sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
 		}
 		else
 		{
-			sum.stripedBlockFilter(divisor, maxx, maxy, n);
+			sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
 		}
 		return divisor;
 	}

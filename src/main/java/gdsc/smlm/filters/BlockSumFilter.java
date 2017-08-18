@@ -34,10 +34,10 @@ public class BlockSumFilter extends BlockFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.filters.BlockFilter#computeWeightedDivisor(int, int, float)
+	 * @see gdsc.smlm.filters.BlockFilter#computeWeightedDivisor(float)
 	 */
 	@Override
-	protected float[] computeWeightedDivisor(int maxx, int maxy, float n)
+	protected float[] computeWeightedDivisor(float n)
 	{
 		// The concept of a divisor for a weighted sum filter is invalid.
 		

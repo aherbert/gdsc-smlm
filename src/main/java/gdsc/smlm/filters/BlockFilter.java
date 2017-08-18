@@ -52,36 +52,28 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 	/**
 	 * Updates the weighted divisor within a 2n+1 size block around each point.
-	 * 
-	 * @param maxx
-	 *            The width of the data
-	 * @param maxy
-	 *            The height of the data
+	 *
 	 * @param n
 	 *            The block size
 	 */
-	private void updateWeightedDivisor(final int maxx, final int maxy, final float n)
+	private void updateWeightedDivisor(final float n)
 	{
 		// Cache the divisor
 		if (weightedDivisor == null || sumN != n)
 		{
 			sumN = n;
-			weightedDivisor = computeWeightedDivisor(maxx, maxy, n);
+			weightedDivisor = computeWeightedDivisor(n);
 		}
 	}
 
 	/**
 	 * Computes the weighted divisor within a 2n+1 size block around each point.
 	 *
-	 * @param maxx
-	 *            The width of the data
-	 * @param maxy
-	 *            The height of the data
 	 * @param n
 	 *            The block size
 	 * @return the weighted divisor
 	 */
-	protected abstract float[] computeWeightedDivisor(final int maxx, final int maxy, final float n);
+	protected abstract float[] computeWeightedDivisor(final float n);
 
 	/**
 	 * Gets the value.
@@ -2212,9 +2204,9 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (!hasWeights())
 			throw new IllegalStateException("Weights have not been set for an algorithm that requires weights");
 		int size = data.length;
-		if (weights.length != size)
+		if (weights.length != size || this.weightWidth != maxx || this.weightHeight != maxy)
 			throw new IllegalStateException("Weights are not the correct size");
-		updateWeightedDivisor(maxx, maxy, n);
+		updateWeightedDivisor(n);
 		// Apply weights
 		for (int i = 0; i < size; i++)
 			data[i] *= weights[i];

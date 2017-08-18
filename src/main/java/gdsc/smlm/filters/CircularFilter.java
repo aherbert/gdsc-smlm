@@ -43,34 +43,26 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	/**
 	 * Updates the weighted number of points within the circle
 	 * 
-	 * @param maxx
-	 *            The width of the data
-	 * @param maxy
-	 *            The height of the data
 	 * @param radius
 	 *            The circle radius
 	 */
-	private void updateWeightedNPoints(final int maxx, final int maxy, final double radius)
+	private void updateWeightedNPoints(final double radius)
 	{
 		// Cache the number of points
 		if (nPoints == null || lastRadius != radius)
 		{
-			nPoints = computeWeightedNPoints(maxx, maxy, radius);
+			nPoints = computeWeightedNPoints(radius);
 		}
 	}
 
 	/**
 	 * Computes the weighted number of points within the circle
 	 *
-	 * @param maxx
-	 *            The width of the data
-	 * @param maxy
-	 *            The height of the data
 	 * @param radius
 	 *            The circle radius
 	 * @return the weighted divisor
 	 */
-	protected abstract float[] computeWeightedNPoints(final int maxx, final int maxy, final double radius);
+	protected abstract float[] computeWeightedNPoints(final double radius);
 
 	/**
 	 * Gets the value.
@@ -150,9 +142,9 @@ public abstract class CircularFilter extends BaseWeightedFilter
 		if (hasWeights())
 		{
 			int size = data.length;
-			if (weights.length != size)
+			if (weights.length != size || this.weightWidth != width || this.weightHeight != height)
 				throw new IllegalStateException("Weights are not the correct size");
-			updateWeightedNPoints(width, height, radius);
+			updateWeightedNPoints(radius);
 			// Apply weights
 			for (int i = 0; i < size; i++)
 				data[i] *= weights[i];

@@ -21,8 +21,7 @@ public abstract class BaseWeightedFilter extends BaseFilter
 	/** The weights. */
 	protected float[] weights;
 
-	/** The height. */
-	protected int width, height;
+	protected int weightWidth, weightHeight;
 
 	/**
 	 * Sets the weights of the data. This should be called before filtering data samples.
@@ -37,8 +36,8 @@ public abstract class BaseWeightedFilter extends BaseFilter
 	public void setWeights(final float[] weights, final int width, final int height)
 	{
 		this.weights = weights;
-		this.width = width;
-		this.height = height;
+		this.weightWidth = width;
+		this.weightHeight = height;
 		newWeights();
 	}
 

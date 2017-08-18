@@ -34,10 +34,10 @@ public class CircularSumFilter extends CircularFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.filters.CircularFilter#computeWeightedNPoints(int, int, double)
+	 * @see gdsc.smlm.filters.CircularFilter#computeWeightedNPoints(double)
 	 */
 	@Override
-	protected float[] computeWeightedNPoints(int maxx, int maxy, double radius)
+	protected float[] computeWeightedNPoints(double radius)
 	{
 		// The concept of a divisor for a weighted sum filter is invalid.
 		
