@@ -89,7 +89,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * @param sum
 	 *            the sum within the block
 	 * @param divisor
-	 *            the divisor (1/[block area])
+	 *            the divisor (block area)
 	 * @return the value
 	 */
 	protected abstract float getValue(float sum, float divisor);
@@ -154,7 +154,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / (blockSize * blockSize));
+		final float divisor = (float) ((blockSize * blockSize));
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -345,7 +345,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / 9);
+		final float divisor = (float) (9);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -564,7 +564,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / (blockSize * blockSize));
+		final float divisor = (float) ((blockSize * blockSize));
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
@@ -706,7 +706,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
+		final float divisor = (float) (((2 * w + 1) * (2 * w + 1)));
 
 		final float w1 = w - n;
 
@@ -853,7 +853,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / 9);
+		final float divisor = (float) (9);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
@@ -964,7 +964,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / (1 + 4 * w * (1 + w)));
+		final float divisor = (float) ((1 + 4 * w * (1 + w)));
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
@@ -1075,7 +1075,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / 25);
+		final float divisor = (float) (25);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
@@ -1192,7 +1192,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		float[] newData = initialise(data.length);
 
 		final float w1 = (w < 2) ? w - (int) w : 1;
-		final float divisor = (float) (1.0 / (9 + 12 * w1 + 4 * w1 * w1));
+		final float divisor = (float) ((9 + 12 * w1 + 4 * w1 * w1));
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
@@ -1308,7 +1308,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / 49);
+		final float divisor = (float) (49);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
@@ -1427,7 +1427,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		float[] newData = initialise(data.length);
 
 		final float w1 = (w < 3) ? w - (int) w : 1;
-		final float divisor = (float) (1.0 / (25 + 20 * w1 + 4 * w1 * w1));
+		final float divisor = (float) ((25 + 20 * w1 + 4 * w1 * w1));
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
@@ -1629,7 +1629,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 					d++;
 				}
 
-		final float divisor = (float) (1.0 / ((2 * n + 1) * (2 * n + 1)));
+		final float divisor = (float) (((2 * n + 1) * (2 * n + 1)));
 
 		for (int y = n; y < maxy - n; y++)
 		{
@@ -1816,7 +1816,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		for (int d = xoffset2.length; d-- > 0;)
 			offset2[d] = maxx * yoffset2[d] + xoffset2[d];
 
-		final float divisor = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
+		final float divisor = (float) (((2 * w + 1) * (2 * w + 1)));
 
 		final float w1 = w - n;
 		final float w2 = w1 * w1;
@@ -1997,7 +1997,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / 9);
+		final float divisor = (float) (9);
 
 		for (int y = 1; y < maxy - 1; y++)
 		{
@@ -2094,7 +2094,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		float[] newData = initialise(data.length);
 
 		final float w2 = w * w;
-		final float divisor = (float) (1.0 / (1 + 4 * w + 4 * w2));
+		final float divisor = (float) ((1 + 4 * w + 4 * w2));
 
 		for (int y = 1; y < maxy - 1; y++)
 		{
@@ -2287,7 +2287,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / ((2 * n + 1) * (2 * n + 1)));
+		final float divisor = (float) (((2 * n + 1) * (2 * n + 1)));
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -2459,7 +2459,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / 9);
+		final float divisor = (float) (9);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -2699,7 +2699,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / ((2 * n + 1) * (2 * n + 1)));
+		final float divisor = (float) (((2 * n + 1) * (2 * n + 1)));
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -2879,7 +2879,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
+		final float divisor = (float) (((2 * w + 1) * (2 * w + 1)));
 
 		final float w1 = w - n;
 
@@ -3059,7 +3059,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / 9);
+		final float divisor = (float) (9);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -3203,8 +3203,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] newData = initialise(data.length);
 
-		//final float divisor = (float) (1.0 / (1 + 4 * w + 4 * w * w));
-		final float divisor = (float) (1.0 / (1 + 4 * w * (1 + w)));
+		//final float divisor = (float) ((1 + 4 * w + 4 * w * w));
+		final float divisor = (float) ((1 + 4 * w * (1 + w)));
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -3340,7 +3340,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / 25);
+		final float divisor = (float) (25);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -3478,7 +3478,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		float[] newData = initialise(data.length);
 
 		final float w1 = (w < 2) ? w - (int) w : 1;
-		final float divisor = (float) (1.0 / (9 + 12 * w1 + 4 * w1 * w1));
+		final float divisor = (float) ((9 + 12 * w1 + 4 * w1 * w1));
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -3618,7 +3618,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		float[] newData = initialise(data.length);
 
-		final float divisor = (float) (1.0 / 49);
+		final float divisor = (float) (49);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -3760,7 +3760,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		float[] newData = initialise(data.length);
 
 		final float w1 = (w < 3) ? w - (int) w : 1;
-		final float divisor = (float) (1.0 / (25 + 20 * w1 + 4 * w1 * w1));
+		final float divisor = (float) ((25 + 20 * w1 + 4 * w1 * w1));
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
@@ -4051,7 +4051,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 					d++;
 				}
 
-		final float divisor = (float) (1.0 / ((2 * n + 1) * (2 * n + 1)));
+		final float divisor = (float) (((2 * n + 1) * (2 * n + 1)));
 
 		int index = 0;
 		for (int y = 0; y < maxy; y++)
@@ -4260,7 +4260,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		for (int d = xoffset2.length; d-- > 0;)
 			offset2[d] = maxx * yoffset2[d] + xoffset2[d];
 
-		final float divisor = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
+		final float divisor = (float) (((2 * w + 1) * (2 * w + 1)));
 
 		final float w1 = w - n;
 		final float w2 = w1 * w1;
@@ -4543,7 +4543,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 					d++;
 				}
 
-		final float divisor = (float) (1.0 / 9);
+		final float divisor = (float) (9);
 
 		for (int y = 0; y < maxy; y++)
 		{
@@ -4708,7 +4708,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		final int[] yoffset2 = new int[] { -1, 1, -1, 1 };
 
 		final float w2 = w * w;
-		final float divisor = (float) (1.0 / (1 + 4 * w + 4 * w2));
+		final float divisor = (float) ((1 + 4 * w + 4 * w2));
 
 		for (int y = 0; y < maxy; y++)
 		{

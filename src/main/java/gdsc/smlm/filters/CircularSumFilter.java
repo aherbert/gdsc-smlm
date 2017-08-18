@@ -23,12 +23,31 @@ public class CircularSumFilter extends CircularFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.filters.CircularFilter#getValue(double, int)
+	 * @see gdsc.smlm.filters.CircularFilter#getValue(double, float)
 	 */
 	@Override
-	protected float getValue(double sum, int nPoints)
+	protected float getValue(double sum, float nPoints)
 	{
 		return (float) sum;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.CircularFilter#computeWeightedNPoints(int, int, double)
+	 */
+	@Override
+	protected float[] computeWeightedNPoints(int maxx, int maxy, double radius)
+	{
+		// The concept of a divisor for a weighted sum filter is invalid.
+		
+		// To avoid array index exceptions we create a empty divisor.
+		//float[] divisor = new float[weights.length];
+		//Arrays.fill(divisor, 1.0f);
+		//return divisor;
+
+		// Since the divisor will not be used in getValue() just return the weights
+		return weights;
 	}
 
 	/*

@@ -28,7 +28,7 @@ public class BlockMeanFilter extends BlockFilter
 	@Override
 	protected float getValue(float sum, float divisor)
 	{
-		return sum * divisor;
+		return sum / divisor;
 	}
 
 	/*

@@ -22,10 +22,66 @@ import java.awt.Rectangle;
  * <p>
  * Adapted from ij.plugin.filter.RankFilters
  */
-public abstract class CircularFilter extends BaseFilter
+public abstract class CircularFilter extends BaseWeightedFilter
 {
 	private int[] kernel = null;
 	private double lastRadius = 0;
+
+	private float[] nPoints = null;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.BaseWeightedFilter#newWeights()
+	 */
+	@Override
+	protected void newWeights()
+	{
+		nPoints = null;
+	}
+
+	/**
+	 * Updates the weighted number of points within the circle
+	 * 
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param radius
+	 *            The circle radius
+	 */
+	private void updateWeightedNPoints(final int maxx, final int maxy, final double radius)
+	{
+		// Cache the number of points
+		if (nPoints == null || lastRadius != radius)
+		{
+			nPoints = computeWeightedNPoints(maxx, maxy, radius);
+		}
+	}
+
+	/**
+	 * Computes the weighted number of points within the circle
+	 *
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param radius
+	 *            The circle radius
+	 * @return the weighted divisor
+	 */
+	protected abstract float[] computeWeightedNPoints(final int maxx, final int maxy, final double radius);
+
+	/**
+	 * Gets the value.
+	 *
+	 * @param sum
+	 *            the sum within the circle
+	 * @param nPoints
+	 *            the n points within the circle
+	 * @return the value
+	 */
+	protected abstract float getValue(double sum, float nPoints);
 
 	/**
 	 * Compute the mean.
@@ -90,6 +146,18 @@ public abstract class CircularFilter extends BaseFilter
 	 */
 	private void rank(float[] data, Rectangle roi, int width, int height, double radius)
 	{
+		// TODO: Set-up for weighted filtering
+		if (hasWeights())
+		{
+			int size = data.length;
+			if (weights.length != size)
+				throw new IllegalStateException("Weights are not the correct size");
+			updateWeightedNPoints(width, height, radius);
+			// Apply weights
+			for (int i = 0; i < size; i++)
+				data[i] *= weights[i];
+		}
+
 		int[] lineRadii = makeLineRadii(radius);
 
 		int kHeight = kHeight(lineRadii);
@@ -170,34 +238,43 @@ public abstract class CircularFilter extends BaseFilter
 		// NOTE:
 		// The incremental algorithm does not work.
 		// The full calculation is always true in the original source code.
-		boolean fullCalculation = true;// smallKernel; //for small kernel, always use the full area, not incremental algorithm
+		//boolean fullCalculation = true;// smallKernel; //for small kernel, always use the full area, not incremental algorithm
 
-		for (int x = 0; x < roi.width; x++, valuesP++)
-		{ // x is with respect to roi.x
-			if (fullCalculation)
-			{
-				getAreaSums(cache, x, cachePointers, sums);
-			}
-			else
-			{
+		if (nPoints != null)
+		{
+			for (int x = 0; x < roi.width; x++, valuesP++)
+			{ // x is with respect to roi.x
+				  //if (fullCalculation)
+			  //{
+			  //	getAreaSums(cache, x, cachePointers, sums);
+			  //}
+			  //else
+			  //{
 				addSideSums(cache, x, cachePointers, sums);
-				if (Double.isNaN(sums[0])) //avoid perpetuating NaNs into remaining line
-					fullCalculation = true;
-			}
-			values[valuesP] = getValue(sums[0], kNPoints);
-		} // for x
+				//	if (Double.isNaN(sums[0])) //avoid perpetuating NaNs into remaining line
+				//		fullCalculation = true;
+				//}
+				values[valuesP] = getValue(sums[0], nPoints[valuesP]);
+			} // for x
+		}
+		else
+		{
+			for (int x = 0; x < roi.width; x++, valuesP++)
+			{ // x is with respect to roi.x
+				  //if (fullCalculation)
+			  //{
+			  //	getAreaSums(cache, x, cachePointers, sums);
+			  //}
+			  //else
+			  //{
+				addSideSums(cache, x, cachePointers, sums);
+				//	if (Double.isNaN(sums[0])) //avoid perpetuating NaNs into remaining line
+				//		fullCalculation = true;
+				//}
+				values[valuesP] = getValue(sums[0], kNPoints);
+			} // for x
+		}
 	}
-
-	/**
-	 * Gets the value.
-	 *
-	 * @param sum
-	 *            the sum within the circle
-	 * @param nPoints
-	 *            the n points within the circle
-	 * @return the value
-	 */
-	protected abstract float getValue(double sum, int nPoints);
 
 	/**
 	 * Read a line into the cache (including padding in x).
@@ -238,25 +315,25 @@ public abstract class CircularFilter extends BaseFilter
 			cache[cp] = cache[cacheLineP + padLeft + widthInside - 1];
 	}
 
-	/**
-	 * Get sum of values and values squared within the kernel area.
-	 * x between 0 and cacheWidth-1
-	 * Output is written to array sums[0] = sum
-	 */
-	private static void getAreaSums(float[] cache, int xCache0, int[] kernel, double[] sums)
-	{
-		double sum = 0;
-		for (int kk = 0; kk < kernel.length; kk++)
-		{ // y within the cache stripe (we have 2 kernel pointers per cache line)
-			for (int p = kernel[kk++] + xCache0; p <= kernel[kk] + xCache0; p++)
-			{
-				float v = cache[p];
-				sum += v;
-			}
-		}
-		sums[0] = sum;
-		return;
-	}
+	//	/**
+	//	 * Get sum of values and values squared within the kernel area.
+	//	 * x between 0 and cacheWidth-1
+	//	 * Output is written to array sums[0] = sum
+	//	 */
+	//	private static void getAreaSums(float[] cache, int xCache0, int[] kernel, double[] sums)
+	//	{
+	//		double sum = 0;
+	//		for (int kk = 0; kk < kernel.length; kk++)
+	//		{ // y within the cache stripe (we have 2 kernel pointers per cache line)
+	//			for (int p = kernel[kk++] + xCache0; p <= kernel[kk] + xCache0; p++)
+	//			{
+	//				float v = cache[p];
+	//				sum += v;
+	//			}
+	//		}
+	//		sums[0] = sum;
+	//		return;
+	//	}
 
 	/**
 	 * Add all values and values squared at the right border inside minus at the left border outside the kernel area.

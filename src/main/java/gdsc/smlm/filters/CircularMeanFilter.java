@@ -23,12 +23,26 @@ public class CircularMeanFilter extends CircularFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.filters.CircularFilter#getValue(double, int)
+	 * @see gdsc.smlm.filters.CircularFilter#getValue(double, float)
 	 */
 	@Override
-	protected float getValue(double sum, int nPoints)
+	protected float getValue(double sum, float nPoints)
 	{
 		return (float) (sum / nPoints);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.CircularFilter#computeWeightedNPoints(int, int, double)
+	 */
+	@Override
+	protected float[] computeWeightedNPoints(int maxx, int maxy, double radius)
+	{
+		float[] nPoints = weights.clone();
+		CircularSumFilter sum = new CircularSumFilter();
+		sum.convolve(nPoints, maxx, maxy, radius);
+		return nPoints;
 	}
 
 	/*
