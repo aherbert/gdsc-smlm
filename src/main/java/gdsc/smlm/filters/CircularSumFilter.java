@@ -14,11 +14,11 @@ package gdsc.smlm.filters;
  *---------------------------------------------------------------------------*/
 
 /**
- * Computes the mean using a circular mask.
+ * Computes the sum using a circular mask.
  * <p>
  * Adapted from ij.plugin.filter.RankFilters
  */
-public class CircularMeanFilter extends CircularFilter
+public class CircularSumFilter extends CircularFilter
 {
 	/*
 	 * (non-Javadoc)
@@ -28,7 +28,7 @@ public class CircularMeanFilter extends CircularFilter
 	@Override
 	protected float getValue(double sum, int nPoints)
 	{
-		return (float) (sum / nPoints);
+		return (float) sum;
 	}
 
 	/*
@@ -36,9 +36,9 @@ public class CircularMeanFilter extends CircularFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public CircularMeanFilter clone()
+	public CircularSumFilter clone()
 	{
-		CircularMeanFilter o = (CircularMeanFilter) super.clone();
+		CircularSumFilter o = (CircularSumFilter) super.clone();
 		return o;
 	}
 }

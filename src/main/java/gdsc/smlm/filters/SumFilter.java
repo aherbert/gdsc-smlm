@@ -771,6 +771,31 @@ public class SumFilter extends BaseFilter
 			stripedBlockSumNxN(data, maxx, maxy, n);
 	}
 
+
+	/**
+	 * Compute the block sum within a 2w+1 size block around each point.
+	 * <p>
+	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The block size
+	 */
+	public void stripedBlockSum(float[] data, final int maxx, final int maxy, final float w)
+	{
+		if (w <= 1)
+			stripedBlockSum3x3(data, maxx, maxy, w);
+		else
+			stripedBlockSumNxN(data, maxx, maxy, w);
+	}
+	
 	/**
 	 * Compute the block sum within a 2n+1 size block around each point.
 	 * <p>
@@ -849,6 +874,104 @@ public class SumFilter extends BaseFilter
 		}
 	}
 
+
+	/**
+	 * Compute the block sum within a 2w+1 size block around each point.
+	 * <p>
+	 * Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The block size
+	 */
+	public void stripedBlockSumNxN(float[] data, final int maxx, final int maxy, final float w)
+	{
+		final int n = (int) w;
+		final int n1 = (n == w) ? n : n + 1;
+
+		if (n == n1)
+		{
+			// There is no edge
+			stripedBlockSum(data, maxx, maxy, n);
+			return;
+		}
+
+		int blockSize = 2 * n1;
+
+		float[] newData = floatBuffer(data.length);
+
+		final float w1 = w - n;
+
+		// NOTE: 
+		// To increase speed when sweeping the arrays and allow for reusing code:
+		//   newData is XY ordinal => x * maxy + y
+		//   data is YX ordinal    => y * maxx + x
+
+		// X-direction
+		int width = maxx;
+		int height = maxy;
+		float[] inData = data;
+		float[] outData = newData;
+
+		float[] row = floatRowBuffer(width + 2 * n1);
+		for (int y = 0; y < height; y++)
+		{
+			extractRow(inData, y, width, n1, row);
+
+			int centreIndex = y;
+			for (int x = 0; x < width; x++)
+			{
+				// Sum strips
+				float sum = row[x] * w1;
+				for (int j = 1; j < blockSize; j++)
+				{
+					sum += row[x + j];
+				}
+				sum += row[x + blockSize] * w1;
+
+				// Store result in transpose
+				outData[centreIndex] = sum;
+				centreIndex += height;
+			}
+		}
+
+		// Y-direction. 
+		width = maxy;
+		height = maxx;
+		inData = newData;
+		outData = data;
+
+		row = floatRowBuffer(width + 2 * n1);
+		for (int y = 0; y < height; y++)
+		{
+			// Extract row (pad ends)
+			extractRow(inData, y, width, n1, row);
+
+			int centreIndex = y;
+			for (int x = 0; x < width; x++)
+			{
+				// Sum strips
+				float sum = row[x] * w1;
+				for (int j = 1; j < blockSize; j++)
+				{
+					sum += row[x + j];
+				}
+				sum += row[x + blockSize] * w1;
+
+				// Store result in transpose
+				outData[centreIndex] = sum;
+				centreIndex += height;
+			}
+		}
+	}
+	
 	/**
 	 * Compute the block sum within a 3x3 size block around each point.
 	 * <p>
@@ -912,6 +1035,76 @@ public class SumFilter extends BaseFilter
 			}
 		}
 	}
+	
+
+	/**
+	 * Compute the block sum within a 3x3 size block around each point.
+	 * <p>
+	 * Uses a [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+	 * <p>
+	 * Note: the input data is destructively modified.
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The weight
+	 */
+	public void stripedBlockSum3x3(float[] data, final int maxx, final int maxy, final float w)
+	{
+		float[] newData = floatBuffer(data.length);
+
+		// NOTE: 
+		// To increase speed when sweeping the arrays and allow for reusing code:
+		//   newData is XY ordinal => x * maxy + y
+		//   data is YX ordinal    => y * maxx + x
+
+		// X-direction
+		int width = maxx;
+		int height = maxy;
+		float[] inData = data;
+		float[] outData = newData;
+
+		float[] row = floatRowBuffer(width + 2);
+		for (int y = 0; y < height; y++)
+		{
+			extractRow1(inData, y, width, row);
+
+			int centreIndex = y;
+			for (int x = 0; x < width; x++)
+			{
+				// Sum strips
+				// Store result in transpose
+				outData[centreIndex] = w * (row[x] + row[x + 2]) + row[x + 1];
+				centreIndex += height;
+			}
+		}
+
+		// Y-direction. 
+		width = maxy;
+		height = maxx;
+		inData = newData;
+		outData = data;
+
+		row = floatRowBuffer(width + 2);
+		for (int y = 0; y < height; y++)
+		{
+			// Extract row (pad ends)
+			extractRow1(inData, y, width, row);
+
+			int centreIndex = y;
+			for (int x = 0; x < width; x++)
+			{
+				// Sum strips
+				// Store result in transpose
+				outData[centreIndex] = w * (row[x] + row[x + 2]) + row[x + 1];
+				centreIndex += height;
+			}
+		}
+	}	
 
 	private float[] floatRowBuffer(int size)
 	{

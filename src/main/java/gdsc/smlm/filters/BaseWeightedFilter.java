@@ -19,7 +19,6 @@ package gdsc.smlm.filters;
  */
 public abstract class BaseWeightedFilter extends BaseFilter
 {
-
 	/** The weights. */
 	protected float[] weights;
 

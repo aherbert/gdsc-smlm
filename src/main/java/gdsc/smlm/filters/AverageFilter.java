@@ -1,10 +1,6 @@
 package gdsc.smlm.filters;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.util.FastMath;
-
-import gdsc.core.utils.Maths;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -35,58 +31,10 @@ import gdsc.core.utils.Maths;
  * Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less than 2. All routines
  * are OK for 3x3 images and larger.
  */
-public class AverageFilter extends BaseWeightedFilter
+public class AverageFilter extends BaseFilter
 {
 	private float[] floatDataBuffer = null;
 	private float[] floatRowBuffer = null;
-
-	private float[] sumWeights = null;
-	private float sumN = 0;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.filters.BaseWeightedFilter#newWeights()
-	 */
-	@Override
-	protected void newWeights()
-	{
-		sumWeights = null;
-	}
-
-	/**
-	 * Compute the block sum of the weights within a 2n+1 size block around each point.
-	 * 
-	 * @param maxx
-	 *            The width of the data
-	 * @param maxy
-	 *            The height of the data
-	 * @param n
-	 *            The block size
-	 */
-	private void computeSumWeights(final int maxx, final int maxy, final float n)
-	{
-		// Cache the sum of the weights
-		if (sumWeights == null || sumN != n)
-		{
-			sumN = n;
-			sumWeights = weights.clone();
-			// Use a sum filter
-			SumFilter sum = new SumFilter();
-			if ((int) n == n)
-				sum.rollingBlockSum(sumWeights, maxx, maxy, (int) n);
-			else
-			{
-				// TODO - support this method
-				//sum.stripedBlockSum(sumWeights, maxx, maxy, n);
-			}
-		}
-	}
-
-	private static int pow2(int i)
-	{
-		return i * i;
-	}
 
 	/**
 	 * Compute the block average within a 2n+1 size block around each point.
@@ -106,20 +54,12 @@ public class AverageFilter extends BaseWeightedFilter
 	 */
 	public void rollingBlockAverageInternal(float[] data, final int maxx, final int maxy, final int n)
 	{
-		if (hasWeights())
-		{
-			// TODO
-			// Create weighted versions of the routines below
-		}
+		// Note: Speed tests show that this method is only marginally faster than rollingBlockAverageNxNInternal.
+		// Sometimes it is slower. The intricacies of the java optimiser escape me.
+		if (n == 1)
+			rollingBlockAverage3x3Internal(data, maxx, maxy);
 		else
-		{
-			// Note: Speed tests show that this method is only marginally faster than rollingBlockAverageNxNInternal.
-			// Sometimes it is slower. The intricacies of the java optimiser escape me.
-			if (n == 1)
-				rollingBlockAverage3x3Internal(data, maxx, maxy);
-			else
-				rollingBlockAverageNxNInternal(data, maxx, maxy, n);
-		}
+			rollingBlockAverageNxNInternal(data, maxx, maxy, n);
 	}
 
 	/**
@@ -334,22 +274,14 @@ public class AverageFilter extends BaseWeightedFilter
 	 */
 	public void stripedBlockAverageInternal(float[] data, final int maxx, final int maxy, final float w)
 	{
-		if (hasWeights())
-		{
-			// TODO
-			// Create weighted versions of the routines below
-		}
+		if (w <= 1)
+			stripedBlockAverage3x3Internal(data, maxx, maxy, w);
+		else if (w <= 2)
+			stripedBlockAverage5x5Internal(data, maxx, maxy, w);
+		else if (w <= 3)
+			stripedBlockAverage7x7Internal(data, maxx, maxy, w);
 		else
-		{
-			if (w <= 1)
-				stripedBlockAverage3x3Internal(data, maxx, maxy, w);
-			else if (w <= 2)
-				stripedBlockAverage5x5Internal(data, maxx, maxy, w);
-			else if (w <= 3)
-				stripedBlockAverage7x7Internal(data, maxx, maxy, w);
-			else
-				stripedBlockAverageNxNInternal(data, maxx, maxy, w);
-		}
+			stripedBlockAverageNxNInternal(data, maxx, maxy, w);
 	}
 
 	/**
@@ -1247,24 +1179,6 @@ public class AverageFilter extends BaseWeightedFilter
 
 	private float[] floatBuffer(int size)
 	{
-		return floatBuffer(size, true);
-	}
-
-	private float[] floatBuffer(int size, boolean unweighted)
-	{
-		if (unweighted)
-		{
-			if (hasWeights())
-				throw new IllegalStateException("Weights have been set for an algorithm that does not support weights");
-		}
-		else
-		{
-			if (!hasWeights())
-				throw new IllegalStateException("Weights have not been set for an algorithm that requires weights");
-			if (weights.length != size)
-				throw new IllegalStateException("Weights are not the correct size");
-		}
-
 		if (floatDataBuffer == null || floatDataBuffer.length < size)
 		{
 			floatDataBuffer = new float[size];
@@ -1288,18 +1202,10 @@ public class AverageFilter extends BaseWeightedFilter
 	 */
 	public void rollingBlockAverage(float[] data, final int maxx, final int maxy, final int n)
 	{
-		if (hasWeights())
-		{
-			// TODO
-
-		}
+		if (n == 1)
+			rollingBlockAverage3x3(data, maxx, maxy);
 		else
-		{
-			if (n == 1)
-				rollingBlockAverage3x3(data, maxx, maxy);
-			else
-				rollingBlockAverageNxN(data, maxx, maxy, n);
-		}
+			rollingBlockAverageNxN(data, maxx, maxy, n);
 	}
 
 	/**
@@ -1512,22 +1418,14 @@ public class AverageFilter extends BaseWeightedFilter
 	 */
 	public void stripedBlockAverage(float[] data, final int maxx, final int maxy, final float w)
 	{
-		if (hasWeights())
-		{
-			// TODO
-			// Create weighted versions of the routines below
-		}
+		if (w <= 1)
+			stripedBlockAverage3x3(data, maxx, maxy, w);
+		else if (w <= 2)
+			stripedBlockAverage5x5(data, maxx, maxy, w);
+		else if (w <= 3)
+			stripedBlockAverage7x7(data, maxx, maxy, w);
 		else
-		{
-			if (w <= 1)
-				stripedBlockAverage3x3(data, maxx, maxy, w);
-			else if (w <= 2)
-				stripedBlockAverage5x5(data, maxx, maxy, w);
-			else if (w <= 3)
-				stripedBlockAverage7x7(data, maxx, maxy, w);
-			else
-				stripedBlockAverageNxN(data, maxx, maxy, w);
-		}
+			stripedBlockAverageNxN(data, maxx, maxy, w);
 	}
 
 	/**

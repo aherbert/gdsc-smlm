@@ -26,7 +26,7 @@ import org.apache.commons.math3.util.FastMath;
 public class BlockAverageDataProcessor extends DataProcessor
 {
 	private final double smooth;
-	private AverageFilter filter = new AverageFilter();
+	private BlockMeanFilter filter = new BlockMeanFilter();
 
 	/**
 	 * Constructor
@@ -43,10 +43,10 @@ public class BlockAverageDataProcessor extends DataProcessor
 	}
 
 	/**
-	 * Convert the smoothing parameter to the value which is used for the AverageFilter.
+	 * Convert the smoothing parameter to the value which is used for the BlockMeanFilter.
 	 * We only use int smoothing. Values below zero are set to zero.
 	 * 
-	 * @see AverageFilter
+	 * @see BlockMeanFilter
 	 * 
 	 * @param smooth
 	 * @return The adjusted value
@@ -112,11 +112,11 @@ public class BlockAverageDataProcessor extends DataProcessor
 
 			if (tmpSmooth <= getBorder())
 			{
-				filter.rollingBlockAverageInternal(smoothData, width, height, tmpSmooth);
+				filter.rollingBlockFilterInternal(smoothData, width, height, tmpSmooth);
 			}
 			else
 			{
-				filter.rollingBlockAverage(smoothData, width, height, tmpSmooth);
+				filter.rollingBlockFilter(smoothData, width, height, tmpSmooth);
 			}
 		}
 		return smoothData;
