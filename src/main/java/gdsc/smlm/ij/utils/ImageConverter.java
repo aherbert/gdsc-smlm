@@ -60,6 +60,8 @@ public class ImageConverter
 	 * <p>
 	 * Allows reuse of an existing buffer if provided. This will not be truncated if it is larger than the
 	 * ImageProcessor ROI bounds. If smaller then a new buffer will be created.
+	 * <p>
+	 * If the object pixels array is incorrect size (it should be width*height) then null will be returned. 
 	 * 
 	 * @param oPixels
 	 * @param width
@@ -79,6 +81,8 @@ public class ImageConverter
 		if (oPixels instanceof float[])
 		{
 			float[] pixels = (float[]) oPixels;
+			if (incorrectSize(pixels.length, width, height))
+				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
@@ -99,6 +103,8 @@ public class ImageConverter
 		else if (oPixels instanceof short[])
 		{
 			short[] pixels = (short[]) oPixels;
+			if (incorrectSize(pixels.length, width, height))
+				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
@@ -120,6 +126,8 @@ public class ImageConverter
 		else if (oPixels instanceof byte[])
 		{
 			byte[] pixels = (byte[]) oPixels;
+			if (incorrectSize(pixels.length, width, height))
+				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
@@ -141,12 +149,20 @@ public class ImageConverter
 		else if (oPixels instanceof int[])
 		{
 			// The default processing
-			ImageProcessor ip = new ColorProcessor(width, height, (int[]) oPixels);
+			int[] pixels = (int[]) oPixels;
+			if (incorrectSize(pixels.length, width, height))
+				return null;
+			ImageProcessor ip = new ColorProcessor(width, height, pixels);
 			ip.setRoi(bounds);
 			FloatProcessor fp = ip.crop().toFloat(0, null);
 			return (float[]) fp.getPixels();
 		}
 		return null;
+	}
+	
+	private static boolean incorrectSize(int length, int width, int height)
+	{
+		return length != width * height;
 	}
 
 	private static float[] allocate(float[] buffer, int size)
@@ -155,6 +171,7 @@ public class ImageConverter
 			buffer = new float[size];
 		return buffer;
 	}
+	
 
 	/**
 	 * Get the data from the image processor as a double array (include cropping to the ROI). Data is duplicated if the
@@ -181,6 +198,8 @@ public class ImageConverter
 	 * <p>
 	 * Allows reuse of an existing buffer if provided. This will not be truncated if it is larger than the
 	 * ImageProcessor ROI bounds. If smaller then a new buffer will be created.
+	 * <p>
+	 * If the object pixels array is incorrect size (it should be width*height) then null will be returned. 
 	 * 
 	 * @param oPixels
 	 * @param width
@@ -200,6 +219,8 @@ public class ImageConverter
 		if (oPixels instanceof float[])
 		{
 			float[] pixels = (float[]) oPixels;
+			if (incorrectSize(pixels.length, width, height))
+				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
@@ -221,6 +242,8 @@ public class ImageConverter
 		else if (oPixels instanceof short[])
 		{
 			short[] pixels = (short[]) oPixels;
+			if (incorrectSize(pixels.length, width, height))
+				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
@@ -242,6 +265,8 @@ public class ImageConverter
 		else if (oPixels instanceof byte[])
 		{
 			byte[] pixels = (byte[]) oPixels;
+			if (incorrectSize(pixels.length, width, height))
+				return null;
 			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
 			{
 				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
@@ -263,7 +288,10 @@ public class ImageConverter
 		else if (oPixels instanceof int[])
 		{
 			// The default processing
-			ImageProcessor ip = new ColorProcessor(width, height, (int[]) oPixels);
+			int[] pixels = (int[]) oPixels;
+			if (incorrectSize(pixels.length, width, height))
+				return null;
+			ImageProcessor ip = new ColorProcessor(width, height, pixels);
 			ip.setRoi(bounds);
 			FloatProcessor fp = ip.crop().toFloat(0, null);
 			return (double[]) fp.getPixels();

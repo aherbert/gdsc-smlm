@@ -267,6 +267,7 @@ public class CMOSAnalysis implements PlugIn
 			}
 			finally
 			{
+				//Utils.log("Finished");
 				finished = true;
 			}
 		}
@@ -433,6 +434,7 @@ public class CMOSAnalysis implements PlugIn
 	 */
 	private synchronized void showProgress()
 	{
+		//Utils.log("%d/%d\n", progress, totalProgress);
 		if (progress % stepProgress == 0)
 		{
 			//IJ.showProgress(progress, totalProgress);
@@ -867,7 +869,7 @@ public class CMOSAnalysis implements PlugIn
 			modelDirectory = directory;
 			modelName = "sCMOS Camera";
 		}
-		egd.addStringField("Model_name", modelName);
+		egd.addStringField("Model_name", modelName, 30);
 		egd.addDirectoryField("Model_directory", modelDirectory);
 		egd.showDialog();
 		if (!egd.wasCanceled())
