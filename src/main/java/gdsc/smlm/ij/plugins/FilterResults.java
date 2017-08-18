@@ -201,17 +201,17 @@ public class FilterResults implements PlugIn
 			for (String s : error)
 				sb.append(s).append(".\n");
 			IJ.error(TITLE, sb.toString());
-			return true;
+			return false;
 		}
 
 		IJ.showProgress(1);
 		IJ.showStatus("");
-		return false;
+		return true;
 	}
 
 	private float getDrift(PeakResult result, float x, float y)
 	{
-		return FastMath.max(Math.abs(result.origX - x), Math.abs(result.origY - y));
+		return FastMath.max(Math.abs(result.origX + 0.5f - x), Math.abs(result.origY + 0.5f - y));
 	}
 
 	private float getSnr(PeakResult result)
