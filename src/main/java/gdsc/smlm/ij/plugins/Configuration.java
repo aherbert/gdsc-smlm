@@ -309,7 +309,7 @@ public class Configuration implements PlugIn, ItemListener
 			if (gd.wasCanceled())
 				return;
 			String filename = gd.getNextString();
-			String notes = gd.getNextText();
+			notes = gd.getNextText();
 
 			if (filename != null)
 			{
@@ -317,8 +317,11 @@ public class Configuration implements PlugIn, ItemListener
 				File file = new File(templateFilename);
 				String name = Utils.removeExtension(file.getName());
 				TemplateSettings.Builder settings = TemplateSettings.newBuilder();
-				settings.setFitEngineSettings(config.getFitEngineSettings());
 				settings.addNotes(notes);
+				settings.setCalibration(fitConfig.getCalibration());
+				settings.setFitEngineSettings(config.getFitEngineSettings());
+				// Note: No results settings are currently supported
+				settings.setPsf(fitConfig.getPSF());
 				if (!ConfigurationTemplate.saveTemplate(name, settings.build(), file))
 					IJ.error(TITLE, "Failed to save to file: " + templateFilename);
 			}
