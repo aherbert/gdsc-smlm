@@ -220,8 +220,14 @@ public class CameraModelManager implements PlugIn
 		return list.toArray(new String[list.size()]);
 	}
 
-	private static String[] OPTIONS = { "Print model details", "View a camera model", "Load a camera model",
-			"Load from directory" };
+	//@formatter:off
+	private static String[] OPTIONS = { 
+			"Print model details", 
+			"View a camera model", 
+			"Load a camera model",
+			"Load from directory",
+			"Delete a camera model" };
+	//@formatter:on
 	private static int option = 0;
 	private static String selected = "";
 
@@ -250,6 +256,9 @@ public class CameraModelManager implements PlugIn
 
 		switch (option)
 		{
+			case 4:
+				deleteCameraModel();
+				break;
 			case 3:
 				loadFromDirectory();
 				break;
@@ -264,6 +273,29 @@ public class CameraModelManager implements PlugIn
 		}
 	}
 
+	private void deleteCameraModel()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		String[] MODELS = listCameraModels(false);
+		gd.addChoice("Model", MODELS, selected);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		String name = selected = gd.getNextChoice();
+
+		CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
+		if (resource == null)
+		{
+			IJ.log("Failed to find camera data for model: " + name);
+			return;
+		}
+		
+		settings.removeCameraModelResources(name);
+		SettingsManager.writeSettings(settings.build());
+		
+		Utils.log("Deleted camera model: %s\n%s", name, resource);
+	}
+	
 	private void loadFromDirectory()
 	{
 		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
@@ -330,7 +362,7 @@ public class CameraModelManager implements PlugIn
 			return;
 		}
 		// Try and load the resource. 
-		// Do not use loadFromFile as that vaidates the model data. We just want 
+		// Do not use loadFromFile as that validates the model data. We just want 
 		// to view the raw image.
 		ImagePlus imp = IJ.openImage(resource.getFilename());
 		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
