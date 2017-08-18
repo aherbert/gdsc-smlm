@@ -142,11 +142,13 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		 */
 		public boolean save(File file)
 		{
+			boolean result = false;
 			if (file != null)
 			{
-				return SettingsManager.toJSON(settings, file, SettingsManager.FLAG_JSON_WHITESPACE);
+				result = SettingsManager.toJSON(settings, file, SettingsManager.FLAG_JSON_WHITESPACE);
+				timestamp = file.lastModified();
 			}
-			return false;
+			return result;
 		}
 
 		public boolean hasImage()
@@ -444,6 +446,26 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		return template.settings;
 	}
 
+	/**
+	 * Gets the template file.
+	 *
+	 * @param name the name
+	 * @return the template file
+	 */
+	public static File getTemplateFile(String name)
+	{
+		Template template = map.get(name);
+		if (template == null)
+			return null;
+		return template.file;
+	}
+	
+	/**
+	 * Gets the template image.
+	 *
+	 * @param name the name
+	 * @return the template image
+	 */
 	public static ImagePlus getTemplateImage(String name)
 	{
 		Template template = map.get(name);

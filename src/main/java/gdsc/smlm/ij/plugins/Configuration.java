@@ -35,6 +35,7 @@ public class Configuration implements PlugIn, ItemListener
 {
 	private static final String TITLE = "Fit Configuration";
 	private static String templateFilename = "";
+	private static String notes = "";
 
 	private FitEngineConfiguration config;
 	private FitConfiguration fitConfig;
@@ -225,10 +226,10 @@ public class Configuration implements PlugIn, ItemListener
 
 		// In case a template update the calibration
 		calibration = fitConfig.getCalibrationWriter();
-		
+
 		// Ignore the template
 		gd.getNextChoice();
-		
+
 		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		calibration.setNmPerPixel(gd.getNextNumber());
 		calibration.setExposureTime(gd.getNextNumber());
@@ -303,7 +304,7 @@ public class Configuration implements PlugIn, ItemListener
 			gd = new ExtendedGenericDialog(TITLE);
 			gd.addFilenameField("Template_filename", templateFilename);
 			gd.addMessage("Add notes to the template ...");
-			gd.addTextAreas("", null, 10, 60);
+			gd.addTextAreas(notes, null, 10, 60);
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return;
@@ -354,9 +355,19 @@ public class Configuration implements PlugIn, ItemListener
 			if (template != null)
 			{
 				IJ.log("Applying template: " + templateName);
+				File file = ConfigurationTemplate.getTemplateFile(templateName);
+				if (file != null)
+					templateFilename = file.getPath();
 
+				StringBuilder sb = new StringBuilder();
 				for (String note : template.getNotesList())
+				{
+					sb.append(note);
+					if (!note.endsWith("\n"))
+						sb.append("\n");
 					IJ.log(note);
+				}
+				notes = sb.toString();
 
 				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
 				if (template.hasCalibration())
