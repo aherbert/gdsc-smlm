@@ -399,7 +399,7 @@ public class ResultsManager implements PlugIn
 	public static PeakResults addFileResults(PeakResultsList resultsList, ResultsFileSettings resultsSettings,
 			String resultsFilename, boolean showDeviations, boolean showEndFrame, boolean showId)
 	{
-		if (resultsSettings.getFileFormat().getNumber() > 0)
+		if (resultsSettings.getFileFormat().getNumber() > 0 && resultsFilename != null)
 		{
 			File file = new File(resultsFilename);
 			File parent = file.getParentFile();
@@ -684,8 +684,17 @@ public class ResultsManager implements PlugIn
 		else if (BitFlags.anySet(flags, FLAG_RESULTS_FILE))
 			gd.addFilenameField("Results_file", fileSettings.getResultsFilename());
 		else
-			// Do not add a results file to prevent constant overwrite messages
+		{
+			// Do not add a selected results file to prevent constant overwrite messages.
+			// However we can set the initial directory if we have a results file.
+			if (fileSettings.getResultsFilename() != null)
+			{
+				File dir = new File(fileSettings.getResultsFilename()).getParentFile();
+				if (dir != null)
+					OpenDialog.setDefaultDirectory(dir.getPath());
+			}
 			gd.addFilenameField("Results_file", "");
+		}
 	}
 
 	public static void addInMemoryResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)

@@ -2233,7 +2233,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				if (!checkCameraModel(fitConfig, bounds, false))
 					return false;
 			}
-			
+
 			if (saveSettings)
 				saveFitEngineSettings(config);
 
@@ -2323,25 +2323,25 @@ public class PeakFit implements PlugInFilter, ItemListener
 						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
 						bounds.x, bounds.y, bounds.width, bounds.height 
 						));
-				//@formatter:off
+				//@formatter:on
 				gd.enableYesNoCancel();
 				gd.hideCancelButton();
 				gd.showDialog();
 				if (!gd.wasOKed())
 					return false;
 			}
-			
+
 			// Crop for efficiency
 			cameraModel = cameraModel.crop(bounds);
 			if (initialise && cameraModel instanceof PerPixelCameraModel)
 			{
-				((PerPixelCameraModel)cameraModel).initialise();
+				((PerPixelCameraModel) cameraModel).initialise();
 			}
 			fitConfig.setCameraModel(cameraModel);
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Add a result output.
 	 * <p>
@@ -2382,7 +2382,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 			else
 			{
-				resultsFilename = resultsSettings.getResultsFilename();
+				// This is used for running via other code calling PeakFit methods,
+				// i.e. not as an ImageJ plugin.
+				if (plugin_flags == 0)
+					resultsFilename = resultsSettings.getResultsFilename();
 			}
 			PeakResults r = ResultsManager.addFileResults(resultsList, resultsSettings, resultsFilename,
 					this.resultsSettings.getShowDeviations(), integrateFrames > 1, false);
@@ -2796,7 +2799,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		// Use the FitEngine to allow multi-threading.
 		final FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
-		if (engine==null)
+		if (engine == null)
 			return;
 
 		final int step = Utils.getProgressInterval(totalFrames);
