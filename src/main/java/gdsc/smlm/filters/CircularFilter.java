@@ -238,11 +238,11 @@ public abstract class CircularFilter extends BaseWeightedFilter
 		{ // x is with respect to roi.x
 			  //if (fullCalculation)
 		  //{
-		  //	getAreaSums(cache, x, cachePointers, sums);
-		  //}
-		  //else
-		  //{
-			addSideSums(cache, x, cachePointers, sums);
+			getAreaSums(cache, x, cachePointers, sums);
+			//}
+			//else
+			//{
+			//addSideSums(cache, x, cachePointers, sums);
 			//	if (Double.isNaN(sums[0])) //avoid perpetuating NaNs into remaining line
 			//		fullCalculation = true;
 			//}
@@ -289,31 +289,32 @@ public abstract class CircularFilter extends BaseWeightedFilter
 			cache[cp] = cache[cacheLineP + padLeft + widthInside - 1];
 	}
 
-	//	/**
-	//	 * Get sum of values and values squared within the kernel area.
-	//	 * x between 0 and cacheWidth-1
-	//	 * Output is written to array sums[0] = sum
-	//	 */
-	//	private static void getAreaSums(float[] cache, int xCache0, int[] kernel, double[] sums)
-	//	{
-	//		double sum = 0;
-	//		for (int kk = 0; kk < kernel.length; kk++)
-	//		{ // y within the cache stripe (we have 2 kernel pointers per cache line)
-	//			for (int p = kernel[kk++] + xCache0; p <= kernel[kk] + xCache0; p++)
-	//			{
-	//				float v = cache[p];
-	//				sum += v;
-	//			}
-	//		}
-	//		sums[0] = sum;
-	//		return;
-	//	}
+	/**
+	 * Get sum of values and values squared within the kernel area.
+	 * x between 0 and cacheWidth-1
+	 * Output is written to array sums[0] = sum
+	 */
+	private static void getAreaSums(float[] cache, int xCache0, int[] kernel, double[] sums)
+	{
+		double sum = 0;
+		for (int kk = 0; kk < kernel.length; kk++)
+		{ // y within the cache stripe (we have 2 kernel pointers per cache line)
+			for (int p = kernel[kk++] + xCache0; p <= kernel[kk] + xCache0; p++)
+			{
+				float v = cache[p];
+				sum += v;
+			}
+		}
+		sums[0] = sum;
+		return;
+	}
 
 	/**
 	 * Add all values and values squared at the right border inside minus at the left border outside the kernel area.
 	 * Output is added or subtracted to/from array sums[0] += sum when at
 	 * the right border, minus when at the left border
 	 */
+	@SuppressWarnings("unused")
 	private static void addSideSums(float[] cache, int xCache0, int[] kernel, double[] sums)
 	{
 		double sum = 0;
