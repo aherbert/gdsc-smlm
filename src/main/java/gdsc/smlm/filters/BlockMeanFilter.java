@@ -23,24 +23,13 @@ public class BlockMeanFilter extends BlockFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.filters.BlockFilter#getValue(float, float)
+	 * @see gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
 	 */
 	@Override
-	protected float getValue(float sum, float divisor)
-	{
-		return sum / divisor;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.filters.BlockFilter#computeWeightedDivisor(float)
-	 */
-	@Override
-	protected float[] computeWeightedDivisor(final float n)
+	protected Normaliser computeWeightedNormaliser(float n)
 	{
 		float[] divisor = weights.clone();
-		
+
 		// Use a sum filter to get the sum of the weights in the region
 		BlockSumFilter sum = new BlockSumFilter();
 		if ((int) n == n)
@@ -51,7 +40,23 @@ public class BlockMeanFilter extends BlockFilter
 		{
 			sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
 		}
-		return divisor;
+		return new PerPixelNormaliser(divisor);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
+	 */
+	@Override
+	protected Normaliser computeNormaliser(float n)
+	{
+		return new FixedNormaliser(pow2(2 * n + 1));
+	}
+
+	private float pow2(float f)
+	{
+		return f * f;
 	}
 
 	/*

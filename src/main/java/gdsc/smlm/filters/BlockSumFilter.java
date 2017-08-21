@@ -20,34 +20,28 @@ package gdsc.smlm.filters;
  */
 public class BlockSumFilter extends BlockFilter
 {
+	private static NonNormaliser normaliser = new NonNormaliser();
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.filters.BlockFilter#getValue(float, float)
+	 * @see gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
 	 */
 	@Override
-	protected float getValue(float sum, float divisor)
+	protected Normaliser computeWeightedNormaliser(float n)
 	{
-		return sum;
+		return normaliser;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.filters.BlockFilter#computeWeightedDivisor(float)
+	 * @see gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
 	 */
 	@Override
-	protected float[] computeWeightedDivisor(float n)
+	protected Normaliser computeNormaliser(float n)
 	{
-		// The concept of a divisor for a weighted sum filter is invalid.
-		
-		// To avoid array index exceptions we create a empty divisor.
-		//float[] divisor = new float[weights.length];
-		//Arrays.fill(divisor, 1.0f);
-		//return divisor;
-
-		// Since the divisor will not be used in getValue() just return the weights
-		return weights;
+		return normaliser;
 	}
 
 	/*

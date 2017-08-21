@@ -27,7 +27,8 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	private int[] kernel = null;
 	private double lastRadius = 0;
 
-	private float[] nPoints = null;
+	private Normaliser normaliser;
+	private Normaliser weightedNormaliser = null;
 
 	/*
 	 * (non-Javadoc)
@@ -37,43 +38,42 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	@Override
 	protected void newWeights()
 	{
-		nPoints = null;
+		weightedNormaliser = null;
 	}
 
 	/**
-	 * Updates the weighted number of points within the circle
-	 * 
-	 * @param radius
-	 *            The circle radius
+	 * Updates the weighted normaliser within a radius around each point.
+	 *
+	 * @param n
+	 *            The block size
 	 */
-	private void updateWeightedNPoints(final double radius)
+	private void updateWeightedNormaliser(final double radius)
 	{
-		// Cache the number of points
-		if (nPoints == null || lastRadius != radius)
+		// Cache the normaliser
+		if (weightedNormaliser == null || lastRadius != radius)
 		{
-			nPoints = computeWeightedNPoints(radius);
+			weightedNormaliser = computeWeightedNormaliser(radius);
 		}
+		normaliser = weightedNormaliser;
 	}
 
 	/**
-	 * Computes the weighted number of points within the circle
+	 * Computes the weighted normaliser within a radius around each point.
 	 *
-	 * @param radius
-	 *            The circle radius
-	 * @return the weighted divisor
+	 * @param n
+	 *            The block size
+	 * @return the weighted normaliser
 	 */
-	protected abstract float[] computeWeightedNPoints(final double radius);
+	protected abstract Normaliser computeWeightedNormaliser(final double radius);
 
 	/**
-	 * Gets the value.
+	 * Computes the normaliser within a radius around each point.
 	 *
-	 * @param sum
-	 *            the sum within the circle
 	 * @param nPoints
-	 *            the n points within the circle
-	 * @return the value
+	 *            the number of point in the circle
+	 * @return the normaliser
 	 */
-	protected abstract float getValue(double sum, float nPoints);
+	protected abstract Normaliser computeNormaliser(int nPoints);
 
 	/**
 	 * Compute the mean.
@@ -138,19 +138,22 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	 */
 	private void rank(float[] data, Rectangle roi, int width, int height, double radius)
 	{
-		// TODO: Set-up for weighted filtering
+		int[] lineRadii = makeLineRadii(radius);
+
 		if (hasWeights())
 		{
 			int size = data.length;
 			if (weights.length != size || this.weightWidth != width || this.weightHeight != height)
 				throw new IllegalStateException("Weights are not the correct size");
-			updateWeightedNPoints(radius);
+			updateWeightedNormaliser(radius);
 			// Apply weights
 			for (int i = 0; i < size; i++)
 				data[i] *= weights[i];
 		}
-
-		int[] lineRadii = makeLineRadii(radius);
+		else
+		{
+			normaliser = computeNormaliser(kNPoints(lineRadii));
+		}
 
 		int kHeight = kHeight(lineRadii);
 		int kRadius = kRadius(lineRadii);
@@ -181,7 +184,6 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	{
 		int kHeight = kHeight(lineRadii);
 		int kRadius = kRadius(lineRadii);
-		int kNPoints = kNPoints(lineRadii);
 
 		int xmin = roi.x - kRadius;
 		int xmax = roi.x + roi.width + kRadius;
@@ -217,12 +219,12 @@ public abstract class CircularFilter extends BaseWeightedFilter
 			}
 
 			int cacheLineP = cacheWidth * (y % cacheHeight) + kRadius; //points to pixel (roi.x, y)
-			filterLine(values, width, cache, cachePointers, kNPoints, cacheLineP, roi, y, // F I L T E R
+			filterLine(values, width, cache, cachePointers, cacheLineP, roi, y, // F I L T E R
 					sums, maxValue, smallKernel);
 		}
 	}
 
-	private void filterLine(float[] values, int width, float[] cache, int[] cachePointers, int kNPoints, int cacheLineP,
+	private void filterLine(float[] values, int width, float[] cache, int[] cachePointers, int cacheLineP,
 			Rectangle roi, int y, double[] sums, float maxValue, boolean smallKernel)
 	{
 		int valuesP = roi.x + y * width;
@@ -232,40 +234,20 @@ public abstract class CircularFilter extends BaseWeightedFilter
 		// The full calculation is always true in the original source code.
 		//boolean fullCalculation = true;// smallKernel; //for small kernel, always use the full area, not incremental algorithm
 
-		if (nPoints != null)
-		{
-			for (int x = 0; x < roi.width; x++, valuesP++)
-			{ // x is with respect to roi.x
-				  //if (fullCalculation)
-			  //{
-			  //	getAreaSums(cache, x, cachePointers, sums);
-			  //}
-			  //else
-			  //{
-				addSideSums(cache, x, cachePointers, sums);
-				//	if (Double.isNaN(sums[0])) //avoid perpetuating NaNs into remaining line
-				//		fullCalculation = true;
-				//}
-				values[valuesP] = getValue(sums[0], nPoints[valuesP]);
-			} // for x
-		}
-		else
-		{
-			for (int x = 0; x < roi.width; x++, valuesP++)
-			{ // x is with respect to roi.x
-				  //if (fullCalculation)
-			  //{
-			  //	getAreaSums(cache, x, cachePointers, sums);
-			  //}
-			  //else
-			  //{
-				addSideSums(cache, x, cachePointers, sums);
-				//	if (Double.isNaN(sums[0])) //avoid perpetuating NaNs into remaining line
-				//		fullCalculation = true;
-				//}
-				values[valuesP] = getValue(sums[0], kNPoints);
-			} // for x
-		}
+		for (int x = 0; x < roi.width; x++, valuesP++)
+		{ // x is with respect to roi.x
+			  //if (fullCalculation)
+		  //{
+		  //	getAreaSums(cache, x, cachePointers, sums);
+		  //}
+		  //else
+		  //{
+			addSideSums(cache, x, cachePointers, sums);
+			//	if (Double.isNaN(sums[0])) //avoid perpetuating NaNs into remaining line
+			//		fullCalculation = true;
+			//}
+			values[valuesP] = normaliser.normalise(sums[0], valuesP);
+		} // for x
 	}
 
 	/**

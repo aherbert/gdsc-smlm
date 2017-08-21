@@ -20,34 +20,28 @@ package gdsc.smlm.filters;
  */
 public class CircularSumFilter extends CircularFilter
 {
+	private static NonNormaliser normaliser = new NonNormaliser();
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.filters.CircularFilter#getValue(double, float)
+	 * @see gdsc.smlm.filters.CircularFilter#computeWeightedNormaliser(double)
 	 */
 	@Override
-	protected float getValue(double sum, float nPoints)
+	protected Normaliser computeWeightedNormaliser(double radius)
 	{
-		return (float) sum;
+		return normaliser;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.filters.CircularFilter#computeWeightedNPoints(double)
+	 * @see gdsc.smlm.filters.CircularFilter#computeNormaliser(int)
 	 */
 	@Override
-	protected float[] computeWeightedNPoints(double radius)
+	protected Normaliser computeNormaliser(int nPoints)
 	{
-		// The concept of a divisor for a weighted sum filter is invalid.
-		
-		// To avoid array index exceptions we create a empty divisor.
-		//float[] divisor = new float[weights.length];
-		//Arrays.fill(divisor, 1.0f);
-		//return divisor;
-
-		// Since the divisor will not be used in getValue() just return the weights
-		return weights;
+		return normaliser;
 	}
 
 	/*
