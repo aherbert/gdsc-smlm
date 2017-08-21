@@ -20,7 +20,7 @@ import java.awt.Rectangle;
  * <p>
  * Adapted from ij.plugin.filter.GaussianBlur
  */
-public class GaussianFilter extends BaseFilter
+public class GaussianFilter extends BaseWeightedFilter
 {
 	private final double accuracy;
 
@@ -30,6 +30,41 @@ public class GaussianFilter extends BaseFilter
 	private float[] downscaleKernel = null;
 	private float[] upscaleKernel = null;
 	private int lastUnitLength;
+
+	private float[] normalise = null;
+	private double sx, sy;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.BaseWeightedFilter#newWeights()
+	 */
+	@Override
+	protected void newWeights()
+	{
+		normalise = null;
+	}
+
+	/**
+	 * Updates the weighted normaliser for the Gaussian.
+	 *
+	 * @param sigmaX
+	 *            The Gaussian standard deviation in X
+	 * @param sigmaY
+	 *            The Gaussian standard deviation in Y
+	 */
+	private void updateWeightedNormaliser(final double sigmaX, final double sigmaY)
+	{
+		// Cache the normaliser
+		if (normalise == null || sx != sigmaX || sy != sigmaY)
+		{
+			normalise = weights.clone();
+			sx = sigmaX;
+			sy = sigmaY;
+			GaussianFilter gf = new GaussianFilter(accuracy);
+			gf.convolve(normalise, weightHeight, weightWidth, sigmaX, sigmaY);
+		}
+	}
 
 	/**
 	 * Use the default accuracy of 0.02
@@ -71,9 +106,7 @@ public class GaussianFilter extends BaseFilter
 		if (roi.width < 1 || roi.height < 1)
 			return;
 		// Q. Should the extra lines parameter be used here?
-		blur1Direction(data, roi, maxx, maxy, sigma, true, border);
-		//blur1Direction(data, roi, maxx, maxy, sigma, true, 0);
-		blur1Direction(data, roi, maxx, maxy, sigma, false, 0);
+		convolve(data, roi, maxx, maxy, sigma, sigma, border);
 	}
 
 	/**
@@ -105,8 +138,7 @@ public class GaussianFilter extends BaseFilter
 	public void convolve(float[] data, final int maxx, final int maxy, final double sigma)
 	{
 		Rectangle roi = new Rectangle(maxx, maxy);
-		blur1Direction(data, roi, maxx, maxy, sigma, true, 0);
-		blur1Direction(data, roi, maxx, maxy, sigma, false, 0);
+		convolve(data, roi, maxx, maxy, sigma, sigma, 0);
 	}
 
 	/**
@@ -128,8 +160,36 @@ public class GaussianFilter extends BaseFilter
 	public void convolve(float[] data, final int maxx, final int maxy, final double sigmaX, final double sigmaY)
 	{
 		Rectangle roi = new Rectangle(maxx, maxy);
-		blur1Direction(data, roi, maxx, maxy, sigmaX, true, 0);
-		blur1Direction(data, roi, maxx, maxy, sigmaY, false, 0);
+		convolve(data, roi, maxx, maxy, sigmaX, sigmaY, 0);
+	}
+
+	private void convolve(float[] data, Rectangle roi, final int maxx, final int maxy, final double sigmaX,
+			final double sigmaY, final int extraLines)
+	{
+		if (hasWeights())
+		{
+			int size = data.length;
+			if (weights.length != size || this.weightWidth != maxx || this.weightHeight != maxy)
+				throw new IllegalStateException("Weights are not the correct size");
+
+			updateWeightedNormaliser(sigmaX, sigmaY);
+
+			// Apply weights
+			for (int i = 0; i < size; i++)
+				data[i] *= weights[i];
+
+			blur1Direction(data, roi, maxx, maxy, sigmaX, true, extraLines);
+			blur1Direction(data, roi, maxx, maxy, sigmaY, false, 0);
+
+			// Normalise
+			for (int i = 0; i < size; i++)
+				data[i] /= normalise[i];
+		}
+		else
+		{
+			blur1Direction(data, roi, maxx, maxy, sigmaX, true, extraLines);
+			blur1Direction(data, roi, maxx, maxy, sigmaY, false, 0);
+		}
 	}
 
 	/**

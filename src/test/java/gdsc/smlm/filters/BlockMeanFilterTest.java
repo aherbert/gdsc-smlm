@@ -215,9 +215,8 @@ public class BlockMeanFilterTest
 	private void weightedMeanIsCorrect(float[] data, float[] w, int width, int height, float boxSize, boolean internal,
 			DataFilter filter) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		float[] data1 = createData(width, height);
-		float[] data2 = data1.clone();
+		float[] data1 = data.clone();
+		float[] data2 = data.clone();
 
 		weightedMean(data1, w, width, height, boxSize);
 
