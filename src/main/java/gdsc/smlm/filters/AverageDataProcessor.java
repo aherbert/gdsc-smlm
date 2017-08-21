@@ -36,8 +36,8 @@ public class AverageDataProcessor extends DataProcessor
 
 	private final float smooth;
 	private final int iSmooth;
-	private AverageFilter filter = null;
-	private AreaAverageFilter areaFilter = null;
+	private BlockMeanFilter blockMeanFilter = null;
+	private AreaAverageFilter areaAverageFilter = null;
 
 	/**
 	 * Constructor
@@ -72,14 +72,14 @@ public class AverageDataProcessor extends DataProcessor
 		// Only create the area filter if we need it
 		if (iSmooth > 0)
 		{
-			filter = new AverageFilter();
+			blockMeanFilter = new BlockMeanFilter();
 		}
 		else
 		{
 			if (smooth > areaFilterLimit)
-				areaFilter = new AreaAverageFilter();
+				areaAverageFilter = new AreaAverageFilter();
 			else
-				filter = new AverageFilter();
+				blockMeanFilter = new BlockMeanFilter();
 		}
 	}
 
@@ -105,8 +105,7 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public boolean isWeighted()
 	{
-		BaseFilter f = getFilter();
-		return f != null && f instanceof BaseWeightedFilter;
+		return getFilter() != null;
 	}
 
 	/*
@@ -117,9 +116,9 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public void setWeights(float[] weights, int width, int height)
 	{
-		BaseFilter f = getFilter();
+		BaseWeightedFilter f = getFilter();
 		if (f != null)
-			((BaseWeightedFilter) f).setWeights(weights, width, height);
+			f.setWeights(weights, width, height);
 	}
 
 	/*
@@ -130,8 +129,8 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public boolean hasWeights()
 	{
-		BaseFilter f = getFilter();
-		return (f != null) ? ((BaseWeightedFilter) f).hasWeights() : false;
+		BaseWeightedFilter f = getFilter();
+		return (f != null) ? f.hasWeights() : false;
 	}
 
 	/**
@@ -154,11 +153,11 @@ public class AverageDataProcessor extends DataProcessor
 				// Integer smoothing is faster using a rolling block algorithm
 				if (smooth <= getBorder())
 				{
-					filter.rollingBlockAverageInternal(smoothData, width, height, iSmooth);
+					blockMeanFilter.rollingBlockFilterInternal(smoothData, width, height, iSmooth);
 				}
 				else
 				{
-					filter.rollingBlockAverage(smoothData, width, height, iSmooth);
+					blockMeanFilter.rollingBlockFilter(smoothData, width, height, iSmooth);
 				}
 			}
 			else
@@ -168,26 +167,26 @@ public class AverageDataProcessor extends DataProcessor
 				// At this point the difference between the filters is small (the area average filter
 				// is biased to the corners) so switch to the faster filter.
 
-				if (areaFilter != null)
+				if (areaAverageFilter != null)
 				{
 					if (smooth <= getBorder())
 					{
-						areaFilter.areaAverageUsingSumsInternal(smoothData, width, height, smooth);
+						areaAverageFilter.areaAverageUsingSumsInternal(smoothData, width, height, smooth);
 					}
 					else
 					{
-						areaFilter.areaAverageUsingSums(smoothData, width, height, smooth);
+						areaAverageFilter.areaAverageUsingSums(smoothData, width, height, smooth);
 					}
 				}
 				else
 				{
 					if (smooth <= getBorder())
 					{
-						filter.stripedBlockAverageInternal(smoothData, width, height, smooth);
+						blockMeanFilter.stripedBlockFilterInternal(smoothData, width, height, smooth);
 					}
 					else
 					{
-						filter.stripedBlockAverage(smoothData, width, height, smooth);
+						blockMeanFilter.stripedBlockFilter(smoothData, width, height, smooth);
 					}
 				}
 			}
@@ -195,23 +194,23 @@ public class AverageDataProcessor extends DataProcessor
 		return smoothData;
 	}
 
-	private BaseFilter getFilter()
+	private BaseWeightedFilter getFilter()
 	{
 		if (smooth > 0)
 		{
 			if (iSmooth > 1)
 			{
-				return filter;
+				return blockMeanFilter;
 			}
 			else
 			{
-				if (areaFilter != null)
+				if (areaAverageFilter != null)
 				{
-					return areaFilter;
+					return areaAverageFilter;
 				}
 				else
 				{
-					return filter;
+					return blockMeanFilter;
 				}
 			}
 		}
@@ -235,10 +234,10 @@ public class AverageDataProcessor extends DataProcessor
 	{
 		AverageDataProcessor f = (AverageDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		if (filter != null)
-			f.filter = filter.clone();
+		if (blockMeanFilter != null)
+			f.blockMeanFilter = blockMeanFilter.clone();
 		else
-			f.areaFilter = areaFilter.clone();
+			f.areaAverageFilter = areaAverageFilter.clone();
 		return f;
 	}
 

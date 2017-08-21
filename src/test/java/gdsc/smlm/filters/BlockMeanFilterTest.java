@@ -1,18 +1,17 @@
 package gdsc.smlm.filters;
 
-import gdsc.core.utils.FloatEquality;
-import gdsc.smlm.TestSettings;
-import gdsc.smlm.filters.AverageFilter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
-@SuppressWarnings("deprecation")
-public class AverageFilterTest
+import gdsc.core.utils.FloatEquality;
+import gdsc.smlm.TestSettings;
+
+public class BlockMeanFilterTest
 {
 	private gdsc.core.utils.Random rand;
 
@@ -29,14 +28,18 @@ public class AverageFilterTest
 	boolean[] checkInternal = new boolean[] { true, false };
 
 	/**
-	 * Do a simple and stupid mean filter
-	 * 
+	 * Do a simple and stupid mean filter.
+	 *
 	 * @param data
+	 *            the data
 	 * @param maxx
+	 *            the maxx
 	 * @param maxy
+	 *            the maxy
 	 * @param boxSize
+	 *            the box size
 	 */
-	public static void average(float[] data, int maxx, int maxy, float boxSize)
+	public static void mean(float[] data, int maxx, int maxy, float boxSize)
 	{
 		if (boxSize <= 0)
 			return;
@@ -48,11 +51,11 @@ public class AverageFilterTest
 		if (boxSize != n)
 			weight[0] = weight[weight.length - 1] = boxSize - (n - 1);
 
-		float norm = 0;
+		double norm = 0;
 		for (int yy = 0; yy < size; yy++)
 			for (int xx = 0; xx < size; xx++)
 				norm += weight[yy] * weight[xx];
-		norm = (float) (1.0 / norm);
+		norm = 1.0 / norm;
 
 		float[] out = new float[data.length];
 
@@ -60,7 +63,7 @@ public class AverageFilterTest
 		{
 			for (int x = 0; x < maxx; x++)
 			{
-				float sum = 0;
+				double sum = 0;
 				for (int yy = 0; yy < size; yy++)
 				{
 					int yyy = y + yy - n;
@@ -79,7 +82,66 @@ public class AverageFilterTest
 						sum += data[index] * weight[yy] * weight[xx];
 					}
 				}
-				out[y * maxx + x] = sum * norm;
+				out[y * maxx + x] = (float) (sum * norm);
+			}
+		}
+		System.arraycopy(out, 0, data, 0, out.length);
+	}
+
+	/**
+	 * Do a simple and stupid mean filter with weights.
+	 *
+	 * @param data
+	 *            the data
+	 * @param w
+	 *            the weights
+	 * @param maxx
+	 *            the maxx
+	 * @param maxy
+	 *            the maxy
+	 * @param boxSize
+	 *            the box size
+	 */
+	public static void weightedMean(float[] data, float[] w, int maxx, int maxy, float boxSize)
+	{
+		if (boxSize <= 0)
+			return;
+
+		int n = (int) Math.ceil(boxSize);
+		int size = 2 * n + 1;
+		float[] weight = new float[size];
+		Arrays.fill(weight, 1);
+		if (boxSize != n)
+			weight[0] = weight[weight.length - 1] = boxSize - (n - 1);
+
+		float[] out = new float[data.length];
+
+		for (int y = 0; y < maxy; y++)
+		{
+			for (int x = 0; x < maxx; x++)
+			{
+				double sum = 0, norm = 0;
+				for (int yy = 0; yy < size; yy++)
+				{
+					int yyy = y + yy - n;
+					if (yyy < 0)
+						yyy = 0;
+					if (yyy >= maxy)
+						yyy = maxy - 1;
+					for (int xx = 0; xx < size; xx++)
+					{
+						int xxx = x + xx - n;
+						if (xxx < 0)
+							xxx = 0;
+						if (xxx >= maxx)
+							xxx = maxx - 1;
+						int index = yyy * maxx + xxx;
+						double w2 = w[index] * weight[yy] * weight[xx];
+						sum += data[index] * w2;
+						norm += w2;
+					}
+				}
+				out[y * maxx + x] = (float) (sum / norm);
 			}
 		}
 		System.arraycopy(out, 0, data, 0, out.length);
@@ -87,7 +149,7 @@ public class AverageFilterTest
 
 	private void floatArrayEquals(String message, float[] data1, float[] data2, int maxx, int maxy, float boxSize)
 	{
-		FloatEquality eq = new FloatEquality(1e-5f, 1e-10f);
+		FloatEquality eq = new FloatEquality(1e-4f, 1e-10f);
 		// Debug: show the images
 		//gdsc.core.ij.Utils.display("data1", new ij.process.FloatProcessor(maxx, maxy, data1));
 		//gdsc.core.ij.Utils.display("data2", new ij.process.FloatProcessor(maxx, maxy, data2));
@@ -122,21 +184,20 @@ public class AverageFilterTest
 			this.isInterpolated = isInterpolated;
 		}
 
-		AverageFilter f = new AverageFilter();
+		BlockMeanFilter f = new BlockMeanFilter();
 
 		public abstract void filter(float[] data, int width, int height, float boxSize);
 
 		public abstract void filterInternal(float[] data, int width, int height, float boxSize);
 	}
 
-	private void averageIsCorrect(int width, int height, float boxSize, boolean internal, DataFilter filter)
+	private void meanIsCorrect(float[] data, int width, int height, float boxSize, boolean internal, DataFilter filter)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		float[] data1 = createData(width, height);
-		float[] data2 = data1.clone();
+		float[] data1 = data.clone();
+		float[] data2 = data.clone();
 
-		AverageFilterTest.average(data1, width, height, boxSize);
+		mean(data1, width, height, boxSize);
 		if (internal)
 		{
 			filter.filterInternal(data2, width, height, boxSize);
@@ -146,76 +207,147 @@ public class AverageFilterTest
 		else
 		{
 			filter.filter(data2, width, height, boxSize);
-			floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %.1f", width, height, boxSize), data1,
-					data2, width, height, 0);
+			floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %.1f", width, height, boxSize), data1, data2,
+					width, height, 0);
+		}
+	}
+
+	private void weightedMeanIsCorrect(float[] data, float[] w, int width, int height, float boxSize, boolean internal,
+			DataFilter filter) throws ArrayComparisonFailure
+	{
+		rand = new gdsc.core.utils.Random(-30051976);
+		float[] data1 = createData(width, height);
+		float[] data2 = data1.clone();
+
+		weightedMean(data1, w, width, height, boxSize);
+
+		//// Check the weights do not alter the image mean
+		//double u1 = Maths.sum(data) / data.length;
+		//double u2 = Maths.sum(data1) / data.length;
+		//System.out.printf("[%dx%d] @ %.1f : %g => %g  (%g)\n", width, height, boxSize, u1, u2,
+		//		DoubleEquality.relativeError(u1, u2));
+
+		if (internal)
+		{
+			filter.filterInternal(data2, width, height, boxSize);
+			floatArrayEquals(String.format("Internal arrays do not match: [%dx%d] @ %.1f", width, height, boxSize),
+					data1, data2, width, height, boxSize);
+		}
+		else
+		{
+			filter.filter(data2, width, height, boxSize);
+			floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %.1f", width, height, boxSize), data1, data2,
+					width, height, 0);
 		}
 	}
 
 	private void checkIsCorrect(DataFilter filter)
 	{
+		rand = new gdsc.core.utils.Random(-30051976);
+		ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
+				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+
 		for (int width : primes)
 			for (int height : primes)
+			{
+				float[] data = createData(width, height);
+
+				filter.f.setWeights(null, 0, 0);
 				for (float boxSize : boxSizes)
 					for (boolean internal : checkInternal)
 					{
-						averageIsCorrect(width, height, boxSize, internal, filter);
+						meanIsCorrect(data, width, height, boxSize, internal, filter);
 						if (filter.isInterpolated)
 						{
-							averageIsCorrect(width, height, boxSize - 0.3f, internal, filter);
-							averageIsCorrect(width, height, boxSize - 0.6f, internal, filter);
+							meanIsCorrect(data, width, height, boxSize - 0.3f, internal, filter);
+							meanIsCorrect(data, width, height, boxSize - 0.6f, internal, filter);
 						}
 					}
+
+				// Uniform weights
+				float[] w = new float[width * height];
+				Arrays.fill(w, 1);
+				filter.f.setWeights(w, width, height);
+				for (float boxSize : boxSizes)
+					for (boolean internal : checkInternal)
+					{
+						weightedMeanIsCorrect(data, w, width, height, boxSize, internal, filter);
+						if (filter.isInterpolated)
+						{
+							weightedMeanIsCorrect(data, w, width, height, boxSize - 0.3f, internal, filter);
+							weightedMeanIsCorrect(data, w, width, height, boxSize - 0.6f, internal, filter);
+						}
+					}
+
+				// Weights simulating the variance of sCMOS pixels
+				for (int i = 0; i < w.length; i++)
+				{
+					w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
+				}
+
+				filter.f.setWeights(w, width, height);
+				for (float boxSize : boxSizes)
+					for (boolean internal : checkInternal)
+					{
+						weightedMeanIsCorrect(data, w, width, height, boxSize, internal, filter);
+						if (filter.isInterpolated)
+						{
+							weightedMeanIsCorrect(data, w, width, height, boxSize - 0.3f, internal, filter);
+							weightedMeanIsCorrect(data, w, width, height, boxSize - 0.6f, internal, filter);
+						}
+					}
+			}
 	}
 
 	@Test
-	public void blockAverageIsCorrect()
+	public void blockFilterIsCorrect()
 	{
 		DataFilter filter = new DataFilter("block", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.blockAverage(data, width, height, boxSize);
+				f.blockFilter(data, width, height, boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.blockAverageInternal(data, width, height, boxSize);
+				f.blockFilterInternal(data, width, height, boxSize);
 			}
 		};
 		checkIsCorrect(filter);
 	}
 
 	@Test
-	public void stripedBlockAverageIsCorrect()
+	public void stripedBlockFilterIsCorrect()
 	{
 		DataFilter filter = new DataFilter("stripedBlock", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage(data, width, height, boxSize);
+				f.stripedBlockFilter(data, width, height, boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageInternal(data, width, height, boxSize);
+				f.stripedBlockFilterInternal(data, width, height, boxSize);
 			}
 		};
 		checkIsCorrect(filter);
 	}
 
 	@Test
-	public void rollingBlockAverageIsCorrect()
+	public void rollingBlockFilterIsCorrect()
 	{
 		DataFilter filter = new DataFilter("rollingBlock", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.rollingBlockAverage(data, width, height, (int) boxSize);
+				f.rollingBlockFilter(data, width, height, (int) boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.rollingBlockAverageInternal(data, width, height, (int) boxSize);
+				f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
 			}
 		};
 		checkIsCorrect(filter);
@@ -438,24 +570,24 @@ public class AverageFilterTest
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.blockAverage(data, width, height, (int) boxSize);
+				f.blockFilter(data, width, height, (int) boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.blockAverageInternal(data, width, height, (int) boxSize);
+				f.blockFilterInternal(data, width, height, (int) boxSize);
 			}
 		};
 		DataFilter fast = new DataFilter("stripedBlock", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage(data, width, height, (int) boxSize);
+				f.stripedBlockFilter(data, width, height, (int) boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageInternal(data, width, height, (int) boxSize);
+				f.stripedBlockFilterInternal(data, width, height, (int) boxSize);
 			}
 		};
 
@@ -470,24 +602,24 @@ public class AverageFilterTest
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.blockAverage(data, width, height, boxSize);
+				f.blockFilter(data, width, height, boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.blockAverageInternal(data, width, height, boxSize);
+				f.blockFilterInternal(data, width, height, boxSize);
 			}
 		};
 		DataFilter fast = new DataFilter("stripedBlock", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage(data, width, height, boxSize);
+				f.stripedBlockFilter(data, width, height, boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageInternal(data, width, height, boxSize);
+				f.stripedBlockFilterInternal(data, width, height, boxSize);
 			}
 		};
 
@@ -502,24 +634,24 @@ public class AverageFilterTest
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.blockAverage(data, width, height, (int) boxSize);
+				f.blockFilter(data, width, height, (int) boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.blockAverageInternal(data, width, height, (int) boxSize);
+				f.blockFilterInternal(data, width, height, (int) boxSize);
 			}
 		};
 		DataFilter fast = new DataFilter("rollingBlock", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.rollingBlockAverage(data, width, height, (int) boxSize);
+				f.rollingBlockFilter(data, width, height, (int) boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.rollingBlockAverageInternal(data, width, height, (int) boxSize);
+				f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
 			}
 		};
 
@@ -534,24 +666,24 @@ public class AverageFilterTest
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage(data, width, height, (int) boxSize);
+				f.stripedBlockFilter(data, width, height, (int) boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageInternal(data, width, height, (int) boxSize);
+				f.stripedBlockFilterInternal(data, width, height, (int) boxSize);
 			}
 		};
 		DataFilter fast = new DataFilter("rollingBlock", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.rollingBlockAverage(data, width, height, (int) boxSize);
+				f.rollingBlockFilter(data, width, height, (int) boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.rollingBlockAverageInternal(data, width, height, (int) boxSize);
+				f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
 			}
 		};
 
@@ -566,24 +698,24 @@ public class AverageFilterTest
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxN(data, width, height, (int) boxSize);
+				f.stripedBlockFilterNxN(data, width, height, (int) boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxNInternal(data, width, height, (int) boxSize);
+				f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
 			}
 		};
 		DataFilter fast = new DataFilter("stripedBlock3x3", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage3x3(data, width, height);
+				f.stripedBlockFilter3x3(data, width, height);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage3x3Internal(data, width, height);
+				f.stripedBlockFilter3x3Internal(data, width, height);
 			}
 		};
 
@@ -599,24 +731,24 @@ public class AverageFilterTest
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxN(data, width, height, boxSize);
+				f.stripedBlockFilterNxN(data, width, height, boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxNInternal(data, width, height, boxSize);
+				f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
 			}
 		};
 		DataFilter fast = new DataFilter("stripedBlock3x3", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage3x3(data, width, height, boxSize);
+				f.stripedBlockFilter3x3(data, width, height, boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage3x3Internal(data, width, height, boxSize);
+				f.stripedBlockFilter3x3Internal(data, width, height, boxSize);
 			}
 		};
 
@@ -632,24 +764,24 @@ public class AverageFilterTest
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxN(data, width, height, (int) boxSize);
+				f.stripedBlockFilterNxN(data, width, height, (int) boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxNInternal(data, width, height, (int) boxSize);
+				f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
 			}
 		};
 		DataFilter fast = new DataFilter("stripedBlock5x5", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage5x5(data, width, height);
+				f.stripedBlockFilter5x5(data, width, height);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage5x5Internal(data, width, height);
+				f.stripedBlockFilter5x5Internal(data, width, height);
 			}
 		};
 
@@ -665,24 +797,24 @@ public class AverageFilterTest
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxN(data, width, height, boxSize);
+				f.stripedBlockFilterNxN(data, width, height, boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxNInternal(data, width, height, boxSize);
+				f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
 			}
 		};
 		DataFilter fast = new DataFilter("stripedBlock5x5", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage5x5(data, width, height, boxSize);
+				f.stripedBlockFilter5x5(data, width, height, boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage5x5Internal(data, width, height, boxSize);
+				f.stripedBlockFilter5x5Internal(data, width, height, boxSize);
 			}
 		};
 
@@ -698,24 +830,24 @@ public class AverageFilterTest
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxN(data, width, height, (int) boxSize);
+				f.stripedBlockFilterNxN(data, width, height, (int) boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxNInternal(data, width, height, (int) boxSize);
+				f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
 			}
 		};
 		DataFilter fast = new DataFilter("stripedBlock7x7", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage7x7(data, width, height);
+				f.stripedBlockFilter7x7(data, width, height);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage7x7Internal(data, width, height);
+				f.stripedBlockFilter7x7Internal(data, width, height);
 			}
 		};
 
@@ -731,28 +863,29 @@ public class AverageFilterTest
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxN(data, width, height, boxSize);
+				f.stripedBlockFilterNxN(data, width, height, boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverageNxNInternal(data, width, height, boxSize);
+				f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
 			}
 		};
 		DataFilter fast = new DataFilter("stripedBlock7x7", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage7x7(data, width, height, boxSize);
+				f.stripedBlockFilter7x7(data, width, height, boxSize);
 			}
 
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
-				f.stripedBlockAverage7x7Internal(data, width, height, boxSize);
+				f.stripedBlockFilter7x7Internal(data, width, height, boxSize);
 			}
 		};
 
 		int[] testBoxSizes = new int[] { 3 };
 		speedTest(fast, slow, testBoxSizes);
 		speedTestInternal(fast, slow, testBoxSizes);
-	}}
+	}
+}

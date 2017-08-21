@@ -17,7 +17,10 @@ import org.apache.commons.math3.util.FastMath;
 
 /**
  * Computes the block sum for each point within the array.
+ * 
+ * @deprecated replaced by BlockSumFilter
  */
+@Deprecated
 public class SumFilter extends BaseFilter
 {
 	private float[] floatDataBuffer = null;
@@ -771,7 +774,6 @@ public class SumFilter extends BaseFilter
 			stripedBlockSumNxN(data, maxx, maxy, n);
 	}
 
-
 	/**
 	 * Compute the block sum within a 2w+1 size block around each point.
 	 * <p>
@@ -795,7 +797,7 @@ public class SumFilter extends BaseFilter
 		else
 			stripedBlockSumNxN(data, maxx, maxy, w);
 	}
-	
+
 	/**
 	 * Compute the block sum within a 2n+1 size block around each point.
 	 * <p>
@@ -873,7 +875,6 @@ public class SumFilter extends BaseFilter
 			}
 		}
 	}
-
 
 	/**
 	 * Compute the block sum within a 2w+1 size block around each point.
@@ -971,7 +972,7 @@ public class SumFilter extends BaseFilter
 			}
 		}
 	}
-	
+
 	/**
 	 * Compute the block sum within a 3x3 size block around each point.
 	 * <p>
@@ -1035,7 +1036,6 @@ public class SumFilter extends BaseFilter
 			}
 		}
 	}
-	
 
 	/**
 	 * Compute the block sum within a 3x3 size block around each point.
@@ -1104,7 +1104,7 @@ public class SumFilter extends BaseFilter
 				centreIndex += height;
 			}
 		}
-	}	
+	}
 
 	private float[] floatRowBuffer(int size)
 	{

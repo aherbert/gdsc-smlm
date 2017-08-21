@@ -35,10 +35,12 @@ public class BlockMeanFilter extends BlockFilter
 		if ((int) n == n)
 		{
 			sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
+			//sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
 		}
 		else
 		{
 			sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
+			//sum.blockFilter(divisor, weightWidth, weightHeight, n);
 		}
 		return new PerPixelNormaliser(divisor);
 	}

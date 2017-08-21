@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings("deprecation")
 public class AreaAverageFilterTest
 {
 	private gdsc.core.utils.Random rand;

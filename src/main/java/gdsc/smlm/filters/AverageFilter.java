@@ -30,7 +30,10 @@ import org.apache.commons.math3.util.FastMath;
  * <p>
  * Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less than 2. All routines
  * are OK for 3x3 images and larger.
+ * 
+ * @deprecated Replaced by BlockMeanFilter
  */
+@Deprecated
 public class AverageFilter extends BaseFilter
 {
 	private float[] floatDataBuffer = null;

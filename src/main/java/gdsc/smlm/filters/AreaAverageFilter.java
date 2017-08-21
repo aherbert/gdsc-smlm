@@ -28,10 +28,10 @@ package gdsc.smlm.filters;
  * Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less than 2. All routines
  * are OK for 3x3 images and larger.
  */
-public class AreaAverageFilter extends BaseFilter
+public class AreaAverageFilter extends BaseWeightedFilter
 {
-	private SumFilter filter = new SumFilter();
-	private AverageFilter avFilter = new AverageFilter();
+	private BlockSumFilter sumFilter = new BlockSumFilter();
+	private BlockMeanFilter blockMeanFilter = new BlockMeanFilter();
 
 	private boolean simpleInterpolation = false;
 
@@ -64,7 +64,7 @@ public class AreaAverageFilter extends BaseFilter
 		if (n == n1)
 		{
 			// There is no edge
-			avFilter.rollingBlockAverageInternal(data, maxx, maxy, n);
+			blockMeanFilter.rollingBlockFilterInternal(data, maxx, maxy, n);
 			return;
 		}
 
@@ -77,10 +77,10 @@ public class AreaAverageFilter extends BaseFilter
 		else
 		{
 			sum1 = data.clone();
-			filter.rollingBlockSum(sum1, maxx, maxy, n);
+			sumFilter.rollingBlockFilter(sum1, maxx, maxy, n);
 		}
 		final float[] sum2 = data.clone();
-		filter.rollingBlockSumInternal(sum2, maxx, maxy, n1);
+		sumFilter.rollingBlockFilterInternal(sum2, maxx, maxy, n1);
 
 		// Get the average by adding the inner sum to the weighted edge pixels.  
 		final double area = (2 * w + 1) * (2 * w + 1);
@@ -136,7 +136,7 @@ public class AreaAverageFilter extends BaseFilter
 		if (n == n1 || (maxx < n1 && maxy < n1))
 		{
 			// There is no edge
-			avFilter.rollingBlockAverage(data, maxx, maxy, n);
+			blockMeanFilter.rollingBlockFilter(data, maxx, maxy, n);
 			return;
 		}
 
@@ -149,10 +149,10 @@ public class AreaAverageFilter extends BaseFilter
 		else
 		{
 			sum1 = data.clone();
-			filter.rollingBlockSum(sum1, maxx, maxy, n);
+			sumFilter.rollingBlockFilter(sum1, maxx, maxy, n);
 		}
 		final float[] sum2 = data.clone();
-		filter.rollingBlockSum(sum2, maxx, maxy, n1);
+		sumFilter.rollingBlockFilter(sum2, maxx, maxy, n1);
 
 		// Get the average by adding the inner sum to the weighted edge pixels.  
 		final double area = (2 * w + 1) * (2 * w + 1);
@@ -208,7 +208,7 @@ public class AreaAverageFilter extends BaseFilter
 		if (n == n1)
 		{
 			// There is no edge
-			avFilter.rollingBlockAverageInternal(data, maxx, maxy, n);
+			blockMeanFilter.rollingBlockFilterInternal(data, maxx, maxy, n);
 			return;
 		}
 
@@ -221,10 +221,10 @@ public class AreaAverageFilter extends BaseFilter
 		else
 		{
 			av1 = data.clone();
-			avFilter.rollingBlockAverage(av1, maxx, maxy, n);
+			blockMeanFilter.rollingBlockFilter(av1, maxx, maxy, n);
 		}
 		final float[] av2 = data.clone();
-		avFilter.rollingBlockAverageInternal(av2, maxx, maxy, n1);
+		blockMeanFilter.rollingBlockFilterInternal(av2, maxx, maxy, n1);
 
 		// Get the average by weighting the two
 		final float outerWeight;
@@ -279,7 +279,7 @@ public class AreaAverageFilter extends BaseFilter
 		if (n == n1 || (maxx < n1 && maxy < n1))
 		{
 			// There is no edge
-			avFilter.rollingBlockAverage(data, maxx, maxy, n);
+			blockMeanFilter.rollingBlockFilter(data, maxx, maxy, n);
 			return;
 		}
 
@@ -292,10 +292,10 @@ public class AreaAverageFilter extends BaseFilter
 		else
 		{
 			av1 = data.clone();
-			avFilter.rollingBlockAverage(av1, maxx, maxy, n);
+			blockMeanFilter.rollingBlockFilter(av1, maxx, maxy, n);
 		}
 		final float[] av2 = data.clone();
-		avFilter.rollingBlockAverage(av2, maxx, maxy, n1);
+		blockMeanFilter.rollingBlockFilter(av2, maxx, maxy, n1);
 
 		// Get the average by weighting the two
 		final float outerWeight;
@@ -329,8 +329,8 @@ public class AreaAverageFilter extends BaseFilter
 	public AreaAverageFilter clone()
 	{
 		AreaAverageFilter o = (AreaAverageFilter) super.clone();
-		o.filter = filter.clone();
-		o.avFilter = avFilter.clone();
+		o.sumFilter = sumFilter.clone();
+		o.blockMeanFilter = blockMeanFilter.clone();
 		return o;
 	}
 
@@ -352,5 +352,17 @@ public class AreaAverageFilter extends BaseFilter
 	public void setSimpleInterpolation(boolean simpleInterpolation)
 	{
 		this.simpleInterpolation = simpleInterpolation;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.BaseWeightedFilter#newWeights()
+	 */
+	@Override
+	protected void newWeights()
+	{
+		sumFilter.setWeights(weights, weightWidth, weightHeight);
+		blockMeanFilter.setWeights(weights, weightWidth, weightHeight);
 	}
 }

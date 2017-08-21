@@ -82,7 +82,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 *
 	 * @param n
 	 *            The block size
-	 * @return the weighted normaliser
+	 * @return the normaliser
 	 */
 	protected abstract Normaliser computeNormaliser(final float n);
 
@@ -138,7 +138,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		for (int y = 0; y < maxy; y++)
 		{
 			// Initialise the rolling sum
-			float sum = 0;
+			double sum = 0;
 
 			int endIndex = y * maxx;
 			int x = 0;
@@ -153,7 +153,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int startIndex = y * maxx;
 			int centreIndex = startIndex + n;
 
-			newData[centreIndex] = sum;
+			newData[centreIndex] = (float) sum;
 
 			while (x < maxx)
 			{
@@ -161,7 +161,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 				sum += data[endIndex] - data[startIndex];
 
-				newData[centreIndex] = sum;
+				newData[centreIndex] = (float) sum;
 
 				x++;
 				startIndex++;
@@ -174,7 +174,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		for (int x = n; x < maxx - n; x++)
 		{
 			// Initialise the rolling sum
-			float sum = 0;
+			double sum = 0;
 
 			int endIndex = x;
 			int y = 0;
@@ -234,15 +234,15 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int startIndex = y * maxx;
 			int centreIndex = startIndex + 1;
 			int endIndex = centreIndex + 1;
-			float sum = data[startIndex] + data[centreIndex] + data[endIndex];
+			double sum = data[startIndex] + data[centreIndex] + data[endIndex];
 
 			// Rolling sum over the X-direction
-			newData[centreIndex++] = sum;
+			newData[centreIndex++] = (float) sum;
 
 			for (int x = 0; x < maxx - 3; x++)
 			{
 				sum += data[++endIndex] - data[startIndex++];
-				newData[centreIndex++] = sum;
+				newData[centreIndex++] = (float) sum;
 			}
 		}
 
@@ -254,7 +254,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int startIndex = x;
 			int centreIndex = startIndex + maxx;
 			int endIndex = centreIndex + maxx;
-			float sum = newData[startIndex] + newData[centreIndex] + newData[endIndex];
+			double sum = newData[startIndex] + newData[centreIndex] + newData[endIndex];
 
 			// Rolling sum over the Y-direction
 			data[centreIndex] = normaliser.normalise(sum, centreIndex);
@@ -363,12 +363,12 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index = y * maxx;
 			for (int x = 0; x <= maxx - blockSize; x++, index++)
 			{
-				float sum = 0;
+				double sum = 0;
 				for (int x2 = 0; x2 < blockSize; x2++)
 				{
 					sum += data[index + x2];
 				}
-				newData[(x + n) * maxy + y] = sum;
+				newData[(x + n) * maxy + y] = (float) sum;
 			}
 		}
 
@@ -379,7 +379,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index = x * maxy;
 			for (int y = 0; y <= maxy - blockSize; y++, index++)
 			{
-				float sum = 0;
+				double sum = 0;
 				for (int y2 = 0; y2 < blockSize; y2++)
 				{
 					sum += newData[index + y2];
@@ -444,13 +444,13 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index = y * maxx;
 			for (int x = 0; x < maxx - blockSize; x++, index++)
 			{
-				float sum = data[index] * w1;
+				double sum = data[index] * w1;
 				for (int x2 = 1; x2 < blockSize; x2++)
 				{
 					sum += data[index + x2];
 				}
 				sum += data[index + blockSize] * w1;
-				newData[(x + n1) * maxy + y] = sum;
+				newData[(x + n1) * maxy + y] = (float) sum;
 			}
 		}
 
@@ -461,7 +461,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index = x * maxy;
 			for (int y = 0; y < maxy - blockSize; y++, index++)
 			{
-				float sum = newData[index] * w1;
+				double sum = newData[index] * w1;
 				for (int y2 = 1; y2 < blockSize; y2++)
 				{
 					sum += newData[index + y2];
@@ -615,8 +615,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = 2 * maxy + y;
 			for (int x = 0; x <= maxx - 5; x++, index++)
 			{
-				float sum = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4];
-				newData[index2] = sum;
+				newData[index2] = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4];
 				index2 += maxy;
 			}
 		}
@@ -629,9 +628,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = x + 2 * maxx;
 			for (int y = 0; y <= maxy - 5; y++, index++)
 			{
-				float sum = newData[index] + newData[index + 1] + newData[index + 2] + newData[index + 3] +
-						newData[index + 4];
-				data[index2] = normaliser.normalise(sum, index2);
+				data[index2] = normaliser.normalise(newData[index] + newData[index + 1] + newData[index + 2] +
+						newData[index + 3] + newData[index + 4], index2);
 				index2 += maxx;
 			}
 		}
@@ -730,9 +728,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = 3 * maxy + y;
 			for (int x = 0; x <= maxx - 7; x++, index++)
 			{
-				float sum = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4] +
+				newData[index2] = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4] +
 						data[index + 5] + data[index + 6];
-				newData[index2] = sum;
 				index2 += maxy;
 			}
 		}
@@ -745,9 +742,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = x + 3 * maxx;
 			for (int y = 0; y <= maxy - 7; y++, index++)
 			{
-				float sum = newData[index] + newData[index + 1] + newData[index + 2] + newData[index + 3] +
-						newData[index + 4] + newData[index + 5] + newData[index + 6];
-				data[index2] = normaliser.normalise(sum, index2);
+				data[index2] = normaliser.normalise(newData[index] + newData[index + 1] + newData[index + 2] +
+						newData[index + 3] + newData[index + 4] + newData[index + 5] + newData[index + 6], index2);
 				index2 += maxx;
 			}
 		}
@@ -904,7 +900,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index = y * maxx + n;
 			for (int x = n; x < maxx - n; x++, index++)
 			{
-				float sum = data[index];
+				double sum = data[index];
 
 				// Sweep neighbourhood - 
 				// No check for boundaries as this should be an internal sweep.
@@ -1026,9 +1022,9 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index = y * maxx + n1;
 			for (int x = n1; x < xlimit; x++, index++)
 			{
-				float sum = data[index];
-				float sum1 = 0;
-				float sum2 = 0;
+				double sum = data[index];
+				double sum1 = 0;
+				double sum2 = 0;
 
 				// Sweep neighbourhood
 				// No check for boundaries as this should be an internal sweep.
@@ -1079,7 +1075,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = (y + 1) * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++)
 			{
-				float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
+				double sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
 						data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
 				newData[index1] = normaliser.normalise(sum, index1);
 				index0++;
@@ -1131,9 +1127,9 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			for (int x = 1; x < maxx - 1; x++)
 			{
 				// Edges
-				float sum1 = data[index0] + data[index1 - 1] + data[index1 + 1] + data[index2];
+				double sum1 = data[index0] + data[index1 - 1] + data[index1 + 1] + data[index2];
 				// Corners
-				float sum2 = data[index0 - 1] + data[index0 + 1] + data[index2 - 1] + data[index2 + 1];
+				double sum2 = data[index0 - 1] + data[index0 + 1] + data[index2 - 1] + data[index2 + 1];
 
 				newData[index1] = normaliser.normalise(data[index1] + sum1 * w + sum2 * w2, index1);
 				index0++;
@@ -1258,7 +1254,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			extractRow(inData, y, width, n, row);
 
 			// Initialise rolling sum
-			float sum = (n + 1) * row[0];
+			double sum = (n + 1) * row[0];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
 			{
@@ -1266,14 +1262,14 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			}
 
 			int centreIndex = y;
-			outData[centreIndex] = sum;
+			outData[centreIndex] = (float) sum;
 
 			// Rolling sum over the X-direction
 			for (int x = 0; x < width - 1; x++)
 			{
 				sum += row[endIndex++] - row[x];
 				centreIndex += height;
-				outData[centreIndex] = sum;
+				outData[centreIndex] = (float) sum;
 			}
 		}
 
@@ -1289,7 +1285,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			extractRow(inData, y, width, n, row);
 
 			// Initialise rolling sum
-			float sum = (n + 1) * row[0];
+			double sum = (n + 1) * row[0];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
 			{
@@ -1342,18 +1338,18 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			extractRow1(inData, y, width, row);
 
 			// Initialise rolling sum
-			float sum = 2 * row[0] + row[2];
+			double sum = 2 * row[0] + row[2];
 			int endIndex = 3;
 
 			int centreIndex = y;
-			outData[centreIndex] = sum;
+			outData[centreIndex] = (float) sum;
 
 			// Rolling sum over the X-direction
 			for (int x = 0; x < width - 1; x++)
 			{
 				sum += row[endIndex++] - row[x];
 				centreIndex += height;
-				outData[centreIndex] = sum;
+				outData[centreIndex] = (float) sum;
 			}
 		}
 
@@ -1369,7 +1365,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			extractRow1(inData, y, width, row);
 
 			// Initialise rolling sum
-			float sum = 2 * row[0] + row[2];
+			double sum = 2 * row[0] + row[2];
 			int endIndex = 3;
 
 			int centreIndex = y;
@@ -1479,7 +1475,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = 0;
+				double sum = 0;
 
 				for (int j = 0; j < blockSize; j++)
 				{
@@ -1487,7 +1483,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				}
 
 				// Store result in transpose
-				outData[centreIndex] = sum;
+				outData[centreIndex] = (float) sum;
 				centreIndex += height;
 			}
 		}
@@ -1508,7 +1504,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = 0;
+				double sum = 0;
 
 				for (int j = 0; j < blockSize; j++)
 				{
@@ -1576,7 +1572,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = row[x] * w1;
+				double sum = row[x] * w1;
 				for (int j = 1; j < blockSize; j++)
 				{
 					sum += row[x + j];
@@ -1584,7 +1580,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				sum += row[x + blockSize] * w1;
 
 				// Store result in transpose
-				outData[centreIndex] = sum;
+				outData[centreIndex] = (float) sum;
 				centreIndex += height;
 			}
 		}
@@ -1605,7 +1601,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = row[x] * w1;
+				double sum = row[x] * w1;
 				for (int j = 1; j < blockSize; j++)
 				{
 					sum += row[x + j];
@@ -1655,10 +1651,10 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = row[x] + row[x + 1] + row[x + 2];
+				double sum = row[x] + row[x + 1] + row[x + 2];
 
 				// Store result in transpose
-				outData[centreIndex] = sum;
+				outData[centreIndex] = (float) sum;
 				centreIndex += height;
 			}
 		}
@@ -1679,7 +1675,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = row[x] + row[x + 1] + row[x + 2];
+				double sum = row[x] + row[x + 1] + row[x + 2];
 
 				// Store result in transpose
 				outData[centreIndex] = normaliser.normalise(sum, centreIndex);
@@ -2185,7 +2181,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		{
 			for (int x = 0; x < maxx; x++, index++)
 			{
-				float sum = data[index];
+				double sum = data[index];
 
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood 
 				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
@@ -2313,9 +2309,9 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		{
 			for (int x = 0; x < maxx; x++, index++)
 			{
-				float sum = data[index];
-				float sum1 = 0;
-				float sum2 = 0;
+				double sum = data[index];
+				double sum1 = 0;
+				double sum2 = 0;
 
 				// Flag to indicate this pixels has a complete (2n1+1) neighbourhood 
 				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
@@ -2436,13 +2432,13 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				// Sweep neighbourhood
 				if (isInnerXY)
 				{
-					float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
+					double sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
 							data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
 					newData[index1] = normaliser.normalise(sum, index1);
 				}
 				else
 				{
-					float sum = data[index1];
+					double sum = data[index1];
 
 					for (int d = offset.length; d-- > 0;)
 					{
@@ -2515,8 +2511,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				boolean isInnerXY = (y > 0 && y < ylimit) && (x > 0 && x < xlimit);
 
 				// Sweep neighbourhood
-				float sum1 = 0;
-				float sum2 = 0;
+				double sum1 = 0;
+				double sum2 = 0;
 				if (isInnerXY)
 				{
 					// Edges

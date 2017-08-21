@@ -1,8 +1,8 @@
 package gdsc.smlm.filters;
 
 import gdsc.smlm.TestSettings;
-import gdsc.smlm.filters.AverageFilter;
-import gdsc.smlm.filters.SumFilter;
+import gdsc.smlm.filters.BlockMeanFilter;
+import gdsc.smlm.filters.BlockSumFilter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,14 +67,14 @@ public class FilterTest
 	}
 
 	@Test
-	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockAverageNxNInternal()
+	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockMeanNxNInternal()
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
 		rand = new gdsc.core.utils.Random(-300519);
 
-		SumFilter filter = new SumFilter();
-		AverageFilter filter2 = new AverageFilter();
+		BlockSumFilter filter = new BlockSumFilter();
+		BlockMeanFilter filter2 = new BlockMeanFilter();
 
 		int iter = 50;
 
@@ -87,8 +87,8 @@ public class FilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.rollingBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
-		filter2.rollingBlockAverageNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		filter.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		filter2.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
 		for (int boxSize : boxSizes)
 			for (int width : primes)
@@ -100,7 +100,7 @@ public class FilterTest
 
 					long time = System.nanoTime();
 					for (float[] data : dataSet2)
-						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
+						filter.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
 				}
@@ -119,7 +119,7 @@ public class FilterTest
 
 					long time = System.nanoTime();
 					for (float[] data : dataSet2)
-						filter2.rollingBlockAverageNxNInternal(data, width, height, boxSize);
+						filter2.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 
 					long fastTime = fastTimes.get(index++);
@@ -128,33 +128,32 @@ public class FilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float rollingBlockAverageNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float rollingBlockMeanNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf(
-					"float rollingBlockAverageNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float rollingBlockMeanNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float rollingBlockAverageNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float rollingBlockMeanNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
-	public void floatRollingBlockAverageNxNInternalIsFasterThanBlockMedianNxNInternal()
+	public void floatRollingBlockMeanNxNInternalIsFasterThanBlockMedianNxNInternal()
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
 		rand = new gdsc.core.utils.Random(-300519);
 
-		AverageFilter filter1 = new AverageFilter();
+		BlockMeanFilter filter1 = new BlockMeanFilter();
 		MedianFilter filter2 = new MedianFilter();
 
 		int iter = 10;
@@ -168,7 +167,7 @@ public class FilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter1.rollingBlockAverageNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		filter1.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter2.blockMedianNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
 		for (int boxSize : boxSizes)
@@ -181,7 +180,7 @@ public class FilterTest
 
 					long time = System.nanoTime();
 					for (float[] data : dataSet2)
-						filter1.rollingBlockAverageNxNInternal(data, width, height, boxSize);
+						filter1.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
 				}
@@ -209,32 +208,32 @@ public class FilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float blockMedianNxNInternal [%dx%d] @ %d : %d => rollingBlockAverageNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float blockMedianNxNInternal [%dx%d] @ %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockMedianNxNInternal %d : %d => rollingBlockAverageNxNInternal %d = %.2fx\n",
+			System.out.printf("float blockMedianNxNInternal %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n",
 					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float blockMedianNxNInternal %d => rollingBlockAverageNxNInternal %d = %.2fx\n", slowTotal,
+		System.out.printf("float blockMedianNxNInternal %d => rollingBlockMeanNxNInternal %d = %.2fx\n", slowTotal,
 				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
-	public void floatRollingBlockAverageNxNInternalIsFasterThanRollingMedianNxNInternal()
+	public void floatRollingBlockMeanNxNInternalIsFasterThanRollingMedianNxNInternal()
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
 		rand = new gdsc.core.utils.Random(-300519);
 
-		AverageFilter filter1 = new AverageFilter();
+		BlockMeanFilter filter1 = new BlockMeanFilter();
 		MedianFilter filter2 = new MedianFilter();
 
 		int iter = 10;
@@ -248,7 +247,7 @@ public class FilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter1.rollingBlockAverageNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		filter1.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter2.rollingMedianNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
 		for (int boxSize : boxSizes)
@@ -261,7 +260,7 @@ public class FilterTest
 
 					long time = System.nanoTime();
 					for (float[] data : dataSet2)
-						filter1.rollingBlockAverageNxNInternal(data, width, height, boxSize);
+						filter1.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
 				}
@@ -289,32 +288,32 @@ public class FilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float rollingMedianNxNInternal [%dx%d] @ %d : %d => rollingBlockAverageNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float rollingMedianNxNInternal [%dx%d] @ %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float rollingMedianNxNInternal %d : %d => rollingBlockAverageNxNInternal %d = %.2fx\n",
+			System.out.printf("float rollingMedianNxNInternal %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n",
 					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float rollingMedianNxNInternal %d => rollingBlockAverageNxNInternal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float rollingMedianNxNInternal %d => rollingBlockMeanNxNInternal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
-	public void floatRollingBlockAverageNxNInternalIsFasterThanGaussianNxNInternal()
+	public void floatRollingBlockMeanNxNInternalIsFasterThanGaussianNxNInternal()
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
 		rand = new gdsc.core.utils.Random(-300519);
 
-		AverageFilter filter1 = new AverageFilter();
+		BlockMeanFilter filter1 = new BlockMeanFilter();
 		GaussianFilter filter2 = new GaussianFilter();
 
 		int iter = 10;
@@ -328,7 +327,7 @@ public class FilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter1.rollingBlockAverageNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		filter1.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 		filter2.convolveInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0] / 3.0);
 
 		for (int boxSize : boxSizes)
@@ -341,7 +340,7 @@ public class FilterTest
 
 					long time = System.nanoTime();
 					for (float[] data : dataSet2)
-						filter1.rollingBlockAverageNxNInternal(data, width, height, boxSize);
+						filter1.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
 				}
@@ -369,32 +368,32 @@ public class FilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float convolveInternal [%dx%d] @ %d : %d => rollingBlockAverageNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float convolveInternal [%dx%d] @ %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float convolveInternal %d : %d => rollingBlockAverageNxNInternal %d = %.2fx\n", boxSize,
+			System.out.printf("float convolveInternal %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float convolveInternal %d => rollingBlockAverageNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float convolveInternal %d => rollingBlockMeanNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
-	public void floatRollingBlockAverageNxNInternalIsFasterThanAreaAverageNxNInternal()
+	public void floatRollingBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal()
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
 		rand = new gdsc.core.utils.Random(-300519);
 
-		AverageFilter filter1 = new AverageFilter();
+		BlockMeanFilter filter1 = new BlockMeanFilter();
 		AreaAverageFilter filter2 = new AreaAverageFilter();
 
 		int iter = 10;
@@ -408,8 +407,8 @@ public class FilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		//filter1.rollingBlockAverageNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
-		//filter2.areaAverageInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0] - 0.05);
+		//filter1.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		//filter2.areaFilterInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0] - 0.05);
 
 		for (int boxSize : boxSizes)
 			for (int width : primes)
@@ -421,10 +420,10 @@ public class FilterTest
 
 					// Initialise
 					for (float[] data : dataSet2)
-						filter1.rollingBlockAverageNxNInternal(data.clone(), width, height, boxSize);
+						filter1.rollingBlockFilterNxNInternal(data.clone(), width, height, boxSize);
 					long time = System.nanoTime();
 					for (float[] data : dataSet2)
-						filter1.rollingBlockAverageNxNInternal(data, width, height, boxSize);
+						filter1.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
 				}
@@ -455,24 +454,112 @@ public class FilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float areaAverageInternal [%dx%d] @ %d : %d => rollingBlockAverageNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float areaFilterInternal [%dx%d] @ %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float areaAverageInternal %d : %d => rollingBlockAverageNxNInternal %d = %.2fx\n", boxSize,
+			System.out.printf("float areaFilterInternal %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float areaAverageInternal %d => rollingBlockAverageNxNInternal %d = %.2fx\n", slowTotal,
+		System.out.printf("float areaFilterInternal %d => rollingBlockMeanNxNInternal %d = %.2fx\n", slowTotal,
 				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
-	
+
+	@Test
+	public void floatStripedBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal()
+	{
+		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+
+		rand = new gdsc.core.utils.Random(-300519);
+
+		BlockMeanFilter filter1 = new BlockMeanFilter();
+		AreaAverageFilter filter2 = new AreaAverageFilter();
+
+		int iter = 10;
+
+		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
+		for (int i = iter; i-- > 0;)
+		{
+			dataSet.add(floatCreateData(primes[0], primes[0]));
+		}
+
+		ArrayList<Long> fastTimes = new ArrayList<Long>();
+
+		// Initialise
+		//filter1.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		//filter2.areaFilterInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0] - 0.05);
+
+		for (int boxSize : boxSizes)
+			for (int width : primes)
+				for (int height : primes)
+				{
+					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(iter);
+					for (float[] data : dataSet)
+						dataSet2.add(floatClone(data));
+
+					// Initialise
+					float w = (float) (boxSize - 0.05);
+					for (float[] data : dataSet2)
+						filter1.stripedBlockFilterNxNInternal(data.clone(), width, height, w);
+					long time = System.nanoTime();
+					for (float[] data : dataSet2)
+						filter1.stripedBlockFilterNxNInternal(data, width, height, w);
+					time = System.nanoTime() - time;
+					fastTimes.add(time);
+				}
+
+		long slowTotal = 0, fastTotal = 0;
+		int index = 0;
+		for (int boxSize : boxSizes)
+		{
+			long boxSlowTotal = 0, boxFastTotal = 0;
+			for (int width : primes)
+				for (int height : primes)
+				{
+					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(iter);
+					for (float[] data : dataSet)
+						dataSet2.add(floatClone(data));
+
+					// Initialise
+					for (float[] data : dataSet2)
+						filter2.areaAverageUsingAveragesInternal(data.clone(), width, height, boxSize - 0.05);
+					long time = System.nanoTime();
+					for (float[] data : dataSet2)
+						filter2.areaAverageUsingAveragesInternal(data, width, height, boxSize - 0.05);
+					time = System.nanoTime() - time;
+
+					long fastTime = fastTimes.get(index++);
+					slowTotal += time;
+					fastTotal += fastTime;
+					boxSlowTotal += time;
+					boxFastTotal += fastTime;
+					if (debug)
+						System.out.printf(
+								"float areaFilterInternal [%dx%d] @ %d : %d => stripedBlockMeanNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+					//Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//		blockTime, time), blockTime < time);
+				}
+			//if (debug)
+			System.out.printf("float areaFilterInternal %d : %d => stripedBlockMeanNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
+			//					boxFastTotal < boxSlowTotal);
+		}
+		System.out.printf("float areaFilterInternal %d => stripedBlockMeanNxNInternal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		if (TestSettings.ASSERT_SPEED_TESTS)
+			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+	}
+
+	@SuppressWarnings("deprecation")
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanIntRollingBlockSumNxNInternal()
 	{
@@ -481,6 +568,7 @@ public class FilterTest
 		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
+		BlockSumFilter filter2 = new BlockSumFilter();
 
 		int iter = 50;
 
@@ -494,7 +582,7 @@ public class FilterTest
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
-		filter.rollingBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		filter2.rollingBlockFilterNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
 
 		for (int boxSize : boxSizes)
 			for (int width : primes)
@@ -506,7 +594,7 @@ public class FilterTest
 
 					long time = System.nanoTime();
 					for (float[] data : dataSet2)
-						filter.rollingBlockSumNxNInternal(data, width, height, boxSize);
+						filter2.rollingBlockFilterNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
 					fastTimes.add(time);
 				}
@@ -534,18 +622,18 @@ public class FilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("int rollingBlockSumNxNInternal [%dx%d] @ %d : %d => float rollingBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"int rollingBlockSumNxNInternal [%dx%d] @ %d : %d => float rollingBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf(
-					"int rollingBlockSumNxNInternal %d : %d => float rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-					boxFastTotal < boxSlowTotal);
+			System.out.printf("int rollingBlockSumNxNInternal %d : %d => float rollingBlockSumNxNInternal %d = %.2fx\n",
+					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			if (TestSettings.ASSERT_SPEED_TESTS)
+				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
+						boxFastTotal < boxSlowTotal);
 		}
 		System.out.printf("int rollingBlockSumNxNInternal %d => float rollingBlockSumNxNInternal %d = %.2fx\n",
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));

@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
+@SuppressWarnings("deprecation")
 public class SumFilterTest
 {
 	private gdsc.core.utils.Random rand;
@@ -125,7 +126,6 @@ public class SumFilterTest
 							width, height, boxSize);
 	}
 
-	@SuppressWarnings("deprecation")
 	private void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
@@ -815,7 +815,6 @@ public class SumFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
@@ -1857,7 +1856,6 @@ public class SumFilterTest
 							height, boxSize);
 	}
 
-	@SuppressWarnings("deprecation")
 	private void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
@@ -2546,7 +2544,6 @@ public class SumFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
