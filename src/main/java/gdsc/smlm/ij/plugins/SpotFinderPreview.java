@@ -13,6 +13,8 @@ import gdsc.core.match.Coordinate;
 import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.MatchResult;
 import gdsc.core.match.PointPair;
+import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
+import gdsc.smlm.data.config.FitProtos.DataFilterType;
 import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
@@ -32,6 +34,9 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.model.camera.BaseCameraModel;
+import gdsc.smlm.model.camera.CameraModel;
+import gdsc.smlm.model.camera.FakePerPixelCameraModel;
 import gdsc.smlm.results.MemoryPeakResults;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
@@ -46,6 +51,7 @@ import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
+import ij.process.Blitter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
@@ -55,6 +61,15 @@ import ij.process.ImageProcessor;
 public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, ImageListener
 {
 	private final static String TITLE = "Spot Finder Preview";
+
+	private static DataFilterMethod defaultDataFilterMethod;
+	private static double defaultSmooth;
+	static
+	{
+		FitEngineConfiguration c = new FitEngineConfiguration();
+		defaultDataFilterMethod = c.getDataFilterMethod(0);
+		defaultSmooth = c.getSmooth(0);
+	}
 
 	private int flags = DOES_16 | DOES_8G | DOES_32;
 	private FitEngineConfiguration config = null;
@@ -67,6 +82,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	private static double distance = 1.5;
 	private static boolean showTP = true;
 	private static boolean showFP = true;
+
+	private int currentSlice = 0;
+	private MaximaSpotFilter filter = null;
 
 	/*
 	 * (non-Javadoc)
@@ -114,12 +132,18 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 
+		String[] models = CameraModelManager.listCameraModels(true);
+		gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
+
 		gd.addNumericField("Initial_StdDev0", fitConfig.getInitialXSD(), 3);
 		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
 				config.getDataFilterType().ordinal());
 		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
 				config.getDataFilterMethod(0).ordinal());
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
+		gd.addChoice("Spot_filter_2", SettingsManager.getDataFilterMethodNames(),
+				config.getDataFilterMethod(1, defaultDataFilterMethod).ordinal());
+		gd.addSlider("Smoothing_2", 2.5, 4.5, config.getSmooth(1, defaultSmooth));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
 
@@ -174,11 +198,18 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		gd.getNextChoice();
-		gd.getNextString();
 
-		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
+		// Set a camera model
+		fitConfig.setCameraModelName(gd.getNextChoice());
+		CameraModel model = CameraModelManager.load(fitConfig.getCameraModelName());
+		if (model == null)
+			model = new FakePerPixelCameraModel(0, 1, 1);
+		fitConfig.setCameraModel(model);
+
+		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
 		config.setDataFilterType(gd.getNextChoiceIndex());
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 1);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		if (label != null)
@@ -188,12 +219,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			showFP = gd.getNextBoolean();
 		}
 		preview = gd.getNextBoolean();
+		boolean result = !gd.invalidNumber();
 		if (!preview)
 		{
 			setLabel("");
 			this.imp.setOverlay(o);
 		}
-		return !gd.invalidNumber();
+		return result;
 	}
 
 	private void setLabel(String message)
@@ -210,10 +242,60 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 */
 	public void run(ImageProcessor ip)
 	{
+		currentSlice = imp.getCurrentSlice();
+
 		Rectangle bounds = ip.getRoi();
 
-		MaximaSpotFilter filter = config.createSpotFilter(true);
+		// Set a camera model
+		CameraModel cameraModel = CameraModelManager.load(fitConfig.getCameraModelName());
+		if (cameraModel == null)
+			cameraModel = new FakePerPixelCameraModel(0, 1, 1);
+		fitConfig.setCameraModel(cameraModel);
 
+		// Configure a jury filter
+		if (config.getDataFilterType() == DataFilterType.JURY)
+		{
+			if (!PeakFit.configureDataFilter(config, PeakFit.FLAG_NO_SAVE))
+				return;
+		}
+
+		MaximaSpotFilter filter = config.createSpotFilter(true);
+		Utils.log(filter.getDescription());
+		
+		Rectangle modelBounds = cameraModel.getBounds();
+		if (modelBounds != null)
+		{
+			if (!modelBounds.contains(bounds))
+			{
+			//@formatter:off
+			Utils.log("WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
+					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
+					bounds.x, bounds.y, bounds.width, bounds.height 
+					);
+			//@formatter:on
+			}
+			else
+			// Warn if the model bounds are bigger than the image as this may be an incorrect
+			// selection for the camera model
+			if (modelBounds.width > ip.getWidth() || modelBounds.height > ip.getHeight())
+			{
+			//@formatter:off
+			Utils.log("WARNING: Camera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image image target bounds\n[width=%d,height=%d].\n \nThis is probably an incorrect camera model.",
+					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
+					ip.getWidth(),  ip.getHeight()
+					);
+			//@formatter:on
+			}
+		}
+		
+		run(ip, filter);
+	}
+	
+	private void run(ImageProcessor ip, MaximaSpotFilter filter)
+	{
+		this.filter = filter;
+		Rectangle bounds = ip.getRoi();
+		
 		// Crop to the ROI
 		FloatProcessor fp = ip.crop().toFloat(0, null);
 
@@ -221,17 +303,29 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		int width = fp.getWidth();
 		int height = fp.getHeight();
+
+		// Set weights
+		CameraModel cameraModel = fitConfig.getCameraModel();
+		if (!(cameraModel instanceof FakePerPixelCameraModel))
+		{
+			float[] w = BaseCameraModel.toWeights(cameraModel.getVariance(bounds));
+			filter.setWeights(w, width, height);
+		}
+
 		Spot[] spots = filter.rank(data, width, height);
 		data = filter.getPreprocessedData();
 
 		fp = new FloatProcessor(width, height, data);
-		ip = ip.duplicate();
-		ip.insert(fp, bounds.x, bounds.y);
+		FloatProcessor out = new FloatProcessor(ip.getWidth(), ip.getHeight());
+		out.copyBits(ip, 0, 0, Blitter.COPY);
+		out.insert(fp, bounds.x, bounds.y);
 		//ip.resetMinAndMax();
-		ip.setMinAndMax(fp.getMin(), fp.getMax());
+		double min = fp.getMin();
+		double max = fp.getMax();
+		out.setMinAndMax(min, max);
 
 		Overlay o = new Overlay();
-		o.add(new ImageRoi(0, 0, ip));
+		o.add(new ImageRoi(0, 0, out));
 
 		if (label != null)
 		{
@@ -302,6 +396,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			// Add options to configure colour and labels
 			o.add(roi);
 		}
+
 		imp.setOverlay(o);
 	}
 
@@ -347,7 +442,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	{
 		if (this.imp.getID() == imp.getID() && preview)
 		{
-			run(imp.getProcessor());
+			if (imp.getCurrentSlice() != currentSlice && filter != null)
+			{
+				run(imp.getProcessor(), filter);
+			}
 		}
 	}
 }
