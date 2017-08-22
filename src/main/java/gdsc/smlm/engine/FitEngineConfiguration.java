@@ -440,6 +440,22 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the data filter method.
+	 *
+	 * @param n
+	 *            The filter number
+	 * @param defaultValue
+	 *            the default value
+	 * @return the filter to apply to the data before identifying local maxima
+	 */
+	public DataFilterMethod getDataFilterMethod(int n, DataFilterMethod defaultValue)
+	{
+		if (n < getDataFiltersCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getDataFilterMethod();
+		return defaultValue;
+	}
+
+	/**
 	 * @param n
 	 *            The filter number
 	 * @return if the smoothing parameter is absolute
@@ -449,6 +465,22 @@ public class FitEngineConfiguration implements Cloneable
 		if (n < getDataFiltersCount())
 			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getAbsolute();
 		throw new IndexOutOfBoundsException(n + " >= " + getDataFiltersCount());
+	}
+
+	/**
+	 * Gets the data filter absolute.
+	 *
+	 * @param n
+	 *            The filter number
+	 * @param defaultValue
+	 *            the default value
+	 * @return if the smoothing parameter is absolute
+	 */
+	public boolean getDataFilterAbsolute(int n, boolean defaultValue)
+	{
+		if (n < getDataFiltersCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getAbsolute();
+		return defaultValue;
 	}
 
 	/**
@@ -464,6 +496,22 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Gets the smooth.
+	 *
+	 * @param n
+	 *            The filter number
+	 * @param defaultValue
+	 *            the default value
+	 * @return the smoothing window size
+	 */
+	public double getSmooth(int n, double defaultValue)
+	{
+		if (n < getDataFiltersCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getValue();
+		return defaultValue;
+	}
+
+	/**
 	 * @param n
 	 *            The filter number
 	 * @return the absolute flag for the smoothing window size
@@ -473,6 +521,22 @@ public class FitEngineConfiguration implements Cloneable
 		if (n < getDataFiltersCount())
 			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getAbsolute();
 		throw new IndexOutOfBoundsException(n + " >= " + getDataFiltersCount());
+	}
+
+	/**
+	 * Gets the absolute.
+	 *
+	 * @param n
+	 *            The filter number
+	 * @param defaultValue
+	 *            the default value
+	 * @return the absolute flag for the smoothing window size
+	 */
+	public boolean getAbsolute(int n, boolean defaultValue)
+	{
+		if (n < getDataFiltersCount())
+			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getAbsolute();
+		return defaultValue;
 	}
 
 	/**
@@ -491,7 +555,7 @@ public class FitEngineConfiguration implements Cloneable
 	public void setDataFilter(DataFilterMethod dataFilterMethod, double smooth, boolean absolute, int n)
 	{
 		DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
-		truncateFilters(b, n + 1);
+		//truncateFilters(b, n + 1);
 		DataFilter.Builder b2 = (b.getDataFiltersCount() == n) ? b.addDataFiltersBuilder() : b.getDataFiltersBuilder(n);
 		b2.setDataFilterMethod(dataFilterMethod);
 		b2.clearParameters();
@@ -642,8 +706,8 @@ public class FitEngineConfiguration implements Cloneable
 		if (getFitConfiguration().isPerPixelCameraType())
 		{
 			if (!spotFilter.isWeighted())
-				throw new IllegalStateException("Camera type requires a weighted spot filter: " +
-						fitConfiguration.getCameraType());
+				throw new IllegalStateException(
+						"Camera type requires a weighted spot filter: " + fitConfiguration.getCameraType());
 			CameraModel model = fitConfiguration.getCameraModel();
 			if (model == null || !model.isPerPixelModel())
 				throw new IllegalStateException("Weighted spot filter requires a per-pixel camera model");

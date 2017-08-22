@@ -1956,21 +1956,43 @@ public class PeakFit implements PlugInFilter, ItemListener
 		String[] filterNames = SettingsManager.getDataFilterMethodNames();
 		DataFilterMethod[] filterValues = SettingsManager.getDataFilterMethodValues();
 
+		// Set some defaults in the event the configuration does not have any current values
+		int count = config.getDataFiltersCount();
+		DataFilterMethod defaultDataFilterMethod = null;
+		double defaultSmooth = 0;
+		if (count < n)
+		{
+			FitEngineConfiguration c = new FitEngineConfiguration();
+			defaultDataFilterMethod = c.getDataFilterMethod(0);
+			defaultSmooth = c.getSmooth(0);
+		}
+
 		for (int i = 1; i < n; i++)
 		{
 			int filter = i + 1;
+
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-			gd.enableYesNoCancel("Add", "Continue");
-			gd.addMessage(
-					String.format("Configure the %s filter.\nClick continue to proceed with the current set of %d.",
-							FitProtosHelper.getName(config.getDataFilterType()), i));
+			if (filter == n)
+			{
+				// This is maximum filter count so no continue option
+				gd.addMessage(String.format("Configure the %s filter.",
+						FitProtosHelper.getName(config.getDataFilterType()), i));
+			}
+			else
+			{
+				gd.enableYesNoCancel("Add", "Continue");
+				gd.addMessage(
+						String.format("Configure the %s filter.\nClick continue to proceed with the current set of %d.",
+								FitProtosHelper.getName(config.getDataFilterType()), i));
+			}
 			String fieldName = "Spot_filter" + filter;
 			if (IJ.isMacro())
 				// Use blank default value so bad macro parameters return nothing
 				gd.addStringField(fieldName, "");
 			else
-				gd.addChoice(fieldName, filterNames, filterNames[config.getDataFilterMethod(i).ordinal()]);
-			gd.addSlider("Smoothing" + filter, 0, 4.5, config.getSmooth(i));
+				gd.addChoice(fieldName, filterNames,
+						filterNames[config.getDataFilterMethod(i, defaultDataFilterMethod).ordinal()]);
+			gd.addSlider("Smoothing" + filter, 0, 4.5, config.getSmooth(i, defaultSmooth));
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
