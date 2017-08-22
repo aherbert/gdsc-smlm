@@ -81,14 +81,11 @@ public class NonNormaliser implements Normaliser
 	 */
 	public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
 	{
-		int xlimit = maxx - border;
-		int ylimit = maxy - border;
-		for (int y = border; y < ylimit; y++)
+		int width = maxx - 2 * border;
+		int max = (maxy - border) * maxx;
+		for (int i = border * maxx + border; i < max; i += maxx)
 		{
-			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
-			{
-				out[i] = data[i];
-			}
+			System.arraycopy(data, i, out, i, width);
 		}
 	}
 }
