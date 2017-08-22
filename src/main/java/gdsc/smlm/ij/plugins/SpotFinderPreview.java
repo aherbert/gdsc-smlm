@@ -1,11 +1,17 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
+import java.awt.Checkbox;
+import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Label;
 import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
@@ -15,6 +21,10 @@ import gdsc.core.match.MatchResult;
 import gdsc.core.match.PointPair;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
+import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
@@ -33,6 +43,7 @@ import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
+import gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.camera.BaseCameraModel;
 import gdsc.smlm.model.camera.CameraModel;
@@ -43,6 +54,7 @@ import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.ImageRoi;
 import ij.gui.NonBlockingExtendedGenericDialog;
@@ -58,7 +70,8 @@ import ij.process.ImageProcessor;
 /**
  * Runs the candidate maxima identification on the image and provides a preview using an overlay
  */
-public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, ImageListener
+public class SpotFinderPreview
+		implements ExtendedPlugInFilter, DialogListener, ImageListener, ItemListener, FitConfigurationProvider
 {
 	private final static String TITLE = "Spot Finder Preview";
 
@@ -85,6 +98,20 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	private int currentSlice = 0;
 	private MaximaSpotFilter filter = null;
+
+	// All the fields that will be updated when reloading the configuration file
+	private Choice textCameraModelName;
+	private Choice textPSF;
+	private Choice textDataFilterType;
+	private Choice textDataFilterMethod;
+	private TextField textSmooth;
+	private Choice textDataFilterMethod2;
+	private TextField textSmooth2;
+	private TextField textSearch;
+	private TextField textBorder;
+
+	private boolean refreshing = false;
+	private NonBlockingExtendedGenericDialog gd;
 
 	/*
 	 * (non-Javadoc)
@@ -117,6 +144,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
+	@SuppressWarnings("unchecked")
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
 		this.o = imp.getOverlay();
@@ -125,7 +153,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		config = SettingsManager.readFitEngineConfiguration(0);
 		fitConfig = config.getFitConfiguration();
 
-		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+		gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Preview candidate maxima");
 
@@ -135,7 +163,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		String[] models = CameraModelManager.listCameraModels(true);
 		gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
 
-		gd.addNumericField("Initial_StdDev0", fitConfig.getInitialXSD(), 3);
+		PeakFit.addPSFOptions(gd, this);
 		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
 				config.getDataFilterType().ordinal());
 		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
@@ -167,12 +195,34 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		{
 			// Listen for changes to an image
 			ImagePlus.addImageListener(this);
+
+			// Support template settings
+			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
+			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
+
+			int n = 0;
+			int ch = 0;
+
+			Choice textTemplate = choices.get(ch++);
+			textTemplate.removeItemListener(gd);
+			textTemplate.removeKeyListener(gd);
+			textTemplate.addItemListener(this);
+
+			textCameraModelName = choices.get(ch++);
+			textPSF = choices.get(ch++);
+			textDataFilterType = choices.get(ch++);
+			textDataFilterMethod = choices.get(ch++);
+			textSmooth = numerics.get(n++);
+			textDataFilterMethod2 = choices.get(ch++);
+			textSmooth2 = numerics.get(n++);
+			textSearch = numerics.get(n++);
+			textBorder = numerics.get(n++);
 		}
 
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
-		gd.hideCancelButton();
-		gd.setOKLabel("Close");
+		gd.setOKLabel("Save");
+		gd.setCancelLabel("Close");
 		gd.showDialog();
 
 		if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless()))
@@ -197,7 +247,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 */
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
-		gd.getNextChoice();
+		if (refreshing)
+			return false;
+
+		gd.getNextChoice(); // Ignore template
 
 		// Set a camera model
 		fitConfig.setCameraModelName(gd.getNextChoice());
@@ -206,7 +259,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			model = new FakePerPixelCameraModel(0, 1, 1);
 		fitConfig.setCameraModel(model);
 
-		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
+		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+
 		config.setDataFilterType(gd.getNextChoiceIndex());
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 1);
@@ -242,6 +296,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 */
 	public void run(ImageProcessor ip)
 	{
+		if (refreshing)
+			return;
+		
 		currentSlice = imp.getCurrentSlice();
 
 		Rectangle bounds = ip.getRoi();
@@ -259,9 +316,20 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				return;
 		}
 
-		MaximaSpotFilter filter = config.createSpotFilter(true);
+		try
+		{
+			filter = config.createSpotFilter(true);
+		}
+		catch (Exception e)
+		{
+			filter = null;
+			this.imp.setOverlay(o);
+			throw new RuntimeException(e); // Required for ImageJ to disable the preview
+			//Utils.log("ERROR: " + e.getMessage());			
+			//return;
+		}
 		Utils.log(filter.getDescription());
-		
+
 		Rectangle modelBounds = cameraModel.getBounds();
 		if (modelBounds != null)
 		{
@@ -287,15 +355,17 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			//@formatter:on
 			}
 		}
-		
+
 		run(ip, filter);
 	}
-	
+
 	private void run(ImageProcessor ip, MaximaSpotFilter filter)
 	{
-		this.filter = filter;
-		Rectangle bounds = ip.getRoi();
+		if (refreshing)
+			return;
 		
+		Rectangle bounds = ip.getRoi();
+
 		// Crop to the ROI
 		FloatProcessor fp = ip.crop().toFloat(0, null);
 
@@ -347,7 +417,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			List<PointPair> matches = new ArrayList<PointPair>(Math.min(actual.length, predicted.length));
 			List<Coordinate> FP = new ArrayList<Coordinate>(predicted.length);
 			MatchResult result = MatchCalculator.analyseResults2D(actual, predicted,
-					distance * fitConfig.getInitialXSD(), null, FP, null, matches);
+					distance * fitConfig.getInitialPeakStdDev(), null, FP, null, matches);
 
 			// Show scores
 			setLabel(String.format("P=%s, R=%s, J=%s", Utils.rounded(result.getPrecision()),
@@ -447,5 +517,98 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				run(imp.getProcessor(), filter);
 			}
 		}
+	}
+
+	public void itemStateChanged(ItemEvent e)
+	{
+		if (e.getSource() instanceof Choice)
+		{
+			// Update the settings from the template
+			Choice choice = (Choice) e.getSource();
+			String templateName = choice.getSelectedItem();
+			//System.out.println("Update to " + templateName);
+
+			// Get the configuration template
+			TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
+
+			if (template != null)
+			{
+				refreshing = true;
+
+				IJ.log("Applying template: " + templateName);
+
+				for (String note : template.getNotesList())
+					IJ.log(note);
+
+				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
+				if (template.hasPsf())
+				{
+					refreshSettings(template.getPsf(), custom);
+				}
+				if (template.hasFitEngineSettings())
+				{
+					refreshSettings(template.getFitEngineSettings(), custom);
+				}
+
+				refreshing = false;
+				//dialogItemChanged(gd, null);
+			}
+		}
+	}
+
+	private void refreshSettings(PSF psf, boolean isCustomTemplate)
+	{
+		if (!isCustomTemplate || psf == null)
+			return;
+
+		// Do not use set() as we support merging a partial PSF
+		fitConfig.mergePSF(psf);
+
+		textPSF.select(PSFProtosHelper.getName(fitConfig.getPSFType()));
+	}
+
+	/**
+	 * Refresh settings.
+	 * <p>
+	 * If this is a custom template then use all the settings. If a default template then leave some existing spot
+	 * settings untouched as the user may have updated them (e.g. PSF width).
+	 *
+	 * @param fitEngineSettings
+	 *            the config
+	 * @param isCustomTemplate
+	 *            True if a custom template.
+	 */
+	private void refreshSettings(FitEngineSettings fitEngineSettings, boolean isCustomTemplate)
+	{
+		// Set the configuration
+		// This will clear everything and merge the configuration so
+		// remove the fit settings (as we do not care about those).
+
+		this.config.setFitEngineSettings(fitEngineSettings.toBuilder().clearFitSettings().build());
+		fitConfig = this.config.getFitConfiguration();
+
+		textCameraModelName.select(fitConfig.getCameraModelName());
+		textDataFilterType.select(SettingsManager.getDataFilterTypeNames()[config.getDataFilterType().ordinal()]);
+		textDataFilterMethod
+				.select(SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(0).ordinal()]);
+		textSmooth.setText("" + config.getSmooth(0));
+		if (config.getDataFiltersCount() > 1)
+		{
+			textDataFilterMethod2
+					.select(SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(1).ordinal()]);
+			textSmooth2.setText("" + config.getSmooth(1));
+		}
+		textSearch.setText("" + config.getSearch());
+		textBorder.setText("" + config.getBorder());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider#getFitConfiguration()
+	 */
+	public FitConfiguration getFitConfiguration()
+	{
+		return fitConfig;
 	}
 }
