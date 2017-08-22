@@ -55,6 +55,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.model.camera.BaseCameraModel;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -710,10 +711,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (!cc.dataBounds.equals(lastBounds))
 			{
 				lastBounds = cc.dataBounds;
-				// Invert the variance to get the weights
-				float[] w = cameraModel.getVariance(cc.dataBounds);
-				for (int i = 0; i < w.length; i++)
-					w[i] = (float) (1.0 / w[i]);
+				float[] w = BaseCameraModel.toWeights(cameraModel.getVariance(cc.dataBounds));
 				spotFilter.setWeights(w, lastBounds.width, lastBounds.height);
 			}
 		}

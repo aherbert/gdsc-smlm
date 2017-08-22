@@ -4,6 +4,7 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -28,43 +29,45 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable
 	/**
 	 * Check bias is finite.
 	 *
-	 * @param bias the bias
+	 * @param bias
+	 *            the bias
 	 */
 	public void checkBias(float bias)
 	{
 		if (!Maths.isFinite(bias))
 			throw new IllegalArgumentException("Bias must be a finite number");
 	}
-	
+
 	/**
 	 * Check gain is strictly positive.
 	 *
-	 * @param gain the gain
+	 * @param gain
+	 *            the gain
 	 */
 	public void checkGain(float gain)
 	{
 		if (!(gain <= Double.MAX_VALUE && gain > 0))
 			throw new IllegalArgumentException("Gain must be strictly positive");
 	}
-	
+
 	/**
 	 * Check variance is positive.
 	 *
-	 * @param variance the variance
+	 * @param variance
+	 *            the variance
 	 */
 	public void checkVariance(float variance)
 	{
 		if (!(variance <= Double.MAX_VALUE && variance >= 0))
 			throw new IllegalArgumentException("Variance must be positive");
 	}
-	
+
 	/**
 	 * Copy this camera model. This is a deep copy of any structures.
 	 *
 	 * @return the base camera model
 	 */
 	public abstract BaseCameraModel copy();
-	
 
 	/**
 	 * Create a new array.
@@ -82,5 +85,21 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable
 		float[] data = new float[bounds.width * bounds.height];
 		Arrays.fill(data, value);
 		return data;
+	}
+
+	/**
+	 * Convert the variance to weights (1/variance). Any value of the variance that is not strictly positive is set to
+	 * the minimum variance above zero.
+	 *
+	 * @param variance
+	 *            the variance
+	 * @return the weights
+	 */
+	public static float[] toWeights(float[] variance)
+	{
+		float[] w = SimpleArrayUtils.ensureStrictlyPositive(variance);
+		for (int i = 0; i < w.length; i++)
+			w[i] = (float) (1.0 / w[i]);
+		return w;
 	}
 }
