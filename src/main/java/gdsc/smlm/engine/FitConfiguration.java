@@ -1382,7 +1382,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *
 	 * @return the camera type
 	 */
-	private CameraType getCameraType()
+	public CameraType getCameraType()
 	{
 		return calibration.getCameraType();
 	}
@@ -3297,6 +3297,30 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		this.cameraModel = cameraModel;
 	}
 
+	
+	/**
+	 * Return true if the camera type requires a per-pixel camera model
+	 *
+	 * @return true, if successful
+	 */
+	public boolean isPerPixelCameraType()
+	{
+		switch (getCameraType())
+		{
+			case CAMERA_TYPE_NA:
+			case CCD:
+			case EMCCD:
+				return false;
+
+			case SCMOS:
+				return true;
+				
+			case UNRECOGNIZED:
+			default:
+				throw new IllegalStateException("Unknown camera type: " + getCameraType());
+		}
+	}
+	
 	/**
 	 * Gets the camera model.
 	 *

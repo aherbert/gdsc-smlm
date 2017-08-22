@@ -31,6 +31,7 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.MedianDataProcessor;
 import gdsc.smlm.filters.SingleSpotFilter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.model.camera.CameraModel;
 
 /**
  * Specifies the configuration for the fit engine
@@ -638,9 +639,15 @@ public class FitEngineConfiguration implements Cloneable
 				spotFilter = new SingleSpotFilter(search, border, processor0);
 		}
 
-		// Note: It is possible to configure the score data processor here. However small tests 
-		// show this often reduces performance and the additional parameters make it harder to 
-		// configure. It is a subject for future work.
+		if (getFitConfiguration().isPerPixelCameraType())
+		{
+			if (!spotFilter.isWeighted())
+				throw new IllegalStateException("Camera type requires a weighted spot filter: " +
+						fitConfiguration.getCameraType());
+			CameraModel model = fitConfiguration.getCameraModel();
+			if (model == null || !model.isPerPixelModel())
+				throw new IllegalStateException("Weighted spot filter requires a per-pixel camera model");
+		}
 
 		return spotFilter;
 	}

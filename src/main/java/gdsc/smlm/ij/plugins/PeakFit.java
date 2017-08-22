@@ -1923,6 +1923,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 	/**
 	 * Show a dialog to configure the data filter. The updated settings are saved to the settings file. An error
 	 * message is shown if the dialog is cancelled or the configuration is invalid.
+	 * <p>
+	 * If the configuration is for a per-pixel camera type (e.g. sCMOS) then the camera model will loaded using the
+	 * configured camera model name. This will be used to validate the filter to check the filter supports the per-pixel
+	 * camera type.
 	 *
 	 * @param config
 	 *            the config
@@ -1997,8 +2001,27 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 		}
 		config.setNumberOfFilters(numberOfFilters);
+
 		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
 			saveFitEngineSettings(config);
+
+		FitConfiguration fitConfig = config.getFitConfiguration();
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		if (calibration.isSCMOS())
+		{
+			fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
+		}
+
+		try
+		{
+			config.createSpotFilter(true);
+		}
+		catch (Exception e) // IllegalStateException
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}
+
 		return true;
 	}
 
@@ -2091,7 +2114,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				Parameters.isAboveZero("Max function evaluations", fitConfig.getMaxFunctionEvaluations());
 				fitConfig.getFunctionSolver();
 			}
-			catch (IllegalArgumentException e)
+			catch (Exception e) // IllegalArgumentException, IllegalStateException
 			{
 				IJ.error(TITLE, e.getMessage());
 				return false;
@@ -2244,7 +2267,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				// This call will check if the configuration is OK (including convergence criteria)
 				fitConfig.getFunctionSolver();
 			}
-			catch (IllegalArgumentException e)
+			catch (Exception e) // IllegalArgumentException, IllegalStateException
 			{
 				IJ.error(TITLE, e.getMessage());
 				return false;
