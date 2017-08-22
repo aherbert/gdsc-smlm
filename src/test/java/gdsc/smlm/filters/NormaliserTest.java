@@ -40,7 +40,6 @@ public class NormaliserTest
 					n.normalise(data, e, width, height, boxSize);
 					nn.normalise(data, o, width, height, boxSize);
 					Assert.assertArrayEquals(o, e, 0);
-					return;
 				}
 			}
 	}
