@@ -149,7 +149,7 @@ public class BlockMeanFilterTest
 
 	private void floatArrayEquals(String message, float[] data1, float[] data2, int maxx, int maxy, float boxSize)
 	{
-		FloatEquality eq = new FloatEquality(1e-4f, 1e-10f);
+		FloatEquality eq = new FloatEquality(2e-4f, 1e-10f);
 		// Debug: show the images
 		//gdsc.core.ij.Utils.display("data1", new ij.process.FloatProcessor(maxx, maxy, data1));
 		//gdsc.core.ij.Utils.display("data2", new ij.process.FloatProcessor(maxx, maxy, data2));
@@ -163,8 +163,8 @@ public class BlockMeanFilterTest
 			{
 				if (!eq.almostEqualRelativeOrAbsolute(data1[index], data2[index]))
 				{
-					Assert.assertTrue(String.format("%s [%d,%d] %f != %f", message, x, y, data1[index], data2[index]),
-							false);
+					Assert.fail(String.format("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
+							FloatEquality.relativeError(data1[index], data2[index])));
 				}
 			}
 		}

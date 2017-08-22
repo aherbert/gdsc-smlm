@@ -31,7 +31,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	private float[] upscaleKernel = null;
 	private int lastUnitLength;
 
-	private float[] normalise = null;
+	private Normaliser normaliser = null;
 	private double sx, sy;
 
 	/*
@@ -42,7 +42,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	@Override
 	protected void newWeights()
 	{
-		normalise = null;
+		normaliser = null;
 	}
 
 	/**
@@ -56,13 +56,14 @@ public class GaussianFilter extends BaseWeightedFilter
 	private void updateWeightedNormaliser(final double sigmaX, final double sigmaY)
 	{
 		// Cache the normaliser
-		if (normalise == null || sx != sigmaX || sy != sigmaY)
+		if (normaliser == null || sx != sigmaX || sy != sigmaY)
 		{
-			normalise = weights.clone();
+			float[] normalisation = weights.clone();
 			sx = sigmaX;
 			sy = sigmaY;
 			GaussianFilter gf = new GaussianFilter(accuracy);
-			gf.convolve(normalise, weightHeight, weightWidth, sigmaX, sigmaY);
+			gf.convolve(normalisation, weightHeight, weightWidth, sigmaX, sigmaY);
+			normaliser = new PerPixelNormaliser(normalisation);
 		}
 	}
 
@@ -181,9 +182,11 @@ public class GaussianFilter extends BaseWeightedFilter
 			blur1Direction(data, roi, maxx, maxy, sigmaX, true, extraLines);
 			blur1Direction(data, roi, maxx, maxy, sigmaY, false, 0);
 
-			// Normalise
-			for (int i = 0; i < size; i++)
-				data[i] /= normalise[i];
+			// Normalise. This assumes the roi is only ever constructed as a border.
+			if (roi.x != 0)
+				normaliser.normalise(data, maxx, maxy, roi.x);
+			else
+				normaliser.normalise(data, size);
 		}
 		else
 		{

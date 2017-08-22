@@ -45,4 +45,50 @@ public class NonNormaliser implements Normaliser
 	{
 		return sum;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], int)
+	 */
+	public void normalise(float[] data, int size)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], float[], int)
+	 */
+	public void normalise(float[] data, float[] out, int size)
+	{
+		System.arraycopy(data, 0, out, 0, size);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], int, int, int)
+	 */
+	public void normalise(float[] data, int maxx, int maxy, int border)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], float[], int, int, int)
+	 */
+	public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
+	{
+		int xlimit = maxx - border;
+		int ylimit = maxy - border;
+		for (int y = border; y < ylimit; y++)
+		{
+			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
+			{
+				out[i] = data[i];
+			}
+		}
+	}
 }

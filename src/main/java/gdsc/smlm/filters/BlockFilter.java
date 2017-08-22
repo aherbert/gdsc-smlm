@@ -909,19 +909,12 @@ public abstract class BlockFilter extends BaseWeightedFilter
 					sum += data[index + offset_d];
 				}
 
-				newData[index] = normaliser.normalise(sum, index);
+				newData[index] = (float) sum;
 			}
 		}
 
 		// Copy back
-		for (int y = n; y < maxy - n; y++)
-		{
-			int index = y * maxx + n;
-			for (int x = n; x < maxx - n; x++, index++)
-			{
-				data[index] = newData[index];
-			}
-		}
+		normaliser.normalise(newData, data, maxx, maxy, n);
 	}
 
 	/**
@@ -1035,19 +1028,12 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				for (int d = offset2.length; d-- > 0;)
 					sum2 += data[index + offset2[d]];
 
-				newData[index] = normaliser.normalise(sum + sum1 * w1 + sum2 * w2, index);
+				newData[index] = (float) (sum + sum1 * w1 + sum2 * w2);
 			}
 		}
 
 		// Copy back
-		for (int y = n1; y < ylimit; y++)
-		{
-			int index = y * maxx + n1;
-			for (int x = n1; x < xlimit; x++, index++)
-			{
-				data[index] = newData[index];
-			}
-		}
+		normaliser.normalise(newData, data, maxx, maxy, n1);
 	}
 
 	/**
@@ -1075,9 +1061,12 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = (y + 1) * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++)
 			{
-				double sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
-						data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
-				newData[index1] = normaliser.normalise(sum, index1);
+				//@formatter:off
+				newData[index1] = 
+						data[index0 - 1] + data[index0] + data[index0 + 1] + 
+						data[index1 - 1] + data[index1] + data[index1 + 1] + 
+						data[index2 - 1] + data[index2] + data[index2 + 1];
+				//@formatter:on
 				index0++;
 				index1++;
 				index2++;
@@ -1085,14 +1074,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		}
 
 		// Copy back
-		for (int y = 1; y < maxy - 1; y++)
-		{
-			int index = y * maxx + 1;
-			for (int x = 1; x < maxx - 1; x++, index++)
-			{
-				data[index] = newData[index];
-			}
-		}
+		normaliser.normalise(newData, data, maxx, maxy, 1);
 	}
 
 	/**
@@ -1131,7 +1113,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				// Corners
 				double sum2 = data[index0 - 1] + data[index0 + 1] + data[index2 - 1] + data[index2 + 1];
 
-				newData[index1] = normaliser.normalise(data[index1] + sum1 * w + sum2 * w2, index1);
+				newData[index1] = (float) (data[index1] + sum1 * w + sum2 * w2);
 				index0++;
 				index1++;
 				index2++;
@@ -1139,14 +1121,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		}
 
 		// Copy back
-		for (int y = 1; y < maxy - 1; y++)
-		{
-			int index = y * maxx + 1;
-			for (int x = 1; x < maxx - 1; x++, index++)
-			{
-				data[index] = newData[index];
-			}
-		}
+		normaliser.normalise(newData, data, maxx, maxy, 1);
 	}
 
 	/**
@@ -2212,12 +2187,12 @@ public abstract class BlockFilter extends BaseWeightedFilter
 						sum += data[xx + yy * maxx];
 					}
 				}
-				newData[index] = normaliser.normalise(sum, index);
+				newData[index] = (float) sum;
 			}
 		}
 
 		// Copy back
-		System.arraycopy(newData, 0, data, 0, data.length);
+		normaliser.normalise(newData, data, data.length);
 	}
 
 	/**
@@ -2376,12 +2351,12 @@ public abstract class BlockFilter extends BaseWeightedFilter
 						sum2 += data[xx + yy * maxx];
 					}
 				}
-				newData[index] = normaliser.normalise(sum + sum1 * w1 + sum2 * w2, index);
+				newData[index] = (float) (sum + sum1 * w1 + sum2 * w2);
 			}
 		}
 
 		// Copy back
-		System.arraycopy(newData, 0, data, 0, data.length);
+		normaliser.normalise(newData, data, data.length);
 	}
 
 	/**
@@ -2434,7 +2409,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				{
 					double sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
 							data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
-					newData[index1] = normaliser.normalise(sum, index1);
+					newData[index1] = (float) sum;
 				}
 				else
 				{
@@ -2455,7 +2430,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 							yy = maxy - 1;
 						sum += data[xx + yy * maxx];
 					}
-					newData[index1] = normaliser.normalise(sum, index1);
+					newData[index1] = (float) sum;
 				}
 				index0++;
 				index1++;
@@ -2464,7 +2439,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		}
 
 		// Copy back
-		System.arraycopy(newData, 0, data, 0, data.length);
+		normaliser.normalise(newData, data, data.length);
 	}
 
 	/**
@@ -2555,7 +2530,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 						sum2 += data[xx + yy * maxx];
 					}
 				}
-				newData[index1] = normaliser.normalise(data[index1] + sum1 * w + sum2 * w2, index1);
+				newData[index1] = (float) (data[index1] + sum1 * w + sum2 * w2);
 
 				index0++;
 				index1++;
@@ -2564,7 +2539,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		}
 
 		// Copy back
-		System.arraycopy(newData, 0, data, 0, data.length);
+		normaliser.normalise(newData, data, data.length);
 	}
 
 	/*

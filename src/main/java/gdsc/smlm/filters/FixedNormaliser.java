@@ -24,7 +24,8 @@ public class FixedNormaliser implements Normaliser
 	/**
 	 * Instantiates a new fixed normaliser.
 	 *
-	 * @param normalisation the normalisation
+	 * @param normalisation
+	 *            the normalisation
 	 */
 	public FixedNormaliser(float normalisation)
 	{
@@ -57,5 +58,61 @@ public class FixedNormaliser implements Normaliser
 	public float normalise(float sum, int index)
 	{
 		return sum / normalisation;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], int)
+	 */
+	public void normalise(float[] data, int size)
+	{
+		for (int i = 0; i < size; i++)
+			data[i] /= normalisation;
+	}
+
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], float[], int)
+	 */
+	public void normalise(float[] data, float[] out, int size)
+	{
+		for (int i = 0; i < size; i++)
+			out[i] = data[i] / normalisation;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], int, int, int)
+	 */
+	public void normalise(float[] data, int maxx, int maxy, int border)
+	{
+		int xlimit = maxx - border;
+		int ylimit = maxy - border;
+		for (int y = border; y < ylimit; y++)
+		{
+			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
+			{
+				data[i] /= normalisation;
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], float[], int, int, int)
+	 */
+	public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
+	{
+		int xlimit = maxx - border;
+		int ylimit = maxy - border;
+		for (int y = border; y < ylimit; y++)
+		{
+			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
+			{
+				out[i] = data[i] / normalisation;
+			}
+		}
 	}
 }

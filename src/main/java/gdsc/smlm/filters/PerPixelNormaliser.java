@@ -59,4 +59,62 @@ public class PerPixelNormaliser implements Normaliser
 	{
 		return sum / normalisation[index];
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], int)
+	 */
+	public void normalise(float[] data, int size)
+	{
+		for (int i = 0; i < size; i++)
+			data[i] /= normalisation[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], float[], int)
+	 */
+	public void normalise(float[] data, float[] out, int size)
+	{
+		for (int i = 0; i < size; i++)
+			out[i] = data[i] / normalisation[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], int, int, int)
+	 */
+	public void normalise(float[] data, int maxx, int maxy, int border)
+	{
+		int xlimit = maxx - border;
+		int ylimit = maxy - border;
+		for (int y = border; y < ylimit; y++)
+		{
+			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
+			{
+				data[i] /= normalisation[i];
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], float[], int, int, int)
+	 */
+	public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
+	{
+		int xlimit = maxx - border;
+		int ylimit = maxy - border;
+		for (int y = border; y < ylimit; y++)
+		{
+			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
+			{
+				out[i] = data[i] / normalisation[i];
+			}
+		}
+	}
 }
