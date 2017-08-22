@@ -1,7 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
-import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Label;
@@ -54,7 +53,6 @@ import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
 import ij.gui.DialogListener;
-import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.ImageRoi;
 import ij.gui.NonBlockingExtendedGenericDialog;
