@@ -98,6 +98,13 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable
 	public static float[] toWeights(float[] variance)
 	{
 		float[] w = SimpleArrayUtils.ensureStrictlyPositive(variance);
+		// If all the weights are zero then the first item will be zero 
+		// and there are no weights
+		if (w[0] == 0)
+		{
+			Arrays.fill(w, 1f);
+			return w;
+		}
 		for (int i = 0; i < w.length; i++)
 			w[i] = (float) (1.0 / w[i]);
 		return w;
