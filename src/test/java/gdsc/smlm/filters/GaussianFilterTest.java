@@ -1,103 +1,141 @@
 package gdsc.smlm.filters;
 
-import java.util.Arrays;
-
-import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.internal.ArrayComparisonFailure;
 
-import gdsc.core.utils.DoubleEquality;
-import gdsc.core.utils.Maths;
+import gdsc.core.test.BaseTimingTask;
+import gdsc.core.test.TimingService;
 
 public class GaussianFilterTest
 {
 	private gdsc.core.utils.Random rand;
 
-	// TODO - The test data should be representative of the final use case
-	int[] primes = new int[] { 113, 97, 53, 29 };
-	//int[] primes = new int[] { 1024 };
-	int[] boxSizes = new int[] { 15, 9, 5, 3, 2, 1 };
-	boolean[] checkInternal = new boolean[] { true, false };
+	int[] primes = new int[] { 113, 97, 53 };
+	double[] sigmas = new double[] { 9.3, 5, 3.2, 2.1, 0.5 };
+	int size = 256;
 
 	@Test
-	public void filterDoesNotAlterImageMean()
+	public void floatFilterIsSameAsDoubleFilter()
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
-		ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
-				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
-		GaussianFilter filter = new GaussianFilter();
+
+		GaussianFilter ff = new GaussianFilter();
+		DoubleGaussianFilter df = new DoubleGaussianFilter();
+		float[] e, o;
+
+		float tolerance = 1e-2f;
 
 		for (int width : primes)
 			for (int height : primes)
 			{
 				float[] data = createData(width, height);
-				double u1 = Maths.sum(data) / data.length;
 
-				// TODO - rearrange so that the w=null, w=1 and weights are run sequentially
-				// for the same box size.
-				
-				float[] w = null;
-				filter.setWeights(w, width, height);
-				for (float boxSize : boxSizes)
-					for (boolean internal : checkInternal)
-					{
-						filterDoesNotAlterImageMean("w=null", data, w, width, height, boxSize, internal, u1, filter);
-						filterDoesNotAlterImageMean("w=null", data, w, width, height, boxSize - 0.3f, internal, u1,
-								filter);
-						filterDoesNotAlterImageMean("w=null", data, w, width, height, boxSize - 0.6f, internal, u1,
-								filter);
-					}
-
-				// Uniform weights
-				w = new float[width * height];
-				Arrays.fill(w, 1);
-				filter.setWeights(w, width, height);
-				for (float boxSize : boxSizes)
-					for (boolean internal : checkInternal)
-					{
-						filterDoesNotAlterImageMean("w=1", data, w, width, height, boxSize, internal, u1, filter);
-						filterDoesNotAlterImageMean("w=1", data, w, width, height, boxSize - 0.3f, internal, u1,
-								filter);
-						filterDoesNotAlterImageMean("w=1", data, w, width, height, boxSize - 0.6f, internal, u1,
-								filter);
-					}
-
-				// Weights simulating the variance of sCMOS pixels
-				for (int i = 0; i < w.length; i++)
+				for (double sigma : sigmas)
 				{
-					w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
-				}
+					e = data.clone();
+					df.convolve(e, width, height, sigma);
+					o = data.clone();
+					ff.convolve(o, width, height, sigma);
+					Assert.assertArrayEquals("Full", e, o, tolerance);
 
-				filter.setWeights(w, width, height);
-				for (float boxSize : boxSizes)
-					for (boolean internal : checkInternal)
-					{
-						filterDoesNotAlterImageMean("Weighted", data, w, width, height, boxSize, internal, u1, filter);
-						filterDoesNotAlterImageMean("Weighted", data, w, width, height, boxSize - 0.3f, internal, u1,
-								filter);
-						filterDoesNotAlterImageMean("Weighted", data, w, width, height, boxSize - 0.6f, internal, u1,
-								filter);
-					}
+					e = data.clone();
+					df.convolveInternal(e, width, height, sigma);
+					o = data.clone();
+					ff.convolveInternal(o, width, height, sigma);
+					Assert.assertArrayEquals("Internal", e, o, tolerance);
+				}
 			}
 	}
 
-	private void filterDoesNotAlterImageMean(String title, float[] data, float[] w, int width, int height,
-			float boxSize, boolean internal, double u1, GaussianFilter filter) throws ArrayComparisonFailure
+	private abstract class MyTimingTask extends BaseTimingTask
 	{
-		float[] data1 = data.clone();
-		if (internal)
+		float[][] data;
+		double sigma;
+
+		public MyTimingTask(String name, float[][] data, double sigma)
 		{
-			filter.convolveInternal(data1, width, height, boxSize);
-		}
-		else
-		{
-			filter.convolve(data1, width, height, boxSize);
+			super(name);
+			this.data = data;
+			this.sigma = sigma;
 		}
 
-		// Check the weights do not alter the image mean
-		double u2 = Maths.sum(data1) / data.length;
-		System.out.printf("[%dx%d] @ %.1f [%s,internal=%b] : %g => %g  (%g)\n", width, height, boxSize, title, internal, u1, u2,
-				DoubleEquality.relativeError(u1, u2));
+		public int getSize()
+		{
+			return data.length;
+		}
+
+		public Object getData(int i)
+		{
+			return data[i].clone();
+		}
+
+		public Object run(Object data)
+		{
+			float[] d = (float[]) data;
+			return filter(d);
+		}
+
+		abstract float[] filter(float[] d);
+	}
+
+	private class FloatTimingTask extends MyTimingTask
+	{
+		GaussianFilter gf = new GaussianFilter();
+
+		public FloatTimingTask(float[][] data, double sigma)
+		{
+			super("float " + sigma, data, sigma);
+		}
+
+		@Override
+		float[] filter(float[] d)
+		{
+			gf.convolve(d, size, size, sigma);
+			return d;
+		}
+	}
+
+	private class DoubleTimingTask extends MyTimingTask
+	{
+		DoubleGaussianFilter gf = new DoubleGaussianFilter();
+
+		public DoubleTimingTask(float[][] data, double sigma)
+		{
+			super("double " + sigma, data, sigma);
+		}
+
+		@Override
+		float[] filter(float[] d)
+		{
+			gf.convolve(d, size, size, sigma);
+			return d;
+		}
+	}
+
+	@Test
+	public void floatFilterIsFasterThanDoubleFilter()
+	{
+		rand = new gdsc.core.utils.Random(-30051976);
+
+		float[][] data = new float[10][];
+		for (int i = 0; i < data.length; i++)
+			data[i] = createData(size, size);
+
+		// TODO - Test with a float[] pixels array but double sums ...
+		
+		TimingService ts = new TimingService();
+		for (double sigma : sigmas)
+		{
+			ts.execute(new FloatTimingTask(data, sigma));
+			ts.execute(new DoubleTimingTask(data, sigma));
+		}
+		int size = ts.getSize();
+		ts.repeat();
+		ts.report(size);
+		for (int i = 0, j = size; i < sigmas.length; i++, j += 2)
+		{
+			Assert.assertTrue(ts.get(j).getMean() < ts.get(j + 1).getMean() * 1.1);
+		}
 	}
 
 	private float[] createData(int width, int height)

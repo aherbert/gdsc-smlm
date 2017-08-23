@@ -88,4 +88,33 @@ public class NonNormaliser implements Normaliser
 			System.arraycopy(data, i, out, i, width);
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(double[], float[], int)
+	 */
+	public void normalise(double[] data, float[] out, int size)
+	{
+		for (int i = 0; i < size; i++)
+			out[i] = (float) (data[i]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.Normaliser#normalise(double[], float[], int, int, int)
+	 */
+	public void normalise(double[] data, float[] out, int maxx, int maxy, int border)
+	{
+		int xlimit = maxx - border;
+		int ylimit = maxy - border;
+		for (int y = border; y < ylimit; y++)
+		{
+			for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
+			{
+				out[i] = (float) (data[i]);
+			}
+		}
+	}
 }

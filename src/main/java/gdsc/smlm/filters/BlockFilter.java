@@ -33,7 +33,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public abstract class BlockFilter extends BaseWeightedFilter
 {
-	private float[] floatDataBuffer = null;
+	private float[] buffer = null;
 	private float[] floatRowBuffer = null;
 
 	private Normaliser normaliser;
@@ -132,7 +132,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		float[] newData = initialise(data, maxx, maxy, n);
+		float[] wdata = initialise(data, maxx, maxy, n, true);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -144,7 +144,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int x = 0;
 			while (x < blockSize)
 			{
-				sum += data[endIndex];
+				sum += wdata[endIndex];
 				endIndex++;
 				x++;
 			}
@@ -153,15 +153,15 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int startIndex = y * maxx;
 			int centreIndex = startIndex + n;
 
-			newData[centreIndex] = (float) sum;
+			buffer[centreIndex] = (float) sum;
 
 			while (x < maxx)
 			{
 				centreIndex++;
 
-				sum += data[endIndex] - data[startIndex];
+				sum += wdata[endIndex] - wdata[startIndex];
 
-				newData[centreIndex] = (float) sum;
+				buffer[centreIndex] = (float) sum;
 
 				x++;
 				startIndex++;
@@ -180,7 +180,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int y = 0;
 			while (y < blockSize)
 			{
-				sum += newData[endIndex];
+				sum += buffer[endIndex];
 				endIndex += maxx;
 				y++;
 			}
@@ -195,7 +195,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			{
 				centreIndex += maxx;
 
-				sum += newData[endIndex] - newData[startIndex];
+				sum += buffer[endIndex] - buffer[startIndex];
 
 				data[centreIndex] = normaliser.normalise(sum, centreIndex);
 
@@ -225,7 +225,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		float[] newData = initialise(data, maxx, maxy, 1);
+		float[] wdata = initialise(data, maxx, maxy, 1, true);
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -234,15 +234,15 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int startIndex = y * maxx;
 			int centreIndex = startIndex + 1;
 			int endIndex = centreIndex + 1;
-			double sum = data[startIndex] + data[centreIndex] + data[endIndex];
+			double sum = wdata[startIndex] + wdata[centreIndex] + wdata[endIndex];
 
 			// Rolling sum over the X-direction
-			newData[centreIndex++] = (float) sum;
+			buffer[centreIndex++] = (float) sum;
 
 			for (int x = 0; x < maxx - 3; x++)
 			{
-				sum += data[++endIndex] - data[startIndex++];
-				newData[centreIndex++] = (float) sum;
+				sum += wdata[++endIndex] - wdata[startIndex++];
+				buffer[centreIndex++] = (float) sum;
 			}
 		}
 
@@ -254,7 +254,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int startIndex = x;
 			int centreIndex = startIndex + maxx;
 			int endIndex = centreIndex + maxx;
-			double sum = newData[startIndex] + newData[centreIndex] + newData[endIndex];
+			double sum = buffer[startIndex] + buffer[centreIndex] + buffer[endIndex];
 
 			// Rolling sum over the Y-direction
 			data[centreIndex] = normaliser.normalise(sum, centreIndex);
@@ -263,7 +263,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			{
 				centreIndex += maxx;
 				endIndex += maxx;
-				sum += newData[endIndex] - newData[startIndex];
+				sum += buffer[endIndex] - buffer[startIndex];
 				data[centreIndex] = normaliser.normalise(sum, centreIndex);
 				startIndex += maxx;
 			}
@@ -350,11 +350,11 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		float[] newData = initialise(data, maxx, maxy, n);
+		float[] wdata = initialise(data, maxx, maxy, n, true);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
@@ -366,9 +366,9 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				double sum = 0;
 				for (int x2 = 0; x2 < blockSize; x2++)
 				{
-					sum += data[index + x2];
+					sum += wdata[index + x2];
 				}
-				newData[(x + n) * maxy + y] = (float) sum;
+				buffer[(x + n) * maxy + y] = (float) sum;
 			}
 		}
 
@@ -382,7 +382,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				double sum = 0;
 				for (int y2 = 0; y2 < blockSize; y2++)
 				{
-					sum += newData[index + y2];
+					sum += buffer[index + y2];
 				}
 				int index2 = x + (y + n) * maxx;
 				data[index2] = normaliser.normalise(sum, index2);
@@ -429,13 +429,13 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		final int blockSize = 2 * n1;
 
-		float[] newData = initialise(data, maxx, maxy, w);
+		float[] wdata = initialise(data, maxx, maxy, w, true);
 
 		final float w1 = w - n;
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
@@ -444,13 +444,13 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index = y * maxx;
 			for (int x = 0; x < maxx - blockSize; x++, index++)
 			{
-				double sum = data[index] * w1;
+				double sum = wdata[index] * w1;
 				for (int x2 = 1; x2 < blockSize; x2++)
 				{
-					sum += data[index + x2];
+					sum += wdata[index + x2];
 				}
-				sum += data[index + blockSize] * w1;
-				newData[(x + n1) * maxy + y] = (float) sum;
+				sum += wdata[index + blockSize] * w1;
+				buffer[(x + n1) * maxy + y] = (float) sum;
 			}
 		}
 
@@ -461,12 +461,12 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index = x * maxy;
 			for (int y = 0; y < maxy - blockSize; y++, index++)
 			{
-				double sum = newData[index] * w1;
+				double sum = buffer[index] * w1;
 				for (int y2 = 1; y2 < blockSize; y2++)
 				{
-					sum += newData[index + y2];
+					sum += buffer[index + y2];
 				}
-				sum += newData[index + blockSize] * w1;
+				sum += buffer[index + blockSize] * w1;
 				int index2 = x + (y + n1) * maxx;
 				data[index2] = normaliser.normalise(sum, index2);
 			}
@@ -492,11 +492,11 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		float[] newData = initialise(data, maxx, maxy, 1);
+		float[] wdata = initialise(data, maxx, maxy, 1, true);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
@@ -506,7 +506,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = maxy + y;
 			for (int x = 0; x <= maxx - 3; x++, index++)
 			{
-				newData[index2] = data[index] + data[index + 1] + data[index + 2];
+				buffer[index2] = wdata[index] + wdata[index + 1] + wdata[index + 2];
 				index2 += maxy;
 			}
 		}
@@ -519,7 +519,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = x + maxx;
 			for (int y = 0; y <= maxy - 3; y++, index++)
 			{
-				data[index2] = normaliser.normalise(newData[index] + newData[index + 1] + newData[index + 2], index2);
+				data[index2] = normaliser.normalise(buffer[index] + buffer[index + 1] + buffer[index + 2], index2);
 				index2 += maxx;
 			}
 		}
@@ -548,11 +548,11 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < 3 || maxy < 3)
 			return;
 
-		float[] newData = initialise(data, maxx, maxy, w);
+		float[] wdata = initialise(data, maxx, maxy, w, true);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
@@ -562,7 +562,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = maxy + y;
 			for (int x = 0; x <= maxx - 3; x++, index++)
 			{
-				newData[index2] = w * (data[index] + data[index + 2]) + data[index + 1];
+				buffer[index2] = w * (wdata[index] + wdata[index + 2]) + wdata[index + 1];
 				index2 += maxy;
 			}
 		}
@@ -575,7 +575,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = x + maxx;
 			for (int y = 0; y <= maxy - 3; y++, index++)
 			{
-				data[index2] = normaliser.normalise(w * (newData[index] + newData[index + 2]) + newData[index + 1],
+				data[index2] = normaliser.normalise(w * (buffer[index] + buffer[index + 2]) + buffer[index + 1],
 						index2);
 				index2 += maxx;
 			}
@@ -601,11 +601,11 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < 5 || maxy < 5)
 			return;
 
-		float[] newData = initialise(data, maxx, maxy, 2);
+		float[] wdata = initialise(data, maxx, maxy, 2, true);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
@@ -615,7 +615,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = 2 * maxy + y;
 			for (int x = 0; x <= maxx - 5; x++, index++)
 			{
-				newData[index2] = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4];
+				buffer[index2] = wdata[index] + wdata[index + 1] + wdata[index + 2] + wdata[index + 3] +
+						wdata[index + 4];
 				index2 += maxy;
 			}
 		}
@@ -628,8 +629,9 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = x + 2 * maxx;
 			for (int y = 0; y <= maxy - 5; y++, index++)
 			{
-				data[index2] = normaliser.normalise(newData[index] + newData[index + 1] + newData[index + 2] +
-						newData[index + 3] + newData[index + 4], index2);
+				data[index2] = normaliser.normalise(
+						buffer[index] + buffer[index + 1] + buffer[index + 2] + buffer[index + 3] + buffer[index + 4],
+						index2);
 				index2 += maxx;
 			}
 		}
@@ -658,13 +660,13 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < 5 || maxy < 5)
 			return;
 
-		float[] newData = initialise(data, maxx, maxy, w);
+		float[] wdata = initialise(data, maxx, maxy, w, true);
 
 		final float w1 = (w < 2) ? w - (int) w : 1;
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
@@ -674,8 +676,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = 2 * maxy + y;
 			for (int x = 0; x <= maxx - 5; x++, index++)
 			{
-				newData[index2] = w1 * (data[index] + data[index + 4]) + data[index + 1] + data[index + 2] +
-						data[index + 3];
+				buffer[index2] = w1 * (wdata[index] + wdata[index + 4]) + wdata[index + 1] + wdata[index + 2] +
+						wdata[index + 3];
 				index2 += maxy;
 			}
 		}
@@ -688,8 +690,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = x + 2 * maxx;
 			for (int y = 0; y <= maxy - 5; y++, index++)
 			{
-				data[index2] = normaliser.normalise(w1 * (newData[index] + newData[index + 4]) + newData[index + 1] +
-						newData[index + 2] + newData[index + 3], index2);
+				data[index2] = normaliser.normalise(w1 * (buffer[index] + buffer[index + 4]) + buffer[index + 1] +
+						buffer[index + 2] + buffer[index + 3], index2);
 				index2 += maxx;
 			}
 		}
@@ -714,11 +716,11 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < 7 || maxy < 7)
 			return;
 
-		float[] newData = initialise(data, maxx, maxy, 3);
+		float[] wdata = initialise(data, maxx, maxy, 3, true);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
@@ -728,8 +730,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = 3 * maxy + y;
 			for (int x = 0; x <= maxx - 7; x++, index++)
 			{
-				newData[index2] = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4] +
-						data[index + 5] + data[index + 6];
+				buffer[index2] = wdata[index] + wdata[index + 1] + wdata[index + 2] + wdata[index + 3] +
+						wdata[index + 4] + wdata[index + 5] + wdata[index + 6];
 				index2 += maxy;
 			}
 		}
@@ -742,8 +744,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = x + 3 * maxx;
 			for (int y = 0; y <= maxy - 7; y++, index++)
 			{
-				data[index2] = normaliser.normalise(newData[index] + newData[index + 1] + newData[index + 2] +
-						newData[index + 3] + newData[index + 4] + newData[index + 5] + newData[index + 6], index2);
+				data[index2] = normaliser.normalise(buffer[index] + buffer[index + 1] + buffer[index + 2] +
+						buffer[index + 3] + buffer[index + 4] + buffer[index + 5] + buffer[index + 6], index2);
 				index2 += maxx;
 			}
 		}
@@ -772,13 +774,13 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < 7 || maxy < 7)
 			return;
 
-		float[] newData = initialise(data, maxx, maxy, w);
+		float[] wdata = initialise(data, maxx, maxy, w, true);
 
 		final float w1 = (w < 3) ? w - (int) w : 1;
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
@@ -788,8 +790,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = 3 * maxy + y;
 			for (int x = 0; x <= maxx - 7; x++, index++)
 			{
-				newData[index2] = w1 * (data[index] + data[index + 6]) + data[index + 1] + data[index + 2] +
-						data[index + 3] + data[index + 4] + data[index + 5];
+				buffer[index2] = w1 * (wdata[index] + wdata[index + 6]) + wdata[index + 1] + wdata[index + 2] +
+						wdata[index + 3] + wdata[index + 4] + wdata[index + 5];
 				index2 += maxy;
 			}
 		}
@@ -802,8 +804,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index2 = x + 3 * maxx;
 			for (int y = 0; y <= maxy - 7; y++, index++)
 			{
-				data[index2] = normaliser.normalise(w1 * (newData[index] + newData[index + 6]) + newData[index + 1] +
-						newData[index + 2] + newData[index + 3] + newData[index + 4] + newData[index + 5], index2);
+				data[index2] = normaliser.normalise(w1 * (buffer[index] + buffer[index + 6]) + buffer[index + 1] +
+						buffer[index + 2] + buffer[index + 3] + buffer[index + 4] + buffer[index + 5], index2);
 				index2 += maxx;
 			}
 		}
@@ -884,7 +886,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < nX || maxy < nY)
 			return;
 
-		float[] newData = initialise(data, maxx, maxy, n);
+		float[] wdata = initialise(data, maxx, maxy, n, true);
 
 		int[] offset = new int[nX * nY - 1];
 		for (int y = -n, d = 0; y <= n; y++)
@@ -900,21 +902,21 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index = y * maxx + n;
 			for (int x = n; x < maxx - n; x++, index++)
 			{
-				double sum = data[index];
+				double sum = wdata[index];
 
 				// Sweep neighbourhood - 
 				// No check for boundaries as this should be an internal sweep.
 				for (int offset_d : offset)
 				{
-					sum += data[index + offset_d];
+					sum += wdata[index + offset_d];
 				}
 
-				newData[index] = (float) sum;
+				buffer[index] = (float) sum;
 			}
 		}
 
 		// Copy back
-		normaliser.normalise(newData, data, maxx, maxy, n);
+		normaliser.normalise(buffer, data, maxx, maxy, n);
 	}
 
 	/**
@@ -954,7 +956,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		if (maxx < nX || maxy < nY)
 			return;
 
-		final float[] newData = initialise(data, maxx, maxy, w);
+		final float[] wdata = initialise(data, maxx, maxy, w, true);
 
 		// Boundary control
 		final int xwidth = n1;
@@ -1015,25 +1017,25 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			int index = y * maxx + n1;
 			for (int x = n1; x < xlimit; x++, index++)
 			{
-				double sum = data[index];
+				double sum = wdata[index];
 				double sum1 = 0;
 				double sum2 = 0;
 
 				// Sweep neighbourhood
 				// No check for boundaries as this should be an internal sweep.
 				for (int d = offset.length; d-- > 0;)
-					sum += data[index + offset[d]];
+					sum += wdata[index + offset[d]];
 				for (int d = offset1.length; d-- > 0;)
-					sum1 += data[index + offset1[d]];
+					sum1 += wdata[index + offset1[d]];
 				for (int d = offset2.length; d-- > 0;)
-					sum2 += data[index + offset2[d]];
+					sum2 += wdata[index + offset2[d]];
 
-				newData[index] = (float) (sum + sum1 * w1 + sum2 * w2);
+				buffer[index] = (float) (sum + sum1 * w1 + sum2 * w2);
 			}
 		}
 
 		// Copy back
-		normaliser.normalise(newData, data, maxx, maxy, n1);
+		normaliser.normalise(buffer, data, maxx, maxy, n1);
 	}
 
 	/**
@@ -1052,7 +1054,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void blockFilter3x3Internal(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = initialise(data, maxx, maxy, 1);
+		float[] wdata = initialise(data, maxx, maxy, 1, true);
 
 		for (int y = 1; y < maxy - 1; y++)
 		{
@@ -1062,10 +1064,10 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			for (int x = 1; x < maxx - 1; x++)
 			{
 				//@formatter:off
-				newData[index1] = 
-						data[index0 - 1] + data[index0] + data[index0 + 1] + 
-						data[index1 - 1] + data[index1] + data[index1 + 1] + 
-						data[index2 - 1] + data[index2] + data[index2 + 1];
+				buffer[index1] = 
+						wdata[index0 - 1] + wdata[index0] + wdata[index0 + 1] + 
+						wdata[index1 - 1] + wdata[index1] + wdata[index1 + 1] + 
+						wdata[index2 - 1] + wdata[index2] + wdata[index2 + 1];
 				//@formatter:on
 				index0++;
 				index1++;
@@ -1074,7 +1076,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		}
 
 		// Copy back
-		normaliser.normalise(newData, data, maxx, maxy, 1);
+		normaliser.normalise(buffer, data, maxx, maxy, 1);
 	}
 
 	/**
@@ -1097,7 +1099,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void blockFilter3x3Internal(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = initialise(data, maxx, maxy, w);
+		float[] wdata = initialise(data, maxx, maxy, w, true);
 
 		final float w2 = w * w;
 
@@ -1109,11 +1111,11 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			for (int x = 1; x < maxx - 1; x++)
 			{
 				// Edges
-				double sum1 = data[index0] + data[index1 - 1] + data[index1 + 1] + data[index2];
+				double sum1 = wdata[index0] + wdata[index1 - 1] + wdata[index1 + 1] + wdata[index2];
 				// Corners
-				double sum2 = data[index0 - 1] + data[index0 + 1] + data[index2 - 1] + data[index2 + 1];
+				double sum2 = wdata[index0 - 1] + wdata[index0 + 1] + wdata[index2 - 1] + wdata[index2 + 1];
 
-				newData[index1] = (float) (data[index1] + sum1 * w + sum2 * w2);
+				buffer[index1] = (float) (wdata[index1] + sum1 * w + sum2 * w2);
 				index0++;
 				index1++;
 				index2++;
@@ -1121,7 +1123,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		}
 
 		// Copy back
-		normaliser.normalise(newData, data, maxx, maxy, 1);
+		normaliser.normalise(buffer, data, maxx, maxy, 1);
 	}
 
 	/**
@@ -1135,9 +1137,11 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 *            The height of the data
 	 * @param n
 	 *            The block size
-	 * @return the float buffer
+	 * @param internal
+	 *            the internal flag
+	 * @return the working data (which may be weighted)
 	 */
-	private float[] initialise(float[] data, final int maxx, final int maxy, final float n)
+	private float[] initialise(float[] data, final int maxx, final int maxy, final float n, boolean internal)
 	{
 		int size = data.length;
 		if (hasWeights())
@@ -1145,6 +1149,9 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			if (weights.length != size || this.weightWidth != maxx || this.weightHeight != maxy)
 				throw new IllegalStateException("Weights are not the correct size");
 			updateWeightedNormaliser(n);
+			if (internal)
+				// Not all data points will be over-written so clone the input before weighting
+				data = data.clone();
 			// Apply weights
 			for (int i = 0; i < size; i++)
 				data[i] *= weights[i];
@@ -1153,7 +1160,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		{
 			normaliser = computeNormaliser(n);
 		}
-		return createFloatBuffer(size);
+		createFloatBuffer(size);
+		return data;
 	}
 
 	/**
@@ -1165,11 +1173,11 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	private float[] createFloatBuffer(int size)
 	{
-		if (floatDataBuffer == null || floatDataBuffer.length < size)
+		if (buffer == null || buffer.length < size)
 		{
-			floatDataBuffer = new float[size];
+			buffer = new float[size];
 		}
-		return floatDataBuffer;
+		return buffer;
 	}
 
 	/**
@@ -1210,18 +1218,18 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void rollingBlockFilterNxN(float[] data, final int maxx, final int maxy, final int n)
 	{
-		float[] newData = initialise(data, maxx, maxy, n);
+		float[] wdata = initialise(data, maxx, maxy, n, false);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
 		int width = maxx;
 		int height = maxy;
-		float[] inData = data;
-		float[] outData = newData;
+		float[] inData = wdata;
+		float[] outData = buffer;
 
 		float[] row = floatRowBuffer(width + 2 * n);
 		for (int y = 0; y < height; y++)
@@ -1251,7 +1259,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		// Y-direction. 
 		width = maxy;
 		height = maxx;
-		inData = newData;
+		inData = buffer;
 		outData = data;
 
 		row = floatRowBuffer(width + 2 * n);
@@ -1294,18 +1302,18 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void rollingBlockFilter3x3(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = initialise(data, maxx, maxy, 1);
+		float[] wdata = initialise(data, maxx, maxy, 1, false);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
 		int width = maxx;
 		int height = maxy;
-		float[] inData = data;
-		float[] outData = newData;
+		float[] inData = wdata;
+		float[] outData = buffer;
 
 		float[] row = floatRowBuffer(width + 2);
 		for (int y = 0; y < height; y++)
@@ -1331,7 +1339,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		// Y-direction. 
 		width = maxy;
 		height = maxx;
-		inData = newData;
+		inData = buffer;
 		outData = data;
 
 		row = floatRowBuffer(width + 2);
@@ -1428,18 +1436,18 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	{
 		int blockSize = 2 * n + 1;
 
-		float[] newData = initialise(data, maxx, maxy, n);
+		float[] wdata = initialise(data, maxx, maxy, n, false);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
 		int width = maxx;
 		int height = maxy;
-		float[] inData = data;
-		float[] outData = newData;
+		float[] inData = wdata;
+		float[] outData = buffer;
 
 		float[] row = floatRowBuffer(width + 2 * n);
 		for (int y = 0; y < height; y++)
@@ -1466,7 +1474,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		// Y-direction. 
 		width = maxy;
 		height = maxx;
-		inData = newData;
+		inData = buffer;
 		outData = data;
 
 		row = floatRowBuffer(width + 2 * n);
@@ -1523,20 +1531,20 @@ public abstract class BlockFilter extends BaseWeightedFilter
 
 		int blockSize = 2 * n1;
 
-		float[] newData = initialise(data, maxx, maxy, w);
+		float[] wdata = initialise(data, maxx, maxy, w, false);
 
 		final float w1 = w - n;
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
 		int width = maxx;
 		int height = maxy;
-		float[] inData = data;
-		float[] outData = newData;
+		float[] inData = wdata;
+		float[] outData = buffer;
 
 		float[] row = floatRowBuffer(width + 2 * n1);
 		for (int y = 0; y < height; y++)
@@ -1563,7 +1571,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		// Y-direction. 
 		width = maxy;
 		height = maxx;
-		inData = newData;
+		inData = buffer;
 		outData = data;
 
 		row = floatRowBuffer(width + 2 * n1);
@@ -1604,18 +1612,18 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void stripedBlockFilter3x3(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = initialise(data, maxx, maxy, 1);
+		float[] wdata = initialise(data, maxx, maxy, 1, false);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
 		int width = maxx;
 		int height = maxy;
-		float[] inData = data;
-		float[] outData = newData;
+		float[] inData = wdata;
+		float[] outData = buffer;
 
 		float[] row = floatRowBuffer(width + 2);
 		for (int y = 0; y < height; y++)
@@ -1637,7 +1645,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		// Y-direction. 
 		width = maxy;
 		height = maxx;
-		inData = newData;
+		inData = buffer;
 		outData = data;
 
 		row = floatRowBuffer(width + 2);
@@ -1677,18 +1685,18 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void stripedBlockFilter3x3(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = initialise(data, maxx, maxy, w);
+		float[] wdata = initialise(data, maxx, maxy, w, false);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
 		int width = maxx;
 		int height = maxy;
-		float[] inData = data;
-		float[] outData = newData;
+		float[] inData = wdata;
+		float[] outData = buffer;
 
 		float[] row = floatRowBuffer(width + 2);
 		for (int y = 0; y < height; y++)
@@ -1708,7 +1716,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		// Y-direction. 
 		width = maxy;
 		height = maxx;
-		inData = newData;
+		inData = buffer;
 		outData = data;
 
 		row = floatRowBuffer(width + 2);
@@ -1742,18 +1750,18 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void stripedBlockFilter5x5(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = initialise(data, maxx, maxy, 2);
+		float[] wdata = initialise(data, maxx, maxy, 2, false);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
 		int width = maxx;
 		int height = maxy;
-		float[] inData = data;
-		float[] outData = newData;
+		float[] inData = wdata;
+		float[] outData = buffer;
 
 		float[] row = floatRowBuffer(width + 4);
 		for (int y = 0; y < height; y++)
@@ -1773,7 +1781,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		// Y-direction. 
 		width = maxy;
 		height = maxx;
-		inData = newData;
+		inData = buffer;
 		outData = data;
 
 		row = floatRowBuffer(width + 4);
@@ -1812,20 +1820,20 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void stripedBlockFilter5x5(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = initialise(data, maxx, maxy, w);
+		float[] wdata = initialise(data, maxx, maxy, w, false);
 
 		final float w1 = (w < 2) ? w - (int) w : 1;
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
 		int width = maxx;
 		int height = maxy;
-		float[] inData = data;
-		float[] outData = newData;
+		float[] inData = wdata;
+		float[] outData = buffer;
 
 		float[] row = floatRowBuffer(width + 4);
 		for (int y = 0; y < height; y++)
@@ -1845,7 +1853,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		// Y-direction. 
 		width = maxy;
 		height = maxx;
-		inData = newData;
+		inData = buffer;
 		outData = data;
 
 		row = floatRowBuffer(width + 4);
@@ -1880,18 +1888,18 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void stripedBlockFilter7x7(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = initialise(data, maxx, maxy, 3);
+		float[] wdata = initialise(data, maxx, maxy, 3, false);
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
 		int width = maxx;
 		int height = maxy;
-		float[] inData = data;
-		float[] outData = newData;
+		float[] inData = wdata;
+		float[] outData = buffer;
 
 		float[] row = floatRowBuffer(width + 6);
 		for (int y = 0; y < height; y++)
@@ -1912,7 +1920,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		// Y-direction. 
 		width = maxy;
 		height = maxx;
-		inData = newData;
+		inData = buffer;
 		outData = data;
 
 		row = floatRowBuffer(width + 6);
@@ -1952,20 +1960,20 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void stripedBlockFilter7x7(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = initialise(data, maxx, maxy, w);
+		float[] wdata = initialise(data, maxx, maxy, w, false);
 
 		final float w1 = (w < 3) ? w - (int) w : 1;
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays and allow for reusing code:
-		//   newData is XY ordinal => x * maxy + y
+		//   buffer is XY ordinal => x * maxy + y
 		//   data is YX ordinal    => y * maxx + x
 
 		// X-direction
 		int width = maxx;
 		int height = maxy;
-		float[] inData = data;
-		float[] outData = newData;
+		float[] inData = wdata;
+		float[] outData = buffer;
 
 		float[] row = floatRowBuffer(width + 6);
 		for (int y = 0; y < height; y++)
@@ -1986,7 +1994,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		// Y-direction. 
 		width = maxy;
 		height = maxx;
-		inData = newData;
+		inData = buffer;
 		outData = data;
 
 		row = floatRowBuffer(width + 6);
@@ -2130,7 +2138,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void blockFilterNxN(float[] data, final int maxx, final int maxy, final int n)
 	{
-		float[] newData = initialise(data, maxx, maxy, n);
+		float[] wdata = initialise(data, maxx, maxy, n, false);
 
 		// Boundary control
 		final int xwidth = FastMath.min(n, maxx - 1);
@@ -2156,7 +2164,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		{
 			for (int x = 0; x < maxx; x++, index++)
 			{
-				double sum = data[index];
+				double sum = wdata[index];
 
 				// Flag to indicate this pixels has a complete (2n+1) neighbourhood 
 				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
@@ -2166,7 +2174,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				{
 					for (int d = offset.length; d-- > 0;)
 					{
-						sum += data[index + offset[d]];
+						sum += wdata[index + offset[d]];
 					}
 				}
 				else
@@ -2184,15 +2192,15 @@ public abstract class BlockFilter extends BaseWeightedFilter
 							yy = 0;
 						else if (yy >= maxy)
 							yy = maxy - 1;
-						sum += data[xx + yy * maxx];
+						sum += wdata[xx + yy * maxx];
 					}
 				}
-				newData[index] = (float) sum;
+				buffer[index] = (float) sum;
 			}
 		}
 
 		// Copy back
-		normaliser.normalise(newData, data, data.length);
+		normaliser.normalise(buffer, data, data.length);
 	}
 
 	/**
@@ -2223,7 +2231,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 			return;
 		}
 
-		final float[] newData = initialise(data, maxx, maxy, w);
+		final float[] wdata = initialise(data, maxx, maxy, w, false);
 
 		// Boundary control
 		final int xwidth = FastMath.min(n1, maxx - 1);
@@ -2284,7 +2292,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		{
 			for (int x = 0; x < maxx; x++, index++)
 			{
-				double sum = data[index];
+				double sum = wdata[index];
 				double sum1 = 0;
 				double sum2 = 0;
 
@@ -2295,11 +2303,11 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				if (isInnerXY)
 				{
 					for (int d = offset.length; d-- > 0;)
-						sum += data[index + offset[d]];
+						sum += wdata[index + offset[d]];
 					for (int d = offset1.length; d-- > 0;)
-						sum1 += data[index + offset1[d]];
+						sum1 += wdata[index + offset1[d]];
 					for (int d = offset2.length; d-- > 0;)
-						sum2 += data[index + offset2[d]];
+						sum2 += wdata[index + offset2[d]];
 				}
 				else
 				{
@@ -2318,7 +2326,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 							yy = 0;
 						else if (yy >= maxy)
 							yy = maxy - 1;
-						sum += data[xx + yy * maxx];
+						sum += wdata[xx + yy * maxx];
 					}
 					// Edges
 					for (int d = offset1.length; d-- > 0;)
@@ -2333,7 +2341,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 							yy = 0;
 						else if (yy >= maxy)
 							yy = maxy - 1;
-						sum1 += data[xx + yy * maxx];
+						sum1 += wdata[xx + yy * maxx];
 					}
 					// Corners
 					for (int d = offset2.length; d-- > 0;)
@@ -2348,15 +2356,15 @@ public abstract class BlockFilter extends BaseWeightedFilter
 							yy = 0;
 						else if (yy >= maxy)
 							yy = maxy - 1;
-						sum2 += data[xx + yy * maxx];
+						sum2 += wdata[xx + yy * maxx];
 					}
 				}
-				newData[index] = (float) (sum + sum1 * w1 + sum2 * w2);
+				buffer[index] = (float) (sum + sum1 * w1 + sum2 * w2);
 			}
 		}
 
 		// Copy back
-		normaliser.normalise(newData, data, data.length);
+		normaliser.normalise(buffer, data, data.length);
 	}
 
 	/**
@@ -2373,7 +2381,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void blockFilter3x3(float[] data, final int maxx, final int maxy)
 	{
-		float[] newData = initialise(data, maxx, maxy, 1);
+		float[] wdata = initialise(data, maxx, maxy, 1, false);
 
 		// Boundary control
 		final int xwidth = 1;
@@ -2407,13 +2415,13 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				// Sweep neighbourhood
 				if (isInnerXY)
 				{
-					double sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1] +
-							data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
-					newData[index1] = (float) sum;
+					double sum = wdata[index0 - 1] + wdata[index0] + wdata[index0 + 1] + wdata[index1 - 1] + wdata[index1] +
+							wdata[index1 + 1] + wdata[index2 - 1] + wdata[index2] + wdata[index2 + 1];
+					buffer[index1] = (float) sum;
 				}
 				else
 				{
-					double sum = data[index1];
+					double sum = wdata[index1];
 
 					for (int d = offset.length; d-- > 0;)
 					{
@@ -2428,9 +2436,9 @@ public abstract class BlockFilter extends BaseWeightedFilter
 							yy = 0;
 						else if (yy >= maxy)
 							yy = maxy - 1;
-						sum += data[xx + yy * maxx];
+						sum += wdata[xx + yy * maxx];
 					}
-					newData[index1] = (float) sum;
+					buffer[index1] = (float) sum;
 				}
 				index0++;
 				index1++;
@@ -2439,7 +2447,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		}
 
 		// Copy back
-		normaliser.normalise(newData, data, data.length);
+		normaliser.normalise(buffer, data, data.length);
 	}
 
 	/**
@@ -2460,7 +2468,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 */
 	void blockFilter3x3(float[] data, final int maxx, final int maxy, final float w)
 	{
-		float[] newData = initialise(data, maxx, maxy, w);
+		float[] wdata = initialise(data, maxx, maxy, w, false);
 
 		// Boundary control
 		final int xlimit = maxx - 1;
@@ -2491,9 +2499,9 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				if (isInnerXY)
 				{
 					// Edges
-					sum1 = data[index0] + data[index1 - 1] + data[index1 + 1] + data[index2];
+					sum1 = wdata[index0] + wdata[index1 - 1] + wdata[index1 + 1] + wdata[index2];
 					// Corners
-					sum2 = data[index0 - 1] + data[index0 + 1] + data[index2 - 1] + data[index2 + 1];
+					sum2 = wdata[index0 - 1] + wdata[index0 + 1] + wdata[index2 - 1] + wdata[index2 + 1];
 				}
 				else
 				{
@@ -2512,7 +2520,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 							yy = 0;
 						else if (yy >= maxy)
 							yy = maxy - 1;
-						sum1 += data[xx + yy * maxx];
+						sum1 += wdata[xx + yy * maxx];
 					}
 					// Corners
 					for (int d = xoffset2.length; d-- > 0;)
@@ -2527,10 +2535,10 @@ public abstract class BlockFilter extends BaseWeightedFilter
 							yy = 0;
 						else if (yy >= maxy)
 							yy = maxy - 1;
-						sum2 += data[xx + yy * maxx];
+						sum2 += wdata[xx + yy * maxx];
 					}
 				}
-				newData[index1] = (float) (data[index1] + sum1 * w + sum2 * w2);
+				buffer[index1] = (float) (wdata[index1] + sum1 * w + sum2 * w2);
 
 				index0++;
 				index1++;
@@ -2539,7 +2547,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 		}
 
 		// Copy back
-		normaliser.normalise(newData, data, data.length);
+		normaliser.normalise(buffer, data, data.length);
 	}
 
 	/*
@@ -2550,7 +2558,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	public BlockFilter clone()
 	{
 		BlockFilter o = (BlockFilter) super.clone();
-		o.floatDataBuffer = null;
+		o.buffer = null;
 		o.floatRowBuffer = null;
 		return o;
 	}

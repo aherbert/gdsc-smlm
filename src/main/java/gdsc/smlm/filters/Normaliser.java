@@ -89,4 +89,30 @@ public interface Normaliser
 	 *            the border
 	 */
 	public void normalise(float[] data, float[] out, int maxx, int maxy, int border);
+
+	/**
+	 * Normalise the sum of the data for all indices to the out data.
+	 *
+	 * @param data
+	 *            the data
+	 * @param out
+	 *            the out data
+	 * @param size
+	 *            the size of the data
+	 */
+	public void normalise(double[] data, float[] out, int size);
+
+	/**
+	 * Normalise the sum of the data ignoring the border to the out data.
+	 *
+	 * @param data
+	 *            the data
+	 * @param maxx
+	 *            the maxx
+	 * @param maxy
+	 *            the maxy
+	 * @param border
+	 *            the border
+	 */
+	public void normalise(double[] data, float[] out, int maxx, int maxy, int border);
 }

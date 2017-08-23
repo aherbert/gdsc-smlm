@@ -8,8 +8,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.FloatEquality;
+import gdsc.core.utils.Maths;
 import gdsc.smlm.TestSettings;
+import gnu.trove.list.array.TDoubleArrayList;
 
 public class BlockMeanFilterTest
 {
@@ -173,25 +176,23 @@ public class BlockMeanFilterTest
 	/**
 	 * Used to test the filter methods calculate the correct result
 	 */
-	private abstract class DataFilter
+	private abstract class BlockMeanDataFilter extends DataFilter
 	{
-		final String name;
-		final boolean isInterpolated;
-
-		public DataFilter(String name, boolean isInterpolated)
+		public BlockMeanDataFilter(String name, boolean isInterpolated)
 		{
-			this.name = name;
-			this.isInterpolated = isInterpolated;
+			super(name, isInterpolated);
 		}
 
 		BlockMeanFilter f = new BlockMeanFilter();
 
-		public abstract void filter(float[] data, int width, int height, float boxSize);
-
-		public abstract void filterInternal(float[] data, int width, int height, float boxSize);
+		@Override
+		public void setWeights(float[] w, int width, int height)
+		{
+			f.setWeights(w, width, height);
+		}
 	}
 
-	private void meanIsCorrect(float[] data, int width, int height, float boxSize, boolean internal, DataFilter filter)
+	private void meanIsCorrect(float[] data, int width, int height, float boxSize, boolean internal, BlockMeanDataFilter filter)
 			throws ArrayComparisonFailure
 	{
 		float[] data1 = data.clone();
@@ -213,7 +214,7 @@ public class BlockMeanFilterTest
 	}
 
 	private void weightedMeanIsCorrect(float[] data, float[] w, int width, int height, float boxSize, boolean internal,
-			DataFilter filter) throws ArrayComparisonFailure
+			BlockMeanDataFilter filter) throws ArrayComparisonFailure
 	{
 		float[] data1 = data.clone();
 		float[] data2 = data.clone();
@@ -240,7 +241,7 @@ public class BlockMeanFilterTest
 		}
 	}
 
-	private void checkIsCorrect(DataFilter filter)
+	private void checkIsCorrect(BlockMeanDataFilter filter)
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
 		ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
@@ -301,7 +302,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void blockFilterIsCorrect()
 	{
-		DataFilter filter = new DataFilter("block", true)
+		BlockMeanDataFilter filter = new BlockMeanDataFilter("block", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -319,7 +320,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void stripedBlockFilterIsCorrect()
 	{
-		DataFilter filter = new DataFilter("stripedBlock", true)
+		BlockMeanDataFilter filter = new BlockMeanDataFilter("stripedBlock", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -337,7 +338,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void rollingBlockFilterIsCorrect()
 	{
-		DataFilter filter = new DataFilter("rollingBlock", false)
+		BlockMeanDataFilter filter = new BlockMeanDataFilter("rollingBlock", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -398,12 +399,12 @@ public class BlockMeanFilterTest
 		return dataSet2;
 	}
 
-	private void speedTest(DataFilter fast, DataFilter slow)
+	private void speedTest(BlockMeanDataFilter fast, BlockMeanDataFilter slow)
 	{
 		speedTest(fast, slow, boxSizes);
 	}
 
-	private void speedTest(DataFilter fast, DataFilter slow, int[] testBoxSizes)
+	private void speedTest(BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
@@ -480,12 +481,12 @@ public class BlockMeanFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
-	private void speedTestInternal(DataFilter fast, DataFilter slow)
+	private void speedTestInternal(BlockMeanDataFilter fast, BlockMeanDataFilter slow)
 	{
 		speedTestInternal(fast, slow, boxSizes);
 	}
 
-	private void speedTestInternal(DataFilter fast, DataFilter slow, int[] testBoxSizes)
+	private void speedTestInternal(BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
@@ -565,7 +566,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void stripedBlockIsFasterThanBlock()
 	{
-		DataFilter slow = new DataFilter("block", false)
+		BlockMeanDataFilter slow = new BlockMeanDataFilter("block", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -577,7 +578,7 @@ public class BlockMeanFilterTest
 				f.blockFilterInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock", false)
+		BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -597,7 +598,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void interpolatedStripedBlockIsFasterThanBlock()
 	{
-		DataFilter slow = new DataFilter("block", true)
+		BlockMeanDataFilter slow = new BlockMeanDataFilter("block", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -609,7 +610,7 @@ public class BlockMeanFilterTest
 				f.blockFilterInternal(data, width, height, boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock", true)
+		BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -629,7 +630,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void rollingBlockIsFasterThanBlock()
 	{
-		DataFilter slow = new DataFilter("block", false)
+		BlockMeanDataFilter slow = new BlockMeanDataFilter("block", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -641,7 +642,7 @@ public class BlockMeanFilterTest
 				f.blockFilterInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("rollingBlock", false)
+		BlockMeanDataFilter fast = new BlockMeanDataFilter("rollingBlock", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -661,7 +662,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void rollingBlockIsFasterThanStripedBlock()
 	{
-		DataFilter slow = new DataFilter("stripedBlock", false)
+		BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlock", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -673,7 +674,7 @@ public class BlockMeanFilterTest
 				f.stripedBlockFilterInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("rollingBlock", false)
+		BlockMeanDataFilter fast = new BlockMeanDataFilter("rollingBlock", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -693,7 +694,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void stripedBlock3x3IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", false)
+		BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -705,7 +706,7 @@ public class BlockMeanFilterTest
 				f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock3x3", false)
+		BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock3x3", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -726,7 +727,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void interpolatedStripedBlock3x3IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", true)
+		BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -738,7 +739,7 @@ public class BlockMeanFilterTest
 				f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock3x3", true)
+		BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock3x3", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -759,7 +760,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void stripedBlock5x5IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", false)
+		BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -771,7 +772,7 @@ public class BlockMeanFilterTest
 				f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock5x5", false)
+		BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock5x5", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -792,7 +793,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void interpolatedStripedBlock5x5IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", true)
+		BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -804,7 +805,7 @@ public class BlockMeanFilterTest
 				f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock5x5", true)
+		BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock5x5", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -825,7 +826,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void stripedBlock7x7IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", false)
+		BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -837,7 +838,7 @@ public class BlockMeanFilterTest
 				f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock7x7", false)
+		BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock7x7", false)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -858,7 +859,7 @@ public class BlockMeanFilterTest
 	@Test
 	public void interpolatedStripedBlock7x7IsFasterThanStripedBlockNxN()
 	{
-		DataFilter slow = new DataFilter("stripedBlockNxN", true)
+		BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
@@ -870,7 +871,7 @@ public class BlockMeanFilterTest
 				f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
 			}
 		};
-		DataFilter fast = new DataFilter("stripedBlock7x7", true)
+		BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock7x7", true)
 		{
 			public void filter(float[] data, int width, int height, float boxSize)
 			{

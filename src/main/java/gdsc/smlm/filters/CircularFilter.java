@@ -29,6 +29,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 
 	private Normaliser normaliser;
 	private Normaliser weightedNormaliser = null;
+	private double weightedNormaliserRadius = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -50,8 +51,9 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	private void updateWeightedNormaliser(final double radius)
 	{
 		// Cache the normaliser
-		if (weightedNormaliser == null || lastRadius != radius)
+		if (weightedNormaliser == null || weightedNormaliserRadius != radius)
 		{
+			weightedNormaliserRadius = radius;
 			weightedNormaliser = computeWeightedNormaliser(radius);
 		}
 		normaliser = weightedNormaliser;
@@ -140,12 +142,17 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	{
 		int[] lineRadii = makeLineRadii(radius);
 
+		float[] outData = data;
+
 		if (hasWeights())
 		{
 			int size = data.length;
 			if (weights.length != size || this.weightWidth != width || this.weightHeight != height)
 				throw new IllegalStateException("Weights are not the correct size");
 			updateWeightedNormaliser(radius);
+			if (roi.x != 0)
+				// Not all data points will be over-written so clone the input before weighting
+				data = data.clone();
 			// Apply weights
 			for (int i = 0; i < size; i++)
 				data[i] *= weights[i];
@@ -162,7 +169,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 		// 'cache' is the input buffer. Each line y in the image is mapped onto cache line y%cacheHeight
 		final float[] cache = new float[cacheWidth * cacheHeight];
 
-		doFiltering(data, roi, width, height, lineRadii, cache, cacheWidth, cacheHeight);
+		doFiltering(data, outData, roi, width, height, lineRadii, cache, cacheWidth, cacheHeight);
 	}
 
 	// Filter a grayscale image or one channel of an RGB image using one thread
@@ -179,8 +186,8 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	// Algorithm: For mean and variance, except for very small radius, usually do not calculate the
 	// sum over all pixels. This sum is calculated for the first pixel of every line only. For the
 	// following pixels, add the new values and subtract those that are not in the sum any more.
-	private void doFiltering(float[] pixels, Rectangle roi, int width, int height, int[] lineRadii, float[] cache,
-			int cacheWidth, int cacheHeight)
+	private void doFiltering(float[] inPixels, float[] outPixels, Rectangle roi, int width, int height, int[] lineRadii,
+			float[] cache, int cacheWidth, int cacheHeight)
 	{
 		int kHeight = kHeight(lineRadii);
 		int kRadius = kRadius(lineRadii);
@@ -199,9 +206,6 @@ public abstract class CircularFilter extends BaseWeightedFilter
 
 		boolean smallKernel = kRadius < 2;
 
-		float maxValue = Float.NaN;
-		float[] values = pixels;
-
 		int previousY = kHeight / 2 - cacheHeight;
 
 		for (int y = roi.y; y < roi.y + roi.height; y++)
@@ -214,18 +218,18 @@ public abstract class CircularFilter extends BaseWeightedFilter
 			int yStartReading = y == roi.y ? Math.max(roi.y - kHeight / 2, 0) : y + kHeight / 2;
 			for (int yNew = yStartReading; yNew <= y + kHeight / 2; yNew++)
 			{ //only 1 line except at start
-				readLineToCacheOrPad(pixels, width, height, roi.y, xminInside, widthInside, cache, cacheWidth,
+				readLineToCacheOrPad(inPixels, width, height, roi.y, xminInside, widthInside, cache, cacheWidth,
 						cacheHeight, padLeft, padRight, kHeight, yNew);
 			}
 
 			int cacheLineP = cacheWidth * (y % cacheHeight) + kRadius; //points to pixel (roi.x, y)
-			filterLine(values, width, cache, cachePointers, cacheLineP, roi, y, // F I L T E R
-					sums, maxValue, smallKernel);
+			filterLine(outPixels, width, cache, cachePointers, cacheLineP, roi, y, // F I L T E R
+					sums, smallKernel);
 		}
 	}
 
 	private void filterLine(float[] values, int width, float[] cache, int[] cachePointers, int cacheLineP,
-			Rectangle roi, int y, double[] sums, float maxValue, boolean smallKernel)
+			Rectangle roi, int y, double[] sums, boolean smallKernel)
 	{
 		int valuesP = roi.x + y * width;
 

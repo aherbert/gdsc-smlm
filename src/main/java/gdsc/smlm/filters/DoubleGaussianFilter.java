@@ -2,6 +2,8 @@ package gdsc.smlm.filters;
 
 import java.awt.Rectangle;
 
+import gdsc.core.utils.SimpleArrayUtils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -20,15 +22,15 @@ import java.awt.Rectangle;
  * <p>
  * Adapted from ij.plugin.filter.GaussianBlur
  */
-public class GaussianFilter extends BaseWeightedFilter
+public class DoubleGaussianFilter extends BaseWeightedFilter
 {
 	private final double accuracy;
 
 	private double lastSigma;
 	private int lastMaxRadius;
-	private float[][] kernel = null;
-	private float[] downscaleKernel = null;
-	private float[] upscaleKernel = null;
+	private double[][] kernel = null;
+	private double[] downscaleKernel = null;
+	private double[] upscaleKernel = null;
 	private int lastUnitLength;
 
 	private Normaliser normaliser = null;
@@ -61,7 +63,7 @@ public class GaussianFilter extends BaseWeightedFilter
 			float[] normalisation = weights.clone();
 			sx = sigmaX;
 			sy = sigmaY;
-			GaussianFilter gf = new GaussianFilter(accuracy);
+			DoubleGaussianFilter gf = new DoubleGaussianFilter(accuracy);
 			gf.convolve(normalisation, weightHeight, weightWidth, sigmaX, sigmaY);
 			normaliser = new PerPixelNormaliser(normalisation);
 		}
@@ -70,7 +72,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	/**
 	 * Use the default accuracy of 0.02
 	 */
-	public GaussianFilter()
+	public DoubleGaussianFilter()
 	{
 		this(0.02);
 	}
@@ -80,7 +82,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 *            Accuracy of kernel, should not be above 0.02. Better (lower)
 	 *            accuracy needs slightly more computing time.
 	 */
-	public GaussianFilter(double accuracy)
+	public DoubleGaussianFilter(double accuracy)
 	{
 		this.accuracy = accuracy;
 	}
@@ -167,9 +169,9 @@ public class GaussianFilter extends BaseWeightedFilter
 	private void convolve(float[] data, Rectangle roi, final int maxx, final int maxy, final double sigmaX,
 			final double sigmaY, final int extraLines)
 	{
-		// If not all data points will be over-written clone the input before blurring 
-		float[] wdata = (extraLines != 0) ? data.clone() : data;
-		
+		// Compute using double precision
+		double[] wdata = SimpleArrayUtils.toDouble(data);
+
 		if (hasWeights())
 		{
 			int size = data.length;
@@ -185,23 +187,28 @@ public class GaussianFilter extends BaseWeightedFilter
 			blur1Direction(wdata, roi, maxx, maxy, sigmaX, true, extraLines);
 			blur1Direction(wdata, roi, maxx, maxy, sigmaY, false, 0);
 
-			// Normalise. This assumes the roi is only ever constructed as a border.
+			// Normalise
 			if (extraLines != 0)
 				normaliser.normalise(wdata, data, maxx, maxy, extraLines);
 			else
 				// wdata == data
-				normaliser.normalise(wdata, size);
+				normaliser.normalise(wdata, data, size);
 		}
 		else
 		{
 			blur1Direction(wdata, roi, maxx, maxy, sigmaX, true, extraLines);
 			blur1Direction(wdata, roi, maxx, maxy, sigmaY, false, 0);
-			
+
 			if (extraLines != 0)
 			{
 				// Copy back to the input array so that the extra blurred lines 
 				// are not present.
 				new NonNormaliser().normalise(wdata, data, maxx, maxy, extraLines);
+			}
+			else
+			{
+				for (int i = 0; i < data.length; i++)
+					data[i] = (float) wdata[i];
 			}
 		}
 	}
@@ -225,7 +232,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 *            Number of lines (parallel to the blurring direction)
 	 *            below and above the roi bounds that should be processed.
 	 */
-	private void blur1Direction(final float[] pixels, Rectangle roi, final int width, final int height,
+	private void blur1Direction(final double[] pixels, Rectangle roi, final int width, final int height,
 			final double sigma, final boolean xDirection, final int extraLines)
 	{
 		final int UPSCALE_K_RADIUS = 2; //number of pixels to add for upscaling
@@ -262,7 +269,7 @@ public class GaussianFilter extends BaseWeightedFilter
 				: sigma;
 		final int maxLength = doDownscaling ? (length + reduceBy - 1) / reduceBy + 2 * (UPSCALE_K_RADIUS + 1) //downscaled line can't be longer
 				: length;
-		final float[][] gaussKernel = makeGaussianKernel(sigmaGauss, maxLength);
+		final double[][] gaussKernel = makeGaussianKernel(sigmaGauss, maxLength);
 		final int kRadius = gaussKernel[0].length * reduceBy; //Gaussian kernel radius after upscaling
 		final int readFrom = (writeFrom - kRadius < 0) ? 0 : writeFrom - kRadius; //not including broadening by downscale&upscale
 		final int readTo = (writeTo + kRadius > length) ? length : writeTo + kRadius;
@@ -273,8 +280,8 @@ public class GaussianFilter extends BaseWeightedFilter
 		if (doDownscaling)
 			createScalingKernels(reduceBy);
 
-		final float[] cache1 = new float[newLength]; //holds data before convolution (after downscaling, if any)
-		final float[] cache2 = doDownscaling ? new float[newLength] : null; //holds data after convolution
+		final double[] cache1 = new double[newLength]; //holds data before convolution (after downscaling, if any)
+		final double[] cache2 = doDownscaling ? new double[newLength] : null; //holds data after convolution
 
 		int pixel0 = lineFrom * lineInc;
 		for (int line = lineFrom; line < lineTo; line += 1, pixel0 += lineInc)
@@ -332,7 +339,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * @param newLength
 	 *            length of downscaled data
 	 */
-	final static private void downscaleLine(final float[] pixels, final float[] cache, final float[] kernel,
+	final static private void downscaleLine(final double[] pixels, final double[] cache, final double[] kernel,
 			final int reduceBy, final int pixel0, final int unscaled0, final int length, final int pointInc,
 			final int newLength)
 	{
@@ -340,10 +347,10 @@ public class GaussianFilter extends BaseWeightedFilter
 		final int pLast = pixel0 + pointInc * (length - 1);
 		for (int xout = -1; xout <= newLength; xout++)
 		{
-			float sum0 = 0, sum1 = 0, sum2 = 0;
+			double sum0 = 0, sum1 = 0, sum2 = 0;
 			for (int x = 0; x < reduceBy; x++, p += pointInc)
 			{
-				float v = pixels[p < pixel0 ? pixel0 : (p > pLast ? pLast : p)];
+				double v = pixels[p < pixel0 ? pixel0 : (p > pLast ? pLast : p)];
 				sum0 += v * kernel[x + 2 * reduceBy];
 				sum1 += v * kernel[x + reduceBy];
 				sum2 += v * kernel[x];
@@ -366,21 +373,21 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * Array index corresponding to the kernel center is
 	 * unitLength*3/2
 	 */
-	final static private float[] makeDownscaleKernel(final int unitLength)
+	final static private double[] makeDownscaleKernel(final int unitLength)
 	{
 		final int mid = unitLength * 3 / 2;
-		final float[] kernel = new float[3 * unitLength];
+		final double[] kernel = new double[3 * unitLength];
 		for (int i = 0; i <= unitLength / 2; i++)
 		{
 			final double x = i / (double) unitLength;
-			final float v = (float) ((0.75 - x * x) / unitLength);
+			final double v = (double) ((0.75 - x * x) / unitLength);
 			kernel[mid - i] = v;
 			kernel[mid + i] = v;
 		}
 		for (int i = unitLength / 2 + 1; i < (unitLength * 3 + 1) / 2; i++)
 		{
 			final double x = i / (double) unitLength;
-			final float v = (float) ((0.125 + 0.5 * (x - 1) * (x - 2)) / unitLength);
+			final double v = (double) ((0.125 + 0.5 * (x - 1) * (x - 2)) / unitLength);
 			kernel[mid - i] = v;
 			kernel[mid + i] = v;
 		}
@@ -391,7 +398,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * Scale a line up by factor <code>reduceBy</code> and write as a row
 	 * or column (or part thereof) to the pixels array of a FloatProcessor.
 	 */
-	final static private void upscaleLine(final float[] cache, final float[] pixels, final float[] kernel,
+	final static private void upscaleLine(final double[] cache, final double[] pixels, final double[] kernel,
 			final int reduceBy, final int pixel0, final int unscaled0, final int writeFrom, final int writeTo,
 			final int pointInc)
 	{
@@ -414,22 +421,22 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * The kernel runs from [-2 to +2[, corresponding to array index
 	 * 0 ... 4*unitLength (whereby the last point is not in the array any more).
 	 */
-	final static private float[] makeUpscaleKernel(final int unitLength)
+	final static private double[] makeUpscaleKernel(final int unitLength)
 	{
-		final float[] kernel = new float[4 * unitLength];
+		final double[] kernel = new double[4 * unitLength];
 		final int mid = 2 * unitLength;
 		kernel[0] = 0;
 		for (int i = 0; i < unitLength; i++)
 		{
 			final double x = i / (double) unitLength;
-			final float v = (float) ((2. / 3. - x * x * (1 - 0.5 * x)));
+			final double v = (double) ((2. / 3. - x * x * (1 - 0.5 * x)));
 			kernel[mid + i] = v;
 			kernel[mid - i] = v;
 		}
 		for (int i = unitLength; i < 2 * unitLength; i++)
 		{
 			final double x = i / (double) unitLength;
-			final float v = (float) ((2. - x) * (2. - x) * (2. - x) / 6.);
+			final double v = (double) ((2. - x) * (2. - x) * (2. - x) / 6.);
 			kernel[mid + i] = v;
 			kernel[mid - i] = v;
 		}
@@ -467,29 +474,29 @@ public class GaussianFilter extends BaseWeightedFilter
 	 *            Increment of the pixels array index to the next point (for an ImageProcessor,
 	 *            it should be <code>1</code> for a row, <code>width</code> for a column)
 	 */
-	final static private void convolveLine(final float[] input, final float[] pixels, final float[][] kernel,
+	final static private void convolveLine(final double[] input, final double[] pixels, final double[][] kernel,
 			final int readFrom, final int readTo, final int writeFrom, final int writeTo, final int point0,
 			final int pointInc)
 	{
 		final int length = input.length;
-		final float first = input[0]; //out-of-edge pixels are replaced by nearest edge pixels
-		final float last = input[length - 1];
-		final float[] kern = kernel[0]; //the kernel itself
-		final float kern0 = kern[0];
-		final float[] kernSum = kernel[1]; //the running sum over the kernel
+		final double first = input[0]; //out-of-edge pixels are replaced by nearest edge pixels
+		final double last = input[length - 1];
+		final double[] kern = kernel[0]; //the kernel itself
+		final double kern0 = kern[0];
+		final double[] kernSum = kernel[1]; //the running sum over the kernel
 		final int kRadius = kern.length;
 		final int firstPart = kRadius < length ? kRadius : length;
 		int p = point0 + writeFrom * pointInc;
 		int i = writeFrom;
 		for (; i < firstPart; i++, p += pointInc)
 		{ //while the sum would include pixels < 0
-			float result = input[i] * kern0;
+			double result = input[i] * kern0;
 			result += kernSum[i] * first;
 			if (i + kRadius > length)
 				result += kernSum[length - i - 1] * last;
 			for (int k = 1; k < kRadius; k++)
 			{
-				float v = 0;
+				double v = 0;
 				if (i - k >= 0)
 					v += input[i - k];
 				if (i + k < length)
@@ -501,21 +508,21 @@ public class GaussianFilter extends BaseWeightedFilter
 		final int iEndInside = length - kRadius < writeTo ? length - kRadius : writeTo;
 		for (; i < iEndInside; i++, p += pointInc)
 		{ //while only pixels within the line are be addressed (the easy case)
-			float result = input[i] * kern0;
+			double result = input[i] * kern0;
 			for (int k = 1; k < kRadius; k++)
 				result += kern[k] * (input[i - k] + input[i + k]);
 			pixels[p] = result;
 		}
 		for (; i < writeTo; i++, p += pointInc)
 		{ //while the sum would include pixels >= length 
-			float result = input[i] * kern0;
+			double result = input[i] * kern0;
 			if (i < kRadius)
 				result += kernSum[i] * first;
 			if (i + kRadius >= length)
 				result += kernSum[length - i - 1] * last;
 			for (int k = 1; k < kRadius; k++)
 			{
-				float v = 0;
+				double v = 0;
 				if (i - k >= 0)
 					v += input[i - k];
 				if (i + k < length)
@@ -549,7 +556,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 *         values > n, including non-calculated values in case the kernel
 	 *         size is limited by <code>maxRadius</code>.
 	 */
-	private float[][] makeGaussianKernel(final double sigma, int maxRadius)
+	private double[][] makeGaussianKernel(final double sigma, int maxRadius)
 	{
 		if (maxRadius < 50)
 			maxRadius = 50; // too small maxRadius would result in inaccurate sum.
@@ -561,13 +568,13 @@ public class GaussianFilter extends BaseWeightedFilter
 		int kRadius = getHalfWidth(sigma) + 1;
 		if (kRadius > maxRadius)
 			kRadius = maxRadius;
-		kernel = new float[2][kRadius];
+		kernel = new double[2][kRadius];
 		lastSigma = sigma;
 		lastMaxRadius = maxRadius;
 
 		for (int i = 0; i < kRadius; i++)
 			// Gaussian function
-			kernel[0][i] = (float) (Math.exp(-0.5 * i * i / sigma / sigma));
+			kernel[0][i] = (double) (Math.exp(-0.5 * i * i / sigma / sigma));
 		if (kRadius < maxRadius && kRadius > 3)
 		{ // edge correction
 			double sqrtSlope = Double.MAX_VALUE;
@@ -583,7 +590,7 @@ public class GaussianFilter extends BaseWeightedFilter
 			}
 			//System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma, kRadius, r, sqrtSlope);
 			for (int r1 = r + 2; r1 < kRadius; r1++)
-				kernel[0][r1] = (float) ((kRadius - r1) * (kRadius - r1) * sqrtSlope * sqrtSlope);
+				kernel[0][r1] = (double) ((kRadius - r1) * (kRadius - r1) * sqrtSlope * sqrtSlope);
 		}
 		double sum; // sum over all kernel elements for normalization
 		if (kRadius < maxRadius)
@@ -599,9 +606,9 @@ public class GaussianFilter extends BaseWeightedFilter
 		for (int i = 0; i < kRadius; i++)
 		{
 			double v = (kernel[0][i] / sum);
-			kernel[0][i] = (float) v;
+			kernel[0][i] = (double) v;
 			rsum -= v;
-			kernel[1][i] = (float) rsum;
+			kernel[1][i] = (double) rsum;
 		}
 		return kernel;
 	}
@@ -611,9 +618,9 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public GaussianFilter clone()
+	public DoubleGaussianFilter clone()
 	{
-		GaussianFilter o = (GaussianFilter) super.clone();
+		DoubleGaussianFilter o = (DoubleGaussianFilter) super.clone();
 		return o;
 	}
 

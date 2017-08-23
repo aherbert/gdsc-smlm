@@ -106,6 +106,8 @@ import gdsc.smlm.model.SpatialIllumination;
 import gdsc.smlm.model.SphericalDistribution;
 import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
+import gdsc.smlm.model.camera.CameraModel;
+import gdsc.smlm.model.camera.FixedPixelCameraModel;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FrameCounter;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -1412,9 +1414,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else
 		{
+			uniformBackground = true;
 			if (pulseInterval > 1)
 				return new UniformIllumination(1, intensity, pulseInterval);
-			uniformBackground = true;
 			return new UniformIllumination(intensity);
 		}
 	}
@@ -2182,6 +2184,59 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
+	private float[] bias, gain, readNoise;
+
+	private void createPerPixelData(CameraModel cameraModel)
+	{
+		Rectangle bounds = new Rectangle(0, 0, settings.getSize(), settings.getSize());
+		bias = cameraModel.getBias(bounds);
+		gain = cameraModel.getGain(bounds);
+		readNoise = cameraModel.getVariance(bounds);
+		if (cameraModel.isPerPixelModel())
+		{
+			for (int i = 0; i < readNoise.length; i++)
+				readNoise[i] = (float) Math.sqrt(readNoise[i]);
+		}
+		else
+		{
+			// Avoid sqrt on all the same value 
+			Arrays.fill(readNoise, (float) Math.sqrt(readNoise[0]));
+		}
+
+		// Remove if it will have no effect
+		bias = nullIf(bias, 0f);
+		gain = nullIf(gain, 1f);
+		readNoise = nullIf(readNoise, 0f);
+	}
+
+	private float[] nullIf(float[] data, float f)
+	{
+		for (int i = 0; i < data.length; i++)
+			if (data[i] != f)
+				return data;
+		return null;
+	}
+
+	private CameraModel createCCDCameraModel()
+	{
+		float bias = settings.getBias();
+		float gain = 1f;
+		float readNoise = 0;
+
+		if (settings.getCameraGain() != 0)
+			gain = (float) settings.getCameraGain();
+
+		if (settings.getReadNoise() > 0)
+		{
+			readNoise = (float) settings.getReadNoise();
+			// Read noise is in electrons. Apply camera gain to get the noise in ADUs.
+			if (settings.getCameraGain() != 0)
+				readNoise *= settings.getCameraGain();
+		}
+
+		return new FixedPixelCameraModel(bias, gain, (float) Maths.pow2(readNoise));
+	}
+
 	/**
 	 * Use a runnable for the image generation to allow multi-threaded operation. Input parameters
 	 * that are manipulated should have synchronized methods.
@@ -2234,20 +2289,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			final double xoffset = settings.getSize() * 0.5;
 
 			float[] image = createBackground(random);
-			float[] imageCache = Arrays.copyOf(image, image.length);
+			float[] imageCache = image.clone();
 
-			// Create read noise now so that we can calculate the true background noise  
+			// Create read noise now so that we can calculate the true background noise
 			float[] imageReadNoise = new float[image.length];
-			if (settings.getReadNoise() > 0)
+			if (readNoise != null)
 			{
-				// Read noise is in electrons. Apply camera gain to get the noise in ADUs.
-				float readNoise = (float) settings.getReadNoise();
-				if (settings.getCameraGain() != 0)
-					readNoise *= settings.getCameraGain();
-
 				RandomGenerator r = random.getRandomGenerator();
 				for (int i = 0; i < imageReadNoise.length; i++)
-					imageReadNoise[i] += readNoise * r.nextGaussian();
+					imageReadNoise[i] += readNoise[i] * r.nextGaussian();
 			}
 
 			// Extract the localisations and draw if we have a PSF model
@@ -2485,8 +2535,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Since the call random.nextGamma(...) creates a Gamma distribution 
 					// which pre-calculates factors only using the scale parameter we 
 					// create a custom gamma distribution where the shape can be set as a property.
-					CustomGammaDistribution dist = new CustomGammaDistribution(random.getRandomGenerator(), 1,
-							settings.getEmGain(), GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+					double shape = 1;
+					double scale = settings.getEmGain();
+					CustomGammaDistribution dist = new CustomGammaDistribution(random.getRandomGenerator(), shape,
+							scale, GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 					for (int i = 0; i < image.length; i++)
 					{
@@ -2504,14 +2556,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// Apply camera gain. Note that the noise component of the camera gain is the 
 			// read noise. Thus the read noise may change for each camera gain.
-			if (settings.getCameraGain() > 0)
+			if (gain != null)
 			{
 				for (int i = 0; i < image.length; i++)
-					image[i] *= settings.getCameraGain();
+					image[i] *= gain[i];
 			}
 
 			// Apply read noise (in ADUs)
-			if (settings.getReadNoise() > 0)
+			if (readNoise != null)
 			{
 				for (int i = 0; i < image.length; i++)
 					image[i] += imageReadNoise[i];
@@ -2533,8 +2585,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 
 			// Add the bias
-			for (int i = 0; i < image.length; i++)
-				image[i] += settings.getBias();
+			if (bias != null)
+			{
+				for (int i = 0; i < image.length; i++)
+					image[i] += bias[i];
+			}
 
 			// Send to output
 			stack.setPixels(image, t);
@@ -2673,43 +2728,38 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (random == null)
 				random = new RandomDataGenerator(createRandomGenerator());
 			createBackgroundPixels();
-			pixels2 = Arrays.copyOf(backgroundPixels, backgroundPixels.length);
+			pixels2 = new float[backgroundPixels.length];
 
 			// Add Poisson noise.
 			if (uniformBackground)
 			{
-				// We can do N random samples thus ensuring the background average is constant.
-				// Note: The number of samples must be Poisson distributed.
-				// currently: pixels2[0] = uniform background level
-				// => (pixels2[0] * pixels2.length) = amount of photons that fall on the image. 
-				final int samples = (int) random.nextPoisson(pixels2[0] * pixels2.length);
+				double mean = backgroundPixels[0];
 
-				// Only do sampling if the number of samples is valid
-				if (samples >= 1)
+				// Simulate N photons hitting the image. The total photons (N) is 
+				// the mean for each pixel multiplied by the number of pixels.
+				// Note: The number of samples (N) must be Poisson distributed, i.e. 
+				// the total amount of photons per frame is Poisson noise.
+				final int samples = (int) random.nextPoisson(mean * backgroundPixels.length);
+
+				final int upper = pixels2.length - 1;
+				for (int i = 0; i < samples; i++)
 				{
-					pixels2 = new float[pixels2.length];
-					final int upper = pixels2.length - 1;
-					for (int i = 0; i < samples; i++)
-					{
-						pixels2[random.nextInt(0, upper)] += 1;
-					}
+					pixels2[random.nextInt(0, upper)] += 1;
 				}
-				else
-				{
-					// If using a uniform illumination then we can use a fixed Poisson distribution
-					PoissonDistribution dist = new PoissonDistribution(random.getRandomGenerator(), pixels2[0],
-							PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-					for (int i = 0; i < pixels2.length; i++)
-					{
-						pixels2[i] = dist.sample();
-					}
-				}
+
+				//// Alternative is to sample each pixel from a Poisson distribution. This is slow
+				//PoissonDistribution dist = new PoissonDistribution(random.getRandomGenerator(), backgroundPixels[0],
+				//		PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+				//for (int i = 0; i < pixels2.length; i++)
+				//{
+				//	pixels2[i] = dist.sample();
+				//}
 			}
 			else
 			{
 				for (int i = 0; i < pixels2.length; i++)
 				{
-					pixels2[i] = random.nextPoisson(pixels2[i]);
+					pixels2[i] = random.nextPoisson(backgroundPixels[i]);
 				}
 			}
 		}
@@ -2736,7 +2786,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				ip.setInterpolationMethod(ImageProcessor.BILINEAR);
 				ip = ip.resize(settings.getSize(), settings.getSize());
 				float[] data = (float[]) ip.getPixels();
-				final double max = FastMath.max(0, Maths.max(data));
+				final double max = Maths.maxDefault(0, data);
 				if (max != 0)
 				{
 					final double scale = settings.getBackground() / max;
