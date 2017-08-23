@@ -44,7 +44,6 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.model.camera.BaseCameraModel;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.FakePerPixelCameraModel;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -376,7 +375,7 @@ public class SpotFinderPreview
 		CameraModel cameraModel = fitConfig.getCameraModel();
 		if (!(cameraModel instanceof FakePerPixelCameraModel))
 		{
-			float[] w = BaseCameraModel.toWeights(cameraModel.getVariance(bounds));
+			float[] w = cameraModel.getWeights(bounds);
 			filter.setWeights(w, width, height);
 		}
 

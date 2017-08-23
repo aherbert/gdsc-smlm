@@ -1,6 +1,7 @@
 package gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
+import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -8,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.SimpleArrayUtils;
 import ij.process.FloatProcessor;
 
 public class PerPixelCameraModelTest
@@ -175,5 +177,45 @@ public class PerPixelCameraModelTest
 					5 + rand.nextInt(5));
 			checkConversion(bounds, model.crop(bounds));
 		}
+	}
+
+	@Test
+	public void canGetWeightsWithPositiveVariance()
+	{
+		float[] var = variance.clone();
+		for (int i = 0; i < var.length; i++)
+			if (var[i] == 0)
+				var[i] = 1;
+		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, var);
+		float[] w = model.getWeights(model.getBounds());
+		float[] e = var;
+		for (int i = 0; i < e.length; i++)
+			e[i] = (float) (1.0 / e[i]);
+		Assert.assertArrayEquals(e, w, 0);
+	}
+
+	@Test
+	public void canGetWeightsWithAllZeroVariance()
+	{
+		float[] var = new float[variance.length];
+		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, var);
+		float[] w = model.getWeights(model.getBounds());
+		float[] e = var;
+		Arrays.fill(e, 1f);
+		Assert.assertArrayEquals(e, w, 0);
+	}
+
+	@Test
+	public void canGetWeightsWithZeroVariance()
+	{
+		float[] var = variance.clone();
+		var[0] = 0;
+		float min = SimpleArrayUtils.minAboveZero(var);
+		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, var);
+		float[] w = model.getWeights(model.getBounds());
+		float[] e = var;
+		for (int i = 0; i < e.length; i++)
+			e[i] = (e[i] == 0) ? (float) (1.0 / min) : (float) (1.0 / e[i]);
+		Assert.assertArrayEquals(e, w, 0);
 	}
 }
