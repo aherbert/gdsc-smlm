@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Checkbox;
+import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -58,6 +59,7 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.CreateDataSettingsHelper;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
@@ -71,7 +73,7 @@ import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.Offset;
 import gdsc.smlm.data.config.PSFProtos.PSF;
-import gdsc.smlm.data.config.PSFProtos.PSFType;
+import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -131,6 +133,7 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
 import ij.io.FileSaver;
 import ij.io.OpenDialog;
@@ -948,8 +951,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Store the benchmark settings when not using variable photons
 		if (settings.getPhotonsPerSecond() == settings.getPhotonsPerSecondMaximum())
 		{
-			final double amplification = totalGain /
-					((settings.getQuantumEfficiency() == 0) ? 1 : settings.getQuantumEfficiency());
+			final double amplification = totalGain / getQuantumEfficiency();
 			// Store read noise in ADUs
 			readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, settings.getPixelPitch(),
@@ -995,8 +997,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		boolean emCCD = settings.getEmGain() > 1;
 		double sd = getPsfSD() * settings.getPixelPitch();
 
-		final double amplification = totalGain /
-				((settings.getQuantumEfficiency() == 0) ? 1 : settings.getQuantumEfficiency());
+		final double amplification = totalGain / getQuantumEfficiency();
 
 		// Store read noise in ADUs
 		readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
@@ -1541,7 +1542,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		//System.out.printf("combineSimulationSteps @ %f\n", simulationStepsPerFrame);
 
-		final double gain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
+		//final double gain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
 		sortLocalisationsByIdThenTime(localisations);
 		int[] idList = getIds(localisations);
 		movingMolecules = new TIntHashSet(idList.length);
@@ -1670,9 +1671,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					{
 						sets[i].setPrevious(previous);
 
-						// Create a data array and store the current intensity after gain. 
+						// Create a data array and store the current intensity. 
 						// This is used later to filter based on SNR
-						sets[i].setData(new double[] { 0, 0, 0, 0, sets[i].getIntensity() * gain });
+						sets[i].setData(new double[] { 0, 0, 0, 0, sets[i].getIntensity() //* gain
+						});
 
 						newLocalisations.add(sets[i]);
 					}
@@ -1683,6 +1685,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Sort by time
 		Collections.sort(newLocalisations);
 		return newLocalisations;
+
 	}
 
 	/**
@@ -1803,19 +1806,28 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Add drawn spots to memory
 		results = new MemoryPeakResults();
 		CalibrationWriter c = new CalibrationWriter();
-		CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
+		c.setDistanceUnit(DistanceUnit.PIXEL);
+		c.setIntensityUnit(IntensityUnit.PHOTON);
 		c.setNmPerPixel(settings.getPixelPitch());
-		c.setCountPerPhoton(helper.getTotalGain());
 		c.setExposureTime(settings.getExposureTime());
-		c.setCameraType((settings.getEmGain() > 1) ? CameraType.EMCCD : CameraType.CCD);
-		c.setBias(settings.getBias());
-		c.setReadNoise(settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1));
-		c.setCountPerElectron(helper.getAmplification());
+
+		c.setCameraType(settings.getCameraType());
+		if (settings.getCameraType() == CameraType.SCMOS)
+		{
+			c.setCameraModelName(settings.getCameraModelName());
+		}
+		else
+		{
+			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
+			c.setCountPerPhoton(helper.getTotalGainSafe());
+			c.setBias(settings.getBias());
+			c.setReadNoise(settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1));
+			c.setCountPerElectron(helper.getAmplification());
+		}
+
 		results.setCalibration(c.getCalibration());
 		results.setSortAfterEnd(true);
 		results.begin();
-		// TODO - Add better support for the type of PSF that is being drawn
-		results.setPSF(PSFHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D));
 
 		maxT = localisationSets.get(localisationSets.size() - 1).getTime();
 
@@ -1834,6 +1846,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (imagePSFModel == null)
 				return null;
 		}
+
+		// Create the camera noise model
+		createPerPixelCameraModelData(cameraModel);
 
 		IJ.showStatus("Drawing image ...");
 
@@ -2003,7 +2018,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setName(CREATE_DATA_IMAGE_TITLE + " (" + TITLE + ")");
 		results.setBounds(new Rectangle(0, 0, settings.getSize(), settings.getSize()));
 		// Set the PSF as a Gaussian for now. In future this could be improved for other PSFs.
-		PSF.Builder psf = PSFHelper.createBuilder(PSFType.ONE_AXIS_GAUSSIAN_2D);
+		PSF.Builder psf = PSFProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
 		psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
 		results.setPSF(psf.build());
 		MemoryPeakResults.addResults(results);
@@ -2184,28 +2199,41 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	private float[] bias, gain, readNoise;
+	private CameraModel cameraModel;
 
-	private void createPerPixelData(CameraModel cameraModel)
+	/**
+	 * The read noise.
+	 * This is stored in electrons even though camera read noise is measured in ADUs. This allows it
+	 * to be used to compute the combined background noise (with the background photon shot noise)
+	 * for each localisation.
+	 */
+	private float[] readNoise;
+
+	private void createPerPixelCameraModelData(CameraModel cameraModel)
 	{
-		Rectangle bounds = new Rectangle(0, 0, settings.getSize(), settings.getSize());
-		bias = cameraModel.getBias(bounds);
-		gain = cameraModel.getGain(bounds);
-		readNoise = cameraModel.getVariance(bounds);
+		// Note: Store read noise in electrons for SNR computation. The gain is later applied back.
+
 		if (cameraModel.isPerPixelModel())
 		{
+			Rectangle bounds = cameraModel.getBounds();
+			readNoise = cameraModel.getVariance(bounds);
+			float[] gain = cameraModel.getGain(bounds);
 			for (int i = 0; i < readNoise.length; i++)
-				readNoise[i] = (float) Math.sqrt(readNoise[i]);
+				readNoise[i] = (float) (Math.sqrt(readNoise[i]) / gain[i]);
 		}
 		else
 		{
-			// Avoid sqrt on all the same value 
-			Arrays.fill(readNoise, (float) Math.sqrt(readNoise[0]));
+			// Use a dummy bounds to find out the fixed variance and gain 
+			Rectangle bounds = new Rectangle(1, 1);
+			float variance = cameraModel.getVariance(bounds)[0];
+			float gain = cameraModel.getGain(bounds)[0];
+
+			// Avoid sqrt on all the same value
+			this.readNoise = new float[settings.getSize() * settings.getSize()];
+			Arrays.fill(this.readNoise, (float) (Math.sqrt(variance) / gain));
 		}
 
 		// Remove if it will have no effect
-		bias = nullIf(bias, 0f);
-		gain = nullIf(gain, 1f);
 		readNoise = nullIf(readNoise, 0f);
 	}
 
@@ -2252,6 +2280,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final ImageStack stack;
 		final boolean poissonNoise;
 		final RandomDataGenerator random;
+		final double emGain, qe;
 
 		public ImageGenerator(final List<LocalisationModelSet> localisationSets,
 				List<LocalisationModelSet> newLocalisations, int startIndex, int t, PSFModel psfModel,
@@ -2266,6 +2295,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.stack = stack;
 			this.poissonNoise = poissonNoise;
 			this.random = random;
+			// This could be >=1 but the rest of the code ignores EM-gain if it is <=1			
+			emGain = (settings.getCameraType() == CameraType.EMCCD && settings.getEmGain() > 1) ? settings.getEmGain()
+					: 0;
+			qe = getQuantumEfficiency();
 		}
 
 		/*
@@ -2283,7 +2316,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			showProgress();
 
 			final boolean checkSNR = minSNRt1 > 0 || minSNRtN > 0;
-			final double totalGain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
 
 			// Adjust XY dimensions since they are centred on zero
 			final double xoffset = settings.getSize() * 0.5;
@@ -2358,11 +2390,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							spots[spotCount++] = new Spot(psfModel.getPSF(), psfModel.getX0min(), psfModel.getX0max(),
 									psfModel.getX1min(), psfModel.getX1max(), samplePositions);
 						}
-
-						// Update the intensity using the gain.
-						// Use the sampled intensity and not the photons rendered. This is the intensity that should be
-						// fitted by any function irrespective of whether the photons were actually sampled on the image.
-						localisation.setIntensity(intensity * totalGain);
 					}
 
 					// Skip if nothing has been drawn. Note that if the localisation set is skipped then the 
@@ -2388,9 +2415,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					LocalisationModel localisation = localisationSet.toLocalisation();
 
-					// Account for gain 
-					totalPhotonsRendered *= totalGain;
-
 					// Add to memory.
 					// Use the actual intensity (not the total photons rendered)
 					float intensity = (float) localisation.getIntensity();
@@ -2403,7 +2427,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Background and noise should be calculated using the
 					// region covered by the PSF.
 					double[] localStats = getStatistics(imageCache, imageReadNoise, origX, origY);
-					float background = (float) (localStats[0] * totalGain + settings.getBias());
+					float background = (float) (localStats[0]);
 
 					// Note: The width estimate does not account for diffusion
 					float sx, sy;
@@ -2430,17 +2454,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						sx = sy = (float) psfSD;
 					}
 
-					// The variance of the background image is currently in photons^2. Apply gain to convert to ADUs. 
-					double backgroundVariance = localStats[1] * totalGain * totalGain;
+					// The variance of the background image is currently in photons^2 
+					double backgroundVariance = localStats[1];
+
+					// Convert to electrons^2
+					if (qe < 1)
+						backgroundVariance *= Maths.pow2(qe);
 
 					// EM-gain noise factor: Adds sqrt(2) to the electrons input to the register.
 					// All data 'read' through the EM-register must have this additional noise factor added.
-					if (settings.getEmGain() > 1)
+					if (emGain != 0)
 					{
 						backgroundVariance *= 2; // Note we are using the variance (std.dev^2) so we use the factor 2
 					}
 
-					// Get the actual read noise applied to this part of the image
+					// Get the actual read noise applied to this part of the image. This is in electrons^2.
 					double readVariance = localStats[3];
 
 					// *-*-*-*-*
@@ -2451,11 +2479,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// *-*-*-*-*
 
 					// Overall noise can be calculated from the ‘root of sum of squares’ equation
-					final double totalNoise = Math.sqrt(backgroundVariance + readVariance);
+					double totalNoise = Math.sqrt(backgroundVariance + readVariance);
+
+					// Convert noise back to photons for convenience when computing SNR using the signal in photons.
+					if (qe < 1)
+						totalNoise /= qe;
 
 					// Ensure the new data is added before the intensity is updated. This avoids 
 					// syncronisation clashes in the getIntensity(...) function.
 					// Use the total photons rendered for signal filtering.
+					// [0] = background (photons)
+					// [1] = total noise (photons)
+					// [2] = Gaussian Sx
+					// [3] = Gaussian Sy
+					// [4] = total intensity (photons)
 					localisationSet.setData(new double[] { localStats[0], totalNoise, sx, sy, totalPhotonsRendered });
 
 					if (checkSNR)
@@ -2487,17 +2524,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 
 			// Quantum efficiency: Model using binomial distribution
-			if (settings.getQuantumEfficiency() < 1)
+			if (qe < 1)
 			{
-				final double qe = settings.getQuantumEfficiency();
 				for (int i = 0; i < image.length; i++)
 					image[i] = random.nextBinomial((int) image[i], qe);
 			}
 
 			// Apply EM gain and add Gaussian read noise after all the photons have been simulated
-			final boolean tubbsModel = false;
-			if (settings.getEmGain() > 1) // This could be >=1 but the rest of the code ignores EM-gain if it is <=1
+			if (emGain != 0)
 			{
+				final boolean tubbsModel = false;
 				// See: https://www.andor.com/learning-academy/sensitivity-making-sense-of-sensitivity
 				// there is a statistical variation in the overall number of electrons generated from an initial 
 				// charge packet by the gain register. This uncertainty is quantified by a parameter called "Noise Factor" 
@@ -2522,7 +2558,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					{
 						if (image[i] <= 0)
 							continue;
-						final double scale = settings.getEmGain() - 1 + 1 / image[i];
+						final double scale = emGain - 1 + 1 / image[i];
 						final double electrons = random.nextGamma(image[i], scale) - 1;
 						image[i] += electrons;
 					}
@@ -2536,9 +2572,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// which pre-calculates factors only using the scale parameter we 
 					// create a custom gamma distribution where the shape can be set as a property.
 					double shape = 1;
-					double scale = settings.getEmGain();
 					CustomGammaDistribution dist = new CustomGammaDistribution(random.getRandomGenerator(), shape,
-							scale, GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+							emGain, GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 					for (int i = 0; i < image.length; i++)
 					{
@@ -2554,24 +2589,24 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				}
 			}
 
-			// Apply camera gain. Note that the noise component of the camera gain is the 
-			// read noise. Thus the read noise may change for each camera gain.
-			if (gain != null)
-			{
-				for (int i = 0; i < image.length; i++)
-					image[i] *= gain[i];
-			}
-
-			// Apply read noise (in ADUs)
+			// Apply read noise (in photons)
 			if (readNoise != null)
 			{
 				for (int i = 0; i < image.length; i++)
 					image[i] += imageReadNoise[i];
 			}
 
+			// Apply camera gain. Note that the noise component of the camera gain IS the 
+			// read noise. Thus the read noise is expected to be different for each camera gain.
+			// Also add the bias.
+			cameraModel.applyGainAndBias(cameraModel.getBounds(), image);
+
 			{
 				// TODO Compute the Fisher information for each spot.
+				// This is valid for a Poisson process (see Smith et al, 2010):
 				// Iaa = sum(i) (dYi da) * (dYi da) / Yi
+				// Q. What about EM-CCD? We actually require the difference in the 
+				// log-likelihood function.
 				// 1. Draw each spot perfectly on a new image using psfModel.create3D
 				// 2. Apply perfect gain to get the correct scale 
 				// 3. For each spot
@@ -2582,13 +2617,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				// The simulated image is not used?
 
-			}
-
-			// Add the bias
-			if (bias != null)
-			{
-				for (int i = 0; i < image.length; i++)
-					image[i] += bias[i];
 			}
 
 			// Send to output
@@ -2692,8 +2720,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			double previousIntensity = getIntensity(localisationSet.getPrevious());
 
 			// Check if either neighbour is above the t1 threshold
-			if ((nextIntensity / noise > settings.getMinSnrT1()) ||
-					(previousIntensity / noise > settings.getMinSnrT1()))
+			if (Math.max(nextIntensity, previousIntensity) / noise > settings.getMinSnrT1())
 			{
 				// If neighbours are bright then use a more lenient threshold
 				minSNR = settings.getMinSnrTN();
@@ -2969,19 +2996,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double centreOffset = settings.getSize() * 0.5;
 		// Used to convert the sampled times in frames into seconds
 		final double framesPerSecond = 1000.0 / settings.getExposureTime();
-		final double gain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
+		//final double gain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
 		for (LocalisationModel l : localisations)
 		{
-			if (l.getData() == null)
-				System.out.println("No localisation data. This should not happen!");
-			final double noise = (l.getData() != null) ? l.getData()[1] : 1;
-			final double intensity = (l.getData() != null) ? l.getData()[4] : l.getIntensity();
-			final double intensityInPhotons = intensity / gain;
+			double[] data = l.getData();
+			if (data == null)
+				throw new IllegalStateException("No localisation data. This should not happen!");
+			final double noise = data[1];
+			final double intensityInPhotons = data[4];
 			// Q. What if the noise is zero, i.e. no background photon / read noise?
 			// Just ignore it at current.
-			final double snr = intensity / noise;
+			final double snr = intensityInPhotons / noise;
 			stats[SIGNAL].add(intensityInPhotons);
-			stats[NOISE].add(noise / gain);
+			stats[NOISE].add(noise);
 			if (noise != 0)
 				stats[SNR].add(snr);
 			// Average intensity only from continuous spots.
@@ -3079,6 +3106,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			catch (DataException e)
 			{
+				Utils.log("Unable to compute width: " + e.getMessage());
 			}
 
 			try
@@ -3099,6 +3127,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			catch (DataException e)
 			{
+				Utils.log("Unable to compute LSE precision: " + e.getMessage());
 			}
 
 			// Compute density per frame. Multithread for speed
@@ -3740,11 +3769,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					addHeaderLine(sb, "Background_image", settings.getBackgroundImage());
 			}
 			addHeaderLine(sb, "Background", settings.getBackground());
-			addHeaderLine(sb, "EM_gain", settings.getEmGain());
-			addHeaderLine(sb, "Camera_gain", settings.getCameraGain());
-			addHeaderLine(sb, "Quantum_efficiency", settings.getQuantumEfficiency());
-			addHeaderLine(sb, "Read_noise", settings.getReadNoise());
-			addHeaderLine(sb, "Bias", settings.getBias());
+			addCameraOptions(sb);
 			addHeaderLine(sb, "PSF_model", settings.getPsfModel());
 			if (imagePSF)
 			{
@@ -3852,7 +3877,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private boolean showSimpleDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		settings = SettingsManager.readCreateDataSettings(0).toBuilder();
 
@@ -3871,11 +3896,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (extraOptions)
 			gd.addCheckbox("No_poisson_noise", !settings.getPoissonNoise());
 		gd.addNumericField("Background (photons)", settings.getBackground(), 2);
-		gd.addNumericField("EM_gain", settings.getEmGain(), 2);
-		gd.addNumericField("Camera_gain (ADU/e-)", settings.getCameraGain(), 4);
-		gd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2);
-		gd.addNumericField("Read_noise (e-)", settings.getReadNoise(), 2);
-		gd.addNumericField("Bias", settings.getBias(), 0);
+
+		addCameraOptions(gd);
 
 		// PSF Model
 		List<String> imageNames = addPSFOptions(gd);
@@ -3973,11 +3995,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			poissonNoise = settings.getPoissonNoise();
 		}
 		settings.setBackground(Math.abs(gd.getNextNumber()));
-		settings.setEmGain(Math.abs(gd.getNextNumber()));
-		settings.setCameraGain(Math.abs(gd.getNextNumber()));
-		settings.setQuantumEfficiency(Math.abs(gd.getNextNumber()));
-		settings.setReadNoise(Math.abs(gd.getNextNumber()));
-		settings.setBias(Math.abs((int) gd.getNextNumber()));
+		settings.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 
 		if (!collectPSFOptions(gd, imageNames))
 			return false;
@@ -4012,6 +4030,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			settings.setDensityRadius((float) gd.getNextNumber());
 		settings.setDepthOfField((float) Math.abs(gd.getNextNumber()));
 
+		gd.collectOptions();
+
 		// Save before validation so that the current values are preserved.
 		SettingsManager.writeSettings(settings.build());
 
@@ -4026,12 +4046,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (!benchmarkMode && !settings.getFixedDepth())
 				Parameters.isPositive("Depth", settings.getDepth());
 			Parameters.isPositive("Background", settings.getBackground());
-			Parameters.isPositive("EM gain", settings.getEmGain());
-			Parameters.isPositive("Camera gain", settings.getCameraGain());
-			Parameters.isPositive("Read noise", settings.getReadNoise());
-			double noiseRange = settings.getReadNoise() * settings.getCameraGain() * 4;
-			Parameters.isEqualOrAbove("Bias must prevent clipping the read noise (@ +/- 4 StdDev) so ",
-					settings.getBias(), noiseRange);
 			Parameters.isAboveZero("Particles", settings.getParticles());
 			if (simpleMode)
 				Parameters.isAboveZero("Density", settings.getDensity());
@@ -4047,6 +4061,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isPositive("Histogram bins", settings.getHistogramBins());
 			if (simpleMode)
 				Parameters.isPositive("Density radius", settings.getDensityRadius());
+
+			validateCameraOptions();
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -4059,7 +4075,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			String[] maskImages = createDistributionImageList();
 			if (maskImages != null)
 			{
-				gd = new GenericDialog(TITLE);
+				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Select the mask image for the distribution");
 				gd.addChoice("Distribution_mask", maskImages, settings.getDistributionMask());
 				if (maskListContainsStacks)
@@ -4076,6 +4092,175 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		return getHistogramOptions();
+	}
+
+	private void addCameraOptions(final ExtendedGenericDialog gd)
+	{
+		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
+				CalibrationProtosHelper.getName(settings.getCameraType()), new OptionListener<Choice>()
+				{
+					public boolean collectOptions(Choice field)
+					{
+						settings.setCameraType(SettingsManager.getCameraTypeValues()[field.getSelectedIndex()]);
+						boolean result = collectOptions();
+						return result;
+					}
+
+					public boolean collectOptions()
+					{
+						CameraType cameraType = settings.getCameraType();
+						boolean isCCD = cameraType == CameraType.CCD || cameraType == CameraType.EMCCD;
+						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						if (isCCD)
+						{
+							if (cameraType == CameraType.EMCCD)
+								egd.addNumericField("EM_gain", settings.getEmGain(), 2);
+							egd.addNumericField("Camera_gain (ADU/e-)", settings.getCameraGain(), 4);
+							egd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2);
+							egd.addNumericField("Read_noise (e-)", settings.getReadNoise(), 2);
+							egd.addNumericField("Bias", settings.getBias(), 0);
+						}
+						else if (cameraType == CameraType.SCMOS)
+						{
+							String[] models = CameraModelManager.listCameraModels(true);
+							egd.addChoice("Camera_model_name", models, settings.getCameraModelName());
+							egd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2);
+						}
+						else
+						{
+							IJ.error("Unsupported camera type " + CalibrationProtosHelper.getName(cameraType));
+							return false;
+						}
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
+							return false;
+						if (isCCD)
+						{
+							if (cameraType == CameraType.EMCCD)
+								settings.setEmGain(Math.abs(gd.getNextNumber()));
+							settings.setCameraGain(Math.abs(gd.getNextNumber()));
+							settings.setQuantumEfficiency(Math.abs(gd.getNextNumber()));
+							settings.setReadNoise(Math.abs(gd.getNextNumber()));
+							settings.setBias(Math.abs((int) gd.getNextNumber()));
+						}
+						else if (cameraType == CameraType.SCMOS)
+						{
+							settings.setCameraModelName(egd.getNextChoice());
+							settings.setQuantumEfficiency(Math.abs(gd.getNextNumber()));
+						}
+						return true;
+					}
+				});
+	}
+
+	private void validateCameraOptions()
+	{
+		CameraType cameraType = settings.getCameraType();
+		boolean isCCD = cameraType == CameraType.CCD || cameraType == CameraType.EMCCD;
+		if (isCCD)
+		{
+			if (cameraType == CameraType.EMCCD)
+				Parameters.isPositive("EM gain", settings.getEmGain());
+			Parameters.isPositive("Camera gain", settings.getCameraGain());
+			Parameters.isPositive("Read noise", settings.getReadNoise());
+			double noiseRange = settings.getReadNoise() * settings.getCameraGain() * 4;
+			Parameters.isEqualOrAbove("Bias must prevent clipping the read noise (@ +/- 4 StdDev) so ",
+					settings.getBias(), noiseRange);
+
+			cameraModel = createCCDCameraModel();
+		}
+		else if (cameraType == CameraType.SCMOS)
+		{
+			// Load the model
+			cameraModel = CameraModelManager.load(settings.getCameraModelName());
+			if (cameraModel == null)
+			{
+				throw new IllegalArgumentException("Unknown camera model for name: " + settings.getCameraModelName());
+			}
+
+			// Check the width is above the selected size
+			Rectangle modelBounds = cameraModel.getBounds();
+			int size = settings.getSize();
+			if (modelBounds.width < size || modelBounds.height < size)
+			{
+				throw new IllegalArgumentException(String.format(
+						"Camera model bounds [x=%d,y=%d,width=%d,height=%d] is smaller than simulation size [%d]",
+						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, size));
+			}
+
+			// Ask for a crop
+			if (modelBounds.width > size || modelBounds.height > size)
+			{
+				GenericDialog gd = new GenericDialog(TITLE);
+				//@formatter:off
+				gd.addMessage(String.format(
+						"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the simulation size [=%d].\n \nCrop the model?",
+						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, size
+						));
+				//@formatter:on
+				gd.addCheckbox("Random_crop", settings.getRandomCrop());
+				int upperx = modelBounds.width - size;
+				int uppery = modelBounds.height - size;
+				gd.addSlider("Origin_x", 0, upperx, Maths.clip(0, upperx, settings.getOriginX()));
+				gd.addSlider("Origin_y", 0, uppery, Maths.clip(0, uppery, settings.getOriginY()));
+				gd.showDialog();
+				if (gd.wasCanceled())
+					throw new IllegalArgumentException("Unknown camera model crop");
+				settings.setRandomCrop(gd.getNextBoolean());
+				settings.setOriginX((int) gd.getNextNumber());
+				settings.setOriginY((int) gd.getNextNumber());
+				SettingsManager.writeSettings(settings.build());
+
+				int ox, oy;
+				if (settings.getRandomCrop())
+				{
+					RandomGenerator rg = createRandomGenerator();
+					ox = rg.nextInt(upperx + 1);
+					oy = rg.nextInt(uppery + 1);
+				}
+				else
+				{
+					ox = settings.getOriginX();
+					oy = settings.getOriginY();
+				}
+				Rectangle bounds = new Rectangle(ox, oy, size, size);
+				cameraModel = cameraModel.crop(bounds);
+				modelBounds = cameraModel.getBounds();
+				if (modelBounds.width != size || modelBounds.height != size)
+					throw new IllegalArgumentException("Failed to crop camera model to bounds: " + bounds);
+			}
+		}
+		else
+		{
+			throw new IllegalArgumentException(
+					"Unsupported camera type: " + CalibrationProtosHelper.getName(cameraType));
+		}
+	}
+
+	private void addCameraOptions(StringBuffer sb)
+	{
+		CameraType cameraType = settings.getCameraType();
+		boolean isCCD = cameraType == CameraType.CCD || cameraType == CameraType.EMCCD;
+		if (isCCD)
+		{
+			if (cameraType == CameraType.EMCCD)
+				addHeaderLine(sb, "EM_gain", settings.getEmGain());
+			addHeaderLine(sb, "Camera_gain", settings.getCameraGain());
+			addHeaderLine(sb, "Quantum_efficiency", getQuantumEfficiency());
+			addHeaderLine(sb, "Read_noise", settings.getReadNoise());
+			addHeaderLine(sb, "Bias", settings.getBias());
+		}
+		else if (cameraType == CameraType.SCMOS)
+		{
+			addHeaderLine(sb, "Camera_model_name", settings.getCameraModelName());
+			addHeaderLine(sb, "Quantum_efficiency", getQuantumEfficiency());
+		}
+	}
+
+	private double getQuantumEfficiency()
+	{
+		double qe = settings.getQuantumEfficiency();
+		return (qe > 0 && qe < 1) ? qe : 1;
 	}
 
 	/**
@@ -4204,7 +4389,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Fixed length tracks will be drawn, non-overlapping in time. This is the simplest
 		// simulation for moving molecules
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		settings = SettingsManager.readCreateDataSettings(0).toBuilder();
 
@@ -4232,11 +4417,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (extraOptions)
 			gd.addCheckbox("No_poisson_noise", !settings.getPoissonNoise());
 		gd.addNumericField("Background (photons)", settings.getBackground(), 2);
-		gd.addNumericField("EM_gain", settings.getEmGain(), 2);
-		gd.addNumericField("Camera_gain (ADU/e-)", settings.getCameraGain(), 4);
-		gd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2);
-		gd.addNumericField("Read_noise (e-)", settings.getReadNoise(), 2);
-		gd.addNumericField("Bias", settings.getBias(), 0);
+
+		addCameraOptions(gd);
 
 		List<String> imageNames = addPSFOptions(gd);
 
@@ -4351,11 +4533,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			poissonNoise = settings.getPoissonNoise();
 		}
 		settings.setBackground(Math.abs(gd.getNextNumber()));
-		settings.setEmGain(Math.abs(gd.getNextNumber()));
-		settings.setCameraGain(Math.abs(gd.getNextNumber()));
-		settings.setQuantumEfficiency(Math.abs(gd.getNextNumber()));
-		settings.setReadNoise(Math.abs(gd.getNextNumber()));
-		settings.setBias(Math.abs((int) gd.getNextNumber()));
+		settings.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 
 		if (!collectPSFOptions(gd, imageNames))
 			return false;
@@ -4407,6 +4585,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			settings.setMinSnrTN(tmp);
 		}
 
+		gd.collectOptions();
+
 		// Save before validation so that the current values are preserved.
 		SettingsManager.writeSettings(settings.build());
 
@@ -4422,12 +4602,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isAboveZero("Exposure time", settings.getExposureTime());
 			Parameters.isAboveZero("Steps per second", settings.getStepsPerSecond());
 			Parameters.isPositive("Background", settings.getBackground());
-			Parameters.isPositive("EM gain", settings.getEmGain());
-			Parameters.isPositive("Camera gain", settings.getCameraGain());
-			Parameters.isPositive("Read noise", settings.getReadNoise());
-			double noiseRange = settings.getReadNoise() * settings.getCameraGain() * 4;
-			Parameters.isEqualOrAbove("Bias must prevent clipping the read noise (@ +/- 4 StdDev) so ",
-					settings.getBias(), noiseRange);
 			Parameters.isAboveZero("Particles", settings.getParticles());
 			Parameters.isAboveZero("Photons", settings.getPhotonsPerSecond());
 			if (!imagePSF)
@@ -4453,6 +4627,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isPositive("Min SNR tN", settings.getMinSnrTN());
 			Parameters.isPositive("Histogram bins", settings.getHistogramBins());
 			Parameters.isPositive("Density radius", settings.getDensityRadius());
+
+			validateCameraOptions();
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -4472,7 +4648,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			maskImages = createDistributionImageList();
 			if (maskImages != null)
 			{
-				gd = new GenericDialog(TITLE);
+				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Select the mask image for the distribution");
 				gd.addChoice("Distribution_mask", maskImages, settings.getDistributionMask());
 				if (maskListContainsStacks)
@@ -4487,7 +4663,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else if (settings.getDistribution().equals(DISTRIBUTION[GRID]))
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage("Select grid for the distribution");
 			gd.addNumericField("Cell_size", settings.getCellSize(), 0);
 			gd.addSlider("p-binary", 0, 1, settings.getProbabilityBinary());
@@ -4525,7 +4701,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_SPHERE]))
 			{
-				gd = new GenericDialog(TITLE);
+				gd = new ExtendedGenericDialog(TITLE);
 				gd.addMessage("Select the sphere radius for the diffusion confinement");
 				gd.addSlider("Confinement_radius (nm)", 0, 2000, settings.getConfinementRadius());
 				gd.showDialog();
@@ -4539,7 +4715,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					maskImages = createDistributionImageList();
 				if (maskImages != null)
 				{
-					gd = new GenericDialog(TITLE);
+					gd = new ExtendedGenericDialog(TITLE);
 					gd.addMessage("Select the mask image for the diffusion confinement");
 					gd.addChoice("Confinement_mask", maskImages, settings.getConfinementMask());
 					if (maskListContainsStacks)
@@ -4559,7 +4735,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.getCompoundMolecules())
 		{
 			// Show a second dialog where the molecule configuration is specified
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 
 			gd.addMessage("Specify the compound molecules");
 			gd.addTextAreas(settings.getCompoundText(), null, 20, 80);
@@ -4596,7 +4772,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		SettingsManager.writeSettings(settings.build());
 
-		gd = new GenericDialog(TITLE);
+		gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Configure the photon distribution: " + settings.getPhotonDistribution());
 		if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.getPhotonDistribution()))
 		{
