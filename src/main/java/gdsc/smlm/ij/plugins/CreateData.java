@@ -1815,6 +1815,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.getCameraType() == CameraType.SCMOS)
 		{
 			c.setCameraModelName(settings.getCameraModelName());
+			//c.setCountPerPhoton(1.0); // So the results appear 'calibrated'
 		}
 		else
 		{
@@ -2369,7 +2370,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							// This can be used later to compute the Fisher information for each spot.
 							if (poissonNoise)
 							{
-								final int samples = (int) random.nextPoisson(localisation.getIntensity());
+								final int samples = (int) random.nextPoisson(intensity);
 								intensity = samples;
 								photonsRendered = psfModel.sample3D(data, settings.getSize(), settings.getSize(),
 										samples, localisation.getX(), localisation.getY(), localisation.getZ());
@@ -2377,7 +2378,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							}
 							else
 							{
-								intensity = localisation.getIntensity();
 								photonsRendered = psfModel.create3D(data, settings.getSize(), settings.getSize(),
 										intensity, localisation.getX(), localisation.getY(), localisation.getZ(),
 										false);
@@ -4137,16 +4137,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						if (isCCD)
 						{
 							if (cameraType == CameraType.EMCCD)
-								settings.setEmGain(Math.abs(gd.getNextNumber()));
-							settings.setCameraGain(Math.abs(gd.getNextNumber()));
-							settings.setQuantumEfficiency(Math.abs(gd.getNextNumber()));
-							settings.setReadNoise(Math.abs(gd.getNextNumber()));
-							settings.setBias(Math.abs((int) gd.getNextNumber()));
+								settings.setEmGain(Math.abs(egd.getNextNumber()));
+							settings.setCameraGain(Math.abs(egd.getNextNumber()));
+							settings.setQuantumEfficiency(Math.abs(egd.getNextNumber()));
+							settings.setReadNoise(Math.abs(egd.getNextNumber()));
+							settings.setBias(Math.abs((int) egd.getNextNumber()));
 						}
 						else if (cameraType == CameraType.SCMOS)
 						{
 							settings.setCameraModelName(egd.getNextChoice());
-							settings.setQuantumEfficiency(Math.abs(gd.getNextNumber()));
+							settings.setQuantumEfficiency(Math.abs(egd.getNextNumber()));
 						}
 						return true;
 					}
@@ -5326,6 +5326,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Get this from the user
 		double b = -1;
 
+		// TODO - Support sCMOS camera simulations
+		
 		// Use last simulation parameters for missing settings.
 		// This is good if we are re-running the plugin to load data.
 		if (simulationParameters != null && simulationParameters.isLoaded())
