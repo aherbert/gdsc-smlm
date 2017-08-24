@@ -105,7 +105,7 @@ public class Gaussian2DPeakResultHelper
 			if (toPixel == null)
 			{
 				if (calibration == null)
-					throw new ConfigurationException("Not a valid calibration");
+					throw new ConfigurationException("No calibration");
 				toPixel = calibration.getDistanceConverter(DistanceUnit.PIXEL);
 			}
 
@@ -123,8 +123,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
-					throw new ConfigurationException("Not a valid calibration");
+				checkLSEPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -135,13 +134,22 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
+		private void checkLSEPrecisionCalibration()
+		{
+			if (calibration == null)
+				throw new ConfigurationException("No calibration");
+			if (!calibration.hasNmPerPixel())
+				throw new ConfigurationException("Not a valid calibration: nm/pixel is required");
+			if (!isCCD(calibration))
+				throw new ConfigurationException("Not a valid calibration: CCD/EM-CCD camera type is required");
+		}
+
 		public double getLSEPrecision(float[] params) throws ConfigurationException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
-					throw new ConfigurationException("Not a valid calibration");
+				checkLSEPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -158,8 +166,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
-					throw new ConfigurationException("Not a valid calibration");
+				checkLSEPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -175,8 +182,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
-					throw new ConfigurationException("Not a valid calibration");
+				checkLSEPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -193,8 +199,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
-					throw new ConfigurationException("Not a valid calibration");
+				checkLSEPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -210,8 +215,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
-					throw new ConfigurationException("Not a valid calibration");
+				checkLSEPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -228,8 +232,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
-					throw new ConfigurationException("Not a valid calibration");
+				checkLSEPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -245,8 +248,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				if (calibration == null || !calibration.hasNmPerPixel() || !isCCD(calibration))
-					throw new ConfigurationException("Not a valid calibration");
+				checkLSEPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
