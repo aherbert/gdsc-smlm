@@ -770,7 +770,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addChoice("Template", templates, templates[0]);
 
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
-		addCameraOptions(gd, false, new CalibrationProvider()
+		addCameraOptions(gd, 0, new CalibrationProvider()
 		{
 			public CalibrationWriter getCalibrationWriter()
 			{
@@ -1089,7 +1089,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	public static void addCameraOptions(final ExtendedGenericDialog gd, final CalibrationWriter calibration)
 	{
-		addCameraOptions(gd, false, new CalibrationProvider()
+		addCameraOptions(gd, 0, new CalibrationProvider()
 		{
 			public CalibrationWriter getCalibrationWriter()
 			{
@@ -1103,15 +1103,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 *
 	 * @param gd
 	 *            the gd
-	 * @param allOptions
-	 *            the all options flag
+	 * @param options
+	 *            the options
 	 * @param calibration
 	 *            the calibration
 	 */
-	public static void addCameraOptions(final ExtendedGenericDialog gd, final boolean allOptions,
+	public static void addCameraOptions(final ExtendedGenericDialog gd, final int options,
 			final CalibrationWriter calibration)
 	{
-		addCameraOptions(gd, allOptions, new CalibrationProvider()
+		addCameraOptions(gd, options, new CalibrationProvider()
 		{
 			public CalibrationWriter getCalibrationWriter()
 			{
@@ -1120,15 +1120,22 @@ public class PeakFit implements PlugInFilter, ItemListener
 		});
 	}
 
+	/** Flag to indicate that read noise should be configured. */
+	public static final int FLAG_READ_NOISE = 0x00000001;
+	/** Flag to indicate that amplification should be configured. */
+	public static final int FLAG_AMPLIFICATION = 0x00000002;
+
 	/**
 	 * Adds the camera options.
 	 *
 	 * @param gd
 	 *            the gd
+	 * @param options
+	 *            the options
 	 * @param calibrationProvider
 	 *            the calibration provider
 	 */
-	public static void addCameraOptions(final ExtendedGenericDialog gd, final boolean allOptions,
+	public static void addCameraOptions(final ExtendedGenericDialog gd, final int options,
 			final CalibrationProvider calibrationProvider)
 	{
 		CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
@@ -1152,12 +1159,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 						{
 							egd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
 							egd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
-							if (allOptions)
-							{
+							if (BitFlags.areSet(options, FLAG_READ_NOISE))
 								egd.addNumericField("Read_noise (Count)", calibration.getReadNoise(), 2);
+							if (BitFlags.areSet(options, FLAG_AMPLIFICATION))
 								egd.addNumericField("Amplification (Count/electron)", calibration.getCountPerElectron(),
 										2);
-							}
 						}
 						else if (calibration.isSCMOS())
 						{
@@ -1177,11 +1183,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 						{
 							calibration.setBias(Math.abs(egd.getNextNumber()));
 							calibration.setCountPerPhoton(Math.abs(egd.getNextNumber()));
-							if (allOptions)
-							{
+							if (BitFlags.areSet(options, FLAG_READ_NOISE))
 								calibration.setReadNoise(Math.abs(egd.getNextNumber()));
+							if (BitFlags.areSet(options, FLAG_AMPLIFICATION))
 								calibration.setCountPerElectron(Math.abs(egd.getNextNumber()));
-							}
 						}
 						else if (calibration.isSCMOS())
 						{

@@ -101,7 +101,7 @@ public class CalibrateResults implements PlugIn
 		gd.addStringField("Name", results.getName(), Math.max(Math.min(results.getName().length(), 60), 20));
 		if (existingCalibration)
 			gd.addCheckbox("Update_all_linked_results", updateAll);
-		PeakFit.addCameraOptions(gd, true, cw);
+		PeakFit.addCameraOptions(gd, PeakFit.FLAG_AMPLIFICATION | PeakFit.FLAG_READ_NOISE, cw);
 		gd.addNumericField("Calibration (nm/px)", cw.getNmPerPixel(), 2);
 		gd.addNumericField("Exposure_time (ms)", cw.getExposureTime(), 2);
 
@@ -129,7 +129,7 @@ public class CalibrateResults implements PlugIn
 		cw.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		cw.setNmPerPixel(Math.abs(gd.getNextNumber()));
 		cw.setExposureTime(Math.abs(gd.getNextNumber()));
-		
+
 		gd.collectOptions();
 
 		Calibration newCalibration = cw.getCalibration();
