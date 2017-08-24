@@ -67,7 +67,6 @@ import gdsc.smlm.results.PeakResultsReader;
 import gdsc.smlm.results.ResultOption;
 import gdsc.smlm.results.TSFPeakResultsWriter;
 import gdsc.smlm.results.TextFilePeakResults;
-import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import ij.IJ;
 import ij.Prefs;
@@ -127,7 +126,6 @@ public class ResultsManager implements PlugIn
 	private static double input_nmPerPixel = Prefs.get(Constants.inputNmPerPixel, 0);
 	private static double input_gain = Prefs.get(Constants.inputGain, 1);
 	private static double input_exposureTime = Prefs.get(Constants.inputExposureTime, 0);
-	private static float input_noise = (float) Prefs.get(Constants.inputNoise, 0);
 	private static ArrayList<String> selected;
 
 	/*
@@ -1258,92 +1256,85 @@ public class ResultsManager implements PlugIn
 		// Check for Calibration
 		CalibrationWriter calibration = results.getCalibrationWriterSafe();
 		String msg = "partially calibrated";
-		if (results.hasCalibration())
+		if (!results.hasCalibration())
 		{
 			// Make sure the user knows all the values have not been set
 			msg = "uncalibrated";
 		}
 
 		// Only check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification)
-		if (!calibration.hasNmPerPixel() || !calibration.hasCountPerPhoton() || !calibration.hasExposureTime())
+		boolean missing = false;
+		if (!calibration.hasNmPerPixel())
 		{
-			final float noise = getNoise(results);
+			missing = true;
+			calibration.setNmPerPixel(input_nmPerPixel);
+		}
+		if (!calibration.hasExposureTime())
+		{
+			missing = true;
+			calibration.setExposureTime(input_exposureTime);
+		}
+		if (!calibration.hasDistanceUnit())
+			missing = true;
+		if (!calibration.hasIntensityUnit())
+			missing = true;
 
-			if (!calibration.hasNmPerPixel())
-				calibration.setNmPerPixel(input_nmPerPixel);
-			if (!calibration.hasCountPerPhoton())
+		switch (calibration.getCameraType())
+		{
+			case CCD:
+			case EMCCD:
+				// Count-per-photon is required for CCD camera types
+				missing |= !calibration.hasCountPerPhoton();
 				calibration.setCountPerPhoton(input_gain);
-			if (!calibration.hasExposureTime())
-				calibration.setExposureTime(input_exposureTime);
+				break;
+			case SCMOS:
+				break;
+			case CAMERA_TYPE_NA:
+			case UNRECOGNIZED:
+			default:
+				missing = true;
+		}
 
+		if (missing)
+		{
 			Rectangle2D.Float dataBounds = results.getDataBounds(null);
 
-			GenericDialog gd = new GenericDialog(TITLE);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			gd.addMessage(
 					String.format("Results are %s.\nData bounds = (%s,%s) to (%s,%s)", msg, Utils.rounded(dataBounds.x),
 							Utils.rounded(dataBounds.y), Utils.rounded(dataBounds.y + dataBounds.getWidth()),
 							Utils.rounded(dataBounds.x + dataBounds.getHeight())));
+			gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(),
+					calibration.getDistanceUnit().getNumber());
+			gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(),
+					calibration.getIntensityUnit().getNumber());
 			gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
-			gd.addNumericField("Gain (ADU/photon)", calibration.getCountPerPhoton(), 2);
 			gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
-			if (noise <= 0)
-				gd.addNumericField("Noise (ADU)", input_noise, 2);
+			PeakFit.addCameraOptions(gd, calibration);
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
-			input_nmPerPixel = Math.abs(gd.getNextNumber());
-			input_gain = Math.abs(gd.getNextNumber());
-			input_exposureTime = Math.abs(gd.getNextNumber());
-			if (noise <= 0)
-				input_noise = Math.abs((float) gd.getNextNumber());
+			calibration.setDistanceUnit(SettingsManager.getDistanceUnitValues()[gd.getNextChoiceIndex()]);
+			calibration.setIntensityUnit(SettingsManager.getIntensityUnitValues()[gd.getNextChoiceIndex()]);
+			calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
+			calibration.setExposureTime(Math.abs(gd.getNextNumber()));
 
+			gd.collectOptions();
+
+			// Save for next time ...
+			input_nmPerPixel = calibration.getNmPerPixel();
+			input_exposureTime = calibration.getExposureTime();
 			Prefs.set(Constants.inputNmPerPixel, input_nmPerPixel);
-			Prefs.set(Constants.inputGain, input_gain);
 			Prefs.set(Constants.inputExposureTime, input_exposureTime);
-			Prefs.set(Constants.inputNoise, input_noise);
-
-			calibration.setNmPerPixel(input_nmPerPixel);
-			calibration.setCountPerPhoton(input_gain);
-			calibration.setExposureTime(input_exposureTime);
+			if (calibration.isCCDCamera())
+			{
+				input_gain = calibration.getCountPerPhoton();
+				Prefs.set(Constants.inputGain, input_gain);
+			}
 
 			results.setCalibration(calibration.getCalibration());
-
-			if (noise == 0)
-			{
-				results.forEach(new PeakResultProcedure()
-				{
-					public void execute(PeakResult p)
-					{
-						p.noise = input_noise;
-					}
-				});
-			}
 		}
 		return true;
-	}
-
-	/**
-	 * get the first non-zero noise value
-	 * 
-	 * @param results
-	 * @return The noise (zero if no results have a noise value)
-	 */
-	private static float getNoise(MemoryPeakResults results)
-	{
-		final float[] noise = new float[1];
-		results.forEach(new PeakResultProcedureX()
-		{
-			public boolean execute(PeakResult r)
-			{
-				if (r.noise != 0)
-				{
-					noise[0] = r.noise;
-					return true;
-				}
-				return false;
-			}
-		});
-		return noise[0];
 	}
 
 	/**
