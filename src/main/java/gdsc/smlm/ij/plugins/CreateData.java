@@ -871,6 +871,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private void reportAndSaveFittingLimits(SpatialDistribution dist)
 	{
+		// TODO - fix this
+		
 		final double totalGain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
 
 		// Background is in photons
@@ -974,6 +976,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private void saveSimulationParameters(int particles, boolean fullSimulation, double signalPerFrame)
 	{
+		// TODO - fix this
+		
 		final double totalGain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
 
 		// Background is in photons
