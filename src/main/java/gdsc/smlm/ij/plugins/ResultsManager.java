@@ -1321,6 +1321,21 @@ public class ResultsManager implements PlugIn
 
 			gd.collectOptions();
 
+			// Validate
+			switch (calibration.getCameraType())
+			{
+				case CCD:
+				case EMCCD:
+					break;
+				case SCMOS:
+					calibration.clearGlobalCameraSettings();
+					break;
+				case CAMERA_TYPE_NA:
+				case UNRECOGNIZED:
+				default:
+					missing = true;
+			}
+
 			// Save for next time ...
 			input_nmPerPixel = calibration.getNmPerPixel();
 			input_exposureTime = calibration.getExposureTime();

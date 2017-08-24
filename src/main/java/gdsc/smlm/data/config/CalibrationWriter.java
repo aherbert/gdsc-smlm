@@ -290,4 +290,19 @@ public class CalibrationWriter extends CalibrationReader
 		else
 			getBuilder().getAngleCalibrationBuilder().setAngleUnit(angleUnit);
 	}
+
+	/**
+	 * Clear global camera settings. This should be used to remove the global camera settings, e.g. bias, read noise,
+	 * count/photon, for example when a per-pixel camera model is used such as sCMOS camera type.
+	 */
+	public void clearGlobalCameraSettings()
+	{
+		setBias(0);
+		setCountPerElectron(0);
+		setReadNoise(0);
+		// Note that we could use an average gain here but the concept
+		// of converting the photons back to per-pixel counts is invalid
+		// so for clarity this is set to 0
+		setCountPerPhoton(0);
+	}
 }

@@ -3274,22 +3274,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// Use this to set the bias and gain
 		if (cameraModel != null && cameraModel.isPerPixelModel())
 		{
-			// Remove global calibration
-
-			calibration.setBias(0);
-			calibration.setCountPerElectron(0);
-			calibration.setReadNoise(0);
-			// Note that we could use an average gain here but the concept
-			// of converting the photons back to per-pixel counts is invalid
-			// so for clarity this is set to 0
-			calibration.setCountPerPhoton(0);
-
-			// These update the state, so we directly set the calibration 
-			// and then update the state.
-			//setBias(0);
-			//setAmplification(0);
-			//setReadNoise(0);
-			//setGain(0);
+			calibration.clearGlobalCameraSettings();
 
 			// Trigger an update to the calibration used for validation.
 			updateCalibration();
