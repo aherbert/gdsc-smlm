@@ -129,4 +129,37 @@ public interface CameraModel
 	 *            the data
 	 */
 	public void removeBiasAndGain(Rectangle bounds, float[] data);
+
+	/**
+	 * Apply the per-pixel camera bias (offset) to the crop of the camera data. The bounds are expected to fit
+	 * within the camera bounds.
+	 *
+	 * @param bounds
+	 *            the bounds of the data.
+	 * @param data
+	 *            the data
+	 */
+	public void applyBias(Rectangle bounds, float[] data);
+
+	/**
+	 * Apply the per-pixel gain to the crop of the camera data. The bounds are expected to fit within the camera
+	 * bounds.
+	 *
+	 * @param bounds
+	 *            the bounds of the data.
+	 * @param data
+	 *            the data
+	 */
+	public void applyGain(Rectangle bounds, float[] data);
+
+	/**
+	 * Apply the per-pixel gain and camera bias (offset) to the crop of the camera data. The bounds are expected to
+	 * fit within the camera bounds.
+	 *
+	 * @param bounds
+	 *            the bounds of the data.
+	 * @param data
+	 *            the data
+	 */
+	public void applyGainAndBias(Rectangle bounds, float[] data);
 }

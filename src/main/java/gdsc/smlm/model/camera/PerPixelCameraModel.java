@@ -564,6 +564,58 @@ public class PerPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(java.awt.Rectangle, float[])
+	 */
+	public void applyBias(Rectangle bounds, float[] data)
+	{
+		if (data == null)
+			return;
+		Rectangle intersection = getIntersection(bounds);
+		float[] bias = getData(this.bias, intersection, false);
+		if (data.length != bias.length)
+			throw new IllegalArgumentException("Bounds must match the data size");
+		for (int i = 0; i < data.length; i++)
+			data[i] += bias[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(java.awt.Rectangle, float[])
+	 */
+	public void applyGain(Rectangle bounds, float[] data)
+	{
+		if (data == null)
+			return;
+		Rectangle intersection = getIntersection(bounds);
+		float[] gain = getData(this.gain, intersection, false);
+		if (data.length != gain.length)
+			throw new IllegalArgumentException("Bounds must match the data size");
+		for (int i = 0; i < data.length; i++)
+			data[i] *= gain[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(java.awt.Rectangle, float[])
+	 */
+	public void applyGainAndBias(Rectangle bounds, float[] data)
+	{
+		if (data == null)
+			return;
+		Rectangle intersection = getIntersection(bounds);
+		float[] bias = getData(this.bias, intersection, false);
+		if (data.length != bias.length)
+			throw new IllegalArgumentException("Bounds must match the data size");
+		float[] gain = getData(this.gain, intersection, false);
+		for (int i = 0; i < data.length; i++)
+			data[i] = data[i] * gain[i] + bias[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle)
 	 */
 	public CameraModel crop(Rectangle bounds)

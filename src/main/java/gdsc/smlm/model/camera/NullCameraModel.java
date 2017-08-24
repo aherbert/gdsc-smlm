@@ -132,6 +132,33 @@ public class NullCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(java.awt.Rectangle, float[])
+	 */
+	public void applyBias(Rectangle bounds, float[] data)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(java.awt.Rectangle, float[])
+	 */
+	public void applyGain(Rectangle bounds, float[] data)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(java.awt.Rectangle, float[])
+	 */
+	public void applyGainAndBias(Rectangle bounds, float[] data)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.model.camera.BaseCameraModel#copy()
 	 */
 	@Override
