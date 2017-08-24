@@ -3676,6 +3676,66 @@ public final class GUIProtos {
      * <code>double z_position = 79;</code>
      */
     double getZPosition();
+
+    /**
+     * <pre>
+     * The camera type.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
+     */
+    int getCameraTypeValue();
+    /**
+     * <pre>
+     * The camera type.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
+     */
+    gdsc.smlm.data.config.CalibrationProtos.CameraType getCameraType();
+
+    /**
+     * <pre>
+     * The camera model name. This should contain all the information required to 
+     * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+     * </pre>
+     *
+     * <code>string camera_model_name = 81;</code>
+     */
+    java.lang.String getCameraModelName();
+    /**
+     * <pre>
+     * The camera model name. This should contain all the information required to 
+     * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+     * </pre>
+     *
+     * <code>string camera_model_name = 81;</code>
+     */
+    com.google.protobuf.ByteString
+        getCameraModelNameBytes();
+
+    /**
+     * <code>bool random_crop = 82;</code>
+     */
+    boolean getRandomCrop();
+
+    /**
+     * <pre>
+     * The origin x-coordinate used to crop the model
+     * </pre>
+     *
+     * <code>int32 origin_x = 83;</code>
+     */
+    int getOriginX();
+
+    /**
+     * <pre>
+     * The origin y-coordinate used to crop the model
+     * </pre>
+     *
+     * <code>int32 origin_y = 84;</code>
+     */
+    int getOriginY();
   }
   /**
    * <pre>
@@ -3772,6 +3832,11 @@ public final class GUIProtos {
       xPosition_ = 0D;
       yPosition_ = 0D;
       zPosition_ = 0D;
+      cameraType_ = 0;
+      cameraModelName_ = "";
+      randomCrop_ = false;
+      originX_ = 0;
+      originY_ = 0;
     }
 
     @java.lang.Override
@@ -4208,6 +4273,33 @@ public final class GUIProtos {
             case 633: {
 
               zPosition_ = input.readDouble();
+              break;
+            }
+            case 640: {
+              int rawValue = input.readEnum();
+
+              cameraType_ = rawValue;
+              break;
+            }
+            case 650: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              cameraModelName_ = s;
+              break;
+            }
+            case 656: {
+
+              randomCrop_ = input.readBool();
+              break;
+            }
+            case 664: {
+
+              originX_ = input.readInt32();
+              break;
+            }
+            case 672: {
+
+              originY_ = input.readInt32();
               break;
             }
           }
@@ -5343,6 +5435,109 @@ public final class GUIProtos {
       return zPosition_;
     }
 
+    public static final int CAMERA_TYPE_FIELD_NUMBER = 80;
+    private int cameraType_;
+    /**
+     * <pre>
+     * The camera type.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
+     */
+    public int getCameraTypeValue() {
+      return cameraType_;
+    }
+    /**
+     * <pre>
+     * The camera type.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
+     */
+    public gdsc.smlm.data.config.CalibrationProtos.CameraType getCameraType() {
+      gdsc.smlm.data.config.CalibrationProtos.CameraType result = gdsc.smlm.data.config.CalibrationProtos.CameraType.valueOf(cameraType_);
+      return result == null ? gdsc.smlm.data.config.CalibrationProtos.CameraType.UNRECOGNIZED : result;
+    }
+
+    public static final int CAMERA_MODEL_NAME_FIELD_NUMBER = 81;
+    private volatile java.lang.Object cameraModelName_;
+    /**
+     * <pre>
+     * The camera model name. This should contain all the information required to 
+     * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+     * </pre>
+     *
+     * <code>string camera_model_name = 81;</code>
+     */
+    public java.lang.String getCameraModelName() {
+      java.lang.Object ref = cameraModelName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cameraModelName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The camera model name. This should contain all the information required to 
+     * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+     * </pre>
+     *
+     * <code>string camera_model_name = 81;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCameraModelNameBytes() {
+      java.lang.Object ref = cameraModelName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cameraModelName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RANDOM_CROP_FIELD_NUMBER = 82;
+    private boolean randomCrop_;
+    /**
+     * <code>bool random_crop = 82;</code>
+     */
+    public boolean getRandomCrop() {
+      return randomCrop_;
+    }
+
+    public static final int ORIGIN_X_FIELD_NUMBER = 83;
+    private int originX_;
+    /**
+     * <pre>
+     * The origin x-coordinate used to crop the model
+     * </pre>
+     *
+     * <code>int32 origin_x = 83;</code>
+     */
+    public int getOriginX() {
+      return originX_;
+    }
+
+    public static final int ORIGIN_Y_FIELD_NUMBER = 84;
+    private int originY_;
+    /**
+     * <pre>
+     * The origin y-coordinate used to crop the model
+     * </pre>
+     *
+     * <code>int32 origin_y = 84;</code>
+     */
+    public int getOriginY() {
+      return originY_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -5591,6 +5786,21 @@ public final class GUIProtos {
       }
       if (zPosition_ != 0D) {
         output.writeDouble(79, zPosition_);
+      }
+      if (cameraType_ != gdsc.smlm.data.config.CalibrationProtos.CameraType.CAMERA_TYPE_NA.getNumber()) {
+        output.writeEnum(80, cameraType_);
+      }
+      if (!getCameraModelNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 81, cameraModelName_);
+      }
+      if (randomCrop_ != false) {
+        output.writeBool(82, randomCrop_);
+      }
+      if (originX_ != 0) {
+        output.writeInt32(83, originX_);
+      }
+      if (originY_ != 0) {
+        output.writeInt32(84, originY_);
       }
     }
 
@@ -5901,6 +6111,25 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(79, zPosition_);
       }
+      if (cameraType_ != gdsc.smlm.data.config.CalibrationProtos.CameraType.CAMERA_TYPE_NA.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(80, cameraType_);
+      }
+      if (!getCameraModelNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(81, cameraModelName_);
+      }
+      if (randomCrop_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(82, randomCrop_);
+      }
+      if (originX_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(83, originX_);
+      }
+      if (originY_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(84, originY_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -6155,6 +6384,15 @@ public final class GUIProtos {
           java.lang.Double.doubleToLongBits(getZPosition())
           == java.lang.Double.doubleToLongBits(
               other.getZPosition()));
+      result = result && cameraType_ == other.cameraType_;
+      result = result && getCameraModelName()
+          .equals(other.getCameraModelName());
+      result = result && (getRandomCrop()
+          == other.getRandomCrop());
+      result = result && (getOriginX()
+          == other.getOriginX());
+      result = result && (getOriginY()
+          == other.getOriginY());
       return result;
     }
 
@@ -6381,6 +6619,17 @@ public final class GUIProtos {
       hash = (37 * hash) + Z_POSITION_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getZPosition()));
+      hash = (37 * hash) + CAMERA_TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + cameraType_;
+      hash = (37 * hash) + CAMERA_MODEL_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getCameraModelName().hashCode();
+      hash = (37 * hash) + RANDOM_CROP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRandomCrop());
+      hash = (37 * hash) + ORIGIN_X_FIELD_NUMBER;
+      hash = (53 * hash) + getOriginX();
+      hash = (37 * hash) + ORIGIN_Y_FIELD_NUMBER;
+      hash = (53 * hash) + getOriginY();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -6672,6 +6921,16 @@ public final class GUIProtos {
 
         zPosition_ = 0D;
 
+        cameraType_ = 0;
+
+        cameraModelName_ = "";
+
+        randomCrop_ = false;
+
+        originX_ = 0;
+
+        originY_ = 0;
+
         return this;
       }
 
@@ -6773,6 +7032,11 @@ public final class GUIProtos {
         result.xPosition_ = xPosition_;
         result.yPosition_ = yPosition_;
         result.zPosition_ = zPosition_;
+        result.cameraType_ = cameraType_;
+        result.cameraModelName_ = cameraModelName_;
+        result.randomCrop_ = randomCrop_;
+        result.originX_ = originX_;
+        result.originY_ = originY_;
         onBuilt();
         return result;
       }
@@ -7064,6 +7328,22 @@ public final class GUIProtos {
         }
         if (other.getZPosition() != 0D) {
           setZPosition(other.getZPosition());
+        }
+        if (other.cameraType_ != 0) {
+          setCameraTypeValue(other.getCameraTypeValue());
+        }
+        if (!other.getCameraModelName().isEmpty()) {
+          cameraModelName_ = other.cameraModelName_;
+          onChanged();
+        }
+        if (other.getRandomCrop() != false) {
+          setRandomCrop(other.getRandomCrop());
+        }
+        if (other.getOriginX() != 0) {
+          setOriginX(other.getOriginX());
+        }
+        if (other.getOriginY() != 0) {
+          setOriginY(other.getOriginY());
         }
         onChanged();
         return this;
@@ -9885,6 +10165,266 @@ public final class GUIProtos {
       public Builder clearZPosition() {
         
         zPosition_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int cameraType_ = 0;
+      /**
+       * <pre>
+       * The camera type.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
+       */
+      public int getCameraTypeValue() {
+        return cameraType_;
+      }
+      /**
+       * <pre>
+       * The camera type.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
+       */
+      public Builder setCameraTypeValue(int value) {
+        cameraType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The camera type.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
+       */
+      public gdsc.smlm.data.config.CalibrationProtos.CameraType getCameraType() {
+        gdsc.smlm.data.config.CalibrationProtos.CameraType result = gdsc.smlm.data.config.CalibrationProtos.CameraType.valueOf(cameraType_);
+        return result == null ? gdsc.smlm.data.config.CalibrationProtos.CameraType.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The camera type.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
+       */
+      public Builder setCameraType(gdsc.smlm.data.config.CalibrationProtos.CameraType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        cameraType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The camera type.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.CameraType camera_type = 80;</code>
+       */
+      public Builder clearCameraType() {
+        
+        cameraType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cameraModelName_ = "";
+      /**
+       * <pre>
+       * The camera model name. This should contain all the information required to 
+       * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+       * </pre>
+       *
+       * <code>string camera_model_name = 81;</code>
+       */
+      public java.lang.String getCameraModelName() {
+        java.lang.Object ref = cameraModelName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cameraModelName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The camera model name. This should contain all the information required to 
+       * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+       * </pre>
+       *
+       * <code>string camera_model_name = 81;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCameraModelNameBytes() {
+        java.lang.Object ref = cameraModelName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cameraModelName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The camera model name. This should contain all the information required to 
+       * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+       * </pre>
+       *
+       * <code>string camera_model_name = 81;</code>
+       */
+      public Builder setCameraModelName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        cameraModelName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The camera model name. This should contain all the information required to 
+       * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+       * </pre>
+       *
+       * <code>string camera_model_name = 81;</code>
+       */
+      public Builder clearCameraModelName() {
+        
+        cameraModelName_ = getDefaultInstance().getCameraModelName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The camera model name. This should contain all the information required to 
+       * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+       * </pre>
+       *
+       * <code>string camera_model_name = 81;</code>
+       */
+      public Builder setCameraModelNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        cameraModelName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean randomCrop_ ;
+      /**
+       * <code>bool random_crop = 82;</code>
+       */
+      public boolean getRandomCrop() {
+        return randomCrop_;
+      }
+      /**
+       * <code>bool random_crop = 82;</code>
+       */
+      public Builder setRandomCrop(boolean value) {
+        
+        randomCrop_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool random_crop = 82;</code>
+       */
+      public Builder clearRandomCrop() {
+        
+        randomCrop_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int originX_ ;
+      /**
+       * <pre>
+       * The origin x-coordinate used to crop the model
+       * </pre>
+       *
+       * <code>int32 origin_x = 83;</code>
+       */
+      public int getOriginX() {
+        return originX_;
+      }
+      /**
+       * <pre>
+       * The origin x-coordinate used to crop the model
+       * </pre>
+       *
+       * <code>int32 origin_x = 83;</code>
+       */
+      public Builder setOriginX(int value) {
+        
+        originX_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The origin x-coordinate used to crop the model
+       * </pre>
+       *
+       * <code>int32 origin_x = 83;</code>
+       */
+      public Builder clearOriginX() {
+        
+        originX_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int originY_ ;
+      /**
+       * <pre>
+       * The origin y-coordinate used to crop the model
+       * </pre>
+       *
+       * <code>int32 origin_y = 84;</code>
+       */
+      public int getOriginY() {
+        return originY_;
+      }
+      /**
+       * <pre>
+       * The origin y-coordinate used to crop the model
+       * </pre>
+       *
+       * <code>int32 origin_y = 84;</code>
+       */
+      public Builder setOriginY(int value) {
+        
+        originY_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The origin y-coordinate used to crop the model
+       * </pre>
+       *
+       * <code>int32 origin_y = 84;</code>
+       */
+      public Builder clearOriginY() {
+        
+        originY_ = 0;
         onChanged();
         return this;
       }
@@ -16021,111 +16561,115 @@ public final class GUIProtos {
   static {
     java.lang.String[] descriptorData = {
       "\n\tgui.proto\022\025gdsc.smlm.data.config\032\nunit" +
-      ".proto\"\212\002\n\021GUIFilterSettings\022\021\n\tmax_drif" +
-      "t\030\001 \001(\002\022\022\n\nmin_signal\030\002 \001(\002\022\017\n\007min_snr\030\003" +
-      " \001(\002\022\025\n\rmax_precision\030\004 \001(\001\022\021\n\tmax_width" +
-      "\030\005 \001(\002\022\021\n\tmin_width\030\006 \001(\002\022\022\n\nmask_title\030" +
-      "\007 \001(\t\022\023\n\013free_filter\030\010 \001(\t\022\027\n\017filter_tem" +
-      "plate\030\t \001(\t\022!\n\031filter_analysis_directory" +
-      "\030\n \001(\t\022\033\n\023filter_set_filename\030\013 \001(\t\"\314\001\n\025" +
-      "PSFCalculatorSettings\022\023\n\013pixel_pitch\030\001 \001" +
-      "(\001\022\025\n\rmagnification\030\002 \001(\001\022\025\n\rbeam_expand",
-      "er\030\003 \001(\001\022\022\n\nwavelength\030\004 \001(\001\022\032\n\022numerica" +
-      "l_aperture\030\005 \001(\001\022 \n\030adjust_for_square_pi" +
-      "xels\030\006 \001(\010\022\036\n\026proportionality_factor\030\007 \001" +
-      "(\001\"\273\001\n\024PSFEstimatorSettings\022\027\n\017number_of" +
-      "_peaks\030\001 \001(\005\022\017\n\007p_value\030\002 \001(\001\022\032\n\022update_" +
-      "preferences\030\003 \001(\010\022\033\n\023debug_psf_estimator" +
-      "\030\004 \001(\010\022\017\n\007iterate\030\005 \001(\010\022\027\n\017show_histogra" +
-      "ms\030\006 \001(\010\022\026\n\016histogram_bins\030\007 \001(\005\"\367\016\n\022Cre" +
-      "ateDataSettings\022\014\n\004size\030\001 \001(\005\022\r\n\005depth\030\002" +
-      " \001(\001\022\023\n\013fixed_Depth\030\003 \001(\010\022\017\n\007seconds\030\004 \001",
-      "(\001\022\025\n\rexposure_time\030\005 \001(\001\022\030\n\020steps_per_s" +
-      "econd\030\006 \001(\001\022\024\n\014illumination\030\007 \001(\t\022\030\n\020bac" +
-      "kground_image\030\010 \001(\t\022\024\n\014distribution\030\t \001(" +
-      "\t\022\031\n\021distribution_mask\030\n \001(\t\022%\n\035distribu" +
-      "tion_mask_slice_depth\030\013 \001(\001\022\025\n\rpoisson_n" +
-      "oise\030\014 \001(\010\022\022\n\nbackground\030\r \001(\001\022\017\n\007em_gai" +
-      "n\030\016 \001(\001\022\023\n\013camera_gain\030\017 \001(\001\022\032\n\022quantum_" +
-      "efficiency\030\020 \001(\001\022\022\n\nread_noise\030\021 \001(\001\022\014\n\004" +
-      "bias\030\022 \001(\005\022\021\n\tparticles\030\023 \001(\005\022\030\n\020sample_" +
-      "per_frame\030\024 \001(\010\022\032\n\022photons_per_second\030\025 ",
-      "\001(\001\022\"\n\032photons_per_second_maximum\030\026 \001(\001\022" +
-      "\033\n\023photon_distribution\030\027 \001(\t\022 \n\030photon_d" +
-      "istribution_file\030\030 \001(\t\022\024\n\014photon_shape\030\031" +
-      " \001(\001\022\023\n\013correlation\030\032 \001(\001\022\021\n\tpsf_model\030\033" +
-      " \001(\t\022\026\n\016psf_image_name\030\034 \001(\t\022\023\n\013enter_wi" +
-      "dth\030\035 \001(\010\022\022\n\nwavelength\030\036 \001(\001\022\032\n\022numeric" +
-      "al_aperture\030\037 \001(\001\022\016\n\006psf_sd\030  \001(\001\022\023\n\013pix" +
-      "el_pitch\030! \001(\001\022\017\n\007density\030\" \001(\001\022\026\n\016diffu" +
-      "sion_rate\030# \001(\001\022\026\n\016diffusion_type\030$ \001(\005\022" +
-      "\032\n\022compound_molecules\030% \001(\010\022\025\n\rcompound_",
-      "text\030& \001(\t\022\022\n\ndiffuse_2D\030\' \001(\010\022\"\n\032rotate" +
-      "_initial_orientation\030( \001(\010\022 \n\030rotate_dur" +
-      "ing_simulation\030) \001(\010\022\021\n\trotate_2D\030* \001(\010\022" +
-      "\025\n\rfixedFraction\030+ \001(\001\022\023\n\013confinement\030, " +
-      "\001(\t\022\030\n\020confinement_mask\030- \001(\t\022$\n\034confine" +
-      "ment_mask_slice_depth\030. \001(\001\022\032\n\022confineme" +
-      "nt_radius\030/ \001(\001\022\026\n\016pulse_interval\0300 \001(\005\022" +
-      "\023\n\013pulse_ratio\0301 \001(\001\022\014\n\004t_on\0302 \001(\001\022\023\n\013t_" +
-      "off_short\0303 \001(\001\022\022\n\nt_off_long\0304 \001(\001\022\026\n\016n" +
-      "_blinks_short\0305 \001(\001\022\025\n\rn_blinks_long\0306 \001",
-      "(\001\022\'\n\037n_blinks_geometric_distribution\0307 " +
-      "\001(\010\022\023\n\013min_photons\0308 \001(\001\022\022\n\nmin_snr_t1\0309" +
-      " \001(\001\022\022\n\nmin_snr_tN\030: \001(\001\022\021\n\traw_image\030; " +
-      "\001(\010\022\022\n\nsave_image\030< \001(\010\022\032\n\022save_image_re" +
-      "sults\030= \001(\010\022\032\n\022save_localisations\030> \001(\010\022" +
-      "\031\n\021save_fluorophores\030? \001(\010\022\026\n\016image_file" +
-      "name\030@ \001(\t\022\036\n\026image_results_filename\030A \001" +
-      "(\t\022\034\n\024fluorophoresFilename\030B \001(\t\022\021\n\tcell" +
-      "_size\030C \001(\005\022\032\n\022probability_binary\030D \001(\001\022" +
-      "\033\n\023min_binary_distance\030E \001(\001\022\033\n\023max_bina",
-      "ry_distance\030F \001(\001\022\027\n\017show_histograms\030G \001" +
-      "(\010\022\031\n\021choose_histograms\030H \001(\010\022\026\n\016histogr" +
-      "am_bins\030I \001(\005\022\027\n\017remove_outliers\030J \001(\010\022\026" +
-      "\n\016density_radius\030K \001(\002\022\026\n\016depth_of_field" +
-      "\030L \001(\002\022\022\n\nx_position\030M \001(\001\022\022\n\ny_position" +
-      "\030N \001(\001\022\022\n\nz_position\030O \001(\001\":\n\031LoadLocali" +
-      "sationsSettings\022\035\n\025localisationsFilename" +
-      "\030\001 \001(\t\"\220\007\n\022ClusteringSettings\022\032\n\022distanc" +
-      "e_threshold\030\001 \001(\001\022\032\n\022distance_exclusion\030" +
-      "\002 \001(\001\022\026\n\016time_threshold\030\003 \001(\001\0222\n\ttime_un",
-      "it\030\004 \001(\0162\037.gdsc.smlm.data.config.TimeUni" +
-      "t\022\022\n\ntrace_mode\030\005 \001(\005\022\034\n\024clustering_algo" +
-      "rithm\030\006 \001(\005\022\026\n\016pulse_interval\030\007 \001(\005\022\024\n\014p" +
-      "ulse_window\030\010 \001(\005\022\024\n\014split_pulses\030\t \001(\010\022" +
-      "\025\n\rblinking_rate\030\n \001(\001\022\020\n\010optimise\030\013 \001(\010" +
-      "\022\036\n\026min_distance_threshold\030\014 \001(\001\022\036\n\026max_" +
-      "distance_threshold\030\r \001(\001\022\032\n\022min_time_thr" +
-      "eshold\030\016 \001(\005\022\032\n\022max_time_threshold\030\017 \001(\005" +
-      "\022\027\n\017optimiser_steps\030\020 \001(\005\022\026\n\016optimiser_p" +
-      "lot\030\021 \001(\005\022\023\n\013save_traces\030\022 \001(\010\022\027\n\017show_h",
-      "istograms\030\023 \001(\010\022\027\n\017save_trace_data\030\024 \001(\010" +
-      "\022\034\n\024trace_data_directory\030\025 \001(\t\022\026\n\016histog" +
-      "ram_bins\030\026 \001(\005\022\027\n\017remove_outliers\030\027 \001(\010\022" +
-      "\024\n\014refit_option\030\030 \001(\010\022\034\n\024minimum_trace_l" +
-      "ength\030\031 \001(\005\022\020\n\010truncate\030\032 \001(\010\022\032\n\022interna" +
-      "l_distances\030\033 \001(\010\022\035\n\025sub_sampled_distanc" +
-      "es\030\034 \001(\010\022\023\n\013ignore_ends\030\035 \001(\010\022\034\n\024precisi" +
-      "on_correction\030\036 \001(\010\022\026\n\016msd_correction\030\037 " +
-      "\001(\010\022\013\n\003mle\030  \001(\010\022\022\n\nfit_length\030! \001(\005\022\024\n\014" +
-      "fit_restarts\030\" \001(\005\022\025\n\rjump_distance\030# \001(",
-      "\005\"\313\004\n\016OpticsSettings\022\024\n\014input_option\030\001 \001" +
-      "(\t\022\023\n\013optics_mode\030\002 \001(\005\022\034\n\024number_of_spl" +
-      "it_sets\030\003 \001(\005\022\032\n\022use_random_vectors\030\004 \001(" +
-      "\010\022\035\n\025save_approximate_sets\030\005 \001(\010\022\023\n\013samp" +
-      "le_mode\030\006 \001(\005\022\033\n\023generating_distance\030\007 \001" +
-      "(\001\022\022\n\nmin_points\030\010 \001(\005\022\027\n\017clustering_mod" +
-      "e\030\t \001(\005\022\n\n\002xi\030\n \001(\001\022\020\n\010topLevel\030\013 \001(\010\022\023\n" +
-      "\013upper_limit\030\014 \001(\001\022\023\n\013lower_limit\030\r \001(\001\022" +
-      "\017\n\007samples\030\016 \001(\005\022\027\n\017sample_fraction\030\017 \001(" +
-      "\001\022\026\n\016fraction_noise\030\020 \001(\001\022\033\n\023clustering_",
-      "distance\030\021 \001(\001\022\014\n\004core\030\022 \001(\010\022\023\n\013image_sc" +
-      "ale\030\023 \001(\001\022\022\n\nimage_mode\030\024 \001(\005\022\020\n\010weighte" +
-      "d\030\025 \001(\010\022\021\n\tequalised\030\026 \001(\010\022\021\n\tplot_mode\030" +
-      "\027 \001(\005\022\024\n\014outline_mode\030\030 \001(\005\022\032\n\022spanning_" +
-      "tree_mode\030\031 \001(\005\022\016\n\006lambda\030\032 \001(\001B\013B\tGUIPr" +
-      "otosb\006proto3"
+      ".proto\032\021calibration.proto\"\212\002\n\021GUIFilterS" +
+      "ettings\022\021\n\tmax_drift\030\001 \001(\002\022\022\n\nmin_signal" +
+      "\030\002 \001(\002\022\017\n\007min_snr\030\003 \001(\002\022\025\n\rmax_precision" +
+      "\030\004 \001(\001\022\021\n\tmax_width\030\005 \001(\002\022\021\n\tmin_width\030\006" +
+      " \001(\002\022\022\n\nmask_title\030\007 \001(\t\022\023\n\013free_filter\030" +
+      "\010 \001(\t\022\027\n\017filter_template\030\t \001(\t\022!\n\031filter" +
+      "_analysis_directory\030\n \001(\t\022\033\n\023filter_set_" +
+      "filename\030\013 \001(\t\"\314\001\n\025PSFCalculatorSettings" +
+      "\022\023\n\013pixel_pitch\030\001 \001(\001\022\025\n\rmagnification\030\002",
+      " \001(\001\022\025\n\rbeam_expander\030\003 \001(\001\022\022\n\nwavelengt" +
+      "h\030\004 \001(\001\022\032\n\022numerical_aperture\030\005 \001(\001\022 \n\030a" +
+      "djust_for_square_pixels\030\006 \001(\010\022\036\n\026proport" +
+      "ionality_factor\030\007 \001(\001\"\273\001\n\024PSFEstimatorSe" +
+      "ttings\022\027\n\017number_of_peaks\030\001 \001(\005\022\017\n\007p_val" +
+      "ue\030\002 \001(\001\022\032\n\022update_preferences\030\003 \001(\010\022\033\n\023" +
+      "debug_psf_estimator\030\004 \001(\010\022\017\n\007iterate\030\005 \001" +
+      "(\010\022\027\n\017show_histograms\030\006 \001(\010\022\026\n\016histogram" +
+      "_bins\030\007 \001(\005\"\203\020\n\022CreateDataSettings\022\014\n\004si" +
+      "ze\030\001 \001(\005\022\r\n\005depth\030\002 \001(\001\022\023\n\013fixed_Depth\030\003",
+      " \001(\010\022\017\n\007seconds\030\004 \001(\001\022\025\n\rexposure_time\030\005" +
+      " \001(\001\022\030\n\020steps_per_second\030\006 \001(\001\022\024\n\014illumi" +
+      "nation\030\007 \001(\t\022\030\n\020background_image\030\010 \001(\t\022\024" +
+      "\n\014distribution\030\t \001(\t\022\031\n\021distribution_mas" +
+      "k\030\n \001(\t\022%\n\035distribution_mask_slice_depth" +
+      "\030\013 \001(\001\022\025\n\rpoisson_noise\030\014 \001(\010\022\022\n\nbackgro" +
+      "und\030\r \001(\001\022\017\n\007em_gain\030\016 \001(\001\022\023\n\013camera_gai" +
+      "n\030\017 \001(\001\022\032\n\022quantum_efficiency\030\020 \001(\001\022\022\n\nr" +
+      "ead_noise\030\021 \001(\001\022\014\n\004bias\030\022 \001(\005\022\021\n\tparticl" +
+      "es\030\023 \001(\005\022\030\n\020sample_per_frame\030\024 \001(\010\022\032\n\022ph",
+      "otons_per_second\030\025 \001(\001\022\"\n\032photons_per_se" +
+      "cond_maximum\030\026 \001(\001\022\033\n\023photon_distributio" +
+      "n\030\027 \001(\t\022 \n\030photon_distribution_file\030\030 \001(" +
+      "\t\022\024\n\014photon_shape\030\031 \001(\001\022\023\n\013correlation\030\032" +
+      " \001(\001\022\021\n\tpsf_model\030\033 \001(\t\022\026\n\016psf_image_nam" +
+      "e\030\034 \001(\t\022\023\n\013enter_width\030\035 \001(\010\022\022\n\nwaveleng" +
+      "th\030\036 \001(\001\022\032\n\022numerical_aperture\030\037 \001(\001\022\016\n\006" +
+      "psf_sd\030  \001(\001\022\023\n\013pixel_pitch\030! \001(\001\022\017\n\007den" +
+      "sity\030\" \001(\001\022\026\n\016diffusion_rate\030# \001(\001\022\026\n\016di" +
+      "ffusion_type\030$ \001(\005\022\032\n\022compound_molecules",
+      "\030% \001(\010\022\025\n\rcompound_text\030& \001(\t\022\022\n\ndiffuse" +
+      "_2D\030\' \001(\010\022\"\n\032rotate_initial_orientation\030" +
+      "( \001(\010\022 \n\030rotate_during_simulation\030) \001(\010\022" +
+      "\021\n\trotate_2D\030* \001(\010\022\025\n\rfixedFraction\030+ \001(" +
+      "\001\022\023\n\013confinement\030, \001(\t\022\030\n\020confinement_ma" +
+      "sk\030- \001(\t\022$\n\034confinement_mask_slice_depth" +
+      "\030. \001(\001\022\032\n\022confinement_radius\030/ \001(\001\022\026\n\016pu" +
+      "lse_interval\0300 \001(\005\022\023\n\013pulse_ratio\0301 \001(\001\022" +
+      "\014\n\004t_on\0302 \001(\001\022\023\n\013t_off_short\0303 \001(\001\022\022\n\nt_" +
+      "off_long\0304 \001(\001\022\026\n\016n_blinks_short\0305 \001(\001\022\025",
+      "\n\rn_blinks_long\0306 \001(\001\022\'\n\037n_blinks_geomet" +
+      "ric_distribution\0307 \001(\010\022\023\n\013min_photons\0308 " +
+      "\001(\001\022\022\n\nmin_snr_t1\0309 \001(\001\022\022\n\nmin_snr_tN\030: " +
+      "\001(\001\022\021\n\traw_image\030; \001(\010\022\022\n\nsave_image\030< \001" +
+      "(\010\022\032\n\022save_image_results\030= \001(\010\022\032\n\022save_l" +
+      "ocalisations\030> \001(\010\022\031\n\021save_fluorophores\030" +
+      "? \001(\010\022\026\n\016image_filename\030@ \001(\t\022\036\n\026image_r" +
+      "esults_filename\030A \001(\t\022\034\n\024fluorophoresFil" +
+      "ename\030B \001(\t\022\021\n\tcell_size\030C \001(\005\022\032\n\022probab" +
+      "ility_binary\030D \001(\001\022\033\n\023min_binary_distanc",
+      "e\030E \001(\001\022\033\n\023max_binary_distance\030F \001(\001\022\027\n\017" +
+      "show_histograms\030G \001(\010\022\031\n\021choose_histogra" +
+      "ms\030H \001(\010\022\026\n\016histogram_bins\030I \001(\005\022\027\n\017remo" +
+      "ve_outliers\030J \001(\010\022\026\n\016density_radius\030K \001(" +
+      "\002\022\026\n\016depth_of_field\030L \001(\002\022\022\n\nx_position\030" +
+      "M \001(\001\022\022\n\ny_position\030N \001(\001\022\022\n\nz_position\030" +
+      "O \001(\001\0226\n\013camera_type\030P \001(\0162!.gdsc.smlm.d" +
+      "ata.config.CameraType\022\031\n\021camera_model_na" +
+      "me\030Q \001(\t\022\023\n\013random_crop\030R \001(\010\022\020\n\010origin_" +
+      "x\030S \001(\005\022\020\n\010origin_y\030T \001(\005\":\n\031LoadLocalis",
+      "ationsSettings\022\035\n\025localisationsFilename\030" +
+      "\001 \001(\t\"\220\007\n\022ClusteringSettings\022\032\n\022distance" +
+      "_threshold\030\001 \001(\001\022\032\n\022distance_exclusion\030\002" +
+      " \001(\001\022\026\n\016time_threshold\030\003 \001(\001\0222\n\ttime_uni" +
+      "t\030\004 \001(\0162\037.gdsc.smlm.data.config.TimeUnit" +
+      "\022\022\n\ntrace_mode\030\005 \001(\005\022\034\n\024clustering_algor" +
+      "ithm\030\006 \001(\005\022\026\n\016pulse_interval\030\007 \001(\005\022\024\n\014pu" +
+      "lse_window\030\010 \001(\005\022\024\n\014split_pulses\030\t \001(\010\022\025" +
+      "\n\rblinking_rate\030\n \001(\001\022\020\n\010optimise\030\013 \001(\010\022" +
+      "\036\n\026min_distance_threshold\030\014 \001(\001\022\036\n\026max_d",
+      "istance_threshold\030\r \001(\001\022\032\n\022min_time_thre" +
+      "shold\030\016 \001(\005\022\032\n\022max_time_threshold\030\017 \001(\005\022" +
+      "\027\n\017optimiser_steps\030\020 \001(\005\022\026\n\016optimiser_pl" +
+      "ot\030\021 \001(\005\022\023\n\013save_traces\030\022 \001(\010\022\027\n\017show_hi" +
+      "stograms\030\023 \001(\010\022\027\n\017save_trace_data\030\024 \001(\010\022" +
+      "\034\n\024trace_data_directory\030\025 \001(\t\022\026\n\016histogr" +
+      "am_bins\030\026 \001(\005\022\027\n\017remove_outliers\030\027 \001(\010\022\024" +
+      "\n\014refit_option\030\030 \001(\010\022\034\n\024minimum_trace_le" +
+      "ngth\030\031 \001(\005\022\020\n\010truncate\030\032 \001(\010\022\032\n\022internal" +
+      "_distances\030\033 \001(\010\022\035\n\025sub_sampled_distance",
+      "s\030\034 \001(\010\022\023\n\013ignore_ends\030\035 \001(\010\022\034\n\024precisio" +
+      "n_correction\030\036 \001(\010\022\026\n\016msd_correction\030\037 \001" +
+      "(\010\022\013\n\003mle\030  \001(\010\022\022\n\nfit_length\030! \001(\005\022\024\n\014f" +
+      "it_restarts\030\" \001(\005\022\025\n\rjump_distance\030# \001(\005" +
+      "\"\313\004\n\016OpticsSettings\022\024\n\014input_option\030\001 \001(" +
+      "\t\022\023\n\013optics_mode\030\002 \001(\005\022\034\n\024number_of_spli" +
+      "t_sets\030\003 \001(\005\022\032\n\022use_random_vectors\030\004 \001(\010" +
+      "\022\035\n\025save_approximate_sets\030\005 \001(\010\022\023\n\013sampl" +
+      "e_mode\030\006 \001(\005\022\033\n\023generating_distance\030\007 \001(" +
+      "\001\022\022\n\nmin_points\030\010 \001(\005\022\027\n\017clustering_mode",
+      "\030\t \001(\005\022\n\n\002xi\030\n \001(\001\022\020\n\010topLevel\030\013 \001(\010\022\023\n\013" +
+      "upper_limit\030\014 \001(\001\022\023\n\013lower_limit\030\r \001(\001\022\017" +
+      "\n\007samples\030\016 \001(\005\022\027\n\017sample_fraction\030\017 \001(\001" +
+      "\022\026\n\016fraction_noise\030\020 \001(\001\022\033\n\023clustering_d" +
+      "istance\030\021 \001(\001\022\014\n\004core\030\022 \001(\010\022\023\n\013image_sca" +
+      "le\030\023 \001(\001\022\022\n\nimage_mode\030\024 \001(\005\022\020\n\010weighted" +
+      "\030\025 \001(\010\022\021\n\tequalised\030\026 \001(\010\022\021\n\tplot_mode\030\027" +
+      " \001(\005\022\024\n\014outline_mode\030\030 \001(\005\022\032\n\022spanning_t" +
+      "ree_mode\030\031 \001(\005\022\016\n\006lambda\030\032 \001(\001B\013B\tGUIPro" +
+      "tosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -16139,6 +16683,7 @@ public final class GUIProtos {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           gdsc.smlm.data.config.UnitProtos.getDescriptor(),
+          gdsc.smlm.data.config.CalibrationProtos.getDescriptor(),
         }, assigner);
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -16163,7 +16708,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_CreateDataSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CreateDataSettings_descriptor,
-        new java.lang.String[] { "Size", "Depth", "FixedDepth", "Seconds", "ExposureTime", "StepsPerSecond", "Illumination", "BackgroundImage", "Distribution", "DistributionMask", "DistributionMaskSliceDepth", "PoissonNoise", "Background", "EmGain", "CameraGain", "QuantumEfficiency", "ReadNoise", "Bias", "Particles", "SamplePerFrame", "PhotonsPerSecond", "PhotonsPerSecondMaximum", "PhotonDistribution", "PhotonDistributionFile", "PhotonShape", "Correlation", "PsfModel", "PsfImageName", "EnterWidth", "Wavelength", "NumericalAperture", "PsfSd", "PixelPitch", "Density", "DiffusionRate", "DiffusionType", "CompoundMolecules", "CompoundText", "Diffuse2D", "RotateInitialOrientation", "RotateDuringSimulation", "Rotate2D", "FixedFraction", "Confinement", "ConfinementMask", "ConfinementMaskSliceDepth", "ConfinementRadius", "PulseInterval", "PulseRatio", "TOn", "TOffShort", "TOffLong", "NBlinksShort", "NBlinksLong", "NBlinksGeometricDistribution", "MinPhotons", "MinSnrT1", "MinSnrTN", "RawImage", "SaveImage", "SaveImageResults", "SaveLocalisations", "SaveFluorophores", "ImageFilename", "ImageResultsFilename", "FluorophoresFilename", "CellSize", "ProbabilityBinary", "MinBinaryDistance", "MaxBinaryDistance", "ShowHistograms", "ChooseHistograms", "HistogramBins", "RemoveOutliers", "DensityRadius", "DepthOfField", "XPosition", "YPosition", "ZPosition", });
+        new java.lang.String[] { "Size", "Depth", "FixedDepth", "Seconds", "ExposureTime", "StepsPerSecond", "Illumination", "BackgroundImage", "Distribution", "DistributionMask", "DistributionMaskSliceDepth", "PoissonNoise", "Background", "EmGain", "CameraGain", "QuantumEfficiency", "ReadNoise", "Bias", "Particles", "SamplePerFrame", "PhotonsPerSecond", "PhotonsPerSecondMaximum", "PhotonDistribution", "PhotonDistributionFile", "PhotonShape", "Correlation", "PsfModel", "PsfImageName", "EnterWidth", "Wavelength", "NumericalAperture", "PsfSd", "PixelPitch", "Density", "DiffusionRate", "DiffusionType", "CompoundMolecules", "CompoundText", "Diffuse2D", "RotateInitialOrientation", "RotateDuringSimulation", "Rotate2D", "FixedFraction", "Confinement", "ConfinementMask", "ConfinementMaskSliceDepth", "ConfinementRadius", "PulseInterval", "PulseRatio", "TOn", "TOffShort", "TOffLong", "NBlinksShort", "NBlinksLong", "NBlinksGeometricDistribution", "MinPhotons", "MinSnrT1", "MinSnrTN", "RawImage", "SaveImage", "SaveImageResults", "SaveLocalisations", "SaveFluorophores", "ImageFilename", "ImageResultsFilename", "FluorophoresFilename", "CellSize", "ProbabilityBinary", "MinBinaryDistance", "MaxBinaryDistance", "ShowHistograms", "ChooseHistograms", "HistogramBins", "RemoveOutliers", "DensityRadius", "DepthOfField", "XPosition", "YPosition", "ZPosition", "CameraType", "CameraModelName", "RandomCrop", "OriginX", "OriginY", });
     internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_fieldAccessorTable = new
@@ -16183,6 +16728,7 @@ public final class GUIProtos {
         internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor,
         new java.lang.String[] { "InputOption", "OpticsMode", "NumberOfSplitSets", "UseRandomVectors", "SaveApproximateSets", "SampleMode", "GeneratingDistance", "MinPoints", "ClusteringMode", "Xi", "TopLevel", "UpperLimit", "LowerLimit", "Samples", "SampleFraction", "FractionNoise", "ClusteringDistance", "Core", "ImageScale", "ImageMode", "Weighted", "Equalised", "PlotMode", "OutlineMode", "SpanningTreeMode", "Lambda", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
+    gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

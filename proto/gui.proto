@@ -8,6 +8,7 @@ package gdsc.smlm.data.config;
 option java_outer_classname = "GUIProtos";
 
 import "unit.proto";
+import "calibration.proto";
 
 // Contain the settings for the result filtering
 message GUIFilterSettings {
@@ -149,6 +150,17 @@ message CreateDataSettings
 	double x_position = 77;
 	double y_position = 78;
 	double z_position = 79;
+	
+	// The camera type.
+	CameraType camera_type = 80;
+	// The camera model name. This should contain all the information required to 
+	// load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+	string camera_model_name = 81;
+	bool random_crop = 82;
+	// The origin x-coordinate used to crop the model
+	int32 origin_x = 83;
+	// The origin y-coordinate used to crop the model
+	int32 origin_y = 84;
 }
 
 // Settings for the Load Localisations plugin
