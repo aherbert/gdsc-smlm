@@ -311,10 +311,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final double bias;
 		/**
-		 * True if EM-gain was modelled
-		 */
-		final boolean emCCD;
-		/**
 		 * Total gain (ADUs/photon)
 		 */
 		final double gain;
@@ -327,6 +323,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final double readNoise;
 		/**
+		 * The camera type.
+		 */
+		CameraType cameraType;
+		/**
+		 * The camera model name.
+		 */
+		String cameraModelName;
+		/**
+		 * The camera bounds.
+		 */
+		Rectangle cameraBounds;
+		/**
 		 * Background
 		 */
 		final double b;
@@ -338,8 +346,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		private boolean loaded;
 
 		public SimulationParameters(int molecules, boolean fullSimulation, double s, double a, double minSignal,
-				double maxSignal, double signalPerFrame, double depth, boolean fixedDepth, double bias, boolean emCCD,
-				double gain, double qe, double readNoise, double b, double b2)
+				double maxSignal, double signalPerFrame, double depth, boolean fixedDepth, double bias, double gain,
+				double qe, double readNoise, CameraType cameraType, String cameraModelName, Rectangle cameraBounds,
+				double b, double b2)
 		{
 			id = nextId++;
 			this.molecules = molecules;
@@ -353,10 +362,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// We must have a fixed depth if the depth is zero
 			this.fixedDepth = (depth > 0) ? fixedDepth : true;
 			this.bias = bias;
-			this.emCCD = emCCD;
 			this.gain = gain;
 			this.qe = qe;
 			this.readNoise = readNoise;
+			this.cameraType = cameraType;
+			this.cameraModelName = cameraModelName;
+			this.cameraBounds = cameraBounds;
 			this.b = b;
 			this.b2 = b2;
 		}
@@ -369,6 +380,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		public boolean isLoaded()
 		{
 			return loaded;
+		}
+
+		/**
+		 * Checks if is emccd.
+		 *
+		 * @return true, if is emccd
+		 */
+		public boolean isEMCCD()
+		{
+			return cameraType == CameraType.EMCCD;
 		}
 	}
 
@@ -403,10 +424,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double x, y, z;
 		final double bias;
 		/**
-		 * True if EM-gain was modelled
-		 */
-		final boolean emCCD;
-		/**
 		 * Total gain
 		 */
 		final double gain;
@@ -418,6 +435,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 * Read noise in ADUs
 		 */
 		final double readNoise;
+		/**
+		 * The camera type.
+		 */
+		CameraType cameraType;
+		/**
+		 * The camera model name.
+		 */
+		String cameraModelName;
+		/**
+		 * The camera bounds.
+		 */
+		Rectangle cameraBounds;
 		/**
 		 * Background
 		 */
@@ -444,8 +473,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double precisionN, precisionX, precisionXML;
 
 		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double z,
-				double bias, boolean emCCD, double gain, double qe, double readNoise, double b, double b2,
-				double precisionN, double precisionX, double precisionXML)
+				double bias, double gain, double qe, double readNoise, CameraType cameraType, String cameraModelName,
+				Rectangle cameraBounds, double b, double b2, double precisionN, double precisionX, double precisionXML)
 		{
 			id = nextId++;
 			this.frames = frames;
@@ -456,10 +485,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.y = y;
 			this.z = z;
 			this.bias = bias;
-			this.emCCD = emCCD;
 			this.gain = gain;
 			this.qe = qe;
 			this.readNoise = readNoise;
+			this.cameraType = cameraType;
+			this.cameraModelName = cameraModelName;
+			this.cameraBounds = cameraBounds;
 			this.b = b;
 			this.b2 = b2;
 			this.precisionN = precisionN;
@@ -517,6 +548,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		public double getBackground()
 		{
 			return b;
+		}
+
+		/**
+		 * Checks if is emccd.
+		 *
+		 * @return true, if is emccd
+		 */
+		public boolean isEMCCD()
+		{
+			return cameraType == CameraType.EMCCD;
 		}
 	}
 
@@ -948,8 +989,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			final double qe = getQuantumEfficiency();
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, settings.getPixelPitch(),
-					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), emCCD, totalGain, qe,
-					readNoise, settings.getBackground(), b2, lowerN, lowerP, lowerMLP);
+					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), totalGain, qe,
+					readNoise, settings.getCameraType(), settings.getCameraModelName(), cameraModel.getBounds(),
+					settings.getBackground(), b2, lowerN, lowerP, lowerMLP);
 		}
 		else
 		{
@@ -1037,7 +1079,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		simulationParameters = new SimulationParameters(particles, fullSimulation, sd, settings.getPixelPitch(),
 				settings.getPhotonsPerSecond(), settings.getPhotonsPerSecondMaximum(), signalPerFrame,
-				settings.getDepth(), settings.getFixedDepth(), settings.getBias(), emCCD, totalGain, qe, readNoise,
+				settings.getDepth(), settings.getFixedDepth(), settings.getBias(), totalGain, qe, readNoise,
+				settings.getCameraType(), settings.getCameraModelName(), cameraModel.getBounds(),
 				settings.getBackground(), b2);
 	}
 
@@ -1849,7 +1892,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.getCameraType() == CameraType.SCMOS)
 		{
 			c.setCameraModelName(settings.getCameraModelName());
-			//c.setCountPerPhoton(1.0); // So the results appear 'calibrated'
 		}
 		else
 		{
@@ -2051,7 +2093,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		results.setSource(new IJImageSource(imp));
 		results.setName(CREATE_DATA_IMAGE_TITLE + " (" + TITLE + ")");
-		results.setBounds(new Rectangle(0, 0, settings.getSize(), settings.getSize()));
+		results.setBounds(new Rectangle(settings.getSize(), settings.getSize()));
+		if (settings.getCameraType() == CameraType.SCMOS)
+		{
+			Rectangle bounds = cameraModel.getBounds();
+			// Shift simulation to correct location
+			results.translate(bounds.x, bounds.y);
+		}
 		// Set the PSF as a Gaussian for now. In future this could be improved for other PSFs.
 		PSF.Builder psf = PSFProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
 		psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
@@ -3705,6 +3753,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		sortLocalisationsByTime(localisations);
 
+		// Shift to correct reference frame 
+		int originx = 0, originy = 0;
+		Rectangle bounds = cameraModel.getBounds();
+		if (bounds != null)
+		{
+			originx = bounds.x;
+			originy = bounds.y;
+		}
+
 		//		Collections.sort(localisations, new Comparator<LocalisationModel>(){
 		//
 		//			public int compare(LocalisationModel o1, LocalisationModel o2)
@@ -3744,8 +3801,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					StringBuffer sb = new StringBuffer();
 					sb.append(l.getTime()).append('\t');
 					sb.append(l.getId()).append('\t');
-					sb.append(IJ.d2s(l.getX(), 6)).append('\t');
-					sb.append(IJ.d2s(l.getY(), 6)).append('\t');
+					sb.append(IJ.d2s(l.getX() + originx, 6)).append('\t');
+					sb.append(IJ.d2s(l.getY() + originy, 6)).append('\t');
 					sb.append(IJ.d2s(l.getZ(), 6)).append('\t');
 					sb.append(l.getIntensity());
 					output.write(sb.toString());
@@ -4146,7 +4203,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					public boolean collectOptions()
 					{
 						CameraType cameraType = settings.getCameraType();
-						boolean isCCD = cameraType == CameraType.CCD || cameraType == CameraType.EMCCD;
+						boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (isCCD)
 						{
@@ -4195,7 +4252,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void validateCameraOptions()
 	{
 		CameraType cameraType = settings.getCameraType();
-		boolean isCCD = cameraType == CameraType.CCD || cameraType == CameraType.EMCCD;
+		boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
 		if (isCCD)
 		{
 			if (cameraType == CameraType.EMCCD)
@@ -4279,7 +4336,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void addCameraOptions(StringBuffer sb)
 	{
 		CameraType cameraType = settings.getCameraType();
-		boolean isCCD = cameraType == CameraType.CCD || cameraType == CameraType.EMCCD;
+		boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
 		if (isCCD)
 		{
 			if (cameraType == CameraType.EMCCD)
@@ -5358,7 +5415,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		float depth = Math.max(Math.abs(limits[0]), Math.abs(limits[1]));
 		boolean fixedDepth = Double.compare(limits[0], limits[1]) == 0;
 
-		CalibrationWriter cal = results.getCalibrationWriter();
+		final CalibrationWriter cal = results.getCalibrationWriter();
 		String iUnits = " " + UnitHelper.getName(cal.getIntensityUnit());
 		String zUnits = " " + UnitHelper.getName(cal.getDistanceUnit());
 
@@ -5382,14 +5439,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				cal.setQuantumEfficiency(simulationParameters.qe);
 			if (!cal.hasReadNoise())
 				cal.setReadNoise(simulationParameters.readNoise);
-			if (!cal.isCCDCamera())
-				cal.setCameraType((simulationParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
+			if (!cal.hasCameraType())
+				cal.setCameraType(simulationParameters.cameraType);
 			if (!cal.hasNmPerPixel())
 				cal.setNmPerPixel(simulationParameters.a);
+			if (!cal.hasCameraModelName())
+				cal.setCameraModelName(simulationParameters.cameraModelName);
 		}
 
 		// Show a dialog to confirm settings
-		GenericDialog gd = new GenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		StringBuilder sb = new StringBuilder();
 		sb.append("Results contain ").append(TextUtils.pleural(molecules, "molecule")).append('\n');
 		sb.append("Min signal = ").append(Utils.rounded(minSignal)).append(iUnits).append('\n');
@@ -5403,11 +5462,61 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Gaussian_SD", s, 3, 8, "nm");
 		gd.addNumericField("Pixel_pitch", cal.getNmPerPixel(), 3, 8, "nm");
 		gd.addNumericField("Background", b, 3, 8, "photon");
-		gd.addNumericField("Total_gain", cal.getCountPerPhoton(), 3, 8, "count/photon");
-		gd.addNumericField("Quantum_efficiency", cal.getQuantumEfficiency(), 3, 8, "e-/photon");
-		gd.addCheckbox("EM-CCD", cal.isEMCCD());
-		gd.addNumericField("Read_noise", cal.getReadNoise(), 3, 8, "count");
-		gd.addNumericField("Bias", cal.getBias(), 3, 8, "count");
+
+		// Camera type does not need the full simulation settings. Plus the units are different
+		// so just reimplement.
+		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
+				CalibrationProtosHelper.getName(settings.getCameraType()), new OptionListener<Choice>()
+				{
+					public boolean collectOptions(Choice field)
+					{
+						settings.setCameraType(SettingsManager.getCameraTypeValues()[field.getSelectedIndex()]);
+						boolean result = collectOptions();
+						return result;
+					}
+
+					public boolean collectOptions()
+					{
+						CameraType cameraType = settings.getCameraType();
+						boolean isCCD = cal.isCCD();
+						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						if (isCCD)
+						{
+							egd.addNumericField("Total_gain", cal.getCountPerPhoton(), 3, 8, "count/photon");
+							egd.addNumericField("Quantum_efficiency", cal.getQuantumEfficiency(), 3, 8, "e-/photon");
+							egd.addNumericField("Read_noise", cal.getReadNoise(), 3, 8, "count");
+							egd.addNumericField("Bias", cal.getBias(), 3, 8, "count");
+						}
+						else if (cameraType == CameraType.SCMOS)
+						{
+							String[] models = CameraModelManager.listCameraModels(true);
+							egd.addChoice("Camera_model_name", models, cal.getCameraModelName());
+							egd.addNumericField("Quantum_efficiency", cal.getQuantumEfficiency(), 2, 6,
+									"electron/photon");
+						}
+						else
+						{
+							IJ.error("Unsupported camera type " + CalibrationProtosHelper.getName(cameraType));
+							return false;
+						}
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
+							return false;
+						if (isCCD)
+						{
+							cal.setCountPerPhoton(egd.getNextNumber());
+							cal.setQuantumEfficiency(egd.getNextNumber());
+							cal.setReadNoise(egd.getNextNumber());
+							cal.setBias(egd.getNextNumber());
+						}
+						else if (cameraType == CameraType.SCMOS)
+						{
+							cal.setCameraModelName(egd.getNextChoice());
+							cal.setQuantumEfficiency(Math.abs(egd.getNextNumber()));
+						}
+						return true;
+					}
+				});
 
 		if (!fixedDepth)
 		{
@@ -5422,11 +5531,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		s = gd.getNextNumber();
 		cal.setNmPerPixel(gd.getNextNumber());
 		b = gd.getNextNumber();
-		cal.setCountPerPhoton(gd.getNextNumber());
-		cal.setQuantumEfficiency(gd.getNextNumber());
-		cal.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
-		cal.setReadNoise(gd.getNextNumber());
-		cal.setBias(gd.getNextNumber());
+		settings.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
+
 		float myDepth = depth;
 		if (!fixedDepth)
 		{
@@ -5440,17 +5546,57 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			depth = myDepth;
 		}
 
+		gd.collectOptions();
+
 		// Validate settings
+		Rectangle resultsBounds = results.getBounds();
 		try
 		{
 			Parameters.isAboveZero("Gaussian SD", s);
 			Parameters.isAboveZero("Pixel pitch", cal.getNmPerPixel());
 			Parameters.isPositive("Background", b);
-			Parameters.isAboveZero("Total gain", cal.getCountPerPhoton());
+
 			Parameters.isAboveZero("Quantum efficiency", cal.getQuantumEfficiency());
 			Parameters.isEqualOrBelow("Quantum efficiency", cal.getQuantumEfficiency(), 1);
-			Parameters.isPositive("Read noise", cal.getReadNoise());
-			Parameters.isPositive("Bias", cal.getBias());
+
+			if (cal.isCCDCamera())
+			{
+				Parameters.isAboveZero("Total gain", cal.getCountPerPhoton());
+				Parameters.isPositive("Read noise", cal.getReadNoise());
+				Parameters.isPositive("Bias", cal.getBias());
+			}
+			else if (cal.isSCMOS())
+			{
+				// Load the model
+				cameraModel = CameraModelManager.load(cal.getCameraModelName());
+				if (cameraModel == null)
+				{
+					IJ.error(TITLE, "Unknown camera model for name: " + cal.getCameraModelName());
+					return null;
+				}
+				// Check the bounds of the results fit the image
+				if (resultsBounds == null || resultsBounds.width != imp.getWidth() ||
+						resultsBounds.height != imp.getHeight())
+				{
+					IJ.error(TITLE, "sCMOS model error: Results bounds do not match the image width/height");
+					return null;
+				}
+				// Ensure we can crop the camera model to the results bounds, 
+				// i.e. we can get a per-pixel noise model for the image.
+				Rectangle cameraBounds = cameraModel.getBounds();
+				if (cameraBounds == null || !cameraBounds.contains(resultsBounds))
+				{
+					IJ.error(TITLE, "Camera model bounds do not contain the results bounds");
+					return null;
+				}
+
+				cal.clearGlobalCameraSettings();
+			}
+			else
+			{
+				IJ.error(TITLE, "Unknown camera type: " + cal.getCameraType());
+				return null;
+			}
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -5461,12 +5607,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Store calibration
 		results.setCalibration(cal.getCalibration());
 
-		double gain = cal.getCountPerPhoton();
 		double a = cal.getNmPerPixel();
 		double bias = cal.getBias();
+		double gain = cal.getCountPerPhoton();
 		double readNoise = cal.getReadNoise();
 		double qe = cal.getQuantumEfficiency();
-		boolean emCCD = cal.isEMCCD();
 
 		// Note: The calibration will throw an exception if the converter cannot be created.
 		// This is OK as the data will be invalid.
@@ -5495,7 +5640,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		double b2 = backgroundVariance + readNoiseInPhotons * readNoiseInPhotons;
 
 		SimulationParameters p = new SimulationParameters(molecules, fullSimulation, s, a, minSignal, maxSignal,
-				signalPerFrame, depth, fixedDepth, bias, emCCD, gain, qe, readNoise, b, b2);
+				signalPerFrame, depth, fixedDepth, bias, gain, qe, readNoise, cal.getCameraType(),
+				cal.getCameraModelName(), resultsBounds, b, b2);
 		p.loaded = true;
 		return p;
 	}

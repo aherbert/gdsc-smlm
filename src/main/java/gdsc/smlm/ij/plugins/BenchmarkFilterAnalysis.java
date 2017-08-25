@@ -1932,11 +1932,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			signal *= 0.5;
 		}
 		double pSignal = CreateData.getPrecisionN(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
+				simulationParameters.b2, simulationParameters.isEMCCD());
 		double pLSE = Gaussian2DPeakResultHelper.getPrecisionX(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
+				simulationParameters.b2, simulationParameters.isEMCCD());
 		double pMLE = Gaussian2DPeakResultHelper.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
+				simulationParameters.b2, simulationParameters.isEMCCD());
 		String msg = String.format(
 				"Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)\nNot duplicates : %d / %d (%.2f%%)",
 				fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE, notDuplicateCount,

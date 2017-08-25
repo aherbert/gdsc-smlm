@@ -598,7 +598,7 @@ public class BenchmarkFit implements PlugIn
 		calibration.setCountPerPhoton(benchmarkParameters.gain);
 		calibration.setQuantumEfficiency(benchmarkParameters.qe);
 		calibration.setBias(benchmarkParameters.bias);
-		calibration.setCameraType((benchmarkParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
+		calibration.setCameraType(benchmarkParameters.cameraType);
 		calibration.setReadNoise(benchmarkParameters.readNoise);
 		calibration.setExposureTime(1000);
 		fitConfig.setCalibration(calibration.getCalibration());
@@ -987,7 +987,7 @@ public class BenchmarkFit implements PlugIn
 
 		// Compute the noise
 		double noise = benchmarkParameters.b2;
-		if (benchmarkParameters.emCCD)
+		if (benchmarkParameters.isEMCCD())
 		{
 			// The b2 parameter was computed without application of the EM-CCD noise factor of 2.
 			//final double b2 = backgroundVariance + readVariance

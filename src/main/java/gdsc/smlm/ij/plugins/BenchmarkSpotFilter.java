@@ -1945,7 +1945,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		// Compute the noise
 		double noise = simulationParameters.b2;
-		if (simulationParameters.emCCD)
+		if (simulationParameters.isEMCCD())
 		{
 			// The b2 parameter was computed without application of the EM-CCD noise factor of 2.
 			//final double b2 = backgroundVariance + readVariance

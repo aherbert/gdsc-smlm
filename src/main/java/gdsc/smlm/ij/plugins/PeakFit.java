@@ -2366,6 +2366,20 @@ public class PeakFit implements PlugInFilter, ItemListener
 				//@formatter:on
 			}
 
+			
+			// TODO - Fix support for fitting a sCMOS image that has been cropped to
+			// part of the sensor (i.e. a subset of the camera model)
+			
+			// Q. How to determine if the input source is from a crop of the sensor. 
+			// Perhaps the input dialog should just ask for the origin x and origin y
+			// if it is a sCMOS image. This can then be passed through the system as the bounds.
+			
+			// Q. What are the bounds used for. By the image extractor. So these are relative to the input source.
+			// We need to store global origin separately in the fitting configuration.
+			
+			if (true)
+				throw new IllegalStateException("Camera model does not match image bounds");
+			
 			// Warn if the model bounds are bigger than the image as this may be an incorrect
 			// selection for the camera model
 			if (modelBounds.width > bounds.width || modelBounds.height > bounds.height)

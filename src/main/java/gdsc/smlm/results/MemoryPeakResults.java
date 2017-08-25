@@ -221,7 +221,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		{
 			public boolean test(PeakResult t)
 			{
-				return t==null;
+				return t == null;
 			}
 		});
 	}
@@ -1914,6 +1914,51 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			procedure.executeMLEPrecisionB(calculator.getMLEPrecision(getf(i).params));
+		}
+	}
+
+	/**
+	 * Apply a pixel translation to the results. The original coordinates are updated using a raw pixel shift. The
+	 * current XY coordinates are updated by converting the pixel shift to the current distance units. If there are
+	 * current bounds then the origin will be updated with a raw pixel shift.
+	 *
+	 * @param x
+	 *            the x pixel shift
+	 * @param y
+	 *            the y pixel shift
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void translate(int x, int y) throws ConversionException, ConfigurationException
+	{
+		if (x == 0 && y == 0)
+			return;
+
+		if (!hasCalibration())
+			throw new ConfigurationException("No calibration");
+
+		Rectangle bounds = getBounds();
+		if (bounds != null)
+		{
+			bounds.x += x;
+			bounds.y += y;
+			setBounds(bounds);
+		}
+
+		// Convert the pixel shift to the units of the results
+		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(getDistanceUnit());
+		float xx = dc.convert(x);
+		float yy = dc.convert(y);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getf(i);
+			r.origX += x;
+			r.origY += y;
+			r.params[PeakResult.X] += xx;
+			r.params[PeakResult.Y] += yy;
 		}
 	}
 

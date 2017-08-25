@@ -316,11 +316,10 @@ public class CalibrationWriter extends CalibrationReader
 	{
 		CameraCalibration.Builder b = getBuilder().getCameraCalibrationBuilder();
 		b.setBias(0);
-		b.setQuantumEfficiency(0);
 		b.setReadNoise(0);
-		// Note that we could use an average gain here but the concept
-		// of converting the photons back to per-pixel counts is invalid
-		// so for clarity this is set to 0
-		setCountPerPhoton(0);
+		setCountPerPhoton(0); // gain
+		
+		// This is still relevant to per-pixel camera settings as it is related to the chip sensitivity
+		//b.setQuantumEfficiency(0);   
 	}
 }

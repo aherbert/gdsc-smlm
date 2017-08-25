@@ -1601,7 +1601,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			cal.setExposureTime(100);
 			cal.setReadNoise(simulationParameters.readNoise);
 			cal.setBias(simulationParameters.bias);
-			cal.setCameraType((simulationParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
+			cal.setCameraType(simulationParameters.cameraType);
 
 			fitConfig.setCalibration(cal.getCalibration());
 		}
@@ -1764,7 +1764,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		cal.setExposureTime(100);
 		cal.setReadNoise(simulationParameters.readNoise);
 		cal.setBias(simulationParameters.bias);
-		cal.setCameraType((simulationParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
+		cal.setCameraType(simulationParameters.cameraType);
 
 		fitConfig.setCalibration(cal.getCalibration());
 
@@ -2090,7 +2090,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		// Compute the noise
 		double noise = Math
-				.sqrt((simulationParameters.b * ((simulationParameters.emCCD) ? 2 : 1)) / simulationParameters.gain +
+				.sqrt((simulationParameters.b * ((simulationParameters.isEMCCD()) ? 2 : 1)) / simulationParameters.gain +
 						simulationParameters.readNoise * simulationParameters.readNoise);
 		sb.append(Utils.rounded(noise)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.signalPerFrame / noise)).append('\t');

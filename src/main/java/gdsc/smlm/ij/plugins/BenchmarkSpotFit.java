@@ -1212,7 +1212,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitConfig.setQuantumEfficiency(simulationParameters.qe);
 			fitConfig.setReadNoise(simulationParameters.readNoise);
 			fitConfig.setBias(simulationParameters.bias);
-			fitConfig.setCameraType((simulationParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
+			fitConfig.setCameraType(simulationParameters.cameraType);
 		}
 		if (!PeakFit.configureFitSolver(config, imp.getProcessor().getRoi(), (extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
 			return false;
@@ -1832,7 +1832,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		// Compute the noise
 		double noise = simulationParameters.b2;
-		if (simulationParameters.emCCD)
+		if (simulationParameters.isEMCCD())
 		{
 			// The b2 parameter was computed without application of the EM-CCD noise factor of 2.
 			//final double b2 = backgroundVariance + readVariance
