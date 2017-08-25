@@ -1491,7 +1491,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				"Enter the size of each pixel. This is required to ensure the dimensions of the image are calibrated.",
 				"E.g. a camera with a 6.45um pixel size and a 60x objective will have a pitch of 6450/60 = 107.5nm.");
 		// TODO - Add a pop-up calculator...
-		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
+		gd.addNumericField("Calibration", calibration.getNmPerPixel(), 2, 6, "nm/px");
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
@@ -1506,8 +1506,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 				"The gain is usually expressed using the product of the EM-gain (if applicable), the camera gain and the sensor quantum efficiency.",
 				"A value of 1 means no conversion to photons will occur.");
 		// TODO - Add a wizard to allow calculation of total gain from EM-gain, camera gain and QE
-		gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
-		gd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
+		gd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
+		gd.addNumericField("Gain", calibration.getCountPerPhoton(), 2, 6, "Count/photon");
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
@@ -1521,7 +1521,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		ExtendedGenericDialog gd = newWizardDialog(
 				"Enter the exposure time. Calibration of the exposure time allows correct reporting of on and off times.",
 				"This is the length of time for each frame in the image.");
-		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
+		gd.addNumericField("Exposure_time", calibration.getExposureTime(), 2, 6, "ms");
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
@@ -1802,7 +1802,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				if (calibration.isCCDCamera())
 				{
 					gd.addMessage("Local background requires the camera bias");
-					gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
+					gd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
 				}
 				gd.showDialog();
 				if (gd.wasCanceled())
@@ -1904,7 +1904,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Currently we just collect it here even if not needed
 		gd.addMessage(
 				"Smart filters using precision filtering may require a local background level.\n \nLocal background requires the camera bias:");
-		gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
+		gd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -2223,8 +2223,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 				}
 				else
 				{
-					gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
-					gd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
+					gd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
+					gd.addNumericField("Gain", calibration.getCountPerPhoton(), 2, 6, "Count/photon");
 				}
 			}
 
