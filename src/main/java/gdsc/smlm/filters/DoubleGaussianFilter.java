@@ -193,7 +193,6 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 			if (extraLines != 0)
 				normaliser.normalise(wdata, data, maxx, maxy, extraLines);
 			else
-				// wdata == data
 				normaliser.normalise(wdata, data, size);
 		}
 		else
