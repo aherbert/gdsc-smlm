@@ -777,8 +777,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 				return fitConfig.getCalibrationWriter();
 			}
 		});
-		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
-		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
+		gd.addNumericField("Calibration", calibration.getNmPerPixel(), 2, 6, "nm/px");
+		gd.addNumericField("Exposure_time", calibration.getExposureTime(), 2, 6, "ms");
 
 		if (isCrop)
 			gd.addCheckbox("Ignore_bounds_for_noise", optionIgnoreBoundsForNoise);
