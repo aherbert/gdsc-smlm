@@ -871,37 +871,49 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private void reportAndSaveFittingLimits(SpatialDistribution dist)
 	{
-		// TODO - fix this
+		Utils.log(TITLE + " Benchmark");
 
-		final double totalGain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
-
-		// Background is in photons
-		double backgroundVariance = settings.getBackground();
-		// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor 
-		// so this is "double-counting" the EM-CCD.  
-		//if (settings.getEmGain() > 1)
-		//	backgroundVariance *= 2;
-
-		final double backgroundVarianceInADUs = settings.getBackground() * totalGain * totalGain *
-				((settings.getEmGain() > 1) ? 2 : 1);
-
-		// Read noise is in electrons. Convert to Photons
-		double readNoise = settings.getReadNoise() / totalGain;
-		if (settings.getCameraGain() != 0)
-			readNoise *= settings.getCameraGain();
-
-		final double readVariance = readNoise * readNoise;
-
-		double readVarianceInADUs = settings.getReadNoise() *
-				((settings.getCameraGain() != 0) ? settings.getCameraGain() : 1);
-		readVarianceInADUs *= readVarianceInADUs;
-
-		// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
-		// is equal to the total variance at the pixel.
-		final double b2 = backgroundVariance + readVariance;
-
-		boolean emCCD = settings.getEmGain() > 1;
+		double[] xyz = dist.next().clone();
+		double offset = settings.getSize() * 0.5;
+		for (int i = 0; i < 2; i++)
+			xyz[i] += offset;
 		double sd = getPsfSD() * settings.getPixelPitch();
+
+		Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * settings.getPixelPitch()), Utils.rounded(xyz[0], 6));
+		Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * settings.getPixelPitch()), Utils.rounded(xyz[1], 6));
+		Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / settings.getPixelPitch()));
+		final double sa = PSFCalculator.squarePixelAdjustment(sd, settings.getPixelPitch());
+		Utils.log("Adjusted Width (sa) = %s nm : %s px", Utils.rounded(sa),
+				Utils.rounded(sa / settings.getPixelPitch()));
+		Utils.log("Signal (N) = %s - %s photons", Utils.rounded(settings.getPhotonsPerSecond()),
+				Utils.rounded(settings.getPhotonsPerSecondMaximum()));
+
+		boolean emCCD;
+		double totalGain;
+		double b2 = getBackgroundEstimate();
+		double readNoise;
+
+		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
+		{
+			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
+			emCCD = (settings.getCameraType() == CameraType.EMCCD) ? settings.getEmGain() > 1 : false;
+			totalGain = helper.getTotalGainSafe();
+			// Store read noise in ADUs
+			readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
+		}
+		else if (settings.getCameraType() == CameraType.SCMOS)
+		{
+			// Assume sCMOS amplification is like a CCD. We need an average read noise to get an 
+			// approximation of the background noise for the precision computation.
+			emCCD = false;
+			// Not required for sCMOS
+			totalGain = 0;
+			readNoise = 0;
+		}
+		else
+		{
+			throw new IllegalStateException("Unknown camera type: " + settings.getCameraType());
+		}
 
 		// The precision calculation is dependent on the model. The classic Mortensen formula
 		// is for a Gaussian Mask Estimator. Use other equation for MLE. The formula provided 
@@ -919,43 +931,22 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				settings.getPhotonsPerSecond(), b2, emCCD);
 		double lowerN = getPrecisionN(settings.getPixelPitch(), sd, settings.getPhotonsPerSecond(), b2, emCCD);
 		double upperN = getPrecisionN(settings.getPixelPitch(), sd, settings.getPhotonsPerSecondMaximum(), b2, emCCD);
-		//final double b = Math.sqrt(b2);
-		Utils.log(TITLE + " Benchmark");
-		double[] xyz = dist.next().clone();
-		double offset = settings.getSize() * 0.5;
-		for (int i = 0; i < 2; i++)
-			xyz[i] += offset;
-		Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * settings.getPixelPitch()), Utils.rounded(xyz[0], 6));
-		Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * settings.getPixelPitch()), Utils.rounded(xyz[1], 6));
-		Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / settings.getPixelPitch()));
-		final double sa = PSFCalculator.squarePixelAdjustment(sd, settings.getPixelPitch());
-		Utils.log("Adjusted Width (sa) = %s nm : %s px", Utils.rounded(sa),
-				Utils.rounded(sa / settings.getPixelPitch()));
-		Utils.log("Signal (N) = %s - %s photons : %s - %s ADUs", Utils.rounded(settings.getPhotonsPerSecond()),
-				Utils.rounded(settings.getPhotonsPerSecondMaximum()),
-				Utils.rounded(settings.getPhotonsPerSecond() * totalGain),
-				Utils.rounded(settings.getPhotonsPerSecondMaximum() * totalGain));
-		final double noiseInADUs = Math.sqrt(readVarianceInADUs + backgroundVarianceInADUs);
-		Utils.log("Pixel noise = %s photons : %s ADUs", Utils.rounded(noiseInADUs / totalGain),
-				Utils.rounded(noiseInADUs));
-		Utils.log(
-				"Expected background variance pre EM-gain (b^2) = %s photons^2 (%s ADUs^2) " +
-						"[includes read variance converted to photons]",
-				Utils.rounded(b2), Utils.rounded(b2 * totalGain * totalGain));
+
+		if (settings.getCameraType() == CameraType.SCMOS)
+			Utils.log("sCMOS camera background estimate uses an average read noise");
+		Utils.log("Expected background variance pre EM-gain (b^2) = %s photons^2" +
+				"[includes read variance converted to photons]", Utils.rounded(b2));
 		Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP), Utils.rounded(upperP),
 				Utils.rounded(lowerP / settings.getPixelPitch()), Utils.rounded(upperP / settings.getPixelPitch()));
 		Utils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", Utils.rounded(lowerMLP),
 				Utils.rounded(upperMLP), Utils.rounded(lowerMLP / settings.getPixelPitch()),
 				Utils.rounded(upperMLP / settings.getPixelPitch()));
-		Utils.log("Signal precision: %s - %s photons : %s - %s ADUs", Utils.rounded(lowerN), Utils.rounded(upperN),
-				Utils.rounded(lowerN * totalGain), Utils.rounded(upperN * totalGain));
+		Utils.log("Signal precision: %s - %s photons", Utils.rounded(lowerN), Utils.rounded(upperN));
 
 		// Store the benchmark settings when not using variable photons
 		if (settings.getPhotonsPerSecond() == settings.getPhotonsPerSecondMaximum())
 		{
 			final double qe = getQuantumEfficiency();
-			// Store read noise in ADUs
-			readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, settings.getPixelPitch(),
 					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), emCCD, totalGain, qe,
 					readNoise, settings.getBackground(), b2, lowerN, lowerP, lowerMLP);
@@ -969,6 +960,43 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
+	private double getBackgroundEstimate()
+	{
+		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
+		{
+			// Background is in photons
+			double backgroundVariance = settings.getBackground();
+			// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor 
+			// so this is "double-counting" the EM-CCD.  
+			//if (settings.getEmGain() > 1)
+			//	backgroundVariance *= 2;
+
+			// Read noise is in electrons. Convert to Photons
+			double readNoise = settings.getReadNoise() / settings.getQuantumEfficiency();
+
+			// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
+			// is equal to the total variance at the pixel.
+			return backgroundVariance + Maths.pow2(readNoise);
+		}
+		else if (settings.getCameraType() == CameraType.SCMOS)
+		{
+			// Assume sCMOS amplification is like a CCD. We need an average read noise to get an 
+			// approximation of the background noise for the precision computation.
+
+			// We get the total background in photons  
+			double backgroundVariance = settings.getBackground();
+
+			// Create the camera noise model
+			createPerPixelCameraModelData(cameraModel);
+
+			// Get the average read noise. Convert from electrons to photons
+			double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length) / settings.getQuantumEfficiency();
+
+			return backgroundVariance + Maths.pow2(readNoise);
+		}
+		throw new IllegalStateException("Unknown camera type: " + settings.getCameraType());
+	}
+
 	/**
 	 * Store the simulation settings
 	 * 
@@ -976,39 +1004,41 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private void saveSimulationParameters(int particles, boolean fullSimulation, double signalPerFrame)
 	{
-		// TODO - fix this
+		boolean emCCD;
+		double totalGain;
+		double b2 = getBackgroundEstimate();
+		double readNoise;
 
-		final double totalGain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
+		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
+		{
+			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
+			emCCD = (settings.getCameraType() == CameraType.EMCCD) ? settings.getEmGain() > 1 : false;
+			totalGain = helper.getTotalGainSafe();
+			// Store read noise in ADUs
+			readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
+		}
+		else if (settings.getCameraType() == CameraType.SCMOS)
+		{
+			// Assume sCMOS amplification is like a CCD. We need an average read noise to get an 
+			// approximation of the background noise for the precision computation.
+			emCCD = false;
+			// Not required for sCMOS
+			totalGain = 0;
+			readNoise = 0;
+		}
+		else
+		{
+			throw new IllegalStateException("Unknown camera type: " + settings.getCameraType());
+		}
 
-		// Background is in photons
-		double backgroundVariance = settings.getBackground();
-		// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor 
-		// so this is "double-counting" the EM-CCD.  
-		//if (settings.getEmGain() > 1)
-		//	backgroundVariance *= 2;
-
-		// Read noise is in electrons. Convert to Photons to get contribution to background variance
-		double readNoise = settings.getReadNoise() / totalGain;
-		if (settings.getCameraGain() != 0)
-			readNoise *= settings.getCameraGain();
-
-		final double readVariance = readNoise * readNoise;
-
-		// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
-		// is equal to the total variance at the pixel.
-		final double b2 = backgroundVariance + readVariance;
-
-		boolean emCCD = settings.getEmGain() > 1;
 		double sd = getPsfSD() * settings.getPixelPitch();
 
-		final double amplification = totalGain / getQuantumEfficiency();
+		final double qe = getQuantumEfficiency();
 
-		// Store read noise in ADUs
-		readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 		simulationParameters = new SimulationParameters(particles, fullSimulation, sd, settings.getPixelPitch(),
 				settings.getPhotonsPerSecond(), settings.getPhotonsPerSecondMaximum(), signalPerFrame,
-				settings.getDepth(), settings.getFixedDepth(), settings.getBias(), emCCD, totalGain, amplification,
-				readNoise, settings.getBackground(), b2);
+				settings.getDepth(), settings.getFixedDepth(), settings.getBias(), emCCD, totalGain, qe, readNoise,
+				settings.getBackground(), b2);
 	}
 
 	/**
@@ -2216,6 +2246,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private void createPerPixelCameraModelData(CameraModel cameraModel)
 	{
+		if (readNoise != null)
+			return;
+
 		// Note: Store read noise in electrons for SNR computation. The gain is later applied back.
 
 		if (cameraModel.isPerPixelModel())

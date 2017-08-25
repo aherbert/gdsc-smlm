@@ -307,14 +307,7 @@ public class CalibrationReader
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
 		if (c.hasCameraCalibration())
 		{
-			switch (c.getCameraCalibration().getCameraType())
-			{
-				case CCD:
-				case EMCCD:
-					return true;
-				default:
-					break;
-			}
+			return CalibrationProtosHelper.isCCDCameraType(c.getCameraCalibration().getCameraType());
 		}
 		return false;
 	}
@@ -378,36 +371,40 @@ public class CalibrationReader
 		double qe = getQuantumEfficiency();
 		return qe > 0 && qe <= 1;
 	}
-	
+
 	/**
 	 * Get the camera amplification (Count/e-) used when modelling a microscope camera.
 	 * <p>
 	 * Note that the camera noise model assumes that electrons are converted to Count units by amplification that is not
 	 * perfect (i.e. it has noise). The amplification is equal to the gain (Count/photon) divided by the quantum
-	 * efficiency (e-/photon).
+	 * efficiency [QE] (e-/photon).
+	 * <p>
+	 * If the QE is not set then it is assumed to be 1.
 	 *
 	 * @return the amplification
-	 */ 
+	 */
 	public double getCountPerElectron()
 	{
 		double countPerPhoton = getCountPerPhoton();
 		if (countPerPhoton > 0)
 		{
 			double qe = getQuantumEfficiency();
-			if (qe > 0)
-				return countPerPhoton / qe;
+			if (qe == 0)
+				qe = 1;
+			return countPerPhoton / qe;
 		}
 		return 0;
 	}
-	
+
 	/**
-	 * Checks for amplification (Count/e-).
+	 * Checks for amplification (Count/e-). This is true if there is a count/photon since the quantum efficiency is
+	 * assumed to be 1 if absent.
 	 *
 	 * @return true, if successful
 	 */
 	public boolean hasCountPerElectron()
 	{
-		return hasCountPerPhoton() && hasQuantumEfficiency();
+		return hasCountPerPhoton(); // && hasQuantumEfficiency();
 	}
 
 	/**

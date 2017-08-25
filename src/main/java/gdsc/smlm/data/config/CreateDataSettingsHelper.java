@@ -35,6 +35,8 @@ public class CreateDataSettingsHelper
 	{
 		if (createDataSettings == null)
 			throw new IllegalArgumentException("CreateDataSettings must not be null");
+		if (!CalibrationProtosHelper.isCCDCameraType(createDataSettings.getCameraType()))
+			throw new IllegalArgumentException("Helper instance must be used for a CCD-type camera");
 		this.createDataSettings = createDataSettings;
 		updateTotalGain();
 	}
