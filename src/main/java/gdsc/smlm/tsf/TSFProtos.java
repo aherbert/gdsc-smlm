@@ -2501,7 +2501,7 @@ public final class TSFProtos {
 
     /**
      * <pre>
-     * Source of the results (can be a serialised 
+     * Source of the results (can be a serialised object)
      * </pre>
      *
      * <code>optional string source = 1501;</code>
@@ -2509,7 +2509,7 @@ public final class TSFProtos {
     boolean hasSource();
     /**
      * <pre>
-     * Source of the results (can be a serialised 
+     * Source of the results (can be a serialised object)
      * </pre>
      *
      * <code>optional string source = 1501;</code>
@@ -2517,7 +2517,7 @@ public final class TSFProtos {
     java.lang.String getSource();
     /**
      * <pre>
-     * Source of the results (can be a serialised 
+     * Source of the results (can be a serialised object)
      * </pre>
      *
      * <code>optional string source = 1501;</code>
@@ -2527,7 +2527,7 @@ public final class TSFProtos {
 
     /**
      * <pre>
-     * Configuration used for fitting (can 
+     * Configuration used for fitting (can be a serialised object)
      * </pre>
      *
      * <code>optional string configuration = 1502;</code>
@@ -2535,7 +2535,7 @@ public final class TSFProtos {
     boolean hasConfiguration();
     /**
      * <pre>
-     * Configuration used for fitting (can 
+     * Configuration used for fitting (can be a serialised object)
      * </pre>
      *
      * <code>optional string configuration = 1502;</code>
@@ -2543,7 +2543,7 @@ public final class TSFProtos {
     java.lang.String getConfiguration();
     /**
      * <pre>
-     * Configuration used for fitting (can 
+     * Configuration used for fitting (can be a serialised object)
      * </pre>
      *
      * <code>optional string configuration = 1502;</code>
@@ -2553,8 +2553,7 @@ public final class TSFProtos {
 
     /**
      * <pre>
-     * Calibration. This is for a single channel, i.e. camera.
-     * The pixel pitch is expected in pixel_size.
+     * The system gain to convert counts to photons (units=count/photon)
      * </pre>
      *
      * <code>optional double gain = 1503;</code>
@@ -2562,8 +2561,7 @@ public final class TSFProtos {
     boolean hasGain();
     /**
      * <pre>
-     * Calibration. This is for a single channel, i.e. camera.
-     * The pixel pitch is expected in pixel_size.
+     * The system gain to convert counts to photons (units=count/photon)
      * </pre>
      *
      * <code>optional double gain = 1503;</code>
@@ -2572,7 +2570,7 @@ public final class TSFProtos {
 
     /**
      * <pre>
-     * (units=count/photon)
+     * The exposure time for a single frame (units=millisecond)
      * </pre>
      *
      * <code>optional double exposure_time = 1504;</code>
@@ -2580,7 +2578,7 @@ public final class TSFProtos {
     boolean hasExposureTime();
     /**
      * <pre>
-     * (units=count/photon)
+     * The exposure time for a single frame (units=millisecond)
      * </pre>
      *
      * <code>optional double exposure_time = 1504;</code>
@@ -2589,7 +2587,7 @@ public final class TSFProtos {
 
     /**
      * <pre>
-     * (units=millisecond)
+     * The camera read noise for a pixel (units=count) 
      * </pre>
      *
      * <code>optional double read_noise = 1505;</code>
@@ -2597,7 +2595,7 @@ public final class TSFProtos {
     boolean hasReadNoise();
     /**
      * <pre>
-     * (units=millisecond)
+     * The camera read noise for a pixel (units=count) 
      * </pre>
      *
      * <code>optional double read_noise = 1505;</code>
@@ -2606,7 +2604,7 @@ public final class TSFProtos {
 
     /**
      * <pre>
-     * (units=count)
+     * The camera bias (units=counts) 
      * </pre>
      *
      * <code>optional double bias = 1506;</code>
@@ -2614,7 +2612,7 @@ public final class TSFProtos {
     boolean hasBias();
     /**
      * <pre>
-     * (units=count)
+     * The camera bias (units=counts) 
      * </pre>
      *
      * <code>optional double bias = 1506;</code>
@@ -2623,45 +2621,7 @@ public final class TSFProtos {
 
     /**
      * <pre>
-     * Set to true if this was an EM-CCD camera
-     * </pre>
-     *
-     * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
-     */
-    @java.lang.Deprecated boolean hasIsEmCcd();
-    /**
-     * <pre>
-     * Set to true if this was an EM-CCD camera
-     * </pre>
-     *
-     * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
-     */
-    @java.lang.Deprecated boolean getIsEmCcd();
-
-    /**
-     * <pre>
-     * The readout amplification applied 
-     * </pre>
-     *
-     * <code>optional double amplification = 1508;</code>
-     */
-    boolean hasAmplification();
-    /**
-     * <pre>
-     * The readout amplification applied 
-     * </pre>
-     *
-     * <code>optional double amplification = 1508;</code>
-     */
-    double getAmplification();
-
-    /**
-     * <pre>
-     * when converting the pixel value to counts (units=count/electron). This 
-     * is expected to be higher than the total system gain. The factor 
-     * difference (gain/amplification) is the Quantum Efficiency (QE, 
-     * units=electron/photon). The amplification is used in the noise model 
-     * when fitting using Maximum Likelihood Estimation (MLE).
+     * The camera type 
      * </pre>
      *
      * <code>optional .TSF.CameraType camera_type = 1509;</code>
@@ -2669,11 +2629,7 @@ public final class TSFProtos {
     boolean hasCameraType();
     /**
      * <pre>
-     * when converting the pixel value to counts (units=count/electron). This 
-     * is expected to be higher than the total system gain. The factor 
-     * difference (gain/amplification) is the Quantum Efficiency (QE, 
-     * units=electron/photon). The amplification is used in the noise model 
-     * when fitting using Maximum Likelihood Estimation (MLE).
+     * The camera type 
      * </pre>
      *
      * <code>optional .TSF.CameraType camera_type = 1509;</code>
@@ -2746,8 +2702,6 @@ public final class TSFProtos {
       exposureTime_ = 0D;
       readNoise_ = 0D;
       bias_ = 0D;
-      isEmCcd_ = false;
-      amplification_ = 0D;
       cameraType_ = 0;
       pSF_ = "";
     }
@@ -2992,30 +2946,20 @@ public final class TSFProtos {
               bias_ = input.readDouble();
               break;
             }
-            case 12056: {
-              bitField0_ |= 0x02000000;
-              isEmCcd_ = input.readBool();
-              break;
-            }
-            case 12065: {
-              bitField0_ |= 0x04000000;
-              amplification_ = input.readDouble();
-              break;
-            }
             case 12072: {
               int rawValue = input.readEnum();
               gdsc.smlm.tsf.TSFProtos.CameraType value = gdsc.smlm.tsf.TSFProtos.CameraType.valueOf(rawValue);
               if (value == null) {
                 unknownFields.mergeVarintField(1509, rawValue);
               } else {
-                bitField0_ |= 0x08000000;
+                bitField0_ |= 0x02000000;
                 cameraType_ = rawValue;
               }
               break;
             }
             case 12082: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x10000000;
+              bitField0_ |= 0x04000000;
               pSF_ = bs;
               break;
             }
@@ -3705,7 +3649,7 @@ public final class TSFProtos {
     private volatile java.lang.Object source_;
     /**
      * <pre>
-     * Source of the results (can be a serialised 
+     * Source of the results (can be a serialised object)
      * </pre>
      *
      * <code>optional string source = 1501;</code>
@@ -3715,7 +3659,7 @@ public final class TSFProtos {
     }
     /**
      * <pre>
-     * Source of the results (can be a serialised 
+     * Source of the results (can be a serialised object)
      * </pre>
      *
      * <code>optional string source = 1501;</code>
@@ -3736,7 +3680,7 @@ public final class TSFProtos {
     }
     /**
      * <pre>
-     * Source of the results (can be a serialised 
+     * Source of the results (can be a serialised object)
      * </pre>
      *
      * <code>optional string source = 1501;</code>
@@ -3759,7 +3703,7 @@ public final class TSFProtos {
     private volatile java.lang.Object configuration_;
     /**
      * <pre>
-     * Configuration used for fitting (can 
+     * Configuration used for fitting (can be a serialised object)
      * </pre>
      *
      * <code>optional string configuration = 1502;</code>
@@ -3769,7 +3713,7 @@ public final class TSFProtos {
     }
     /**
      * <pre>
-     * Configuration used for fitting (can 
+     * Configuration used for fitting (can be a serialised object)
      * </pre>
      *
      * <code>optional string configuration = 1502;</code>
@@ -3790,7 +3734,7 @@ public final class TSFProtos {
     }
     /**
      * <pre>
-     * Configuration used for fitting (can 
+     * Configuration used for fitting (can be a serialised object)
      * </pre>
      *
      * <code>optional string configuration = 1502;</code>
@@ -3813,8 +3757,7 @@ public final class TSFProtos {
     private double gain_;
     /**
      * <pre>
-     * Calibration. This is for a single channel, i.e. camera.
-     * The pixel pitch is expected in pixel_size.
+     * The system gain to convert counts to photons (units=count/photon)
      * </pre>
      *
      * <code>optional double gain = 1503;</code>
@@ -3824,8 +3767,7 @@ public final class TSFProtos {
     }
     /**
      * <pre>
-     * Calibration. This is for a single channel, i.e. camera.
-     * The pixel pitch is expected in pixel_size.
+     * The system gain to convert counts to photons (units=count/photon)
      * </pre>
      *
      * <code>optional double gain = 1503;</code>
@@ -3838,7 +3780,7 @@ public final class TSFProtos {
     private double exposureTime_;
     /**
      * <pre>
-     * (units=count/photon)
+     * The exposure time for a single frame (units=millisecond)
      * </pre>
      *
      * <code>optional double exposure_time = 1504;</code>
@@ -3848,7 +3790,7 @@ public final class TSFProtos {
     }
     /**
      * <pre>
-     * (units=count/photon)
+     * The exposure time for a single frame (units=millisecond)
      * </pre>
      *
      * <code>optional double exposure_time = 1504;</code>
@@ -3861,7 +3803,7 @@ public final class TSFProtos {
     private double readNoise_;
     /**
      * <pre>
-     * (units=millisecond)
+     * The camera read noise for a pixel (units=count) 
      * </pre>
      *
      * <code>optional double read_noise = 1505;</code>
@@ -3871,7 +3813,7 @@ public final class TSFProtos {
     }
     /**
      * <pre>
-     * (units=millisecond)
+     * The camera read noise for a pixel (units=count) 
      * </pre>
      *
      * <code>optional double read_noise = 1505;</code>
@@ -3884,7 +3826,7 @@ public final class TSFProtos {
     private double bias_;
     /**
      * <pre>
-     * (units=count)
+     * The camera bias (units=counts) 
      * </pre>
      *
      * <code>optional double bias = 1506;</code>
@@ -3894,7 +3836,7 @@ public final class TSFProtos {
     }
     /**
      * <pre>
-     * (units=count)
+     * The camera bias (units=counts) 
      * </pre>
      *
      * <code>optional double bias = 1506;</code>
@@ -3903,75 +3845,21 @@ public final class TSFProtos {
       return bias_;
     }
 
-    public static final int IS_EM_CCD_FIELD_NUMBER = 1507;
-    private boolean isEmCcd_;
-    /**
-     * <pre>
-     * Set to true if this was an EM-CCD camera
-     * </pre>
-     *
-     * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
-     */
-    @java.lang.Deprecated public boolean hasIsEmCcd() {
-      return ((bitField0_ & 0x02000000) == 0x02000000);
-    }
-    /**
-     * <pre>
-     * Set to true if this was an EM-CCD camera
-     * </pre>
-     *
-     * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
-     */
-    @java.lang.Deprecated public boolean getIsEmCcd() {
-      return isEmCcd_;
-    }
-
-    public static final int AMPLIFICATION_FIELD_NUMBER = 1508;
-    private double amplification_;
-    /**
-     * <pre>
-     * The readout amplification applied 
-     * </pre>
-     *
-     * <code>optional double amplification = 1508;</code>
-     */
-    public boolean hasAmplification() {
-      return ((bitField0_ & 0x04000000) == 0x04000000);
-    }
-    /**
-     * <pre>
-     * The readout amplification applied 
-     * </pre>
-     *
-     * <code>optional double amplification = 1508;</code>
-     */
-    public double getAmplification() {
-      return amplification_;
-    }
-
     public static final int CAMERA_TYPE_FIELD_NUMBER = 1509;
     private int cameraType_;
     /**
      * <pre>
-     * when converting the pixel value to counts (units=count/electron). This 
-     * is expected to be higher than the total system gain. The factor 
-     * difference (gain/amplification) is the Quantum Efficiency (QE, 
-     * units=electron/photon). The amplification is used in the noise model 
-     * when fitting using Maximum Likelihood Estimation (MLE).
+     * The camera type 
      * </pre>
      *
      * <code>optional .TSF.CameraType camera_type = 1509;</code>
      */
     public boolean hasCameraType() {
-      return ((bitField0_ & 0x08000000) == 0x08000000);
+      return ((bitField0_ & 0x02000000) == 0x02000000);
     }
     /**
      * <pre>
-     * when converting the pixel value to counts (units=count/electron). This 
-     * is expected to be higher than the total system gain. The factor 
-     * difference (gain/amplification) is the Quantum Efficiency (QE, 
-     * units=electron/photon). The amplification is used in the noise model 
-     * when fitting using Maximum Likelihood Estimation (MLE).
+     * The camera type 
      * </pre>
      *
      * <code>optional .TSF.CameraType camera_type = 1509;</code>
@@ -3991,7 +3879,7 @@ public final class TSFProtos {
      * <code>optional string PSF = 1510;</code>
      */
     public boolean hasPSF() {
-      return ((bitField0_ & 0x10000000) == 0x10000000);
+      return ((bitField0_ & 0x04000000) == 0x04000000);
     }
     /**
      * <pre>
@@ -4155,15 +4043,9 @@ public final class TSFProtos {
         output.writeDouble(1506, bias_);
       }
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
-        output.writeBool(1507, isEmCcd_);
-      }
-      if (((bitField0_ & 0x04000000) == 0x04000000)) {
-        output.writeDouble(1508, amplification_);
-      }
-      if (((bitField0_ & 0x08000000) == 0x08000000)) {
         output.writeEnum(1509, cameraType_);
       }
-      if (((bitField0_ & 0x10000000) == 0x10000000)) {
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1510, pSF_);
       }
       extensionWriter.writeUntil(2048, output);
@@ -4289,17 +4171,9 @@ public final class TSFProtos {
       }
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1507, isEmCcd_);
-      }
-      if (((bitField0_ & 0x04000000) == 0x04000000)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1508, amplification_);
-      }
-      if (((bitField0_ & 0x08000000) == 0x08000000)) {
-        size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1509, cameraType_);
       }
-      if (((bitField0_ & 0x10000000) == 0x10000000)) {
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1510, pSF_);
       }
       size += extensionsSerializedSize();
@@ -4457,18 +4331,6 @@ public final class TSFProtos {
             == java.lang.Double.doubleToLongBits(
                 other.getBias()));
       }
-      result = result && (hasIsEmCcd() == other.hasIsEmCcd());
-      if (hasIsEmCcd()) {
-        result = result && (getIsEmCcd()
-            == other.getIsEmCcd());
-      }
-      result = result && (hasAmplification() == other.hasAmplification());
-      if (hasAmplification()) {
-        result = result && (
-            java.lang.Double.doubleToLongBits(getAmplification())
-            == java.lang.Double.doubleToLongBits(
-                other.getAmplification()));
-      }
       result = result && (hasCameraType() == other.hasCameraType());
       if (hasCameraType()) {
         result = result && cameraType_ == other.cameraType_;
@@ -4610,16 +4472,6 @@ public final class TSFProtos {
         hash = (37 * hash) + BIAS_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getBias()));
-      }
-      if (hasIsEmCcd()) {
-        hash = (37 * hash) + IS_EM_CCD_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-            getIsEmCcd());
-      }
-      if (hasAmplification()) {
-        hash = (37 * hash) + AMPLIFICATION_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            java.lang.Double.doubleToLongBits(getAmplification()));
       }
       if (hasCameraType()) {
         hash = (37 * hash) + CAMERA_TYPE_FIELD_NUMBER;
@@ -4826,14 +4678,10 @@ public final class TSFProtos {
         bitField0_ = (bitField0_ & ~0x04000000);
         bias_ = 0D;
         bitField0_ = (bitField0_ & ~0x08000000);
-        isEmCcd_ = false;
-        bitField0_ = (bitField0_ & ~0x10000000);
-        amplification_ = 0D;
-        bitField0_ = (bitField0_ & ~0x20000000);
         cameraType_ = 0;
-        bitField0_ = (bitField0_ & ~0x40000000);
+        bitField0_ = (bitField0_ & ~0x10000000);
         pSF_ = "";
-        bitField0_ = (bitField0_ & ~0x80000000);
+        bitField0_ = (bitField0_ & ~0x20000000);
         return this;
       }
 
@@ -4984,17 +4832,9 @@ public final class TSFProtos {
         if (((from_bitField0_ & 0x10000000) == 0x10000000)) {
           to_bitField0_ |= 0x02000000;
         }
-        result.isEmCcd_ = isEmCcd_;
+        result.cameraType_ = cameraType_;
         if (((from_bitField0_ & 0x20000000) == 0x20000000)) {
           to_bitField0_ |= 0x04000000;
-        }
-        result.amplification_ = amplification_;
-        if (((from_bitField0_ & 0x40000000) == 0x40000000)) {
-          to_bitField0_ |= 0x08000000;
-        }
-        result.cameraType_ = cameraType_;
-        if (((from_bitField0_ & 0x80000000) == 0x80000000)) {
-          to_bitField0_ |= 0x10000000;
         }
         result.pSF_ = pSF_;
         result.bitField0_ = to_bitField0_;
@@ -5191,17 +5031,11 @@ public final class TSFProtos {
         if (other.hasBias()) {
           setBias(other.getBias());
         }
-        if (other.hasIsEmCcd()) {
-          setIsEmCcd(other.getIsEmCcd());
-        }
-        if (other.hasAmplification()) {
-          setAmplification(other.getAmplification());
-        }
         if (other.hasCameraType()) {
           setCameraType(other.getCameraType());
         }
         if (other.hasPSF()) {
-          bitField0_ |= 0x80000000;
+          bitField0_ |= 0x20000000;
           pSF_ = other.pSF_;
           onChanged();
         }
@@ -6920,7 +6754,7 @@ public final class TSFProtos {
       private java.lang.Object source_ = "";
       /**
        * <pre>
-       * Source of the results (can be a serialised 
+       * Source of the results (can be a serialised object)
        * </pre>
        *
        * <code>optional string source = 1501;</code>
@@ -6930,7 +6764,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Source of the results (can be a serialised 
+       * Source of the results (can be a serialised object)
        * </pre>
        *
        * <code>optional string source = 1501;</code>
@@ -6951,7 +6785,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Source of the results (can be a serialised 
+       * Source of the results (can be a serialised object)
        * </pre>
        *
        * <code>optional string source = 1501;</code>
@@ -6971,7 +6805,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Source of the results (can be a serialised 
+       * Source of the results (can be a serialised object)
        * </pre>
        *
        * <code>optional string source = 1501;</code>
@@ -6988,7 +6822,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Source of the results (can be a serialised 
+       * Source of the results (can be a serialised object)
        * </pre>
        *
        * <code>optional string source = 1501;</code>
@@ -7001,7 +6835,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Source of the results (can be a serialised 
+       * Source of the results (can be a serialised object)
        * </pre>
        *
        * <code>optional string source = 1501;</code>
@@ -7020,7 +6854,7 @@ public final class TSFProtos {
       private java.lang.Object configuration_ = "";
       /**
        * <pre>
-       * Configuration used for fitting (can 
+       * Configuration used for fitting (can be a serialised object)
        * </pre>
        *
        * <code>optional string configuration = 1502;</code>
@@ -7030,7 +6864,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Configuration used for fitting (can 
+       * Configuration used for fitting (can be a serialised object)
        * </pre>
        *
        * <code>optional string configuration = 1502;</code>
@@ -7051,7 +6885,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Configuration used for fitting (can 
+       * Configuration used for fitting (can be a serialised object)
        * </pre>
        *
        * <code>optional string configuration = 1502;</code>
@@ -7071,7 +6905,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Configuration used for fitting (can 
+       * Configuration used for fitting (can be a serialised object)
        * </pre>
        *
        * <code>optional string configuration = 1502;</code>
@@ -7088,7 +6922,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Configuration used for fitting (can 
+       * Configuration used for fitting (can be a serialised object)
        * </pre>
        *
        * <code>optional string configuration = 1502;</code>
@@ -7101,7 +6935,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Configuration used for fitting (can 
+       * Configuration used for fitting (can be a serialised object)
        * </pre>
        *
        * <code>optional string configuration = 1502;</code>
@@ -7120,8 +6954,7 @@ public final class TSFProtos {
       private double gain_ ;
       /**
        * <pre>
-       * Calibration. This is for a single channel, i.e. camera.
-       * The pixel pitch is expected in pixel_size.
+       * The system gain to convert counts to photons (units=count/photon)
        * </pre>
        *
        * <code>optional double gain = 1503;</code>
@@ -7131,8 +6964,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Calibration. This is for a single channel, i.e. camera.
-       * The pixel pitch is expected in pixel_size.
+       * The system gain to convert counts to photons (units=count/photon)
        * </pre>
        *
        * <code>optional double gain = 1503;</code>
@@ -7142,8 +6974,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Calibration. This is for a single channel, i.e. camera.
-       * The pixel pitch is expected in pixel_size.
+       * The system gain to convert counts to photons (units=count/photon)
        * </pre>
        *
        * <code>optional double gain = 1503;</code>
@@ -7156,8 +6987,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * Calibration. This is for a single channel, i.e. camera.
-       * The pixel pitch is expected in pixel_size.
+       * The system gain to convert counts to photons (units=count/photon)
        * </pre>
        *
        * <code>optional double gain = 1503;</code>
@@ -7172,7 +7002,7 @@ public final class TSFProtos {
       private double exposureTime_ ;
       /**
        * <pre>
-       * (units=count/photon)
+       * The exposure time for a single frame (units=millisecond)
        * </pre>
        *
        * <code>optional double exposure_time = 1504;</code>
@@ -7182,7 +7012,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * (units=count/photon)
+       * The exposure time for a single frame (units=millisecond)
        * </pre>
        *
        * <code>optional double exposure_time = 1504;</code>
@@ -7192,7 +7022,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * (units=count/photon)
+       * The exposure time for a single frame (units=millisecond)
        * </pre>
        *
        * <code>optional double exposure_time = 1504;</code>
@@ -7205,7 +7035,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * (units=count/photon)
+       * The exposure time for a single frame (units=millisecond)
        * </pre>
        *
        * <code>optional double exposure_time = 1504;</code>
@@ -7220,7 +7050,7 @@ public final class TSFProtos {
       private double readNoise_ ;
       /**
        * <pre>
-       * (units=millisecond)
+       * The camera read noise for a pixel (units=count) 
        * </pre>
        *
        * <code>optional double read_noise = 1505;</code>
@@ -7230,7 +7060,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * (units=millisecond)
+       * The camera read noise for a pixel (units=count) 
        * </pre>
        *
        * <code>optional double read_noise = 1505;</code>
@@ -7240,7 +7070,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * (units=millisecond)
+       * The camera read noise for a pixel (units=count) 
        * </pre>
        *
        * <code>optional double read_noise = 1505;</code>
@@ -7253,7 +7083,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * (units=millisecond)
+       * The camera read noise for a pixel (units=count) 
        * </pre>
        *
        * <code>optional double read_noise = 1505;</code>
@@ -7268,7 +7098,7 @@ public final class TSFProtos {
       private double bias_ ;
       /**
        * <pre>
-       * (units=count)
+       * The camera bias (units=counts) 
        * </pre>
        *
        * <code>optional double bias = 1506;</code>
@@ -7278,7 +7108,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * (units=count)
+       * The camera bias (units=counts) 
        * </pre>
        *
        * <code>optional double bias = 1506;</code>
@@ -7288,7 +7118,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * (units=count)
+       * The camera bias (units=counts) 
        * </pre>
        *
        * <code>optional double bias = 1506;</code>
@@ -7301,7 +7131,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * (units=count)
+       * The camera bias (units=counts) 
        * </pre>
        *
        * <code>optional double bias = 1506;</code>
@@ -7313,124 +7143,20 @@ public final class TSFProtos {
         return this;
       }
 
-      private boolean isEmCcd_ ;
-      /**
-       * <pre>
-       * Set to true if this was an EM-CCD camera
-       * </pre>
-       *
-       * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
-       */
-      @java.lang.Deprecated public boolean hasIsEmCcd() {
-        return ((bitField0_ & 0x10000000) == 0x10000000);
-      }
-      /**
-       * <pre>
-       * Set to true if this was an EM-CCD camera
-       * </pre>
-       *
-       * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
-       */
-      @java.lang.Deprecated public boolean getIsEmCcd() {
-        return isEmCcd_;
-      }
-      /**
-       * <pre>
-       * Set to true if this was an EM-CCD camera
-       * </pre>
-       *
-       * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
-       */
-      @java.lang.Deprecated public Builder setIsEmCcd(boolean value) {
-        bitField0_ |= 0x10000000;
-        isEmCcd_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Set to true if this was an EM-CCD camera
-       * </pre>
-       *
-       * <code>optional bool is_em_ccd = 1507 [deprecated = true];</code>
-       */
-      @java.lang.Deprecated public Builder clearIsEmCcd() {
-        bitField0_ = (bitField0_ & ~0x10000000);
-        isEmCcd_ = false;
-        onChanged();
-        return this;
-      }
-
-      private double amplification_ ;
-      /**
-       * <pre>
-       * The readout amplification applied 
-       * </pre>
-       *
-       * <code>optional double amplification = 1508;</code>
-       */
-      public boolean hasAmplification() {
-        return ((bitField0_ & 0x20000000) == 0x20000000);
-      }
-      /**
-       * <pre>
-       * The readout amplification applied 
-       * </pre>
-       *
-       * <code>optional double amplification = 1508;</code>
-       */
-      public double getAmplification() {
-        return amplification_;
-      }
-      /**
-       * <pre>
-       * The readout amplification applied 
-       * </pre>
-       *
-       * <code>optional double amplification = 1508;</code>
-       */
-      public Builder setAmplification(double value) {
-        bitField0_ |= 0x20000000;
-        amplification_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The readout amplification applied 
-       * </pre>
-       *
-       * <code>optional double amplification = 1508;</code>
-       */
-      public Builder clearAmplification() {
-        bitField0_ = (bitField0_ & ~0x20000000);
-        amplification_ = 0D;
-        onChanged();
-        return this;
-      }
-
       private int cameraType_ = 0;
       /**
        * <pre>
-       * when converting the pixel value to counts (units=count/electron). This 
-       * is expected to be higher than the total system gain. The factor 
-       * difference (gain/amplification) is the Quantum Efficiency (QE, 
-       * units=electron/photon). The amplification is used in the noise model 
-       * when fitting using Maximum Likelihood Estimation (MLE).
+       * The camera type 
        * </pre>
        *
        * <code>optional .TSF.CameraType camera_type = 1509;</code>
        */
       public boolean hasCameraType() {
-        return ((bitField0_ & 0x40000000) == 0x40000000);
+        return ((bitField0_ & 0x10000000) == 0x10000000);
       }
       /**
        * <pre>
-       * when converting the pixel value to counts (units=count/electron). This 
-       * is expected to be higher than the total system gain. The factor 
-       * difference (gain/amplification) is the Quantum Efficiency (QE, 
-       * units=electron/photon). The amplification is used in the noise model 
-       * when fitting using Maximum Likelihood Estimation (MLE).
+       * The camera type 
        * </pre>
        *
        * <code>optional .TSF.CameraType camera_type = 1509;</code>
@@ -7441,11 +7167,7 @@ public final class TSFProtos {
       }
       /**
        * <pre>
-       * when converting the pixel value to counts (units=count/electron). This 
-       * is expected to be higher than the total system gain. The factor 
-       * difference (gain/amplification) is the Quantum Efficiency (QE, 
-       * units=electron/photon). The amplification is used in the noise model 
-       * when fitting using Maximum Likelihood Estimation (MLE).
+       * The camera type 
        * </pre>
        *
        * <code>optional .TSF.CameraType camera_type = 1509;</code>
@@ -7454,24 +7176,20 @@ public final class TSFProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        bitField0_ |= 0x40000000;
+        bitField0_ |= 0x10000000;
         cameraType_ = value.getNumber();
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * when converting the pixel value to counts (units=count/electron). This 
-       * is expected to be higher than the total system gain. The factor 
-       * difference (gain/amplification) is the Quantum Efficiency (QE, 
-       * units=electron/photon). The amplification is used in the noise model 
-       * when fitting using Maximum Likelihood Estimation (MLE).
+       * The camera type 
        * </pre>
        *
        * <code>optional .TSF.CameraType camera_type = 1509;</code>
        */
       public Builder clearCameraType() {
-        bitField0_ = (bitField0_ & ~0x40000000);
+        bitField0_ = (bitField0_ & ~0x10000000);
         cameraType_ = 0;
         onChanged();
         return this;
@@ -7486,7 +7204,7 @@ public final class TSFProtos {
        * <code>optional string PSF = 1510;</code>
        */
       public boolean hasPSF() {
-        return ((bitField0_ & 0x80000000) == 0x80000000);
+        return ((bitField0_ & 0x20000000) == 0x20000000);
       }
       /**
        * <pre>
@@ -7541,7 +7259,7 @@ public final class TSFProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x80000000;
+  bitField0_ |= 0x20000000;
         pSF_ = value;
         onChanged();
         return this;
@@ -7554,7 +7272,7 @@ public final class TSFProtos {
        * <code>optional string PSF = 1510;</code>
        */
       public Builder clearPSF() {
-        bitField0_ = (bitField0_ & ~0x80000000);
+        bitField0_ = (bitField0_ & ~0x20000000);
         pSF_ = getDefaultInstance().getPSF();
         onChanged();
         return this;
@@ -7571,7 +7289,7 @@ public final class TSFProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x80000000;
+  bitField0_ |= 0x20000000;
         pSF_ = value;
         onChanged();
         return this;
@@ -11959,7 +11677,7 @@ public final class TSFProtos {
       "\n\ttsf.proto\022\003TSF\"G\n\017FluorophoreType\022\n\n\002i" +
       "d\030\001 \002(\005\022\023\n\013description\030\002 \001(\t\022\023\n\013is_fiduc" +
       "ial\030\003 \001(\010\"=\n\003ROI\022\t\n\001x\030\001 \002(\005\022\t\n\001y\030\002 \002(\005\022\017" +
-      "\n\007x_width\030\003 \002(\005\022\017\n\007y_width\030\004 \002(\005\"\372\005\n\010Spo" +
+      "\n\007x_width\030\003 \002(\005\022\017\n\007y_width\030\004 \002(\005\"\361\005\n\010Spo" +
       "tList\022\031\n\016application_id\030\001 \002(\005:\0011\022\014\n\004name" +
       "\030\002 \001(\t\022\020\n\010filepath\030\003 \001(\t\022\013\n\003uid\030\004 \001(\003\022\023\n" +
       "\013nr_pixels_x\030\005 \001(\005\022\023\n\013nr_pixels_y\030\006 \001(\005\022" +
@@ -11976,31 +11694,31 @@ public final class TSFProtos {
       "(\0132\010.TSF.ROI\022\017\n\006source\030\335\013 \001(\t\022\026\n\rconfigu" +
       "ration\030\336\013 \001(\t\022\r\n\004gain\030\337\013 \001(\001\022\026\n\rexposure" +
       "_time\030\340\013 \001(\001\022\023\n\nread_noise\030\341\013 \001(\001\022\r\n\004bia",
-      "s\030\342\013 \001(\001\022\026\n\tis_em_ccd\030\343\013 \001(\010B\002\030\001\022\026\n\rampl" +
-      "ification\030\344\013 \001(\001\022%\n\013camera_type\030\345\013 \001(\0162\017" +
-      ".TSF.CameraType\022\014\n\003PSF\030\346\013 \001(\t*\006\010\244\r\020\200\020\"\333\004" +
-      "\n\004Spot\022\020\n\010molecule\030\001 \002(\005\022\017\n\007channel\030\002 \002(" +
-      "\005\022\r\n\005frame\030\003 \002(\005\022\r\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005" +
-      " \001(\005\022\030\n\020fluorophore_type\030\023 \001(\005\022\017\n\007cluste" +
-      "r\030\024 \001(\005\022*\n\016location_units\030\021 \001(\0162\022.TSF.Lo" +
-      "cationUnits\022\t\n\001x\030\007 \002(\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t" +
-      " \001(\002\022,\n\017intensity_units\030\022 \001(\0162\023.TSF.Inte" +
-      "nsityUnits\022\021\n\tintensity\030\n \002(\002\022\022\n\nbackgro",
-      "und\030\013 \001(\002\022\r\n\005width\030\014 \001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005t" +
-      "heta\030\016 \001(\002\022\022\n\nx_original\030e \001(\002\022\022\n\ny_orig" +
-      "inal\030f \001(\002\022\022\n\nz_original\030g \001(\002\022\023\n\013x_prec" +
-      "ision\030h \001(\002\022\023\n\013y_precision\030i \001(\002\022\023\n\013z_pr" +
-      "ecision\030j \001(\002\022\022\n\nx_position\030k \001(\005\022\022\n\ny_p" +
-      "osition\030l \001(\005\022\016\n\005error\030\334\013 \001(\001\022\016\n\005noise\030\335" +
-      "\013 \001(\002\022\022\n\tend_frame\030\337\013 \001(\005\022\027\n\016original_va" +
-      "lue\030\340\013 \001(\002\022\027\n\016param_std_devs\030\341\013 \003(\002*\006\010\244\r" +
-      "\020\200\020*8\n\007FitMode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001" +
-      "\022\023\n\017TWOAXISANDTHETA\020\002*&\n\nThetaUnits\022\013\n\007D",
-      "EGREES\020\000\022\013\n\007RADIANS\020\001*)\n\016IntensityUnits\022" +
-      "\n\n\006COUNTS\020\000\022\013\n\007PHOTONS\020\001*+\n\rLocationUnit" +
-      "s\022\006\n\002NM\020\000\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002*+\n\nCameraT" +
-      "ype\022\007\n\003CCD\020\000\022\t\n\005EMCCD\020\001\022\t\n\005SCMOS\020\002B\032\n\rgd" +
-      "sc.smlm.tsfB\tTSFProtos"
+      "s\030\342\013 \001(\001\022%\n\013camera_type\030\345\013 \001(\0162\017.TSF.Cam" +
+      "eraType\022\014\n\003PSF\030\346\013 \001(\t*\006\010\244\r\020\200\020J\006\010\343\013\020\344\013J\006\010" +
+      "\344\013\020\345\013R\006em_ccdR\ramplification\"\333\004\n\004Spot\022\020\n" +
+      "\010molecule\030\001 \002(\005\022\017\n\007channel\030\002 \002(\005\022\r\n\005fram" +
+      "e\030\003 \002(\005\022\r\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005 \001(\005\022\030\n\020f" +
+      "luorophore_type\030\023 \001(\005\022\017\n\007cluster\030\024 \001(\005\022*" +
+      "\n\016location_units\030\021 \001(\0162\022.TSF.LocationUni" +
+      "ts\022\t\n\001x\030\007 \002(\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001(\002\022,\n\017i" +
+      "ntensity_units\030\022 \001(\0162\023.TSF.IntensityUnit" +
+      "s\022\021\n\tintensity\030\n \002(\002\022\022\n\nbackground\030\013 \001(\002",
+      "\022\r\n\005width\030\014 \001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005theta\030\016 \001(" +
+      "\002\022\022\n\nx_original\030e \001(\002\022\022\n\ny_original\030f \001(" +
+      "\002\022\022\n\nz_original\030g \001(\002\022\023\n\013x_precision\030h \001" +
+      "(\002\022\023\n\013y_precision\030i \001(\002\022\023\n\013z_precision\030j" +
+      " \001(\002\022\022\n\nx_position\030k \001(\005\022\022\n\ny_position\030l" +
+      " \001(\005\022\016\n\005error\030\334\013 \001(\001\022\016\n\005noise\030\335\013 \001(\002\022\022\n\t" +
+      "end_frame\030\337\013 \001(\005\022\027\n\016original_value\030\340\013 \001(" +
+      "\002\022\027\n\016param_std_devs\030\341\013 \003(\002*\006\010\244\r\020\200\020*8\n\007Fi" +
+      "tMode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023\n\017TWOAX" +
+      "ISANDTHETA\020\002*&\n\nThetaUnits\022\013\n\007DEGREES\020\000\022",
+      "\013\n\007RADIANS\020\001*)\n\016IntensityUnits\022\n\n\006COUNTS" +
+      "\020\000\022\013\n\007PHOTONS\020\001*+\n\rLocationUnits\022\006\n\002NM\020\000" +
+      "\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002*+\n\nCameraType\022\007\n\003CC" +
+      "D\020\000\022\t\n\005EMCCD\020\001\022\t\n\005SCMOS\020\002B\032\n\rgdsc.smlm.t" +
+      "sfB\tTSFProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -12031,7 +11749,7 @@ public final class TSFProtos {
     internal_static_TSF_SpotList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_SpotList_descriptor,
-        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "ThetaUnits", "FitMode", "IsTrack", "Ecf", "Qe", "Roi", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "IsEmCcd", "Amplification", "CameraType", "PSF", });
+        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "ThetaUnits", "FitMode", "IsTrack", "Ecf", "Qe", "Roi", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "CameraType", "PSF", });
     internal_static_TSF_Spot_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_TSF_Spot_fieldAccessorTable = new

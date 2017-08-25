@@ -122,29 +122,27 @@ message SpotList {
    
    // GDSC SMLM ...
    
-   optional string source = 1501; // Source of the results (can be a serialised 
-      // object)
+   reserved 1507, 1508;
+   reserved "em_ccd", "amplification";
    
-   optional string configuration = 1502; // Configuration used for fitting (can 
-      // be a serialised object)
+   // Source of the results (can be a serialised object)
+   optional string source = 1501; 
+   
+   // Configuration used for fitting (can be a serialised object)
+   optional string configuration = 1502; 
    
    // Calibration. This is for a single channel, i.e. camera.
-   // The pixel pitch is expected in pixel_size.
-   optional double gain = 1503; // The system gain to convert counts to photons 
-      // (units=count/photon)
-   optional double exposure_time = 1504; // The exposure time for a single frame 
-      // (units=millisecond)
-   optional double read_noise = 1505; // The camera read noise for a pixel 
-      // (units=count)
-   optional double bias = 1506; // The camera bias (units=counts)
-   optional bool is_em_ccd = 1507 [deprecated=true]; // Set to true if this was an EM-CCD camera
-   optional double amplification = 1508; // The readout amplification applied 
-      // when converting the pixel value to counts (units=count/electron). This 
-      // is expected to be higher than the total system gain. The factor 
-      // difference (gain/amplification) is the Quantum Efficiency (QE, 
-      // units=electron/photon). The amplification is used in the noise model 
-      // when fitting using Maximum Likelihood Estimation (MLE).
-   optional CameraType camera_type = 1509; // The camera type
+
+   // The system gain to convert counts to photons (units=count/photon)
+   optional double gain = 1503; 
+   // The exposure time for a single frame (units=millisecond)
+   optional double exposure_time = 1504;
+   // The camera read noise for a pixel (units=count) 
+   optional double read_noise = 1505;
+   // The camera bias (units=counts) 
+   optional double bias = 1506; 
+   // The camera type 
+   optional CameraType camera_type = 1509; 
 
    optional string PSF = 1510; // PSF used for fitting (can be a serialised object)
 

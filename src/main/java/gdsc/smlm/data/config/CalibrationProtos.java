@@ -2524,18 +2524,6 @@ public final class CalibrationProtos {
 
     /**
      * <pre>
-     * The camera amplification (Count/electron) used when modelling a microscope camera.
-     * Note that the camera noise model assumes that electrons are converted to counts by 
-     * amplification that is not perfect (i.e. it has noise). The amplification is equal 
-     * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
-     * </pre>
-     *
-     * <code>double count_per_electron = 4;</code>
-     */
-    double getCountPerElectron();
-
-    /**
-     * <pre>
      * The camera model name. This should contain all the information required to 
      * load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
      * </pre>
@@ -2553,6 +2541,22 @@ public final class CalibrationProtos {
      */
     com.google.protobuf.ByteString
         getCameraModelNameBytes();
+
+    /**
+     * <pre>
+     * Define the quantum efficiency (QE in electron/photon) of the microscope camera.
+     * Note that the camera noise model assumes that photons are converted to counts by 
+     * a process that is not perfect (i.e. it has noise). The underlying process is
+     * photons converted to electrons in the camera chip and then amplification 
+     * (count/electron) occurring in the camera hardware. Ideally this should be recorded
+     * by storing the QE and the amplification. However the total gain (Count/photon)
+     * is already stored with the results. Thus the amplification can be inferred by  
+     * dividing the total gain by the quantum efficiency which should be in the range 0-1.
+     * </pre>
+     *
+     * <code>double quantum_efficiency = 6;</code>
+     */
+    double getQuantumEfficiency();
   }
   /**
    * <pre>
@@ -2573,8 +2577,8 @@ public final class CalibrationProtos {
       cameraType_ = 0;
       readNoise_ = 0D;
       bias_ = 0D;
-      countPerElectron_ = 0D;
       cameraModelName_ = "";
+      quantumEfficiency_ = 0D;
     }
 
     @java.lang.Override
@@ -2618,15 +2622,15 @@ public final class CalibrationProtos {
               bias_ = input.readDouble();
               break;
             }
-            case 33: {
-
-              countPerElectron_ = input.readDouble();
-              break;
-            }
             case 42: {
               java.lang.String s = input.readStringRequireUtf8();
 
               cameraModelName_ = s;
+              break;
+            }
+            case 49: {
+
+              quantumEfficiency_ = input.readDouble();
               break;
             }
           }
@@ -2702,22 +2706,6 @@ public final class CalibrationProtos {
       return bias_;
     }
 
-    public static final int COUNT_PER_ELECTRON_FIELD_NUMBER = 4;
-    private double countPerElectron_;
-    /**
-     * <pre>
-     * The camera amplification (Count/electron) used when modelling a microscope camera.
-     * Note that the camera noise model assumes that electrons are converted to counts by 
-     * amplification that is not perfect (i.e. it has noise). The amplification is equal 
-     * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
-     * </pre>
-     *
-     * <code>double count_per_electron = 4;</code>
-     */
-    public double getCountPerElectron() {
-      return countPerElectron_;
-    }
-
     public static final int CAMERA_MODEL_NAME_FIELD_NUMBER = 5;
     private volatile java.lang.Object cameraModelName_;
     /**
@@ -2762,6 +2750,26 @@ public final class CalibrationProtos {
       }
     }
 
+    public static final int QUANTUM_EFFICIENCY_FIELD_NUMBER = 6;
+    private double quantumEfficiency_;
+    /**
+     * <pre>
+     * Define the quantum efficiency (QE in electron/photon) of the microscope camera.
+     * Note that the camera noise model assumes that photons are converted to counts by 
+     * a process that is not perfect (i.e. it has noise). The underlying process is
+     * photons converted to electrons in the camera chip and then amplification 
+     * (count/electron) occurring in the camera hardware. Ideally this should be recorded
+     * by storing the QE and the amplification. However the total gain (Count/photon)
+     * is already stored with the results. Thus the amplification can be inferred by  
+     * dividing the total gain by the quantum efficiency which should be in the range 0-1.
+     * </pre>
+     *
+     * <code>double quantum_efficiency = 6;</code>
+     */
+    public double getQuantumEfficiency() {
+      return quantumEfficiency_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -2783,11 +2791,11 @@ public final class CalibrationProtos {
       if (bias_ != 0D) {
         output.writeDouble(3, bias_);
       }
-      if (countPerElectron_ != 0D) {
-        output.writeDouble(4, countPerElectron_);
-      }
       if (!getCameraModelNameBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, cameraModelName_);
+      }
+      if (quantumEfficiency_ != 0D) {
+        output.writeDouble(6, quantumEfficiency_);
       }
     }
 
@@ -2808,12 +2816,12 @@ public final class CalibrationProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, bias_);
       }
-      if (countPerElectron_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(4, countPerElectron_);
-      }
       if (!getCameraModelNameBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, cameraModelName_);
+      }
+      if (quantumEfficiency_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(6, quantumEfficiency_);
       }
       memoizedSize = size;
       return size;
@@ -2840,12 +2848,12 @@ public final class CalibrationProtos {
           java.lang.Double.doubleToLongBits(getBias())
           == java.lang.Double.doubleToLongBits(
               other.getBias()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getCountPerElectron())
-          == java.lang.Double.doubleToLongBits(
-              other.getCountPerElectron()));
       result = result && getCameraModelName()
           .equals(other.getCameraModelName());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getQuantumEfficiency())
+          == java.lang.Double.doubleToLongBits(
+              other.getQuantumEfficiency()));
       return result;
     }
 
@@ -2864,11 +2872,11 @@ public final class CalibrationProtos {
       hash = (37 * hash) + BIAS_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getBias()));
-      hash = (37 * hash) + COUNT_PER_ELECTRON_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getCountPerElectron()));
       hash = (37 * hash) + CAMERA_MODEL_NAME_FIELD_NUMBER;
       hash = (53 * hash) + getCameraModelName().hashCode();
+      hash = (37 * hash) + QUANTUM_EFFICIENCY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getQuantumEfficiency()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3008,9 +3016,9 @@ public final class CalibrationProtos {
 
         bias_ = 0D;
 
-        countPerElectron_ = 0D;
-
         cameraModelName_ = "";
+
+        quantumEfficiency_ = 0D;
 
         return this;
       }
@@ -3037,8 +3045,8 @@ public final class CalibrationProtos {
         result.cameraType_ = cameraType_;
         result.readNoise_ = readNoise_;
         result.bias_ = bias_;
-        result.countPerElectron_ = countPerElectron_;
         result.cameraModelName_ = cameraModelName_;
+        result.quantumEfficiency_ = quantumEfficiency_;
         onBuilt();
         return result;
       }
@@ -3089,12 +3097,12 @@ public final class CalibrationProtos {
         if (other.getBias() != 0D) {
           setBias(other.getBias());
         }
-        if (other.getCountPerElectron() != 0D) {
-          setCountPerElectron(other.getCountPerElectron());
-        }
         if (!other.getCameraModelName().isEmpty()) {
           cameraModelName_ = other.cameraModelName_;
           onChanged();
+        }
+        if (other.getQuantumEfficiency() != 0D) {
+          setQuantumEfficiency(other.getQuantumEfficiency());
         }
         onChanged();
         return this;
@@ -3262,53 +3270,6 @@ public final class CalibrationProtos {
         return this;
       }
 
-      private double countPerElectron_ ;
-      /**
-       * <pre>
-       * The camera amplification (Count/electron) used when modelling a microscope camera.
-       * Note that the camera noise model assumes that electrons are converted to counts by 
-       * amplification that is not perfect (i.e. it has noise). The amplification is equal 
-       * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
-       * </pre>
-       *
-       * <code>double count_per_electron = 4;</code>
-       */
-      public double getCountPerElectron() {
-        return countPerElectron_;
-      }
-      /**
-       * <pre>
-       * The camera amplification (Count/electron) used when modelling a microscope camera.
-       * Note that the camera noise model assumes that electrons are converted to counts by 
-       * amplification that is not perfect (i.e. it has noise). The amplification is equal 
-       * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
-       * </pre>
-       *
-       * <code>double count_per_electron = 4;</code>
-       */
-      public Builder setCountPerElectron(double value) {
-        
-        countPerElectron_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The camera amplification (Count/electron) used when modelling a microscope camera.
-       * Note that the camera noise model assumes that electrons are converted to counts by 
-       * amplification that is not perfect (i.e. it has noise). The amplification is equal 
-       * to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
-       * </pre>
-       *
-       * <code>double count_per_electron = 4;</code>
-       */
-      public Builder clearCountPerElectron() {
-        
-        countPerElectron_ = 0D;
-        onChanged();
-        return this;
-      }
-
       private java.lang.Object cameraModelName_ = "";
       /**
        * <pre>
@@ -3399,6 +3360,65 @@ public final class CalibrationProtos {
   checkByteStringIsUtf8(value);
         
         cameraModelName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double quantumEfficiency_ ;
+      /**
+       * <pre>
+       * Define the quantum efficiency (QE in electron/photon) of the microscope camera.
+       * Note that the camera noise model assumes that photons are converted to counts by 
+       * a process that is not perfect (i.e. it has noise). The underlying process is
+       * photons converted to electrons in the camera chip and then amplification 
+       * (count/electron) occurring in the camera hardware. Ideally this should be recorded
+       * by storing the QE and the amplification. However the total gain (Count/photon)
+       * is already stored with the results. Thus the amplification can be inferred by  
+       * dividing the total gain by the quantum efficiency which should be in the range 0-1.
+       * </pre>
+       *
+       * <code>double quantum_efficiency = 6;</code>
+       */
+      public double getQuantumEfficiency() {
+        return quantumEfficiency_;
+      }
+      /**
+       * <pre>
+       * Define the quantum efficiency (QE in electron/photon) of the microscope camera.
+       * Note that the camera noise model assumes that photons are converted to counts by 
+       * a process that is not perfect (i.e. it has noise). The underlying process is
+       * photons converted to electrons in the camera chip and then amplification 
+       * (count/electron) occurring in the camera hardware. Ideally this should be recorded
+       * by storing the QE and the amplification. However the total gain (Count/photon)
+       * is already stored with the results. Thus the amplification can be inferred by  
+       * dividing the total gain by the quantum efficiency which should be in the range 0-1.
+       * </pre>
+       *
+       * <code>double quantum_efficiency = 6;</code>
+       */
+      public Builder setQuantumEfficiency(double value) {
+        
+        quantumEfficiency_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Define the quantum efficiency (QE in electron/photon) of the microscope camera.
+       * Note that the camera noise model assumes that photons are converted to counts by 
+       * a process that is not perfect (i.e. it has noise). The underlying process is
+       * photons converted to electrons in the camera chip and then amplification 
+       * (count/electron) occurring in the camera hardware. Ideally this should be recorded
+       * by storing the QE and the amplification. However the total gain (Count/photon)
+       * is already stored with the results. Thus the amplification can be inferred by  
+       * dividing the total gain by the quantum efficiency which should be in the range 0-1.
+       * </pre>
+       *
+       * <code>double quantum_efficiency = 6;</code>
+       */
+      public Builder clearQuantumEfficiency() {
+        
+        quantumEfficiency_ = 0D;
         onChanged();
         return this;
       }
@@ -6758,30 +6778,31 @@ public final class CalibrationProtos {
       "onfig.IntensityUnit\022\030\n\020count_per_photon\030" +
       "\002 \001(\001\"H\n\020AngleCalibration\0224\n\nangle_unit\030",
       "\001 \001(\0162 .gdsc.smlm.data.config.AngleUnit\"" +
-      "\244\001\n\021CameraCalibration\0226\n\013camera_type\030\001 \001" +
+      "\276\001\n\021CameraCalibration\0226\n\013camera_type\030\001 \001" +
       "(\0162!.gdsc.smlm.data.config.CameraType\022\022\n" +
-      "\nread_noise\030\002 \001(\001\022\014\n\004bias\030\003 \001(\001\022\032\n\022count" +
-      "_per_electron\030\004 \001(\001\022\031\n\021camera_model_name" +
-      "\030\005 \001(\t\"\357\002\n\013Calibration\022H\n\024distance_calib" +
-      "ration\030\001 \001(\0132*.gdsc.smlm.data.config.Dis" +
-      "tanceCalibration\022@\n\020time_calibration\030\002 \001" +
-      "(\0132&.gdsc.smlm.data.config.TimeCalibrati" +
-      "on\022J\n\025intensity_calibration\030\003 \001(\0132+.gdsc",
-      ".smlm.data.config.IntensityCalibration\022B" +
-      "\n\021angle_calibration\030\004 \001(\0132\'.gdsc.smlm.da" +
-      "ta.config.AngleCalibration\022D\n\022camera_cal" +
-      "ibration\030\005 \001(\0132(.gdsc.smlm.data.config.C" +
-      "ameraCalibration\"\\\n\023CameraModelResource\022" +
-      "\t\n\001x\030\001 \001(\005\022\t\n\001y\030\002 \001(\005\022\r\n\005width\030\003 \001(\005\022\016\n\006" +
-      "height\030\004 \001(\005\022\020\n\010filename\030\005 \001(\t\"\344\001\n\023Camer" +
-      "aModelSettings\022d\n\026camera_model_resources" +
-      "\030\001 \003(\0132D.gdsc.smlm.data.config.CameraMod" +
-      "elSettings.CameraModelResourcesEntry\032g\n\031",
-      "CameraModelResourcesEntry\022\013\n\003key\030\001 \001(\t\0229" +
-      "\n\005value\030\002 \001(\0132*.gdsc.smlm.data.config.Ca" +
-      "meraModelResource:\0028\001*?\n\nCameraType\022\022\n\016C" +
-      "AMERA_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t\n\005S" +
-      "CMOS\020\003B\023B\021CalibrationProtosb\006proto3"
+      "\nread_noise\030\002 \001(\001\022\014\n\004bias\030\003 \001(\001\022\031\n\021camer" +
+      "a_model_name\030\005 \001(\t\022\032\n\022quantum_efficiency" +
+      "\030\006 \001(\001J\004\010\004\020\005R\022count_per_electron\"\357\002\n\013Cal" +
+      "ibration\022H\n\024distance_calibration\030\001 \001(\0132*" +
+      ".gdsc.smlm.data.config.DistanceCalibrati" +
+      "on\022@\n\020time_calibration\030\002 \001(\0132&.gdsc.smlm" +
+      ".data.config.TimeCalibration\022J\n\025intensit",
+      "y_calibration\030\003 \001(\0132+.gdsc.smlm.data.con" +
+      "fig.IntensityCalibration\022B\n\021angle_calibr" +
+      "ation\030\004 \001(\0132\'.gdsc.smlm.data.config.Angl" +
+      "eCalibration\022D\n\022camera_calibration\030\005 \001(\013" +
+      "2(.gdsc.smlm.data.config.CameraCalibrati" +
+      "on\"\\\n\023CameraModelResource\022\t\n\001x\030\001 \001(\005\022\t\n\001" +
+      "y\030\002 \001(\005\022\r\n\005width\030\003 \001(\005\022\016\n\006height\030\004 \001(\005\022\020" +
+      "\n\010filename\030\005 \001(\t\"\344\001\n\023CameraModelSettings" +
+      "\022d\n\026camera_model_resources\030\001 \003(\0132D.gdsc." +
+      "smlm.data.config.CameraModelSettings.Cam",
+      "eraModelResourcesEntry\032g\n\031CameraModelRes" +
+      "ourcesEntry\022\013\n\003key\030\001 \001(\t\0229\n\005value\030\002 \001(\0132" +
+      "*.gdsc.smlm.data.config.CameraModelResou" +
+      "rce:\0028\001*?\n\nCameraType\022\022\n\016CAMERA_TYPE_NA\020" +
+      "\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t\n\005SCMOS\020\003B\023B\021Cali" +
+      "brationProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6825,7 +6846,7 @@ public final class CalibrationProtos {
     internal_static_gdsc_smlm_data_config_CameraCalibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CameraCalibration_descriptor,
-        new java.lang.String[] { "CameraType", "ReadNoise", "Bias", "CountPerElectron", "CameraModelName", });
+        new java.lang.String[] { "CameraType", "ReadNoise", "Bias", "CameraModelName", "QuantumEfficiency", });
     internal_static_gdsc_smlm_data_config_Calibration_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_gdsc_smlm_data_config_Calibration_fieldAccessorTable = new

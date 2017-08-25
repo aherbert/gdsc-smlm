@@ -845,7 +845,7 @@ public class PeakResultsReaderTest
 		cal.setExposureTime(rand.next());
 		cal.setReadNoise(rand.next());
 		cal.setBias(bias);
-		cal.setCountPerElectron(rand.next());
+		cal.setQuantumEfficiency(rand.next());
 		// Subtract 1 to avoid the additional UNRECOGNISED enum value
 		cal.setCameraType(CameraType.values()[rand.nextInt(CameraType.values().length - 1)]);
 		cal.setDistanceUnit(DistanceUnit.values()[rand.nextInt(DistanceUnit.values().length - 1)]);

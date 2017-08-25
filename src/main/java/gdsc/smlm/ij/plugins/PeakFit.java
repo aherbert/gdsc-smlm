@@ -1122,8 +1122,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/** Flag to indicate that read noise should be configured. */
 	public static final int FLAG_READ_NOISE = 0x00000001;
-	/** Flag to indicate that amplification should be configured. */
-	public static final int FLAG_AMPLIFICATION = 0x00000002;
+	/** Flag to indicate that quantum efficiency should be configured. */
+	public static final int FLAG_QUANTUM_EFFICIENCY = 0x00000002;
 
 	/**
 	 * Adds the camera options.
@@ -1157,13 +1157,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (calibration.isCCDCamera())
 						{
-							egd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
-							egd.addNumericField("Gain (Count/photon)", calibration.getCountPerPhoton(), 2);
+							egd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
+							egd.addNumericField("Gain", calibration.getCountPerPhoton(), 2, 6, "Count/photon");
 							if (BitFlags.areSet(options, FLAG_READ_NOISE))
-								egd.addNumericField("Read_noise (Count)", calibration.getReadNoise(), 2);
-							if (BitFlags.areSet(options, FLAG_AMPLIFICATION))
-								egd.addNumericField("Amplification (Count/electron)", calibration.getCountPerElectron(),
-										2);
+								egd.addNumericField("Read_noise", calibration.getReadNoise(), 2, 6, "Count");
+							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
+								egd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 2, 6,
+										"Count/electron");
 						}
 						else if (calibration.isSCMOS())
 						{
@@ -1185,8 +1185,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 							calibration.setCountPerPhoton(Math.abs(egd.getNextNumber()));
 							if (BitFlags.areSet(options, FLAG_READ_NOISE))
 								calibration.setReadNoise(Math.abs(egd.getNextNumber()));
-							if (BitFlags.areSet(options, FLAG_AMPLIFICATION))
-								calibration.setCountPerElectron(Math.abs(egd.getNextNumber()));
+							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
+								calibration.setQuantumEfficiency(Math.abs(egd.getNextNumber()));
 						}
 						else if (calibration.isSCMOS())
 						{
@@ -2090,14 +2090,18 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (fitSolver == FitSolver.MLE)
 		{
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-			gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
 			if (!ignoreCalibration)
 			{
-				gd.addNumericField("Camera_bias (Count)", calibration.getBias(), 2);
+				gd.addMessage("Maximum Likelihood Estimation requires CCD-type camera parameters");
+				gd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "count");
 				gd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
-				gd.addNumericField("Read_noise (Count)", calibration.getReadNoise(), 2);
-				gd.addNumericField("Amplification (Count/electron)", calibration.getCountPerElectron(), 2);
+				gd.addNumericField("Read_noise", calibration.getReadNoise(), 2, 6, "count");
+				gd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 2, 6, "count/electron");
 				gd.addCheckbox("EM-CCD", calibration.isEMCCD());
+			}
+			else
+			{
+				gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
 			}
 			// This works because the proto configuration enum matches the named enum
 			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
@@ -2116,7 +2120,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				calibration.setBias(Math.abs(gd.getNextNumber()));
 				fitConfig.setModelCamera(gd.getNextBoolean());
 				calibration.setReadNoise(Math.abs(gd.getNextNumber()));
-				calibration.setCountPerElectron(Math.abs(gd.getNextNumber()));
+				calibration.setQuantumEfficiency(Math.abs(gd.getNextNumber()));
 				calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());

@@ -31,16 +31,16 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.tsf.TaggedSpotFile.CameraType;
-import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
-import gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType;
-import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
-import gdsc.smlm.tsf.TaggedSpotFile.LocationUnits;
-import gdsc.smlm.tsf.TaggedSpotFile.ROI;
-import gdsc.smlm.tsf.TaggedSpotFile.Spot;
-import gdsc.smlm.tsf.TaggedSpotFile.Spot.Builder;
-import gdsc.smlm.tsf.TaggedSpotFile.SpotList;
-import gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits;
+import gdsc.smlm.tsf.TSFProtos.CameraType;
+import gdsc.smlm.tsf.TSFProtos.FitMode;
+import gdsc.smlm.tsf.TSFProtos.FluorophoreType;
+import gdsc.smlm.tsf.TSFProtos.IntensityUnits;
+import gdsc.smlm.tsf.TSFProtos.LocationUnits;
+import gdsc.smlm.tsf.TSFProtos.ROI;
+import gdsc.smlm.tsf.TSFProtos.Spot;
+import gdsc.smlm.tsf.TSFProtos.Spot.Builder;
+import gdsc.smlm.tsf.TSFProtos.SpotList;
+import gdsc.smlm.tsf.TSFProtos.ThetaUnits;
 
 /**
  * Saves the fit results to file using the Tagged Spot File (TSF) format.
@@ -497,8 +497,6 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				builder.setBias(cr.getBias());
 			if (cr.hasCameraType())
 				builder.setCameraType(cameraTypeMap[cr.getCameraType().ordinal()]);
-			if (cr.hasCountPerElectron())
-				builder.setAmplification(cr.getCountPerElectron());
 
 			if (cr.hasDistanceUnit())
 			{
@@ -518,19 +516,12 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			{
 				builder.setGain(cr.getCountPerPhoton());
 
-				// Use amplification if present (as this is the correct electrons/count value), otherwise use gain
-				if (cr.hasCountPerElectron())
-				{
-					double ecf = cr.getCountPerElectron();
-					double qe = cr.getCountPerPhoton() / ecf;
-					builder.addEcf(ecf);
-					builder.addQe(qe);
-				}
-				else
-				{
-					builder.addEcf(cr.getCountPerPhoton());
-					builder.addQe(1);
-				}
+				double qe = (cr.hasQuantumEfficiency()) ? cr.getQuantumEfficiency() : 1;
+				// e-/photon / count/photon => e-/count
+				double ecf = qe / cr.getCountPerPhoton();  
+						
+				builder.addEcf(ecf);
+				builder.addQe(qe);
 			}
 		}
 		if (!TextUtils.isNullOrEmpty(getConfiguration()))

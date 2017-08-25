@@ -18,12 +18,12 @@ import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
-import gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType;
-import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
-import gdsc.smlm.tsf.TaggedSpotFile.LocationUnits;
-import gdsc.smlm.tsf.TaggedSpotFile.Spot;
-import gdsc.smlm.tsf.TaggedSpotFile.SpotList;
+import gdsc.smlm.tsf.TSFProtos.FitMode;
+import gdsc.smlm.tsf.TSFProtos.FluorophoreType;
+import gdsc.smlm.tsf.TSFProtos.IntensityUnits;
+import gdsc.smlm.tsf.TSFProtos.LocationUnits;
+import gdsc.smlm.tsf.TSFProtos.Spot;
+import gdsc.smlm.tsf.TSFProtos.SpotList;
 import ij.Macro;
 
 /**

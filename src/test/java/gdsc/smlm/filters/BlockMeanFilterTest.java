@@ -8,11 +8,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
-import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.FloatEquality;
-import gdsc.core.utils.Maths;
 import gdsc.smlm.TestSettings;
-import gnu.trove.list.array.TDoubleArrayList;
 
 public class BlockMeanFilterTest
 {

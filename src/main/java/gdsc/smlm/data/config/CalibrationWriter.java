@@ -4,6 +4,7 @@ import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
+import gdsc.smlm.data.config.CalibrationProtos.CameraCalibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -145,6 +146,8 @@ public class CalibrationWriter extends CalibrationReader
 	 */
 	public void setNmPerPixel(double nmPerPixel)
 	{
+		if (nmPerPixel < 0)
+			throw new IllegalArgumentException();
 		getBuilder().getDistanceCalibrationBuilder().setNmPerPixel(nmPerPixel);
 	}
 
@@ -156,6 +159,8 @@ public class CalibrationWriter extends CalibrationReader
 	 */
 	public void setCountPerPhoton(double gain)
 	{
+		if (gain < 0)
+			throw new IllegalArgumentException();
 		getBuilder().getIntensityCalibrationBuilder().setCountPerPhoton(gain);
 	}
 
@@ -167,6 +172,8 @@ public class CalibrationWriter extends CalibrationReader
 	 */
 	public void setExposureTime(double exposureTime)
 	{
+		if (exposureTime < 0)
+			throw new IllegalArgumentException();
 		getBuilder().getTimeCalibrationBuilder().setExposureTime(exposureTime);
 	}
 
@@ -178,6 +185,8 @@ public class CalibrationWriter extends CalibrationReader
 	 */
 	public void setReadNoise(double readNoise)
 	{
+		if (readNoise < 0)
+			throw new IllegalArgumentException();
 		getBuilder().getCameraCalibrationBuilder().setReadNoise(readNoise);
 	}
 
@@ -189,6 +198,8 @@ public class CalibrationWriter extends CalibrationReader
 	 */
 	public void setBias(double bias)
 	{
+		if (bias < 0)
+			throw new IllegalArgumentException();
 		getBuilder().getCameraCalibrationBuilder().setBias(bias);
 	}
 
@@ -220,18 +231,24 @@ public class CalibrationWriter extends CalibrationReader
 	}
 
 	/**
-	 * Set the camera amplification (Count/e-) used when modelling a microscope camera.
+	 * Sets the camera quantum efficiency (e-/photon) used when modelling a microscope camera.
 	 * <p>
-	 * Note that the camera noise model assumes that electrons are converted to Count units by amplification that is not
-	 * perfect (i.e. it has noise). The amplification is equal to the gain (Count/photon) divided by the quantum
-	 * efficiency (e-/photon).
+	 * Note that the camera noise model assumes that photons are converted to counts by
+	 * a process that is not perfect (i.e. it has noise). The underlying process is
+	 * photons converted to electrons in the camera chip and then amplification
+	 * (count/electron) occurring in the camera hardware. Ideally this should be recorded
+	 * by storing the QE and the amplification. However the total gain (Count/photon)
+	 * is already stored with the results. Thus the amplification can be inferred by
+	 * dividing the total gain by the quantum efficiency which should be in the range 0-1.
 	 *
-	 * @param countPerElectron
-	 *            the new amplification
+	 * @param quantumEfficiency
+	 *            the new quantum efficiency
 	 */
-	public void setCountPerElectron(double countPerElectron)
+	public void setQuantumEfficiency(double quantumEfficiency)
 	{
-		getBuilder().getCameraCalibrationBuilder().setCountPerElectron(countPerElectron);
+		if (quantumEfficiency < 0 || quantumEfficiency > 1)
+			throw new IllegalArgumentException();
+		getBuilder().getCameraCalibrationBuilder().setQuantumEfficiency(quantumEfficiency);
 	}
 
 	/**
@@ -297,9 +314,10 @@ public class CalibrationWriter extends CalibrationReader
 	 */
 	public void clearGlobalCameraSettings()
 	{
-		setBias(0);
-		setCountPerElectron(0);
-		setReadNoise(0);
+		CameraCalibration.Builder b = getBuilder().getCameraCalibrationBuilder();
+		b.setBias(0);
+		b.setQuantumEfficiency(0);
+		b.setReadNoise(0);
 		// Note that we could use an average gain here but the concept
 		// of converting the photons back to per-pixel counts is invalid
 		// so for clarity this is set to 0

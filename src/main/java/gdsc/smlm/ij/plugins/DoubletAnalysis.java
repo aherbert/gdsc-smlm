@@ -1597,7 +1597,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 			cal.setNmPerPixel(simulationParameters.a);
 			cal.setCountPerPhoton(simulationParameters.gain);
-			cal.setCountPerElectron(simulationParameters.amplification);
+			cal.setQuantumEfficiency(simulationParameters.qe);
 			cal.setExposureTime(100);
 			cal.setReadNoise(simulationParameters.readNoise);
 			cal.setBias(simulationParameters.bias);
@@ -1760,7 +1760,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		cal.setNmPerPixel(simulationParameters.a);
 		cal.setCountPerPhoton(simulationParameters.gain);
-		cal.setCountPerElectron(simulationParameters.amplification);
+		cal.setQuantumEfficiency(simulationParameters.qe);
 		cal.setExposureTime(100);
 		cal.setReadNoise(simulationParameters.readNoise);
 		cal.setBias(simulationParameters.bias);

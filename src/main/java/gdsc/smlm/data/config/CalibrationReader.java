@@ -1,7 +1,11 @@
+/*
+ * 
+ */
 package gdsc.smlm.data.config;
 
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
@@ -346,6 +350,36 @@ public class CalibrationReader
 	}
 
 	/**
+	 * Get the camera quantum efficiency (e-/photon) used when modelling a microscope camera.
+	 * <p>
+	 * Note that the camera noise model assumes that photons are converted to counts by
+	 * a process that is not perfect (i.e. it has noise). The underlying process is
+	 * photons converted to electrons in the camera chip and then amplification
+	 * (count/electron) occurring in the camera hardware. Ideally this should be recorded
+	 * by storing the QE and the amplification. However the total gain (Count/photon)
+	 * is already stored with the results. Thus the amplification can be inferred by
+	 * dividing the total gain by the quantum efficiency which should be in the range 0-1.
+	 *
+	 * @return the quantum efficiency
+	 */
+	public double getQuantumEfficiency()
+	{
+		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		return (c.hasCameraCalibration()) ? Maths.clip(0, 1, c.getCameraCalibration().getQuantumEfficiency()) : 0;
+	}
+
+	/**
+	 * Checks for quantum efficiency (e-/photon).
+	 *
+	 * @return true, if successful (QE is in the range 0 (exclusive) to 1 (inclusive)).
+	 */
+	public boolean hasQuantumEfficiency()
+	{
+		double qe = getQuantumEfficiency();
+		return qe > 0 && qe <= 1;
+	}
+	
+	/**
 	 * Get the camera amplification (Count/e-) used when modelling a microscope camera.
 	 * <p>
 	 * Note that the camera noise model assumes that electrons are converted to Count units by amplification that is not
@@ -353,21 +387,27 @@ public class CalibrationReader
 	 * efficiency (e-/photon).
 	 *
 	 * @return the amplification
-	 */
+	 */ 
 	public double getCountPerElectron()
 	{
-		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCountPerElectron() : 0;
+		double countPerPhoton = getCountPerPhoton();
+		if (countPerPhoton > 0)
+		{
+			double qe = getQuantumEfficiency();
+			if (qe > 0)
+				return countPerPhoton / qe;
+		}
+		return 0;
 	}
-
+	
 	/**
-	 * Checks for amplification (count/electron).
+	 * Checks for amplification (Count/e-).
 	 *
 	 * @return true, if successful
 	 */
 	public boolean hasCountPerElectron()
 	{
-		return getCountPerElectron() > 0;
+		return hasCountPerPhoton() && hasQuantumEfficiency();
 	}
 
 	/**
@@ -381,7 +421,7 @@ public class CalibrationReader
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraModelName() : null;
 	}
-	
+
 	/**
 	 * Checks for camera model name.
 	 *

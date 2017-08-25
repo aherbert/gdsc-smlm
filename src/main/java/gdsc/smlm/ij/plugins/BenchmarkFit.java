@@ -596,7 +596,7 @@ public class BenchmarkFit implements PlugIn
 		CalibrationWriter calibration = CalibrationWriter.create(fitConfig.getCalibration());
 		calibration.setNmPerPixel(benchmarkParameters.a);
 		calibration.setCountPerPhoton(benchmarkParameters.gain);
-		calibration.setCountPerElectron(benchmarkParameters.amplification);
+		calibration.setQuantumEfficiency(benchmarkParameters.qe);
 		calibration.setBias(benchmarkParameters.bias);
 		calibration.setCameraType((benchmarkParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);
 		calibration.setReadNoise(benchmarkParameters.readNoise);

@@ -319,9 +319,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final double gain;
 		/**
-		 * Amplification gain (ADUs/electron)
+		 * Quantum efficiency (electron/photon)
 		 */
-		final double amplification;
+		final double qe;
 		/**
 		 * Read noise in ADUs
 		 */
@@ -339,7 +339,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		public SimulationParameters(int molecules, boolean fullSimulation, double s, double a, double minSignal,
 				double maxSignal, double signalPerFrame, double depth, boolean fixedDepth, double bias, boolean emCCD,
-				double gain, double amplification, double readNoise, double b, double b2)
+				double gain, double qe, double readNoise, double b, double b2)
 		{
 			id = nextId++;
 			this.molecules = molecules;
@@ -355,7 +355,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.bias = bias;
 			this.emCCD = emCCD;
 			this.gain = gain;
-			this.amplification = amplification;
+			this.qe = qe;
 			this.readNoise = readNoise;
 			this.b = b;
 			this.b2 = b2;
@@ -411,9 +411,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final double gain;
 		/**
-		 * Amplification gain (ADUs/electron)
+		 * Quantum efficiency (electron/photon)
 		 */
-		final double amplification;
+		final double qe;
 		/**
 		 * Read noise in ADUs
 		 */
@@ -444,7 +444,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double precisionN, precisionX, precisionXML;
 
 		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double z,
-				double bias, boolean emCCD, double gain, double amplification, double readNoise, double b, double b2,
+				double bias, boolean emCCD, double gain, double qe, double readNoise, double b, double b2,
 				double precisionN, double precisionX, double precisionXML)
 		{
 			id = nextId++;
@@ -458,7 +458,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.bias = bias;
 			this.emCCD = emCCD;
 			this.gain = gain;
-			this.amplification = amplification;
+			this.qe = qe;
 			this.readNoise = readNoise;
 			this.b = b;
 			this.b2 = b2;
@@ -953,12 +953,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Store the benchmark settings when not using variable photons
 		if (settings.getPhotonsPerSecond() == settings.getPhotonsPerSecondMaximum())
 		{
-			final double amplification = totalGain / getQuantumEfficiency();
+			final double qe = getQuantumEfficiency();
 			// Store read noise in ADUs
 			readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, settings.getPixelPitch(),
 					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), emCCD, totalGain,
-					amplification, readNoise, settings.getBackground(), b2, lowerN, lowerP, lowerMLP);
+					qe, readNoise, settings.getBackground(), b2, lowerN, lowerP, lowerMLP);
 		}
 		else
 		{
@@ -1827,7 +1827,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			c.setCountPerPhoton(helper.getTotalGainSafe());
 			c.setBias(settings.getBias());
 			c.setReadNoise(settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1));
-			c.setCountPerElectron(helper.getAmplification());
+			c.setQuantumEfficiency(helper.getQuantumEfficiency());
 		}
 
 		results.setCalibration(c.getCalibration());
@@ -5343,8 +5343,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				cal.setBias(simulationParameters.bias);
 			if (!cal.hasCountPerPhoton())
 				cal.setCountPerPhoton(simulationParameters.gain);
-			if (!cal.hasCountPerElectron())
-				cal.setCountPerElectron(simulationParameters.amplification);
+			if (!cal.hasQuantumEfficiency())
+				cal.setQuantumEfficiency(simulationParameters.qe);
 			if (!cal.hasReadNoise())
 				cal.setReadNoise(simulationParameters.readNoise);
 			if (!cal.isCCDCamera())
@@ -5369,7 +5369,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Pixel_pitch", cal.getNmPerPixel(), 3, 8, "nm");
 		gd.addNumericField("Background", b, 3, 8, "photon");
 		gd.addNumericField("Total_gain", cal.getCountPerPhoton(), 3, 8, "ADU/photon");
-		gd.addNumericField("Amplification", cal.getCountPerElectron(), 3, 8, "ADU/e-");
+		gd.addNumericField("Quantum_efficiency", cal.getQuantumEfficiency(), 3, 8, "e-/photon");
 		gd.addCheckbox("EM-CCD", cal.isEMCCD());
 		gd.addNumericField("Read_noise", cal.getReadNoise(), 3, 8, "ADU");
 		gd.addNumericField("Bias", cal.getBias(), 3, 8, "pixel");
@@ -5388,7 +5388,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		cal.setNmPerPixel(gd.getNextNumber());
 		b = gd.getNextNumber();
 		cal.setCountPerPhoton(gd.getNextNumber());
-		cal.setCountPerElectron(gd.getNextNumber());
+		cal.setQuantumEfficiency(gd.getNextNumber());
 		cal.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
 		cal.setReadNoise(gd.getNextNumber());
 		cal.setBias(gd.getNextNumber());
@@ -5408,12 +5408,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Validate settings
 		try
 		{
-			Parameters.isAboveZero("Gaussian_SD", s);
-			Parameters.isAboveZero("Pixel_pitch", cal.getNmPerPixel());
+			Parameters.isAboveZero("Gaussian SD", s);
+			Parameters.isAboveZero("Pixel pitch", cal.getNmPerPixel());
 			Parameters.isPositive("Background", b);
-			Parameters.isAboveZero("Total_gain", cal.getCountPerPhoton());
-			Parameters.isAboveZero("Amplification", cal.getCountPerElectron());
-			Parameters.isPositive("Read_noise", cal.getReadNoise());
+			Parameters.isAboveZero("Total gain", cal.getCountPerPhoton());
+			Parameters.isAboveZero("Quantum efficiency", cal.getQuantumEfficiency());
+			Parameters.isEqualOrBelow("Quantum efficiency", cal.getQuantumEfficiency(), 1);
+			Parameters.isPositive("Read noise", cal.getReadNoise());
 			Parameters.isPositive("Bias", cal.getBias());
 		}
 		catch (IllegalArgumentException e)
@@ -5429,7 +5430,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		double a = cal.getNmPerPixel();
 		double bias = cal.getBias();
 		double readNoise = cal.getReadNoise();
-		double amplification = cal.getCountPerElectron();
+		double qe = cal.getQuantumEfficiency();
 		boolean emCCD = cal.isEMCCD();
 
 		// Note: The calibration will throw an exception if the converter cannot be created.
@@ -5459,7 +5460,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		double b2 = backgroundVariance + readNoiseInPhotons * readNoiseInPhotons;
 
 		SimulationParameters p = new SimulationParameters(molecules, fullSimulation, s, a, minSignal, maxSignal,
-				signalPerFrame, depth, fixedDepth, bias, emCCD, gain, amplification, readNoise, b, b2);
+				signalPerFrame, depth, fixedDepth, bias, emCCD, gain, qe, readNoise, b, b2);
 		p.loaded = true;
 		return p;
 	}

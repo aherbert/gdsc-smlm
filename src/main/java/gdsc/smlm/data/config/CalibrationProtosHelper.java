@@ -26,6 +26,8 @@ public class CalibrationProtosHelper
 	static
 	{
 		Calibration.Builder builder = Calibration.newBuilder();
+		// Note: Ideally we would set QE to be 1 but this will involve creating a 
+		// camera calibration and it is more useful to have the default as null. 
 		defaultCalibration = builder.build();
 	}
 

@@ -444,7 +444,10 @@ public class PeakResultsReader
 								if (cal.emCCD)
 									calibration.setCameraType(CameraType.EMCCD);
 								if (cal.hasAmplification())
-									calibration.setCountPerElectron(cal.getAmplification());
+								{
+									if (cal.hasGain())
+										calibration.setQuantumEfficiency(cal.getGain() / cal.getAmplification());
+								}
 
 								// Previous version were always in fixed units
 								calibration.setDistanceUnit(DistanceUnit.PIXEL);

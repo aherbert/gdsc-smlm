@@ -30,15 +30,15 @@ import gdsc.smlm.data.config.PSFProtos.PSFType;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.tsf.TaggedSpotFile.CameraType;
-import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
-import gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType;
-import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
-import gdsc.smlm.tsf.TaggedSpotFile.LocationUnits;
-import gdsc.smlm.tsf.TaggedSpotFile.ROI;
-import gdsc.smlm.tsf.TaggedSpotFile.Spot;
-import gdsc.smlm.tsf.TaggedSpotFile.SpotList;
-import gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits;
+import gdsc.smlm.tsf.TSFProtos.CameraType;
+import gdsc.smlm.tsf.TSFProtos.FitMode;
+import gdsc.smlm.tsf.TSFProtos.FluorophoreType;
+import gdsc.smlm.tsf.TSFProtos.IntensityUnits;
+import gdsc.smlm.tsf.TSFProtos.LocationUnits;
+import gdsc.smlm.tsf.TSFProtos.ROI;
+import gdsc.smlm.tsf.TSFProtos.Spot;
+import gdsc.smlm.tsf.TSFProtos.SpotList;
+import gdsc.smlm.tsf.TSFProtos.ThetaUnits;
 
 /**
  * Reads the fit results from file using the Tagged Spot File (TSF) format.
@@ -523,8 +523,9 @@ public class TSFPeakResultsReader
 			double ecf = spotList.getEcf(channel - 1);
 			// QE is per fluorophore type
 			double qe = (spotList.getQeCount() >= fluorophoreType) ? spotList.getQe(fluorophoreType - 1) : 1;
-			cal.setCountPerPhoton(ecf * qe);
-			cal.setCountPerElectron(ecf);
+			// e-/photon / e-/count => count/photon
+			cal.setCountPerPhoton(qe / ecf);
+			cal.setQuantumEfficiency(qe);
 		}
 
 		if (isGDSC)
@@ -557,8 +558,6 @@ public class TSFPeakResultsReader
 				cal.setCameraType(cameraTypeMap[spotList.getCameraType().ordinal()]);
 			else
 				cal.setCameraType(null);
-			if (spotList.hasAmplification())
-				cal.setCountPerElectron(spotList.getAmplification());
 
 			if (spotList.hasConfiguration())
 			{

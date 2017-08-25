@@ -1209,7 +1209,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			// This is needed to configure the fit solver
 			fitConfig.setNmPerPixel(simulationParameters.a);
 			fitConfig.setGain(simulationParameters.gain);
-			fitConfig.setAmplification(simulationParameters.amplification);
+			fitConfig.setQuantumEfficiency(simulationParameters.qe);
 			fitConfig.setReadNoise(simulationParameters.readNoise);
 			fitConfig.setBias(simulationParameters.bias);
 			fitConfig.setCameraType((simulationParameters.emCCD) ? CameraType.EMCCD : CameraType.CCD);

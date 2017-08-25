@@ -1431,13 +1431,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * @param amplification
-	 *            The amplification [ADUs/electron] (used for maximum likelihood estimation)
+	 * Sets the quantum efficiency.
+	 *
+	 * @param quantumEfficiency the new quantum efficiency [electron/photon] (used for maximum likelihood estimation) 
 	 */
-	public void setAmplification(double amplification)
+	public void setQuantumEfficiency(double quantumEfficiency)
 	{
 		invalidateFunctionSolver();
-		calibration.setCountPerElectron(amplification);
+		calibration.setQuantumEfficiency(quantumEfficiency);
 	}
 
 	/**

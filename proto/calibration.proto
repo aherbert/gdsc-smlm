@@ -50,6 +50,10 @@ enum CameraType {
 
 // Define the camera calibration
 message CameraCalibration {
+	// Amplification (count/electron) has been removed and replaced by quantum efficiency
+	reserved 4;
+	reserved "count_per_electron";
+
 	// The camera type.
 	CameraType camera_type = 1;
 	
@@ -59,15 +63,19 @@ message CameraCalibration {
 	// The camera bias (in Counts) 
 	double bias = 3;
 
-	// The camera amplification (Count/electron) used when modelling a microscope camera.
-	// Note that the camera noise model assumes that electrons are converted to counts by 
-	// amplification that is not perfect (i.e. it has noise). The amplification is equal 
-	// to the gain (Count/photon) divided by the quantum efficiency (electron/photon).
-	double count_per_electron = 4;
-	
 	// The camera model name. This should contain all the information required to 
 	// load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
 	string camera_model_name = 5;
+	
+	// Define the quantum efficiency (QE in electron/photon) of the microscope camera.
+	// Note that the camera noise model assumes that photons are converted to counts by 
+	// a process that is not perfect (i.e. it has noise). The underlying process is
+	// photons converted to electrons in the camera chip and then amplification 
+	// (count/electron) occurring in the camera hardware. Ideally this should be recorded
+	// by storing the QE and the amplification. However the total gain (Count/photon)
+	// is already stored with the results. Thus the amplification can be inferred by  
+	// dividing the total gain by the quantum efficiency which should be in the range 0-1.
+	double quantum_efficiency = 6;
 }
 
 // Define the calibration for the results. The calibration contains details of the 
