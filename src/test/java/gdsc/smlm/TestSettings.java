@@ -15,6 +15,12 @@ public class TestSettings
 	 */
 	public static final boolean ASSERT_SPEED_TESTS = false;
 
+	/**
+	 * Set this to true to run fitting tests. Certain tests may fail the strict pass criteria due to the use of random
+	 * seeds creating poor data. These test can be disabled.
+	 */
+	public static final boolean RUN_FITTING_TESTS = false;
+
 	// This functionality would be better served with log4j (or another logging framework)
 	// TODO - Add a logging framework for the tests. 
 

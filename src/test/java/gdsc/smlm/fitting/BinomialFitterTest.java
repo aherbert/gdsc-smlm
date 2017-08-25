@@ -4,7 +4,10 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
+
+import gdsc.smlm.TestSettings;
 
 public class BinomialFitterTest
 {
@@ -159,6 +162,8 @@ public class BinomialFitterTest
 
 	private void fitBinomial(int n, double p, boolean zeroTruncated, boolean maximumLikelihood, int minN, int maxN)
 	{
+		Assume.assumeTrue("Skipped", TestSettings.RUN_FITTING_TESTS);
+		
 		BinomialFitter bf = new BinomialFitter(null);
 		//BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
 		bf.setMaximumLikelihood(maximumLikelihood);

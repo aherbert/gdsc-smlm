@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting;
 
 import gdsc.core.logging.Logger;
+import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
@@ -194,6 +195,8 @@ public class JumpDistanceAnalysisTest
 
 	private void fitDualPopulation(boolean mle, double fraction)
 	{
+		Assume.assumeTrue("Skipped", TestSettings.RUN_FITTING_TESTS);
+		
 		String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
 		AssertionError error = null;
 		for (int i = 0; i < D.length; i++)

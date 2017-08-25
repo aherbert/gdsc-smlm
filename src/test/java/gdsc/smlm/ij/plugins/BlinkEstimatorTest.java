@@ -13,6 +13,7 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.TestSettings;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
@@ -183,6 +184,8 @@ public class BlinkEstimatorTest
 	private TIntHashSet estimateBlinking(double nBlinks, double tOn, double tOff, int particles, double fixedFraction,
 			boolean timeAtLowerBound, boolean doAssert)
 	{
+		Assume.assumeTrue("Skipped", TestSettings.RUN_FITTING_TESTS);
+		
 		SpatialIllumination activationIllumination = new UniformIllumination(100);
 		int totalSteps = 100;
 		double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
