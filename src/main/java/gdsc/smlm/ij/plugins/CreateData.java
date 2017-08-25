@@ -872,7 +872,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void reportAndSaveFittingLimits(SpatialDistribution dist)
 	{
 		// TODO - fix this
-		
+
 		final double totalGain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
 
 		// Background is in photons
@@ -957,8 +957,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Store read noise in ADUs
 			readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, settings.getPixelPitch(),
-					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), emCCD, totalGain,
-					qe, readNoise, settings.getBackground(), b2, lowerN, lowerP, lowerMLP);
+					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), emCCD, totalGain, qe,
+					readNoise, settings.getBackground(), b2, lowerN, lowerP, lowerMLP);
 		}
 		else
 		{
@@ -977,7 +977,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void saveSimulationParameters(int particles, boolean fullSimulation, double signalPerFrame)
 	{
 		// TODO - fix this
-		
+
 		final double totalGain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
 
 		// Background is in photons
@@ -4119,16 +4119,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						{
 							if (cameraType == CameraType.EMCCD)
 								egd.addNumericField("EM_gain", settings.getEmGain(), 2);
-							egd.addNumericField("Camera_gain (ADU/e-)", settings.getCameraGain(), 4);
-							egd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2);
-							egd.addNumericField("Read_noise (e-)", settings.getReadNoise(), 2);
-							egd.addNumericField("Bias", settings.getBias(), 0);
+							egd.addNumericField("Camera_gain", settings.getCameraGain(), 4, 6, "count/electron");
+							egd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2, 6,
+									"electron/photon");
+							egd.addNumericField("Read_noise", settings.getReadNoise(), 2, 6, "electron");
+							egd.addNumericField("Bias", settings.getBias(), 0, 6, "count");
 						}
 						else if (cameraType == CameraType.SCMOS)
 						{
 							String[] models = CameraModelManager.listCameraModels(true);
 							egd.addChoice("Camera_model_name", models, settings.getCameraModelName());
-							egd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2);
+							egd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2, 6,
+									"electron/photon");
 						}
 						else
 						{
@@ -5331,7 +5333,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		double b = -1;
 
 		// TODO - Support sCMOS camera simulations
-		
+
 		// Use last simulation parameters for missing settings.
 		// This is good if we are re-running the plugin to load data.
 		if (simulationParameters != null && simulationParameters.isLoaded())
@@ -5368,11 +5370,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Gaussian_SD", s, 3, 8, "nm");
 		gd.addNumericField("Pixel_pitch", cal.getNmPerPixel(), 3, 8, "nm");
 		gd.addNumericField("Background", b, 3, 8, "photon");
-		gd.addNumericField("Total_gain", cal.getCountPerPhoton(), 3, 8, "ADU/photon");
+		gd.addNumericField("Total_gain", cal.getCountPerPhoton(), 3, 8, "count/photon");
 		gd.addNumericField("Quantum_efficiency", cal.getQuantumEfficiency(), 3, 8, "e-/photon");
 		gd.addCheckbox("EM-CCD", cal.isEMCCD());
-		gd.addNumericField("Read_noise", cal.getReadNoise(), 3, 8, "ADU");
-		gd.addNumericField("Bias", cal.getBias(), 3, 8, "pixel");
+		gd.addNumericField("Read_noise", cal.getReadNoise(), 3, 8, "count");
+		gd.addNumericField("Bias", cal.getBias(), 3, 8, "count");
 
 		if (!fixedDepth)
 		{

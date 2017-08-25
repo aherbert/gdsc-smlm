@@ -1163,7 +1163,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 								egd.addNumericField("Read_noise", calibration.getReadNoise(), 2, 6, "Count");
 							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
 								egd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 2, 6,
-										"Count/electron");
+										"electron/photon");
 						}
 						else if (calibration.isSCMOS())
 						{
@@ -2096,7 +2096,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				gd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "count");
 				gd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
 				gd.addNumericField("Read_noise", calibration.getReadNoise(), 2, 6, "count");
-				gd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 2, 6, "count/electron");
+				gd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 2, 6, "electron/photon");
 				gd.addCheckbox("EM-CCD", calibration.isEMCCD());
 			}
 			else
