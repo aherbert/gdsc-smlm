@@ -1013,7 +1013,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			//	backgroundVariance *= 2;
 
 			// Read noise is in electrons. Convert to Photons
-			double readNoise = settings.getReadNoise() / settings.getQuantumEfficiency();
+			double readNoise = settings.getReadNoise() / getQuantumEfficiency();
+			
+			// If an EM-CCD camera the read noise (in Counts) is swamped by amplification of the signal. 
+			// We get the same result by dividing the read noise (in photons) by the EM-gain.
+			if (settings.getCameraType() == CameraType.EMCCD && settings.getEmGain() > 1)
+				readNoise /= settings.getEmGain();
 
 			// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
 			// is equal to the total variance at the pixel.
@@ -1031,7 +1036,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			createPerPixelCameraModelData(cameraModel);
 
 			// Get the average read noise. Convert from electrons to photons
-			double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length) / settings.getQuantumEfficiency();
+			double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length) / getQuantumEfficiency();
 
 			return backgroundVariance + Maths.pow2(readNoise);
 		}
@@ -2409,7 +2414,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				RandomGenerator r = random.getRandomGenerator();
 				for (int i = 0; i < imageReadNoise.length; i++)
-					imageReadNoise[i] += readNoise[i] * r.nextGaussian();
+					imageReadNoise[i] = (float) (readNoise[i] * r.nextGaussian());
 			}
 
 			// Extract the localisations and draw if we have a PSF model
@@ -2533,6 +2538,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						sx = sy = (float) psfSD;
 					}
 
+					// *-*-*-*-*
+					// We want to compute the background noise at the localisation position in photons.
+					// noise = shot noise + read noise
+					// *-*-*-*-*
+					// Note that the noise we are calculating is the noise that would be in the image with no
+					// fluorophore present. This is the true background noise and it is the noise that is  
+					// estimated by the Peak Fit plugin. This noise therefore IGNORES THE SHOT NOISE of the 
+					// fluorophore SIGNAL.
+					// *-*-*-*-*
+					
+					// (EM-)CCD camera:
+					// 
+					
+					
 					// The variance of the background image is currently in photons^2 
 					double backgroundVariance = localStats[1];
 
@@ -2540,27 +2559,34 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					if (qe < 1)
 						backgroundVariance *= Maths.pow2(qe);
 
+					// Get the actual read noise applied to this part of the image. This is in electrons^2.
+					double readVariance = localStats[3];
+					
 					// EM-gain noise factor: Adds sqrt(2) to the electrons input to the register.
 					// All data 'read' through the EM-register must have this additional noise factor added.
 					if (emGain != 0)
 					{
 						backgroundVariance *= 2; // Note we are using the variance (std.dev^2) so we use the factor 2
+
+						// For an EM-CCD camera the EM amplification massively scales the electrophotons
+						// and then read noise is added after. This is the same as descaling the read noise by 
+						// the EM-gain so that they can be combined.
+						// Note: Previously the noise computation was in ADUs:
+						// backgroundVariance(photons) * totalGain^2 + readVariance(electrons) * cameraGain^2
+						// backgroundVariance(electrons) * (emGain * cameraGain)^2 + readVariance(electrons) * cameraGain^2
+						// To convert to electrons we divide by total gain:
+						// (backgroundVariance * (emGain * cameraGain)^2 + readVariance * cameraGain^2) / (emGain * cameraGain)^2 
+						// backgroundVariance + readVariance * cameraGain^2 / (emGain * cameraGain)^2
+						// backgroundVariance + readVariance * cameraGain^2 / (emGain * cameraGain)^2
+						// backgroundVariance + readVariance / emGain^2
+						
+						readVariance /= Maths.pow2(emGain);
 					}
-
-					// Get the actual read noise applied to this part of the image. This is in electrons^2.
-					double readVariance = localStats[3];
-
-					// *-*-*-*-*
-					// Note that the noise we are calculating is the noise that would be in the image with no
-					// fluorophore present. This is the true background noise and it is the noise that is  
-					// estimated by the Peak Fit plugin. This noise therefore IGNORES THE SHOT NOISE of the 
-					// fluorophore SIGNAL.
-					// *-*-*-*-*
 
 					// Overall noise can be calculated from the ‘root of sum of squares’ equation
 					double totalNoise = Math.sqrt(backgroundVariance + readVariance);
 
-					// Convert noise back to photons for convenience when computing SNR using the signal in photons.
+					// Convert noise from electrons back to photons for convenience when computing SNR using the signal in photons.
 					if (qe < 1)
 						totalNoise /= qe;
 
@@ -2668,7 +2694,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				}
 			}
 
-			// Apply read noise (in photons)
+			// Apply read noise (in electrons)
 			if (readNoise != null)
 			{
 				for (int i = 0; i < image.length; i++)
