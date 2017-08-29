@@ -1,12 +1,22 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.NoiseEstimator;
+import gdsc.core.utils.Statistics;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.NoiseEstimator;
-import gdsc.core.utils.Statistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -18,16 +28,6 @@ import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 import ij.util.Tools;
-
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import org.apache.commons.math3.util.FastMath;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -138,8 +138,19 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		boolean preserveResiduals = method1.name().contains("Residuals") && method2.name().contains("Residuals") &&
 				twoMethods;
 
-		int start = imp.getCurrentSlice();
-		int end = FastMath.min(imp.getStackSize(), start + 100);
+		int current = imp.getCurrentSlice();
+		int stackSize = imp.getStackSize();
+		int preview = 100;
+		int start = current;
+		int end = current + preview;
+		if (end > stackSize)
+		{
+			int shift = end - stackSize;
+			start -= shift;
+			end = stackSize;
+			start = Math.max(1, start);
+		}
+
 		int size = end - start + 1;
 		double[] xValues = new double[size];
 		double[] yValues1 = new double[size];
