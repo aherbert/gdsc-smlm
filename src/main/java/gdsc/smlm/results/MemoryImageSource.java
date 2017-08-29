@@ -18,7 +18,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  *---------------------------------------------------------------------------*/
 
 /**
- * Represent a named results source. Does not support data provision.
+ * Represent a named results source providing data from memory.
  */
 public class MemoryImageSource extends ImageSource
 {
@@ -31,6 +31,14 @@ public class MemoryImageSource extends ImageSource
 	 * Create a new image source
 	 */
 	public MemoryImageSource(int width, int height, float[]... data)
+	{
+		this(0, 0, width, height, data);
+	}
+
+	/**
+	 * Create a new image source
+	 */
+	public MemoryImageSource(int xOrigin, int yOrigin, int width, int height, float[]... data)
 	{
 		super("Memory");
 		if (width < 1)
@@ -47,6 +55,8 @@ public class MemoryImageSource extends ImageSource
 			if (f.length != length)
 				throw new IllegalArgumentException("Image data length does not match width*height");
 		}
+		this.xOrigin = xOrigin;
+		this.yOrigin = yOrigin;
 		this.width = width;
 		this.height = height;
 		this.data = data;

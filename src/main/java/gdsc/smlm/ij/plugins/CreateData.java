@@ -944,8 +944,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else if (settings.getCameraType() == CameraType.SCMOS)
 		{
-			// Assume sCMOS amplification is like a CCD. We need an average read noise to get an 
-			// approximation of the background noise for the precision computation.
+			// Assume sCMOS amplification is like a CCD for the precision computation.
 			emCCD = false;
 			// Not required for sCMOS
 			totalGain = 0;
@@ -1046,7 +1045,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private void saveSimulationParameters(int particles, boolean fullSimulation, double signalPerFrame)
 	{
-		boolean emCCD;
 		double totalGain;
 		double b2 = getBackgroundEstimate();
 		double readNoise;
@@ -1054,16 +1052,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
 		{
 			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
-			emCCD = (settings.getCameraType() == CameraType.EMCCD) ? settings.getEmGain() > 1 : false;
 			totalGain = helper.getTotalGainSafe();
 			// Store read noise in ADUs
 			readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 		}
 		else if (settings.getCameraType() == CameraType.SCMOS)
 		{
-			// Assume sCMOS amplification is like a CCD. We need an average read noise to get an 
-			// approximation of the background noise for the precision computation.
-			emCCD = false;
 			// Not required for sCMOS
 			totalGain = 0;
 			readNoise = 0;
@@ -2091,15 +2085,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		saveImage(imp);
 
-		results.setSource(new IJImageSource(imp));
+		IJImageSource imageSource = new IJImageSource(imp);
+		// Shift simulation image source to correct location
+		Rectangle bounds = cameraModel.getBounds();
+		if (bounds != null)
+			imageSource.setOrigin(bounds.x, bounds.y);
+		results.setSource(imageSource);
 		results.setName(CREATE_DATA_IMAGE_TITLE + " (" + TITLE + ")");
+		// Bounds are relative to the image source
 		results.setBounds(new Rectangle(settings.getSize(), settings.getSize()));
-		if (settings.getCameraType() == CameraType.SCMOS)
-		{
-			Rectangle bounds = cameraModel.getBounds();
-			// Shift simulation to correct location
-			results.translate(bounds.x, bounds.y);
-		}
 		// Set the PSF as a Gaussian for now. In future this could be improved for other PSFs.
 		PSF.Builder psf = PSFProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
 		psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
@@ -3753,15 +3747,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		sortLocalisationsByTime(localisations);
 
-		// Shift to correct reference frame 
-		int originx = 0, originy = 0;
-		Rectangle bounds = cameraModel.getBounds();
-		if (bounds != null)
-		{
-			originx = bounds.x;
-			originy = bounds.y;
-		}
-
 		//		Collections.sort(localisations, new Comparator<LocalisationModel>(){
 		//
 		//			public int compare(LocalisationModel o1, LocalisationModel o2)
@@ -3801,9 +3786,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					StringBuffer sb = new StringBuffer();
 					sb.append(l.getTime()).append('\t');
 					sb.append(l.getId()).append('\t');
-					sb.append(IJ.d2s(l.getX() + originx, 6)).append('\t');
-					sb.append(IJ.d2s(l.getY() + originy, 6)).append('\t');
-					sb.append(IJ.d2s(l.getZ(), 6)).append('\t');
+					sb.append(l.getX()).append('\t');
+					sb.append(l.getY()).append('\t');
+					sb.append(l.getZ()).append('\t');
 					sb.append(l.getIntensity());
 					output.write(sb.toString());
 					output.newLine();
@@ -4295,10 +4280,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						));
 				//@formatter:on
 				gd.addCheckbox("Random_crop", settings.getRandomCrop());
-				int upperx = modelBounds.width - size;
-				int uppery = modelBounds.height - size;
-				gd.addSlider("Origin_x", 0, upperx, Maths.clip(0, upperx, settings.getOriginX()));
-				gd.addSlider("Origin_y", 0, uppery, Maths.clip(0, uppery, settings.getOriginY()));
+				int upperx = modelBounds.x + modelBounds.width - size;
+				int uppery = modelBounds.y + modelBounds.height - size;
+				gd.addSlider("Origin_x", modelBounds.x, upperx, Maths.clip(modelBounds.x, upperx, settings.getOriginX()));
+				gd.addSlider("Origin_y", modelBounds.y, uppery, Maths.clip(modelBounds.y, uppery, settings.getOriginY()));
 				gd.showDialog();
 				if (gd.wasCanceled())
 					throw new IllegalArgumentException("Unknown camera model crop");
@@ -4310,9 +4295,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				int ox, oy;
 				if (settings.getRandomCrop())
 				{
-					RandomGenerator rg = createRandomGenerator();
-					ox = rg.nextInt(upperx + 1);
-					oy = rg.nextInt(uppery + 1);
+					RandomDataGenerator rg = new RandomDataGenerator(createRandomGenerator());
+					ox = rg.nextInt(modelBounds.x, upperx);
+					oy = rg.nextInt(modelBounds.y, uppery);
 				}
 				else
 				{
@@ -5283,7 +5268,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		results.setName(imp.getTitle() + " (Results)");
 		results.setBounds(new Rectangle(0, 0, imp.getWidth(), imp.getHeight()));
-		results.setSource(new IJImageSource(imp));
+		IJImageSource imageSource = new IJImageSource(imp);
+		results.setSource(imageSource);
 
 		// Get the calibration
 		simulationParameters = showSimulationParametersDialog(imp, results);
@@ -5422,10 +5408,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Get this from the user
 		double b = -1;
 
-		// TODO - Support sCMOS camera simulations
-
 		// Use last simulation parameters for missing settings.
 		// This is good if we are re-running the plugin to load data.
+		Rectangle lastCameraBounds = null;
 		if (simulationParameters != null && simulationParameters.isLoaded())
 		{
 			fullSimulation = simulationParameters.fullSimulation;
@@ -5445,6 +5430,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				cal.setNmPerPixel(simulationParameters.a);
 			if (!cal.hasCameraModelName())
 				cal.setCameraModelName(simulationParameters.cameraModelName);
+			lastCameraBounds = simulationParameters.cameraBounds;
 		}
 
 		// Show a dialog to confirm settings
@@ -5464,7 +5450,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Background", b, 3, 8, "photon");
 
 		// Camera type does not need the full simulation settings. Plus the units are different
-		// so just reimplement.
+		// so just re-implement.
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
 				CalibrationProtosHelper.getName(settings.getCameraType()), new OptionListener<Choice>()
 				{
@@ -5549,7 +5535,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.collectOptions();
 
 		// Validate settings
-		Rectangle resultsBounds = results.getBounds();
+		Rectangle modelBounds = null;
 		try
 		{
 			Parameters.isAboveZero("Gaussian SD", s);
@@ -5574,20 +5560,51 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					IJ.error(TITLE, "Unknown camera model for name: " + cal.getCameraModelName());
 					return null;
 				}
-				// Check the bounds of the results fit the image
-				if (resultsBounds == null || resultsBounds.width != imp.getWidth() ||
-						resultsBounds.height != imp.getHeight())
-				{
-					IJ.error(TITLE, "sCMOS model error: Results bounds do not match the image width/height");
-					return null;
-				}
 				// Ensure we can crop the camera model to the results bounds, 
 				// i.e. we can get a per-pixel noise model for the image.
-				Rectangle cameraBounds = cameraModel.getBounds();
-				if (cameraBounds == null || !cameraBounds.contains(resultsBounds))
+				modelBounds = cameraModel.getBounds();
+				if (modelBounds.width < imp.getWidth() || modelBounds.height < imp.getHeight())
 				{
-					IJ.error(TITLE, "Camera model bounds do not contain the results bounds");
-					return null;
+					throw new IllegalArgumentException(String.format(
+							"Camera model bounds [x=%d,y=%d,width=%d,height=%d] is smaller than simulation size [%dx%d]",
+							modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, imp.getWidth(),
+							imp.getHeight()));
+				}
+
+				if (modelBounds.width > imp.getWidth() || modelBounds.height > imp.getHeight())
+				{
+					GenericDialog gd2 = new GenericDialog(TITLE);
+					//@formatter:off
+					gd2.addMessage(String.format(
+							"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the simulation size [%dx%d].\n \nCrop the model?",
+							modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
+							imp.getWidth(), imp.getHeight()
+							));
+					//@formatter:on
+					int upperx = modelBounds.x + modelBounds.width - imp.getWidth();
+					int uppery = modelBounds.y + modelBounds.height - imp.getHeight();
+					int ox = 0, oy=0;
+					if (lastCameraBounds!=null)
+					{
+						ox = lastCameraBounds.x;
+						oy = lastCameraBounds.y;
+					}
+					gd2.addSlider("Origin_x", modelBounds.x, upperx, Maths.clip(modelBounds.x, upperx, ox));
+					gd2.addSlider("Origin_y", modelBounds.y, uppery, Maths.clip(modelBounds.y, uppery, oy));
+					gd2.showDialog();
+					if (gd2.wasCanceled())
+						throw new IllegalArgumentException("Unknown camera model crop");
+					ox = (int) gd2.getNextNumber();
+					oy = (int) gd2.getNextNumber();
+					
+					Rectangle bounds = new Rectangle(ox, oy, imp.getWidth(), imp.getHeight());
+					cameraModel = cameraModel.crop(bounds);
+					modelBounds = cameraModel.getBounds();
+					if (modelBounds.width != bounds.width || modelBounds.height != bounds.height)
+						throw new IllegalArgumentException("Failed to crop camera model to bounds: " + bounds);
+					
+					IJImageSource imageSource = (IJImageSource) results.getSource();
+					imageSource.setOrigin(ox, oy);
 				}
 
 				cal.clearGlobalCameraSettings();
@@ -5641,7 +5658,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		SimulationParameters p = new SimulationParameters(molecules, fullSimulation, s, a, minSignal, maxSignal,
 				signalPerFrame, depth, fixedDepth, bias, gain, qe, readNoise, cal.getCameraType(),
-				cal.getCameraModelName(), resultsBounds, b, b2);
+				cal.getCameraModelName(), modelBounds, b, b2);
 		p.loaded = true;
 		return p;
 	}

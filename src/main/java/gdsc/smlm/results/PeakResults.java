@@ -55,21 +55,24 @@ public interface PeakResults
 	/**
 	 * Add a fitted peak result
 	 *
-	 * @param result the result
+	 * @param result
+	 *            the result
 	 */
 	public void add(PeakResult result);
-	
+
 	/**
 	 * Add a series of fitted peak results.
 	 *
-	 * @param results the results
+	 * @param results
+	 *            the results
 	 */
 	public void addAll(Collection<PeakResult> results);
 
 	/**
 	 * Add a series of fitted peak results.
 	 *
-	 * @param results the results
+	 * @param results
+	 *            the results
 	 */
 	public void addAll(PeakResult[] results);
 
@@ -100,13 +103,24 @@ public interface PeakResults
 	public ImageSource getSource();
 
 	/**
+	 * Set the bounds of the results. All fitting results are expected to be within the bounds, i.e. results were
+	 * created by fitting a rectangle taken from the image source.
+	 * <p>
+	 * Note that the bounds are relative to the width and height of the image source. They do not include the (x,y)
+	 * origin of the image source.
+	 * 
 	 * @param bounds
-	 *            The bounds used from the source to create the results
+	 *            The bounds of the image source used to create the results
 	 */
 	public void setBounds(Rectangle bounds);
 
 	/**
-	 * @return The Bounds used to create the results
+	 * Get the bounds of the rectangle taken from the image source that encapsulates all the fitting results.
+	 * <p>
+	 * Note that the bounds are relative to the width and height of the image source. They do not include the (x,y)
+	 * origin of the image source.
+	 * 
+	 * @return The bounds used to create the results
 	 */
 	public Rectangle getBounds();
 
@@ -131,10 +145,11 @@ public interface PeakResults
 	/**
 	 * Sets the Point Spread Function (PSF) used when fitting the results.
 	 *
-	 * @param psf the new psf
+	 * @param psf
+	 *            the new psf
 	 */
 	public void setPSF(PSF psf);
-	
+
 	/**
 	 * @param configuration
 	 *            The configuration used to create the results

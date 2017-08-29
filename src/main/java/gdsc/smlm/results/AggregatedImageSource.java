@@ -59,6 +59,28 @@ public class AggregatedImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.ImageSource#getXOrigin()
+	 */
+	@Override
+	public int getXOrigin()
+	{
+		return imageSource.getXOrigin();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#getYOrigin()
+	 */
+	@Override
+	public int getYOrigin()
+	{
+		return imageSource.getYOrigin();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.ImageSource#getWidth()
 	 */
 	@Override

@@ -548,6 +548,20 @@ public class SeriesImageSource extends ImageSource
 		return false;
 	}
 
+	/**
+	 * Sets the origin. This should be used if the source was a crop from a image camera sensor.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 */
+	public void setOrigin(int x, int y)
+	{
+		xOrigin = x;
+		yOrigin = y;
+	}
+
 	private void setDimensions(int maxx, int maxy, int maxz)
 	{
 		width = maxx;

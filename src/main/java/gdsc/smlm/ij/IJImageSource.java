@@ -153,6 +153,20 @@ public class IJImageSource extends ImageSource
 		initialise(imp);
 	}
 
+	/**
+	 * Sets the origin. This should be used if the source was a crop from a image camera sensor.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 */
+	public void setOrigin(int x, int y)
+	{
+		xOrigin = x;
+		yOrigin = y;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

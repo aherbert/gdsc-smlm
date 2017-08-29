@@ -30,6 +30,8 @@ public abstract class ImageSource
 	private int startFrame;
 	@XStreamOmitField
 	private int endFrame;
+	protected int xOrigin;
+	protected int yOrigin;
 	protected int width;
 	protected int height;
 	protected int frames;
@@ -65,7 +67,27 @@ public abstract class ImageSource
 	public abstract void close();
 
 	/**
-	 * Get the width of the results. The frame returned by {@link #next()} will be equal to width * height.
+	 * Gets the x origin of the image frame. This may be non-zero to specify a crop of an image frame.
+	 *
+	 * @return the x origin
+	 */
+	public int getXOrigin()
+	{
+		return xOrigin;
+	}
+	
+	/**
+	 * Gets the y origin of the image frame. This may be non-zero to specify a crop of an image frame.
+	 *
+	 * @return the y origin
+	 */
+	public int getYOrigin()
+	{
+		return yOrigin;
+	}
+	
+	/**
+	 * Get the width of the image frame. The frame returned by {@link #next()} will be equal to width * height.
 	 * 
 	 * @return
 	 */
@@ -75,7 +97,7 @@ public abstract class ImageSource
 	}
 
 	/**
-	 * Get the height of the results. The frame returned by {@link #next()} will be equal to width * height.
+	 * Get the height of the image frame. The frame returned by {@link #next()} will be equal to width * height.
 	 * 
 	 * @return
 	 */
@@ -96,9 +118,6 @@ public abstract class ImageSource
 
 	/**
 	 * Get the start frame number of the source returned by the last call to {@link #get(int)} or {@link #next()}.
-	 * <p>
-	 * This may be larger than the result returned by {@link #getFrames()} if the ImageSource is selecting a subset of
-	 * the possible frames.
 	 * 
 	 * @return The start frame number of the latest block of data
 	 */
@@ -294,7 +313,7 @@ public abstract class ImageSource
 	public String toString()
 	{
 		// Over-ride this to produce a nicer output description of the results source
-		return String.format("%s [%dx%dx%d]", name, width, height, frames);
+		return String.format("%s [%d,%d:%dx%dx%d]", name, xOrigin, yOrigin, width, height, frames);
 	}
 
 	/**
