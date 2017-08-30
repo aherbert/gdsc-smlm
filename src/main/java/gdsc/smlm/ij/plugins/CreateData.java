@@ -260,8 +260,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private boolean poissonNoise = true;
 	private double minPhotons = 0, minSNRt1 = 0, minSNRtN = 0;
 
-	// Store the parameters for the last simulation for spot data
-	public static class SimulationParameters
+	// Store the parameters
+	public static class BaseParameters
 	{
 		private static int nextId = 1;
 
@@ -269,15 +269,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 * The parameter set identifier
 		 */
 		final int id;
-		/**
-		 * Number of molecules in the simulated image
-		 */
-		final int molecules;
-		/**
-		 * True if using a full simulation of fluorophores with a lifetime. False is for single random localisations per
-		 * frame.
-		 */
-		final boolean fullSimulation;
 		/**
 		 * Gaussian standard deviation
 		 */
@@ -297,15 +288,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		/**
 		 * The average signal per frame
 		 */
-		final double signalPerFrame;
-		/**
-		 * The z-position depth
-		 */
-		final double depth;
-		/**
-		 * True if the depth is fixed
-		 */
-		final boolean fixedDepth;
+		double averageSignal;
 		/**
 		 * The camera bias
 		 */
@@ -337,30 +320,22 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		/**
 		 * Background
 		 */
-		final double b;
+		double b;
 		/**
 		 * Background noise in photons per pixel (used in the precision calculations)
 		 */
-		final double b2;
+		final double noise;
 
-		private boolean loaded;
-
-		public SimulationParameters(int molecules, boolean fullSimulation, double s, double a, double minSignal,
-				double maxSignal, double signalPerFrame, double depth, boolean fixedDepth, double bias, double gain,
-				double qe, double readNoise, CameraType cameraType, String cameraModelName, Rectangle cameraBounds,
-				double b, double b2)
+		public BaseParameters(double s, double a, double minSignal, double maxSignal, double averageSignal, double bias,
+				double gain, double qe, double readNoise, CameraType cameraType, String cameraModelName,
+				Rectangle cameraBounds, double b, double noise)
 		{
 			id = nextId++;
-			this.molecules = molecules;
-			this.fullSimulation = fullSimulation;
 			this.s = s;
 			this.a = a;
 			this.minSignal = minSignal;
 			this.maxSignal = maxSignal;
-			this.signalPerFrame = signalPerFrame;
-			this.depth = depth;
-			// We must have a fixed depth if the depth is zero
-			this.fixedDepth = (depth > 0) ? fixedDepth : true;
+			this.averageSignal = averageSignal;
 			this.bias = bias;
 			this.gain = gain;
 			this.qe = qe;
@@ -369,17 +344,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.cameraModelName = cameraModelName;
 			this.cameraBounds = cameraBounds;
 			this.b = b;
-			this.b2 = b2;
-		}
-
-		/**
-		 * Checks if is a loaded simulation.
-		 *
-		 * @return true, if is loaded
-		 */
-		public boolean isLoaded()
-		{
-			return loaded;
+			this.noise = noise;
 		}
 
 		/**
@@ -393,76 +358,72 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	// Store the parameters for the last benchmark
-	public static class BenchmarkParameters
+	// Store the parameters for the last simulation for spot data
+	public static class SimulationParameters extends BaseParameters
 	{
-		private static int nextId = 1;
+		/**
+		 * Number of molecules in the simulated image
+		 */
+		final int molecules;
+		/**
+		 * True if using a full simulation of fluorophores with a lifetime. False is for single random localisations per
+		 * frame.
+		 */
+		final boolean fullSimulation;
+		/**
+		 * The z-position depth
+		 */
+		final double depth;
+		/**
+		 * True if the depth is fixed
+		 */
+		final boolean fixedDepth;
+
+		private boolean loaded;
+
+		public SimulationParameters(int molecules, boolean fullSimulation, double s, double a, double minSignal,
+				double maxSignal, double averageSignal, double depth, boolean fixedDepth, double bias, double gain,
+				double qe, double readNoise, CameraType cameraType, String cameraModelName, Rectangle cameraBounds,
+				double b, double noise)
+		{
+			super(s, a, minSignal, maxSignal, averageSignal, bias, gain, qe, readNoise, cameraType, cameraModelName,
+					cameraBounds, b, noise);
+			this.molecules = molecules;
+			this.fullSimulation = fullSimulation;
+			this.depth = depth;
+			// We must have a fixed depth if the depth is zero
+			this.fixedDepth = (depth > 0) ? fixedDepth : true;
+		}
 
 		/**
-		 * The parameter set identifier
+		 * Checks if is a loaded simulation.
+		 *
+		 * @return true, if is loaded
 		 */
-		final int id;
+		public boolean isLoaded()
+		{
+			return loaded;
+		}
+	}
+
+	// Store the parameters for the last benchmark
+	public static class BenchmarkParameters extends BaseParameters
+	{
 		/**
 		 * Number of frames in the simulated image
 		 */
 		final int frames;
 		/**
-		 * Gaussian standard deviation
-		 */
-		final double s;
-		/**
-		 * Pixel pitch in nm
-		 */
-		final double a;
-		/**
-		 * The average number of photons per frame
-		 */
-		private double signal;
-		/**
 		 * The x,y,z position of the localisation in each frame
 		 */
 		final double x, y, z;
-		final double bias;
 		/**
-		 * Total gain
-		 */
-		final double gain;
-		/**
-		 * Quantum efficiency (electron/photon)
-		 */
-		final double qe;
-		/**
-		 * Read noise in ADUs
-		 */
-		final double readNoise;
-		/**
-		 * The camera type.
-		 */
-		CameraType cameraType;
-		/**
-		 * The camera model name.
-		 */
-		String cameraModelName;
-		/**
-		 * The camera bounds.
-		 */
-		Rectangle cameraBounds;
-		/**
-		 * Background
-		 */
-		private double b;
-		/**
-		 * Background noise in photons per pixel (used in the precision calculations)
-		 */
-		final double b2;
-		/**
-		 * The actual number of simulated ADUs in each frame of the benchmark image. Some frames may be empty (due to
-		 * signal filtering or Poisson sampling). The count is after gain has been applied to the photons.
+		 * The actual number of simulated photons in each frame of the benchmark image. Some frames may be empty (due to
+		 * signal filtering or Poisson sampling).
 		 */
 		final double[] p;
 		/**
-		 * The actual number of simulated background ADUs in each frame of the benchmark image. The count is after gain
-		 * has been applied to the photons.
+		 * The actual number of simulated background photons in each frame of the benchmark image.
 		 */
 		final double[] background;
 		/**
@@ -474,25 +435,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double z,
 				double bias, double gain, double qe, double readNoise, CameraType cameraType, String cameraModelName,
-				Rectangle cameraBounds, double b, double b2, double precisionN, double precisionX, double precisionXML)
+				Rectangle cameraBounds, double b, double noise, double precisionN, double precisionX,
+				double precisionXML)
 		{
-			id = nextId++;
+			super(s, a, signal, signal, signal, bias, gain, qe, readNoise, cameraType, cameraModelName, cameraBounds, b,
+					noise);
+
 			this.frames = frames;
-			this.s = s;
-			this.a = a;
-			this.signal = signal;
 			this.x = x;
 			this.y = y;
 			this.z = z;
-			this.bias = bias;
-			this.gain = gain;
-			this.qe = qe;
-			this.readNoise = readNoise;
-			this.cameraType = cameraType;
-			this.cameraModelName = cameraModelName;
-			this.cameraBounds = cameraBounds;
-			this.b = b;
-			this.b2 = b2;
 			this.precisionN = precisionN;
 			this.precisionX = precisionX;
 			this.precisionXML = precisionXML;
@@ -511,17 +463,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					if (p[i] != 0)
 						throw new RuntimeException("Multiple peaks on the same frame: " + result.getFrame());
 					p[i] = result.getSignal();
-					background[i] = result.getBackground() - bias;
+					background[i] = result.getBackground();
 				}
 			});
 			double av = Maths.sum(p) / molecules;
 			double av2 = Maths.sum(background) / molecules;
 			Utils.log(
 					"Created %d frames, %d molecules. Simulated signal %s : average %s. Simulated background %s : average %s",
-					frames, molecules, Utils.rounded(signal), Utils.rounded(av / gain), Utils.rounded(b),
+					frames, molecules, Utils.rounded(averageSignal), Utils.rounded(av / gain), Utils.rounded(b),
 					Utils.rounded(av2 / gain));
 			// Reset the average signal and background (in photons)
-			signal = av / gain;
+			averageSignal = av / gain;
 			b = av2 / gain;
 		}
 
@@ -530,7 +482,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		public double getSignal()
 		{
-			return signal;
+			return averageSignal;
 		}
 
 		/**
@@ -548,16 +500,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		public double getBackground()
 		{
 			return b;
-		}
-
-		/**
-		 * Checks if is emccd.
-		 *
-		 * @return true, if is emccd
-		 */
-		public boolean isEMCCD()
-		{
-			return cameraType == CameraType.EMCCD;
 		}
 	}
 
@@ -931,7 +873,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		boolean emCCD;
 		double totalGain;
-		double b2 = getBackgroundEstimate();
+		double noise = getNoiseEstimate();
 		double readNoise;
 
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
@@ -961,21 +903,23 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
 		// is the same as MLE with the caveat of numerical instability.
 
-		double lowerP = Gaussian2DPeakResultHelper.getPrecisionX(settings.getPixelPitch(), sd,
-				settings.getPhotonsPerSecondMaximum(), b2, emCCD);
-		double upperP = Gaussian2DPeakResultHelper.getPrecisionX(settings.getPixelPitch(), sd,
-				settings.getPhotonsPerSecond(), b2, emCCD);
-		double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecisionX(settings.getPixelPitch(), sd,
-				settings.getPhotonsPerSecondMaximum(), b2, emCCD);
-		double upperMLP = Gaussian2DPeakResultHelper.getMLPrecisionX(settings.getPixelPitch(), sd,
-				settings.getPhotonsPerSecond(), b2, emCCD);
-		double lowerN = getPrecisionN(settings.getPixelPitch(), sd, settings.getPhotonsPerSecond(), b2, emCCD);
-		double upperN = getPrecisionN(settings.getPixelPitch(), sd, settings.getPhotonsPerSecondMaximum(), b2, emCCD);
+		double lowerP = Gaussian2DPeakResultHelper.getPrecision(settings.getPixelPitch(), sd,
+				settings.getPhotonsPerSecondMaximum(), noise, emCCD);
+		double upperP = Gaussian2DPeakResultHelper.getPrecision(settings.getPixelPitch(), sd,
+				settings.getPhotonsPerSecond(), noise, emCCD);
+		double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecision(settings.getPixelPitch(), sd,
+				settings.getPhotonsPerSecondMaximum(), noise, emCCD);
+		double upperMLP = Gaussian2DPeakResultHelper.getMLPrecision(settings.getPixelPitch(), sd,
+				settings.getPhotonsPerSecond(), noise, emCCD);
+		double lowerN = getPrecisionN(settings.getPixelPitch(), sd, settings.getPhotonsPerSecond(), Maths.pow2(noise),
+				emCCD);
+		double upperN = getPrecisionN(settings.getPixelPitch(), sd, settings.getPhotonsPerSecondMaximum(),
+				Maths.pow2(noise), emCCD);
 
 		if (settings.getCameraType() == CameraType.SCMOS)
 			Utils.log("sCMOS camera background estimate uses an average read noise");
-		Utils.log("Expected background variance pre EM-gain (b^2) = %s photons^2" +
-				"[includes read variance converted to photons]", Utils.rounded(b2));
+		Utils.log("Effective background noise = %s photons [includes read variance converted to photons]",
+				Utils.rounded(noise));
 		Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP), Utils.rounded(upperP),
 				Utils.rounded(lowerP / settings.getPixelPitch()), Utils.rounded(upperP / settings.getPixelPitch()));
 		Utils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", Utils.rounded(lowerMLP),
@@ -990,7 +934,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, settings.getPixelPitch(),
 					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), totalGain, qe,
 					readNoise, settings.getCameraType(), settings.getCameraModelName(), cameraModel.getBounds(),
-					settings.getBackground(), b2, lowerN, lowerP, lowerMLP);
+					settings.getBackground(), noise, lowerN, lowerP, lowerMLP);
 		}
 		else
 		{
@@ -1001,28 +945,29 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	private double getBackgroundEstimate()
+	private double getNoiseEstimate()
 	{
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
 		{
 			// Background is in photons
 			double backgroundVariance = settings.getBackground();
-			// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor 
-			// so this is "double-counting" the EM-CCD.  
-			//if (settings.getEmGain() > 1)
-			//	backgroundVariance *= 2;
 
 			// Read noise is in electrons. Convert to Photons
 			double readNoise = settings.getReadNoise() / getQuantumEfficiency();
 
-			// If an EM-CCD camera the read noise (in Counts) is swamped by amplification of the signal. 
+			// In an EM-CCD camera the read noise (in Counts) is swamped by amplification of the signal. 
 			// We get the same result by dividing the read noise (in photons) by the EM-gain.
 			if (settings.getCameraType() == CameraType.EMCCD && settings.getEmGain() > 1)
+			{
+				// Add EM-CCD noise factor. The Mortensen formula also includes this factor 
+				// so this is "double-counting" the EM-CCD.  
+				backgroundVariance *= 2;
 				readNoise /= settings.getEmGain();
+			}
 
 			// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
 			// is equal to the total variance at the pixel.
-			return backgroundVariance + Maths.pow2(readNoise);
+			return Math.sqrt(backgroundVariance + Maths.pow2(readNoise));
 		}
 		else if (settings.getCameraType() == CameraType.SCMOS)
 		{
@@ -1038,7 +983,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Get the average read noise. Convert from electrons to photons
 			double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length) / getQuantumEfficiency();
 
-			return backgroundVariance + Maths.pow2(readNoise);
+			return Math.sqrt(backgroundVariance + Maths.pow2(readNoise));
 		}
 		throw new IllegalStateException("Unknown camera type: " + settings.getCameraType());
 	}
@@ -1051,7 +996,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void saveSimulationParameters(int particles, boolean fullSimulation, double signalPerFrame)
 	{
 		double totalGain;
-		double b2 = getBackgroundEstimate();
+		double noise = getNoiseEstimate();
 		double readNoise;
 
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
@@ -1080,7 +1025,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				settings.getPhotonsPerSecond(), settings.getPhotonsPerSecondMaximum(), signalPerFrame,
 				settings.getDepth(), settings.getFixedDepth(), settings.getBias(), totalGain, qe, readNoise,
 				settings.getCameraType(), settings.getCameraModelName(), cameraModel.getBounds(),
-				settings.getBackground(), b2);
+				settings.getBackground(), noise);
 	}
 
 	/**

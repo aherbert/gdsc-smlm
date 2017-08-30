@@ -20,7 +20,6 @@ import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
-import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitStatus;
@@ -983,21 +982,9 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(benchmarkParameters.gain)).append('\t');
 		sb.append(Utils.rounded(benchmarkParameters.readNoise)).append('\t');
 		sb.append(Utils.rounded(benchmarkParameters.getBackground())).append('\t');
-		sb.append(Utils.rounded(benchmarkParameters.b2)).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.noise)).append('\t');
 
-		// Compute the noise
-		double noise = benchmarkParameters.b2;
-		if (benchmarkParameters.isEMCCD())
-		{
-			// The b2 parameter was computed without application of the EM-CCD noise factor of 2.
-			//final double b2 = backgroundVariance + readVariance
-			//                = benchmarkParameters.getBackground() + readVariance
-			// This should be applied only to the background variance.
-			final double readVariance = noise - benchmarkParameters.getBackground();
-			noise = benchmarkParameters.getBackground() * 2 + readVariance;
-		}
-
-		sb.append(Utils.rounded(benchmarkParameters.getSignal() / Math.sqrt(noise))).append('\t');
+		sb.append(Utils.rounded(benchmarkParameters.getSignal() / benchmarkParameters.noise)).append('\t');
 		sb.append(Utils.rounded(benchmarkParameters.precisionN)).append('\t');
 		sb.append(Utils.rounded(benchmarkParameters.precisionX)).append('\t');
 		sb.append(Utils.rounded(benchmarkParameters.precisionXML)).append('\t');
@@ -1121,7 +1108,7 @@ public class BenchmarkFit implements PlugIn
 
 	private String createParameterHeader()
 	{
-		return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tZ (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions";
+		return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tZ (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tNoise (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions";
 	}
 
 	private void runAnalysis()

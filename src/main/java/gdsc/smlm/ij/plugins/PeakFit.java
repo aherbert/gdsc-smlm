@@ -1166,21 +1166,24 @@ public class PeakFit implements PlugInFilter, ItemListener
 					public boolean collectOptions()
 					{
 						CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
-						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						ExtendedGenericDialog egd = new ExtendedGenericDialog("Camera type options", null);
 						if (calibration.isCCDCamera())
 						{
 							egd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
-							egd.addNumericField("Gain", calibration.getCountPerPhoton(), 2, 6, "Count/photon");
+							egd.addNumericField("Gain", calibration.getCountPerPhoton(), 4, 6, "Count/photon");
 							if (BitFlags.areSet(options, FLAG_READ_NOISE))
-								egd.addNumericField("Read_noise", calibration.getReadNoise(), 2, 6, "Count");
+								egd.addNumericField("Read_noise", calibration.getReadNoise(), 4, 6, "Count");
 							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
-								egd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 2, 6,
+								egd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 4, 6,
 										"electron/photon");
 						}
 						else if (calibration.isSCMOS())
 						{
 							String[] models = CameraModelManager.listCameraModels(true);
 							egd.addChoice("Camera_model_name", models, calibration.getCameraModelName());
+							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
+								egd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 4, 6,
+										"electron/photon");
 						}
 						else
 						{
@@ -1207,6 +1210,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 							// should later call configureFitSolver(...) which will set the camera model
 							// using the camera model name.
 							calibration.setCameraModelName(egd.getNextChoice());
+							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
+								calibration.setQuantumEfficiency(Math.abs(egd.getNextNumber()));
 						}
 						return true;
 					}
@@ -1277,7 +1282,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 					{
 						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						PSFType psfType = fitConfig.getPSFType();
-						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+						ExtendedGenericDialog egd = new ExtendedGenericDialog("PSF Options", null);
 						PSF psf = fitConfig.getPSF();
 						for (PSFParameter p : psf.getParametersList())
 							egd.addNumericField(p.getName(), p.getValue(), 3);

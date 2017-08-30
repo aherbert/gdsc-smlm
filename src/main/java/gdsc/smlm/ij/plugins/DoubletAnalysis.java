@@ -53,7 +53,6 @@ import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.PSFProtosHelper;
-import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -2080,20 +2079,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append(Utils.rounded(density)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.minSignal)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.maxSignal)).append('\t');
-		sb.append(Utils.rounded(simulationParameters.signalPerFrame)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.averageSignal)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.s)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.a)).append('\t');
 		sb.append(Utils.rounded(getSa() * simulationParameters.a)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.gain)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.readNoise)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.b)).append('\t');
-
-		// Compute the noise
-		double noise = Math
-				.sqrt((simulationParameters.b * ((simulationParameters.isEMCCD()) ? 2 : 1)) / simulationParameters.gain +
-						simulationParameters.readNoise * simulationParameters.readNoise);
-		sb.append(Utils.rounded(noise)).append('\t');
-		sb.append(Utils.rounded(simulationParameters.signalPerFrame / noise)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.noise)).append('\t');
+		sb.append(Utils.rounded(simulationParameters.averageSignal / simulationParameters.noise)).append('\t');
 		sb.append(config.getRelativeFitting()).append('\t');
 		sb.append(PSFProtosHelper.getName(fitConfig.getPSFType()));
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));

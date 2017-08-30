@@ -59,7 +59,6 @@ import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.XmlUtils;
-import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
@@ -1810,7 +1809,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		StringBuilder sb = new StringBuilder(300);
 
 		// Add information about the simulation
-		final double signal = simulationParameters.signalPerFrame; //(simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
+		final double signal = simulationParameters.averageSignal; //(simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
 		final int n = results.size();
 		sb.append(imp.getStackSize()).append('\t');
 		final int w = imp.getWidth();
@@ -1829,26 +1828,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		sb.append(Utils.rounded(simulationParameters.gain)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.readNoise)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.b)).append('\t');
-		sb.append(Utils.rounded(simulationParameters.b2)).append('\t');
-
-		// Compute the noise
-		double noise = simulationParameters.b2;
-		if (simulationParameters.isEMCCD())
-		{
-			// The b2 parameter was computed without application of the EM-CCD noise factor of 2.
-			//final double b2 = backgroundVariance + readVariance
-			//                = simulationParameters.b + readVariance
-			// This should be applied only to the background variance.
-			final double readVariance = noise - simulationParameters.b;
-			noise = simulationParameters.b * 2 + readVariance;
-		}
+		sb.append(Utils.rounded(simulationParameters.noise)).append('\t');
 
 		if (simulationParameters.fullSimulation)
 		{
 			// The total signal is spread over frames
 		}
 
-		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append('\t');
+		sb.append(Utils.rounded(signal / simulationParameters.noise)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append('\t');
 
 		sb.append(spotFilter.getDescription());
@@ -2708,7 +2695,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private String createHeader(boolean extraRecall)
 	{
 		StringBuilder sb = new StringBuilder(
-				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
+				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tNoise (photons)\tSNR\ts (px)\t");
 		sb.append("Filter\t");
 		sb.append("Spots\t");
 		sb.append("nP\t");
