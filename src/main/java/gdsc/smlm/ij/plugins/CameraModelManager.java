@@ -13,11 +13,15 @@ import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationProtos.CameraModelResource;
 import gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings;
+import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.PerPixelCameraModel;
+import gdsc.smlm.results.ImageSource;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.io.FileSaver;
@@ -229,9 +233,13 @@ public class CameraModelManager implements PlugIn
 			"View a camera model", 
 			"Load a camera model",
 			"Load from directory",
-			"Delete a camera model" };
+			"Delete a camera model",
+			"Filter an image" };
 	//@formatter:on
 	private static int option = 0;
+	private static int ox = 0;
+	private static int oy = 0;
+	private static String image = "";
 	private static String selected = "";
 
 	/*
@@ -259,6 +267,9 @@ public class CameraModelManager implements PlugIn
 
 		switch (option)
 		{
+			case 5:
+				filterImage();
+				break;
 			case 4:
 				deleteCameraModel();
 				break;
@@ -274,6 +285,58 @@ public class CameraModelManager implements PlugIn
 			default:
 				printCameraModels();
 		}
+	}
+
+	private void filterImage()
+	{
+		// Select an image
+		GenericDialog gd = new GenericDialog(TITLE);
+		String[] list = Utils.getImageList(Utils.GREY_SCALE);
+		gd.addChoice("Image", list, image);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		image = gd.getNextChoice();
+		ImagePlus imp = WindowManager.getImage(image);
+		if (imp == null)
+		{
+			IJ.log("Failed to find image: " + image);
+			return;
+		}
+
+		// Select the model
+		gd = new GenericDialog(TITLE);
+		String[] MODELS = listCameraModels(false);
+		gd.addChoice("Model", MODELS, selected);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		String name = selected = gd.getNextChoice();
+
+		CameraModel cameraModel = load(name);
+
+		if (cameraModel == null)
+		{
+			IJ.log("Failed to find camera data for model: " + name);
+			return;
+		}
+
+		// Crop the model if appropriate
+		cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(), ox, oy, true);
+
+		// Filter all the frames
+		ImageSource source = new IJImageSource(imp);
+		ImageStack stack = new ImageStack(imp.getWidth(), imp.getHeight());
+		Rectangle bounds = cameraModel.getBounds();
+		for (float[] data = source.next(); data != null; data = source.next())
+		{
+			cameraModel.removeBiasAndGain(bounds, data);
+			stack.addSlice(null, data);
+		}
+
+		ImagePlus imp2 = new ImagePlus(imp.getTitle() + " Filtered", stack);
+		imp2.copyScale(imp);
+		imp2.show();
 	}
 
 	private void deleteCameraModel()
