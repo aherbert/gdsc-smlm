@@ -31,17 +31,31 @@ public interface CameraModel
 	public Rectangle getBounds();
 
 	/**
+	 * Sets the origin. This updates the origin of the bounds.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 */
+	public void setOrigin(int x, int y);
+
+	/**
 	 * Crop the camera to the given bounds. The bounds are expected to fit within the camera bounds.
 	 * <p>
 	 * This can be used to create a more efficient representation if no data outside the bounds are required.
+	 * <p>
+	 * The origin of the new model can optionally be reset to 0,0.
 	 * <p>
 	 * Note: If the bounds match the current bounds then the returned model may not be a copy.
 	 *
 	 * @param bounds
 	 *            the bounds
+	 * @param resetOrigin
+	 *            the reset origin flag
 	 * @return the camera model
 	 */
-	public CameraModel crop(Rectangle bounds);
+	public CameraModel crop(Rectangle bounds, boolean resetOrigin);
 
 	/**
 	 * Checks if is per pixel model. If false then all pixels are treated equally.
@@ -162,4 +176,11 @@ public interface CameraModel
 	 *            the data
 	 */
 	public void applyGainAndBias(Rectangle bounds, float[] data);
+
+	/**
+	 * Copy this camera model. This is a deep copy of any structures.
+	 *
+	 * @return the copy
+	 */
+	public CameraModel copy();
 }

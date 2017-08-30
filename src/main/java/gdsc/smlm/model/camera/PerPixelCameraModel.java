@@ -250,6 +250,17 @@ public class PerPixelCameraModel extends BaseCameraModel
 		return new Rectangle(cameraBounds);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#setOrigin(int, int)
+	 */
+	public void setOrigin(int x, int y)
+	{
+		cameraBounds.x = x;
+		cameraBounds.y = y;
+	}
+
 	/**
 	 * Gets a copy of the bias for the current bounds.
 	 *
@@ -621,14 +632,22 @@ public class PerPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle)
+	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle, boolean)
 	 */
-	public CameraModel crop(Rectangle bounds)
+	public CameraModel crop(Rectangle bounds, boolean resetOrigin)
 	{
 		if (bounds == null)
 			throw new IllegalArgumentException("Bounds are null");
 		if (equal(bounds))
+		{
+			if (resetOrigin)
+			{
+				PerPixelCameraModel model = copy();
+				model.setOrigin(0, 0);
+				return model;
+			}
 			return this;
+		}
 		Rectangle intersection = getIntersection(bounds);
 		float[] bias = getData(this.bias, intersection, true);
 		float[] gain = getData(this.gain, intersection, true);
@@ -640,10 +659,11 @@ public class PerPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.camera.BaseCameraModel#copy()
+	 * @see gdsc.smlm.model.camera.CameraModel#copy()
 	 */
 	public PerPixelCameraModel copy()
 	{
+		// Deep copy
 		return new PerPixelCameraModel(true, cameraBounds, bias, gain, variance, var_g2);
 	}
 

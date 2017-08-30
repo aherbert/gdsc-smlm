@@ -35,9 +35,16 @@ public class NullCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle)
+	 * @see gdsc.smlm.model.camera.CameraModel#setOrigin(int, int)
 	 */
-	public CameraModel crop(Rectangle bounds)
+	public void setOrigin(int x, int y)
+	{
+	}
+	
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle, boolean)
+	 */
+	public CameraModel crop(Rectangle bounds, boolean resetOrigin)
 	{
 		return this;
 	}
@@ -159,12 +166,11 @@ public class NullCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.camera.BaseCameraModel#copy()
+	 * @see gdsc.smlm.model.camera.CameraModel#copy()
 	 */
-	@Override
 	public NullCameraModel copy()
 	{
-		return clone();
+		return this; // no state so no need to clone()
 	}
 
 	/*

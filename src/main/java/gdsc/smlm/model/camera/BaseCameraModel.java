@@ -63,13 +63,6 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable
 	}
 
 	/**
-	 * Copy this camera model. This is a deep copy of any structures.
-	 *
-	 * @return the base camera model
-	 */
-	public abstract BaseCameraModel copy();
-
-	/**
 	 * Create a new array.
 	 *
 	 * @param bounds
