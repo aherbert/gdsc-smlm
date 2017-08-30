@@ -3236,6 +3236,30 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(datasetNumber).append('\t');
+		if (settings.getCameraType() == CameraType.SCMOS)
+		{
+			sb.append("sCMOS (").append(settings.getCameraModelName()).append(") ");
+			Rectangle bounds = cameraModel.getBounds();			
+			sb.append(" ").append(bounds.x).append(",").append(bounds.y);
+			int size = settings.getSize();
+			sb.append(" ").append(size).append("x").append(size);
+		}
+		else if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
+		{
+			sb.append(CalibrationProtosHelper.getName(settings.getCameraType()));
+			int size = settings.getSize();
+			sb.append(" ").append(size).append("x").append(size);
+			if (settings.getCameraType() == CameraType.EMCCD)
+				sb.append(" EM=").append(settings.getEmGain());
+			sb.append(" CG=").append(settings.getEmGain());
+			sb.append(" RN=").append(settings.getReadNoise());
+			sb.append(" B=").append(settings.getBias());
+		}
+		else
+		{
+			throw new IllegalStateException();
+		}
+		sb.append(" QE=").append(settings.getQuantumEfficiency()).append('\t');
 		sb.append((fluorophores == null) ? localisations.size() : fluorophores.size()).append('\t');
 		sb.append(stats[SAMPLED_BLINKS].getN() + (int) stats[SAMPLED_BLINKS].getSum()).append('\t');
 		sb.append(localisations.size()).append('\t');
@@ -3452,7 +3476,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Dataset\tMolecules\tPulses\tLocalisations\tnFrames\tArea (um^2)\tDensity (mol/um^2)\tHWHM\tS\tSa");
+				"Dataset\tCamera\tMolecules\tPulses\tLocalisations\tnFrames\tArea (um^2)\tDensity (mol/um^2)\tHWHM\tS\tSa");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append('\t').append(NAMES[i]);
