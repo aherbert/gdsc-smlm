@@ -13,14 +13,19 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Statistics;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.model.camera.CameraModel;
+import gdsc.smlm.model.camera.FixedPixelCameraModel;
+import gdsc.smlm.model.camera.NullCameraModel;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.plugin.filter.ExtendedPlugInFilter;
@@ -52,11 +57,22 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING | NO_CHANGES;
 	private PlugInFilterRunner pfr;
 	private ImagePlus imp;
-	private GenericDialog gd;
-	private static int algorithm = 0;
-	private static int algorithm2 = 1;
+	private static int algorithm = NoiseEstimatorMethod.ALL_PIXELS_VALUE;
+	private static int algorithm2 = NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES_VALUE;
 	private static int lowestPixelsRange = 6;
+	private static int ox = 0, oy = 0;
+	private CalibrationWriter calibration;
+	private CameraModel cameraModel;
+	
+	private static final String Y_AXIS_COUNT = "Noise (counts)";
+	private static final String Y_AXIS_PHOTON = "Noise (photons)";
+	private String yAxisTitle;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
+	 */
 	public int setup(String arg, ImagePlus imp)
 	{
 		if (arg.equalsIgnoreCase("final"))
@@ -76,8 +92,36 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		return FLAGS;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
+	 * ij.plugin.filter.PlugInFilterRunner)
+	 */
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
+		// Select a camera model
+		calibration = CalibrationWriter.create(SettingsManager.readCalibration(0));
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addMessage("Preprocess camera image and estimate global noise");
+		PeakFit.addCameraOptions(gd, calibration);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return DONE;
+		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
+		gd.collectOptions();
+		SettingsManager.writeSettings(calibration.getCalibration());
+
+		try
+		{
+			createCameraModel();
+		}
+		catch (Exception e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return DONE;
+		}
+
 		// If using a stack, provide a preview graph of the noise for two methods
 		if (imp.getStackSize() > 1)
 		{
@@ -85,7 +129,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 
 			drawPlot();
 
-			gd = new GenericDialog(TITLE);
+			gd = new ExtendedGenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
 			String[] methodNames = SettingsManager.getNoiseEstimatorMethodNames();
@@ -104,6 +148,43 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		}
 
 		return IJ.setupDialog(imp, FLAGS);
+	}
+
+	private void createCameraModel()
+	{
+		yAxisTitle = Y_AXIS_PHOTON;
+		switch (calibration.getCameraType())
+		{
+			case CCD:
+			case EMCCD:
+				cameraModel = new FixedPixelCameraModel((float) calibration.getBias(),
+						(float) calibration.getCountPerPhoton());
+				break;
+			case SCMOS:
+				cameraModel = CameraModelManager.load(calibration.getCameraModelName());
+				if (cameraModel == null)
+				{
+					throw new IllegalStateException("No camera model for camera type: " + calibration.getCameraType());
+				}
+				cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(), ox, oy, false);
+				// Store for next time
+				Rectangle bounds = cameraModel.getBounds();
+				ox = bounds.x;
+				oy = bounds.y;
+				// Reset origin for filtering
+				if (ox != 0 || oy != 0)
+				{
+					cameraModel = cameraModel.copy();
+					cameraModel.setOrigin(0, 0);
+				}
+				break;
+			case CAMERA_TYPE_NA:
+			case UNRECOGNIZED:
+			default:
+				cameraModel = new NullCameraModel();
+				yAxisTitle = Y_AXIS_COUNT;
+				break;
+		}
 	}
 
 	/*
@@ -164,6 +245,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			IJ.showProgress(i, size);
 			final ImageProcessor ip = stack.getProcessor(slice);
 			buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, buffer);
+			cameraModel.removeBiasAndGain(bounds, buffer);
 			final NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
 			ne.preserveResiduals = preserveResiduals;
 			ne.setRange(lowestPixelsRange);
@@ -187,7 +269,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		}
 
 		String title = imp.getTitle() + " Noise";
-		Plot2 plot = new Plot2(title, "Slice", "Noise", xValues, yValues1);
+		Plot2 plot = new Plot2(title, "Slice", yAxisTitle, xValues, yValues1);
 		double range = b1[1] - b1[0];
 		if (range == 0)
 			range = 1;
@@ -221,6 +303,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
 		Rectangle bounds = ip.getRoi();
 		float[] buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
+		cameraModel.removeBiasAndGain(bounds, buffer);
 		NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
 		ne.preserveResiduals = true;
 		for (NoiseEstimator.Method m : NoiseEstimator.Method.values())
@@ -257,9 +340,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		{
 			tw.append(createResult(result));
 		}
-
-		// TODO - ImageJ plotting is not very good. Change to use a Java plotting library 
-		//plotResults();
 	}
 
 	private String createHeader()
