@@ -106,7 +106,7 @@ public class PerPixelCameraModelTest
 		{
 			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
 					5 + rand.nextInt(5));
-			CameraModel model2 = model.crop(bounds);
+			CameraModel model2 = model.crop(bounds, false);
 			Assert.assertEquals(model2.getBounds(), bounds);
 			check(bias, bounds, model2.getBias(bounds));
 			check(gain, bounds, model2.getGain(bounds));
@@ -175,7 +175,7 @@ public class PerPixelCameraModelTest
 		{
 			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
 					5 + rand.nextInt(5));
-			checkConversion(bounds, model.crop(bounds));
+			checkConversion(bounds, model.crop(bounds, false));
 		}
 	}
 
