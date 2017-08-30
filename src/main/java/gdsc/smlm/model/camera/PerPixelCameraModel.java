@@ -287,7 +287,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 */
 	public float[] getNormalisedVariance()
 	{
-		return createNormalisedVariance().clone();
+		return getNormalisedVarianceInternal().clone();
 	}
 
 	/**
@@ -296,7 +296,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 */
 	public void initialise()
 	{
-		createNormalisedVariance();
+		getNormalisedVarianceInternal();
 	}
 
 	/*
@@ -386,21 +386,26 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 */
 	public float[] getNormalisedVariance(Rectangle bounds)
 	{
-		return getData(bounds, createNormalisedVariance());
+		return getData(bounds, getNormalisedVarianceInternal());
 	}
 
-	private float[] createNormalisedVariance()
+	private float[] getNormalisedVarianceInternal()
 	{
 		if (var_g2 == null)
 		{
-			int size = variance.length;
-			var_g2 = new float[size];
-			for (int i = 0; i < size; i++)
-			{
-				var_g2[i] = variance[i] / (gain[i] * gain[i]);
-			}
+			createNormalisedVariance();
 		}
 		return var_g2;
+	}
+
+	private synchronized void createNormalisedVariance()
+	{
+		int size = variance.length;
+		var_g2 = new float[size];
+		for (int i = 0; i < size; i++)
+		{
+			var_g2[i] = variance[i] / (gain[i] * gain[i]);
+		}
 	}
 
 	/**
