@@ -1524,7 +1524,7 @@ public class PSFCreator implements PlugInFilter
 			if (interactiveMode)
 			{
 				// This assumes the LVM does not need the calibration
-				PeakFit.configureFitSolver(config, null, 0);
+				PeakFit.configureFitSolver(config, 0, 0, 0);
 			}
 		}
 

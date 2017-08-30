@@ -68,6 +68,9 @@ public abstract class ImageSource
 
 	/**
 	 * Gets the x origin of the image frame. This may be non-zero to specify a crop of an image frame.
+	 * <p>
+	 * Note that the origin is ignored by the method {@link #next(Rectangle)} and {@link #get(int, Rectangle)} as these
+	 * use a rectangle relative to the image source origin.
 	 *
 	 * @return the x origin
 	 */
@@ -75,9 +78,12 @@ public abstract class ImageSource
 	{
 		return xOrigin;
 	}
-	
+
 	/**
 	 * Gets the y origin of the image frame. This may be non-zero to specify a crop of an image frame.
+	 * <p>
+	 * Note that the origin is ignored by the method {@link #next(Rectangle)} and {@link #get(int, Rectangle)} as these
+	 * use a rectangle relative to the image source origin.
 	 *
 	 * @return the y origin
 	 */
@@ -85,7 +91,7 @@ public abstract class ImageSource
 	{
 		return yOrigin;
 	}
-	
+
 	/**
 	 * Get the width of the image frame. The frame returned by {@link #next()} will be equal to width * height.
 	 * 
@@ -175,7 +181,8 @@ public abstract class ImageSource
 	 * <p>
 	 * Provides serial access to the data after a successful call to {@link #openSource()}
 	 * <p>
-	 * Note: bounds.x + bounds.width must be less or equal to than {@link #getWidth()}, similarly for height.
+	 * Note: The bounds are relative to the image source origin so that bounds.x + bounds.width must be less or equal to
+	 * than {@link #getWidth()}, similarly for height.
 	 * 
 	 * @param bounds
 	 *            The bounding limits of the frame to extract
@@ -223,7 +230,8 @@ public abstract class ImageSource
 	 * Provides random access to the data after a successful call to {@link #openSource()}. This operation may be
 	 * significantly slower than using {@link #next()} to read all the data.
 	 * <p>
-	 * Note: bounds.x + bounds.width must be less or equal to than {@link #getWidth()}, similarly for height.
+	 * Note: The bounds are relative to the image source origin so that bounds.x + bounds.width must be less or equal to
+	 * than {@link #getWidth()}, similarly for height.
 	 * 
 	 * @param frame
 	 * @param bounds

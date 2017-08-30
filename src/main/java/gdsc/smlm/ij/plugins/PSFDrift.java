@@ -479,7 +479,7 @@ public class PSFDrift implements PlugIn
 		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
 				SettingsManager.readCalibration(0), PSFProtosHelper.defaultOneAxisGaussian2DPSF);
 		config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
-		if (!PeakFit.configureFitSolver(config, imp.getProcessor().getRoi(), PeakFit.FLAG_NO_SAVE))
+		if (!PeakFit.configureFitSolver(config, imp.getWidth(), imp.getHeight(), PeakFit.FLAG_NO_SAVE))
 			return;
 		fitConfig = config.getFitConfiguration();
 

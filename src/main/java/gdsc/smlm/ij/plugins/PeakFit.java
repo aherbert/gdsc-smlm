@@ -31,6 +31,7 @@ import gdsc.core.ij.SeriesOpener;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.BitFlags;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
@@ -537,11 +538,22 @@ public class PeakFit implements PlugInFilter, ItemListener
 			// No region so no need to ignore the bounds.
 			this.ignoreBoundsForNoise = false;
 		}
+
 		this.bounds = bounds;
 		results = new PeakResultsList();
 
 		time = 0;
 		//config = null;
+
+		// The bounds must fit in the image
+		try
+		{
+			imageSource.checkBounds(bounds);
+		}
+		catch (RuntimeException e)
+		{
+			return false;
+		}
 
 		return true;
 	}
@@ -1819,7 +1831,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Second dialog for solver dependent parameters
 		if (!maximaIdentification)
 		{
-			if (!configureFitSolver(config, bounds, flags))
+			if (!configureFitSolver(config, source.getWidth(), source.getHeight(), flags))
 				return false;
 		}
 
@@ -2065,13 +2077,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 *
 	 * @param config
 	 *            the config
-	 * @param bounds
-	 *            the source image bounds (used to validate the camera model dimensions)
+	 * @param width
+	 *            the source image width (used to validate the camera model dimensions)
+	 * @param height
+	 *            the source image height (used to validate the camera model dimensions)
 	 * @param flags
 	 *            the flags
 	 * @return True if the configuration succeeded
 	 */
-	public static boolean configureFitSolver(FitEngineConfiguration config, Rectangle bounds, int flags)
+	public static boolean configureFitSolver(FitEngineConfiguration config, int width, int height, int flags)
 	{
 		boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
 		boolean ignoreCalibration = BitFlags.anySet(flags, FLAG_IGNORE_CALIBRATION);
@@ -2284,7 +2298,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (calibration.isSCMOS())
 			{
 				fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
-				if (!checkCameraModel(fitConfig, bounds, false))
+				if (!checkCameraModel(fitConfig, width, height, null, false))
 					return false;
 			}
 
@@ -2342,7 +2356,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 	}
 
-	private static boolean checkCameraModel(FitConfiguration fitConfig, Rectangle bounds, boolean initialise)
+	private static boolean checkCameraModel(FitConfiguration fitConfig, int width, int height, Rectangle bounds,
+			boolean initialise)
 	{
 		if (fitConfig.getCalibrationWriter().isSCMOS() && bounds != null)
 		{
@@ -2353,54 +2368,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 						"No camera model for camera type: " + fitConfig.getCalibrationWriter().getCameraType());
 			}
 
-			// Check the camera model supports the target bounds
-			Rectangle modelBounds = cameraModel.getBounds();
-			if (!modelBounds.contains(bounds))
-			{
-				//@formatter:off
-				throw new IllegalStateException(String.format(
-						"Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
-						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
-						bounds.x, bounds.y, bounds.width, bounds.height 
-						));
-				//@formatter:on
-			}
-
-			
-			// TODO - Fix support for fitting a sCMOS image that has been cropped to
-			// part of the sensor (i.e. a subset of the camera model)
-			
-			// Q. How to determine if the input source is from a crop of the sensor. 
-			// Perhaps the input dialog should just ask for the origin x and origin y
-			// if it is a sCMOS image. This can then be passed through the system as the bounds.
-			
-			// Q. What are the bounds used for. By the image extractor. So these are relative to the input source.
-			// We need to store global origin separately in the fitting configuration.
-			
-			if (true)
-				throw new IllegalStateException("Camera model does not match image bounds");
-			
-			// Warn if the model bounds are bigger than the image as this may be an incorrect
-			// selection for the camera model
-			if (modelBounds.width > bounds.width || modelBounds.height > bounds.height)
-			{
-				GenericDialog gd = new GenericDialog(TITLE);
-				//@formatter:off
-				gd.addMessage(String.format(
-						"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image image target bounds\n[x=%d,y=%d,width=%d,height=%d].\n \nThis is probably an incorrect camera model.\n \nDo you wish to continue?",
-						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
-						bounds.x, bounds.y, bounds.width, bounds.height 
-						));
-				//@formatter:on
-				gd.enableYesNoCancel();
-				gd.hideCancelButton();
-				gd.showDialog();
-				if (!gd.wasOKed())
-					return false;
-			}
+			cameraModel = cropCameraModel(cameraModel, width, height, 0, 0, true);
 
 			// Crop for efficiency
-			cameraModel = cameraModel.crop(bounds);
+			if (bounds != null)
+				cameraModel = cameraModel.crop(bounds, false);
+
 			if (initialise && cameraModel instanceof PerPixelCameraModel)
 			{
 				((PerPixelCameraModel) cameraModel).initialise();
@@ -2408,6 +2381,80 @@ public class PeakFit implements PlugInFilter, ItemListener
 			fitConfig.setCameraModel(cameraModel);
 		}
 		return true;
+	}
+
+	/**
+	 * Crop a camera model for processing data from an image frame of the given width and height. The camera model
+	 * bounds will be checked to verify that the image fits within the model. If the model is larger then a crop will be
+	 * made using a dialog to select the crop. Optionally the model origin is set to 0,0.
+	 * <p>
+	 * This method can be used to prepare a camera model for processing images frames of width x height.
+	 *
+	 * @param cameraModel
+	 *            the camera model
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
+	 * @param ox
+	 *            the suggestion for the crop origin x
+	 * @param oy
+	 *            the suggestion for the crop origin x
+	 * @param resetOrigin
+	 *            the reset origin
+	 * @return the camera model
+	 * @throws IllegalArgumentException
+	 *             If the model is null or the crop cannot be done
+	 */
+	public static CameraModel cropCameraModel(CameraModel cameraModel, int width, int height, int ox, int oy,
+			boolean resetOrigin) throws IllegalArgumentException
+	{
+		if (cameraModel == null)
+		{
+			throw new IllegalStateException("No camera model");
+		}
+		Rectangle modelBounds = cameraModel.getBounds();
+		if (modelBounds == null || width == 0 || height == 0)
+			return cameraModel;
+		if (modelBounds.width < width || modelBounds.height < height)
+		{
+			throw new IllegalArgumentException(String.format(
+					"Camera model bounds [x=%d,y=%d,width=%d,height=%d] is smaller than image size [%dx%d]",
+					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, width, height));
+		}
+		else if (modelBounds.width > width || modelBounds.height > height)
+		{
+			GenericDialog gd2 = new GenericDialog("Crop Camera Model");
+			//@formatter:off
+			gd2.addMessage(String.format(
+					"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image size [%dx%d].\n \nCrop the model?",
+					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
+					width, height
+					));
+			//@formatter:on
+			int upperx = modelBounds.x + modelBounds.width - width;
+			int uppery = modelBounds.y + modelBounds.height - height;
+			gd2.addSlider("Origin_x", modelBounds.x, upperx, Maths.clip(modelBounds.x, upperx, ox));
+			gd2.addSlider("Origin_y", modelBounds.y, uppery, Maths.clip(modelBounds.y, uppery, oy));
+			gd2.showDialog();
+			if (gd2.wasCanceled())
+				throw new IllegalArgumentException("Unknown camera model crop");
+			ox = (int) gd2.getNextNumber();
+			oy = (int) gd2.getNextNumber();
+
+			Rectangle bounds = new Rectangle(ox, oy, width, height);
+			cameraModel = cameraModel.crop(bounds, resetOrigin); // Reset origin for fast filtering
+			modelBounds = cameraModel.getBounds();
+			if (modelBounds.width != bounds.width || modelBounds.height != bounds.height)
+				throw new IllegalArgumentException("Failed to crop camera model using bounds: " + bounds);
+		}
+		else if (resetOrigin && (modelBounds.x != 0 || modelBounds.y != 0))
+		{
+			// Reset origin for fast filtering
+			cameraModel = cameraModel.copy();
+			cameraModel.setOrigin(0, 0);
+		}
+		return cameraModel;
 	}
 
 	/**
@@ -2840,7 +2887,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		config.configureOutputUnits();
 
-		if (!checkCameraModel(fitConfig, bounds, true))
+		if (!checkCameraModel(fitConfig, source.getWidth(), source.getHeight(), bounds, true))
 			return false;
 
 		return true;

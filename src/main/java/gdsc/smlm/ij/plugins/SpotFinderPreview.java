@@ -295,7 +295,7 @@ public class SpotFinderPreview
 	{
 		if (refreshing)
 			return;
-		
+
 		currentSlice = imp.getCurrentSlice();
 
 		Rectangle bounds = ip.getRoi();
@@ -327,6 +327,14 @@ public class SpotFinderPreview
 		}
 		Utils.log(filter.getDescription());
 
+		// Note: 
+		// Do not support origin selection when there is a width/height mismatch 
+		// as this will break the live preview with multiple pop-ups. Origin 
+		// could be added to the input dialog.
+		//cameraModel = PeakFit.cropCameraModel(cameraModel, ip.getWidth(), ip.getHeight(), 0, 0, true);		
+
+		// Instead just warn if the roi cannot be extracted from the selected model 
+		// or there is a mismatch
 		Rectangle modelBounds = cameraModel.getBounds();
 		if (modelBounds != null)
 		{
@@ -340,12 +348,13 @@ public class SpotFinderPreview
 			//@formatter:on
 			}
 			else
-			// Warn if the model bounds are bigger than the image as this may be an incorrect
+			// Warn if the model bounds are mismatched than the image as this may be an incorrect
 			// selection for the camera model
-			if (modelBounds.width > ip.getWidth() || modelBounds.height > ip.getHeight())
+			if (modelBounds.x != 0 || modelBounds.y != 0 || modelBounds.width > ip.getWidth() ||
+					modelBounds.height > ip.getHeight())
 			{
 			//@formatter:off
-			Utils.log("WARNING: Camera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image image target bounds\n[width=%d,height=%d].\n \nThis is probably an incorrect camera model.",
+			Utils.log("WARNING: Camera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare mismatched from the image image target bounds\n[width=%d,height=%d].\n \nThis is probably an incorrect camera model.",
 					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
 					ip.getWidth(),  ip.getHeight()
 					);
@@ -360,7 +369,7 @@ public class SpotFinderPreview
 	{
 		if (refreshing)
 			return;
-		
+
 		Rectangle bounds = ip.getRoi();
 
 		// Crop to the ROI

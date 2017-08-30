@@ -1214,7 +1214,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitConfig.setBias(simulationParameters.bias);
 			fitConfig.setCameraType(simulationParameters.cameraType);
 		}
-		if (!PeakFit.configureFitSolver(config, imp.getProcessor().getRoi(), (extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
+		if (!PeakFit.configureFitSolver(config, imp.getWidth(), imp.getHeight(),
+				(extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
 			return false;
 
 		return true;

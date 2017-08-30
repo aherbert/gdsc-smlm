@@ -297,7 +297,7 @@ public class Configuration implements PlugIn, ItemListener
 			return;
 		if (!PeakFit.configureDataFilter(config, flags))
 			return;
-		PeakFit.configureFitSolver(config, null, flags);
+		PeakFit.configureFitSolver(config, 0, 0, flags);
 
 		if (saveToFile)
 		{

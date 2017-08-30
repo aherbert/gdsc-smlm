@@ -1014,7 +1014,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// Read noise is in electrons. Convert to Photons
 			double readNoise = settings.getReadNoise() / getQuantumEfficiency();
-			
+
 			// If an EM-CCD camera the read noise (in Counts) is swamped by amplification of the signal. 
 			// We get the same result by dividing the read noise (in photons) by the EM-gain.
 			if (settings.getCameraType() == CameraType.EMCCD && settings.getEmGain() > 1)
@@ -2547,11 +2547,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// estimated by the Peak Fit plugin. This noise therefore IGNORES THE SHOT NOISE of the 
 					// fluorophore SIGNAL.
 					// *-*-*-*-*
-					
+
 					// (EM-)CCD camera:
 					// 
-					
-					
+
 					// The variance of the background image is currently in photons^2 
 					double backgroundVariance = localStats[1];
 
@@ -2561,7 +2560,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					// Get the actual read noise applied to this part of the image. This is in electrons^2.
 					double readVariance = localStats[3];
-					
+
 					// EM-gain noise factor: Adds sqrt(2) to the electrons input to the register.
 					// All data 'read' through the EM-register must have this additional noise factor added.
 					if (emGain != 0)
@@ -2579,7 +2578,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						// backgroundVariance + readVariance * cameraGain^2 / (emGain * cameraGain)^2
 						// backgroundVariance + readVariance * cameraGain^2 / (emGain * cameraGain)^2
 						// backgroundVariance + readVariance / emGain^2
-						
+
 						readVariance /= Maths.pow2(emGain);
 					}
 
@@ -4291,7 +4290,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (modelBounds.width < size || modelBounds.height < size)
 			{
 				throw new IllegalArgumentException(String.format(
-						"Camera model bounds [x=%d,y=%d,width=%d,height=%d] is smaller than simulation size [%d]",
+						"Camera model bounds [x=%d,y=%d,width=%d,height=%d] are smaller than simulation size [%d]",
 						modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, size));
 			}
 
@@ -4308,8 +4307,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				gd.addCheckbox("Random_crop", settings.getRandomCrop());
 				int upperx = modelBounds.x + modelBounds.width - size;
 				int uppery = modelBounds.y + modelBounds.height - size;
-				gd.addSlider("Origin_x", modelBounds.x, upperx, Maths.clip(modelBounds.x, upperx, settings.getOriginX()));
-				gd.addSlider("Origin_y", modelBounds.y, uppery, Maths.clip(modelBounds.y, uppery, settings.getOriginY()));
+				gd.addSlider("Origin_x", modelBounds.x, upperx,
+						Maths.clip(modelBounds.x, upperx, settings.getOriginX()));
+				gd.addSlider("Origin_y", modelBounds.y, uppery,
+						Maths.clip(modelBounds.y, uppery, settings.getOriginY()));
 				gd.showDialog();
 				if (gd.wasCanceled())
 					throw new IllegalArgumentException("Unknown camera model crop");
@@ -4331,7 +4332,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					oy = settings.getOriginY();
 				}
 				Rectangle bounds = new Rectangle(ox, oy, size, size);
-				cameraModel = cameraModel.crop(bounds);
+				cameraModel = cameraModel.crop(bounds, false);
 				modelBounds = cameraModel.getBounds();
 				if (modelBounds.width != size || modelBounds.height != size)
 					throw new IllegalArgumentException("Failed to crop camera model to bounds: " + bounds);
@@ -5586,52 +5587,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					IJ.error(TITLE, "Unknown camera model for name: " + cal.getCameraModelName());
 					return null;
 				}
-				// Ensure we can crop the camera model to the results bounds, 
-				// i.e. we can get a per-pixel noise model for the image.
+				int ox = 0, oy = 0;
+				if (lastCameraBounds != null)
+				{
+					ox = lastCameraBounds.x;
+					oy = lastCameraBounds.y;
+				}
+				cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(), ox, oy, false);
 				modelBounds = cameraModel.getBounds();
-				if (modelBounds.width < imp.getWidth() || modelBounds.height < imp.getHeight())
-				{
-					throw new IllegalArgumentException(String.format(
-							"Camera model bounds [x=%d,y=%d,width=%d,height=%d] is smaller than simulation size [%dx%d]",
-							modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, imp.getWidth(),
-							imp.getHeight()));
-				}
 
-				if (modelBounds.width > imp.getWidth() || modelBounds.height > imp.getHeight())
-				{
-					GenericDialog gd2 = new GenericDialog(TITLE);
-					//@formatter:off
-					gd2.addMessage(String.format(
-							"WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the simulation size [%dx%d].\n \nCrop the model?",
-							modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
-							imp.getWidth(), imp.getHeight()
-							));
-					//@formatter:on
-					int upperx = modelBounds.x + modelBounds.width - imp.getWidth();
-					int uppery = modelBounds.y + modelBounds.height - imp.getHeight();
-					int ox = 0, oy=0;
-					if (lastCameraBounds!=null)
-					{
-						ox = lastCameraBounds.x;
-						oy = lastCameraBounds.y;
-					}
-					gd2.addSlider("Origin_x", modelBounds.x, upperx, Maths.clip(modelBounds.x, upperx, ox));
-					gd2.addSlider("Origin_y", modelBounds.y, uppery, Maths.clip(modelBounds.y, uppery, oy));
-					gd2.showDialog();
-					if (gd2.wasCanceled())
-						throw new IllegalArgumentException("Unknown camera model crop");
-					ox = (int) gd2.getNextNumber();
-					oy = (int) gd2.getNextNumber();
-					
-					Rectangle bounds = new Rectangle(ox, oy, imp.getWidth(), imp.getHeight());
-					cameraModel = cameraModel.crop(bounds);
-					modelBounds = cameraModel.getBounds();
-					if (modelBounds.width != bounds.width || modelBounds.height != bounds.height)
-						throw new IllegalArgumentException("Failed to crop camera model to bounds: " + bounds);
-					
-					IJImageSource imageSource = (IJImageSource) results.getSource();
-					imageSource.setOrigin(ox, oy);
-				}
+				IJImageSource imageSource = (IJImageSource) results.getSource();
+				imageSource.setOrigin(modelBounds.x, modelBounds.y);
 
 				cal.clearGlobalCameraSettings();
 			}
