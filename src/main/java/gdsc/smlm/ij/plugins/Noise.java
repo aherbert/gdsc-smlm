@@ -63,7 +63,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	private static int ox = 0, oy = 0;
 	private CalibrationWriter calibration;
 	private CameraModel cameraModel;
-	
+
 	private static final String Y_AXIS_COUNT = "Noise (counts)";
 	private static final String Y_AXIS_PHOTON = "Noise (photons)";
 	private String yAxisTitle;
@@ -269,25 +269,34 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		}
 
 		String title = imp.getTitle() + " Noise";
-		Plot2 plot = new Plot2(title, "Slice", yAxisTitle, xValues, yValues1);
+		Plot2 plot = new Plot2(title, "Slice", yAxisTitle);
 		double range = b1[1] - b1[0];
 		if (range == 0)
 			range = 1;
 		plot.setLimits(a[0], a[1], b1[0] - 0.05 * range, b1[1] + 0.05 * range);
 		plot.setColor(Color.blue);
-		plot.draw();
-		String label = String.format("Blue = %s", Utils.rounded(new Statistics(yValues1).getMean()));
+		plot.addPoints(xValues, yValues1, Plot2.LINE);
+		//plot.draw();
+		String label = String.format("%s (Blue) = %s", trim(method1.getName()),
+				Utils.rounded(new Statistics(yValues1).getMean()));
 		if (twoMethods)
 		{
 			plot.setColor(Color.red);
 			plot.addPoints(xValues, yValues2, Plot2.LINE);
-			label += String.format(", Red = %s", Utils.rounded(new Statistics(yValues2).getMean()));
+			label += String.format(", %s (Red) = %s", trim(method2.getName()),
+					Utils.rounded(new Statistics(yValues2).getMean()));
 		}
+		plot.setColor(Color.black);
 		plot.addLabel(0, 0, label);
 
 		Utils.display(title, plot);
 
 		IJ.showStatus("");
+	}
+
+	private Object trim(String name)
+	{
+		return (name.length() > 20) ? name.substring(0, 20) + "..." : name;
 	}
 
 	/*
