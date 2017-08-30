@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationProtos.CameraModelResource;
@@ -22,6 +23,8 @@ import ij.gui.GenericDialog;
 import ij.io.FileSaver;
 import ij.measure.Calibration;
 import ij.plugin.PlugIn;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
 
 /**
  * This plugin handle the save and load of per-pixel camera models
@@ -142,7 +145,7 @@ public class CameraModelManager implements PlugIn
 		// Try and load the resource
 		ImagePlus imp = IJ.openImage(filename);
 		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
-		
+
 		if (imp == null)
 		{
 			Utils.log("Failed to load camera model %s data from file: ", name, filename);
@@ -222,7 +225,7 @@ public class CameraModelManager implements PlugIn
 
 	//@formatter:off
 	private static String[] OPTIONS = { 
-			"Print model details", 
+			"Print all model details", 
 			"View a camera model", 
 			"Load a camera model",
 			"Load from directory",
@@ -289,13 +292,13 @@ public class CameraModelManager implements PlugIn
 			IJ.log("Failed to find camera data for model: " + name);
 			return;
 		}
-		
+
 		settings.removeCameraModelResources(name);
 		SettingsManager.writeSettings(settings.build());
-		
+
 		Utils.log("Deleted camera model: %s\n%s", name, resource);
 	}
-	
+
 	private void loadFromDirectory()
 	{
 		ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
@@ -314,7 +317,7 @@ public class CameraModelManager implements PlugIn
 				return pathname.isFile();
 			}
 		});
-		
+
 		for (File file : fileList)
 		{
 			loadFromFileAndSaveResource(file.getPath());
@@ -331,7 +334,7 @@ public class CameraModelManager implements PlugIn
 			return;
 
 		filename = egd.getNextString();
-		
+
 		loadFromFileAndSaveResource(filename);
 	}
 
@@ -372,7 +375,23 @@ public class CameraModelManager implements PlugIn
 			return;
 		}
 		Utils.log("Camera model: %s\n%s", name, resource);
+		ImageStack stack = imp.getImageStack();
+		for (int n = 1; n <= stack.getSize(); n++)
+			logStats(stack.getSliceLabel(n), stack.getProcessor(n));
 		imp.show();
+	}
+
+	private void logStats(String name, ImageProcessor ip)
+	{
+		Statistics stats = new Statistics();
+		if (ip instanceof FloatProcessor)
+			stats.add((float[]) ip.getPixels());
+		else
+		{
+			for (int i = ip.getPixelCount(); i-- > 0;)
+				stats.add(ip.getf(i));
+		}
+		Utils.log("%s : %s += %s", name, Utils.rounded(stats.getMean()), Utils.rounded(stats.getStandardDeviation()));
 	}
 
 	private void printCameraModels()
