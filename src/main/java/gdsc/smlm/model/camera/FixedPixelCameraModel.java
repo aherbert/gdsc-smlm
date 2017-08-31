@@ -44,6 +44,19 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 *            the bias (in counts)
 	 * @param gain
 	 *            the gain (count/photon)
+	 */
+	public FixedPixelCameraModel(double bias, double gain)
+	{
+		this((float) bias, (float) gain, 0);
+	}
+
+	/**
+	 * Instantiates a new fixed pixel camera model.
+	 *
+	 * @param bias
+	 *            the bias (in counts)
+	 * @param gain
+	 *            the gain (count/photon)
 	 * @param variance
 	 *            the variance (in counts)
 	 */
