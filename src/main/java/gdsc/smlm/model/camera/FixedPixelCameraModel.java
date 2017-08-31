@@ -47,7 +47,7 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 */
 	public FixedPixelCameraModel(double bias, double gain)
 	{
-		this((float) bias, (float) gain, 0);
+		this(bias, gain, 0);
 	}
 
 	/**
@@ -69,6 +69,31 @@ public class FixedPixelCameraModel extends BaseCameraModel
 		this.gain = gain;
 		this.variance = variance;
 		this.var_g2 = variance / (gain * gain);
+	}
+
+	/**
+	 * Instantiates a new fixed pixel camera model.
+	 *
+	 * @param bias
+	 *            the bias (in counts)
+	 * @param gain
+	 *            the gain (count/photon)
+	 * @param variance
+	 *            the variance (in counts)
+	 */
+	public FixedPixelCameraModel(double bias, double gain, double variance)
+	{
+		// Re-implement the constructor (rather than chaining)
+		// to take advantage of double precision computation of var_g2.
+		
+		// Cast to float then check
+		this.bias = (float) bias;
+		checkBias(this.bias);
+		this.gain = (float) gain;
+		checkGain(this.gain);
+		this.variance = (float) variance;
+		checkVariance(this.variance);
+		this.var_g2 = (float) (variance / (gain * gain));
 	}
 
 	/*
