@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
+import java.awt.Label;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1059,9 +1060,12 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Set-up the converters
 		try
 		{
-			if (results.getCalibration() == null ||
-					results.getCalibrationReader().getDistanceUnit() != DistanceUnit.PIXEL)
+			if (results.getCalibration() == null)
+				throw new ConfigurationException("Require calibrated results");
+			if (results.getCalibrationReader().getDistanceUnit() != DistanceUnit.PIXEL)
 				throw new ConfigurationException("Require results in pixel distance units");
+			if (results.getCalibrationReader().getIntensityUnit() != IntensityUnit.PHOTON)
+				throw new ConfigurationException("Require results in photon units");
 
 			int flags = Gaussian2DPeakResultHelper.AMPLITUDE;
 			calculator = Gaussian2DPeakResultHelper.create(results.getPSF(), results.getCalibration(), flags);
@@ -1468,6 +1472,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (extraOptions)
 			gd.addCheckbox("Debug", sDebug);
 
+		Utils.rearrangeColumns(gd, 8);
+
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -1718,7 +1724,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			// To allow the signal factor to be computed we need to lower the image by the background so 
 			// that the intensities correspond to the results amplitude.
 			// Just assume the background is uniform.
-			StandardResultProcedure s = new StandardResultProcedure(results, IntensityUnit.COUNT);
+			StandardResultProcedure s = new StandardResultProcedure(results, IntensityUnit.PHOTON);
 			s.getBIXY();
 			background = (float) (Maths.sum(s.background) / results.size());
 		}

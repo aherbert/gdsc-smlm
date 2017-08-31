@@ -21,6 +21,7 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
+import gdsc.smlm.results.procedures.BResultProcedure;
 import gdsc.smlm.results.procedures.HResultProcedure;
 import gdsc.smlm.results.procedures.IResultProcedure;
 import gdsc.smlm.results.procedures.IXYRResultProcedure;
@@ -1279,6 +1280,34 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			return;
 		final PeakResult r = getf(0);
 		procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getZPosition());
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(IntensityUnit intensityUnit, BResultProcedure procedure)
+			throws ConversionException, ConfigurationException
+	{
+		if (!hasCalibration())
+			throw new ConfigurationException("No calibration");
+
+		TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			procedure.executeB(ic.convert(getf(i).getBackground()));
+		}
 	}
 
 	/**
