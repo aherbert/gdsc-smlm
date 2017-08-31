@@ -24,6 +24,7 @@ import gdsc.smlm.results.PeakResult;
  */
 //@formatter:off
 public class StandardResultProcedure extends UnitResultProcedure implements 
+		BResultProcedure, 
         BIXYResultProcedure, 
         BIXYZResultProcedure, 
         IResultProcedure, 
@@ -123,6 +124,24 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	public StandardResultProcedure(MemoryPeakResults results)
 	{
 		super(results);
+	}
+
+	/**
+	 * Gets the B data in the configured units.
+	 * 
+	 * @throws DataException
+	 *             if conversion to the required units is not possible
+	 */
+	public void getB() throws DataException
+	{
+		i = 0;
+		allocateB();
+		results.forEach(getIntensityUnit(), (BResultProcedure) this);
+	}
+
+	public void executeB(float background)
+	{
+		this.background[i++] = background;
 	}
 
 	/**
