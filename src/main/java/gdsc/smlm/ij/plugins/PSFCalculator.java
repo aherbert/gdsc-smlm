@@ -262,9 +262,15 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * sa^2 = s^2 + a^2/12.
 	 * </pre>
 	 * 
+	 * This is relevant if using a single Gaussian evaluated at the centre of the pixel (0.5,0.5) to represent the value
+	 * over the entire pixel. If using a complete Gaussian function using the integral of the error function (erf) then
+	 * this is not needed.
+	 * 
 	 * @param s
+	 *            Gaussian standard deviation
 	 * @param a
-	 * @return sa
+	 *            The pixel size
+	 * @return sa The adjusted standard deviation
 	 */
 	public static double squarePixelAdjustment(double s, final double a)
 	{
