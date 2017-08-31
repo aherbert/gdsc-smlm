@@ -635,6 +635,96 @@ public class PerPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(float[])
+	 */
+	public void removeBias(float[] data)
+	{
+		if (data == null)
+			return;
+		if (data.length != bias.length)
+			throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+		for (int i = 0; i < data.length; i++)
+			data[i] -= bias[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(float[])
+	 */
+	public void removeGain(float[] data)
+	{
+		if (data == null)
+			return;
+		if (data.length != gain.length)
+			throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+		for (int i = 0; i < data.length; i++)
+			data[i] /= gain[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(float[])
+	 */
+	public void removeBiasAndGain(float[] data)
+	{
+		if (data == null)
+			return;
+		if (data.length != bias.length)
+			throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+		for (int i = 0; i < data.length; i++)
+			data[i] = (data[i] - bias[i]) / gain[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(float[])
+	 */
+	public void applyBias(float[] data)
+	{
+		if (data == null)
+			return;
+		if (data.length != bias.length)
+			throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+		for (int i = 0; i < data.length; i++)
+			data[i] += bias[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(float[])
+	 */
+	public void applyGain(float[] data)
+	{
+		if (data == null)
+			return;
+		if (data.length != gain.length)
+			throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+		for (int i = 0; i < data.length; i++)
+			data[i] *= gain[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(float[])
+	 */
+	public void applyGainAndBias(float[] data)
+	{
+		if (data == null)
+			return;
+		if (data.length != bias.length)
+			throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+		for (int i = 0; i < data.length; i++)
+			data[i] = data[i] * gain[i] + bias[i];
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle, boolean)
 	 */
 	public CameraModel crop(Rectangle bounds, boolean resetOrigin)

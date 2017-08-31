@@ -327,10 +327,9 @@ public class CameraModelManager implements PlugIn
 		// Filter all the frames
 		ImageSource source = new IJImageSource(imp);
 		ImageStack stack = new ImageStack(imp.getWidth(), imp.getHeight());
-		Rectangle bounds = cameraModel.getBounds();
 		for (float[] data = source.next(); data != null; data = source.next())
 		{
-			cameraModel.removeBiasAndGain(bounds, data);
+			cameraModel.removeBiasAndGain(data);
 			stack.addSlice(null, data);
 		}
 

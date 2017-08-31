@@ -16,8 +16,8 @@ import java.awt.Rectangle;
  *---------------------------------------------------------------------------*/
 
 /**
- * Define the methods for manipulating camera pixel data
- * 
+ * Define the methods for manipulating camera pixel data.
+ *
  * @author Alex Herbert
  */
 public interface CameraModel
@@ -176,6 +176,60 @@ public interface CameraModel
 	 *            the data
 	 */
 	public void applyGainAndBias(Rectangle bounds, float[] data);
+
+	/**
+	 * Remove the per-pixel camera bias (offset) from the crop of the camera data. The data length is expected to
+	 * match the camera bounds.
+	 *
+	 * @param data
+	 *            the data
+	 */
+	public void removeBias(float[] data);
+
+	/**
+	 * Remove the per-pixel gain from the crop of the camera data. The data length is expected to
+	 * match the camera bounds.
+	 *
+	 * @param data
+	 *            the data
+	 */
+	public void removeGain(float[] data);
+
+	/**
+	 * Remove the per-pixel camera bias (offset) and gain from the crop of the camera data. The data length is expected to
+	 * match the camera bounds.
+	 *
+	 * @param data
+	 *            the data
+	 */
+	public void removeBiasAndGain(float[] data);
+
+	/**
+	 * Apply the per-pixel camera bias (offset) to the crop of the camera data. The data length is expected to
+	 * match the camera bounds.
+	 *
+	 * @param data
+	 *            the data
+	 */
+	public void applyBias(float[] data);
+
+	/**
+	 * Apply the per-pixel gain to the crop of the camera data. The data length is expected to
+	 * match the camera bounds.
+	 *
+	 * @param data
+	 *            the data
+	 */
+	public void applyGain(float[] data);
+
+	/**
+	 * Apply the per-pixel gain and camera bias (offset) to the crop of the camera data. The data length is expected to
+	 * match the camera bounds.
+	 *
+	 * @param data
+	 *            the data
+	 */
+	public void applyGainAndBias(float[] data);
 
 	/**
 	 * Copy this camera model. This is a deep copy of any structures.

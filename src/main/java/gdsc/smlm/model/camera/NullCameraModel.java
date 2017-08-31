@@ -40,8 +40,10 @@ public class NullCameraModel extends BaseCameraModel
 	public void setOrigin(int x, int y)
 	{
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle, boolean)
 	 */
 	public CameraModel crop(Rectangle bounds, boolean resetOrigin)
@@ -160,6 +162,60 @@ public class NullCameraModel extends BaseCameraModel
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(java.awt.Rectangle, float[])
 	 */
 	public void applyGainAndBias(Rectangle bounds, float[] data)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(float[])
+	 */
+	public void removeBias(float[] data)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(float[])
+	 */
+	public void removeGain(float[] data)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndGain(float[])
+	 */
+	public void removeBiasAndGain(float[] data)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(float[])
+	 */
+	public void applyBias(float[] data)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(float[])
+	 */
+	public void applyGain(float[] data)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(float[])
+	 */
+	public void applyGainAndBias(float[] data)
 	{
 	}
 

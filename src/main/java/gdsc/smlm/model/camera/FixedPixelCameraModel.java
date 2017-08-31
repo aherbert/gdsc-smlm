@@ -85,7 +85,7 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	{
 		// Re-implement the constructor (rather than chaining)
 		// to take advantage of double precision computation of var_g2.
-		
+
 		// Cast to float then check
 		this.bias = (float) bias;
 		checkBias(this.bias);
@@ -192,6 +192,66 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	 */
 	public void removeBias(Rectangle bounds, float[] data)
 	{
+		removeBias(data);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(java.awt.Rectangle, float[])
+	 */
+	public void removeGain(Rectangle bounds, float[] data)
+	{
+		removeGain(data);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(java.awt.Rectangle, float[])
+	 */
+	public void removeBiasAndGain(Rectangle bounds, float[] data)
+	{
+		removeBiasAndGain(data);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(java.awt.Rectangle, float[])
+	 */
+	public void applyBias(Rectangle bounds, float[] data)
+	{
+		applyBias(data);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(java.awt.Rectangle, float[])
+	 */
+	public void applyGain(Rectangle bounds, float[] data)
+	{
+		applyGain(data);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(java.awt.Rectangle, float[])
+	 */
+	public void applyGainAndBias(Rectangle bounds, float[] data)
+	{
+		applyGainAndBias(data);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(float[])
+	 */
+	public void removeBias(float[] data)
+	{
 		if (data == null)
 			return;
 		for (int i = 0; i < data.length; i++)
@@ -201,9 +261,9 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(java.awt.Rectangle, float[])
+	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(float[])
 	 */
-	public void removeGain(Rectangle bounds, float[] data)
+	public void removeGain(float[] data)
 	{
 		if (data == null)
 			return;
@@ -214,9 +274,9 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(java.awt.Rectangle, float[])
+	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(float[])
 	 */
-	public void removeBiasAndGain(Rectangle bounds, float[] data)
+	public void removeBiasAndGain(float[] data)
 	{
 		if (data == null)
 			return;
@@ -227,9 +287,9 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(java.awt.Rectangle, float[])
+	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(float[])
 	 */
-	public void applyBias(Rectangle bounds, float[] data)
+	public void applyBias(float[] data)
 	{
 		if (data == null)
 			return;
@@ -240,9 +300,9 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(java.awt.Rectangle, float[])
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(float[])
 	 */
-	public void applyGain(Rectangle bounds, float[] data)
+	public void applyGain(float[] data)
 	{
 		if (data == null)
 			return;
@@ -253,9 +313,9 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(java.awt.Rectangle, float[])
+	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(float[])
 	 */
-	public void applyGainAndBias(Rectangle bounds, float[] data)
+	public void applyGainAndBias(float[] data)
 	{
 		if (data == null)
 			return;
