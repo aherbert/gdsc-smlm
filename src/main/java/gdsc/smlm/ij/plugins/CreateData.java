@@ -82,7 +82,6 @@ import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
-import gdsc.smlm.ij.plugins.CreateData.SimulationParameters;
 import gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -5690,5 +5689,29 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			default:
 				throw new ConfigurationException("Unknown camera model");
 		}
+	}
+
+	public static StringBuilder addCameraDescription(StringBuilder sb, BaseParameters parameters)
+			throws ConfigurationException
+	{
+		if (parameters.cameraType == CameraType.SCMOS)
+		{
+			sb.append("sCMOS (").append(parameters.cameraModelName).append(") ");
+			Rectangle bounds = parameters.cameraBounds;
+			sb.append(" ").append(bounds.x).append(",").append(bounds.y);
+			sb.append(" ").append(bounds.width).append("x").append(bounds.height);
+		}
+		else if (CalibrationProtosHelper.isCCDCameraType(parameters.cameraType))
+		{
+			sb.append(CalibrationProtosHelper.getName(parameters.cameraType));
+			sb.append(" G=").append(parameters.gain);
+			sb.append(" RN=").append(parameters.readNoise);
+			sb.append(" B=").append(parameters.bias);
+		}
+		else
+		{
+			throw new IllegalStateException();
+		}
+		return sb;
 	}
 }
