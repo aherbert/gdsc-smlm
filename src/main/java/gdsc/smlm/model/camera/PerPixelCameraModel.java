@@ -459,12 +459,15 @@ public class PerPixelCameraModel extends BaseCameraModel
 		if (equal(bounds))
 			return new Rectangle(getWidth(), getHeight()); // Offset to the origin
 		checkBounds(bounds);
-		// We avoid over/underflow since we have checked the bounds are positive integers
+		// We avoid underflow since we have checked the bounds are positive integers
 		int minx = bounds.x - cameraBounds.x;
 		int miny = bounds.y - cameraBounds.y;
-		int maxx = minx + bounds.width;
-		int maxy = miny + bounds.height;
-		if (minx < 0 || miny < 0 || maxx > cameraBounds.width || maxy > cameraBounds.height)
+		if (minx < 0 || miny < 0)
+			throw new IllegalArgumentException("Bounds must be within the camera bounds");
+		// Avoid overflow using a long result
+		long maxx = (long) minx + bounds.width;
+		long maxy = (long) miny + bounds.height;
+		if (maxx > cameraBounds.width || maxy > cameraBounds.height)
 			throw new IllegalArgumentException("Bounds must be within the camera bounds");
 		return new Rectangle(minx, miny, bounds.width, bounds.height);
 
