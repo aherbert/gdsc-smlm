@@ -61,6 +61,7 @@ import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.CreateDataSettingsHelper;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
@@ -81,6 +82,7 @@ import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
+import gdsc.smlm.ij.plugins.CreateData.SimulationParameters;
 import gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -3239,7 +3241,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.getCameraType() == CameraType.SCMOS)
 		{
 			sb.append("sCMOS (").append(settings.getCameraModelName()).append(") ");
-			Rectangle bounds = cameraModel.getBounds();			
+			Rectangle bounds = cameraModel.getBounds();
 			sb.append(" ").append(bounds.x).append(",").append(bounds.y);
 			int size = settings.getSize();
 			sb.append(" ").append(size).append("x").append(size);
@@ -5648,5 +5650,45 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		benchmarkAuto = gd.getNextBoolean();
 
 		return true;
+	}
+
+	/**
+	 * Gets the camera model for processing frames from the simulation image. The model will have bounds that match the
+	 * simulation image dimensions.
+	 *
+	 * @param parameters
+	 *            the parameters
+	 * @return the camera model
+	 * @throws ConfigurationException
+	 *             If the model cannot be created
+	 */
+	public static CameraModel getCameraModel(BaseParameters parameters) throws ConfigurationException
+	{
+		// Create the camera model
+		switch (parameters.cameraType)
+		{
+			case CCD:
+			case EMCCD:
+				return new FixedPixelCameraModel(parameters.bias, parameters.gain);
+
+			case SCMOS:
+				CameraModel cameraModel = CameraModelManager.load(parameters.cameraModelName);
+				if (cameraModel == null)
+					throw new ConfigurationException("Unknown camera model for name: " + parameters.cameraModelName);
+				try
+				{
+					cameraModel = cameraModel.crop(parameters.cameraBounds, true);
+				}
+				catch (IllegalArgumentException e)
+				{
+					throw new ConfigurationException(e);
+				}
+				return cameraModel;
+
+			case UNRECOGNIZED:
+			case CAMERA_TYPE_NA:
+			default:
+				throw new ConfigurationException("Unknown camera model");
+		}
 	}
 }
