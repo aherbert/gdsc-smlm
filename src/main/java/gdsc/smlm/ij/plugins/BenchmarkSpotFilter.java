@@ -1,7 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
-import java.awt.Label;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,8 +29,6 @@ import gdsc.core.utils.Settings;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.smlm.data.config.ConfigurationException;
-import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -48,6 +45,8 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
@@ -58,6 +57,7 @@ import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -160,6 +160,10 @@ public class BenchmarkSpotFilter implements PlugIn
 	private ImagePlus imp;
 	private MemoryPeakResults results;
 	private Gaussian2DPeakResultCalculator calculator;
+	private CameraModel cameraModel;
+	private float[] weights;
+	private float background = Float.NaN;
+	private Rectangle bounds;
 	private CreateData.SimulationParameters simulationParameters;
 
 	private static TIntObjectHashMap<PSFSpot[]> actualCoordinates = null;
@@ -603,6 +607,12 @@ public class BenchmarkSpotFilter implements PlugIn
 			this.spotFilter = spotFilter.clone();
 			this.results = new TIntObjectHashMap<FilterResult>();
 			this.background = background;
+
+			// Do not assume that cloning will preserve the weights
+			if (cameraModel.isPerPixelModel() && spotFilter.isWeighted())
+			{
+				this.spotFilter.setWeights(weights, bounds.width, bounds.height);
+			}
 		}
 
 		/*
@@ -658,6 +668,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			//}
 			//background = 0;
 
+			cameraModel.removeBiasAndGain(data);
+
 			long start = System.nanoTime();
 			Spot[] spots = spotFilter.rank(data, stack.getWidth(), stack.getHeight());
 			time += System.nanoTime() - start;
@@ -705,7 +717,8 @@ public class BenchmarkSpotFilter implements PlugIn
 				for (int i = 0; i < spots.length; i++)
 				{
 					final Spot s = spots[i];
-					spotsWeight[i] = getWeight(s.x, s.y, analysisBorder, xlimit, ylimit, weighting);
+					// Add half-pixel offset
+					spotsWeight[i] = getWeight(s.x + 0.5f, s.y + 0.5f, analysisBorder, xlimit, ylimit, weighting);
 					spotsLength += spotsWeight[i];
 				}
 
@@ -798,6 +811,9 @@ public class BenchmarkSpotFilter implements PlugIn
 								s *= signalScore.score(sf);
 							}
 							s = RampedScore.flatten(s, 256);
+
+							if (s == 0)
+								continue;
 
 							double distance = 1 - s;
 							if (distance == 0)
@@ -1057,7 +1073,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			return;
 		}
 
-		// Set-up the converters
+		// Set-up for the simulation
 		try
 		{
 			if (results.getCalibration() == null)
@@ -1069,6 +1085,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			int flags = Gaussian2DPeakResultHelper.AMPLITUDE;
 			calculator = Gaussian2DPeakResultHelper.create(results.getPSF(), results.getCalibration(), flags);
+
+			cameraModel = CreateData.getCameraModel(simulationParameters);
 		}
 		catch (ConfigurationException e)
 		{
@@ -1444,7 +1462,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
 					config.getDataFilterMethod(0).ordinal());
 
-			gd.addCheckbox("Filter_relative_distances (to HWHM)", config.getDataFilterAbsolute(0));
+			gd.addCheckbox("Filter_relative_distances (to HWHM)", !config.getDataFilterAbsolute(0));
 			gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 			gd.addSlider("Search_width", 1, 4, search);
 		}
@@ -1718,15 +1736,26 @@ public class BenchmarkSpotFilter implements PlugIn
 			IJ.showStatus("Computing results ...");
 		final ImageStack stack = imp.getImageStack();
 
-		float background = 0;
 		if (spotFilter.isAbsoluteIntensity())
 		{
-			// To allow the signal factor to be computed we need to lower the image by the background so 
-			// that the intensities correspond to the results amplitude.
-			// Just assume the background is uniform.
-			StandardResultProcedure s = new StandardResultProcedure(results, IntensityUnit.PHOTON);
-			s.getBIXY();
-			background = (float) (Maths.sum(s.background) / results.size());
+			if (Float.isNaN(background))
+			{
+				// To allow the signal factor to be computed we need to lower the image by the background so 
+				// that the intensities correspond to the results amplitude.
+				// Just assume the simulation background is uniform.
+				StandardResultProcedure s = new StandardResultProcedure(results, IntensityUnit.PHOTON);
+				s.getB();
+				background = (float) (Maths.sum(s.background) / results.size());
+			}
+		}
+		// This assumes that cloning the filter will clone the weights
+		if (cameraModel.isPerPixelModel() && spotFilter.isWeighted())
+		{
+			if (weights == null)
+			{
+				bounds = cameraModel.getBounds();
+				weights = cameraModel.getWeights(bounds);
+			}
 		}
 
 		// Create a pool of workers
@@ -1953,8 +1982,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(simulationParameters.a)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.depth)).append('\t');
 		sb.append(simulationParameters.fixedDepth).append('\t');
-		sb.append(Utils.rounded(simulationParameters.gain)).append('\t');
-		sb.append(Utils.rounded(simulationParameters.readNoise)).append('\t');
+
+		// Camera specific
+		CreateData.addCameraDescription(sb, simulationParameters).append('\t');
+
 		sb.append(Utils.rounded(simulationParameters.b)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.noise)).append('\t');
 
@@ -2060,6 +2091,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		if (fractionIndex == r.length)
 			fractionIndex--;
+		sb.append('\t');
 		addResult(sb, new FractionClassificationResult(truePositives[fractionIndex], falsePositives[fractionIndex], 0,
 				n - truePositives[fractionIndex]), c[fractionIndex]);
 
@@ -2070,6 +2102,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (j[maxIndex] < j[ii])
 				maxIndex = ii;
 		}
+		sb.append('\t');
 		addResult(sb, new FractionClassificationResult(truePositives[maxIndex], falsePositives[maxIndex], 0,
 				n - truePositives[maxIndex]), c[maxIndex]);
 
@@ -2354,13 +2387,15 @@ public class BenchmarkSpotFilter implements PlugIn
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tNoise (photons)\tSNR\ts (px)\t");
+				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tCamera\tB (photons)\tNoise (photons)\tSNR\ts (px)\t");
 		sb.append(
 				"Type\tSearch\tBorder\tWidth\tFilter\tAbs.Param\tRel.Param\tDescription\tA.Border\tMatching\tlower d\td\tlower sf\tsf");
 		tablePrefix = sb.toString();
 		sb.append("\tSlope\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
+		sb.append("@FractionRecall\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
+		sb.append("@MaxJ\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
 		sb.append("Time (ms)\t");
 		sb.append("AUC\tAUC2\t");
