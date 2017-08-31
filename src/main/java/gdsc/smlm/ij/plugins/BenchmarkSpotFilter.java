@@ -680,8 +680,6 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// We do not remove results at the border from analysis.
 			// We can just mark them to contribute less to the score.
-			// TODO - Create a Tukey window weighting from the border to the edge.
-			// The type of weighting could be user configurable, e.g. Hard, Tukey, Linear, etc.
 			final double[] actualWeight = new double[actual.length];
 			final double[] spotsWeight = new double[spots.length];
 			double actualLength = actual.length;
@@ -693,28 +691,24 @@ public class BenchmarkSpotFilter implements PlugIn
 				final int analysisBorder = lastAnalysisBorder.x;
 				final int xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
 				final int ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
+				// Create a Tukey window weighting from the border to the edge.
+				// The type of weighting could be user configurable, e.g. Hard, Tukey, Linear, etc.
+				RampedScore weighting = new RampedScore(0, analysisBorder);
 				for (int i = 0; i < actual.length; i++)
 				{
 					final PSFSpot c = actual[i];
-					actualWeight[i] = 1;
-					if (c.getX() < analysisBorder || c.getX() > xlimit || c.getY() < analysisBorder ||
-							c.getY() > ylimit)
-						// TODO - better weighting
-						actualWeight[i] = 0;
+					actualWeight[i] = getWeight(c.getX(), c.getY(), analysisBorder, xlimit, ylimit, weighting);
 					actualLength += actualWeight[i];
 				}
 
 				for (int i = 0; i < spots.length; i++)
 				{
 					final Spot s = spots[i];
-					spotsWeight[i] = 1;
-					if (s.x < analysisBorder || s.x > xlimit || s.y < analysisBorder || s.y > ylimit)
-						// TODO - better weighting
-						spotsWeight[i] = 0;
+					spotsWeight[i] = getWeight(s.x, s.y, analysisBorder, xlimit, ylimit, weighting);
 					spotsLength += spotsWeight[i];
 				}
 
-				// TODO - option for hard border to match the old scoring.
+				// option for hard border to match the old scoring.
 				// Create smaller arrays using only those with a weighting of 1.
 				if (hardBorder)
 				{
@@ -988,6 +982,21 @@ public class BenchmarkSpotFilter implements PlugIn
 			results.put(frame, new FilterResult(frame, calc, result, scoredSpots, actual, actualAssignment));
 		}
 
+		private double getWeight(float x, float y, int analysisBorder, int xlimit, int ylimit, RampedScore weighting)
+		{
+			// Distance outside the border
+			double dx = 0, dy = 0;
+			if (x < analysisBorder)
+				dx = analysisBorder - x;
+			else if (x > xlimit)
+				dx = x - xlimit;
+			if (y < analysisBorder)
+				dy = analysisBorder - y;
+			else if (y > ylimit)
+				dy = y - ylimit;
+			return (dx == 0 && dy == 0) ? 1 : weighting.score(dx) * weighting.score(dy);
+		}
+
 		private double getIntensity(final PSFSpot p)
 		{
 			// Use the amplitude as all spot filters currently estimate the height, not the total signal
@@ -1009,7 +1018,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			public SpotCoordinate(int id, Spot spot)
 			{
-				// Centre ion the middle of the pixel
+				// Centre on the middle of the pixel
 				super(spot.x + 0.5f, spot.y + 0.5f);
 				this.spot = spot;
 			}
