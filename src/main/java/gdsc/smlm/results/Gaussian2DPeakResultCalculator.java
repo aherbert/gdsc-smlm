@@ -38,6 +38,16 @@ public interface Gaussian2DPeakResultCalculator
 	public float getAmplitude(float[] params);
 
 	/**
+	 * Get the height of the central pixel of a Gaussian 2D PSF. The integral of the pixel containing the
+	 * centre of the Gaussian is computed.
+	 *
+	 * @param params
+	 *            the params
+	 * @return the pixel amplitude
+	 */
+	public float getPixelAmplitude(float[] params);
+
+	/**
 	 * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D PSF. This is
 	 * an approximation of the precision of fitting to an optical PSF. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.

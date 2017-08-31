@@ -18,6 +18,7 @@ import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.function.Erf;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -40,6 +41,7 @@ public class Gaussian2DPeakResultHelper
 	private static class BaseGaussian2DPeakResultCalculator implements Gaussian2DPeakResultCalculator
 	{
 		final static double twoPi = 2 * Math.PI;
+		final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
 
 		final CalibrationReader calibration;
 		final int isx, isy;
@@ -111,6 +113,55 @@ public class Gaussian2DPeakResultHelper
 
 			return (float) (params[PeakResult.INTENSITY] /
 					(twoPi * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
+		}
+
+		public float getPixelAmplitude(float[] params) throws ConfigurationException
+		{
+			// Try to create the converter
+			if (toPixel == null)
+			{
+				if (calibration == null)
+					throw new ConfigurationException("No calibration");
+				toPixel = calibration.getDistanceConverter(DistanceUnit.PIXEL);
+			}
+
+			return getPixelAmplitudeImpl(params);
+		}
+
+		protected float getPixelAmplitudeImpl(float[] params)
+		{
+			// Get the Gaussian parameters in pixels
+			double x = toPixel.convert(params[PeakResult.X]);
+			double y = toPixel.convert(params[PeakResult.Y]);
+			double sx = toPixel.convert(params[isx]);
+			double sy = toPixel.convert(params[isy]);
+
+			return (float) (params[PeakResult.INTENSITY] * 0.25 * gaussianPixelIntegral(x, sx) *
+					gaussianPixelIntegral(y, sy));
+		}
+
+		/**
+		 * Compute the integral of the pixel using the error function
+		 *
+		 * @param x
+		 *            the x
+		 * @param s
+		 *            the s
+		 * @return the double
+		 */
+		double gaussianPixelIntegral(double x, double s)
+		{
+			// Find the pixel boundary. Assume 0.5 is the centre of the pixel, we round down 
+			// to find the distance to the lower pixel boundary (lx):
+			// lx = x - l = x - floor(x)
+			//
+			// l          x             u
+			// | <- lx -> |  <- ux ->   |
+			//
+			// We compute the integral over the pixel from the lower (l) to the upper (u).
+			// erf(-lx, ux)
+			double lx = Math.floor(x) - x; // Reversed for convenience, i.e. compute -lx
+			return Erf.erf(lx * (ONE_OVER_ROOT2 / s), (lx + 1) * (ONE_OVER_ROOT2 / s));
 		}
 
 		private static boolean isCCD(CalibrationReader calibration)
@@ -279,6 +330,11 @@ public class Gaussian2DPeakResultHelper
 					(twoPi * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
 		}
 
+		public float getPixelAmplitude(float[] params) throws ConfigurationException
+		{
+			return getPixelAmplitudeImpl(params);
+		}
+
 		@Override
 		public double getLSEPrecision(float[] params, float noise) throws ConfigurationException
 		{
@@ -386,6 +442,8 @@ public class Gaussian2DPeakResultHelper
 	public static final int MLE_PRECISION = 0x00000008;
 	/** Flag for the {@link Gaussian2DPeakResultCalculator#getMLEPrecision(float[])} function. */
 	public static final int MLE_PRECISION_X = 0x00000010;
+	/** Flag for the {@link Gaussian2DPeakResultCalculator#getPixelAmplitude(float[])} function. */
+	public static final int PIXEL_AMPLITUDE = 0x00000020;
 
 	/** Dummy Gaussian 2D parameters */
 	private static final float[] PARAMS = new float[7];
@@ -450,6 +508,8 @@ public class Gaussian2DPeakResultHelper
 			helper.getMLEPrecision(PARAMS, 0);
 		if (BitFlags.anySet(flags, MLE_PRECISION_X))
 			helper.getMLEPrecision(PARAMS);
+		if (BitFlags.anySet(flags, PIXEL_AMPLITUDE))
+			helper.getPixelAmplitude(PARAMS);
 
 		// Get a fast implementation
 		return (helper.oneAxisSD) ? new OneAxisFastGaussian2DPeakResultCalculator(helper)

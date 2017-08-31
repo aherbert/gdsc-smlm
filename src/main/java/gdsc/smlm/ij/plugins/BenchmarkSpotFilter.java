@@ -493,8 +493,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			for (int i = 0; i < actual.length; i++)
 			{
 				sa[i] = PSFCalculator.squarePixelAdjustment(
-						calculator.getStandardDeviation(actual[i].peakResult.getParameters()) * simulationParameters.a,
-						simulationParameters.a) / simulationParameters.a;
+						calculator.getStandardDeviation(actual[i].peakResult.getParameters()), 1);
 				sa2[i] = 2 * sa[i];
 			}
 
@@ -574,7 +573,12 @@ public class BenchmarkSpotFilter implements PlugIn
 				for (Coordinate c : list1)
 				{
 					PeakResultPoint p = (PeakResultPoint) c;
-					list2[i++] = new PSFSpot(p.getTime(), p.getX(), p.getY(), p.peakResult);
+					PSFSpot spot = new PSFSpot(p.getTime(), p.getX(), p.getY(), p.peakResult);
+					list2[i++] = spot;
+
+					// Compute the amplitude.
+					float[] params = spot.peakResult.getParameters();
+					spot.amplitude = calculator.getPixelAmplitude(params);
 				}
 				return list2;
 			}
@@ -1017,8 +1021,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		private double getIntensity(final PSFSpot p)
 		{
 			// Use the amplitude as all spot filters currently estimate the height, not the total signal
-			final double intensity = calculator.getAmplitude(p.peakResult.getParameters());
-			return intensity;
+			//final double intensity = calculator.getAmplitude(p.peakResult.getParameters());
+			//return intensity;
+			return p.amplitude;
 		}
 
 		private SpotCoordinate[] getCoordinates(Spot[] spots)
@@ -1083,7 +1088,9 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (results.getCalibrationReader().getIntensityUnit() != IntensityUnit.PHOTON)
 				throw new ConfigurationException("Require results in photon units");
 
-			int flags = Gaussian2DPeakResultHelper.AMPLITUDE;
+			// This plugin is heavily reliant on the results being represented as a 
+			// Gaussian2D function.
+			int flags = Gaussian2DPeakResultHelper.AMPLITUDE | Gaussian2DPeakResultHelper.PIXEL_AMPLITUDE;
 			calculator = Gaussian2DPeakResultHelper.create(results.getPSF(), results.getCalibration(), flags);
 
 			cameraModel = CreateData.getCameraModel(simulationParameters);
@@ -1726,6 +1733,16 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 			threads.clear();
 
+			// For testing
+			SimpleRegression regression = new SimpleRegression(false);
+			for (PSFSpot[] spots : actualCoordinates.valueCollection())
+			{
+				for (PSFSpot spot : spots)
+					regression.addData(spot.amplitude, calculator.getAmplitude(spot.peakResult.getParameters()));
+			}
+			System.out.printf("Amplitude vs PixelAmplitude = %f, slope=%f, n=%d\n", regression.getR(),
+					regression.getSlope(), regression.getN());
+			
 			IJ.showProgress(-1);
 			IJ.showStatus("");
 

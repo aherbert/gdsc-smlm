@@ -34,6 +34,9 @@ public class PSFSpot extends BasePoint
 	 * higher is this spot due to other PSFs.
 	 */
 	public float backgroundOffset = 0;
+	
+	/** The amplitude. */
+	public double amplitude = 0;
 
 	public PSFSpot(int t, float x, float y, PeakResult peakResult)
 	{
