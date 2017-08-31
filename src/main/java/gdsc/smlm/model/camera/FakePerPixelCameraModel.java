@@ -50,6 +50,34 @@ public class FakePerPixelCameraModel extends FixedPixelCameraModel
 		super(bias, gain, variance);
 	}
 
+	/**
+	 * Instantiates a new fake per pixel camera model.
+	 *
+	 * @param bias
+	 *            the bias (in counts)
+	 * @param gain
+	 *            the gain (count/photon)
+	 */
+	public FakePerPixelCameraModel(double bias, double gain)
+	{
+		super(bias, gain);
+	}
+
+	/**
+	 * Instantiates a new fake per pixel camera model.
+	 *
+	 * @param bias
+	 *            the bias (in counts)
+	 * @param gain
+	 *            the gain (count/photon)
+	 * @param variance
+	 *            the variance (in counts)
+	 */
+	public FakePerPixelCameraModel(double bias, double gain, double variance)
+	{
+		super(bias, gain, variance);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

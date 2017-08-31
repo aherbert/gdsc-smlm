@@ -157,8 +157,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		{
 			case CCD:
 			case EMCCD:
-				cameraModel = new FixedPixelCameraModel((float) calibration.getBias(),
-						(float) calibration.getCountPerPhoton());
+				cameraModel = new FixedPixelCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
 				break;
 			case SCMOS:
 				cameraModel = CameraModelManager.load(calibration.getCameraModelName());
