@@ -28,6 +28,7 @@ import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.ConfigurationException;
 
 /*----------------------------------------------------------------------------- 
@@ -97,6 +98,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static double minSearch = 1;
 	private static double maxSearch = 1;
 	private static double border = 1;
+	private static boolean useCached = true;
 	private static boolean[] batchPlot;
 	private static String[] batchPlotNames;
 	private static String[] SELECTION;
@@ -220,11 +222,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		public DataFilterMethod dataFilter;
 		public double param;
 		public double search;
-		public double differenceParam;
-		public double differenceSmooth;
+		public double param2;
+		public double param2relative;
 
 		public BatchResult(BenchmarkFilterResult filterResult, DataFilterMethod dataFilter, double param, double search,
-				double differenceParam)
+				double param2)
 		{
 			if (filterResult != null)
 			{
@@ -237,11 +239,13 @@ public class BenchmarkSpotFilter implements PlugIn
 			this.dataFilter = dataFilter;
 			this.param = param;
 			this.search = search;
-			if (differenceParam > 0)
+			if (param2 > 0)
 			{
-				this.differenceParam = differenceParam;
-				// Store difference smoothing as the original relative param for convenience in getName()
-				this.differenceSmooth = BenchmarkSpotFilter.differenceSmooth;
+				this.param2 = param2;
+				// Store difference smoothing parameter as the original relative 
+				// param for convenience in getName(). Note we can do this because 
+				// currently it is not variable across filters.
+				this.param2relative = BenchmarkSpotFilter.differenceSmooth;
 			}
 		}
 
@@ -282,10 +286,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		public String getName()
 		{
-			if (differenceParam > 0)
-				return String.format("Difference (%s) %s:%s", differenceSmooth, dataFilter.toString(),
+			if (param2 > 0)
+				return String.format("Difference %s (@%s):%s", dataFilter.toString(), param2relative,
 						Utils.rounded(search));
-			return String.format("%s:%s", dataFilter.toString(), Utils.rounded(search));
+			return String.format("Single %s:%s", dataFilter.toString(), Utils.rounded(search));
 		}
 	}
 
@@ -1154,10 +1158,10 @@ public class BenchmarkSpotFilter implements PlugIn
 					(mParam.length + gParam.length + cParam.length + medParam.length), "Frame");
 
 			ArrayList<BatchResult[]> batchResults = new ArrayList<BatchResult[]>(cachedBatchResults.size());
-			double differenceParam = 0;
+			double param2 = 0;
 			if (differenceFilter && differenceSmooth > 0)
 			{
-				differenceParam = Maths.round(differenceSmooth * config.getHWHMMin(), 0.001);
+				param2 = Maths.round(differenceSmooth * config.getHWHMMin(), 0.001);
 				config.setDataFilterType(DataFilterType.DIFFERENCE);
 			}
 			else
@@ -1170,13 +1174,13 @@ public class BenchmarkSpotFilter implements PlugIn
 				// Allow re-use of these if they are cached to allow quick reanalysis of results.
 				config.setSearch(search);
 				if (batchMean)
-					batchResults.add(addToCache(DataFilterMethod.MEAN, mParam, search, differenceParam));
+					batchResults.add(addToCache(DataFilterMethod.MEAN, mParam, search, param2));
 				if (batchGaussian)
-					batchResults.add(addToCache(DataFilterMethod.GAUSSIAN, gParam, search, differenceParam));
+					batchResults.add(addToCache(DataFilterMethod.GAUSSIAN, gParam, search, param2));
 				if (batchCircular)
-					batchResults.add(addToCache(DataFilterMethod.CIRCULAR_MEAN, cParam, search, differenceParam));
+					batchResults.add(addToCache(DataFilterMethod.CIRCULAR_MEAN, cParam, search, param2));
 				if (batchMean)
-					batchResults.add(addToCache(DataFilterMethod.MEDIAN, medParam, search, differenceParam));
+					batchResults.add(addToCache(DataFilterMethod.MEDIAN, medParam, search, param2));
 			}
 
 			IJ.showProgress(-1);
@@ -1186,6 +1190,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// Analysis options
 			GenericDialog gd = new GenericDialog(TITLE);
+			boolean haveCached = cachedBatchResults.size() > batchResults.size();
+			if (haveCached)
+				gd.addCheckbox("Use_cached_results", useCached);
+
 			gd.addMessage("Choose performance plots:");
 			for (int i = 0; i < batchPlot.length; i++)
 				gd.addCheckbox(batchPlotNames[i], batchPlot[i]);
@@ -1202,6 +1210,12 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (gd.wasCanceled())
 				return;
 
+			if (haveCached)
+			{
+				useCached = gd.getNextBoolean();
+				if (useCached)
+					batchResults = cachedBatchResults;
+			}
 			for (int i = 0; i < batchPlot.length; i++)
 				batchPlot[i] = gd.getNextBoolean();
 			selection = gd.getNextChoiceIndex();
@@ -1252,18 +1266,19 @@ public class BenchmarkSpotFilter implements PlugIn
 		windowOrganiser.tile();
 	}
 
-	private BatchResult[] addToCache(DataFilterMethod dataFilter, double[] param, double search, double differenceParam)
+	private BatchResult[] addToCache(DataFilterMethod dataFilter, double[] param, double search, double param2)
 	{
 		for (BatchResult[] batchResult : cachedBatchResults)
 		{
 			if (batchResult == null || batchResult.length == 0)
 				continue;
 			if (batchResult[0].dataFilter == dataFilter && batchResult[0].search == search &&
-					batchResult[0].differenceParam == differenceParam)
+					batchResult[0].param2 == param2)
 				return batchResult;
 		}
-		BatchResult[] batchResult = run(dataFilter, param, search, differenceParam);
-		cachedBatchResults.add(batchResult);
+		BatchResult[] batchResult = run(dataFilter, param, search, param2);
+		if (batchResult != null)
+			cachedBatchResults.add(batchResult);
 		return batchResult;
 	}
 
@@ -1317,37 +1332,30 @@ public class BenchmarkSpotFilter implements PlugIn
 		double[][] stats = getStats(batchResults);
 
 		double max = 0;
-		DataFilterMethod dataFilter = null;
-		double search = 0;
-		double param = 0;
+		BatchResult best = null;
 		for (BatchResult[] batchResult : batchResults)
 		{
 			if (batchResult == null || batchResult.length == 0)
 				continue;
-			double[][] data = extractData(batchResult, selection, stats);
+			double[] data = extractData(batchResult, selection, stats);
 			int maxi = 0;
-			for (int i = 0; i < batchResult.length; i++)
+			for (int i = 1; i < batchResult.length; i++)
 			{
-				if (data[1][maxi] < data[1][i])
+				if (data[maxi] < data[i])
 					maxi = i;
 			}
-			if (max < data[1][maxi])
+			if (max < data[maxi])
 			{
-				max = data[1][maxi];
-				dataFilter = batchResult[0].dataFilter;
-				search = batchResult[0].search;
-				param = data[0][maxi];
+				max = data[maxi];
+				best = batchResult[maxi];
 			}
 		}
 
-		if (dataFilter != null)
+		if (best != null)
 		{
-			// Convert the absolute distance to be relative to the PSF width
-			param = Maths.round(param / config.getHWHMMin(), 0.001);
-
 			final double hwhmMax = config.getHWHMMax();
 			// Convert absolute search distance to relative
-			config.setSearch(Maths.round(search / hwhmMax, 0.001));
+			config.setSearch(Maths.round(best.search / hwhmMax, 0.001));
 
 			if (filterRelativeDistances)
 			{
@@ -1360,8 +1368,22 @@ public class BenchmarkSpotFilter implements PlugIn
 				config.setBorder(Maths.round(border / hwhmMax, 0.001));
 			}
 
+			// Convert the absolute distance to be relative to the PSF width
+			double param = Maths.round(best.param / config.getHWHMMin(), 0.001);
+			config.setDataFilter(best.dataFilter, param, false, 0);
+
+			// Support difference filters second parameter
+			if (best.param2relative > 0)
+			{
+				config.setDataFilterType(DataFilterType.DIFFERENCE);
+				config.setDataFilter(best.dataFilter, best.param2relative, false, 1);
+			}
+			else
+			{
+				config.setDataFilterType(DataFilterType.SINGLE);
+			}
+
 			// Run the filter using relative distances
-			config.setDataFilter(dataFilter, param, false, 0);
 			BenchmarkFilterResult result = run(config, true, true);
 			getTable(true).flush();
 			return result;
@@ -1394,13 +1416,12 @@ public class BenchmarkSpotFilter implements PlugIn
 		return stats;
 	}
 
-	private double[][] extractData(BatchResult[] batchResult, int index, double[][] stats)
+	private double[] extractData(BatchResult[] batchResult, int index, double[][] stats)
 	{
-		double[][] data = new double[2][batchResult.length];
+		double[] data = new double[batchResult.length];
 		for (int i = 0; i < batchResult.length; i++)
 		{
-			data[0][i] = batchResult[i].param;
-			data[1][i] = getScore(batchResult[i], index, stats);
+			data[i] = getScore(batchResult[i], index, stats);
 		}
 		return data;
 	}
@@ -1442,30 +1463,37 @@ public class BenchmarkSpotFilter implements PlugIn
 		return param;
 	}
 
-	private BatchResult[] run(DataFilterMethod dataFilter, double[] param, double search, double differenceParam)
+	private BatchResult[] run(DataFilterMethod dataFilter, double[] param, double search, double param2)
 	{
-		progressPrefix = new BatchResult(null, dataFilter, 0, search, differenceParam).getName();
-		BatchResult[] result = new BatchResult[param.length];
+		progressPrefix = new BatchResult(null, dataFilter, 0, search, param2).getName();
+		TurboList<BatchResult> result = new TurboList<BatchResult>();
 
 		config.setSearch(search);
 
 		// For difference filters
-		if (differenceParam > 0)
+		if (param2 > 0)
 		{
 			// Note: Add a dummy first param so we can set the second param
-			config.setDataFilter(dataFilter, differenceParam, false, 0);
-			config.setDataFilter(dataFilter, differenceParam, false, 1);
+			config.setDataFilter(dataFilter, param2, false, 0);
+			config.setDataFilter(dataFilter, param2, false, 1);
 		}
 
 		for (int i = 0; i < param.length; i++)
 		{
 			config.setDataFilter(dataFilter, param[i], false, 0);
-			BenchmarkFilterResult filterResult = run(config, false);
-			if (filterResult == null)
-				return null;
-			result[i] = new BatchResult(filterResult, dataFilter, param[i], search, differenceParam);
+			try
+			{
+				BenchmarkFilterResult filterResult = run(config, false);
+				if (filterResult != null)
+					result.add(new BatchResult(filterResult, dataFilter, param[i], search, param2));
+			}
+			catch (IllegalArgumentException e)
+			{
+				// This can occur during batch processing when the param2 argument is smaller than param 
+				break;
+			}
 		}
-		return result;
+		return result.toArray(new BatchResult[result.size()]);
 	}
 
 	private boolean showDialog()
@@ -1497,7 +1525,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			// using only one distance
 			gd.addMessage("Difference filter settings:");
 			gd.addCheckbox("Difference_filter", differenceFilter);
-			gd.addSlider("Difference_smoothing", 1, 4, differenceSmooth);
+			gd.addSlider("Difference_smoothing", 1.5, 5, differenceSmooth);
 			gd.addMessage("Local maxima search settings:");
 			gd.addSlider("Min_search_width", 1, 4, minSearch);
 			gd.addSlider("Max_search_width", 1, 4, maxSearch);
@@ -1717,6 +1745,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			return null;
 
 		MaximaSpotFilter spotFilter = config.createSpotFilter(relativeDistances);
+		//System.out.println(spotFilter.getDescription());
 
 		// Extract all the results in memory into a list per frame. This can be cached
 		if (lastId != simulationParameters.id) // || lastRelativeDistances != relativeDistances)
@@ -2070,13 +2099,13 @@ public class BenchmarkSpotFilter implements PlugIn
 		final double hwhmMin = config.getHWHMMin();
 		if (relativeDistances)
 		{
-			sb.append(Utils.rounded(param * hwhmMin)).append('\t');
+			sb.append(Utils.rounded(Maths.round(param * hwhmMin, 0.001))).append('\t');
 			sb.append(Utils.rounded(param)).append('\t');
 		}
 		else
 		{
 			sb.append(Utils.rounded(param)).append('\t');
-			sb.append(Utils.rounded(param / hwhmMin)).append('\t');
+			sb.append(Utils.rounded(Maths.round(param / hwhmMin, 0.001))).append('\t');
 		}
 		sb.append(spotFilter.getDescription()).append('\t');
 		sb.append(lastAnalysisBorder.x).append('\t');
