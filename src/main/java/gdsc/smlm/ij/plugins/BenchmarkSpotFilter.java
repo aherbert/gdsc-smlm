@@ -45,6 +45,8 @@ import gdsc.smlm.data.config.ConfigurationException;
 
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
+import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitConfiguration;
@@ -90,6 +92,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
 	private static double search = 1;
+	private static boolean differenceFilter = false;
+	private static double differenceSmooth = 3;
 	private static double minSearch = 1;
 	private static double maxSearch = 1;
 	private static double border = 1;
@@ -162,7 +166,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private Gaussian2DPeakResultCalculator calculator;
 	private CameraModel cameraModel;
 	private float[] weights;
-	private float background = Float.NaN;
+	private float resultsBackground = Float.NaN;
 	private Rectangle bounds;
 	private CreateData.SimulationParameters simulationParameters;
 
@@ -216,8 +220,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		public DataFilterMethod dataFilter;
 		public double param;
 		public double search;
+		public double differenceParam;
+		public double differenceSmooth;
 
-		public BatchResult(BenchmarkFilterResult filterResult, DataFilterMethod dataFilter, double param, double search)
+		public BatchResult(BenchmarkFilterResult filterResult, DataFilterMethod dataFilter, double param, double search,
+				double differenceParam)
 		{
 			if (filterResult != null)
 			{
@@ -230,6 +237,12 @@ public class BenchmarkSpotFilter implements PlugIn
 			this.dataFilter = dataFilter;
 			this.param = param;
 			this.search = search;
+			if (differenceParam > 0)
+			{
+				this.differenceParam = differenceParam;
+				// Store difference smoothing as the original relative param for convenience in getName()
+				this.differenceSmooth = BenchmarkSpotFilter.differenceSmooth;
+			}
 		}
 
 		public double getScore(int i)
@@ -269,6 +282,9 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		public String getName()
 		{
+			if (differenceParam > 0)
+				return String.format("Difference (%s) %s:%s", differenceSmooth, dataFilter.toString(),
+						Utils.rounded(search));
 			return String.format("%s:%s", dataFilter.toString(), Utils.rounded(search));
 		}
 	}
@@ -1138,20 +1154,29 @@ public class BenchmarkSpotFilter implements PlugIn
 					(mParam.length + gParam.length + cParam.length + medParam.length), "Frame");
 
 			ArrayList<BatchResult[]> batchResults = new ArrayList<BatchResult[]>(cachedBatchResults.size());
-			config.setDataFilterType(DataFilterType.SINGLE);
+			double differenceParam = 0;
+			if (differenceFilter && differenceSmooth > 0)
+			{
+				differenceParam = Maths.round(differenceSmooth * config.getHWHMMin(), 0.001);
+				config.setDataFilterType(DataFilterType.DIFFERENCE);
+			}
+			else
+			{
+				config.setDataFilterType(DataFilterType.SINGLE);
+			}
 			for (double search : searchParam)
 			{
 				// Run all, store the results for plotting.
 				// Allow re-use of these if they are cached to allow quick reanalysis of results.
 				config.setSearch(search);
 				if (batchMean)
-					batchResults.add(addToCache(DataFilterMethod.MEAN, mParam, search));
+					batchResults.add(addToCache(DataFilterMethod.MEAN, mParam, search, differenceParam));
 				if (batchGaussian)
-					batchResults.add(addToCache(DataFilterMethod.GAUSSIAN, gParam, search));
+					batchResults.add(addToCache(DataFilterMethod.GAUSSIAN, gParam, search, differenceParam));
 				if (batchCircular)
-					batchResults.add(addToCache(DataFilterMethod.CIRCULAR_MEAN, cParam, search));
+					batchResults.add(addToCache(DataFilterMethod.CIRCULAR_MEAN, cParam, search, differenceParam));
 				if (batchMean)
-					batchResults.add(addToCache(DataFilterMethod.MEDIAN, medParam, search));
+					batchResults.add(addToCache(DataFilterMethod.MEDIAN, medParam, search, differenceParam));
 			}
 
 			IJ.showProgress(-1);
@@ -1227,16 +1252,17 @@ public class BenchmarkSpotFilter implements PlugIn
 		windowOrganiser.tile();
 	}
 
-	private BatchResult[] addToCache(DataFilterMethod dataFilter, double[] param, double search)
+	private BatchResult[] addToCache(DataFilterMethod dataFilter, double[] param, double search, double differenceParam)
 	{
 		for (BatchResult[] batchResult : cachedBatchResults)
 		{
 			if (batchResult == null || batchResult.length == 0)
 				continue;
-			if (batchResult[0].dataFilter == dataFilter && batchResult[0].search == search)
+			if (batchResult[0].dataFilter == dataFilter && batchResult[0].search == search &&
+					batchResult[0].differenceParam == differenceParam)
 				return batchResult;
 		}
-		BatchResult[] batchResult = run(dataFilter, param, search);
+		BatchResult[] batchResult = run(dataFilter, param, search, differenceParam);
 		cachedBatchResults.add(batchResult);
 		return batchResult;
 	}
@@ -1416,12 +1442,20 @@ public class BenchmarkSpotFilter implements PlugIn
 		return param;
 	}
 
-	private BatchResult[] run(DataFilterMethod dataFilter, double[] param, double search)
+	private BatchResult[] run(DataFilterMethod dataFilter, double[] param, double search, double differenceParam)
 	{
-		progressPrefix = new BatchResult(null, dataFilter, 0, search).getName();
+		progressPrefix = new BatchResult(null, dataFilter, 0, search, differenceParam).getName();
 		BatchResult[] result = new BatchResult[param.length];
 
 		config.setSearch(search);
+
+		// For difference filters
+		if (differenceParam > 0)
+		{
+			// Note: Add a dummy first param so we can set the second param
+			config.setDataFilter(dataFilter, differenceParam, false, 0);
+			config.setDataFilter(dataFilter, differenceParam, false, 1);
+		}
 
 		for (int i = 0; i < param.length; i++)
 		{
@@ -1429,7 +1463,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			BenchmarkFilterResult filterResult = run(config, false);
 			if (filterResult == null)
 				return null;
-			result[i] = new BatchResult(filterResult, dataFilter, param[i], search);
+			result[i] = new BatchResult(filterResult, dataFilter, param[i], search, differenceParam);
 		}
 		return result;
 	}
@@ -1441,10 +1475,11 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("Finds spots in the benchmark image created by CreateData plugin.\n");
+		final double s = simulationParameters.s / simulationParameters.a;
 		final double sa = getSa() / simulationParameters.a;
-		sb.append("PSF width = ").append(Utils.rounded(simulationParameters.s / simulationParameters.a))
-				.append(" px (sa = ").append(Utils.rounded(sa)).append(" px). HWHM = ")
-				.append(Utils.rounded(sa * Gaussian2DFunction.SD_TO_HWHM_FACTOR)).append(" px\n");
+		sb.append("PSF width = ").append(Utils.rounded(s)).append(" px (sa = ").append(Utils.rounded(sa))
+				.append(" px). HWHM = ").append(Utils.rounded(s * Gaussian2DFunction.SD_TO_HWHM_FACTOR))
+				.append(" px\n");
 		sb.append("Simulation depth = ").append(Utils.rounded(simulationParameters.depth)).append(" nm");
 		if (simulationParameters.fixedDepth)
 			sb.append(" (fixed)");
@@ -1453,11 +1488,17 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		if (batchMode)
 		{
-			// Support enumeration of single spot filters
+			// Support enumeration of single/difference spot filters
 			gd.addCheckbox("Mean", batchMean);
 			gd.addCheckbox("Gaussian", batchGaussian);
 			gd.addCheckbox("Circular", batchCircular);
 			gd.addCheckbox("Median", batchMedian);
+			// For difference filters we set the smoothing for the second filter 
+			// using only one distance
+			gd.addMessage("Difference filter settings:");
+			gd.addCheckbox("Difference_filter", differenceFilter);
+			gd.addSlider("Difference_smoothing", 1, 4, differenceSmooth);
+			gd.addMessage("Local maxima search settings:");
 			gd.addSlider("Min_search_width", 1, 4, minSearch);
 			gd.addSlider("Max_search_width", 1, 4, maxSearch);
 			gd.addCheckbox("Filter_relative_distances (to HWHM)", filterRelativeDistances);
@@ -1497,14 +1538,20 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (extraOptions)
 			gd.addCheckbox("Debug", sDebug);
 
-		Utils.rearrangeColumns(gd, 8);
+		Utils.rearrangeColumns(gd, (batchMode) ? 14 : 8);
 
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return false;
 
-		fitConfig.setInitialPeakStdDev(Maths.round(sa));
+		// Here we use PSF stored in the results if supported (i.e. a Gaussian). 
+		// The results are likely to come from the CreateData simulation.
+		PSF psf = results.getPSF();
+		if (PSFHelper.isGaussian2D(psf))
+			fitConfig.setPSF(results.getPSF());
+		else
+			fitConfig.setInitialPeakStdDev(s);
 
 		if (batchMode)
 		{
@@ -1515,6 +1562,9 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			if (!(batchMean || batchGaussian || batchCircular || batchMedian))
 				return false;
+
+			differenceFilter = gd.getNextBoolean();
+			differenceSmooth = gd.getNextNumber();
 
 			minSearch = gd.getNextNumber();
 			maxSearch = gd.getNextNumber();
@@ -1740,9 +1790,9 @@ public class BenchmarkSpotFilter implements PlugIn
 				for (PSFSpot spot : spots)
 					regression.addData(spot.amplitude, calculator.getAmplitude(spot.peakResult.getParameters()));
 			}
-			System.out.printf("Amplitude vs PixelAmplitude = %f, slope=%f, n=%d\n", regression.getR(),
+			System.out.printf("PixelAmplitude vs Amplitude = %f, slope=%f, n=%d\n", regression.getR(),
 					regression.getSlope(), regression.getN());
-			
+
 			IJ.showProgress(-1);
 			IJ.showStatus("");
 
@@ -1753,19 +1803,21 @@ public class BenchmarkSpotFilter implements PlugIn
 			IJ.showStatus("Computing results ...");
 		final ImageStack stack = imp.getImageStack();
 
+		float background = 0;
 		if (spotFilter.isAbsoluteIntensity())
 		{
-			if (Float.isNaN(background))
+			if (Float.isNaN(resultsBackground))
 			{
 				// To allow the signal factor to be computed we need to lower the image by the background so 
 				// that the intensities correspond to the results amplitude.
 				// Just assume the simulation background is uniform.
 				StandardResultProcedure s = new StandardResultProcedure(results, IntensityUnit.PHOTON);
 				s.getB();
-				background = (float) (Maths.sum(s.background) / results.size());
+				resultsBackground = (float) (Maths.sum(s.background) / results.size());
 			}
+			background = this.resultsBackground;
 		}
-		// This assumes that cloning the filter will clone the weights
+		// Create the weights if needed
 		if (cameraModel.isPerPixelModel() && spotFilter.isWeighted())
 		{
 			if (weights == null)
