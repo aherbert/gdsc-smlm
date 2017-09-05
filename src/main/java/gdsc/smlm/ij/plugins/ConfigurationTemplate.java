@@ -278,7 +278,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		createInlineTemplates();
 
-		loadDefaultTemplates();
+		restoreLoadedTemplates();
 	}
 
 	private static void createInlineTemplates()
@@ -368,12 +368,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	}
 
 	/**
-	 * Load the default templates (those selected by the user to load on start-up).
+	 * Restore the templates that were loaded.
 	 * <p>
 	 * Given the list of standard templates is manipulated only by this plugin this should
 	 * be the same set of templates as that used last time by the user.
 	 */
-	private static void loadDefaultTemplates()
+	private static void restoreLoadedTemplates()
 	{
 		// Allow this to fail silently
 		DefaultTemplateSettings settings = SettingsManager.readDefaultTemplateSettings(SettingsManager.FLAG_SILENT);
@@ -446,7 +446,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	/**
 	 * Save the templates currently available in memory as the default templates to load on start-up.
 	 */
-	private static void saveDefaultTemplates()
+	private static void saveLoadedTemplates()
 	{
 		DefaultTemplateSettings.Builder settings = DefaultTemplateSettings.newBuilder();
 		DefaultTemplate.Builder defaultTemplate = DefaultTemplate.newBuilder();
@@ -660,7 +660,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	/**
 	 * Save template configuration. If an existing template exists with the same name it will be over-written. If an
-	 * existing template was loaded from file it will be saved back to the same file, or optionally a different file.
+	 * existing template was loaded from file it will be saved back to the same file, or optionally a new file.
 	 *
 	 * @param name
 	 *            The name of the template
@@ -673,20 +673,26 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	public static boolean saveTemplate(String name, TemplateSettings settings, File file)
 	{
 		Template template = map.get(name);
-		if (template == null)
+		if (template != null)
 		{
-			template = addTemplate(name, settings, TemplateType.CUSTOM, file, null);
+			// Keep the file to allow it to be loaded on start-up
+			if (file == null)
+				file = template.file;
 		}
-		else
-		{
-			template.settings = settings;
-			template.templateType = TemplateType.CUSTOM;
-		}
+		
+		// Replace any existing template with a new one
+		template = new Template(settings, TemplateType.CUSTOM, file, null);
+
+		boolean result = true;
 		if (file != null)
-			return template.save(file);
-		if (template.file != null)
-			return template.save(template.file);
-		return true;
+			result = !template.save(file);
+		if (result)
+		{
+			// Update the loaded templates
+			map.put(name, template);
+			saveLoadedTemplates();
+		}
+		return result;
 	}
 
 	/**
@@ -899,7 +905,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		}
 
 		if (count > 0)
-			saveDefaultTemplates();
+			saveLoadedTemplates();
 		IJ.showMessage("Loaded " + TextUtils.pleural(count, "standard template"));
 	}
 
@@ -989,7 +995,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		}
 
 		if (count > 0)
-			saveDefaultTemplates();
+			saveLoadedTemplates();
 		IJ.showMessage("Loaded " + TextUtils.pleural(count, "custom template"));
 	}
 
@@ -1035,7 +1041,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 				map.remove(name);
 			}
 		}
-		saveDefaultTemplates();
+		saveLoadedTemplates();
 	}
 
 	/**
