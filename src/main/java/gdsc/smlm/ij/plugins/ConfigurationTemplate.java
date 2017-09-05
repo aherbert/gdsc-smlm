@@ -269,6 +269,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	private int templateId;
 	private String headings;
 	private TIntObjectHashMap<String> text;
+	private boolean templateImage = false;
 
 	static
 	{
@@ -750,6 +751,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		LOAD_STANDARD_TEMPLATES("Load standard templates"),
 		LOAD_CUSTOM_TEMPLATES("Load custom templates"),
 		REMOVE_LOADED_TEMPLATES("Remove loaded templates"),
+		VIEW_TEMPLATE("View template"),
 		VIEW_TEMPLATE_IMAGE("View image example for template");
 
 		private String name;
@@ -808,6 +810,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 				break;
 			case REMOVE_LOADED_TEMPLATES:
 				removeLoadedTemplates(settings);
+				break;
+			case VIEW_TEMPLATE:
+				showTemplate(settings);
 				break;
 			case VIEW_TEMPLATE_IMAGE:
 				showTemplateImages(settings);
@@ -1005,7 +1010,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 			public String getFormattedName(int i)
 			{
-				return names[1];
+				return names[i];
 			}
 		});
 
@@ -1018,7 +1023,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		if (selected.isEmpty())
 			// Nothing to do
 			return;
-		
+
 		if (selected.size() == map.size())
 		{
 			clearTemplates();
@@ -1031,6 +1036,83 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			}
 		}
 		saveDefaultTemplates();
+	}
+
+	/**
+	 * Show template.
+	 *
+	 * @param settings
+	 *            the settings
+	 */
+	private void showTemplate(ConfigurationTemplateSettings.Builder settings)
+	{
+		if (map.isEmpty())
+		{
+			IJ.error(TITLE, "No templates are currently loaded");
+			return;
+		}
+		final String[] names = getTemplateNames();
+
+		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+		gd.addMessage("View the template");
+		gd.addChoice("Template", names, settings.getTemplate());
+		gd.addCheckbox("Close_on_exit", settings.getClose());
+		gd.hideCancelButton();
+		gd.addDialogListener(this);
+
+		// Show the first template
+		String template = ((Choice) (gd.getChoices().get(0))).getSelectedItem();
+		showTemplate(template);
+
+		gd.showDialog();
+
+		// There is no cancel so read the settings.
+		settings.setTemplate(gd.getNextChoice());
+		settings.setClose(gd.getNextBoolean());
+
+		if (settings.getClose())
+		{
+			closeInfo();
+		}
+	}
+
+	/**
+	 * Show template image.
+	 *
+	 * @param name
+	 *            the name
+	 */
+	private void showTemplate(String name)
+	{
+		Template template = map.get(name);
+		if (template == null)
+		{
+			IJ.error(TITLE, "Failed to load template: " + name);
+			return;
+		}
+
+		template.update();
+
+		if (infoWindow == null || !infoWindow.isVisible())
+		{
+			infoWindow = new TextWindow(TITLE + " Info", "", "", 450, 600);
+		}
+
+		infoWindow.getTextPanel().clear();
+		add("Template", name);
+		add("Type", (template.templateType == TemplateType.CUSTOM) ? "Custom" : "Standard");
+		add("File", (template.file == null) ? null : template.file.getPath());
+		add("Tif Image", (template.tifPath == null) ? null : template.tifPath);
+		infoWindow.append("");
+		infoWindow.append(template.settings.toString());
+		infoWindow.getTextPanel().scrollToTop();
+	}
+
+	private void add(String key, String value)
+	{
+		if (value == null)
+			return;
+		infoWindow.append(key + " : " + value);
 	}
 
 	/**
@@ -1058,6 +1140,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		gd.addChoice("Template", names, settings.getTemplate());
 		gd.addCheckbox("Close_on_exit", settings.getClose());
 		gd.hideCancelButton();
+		templateImage = true;
 		gd.addDialogListener(this);
 
 		// Show the first template
@@ -1141,7 +1224,11 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		if (e != null && e.getSource() instanceof Choice)
 		{
 			String template = ((Choice) (e.getSource())).getSelectedItem();
-			showTemplateImage(template);
+			if (templateImage)
+				showTemplateImage(template);
+			else
+				showTemplate(template);
+
 		}
 		return true;
 	}
