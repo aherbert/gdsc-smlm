@@ -59,38 +59,14 @@ public class ConfigurationTemplateTest
 	@Test
 	public void canLoadResourceTemplates()
 	{
-		canLoadResourceTemplates(true, true);
-	}
-
-	@Test
-	public void canLoadAllMandatoryResourceTemplates()
-	{
-		canLoadResourceTemplates(true, false);
-	}
-
-	@Test
-	public void canLoadAllOptionalResourceTemplates()
-	{
-		canLoadResourceTemplates(false, true);
-	}
-
-	private void canLoadResourceTemplates(boolean loadMandatory, boolean loadOptional)
-	{
 		ConfigurationTemplate.clearTemplates();
 
-		// Load others
-		if (loadMandatory ^ loadOptional)
-		{
-			TemplateResource[] templates = ConfigurationTemplate.listPackageTemplates(!loadMandatory, !loadOptional);
-			ConfigurationTemplate.loadTemplates(templates);
-		}
-
 		String[] before = ConfigurationTemplate.getTemplateNames(false);
-		TemplateResource[] templates = ConfigurationTemplate.listPackageTemplates(loadMandatory, loadOptional);
-		ConfigurationTemplate.loadTemplates(templates);
+		TemplateResource[] templates = ConfigurationTemplate.listTemplateResources();
+		ConfigurationTemplate.loadTemplateResources(templates);
 		String[] after = ConfigurationTemplate.getTemplateNames(false);
 
-		checkLoaded(String.format("Mandatory=%b, Optional=%b", loadMandatory, loadOptional), templates, before, after);
+		checkLoaded("canLoadResourceTemplates", templates, before, after);
 	}
 
 	private void checkLoaded(String test, TemplateResource[] templates, String[] before, String[] after)
@@ -167,7 +143,7 @@ public class ConfigurationTemplateTest
 		// This test requires that the system resources does have at least one template with an image
 
 		ConfigurationTemplate.clearTemplates();
-		ConfigurationTemplate.loadTemplates(ConfigurationTemplate.listPackageTemplates(true, true));
+		ConfigurationTemplate.loadTemplateResources(ConfigurationTemplate.listTemplateResources());
 
 		String[] names = ConfigurationTemplate.getTemplateNamesWithImage();
 		if (names.length == 0)
