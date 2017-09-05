@@ -56,6 +56,7 @@ public class MultiDialog extends Dialog
 	private static final long serialVersionUID = -881270633231897572L;
 
 	private java.util.List<String> selected;
+	private boolean selectAll = false;
 
 	private Button cancel, okay, all, none;
 	private boolean wasCanceled;
@@ -199,6 +200,16 @@ public class MultiDialog extends Dialog
 		this.selected = selected;
 	}
 
+	public boolean isSelectAll()
+	{
+		return selectAll;
+	}
+
+	public void setSelectAll(boolean selectAll)
+	{
+		this.selectAll = selectAll;
+	}
+
 	public void showDialog()
 	{
 		// Detect if running in a macro and just collect the input options
@@ -240,8 +251,8 @@ public class MultiDialog extends Dialog
 		{
 			String formattedName = items.getFormattedName(n);
 			list.add(formattedName);
-			// Select the same as last time
-			if (selected != null && selected.contains(items.removeFormatting(formattedName)))
+			// Initial selection
+			if (selectAll || (selected != null && selected.contains(items.removeFormatting(formattedName))))
 			{
 				list.select(n);
 			}
