@@ -412,6 +412,13 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 					break;
 			}
 		}
+		
+		if (map.size() != settings.getDefaultTemplatesCount())
+		{
+			// This occurs if we cannot reload some of the templates. 
+			// Prevent this from happening again.
+			saveLoadedTemplates();
+		}
 	}
 
 	private static void loadCustomTemplate(String name, String path, String tifPath)
