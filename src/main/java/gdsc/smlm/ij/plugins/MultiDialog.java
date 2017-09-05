@@ -55,7 +55,7 @@ public class MultiDialog extends Dialog
 {
 	private static final long serialVersionUID = -881270633231897572L;
 
-	private ArrayList<String> selected;
+	private java.util.List<String> selected;
 
 	private Button cancel, okay, all, none;
 	private boolean wasCanceled;
@@ -194,7 +194,7 @@ public class MultiDialog extends Dialog
 		this.items = items;
 	}
 
-	public void addSelected(ArrayList<String> selected)
+	public void addSelected(java.util.List<String> selected)
 	{
 		this.selected = selected;
 	}

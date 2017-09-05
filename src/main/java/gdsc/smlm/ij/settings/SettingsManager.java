@@ -33,6 +33,7 @@ import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
+import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
@@ -46,11 +47,11 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtosHelper;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
-import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import ij.IJ;
@@ -578,6 +579,32 @@ public class SettingsManager
 	}
 
 	/**
+	 * Write a message to a settings file in the settings directory.
+	 *
+	 * @param message
+	 *            the message
+	 * @return true, if successful
+	 */
+	public static boolean writeSettings(Message.Builder message)
+	{
+		return writeSettings(message.build());
+	}
+
+	/**
+	 * Write a message to a settings file in the settings directory.
+	 *
+	 * @param message
+	 *            the message
+	 * @param flags
+	 *            the flags
+	 * @return true, if successful
+	 */
+	public static boolean writeSettings(Message.Builder message, int flags)
+	{
+		return writeSettings(message.build(), flags);
+	}
+	
+	/**
 	 * Clear the settings file for the given class.
 	 *
 	 * @param clazz
@@ -782,6 +809,18 @@ public class SettingsManager
 	public static OpticsSettings readOpticsSettings(int flags)
 	{
 		return new ConfigurationReader<OpticsSettings>(GUIProtosHelper.defaultOpticsSettings).read(flags);
+	}
+
+	/**
+	 * Read the ConfigurationTemplateSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the ConfigurationTemplateSettings
+	 */
+	public static ConfigurationTemplateSettings readConfigurationTemplateSettings(int flags)
+	{
+		return new ConfigurationReader<ConfigurationTemplateSettings>(GUIProtosHelper.defaultConfigurationTemplateSettings).read(flags);
 	}
 
 	/**

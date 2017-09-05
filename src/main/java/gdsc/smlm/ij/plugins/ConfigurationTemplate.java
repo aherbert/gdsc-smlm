@@ -35,6 +35,7 @@ import gdsc.core.utils.TurboList;
 import gdsc.core.utils.TurboList.SimplePredicate;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -185,15 +186,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	}
 
 	private static LinkedHashMap<String, Template> map;
-	private static boolean selectStandardTemplates = true;
-	private static boolean selectCustomDirectory = false;
-	private static String configurationDirectory;
-	// Used for the multiMode option 
-	private static ArrayList<String> selected;
 
 	private String TITLE;
-	private static String template = "";
-	private static boolean close = true;
 	private ImagePlus imp;
 	private int currentSlice = 0;
 	private TextWindow resultsWindow, infoWindow;
@@ -205,9 +199,6 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	{
 		// Maintain the names in the order they are added
 		map = new LinkedHashMap<String, ConfigurationTemplate.Template>();
-
-		String currentUsersHomeDir = System.getProperty("user.home");
-		configurationDirectory = currentUsersHomeDir + File.separator + "gdsc.smlm";
 
 		// Q. What settings should be in the template?
 
@@ -291,20 +282,20 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 */
 	private static void loadStandardTemplates()
 	{
-		TemplateResource[] templates = listTemplates(true, false);
+		TemplateResource[] templates = listPackageTemplates(true, false);
 		loadTemplates(templates);
 	}
 
 	/**
 	 * List the templates from package resources.
 	 *
-	 * @param loadMandatory
+	 * @param listMandatory
 	 *            Set to true to list the mandatory templates
-	 * @param loadOptional
+	 * @param listOptional
 	 *            Set to true to list the optional templates
 	 * @return the templates
 	 */
-	static TemplateResource[] listTemplates(boolean loadMandatory, boolean loadOptional)
+	static TemplateResource[] listPackageTemplates(boolean listMandatory, boolean listOptional)
 	{
 		// Load templates from package resources
 		String templateDir = "/gdsc/smlm/templates/";
@@ -328,7 +319,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 				String template = line;
 				boolean optional = true;
-				// Mandatory templates have a '*' suffix 
+				// Mandatory templates have a '*' suffix. 
 				int index = template.indexOf('*');
 				if (index >= 0)
 				{
@@ -337,12 +328,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 				}
 				if (optional)
 				{
-					if (!loadOptional)
+					if (!listOptional)
 						continue;
 				}
 				else
 				{
-					if (!loadMandatory)
+					if (!listMandatory)
 						continue;
 				}
 				// Check the resource exists
@@ -574,31 +565,34 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
+		ConfigurationTemplateSettings.Builder settings = SettingsManager.readConfigurationTemplateSettings(0).toBuilder();
+		
 		if ("images".equals(arg))
 		{
-			showTemplateImages();
+			showTemplateImages(settings);
 			return;
 		}
 
 		TITLE = "Template Configuration";
 		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addCheckbox("Select_standard_templates", selectStandardTemplates);
-		gd.addCheckbox("Select_custom_directory", selectCustomDirectory);
+		gd.addCheckbox("Select_standard_templates", settings.getSelectStandardTemplates());
+		gd.addCheckbox("Select_custom_directory", settings.getSelectCustomDirectory());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		selectStandardTemplates = gd.getNextBoolean();
-		selectCustomDirectory = gd.getNextBoolean();
+		settings.setSelectStandardTemplates(gd.getNextBoolean());
+		settings.setSelectCustomDirectory(gd.getNextBoolean());
+		SettingsManager.writeSettings(settings);
 
-		if (selectStandardTemplates)
-			loadSelectedStandardTemplates();
-		if (selectCustomDirectory)
-			loadTemplatesFromDirectory();
+		if (settings.getSelectStandardTemplates())
+			loadSelectedStandardTemplates(settings);
+		if (settings.getSelectCustomDirectory())
+			loadTemplatesFromDirectory(settings);
 	}
 
-	private void loadSelectedStandardTemplates()
+	private void loadSelectedStandardTemplates(ConfigurationTemplateSettings.Builder settings)
 	{
-		final TemplateResource[] templates = listTemplates(false, true);
+		final TemplateResource[] templates = listPackageTemplates(false, true);
 		if (templates.length == 0)
 			return;
 
@@ -614,16 +608,21 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 				return templates[i].name;
 			}
 		});
-		md.addSelected(selected);
+		md.addSelected(settings.getSelectedList());
 
 		md.showDialog();
 
 		if (md.wasCanceled())
 			return;
 
-		selected = md.getSelectedResults();
+		final ArrayList<String> selected = md.getSelectedResults();
 		if (selected.isEmpty())
 			return;
+		
+		// Save
+		settings.clearSelected();
+		settings.addAllSelected(selected);
+		SettingsManager.writeSettings(settings);
 
 		// Use list filtering to get the selected templates
 		TurboList<TemplateResource> list = new TurboList<TemplateResource>(Arrays.asList(templates));
@@ -638,22 +637,28 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		IJ.showMessage("Loaded " + TextUtils.pleural(count, "standard template"));
 	}
 
-	private void loadTemplatesFromDirectory()
+	private void loadTemplatesFromDirectory(ConfigurationTemplateSettings.Builder settings)
 	{
 		// Allow the user to specify a configuration directory
-		String newDirectory = Utils.getDirectory("Template_directory", configurationDirectory);
+		String newDirectory = Utils.getDirectory("Template_directory", settings.getConfigurationDirectory());
 
 		if (newDirectory == null)
 			return;
 
-		configurationDirectory = newDirectory;
+		if (!newDirectory.equals(settings.getConfigurationDirectory()))
+		{
+			settings.setConfigurationDirectory(newDirectory);
+			SettingsManager.writeSettings(settings);
+		}
 
 		// Search the configuration directory and add any custom templates that can be deserialised from XML files
-		File[] fileList = (new File(configurationDirectory)).listFiles(new FilenameFilter()
+		File[] fileList = (new File(newDirectory)).listFiles(new FilenameFilter()
 		{
 			public boolean accept(File arg0, String arg1)
 			{
-				return arg1.toLowerCase().endsWith("xml");
+				// We can try and deserialise everything
+				return arg0.isFile();
+				//return arg1.toLowerCase().endsWith("txt");
 			}
 		});
 		if (fileList == null)
@@ -687,7 +692,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		IJ.showMessage("Loaded " + TextUtils.pleural(count, "custom template"));
 	}
 
-	private void showTemplateImages()
+	private void showTemplateImages(ConfigurationTemplateSettings.Builder settings)
 	{
 		TITLE = "Template Example Images";
 
@@ -703,22 +708,26 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 		gd.addMessage("View the example source image");
-		gd.addChoice("Template", names, template);
-		gd.addCheckbox("Close_on_exit", close);
+		gd.addChoice("Template", names, settings.getTemplate());
+		gd.addCheckbox("Close_on_exit", settings.getClose());
 		gd.hideCancelButton();
 		gd.addDialogListener(this);
 
 		// Show the first template
-		template = ((Choice) (gd.getChoices().get(0))).getSelectedItem();
+		String template = ((Choice) (gd.getChoices().get(0))).getSelectedItem();
 		showTemplateImage(template);
 
 		gd.showDialog();
-		template = gd.getNextChoice();
-		close = gd.getNextBoolean();
+		
+		// There is no cancel so read the settings.
+		settings.setTemplate(gd.getNextChoice());
+		settings.setClose(gd.getNextBoolean());
 
+		SettingsManager.writeSettings(settings);
+		
 		ImagePlus.removeImageListener(this);
 
-		if (close)
+		if (settings.getClose())
 		{
 			if (imp != null)
 				imp.close();
@@ -775,7 +784,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	{
 		if (e != null && e.getSource() instanceof Choice)
 		{
-			template = ((Choice) (e.getSource())).getSelectedItem();
+			String template = ((Choice) (e.getSource())).getSelectedItem();
 			showTemplateImage(template);
 		}
 		return true;

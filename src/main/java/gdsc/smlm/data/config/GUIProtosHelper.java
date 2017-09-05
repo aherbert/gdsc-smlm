@@ -1,5 +1,7 @@
 package gdsc.smlm.data.config;
 
+import java.io.File;
+
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.clustering.optics.SampleMode;
 import gdsc.smlm.data.config.GUIProtos.*;
@@ -140,6 +142,7 @@ public class GUIProtosHelper
 		builder.setJumpDistance(1);
 		defaultClusteringSettings = builder.build();
 	}
+	
 	/** The default OpticsSettings */
 	public static final OpticsSettings defaultOpticsSettings;
 	static
@@ -162,5 +165,16 @@ public class GUIProtosHelper
 		builder.setSpanningTreeMode(SpanningTreeMode.OFF.ordinal());
 		builder.setLambda(3);
 		defaultOpticsSettings = builder.build();
+	}
+	
+	/** The default ConfigurationTemplateSettings */
+	public static final ConfigurationTemplateSettings defaultConfigurationTemplateSettings;
+	static
+	{
+		ConfigurationTemplateSettings.Builder builder = ConfigurationTemplateSettings.newBuilder();
+		builder.setSelectStandardTemplates(true);
+		builder.setSelectCustomDirectory(false);
+		builder.setConfigurationDirectory(System.getProperty("user.home") + File.separator + "gdsc.smlm");
+		defaultConfigurationTemplateSettings = builder.build();
 	}
 }

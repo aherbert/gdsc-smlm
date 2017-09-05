@@ -308,3 +308,20 @@ message OpticsSettings
 	// scores, not the actual ranking of outliers.
 	double lambda = 26;	
 }
+
+// Contains settings for the configuration templates
+message ConfigurationTemplateSettings
+{
+	// Set to true to select from a list of standard templates 
+	bool select_standard_templates = 1;
+	// Set to true to select templates from a configuration directory 
+	bool select_custom_directory = 2;
+	// The configuration directory
+	string configuration_directory = 3;
+	// Used for the multiMode option to select templates 
+	repeated string selected = 4;
+	// The template to view
+	string template = 5;
+	// Set to true to close the template when finished
+	bool close = 6;	
+}
