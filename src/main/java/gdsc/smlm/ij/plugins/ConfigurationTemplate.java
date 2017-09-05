@@ -19,7 +19,7 @@ import java.awt.Point;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -843,7 +843,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			{
 				if (i < inlineNames.length)
 					return inlineNames[i];
-				return templates[inlineNames.length + i].name;
+				return templates[i - inlineNames.length].name;
 			}
 		});
 		md.addSelected(settings.getSelectedStandardTemplatesList());
@@ -915,13 +915,13 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		settings.setConfigurationDirectory(newDirectory);
 
 		// Search the configuration directory and add any custom templates that can be deserialised from XML files
-		File[] fileList = (new File(newDirectory)).listFiles(new FilenameFilter()
+		File[] fileList = (new File(newDirectory)).listFiles(new FileFilter()
 		{
-			public boolean accept(File arg0, String arg1)
+			public boolean accept(File file)
 			{
 				// We can try and deserialise everything that is not a tif image
 				// (which may be the template source image example)
-				return arg0.isFile() && !arg1.toLowerCase().endsWith("tif");
+				return file.isFile() && !file.getName().toLowerCase().endsWith("tif");
 			}
 		});
 		if (fileList == null)
