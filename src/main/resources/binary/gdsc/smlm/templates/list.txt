@@ -1,5 +1,3 @@
-# Mandatory
-MT0.N1.HD.json*
-# Optional
+MT0.N1.HD.json
 MT0.N1.HDb.json
 missing.txt

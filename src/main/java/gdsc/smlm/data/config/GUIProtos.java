@@ -15,6 +15,113 @@ public final class GUIProtos {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
+  /**
+   * Protobuf enum {@code gdsc.smlm.data.config.TemplateType}
+   */
+  public enum TemplateType
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>INLINE_TEMPLATE = 0;</code>
+     */
+    INLINE_TEMPLATE(0),
+    /**
+     * <code>RESOURCE_TEMPLATE = 1;</code>
+     */
+    RESOURCE_TEMPLATE(1),
+    /**
+     * <code>CUSTOM_TEMPLATE = 2;</code>
+     */
+    CUSTOM_TEMPLATE(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>INLINE_TEMPLATE = 0;</code>
+     */
+    public static final int INLINE_TEMPLATE_VALUE = 0;
+    /**
+     * <code>RESOURCE_TEMPLATE = 1;</code>
+     */
+    public static final int RESOURCE_TEMPLATE_VALUE = 1;
+    /**
+     * <code>CUSTOM_TEMPLATE = 2;</code>
+     */
+    public static final int CUSTOM_TEMPLATE_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static TemplateType valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static TemplateType forNumber(int value) {
+      switch (value) {
+        case 0: return INLINE_TEMPLATE;
+        case 1: return RESOURCE_TEMPLATE;
+        case 2: return CUSTOM_TEMPLATE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<TemplateType>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        TemplateType> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<TemplateType>() {
+            public TemplateType findValueByNumber(int number) {
+              return TemplateType.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final TemplateType[] VALUES = values();
+
+    public static TemplateType valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private TemplateType(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.TemplateType)
+  }
+
   public interface GUIFilterSettingsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.GUIFilterSettings)
       com.google.protobuf.MessageOrBuilder {
@@ -16516,16 +16623,1667 @@ public final class GUIProtos {
 
   }
 
+  public interface DefaultTemplateOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.DefaultTemplate)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
+     */
+    int getTemplateTypeValue();
+    /**
+     * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
+     */
+    gdsc.smlm.data.config.GUIProtos.TemplateType getTemplateType();
+
+    /**
+     * <code>string name = 2;</code>
+     */
+    java.lang.String getName();
+    /**
+     * <code>string name = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <code>string filename = 3;</code>
+     */
+    java.lang.String getFilename();
+    /**
+     * <code>string filename = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getFilenameBytes();
+
+    /**
+     * <code>string tif_filename = 4;</code>
+     */
+    java.lang.String getTifFilename();
+    /**
+     * <code>string tif_filename = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getTifFilenameBytes();
+  }
+  /**
+   * <pre>
+   * Contains settings for a default template
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.DefaultTemplate}
+   */
+  public  static final class DefaultTemplate extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.DefaultTemplate)
+      DefaultTemplateOrBuilder {
+    // Use DefaultTemplate.newBuilder() to construct.
+    private DefaultTemplate(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DefaultTemplate() {
+      templateType_ = 0;
+      name_ = "";
+      filename_ = "";
+      tifFilename_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private DefaultTemplate(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              int rawValue = input.readEnum();
+
+              templateType_ = rawValue;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              name_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              filename_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              tifFilename_ = s;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplate_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.DefaultTemplate.class, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder.class);
+    }
+
+    public static final int TEMPLATE_TYPE_FIELD_NUMBER = 1;
+    private int templateType_;
+    /**
+     * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
+     */
+    public int getTemplateTypeValue() {
+      return templateType_;
+    }
+    /**
+     * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
+     */
+    public gdsc.smlm.data.config.GUIProtos.TemplateType getTemplateType() {
+      gdsc.smlm.data.config.GUIProtos.TemplateType result = gdsc.smlm.data.config.GUIProtos.TemplateType.valueOf(templateType_);
+      return result == null ? gdsc.smlm.data.config.GUIProtos.TemplateType.UNRECOGNIZED : result;
+    }
+
+    public static final int NAME_FIELD_NUMBER = 2;
+    private volatile java.lang.Object name_;
+    /**
+     * <code>string name = 2;</code>
+     */
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string name = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FILENAME_FIELD_NUMBER = 3;
+    private volatile java.lang.Object filename_;
+    /**
+     * <code>string filename = 3;</code>
+     */
+    public java.lang.String getFilename() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        filename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string filename = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFilenameBytes() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        filename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TIF_FILENAME_FIELD_NUMBER = 4;
+    private volatile java.lang.Object tifFilename_;
+    /**
+     * <code>string tif_filename = 4;</code>
+     */
+    public java.lang.String getTifFilename() {
+      java.lang.Object ref = tifFilename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        tifFilename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string tif_filename = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTifFilenameBytes() {
+      java.lang.Object ref = tifFilename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        tifFilename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (templateType_ != gdsc.smlm.data.config.GUIProtos.TemplateType.INLINE_TEMPLATE.getNumber()) {
+        output.writeEnum(1, templateType_);
+      }
+      if (!getNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
+      }
+      if (!getFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, filename_);
+      }
+      if (!getTifFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, tifFilename_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (templateType_ != gdsc.smlm.data.config.GUIProtos.TemplateType.INLINE_TEMPLATE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, templateType_);
+      }
+      if (!getNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+      }
+      if (!getFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, filename_);
+      }
+      if (!getTifFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, tifFilename_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplate)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.DefaultTemplate other = (gdsc.smlm.data.config.GUIProtos.DefaultTemplate) obj;
+
+      boolean result = true;
+      result = result && templateType_ == other.templateType_;
+      result = result && getName()
+          .equals(other.getName());
+      result = result && getFilename()
+          .equals(other.getFilename());
+      result = result && getTifFilename()
+          .equals(other.getTifFilename());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + TEMPLATE_TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + templateType_;
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFilename().hashCode();
+      hash = (37 * hash) + TIF_FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getTifFilename().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.DefaultTemplate prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains settings for a default template
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.DefaultTemplate}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.DefaultTemplate)
+        gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplate_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.DefaultTemplate.class, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.DefaultTemplate.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        templateType_ = 0;
+
+        name_ = "";
+
+        filename_ = "";
+
+        tifFilename_ = "";
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.DefaultTemplate.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate build() {
+        gdsc.smlm.data.config.GUIProtos.DefaultTemplate result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.DefaultTemplate result = new gdsc.smlm.data.config.GUIProtos.DefaultTemplate(this);
+        result.templateType_ = templateType_;
+        result.name_ = name_;
+        result.filename_ = filename_;
+        result.tifFilename_ = tifFilename_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplate) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.DefaultTemplate)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.DefaultTemplate other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.DefaultTemplate.getDefaultInstance()) return this;
+        if (other.templateType_ != 0) {
+          setTemplateTypeValue(other.getTemplateTypeValue());
+        }
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          onChanged();
+        }
+        if (!other.getFilename().isEmpty()) {
+          filename_ = other.filename_;
+          onChanged();
+        }
+        if (!other.getTifFilename().isEmpty()) {
+          tifFilename_ = other.tifFilename_;
+          onChanged();
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.DefaultTemplate parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.DefaultTemplate) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int templateType_ = 0;
+      /**
+       * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
+       */
+      public int getTemplateTypeValue() {
+        return templateType_;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
+       */
+      public Builder setTemplateTypeValue(int value) {
+        templateType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
+       */
+      public gdsc.smlm.data.config.GUIProtos.TemplateType getTemplateType() {
+        gdsc.smlm.data.config.GUIProtos.TemplateType result = gdsc.smlm.data.config.GUIProtos.TemplateType.valueOf(templateType_);
+        return result == null ? gdsc.smlm.data.config.GUIProtos.TemplateType.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
+       */
+      public Builder setTemplateType(gdsc.smlm.data.config.GUIProtos.TemplateType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        templateType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.TemplateType template_type = 1;</code>
+       */
+      public Builder clearTemplateType() {
+        
+        templateType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object name_ = "";
+      /**
+       * <code>string name = 2;</code>
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string name = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string name = 2;</code>
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name = 2;</code>
+       */
+      public Builder clearName() {
+        
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name = 2;</code>
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object filename_ = "";
+      /**
+       * <code>string filename = 3;</code>
+       */
+      public java.lang.String getFilename() {
+        java.lang.Object ref = filename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          filename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string filename = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFilenameBytes() {
+        java.lang.Object ref = filename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          filename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string filename = 3;</code>
+       */
+      public Builder setFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        filename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filename = 3;</code>
+       */
+      public Builder clearFilename() {
+        
+        filename_ = getDefaultInstance().getFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filename = 3;</code>
+       */
+      public Builder setFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        filename_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object tifFilename_ = "";
+      /**
+       * <code>string tif_filename = 4;</code>
+       */
+      public java.lang.String getTifFilename() {
+        java.lang.Object ref = tifFilename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          tifFilename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string tif_filename = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTifFilenameBytes() {
+        java.lang.Object ref = tifFilename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          tifFilename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string tif_filename = 4;</code>
+       */
+      public Builder setTifFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        tifFilename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string tif_filename = 4;</code>
+       */
+      public Builder clearTifFilename() {
+        
+        tifFilename_ = getDefaultInstance().getTifFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string tif_filename = 4;</code>
+       */
+      public Builder setTifFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        tifFilename_ = value;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.DefaultTemplate)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.DefaultTemplate)
+    private static final gdsc.smlm.data.config.GUIProtos.DefaultTemplate DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.DefaultTemplate();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DefaultTemplate>
+        PARSER = new com.google.protobuf.AbstractParser<DefaultTemplate>() {
+      public DefaultTemplate parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new DefaultTemplate(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<DefaultTemplate> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DefaultTemplate> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DefaultTemplateSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.DefaultTemplateSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+     */
+    java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> 
+        getDefaultTemplatesList();
+    /**
+     * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+     */
+    gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultTemplates(int index);
+    /**
+     * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+     */
+    int getDefaultTemplatesCount();
+    /**
+     * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+     */
+    java.util.List<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder> 
+        getDefaultTemplatesOrBuilderList();
+    /**
+     * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+     */
+    gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder getDefaultTemplatesOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * Contains the default templates
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.DefaultTemplateSettings}
+   */
+  public  static final class DefaultTemplateSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.DefaultTemplateSettings)
+      DefaultTemplateSettingsOrBuilder {
+    // Use DefaultTemplateSettings.newBuilder() to construct.
+    private DefaultTemplateSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DefaultTemplateSettings() {
+      defaultTemplates_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private DefaultTemplateSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                defaultTemplates_ = new java.util.ArrayList<gdsc.smlm.data.config.GUIProtos.DefaultTemplate>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              defaultTemplates_.add(
+                  input.readMessage(gdsc.smlm.data.config.GUIProtos.DefaultTemplate.parser(), extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          defaultTemplates_ = java.util.Collections.unmodifiableList(defaultTemplates_);
+        }
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings.class, gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings.Builder.class);
+    }
+
+    public static final int DEFAULT_TEMPLATES_FIELD_NUMBER = 1;
+    private java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> defaultTemplates_;
+    /**
+     * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+     */
+    public java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> getDefaultTemplatesList() {
+      return defaultTemplates_;
+    }
+    /**
+     * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+     */
+    public java.util.List<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder> 
+        getDefaultTemplatesOrBuilderList() {
+      return defaultTemplates_;
+    }
+    /**
+     * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+     */
+    public int getDefaultTemplatesCount() {
+      return defaultTemplates_.size();
+    }
+    /**
+     * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+     */
+    public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultTemplates(int index) {
+      return defaultTemplates_.get(index);
+    }
+    /**
+     * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+     */
+    public gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder getDefaultTemplatesOrBuilder(
+        int index) {
+      return defaultTemplates_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < defaultTemplates_.size(); i++) {
+        output.writeMessage(1, defaultTemplates_.get(i));
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < defaultTemplates_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, defaultTemplates_.get(i));
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings other = (gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings) obj;
+
+      boolean result = true;
+      result = result && getDefaultTemplatesList()
+          .equals(other.getDefaultTemplatesList());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getDefaultTemplatesCount() > 0) {
+        hash = (37 * hash) + DEFAULT_TEMPLATES_FIELD_NUMBER;
+        hash = (53 * hash) + getDefaultTemplatesList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains the default templates
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.DefaultTemplateSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.DefaultTemplateSettings)
+        gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings.class, gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getDefaultTemplatesFieldBuilder();
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        if (defaultTemplatesBuilder_ == null) {
+          defaultTemplates_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          defaultTemplatesBuilder_.clear();
+        }
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings build() {
+        gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings result = new gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings(this);
+        int from_bitField0_ = bitField0_;
+        if (defaultTemplatesBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            defaultTemplates_ = java.util.Collections.unmodifiableList(defaultTemplates_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.defaultTemplates_ = defaultTemplates_;
+        } else {
+          result.defaultTemplates_ = defaultTemplatesBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings.getDefaultInstance()) return this;
+        if (defaultTemplatesBuilder_ == null) {
+          if (!other.defaultTemplates_.isEmpty()) {
+            if (defaultTemplates_.isEmpty()) {
+              defaultTemplates_ = other.defaultTemplates_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureDefaultTemplatesIsMutable();
+              defaultTemplates_.addAll(other.defaultTemplates_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.defaultTemplates_.isEmpty()) {
+            if (defaultTemplatesBuilder_.isEmpty()) {
+              defaultTemplatesBuilder_.dispose();
+              defaultTemplatesBuilder_ = null;
+              defaultTemplates_ = other.defaultTemplates_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              defaultTemplatesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getDefaultTemplatesFieldBuilder() : null;
+            } else {
+              defaultTemplatesBuilder_.addAllMessages(other.defaultTemplates_);
+            }
+          }
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> defaultTemplates_ =
+        java.util.Collections.emptyList();
+      private void ensureDefaultTemplatesIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          defaultTemplates_ = new java.util.ArrayList<gdsc.smlm.data.config.GUIProtos.DefaultTemplate>(defaultTemplates_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          gdsc.smlm.data.config.GUIProtos.DefaultTemplate, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder, gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder> defaultTemplatesBuilder_;
+
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate> getDefaultTemplatesList() {
+        if (defaultTemplatesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(defaultTemplates_);
+        } else {
+          return defaultTemplatesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public int getDefaultTemplatesCount() {
+        if (defaultTemplatesBuilder_ == null) {
+          return defaultTemplates_.size();
+        } else {
+          return defaultTemplatesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate getDefaultTemplates(int index) {
+        if (defaultTemplatesBuilder_ == null) {
+          return defaultTemplates_.get(index);
+        } else {
+          return defaultTemplatesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public Builder setDefaultTemplates(
+          int index, gdsc.smlm.data.config.GUIProtos.DefaultTemplate value) {
+        if (defaultTemplatesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDefaultTemplatesIsMutable();
+          defaultTemplates_.set(index, value);
+          onChanged();
+        } else {
+          defaultTemplatesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public Builder setDefaultTemplates(
+          int index, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder builderForValue) {
+        if (defaultTemplatesBuilder_ == null) {
+          ensureDefaultTemplatesIsMutable();
+          defaultTemplates_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          defaultTemplatesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public Builder addDefaultTemplates(gdsc.smlm.data.config.GUIProtos.DefaultTemplate value) {
+        if (defaultTemplatesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDefaultTemplatesIsMutable();
+          defaultTemplates_.add(value);
+          onChanged();
+        } else {
+          defaultTemplatesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public Builder addDefaultTemplates(
+          int index, gdsc.smlm.data.config.GUIProtos.DefaultTemplate value) {
+        if (defaultTemplatesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDefaultTemplatesIsMutable();
+          defaultTemplates_.add(index, value);
+          onChanged();
+        } else {
+          defaultTemplatesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public Builder addDefaultTemplates(
+          gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder builderForValue) {
+        if (defaultTemplatesBuilder_ == null) {
+          ensureDefaultTemplatesIsMutable();
+          defaultTemplates_.add(builderForValue.build());
+          onChanged();
+        } else {
+          defaultTemplatesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public Builder addDefaultTemplates(
+          int index, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder builderForValue) {
+        if (defaultTemplatesBuilder_ == null) {
+          ensureDefaultTemplatesIsMutable();
+          defaultTemplates_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          defaultTemplatesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public Builder addAllDefaultTemplates(
+          java.lang.Iterable<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplate> values) {
+        if (defaultTemplatesBuilder_ == null) {
+          ensureDefaultTemplatesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, defaultTemplates_);
+          onChanged();
+        } else {
+          defaultTemplatesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public Builder clearDefaultTemplates() {
+        if (defaultTemplatesBuilder_ == null) {
+          defaultTemplates_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          defaultTemplatesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public Builder removeDefaultTemplates(int index) {
+        if (defaultTemplatesBuilder_ == null) {
+          ensureDefaultTemplatesIsMutable();
+          defaultTemplates_.remove(index);
+          onChanged();
+        } else {
+          defaultTemplatesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder getDefaultTemplatesBuilder(
+          int index) {
+        return getDefaultTemplatesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder getDefaultTemplatesOrBuilder(
+          int index) {
+        if (defaultTemplatesBuilder_ == null) {
+          return defaultTemplates_.get(index);  } else {
+          return defaultTemplatesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public java.util.List<? extends gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder> 
+           getDefaultTemplatesOrBuilderList() {
+        if (defaultTemplatesBuilder_ != null) {
+          return defaultTemplatesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(defaultTemplates_);
+        }
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder addDefaultTemplatesBuilder() {
+        return getDefaultTemplatesFieldBuilder().addBuilder(
+            gdsc.smlm.data.config.GUIProtos.DefaultTemplate.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder addDefaultTemplatesBuilder(
+          int index) {
+        return getDefaultTemplatesFieldBuilder().addBuilder(
+            index, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .gdsc.smlm.data.config.DefaultTemplate default_templates = 1;</code>
+       */
+      public java.util.List<gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder> 
+           getDefaultTemplatesBuilderList() {
+        return getDefaultTemplatesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          gdsc.smlm.data.config.GUIProtos.DefaultTemplate, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder, gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder> 
+          getDefaultTemplatesFieldBuilder() {
+        if (defaultTemplatesBuilder_ == null) {
+          defaultTemplatesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              gdsc.smlm.data.config.GUIProtos.DefaultTemplate, gdsc.smlm.data.config.GUIProtos.DefaultTemplate.Builder, gdsc.smlm.data.config.GUIProtos.DefaultTemplateOrBuilder>(
+                  defaultTemplates_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          defaultTemplates_ = null;
+        }
+        return defaultTemplatesBuilder_;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.DefaultTemplateSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.DefaultTemplateSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DefaultTemplateSettings>
+        PARSER = new com.google.protobuf.AbstractParser<DefaultTemplateSettings>() {
+      public DefaultTemplateSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new DefaultTemplateSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<DefaultTemplateSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DefaultTemplateSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface ConfigurationTemplateSettingsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.ConfigurationTemplateSettings)
       com.google.protobuf.MessageOrBuilder {
 
     /**
      * <pre>
+     * The option for the Template Manager
+     * </pre>
+     *
+     * <code>int32 option = 1;</code>
+     */
+    int getOption();
+
+    /**
+     * <pre>
      * Set to true to select from a list of standard templates 
      * </pre>
      *
-     * <code>bool select_standard_templates = 1;</code>
+     * <code>bool select_standard_templates = 2;</code>
      */
     boolean getSelectStandardTemplates();
 
@@ -16534,7 +18292,7 @@ public final class GUIProtos {
      * Set to true to select templates from a configuration directory 
      * </pre>
      *
-     * <code>bool select_custom_directory = 2;</code>
+     * <code>bool select_custom_directory = 3;</code>
      */
     boolean getSelectCustomDirectory();
 
@@ -16543,7 +18301,7 @@ public final class GUIProtos {
      * The configuration directory
      * </pre>
      *
-     * <code>string configuration_directory = 3;</code>
+     * <code>string configuration_directory = 4;</code>
      */
     java.lang.String getConfigurationDirectory();
     /**
@@ -16551,52 +18309,87 @@ public final class GUIProtos {
      * The configuration directory
      * </pre>
      *
-     * <code>string configuration_directory = 3;</code>
+     * <code>string configuration_directory = 4;</code>
      */
     com.google.protobuf.ByteString
         getConfigurationDirectoryBytes();
 
     /**
      * <pre>
-     * Used for the multiMode option to select templates 
+     * Used for the multiMode option to select standard templates 
      * </pre>
      *
-     * <code>repeated string selected = 4;</code>
+     * <code>repeated string selected_standard_templates = 5;</code>
      */
     java.util.List<java.lang.String>
-        getSelectedList();
+        getSelectedStandardTemplatesList();
     /**
      * <pre>
-     * Used for the multiMode option to select templates 
+     * Used for the multiMode option to select standard templates 
      * </pre>
      *
-     * <code>repeated string selected = 4;</code>
+     * <code>repeated string selected_standard_templates = 5;</code>
      */
-    int getSelectedCount();
+    int getSelectedStandardTemplatesCount();
     /**
      * <pre>
-     * Used for the multiMode option to select templates 
+     * Used for the multiMode option to select standard templates 
      * </pre>
      *
-     * <code>repeated string selected = 4;</code>
+     * <code>repeated string selected_standard_templates = 5;</code>
      */
-    java.lang.String getSelected(int index);
+    java.lang.String getSelectedStandardTemplates(int index);
     /**
      * <pre>
-     * Used for the multiMode option to select templates 
+     * Used for the multiMode option to select standard templates 
      * </pre>
      *
-     * <code>repeated string selected = 4;</code>
+     * <code>repeated string selected_standard_templates = 5;</code>
      */
     com.google.protobuf.ByteString
-        getSelectedBytes(int index);
+        getSelectedStandardTemplatesBytes(int index);
+
+    /**
+     * <pre>
+     * Used for the multiMode option to select custom templates 
+     * </pre>
+     *
+     * <code>repeated string selected_custom_templates = 6;</code>
+     */
+    java.util.List<java.lang.String>
+        getSelectedCustomTemplatesList();
+    /**
+     * <pre>
+     * Used for the multiMode option to select custom templates 
+     * </pre>
+     *
+     * <code>repeated string selected_custom_templates = 6;</code>
+     */
+    int getSelectedCustomTemplatesCount();
+    /**
+     * <pre>
+     * Used for the multiMode option to select custom templates 
+     * </pre>
+     *
+     * <code>repeated string selected_custom_templates = 6;</code>
+     */
+    java.lang.String getSelectedCustomTemplates(int index);
+    /**
+     * <pre>
+     * Used for the multiMode option to select custom templates 
+     * </pre>
+     *
+     * <code>repeated string selected_custom_templates = 6;</code>
+     */
+    com.google.protobuf.ByteString
+        getSelectedCustomTemplatesBytes(int index);
 
     /**
      * <pre>
      * The template to view
      * </pre>
      *
-     * <code>string template = 5;</code>
+     * <code>string template = 7;</code>
      */
     java.lang.String getTemplate();
     /**
@@ -16604,7 +18397,7 @@ public final class GUIProtos {
      * The template to view
      * </pre>
      *
-     * <code>string template = 5;</code>
+     * <code>string template = 7;</code>
      */
     com.google.protobuf.ByteString
         getTemplateBytes();
@@ -16614,7 +18407,7 @@ public final class GUIProtos {
      * Set to true to close the template when finished
      * </pre>
      *
-     * <code>bool close = 6;</code>
+     * <code>bool close = 8;</code>
      */
     boolean getClose();
   }
@@ -16634,10 +18427,12 @@ public final class GUIProtos {
       super(builder);
     }
     private ConfigurationTemplateSettings() {
+      option_ = 0;
       selectStandardTemplates_ = false;
       selectCustomDirectory_ = false;
       configurationDirectory_ = "";
-      selected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      selectedStandardTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      selectedCustomTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       template_ = "";
       close_ = false;
     }
@@ -16669,36 +18464,50 @@ public final class GUIProtos {
             }
             case 8: {
 
-              selectStandardTemplates_ = input.readBool();
+              option_ = input.readInt32();
               break;
             }
             case 16: {
 
+              selectStandardTemplates_ = input.readBool();
+              break;
+            }
+            case 24: {
+
               selectCustomDirectory_ = input.readBool();
               break;
             }
-            case 26: {
+            case 34: {
               java.lang.String s = input.readStringRequireUtf8();
 
               configurationDirectory_ = s;
               break;
             }
-            case 34: {
+            case 42: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-                selected_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000008;
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+                selectedStandardTemplates_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000010;
               }
-              selected_.add(s);
+              selectedStandardTemplates_.add(s);
               break;
             }
-            case 42: {
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+                selectedCustomTemplates_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000020;
+              }
+              selectedCustomTemplates_.add(s);
+              break;
+            }
+            case 58: {
               java.lang.String s = input.readStringRequireUtf8();
 
               template_ = s;
               break;
             }
-            case 48: {
+            case 64: {
 
               close_ = input.readBool();
               break;
@@ -16711,8 +18520,11 @@ public final class GUIProtos {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-          selected_ = selected_.getUnmodifiableView();
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+          selectedStandardTemplates_ = selectedStandardTemplates_.getUnmodifiableView();
+        }
+        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+          selectedCustomTemplates_ = selectedCustomTemplates_.getUnmodifiableView();
         }
         makeExtensionsImmutable();
       }
@@ -16730,40 +18542,53 @@ public final class GUIProtos {
     }
 
     private int bitField0_;
-    public static final int SELECT_STANDARD_TEMPLATES_FIELD_NUMBER = 1;
+    public static final int OPTION_FIELD_NUMBER = 1;
+    private int option_;
+    /**
+     * <pre>
+     * The option for the Template Manager
+     * </pre>
+     *
+     * <code>int32 option = 1;</code>
+     */
+    public int getOption() {
+      return option_;
+    }
+
+    public static final int SELECT_STANDARD_TEMPLATES_FIELD_NUMBER = 2;
     private boolean selectStandardTemplates_;
     /**
      * <pre>
      * Set to true to select from a list of standard templates 
      * </pre>
      *
-     * <code>bool select_standard_templates = 1;</code>
+     * <code>bool select_standard_templates = 2;</code>
      */
     public boolean getSelectStandardTemplates() {
       return selectStandardTemplates_;
     }
 
-    public static final int SELECT_CUSTOM_DIRECTORY_FIELD_NUMBER = 2;
+    public static final int SELECT_CUSTOM_DIRECTORY_FIELD_NUMBER = 3;
     private boolean selectCustomDirectory_;
     /**
      * <pre>
      * Set to true to select templates from a configuration directory 
      * </pre>
      *
-     * <code>bool select_custom_directory = 2;</code>
+     * <code>bool select_custom_directory = 3;</code>
      */
     public boolean getSelectCustomDirectory() {
       return selectCustomDirectory_;
     }
 
-    public static final int CONFIGURATION_DIRECTORY_FIELD_NUMBER = 3;
+    public static final int CONFIGURATION_DIRECTORY_FIELD_NUMBER = 4;
     private volatile java.lang.Object configurationDirectory_;
     /**
      * <pre>
      * The configuration directory
      * </pre>
      *
-     * <code>string configuration_directory = 3;</code>
+     * <code>string configuration_directory = 4;</code>
      */
     public java.lang.String getConfigurationDirectory() {
       java.lang.Object ref = configurationDirectory_;
@@ -16782,7 +18607,7 @@ public final class GUIProtos {
      * The configuration directory
      * </pre>
      *
-     * <code>string configuration_directory = 3;</code>
+     * <code>string configuration_directory = 4;</code>
      */
     public com.google.protobuf.ByteString
         getConfigurationDirectoryBytes() {
@@ -16798,59 +18623,104 @@ public final class GUIProtos {
       }
     }
 
-    public static final int SELECTED_FIELD_NUMBER = 4;
-    private com.google.protobuf.LazyStringList selected_;
+    public static final int SELECTED_STANDARD_TEMPLATES_FIELD_NUMBER = 5;
+    private com.google.protobuf.LazyStringList selectedStandardTemplates_;
     /**
      * <pre>
-     * Used for the multiMode option to select templates 
+     * Used for the multiMode option to select standard templates 
      * </pre>
      *
-     * <code>repeated string selected = 4;</code>
+     * <code>repeated string selected_standard_templates = 5;</code>
      */
     public com.google.protobuf.ProtocolStringList
-        getSelectedList() {
-      return selected_;
+        getSelectedStandardTemplatesList() {
+      return selectedStandardTemplates_;
     }
     /**
      * <pre>
-     * Used for the multiMode option to select templates 
+     * Used for the multiMode option to select standard templates 
      * </pre>
      *
-     * <code>repeated string selected = 4;</code>
+     * <code>repeated string selected_standard_templates = 5;</code>
      */
-    public int getSelectedCount() {
-      return selected_.size();
+    public int getSelectedStandardTemplatesCount() {
+      return selectedStandardTemplates_.size();
     }
     /**
      * <pre>
-     * Used for the multiMode option to select templates 
+     * Used for the multiMode option to select standard templates 
      * </pre>
      *
-     * <code>repeated string selected = 4;</code>
+     * <code>repeated string selected_standard_templates = 5;</code>
      */
-    public java.lang.String getSelected(int index) {
-      return selected_.get(index);
+    public java.lang.String getSelectedStandardTemplates(int index) {
+      return selectedStandardTemplates_.get(index);
     }
     /**
      * <pre>
-     * Used for the multiMode option to select templates 
+     * Used for the multiMode option to select standard templates 
      * </pre>
      *
-     * <code>repeated string selected = 4;</code>
+     * <code>repeated string selected_standard_templates = 5;</code>
      */
     public com.google.protobuf.ByteString
-        getSelectedBytes(int index) {
-      return selected_.getByteString(index);
+        getSelectedStandardTemplatesBytes(int index) {
+      return selectedStandardTemplates_.getByteString(index);
     }
 
-    public static final int TEMPLATE_FIELD_NUMBER = 5;
+    public static final int SELECTED_CUSTOM_TEMPLATES_FIELD_NUMBER = 6;
+    private com.google.protobuf.LazyStringList selectedCustomTemplates_;
+    /**
+     * <pre>
+     * Used for the multiMode option to select custom templates 
+     * </pre>
+     *
+     * <code>repeated string selected_custom_templates = 6;</code>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getSelectedCustomTemplatesList() {
+      return selectedCustomTemplates_;
+    }
+    /**
+     * <pre>
+     * Used for the multiMode option to select custom templates 
+     * </pre>
+     *
+     * <code>repeated string selected_custom_templates = 6;</code>
+     */
+    public int getSelectedCustomTemplatesCount() {
+      return selectedCustomTemplates_.size();
+    }
+    /**
+     * <pre>
+     * Used for the multiMode option to select custom templates 
+     * </pre>
+     *
+     * <code>repeated string selected_custom_templates = 6;</code>
+     */
+    public java.lang.String getSelectedCustomTemplates(int index) {
+      return selectedCustomTemplates_.get(index);
+    }
+    /**
+     * <pre>
+     * Used for the multiMode option to select custom templates 
+     * </pre>
+     *
+     * <code>repeated string selected_custom_templates = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSelectedCustomTemplatesBytes(int index) {
+      return selectedCustomTemplates_.getByteString(index);
+    }
+
+    public static final int TEMPLATE_FIELD_NUMBER = 7;
     private volatile java.lang.Object template_;
     /**
      * <pre>
      * The template to view
      * </pre>
      *
-     * <code>string template = 5;</code>
+     * <code>string template = 7;</code>
      */
     public java.lang.String getTemplate() {
       java.lang.Object ref = template_;
@@ -16869,7 +18739,7 @@ public final class GUIProtos {
      * The template to view
      * </pre>
      *
-     * <code>string template = 5;</code>
+     * <code>string template = 7;</code>
      */
     public com.google.protobuf.ByteString
         getTemplateBytes() {
@@ -16885,14 +18755,14 @@ public final class GUIProtos {
       }
     }
 
-    public static final int CLOSE_FIELD_NUMBER = 6;
+    public static final int CLOSE_FIELD_NUMBER = 8;
     private boolean close_;
     /**
      * <pre>
      * Set to true to close the template when finished
      * </pre>
      *
-     * <code>bool close = 6;</code>
+     * <code>bool close = 8;</code>
      */
     public boolean getClose() {
       return close_;
@@ -16910,23 +18780,29 @@ public final class GUIProtos {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (option_ != 0) {
+        output.writeInt32(1, option_);
+      }
       if (selectStandardTemplates_ != false) {
-        output.writeBool(1, selectStandardTemplates_);
+        output.writeBool(2, selectStandardTemplates_);
       }
       if (selectCustomDirectory_ != false) {
-        output.writeBool(2, selectCustomDirectory_);
+        output.writeBool(3, selectCustomDirectory_);
       }
       if (!getConfigurationDirectoryBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, configurationDirectory_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, configurationDirectory_);
       }
-      for (int i = 0; i < selected_.size(); i++) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, selected_.getRaw(i));
+      for (int i = 0; i < selectedStandardTemplates_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, selectedStandardTemplates_.getRaw(i));
+      }
+      for (int i = 0; i < selectedCustomTemplates_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, selectedCustomTemplates_.getRaw(i));
       }
       if (!getTemplateBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, template_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, template_);
       }
       if (close_ != false) {
-        output.writeBool(6, close_);
+        output.writeBool(8, close_);
       }
     }
 
@@ -16935,31 +18811,43 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
+      if (option_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, option_);
+      }
       if (selectStandardTemplates_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1, selectStandardTemplates_);
+          .computeBoolSize(2, selectStandardTemplates_);
       }
       if (selectCustomDirectory_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(2, selectCustomDirectory_);
+          .computeBoolSize(3, selectCustomDirectory_);
       }
       if (!getConfigurationDirectoryBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, configurationDirectory_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, configurationDirectory_);
       }
       {
         int dataSize = 0;
-        for (int i = 0; i < selected_.size(); i++) {
-          dataSize += computeStringSizeNoTag(selected_.getRaw(i));
+        for (int i = 0; i < selectedStandardTemplates_.size(); i++) {
+          dataSize += computeStringSizeNoTag(selectedStandardTemplates_.getRaw(i));
         }
         size += dataSize;
-        size += 1 * getSelectedList().size();
+        size += 1 * getSelectedStandardTemplatesList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < selectedCustomTemplates_.size(); i++) {
+          dataSize += computeStringSizeNoTag(selectedCustomTemplates_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getSelectedCustomTemplatesList().size();
       }
       if (!getTemplateBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, template_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, template_);
       }
       if (close_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(6, close_);
+          .computeBoolSize(8, close_);
       }
       memoizedSize = size;
       return size;
@@ -16977,14 +18865,18 @@ public final class GUIProtos {
       gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings other = (gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings) obj;
 
       boolean result = true;
+      result = result && (getOption()
+          == other.getOption());
       result = result && (getSelectStandardTemplates()
           == other.getSelectStandardTemplates());
       result = result && (getSelectCustomDirectory()
           == other.getSelectCustomDirectory());
       result = result && getConfigurationDirectory()
           .equals(other.getConfigurationDirectory());
-      result = result && getSelectedList()
-          .equals(other.getSelectedList());
+      result = result && getSelectedStandardTemplatesList()
+          .equals(other.getSelectedStandardTemplatesList());
+      result = result && getSelectedCustomTemplatesList()
+          .equals(other.getSelectedCustomTemplatesList());
       result = result && getTemplate()
           .equals(other.getTemplate());
       result = result && (getClose()
@@ -16999,6 +18891,8 @@ public final class GUIProtos {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getOption();
       hash = (37 * hash) + SELECT_STANDARD_TEMPLATES_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getSelectStandardTemplates());
@@ -17007,9 +18901,13 @@ public final class GUIProtos {
           getSelectCustomDirectory());
       hash = (37 * hash) + CONFIGURATION_DIRECTORY_FIELD_NUMBER;
       hash = (53 * hash) + getConfigurationDirectory().hashCode();
-      if (getSelectedCount() > 0) {
-        hash = (37 * hash) + SELECTED_FIELD_NUMBER;
-        hash = (53 * hash) + getSelectedList().hashCode();
+      if (getSelectedStandardTemplatesCount() > 0) {
+        hash = (37 * hash) + SELECTED_STANDARD_TEMPLATES_FIELD_NUMBER;
+        hash = (53 * hash) + getSelectedStandardTemplatesList().hashCode();
+      }
+      if (getSelectedCustomTemplatesCount() > 0) {
+        hash = (37 * hash) + SELECTED_CUSTOM_TEMPLATES_FIELD_NUMBER;
+        hash = (53 * hash) + getSelectedCustomTemplatesList().hashCode();
       }
       hash = (37 * hash) + TEMPLATE_FIELD_NUMBER;
       hash = (53 * hash) + getTemplate().hashCode();
@@ -17149,14 +19047,18 @@ public final class GUIProtos {
       }
       public Builder clear() {
         super.clear();
+        option_ = 0;
+
         selectStandardTemplates_ = false;
 
         selectCustomDirectory_ = false;
 
         configurationDirectory_ = "";
 
-        selected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000008);
+        selectedStandardTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        selectedCustomTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000020);
         template_ = "";
 
         close_ = false;
@@ -17185,14 +19087,20 @@ public final class GUIProtos {
         gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings result = new gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
+        result.option_ = option_;
         result.selectStandardTemplates_ = selectStandardTemplates_;
         result.selectCustomDirectory_ = selectCustomDirectory_;
         result.configurationDirectory_ = configurationDirectory_;
-        if (((bitField0_ & 0x00000008) == 0x00000008)) {
-          selected_ = selected_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000008);
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          selectedStandardTemplates_ = selectedStandardTemplates_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000010);
         }
-        result.selected_ = selected_;
+        result.selectedStandardTemplates_ = selectedStandardTemplates_;
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          selectedCustomTemplates_ = selectedCustomTemplates_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000020);
+        }
+        result.selectedCustomTemplates_ = selectedCustomTemplates_;
         result.template_ = template_;
         result.close_ = close_;
         result.bitField0_ = to_bitField0_;
@@ -17237,6 +19145,9 @@ public final class GUIProtos {
 
       public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings other) {
         if (other == gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings.getDefaultInstance()) return this;
+        if (other.getOption() != 0) {
+          setOption(other.getOption());
+        }
         if (other.getSelectStandardTemplates() != false) {
           setSelectStandardTemplates(other.getSelectStandardTemplates());
         }
@@ -17247,13 +19158,23 @@ public final class GUIProtos {
           configurationDirectory_ = other.configurationDirectory_;
           onChanged();
         }
-        if (!other.selected_.isEmpty()) {
-          if (selected_.isEmpty()) {
-            selected_ = other.selected_;
-            bitField0_ = (bitField0_ & ~0x00000008);
+        if (!other.selectedStandardTemplates_.isEmpty()) {
+          if (selectedStandardTemplates_.isEmpty()) {
+            selectedStandardTemplates_ = other.selectedStandardTemplates_;
+            bitField0_ = (bitField0_ & ~0x00000010);
           } else {
-            ensureSelectedIsMutable();
-            selected_.addAll(other.selected_);
+            ensureSelectedStandardTemplatesIsMutable();
+            selectedStandardTemplates_.addAll(other.selectedStandardTemplates_);
+          }
+          onChanged();
+        }
+        if (!other.selectedCustomTemplates_.isEmpty()) {
+          if (selectedCustomTemplates_.isEmpty()) {
+            selectedCustomTemplates_ = other.selectedCustomTemplates_;
+            bitField0_ = (bitField0_ & ~0x00000020);
+          } else {
+            ensureSelectedCustomTemplatesIsMutable();
+            selectedCustomTemplates_.addAll(other.selectedCustomTemplates_);
           }
           onChanged();
         }
@@ -17291,13 +19212,51 @@ public final class GUIProtos {
       }
       private int bitField0_;
 
+      private int option_ ;
+      /**
+       * <pre>
+       * The option for the Template Manager
+       * </pre>
+       *
+       * <code>int32 option = 1;</code>
+       */
+      public int getOption() {
+        return option_;
+      }
+      /**
+       * <pre>
+       * The option for the Template Manager
+       * </pre>
+       *
+       * <code>int32 option = 1;</code>
+       */
+      public Builder setOption(int value) {
+        
+        option_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The option for the Template Manager
+       * </pre>
+       *
+       * <code>int32 option = 1;</code>
+       */
+      public Builder clearOption() {
+        
+        option_ = 0;
+        onChanged();
+        return this;
+      }
+
       private boolean selectStandardTemplates_ ;
       /**
        * <pre>
        * Set to true to select from a list of standard templates 
        * </pre>
        *
-       * <code>bool select_standard_templates = 1;</code>
+       * <code>bool select_standard_templates = 2;</code>
        */
       public boolean getSelectStandardTemplates() {
         return selectStandardTemplates_;
@@ -17307,7 +19266,7 @@ public final class GUIProtos {
        * Set to true to select from a list of standard templates 
        * </pre>
        *
-       * <code>bool select_standard_templates = 1;</code>
+       * <code>bool select_standard_templates = 2;</code>
        */
       public Builder setSelectStandardTemplates(boolean value) {
         
@@ -17320,7 +19279,7 @@ public final class GUIProtos {
        * Set to true to select from a list of standard templates 
        * </pre>
        *
-       * <code>bool select_standard_templates = 1;</code>
+       * <code>bool select_standard_templates = 2;</code>
        */
       public Builder clearSelectStandardTemplates() {
         
@@ -17335,7 +19294,7 @@ public final class GUIProtos {
        * Set to true to select templates from a configuration directory 
        * </pre>
        *
-       * <code>bool select_custom_directory = 2;</code>
+       * <code>bool select_custom_directory = 3;</code>
        */
       public boolean getSelectCustomDirectory() {
         return selectCustomDirectory_;
@@ -17345,7 +19304,7 @@ public final class GUIProtos {
        * Set to true to select templates from a configuration directory 
        * </pre>
        *
-       * <code>bool select_custom_directory = 2;</code>
+       * <code>bool select_custom_directory = 3;</code>
        */
       public Builder setSelectCustomDirectory(boolean value) {
         
@@ -17358,7 +19317,7 @@ public final class GUIProtos {
        * Set to true to select templates from a configuration directory 
        * </pre>
        *
-       * <code>bool select_custom_directory = 2;</code>
+       * <code>bool select_custom_directory = 3;</code>
        */
       public Builder clearSelectCustomDirectory() {
         
@@ -17373,7 +19332,7 @@ public final class GUIProtos {
        * The configuration directory
        * </pre>
        *
-       * <code>string configuration_directory = 3;</code>
+       * <code>string configuration_directory = 4;</code>
        */
       public java.lang.String getConfigurationDirectory() {
         java.lang.Object ref = configurationDirectory_;
@@ -17392,7 +19351,7 @@ public final class GUIProtos {
        * The configuration directory
        * </pre>
        *
-       * <code>string configuration_directory = 3;</code>
+       * <code>string configuration_directory = 4;</code>
        */
       public com.google.protobuf.ByteString
           getConfigurationDirectoryBytes() {
@@ -17412,7 +19371,7 @@ public final class GUIProtos {
        * The configuration directory
        * </pre>
        *
-       * <code>string configuration_directory = 3;</code>
+       * <code>string configuration_directory = 4;</code>
        */
       public Builder setConfigurationDirectory(
           java.lang.String value) {
@@ -17429,7 +19388,7 @@ public final class GUIProtos {
        * The configuration directory
        * </pre>
        *
-       * <code>string configuration_directory = 3;</code>
+       * <code>string configuration_directory = 4;</code>
        */
       public Builder clearConfigurationDirectory() {
         
@@ -17442,7 +19401,7 @@ public final class GUIProtos {
        * The configuration directory
        * </pre>
        *
-       * <code>string configuration_directory = 3;</code>
+       * <code>string configuration_directory = 4;</code>
        */
       public Builder setConfigurationDirectoryBytes(
           com.google.protobuf.ByteString value) {
@@ -17456,132 +19415,262 @@ public final class GUIProtos {
         return this;
       }
 
-      private com.google.protobuf.LazyStringList selected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      private void ensureSelectedIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
-          selected_ = new com.google.protobuf.LazyStringArrayList(selected_);
-          bitField0_ |= 0x00000008;
+      private com.google.protobuf.LazyStringList selectedStandardTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureSelectedStandardTemplatesIsMutable() {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+          selectedStandardTemplates_ = new com.google.protobuf.LazyStringArrayList(selectedStandardTemplates_);
+          bitField0_ |= 0x00000010;
          }
       }
       /**
        * <pre>
-       * Used for the multiMode option to select templates 
+       * Used for the multiMode option to select standard templates 
        * </pre>
        *
-       * <code>repeated string selected = 4;</code>
+       * <code>repeated string selected_standard_templates = 5;</code>
        */
       public com.google.protobuf.ProtocolStringList
-          getSelectedList() {
-        return selected_.getUnmodifiableView();
+          getSelectedStandardTemplatesList() {
+        return selectedStandardTemplates_.getUnmodifiableView();
       }
       /**
        * <pre>
-       * Used for the multiMode option to select templates 
+       * Used for the multiMode option to select standard templates 
        * </pre>
        *
-       * <code>repeated string selected = 4;</code>
+       * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public int getSelectedCount() {
-        return selected_.size();
+      public int getSelectedStandardTemplatesCount() {
+        return selectedStandardTemplates_.size();
       }
       /**
        * <pre>
-       * Used for the multiMode option to select templates 
+       * Used for the multiMode option to select standard templates 
        * </pre>
        *
-       * <code>repeated string selected = 4;</code>
+       * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public java.lang.String getSelected(int index) {
-        return selected_.get(index);
+      public java.lang.String getSelectedStandardTemplates(int index) {
+        return selectedStandardTemplates_.get(index);
       }
       /**
        * <pre>
-       * Used for the multiMode option to select templates 
+       * Used for the multiMode option to select standard templates 
        * </pre>
        *
-       * <code>repeated string selected = 4;</code>
+       * <code>repeated string selected_standard_templates = 5;</code>
        */
       public com.google.protobuf.ByteString
-          getSelectedBytes(int index) {
-        return selected_.getByteString(index);
+          getSelectedStandardTemplatesBytes(int index) {
+        return selectedStandardTemplates_.getByteString(index);
       }
       /**
        * <pre>
-       * Used for the multiMode option to select templates 
+       * Used for the multiMode option to select standard templates 
        * </pre>
        *
-       * <code>repeated string selected = 4;</code>
+       * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public Builder setSelected(
+      public Builder setSelectedStandardTemplates(
           int index, java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  ensureSelectedIsMutable();
-        selected_.set(index, value);
+  ensureSelectedStandardTemplatesIsMutable();
+        selectedStandardTemplates_.set(index, value);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Used for the multiMode option to select templates 
+       * Used for the multiMode option to select standard templates 
        * </pre>
        *
-       * <code>repeated string selected = 4;</code>
+       * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public Builder addSelected(
+      public Builder addSelectedStandardTemplates(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  ensureSelectedIsMutable();
-        selected_.add(value);
+  ensureSelectedStandardTemplatesIsMutable();
+        selectedStandardTemplates_.add(value);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Used for the multiMode option to select templates 
+       * Used for the multiMode option to select standard templates 
        * </pre>
        *
-       * <code>repeated string selected = 4;</code>
+       * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public Builder addAllSelected(
+      public Builder addAllSelectedStandardTemplates(
           java.lang.Iterable<java.lang.String> values) {
-        ensureSelectedIsMutable();
+        ensureSelectedStandardTemplatesIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, selected_);
+            values, selectedStandardTemplates_);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Used for the multiMode option to select templates 
+       * Used for the multiMode option to select standard templates 
        * </pre>
        *
-       * <code>repeated string selected = 4;</code>
+       * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public Builder clearSelected() {
-        selected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000008);
+      public Builder clearSelectedStandardTemplates() {
+        selectedStandardTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Used for the multiMode option to select templates 
+       * Used for the multiMode option to select standard templates 
        * </pre>
        *
-       * <code>repeated string selected = 4;</code>
+       * <code>repeated string selected_standard_templates = 5;</code>
        */
-      public Builder addSelectedBytes(
+      public Builder addSelectedStandardTemplatesBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        ensureSelectedIsMutable();
-        selected_.add(value);
+        ensureSelectedStandardTemplatesIsMutable();
+        selectedStandardTemplates_.add(value);
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringList selectedCustomTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureSelectedCustomTemplatesIsMutable() {
+        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
+          selectedCustomTemplates_ = new com.google.protobuf.LazyStringArrayList(selectedCustomTemplates_);
+          bitField0_ |= 0x00000020;
+         }
+      }
+      /**
+       * <pre>
+       * Used for the multiMode option to select custom templates 
+       * </pre>
+       *
+       * <code>repeated string selected_custom_templates = 6;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getSelectedCustomTemplatesList() {
+        return selectedCustomTemplates_.getUnmodifiableView();
+      }
+      /**
+       * <pre>
+       * Used for the multiMode option to select custom templates 
+       * </pre>
+       *
+       * <code>repeated string selected_custom_templates = 6;</code>
+       */
+      public int getSelectedCustomTemplatesCount() {
+        return selectedCustomTemplates_.size();
+      }
+      /**
+       * <pre>
+       * Used for the multiMode option to select custom templates 
+       * </pre>
+       *
+       * <code>repeated string selected_custom_templates = 6;</code>
+       */
+      public java.lang.String getSelectedCustomTemplates(int index) {
+        return selectedCustomTemplates_.get(index);
+      }
+      /**
+       * <pre>
+       * Used for the multiMode option to select custom templates 
+       * </pre>
+       *
+       * <code>repeated string selected_custom_templates = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSelectedCustomTemplatesBytes(int index) {
+        return selectedCustomTemplates_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * Used for the multiMode option to select custom templates 
+       * </pre>
+       *
+       * <code>repeated string selected_custom_templates = 6;</code>
+       */
+      public Builder setSelectedCustomTemplates(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSelectedCustomTemplatesIsMutable();
+        selectedCustomTemplates_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Used for the multiMode option to select custom templates 
+       * </pre>
+       *
+       * <code>repeated string selected_custom_templates = 6;</code>
+       */
+      public Builder addSelectedCustomTemplates(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSelectedCustomTemplatesIsMutable();
+        selectedCustomTemplates_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Used for the multiMode option to select custom templates 
+       * </pre>
+       *
+       * <code>repeated string selected_custom_templates = 6;</code>
+       */
+      public Builder addAllSelectedCustomTemplates(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureSelectedCustomTemplatesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, selectedCustomTemplates_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Used for the multiMode option to select custom templates 
+       * </pre>
+       *
+       * <code>repeated string selected_custom_templates = 6;</code>
+       */
+      public Builder clearSelectedCustomTemplates() {
+        selectedCustomTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Used for the multiMode option to select custom templates 
+       * </pre>
+       *
+       * <code>repeated string selected_custom_templates = 6;</code>
+       */
+      public Builder addSelectedCustomTemplatesBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureSelectedCustomTemplatesIsMutable();
+        selectedCustomTemplates_.add(value);
         onChanged();
         return this;
       }
@@ -17592,7 +19681,7 @@ public final class GUIProtos {
        * The template to view
        * </pre>
        *
-       * <code>string template = 5;</code>
+       * <code>string template = 7;</code>
        */
       public java.lang.String getTemplate() {
         java.lang.Object ref = template_;
@@ -17611,7 +19700,7 @@ public final class GUIProtos {
        * The template to view
        * </pre>
        *
-       * <code>string template = 5;</code>
+       * <code>string template = 7;</code>
        */
       public com.google.protobuf.ByteString
           getTemplateBytes() {
@@ -17631,7 +19720,7 @@ public final class GUIProtos {
        * The template to view
        * </pre>
        *
-       * <code>string template = 5;</code>
+       * <code>string template = 7;</code>
        */
       public Builder setTemplate(
           java.lang.String value) {
@@ -17648,7 +19737,7 @@ public final class GUIProtos {
        * The template to view
        * </pre>
        *
-       * <code>string template = 5;</code>
+       * <code>string template = 7;</code>
        */
       public Builder clearTemplate() {
         
@@ -17661,7 +19750,7 @@ public final class GUIProtos {
        * The template to view
        * </pre>
        *
-       * <code>string template = 5;</code>
+       * <code>string template = 7;</code>
        */
       public Builder setTemplateBytes(
           com.google.protobuf.ByteString value) {
@@ -17681,7 +19770,7 @@ public final class GUIProtos {
        * Set to true to close the template when finished
        * </pre>
        *
-       * <code>bool close = 6;</code>
+       * <code>bool close = 8;</code>
        */
       public boolean getClose() {
         return close_;
@@ -17691,7 +19780,7 @@ public final class GUIProtos {
        * Set to true to close the template when finished
        * </pre>
        *
-       * <code>bool close = 6;</code>
+       * <code>bool close = 8;</code>
        */
       public Builder setClose(boolean value) {
         
@@ -17704,7 +19793,7 @@ public final class GUIProtos {
        * Set to true to close the template when finished
        * </pre>
        *
-       * <code>bool close = 6;</code>
+       * <code>bool close = 8;</code>
        */
       public Builder clearClose() {
         
@@ -17796,6 +19885,16 @@ public final class GUIProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_OpticsSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_DefaultTemplate_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor;
   private static final 
@@ -17918,12 +20017,22 @@ public final class GUIProtos {
       "le\030\023 \001(\001\022\022\n\nimage_mode\030\024 \001(\005\022\020\n\010weighted" +
       "\030\025 \001(\010\022\021\n\tequalised\030\026 \001(\010\022\021\n\tplot_mode\030\027" +
       " \001(\005\022\024\n\014outline_mode\030\030 \001(\005\022\032\n\022spanning_t" +
-      "ree_mode\030\031 \001(\005\022\016\n\006lambda\030\032 \001(\001\"\267\001\n\035Confi" +
-      "gurationTemplateSettings\022!\n\031select_stand",
-      "ard_templates\030\001 \001(\010\022\037\n\027select_custom_dir" +
-      "ectory\030\002 \001(\010\022\037\n\027configuration_directory\030" +
-      "\003 \001(\t\022\020\n\010selected\030\004 \003(\t\022\020\n\010template\030\005 \001(" +
-      "\t\022\r\n\005close\030\006 \001(\010B\013B\tGUIProtosb\006proto3"
+      "ree_mode\030\031 \001(\005\022\016\n\006lambda\030\032 \001(\001\"\203\001\n\017Defau" +
+      "ltTemplate\022:\n\rtemplate_type\030\001 \001(\0162#.gdsc",
+      ".smlm.data.config.TemplateType\022\014\n\004name\030\002" +
+      " \001(\t\022\020\n\010filename\030\003 \001(\t\022\024\n\014tif_filename\030\004" +
+      " \001(\t\"\\\n\027DefaultTemplateSettings\022A\n\021defau" +
+      "lt_templates\030\001 \003(\0132&.gdsc.smlm.data.conf" +
+      "ig.DefaultTemplate\"\375\001\n\035ConfigurationTemp" +
+      "lateSettings\022\016\n\006option\030\001 \001(\005\022!\n\031select_s" +
+      "tandard_templates\030\002 \001(\010\022\037\n\027select_custom" +
+      "_directory\030\003 \001(\010\022\037\n\027configuration_direct" +
+      "ory\030\004 \001(\t\022#\n\033selected_standard_templates" +
+      "\030\005 \003(\t\022!\n\031selected_custom_templates\030\006 \003(",
+      "\t\022\020\n\010template\030\007 \001(\t\022\r\n\005close\030\010 \001(\010*O\n\014Te" +
+      "mplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOU" +
+      "RCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tG" +
+      "UIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -17981,12 +20090,24 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor,
         new java.lang.String[] { "InputOption", "OpticsMode", "NumberOfSplitSets", "UseRandomVectors", "SaveApproximateSets", "SampleMode", "GeneratingDistance", "MinPoints", "ClusteringMode", "Xi", "TopLevel", "UpperLimit", "LowerLimit", "Samples", "SampleFraction", "FractionNoise", "ClusteringDistance", "Core", "ImageScale", "ImageMode", "Weighted", "Equalised", "PlotMode", "OutlineMode", "SpanningTreeMode", "Lambda", });
-    internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor =
+    internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor =
       getDescriptor().getMessageTypes().get(7);
+    internal_static_gdsc_smlm_data_config_DefaultTemplate_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor,
+        new java.lang.String[] { "TemplateType", "Name", "Filename", "TifFilename", });
+    internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor,
+        new java.lang.String[] { "DefaultTemplates", });
+    internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor =
+      getDescriptor().getMessageTypes().get(9);
     internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor,
-        new java.lang.String[] { "SelectStandardTemplates", "SelectCustomDirectory", "ConfigurationDirectory", "Selected", "Template", "Close", });
+        new java.lang.String[] { "Option", "SelectStandardTemplates", "SelectCustomDirectory", "ConfigurationDirectory", "SelectedStandardTemplates", "SelectedCustomTemplates", "Template", "Close", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
   }

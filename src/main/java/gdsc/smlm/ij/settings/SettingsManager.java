@@ -35,6 +35,7 @@ import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
+import gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
@@ -823,6 +824,18 @@ public class SettingsManager
 		return new ConfigurationReader<ConfigurationTemplateSettings>(GUIProtosHelper.defaultConfigurationTemplateSettings).read(flags);
 	}
 
+	/**
+	 * Read the DefaultTemplateSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the DefaultTemplateSettings
+	 */
+	public static DefaultTemplateSettings readDefaultTemplateSettings(int flags)
+	{
+		return new ConfigurationReader<DefaultTemplateSettings>(DefaultTemplateSettings.getDefaultInstance()).read(flags);
+	}
+	
 	/**
 	 * Read the FitEngineConfiguration from the settings file in the settings directory. This loads the current
 	 * Calibration, PSF and FitEngineSettings.

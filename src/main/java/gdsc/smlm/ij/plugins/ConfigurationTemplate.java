@@ -24,18 +24,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
+import java.util.Map.Entry;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
-import gdsc.core.utils.TurboList.SimplePredicate;
+import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.GUIProtos;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
+import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings.Builder;
+import gdsc.smlm.data.config.GUIProtos.DefaultTemplate;
+import gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -55,51 +60,106 @@ import ij.text.TextWindow;
 import ij.util.StringSorter;
 
 /**
- * This plugin loads configuration templates for the localisation fitting settings
+ * This plugin loads configuration templates for the localisation fitting settings.
  */
 public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListener
 {
 	/**
-	 * Describes the details of a template that can be loaded from the JAR resources folder
+	 * Describes the details of a template that can be loaded from the JAR resources folder.
 	 */
 	static class TemplateResource
 	{
+		/** The path. */
 		final String path;
-		final String tifPath;
-		final String name;
-		final boolean optional;
 
-		TemplateResource(String path, String name, boolean optional, String tifPath)
+		/** The tif path. */
+		final String tifPath;
+
+		/** The name. */
+		final String name;
+
+		/**
+		 * Instantiates a new template resource.
+		 *
+		 * @param path
+		 *            the path
+		 * @param name
+		 *            the name
+		 * @param tifPath
+		 *            the tif path
+		 */
+		TemplateResource(String path, String name, String tifPath)
 		{
 			this.path = path;
 			this.name = name;
-			this.optional = optional;
 			this.tifPath = tifPath;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#toString()
+		 */
 		@Override
 		public String toString()
 		{
-			String text = String.format("path=%s, name=%s, optional=%b", path, name, optional);
+			String text = String.format("path=%s, name=%s", path, name);
 			if (tifPath != null)
 				text += ", tifPath=" + tifPath;
 			return text;
 		}
 	}
 
+	/**
+	 * The template type.
+	 */
+	private enum TemplateType
+	{
+		/** A template that was create using inline code. */
+		INLINE,
+		/** A template loaded from a jar resource. */
+		RESOURCE,
+		/** A custom template, e.g. loaded from file or saved from another plugin. */
+		CUSTOM
+	}
+
+	/**
+	 * The Class Template.
+	 */
 	private static class Template
 	{
+		/** The settings. */
 		TemplateSettings settings;
-		final boolean custom;
+
+		/** The template type. */
+		TemplateType templateType;
+
+		/** The file. */
 		final File file;
+
+		/** The timestamp. */
 		long timestamp;
+
+		/** The tif path. */
 		// An example image from the data used to build the template
 		String tifPath;
 
-		public Template(TemplateSettings settings, boolean custom, File file, String tifPath)
+		/**
+		 * Instantiates a new template.
+		 *
+		 * @param settings
+		 *            the settings
+		 * @param templateType
+		 *            the template type
+		 * @param file
+		 *            the file
+		 * @param tifPath
+		 *            the tif path
+		 */
+		public Template(TemplateSettings settings, TemplateType templateType, File file, String tifPath)
 		{
 			this.settings = settings;
-			this.custom = custom;
+			this.templateType = templateType;
 			this.file = file;
 			timestamp = (file != null) ? file.lastModified() : 0;
 
@@ -117,6 +177,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			}
 		}
 
+		/**
+		 * Update.
+		 */
 		public void update()
 		{
 			// Check if we can update from the file
@@ -135,10 +198,10 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		}
 
 		/**
-		 * Save the settings to file
-		 * 
-		 * @param file
+		 * Save the settings to file.
 		 *
+		 * @param file
+		 *            the file
 		 * @return true, if successful, False if failed (or no file to save to)
 		 */
 		public boolean save(File file)
@@ -152,11 +215,21 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			return result;
 		}
 
+		/**
+		 * Checks for image.
+		 *
+		 * @return true, if successful
+		 */
 		public boolean hasImage()
 		{
 			return tifPath != null;
 		}
 
+		/**
+		 * Load image.
+		 *
+		 * @return the image plus
+		 */
 		public ImagePlus loadImage()
 		{
 			if (!hasImage())
@@ -185,8 +258,10 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		}
 	}
 
+	/** A set of inline templates. These can be loaded. */
+	private static LinkedHashMap<String, Template> inlineTemplates;
+	/** The current set of templates that will be listed as loaded. */
 	private static LinkedHashMap<String, Template> map;
-
 	private String TITLE;
 	private ImagePlus imp;
 	private int currentSlice = 0;
@@ -200,7 +275,15 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		// Maintain the names in the order they are added
 		map = new LinkedHashMap<String, ConfigurationTemplate.Template>();
 
+		createInlineTemplates();
+
+		loadDefaultTemplates();
+	}
+
+	private static void createInlineTemplates()
+	{
 		// Q. What settings should be in the template?
+		inlineTemplates = new LinkedHashMap<String, ConfigurationTemplate.Template>();
 
 		FitEngineConfiguration config = new FitEngineConfiguration();
 		FitConfiguration fitConfig = config.getFitConfiguration();
@@ -217,12 +300,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(45);
-		addTemplate("PALM LSE", config);
+		addInlineTemplate("PALM LSE", config);
 
 		// Add settings for STORM ...
 		config.setResidualsThreshold(0.4);
 		config.setFailuresLimit(3);
-		addTemplate("STORM LSE", config);
+		addInlineTemplate("STORM LSE", config);
 		config.setResidualsThreshold(1);
 		config.setFailuresLimit(1);
 
@@ -235,12 +318,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(47);
-		addTemplate("PALM MLE", config);
+		addInlineTemplate("PALM MLE", config);
 
 		// Add settings for STORM ...
 		config.setResidualsThreshold(0.4);
 		config.setFailuresLimit(3);
-		addTemplate("STORM MLE", config);
+		addInlineTemplate("STORM MLE", config);
 		config.setResidualsThreshold(1);
 		config.setFailuresLimit(1);
 
@@ -251,14 +334,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(50);
-		addTemplate("PALM MLE Camera", config);
+		addInlineTemplate("PALM MLE Camera", config);
 
 		// Add settings for STORM ...
 		config.setResidualsThreshold(0.4);
 		config.setFailuresLimit(3);
-		addTemplate("STORM MLE Camera", config);
-
-		loadStandardTemplates();
+		addInlineTemplate("STORM MLE Camera", config);
 	}
 
 	/**
@@ -270,32 +351,136 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 * @param config
 	 *            the config
 	 */
-	private static void addTemplate(String name, FitEngineConfiguration config)
+	private static void addInlineTemplate(String name, FitEngineConfiguration config)
 	{
 		TemplateSettings.Builder builder = TemplateSettings.newBuilder();
 		builder.setFitEngineSettings(config.getFitEngineSettings());
-		addTemplate(name, builder.build(), false, null, null);
+		Template template = new Template(builder.build(), TemplateType.INLINE, null, null);
+		inlineTemplates.put(name, template);
+	}
+
+	private static String[] listInlineTemplates()
+	{
+		// Turn the keys into an array 
+		ArrayList<String> names = new ArrayList<String>(inlineTemplates.keySet());
+		return names.toArray(new String[inlineTemplates.size()]);
 	}
 
 	/**
-	 * Load standard templates (those not marked as optional).
+	 * Load the default templates (those selected by the user to load on start-up).
+	 * <p>
+	 * Given the list of standard templates is manipulated only by this plugin this should
+	 * be the same set of templates as that used last time by the user.
 	 */
-	private static void loadStandardTemplates()
+	private static void loadDefaultTemplates()
 	{
-		TemplateResource[] templates = listPackageTemplates(true, false);
-		loadTemplates(templates);
+		// Allow this to fail silently
+		DefaultTemplateSettings settings = SettingsManager.readDefaultTemplateSettings(SettingsManager.FLAG_SILENT);
+		if (settings.getDefaultTemplatesCount() == 0)
+			return;
+
+		HashMap<String, TemplateResource> templateResources = null;
+
+		// Process in order so that the order is preserved, i.e. do not bulk load each type
+		for (DefaultTemplate d : settings.getDefaultTemplatesList())
+		{
+			switch (d.getTemplateType())
+			{
+				case CUSTOM_TEMPLATE:
+					loadCustomTemplate(d.getName(), d.getFilename(), d.getTifFilename());
+					break;
+
+				case INLINE_TEMPLATE:
+					Template t = inlineTemplates.get(d.getName());
+					if (t != null)
+						map.put(d.getName(), t);
+					break;
+
+				case RESOURCE_TEMPLATE:
+					if (templateResources == null)
+					{
+						TemplateResource[] list = listTemplateResources();
+						templateResources = new HashMap<String, TemplateResource>(list.length);
+						for (TemplateResource r : list)
+							templateResources.put(r.name, r);
+					}
+					loadTemplateResource(templateResources.get(d.getName()));
+					break;
+
+				default:
+					break;
+			}
+		}
+	}
+
+	private static void loadCustomTemplate(String name, String path, String tifPath)
+	{
+		TemplateSettings.Builder builder = TemplateSettings.newBuilder();
+		File file = new File(path);
+		if (SettingsManager.fromJSON(file, builder, 0))
+		{
+			addTemplate(name, builder.build(), TemplateType.CUSTOM, file, tifPath);
+		}
+	}
+
+	private static void loadTemplateResource(TemplateResource template)
+	{
+		if (template == null)
+			return;
+		Class<ConfigurationTemplate> resourceClass = ConfigurationTemplate.class;
+		InputStream templateStream = resourceClass.getResourceAsStream(template.path);
+		if (templateStream == null)
+			return;
+
+		InputStreamReader reader = new InputStreamReader(templateStream);
+		TemplateSettings.Builder builder = TemplateSettings.newBuilder();
+		if (SettingsManager.fromJSON(reader, builder, 0
+		//SettingsManager.FLAG_SILENT
+		))
+		{
+			addTemplate(template.name, builder.build(), TemplateType.RESOURCE, null, template.tifPath);
+		}
+	}
+
+	/**
+	 * Save the templates currently available in memory as the default templates to load on start-up.
+	 */
+	private static void saveDefaultTemplates()
+	{
+		DefaultTemplateSettings.Builder settings = DefaultTemplateSettings.newBuilder();
+		DefaultTemplate.Builder defaultTemplate = DefaultTemplate.newBuilder();
+		for (Entry<String, Template> entry : map.entrySet())
+		{
+			defaultTemplate.clear();
+			defaultTemplate.setName(entry.getKey());
+			Template t = entry.getValue();
+			switch (t.templateType)
+			{
+				case CUSTOM:
+					defaultTemplate.setTemplateType(GUIProtos.TemplateType.CUSTOM_TEMPLATE);
+					break;
+				case INLINE:
+					defaultTemplate.setTemplateType(GUIProtos.TemplateType.INLINE_TEMPLATE);
+					break;
+				case RESOURCE:
+					defaultTemplate.setTemplateType(GUIProtos.TemplateType.RESOURCE_TEMPLATE);
+					break;
+			}
+			if (t.file != null)
+				defaultTemplate.setFilename(t.file.getPath());
+			if (t.tifPath != null)
+				defaultTemplate.setTifFilename(t.tifPath);
+			settings.addDefaultTemplates(defaultTemplate.build());
+		}
+		SettingsManager.writeSettings(settings);
 	}
 
 	/**
 	 * List the templates from package resources.
 	 *
-	 * @param listMandatory
-	 *            Set to true to list the mandatory templates
-	 * @param listOptional
-	 *            Set to true to list the optional templates
 	 * @return the templates
 	 */
-	static TemplateResource[] listPackageTemplates(boolean listMandatory, boolean listOptional)
+	static TemplateResource[] listTemplateResources()
 	{
 		// Load templates from package resources
 		String templateDir = "/gdsc/smlm/templates/";
@@ -306,7 +491,6 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		BufferedReader input = new BufferedReader(new InputStreamReader(templateListStream));
 		String line;
 		ArrayList<TemplateResource> list = new ArrayList<TemplateResource>();
-		Pattern p = Pattern.compile("\\*");
 		try
 		{
 			while ((line = input.readLine()) != null)
@@ -317,33 +501,14 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 				//System.out.println(line);
 
-				String template = line;
-				boolean optional = true;
-				// Mandatory templates have a '*' suffix. 
-				int index = template.indexOf('*');
-				if (index >= 0)
-				{
-					template = p.matcher(template).replaceAll("");
-					optional = false;
-				}
-				if (optional)
-				{
-					if (!listOptional)
-						continue;
-				}
-				else
-				{
-					if (!listMandatory)
-						continue;
-				}
 				// Check the resource exists
-				String path = templateDir + template;
+				String path = templateDir + line;
 				InputStream templateStream = resourceClass.getResourceAsStream(path);
 				if (templateStream == null)
 					continue;
 
 				// Create a simple name
-				String name = Utils.removeExtension(template);
+				String name = Utils.removeExtension(line);
 
 				// Check if an example TIF file exists for the template
 				String tifPath = templateDir + name + ".tif";
@@ -351,7 +516,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 				if (tifStream == null)
 					tifPath = null;
 
-				list.add(new TemplateResource(path, name, optional, tifPath));
+				list.add(new TemplateResource(path, name, tifPath));
 			}
 		}
 		catch (IOException e)
@@ -366,8 +531,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 *
 	 * @param templates
 	 *            the templates
+	 * @return the int
 	 */
-	static int loadTemplates(TemplateResource[] templates)
+	static int loadTemplateResources(TemplateResource[] templates)
 	{
 		if (templates == null || templates.length == 0)
 			return 0;
@@ -406,22 +572,38 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			))
 			{
 				count++;
-				addTemplate(template.name, builder.build(), false, null, template.tifPath);
+				addTemplate(template.name, builder.build(), TemplateType.RESOURCE, null, template.tifPath);
 			}
 		}
 		return count;
 	}
 
-	private static Template addTemplate(String name, TemplateSettings settings, boolean custom, File file, String tifPath)
+	/**
+	 * Adds the template.
+	 *
+	 * @param name
+	 *            the name
+	 * @param settings
+	 *            the settings
+	 * @param templateType
+	 *            the template type
+	 * @param file
+	 *            the file
+	 * @param tifPath
+	 *            the tif path
+	 * @return the template
+	 */
+	private static Template addTemplate(String name, TemplateSettings settings, TemplateType templateType, File file,
+			String tifPath)
 	{
-		Template template = new Template(settings, custom, file, tifPath);
+		Template template = new Template(settings, templateType, file, tifPath);
 		map.put(name, template);
 		return template;
 	}
 
 	/**
-	 * Get the template configuration
-	 * 
+	 * Get the template configuration.
+	 *
 	 * @param name
 	 *            The name of the template
 	 * @return The template
@@ -440,7 +622,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	/**
 	 * Gets the template file.
 	 *
-	 * @param name the name
+	 * @param name
+	 *            the name
 	 * @return the template file
 	 */
 	public static File getTemplateFile(String name)
@@ -450,11 +633,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			return null;
 		return template.file;
 	}
-	
+
 	/**
 	 * Gets the template image.
 	 *
-	 * @param name the name
+	 * @param name
+	 *            the name
 	 * @return the template image
 	 */
 	public static ImagePlus getTemplateImage(String name)
@@ -465,6 +649,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		return template.loadImage();
 	}
 
+	/**
+	 * Clear templates. Used for testing so made package level.
+	 */
 	static void clearTemplates()
 	{
 		map.clear();
@@ -487,11 +674,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		Template template = map.get(name);
 		if (template == null)
 		{
-			template = addTemplate(name, settings, true, file, null);
+			template = addTemplate(name, settings, TemplateType.CUSTOM, file, null);
 		}
 		else
 		{
 			template.settings = settings;
+			template.templateType = TemplateType.CUSTOM;
 		}
 		if (file != null)
 			return template.save(file);
@@ -510,7 +698,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	public static boolean isCustomTemplate(String name)
 	{
 		Template template = map.get(name);
-		return (template == null) ? null : template.custom;
+		return (template == null) ? null : template.templateType == TemplateType.CUSTOM;
 	}
 
 	/**
@@ -524,8 +712,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	}
 
 	/**
-	 * Get the names of the available templates
-	 * 
+	 * Get the names of the available templates.
+	 *
 	 * @param includeNone
 	 *            Set to true to include [None] in the list of names
 	 * @return The template names
@@ -556,6 +744,39 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		return templateNames.toArray(new String[templateNames.size()]);
 	}
 
+	//@formatter:off
+	public enum TemplateOption implements NamedObject
+	{
+		LOAD_STANDARD_TEMPLATES("Load standard templates"),
+		LOAD_CUSTOM_TEMPLATES("Load custom templates"),
+		REMOVE_LOADED_TEMPLATES("Remove loaded templates"),
+		VIEW_TEMPLATE_IMAGE("View template source-image example");
+
+		private String name;
+		TemplateOption(String name)
+		{
+			this.name = name;
+		}
+		public String getName()
+		{
+			return name;
+		}
+
+		public String getShortName()
+		{
+			return name;
+		}
+		
+		static TemplateOption forNumber(int i)
+		{
+			TemplateOption[] values = TemplateOption.values();
+			if (i < 0 || i >= values.length)
+				i = 0;
+			return values[i];
+		}
+	}
+	//@formatter:on
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -565,79 +786,125 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		ConfigurationTemplateSettings.Builder settings = SettingsManager.readConfigurationTemplateSettings(0).toBuilder();
-		
-		if ("images".equals(arg))
-		{
-			showTemplateImages(settings);
-			return;
-		}
+		ConfigurationTemplateSettings.Builder settings = SettingsManager.readConfigurationTemplateSettings(0)
+				.toBuilder();
 
-		TITLE = "Template Configuration";
+		TITLE = "Template Manager";
 		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addCheckbox("Select_standard_templates", settings.getSelectStandardTemplates());
-		gd.addCheckbox("Select_custom_directory", settings.getSelectCustomDirectory());
+		String[] options = SettingsManager.getNames((Object[]) TemplateOption.values());
+		gd.addChoice("Option", options, options[settings.getOption()]);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		settings.setSelectStandardTemplates(gd.getNextBoolean());
-		settings.setSelectCustomDirectory(gd.getNextBoolean());
-		SettingsManager.writeSettings(settings);
+		int option = gd.getNextChoiceIndex();
+		settings.setOption(option);
+		switch (TemplateOption.forNumber(option))
+		{
+			case LOAD_CUSTOM_TEMPLATES:
+				loadSelectedCustomTemplatesFromDirectory(settings);
+				break;
+			case LOAD_STANDARD_TEMPLATES:
+				loadSelectedStandardTemplates(settings);
+				break;
+			case REMOVE_LOADED_TEMPLATES:
+				removeLoadedTemplates(settings);
+				break;
+			case VIEW_TEMPLATE_IMAGE:
+				showTemplateImages(settings);
+				break;
+			default:
+				break;
 
-		if (settings.getSelectStandardTemplates())
-			loadSelectedStandardTemplates(settings);
-		if (settings.getSelectCustomDirectory())
-			loadTemplatesFromDirectory(settings);
+		}
+		SettingsManager.writeSettings(settings);
 	}
 
+	/**
+	 * Load selected standard templates.
+	 *
+	 * @param settings
+	 *            the settings
+	 */
 	private void loadSelectedStandardTemplates(ConfigurationTemplateSettings.Builder settings)
 	{
-		final TemplateResource[] templates = listPackageTemplates(false, true);
-		if (templates.length == 0)
+		final String[] inlineNames = listInlineTemplates();
+		final TemplateResource[] templates = listTemplateResources();
+		if (templates.length + inlineNames.length == 0)
 			return;
 
-		MultiDialog md = new MultiDialog("Select Templates", new MultiDialog.BaseItems()
+		MultiDialog md = new MultiDialog("Select templates", new MultiDialog.BaseItems()
 		{
 			public int size()
 			{
-				return templates.length;
+				return templates.length + inlineNames.length;
 			}
 
 			public String getFormattedName(int i)
 			{
-				return templates[i].name;
+				if (i < inlineNames.length)
+					return inlineNames[i];
+				return templates[inlineNames.length + i].name;
 			}
 		});
-		md.addSelected(settings.getSelectedList());
+		md.addSelected(settings.getSelectedStandardTemplatesList());
 
 		md.showDialog();
 
 		if (md.wasCanceled())
 			return;
 
-		final ArrayList<String> selected = md.getSelectedResults();
+		ArrayList<String> selected = md.getSelectedResults();
 		if (selected.isEmpty())
 			return;
-		
-		// Save
-		settings.clearSelected();
-		settings.addAllSelected(selected);
-		SettingsManager.writeSettings(settings);
 
-		// Use list filtering to get the selected templates
-		TurboList<TemplateResource> list = new TurboList<TemplateResource>(Arrays.asList(templates));
-		list.removeIf(new SimplePredicate<TemplateResource>()
+		// Save
+		settings.clearSelectedStandardTemplates();
+		settings.addAllSelectedStandardTemplates(selected);
+
+		int count = 0;
+
+		// Keep a hash of those not loaded from inline resources
+		final HashSet<String> remaining = new HashSet<String>(selected.size());
+		for (int i = 0; i < selected.size(); i++)
 		{
-			public boolean test(TemplateResource t)
+			String name = selected.get(i);
+			// Try and get the template from inline resources
+			Template t = inlineTemplates.get(name);
+			if (t != null)
 			{
-				return !(selected.contains(t.name));
+				count++;
+				map.put(name, t);
 			}
-		});
-		int count = loadTemplates(list.toArray(new TemplateResource[list.size()]));
+			else
+			{
+				remaining.add(name);
+			}
+		}
+
+		if (!remaining.isEmpty())
+		{
+			// Build a list of resources to load
+			TurboList<TemplateResource> list = new TurboList<TemplateResource>(remaining.size());
+			for (TemplateResource t : templates)
+			{
+				if (remaining.contains(t.name))
+					list.add(t);
+			}
+			count += loadTemplateResources(list.toArray(new TemplateResource[list.size()]));
+		}
+
+		if (count > 0)
+			saveDefaultTemplates();
 		IJ.showMessage("Loaded " + TextUtils.pleural(count, "standard template"));
 	}
 
-	private void loadTemplatesFromDirectory(ConfigurationTemplateSettings.Builder settings)
+	/**
+	 * Load templates from directory.
+	 *
+	 * @param settings
+	 *            the settings
+	 */
+	private void loadSelectedCustomTemplatesFromDirectory(ConfigurationTemplateSettings.Builder settings)
 	{
 		// Allow the user to specify a configuration directory
 		String newDirectory = Utils.getDirectory("Template_directory", settings.getConfigurationDirectory());
@@ -645,20 +912,16 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		if (newDirectory == null)
 			return;
 
-		if (!newDirectory.equals(settings.getConfigurationDirectory()))
-		{
-			settings.setConfigurationDirectory(newDirectory);
-			SettingsManager.writeSettings(settings);
-		}
+		settings.setConfigurationDirectory(newDirectory);
 
 		// Search the configuration directory and add any custom templates that can be deserialised from XML files
 		File[] fileList = (new File(newDirectory)).listFiles(new FilenameFilter()
 		{
 			public boolean accept(File arg0, String arg1)
 			{
-				// We can try and deserialise everything
-				return arg0.isFile();
-				//return arg1.toLowerCase().endsWith("txt");
+				// We can try and deserialise everything that is not a tif image
+				// (which may be the template source image example)
+				return arg0.isFile() && !arg1.toLowerCase().endsWith("tif");
 			}
 		});
 		if (fileList == null)
@@ -674,24 +937,108 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 				list[n++] = file.getPath();
 			}
 		}
-		list = StringSorter.sortNumerically(list);
+		final String[] sortedList = StringSorter.sortNumerically(list);
+
+		// Select
+		MultiDialog md = new MultiDialog("Select templates", new MultiDialog.BaseItems()
+		{
+			public int size()
+			{
+				return sortedList.length;
+			}
+
+			public String getFormattedName(int i)
+			{
+				String[] path = Utils.decodePath(sortedList[i]);
+				return path[1];
+			}
+		});
+		md.addSelected(settings.getSelectedCustomTemplatesList());
+
+		md.showDialog();
+
+		if (md.wasCanceled())
+			return;
+
+		ArrayList<String> selected = md.getSelectedResults();
+		if (selected.isEmpty())
+			return;
+
+		// Save
+		settings.clearSelectedCustomTemplates();
+		settings.addAllSelectedCustomTemplates(selected);
 
 		int count = 0;
 		TemplateSettings.Builder builder = TemplateSettings.newBuilder();
-		for (String path : list)
+		for (String path : selected)
 		{
 			builder.clear();
-			File file = new File(path);
+			File file = new File(newDirectory, path);
 			if (SettingsManager.fromJSON(file, builder, 0))
 			{
 				count++;
 				String name = Utils.removeExtension(file.getName());
-				addTemplate(name, builder.build(), true, file, null);
+				// Assume the Tif image will be detected automatically
+				addTemplate(name, builder.build(), TemplateType.CUSTOM, file, null);
 			}
 		}
+
+		if (count > 0)
+			saveDefaultTemplates();
 		IJ.showMessage("Loaded " + TextUtils.pleural(count, "custom template"));
 	}
 
+	private void removeLoadedTemplates(Builder settings)
+	{
+		if (map.isEmpty())
+		{
+			IJ.error(TITLE, "No templates are currently loaded");
+			return;
+		}
+		final String[] names = getTemplateNames();
+		MultiDialog md = new MultiDialog("Select templates to remove", new MultiDialog.BaseItems()
+		{
+			public int size()
+			{
+				return names.length;
+			}
+
+			public String getFormattedName(int i)
+			{
+				return names[1];
+			}
+		});
+
+		md.showDialog();
+
+		if (md.wasCanceled())
+			return;
+
+		ArrayList<String> selected = md.getSelectedResults();
+		if (selected.isEmpty())
+			// Nothing to do
+			return;
+		
+		if (selected.size() == map.size())
+		{
+			clearTemplates();
+		}
+		else
+		{
+			for (String name : selected)
+			{
+				map.remove(name);
+			}
+		}
+		saveDefaultTemplates();
+	}
+
+	/**
+	 * Show template images.
+	 *
+	 * @param settings
+	 *            the settings
+	 */
 	private void showTemplateImages(ConfigurationTemplateSettings.Builder settings)
 	{
 		TITLE = "Template Example Images";
@@ -718,13 +1065,11 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		showTemplateImage(template);
 
 		gd.showDialog();
-		
+
 		// There is no cancel so read the settings.
 		settings.setTemplate(gd.getNextChoice());
 		settings.setClose(gd.getNextBoolean());
 
-		SettingsManager.writeSettings(settings);
-		
 		ImagePlus.removeImageListener(this);
 
 		if (settings.getClose())
@@ -736,6 +1081,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		}
 	}
 
+	/**
+	 * Show template image.
+	 *
+	 * @param name
+	 *            the name
+	 */
 	private void showTemplateImage(String name)
 	{
 		ImagePlus imp = getTemplateImage(name);
@@ -780,6 +1131,11 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		return imp;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
+	 */
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		if (e != null && e.getSource() instanceof Choice)
@@ -790,15 +1146,30 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.ImageListener#imageOpened(ij.ImagePlus)
+	 */
 	public void imageOpened(ImagePlus imp)
 	{
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.ImageListener#imageClosed(ij.ImagePlus)
+	 */
 	public void imageClosed(ImagePlus imp)
 	{
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.ImageListener#imageUpdated(ij.ImagePlus)
+	 */
 	public void imageUpdated(ImagePlus imp)
 	{
 		if (imp != null && imp == this.imp)
@@ -890,6 +1261,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		return resultsWindow;
 	}
 
+	/**
+	 * Close results.
+	 */
 	public void closeResults()
 	{
 		if (resultsWindow != null)
@@ -926,6 +1300,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			infoWindow.append(note.replace('\t', ','));
 	}
 
+	/**
+	 * Close info.
+	 */
 	private void closeInfo()
 	{
 		if (infoWindow != null)
