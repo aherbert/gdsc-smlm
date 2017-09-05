@@ -164,7 +164,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			timestamp = (file != null) ? file.lastModified() : 0;
 
 			// Resource templates may have a tif image as a resource
-			if (tifPath != null)
+			if (!TextUtils.isNullOrEmpty(tifPath))
 			{
 				this.tifPath = tifPath;
 			}
@@ -750,7 +750,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		LOAD_STANDARD_TEMPLATES("Load standard templates"),
 		LOAD_CUSTOM_TEMPLATES("Load custom templates"),
 		REMOVE_LOADED_TEMPLATES("Remove loaded templates"),
-		VIEW_TEMPLATE_IMAGE("View template source-image example");
+		VIEW_TEMPLATE_IMAGE("View image example for template");
 
 		private String name;
 		TemplateOption(String name)
