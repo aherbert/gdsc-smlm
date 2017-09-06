@@ -632,7 +632,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			this.stack = stack;
 			this.fitWorker = new FitWorker(config.clone(), peakResults, null);
 
-			final int fitting = config.getRelativeFitting();
+			final int fitting = config.getFittingWidth();
 			fitWorker.setSearchParameters(spotFilter.clone(), fitting);
 
 			this.actualCoordinates = actualCoordinates;
@@ -1251,7 +1251,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 
 		// Extract all the candidates into a list per frame. This can be cached if the settings have not changed
-		final int width = (config.isIncludeNeighbours()) ? config.getRelativeFitting() : 0;
+		final int width = (config.isIncludeNeighbours()) ? config.getFittingWidth() : 0;
 		final Settings settings = new Settings(BenchmarkSpotFilter.filterResult.id, fractionPositives,
 				fractionNegativesAfterAllPositives, negativesAfterAllPositives, width);
 		if (refresh || !settings.equals(lastSettings))

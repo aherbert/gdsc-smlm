@@ -127,7 +127,7 @@ public class FitEngine
 		}
 		this.results = results;
 
-		fitting = config.getRelativeFitting();
+		fitting = config.getFittingWidth();
 		spotFilter = config.createSpotFilter(true);
 
 		logger = config.getFitConfiguration().getLog();

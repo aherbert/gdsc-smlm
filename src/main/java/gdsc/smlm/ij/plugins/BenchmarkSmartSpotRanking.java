@@ -235,7 +235,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			this.actualCoordinates = actualCoordinates;
 			this.filterCandidates = filterCandidates;
 			this.results = new TIntObjectHashMap<RankResults>();
-			fitting = config.getRelativeFitting();
+			fitting = config.getFittingWidth();
 			requireSNR = (levels.length > 0);
 		}
 

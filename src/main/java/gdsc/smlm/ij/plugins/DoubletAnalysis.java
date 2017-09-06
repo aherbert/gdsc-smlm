@@ -488,7 +488,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			this.spotFilter = config.createSpotFilter(true);
 			this.relativeIntensity = !spotFilter.isAbsoluteIntensity();
 
-			fitting = config.getRelativeFitting();
+			fitting = config.getFittingWidth();
 			// Fit window is 2*fitting+1. The distance limit is thus 0.5 pixel higher than fitting. 
 			limit = fitting + 0.5;
 			spotHistogram = new int[20];
@@ -2045,7 +2045,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		StringBuilder sb = new StringBuilder();
 		sb.append(Utils.rounded(density)).append('\t');
 		sb.append(Utils.rounded(getSa())).append('\t');
-		sb.append(config.getRelativeFitting()).append('\t');
+		sb.append(config.getFittingWidth()).append('\t');
 		sb.append(PSFProtosHelper.getName(fitConfig.getPSFType()));
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
 		if (fitConfig.isModelCameraMLE())
@@ -2088,7 +2088,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append(Utils.rounded(simulationParameters.b)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.noise)).append('\t');
 		sb.append(Utils.rounded(simulationParameters.averageSignal / simulationParameters.noise)).append('\t');
-		sb.append(config.getRelativeFitting()).append('\t');
+		sb.append(config.getFittingWidth()).append('\t');
 		sb.append(PSFProtosHelper.getName(fitConfig.getPSFType()));
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
 		if (fitConfig.isModelCameraMLE())
@@ -2630,7 +2630,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		FitConfiguration filterFitConfig2 = filterFitConfig.clone();
 		filterFitConfig2.setCoordinateShift(Integer.MAX_VALUE);
 
-		final int size = 2 * config.getRelativeFitting() + 1;
+		final int size = 2 * config.getFittingWidth() + 1;
 		Rectangle regionBounds = new Rectangle(0, 0, size, size);
 		final double otherDriftAngle = 180 - analysisDriftAngle;
 
@@ -3075,7 +3075,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Show the fitting settings that will effect filters, i.e. fit standard deviation, fit width
 		sb.append("SD0 = ").append(Utils.rounded(fitConfig.getInitialXSD())).append("\n");
 		//sb.append("SD1 = ").append(Utils.rounded(fitConfig.getInitialPeakStdDev1())).append("\n");
-		sb.append("Fit Width = ").append(config.getRelativeFitting()).append("\n");
+		sb.append("Fit Width = ").append(config.getFittingWidth()).append("\n");
 
 		gd.addMessage(sb.toString());
 
