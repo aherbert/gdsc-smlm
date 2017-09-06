@@ -2,10 +2,6 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Checkbox;
 import java.awt.Choice;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -3977,7 +3973,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		List<String> imageNames = addPSFOptions(gd);
 
 		gd.addMessage("--- Fluorophores ---");
-		Component splitLabel = gd.getMessage();
 		// Do not allow grid or mask distribution
 		if (simpleMode)
 		{
@@ -4012,42 +4007,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (simpleMode)
 			gd.addSlider("Density_radius (N x HWHM)", 0, 4.5, settings.getDensityRadius());
 		gd.addNumericField("Depth-of-field (nm)", settings.getDepthOfField(), 0);
-
-		// Split into two columns
-		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
-		// to 4 columns: (label,field) x 2
-
-		if (gd.getLayout() != null)
-		{
-			GridBagLayout grid = (GridBagLayout) gd.getLayout();
-
-			int xOffset = 0, yOffset = 0;
-			int lastY = -1, rowCount = 0;
-			for (Component comp : gd.getComponents())
-			{
-				// Check if this should be the second major column
-				if (comp == splitLabel)
-				{
-					xOffset += 2;
-					yOffset -= rowCount;
-					rowCount = 0;
-				}
-				// Reposition the field
-				GridBagConstraints c = grid.getConstraints(comp);
-				if (lastY != c.gridy)
-					rowCount++;
-				lastY = c.gridy;
-				c.gridx = c.gridx + xOffset;
-				c.gridy = c.gridy + yOffset;
-				c.insets.left = c.insets.left + 10 * xOffset;
-				c.insets.top = 0;
-				c.insets.bottom = 0;
-				grid.setConstraints(comp, c);
-			}
-
-			if (IJ.isLinux())
-				gd.setBackground(new Color(238, 238, 238));
-		}
 
 		gd.showDialog();
 
@@ -4501,7 +4460,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		List<String> imageNames = addPSFOptions(gd);
 
 		gd.addMessage("--- Fluorophores ---");
-		Component splitLabel = gd.getMessage();
 		gd.addChoice("Distribution", DISTRIBUTION, settings.getDistribution());
 		gd.addNumericField("Particles", settings.getParticles(), 0);
 		gd.addCheckbox("Compound_molecules", settings.getCompoundMolecules());
@@ -4532,7 +4490,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addSlider("Min_SNR_tN", 0, 10, settings.getMinSnrTN());
 
 		gd.addMessage("--- Save options ---");
-		Component splitLabel2 = gd.getMessage();
 		gd.addCheckbox("Raw_image", settings.getRawImage());
 		gd.addCheckbox("Save_image", settings.getSaveImage());
 		gd.addCheckbox("Save_image_results", settings.getSaveImageResults());
@@ -4546,42 +4503,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addCheckbox("Remove_outliers", settings.getRemoveOutliers());
 		gd.addSlider("Density_radius (N x HWHM)", 0, 4.5, settings.getDensityRadius());
 		gd.addNumericField("Depth-of-field (nm)", settings.getDepthOfField(), 0);
-
-		// Split into two columns
-		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
-		// to 4 columns: (label,field) x 2
-
-		if (gd.getLayout() != null)
-		{
-			GridBagLayout grid = (GridBagLayout) gd.getLayout();
-
-			int xOffset = 0, yOffset = 0;
-			int lastY = -1, rowCount = 0;
-			for (Component comp : gd.getComponents())
-			{
-				// Check if this should be the second major column
-				if (comp == splitLabel || comp == splitLabel2)
-				{
-					xOffset += 2;
-					yOffset -= rowCount;
-					rowCount = 0;
-				}
-				// Reposition the field
-				GridBagConstraints c = grid.getConstraints(comp);
-				if (lastY != c.gridy)
-					rowCount++;
-				lastY = c.gridy;
-				c.gridx = c.gridx + xOffset;
-				c.gridy = c.gridy + yOffset;
-				c.insets.left = c.insets.left + 10 * xOffset;
-				c.insets.top = 0;
-				c.insets.bottom = 0;
-				grid.setConstraints(comp, c);
-			}
-
-			if (IJ.isLinux())
-				gd.setBackground(new Color(238, 238, 238));
-		}
 
 		gd.showDialog();
 

@@ -3,10 +3,6 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Checkbox;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Label;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
 import java.awt.TextField;
@@ -67,8 +63,8 @@ import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
-import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitHelper;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.function.Erf;
 
 /*----------------------------------------------------------------------------- 
@@ -716,7 +712,6 @@ public class FIRE implements PlugIn
 		if (single)
 		{
 			gd.addMessage("For single datasets:");
-			Label l = (Label) gd.getMessage();
 			gd.addNumericField("Block_size", blockSize, 0);
 			gd.addCheckbox("Random_split", randomSplit);
 			gd.addNumericField("Repeats", repeats, 0);
@@ -728,38 +723,6 @@ public class FIRE implements PlugIn
 			gd.addNumericField("Precision_Sigma", sigma, 2, 6, "nm");
 			if (extraOptions)
 				gd.addNumericField("Threads", getLastNThreads(), 0);
-
-			// Rearrange the dialog
-			if (gd.getLayout() != null)
-			{
-				GridBagLayout grid = (GridBagLayout) gd.getLayout();
-
-				int xOffset = 0, yOffset = 0;
-				int lastY = -1, rowCount = 0;
-				for (Component comp : gd.getComponents())
-				{
-					// Check if this should be the second major column
-					if (comp == l)
-					{
-						xOffset += 2;
-						yOffset = yOffset - rowCount + 1; // Skip title row
-					}
-					// Reposition the field
-					GridBagConstraints c = grid.getConstraints(comp);
-					if (lastY != c.gridy)
-						rowCount++;
-					lastY = c.gridy;
-					c.gridx = c.gridx + xOffset;
-					c.gridy = c.gridy + yOffset;
-					c.insets.left = c.insets.left + 10 * xOffset;
-					c.insets.top = 0;
-					c.insets.bottom = 0;
-					grid.setConstraints(comp, c);
-				}
-
-				if (IJ.isLinux())
-					gd.setBackground(new Color(238, 238, 238));
-			}
 		}
 
 		gd.showDialog();

@@ -1,9 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -380,43 +377,6 @@ public class FilterAnalysis implements PlugIn
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
 		gd.addSlider("Delta", 0.01, 1, delta);
 
-		if (!fileInput)
-		{
-			// Re-arrange to 2 columns
-			if (gd.getLayout() != null)
-			{
-				GridBagLayout grid = (GridBagLayout) gd.getLayout();
-				Component splitLabel = (Component) gd.getCheckboxes().get(3);
-				
-				int xOffset = 0, yOffset = 0;
-				int lastY = -1, rowCount = 0;
-				for (Component comp : gd.getComponents())
-				{
-					// Check if this should be the second major column
-					if (comp == splitLabel)
-					{
-						xOffset += 2;
-						yOffset -= rowCount;
-						rowCount = 0;
-					}
-					// Reposition the field
-					GridBagConstraints c = grid.getConstraints(comp);
-					if (lastY != c.gridy)
-						rowCount++;
-					lastY = c.gridy;
-					c.gridx = c.gridx + xOffset;
-					c.gridy = c.gridy + yOffset;
-					c.insets.left = c.insets.left + 10 * xOffset;
-					c.insets.top = 0;
-					c.insets.bottom = 0;
-					grid.setConstraints(comp, c);
-				}
-
-				if (IJ.isLinux())
-					gd.setBackground(new Color(238, 238, 238));
-			}
-		}
-		
 		gd.showDialog();
 
 		if (gd.wasCanceled() || !readDialog(gd, fileInput))

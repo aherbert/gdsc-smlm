@@ -459,7 +459,6 @@ public class LoadLocalisations implements PlugIn
 		gd.addChoice("Intensity_unit", iUnits, intensityUnit);
 
 		gd.addMessage("Define the fields:");
-		Label l = (Label) gd.getMessage();
 		gd.addNumericField("T", it, 0);
 		gd.addNumericField("ID", iid, 0);
 		gd.addNumericField("X", ix, 0);
@@ -469,38 +468,6 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Sx", isx, 0);
 		gd.addNumericField("Sy", isy, 0);
 		gd.addNumericField("Precision", ip, 0);
-
-		// Rearrange
-		if (gd.getLayout() != null)
-		{
-			GridBagLayout grid = (GridBagLayout) gd.getLayout();
-
-			int xOffset = 0, yOffset = 0;
-			int lastY = -1, rowCount = 0;
-			for (Component comp : gd.getComponents())
-			{
-				// Check if this should be the second major column
-				if (comp == l)
-				{
-					xOffset += 2;
-					yOffset = yOffset - rowCount + 1; // Skip title row
-				}
-				// Reposition the field
-				GridBagConstraints c = grid.getConstraints(comp);
-				if (lastY != c.gridy)
-					rowCount++;
-				lastY = c.gridy;
-				c.gridx = c.gridx + xOffset;
-				c.gridy = c.gridy + yOffset;
-				c.insets.left = c.insets.left + 10 * xOffset;
-				c.insets.top = 0;
-				c.insets.bottom = 0;
-				grid.setConstraints(comp, c);
-			}
-
-			if (IJ.isLinux())
-				gd.setBackground(new Color(238, 238, 238));
-		}
 
 		gd.showDialog();
 		if (gd.wasCanceled())

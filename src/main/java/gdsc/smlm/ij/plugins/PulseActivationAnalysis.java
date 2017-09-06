@@ -4,10 +4,6 @@ import java.awt.AWTEvent;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Label;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -1114,7 +1110,6 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		resultsSettingsBuilder = resultsSettings.toBuilder();
 		ResultsManager.addImageResultsOptions(gd, resultsSettingsBuilder, 0);
-		Label markerLabel = gd.getLastLabel();
 
 		//		ResultsImageSettings s = resultsSettings.getResultsImageSettings();
 		//		gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(),
@@ -1127,44 +1122,12 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		previewCheckBox = gd.addAndGetCheckbox("Preview", false);
 
 		String buttonLabel = "Draw loop";
-		gd.addMessage("Click '" + buttonLabel + "' to draw the current ROIs in a loop");
+		gd.addMessage("Click '" + buttonLabel + "' to draw the current ROIs in a loop view");
 		gd.addAndGetButton(buttonLabel, this);
 		magnificationChoice = gd.addAndGetChoice("Magnification", MAGNIFICATION, magnification);
 
 		gd.addDialogListener(this);
 		gd.addOptionCollectedListener(this);
-
-		// Layout over 2 columns
-		if (gd.getLayout() != null)
-		{
-			GridBagLayout grid = (GridBagLayout) gd.getLayout();
-
-			int xOffset = 0, yOffset = 0;
-			int lastY = -1, rowCount = 0;
-			for (Component comp : gd.getComponents())
-			{
-				// Check if this should be the second major column
-				if (comp == markerLabel)
-				{
-					xOffset += 2;
-					yOffset -= rowCount;
-				}
-				// Reposition the field
-				GridBagConstraints c = grid.getConstraints(comp);
-				if (lastY != c.gridy)
-					rowCount++;
-				lastY = c.gridy;
-				c.gridx = c.gridx + xOffset;
-				c.gridy = c.gridy + yOffset;
-				c.insets.left = c.insets.left + 10 * xOffset;
-				c.insets.top = 0;
-				c.insets.bottom = 0;
-				grid.setConstraints(comp, c);
-			}
-
-			if (IJ.isLinux())
-				gd.setBackground(new Color(238, 238, 238));
-		}
 
 		gd.showDialog();
 
@@ -1974,7 +1937,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	{
 		if (Utils.isExtraOptions())
 		{
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Perform a crosstalk simulation?");
 			gd.enableYesNoCancel();
 			gd.showDialog();

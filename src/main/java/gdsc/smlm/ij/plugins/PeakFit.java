@@ -3,9 +3,6 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
 import java.awt.SystemColor;
@@ -817,7 +814,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 			gd.addSlider("Integrate_frames", 1, 5, optionIntegrateFrames);
 		}
 
-		Component discardLabel = null;
 		if (!maximaIdentification)
 		{
 			gd.addMessage("--- Gaussian fitting ---");
@@ -835,7 +831,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 			gd.addSlider("Duplicate_distance", 0, 1.5, config.getDuplicateDistance());
 
 			gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
-			discardLabel = gd.getMessage();
 
 			gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
 			gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
@@ -870,40 +865,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 		{
 			gd.addMessage("--- Misc ---");
 			gd.addSlider("Fraction_of_threads", 0.1, 1, fractionOfThreads);
-		}
-
-		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
-		// to 4 columns: (label,field) x 2
-
-		if (gd.getLayout() != null)
-		{
-			GridBagLayout grid = (GridBagLayout) gd.getLayout();
-
-			int xOffset = 0, yOffset = 0;
-			int lastY = -1, rowCount = 0;
-			for (Component comp : gd.getComponents())
-			{
-				// Check if this should be the second major column
-				if (comp == discardLabel)
-				{
-					xOffset += 2;
-					yOffset -= rowCount;
-				}
-				// Reposition the field
-				GridBagConstraints c = grid.getConstraints(comp);
-				if (lastY != c.gridy)
-					rowCount++;
-				lastY = c.gridy;
-				c.gridx = c.gridx + xOffset;
-				c.gridy = c.gridy + yOffset;
-				c.insets.left = c.insets.left + 10 * xOffset;
-				c.insets.top = 0;
-				c.insets.bottom = 0;
-				grid.setConstraints(comp, c);
-			}
-
-			if (IJ.isLinux())
-				gd.setBackground(new Color(238, 238, 238));
 		}
 
 		// Add a mouse listener to the config file field

@@ -18,8 +18,6 @@ import java.awt.Checkbox;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.TextArea;
 import java.awt.TextField;
@@ -137,6 +135,7 @@ import ij.ImageStack;
 import ij.Macro;
 import ij.Prefs;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.NonBlockingGenericDialog;
@@ -1801,7 +1800,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private boolean showDialog(int optimiseParameters)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		boolean showOptimiseFilter = (optimiseParameters & FLAG_OPTIMISE_FILTER) != 0;
@@ -1844,7 +1843,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
 		gd.addSlider("Delta", 0.01, 1, delta);
 		gd.addMessage("Match scoring");
-		Component discardLabel = gd.getMessage();
 		gd.addChoice("Criteria", COLUMNS, COLUMNS[criteriaIndex]);
 		gd.addNumericField("Criteria_limit", criteriaLimit, 4);
 		gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
@@ -1872,37 +1870,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		gd.addStringField("Title", resultsTitle, 20);
 		String[] labels = { "Show_TP", "Show_FP", "Show_FN" };
 		gd.addCheckboxGroup(1, 3, labels, new boolean[] { showTP, showFP, showFN });
-
-		if (gd.getLayout() != null)
-		{
-			GridBagLayout grid = (GridBagLayout) gd.getLayout();
-
-			int xOffset = 0, yOffset = 0;
-			int lastY = -1, rowCount = 0;
-			for (Component comp : gd.getComponents())
-			{
-				// Check if this should be the second major column
-				if (comp == discardLabel)
-				{
-					xOffset += 2;
-					yOffset -= rowCount;
-				}
-				// Reposition the field
-				GridBagConstraints c = grid.getConstraints(comp);
-				if (lastY != c.gridy)
-					rowCount++;
-				lastY = c.gridy;
-				c.gridx = c.gridx + xOffset;
-				c.gridy = c.gridy + yOffset;
-				c.insets.left = c.insets.left + 10 * xOffset;
-				c.insets.top = 0;
-				c.insets.bottom = 0;
-				grid.setConstraints(comp, c);
-			}
-
-			if (IJ.isLinux())
-				gd.setBackground(new Color(238, 238, 238));
-		}
 
 		gd.showDialog();
 

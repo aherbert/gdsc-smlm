@@ -1,9 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
@@ -189,7 +185,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		}
 
 		gd.addMessage("--- Gaussian fitting ---");
-		Component splitLabel = gd.getMessage();
 
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 
@@ -209,37 +204,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
 		gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
-
-		if (gd.getLayout() != null)
-		{
-			GridBagLayout grid = (GridBagLayout) gd.getLayout();
-
-			int xOffset = 0, yOffset = 0;
-			int lastY = -1, rowCount = 0;
-			for (Component comp : gd.getComponents())
-			{
-				// Check if this should be the second major column
-				if (comp == splitLabel)
-				{
-					xOffset += 2;
-					yOffset -= rowCount;
-				}
-				// Reposition the field
-				GridBagConstraints c = grid.getConstraints(comp);
-				if (lastY != c.gridy)
-					rowCount++;
-				lastY = c.gridy;
-				c.gridx = c.gridx + xOffset;
-				c.gridy = c.gridy + yOffset;
-				c.insets.left = c.insets.left + 10 * xOffset;
-				c.insets.top = 0;
-				c.insets.bottom = 0;
-				grid.setConstraints(comp, c);
-			}
-
-			if (IJ.isLinux())
-				gd.setBackground(new Color(238, 238, 238));
-		}
 
 		gd.showDialog();
 

@@ -2,9 +2,6 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -20,6 +17,7 @@ import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.engine.FitConfiguration;
+import gdsc.smlm.filters.BlockMeanFilter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -34,7 +32,6 @@ import gdsc.smlm.engine.FitConfiguration;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.filters.AverageFilter;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
@@ -48,6 +45,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
@@ -178,7 +176,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		if (background < minValue)
 			background = (int) minValue;
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Fit 2D Gaussian to identified maxima");
@@ -198,12 +196,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		gd.addSlider("Border", 0, 15, border);
 
 		gd.addMessage("--- Gaussian fitting ---");
-		Component splitLabel = gd.getMessage();
 		gd.addChoice("PSF", getPSFTypeNames(), PSFProtosHelper.getName(getPSFType()));
 		gd.addCheckbox("Fit_background", fitBackground);
 		gd.addNumericField("Max_iterations", maxIterations, 0);
-		gd.addStringField("Relative_threshold", "" + relativeThreshold);
-		gd.addStringField("Absolute_threshold", "" + absoluteThreshold);
+		gd.addNumericField("Relative_threshold", relativeThreshold, -3);
+		gd.addNumericField("Absolute_threshold", absoluteThreshold, -3);
 		gd.addCheckbox("Single_fit", singleFit);
 		gd.addNumericField("Single_region_size", singleRegionSize, 0);
 		gd.addNumericField("Initial_StdDev", initialPeakStdDev, 3);
@@ -219,37 +216,6 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		//		gd.getPreviewCheckbox().setState(true);
 		//		setProperties();
 		//		this.run(imp.getProcessor());
-
-		if (gd.getLayout() != null)
-		{
-			GridBagLayout grid = (GridBagLayout) gd.getLayout();
-
-			int xOffset = 0, yOffset = 0;
-			int lastY = -1, rowCount = 0;
-			for (Component comp : gd.getComponents())
-			{
-				// Check if this should be the second major column
-				if (comp == splitLabel)
-				{
-					xOffset += 2;
-					yOffset -= rowCount;
-				}
-				// Reposition the field
-				GridBagConstraints c = grid.getConstraints(comp);
-				if (lastY != c.gridy)
-					rowCount++;
-				lastY = c.gridy;
-				c.gridx = c.gridx + xOffset;
-				c.gridy = c.gridy + yOffset;
-				c.insets.left = c.insets.left + 10 * xOffset;
-				c.insets.top = 0;
-				c.insets.bottom = 0;
-				grid.setConstraints(comp, c);
-			}
-
-			if (IJ.isLinux())
-				gd.setBackground(new Color(238, 238, 238));
-		}
 
 		gd.showDialog();
 
@@ -314,6 +280,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		blockFindAlgorithm = gd.getNextBoolean();
 		neighbourCheck = gd.getNextBoolean();
 		border = (int) gd.getNextNumber();
+		
 		fitFunction = gd.getNextChoiceIndex();
 		fitBackground = gd.getNextBoolean();
 		maxIterations = (int) gd.getNextNumber();
@@ -404,8 +371,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		if (getSmooth() > 0)
 		{
 			// No need for a copy since we are using a snapshot buffer
-			AverageFilter filter = new AverageFilter();
-			filter.stripedBlockAverage(data, width, height, (float) getSmooth());
+			BlockMeanFilter filter = new BlockMeanFilter();
+			filter.stripedBlockFilter(data, width, height, (float) getSmooth());
 		}
 
 		maxIndices = getMaxima(data, width, height);
@@ -485,12 +452,12 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		{
 			// Smoothing destructively modifies the data so create a copy
 			smoothData = Arrays.copyOf(data, width * height);
-			AverageFilter filter = new AverageFilter();
+			BlockMeanFilter filter = new BlockMeanFilter();
 			//filter.blockAverage(smoothData, width, height, smooth);
 			if (smooth <= border)
-				filter.stripedBlockAverageInternal(smoothData, width, height, (float) smooth);
+				filter.stripedBlockFilterInternal(smoothData, width, height, (float) smooth);
 			else
-				filter.stripedBlockAverage(smoothData, width, height, (float) smooth);
+				filter.stripedBlockFilter(smoothData, width, height, (float) smooth);
 		}
 		Sort.sort(maxIndices, smoothData);
 

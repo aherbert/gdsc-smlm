@@ -69,6 +69,7 @@ public class Test_Plugin implements PlugIn
 				return true;
 			}
 		});
+		gd.setMaxUnscrolledSize(0, 200);
 		gd.showDialog();
 		optionFields[0] = gd.getNextChoice();
 		optionFields[1] = gd.getNextChoice();
