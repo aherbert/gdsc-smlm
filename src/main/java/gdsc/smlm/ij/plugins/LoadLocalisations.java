@@ -1,10 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Label;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,14 +32,14 @@ import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.PSFHelper;
-import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
-import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitHelper;
-import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.AttributePeakResult;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -446,7 +441,7 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
 		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "");
 
-		String[] tUnits = SettingsManager.getNames(set.toArray());
+		String[] tUnits = SettingsManager.getTimeUnitNames();
 		gd.addChoice("Time_unit", tUnits, tUnits[timeUnit]);
 
 		gd.addMessage("Records:");
