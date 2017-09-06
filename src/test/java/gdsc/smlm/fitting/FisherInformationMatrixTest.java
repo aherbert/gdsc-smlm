@@ -5,9 +5,13 @@ import java.util.Arrays;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Random;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -54,15 +58,18 @@ public class FisherInformationMatrixTest
 	}
 
 	@Test
-	public void inversionMatchesReciprocal()
+	public void inversionDoesNotMatchReciprocal()
 	{
 		for (int n = 1; n < 10; n++)
 		{
 			FisherInformationMatrix m = createFisherInformationMatrix(n, 0);
 			double[] crlb = m.crlb();
 			double[] crlb2 = m.crlbReciprocal();
-			// These increasingly do not match with increasing number of parameters. 
+			// These increasingly do not match with increasing number of parameters.
 			System.out.printf("%s =? %s\n", Arrays.toString(crlb), Arrays.toString(crlb2));
+			if (n > 1)
+				// Just do a sum so we have a test
+				Assert.assertNotEquals(Maths.sum(crlb), Maths.sum(crlb2), 0);
 		}
 	}
 
@@ -87,14 +94,16 @@ public class FisherInformationMatrixTest
 		// Use a real Gaussian function here to compute the Fisher information.
 		// The matrix may be sensitive to the type of equation used.
 		int npeaks = 1;
-		while (1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK < n)
+		Gaussian2DFunction f = createFunction(maxx, npeaks);
+		while (f.getNumberOfGradients() < n)
+		{
 			npeaks++;
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxx,
-				GaussianFunctionFactory.FIT_ELLIPTICAL, null);
+			f = createFunction(maxx, npeaks);
+		}
 
 		double[] a = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		a[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(1, 5);
-		for (int i = 0, j = 0; i < npeaks; i++, j += 6)
+		for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 		{
 			a[j + Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
 			// Non-overlapping peaks otherwise the CRLB are poor
@@ -102,11 +111,10 @@ public class FisherInformationMatrixTest
 			a[j + Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(2 + i * 2, 4 + i * 2);
 			a[j + Gaussian2DFunction.X_SD] = rdg.nextUniform(1.5, 2);
 			a[j + Gaussian2DFunction.Y_SD] = rdg.nextUniform(1.5, 2);
-			a[j + Gaussian2DFunction.ANGLE] = rdg.nextUniform(-Math.PI, Math.PI);
 		}
 		f.initialise(a);
 
-		GradientCalculator c = GradientCalculatorFactory.newCalculator(a.length);
+		GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients());
 		double[][] I = c.fisherInformationMatrix(size, a, f);
 
 		//System.out.printf("n=%d, k=%d, I=\n", n, k);
@@ -121,7 +129,7 @@ public class FisherInformationMatrixTest
 		// Zero selected columns
 		if (k > 0)
 		{
-			int[] zero = new RandomDataGenerator(randomGenerator).nextPermutation(n, k);
+			int[] zero = Random.sample(k, n, randomGenerator); // new RandomDataGenerator(randomGenerator).nextPermutation(n, k);
 			for (int i : zero)
 			{
 				for (int j = 0; j < n; j++)
@@ -139,8 +147,83 @@ public class FisherInformationMatrixTest
 		return new FisherInformationMatrix(I, 1e-3);
 	}
 
+	private Gaussian2DFunction createFunction(int maxx, int npeaks)
+	{
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, maxx,
+				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
+		return f;
+	}
+
 	void log(String format, Object... args)
 	{
 		System.out.printf(format, args);
+	}
+
+	@Test
+	public void canProduceSubset()
+	{
+		int k = 5;
+		int n = 10;
+
+		RandomGenerator randomGenerator = new Well19937c(30051977);
+		FisherInformationMatrix m = createRandomMatrix(randomGenerator, n);
+		DenseMatrix64F e = m.getMatrix();
+		System.out.println(e);
+
+		for (int run = 1; run < 10; run++)
+		{
+			int[] indices = Random.sample(k, n, randomGenerator);
+			Arrays.sort(indices);
+			DenseMatrix64F o = m.subset(indices).getMatrix();
+			System.out.println(Arrays.toString(indices));
+			System.out.println(o);
+			for (int i = 0; i < indices.length; i++)
+				for (int j = 0; j < indices.length; j++)
+				{
+					Assert.assertEquals(e.get(indices[i], indices[j]), o.get(i, j), 0);
+				}
+		}
+	}
+
+	private FisherInformationMatrix createRandomMatrix(RandomGenerator randomGenerator, int n)
+	{
+		double[] data = new double[n * n];
+		for (int i = 0; i < data.length; i++)
+			data[i] = randomGenerator.nextDouble();
+		return new FisherInformationMatrix(data, n);
+	}
+
+	@Test
+	public void computeWithSubsetReducesTheCRLB()
+	{
+		Gaussian2DFunction f = createFunction(10, 1);
+		int perPeak = f.getGradientParametersPerPeak();
+		// Create a matrix with 2 peaks + background
+		FisherInformationMatrix m = createFisherInformationMatrix(1 + 2 * perPeak, 0);
+		// Subset each peak
+		int[] indices = SimpleArrayUtils.newArray(1 + perPeak, 0, 1);
+		FisherInformationMatrix m1 = m.subset(indices);
+		for (int i = 1; i < indices.length; i++)
+			indices[i] += perPeak;
+		FisherInformationMatrix m2 = m.subset(indices);
+
+		//System.out.println(m.getMatrix());
+		//System.out.println(m1.getMatrix());
+		//System.out.println(m2.getMatrix());
+
+		double[] crlb = m.crlb();
+		double[] crlb1 = m1.crlb();
+		double[] crlb2 = m2.crlb();
+		double[] crlbB = Arrays.copyOf(crlb1, crlb.length);
+		System.arraycopy(crlb2, 1, crlbB, crlb1.length, perPeak);
+
+		//System.out.println(Arrays.toString(crlb));
+		//System.out.println(Arrays.toString(crlb1));
+		//System.out.println(Arrays.toString(crlb2));
+		//System.out.println(Arrays.toString(crlbB));
+
+		// Removing the interaction between fit parameters lowers the bounds
+		for (int i = 0; i < crlb.length; i++)
+			Assert.assertTrue(crlbB[i] < crlb[i]);
 	}
 }

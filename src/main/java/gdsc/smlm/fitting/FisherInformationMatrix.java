@@ -114,6 +114,39 @@ public class FisherInformationMatrix
 		this(m, DEFAULT_INVERSION_TOLERANCE);
 	}
 
+	/**
+	 * Create a subset of this matrix using the specified row/column indices.
+	 *
+	 * @param indices
+	 *            the indices
+	 * @return the subset fisher information matrix
+	 */
+	public FisherInformationMatrix subset(int[] indices)
+	{
+		int n = m.getNumCols();
+
+		// Check the indices are within the matrix
+		for (int i = 0; i < indices.length; i++)
+		{
+			if (indices[i] < 0 || indices[i] >= n)
+				throw new IllegalArgumentException("Indices must be >=0 and <" + n + ": " + indices[i]);
+		}
+
+		double[] in = m.getData();
+		int m = indices.length;
+		double[] out = new double[m * m];
+		for (int i = 0, ii = 0; i < indices.length; i++)
+		{
+			int index = indices[i] * n;
+			for (int j = 0; j < indices.length; j++, ii++)
+			{
+				out[ii] = in[index + indices[j]];
+			}
+		}
+		
+		return new FisherInformationMatrix(out, m);
+	}
+
 	private void invert()
 	{
 		if (inverted != UNKNOWN)
