@@ -17,7 +17,6 @@ import java.awt.Checkbox;
  *---------------------------------------------------------------------------*/
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.TextArea;
 import java.awt.TextField;
@@ -7873,7 +7872,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// functionality used in the FitWorker. This respects the border of the spot filter.
 			FitEngineConfiguration config = new FitEngineConfiguration();
 			updateAllConfiguration(config);
-			MaximaSpotFilter spotFilter = config.createSpotFilter(true);
+			MaximaSpotFilter spotFilter = config.createSpotFilter();
 			final int border = spotFilter.getBorder();
 			Rectangle bounds = getBounds();
 			final int borderLimitX = bounds.x + bounds.width - border;

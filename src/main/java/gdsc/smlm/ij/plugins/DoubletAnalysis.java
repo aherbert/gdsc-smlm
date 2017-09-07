@@ -485,7 +485,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			this.actualCoordinates = actualCoordinates;
 			this.fitConfig = fitConfig.clone();
 			this.gf = new Gaussian2DFitter(this.fitConfig);
-			this.spotFilter = config.createSpotFilter(true);
+			this.spotFilter = config.createSpotFilter();
 			this.relativeIntensity = !spotFilter.isAbsoluteIntensity();
 
 			fitting = config.getFittingWidth();

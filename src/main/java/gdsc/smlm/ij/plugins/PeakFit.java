@@ -1650,6 +1650,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		config.setDataFilterType(gd.getNextChoiceIndex());
+		// TODO - set the absolute flag
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
@@ -1997,6 +1998,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				}
 				else
 					filterIndex = gd.getNextChoiceIndex();
+				// TODO - set the absolute flag
 				config.setDataFilter(filterValues[filterIndex], Math.abs(gd.getNextNumber()), false, i);
 				numberOfFilters++;
 			}
@@ -2019,7 +2021,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		try
 		{
-			config.createSpotFilter(true);
+			config.createSpotFilter();
 		}
 		catch (Exception e) // IllegalStateException
 		{

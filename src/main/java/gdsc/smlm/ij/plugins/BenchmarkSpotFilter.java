@@ -202,7 +202,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		public double[] i1;
 		public double[] i2;
 		public double[] intensity;
-		public boolean relativeDistances;
 		public long time;
 
 		public BenchmarkFilterResult(TIntObjectHashMap<FilterResult> filterResults, FitEngineConfiguration config,
@@ -1238,7 +1237,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			// Single filter mode
 			setupProgress(imp.getImageStackSize(), "Frame");
 
-			filterResult = run(config, filterRelativeDistances);
+			filterResult = run(config);
 		}
 
 		IJ.showProgress(-1);
@@ -1353,6 +1352,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		if (best != null)
 		{
+			// TODO - Convert the absolute distances to relative.
+			
 			final double hwhmMax = config.getHWHMMax();
 			// Convert absolute search distance to relative
 			config.setSearch(Maths.round(best.search / hwhmMax, 0.001));
@@ -1383,8 +1384,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				config.setDataFilterType(DataFilterType.SINGLE);
 			}
 
-			// Run the filter using relative distances
-			BenchmarkFilterResult result = run(config, true, true);
+			BenchmarkFilterResult result = run(config, true);
 			getTable(true).flush();
 			return result;
 		}
@@ -1734,17 +1734,17 @@ public class BenchmarkSpotFilter implements PlugIn
 		progress++;
 	}
 
-	private BenchmarkFilterResult run(FitEngineConfiguration config, boolean relativeDistances)
+	private BenchmarkFilterResult run(FitEngineConfiguration config)
 	{
-		return run(config, relativeDistances, false);
+		return run(config, false);
 	}
 
-	private BenchmarkFilterResult run(FitEngineConfiguration config, boolean relativeDistances, boolean batchSummary)
+	private BenchmarkFilterResult run(FitEngineConfiguration config, boolean batchSummary)
 	{
 		if (Utils.isInterrupted())
 			return null;
 
-		MaximaSpotFilter spotFilter = config.createSpotFilter(relativeDistances);
+		MaximaSpotFilter spotFilter = config.createSpotFilter();
 		//System.out.println(spotFilter.getDescription());
 
 		// Extract all the results in memory into a list per frame. This can be cached
@@ -1913,7 +1913,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		// Show a table of the results
-		BenchmarkFilterResult filterResult = summariseResults(filterResults, config, spotFilter, relativeDistances,
+		BenchmarkFilterResult filterResult = summariseResults(filterResults, config, spotFilter, 
 				batchSummary);
 
 		if (!batchMode)
@@ -2019,7 +2019,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	}
 
 	private BenchmarkFilterResult summariseResults(TIntObjectHashMap<FilterResult> filterResults,
-			FitEngineConfiguration config, MaximaSpotFilter spotFilter, boolean relativeDistances, boolean batchSummary)
+			FitEngineConfiguration config, MaximaSpotFilter spotFilter, boolean batchSummary)
 	{
 		BenchmarkFilterResult filterResult = new BenchmarkFilterResult(filterResults, config, spotFilter);
 
@@ -2095,17 +2095,18 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(spotFilter.getBorder()).append('\t');
 		sb.append(Utils.rounded(spotFilter.getSpread())).append('\t');
 		sb.append(config.getDataFilterMethod(0)).append('\t');
-		final double param = config.getSmooth(0);
+		double param = config.getSmooth(0);
+		boolean absolute = config.getAbsolute(0);
 		final double hwhmMin = config.getHWHMMin();
-		if (relativeDistances)
+		if (absolute)
 		{
-			sb.append(Utils.rounded(Maths.round(param * hwhmMin, 0.001))).append('\t');
 			sb.append(Utils.rounded(param)).append('\t');
+			sb.append(Maths.roundUsingDecimalPlacesToBigDecimal(param / hwhmMin, 3)).append('\t');
 		}
 		else
 		{
+			sb.append(Maths.roundUsingDecimalPlacesToBigDecimal(param * hwhmMin, 3)).append('\t');
 			sb.append(Utils.rounded(param)).append('\t');
-			sb.append(Utils.rounded(Maths.round(param / hwhmMin, 0.001))).append('\t');
 		}
 		sb.append(spotFilter.getDescription()).append('\t');
 		sb.append(lastAnalysisBorder.x).append('\t');
@@ -2252,7 +2253,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		filterResult.i1 = i1;
 		filterResult.i2 = i2;
 		filterResult.intensity = intensity;
-		filterResult.relativeDistances = relativeDistances;
 		filterResult.time = time;
 		return filterResult;
 	}
@@ -2513,26 +2513,18 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (filterResult == null)
 			return false;
 
-		double scaleSearch = 1;
-		double scaleSmooth = 1;
-		if (!filterResult.relativeDistances)
-		{
-			// Distance were absolute. Convert using the HWHM so they are relative
-			// to the configured fitting width.
-			scaleSearch = 1 / pConfig.getHWHMMax();
-			scaleSmooth = 1 / pConfig.getHWHMMin();
-		}
-
 		FitEngineConfiguration config = filterResult.config;
 
 		pConfig.setDataFilterType(config.getDataFilterType());
 		final int nFilters = config.getNumberOfFilters();
 		for (int n = 0; n < nFilters; n++)
 		{
-			pConfig.setDataFilter(config.getDataFilterMethod(n), config.getSmooth(n) * scaleSmooth, false, n);
+			pConfig.setDataFilter(config.getDataFilterMethod(n), config.getSmooth(n),config.getAbsolute(n), n);
 		}
-		pConfig.setSearch(config.getSearch() * scaleSearch);
-		pConfig.setBorder(config.getBorder() * scaleSearch);
+		pConfig.setSearch(config.getSearch());
+		pConfig.setSearchAbsolute(config.getSearchAbsolute());
+		pConfig.setBorder(config.getBorder());
+		pConfig.setBorderAbsolute(config.getBorderAbsolute());
 
 		return true;
 	}

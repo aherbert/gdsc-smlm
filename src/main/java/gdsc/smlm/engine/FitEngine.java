@@ -128,7 +128,7 @@ public class FitEngine
 		this.results = results;
 
 		fitting = config.getFittingWidth();
-		spotFilter = config.createSpotFilter(true);
+		spotFilter = config.createSpotFilter();
 
 		logger = config.getFitConfiguration().getLog();
 		//// Allow debugging the fit process

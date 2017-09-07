@@ -726,45 +726,33 @@ public class FitEngineConfiguration implements Cloneable
 	 * can be configured relative to the configured standard deviations or left absolute. The standard deviation is used
 	 * to determine the Half-Width at Half-Maximum (HWHM) for each dimension and the parameters set as follows.
 	 * 
-	 * <pre>
-	 * 
+	 * <pre> 
 	 * int search = (int) Math.ceil(getSearch() * hwhmMax);
 	 * int border = (int) Math.floor(getBorder() * hwhmMax);
 	 * // For each filter
 	 * double smooth = getSmooth(i) * hwhmMin;
-	 * 
 	 * </pre>
 	 *
-	 * @param relative
-	 *            True if the parameters should be made relative to the configured standard deviations
 	 * @return the maxima spot filter
-	 * @deprecated The relative flag will be removed and the configured parameters must be set as relative/absolute
 	 */
-	@Deprecated
-	public MaximaSpotFilter createSpotFilter(boolean relative)
+	public MaximaSpotFilter createSpotFilter()
 	{
-		final double hwhmMin, hwhmMax;
+		// Respect the absolute parameter absolute flag for all the distances.
 
-		// TODO fix this to respect the realtive parameter absolute flag.
-		
-		if (relative)
-		{
-			// Get the half-width at half maximim
-			hwhmMin = getHWHMMin();
-			hwhmMax = getHWHMMax();
-		}
-		else
-		{
-			hwhmMin = hwhmMax = 1;
-		}
+		// Get the half-width at half maximum
+		double hwhmMin = getHWHMMin();
+		double hwhmMax = getHWHMMax();
+
+		// Note: rounding to 2 decimal places is a simple method for removing small errors
+		// in floating point precision from creating an incorrect integer  
 
 		// Region for maxima finding
-		int search = (int) Math.ceil(Maths.round(getSearch() * hwhmMax, 0.01));
+		int search = (int) Math.ceil(convert(getSearchParameter(), hwhmMax, 2));
 		if (search < 1)
 			search = 1;
 
 		// Border where peaks are ignored
-		int border = (int) Math.floor(Maths.round(getBorder() * hwhmMax, 0.01));
+		int border = (int) Math.floor(convert(getBorderParameter(), hwhmMax, 2));
 		if (border < 0)
 			border = 0;
 
@@ -899,11 +887,27 @@ public class FitEngineConfiguration implements Cloneable
 	 *            the p
 	 * @param scale
 	 *            the scale
+	 * @param decimalPlaces
+	 *            the decimal places to round the scaled number (set to negative to ignore)
 	 * @return the double
 	 */
-	public static double convert(RelativeParameter p, double scale)
+	public static double convert(RelativeParameter p, double scale, int decimalPlaces)
 	{
-		return (p.getAbsolute()) ? p.getValue() : p.getValue() * scale;
+		return (p.getAbsolute()) ? p.getValue() : round(p.getValue() * scale, decimalPlaces);
+	}
+
+	/**
+	 * Round to the given number of decimal places.
+	 *
+	 * @param value
+	 *            the value
+	 * @param decimalPlaces
+	 *            the decimal places
+	 * @return the double
+	 */
+	public static double round(double value, int decimalPlaces)
+	{
+		return (decimalPlaces >= 0) ? Maths.roundUsingDecimalPlaces(value, decimalPlaces) : value;
 	}
 
 	/**
@@ -977,13 +981,7 @@ public class FitEngineConfiguration implements Cloneable
 		RelativeParameter rp = f.getParameters(0);
 
 		// Q. Why is this rounded. Is it just to make a nicer number?
-		// Otherwise we could use:
-		//return convert(rp, hwhmMin);
-
-		double p = rp.getValue();
-		if (rp.getAbsolute())
-			return p;
-		return Maths.round(p * hwhmMin, 0.01);
+		return convert(rp, hwhmMin, 2);
 	}
 
 	private DataProcessor createDataProcessor(int border, int n, double hwhm)

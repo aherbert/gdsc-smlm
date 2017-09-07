@@ -165,6 +165,10 @@ public class SpotFinderPreview
 				config.getDataFilterType().ordinal());
 		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
 				config.getDataFilterMethod(0).ordinal());
+		
+		// For now just have on switch for aboslute (i.e. not individually)
+		gd.addCheckbox("Absolute_distances", config.getAbsolute(0));
+		
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addChoice("Spot_filter_2", SettingsManager.getDataFilterMethodNames(),
 				config.getDataFilterMethod(1, defaultDataFilterMethod).ordinal());
@@ -259,10 +263,17 @@ public class SpotFinderPreview
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 
 		config.setDataFilterType(gd.getNextChoiceIndex());
-		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
-		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 1);
+		
+		// Single absolute flag
+		boolean absolute = gd.getNextBoolean();
+		config.setSearchAbsolute(absolute);
+		config.setBorderAbsolute(absolute);
+		
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), absolute, 0);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), absolute, 1);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
+		
 		if (label != null)
 		{
 			distance = gd.getNextNumber();
@@ -315,7 +326,7 @@ public class SpotFinderPreview
 
 		try
 		{
-			filter = config.createSpotFilter(true);
+			filter = config.createSpotFilter();
 		}
 		catch (Exception e)
 		{
