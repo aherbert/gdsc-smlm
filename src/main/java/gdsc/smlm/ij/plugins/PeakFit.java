@@ -1114,12 +1114,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 		CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
 
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
-				CalibrationProtosHelper.getName(calibration.getCameraType()), new OptionListener<Choice>()
+				CalibrationProtosHelper.getName(calibration.getCameraType()), new OptionListener<Integer>()
 				{
-					public boolean collectOptions(Choice field)
+					public boolean collectOptions(Integer field)
 					{
 						CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
-						calibration.setCameraType(SettingsManager.getCameraTypeValues()[field.getSelectedIndex()]);
+						calibration.setCameraType(SettingsManager.getCameraTypeValues()[field]);
 						boolean result = collectOptions();
 						return result;
 					}
@@ -1229,12 +1229,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 		gd.addChoice("PSF", getPSFTypeNames(), PSFProtosHelper.getName(fitConfig.getPSFType()),
-				new OptionListener<Choice>()
+				new OptionListener<Integer>()
 				{
-					public boolean collectOptions(Choice field)
+					public boolean collectOptions(Integer field)
 					{
 						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
-						fitConfig.setPSFType(PeakFit.getPSFTypeValues()[field.getSelectedIndex()]);
+						fitConfig.setPSFType(PeakFit.getPSFTypeValues()[field]);
 						boolean result = collectOptions();
 						return result;
 					}

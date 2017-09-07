@@ -1,6 +1,5 @@
 
 import java.awt.Choice;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -24,6 +23,7 @@ public class Test_Plugin implements PlugIn
 		// The parameters that have options must be available statically for the OptionListener
 		final String[] textFields = { "Some text", "More text" };
 		final String[] optionFields = { "", "", "" };
+		final double[] numberFields = { 2.567, 7 };
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog("Test");
 		gd.addChoice("Select1", new String[] { "One", "Two" }, optionFields[0]);
@@ -39,11 +39,11 @@ public class Test_Plugin implements PlugIn
 			}
 		});
 		gd.addStringField("Another", textFields[0]);
-		gd.addStringField("Testing", textFields[1], 15, new OptionListener<TextField>()
+		gd.addStringField("Testing", textFields[1], 15, new OptionListener<String>()
 		{
-			public boolean collectOptions(TextField field)
+			public boolean collectOptions(String field)
 			{
-				IJ.log(field.getText());
+				IJ.log(field);
 				return true;
 			}
 
@@ -55,11 +55,11 @@ public class Test_Plugin implements PlugIn
 		});
 		gd.addFilenameField("File", "", 30);
 		gd.addDirectoryField("Dir", "", 30);
-		gd.addChoice("Select3", new String[] { "Five", "Six" }, optionFields[2], new OptionListener<Choice>()
+		gd.addChoice("Select3", new String[] { "Five", "Six" }, optionFields[2], new OptionListener<Integer>()
 		{
-			public boolean collectOptions(Choice field)
+			public boolean collectOptions(Integer field)
 			{
-				IJ.log(field.getSelectedItem());
+				IJ.log(Integer.toString(field));
 				return true;
 			}
 
@@ -69,13 +69,41 @@ public class Test_Plugin implements PlugIn
 				return true;
 			}
 		});
-		gd.setMaxUnscrolledSize(0, 200);
+		gd.addSlider("Slider1", 0.5, 4.5, numberFields[0], new OptionListener<Double>(){
+
+			public boolean collectOptions(Double field)
+			{
+				IJ.log(field.toString());
+				return true;
+			}
+
+			public boolean collectOptions()
+			{
+				IJ.log(Double.toString(numberFields[0]));
+				return true;
+			}});
+		gd.addSlider("Slider2", 0, 10, numberFields[1], new OptionListener<Double>(){
+
+			public boolean collectOptions(Double field)
+			{
+				IJ.log(field.toString());
+				return true;
+			}
+
+			public boolean collectOptions()
+			{
+				IJ.log(Double.toString(numberFields[1]));
+				return true;
+			}});
+		gd.setMaxUnscrolledSize(0, 300);
 		gd.showDialog();
 		optionFields[0] = gd.getNextChoice();
 		optionFields[1] = gd.getNextChoice();
 		textFields[0] = gd.getNextString();
 		textFields[1] = gd.getNextString();
 		optionFields[2] = gd.getNextChoice();
+		numberFields[0] = gd.getNextNumber();
+		numberFields[1] = gd.getNextNumber();
 		gd.collectOptions();
 	}
 }

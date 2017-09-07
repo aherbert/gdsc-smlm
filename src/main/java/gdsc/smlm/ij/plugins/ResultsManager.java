@@ -526,11 +526,11 @@ public class ResultsManager implements PlugIn
 	{
 		gd.addMessage("--- Table output ---");
 		final ResultsTableSettings.Builder tableSettings = resultsSettings.getResultsTableSettingsBuilder();
-		gd.addCheckbox("Show_results_table", tableSettings.getShowTable(), new OptionListener<Checkbox>()
+		gd.addCheckbox("Show_results_table", tableSettings.getShowTable(), new OptionListener<Boolean>()
 		{
-			public boolean collectOptions(Checkbox field)
+			public boolean collectOptions(Boolean field)
 			{
-				tableSettings.setShowTable(field.getState());
+				tableSettings.setShowTable(field);
 				boolean result = collectOptions();
 				return result;
 			}
@@ -590,11 +590,11 @@ public class ResultsManager implements PlugIn
 		final EnumSet<ResultsImageType> requireWeighted = EnumSet.of(ResultsImageType.DRAW_LOCALISATIONS,
 				ResultsImageType.DRAW_INTENSITY, ResultsImageType.DRAW_FRAME_NUMBER, ResultsImageType.DRAW_FIT_ERROR);
 		gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(), imageSettings.getImageType().getNumber(),
-				new OptionListener<Choice>()
+				new OptionListener<Integer>()
 				{
-					public boolean collectOptions(Choice field)
+					public boolean collectOptions(Integer field)
 					{
-						imageSettings.setImageTypeValue(field.getSelectedIndex());
+						imageSettings.setImageTypeValue(field);
 						boolean result = collectOptions();
 						return result;
 					}
@@ -638,11 +638,11 @@ public class ResultsManager implements PlugIn
 		gd.addMessage("--- File output ---");
 		final ResultsFileSettings.Builder fileSettings = resultsSettings.getResultsFileSettingsBuilder();
 		gd.addChoice("Results_format", SettingsManager.getResultsFileFormatNames(),
-				fileSettings.getFileFormat().getNumber(), new OptionListener<Choice>()
+				fileSettings.getFileFormat().getNumber(), new OptionListener<Integer>()
 				{
-					public boolean collectOptions(Choice field)
+					public boolean collectOptions(Integer field)
 					{
-						fileSettings.setFileFormatValue(field.getSelectedIndex());
+						fileSettings.setFileFormatValue(field);
 						boolean result = collectOptions();
 						return result;
 					}

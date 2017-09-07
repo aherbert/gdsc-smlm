@@ -1,7 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Checkbox;
-import java.awt.Choice;
 import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -4130,11 +4129,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void addCameraOptions(final ExtendedGenericDialog gd)
 	{
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
-				CalibrationProtosHelper.getName(settings.getCameraType()), new OptionListener<Choice>()
+				CalibrationProtosHelper.getName(settings.getCameraType()), new OptionListener<Integer>()
 				{
-					public boolean collectOptions(Choice field)
+					public boolean collectOptions(Integer field)
 					{
-						settings.setCameraType(SettingsManager.getCameraTypeValues()[field.getSelectedIndex()]);
+						settings.setCameraType(SettingsManager.getCameraTypeValues()[field]);
 						boolean result = collectOptions();
 						return result;
 					}
@@ -5370,11 +5369,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Camera type does not need the full simulation settings. Plus the units are different
 		// so just re-implement.
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
-				CalibrationProtosHelper.getName(settings.getCameraType()), new OptionListener<Choice>()
+				CalibrationProtosHelper.getName(settings.getCameraType()), new OptionListener<Integer>()
 				{
-					public boolean collectOptions(Choice field)
+					public boolean collectOptions(Integer field)
 					{
-						settings.setCameraType(SettingsManager.getCameraTypeValues()[field.getSelectedIndex()]);
+						settings.setCameraType(SettingsManager.getCameraTypeValues()[field]);
 						boolean result = collectOptions();
 						return result;
 					}
