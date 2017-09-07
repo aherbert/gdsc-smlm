@@ -172,6 +172,20 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the search.
+	 *
+	 * @param search
+	 *            the size of the region to search for local maxima. The actual window is calculated dynamically
+	 *            in conjunction with the peak widths using {@link #getHWHMMax()}.
+	 * @param absolute
+	 *            the absolute flag
+	 */
+	public void setSearch(double search, boolean absolute)
+	{
+		fitEngineSettings.getSearchBuilder().setValue(search).setAbsolute(absolute);
+	}
+
+	/**
 	 * @return True if the Search parameter is absolute
 	 */
 	public boolean getSearchAbsolute()
@@ -219,6 +233,20 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the border.
+	 *
+	 * @param border
+	 *            the size of the border region to ignore. The actual window is calculated dynamically
+	 *            in conjunction with the peak widths using {@link #getHWHMMax()}.
+	 * @param absolute
+	 *            the absolute flag
+	 */
+	public void setBorder(double border, boolean absolute)
+	{
+		fitEngineSettings.getBorderBuilder().setValue(border).setAbsolute(absolute);
+	}
+
+	/**
 	 * @return True if the Border parameter is absolute
 	 */
 	public boolean getBorderAbsolute()
@@ -261,6 +289,20 @@ public class FitEngineConfiguration implements Cloneable
 	public void setFitting(double fitting)
 	{
 		fitEngineSettings.getFittingBuilder().setValue(fitting);
+	}
+
+	/**
+	 * Sets the fitting.
+	 *
+	 * @param fitting
+	 *            the size of the window used for fitting around a maxima. The actual window is calculated dynamically
+	 *            in conjunction with the peak widths using {@link #getSDMax()}.
+	 * @param absolute
+	 *            the absolute flag
+	 */
+	public void setFitting(double fitting, boolean absolute)
+	{
+		fitEngineSettings.getFittingBuilder().setValue(fitting).setAbsolute(absolute);
 	}
 
 	/**
@@ -726,7 +768,8 @@ public class FitEngineConfiguration implements Cloneable
 	 * can be configured relative to the configured standard deviations or left absolute. The standard deviation is used
 	 * to determine the Half-Width at Half-Maximum (HWHM) for each dimension and the parameters set as follows.
 	 * 
-	 * <pre> 
+	 * <pre>
+	 * 
 	 * int search = (int) Math.ceil(getSearch() * hwhmMax);
 	 * int border = (int) Math.floor(getBorder() * hwhmMax);
 	 * // For each filter
