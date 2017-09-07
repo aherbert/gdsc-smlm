@@ -23,7 +23,7 @@ public class Test_Plugin implements PlugIn
 		// The parameters that have options must be available statically for the OptionListener
 		final String[] textFields = { "Some text", "More text" };
 		final String[] optionFields = { "", "", "" };
-		final double[] numberFields = { 2.567, 7 };
+		final double[] numberFields = { 2.567, 7, 4.567 };
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog("Test");
 		gd.addChoice("Select1", new String[] { "One", "Two" }, optionFields[0]);
@@ -95,6 +95,19 @@ public class Test_Plugin implements PlugIn
 				IJ.log(Double.toString(numberFields[1]));
 				return true;
 			}});
+		gd.addNumericField("Number1", numberFields[2], 2, new OptionListener<Double>(){
+
+			public boolean collectOptions(Double field)
+			{
+				IJ.log(field.toString());
+				return true;
+			}
+
+			public boolean collectOptions()
+			{
+				IJ.log(Double.toString(numberFields[2]));
+				return true;
+			}});
 		gd.setMaxUnscrolledSize(0, 300);
 		gd.showDialog();
 		optionFields[0] = gd.getNextChoice();
@@ -104,6 +117,7 @@ public class Test_Plugin implements PlugIn
 		optionFields[2] = gd.getNextChoice();
 		numberFields[0] = gd.getNextNumber();
 		numberFields[1] = gd.getNextNumber();
+		numberFields[2] = gd.getNextNumber();
 		gd.collectOptions();
 	}
 }
