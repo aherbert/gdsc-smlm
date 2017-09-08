@@ -328,7 +328,7 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using an multiple thresholds: Signal, SNR, width, shift, Euclidian shift and precision (uses fitted background to set noise)";
+		return "Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidian shift and precision (uses fitted background to set noise)";
 	}
 
 	/*
