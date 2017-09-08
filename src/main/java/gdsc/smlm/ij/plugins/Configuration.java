@@ -121,7 +121,7 @@ public class Configuration implements PlugIn, ItemListener
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
 
-		gd.addSlider("Duplicate_distance", 0, 1.5, config.getDuplicateDistance());
+		PeakFit.addDuplicateDistanceOptions(gd, provider);
 
 		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 

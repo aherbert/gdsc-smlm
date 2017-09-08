@@ -437,6 +437,17 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the duplicate distance absolute flas.
+	 *
+	 * @param absolute
+	 *            True if the duplicate distance is absolute
+	 */
+	public void setDuplicateDistanceAbsolute(boolean absolute)
+	{
+		fitEngineSettings.getDuplicateDistanceBuilder().setAbsolute(absolute);
+	}
+
+	/**
 	 * @return The distance within which spots are considered duplicates
 	 */
 	public RelativeParameter getDuplicateDistanceParameter()
@@ -450,6 +461,14 @@ public class FitEngineConfiguration implements Cloneable
 	public double getDuplicateDistance()
 	{
 		return fitEngineSettings.getDuplicateDistance().getValue();
+	}
+
+	/**
+	 * @return True if the duplicate distance is absolute
+	 */
+	public boolean getDuplicateDistanceAbsolute()
+	{
+		return fitEngineSettings.getDuplicateDistance().getAbsolute();
 	}
 
 	/*
@@ -700,7 +719,8 @@ public class FitEngineConfiguration implements Cloneable
 		//truncateFilters(b, n + 1);
 		DataFilter.Builder b2 = (b.getDataFiltersCount() == n) ? b.addDataFiltersBuilder() : b.getDataFiltersBuilder(n);
 		b2.setDataFilterMethod(dataFilterMethod);
-		RelativeParameter.Builder b3 = (b2.getParametersCount() == 0) ? b2.addParametersBuilder() : b2.getParametersBuilder(0);
+		RelativeParameter.Builder b3 = (b2.getParametersCount() == 0) ? b2.addParametersBuilder()
+				: b2.getParametersBuilder(0);
 		b3.setValue(smooth);
 	}
 

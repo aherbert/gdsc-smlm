@@ -147,7 +147,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	// as output from fitting the function. They should be converted to PeakResults
 	// at the end of fitting. This allows using different representations of the PSF.
 	private Candidate[] fittedNeighbours = null;
-	//private final float duplicateDistance2;
 	private CoordinateStore coordinateStore;
 
 	private volatile boolean finished = false;
@@ -336,10 +335,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		xsd = fitConfig.getInitialXSD();
 		ysd = fitConfig.getInitialYSD();
 
-		//gf = new Gaussian2DFitter(fitConfig);
-		//duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		// Used for duplicate checking
-		coordinateStore = CoordinateStoreFactory.create(0, 0, 0, 0, config.getDuplicateDistance());
+		coordinateStore = CoordinateStoreFactory.create(0, 0, 0, 0, 
+				config.convertUsingHWHMax(config.getDuplicateDistanceParameter()));
 		calculateNoise = fitConfig.getNoise() <= 0;
 		if (!calculateNoise)
 		{
@@ -577,7 +575,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				sb.append(((gdsc.smlm.results.filter.Filter) filter.getMinimalFilter()).toXML()).append("\n");
 				sb.append(filter.residualsThreshold).append("\n");
 				sb.append(config.getFailuresLimit()).append("\n");
-				sb.append(config.getDuplicateDistance()).append("\n");
+				sb.append(config.getDuplicateDistance()).append(":");
+				sb.append(config.getDuplicateDistanceAbsolute()).append("\n");
 				if (spotFilter != null)
 					sb.append(spotFilter.getDescription()).append("\n");
 				sb.append("MaxCandidate = ").append(candidates.getSize()).append("\n");

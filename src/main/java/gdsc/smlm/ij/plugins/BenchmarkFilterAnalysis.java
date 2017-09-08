@@ -61,6 +61,7 @@ import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.MatchResult;
+import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
@@ -175,6 +176,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double maxResidualsThreshold = 0.6;
 	private double residualsThreshold = 1; // Disabled
 	private static double duplicateDistance = 0;
+	// This is a flag that is passed around but is only set once, i.e. 
+	// analysis is done using either absolute or relative distances. 
+	private static boolean duplicateDistanceAbsolute = true;
 	private static double minDuplicateDistance = 0;
 	private static double maxDuplicateDistance = 5;
 	private static boolean reset = true;
@@ -650,15 +654,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final double score;
 		final int failCount;
 		final double residualsThreshold, duplicateDistance;
+		final boolean duplicateDistanceAbsolute;
 		final ComplexFilterScore filterScore;
 
 		public FilterResult(int failCount, double residualsThreshold, double duplicateDistance,
-				ComplexFilterScore filterScore)
+				boolean duplicateDistanceAbsolute, ComplexFilterScore filterScore)
 		{
 			this.score = filterScore.score;
 			this.failCount = failCount;
 			this.residualsThreshold = residualsThreshold;
 			this.duplicateDistance = duplicateDistance;
+			this.duplicateDistanceAbsolute = duplicateDistanceAbsolute;
 			this.filterScore = filterScore;
 		}
 
@@ -919,7 +925,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 
 			// Do the fit (using the current optimum filter)
-			fit.run(current.r.filter, residualsThreshold, failCount, duplicateDistance);
+			fit.run(current.r.filter, residualsThreshold, failCount, duplicateDistance, duplicateDistanceAbsolute);
 			if (invalidBenchmarkSpotFitResults(false))
 				return;
 			if (!loadFitResults())
@@ -968,12 +974,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		failCount = BenchmarkSpotFit.config.getFailuresLimit();
 		duplicateDistance = BenchmarkSpotFit.config.getDuplicateDistance();
+		duplicateDistanceAbsolute = BenchmarkSpotFit.config.getDuplicateDistanceAbsolute();
 		residualsThreshold = sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
 				? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
 	}
 
 	private double[] createParameters()
 	{
+		// Ignore the duplicate distance absolute as this is just for convergence checking
 		return new double[] { failCount, residualsThreshold, duplicateDistance };
 	}
 
@@ -1513,6 +1521,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private static Settings lastReadResultsSettings;
 	private static double lastDuplicateDistance = -1;
+	private static boolean lastDuplicateDistanceAbsolute = false;
 
 	private MultiPathFitResults[] readResults()
 	{
@@ -1524,6 +1533,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// Copy the settings from the fitter if this is the first run
 				failCount = BenchmarkSpotFit.config.getFailuresLimit();
 				duplicateDistance = BenchmarkSpotFit.config.getDuplicateDistance();
+				duplicateDistanceAbsolute = BenchmarkSpotFit.config.getDuplicateDistanceAbsolute();
 				sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
 						? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
 			}
@@ -1536,7 +1546,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				upperSignalFactor);
 		boolean equalScoreSettings = settings.equals(lastReadResultsSettings);
 
-		if (update || !equalScoreSettings || lastDuplicateDistance != duplicateDistance)
+		if (update || !equalScoreSettings || lastDuplicateDistance != duplicateDistance ||
+				lastDuplicateDistanceAbsolute != duplicateDistanceAbsolute)
 		{
 			IJ.showStatus("Reading results ...");
 
@@ -1547,6 +1558,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			lastReadResultsSettings = settings;
 			lastDuplicateDistance = duplicateDistance;
+			lastDuplicateDistanceAbsolute = duplicateDistanceAbsolute;
 			depthStats = null;
 			depthFitStats = null;
 			signalFactorStats = null;
@@ -1824,7 +1836,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				gd.addNumericField("Max_residuals_threshold", maxResidualsThreshold, 2);
 			}
 		}
-		gd.addNumericField("Duplicate_distance", duplicateDistance, 2);
+		FitEngineConfiguration tmp = new FitEngineConfiguration();
+		tmp.setDuplicateDistance(duplicateDistance);
+		tmp.setDuplicateDistanceAbsolute(duplicateDistanceAbsolute);
+		PeakFit.addDuplicateDistanceOptions(gd, new PeakFit.SimpleFitEngineConfigurationProvider(tmp));
 		if (showOptimiseParams)
 		{
 			gd.addNumericField("Min_duplicate_distance", minDuplicateDistance, 2);
@@ -1872,7 +1887,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		gd.showDialog();
 
-		if (gd.wasCanceled() || !readDialog(gd, optimiseParameters))
+		if (gd.wasCanceled() || !readDialog(gd, optimiseParameters, tmp))
 			return false;
 
 		if (!selectTableColumns())
@@ -1947,7 +1962,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return true;
 	}
 
-	private boolean readDialog(GenericDialog gd, int optimiseParameters)
+	private boolean readDialog(ExtendedGenericDialog gd, int optimiseParameters, FitEngineConfiguration tmp)
 	{
 		boolean showOptimiseFilter = (optimiseParameters & FLAG_OPTIMISE_FILTER) != 0;
 		boolean showOptimiseParams = (optimiseParameters & FLAG_OPTIMISE_PARAMS) != 0;
@@ -2010,6 +2025,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		showTP = gd.getNextBoolean();
 		showFP = gd.getNextBoolean();
 		showFN = gd.getNextBoolean();
+
+		gd.collectOptions();
+		duplicateDistanceAbsolute = tmp.getDuplicateDistanceAbsolute();
 
 		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
 		createResultsPrefix2();
@@ -2077,7 +2095,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private static String buildResultsPrefix2(int failCount, double residualsThreshold, double duplicateDistance)
 	{
-		return "\t" + failCount + "\t" + Utils.rounded(residualsThreshold) + "\t" + Utils.rounded(duplicateDistance);
+		return "\t" + failCount + "\t" + Utils.rounded(residualsThreshold) + "\t" + Utils.rounded(duplicateDistance) +
+				((duplicateDistanceAbsolute) ? " (absolute)" : " (relative)");
 	}
 
 	private boolean showIterationDialog()
@@ -2415,7 +2434,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// The delta effects the step size for the Genetic Algorithm
 				evolveSetting *= delta;
 			Settings settings = new Settings(filterSets, resultsList, failCount, residualsThreshold, duplicateDistance,
-					plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting);
+					duplicateDistanceAbsolute, plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex,
+					evolveSetting);
 
 			boolean equalSettings = settings.equals(lastAnalyseSettings);
 
@@ -2495,8 +2515,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				min = max = 0;
 			}
 			Settings settings = new Settings(optimum, resultsList, failCount, minFailCount, maxFailCount,
-					residualsThreshold, min, max, duplicateDistance, minDuplicateDistance, maxDuplicateDistance,
-					summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, searchParam);
+					residualsThreshold, min, max, duplicateDistance, duplicateDistanceAbsolute, minDuplicateDistance,
+					maxDuplicateDistance, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, searchParam);
 
 			if (repeatSearch || !settings.equals(lastAnalyseParametersSettings))
 			{
@@ -2659,7 +2679,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 		if (newResults || scores.isEmpty())
 		{
-			scores.add(new FilterResult(failCount, residualsThreshold, duplicateDistance, filters.get(0)));
+			scores.add(new FilterResult(failCount, residualsThreshold, duplicateDistance, duplicateDistanceAbsolute,
+					filters.get(0)));
 		}
 
 		if (saveTemplate)
@@ -4559,7 +4580,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		residualsThreshold = sResidualsThreshold = point[1];
 		duplicateDistance = point[2];
 		// Refresh the coordinate store
-		if (coordinateStore == null || duplicateDistance != coordinateStore.getXYResolution())
+		if (coordinateStore == null ||
+				// Due to the scaling factor the distance may not be exactly the same
+				DoubleEquality.relativeError(duplicateDistance,
+						coordinateStore.getXYResolution() / distanceScallingFactor) > 0.01)
 		{
 			coordinateStore = createCoordinateStore();
 		}
@@ -6579,11 +6603,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			CoordinateStore coordinateStore2;
 
 			// Re-use
-			gridCoordinateStore.changeXYResolution(duplicateDistance);
+			gridCoordinateStore.changeXYResolution(duplicateDistance * distanceScallingFactor);
 			coordinateStore2 = gridCoordinateStore;
 
 			// New
-			//coordinateStore2 = new GridCoordinateStore(bounds[0], bounds[1], duplicateDistance);
+			//coordinateStore2 = new GridCoordinateStore(bounds[0], bounds[1], duplicateDistance * distanceScallingFactor);
 
 			// From factory
 			//coordinateStore2 = createCoordinateStore(duplicateDistance);
@@ -7504,6 +7528,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		config.setFailuresLimit(best.failCount);
 
 		config.setDuplicateDistance(best.duplicateDistance);
+		config.setDuplicateDistanceAbsolute(best.duplicateDistanceAbsolute);
 
 		return true;
 	}
@@ -7927,10 +7952,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private CoordinateStore createCoordinateStore(double duplicateDistance)
 	{
 		getBounds();
+		duplicateDistance *= distanceScallingFactor;
 		return CoordinateStoreFactory.create(bounds.x, bounds.y, bounds.width, bounds.height, duplicateDistance);
 	}
 
 	private Rectangle bounds;
+	private double distanceScallingFactor = 0;
 
 	private Rectangle getBounds()
 	{
@@ -7943,6 +7970,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		if (bounds == null)
 		{
+			if (duplicateDistanceAbsolute)
+			{
+				distanceScallingFactor = 1;
+			}
+			else
+			{
+				// The duplicate distance is scaled
+				distanceScallingFactor = BenchmarkSpotFit.config.getHWHMMax();
+			}
+
 			ImagePlus imp = CreateData.getImage();
 			if (imp != null)
 			{

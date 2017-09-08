@@ -74,6 +74,7 @@ import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
+import gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -1018,11 +1019,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		gd.addSlider("Match_signal", 0, 3.5, signalFactor);
 		gd.addSlider("Lower_signal", 0, 3.5, lowerSignalFactor);
 
+		FitEngineConfigurationProvider fitEngineConfigurationProvider = new PeakFit.SimpleFitEngineConfigurationProvider(
+				config);
+
 		// Collect options for fitting
 		final double sa = getSa();
 		fitConfig.setInitialPeakStdDev(Maths.round(sa / simulationParameters.a));
 		PeakFit.addPSFOptions(gd, fitConfig);
-		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
+		PeakFit.addFittingOptions(gd, fitEngineConfigurationProvider);
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 
 		gd.addMessage("Multi-path filter (used to pick optimum results during fitting)");
@@ -1044,7 +1048,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		textNeighbourHeight = gd.getLastTextField();
 		//gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
 		cbComputeDoublets = gd.addAndGetCheckbox("Compute_doublets", computeDoublets);
-		gd.addNumericField("Duplicate_distance", config.getDuplicateDistance(), 2);
+		PeakFit.addDuplicateDistanceOptions(gd, fitEngineConfigurationProvider);
 		gd.addCheckbox("Show_score_histograms", showFilterScoreHistograms);
 		gd.addCheckbox("Show_correlation", showCorrelation);
 		gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
@@ -1125,6 +1129,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				config.setNeighbourHeightThreshold(tmp.getNeighbourHeightThreshold());
 				computeDoublets = (tmp.getResidualsThreshold() < 1);
 				config.setDuplicateDistance(tmp.getDuplicateDistance());
+				config.setDuplicateDistanceAbsolute(tmp.getDuplicateDistanceAbsolute());
 
 				final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
 				final double residualsThreshold = tmp.getResidualsThreshold();
@@ -1724,7 +1729,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		MultiPathFilter mpf = new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
 		FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults, Integer.MAX_VALUE,
 				this.results.size(), assignments, scoreStore,
-				CoordinateStoreFactory.create(0, 0, imp.getWidth(), imp.getHeight(), config.getDuplicateDistance()));
+				CoordinateStoreFactory.create(0, 0, imp.getWidth(), imp.getHeight(), 
+						config.convertUsingHWHMax(config.getDuplicateDistanceParameter())));
 		double nPredicted = fractionResult.getTP() + fractionResult.getFP();
 
 		final double[][] matchScores = new double[set.size()][];
@@ -2771,6 +2777,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		pConfig.setIncludeNeighbours(config.isIncludeNeighbours());
 		pConfig.setNeighbourHeightThreshold(config.getNeighbourHeightThreshold());
 		pConfig.setDuplicateDistance(config.getDuplicateDistance());
+		pConfig.setDuplicateDistanceAbsolute(config.getDuplicateDistanceAbsolute());
 
 		if (computeDoublets)
 		{
@@ -2854,12 +2861,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 *            the failures limit
 	 * @param duplicateDistance
 	 *            the duplicate distance
+	 * @param duplicateDistanceAbsolute
 	 */
-	public void run(DirectFilter filter, double residualsThreshold, int failuresLimit, double duplicateDistance)
+	public void run(DirectFilter filter, double residualsThreshold, int failuresLimit, double duplicateDistance,
+			boolean duplicateDistanceAbsolute)
 	{
 		multiFilter = new MultiPathFilter(filter, minimalFilter, residualsThreshold);
 		config.setFailuresLimit(failuresLimit);
 		config.setDuplicateDistance(duplicateDistance);
+		config.setDuplicateDistanceAbsolute(duplicateDistanceAbsolute);
 
 		clearFitResults();
 
@@ -2888,6 +2898,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Note we are not resetting the residuals threshold in the config.
 		// Only the threshold in the multi-filter matters.
 		config.setDuplicateDistance(defaultParameters[1]);
+		config.setDuplicateDistanceAbsolute(defaultParameters[2] != 0);
 		return true;
 	}
 
@@ -2901,6 +2912,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	private static double[] createParameters()
 	{
-		return new double[] { config.getFailuresLimit(), config.getDuplicateDistance() };
+		return new double[] { config.getFailuresLimit(), config.getDuplicateDistance(),
+				(config.getDuplicateDistanceAbsolute()) ? 1 : 0 };
 	}
 }

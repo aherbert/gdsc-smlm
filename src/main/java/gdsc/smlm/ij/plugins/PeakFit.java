@@ -3,6 +3,10 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
 import java.awt.SystemColor;
@@ -97,6 +101,8 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
+import ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
 import ij.gui.Overlay;
@@ -833,7 +839,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 			gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
 
-			gd.addSlider("Duplicate_distance", 0, 1.5, config.getDuplicateDistance());
+			addDuplicateDistanceOptions(gd, fitEngineConfigurationProvider);
 
 			gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 
@@ -1333,7 +1339,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	private static void addRelativeParameterOptions(final ExtendedGenericDialog gd, final RelativeParameterProvider rp)
 	{
-		gd.addSlider(rp.getDialogName(), rp.min, rp.max, rp.getValue(), new OptionListener<Double>()
+		final String label = rp.getDialogName();
+		gd.addSlider(label, rp.min, rp.max, rp.getValue(), new OptionListener<Double>()
 		{
 			public boolean collectOptions(Double value)
 			{
@@ -1348,10 +1355,46 @@ public class PeakFit implements PlugInFilter, ItemListener
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;
-				rp.setAbsolute(gd.getNextBoolean());
+				rp.setAbsolute(egd.getNextBoolean());
 				return true;
 			}
 		});
+
+		// Add a label after the button.
+		// The button is added in a panel with a GridBagLayout.
+		Panel p = gd.getLastPanel();
+		GridBagConstraints pc = new GridBagConstraints();
+		pc.gridy = 0;
+		pc.gridx = 3;
+		pc.insets = new Insets(5, 5, 0, 0);
+		pc.anchor = GridBagConstraints.EAST;
+		final Label flagLabel = new Label();
+		updateFlag(flagLabel, rp.isAbsolute());
+		p.add(flagLabel, pc);
+
+		gd.addOptionCollectedListener(new OptionCollectedListener()
+		{
+			public void optionCollected(OptionCollectedEvent e)
+			{
+				if (label.equals(e.getLabel()))
+				{
+					updateFlag(flagLabel, rp.isAbsolute());
+				}
+			}
+		});
+	}
+
+	private static void updateFlag(Label label, boolean absolute)
+	{
+		// Note: Add spaces so the label has extra width for font width differences
+		if (absolute)
+		{
+			label.setText("Absolute   ");
+		}
+		else
+		{
+			label.setText("Relative   ");
+		}
 	}
 
 	/**
@@ -1502,6 +1545,42 @@ public class PeakFit implements PlugInFilter, ItemListener
 					double getValue()
 					{
 						return fitEngineConfigurationProvider.getFitEngineConfiguration().getFitting();
+					}
+				});
+	}
+
+	/**
+	 * Adds the duplicate distance options. A single slider for the duplicate distance parameter is added to the dialog.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param fitEngineConfigurationProvider
+	 *            the fit engine configuration provider
+	 */
+	public static void addDuplicateDistanceOptions(final ExtendedGenericDialog gd,
+			final FitEngineConfigurationProvider fitEngineConfigurationProvider)
+	{
+		addRelativeParameterOptions(gd,
+				new RelativeParameterProvider(0, 1.5, "Duplicate Distance", fitEngineConfigurationProvider)
+				{
+					@Override
+					void setAbsolute(boolean absolute)
+					{
+						fitEngineConfigurationProvider.getFitEngineConfiguration()
+								.setDuplicateDistanceAbsolute(absolute);
+					}
+
+					@Override
+					boolean isAbsolute()
+					{
+						return fitEngineConfigurationProvider.getFitEngineConfiguration()
+								.getDuplicateDistanceAbsolute();
+					}
+
+					@Override
+					double getValue()
+					{
+						return fitEngineConfigurationProvider.getFitEngineConfiguration().getDuplicateDistance();
 					}
 				});
 	}
