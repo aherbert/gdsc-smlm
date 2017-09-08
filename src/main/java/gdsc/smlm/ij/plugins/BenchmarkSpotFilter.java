@@ -313,14 +313,6 @@ public class BenchmarkSpotFilter implements PlugIn
 			add(score, intensity);
 		}
 
-		public ScoredSpot(boolean match, Spot spot, float background)
-		{
-			this.match = match;
-			this.spot = spot;
-			this.background = background;
-			this.fails = 0;
-		}
-
 		public ScoredSpot(boolean match, Spot spot, float background, int fails)
 		{
 			this.match = match;
@@ -988,7 +980,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				{
 					if (scoredSpots[i] == null)
 					{
-						scoredSpots[i] = new ScoredSpot(false, spots[i], fails++);
+						scoredSpots[i] = new ScoredSpot(false, spots[i], background, fails++);
 					}
 					else
 					{
@@ -1010,7 +1002,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				result = new FractionClassificationResult(0, spotsLength, 0, 0);
 				for (int i = 0; i < spots.length; i++)
 				{
-					scoredSpots[i] = new ScoredSpot(false, spots[i], fails++);
+					scoredSpots[i] = new ScoredSpot(false, spots[i], background, fails++);
 				}
 			}
 
