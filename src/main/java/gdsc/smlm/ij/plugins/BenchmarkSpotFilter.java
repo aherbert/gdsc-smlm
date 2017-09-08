@@ -796,7 +796,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				// This is used to raise the spot intensity when computing the signal factor.
 
 				// Compute assignments
-				ArrayList<FractionalAssignment> fractionalAssignments = new ArrayList<FractionalAssignment>(
+				TurboList<FractionalAssignment> fractionalAssignments = new TurboList<FractionalAssignment>(
 						predicted.length * 3);
 
 				final double dmin = matchDistance * matchDistance;
