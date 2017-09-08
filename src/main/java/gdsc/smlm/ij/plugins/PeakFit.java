@@ -792,22 +792,27 @@ public class PeakFit implements PlugInFilter, ItemListener
 		if (isCrop)
 			gd.addCheckbox("Ignore_bounds_for_noise", optionIgnoreBoundsForNoise);
 
-		addPSFOptions(gd, new FitConfigurationProvider()
+		FitConfigurationProvider fitConfigurationProvider = new FitConfigurationProvider()
 		{
 			public FitConfiguration getFitConfiguration()
 			{
 				return fitConfig;
 			}
-		});
+		};
 
-		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
-				config.getDataFilterType().ordinal());
-		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
-				config.getDataFilterMethod(0).ordinal());
-		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
-		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
-		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
-		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
+		FitEngineConfigurationProvider fitEngineConfigurationProvider = new FitEngineConfigurationProvider()
+		{
+			public FitEngineConfiguration getFitEngineConfiguration()
+			{
+				return config;
+			}
+		};
+
+		addPSFOptions(gd, fitConfigurationProvider);
+		addDataFilterOptions(gd, fitEngineConfigurationProvider);
+		addSearchOptions(gd, fitEngineConfigurationProvider);
+		addBorderOptions(gd, fitEngineConfigurationProvider);
+		addFittingOptions(gd, fitEngineConfigurationProvider);
 		if (extraOptions && !fitMaxima)
 		{
 			gd.addCheckbox("Interlaced_data", optionInterlacedData);
@@ -1179,9 +1184,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 				});
 	}
 
-	public FitConfiguration getFitConfiguration()
+	/**
+	 * Allow the latest fitEngineConfiguration to be provided for update
+	 */
+	public interface FitEngineConfigurationProvider
 	{
-		return fitConfig;
+		/**
+		 * Gets the fitEngineConfiguration.
+		 *
+		 * @return the fitEngineConfiguration
+		 */
+		public FitEngineConfiguration getFitEngineConfiguration();
 	}
 
 	/**
@@ -1190,11 +1203,41 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public interface FitConfigurationProvider
 	{
 		/**
-		 * Gets the fitConfiguration writer.
+		 * Gets the fitConfiguration.
 		 *
-		 * @return the fitConfiguration writer
+		 * @return the fitConfiguration
 		 */
 		public FitConfiguration getFitConfiguration();
+	}
+
+	public static class SimpleFitEngineConfigurationProvider implements FitEngineConfigurationProvider
+	{
+		FitEngineConfiguration c;
+
+		SimpleFitEngineConfigurationProvider(FitEngineConfiguration c)
+		{
+			this.c = c;
+		}
+
+		public FitEngineConfiguration getFitEngineConfiguration()
+		{
+			return c;
+		}
+	}
+
+	public static class SimpleFitConfigurationProvider implements FitConfigurationProvider
+	{
+		FitConfiguration c;
+
+		SimpleFitConfigurationProvider(FitConfiguration c)
+		{
+			this.c = c;
+		}
+
+		public FitConfiguration getFitConfiguration()
+		{
+			return c;
+		}
 	}
 
 	/**
@@ -1207,13 +1250,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 */
 	public static void addPSFOptions(final ExtendedGenericDialog gd, final FitConfiguration fitConfiguration)
 	{
-		addPSFOptions(gd, new FitConfigurationProvider()
-		{
-			public FitConfiguration getFitConfiguration()
-			{
-				return fitConfiguration;
-			}
-		});
+		addPSFOptions(gd, new SimpleFitConfigurationProvider(fitConfiguration));
 	}
 
 	/**
@@ -1260,6 +1297,211 @@ public class PeakFit implements PlugInFilter, ItemListener
 						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
 							fitConfig.setFixedPSF(egd.getNextBoolean());
 						return true;
+					}
+				});
+	}
+
+	/**
+	 * Used for relative parameters
+	 */
+	private static abstract class RelativeParameterProvider
+	{
+		double min, max;
+		String name;
+		FitEngineConfigurationProvider fitEngineConfigurationProvider;
+
+		public RelativeParameterProvider(double min, double max, String name,
+				FitEngineConfigurationProvider fitEngineConfigurationProvider)
+		{
+			this.min = min;
+			this.max = max;
+			this.name = name;
+			this.fitEngineConfigurationProvider = fitEngineConfigurationProvider;
+		}
+
+		abstract double getValue();
+
+		abstract boolean isAbsolute();
+
+		abstract void setAbsolute(boolean absolute);
+
+		String getDialogName()
+		{
+			return name.replace(' ', '_');
+		}
+	}
+
+	private static void addRelativeParameterOptions(final ExtendedGenericDialog gd, final RelativeParameterProvider rp)
+	{
+		gd.addSlider(rp.getDialogName(), rp.min, rp.max, rp.getValue(), new OptionListener<Double>()
+		{
+			public boolean collectOptions(Double value)
+			{
+				// Nothing depends on the input double value so just collect the options
+				return collectOptions();
+			}
+
+			public boolean collectOptions()
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog(rp.name + " Options", null);
+				egd.addCheckbox(rp.getDialogName() + "_absolute", rp.isAbsolute());
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				rp.setAbsolute(gd.getNextBoolean());
+				return true;
+			}
+		});
+	}
+
+	/**
+	 * Adds the data filter options for the first filter. Adds to the dialog:
+	 * <ul>
+	 * <li>a choice of filter type (e.g. single, difference, etc)</li>
+	 * <li>a choice of primary filter (e.g. mean, Gaussian, etc)</li>
+	 * <li>a single slider for the primary filter parameter</li>
+	 * </ul>
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param fitEngineConfigurationProvider
+	 *            the fit engine configuration provider
+	 */
+	public static void addDataFilterOptions(final ExtendedGenericDialog gd,
+			final FitEngineConfigurationProvider fitEngineConfigurationProvider)
+	{
+		final int n = 0;
+		FitEngineConfiguration config = fitEngineConfigurationProvider.getFitEngineConfiguration();
+		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
+				config.getDataFilterType().ordinal());
+		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
+				config.getDataFilterMethod(n).ordinal());
+		addRelativeParameterOptions(gd,
+				new RelativeParameterProvider(0, 2.5, "Smoothing", fitEngineConfigurationProvider)
+				{
+					@Override
+					void setAbsolute(boolean absolute)
+					{
+						FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
+						DataFilterMethod m = c.getDataFilterMethod(n);
+						double smooth = c.getDataFilterParameter(n).getValue();
+						c.setDataFilter(m, smooth, absolute, n);
+					}
+
+					@Override
+					boolean isAbsolute()
+					{
+						return fitEngineConfigurationProvider.getFitEngineConfiguration()
+								.getDataFilterParameterAbsolute(n);
+					}
+
+					@Override
+					double getValue()
+					{
+						return fitEngineConfigurationProvider.getFitEngineConfiguration().getDataFilterParameter(n)
+								.getValue();
+					}
+				});
+	}
+
+	/**
+	 * Adds the search options. A single slider for the search parameter is added to the dialog.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param fitEngineConfigurationProvider
+	 *            the fit engine configuration provider
+	 */
+	public static void addSearchOptions(final ExtendedGenericDialog gd,
+			final FitEngineConfigurationProvider fitEngineConfigurationProvider)
+	{
+		addRelativeParameterOptions(gd,
+				new RelativeParameterProvider(0.5, 2.5, "Search Width", fitEngineConfigurationProvider)
+				{
+					@Override
+					void setAbsolute(boolean absolute)
+					{
+						fitEngineConfigurationProvider.getFitEngineConfiguration().setSearchAbsolute(absolute);
+					}
+
+					@Override
+					boolean isAbsolute()
+					{
+						return fitEngineConfigurationProvider.getFitEngineConfiguration().getSearchAbsolute();
+					}
+
+					@Override
+					double getValue()
+					{
+						return fitEngineConfigurationProvider.getFitEngineConfiguration().getSearch();
+					}
+				});
+	}
+
+	/**
+	 * Adds the border options. A single slider for the border parameter is added to the dialog.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param fitEngineConfigurationProvider
+	 *            the fit engine configuration provider
+	 */
+	public static void addBorderOptions(final ExtendedGenericDialog gd,
+			final FitEngineConfigurationProvider fitEngineConfigurationProvider)
+	{
+		addRelativeParameterOptions(gd,
+				new RelativeParameterProvider(0.5, 2.5, "Border Width", fitEngineConfigurationProvider)
+				{
+					@Override
+					void setAbsolute(boolean absolute)
+					{
+						fitEngineConfigurationProvider.getFitEngineConfiguration().setBorderAbsolute(absolute);
+					}
+
+					@Override
+					boolean isAbsolute()
+					{
+						return fitEngineConfigurationProvider.getFitEngineConfiguration().getBorderAbsolute();
+					}
+
+					@Override
+					double getValue()
+					{
+						return fitEngineConfigurationProvider.getFitEngineConfiguration().getBorder();
+					}
+				});
+	}
+
+	/**
+	 * Adds the fitting options. A single slider for the fitting parameter is added to the dialog.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param fitEngineConfigurationProvider
+	 *            the fit engine configuration provider
+	 */
+	public static void addFittingOptions(final ExtendedGenericDialog gd,
+			final FitEngineConfigurationProvider fitEngineConfigurationProvider)
+	{
+		addRelativeParameterOptions(gd,
+				new RelativeParameterProvider(2, 4.5, "Fitting Width", fitEngineConfigurationProvider)
+				{
+					@Override
+					void setAbsolute(boolean absolute)
+					{
+						fitEngineConfigurationProvider.getFitEngineConfiguration().setFittingAbsolute(absolute);
+					}
+
+					@Override
+					boolean isAbsolute()
+					{
+						return fitEngineConfigurationProvider.getFitEngineConfiguration().getFittingAbsolute();
+					}
+
+					@Override
+					double getValue()
+					{
+						return fitEngineConfigurationProvider.getFitEngineConfiguration().getFitting();
 					}
 				});
 	}
@@ -1650,8 +1892,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		config.setDataFilterType(gd.getNextChoiceIndex());
-		// TODO - set the absolute flag
-		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
+		// Note: The absolute flag is set in extra options
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
@@ -1905,8 +2147,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 	}
 
 	/**
-	 * Show a dialog to configure the data filter. The updated settings are saved to the settings file. An error
-	 * message is shown if the dialog is cancelled or the configuration is invalid.
+	 * Show a dialog to configure the data filter. The data filter type and the first data filter must ALREADY be set in
+	 * the configuration. The subsequent filters are then configured, e.g. for difference and jury filters.
+	 * <p>
+	 * The updated settings are saved to the settings file. An error message is shown if the dialog is cancelled or the
+	 * configuration is invalid.
 	 * <p>
 	 * If the configuration is for a per-pixel camera type (e.g. sCMOS) then the camera model will loaded using the
 	 * configured camera model name. This will be used to validate the filter to check the filter supports the per-pixel
@@ -1918,10 +2163,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 *            the flags
 	 * @return True if the configuration succeeded
 	 */
-	public static boolean configureDataFilter(FitEngineConfiguration config, int flags)
+	public static boolean configureDataFilter(final FitEngineConfiguration config, int flags)
 	{
 		int numberOfFilters = 1;
-		final int n;
+		int n;
 		switch (config.getDataFilterType())
 		{
 			case JURY:
@@ -1940,27 +2185,30 @@ public class PeakFit implements PlugInFilter, ItemListener
 		String[] filterNames = SettingsManager.getDataFilterMethodNames();
 		DataFilterMethod[] filterValues = SettingsManager.getDataFilterMethodValues();
 
-		// Set some defaults in the event the configuration does not have any current values
-		int count = config.getDataFiltersCount();
-		DataFilterMethod defaultDataFilterMethod = null;
-		double defaultSmooth = 0;
-		if (count < n)
+		// We use the previous value in the event the configuration does not have any current values.
+		// Check we have at least the first filter.
+		if (config.getDataFiltersCount() == 0)
+			throw new IllegalStateException("No primary filter is configured");
+
+		FitEngineConfigurationProvider fitEngineConfigurationProvider = new FitEngineConfigurationProvider()
 		{
-			FitEngineConfiguration c = new FitEngineConfiguration();
-			defaultDataFilterMethod = c.getDataFilterMethod(0);
-			defaultSmooth = c.getSmooth(0);
-		}
+			public FitEngineConfiguration getFitEngineConfiguration()
+			{
+				return config;
+			}
+		};
 
 		for (int i = 1; i < n; i++)
 		{
 			int filter = i + 1;
+			final int ii = i;
 
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			if (filter == n)
 			{
 				// This is maximum filter count so no continue option
-				gd.addMessage(String.format("Configure the %s filter.",
-						FitProtosHelper.getName(config.getDataFilterType()), i));
+				gd.addMessage(
+						String.format("Configure the %s filter.", FitProtosHelper.getName(config.getDataFilterType())));
 			}
 			else
 			{
@@ -1969,14 +2217,43 @@ public class PeakFit implements PlugInFilter, ItemListener
 						String.format("Configure the %s filter.\nClick continue to proceed with the current set of %d.",
 								FitProtosHelper.getName(config.getDataFilterType()), i));
 			}
+
 			String fieldName = "Spot_filter" + filter;
 			if (IJ.isMacro())
 				// Use blank default value so bad macro parameters return nothing
 				gd.addStringField(fieldName, "");
 			else
 				gd.addChoice(fieldName, filterNames,
-						filterNames[config.getDataFilterMethod(i, defaultDataFilterMethod).ordinal()]);
-			gd.addSlider("Smoothing" + filter, 0, 4.5, config.getSmooth(i, defaultSmooth));
+						filterNames[config.getDataFilterMethod(ii, config.getDataFilterMethod(ii - 1)).ordinal()]);
+			addRelativeParameterOptions(gd,
+					new RelativeParameterProvider(0, 4.5, "Smoothing" + filter, fitEngineConfigurationProvider)
+					{
+						@Override
+						void setAbsolute(boolean absolute)
+						{
+							// Get the current settings
+							FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
+							DataFilterMethod m = c.getDataFilterMethod(ii);
+							double smooth = c.getDataFilterParameter(ii).getValue();
+							// Reset with the new absolute value
+							c.setDataFilter(m, smooth, absolute, ii);
+						}
+
+						@Override
+						boolean isAbsolute()
+						{
+							FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
+							return c.getDataFilterParameterAbsolute(ii, c.getDataFilterParameterAbsolute(ii - 1));
+						}
+
+						@Override
+						double getValue()
+						{
+							FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
+							return c.getDataFilterParameterValue(ii, c.getDataFilterParameterValue(ii - 1));
+						}
+					});
+			//gd.addSlider("Smoothing" + filter, 0, 4.5, config.getDataFilterParameterValue(i, defaultSmooth));
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
@@ -1998,8 +2275,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 				}
 				else
 					filterIndex = gd.getNextChoiceIndex();
-				// TODO - set the absolute flag
-				config.setDataFilter(filterValues[filterIndex], Math.abs(gd.getNextNumber()), false, i);
+				// Note: The absolute flag is set in extra options
+				config.setDataFilter(filterValues[filterIndex], Math.abs(gd.getNextNumber()), i);
+				gd.collectOptions();
 				numberOfFilters++;
 			}
 			else
@@ -3054,7 +3332,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		textDataFilterType.select(SettingsManager.getDataFilterTypeNames()[config.getDataFilterType().ordinal()]);
 		textDataFilterMethod
 				.select(SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(0).ordinal()]);
-		textSmooth.setText("" + config.getSmooth(0));
+		textSmooth.setText("" + config.getDataFilterParameterValue(0));
 		textSearch.setText("" + config.getSearch());
 		textBorder.setText("" + config.getBorder());
 		textFitting.setText("" + config.getFitting());

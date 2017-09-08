@@ -47,6 +47,7 @@ import gdsc.smlm.data.config.ConfigurationException;
 
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
+import gdsc.smlm.data.config.FitProtos.RelativeParameter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -1542,8 +1543,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
 					config.getDataFilterMethod(0).ordinal());
 
-			gd.addCheckbox("Filter_relative_distances (to HWHM)", !config.getDataFilterAbsolute(0));
-			gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
+			gd.addCheckbox("Filter_relative_distances (to HWHM)", !config.getDataFilterParameterAbsolute(0));
+			gd.addSlider("Smoothing", 0, 2.5, config.getDataFilterParameterValue(0));
 			gd.addSlider("Search_width", 1, 4, search);
 		}
 		gd.addSlider("Border", 0, 5, border);
@@ -2087,8 +2088,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(spotFilter.getBorder()).append('\t');
 		sb.append(Utils.rounded(spotFilter.getSpread())).append('\t');
 		sb.append(config.getDataFilterMethod(0)).append('\t');
-		double param = config.getSmooth(0);
-		boolean absolute = config.getAbsolute(0);
+		double param = config.getDataFilterParameterValue(0);
+		boolean absolute = config.getDataFilterParameterAbsolute(0);
 		final double hwhmMin = config.getHWHMMin();
 		if (absolute)
 		{
@@ -2511,7 +2512,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		final int nFilters = config.getNumberOfFilters();
 		for (int n = 0; n < nFilters; n++)
 		{
-			pConfig.setDataFilter(config.getDataFilterMethod(n), config.getSmooth(n), config.getAbsolute(n), n);
+			RelativeParameter p = config.getDataFilterParameter(n);
+			pConfig.setDataFilter(config.getDataFilterMethod(n), p.getValue(), p.getAbsolute(), n);
 		}
 		pConfig.setSearch(config.getSearch(), config.getSearchAbsolute());
 		pConfig.setBorder(config.getBorder(), config.getBorderAbsolute());

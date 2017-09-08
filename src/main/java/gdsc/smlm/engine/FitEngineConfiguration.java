@@ -604,7 +604,7 @@ public class FitEngineConfiguration implements Cloneable
 	 *            The filter number
 	 * @return if the smoothing parameter is absolute
 	 */
-	public boolean getDataFilterAbsolute(int n)
+	public boolean getDataFilterParameterAbsolute(int n)
 	{
 		if (n < getDataFiltersCount())
 			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getAbsolute();
@@ -620,7 +620,7 @@ public class FitEngineConfiguration implements Cloneable
 	 *            the default value
 	 * @return if the smoothing parameter is absolute
 	 */
-	public boolean getDataFilterAbsolute(int n, boolean defaultValue)
+	public boolean getDataFilterParameterAbsolute(int n, boolean defaultValue)
 	{
 		if (n < getDataFiltersCount())
 			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getAbsolute();
@@ -632,7 +632,7 @@ public class FitEngineConfiguration implements Cloneable
 	 *            The filter number
 	 * @return the smoothing window size
 	 */
-	public double getSmooth(int n)
+	public double getDataFilterParameterValue(int n)
 	{
 		if (n < getDataFiltersCount())
 			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getValue();
@@ -648,38 +648,10 @@ public class FitEngineConfiguration implements Cloneable
 	 *            the default value
 	 * @return the smoothing window size
 	 */
-	public double getSmooth(int n, double defaultValue)
+	public double getDataFilterParameterValue(int n, double defaultValue)
 	{
 		if (n < getDataFiltersCount())
 			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getValue();
-		return defaultValue;
-	}
-
-	/**
-	 * @param n
-	 *            The filter number
-	 * @return the absolute flag for the smoothing window size
-	 */
-	public boolean getAbsolute(int n)
-	{
-		if (n < getDataFiltersCount())
-			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getAbsolute();
-		throw new IndexOutOfBoundsException(n + " >= " + getDataFiltersCount());
-	}
-
-	/**
-	 * Gets the absolute.
-	 *
-	 * @param n
-	 *            The filter number
-	 * @param defaultValue
-	 *            the default value
-	 * @return the absolute flag for the smoothing window size
-	 */
-	public boolean getAbsolute(int n, boolean defaultValue)
-	{
-		if (n < getDataFiltersCount())
-			return this.fitEngineSettings.getDataFilterSettings().getDataFilters(n).getParameters(0).getAbsolute();
 		return defaultValue;
 	}
 
@@ -709,6 +681,30 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Sets the data filter without the absolute flag. If no parameter exists then the absolute flag will have the
+	 * default value (false).
+	 *
+	 * @param dataFilterMethod
+	 *            the filter to apply to the data before identifying local maxima
+	 * @param smooth
+	 *            the size of the smoothing window. The actual window is calculated dynamically in conjunction with the
+	 *            peak widths.
+	 * @param absolute
+	 *            the absolute
+	 * @param n
+	 *            The filter number
+	 */
+	public void setDataFilter(DataFilterMethod dataFilterMethod, double smooth, int n)
+	{
+		DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
+		//truncateFilters(b, n + 1);
+		DataFilter.Builder b2 = (b.getDataFiltersCount() == n) ? b.addDataFiltersBuilder() : b.getDataFiltersBuilder(n);
+		b2.setDataFilterMethod(dataFilterMethod);
+		RelativeParameter.Builder b3 = (b2.getParametersCount() == 0) ? b2.addParametersBuilder() : b2.getParametersBuilder(0);
+		b3.setValue(smooth);
+	}
+
+	/**
 	 * Sets the data filter
 	 *
 	 * @param dataFilter
@@ -727,6 +723,27 @@ public class FitEngineConfiguration implements Cloneable
 		if (m != null)
 		{
 			setDataFilter(m, smooth, absolute, n);
+		}
+	}
+
+	/**
+	 * Sets the data filter without the absolute flag. If no parameter exists then the absolute flag will have the
+	 * default value (false).
+	 *
+	 * @param dataFilter
+	 *            the data filter
+	 * @param smooth
+	 *            the size of the smoothing window. The actual window is calculated dynamically in conjunction with the
+	 *            peak widths using {@link #getHWHMMin()}.
+	 * @param n
+	 *            The filter number
+	 */
+	public void setDataFilter(int dataFilter, double smooth, int n)
+	{
+		DataFilterMethod m = DataFilterMethod.forNumber(dataFilter);
+		if (m != null)
+		{
+			setDataFilter(m, smooth, n);
 		}
 	}
 

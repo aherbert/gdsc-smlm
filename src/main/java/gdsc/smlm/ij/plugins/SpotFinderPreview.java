@@ -78,7 +78,7 @@ public class SpotFinderPreview
 	{
 		FitEngineConfiguration c = new FitEngineConfiguration();
 		defaultDataFilterMethod = c.getDataFilterMethod(0);
-		defaultSmooth = c.getSmooth(0);
+		defaultSmooth = c.getDataFilterParameterValue(0);
 	}
 
 	private int flags = DOES_16 | DOES_8G | DOES_32;
@@ -161,20 +161,14 @@ public class SpotFinderPreview
 		gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
 
 		PeakFit.addPSFOptions(gd, this);
-		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
-				config.getDataFilterType().ordinal());
-		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
-				config.getDataFilterMethod(0).ordinal());
-		
-		// For now just have on switch for aboslute (i.e. not individually)
-		gd.addCheckbox("Absolute_distances", config.getAbsolute(0));
-		
-		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
+		PeakFit.SimpleFitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(
+				config);
+		PeakFit.addDataFilterOptions(gd, provider);
 		gd.addChoice("Spot_filter_2", SettingsManager.getDataFilterMethodNames(),
 				config.getDataFilterMethod(1, defaultDataFilterMethod).ordinal());
-		gd.addSlider("Smoothing_2", 2.5, 4.5, config.getSmooth(1, defaultSmooth));
-		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
-		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
+		gd.addSlider("Smoothing_2", 2.5, 4.5, config.getDataFilterParameterValue(1, defaultSmooth));
+		PeakFit.addSearchOptions(gd, provider);
+		PeakFit.addBorderOptions(gd, provider);
 
 		// Find if this image was created with ground truth data
 		if (imp.getID() == CreateData.getImageId())
@@ -263,14 +257,8 @@ public class SpotFinderPreview
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 
 		config.setDataFilterType(gd.getNextChoiceIndex());
-		
-		// Single absolute flag
-		boolean absolute = gd.getNextBoolean();
-		config.setSearchAbsolute(absolute);
-		config.setBorderAbsolute(absolute);
-		
-		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), absolute, 0);
-		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), absolute, 1);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 1);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		
@@ -608,12 +596,12 @@ public class SpotFinderPreview
 		textDataFilterType.select(SettingsManager.getDataFilterTypeNames()[config.getDataFilterType().ordinal()]);
 		textDataFilterMethod
 				.select(SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(0).ordinal()]);
-		textSmooth.setText("" + config.getSmooth(0));
+		textSmooth.setText("" + config.getDataFilterParameterValue(0));
 		if (config.getDataFiltersCount() > 1)
 		{
 			textDataFilterMethod2
 					.select(SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(1).ordinal()]);
-			textSmooth2.setText("" + config.getSmooth(1));
+			textSmooth2.setText("" + config.getDataFilterParameterValue(1));
 		}
 		textSearch.setText("" + config.getSearch());
 		textBorder.setText("" + config.getBorder());

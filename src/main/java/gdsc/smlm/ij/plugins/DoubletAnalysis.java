@@ -1614,15 +1614,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		// Collect options for fitting
 		PeakFit.addPSFOptions(gd, fitConfig);
+		PeakFit.SimpleFitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(
+				config);
+		PeakFit.addDataFilterOptions(gd, provider);
+		PeakFit.addSearchOptions(gd, provider);
+		PeakFit.addBorderOptions(gd, provider);
+		PeakFit.addFittingOptions(gd, provider);
 
-		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
-				config.getDataFilterType().ordinal());
-		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
-				config.getDataFilterMethod(0).ordinal());
-		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
-		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
-		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
-		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 
 		gd.addSlider("Iteration_increase", 1, 4.5, iterationIncrease);
@@ -3257,7 +3255,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							textPSF.select(PeakFit.getPSFTypeNames()[fitConfig2.getPSFType().ordinal()]);
 						textDataFilterType.select(config2.getDataFilterType().ordinal());
 						textDataFilter.select(config2.getDataFilterMethod(0).ordinal());
-						textSmooth.setText("" + config2.getSmooth(0));
+						textSmooth.setText("" + config2.getDataFilterParameterValue(0));
 						textSearch.setText("" + config2.getSearch());
 						textBorder.setText("" + config2.getBorder());
 						textFitting.setText("" + config2.getFitting());
@@ -3303,7 +3301,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				textPSF.select(PeakFit.getPSFTypeNames()[fitConfig.getPSFType().ordinal()]);
 				textDataFilterType.select(config.getDataFilterType().ordinal());
 				textDataFilter.select(config.getDataFilterMethod(0).ordinal());
-				textSmooth.setText("" + config.getSmooth(0));
+				textSmooth.setText("" + config.getDataFilterParameterValue(0));
 				textSearch.setText("" + config.getSearch());
 				textBorder.setText("" + config.getBorder());
 				textFitting.setText("" + config.getFitting());

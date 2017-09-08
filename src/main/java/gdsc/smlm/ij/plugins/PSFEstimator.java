@@ -168,15 +168,12 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 		PeakFit.addCameraOptions(gd, fitConfig.getCalibrationWriter());
 		PeakFit.addPSFOptions(gd, fitConfig);
-
-		gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
-				config.getDataFilterType().ordinal());
-		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
-				config.getDataFilterMethod(0).ordinal());
-		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
-		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
-		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
-		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
+		PeakFit.SimpleFitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(
+				config);
+		PeakFit.addDataFilterOptions(gd, provider);
+		PeakFit.addSearchOptions(gd, provider);
+		PeakFit.addBorderOptions(gd, provider);
+		PeakFit.addFittingOptions(gd, provider);
 
 		if (extraOptions)
 		{
