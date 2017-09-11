@@ -184,7 +184,7 @@ public class CameraModelManager implements PlugIn
 	 * List the camera models.
 	 *
 	 * @param includeNone
-	 *            Set to true to include an empty string
+	 *            Set to true to include an invalid none model string
 	 * @return the list
 	 */
 	public static String[] listCameraModels(boolean includeNone)
@@ -199,7 +199,7 @@ public class CameraModelManager implements PlugIn
 	{
 		List<String> list = new TurboList<String>();
 		if (includeNone)
-			list.add("");
+			list.add("[None]");
 		return list;
 	}
 
