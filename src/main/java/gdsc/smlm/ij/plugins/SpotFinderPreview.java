@@ -12,13 +12,16 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.match.AUCCalculator;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.ClassificationResult;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.ImmutableFractionalAssignment;
 import gdsc.core.match.RankedScoreCalculator;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
@@ -54,12 +57,17 @@ import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
+import ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import ij.gui.GenericDialog;
 import ij.gui.ImageRoi;
 import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Overlay;
+import ij.gui.Plot2;
+import ij.gui.PlotWindow;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
+import ij.plugin.WindowOrganiser;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.Blitter;
@@ -69,8 +77,8 @@ import ij.process.ImageProcessor;
 /**
  * Runs the candidate maxima identification on the image and provides a preview using an overlay
  */
-public class SpotFinderPreview
-		implements ExtendedPlugInFilter, DialogListener, ImageListener, ItemListener, FitConfigurationProvider
+public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, ImageListener, ItemListener,
+		FitConfigurationProvider, OptionCollectedListener
 {
 	private final static String TITLE = "Spot Finder Preview";
 
@@ -92,6 +100,8 @@ public class SpotFinderPreview
 	private Label label = null;
 	private TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = null;
 	private static double distance = 1.5;
+	private static double lowerDistance = 50;
+	private static boolean multipleMatches = false;
 	private static boolean showTP = true;
 	private static boolean showFP = true;
 
@@ -179,8 +189,10 @@ public class SpotFinderPreview
 			if (results != null)
 			{
 				gd.addSlider("Match_distance", 0, 2.5, distance);
-				gd.addCheckbox("Show TP", showTP);
-				gd.addCheckbox("Show FP", showFP);
+				gd.addSlider("Lower_match_distance (%)", 0, 100, lowerDistance);
+				gd.addCheckbox("Multiple_matches", multipleMatches);
+				gd.addCheckbox("Show_TP", showTP);
+				gd.addCheckbox("Show_FP", showFP);
 				gd.addMessage("");
 				label = (Label) gd.getMessage();
 				// Integer coords
@@ -190,6 +202,8 @@ public class SpotFinderPreview
 
 		if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless()))
 		{
+			// Listen for changes in the dialog options
+			gd.addOptionCollectedListener(this);
 			// Listen for changes to an image
 			ImagePlus.addImageListener(this);
 
@@ -267,6 +281,8 @@ public class SpotFinderPreview
 		if (label != null)
 		{
 			distance = gd.getNextNumber();
+			lowerDistance = gd.getNextNumber();
+			multipleMatches = gd.getNextBoolean();
 			showTP = gd.getNextBoolean();
 			showFP = gd.getNextBoolean();
 		}
@@ -296,8 +312,6 @@ public class SpotFinderPreview
 	{
 		if (refreshing)
 			return;
-
-		currentSlice = imp.getCurrentSlice();
 
 		Rectangle bounds = ip.getRoi();
 
@@ -371,6 +385,8 @@ public class SpotFinderPreview
 		if (refreshing)
 			return;
 
+		currentSlice = imp.getCurrentSlice();
+
 		Rectangle bounds = ip.getRoi();
 
 		// Crop to the ROI
@@ -415,12 +431,11 @@ public class SpotFinderPreview
 				predicted[i] = new BasePoint(spots[i].x + bounds.x, spots[i].y + bounds.y);
 			}
 
-			// If so then this needs to be refactored out of the BenchmarkSpotFilter class.
 			// Compute assignments
 			TurboList<FractionalAssignment> fractionalAssignments = new TurboList<FractionalAssignment>(
 					3 * predicted.length);
 			double matchDistance = distance * fitConfig.getInitialPeakStdDev();
-			final RampedScore score = new RampedScore(matchDistance * 0.5, matchDistance);
+			final RampedScore score = new RampedScore(matchDistance * lowerDistance / 100, matchDistance);
 			final double dmin = matchDistance * matchDistance;
 			final int nActual = actual.length;
 			final int nPredicted = predicted.length;
@@ -463,26 +478,63 @@ public class SpotFinderPreview
 
 			// Compute matches
 			RankedScoreCalculator calc = new RankedScoreCalculator(assignments, nActual - 1, nPredicted - 1);
-			// TODO - Make this an option
-			boolean multipleMatches = false;
-			double[] calcScore = calc.score(nPredicted, multipleMatches, true);
+			boolean save = showTP || showFP;
+			double[] calcScore = calc.score(nPredicted, multipleMatches, save);
 			ClassificationResult result = RankedScoreCalculator.toClassificationResult(calcScore, nActual);
 
-			// TODO - compute AUC and max jaccard and plot			
+			// Compute AUC and max jaccard (and plot)
+			double[][] curve = RankedScoreCalculator.getPrecisionRecallCurve(assignments, nActual, nPredicted);
+			double[] precision = curve[0];
+			double[] recall = curve[1];
+			double[] jaccard = curve[2];
+			double auc = AUCCalculator.auc(precision, recall);
 
 			// Show scores
-			setLabel(String.format("P=%s, R=%s, J=%s", Utils.rounded(result.getPrecision()),
-					Utils.rounded(result.getRecall()), Utils.rounded(result.getJaccard())));
+			String label = String.format("Slice=%d, AUC=%s, R=%s, Max J=%s", imp.getCurrentSlice(), Utils.rounded(auc),
+					Utils.rounded(result.getRecall()), Utils.rounded(Maths.maxDefault(0, jaccard)));
+			setLabel(label);
+
+			// Plot
+			String title = TITLE + " Performance";
+			Plot2 plot = new Plot2(title, "Spot Rank", "");
+			double[] rank = SimpleArrayUtils.newArray(precision.length, 0, 1.0);
+			plot.setLimits(0, nPredicted, 0, 1.05);
+			plot.setColor(Color.blue);
+			plot.addPoints(rank, precision, Plot2.LINE);
+			plot.setColor(Color.red);
+			plot.addPoints(rank, recall, Plot2.LINE);
+			plot.setColor(Color.black);
+			plot.addPoints(rank, jaccard, Plot2.LINE);
+			plot.setColor(Color.black);
+			plot.addLabel(0, 0, label);
+
+			PlotWindow pw = Utils.display(title, plot);
+			WindowOrganiser windowOrganiser = new WindowOrganiser();
+			if (Utils.isNewWindow())
+				windowOrganiser.add(pw);
+
+			title = TITLE + " Precision-Recall";
+			plot = new Plot2(title, "Recall", "Precision");
+			plot.setLimits(0, 1, 0, 1.05);
+			plot.setColor(Color.red);
+			plot.addPoints(recall, precision, Plot2.LINE);
+			plot.drawLine(recall[recall.length - 1], precision[recall.length - 1], recall[recall.length - 1], 0);
+			plot.setColor(Color.black);
+			plot.addLabel(0, 0, label);
+			PlotWindow pw2 = Utils.display(title, plot);
+			if (Utils.isNewWindow())
+				windowOrganiser.add(pw2);
+
+			windowOrganiser.tile();
 
 			// Create Rois for TP and FP
-			if (showTP || showFP)
+			if (save)
 			{
 				double[] matchScore = RankedScoreCalculator.getMatchScore(calc.getScoredAssignments(), nPredicted);
 				int matches = 0;
 				for (int i = 0; i < matchScore.length; i++)
 					if (matchScore[i] != 0)
 						matches++;
-
 				if (showTP)
 				{
 					float[] x = new float[matches];
@@ -676,5 +728,17 @@ public class SpotFinderPreview
 	public FitConfiguration getFitConfiguration()
 	{
 		return fitConfig;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.gui.ExtendedGenericDialog.OptionCollectedListener#optionCollected(ij.gui.ExtendedGenericDialog.
+	 * OptionCollectedEvent)
+	 */
+	public void optionCollected(OptionCollectedEvent e)
+	{
+		// Just run on the current processor
+		run(imp.getProcessor());
 	}
 }
