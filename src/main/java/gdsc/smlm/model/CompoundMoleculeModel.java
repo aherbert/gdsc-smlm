@@ -32,6 +32,8 @@ public class CompoundMoleculeModel extends MoleculeModel
 	public static final double[] Y_AXIS = new double[] { 0, 1, 0 };
 	public static final double[] Z_AXIS = new double[] { 0, 0, 1 };
 
+	private int label;
+
 	/**
 	 * Identity matrix for no rotation
 	 */
@@ -562,5 +564,26 @@ public class CompoundMoleculeModel extends MoleculeModel
 	public void setDiffusionType(DiffusionType diffusionType)
 	{
 		this.diffusionType = diffusionType;
+	}
+
+	/**
+	 * Gets the label.
+	 *
+	 * @return the label
+	 */
+	public int getLabel()
+	{
+		return label;
+	}
+
+	/**
+	 * Sets the label. This can be used to identify subsets of molecules.
+	 *
+	 * @param label
+	 *            the new label
+	 */
+	public void setLabel(int label)
+	{
+		this.label = label;
 	}
 }

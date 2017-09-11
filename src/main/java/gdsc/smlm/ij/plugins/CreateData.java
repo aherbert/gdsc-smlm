@@ -122,6 +122,7 @@ import gdsc.smlm.results.procedures.RawResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.WidthResultProcedure;
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
@@ -238,6 +239,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private double hwhm = 0;
 
 	private TIntHashSet movingMolecules;
+	private TIntIntHashMap idToCompound;
+	ArrayList<String> compoundNames;
 	private boolean maskListContainsStacks;
 
 	// Created by drawImage(...)
@@ -755,6 +758,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				return;
 			List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, settings.getParticles(),
 					distribution, settings.getRotateInitialOrientation());
+
+			// Map the molecule ID to the compound for mixtures 
+			if (compounds.size() > 1)
+			{
+				idToCompound = new TIntIntHashMap(settings.getParticles());
+				for (CompoundMoleculeModel m : molecules)
+					idToCompound.put(m.getId(), m.getLabel());
+			}
 
 			// Activate fluorophores
 			IJ.showStatus("Creating fluorophores ...");
@@ -2057,6 +2068,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Saved the fixed and moving localisations into different datasets
 		saveFixedAndMoving(results, CREATE_DATA_IMAGE_TITLE);
+
+		saveCompoundMolecules(results, CREATE_DATA_IMAGE_TITLE);
 
 		return localisations;
 	}
@@ -3642,6 +3655,40 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		fixedResults.end();
 	}
 
+	private void saveCompoundMolecules(MemoryPeakResults results, String title)
+	{
+		if (idToCompound == null)
+			return;
+
+		MemoryPeakResults[] set = new MemoryPeakResults[compoundNames.size()];
+		for (int i = 0; i < set.length; i++)
+			set[i] = copyMemoryPeakResults("Compound " + (i + 1) + ", " + compoundNames.get(i));
+
+		PeakResult[] peakResults = results.toArray();
+		// Sort using the ID
+		Arrays.sort(peakResults, new Comparator<PeakResult>()
+		{
+			public int compare(PeakResult o1, PeakResult o2)
+			{
+				return o1.getId() - o2.getId();
+			}
+		});
+
+		MemoryPeakResults currentResults = null;
+		FrameCounter counter = new FrameCounter(-1);
+		for (PeakResult p : peakResults)
+		{
+			if (counter.advance(p.getId()))
+			{
+				currentResults = set[idToCompound.get(p.getId())];
+			}
+			currentResults.add(p);
+		}
+
+		for (int i = 0; i < set.length; i++)
+			set[i].end();
+	}
+
 	/**
 	 * Update the fluorophores relative coordinates to absolute
 	 * 
@@ -4988,7 +5035,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		List<CompoundMoleculeModel> compounds;
 		if (settings.getCompoundMolecules())
 		{
-			// Try and load the compounds from the XML specification
+			// Try and load the compounds from the text specification
 			try
 			{
 				// Convert from the serialised objects to the compound model
@@ -4998,6 +5045,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				compounds = new ArrayList<CompoundMoleculeModel>(builder.getMoleculeCount());
 				int id = 1;
+				compoundNames = new ArrayList<String>(builder.getMoleculeCount());
 				for (Molecule m : builder.getMoleculeList())
 				{
 					MoleculeModel[] molecules = new MoleculeModel[m.getAtomCount()];
@@ -5007,10 +5055,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						molecules[i] = new MoleculeModel(a.getMass(), a.getX(), a.getY(), a.getZ());
 					}
 					CompoundMoleculeModel cm = new CompoundMoleculeModel(id++, 0, 0, 0, Arrays.asList(molecules));
-					cm.setFraction(cm.getFraction());
-					cm.setDiffusionRate(cm.getDiffusionRate() * diffusionFactor);
+					cm.setFraction(m.getFraction());
+					cm.setDiffusionRate(m.getDiffusionRate() * diffusionFactor);
 					cm.setDiffusionType(DiffusionType.fromString(m.getDiffusionType()));
 					compounds.add(cm);
+					compoundNames.add(String.format("Fraction=%s, D=%s", Utils.rounded(cm.getFraction()),
+							Utils.rounded(cm.getDiffusionRate())));
 				}
 
 				// Convert coordinates from nm to pixels

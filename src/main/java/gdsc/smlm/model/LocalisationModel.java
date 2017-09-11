@@ -27,6 +27,7 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	private int state;
 	private LocalisationModel previous, next;
 	private double[] data = null;
+	private int label;
 
 	public static final int SINGLE = 0;
 	public static final int PREVIOUS = 1;
@@ -288,5 +289,26 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	public void setData(double[] data)
 	{
 		this.data = data;
+	}
+
+	/**
+	 * Gets the label.
+	 *
+	 * @return the label
+	 */
+	public int getLabel()
+	{
+		return label;
+	}
+
+	/**
+	 * Sets the label. This can be used to identify subsets of molecules.
+	 *
+	 * @param label
+	 *            the new label
+	 */
+	public void setLabel(int label)
+	{
+		this.label = label;
 	}
 }

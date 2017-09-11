@@ -167,6 +167,7 @@ public abstract class ImageModel
 		double total = 0;
 		for (CompoundMoleculeModel c : compounds)
 		{
+			//System.out.printf("Compound fraction %f\n", c.getFraction());
 			total += c.getFraction();
 			c.centre();
 		}
@@ -177,9 +178,9 @@ public abstract class ImageModel
 		{
 			// Get the next random compound
 			double d = random.nextDouble() * total;
-			//int j=0;
-			for (CompoundMoleculeModel c : compounds)
+			for (int j = 0; j < compounds.size(); j++)
 			{
+				CompoundMoleculeModel c = compounds.get(j);
 				d -= c.getFraction();
 				if (d <= 0)
 				{
@@ -189,6 +190,7 @@ public abstract class ImageModel
 
 					//count[j]++;
 					CompoundMoleculeModel m = new CompoundMoleculeModel(i, xyz, copyMolecules(c), false);
+					m.setLabel(j);
 					m.setDiffusionRate(c.getDiffusionRate());
 					m.setDiffusionType(c.getDiffusionType());
 					if (rotate)
@@ -197,11 +199,10 @@ public abstract class ImageModel
 					//System.out.printf("XYZ = %f,%f,%f\n", m.getX(), m.getY(), m.getZ());
 					break;
 				}
-				//j++;
 			}
 		}
-		//for (int j=0; j<count.length; j++)
-		//	System.out.printf("Compound %d = %d\n", j+1, count[j]);
+		//for (int j = 0; j < count.length; j++)
+		//	System.out.printf("Compound %d = %d\n", j + 1, count[j]);
 		return molecules;
 	}
 
@@ -625,11 +626,22 @@ public abstract class ImageModel
 		}
 
 		int photonIndex = 0;
-		for (CompoundMoleculeModel c : compoundFluorophores)
+		if (fixedFraction > 0)
 		{
-			final boolean fixed = (random.nextDouble() < fixedFraction);
-			photonIndex += createLocalisation(c, localisations, fixed, maxFrames, photons, photonIndex,
-					!fixed && rotate);
+			for (CompoundMoleculeModel c : compoundFluorophores)
+			{
+				final boolean fixed = random.nextDouble() < fixedFraction;
+				photonIndex += createLocalisation(c, localisations, fixed, maxFrames, photons, photonIndex,
+						!fixed && rotate);
+			}
+		}
+		else
+		{
+			// No fixed molecules
+			for (CompoundMoleculeModel c : compoundFluorophores)
+			{
+				photonIndex += createLocalisation(c, localisations, false, maxFrames, photons, photonIndex, rotate);
+			}
 		}
 
 		sortByTime(localisations);
@@ -792,8 +804,10 @@ public abstract class ImageModel
 					//intensity *= randomGenerator.nextUniform(0.7, 1.3);
 
 					//rawPhotons.add(intensity);
-					models[i][step] = new LocalisationModel(fluorophores.get(i).getId(), t + 1,
+					LocalisationModel model = new LocalisationModel(fluorophores.get(i).getId(), t + 1,
 							compound.getCoordinates(i), intensity, state[i][step]);
+					model.setLabel(compound.getLabel());
+					models[i][step] = model;
 				}
 			}
 
