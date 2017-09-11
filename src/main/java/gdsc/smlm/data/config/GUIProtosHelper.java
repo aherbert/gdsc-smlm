@@ -4,6 +4,7 @@ import java.io.File;
 
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.clustering.optics.SampleMode;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.GUIProtos.*;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.ij.plugins.OPTICS.ClusteringMode;
@@ -78,6 +79,7 @@ public class GUIProtosHelper
 		builder.setDistributionMaskSliceDepth(25);
 		builder.setPoissonNoise(true);
 		builder.setBackground(1);
+		builder.setCameraType(CameraType.EMCCD);
 		builder.setEmGain(255);
 		builder.setCameraGain(0.1557);
 		builder.setQuantumEfficiency(0.95);
