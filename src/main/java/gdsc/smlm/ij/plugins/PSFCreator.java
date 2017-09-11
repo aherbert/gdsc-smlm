@@ -227,7 +227,6 @@ public class PSFCreator implements PlugInFilter
 		if (gd.wasCanceled())
 			return DONE;
 
-		gd.getNextBoolean();
 		nmPerSlice = gd.getNextNumber();
 		radius = gd.getNextNumber();
 		amplitudeFraction = gd.getNextNumber();
