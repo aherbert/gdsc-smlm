@@ -62,6 +62,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private boolean showDeviations = false;
 	private boolean showEndFrame = false;
+	private boolean showId = false;
 	private boolean showFittingData = false;
 	private boolean showNoiseData = false;
 	private boolean showZ = false;
@@ -258,6 +259,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		sb.append(frameColumnName);
 		if (showEndFrame)
 			sb.append("\tEnd ").append(frameColumnName);
+		if (showId)
+			sb.append("\tId");
 		if (showFittingData)
 		{
 			sb.append("\torigX");
@@ -326,17 +329,17 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void add(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsDev)
 	{
-		addPeak(frame, frame, origX, origY, origValue, error, noise, params, paramsDev);
+		addPeak(frame, frame, 0, origX, origY, origValue, error, noise, params, paramsDev);
 	}
 
-	private void addPeak(int frame, int endFrame, int origX, int origY, float origValue, double error, float noise,
-			float[] params, float[] paramsStdDev)
+	private void addPeak(int frame, int endFrame, int id, int origX, int origY, float origValue, double error,
+			float noise, float[] params, float[] paramsStdDev)
 	{
 		if (!tableActive)
 			return;
 
 		final float snr = (noise > 0) ? params[PeakResult.INTENSITY] / noise : 0;
-		StringBuilder sb = addStandardData(frame, endFrame, origX, origY, origValue, error, noise, snr);
+		StringBuilder sb = addStandardData(frame, endFrame, id, origX, origY, origValue, error, noise, snr);
 		if (isShowDeviations())
 		{
 			if (paramsStdDev != null)
@@ -369,8 +372,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		append(sb.toString());
 	}
 
-	private StringBuilder addStandardData(int frame, int endFrame, int origX, int origY, float origValue, double error,
-			float noise, float snr)
+	private StringBuilder addStandardData(int frame, int endFrame, int id, int origX, int origY, float origValue,
+			double error, float noise, float snr)
 	{
 		StringBuilder sb = new StringBuilder();
 		if (addCounter)
@@ -384,6 +387,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		sb.append(frame);
 		if (showEndFrame)
 			sb.append('\t').append(endFrame);
+		if (showId)
+			sb.append('\t').append(id);
 		if (showFittingData)
 		{
 			sb.append('\t').append(origX).append('\t').append(origY);
@@ -451,8 +456,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	public void add(PeakResult result)
 	{
-		addPeak(result.getFrame(), result.getEndFrame(), result.origX, result.origY, result.origValue, result.error,
-				result.noise, result.getParameters(), result.getParameterDeviations());
+		addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.origX, result.origY, result.origValue,
+				result.error, result.noise, result.getParameters(), result.getParameterDeviations());
 	}
 
 	/*
@@ -477,8 +482,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		int n = 0;
 		for (PeakResult result : results)
 		{
-			addPeak(result.getFrame(), result.getEndFrame(), result.origX, result.origY, result.origValue, result.error,
-					result.noise, result.getParameters(), result.getParameterDeviations());
+			addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.origX, result.origY,
+					result.origValue, result.error, result.noise, result.getParameters(),
+					result.getParameterDeviations());
 			if (n++ > 31)
 			{
 				if (!tableActive)
@@ -678,6 +684,23 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void setShowEndFrame(boolean showEndFrame)
 	{
 		this.showEndFrame = showEndFrame;
+	}
+
+	/**
+	 * @return If true show the results Id in the table
+	 */
+	public boolean isShowId()
+	{
+		return showId;
+	}
+
+	/**
+	 * @param showId
+	 *            If true show the results Id in the table
+	 */
+	public void setShowId(boolean showId)
+	{
+		this.showId = showId;
 	}
 
 	/**

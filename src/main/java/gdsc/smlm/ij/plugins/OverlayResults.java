@@ -217,6 +217,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				table.setAddCounter(true);
 				table.setHideSourceText(true);
 				table.setShowZ(results.is3D());
+				table.setShowId(results.hasId());
 				//table.setShowFittingData(true);
 				//table.setShowNoise(true);
 				table.begin();
