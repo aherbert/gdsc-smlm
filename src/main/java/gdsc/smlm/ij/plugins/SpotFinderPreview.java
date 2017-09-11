@@ -9,15 +9,17 @@ import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
+import gdsc.core.match.ClassificationResult;
 import gdsc.core.match.Coordinate;
-import gdsc.core.match.MatchCalculator;
-import gdsc.core.match.MatchResult;
-import gdsc.core.match.PointPair;
+import gdsc.core.match.FractionalAssignment;
+import gdsc.core.match.ImmutableFractionalAssignment;
+import gdsc.core.match.RankedScoreCalculator;
+import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
@@ -261,7 +263,7 @@ public class SpotFinderPreview
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 1);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
-		
+
 		if (label != null)
 		{
 			distance = gd.getNextNumber();
@@ -413,49 +415,108 @@ public class SpotFinderPreview
 				predicted[i] = new BasePoint(spots[i].x + bounds.x, spots[i].y + bounds.y);
 			}
 
-			// Q. Should this use partial scoring with multi-matches allowed.
 			// If so then this needs to be refactored out of the BenchmarkSpotFilter class.
+			// Compute assignments
+			TurboList<FractionalAssignment> fractionalAssignments = new TurboList<FractionalAssignment>(
+					3 * predicted.length);
+			double matchDistance = distance * fitConfig.getInitialPeakStdDev();
+			final RampedScore score = new RampedScore(matchDistance * 0.5, matchDistance);
+			final double dmin = matchDistance * matchDistance;
+			final int nActual = actual.length;
+			final int nPredicted = predicted.length;
+			for (int j = 0; j < nPredicted; j++)
+			{
+				final float x = predicted[j].getX();
+				final float y = predicted[j].getY();
+				// Any spots that match 
+				for (int i = 0; i < nActual; i++)
+				{
+					final double dx = (x - actual[i].getX());
+					final double dy = (y - actual[i].getY());
+					final double d2 = dx * dx + dy * dy;
+					if (d2 <= dmin)
+					{
+						final double d = Math.sqrt(d2);
+						double s = score.score(d);
 
-			// TODO - compute AUC and max jaccard and plot			
+						if (s == 0)
+							continue;
+
+						double distance = 1 - s;
+						if (distance == 0)
+						{
+							// In the case of a match below the distance thresholds
+							// the distance will be 0. To distinguish between candidates all below 
+							// the thresholds just take the closest.
+							// We know d2 is below dmin so we subtract the delta.
+							distance -= (dmin - d2);
+						}
+
+						// Store the match
+						fractionalAssignments.add(new ImmutableFractionalAssignment(i, j, distance, s));
+					}
+				}
+			}
+
+			FractionalAssignment[] assignments = fractionalAssignments
+					.toArray(new FractionalAssignment[fractionalAssignments.size()]);
 
 			// Compute matches
-			List<PointPair> matches = new ArrayList<PointPair>(Math.min(actual.length, predicted.length));
-			List<Coordinate> FP = new ArrayList<Coordinate>(predicted.length);
-			MatchResult result = MatchCalculator.analyseResults2D(actual, predicted,
-					distance * fitConfig.getInitialPeakStdDev(), null, FP, null, matches);
+			RankedScoreCalculator calc = new RankedScoreCalculator(assignments, nActual - 1, nPredicted - 1);
+			// TODO - Make this an option
+			boolean multipleMatches = false;
+			double[] calcScore = calc.score(nPredicted, multipleMatches, true);
+			ClassificationResult result = RankedScoreCalculator.toClassificationResult(calcScore, nActual);
+
+			// TODO - compute AUC and max jaccard and plot			
 
 			// Show scores
 			setLabel(String.format("P=%s, R=%s, J=%s", Utils.rounded(result.getPrecision()),
 					Utils.rounded(result.getRecall()), Utils.rounded(result.getJaccard())));
 
 			// Create Rois for TP and FP
-			if (showTP)
+			if (showTP || showFP)
 			{
-				float[] x = new float[matches.size()];
-				float[] y = new float[x.length];
-				int n = 0;
-				for (PointPair pair : matches)
+				double[] matchScore = RankedScoreCalculator.getMatchScore(calc.getScoredAssignments(), nPredicted);
+				int matches = 0;
+				for (int i = 0; i < matchScore.length; i++)
+					if (matchScore[i] != 0)
+						matches++;
+
+				if (showTP)
 				{
-					BasePoint p = (BasePoint) pair.getPoint2();
-					x[n] = p.getX() + 0.5f;
-					y[n] = p.getY() + 0.5f;
-					n++;
+					float[] x = new float[matches];
+					float[] y = new float[x.length];
+					int n = 0;
+					for (int i = 0; i < matchScore.length; i++)
+					{
+						if (matchScore[i] != 0)
+						{
+							BasePoint p = (BasePoint) predicted[i];
+							x[n] = p.getX() + 0.5f;
+							y[n] = p.getY() + 0.5f;
+							n++;
+						}
+					}
+					addRoi(0, o, x, y, n, Color.green);
 				}
-				addRoi(0, o, x, y, n, Color.green);
-			}
-			if (showFP)
-			{
-				float[] x = new float[predicted.length - matches.size()];
-				float[] y = new float[x.length];
-				int n = 0;
-				for (Coordinate c : FP)
+				if (showFP)
 				{
-					BasePoint p = (BasePoint) c;
-					x[n] = p.getX() + 0.5f;
-					y[n] = p.getY() + 0.5f;
-					n++;
+					float[] x = new float[nPredicted - matches];
+					float[] y = new float[x.length];
+					int n = 0;
+					for (int i = 0; i < matchScore.length; i++)
+					{
+						if (matchScore[i] == 0)
+						{
+							BasePoint p = (BasePoint) predicted[i];
+							x[n] = p.getX() + 0.5f;
+							y[n] = p.getY() + 0.5f;
+							n++;
+						}
+					}
+					addRoi(0, o, x, y, n, Color.red);
 				}
-				addRoi(0, o, x, y, n, Color.red);
 			}
 		}
 		else
