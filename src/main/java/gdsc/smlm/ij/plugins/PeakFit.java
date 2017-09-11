@@ -1351,12 +1351,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 			public boolean collectOptions()
 			{
 				ExtendedGenericDialog egd = new ExtendedGenericDialog(rp.name + " Options", null);
-				egd.addCheckbox(rp.getDialogName() + "_absolute", rp.isAbsolute());
+				boolean oldValue = rp.isAbsolute();
+				egd.addCheckbox(rp.getDialogName() + "_absolute", oldValue);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;
-				rp.setAbsolute(egd.getNextBoolean());
-				return true;
+				boolean newValue = egd.getNextBoolean();
+				rp.setAbsolute(newValue);
+				return oldValue != newValue;
 			}
 		});
 
