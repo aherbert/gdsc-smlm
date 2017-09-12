@@ -2094,4 +2094,16 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		return new CachedPeakResultView(results);
 	}
+
+	/**
+	 * Get a subset of the results if they match the filter.
+	 *
+	 * @param filter
+	 *            the filter
+	 * @return the results
+	 */
+	public PeakResult[] getResults(PeakResultPredicate filter)
+	{
+		return results.subset(filter);
+	}
 }
