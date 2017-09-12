@@ -167,7 +167,7 @@ public class Gaussian2DFitter
 		final double background = getBackground(data, maxx, maxy, npeaks);
 
 		// Set the initial parameters
-		params[0] = background;
+		params[Gaussian2DFunction.BACKGROUND] = background;
 
 		final boolean[] amplitudeEstimate = new boolean[npeaks];
 		if (npeaks == 1)
@@ -244,7 +244,7 @@ public class Gaussian2DFitter
 		else
 		{
 			// Set background using the minimum value in the data
-			background = data[0];
+			background = data[Gaussian2DFunction.BACKGROUND];
 			for (int i = maxx * maxy; --i > 0;)
 				if (background > data[i])
 					background = data[i];
@@ -353,12 +353,12 @@ public class Gaussian2DFitter
 
 		final int paramsPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK; // Fixed for a Gaussian2DFunction
 
-		double background = params[0];
+		double background = params[Gaussian2DFunction.BACKGROUND];
 		if (background == 0 && !zeroBackground)
 		{
 			// Get background
 			background = getBackground(y, maxx, maxy, npeaks);
-			params[0] = background;
+			params[Gaussian2DFunction.BACKGROUND] = background;
 
 			// Input estimates are either signal or amplitude, both of which are above background.
 			// The code below is appropriate if the input estimate is for absolute peak height inc. background.
@@ -731,21 +731,23 @@ public class Gaussian2DFitter
 		}
 		if (fitConfiguration.isBackgroundFitting())
 		{
-			if (yMax > params[0])
-				upper[0] = yMax;
+			if (yMax > params[Gaussian2DFunction.BACKGROUND])
+				upper[Gaussian2DFunction.BACKGROUND] = yMax;
 			else
-				upper[0] = params[0] + (params[0] - yMax);
+				upper[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND] +
+						(params[Gaussian2DFunction.BACKGROUND] - yMax);
 
-			if (yMin < params[0])
-				lower[0] = yMin;
+			if (yMin < params[Gaussian2DFunction.BACKGROUND])
+				lower[Gaussian2DFunction.BACKGROUND] = yMin;
 			else
-				lower[0] = params[0] - (yMin - params[0]);
+				lower[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND] -
+						(yMin - params[Gaussian2DFunction.BACKGROUND]);
 
-			if (lower[0] < 0)
+			if (lower[Gaussian2DFunction.BACKGROUND] < 0)
 			{
 				// This is a problem for MLE fitting
 				if (solver.isStrictlyPositiveFunction())
-					lower[0] = 0;
+					lower[Gaussian2DFunction.BACKGROUND] = 0;
 			}
 		}
 
@@ -836,7 +838,7 @@ public class Gaussian2DFitter
 		if (solver.isStrictlyPositiveFunction())
 		{
 			// This is a problem for MLE fitting
-			
+
 			// If the lower bounds are zero it causes problems when computing gradients since 
 			// the Gaussian function may not exist. So use a small value instead.
 			for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
@@ -869,7 +871,7 @@ public class Gaussian2DFitter
 		}
 
 		// Debug check
-		for (int i = 0; i < params.length; i++)
+		for (int i = (fitConfiguration.isBackgroundFitting()) ? 0 : 1; i < params.length; i++)
 		{
 			if (params[i] < lower[i])
 			{
@@ -946,9 +948,9 @@ public class Gaussian2DFitter
 		Arrays.fill(lower, Float.NEGATIVE_INFINITY);
 		Arrays.fill(upper, Float.POSITIVE_INFINITY);
 
-		lower[0] = 0;
+		lower[Gaussian2DFunction.BACKGROUND] = 0;
 		// If the bias is subtracted then we may have negative data and a background estimate that is negative
-		if (params[0] < 0)
+		if (params[Gaussian2DFunction.BACKGROUND] < 0)
 		{
 			double yMin = 0;
 			for (int i = 0; i < ySize; i++)
@@ -956,10 +958,11 @@ public class Gaussian2DFitter
 				if (yMin > y[i])
 					yMin = y[i];
 			}
-			if (yMin < params[0])
-				lower[0] = yMin;
+			if (yMin < params[Gaussian2DFunction.BACKGROUND])
+				lower[Gaussian2DFunction.BACKGROUND] = yMin;
 			else
-				lower[0] = params[0] - (yMin - params[0]);
+				lower[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND] -
+						(yMin - params[Gaussian2DFunction.BACKGROUND]);
 		}
 
 		for (int j = Gaussian2DFunction.SIGNAL; j < lower.length; j += paramsPerPeak)
