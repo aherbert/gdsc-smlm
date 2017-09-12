@@ -242,7 +242,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			oy.resetQuick();
 			if (view == null)
 			{
-				view = results.getFixedView();
+				view = results.getSnapshotView();
 				converter = results.getDistanceConverter(DistanceUnit.PIXEL);
 			}
 			for (PeakResult r : view.getResultsByFrame(currentSlice))

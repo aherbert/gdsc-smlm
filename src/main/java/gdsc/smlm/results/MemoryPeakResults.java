@@ -2075,12 +2075,22 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Gets the view of the results. Changes to the results may not be reflected in the view so use in a read-only
-	 * context.
+	 * Gets a view of the results.
 	 *
 	 * @return the view
 	 */
-	public PeakResultView getFixedView()
+	public PeakResultView getView()
+	{
+		return new DynamicPeakResultView(results);
+	}
+
+	/**
+	 * Gets a snapshot view of the results. The view can cache the results so changes to the results may not be
+	 * reflected in the view. Use in a read-only context.
+	 *
+	 * @return the view
+	 */
+	public PeakResultView getSnapshotView()
 	{
 		return new CachedPeakResultView(results);
 	}
