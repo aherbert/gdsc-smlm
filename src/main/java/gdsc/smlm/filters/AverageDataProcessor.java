@@ -105,7 +105,7 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public boolean isWeighted()
 	{
-		return getFilter() != null;
+		return true;
 	}
 
 	/*

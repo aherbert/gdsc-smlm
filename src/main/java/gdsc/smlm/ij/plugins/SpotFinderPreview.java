@@ -28,6 +28,7 @@ import gdsc.smlm.data.config.FitProtos.DataFilterType;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 
@@ -315,10 +316,18 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		Rectangle bounds = ip.getRoi();
 
-		// Set a camera model
+		// Set a camera model.
+		// We have to set the camera type too to avoid configuration errors.
 		CameraModel cameraModel = CameraModelManager.load(fitConfig.getCameraModelName());
 		if (cameraModel == null)
+		{
 			cameraModel = new FakePerPixelCameraModel(0, 1, 1);
+			fitConfig.setCameraType(CameraType.EMCCD);
+		}			
+		else
+		{
+			fitConfig.setCameraType(CameraType.SCMOS);
+		}
 		fitConfig.setCameraModel(cameraModel);
 
 		// Configure a jury filter
@@ -369,7 +378,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 					modelBounds.height > ip.getHeight())
 			{
 			//@formatter:off
-			Utils.log("WARNING: Camera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare mismatched from the image image target bounds\n[width=%d,height=%d].\n \nThis is probably an incorrect camera model.",
+			Utils.log("WARNING: Probably an incorrect camera model!\nModel bounds [x=%d,y=%d,width=%d,height=%d]\ndo not match the image target bounds [width=%d,height=%d].",
 					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
 					ip.getWidth(),  ip.getHeight()
 					);
