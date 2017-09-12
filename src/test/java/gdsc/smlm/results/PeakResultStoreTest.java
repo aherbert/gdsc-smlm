@@ -8,6 +8,8 @@ import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.smlm.results.predicates.PeakResultPredicate;
+
 public class PeakResultStoreTest
 {
 	int capacity = 1;

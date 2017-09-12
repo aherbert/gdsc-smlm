@@ -196,8 +196,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				gd.addCheckbox("Show_FP", showFP);
 				gd.addMessage("");
 				label = (Label) gd.getMessage();
-				// Integer coords
-				actualCoordinates = ResultsMatchCalculator.getCoordinates(results, true);
+				boolean integerCoords = false;
+				actualCoordinates = ResultsMatchCalculator.getCoordinates(results, integerCoords);
 			}
 		}
 
@@ -450,8 +450,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			final int nPredicted = predicted.length;
 			for (int j = 0; j < nPredicted; j++)
 			{
-				final float x = predicted[j].getX();
-				final float y = predicted[j].getY();
+				// Centre in the middle of the pixel
+				final float x = predicted[j].getX() + 0.5f;
+				final float y = predicted[j].getY() + 0.5f;
 				// Any spots that match 
 				for (int i = 0; i < nActual; i++)
 				{

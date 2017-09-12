@@ -3,6 +3,9 @@ package gdsc.smlm.results;
 import java.util.Collection;
 import java.util.Comparator;
 
+import gdsc.smlm.results.predicates.PeakResultPredicate;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -113,4 +116,21 @@ public interface PeakResultStore
 	 * @return true, if any were removed
 	 */
 	public boolean removeIf(PeakResultPredicate filter);
+
+	/**
+	 * Execute the procedure on each result in the store.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forEach(PeakResultProcedure procedure);
+
+	/**
+	 * Get a subset of the results if they match the filter.
+	 *
+	 * @param filter
+	 *            the filter
+	 * @return the results
+	 */
+	public PeakResult[] subset(PeakResultPredicate filter);
 }

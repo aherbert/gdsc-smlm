@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 
+import gdsc.smlm.results.predicates.PeakResultPredicate;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -235,7 +238,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 	 * Note: This does not remove the references to the underlying data or reallocate storage thus {@link #get(int)} can
 	 * return stale data.
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#removeIf(gdsc.smlm.results.PeakResultPredicate)
+	 * @see gdsc.smlm.results.PeakResultStore#removeIf(gdsc.smlm.results.predicates.PeakResultPredicate)
 	 */
 	public boolean removeIf(PeakResultPredicate filter)
 	{
@@ -276,5 +279,30 @@ public class ArrayPeakResultStore implements PeakResultStore
 		}
 
 		return anyToRemove;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#forEach(gdsc.smlm.results.procedures.PeakResultProcedure)
+	 */
+	public void forEach(PeakResultProcedure procedure)
+	{
+		for (int i = 0; i < size; i++)
+			procedure.execute(results[i]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#subset(gdsc.smlm.results.procedures.PeakResultPredicate)
+	 */
+	public PeakResult[] subset(PeakResultPredicate filter)
+	{
+		final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
+		for (int i = 0; i < size; i++)
+			if (filter.test(results[i]))
+				list.add(results[i]);
+		return list.toArray();
 	}
 }

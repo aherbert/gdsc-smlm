@@ -19,6 +19,7 @@ import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import gdsc.smlm.results.procedures.BResultProcedure;
@@ -243,10 +244,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	// END OF RESULTS STORAGE METHODS 
 	/////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////
-	// START OF STATIC MEMORY STORAGE METHODS 
-	/////////////////////////////////////////////////////////////////
-
 	/**
 	 * Instantiates a new memory peak results.
 	 *
@@ -305,6 +302,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		this();
 		setPSF(psf);
 	}
+
+	/////////////////////////////////////////////////////////////////
+	// START OF STATIC MEMORY STORAGE METHODS 
+	/////////////////////////////////////////////////////////////////
 
 	/**
 	 * Gets the results.
@@ -1299,10 +1300,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, BResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
+		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1329,10 +1327,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, BIXYResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
+		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
@@ -1367,10 +1362,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, BIXYZResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
+		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
@@ -1407,8 +1399,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, HResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
+		checkCalibration();
 
 		int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
 
@@ -1451,10 +1442,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, IResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
+		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1485,10 +1473,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
+		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
@@ -1522,10 +1507,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYRResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
+		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
@@ -1560,10 +1542,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYZResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<IntensityUnit> ic = getCalibrationReader().getIntensityConverter(intensityUnit);
+		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
@@ -1593,8 +1572,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void forEach(TResultProcedure procedure) throws ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
+		checkCalibration();
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1623,10 +1601,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, TXYResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1657,8 +1632,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, WResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
+		checkCalibration();
 
 		// Note that in the future we may support more than just Gaussian2D PSF
 		// so this may have to change
@@ -1713,8 +1687,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, WxWyResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
+		checkCalibration();
 
 		// Note that in the future we may support more than just Gaussian2D PSF
 		// so this may have to change
@@ -1754,10 +1727,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, XYResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1789,10 +1759,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, XYRResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1823,10 +1790,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public void forEach(DistanceUnit distanceUnit, XYZResultProcedure procedure)
 			throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
-
-		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
@@ -1854,8 +1818,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void forEach(LSEPrecisionProcedure procedure) throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
+		checkCalibration();
 
 		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
 				Gaussian2DPeakResultHelper.LSE_PRECISION);
@@ -1881,8 +1844,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void forEach(LSEPrecisionBProcedure procedure) throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
+		checkCalibration();
 
 		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
 				Gaussian2DPeakResultHelper.LSE_PRECISION_X);
@@ -1907,8 +1869,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void forEach(MLEPrecisionProcedure procedure) throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
+		checkCalibration();
 
 		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
 				Gaussian2DPeakResultHelper.MLE_PRECISION);
@@ -1934,8 +1895,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public void forEach(MLEPrecisionBProcedure procedure) throws ConversionException, ConfigurationException
 	{
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
+		checkCalibration();
 
 		Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
 				Gaussian2DPeakResultHelper.MLE_PRECISION_X);
@@ -1965,8 +1925,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (x == 0 && y == 0)
 			return;
 
-		if (!hasCalibration())
-			throw new ConfigurationException("No calibration");
+		checkCalibration();
 
 		Rectangle bounds = getBounds();
 		if (bounds != null)
@@ -2041,6 +2000,54 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Gets the distance converter.
+	 *
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @return the distance converter
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit distanceUnit)
+			throws ConversionException, ConfigurationException
+	{
+		checkCalibration();
+		return getCalibrationReader().getDistanceConverter(distanceUnit);
+	}
+
+	/**
+	 * Gets the intensity converter.
+	 *
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @return the intensity converter
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public TypeConverter<IntensityUnit> getIntensityConverter(IntensityUnit intensityUnit)
+			throws ConversionException, ConfigurationException
+	{
+		checkCalibration();
+		return getCalibrationReader().getIntensityConverter(intensityUnit);
+	}
+
+	/**
+	 * Check calibration exits.
+	 *
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	private void checkCalibration() throws ConversionException, ConfigurationException
+	{
+		if (!hasCalibration())
+			throw new ConfigurationException("No calibration");
+	}
+
+	/**
 	 * Fix zero background to the given background.
 	 *
 	 * @param newBackground
@@ -2065,5 +2072,16 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public FrameCounter newFrameCounter()
 	{
 		return new FrameCounter((isEmpty()) ? 0 : getFirstFrame());
+	}
+
+	/**
+	 * Gets the view of the results. Changes to the results may not be reflected in the view so use in a read-only
+	 * context.
+	 *
+	 * @return the view
+	 */
+	public PeakResultView getFixedView()
+	{
+		return new CachedPeakResultView(results);
 	}
 }

@@ -17,7 +17,7 @@ import gdsc.smlm.ij.plugins.MultiDialog.MemoryResultsItems;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResultPredicate;
+import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;

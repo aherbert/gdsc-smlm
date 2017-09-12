@@ -1,4 +1,6 @@
-package gdsc.smlm.results;
+package gdsc.smlm.results.predicates;
+
+import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

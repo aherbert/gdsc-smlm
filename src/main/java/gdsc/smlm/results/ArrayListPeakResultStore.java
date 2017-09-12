@@ -8,6 +8,8 @@ import java.util.Comparator;
 
 import gdsc.core.utils.TurboList;
 import gdsc.core.utils.TurboList.SimplePredicate;
+import gdsc.smlm.results.predicates.PeakResultPredicate;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -201,5 +203,29 @@ public class ArrayListPeakResultStore implements PeakResultStore
 			return true;
 		}
 		return false;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#forEach(gdsc.smlm.results.procedures.PeakResultProcedure)
+	 */
+	public void forEach(PeakResultProcedure procedure)
+	{
+		for (int i = 0, size = size(); i < size; i++)
+			procedure.execute(results.get(i));
+	}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#subset(gdsc.smlm.results.procedures.PeakResultPredicate)
+	 */
+	public PeakResult[] subset(PeakResultPredicate filter)
+	{
+		final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
+		for (int i = 0, size = size(); i < size; i++)
+			if (filter.test(results.get(i)))
+				list.add(results.get(i));
+		return list.toArray();
 	}
 }
