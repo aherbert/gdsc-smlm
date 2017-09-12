@@ -33,9 +33,9 @@ public class Workflow<S, R>
 	private class Work
 	{
 		public final long timeout;
-		public final Pair<S,R> work;
+		public final Pair<S, R> work;
 
-		Work(long time, Pair<S,R> work)
+		Work(long time, Pair<S, R> work)
 		{
 			if (work.s == null)
 				throw new NullPointerException("Settings cannot be null");
@@ -43,16 +43,16 @@ public class Workflow<S, R>
 			this.work = work;
 		}
 
-		Work(Pair<S,R> work)
+		Work(Pair<S, R> work)
 		{
 			this(0, work);
 		}
-		
+
 		S getSettings()
 		{
 			return work.s;
 		}
-		
+
 		R getResults()
 		{
 			return work.r;
@@ -172,9 +172,11 @@ public class Workflow<S, R>
 					}
 					else
 					{
-						// Pass through the new settings with the existing results
+						// Pass through the new settings with the existing results.
+						// This allows a worker to ignore settings changes that do not effect 
+						// its results but pass the new settings to downstream workers.
 						debug(" Updating existing result");
-						result = new Work(work.work);
+						result = new Work(new Pair<S, R>(work.getSettings(), result.getResults()));
 					}
 					lastWork = work;
 					// Add the result to the output
@@ -421,7 +423,7 @@ public class Workflow<S, R>
 	 */
 	public void run(S settings, R results)
 	{
-		inputStack.addWork(new Work(getTimeout(), new Pair<S,R>(settings, results)));
+		inputStack.addWork(new Work(getTimeout(), new Pair<S, R>(settings, results)));
 	}
 
 	/**
@@ -445,7 +447,7 @@ public class Workflow<S, R>
 	 */
 	public void stage(S settings, R results)
 	{
-		inputStack.setWork(new Work(getTimeout(), new Pair<S,R>(settings, results)));
+		inputStack.setWork(new Work(getTimeout(), new Pair<S, R>(settings, results)));
 	}
 
 	/**
