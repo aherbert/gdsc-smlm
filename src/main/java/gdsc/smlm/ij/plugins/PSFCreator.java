@@ -35,6 +35,9 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -302,6 +305,8 @@ public class PSFCreator implements PlugInFilter
 		StoredDataStatistics averageA = new StoredDataStatistics();
 		Statistics averageRange = new Statistics();
 		MemoryPeakResults allResults = new MemoryPeakResults();
+		allResults.setCalibration(fitConfig.getCalibration());
+		allResults.setPSF(fitConfig.getPSF());
 		allResults.setName(TITLE);
 		allResults.setBounds(new Rectangle(0, 0, width, height));
 		MemoryPeakResults.addResults(allResults);
@@ -620,6 +625,8 @@ public class PSFCreator implements PlugInFilter
 
 		// Create a fit engine
 		MemoryPeakResults results = new MemoryPeakResults();
+		results.setCalibration(fitConfig.getCalibration());
+		results.setPSF(fitConfig.getPSF());
 		results.setSortAfterEnd(true);
 		results.begin();
 		int threadCount = Prefs.getThreads();
@@ -1410,6 +1417,7 @@ public class PSFCreator implements PlugInFilter
 	private void loadConfiguration()
 	{
 		config = SettingsManager.readFitEngineConfiguration(0);
+		config.configureOutputUnits();
 		fitConfig = config.getFitConfiguration();
 		nmPerPixel = fitConfig.getCalibrationWriter().getNmPerPixel();
 		if (radius < 5 * FastMath.max(fitConfig.getInitialXSD(), fitConfig.getInitialYSD()))
@@ -1533,13 +1541,27 @@ public class PSFCreator implements PlugInFilter
 		final int y = boxRadius;
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		final double shift = fitConfig.getCoordinateShiftFactor();
-		fitConfig.setInitialPeakStdDev0(fitConfig.getInitialXSD() * magnification);
-		fitConfig.setInitialPeakStdDev1(fitConfig.getInitialYSD() * magnification);
+
+		// Scale the PSF
+		PSF.Builder b = fitConfig.getPSF().toBuilder();
+		for (int i = 0; i < b.getParametersCount(); i++)
+		{
+			PSFParameter param = b.getParameters(i);
+			if (param.getUnit() == PSFParameterUnit.DISTANCE)
+			{
+				PSFParameter.Builder pb = param.toBuilder();
+				pb.setValue(pb.getValue() * magnification);
+				b.setParameters(i, pb);
+			}
+		}
+		//fitConfig.setInitialPeakStdDev0(fitConfig.getInitialXSD() * magnification);
+		//fitConfig.setInitialPeakStdDev1(fitConfig.getInitialYSD() * magnification);
+
 		// Need to be updated after the widths have been set
 		fitConfig.setCoordinateShiftFactor(shift);
 		fitConfig.setBackgroundFitting(false);
 		// Since the PSF will be normalised
-		fitConfig.setMinPhotons(0); 
+		fitConfig.setMinPhotons(0);
 		fitConfig.setBias(0);
 		fitConfig.setGain(1);
 		//fitConfig.setLog(new IJLogger());
