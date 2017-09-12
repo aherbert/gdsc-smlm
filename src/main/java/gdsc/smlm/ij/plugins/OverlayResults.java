@@ -1,5 +1,14 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.Label;
+import java.awt.Point;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Arrays;
+
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -21,7 +30,7 @@ import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.procedures.XYRResultProcedure;
+import gdsc.smlm.results.PeakResultView;
 import gnu.trove.list.array.TFloatArrayList;
 import ij.IJ;
 import ij.ImageListener;
@@ -33,14 +42,6 @@ import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-
-import java.awt.Checkbox;
-import java.awt.Choice;
-import java.awt.Label;
-import java.awt.Point;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.Arrays;
 
 /**
  * Produces a summary table of the results that are stored in memory.
@@ -110,6 +111,8 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 
 		TFloatArrayList ox = new TFloatArrayList(100);
 		TFloatArrayList oy = new TFloatArrayList(100);
+		PeakResultView view = null;
+		TypeConverter<DistanceUnit> converter;
 
 		public void run()
 		{
@@ -157,6 +160,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				if (oldImp != null)
 					oldImp.setOverlay(null);
 			}
+			view = null;
 			currentSlice = -1;
 			currentIndex = 0;
 		}
@@ -236,19 +240,32 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 
 			ox.resetQuick();
 			oy.resetQuick();
-			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
+			if (view == null)
 			{
-				public void executeXYR(float x, float y, PeakResult r)
-				{
-					if (r.getFrame() == currentSlice)
-					{
-						ox.add(x);
-						oy.add(y);
-						if (table != null)
-							table.add(r);
-					}
-				}
-			});
+				view = results.getFixedView();
+				converter = results.getDistanceConverter(DistanceUnit.PIXEL);
+			}
+			for (PeakResult r : view.getResultsByFrame(currentSlice))
+			{
+				ox.add(converter.convert(r.getXPosition()));
+				oy.add(converter.convert(r.getYPosition()));
+				if (table != null)
+					table.add(r);
+			}
+			// Old method without the cached view
+			//			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
+			//			{
+			//				public void executeXYR(float x, float y, PeakResult r)
+			//				{
+			//					if (r.getFrame() == currentSlice)
+			//					{
+			//						ox.add(x);
+			//						oy.add(y);
+			//						if (table != null)
+			//							table.add(r);
+			//					}
+			//				}
+			//			});
 			PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
 			roi.setPointType(3);
 			imp.getWindow().toFront();
