@@ -10,6 +10,7 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 public abstract class Gaussian2DFunctionTest
@@ -227,15 +228,15 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void functionComputesBackgroundGradient()
 	{
-		if (f1.evaluatesBackground())
-			functionComputesTargetGradient(Gaussian2DFunction.BACKGROUND);
+		Assume.assumeTrue(f1.evaluatesBackground());
+		functionComputesTargetGradient(Gaussian2DFunction.BACKGROUND);
 	}
 
 	@Test
 	public void functionComputesSignalGradient()
 	{
-		if (f1.evaluatesSignal())
-			functionComputesTargetGradient(Gaussian2DFunction.SIGNAL);
+		Assume.assumeTrue(f1.evaluatesSignal());
+		functionComputesTargetGradient(Gaussian2DFunction.SIGNAL);
 	}
 
 	@Test
@@ -253,29 +254,29 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void functionComputesZGradient()
 	{
-		if (f1.evaluatesZ())
-			functionComputesTargetGradient(Gaussian2DFunction.Z_POSITION);
+		Assume.assumeTrue(f1.evaluatesZ());
+		functionComputesTargetGradient(Gaussian2DFunction.Z_POSITION);
 	}
 
 	@Test
 	public void functionComputesXWidthGradient()
 	{
-		if (f1.evaluatesSD0())
-			functionComputesTargetGradient(Gaussian2DFunction.X_SD);
+		Assume.assumeTrue(f1.evaluatesSD0());
+		functionComputesTargetGradient(Gaussian2DFunction.X_SD);
 	}
 
 	@Test
 	public void functionComputesYWidthGradient()
 	{
-		if (f1.evaluatesSD1())
-			functionComputesTargetGradient(Gaussian2DFunction.Y_SD);
+		Assume.assumeTrue(f1.evaluatesSD1());
+		functionComputesTargetGradient(Gaussian2DFunction.Y_SD);
 	}
 
 	@Test
 	public void functionComputesAngleGradient()
 	{
-		if (f1.evaluatesAngle())
-			functionComputesTargetGradient(Gaussian2DFunction.ANGLE);
+		Assume.assumeTrue(f1.evaluatesAngle());
+		functionComputesTargetGradient(Gaussian2DFunction.ANGLE);
 	}
 
 	private void functionComputesTargetGradient(int targetParameter)
@@ -415,27 +416,24 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void functionComputesBackgroundGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
-		if (f2.evaluatesBackground())
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.BACKGROUND);
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesBackground());
+		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.BACKGROUND);
 	}
 
 	@Test
 	public void functionComputesSignalGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
-		if (f2.evaluatesSignal())
-		{
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
-			functionComputesTargetGradientWith2Peaks(
-					Gaussian2DFunction.SIGNAL + Gaussian2DFunction.PARAMETERS_PER_PEAK);
-		}
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesSignal());
+		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
+		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	@Test
 	public void functionComputesXGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION);
 		functionComputesTargetGradientWith2Peaks(
 				Gaussian2DFunction.X_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
@@ -444,7 +442,7 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void functionComputesYGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION);
 		functionComputesTargetGradientWith2Peaks(
 				Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
@@ -453,46 +451,38 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void functionComputesZGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
-		if (f2.evaluatesZ())
-		{
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Z_POSITION);
-			functionComputesTargetGradientWith2Peaks(
-					Gaussian2DFunction.Z_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
-		}
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesZ());
+		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Z_POSITION);
+		functionComputesTargetGradientWith2Peaks(
+				Gaussian2DFunction.Z_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	@Test
 	public void functionComputesXWidthGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
-		if (f2.evaluatesSD0())
-		{
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD);
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD + Gaussian2DFunction.PARAMETERS_PER_PEAK);
-		}
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesSD0());
+		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD);
+		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	@Test
 	public void functionComputesYWidthGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
-		if (f2.evaluatesSD1())
-		{
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD);
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD + Gaussian2DFunction.PARAMETERS_PER_PEAK);
-		}
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesSD1());
+		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD);
+		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	@Test
 	public void functionComputesAngleGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
-		if (f2.evaluatesAngle())
-		{
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE);
-			functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE + Gaussian2DFunction.PARAMETERS_PER_PEAK);
-		}
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesAngle());
+		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE);
+		functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE + Gaussian2DFunction.PARAMETERS_PER_PEAK);
 	}
 
 	private void functionComputesTargetGradientWith2Peaks(int targetParameter)

@@ -21,7 +21,7 @@ import gdsc.smlm.function.ValueProcedure;
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
-public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularErfGaussian2DFunction
+public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussian2DFunction
 {
 	/**
 	 * Constructor.
@@ -33,7 +33,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 	 * @param maxy
 	 *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
 	 */
-	public MultiNBFreeCircularErfGaussian2DFunction(int nPeaks, int maxx, int maxy)
+	public MultiNBCircularErfGaussian2DFunction(int nPeaks, int maxx, int maxy)
 	{
 		super(nPeaks, maxx, maxy);
 	}
@@ -41,13 +41,13 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 	@Override
 	protected int[] createGradientIndices()
 	{
-		return replicateGradientIndices(SingleNBFreeCircularErfGaussian2DFunction.gradientIndices);
+		return replicateGradientIndices(SingleNBCircularErfGaussian2DFunction.gradientIndices);
 	}
 
 	@Override
 	public ErfGaussian2DFunction copy()
 	{
-		return new MultiNBFreeCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
+		return new MultiNBCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
 	}
 
 	/*
@@ -70,8 +70,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 			I += tI[n] * duda[a++];
 			duda[a++] = du_dtx[xx] * deltaEy[yy];
 			duda[a++] = du_dty[yy] * deltaEx[xx];
-			duda[a++] = du_dtsx[xx] * deltaEy[yy];
-			duda[a++] = du_dtsy[yy] * deltaEx[xx];
+			duda[a++] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
 		}
 		return I;
 	}
@@ -99,10 +98,12 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 			d2uda2[a++] = d2u_dtx2[xx] * deltaEy[yy];
 			duda[a] = du_dty[yy] * deltaEx[xx];
 			d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
-			duda[a] = du_dtsx[xx] * deltaEy[yy];
-			d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy];
-			duda[a] = du_dtsy[yy] * deltaEx[xx];
-			d2uda2[a++] = d2u_dtsy2[yy] * deltaEx[xx];
+			duda[a] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
+			//@formatter:off
+			d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy] + 
+					      d2u_dtsy2[yy] * deltaEx[xx] +
+					      2 * du_dtsx[xx] * du_dtsy[yy] / tI[n];
+			//@formatter:on
 		}
 		return I;
 	}
@@ -140,13 +141,13 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 	@Override
 	public boolean evaluatesSD1()
 	{
-		return true;
+		return false;
 	}
 
 	@Override
 	public int getGradientParametersPerPeak()
 	{
-		return 5;
+		return 4;
 	}
 
 	@Override
@@ -194,9 +195,9 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					I += tI[n] * duda[a++];
 					duda[a++] = du_dtx[xx] * deltaEy[yy];
 					duda[a++] = du_dty[yy] * deltaEx[xx];
-					duda[a++] = du_dtsx[xx] * deltaEy[yy];
-					duda[a++] = du_dtsy[yy] * deltaEx[xx];
+					duda[a++] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
 				}
+				//invalidGradients(duda);
 				procedure.execute(I, duda);
 			}
 		}
@@ -205,14 +206,17 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
+	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient2Procedure)
 	 */
 	public void forEach(Gradient2Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
 		final double[] d2uda2 = new double[getNumberOfGradients()];
+		final double[] two_du_dtsy_tI = new double[nPeaks];
 		for (int y = 0; y < maxy; y++)
 		{
+			for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy)
+				two_du_dtsy_tI[n] = 2 * this.du_dtsy[yy] / tI[n];
 			for (int x = 0; x < maxx; x++)
 			{
 				double I = tB;
@@ -224,10 +228,12 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					d2uda2[a++] = d2u_dtx2[xx] * deltaEy[yy];
 					duda[a] = du_dty[yy] * deltaEx[xx];
 					d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
-					duda[a] = du_dtsx[xx] * deltaEy[yy];
-					d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy];
-					duda[a] = du_dtsy[yy] * deltaEx[xx];
-					d2uda2[a++] = d2u_dtsy2[yy] * deltaEx[xx];
+					duda[a] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
+					//@formatter:off
+    				d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy] + 
+    							  d2u_dtsy2[yy] * deltaEx[xx] + 
+    						      du_dtsx[xx] * two_du_dtsy_tI[n];
+    				//@formatter:on
 				}
 				procedure.execute(I, duda, d2uda2);
 			}
@@ -250,12 +256,14 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 				du_dtsx_tI[xx] = du_dtsx[xx] / tI[n];
 		final double[] du_dty_tI = new double[nPeaks];
 		final double[] du_dtsy_tI = new double[nPeaks];
+		final double[] two_du_dtsy_tI = new double[nPeaks];
 		for (int y = 0; y < maxy; y++)
 		{
 			for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy)
 			{
 				du_dty_tI[n] = du_dty[yy] / tI[n];
 				du_dtsy_tI[n] = du_dtsy[yy] / tI[n];
+				two_du_dtsy_tI[n] = 2 * du_dtsy[yy] / tI[n];
 			}
 			for (int x = 0; x < maxx; x++)
 			{
@@ -266,8 +274,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					I += tI[n] * duda[a];
 					duda[a + 1] = du_dtx[xx] * deltaEy[yy];
 					duda[a + 2] = du_dty[yy] * deltaEx[xx];
-					duda[a + 3] = du_dtsx[xx] * deltaEy[yy];
-					duda[a + 4] = du_dtsy[yy] * deltaEx[xx];
+					duda[a + 3] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
 
 					// Compute all the partial second order derivatives
 					final double tI = this.tI[n];
@@ -279,10 +286,8 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					d2udadb[k + 2] = duda[a + 2] / tI;
 					// Signal,X SD
 					d2udadb[k + 3] = duda[a + 3] / tI;
-					// Signal,Y SD
-					d2udadb[k + 4] = duda[a + 4] / tI;
 
-					a += 5;
+					a += 4;
 
 					int kk = k + ng;
 					// X,Signal
@@ -292,9 +297,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					// X,Y
 					d2udadb[kk + 2] = du_dtx[xx] * du_dty_tI[n];
 					// X,X SD
-					d2udadb[kk + 3] = deltaEy[yy] * d2deltaEx_dtsxdx[xx];
-					// X,Y SD
-					d2udadb[kk + 4] = du_dtx[xx] * du_dtsy_tI[n];
+					d2udadb[kk + 3] = deltaEy[yy] * d2deltaEx_dtsxdx[xx] + du_dtx[xx] * du_dtsy_tI[n];
 
 					int kkk = kk + ng;
 					// Y,Signal
@@ -304,9 +307,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					// Y,Y
 					d2udadb[kkk + 2] = d2u_dty2[yy] * deltaEx[xx];
 					// Y,X SD
-					d2udadb[kkk + 3] = du_dty[yy] * du_dtsx_tI[xx];
-					// Y,Y SD
-					d2udadb[kkk + 4] = deltaEx[xx] * d2deltaEy_dtsydy[yy];
+					d2udadb[kkk + 3] = du_dty[yy] * du_dtsx_tI[xx] + deltaEx[xx] * d2deltaEy_dtsydy[yy];
 
 					int kkkk = kkk + ng;
 					// X SD,Signal
@@ -316,22 +317,11 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
 					// X SD,Y
 					d2udadb[kkkk + 2] = d2udadb[kkk + 3];
 					// X SD,X SD
-					d2udadb[kkkk + 3] = d2u_dtsx2[xx] * deltaEy[yy];
-					// X SD,Y SD
-					d2udadb[kkkk + 4] = du_dtsy[yy] * du_dtsx_tI[xx];
-
-					int kkkkk = kkkk + ng;
-					// Y SD,Signal
-					d2udadb[kkkkk] = d2udadb[k + 4];
-					// Y SD,X
-					d2udadb[kkkkk + 1] = d2udadb[kk + 4];
-					// Y SD,Y
-					d2udadb[kkkkk + 2] = d2udadb[kkk + 4];
-					// Y SD,X SD
-					d2udadb[kkkkk + 3] = d2udadb[kkkk + 4];
-					// Y SD,Y SD
-					d2udadb[kkkkk + 4] = d2u_dtsy2[yy] * deltaEx[xx];
-
+					//@formatter:off
+					d2udadb[kkkk + 3] = d2u_dtsx2[xx] * deltaEy[yy] + 
+    						            d2u_dtsy2[yy] * deltaEx[xx] + 
+    						            du_dtsx[xx] * two_du_dtsy_tI[n];
+    				//@formatter:on
 				}
 				procedure.executeExtended(I, duda, d2udadb);
 			}

@@ -60,7 +60,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	}
 
 	@Test
-	public void functionComputesSecondsignalGradient()
+	public void functionComputesSecondSignalGradient()
 	{
 		if (f1.evaluatesSignal())
 			functionComputesSecondTargetGradient(Gaussian2DFunction.SIGNAL);
@@ -183,7 +183,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	}
 
 	@Test
-	public void functionComputesSecondsignalGradientWith2Peaks()
+	public void functionComputesSecondSignalGradientWith2Peaks()
 	{
 		org.junit.Assume.assumeNotNull(f2);
 		if (f2.evaluatesSignal())

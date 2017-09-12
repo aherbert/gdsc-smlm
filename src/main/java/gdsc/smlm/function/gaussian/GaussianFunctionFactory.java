@@ -4,11 +4,13 @@ import gdsc.smlm.function.gaussian.erf.MultiAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.MultiNBCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiNBFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.SingleNBCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleNBFreeCircularErfGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -144,6 +146,11 @@ public class GaussianFunctionFactory
 	public static final int FIT_ERF_NB_FREE_CIRCLE = FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL | FIT_ERF;
 
 	/**
+	 * An 2D Gaussian (full integration per pixel) with gradients for signal, x/y position, width
+	 */
+	public static final int FIT_ERF_NB_CIRCLE = FIT_X_WIDTH | FIT_SIGNAL | FIT_ERF;
+	
+	/**
 	 * An elliptical 2D Gaussian (single exponential per pixel) with gradients for signal, rotation angle,
 	 * x/y position, x/y width
 	 */
@@ -212,6 +219,8 @@ public class GaussianFunctionFactory
 				}
 				if ((flags & FIT_Y_WIDTH) != 0)
 					return new SingleNBFreeCircularErfGaussian2DFunction(maxx, maxy);
+				if ((flags & FIT_X_WIDTH) != 0)
+					return new SingleNBCircularErfGaussian2DFunction(maxx, maxy);
 			}
 			else
 			{
@@ -232,6 +241,8 @@ public class GaussianFunctionFactory
 				}
 				if ((flags & FIT_Y_WIDTH) != 0)
 					return new MultiNBFreeCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
+				if ((flags & FIT_X_WIDTH) != 0)
+					return new MultiNBCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
 			}
 		}
 
