@@ -1510,13 +1510,13 @@ public class PSFCreator implements PlugInFilter
 	/**
 	 * Fit the new PSF image and show a graph of the amplitude/width
 	 * 
-	 * @param psf
+	 * @param psfStack
 	 * @param loess
 	 * @param averageRange
 	 * @param fitCom
 	 * @return The width of the PSF in the z-centre
 	 */
-	private double fitPSF(ImageStack psf, LoessInterpolator loess, int cz, double averageRange, final double[][] fitCom)
+	private double fitPSF(ImageStack psfStack, LoessInterpolator loess, int cz, double averageRange, final double[][] fitCom)
 	{
 		IJ.showStatus("Fitting final PSF");
 
@@ -1536,26 +1536,25 @@ public class PSFCreator implements PlugInFilter
 		}
 
 		// Update the box radius since this is used in the fitSpot method.
-		boxRadius = psf.getWidth() / 2;
+		boxRadius = psfStack.getWidth() / 2;
 		final int x = boxRadius;
 		final int y = boxRadius;
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		final double shift = fitConfig.getCoordinateShiftFactor();
 
 		// Scale the PSF
-		PSF.Builder b = fitConfig.getPSF().toBuilder();
-		for (int i = 0; i < b.getParametersCount(); i++)
+		PSF.Builder psf = fitConfig.getPSF().toBuilder();
+		for (int i = 0; i < psf.getParametersCount(); i++)
 		{
-			PSFParameter param = b.getParameters(i);
+			PSFParameter param = psf.getParameters(i);
 			if (param.getUnit() == PSFParameterUnit.DISTANCE)
 			{
-				PSFParameter.Builder pb = param.toBuilder();
-				pb.setValue(pb.getValue() * magnification);
-				b.setParameters(i, pb);
+				PSFParameter.Builder b = param.toBuilder();
+				b.setValue(b.getValue() * magnification);
+				psf.setParameters(i, b);
 			}
 		}
-		//fitConfig.setInitialPeakStdDev0(fitConfig.getInitialXSD() * magnification);
-		//fitConfig.setInitialPeakStdDev1(fitConfig.getInitialYSD() * magnification);
+		fitConfig.setPSF(psf.build());
 
 		// Need to be updated after the widths have been set
 		fitConfig.setCoordinateShiftFactor(shift);
@@ -1564,9 +1563,13 @@ public class PSFCreator implements PlugInFilter
 		fitConfig.setMinPhotons(0);
 		fitConfig.setBias(0);
 		fitConfig.setGain(1);
-		//fitConfig.setLog(new IJLogger());
+		// No complex filtering so we get a fit. It should be easy to fit anyway.
+		fitConfig.setPrecisionThreshold(0);
+		fitConfig.setDirectFilter(null);
+		//fitConfig.setDisableSimpleFilter(true);
+		//fitConfig.setLog(new gdsc.core.ij.IJLogger());
 
-		MemoryPeakResults results = fitSpot(psf, psf.getWidth(), psf.getHeight(), x, y);
+		MemoryPeakResults results = fitSpot(psfStack, psfStack.getWidth(), psfStack.getHeight(), x, y);
 
 		if (results.size() < 5)
 		{

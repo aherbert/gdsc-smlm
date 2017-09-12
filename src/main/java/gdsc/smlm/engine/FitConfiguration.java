@@ -2932,6 +2932,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		if (directFilter != null)
 			return directFilter.validate(peak);
+		if (isDisableSimpleFilter())
+			return 0;
 
 		// Do filtering 
 		if (peak.getPhotons() < getMinPhotons())
