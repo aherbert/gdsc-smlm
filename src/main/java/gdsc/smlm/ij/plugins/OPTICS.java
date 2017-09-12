@@ -1505,17 +1505,7 @@ public class OPTICS implements PlugIn
 								}
 							}
 						}
-						if (requiresLoop(settings) && loop == null)
-						{
-							synchronized (opticsManager)
-							{
-								lastLambda = (extraOptions) ? settings.getLambda() : 3;
-								lastMinPoints = settings.getMinPoints();
-								loop = opticsManager.loop(lastMinPoints, lastLambda, true);
-							}
-							float[] limits = Maths.limits(loop);
-							Utils.log("LoOP range: %s - %s", Utils.rounded(limits[0]), Utils.rounded(limits[1]));
-						}
+						createLoopData(settings, opticsManager);
 
 						// Draw each cluster in a new colour
 						LUT lut = valueLut;
@@ -1752,6 +1742,8 @@ public class OPTICS implements PlugIn
 								colors[c] = mapper.getColour(lut, c);
 						}
 
+						createLoopData(settings, opticsManager);
+						
 						for (int i = 1; i < predecessor.length; i++)
 						{
 							if (clusters[i] == 0 || predecessor[i] < 0)
@@ -1799,6 +1791,21 @@ public class OPTICS implements PlugIn
 
 			return new Pair<OpticsSettings, Settings>(settings,
 					new Settings(results, opticsManager, clusteringResult, clusterCount, image));
+		}
+
+		private void createLoopData(OpticsSettings settings, OPTICSManager opticsManager)
+		{
+			if (requiresLoop(settings) && loop == null)
+			{
+				synchronized (opticsManager)
+				{
+					lastLambda = (extraOptions) ? settings.getLambda() : 3;
+					lastMinPoints = settings.getMinPoints();
+					loop = opticsManager.loop(lastMinPoints, lastLambda, true);
+				}
+				float[] limits = Maths.limits(loop);
+				Utils.log("LoOP range: %s - %s", Utils.rounded(limits[0]), Utils.rounded(limits[1]));
+			}
 		}
 
 		private int getDisplayFlags(OpticsSettings inputSettings)
