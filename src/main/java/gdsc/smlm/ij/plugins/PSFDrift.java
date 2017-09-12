@@ -137,8 +137,8 @@ public class PSFDrift implements PlugIn
 		volatile boolean finished = false;
 		final ImagePSFModel psf;
 		final BlockingQueue<Job> jobs;
-		final FitConfiguration fitConfig;
-		final double s, a;
+		final FitConfiguration fitConfig2;
+		final double sx, sy, a;
 		final double[][] xy;
 		final int w;
 		final int w2;
@@ -151,8 +151,9 @@ public class PSFDrift implements PlugIn
 		{
 			this.jobs = jobs;
 			this.psf = psf.copy();
-			this.fitConfig = fitConfig.clone();
-			s = fitConfig.getInitialXSD();
+			this.fitConfig2 = fitConfig.clone();
+			sx = fitConfig.getInitialXSD();
+			sy = fitConfig.getInitialYSD();
 			a = psfSettings.getPixelSize() * scale;
 			xy = PSFDrift.getStartPoints(PSFDrift.this);
 			w = width;
@@ -235,7 +236,8 @@ public class PSFDrift implements PlugIn
 			double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
 			initialParams[Gaussian2DFunction.SIGNAL] = signal;
-			initialParams[Gaussian2DFunction.X_SD] = initialParams[Gaussian2DFunction.Y_SD] = s;
+			initialParams[Gaussian2DFunction.X_SD] = sx;
+			initialParams[Gaussian2DFunction.Y_SD] = sy;
 
 			int resultPosition = job.index;
 			for (double[] centre : xy)
@@ -244,8 +246,8 @@ public class PSFDrift implements PlugIn
 				final double[] params = initialParams.clone();
 				params[Gaussian2DFunction.X_POSITION] = cx + centre[0];
 				params[Gaussian2DFunction.Y_POSITION] = cy + centre[1];
-				fitConfig.initialise(1, w, w, params);
-				FunctionSolver solver = fitConfig.getFunctionSolver();
+				fitConfig2.initialise(1, w, w, params);
+				FunctionSolver solver = fitConfig2.getFunctionSolver();
 				if (solver.isBounded())
 					setBounds(solver);
 				else if (solver.isConstrained())
@@ -296,10 +298,10 @@ public class PSFDrift implements PlugIn
 				lb[Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
 				ub[Gaussian2DFunction.Z_POSITION] = Double.POSITIVE_INFINITY;
 				double wf = 1.5;
-				lb[Gaussian2DFunction.X_SD] = s / wf;
-				ub[Gaussian2DFunction.X_SD] = s * 5;
-				lb[Gaussian2DFunction.Y_SD] = s / wf;
-				ub[Gaussian2DFunction.Y_SD] = s * 5;
+				lb[Gaussian2DFunction.X_SD] = sx / wf;
+				ub[Gaussian2DFunction.X_SD] = sx * 5;
+				lb[Gaussian2DFunction.Y_SD] = sy / wf;
+				ub[Gaussian2DFunction.Y_SD] = sy * 5;
 			}
 		}
 
@@ -350,7 +352,7 @@ public class PSFDrift implements PlugIn
 			//}
 
 			// Q. Should we do width bounds checking?
-			if (fitConfig.isXSDFitting())
+			if (fitConfig2.isXSDFitting())
 			{
 				if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD] ||
 						params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])
@@ -359,7 +361,7 @@ public class PSFDrift implements PlugIn
 					return false;
 				}
 			}
-			if (fitConfig.isYSDFitting())
+			if (fitConfig2.isYSDFitting())
 			{
 				if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD] ||
 						params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])
@@ -716,7 +718,7 @@ public class PSFDrift implements PlugIn
 			{
 				int slice = (int) o[0];
 				offsetBuilder.setCx(o[1]);
-				offsetBuilder.setCx(o[2]);
+				offsetBuilder.setCy(o[2]);
 				imagePSFBuilder.putOffsets(slice, offsetBuilder.build());
 			}
 			imagePSFBuilder.putNotes(TITLE,

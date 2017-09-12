@@ -542,7 +542,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public FitConfiguration clone()
 	{
-		return copySettings(new FitConfiguration(getFitSettings(), getCalibration(), getPSF()));
+		return new FitConfiguration(getFitSettings(), getCalibration(), getPSF()).copySettings(this);
 
 		//		// This is not a complete duplicate. The settings builder objects with the 
 		//		// underlying configuration will be the same between all instances. 
@@ -1185,8 +1185,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// computed during the fit which is stored for validation.
 		if (nmPerPixel > 0 && gain > 0 &&
 				//calibration.isCCDCamera()
-				(calibration.isCCDCamera() || calibration.isSCMOS())
-				)
+				(calibration.isCCDCamera() || calibration.isSCMOS()))
 			this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
 		else
 			this.precisionThreshold = 0;
@@ -1433,7 +1432,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * Sets the quantum efficiency.
 	 *
-	 * @param quantumEfficiency the new quantum efficiency [electron/photon] (used for maximum likelihood estimation) 
+	 * @param quantumEfficiency
+	 *            the new quantum efficiency [electron/photon] (used for maximum likelihood estimation)
 	 */
 	public void setQuantumEfficiency(double quantumEfficiency)
 	{
@@ -2559,7 +2559,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			{
 				throw new IllegalStateException("CCD/EM-CCD camera is required for fit solver: " + getFitSolver());
 			}
-			
+
 			// This requires the gain
 			if (gain <= 0)
 			{
@@ -3285,7 +3285,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		this.cameraModel = cameraModel;
 	}
 
-	
 	/**
 	 * Return true if the camera type requires a per-pixel camera model
 	 *
@@ -3302,13 +3301,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 			case SCMOS:
 				return true;
-				
+
 			case UNRECOGNIZED:
 			default:
 				throw new IllegalStateException("Unknown camera type: " + getCameraType());
 		}
 	}
-	
+
 	/**
 	 * Gets the camera model.
 	 *
