@@ -17,6 +17,7 @@ public class DepthMask implements PlugIn
 
 	private static String titleXY = "";
 	private static String titleXZ = "";
+	private static String titleYZ = "";
 
 	/*
 	 * (non-Javadoc)
@@ -38,11 +39,12 @@ public class DepthMask implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Create a mask stack using XY and XZ mask images");
+		gd.addMessage("Create a mask stack using XY, XZ and YZ mask images");
 
 		String[] maskList = Utils.getImageList(Utils.SINGLE);
 		gd.addChoice("Mask_XY", maskList, titleXY);
 		gd.addChoice("Mask_XZ", maskList, titleXZ);
+		gd.addChoice("Mask_YZ", maskList, titleYZ);
 
 		gd.showDialog();
 
@@ -51,6 +53,7 @@ public class DepthMask implements PlugIn
 
 		titleXY = gd.getNextChoice();
 		titleXZ = gd.getNextChoice();
+		titleYZ = gd.getNextChoice();
 
 		return true;
 	}
@@ -59,6 +62,7 @@ public class DepthMask implements PlugIn
 	{
 		ImagePlus impXY = WindowManager.getImage(titleXY);
 		ImagePlus impXZ = WindowManager.getImage(titleXZ);
+		ImagePlus impYZ = WindowManager.getImage(titleYZ);
 		if (impXY == null)
 		{
 			IJ.error(TITLE, "No XY mask");
@@ -69,9 +73,24 @@ public class DepthMask implements PlugIn
 			IJ.error(TITLE, "No XZ mask");
 			return;
 		}
+		if (impYZ == null)
+		{
+			IJ.error(TITLE, "No YZ mask");
+			return;
+		}
 		if (impXY.getWidth() != impXZ.getWidth())
 		{
 			IJ.error(TITLE, "XY mask width does not match XZ mask width");
+			return;
+		}
+		if (impXY.getHeight() != impYZ.getWidth())
+		{
+			IJ.error(TITLE, "XY mask height does not match YZ mask width");
+			return;
+		}
+		if (impXZ.getHeight() != impYZ.getHeight())
+		{
+			IJ.error(TITLE, "XZ mask height does not match YZ mask height");
 			return;
 		}
 
@@ -81,19 +100,41 @@ public class DepthMask implements PlugIn
 		ImageStack stack = new ImageStack(maxx, maxy, maxz);
 		byte[] maskXY = getMask(impXY);
 		byte[] maskXZ = getMask(impXZ);
-		byte[] strip = new byte[maxx];
-		for (int z = 0, p = 0; z < maxz; z++, p += maxx)
+		byte[] maskYZ = getMask(impYZ);
+		for (int z = 0; z < maxz; z++)
 		{
 			byte[] mask = maskXY.clone();
-			System.arraycopy(maskXZ, p, strip, 0, maxx);
-			for (int y = 0, i = 0; y < maxy; y++)
+
+			//// Simple method
+			//for (int y = 0, i = 0; y < maxy; y++, i++)
+			//	for (int x = 0; x < maxx; x++, i++)
+			//	{
+			//		if (maskXZ[z * maxx + x] == 0)
+			//			mask[i] = 0;
+			//		else if (maskYZ[z * maxy + y] == 0)
+			//			mask[i] = 0;
+			//	}
+			
+			for (int x = 0, i = maxx * z; x < maxx; x++, i++)
 			{
-				for (int x = 0; x < maxx; x++, i++)
+				if (maskXZ[i] == 0)
 				{
-					if (strip[x] == 0)
-						mask[i] = 0;
+					// Blank all the (x,y) for this X
+					for (int y = 0, xy = x; y < maxy; y++, xy += maxx)
+						mask[xy] = 0;
 				}
 			}
+
+			for (int y = 0, i = maxy * z; y < maxy; y++, i++)
+			{
+				if (maskYZ[i] == 0)
+				{
+					// Blank all the (x,y) for this Y
+					for (int x = 0, xy = y * maxx; x < maxx; x++, xy++)
+						mask[xy] = 0;
+				}
+			}
+
 			stack.setPixels(mask, z + 1);
 		}
 		Utils.display(TITLE, stack);
