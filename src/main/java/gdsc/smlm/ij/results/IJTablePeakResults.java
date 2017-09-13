@@ -74,6 +74,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private String tableTitle = "Fit Results";
 	private TextWindow resultsWindow;
 	private TextPanel tp;
+	private ImageROIPainter roiPainter;
 	private boolean addCounter = false;
 	protected boolean tableActive = false;
 	private int nextRepaintSize = 0;
@@ -181,7 +182,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	{
 		String header = createResultsHeader();
 
-		ImageROIPainter roiPainter = null;
+		roiPainter = null;
 		for (Frame f : WindowManager.getNonImageWindows())
 		{
 			if (f != null && tableTitle.equals(f.getTitle()) && f instanceof TextWindow)
@@ -885,5 +886,39 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void setRoundingPrecision(int roundingPrecision)
 	{
 		this.roundingPrecision = roundingPrecision;
+	}
+
+	/**
+	 * Select an index from the text panel.
+	 *
+	 * @param selectedIndex
+	 *            the selected index
+	 */
+	public void select(int selectedIndex)
+	{
+		if (selectedIndex < 0 || selectedIndex >= tp.getLineCount())
+			return;
+		tp.setSelection(selectedIndex, selectedIndex);
+		if (roiPainter != null)
+			roiPainter.paint(selectedIndex);
+	}
+
+	/**
+	 * Select a range of indices from the text panel.
+	 *
+	 * @param selectionStart
+	 *            the selection start
+	 * @param selectionEnd
+	 *            the selection end
+	 */
+	public void select(int selectionStart, int selectionEnd)
+	{
+		if (selectionStart < 0 || selectionStart >= tp.getLineCount())
+			return;
+		if (selectionEnd < selectionStart || selectionEnd >= tp.getLineCount())
+			return;
+		tp.setSelection(selectionStart, selectionEnd);
+		if (roiPainter != null)
+			roiPainter.paint(selectionStart, selectionEnd);
 	}
 }

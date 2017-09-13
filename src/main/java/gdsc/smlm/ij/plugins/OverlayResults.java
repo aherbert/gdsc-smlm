@@ -32,6 +32,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultView;
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
@@ -41,6 +42,7 @@ import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
+import ij.text.TextPanel;
 import ij.text.TextWindow;
 
 /**
@@ -212,8 +214,30 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			clearError();
 
 			final IJTablePeakResults table;
+			TIntHashSet selectedId = null;
 			if (showTable)
 			{
+				boolean hasId = results.hasId();
+
+				// Old selected item
+				if (hasId && tw != null)
+				{
+					TextPanel tp = tw.getTextPanel();
+					int idColumn = Utils.getColumn(tp, "Id");
+					int start = tp.getSelectionStart();
+					if (start != -1 && idColumn != -1)
+					{
+						selectedId = new TIntHashSet();
+						int end = tp.getSelectionEnd();
+						for (int index = start; index <= end; index++)
+						{
+							String text = tp.getLine(index).split("\t")[idColumn];
+							selectedId.add(Integer.parseInt(text));
+						}
+					}
+				}
+				
+				// New table
 				table = new IJTablePeakResults(false);
 				table.setTableTitle(TITLE);
 				table.copySettings(results);
@@ -221,11 +245,12 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				table.setAddCounter(true);
 				table.setHideSourceText(true);
 				table.setShowZ(results.is3D());
-				table.setShowId(results.hasId());
+				table.setShowId(hasId);
 				//table.setShowFittingData(true);
 				//table.setShowNoise(true);
 				table.begin();
-				// Position under thew window
+
+				// Position under the window
 				tw = table.getResultsWindow();
 				ImageWindow win = imp.getWindow();
 				Point p = win.getLocation();
@@ -245,12 +270,27 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				view = results.getSnapshotView();
 				converter = results.getDistanceConverter(DistanceUnit.PIXEL);
 			}
-			for (PeakResult r : view.getResultsByFrame(currentSlice))
+			int select = -1;
+			PeakResult[] frameResults = view.getResultsByFrame(currentSlice);
+			for (int i = 0; i < frameResults.length; i++)
 			{
+				PeakResult r = frameResults[i];
 				ox.add(converter.convert(r.getXPosition()));
 				oy.add(converter.convert(r.getYPosition()));
 				if (table != null)
+				{
 					table.add(r);
+					if (selectedId != null)
+					{
+						if (selectedId.contains(r.getId()))
+						{
+							// For now just preserve the first selected ID. 
+							// This at least allows tracking a single localisation.
+							select = i;
+							selectedId = null;
+						}
+					}
+				}
 			}
 			// Old method without the cached view
 			//			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
@@ -275,7 +315,12 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			{
 				table.end();
 				TextWindow tw = table.getResultsWindow();
-				tw.getTextPanel().scrollToTop();
+				TextPanel tp = tw.getTextPanel();
+				tp.scrollToTop();
+
+				// Reselect the same Id
+				if (select != -1)
+					table.select(select);
 			}
 		}
 

@@ -59,38 +59,61 @@ public class ImageROIPainter implements MouseListener
 	{
 		// Show the result that was double clicked in the result table
 		if (e.getClickCount() > 1)
-		{
-			ImagePlus imp = WindowManager.getImage(title);
-			if (imp == null)
-				return;
+			paint(textPanel.getSelectionStart());
+	}
 
-			int index = textPanel.getSelectionStart();
-			if (index == -1)
-				return;
+	/**
+	 * Trigger the ROI painter using the selected index from the text panel.
+	 *
+	 * @param selectedIndex
+	 *            the selected index
+	 */
+	public void paint(int selectedIndex)
+	{
+		if (selectedIndex < 0 || selectedIndex >= textPanel.getLineCount())
+			return;
 
-			double[] position = coordProvider.getCoordinates(textPanel.getLine(index));
+		ImagePlus imp = WindowManager.getImage(title);
+		if (imp == null)
+			return;
 
-			if (position == null || position.length < 3)
-				return;
+		double[] position = coordProvider.getCoordinates(textPanel.getLine(selectedIndex));
 
-			int slice = (int) position[0];
-			double x = position[1];
-			double y = position[2];
+		if (position == null || position.length < 3)
+			return;
 
-			addRoi(imp, slice, new PointRoi(x, y));
+		int slice = (int) position[0];
+		double x = position[1];
+		double y = position[2];
 
-			Utils.adjustSourceRect(imp, 0, (int) x, (int) y);
-		}
+		addRoi(imp, slice, new PointRoi(x, y));
+
+		Utils.adjustSourceRect(imp, 0, (int) x, (int) y);
 	}
 
 	public void mousePressed(MouseEvent e)
 	{
 		// If a multiple-line selection is made then show all the points
 		int index = textPanel.getSelectionStart();
-		if (index == -1)
-			return;
 		int index2 = textPanel.getSelectionEnd();
 		if (index == index2)
+			return;
+		paint(textPanel.getSelectionStart(), textPanel.getSelectionEnd());
+	}
+
+	/**
+	 * Trigger the ROI painter using the selection from the text panel.
+	 *
+	 * @param selectionStart
+	 *            the selection start
+	 * @param selectionEnd
+	 *            the selection end
+	 */
+	public void paint(int selectionStart, int selectionEnd)
+	{
+		if (selectionStart < 0 || selectionStart >= textPanel.getLineCount())
+			return;
+		if (selectionEnd < selectionStart || selectionEnd >= textPanel.getLineCount())
 			return;
 		ImagePlus imp = WindowManager.getImage(title);
 		if (imp == null)
@@ -98,12 +121,12 @@ public class ImageROIPainter implements MouseListener
 
 		// Show all
 		int points = 0;
-		float[] x = new float[index2 - index + 1];
+		float[] x = new float[selectionEnd - selectionStart + 1];
 		float[] y = new float[x.length];
 		int[] slice = new int[x.length];
-		while (index <= index2)
+		while (selectionStart <= selectionEnd)
 		{
-			double[] position = coordProvider.getCoordinates(textPanel.getLine(index));
+			double[] position = coordProvider.getCoordinates(textPanel.getLine(selectionStart));
 
 			if (position == null || position.length < 3)
 				continue;
@@ -112,7 +135,7 @@ public class ImageROIPainter implements MouseListener
 			x[points] = (float) position[1];
 			y[points] = (float) position[2];
 			points++;
-			index++;
+			selectionStart++;
 		}
 
 		if (points == 0)
