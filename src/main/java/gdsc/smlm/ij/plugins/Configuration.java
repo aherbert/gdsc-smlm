@@ -36,8 +36,6 @@ public class Configuration implements PlugIn, ItemListener
 	private FitEngineConfiguration config;
 	private FitConfiguration fitConfig;
 
-	private boolean configurationChanged = false;
-
 	// All the fields that will be updated when reloading the configuration file
 	private Choice textCameraType;
 	private TextField textNmPerPixel;
@@ -73,18 +71,25 @@ public class Configuration implements PlugIn, ItemListener
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		showDialog();
+		showDialog(true);
+	}
+
+	/**
+	 * Show the current properties
+	 */
+	public boolean showDialog(boolean save)
+	{
+		config = SettingsManager.readFitEngineConfiguration(0);
+		return showDialog(config, save);
 	}
 
 	/**
 	 * Show the current properties
 	 */
 	@SuppressWarnings("unchecked")
-	public void showDialog()
+	public boolean showDialog(FitEngineConfiguration fitEngineConfiguration, boolean save)
 	{
-		configurationChanged = false;
-
-		config = SettingsManager.readFitEngineConfiguration(0);
+		this.config = fitEngineConfiguration;
 		fitConfig = config.getFitConfiguration();
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
@@ -178,13 +183,16 @@ public class Configuration implements PlugIn, ItemListener
 			textDisableSimpleFilter.addItemListener(this);
 		}
 
-		gd.enableYesNoCancel("Save", "Save template");
-		//gd.setCancelLabel("Close");
+		if (save)
+		{
+			gd.enableYesNoCancel("Save", "Save template");
+			//gd.setCancelLabel("Close");
+		}
 
 		gd.showDialog();
 
 		if (gd.wasCanceled())
-			return;
+			return false;
 
 		// In case a template update the calibration
 		calibration = fitConfig.getCalibrationWriter();
@@ -246,58 +254,66 @@ public class Configuration implements PlugIn, ItemListener
 		catch (IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
-			return;
+			return false;
 		}
 
 		if (gd.invalidNumber())
-			return;
-
-		boolean saveToFile = !gd.wasOKed();
+			return false;
 
 		int flags = PeakFit.FLAG_NO_SAVE;
 		if (!PeakFit.configureSmartFilter(config, flags))
-			return;
+			return false;
 		if (!PeakFit.configureDataFilter(config, flags))
-			return;
+			return false;
 		PeakFit.configureFitSolver(config, 0, 0, flags);
 
-		if (saveToFile)
+		if (save)
 		{
-			gd = new ExtendedGenericDialog(TITLE);
-			gd.addFilenameField("Template_filename", templateFilename);
-			gd.addMessage("Add notes to the template ...");
-			gd.addTextAreas(notes, null, 10, 60);
-			gd.showDialog();
-			if (gd.wasCanceled())
-				return;
-			String filename = gd.getNextString();
-			notes = gd.getNextText();
-
-			if (filename != null)
+			boolean saveToFile = !gd.wasOKed();
+			if (saveToFile)
 			{
-				templateFilename = Utils.replaceExtension(filename, ".txt");
-				File file = new File(templateFilename);
-				String name = Utils.removeExtension(file.getName());
-				TemplateSettings.Builder settings = TemplateSettings.newBuilder();
-				settings.addNotes(notes);
-				settings.setCalibration(fitConfig.getCalibration());
-				settings.setFitEngineSettings(config.getFitEngineSettings());
-				// Note: No results settings are currently supported
-				settings.setPsf(fitConfig.getPSF());
-				if (!ConfigurationTemplate.saveTemplate(name, settings.build(), file))
-					IJ.error(TITLE, "Failed to save to file: " + templateFilename);
+				gd = new ExtendedGenericDialog(TITLE);
+				gd.addFilenameField("Template_filename", templateFilename);
+				gd.addMessage("Add notes to the template ...");
+				gd.addTextAreas(notes, null, 10, 60);
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return false;
+				String filename = gd.getNextString();
+				notes = gd.getNextText();
+
+				if (filename != null)
+				{
+					templateFilename = Utils.replaceExtension(filename, ".txt");
+					File file = new File(templateFilename);
+					String name = Utils.removeExtension(file.getName());
+					TemplateSettings.Builder settings = TemplateSettings.newBuilder();
+					settings.addNotes(notes);
+					settings.setCalibration(fitConfig.getCalibration());
+					settings.setFitEngineSettings(config.getFitEngineSettings());
+					// Note: No results settings are currently supported
+					settings.setPsf(fitConfig.getPSF());
+					if (!ConfigurationTemplate.saveTemplate(name, settings.build(), file))
+						IJ.error(TITLE, "Failed to save to file: " + templateFilename);
+				}
+			}
+			else
+			{
+				SettingsManager.writeSettings(config, 0);
 			}
 		}
-		else
-		{
-			SettingsManager.writeSettings(config, 0);
-			configurationChanged = true;
-		}
+
+		return true;
 	}
 
-	public boolean isConfigurationChanged()
+	/**
+	 * Gets the fit engine configuration.
+	 *
+	 * @return the fit engine configuration
+	 */
+	public FitEngineConfiguration getFitEngineConfiguration()
 	{
-		return configurationChanged;
+		return config;
 	}
 
 	/*

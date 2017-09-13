@@ -6,8 +6,6 @@ import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,10 +33,10 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
-import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitConfiguration;
@@ -62,7 +60,6 @@ import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
-import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -103,6 +100,9 @@ public class PSFCreator implements PlugInFilter
 	private final static String TITLE_AMPLITUDE = "Spot Amplitude";
 	private final static String TITLE_PSF_PARAMETERS = "Spot PSF";
 	private final static String TITLE_INTENSITY = "Spot Intensity";
+
+	private final static String[] MODE = { "Projection", "Gaussian Fitting" };
+	private static int mode = 0;
 
 	private static double nmPerSlice = 20;
 	private static double radius = 10;
@@ -203,15 +203,7 @@ public class PSFCreator implements PlugInFilter
 		gd.addMessage(
 				"Produces an average PSF using selected diffraction limited spots.\nUses the current fit configuration to fit spots.");
 
-		gd.addAndGetButton("Update Fit Configuration", new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				// Run the fit configuration plugin to update the settings.
-				Configuration c = new Configuration();
-				c.run("");
-			}
-		});
+		gd.addChoice("Mode", MODE, mode);
 		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
 		gd.addSlider("Radius", 3, 20, radius);
 		gd.addSlider("Amplitude_fraction", 0.01, 0.5, amplitudeFraction);
@@ -230,6 +222,7 @@ public class PSFCreator implements PlugInFilter
 		if (gd.wasCanceled())
 			return DONE;
 
+		mode = gd.getNextChoiceIndex();
 		nmPerSlice = gd.getNextNumber();
 		radius = gd.getNextNumber();
 		amplitudeFraction = gd.getNextNumber();
@@ -272,7 +265,17 @@ public class PSFCreator implements PlugInFilter
 	 */
 	public void run(ImageProcessor ip)
 	{
-		loadConfiguration();
+		if (mode == 0)
+			runUsingProjections();
+		else
+			runUsingFitting();
+	}
+
+	private void runUsingFitting()
+	{
+		if (!loadConfiguration())
+			return;
+		
 		BasePoint[] spots = getSpots();
 		if (spots.length == 0)
 		{
@@ -438,7 +441,7 @@ public class PSFCreator implements PlugInFilter
 
 		if (centres.isEmpty())
 		{
-			String msg = "No suitable spots could be identified centres";
+			String msg = "No suitable spots could be identified";
 			Utils.log(msg);
 			IJ.error(TITLE, msg);
 			return;
@@ -569,6 +572,12 @@ public class PSFCreator implements PlugInFilter
 		createInteractivePlots(psf, maxz, nmPerPixel / magnification, fittedSd * nmPerPixel);
 
 		IJ.showStatus("");
+	}
+
+	private void runUsingProjections()
+	{
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**
@@ -1414,10 +1423,21 @@ public class PSFCreator implements PlugInFilter
 		return com;
 	}
 
-	private void loadConfiguration()
+	private boolean loadConfiguration()
 	{
-		config = SettingsManager.readFitEngineConfiguration(0);
+		Configuration c = new Configuration();
+		// TODO: We could have a different fit configuration just for the PSF Creator.
+		// This would allow it to be saved and not effect PeakFit settings.
+		boolean save = true; 
+		if (!c.showDialog(save))
+		{
+			IJ.error(TITLE, "No fit configuration loaded");
+			return false;
+		}
+		
+		config = c.getFitEngineConfiguration();
 		config.configureOutputUnits();
+		config.setResidualsThreshold(1);
 		fitConfig = config.getFitConfiguration();
 		nmPerPixel = fitConfig.getCalibrationWriter().getNmPerPixel();
 		if (radius < 5 * FastMath.max(fitConfig.getInitialXSD(), fitConfig.getInitialYSD()))
@@ -1426,6 +1446,7 @@ public class PSFCreator implements PlugInFilter
 			Utils.log("Radius is less than 5 * PSF standard deviation, increasing to %s", Utils.rounded(radius));
 		}
 		boxRadius = (int) Math.ceil(radius);
+		return true;
 	}
 
 	/**
@@ -1516,7 +1537,8 @@ public class PSFCreator implements PlugInFilter
 	 * @param fitCom
 	 * @return The width of the PSF in the z-centre
 	 */
-	private double fitPSF(ImageStack psfStack, LoessInterpolator loess, int cz, double averageRange, final double[][] fitCom)
+	private double fitPSF(ImageStack psfStack, LoessInterpolator loess, int cz, double averageRange,
+			final double[][] fitCom)
 	{
 		IJ.showStatus("Fitting final PSF");
 
