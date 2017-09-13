@@ -574,12 +574,6 @@ public class PSFCreator implements PlugInFilter
 		IJ.showStatus("");
 	}
 
-	private void runUsingProjections()
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
 	/**
 	 * Get the limits of the array ignoring outliers more than 1.5x the inter quartile range
 	 * 
@@ -2278,5 +2272,10 @@ public class PSFCreator implements PlugInFilter
 			note.put("Title", imp.getTitle());
 		}
 		return note;
+	}
+
+	private void runUsingProjections()
+	{
+		IJ.error(TITLE, "Not yet implemented");
 	}
 }
