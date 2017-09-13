@@ -1128,7 +1128,7 @@ public class PSFDrift implements PlugIn
 				plot.drawDottedLine(newCentre, 0, newCentre, maxY, 2);
 		}
 		plot.setColor(Color.black);
-		plot.addLabel(0, 0, "X=red; Y=blue; FWHM=" + Utils.rounded(newFWHM));
+		plot.addLabel(0, 0, "X=red; Y=blue; Center=" + newCentre + "; FWHM=" + Utils.rounded(newFWHM));
 		Utils.display(title, plot);
 
 		if (centre != newCentre || newFWHM != fwhm)
