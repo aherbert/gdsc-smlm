@@ -1166,6 +1166,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
+						Calibration old = calibration.getCalibration();
 						if (calibration.isCCDCamera())
 						{
 							calibration.setBias(Math.abs(egd.getNextNumber()));
@@ -1185,7 +1186,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
 								calibration.setQuantumEfficiency(Math.abs(egd.getNextNumber()));
 						}
-						return true;
+						return !old.equals(calibration.getCalibration());
 					}
 				});
 	}
@@ -1287,22 +1288,28 @@ public class PeakFit implements PlugInFilter, ItemListener
 						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						PSFType psfType = fitConfig.getPSFType();
 						ExtendedGenericDialog egd = new ExtendedGenericDialog("PSF Options", null);
-						PSF psf = fitConfig.getPSF();
-						for (PSFParameter p : psf.getParametersList())
+						PSF oldPsf = fitConfig.getPSF();
+						for (PSFParameter p : oldPsf.getParametersList())
 							egd.addNumericField(p.getName(), p.getValue(), 3);
 						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
 							egd.addCheckbox("Fixed", fitConfig.isFixedPSF());
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
-						PSF.Builder b = psf.toBuilder();
+						PSF.Builder b = oldPsf.toBuilder();
 						int n = b.getParametersCount();
 						for (int i = 0; i < n; i++)
 							b.getParametersBuilder(i).setValue(egd.getNextNumber());
-						fitConfig.setPSF(b.build());
+						PSF newPsf = b.build();
+						fitConfig.setPSF(newPsf);
+						boolean changed = !oldPsf.equals(newPsf);
 						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
-							fitConfig.setFixedPSF(egd.getNextBoolean());
-						return true;
+						{
+							boolean newFixed = egd.getNextBoolean();
+							changed = changed || (newFixed != fitConfig.isFixedPSF());
+							fitConfig.setFixedPSF(newFixed);
+						}
+						return changed;
 					}
 				});
 	}
