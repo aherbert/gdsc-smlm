@@ -474,7 +474,7 @@ public class PSFDrift implements PlugIn
 			IJ.error(TITLE, "No PSF settings for image: " + title);
 			return;
 		}
-		
+
 		// Configure the fit solver. We must wrap the settings with a 
 		// FitEngineConfiguration to pass to the PeakFit method
 		FitEngineSettings fitEngineSettings = FitProtosHelper.defaultFitEngineSettings;
@@ -522,7 +522,7 @@ public class PSFDrift implements PlugIn
 		startSlice = (startSlice < 1) ? 1 : (startSlice > nSlices) ? nSlices : startSlice;
 		endSlice = (endSlice < 1) ? 1 : (endSlice > nSlices) ? nSlices : endSlice;
 
-		ImagePSFModel psf = createImagePSF(startSlice, endSlice);
+		ImagePSFModel psf = createImagePSF(startSlice, endSlice, scale);
 
 		int minz = startSlice - psfSettings.getCentreImage();
 		int maxz = endSlice - psfSettings.getCentreImage();
@@ -899,7 +899,7 @@ public class PSFDrift implements PlugIn
 		plot.addPoints(x2, y2, shape);
 	}
 
-	private ImagePSFModel createImagePSF(int lower, int upper)
+	private ImagePSFModel createImagePSF(int lower, int upper, double scale)
 	{
 		int zCentre = psfSettings.getCentreImage();
 
@@ -1049,10 +1049,10 @@ public class PSFDrift implements PlugIn
 	private void showHWHM(List<String> titles)
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Select the input PSF image");
+		gd.addMessage("Approximate the volume of the PSF as a Gaussian and\ncompute the equivalent Gaussian width.");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
 		gd.addCheckbox("Use_offset", useOffset);
-		gd.addNumericField("Scale", scale, 2);
+		gd.addSlider("Smoothing", 0, 0.5, smoothing);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -1060,7 +1060,7 @@ public class PSFDrift implements PlugIn
 
 		title = gd.getNextChoice();
 		useOffset = gd.getNextBoolean();
-		scale = gd.getNextNumber();
+		smoothing = gd.getNextNumber();
 
 		imp = WindowManager.getImage(title);
 		if (imp == null)
@@ -1076,24 +1076,77 @@ public class PSFDrift implements PlugIn
 		}
 
 		int size = imp.getStackSize();
-		ImagePSFModel psf = createImagePSF(1, size);
+		ImagePSFModel psf = createImagePSF(1, size, 1);
 
 		double[] w0 = psf.getAllHWHM0();
 		double[] w1 = psf.getAllHWHM1();
 		double[] slice = SimpleArrayUtils.newArray(w0.length, 1, 1.0);
+
+		// Get current centre
+		int centre = psfSettings.getCentreImage();
+
+		// Smooth 
+		if (smoothing > 0)
+		{
+			LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
+			w0 = loess.smooth(slice, w0);
+			w1 = loess.smooth(slice, w1);
+		}
+
+		// Get min of both widths as the proposed centre
+		int newCentre = 0;
+		double minW = Double.POSITIVE_INFINITY;
+		for (int i = 0; i < slice.length; i++)
+		{
+			double w = w0[i] * w1[i];
+			if (minW > w)
+			{
+				minW = w;
+				newCentre = i + 1;
+			}
+		}
+		// Convert to FWHM
+		double newFWHM = 2 * Math.sqrt(minW);
+		double fwhm = psfSettings.getFwhm();
 
 		// Widths are in pixels
 		String title = TITLE + " HWHM";
 		Plot plot = new Plot(title, "Slice", "HWHM (px)");
 		double[] limits = Maths.limits(w0);
 		limits = Maths.limits(limits, w1);
-		plot.setLimits(1, size, 0, limits[1] * 1.05);
+		double maxY = limits[1] * 1.05;
+		plot.setLimits(1, size, 0, maxY);
 		plot.setColor(Color.red);
 		plot.addPoints(slice, w0, Plot.LINE);
 		plot.setColor(Color.blue);
 		plot.addPoints(slice, w1, Plot.LINE);
+		if (centre != 0)
+		{
+			plot.setColor(Color.MAGENTA);
+			plot.drawLine(centre, 0, centre, maxY);
+			if (centre != newCentre)
+				plot.drawDottedLine(newCentre, 0, newCentre, maxY, 2);
+		}
 		plot.setColor(Color.black);
-		plot.addLabel(0, 0, "X=red; Y=blue");
+		plot.addLabel(0, 0, "X=red; Y=blue; FWHM=" + Utils.rounded(newFWHM));
 		Utils.display(title, plot);
+
+		if (centre != newCentre || newFWHM != fwhm)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage(String.format(
+					"Update the centre to the point of the minimum width?\n \nCurrent = %d, FHWM = %s\nNew = %d, FWHM = %s",
+					centre, Utils.rounded(fwhm), newCentre, Utils.rounded(newFWHM)));
+			gd.enableYesNoCancel();
+			gd.hideCancelButton();
+			gd.showDialog();
+			if (gd.wasOKed())
+			{
+				ImagePSF.Builder b = psfSettings.toBuilder();
+				b.setCentreImage(newCentre);
+				b.setFwhm(newFWHM);
+				imp.setProperty("Info", ImagePSFHelper.toString(b));
+			}
+		}
 	}
 }
