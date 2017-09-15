@@ -180,10 +180,10 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 		imp = Utils.display(TITLE, stack);
 		calibrate(imp);
 
+		imp.setSlice(maxz / 2);
+		
 		if (settings.getMode() == 1)
 		{
-			imp.setSlice(maxz / 2);
-
 			// Allow mouse click to draw spheres
 			imp.getCanvas().addMouseListener(this);
 
