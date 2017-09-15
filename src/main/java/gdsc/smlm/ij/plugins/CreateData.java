@@ -789,7 +789,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				return;
 
 			imageModel.setPhotonDistribution(createPhotonDistribution());
-			imageModel.setConfinementDistribution(createConfinementDistribution());
+			imageModel.setConfinementDistribution(createConfinementDistribution(distribution));
 			// This should be optimised
 			imageModel.setConfinementAttempts(10);
 
@@ -1407,13 +1407,25 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return distribution;
 	}
 
-	private SpatialDistribution createConfinementDistribution()
+	private SpatialDistribution createConfinementDistribution(SpatialDistribution distribution)
 	{
 		if (settings.getDiffusionRate() <= 0 || settings.getFixedFraction() >= 1)
 			return null;
 
+		// Log a warning if the confinement conflicts with the distribution
+
 		if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_MASK]))
 		{
+			// The mask should be the same
+			if (!settings.getDistribution().equals(DISTRIBUTION[MASK]))
+				Utils.log(TITLE + " Warning: Simulation uses a mask confinement but no mask distribution");
+			else if (!settings.getConfinementMask().equals(settings.getDistributionMask()))
+				Utils.log(TITLE +
+						" Warning: Simulation uses a mask confinement with a different image to the mask distribution");
+			else if (settings.getConfinementMaskSliceDepth() != settings.getDistributionMaskSliceDepth())
+				Utils.log(TITLE +
+						" Warning: Simulation uses a mask confinement with a different depth to the mask distribution");
+
 			ImagePlus imp = WindowManager.getImage(settings.getConfinementMask());
 			if (imp != null)
 			{
@@ -1422,14 +1434,26 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_SPHERE]))
 		{
+			// This may be an error if the distribution is a mask
+			if (settings.getDistribution().equals(DISTRIBUTION[MASK]))
+				Utils.log(TITLE + " Warning: Simulation uses a mask confinement but a %s confinement",
+						CONFINEMENT[CONFINEMENT_SPHERE]);
+
 			return new SphericalDistribution(settings.getConfinementRadius() / settings.getPixelPitch());
 		}
 		else if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_WITHIN_IMAGE]))
 		{
+			// This may be an error if the distribution is a mask
+			if (settings.getDistribution().equals(DISTRIBUTION[MASK]))
+				Utils.log(TITLE + " Warning: Simulation uses a mask confinement but a %s confinement",
+						CONFINEMENT[CONFINEMENT_WITHIN_IMAGE]);
+
 			//return createUniformDistribution(0);
 			return createUniformDistributionWithPSFWidthBorder();
 		}
-
+		
+		if (settings.getDistribution().equals(DISTRIBUTION[MASK]))
+			Utils.log(TITLE + " Warning: Simulation uses a mask confinement but no confinement");
 		return null;
 	}
 
