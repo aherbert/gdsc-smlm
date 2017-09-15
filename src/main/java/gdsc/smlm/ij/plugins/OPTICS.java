@@ -60,6 +60,10 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
+import ij.gui.ExtendedGenericDialog.OptionCollectedListener;
+import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
 import ij.gui.Line;
 import ij.gui.NonBlockingExtendedGenericDialog;
@@ -1743,7 +1747,7 @@ public class OPTICS implements PlugIn
 						}
 
 						createLoopData(settings, opticsManager);
-						
+
 						for (int i = 1; i < predecessor.length; i++)
 						{
 							if (clusters[i] == 0 || predecessor[i] < 0)
@@ -2189,7 +2193,7 @@ public class OPTICS implements PlugIn
 	{
 		logReferences(isDBSCAN);
 
-		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+		final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		ResultsManager.addInput(gd, inputSettings.getInputOption(), InputSource.MEMORY);
@@ -2240,6 +2244,8 @@ public class OPTICS implements PlugIn
 			gd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 4);
 			gd.addCheckbox("Core_points", inputSettings.getCore());
 		}
+		gd.addMessage("--- Table ---");
+
 		gd.addMessage("--- Image ---");
 		gd.addSlider("Image_scale", 0, 15, inputSettings.getImageScale());
 		TreeSet<ImageMode> imageModeSet = new TreeSet<ImageMode>();
@@ -2251,10 +2257,44 @@ public class OPTICS implements PlugIn
 		}
 		imageModeArray = imageModeSet.toArray();
 		String[] imageModes = SettingsManager.getNames(imageModeArray);
-		gd.addChoice("Image_mode", imageModes, ImageMode.get(inputSettings.getImageMode()).toString());
+		gd.addChoice("Image_mode", imageModes, ImageMode.get(inputSettings.getImageMode()).toString(),
+				new OptionListener<Integer>()
+				{
+					public boolean collectOptions(Integer value)
+					{
+						inputSettings.setImageMode(value);
+						return collectOptions();
+					}
 
-		gd.addCheckboxGroup(1, 2, new String[] { "Weighted", "Equalised" },
-				new boolean[] { inputSettings.getWeighted(), inputSettings.getEqualised() }, new String[] { "Image" });
+					public boolean collectOptions()
+					{
+						ImageMode imageMode = ImageMode.get(inputSettings.getImageMode());
+						if (imageMode.canBeWeighted())
+						{
+							ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+							boolean[] b = new boolean[2];
+							b[0] = inputSettings.getWeighted();
+							b[1] = inputSettings.getEqualised();
+							egd.addCheckbox("Weighted", b[0]);
+							egd.addCheckbox("Equalised", b[1]);
+							egd.showDialog(true, gd);
+							if (egd.wasCanceled())
+								return false;
+							boolean changed = false;
+							boolean next = egd.getNextBoolean();
+							if (next != b[0])
+								changed = true;
+							inputSettings.setWeighted(next);
+							next = egd.getNextBoolean();
+							if (next != b[1])
+								changed = true;
+							inputSettings.setEqualised(next);
+							return changed;
+						}
+						return false;
+					}
+				});
+
 		if (extraOptions)
 		{
 			gd.addNumericField("LoOP_lambda", inputSettings.getLambda(), 4);
@@ -2286,10 +2326,9 @@ public class OPTICS implements PlugIn
 			gd.addCheckbox("Debug", false);
 
 		// Everything is done within the dialog listener
-		if (isDBSCAN)
-			gd.addDialogListener(new DBSCANDialogListener());
-		else
-			gd.addDialogListener(new OPTICSDialogListener());
+		BaseDialogListener listener = (isDBSCAN) ? new DBSCANDialogListener() : new OPTICSDialogListener();
+		gd.addDialogListener(listener);
+		gd.addOptionCollectedListener(listener);
 
 		gd.showDialog();
 
@@ -2344,7 +2383,6 @@ public class OPTICS implements PlugIn
 				if (inputSettings.getCore())
 					Recorder.recordOption("Core_points");
 			}
-			gd.addMessage("--- Image ---");
 			Recorder.recordOption("Image_scale", Double.toString(inputSettings.getImageScale()));
 			Recorder.recordOption("Image_mode", ImageMode.get(inputSettings.getImageMode()).toString());
 
@@ -2413,8 +2451,11 @@ public class OPTICS implements PlugIn
 			IJ.log(sb.toString());
 	}
 
-	private abstract class BaseDialogListener implements DialogListener
+	private abstract class BaseDialogListener implements DialogListener, OptionCollectedListener
 	{
+		MemoryPeakResults results = null;
+		String input = null;
+
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			//		if (e == null)
@@ -2441,9 +2482,13 @@ public class OPTICS implements PlugIn
 			inputSettings.setInputOption(ResultsManager.getInputSource(gd));
 
 			// Load the results. 
-			// TODO - update the plugin to handle any data, not just pixels 
-			MemoryPeakResults results = ResultsManager.loadInputResults(inputSettings.getInputOption(), true,
-					DistanceUnit.PIXEL, null);
+			if (results == null || !inputSettings.getInputOption().equals(input))
+			{
+				input = inputSettings.getInputOption();
+				// TODO - update the plugin to handle any data, not just pixels
+				results = ResultsManager.loadInputResults(inputSettings.getInputOption(), true, DistanceUnit.PIXEL,
+						null);
+			}
 			if (results == null || results.size() == 0)
 			{
 				IJ.error(TITLE, "No results could be loaded");
@@ -2453,6 +2498,13 @@ public class OPTICS implements PlugIn
 			if (!readSettings(gd))
 				return false;
 
+			createWork();
+
+			return true;
+		}
+
+		private void createWork()
+		{
 			// Clone so that the workflow has it's own unique reference
 			OpticsSettings settings = inputSettings.build();
 			Settings baseResults = new Settings(results);
@@ -2470,8 +2522,18 @@ public class OPTICS implements PlugIn
 				// Stage the work but do not run
 				workflow.stage(settings, baseResults);
 			}
+		}
 
-			return true;
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see ij.gui.ExtendedGenericDialog.OptionCollectedListener#optionCollected(ij.gui.ExtendedGenericDialog.
+		 * OptionCollectedEvent)
+		 */
+		public void optionCollected(OptionCollectedEvent e)
+		{
+			// This occurs when any of the additional options have changed. We just add the work.
+			createWork();
 		}
 
 		abstract boolean readSettings(GenericDialog gd);
@@ -2500,8 +2562,6 @@ public class OPTICS implements PlugIn
 			inputSettings.setCore(gd.getNextBoolean());
 			inputSettings.setImageScale(Math.abs(gd.getNextNumber()));
 			inputSettings.setImageMode(((ImageMode) imageModeArray[gd.getNextChoiceIndex()]).ordinal());
-			inputSettings.setWeighted(gd.getNextBoolean());
-			inputSettings.setEqualised(gd.getNextBoolean());
 			if (extraOptions)
 			{
 				inputSettings.setLambda(Math.abs(gd.getNextNumber()));
@@ -2515,6 +2575,8 @@ public class OPTICS implements PlugIn
 
 			if (gd.invalidNumber())
 				return false;
+
+			((ExtendedGenericDialog) gd).collectOptions(); // For macros
 
 			// Check arguments
 			try
@@ -2559,6 +2621,8 @@ public class OPTICS implements PlugIn
 
 			if (gd.invalidNumber())
 				return false;
+
+			((ExtendedGenericDialog) gd).collectOptions(); // For macros
 
 			return true;
 		}
