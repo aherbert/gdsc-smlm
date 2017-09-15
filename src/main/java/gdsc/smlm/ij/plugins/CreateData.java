@@ -789,7 +789,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				return;
 
 			imageModel.setPhotonDistribution(createPhotonDistribution());
-			imageModel.setConfinementDistribution(createConfinementDistribution(distribution));
+			try
+			{
+				imageModel.setConfinementDistribution(createConfinementDistribution());
+			}
+			catch (ConfigurationException e)
+			{
+				// We asked the user if it was OK to continue and the said no
+				return;
+			}
 			// This should be optimised
 			imageModel.setConfinementAttempts(10);
 
@@ -1407,7 +1415,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return distribution;
 	}
 
-	private SpatialDistribution createConfinementDistribution(SpatialDistribution distribution)
+	private SpatialDistribution createConfinementDistribution() throws ConfigurationException
 	{
 		if (settings.getDiffusionRate() <= 0 || settings.getFixedFraction() >= 1)
 			return null;
@@ -1418,13 +1426,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			// The mask should be the same
 			if (!settings.getDistribution().equals(DISTRIBUTION[MASK]))
-				Utils.log(TITLE + " Warning: Simulation uses a mask confinement but no mask distribution");
+				checkConfiguration("Simulation uses a mask confinement but no mask distribution");
 			else if (!settings.getConfinementMask().equals(settings.getDistributionMask()))
-				Utils.log(TITLE +
-						" Warning: Simulation uses a mask confinement with a different image to the mask distribution");
+				checkConfiguration(
+						"Simulation uses a mask confinement with a different image to the mask distribution");
 			else if (settings.getConfinementMaskSliceDepth() != settings.getDistributionMaskSliceDepth())
-				Utils.log(TITLE +
-						" Warning: Simulation uses a mask confinement with a different depth to the mask distribution");
+				checkConfiguration(
+						"Simulation uses a mask confinement with a different depth to the mask distribution");
 
 			ImagePlus imp = WindowManager.getImage(settings.getConfinementMask());
 			if (imp != null)
@@ -1436,8 +1444,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			// This may be an error if the distribution is a mask
 			if (settings.getDistribution().equals(DISTRIBUTION[MASK]))
-				Utils.log(TITLE + " Warning: Simulation uses a mask confinement but a %s confinement",
-						CONFINEMENT[CONFINEMENT_SPHERE]);
+				checkConfiguration("Simulation uses a mask confinement but a " + CONFINEMENT[CONFINEMENT_WITHIN_IMAGE] +
+						" confinement");
 
 			return new SphericalDistribution(settings.getConfinementRadius() / settings.getPixelPitch());
 		}
@@ -1445,16 +1453,26 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			// This may be an error if the distribution is a mask
 			if (settings.getDistribution().equals(DISTRIBUTION[MASK]))
-				Utils.log(TITLE + " Warning: Simulation uses a mask confinement but a %s confinement",
-						CONFINEMENT[CONFINEMENT_WITHIN_IMAGE]);
+				checkConfiguration("Simulation uses a mask confinement but a " + CONFINEMENT[CONFINEMENT_WITHIN_IMAGE] +
+						" confinement");
 
 			//return createUniformDistribution(0);
 			return createUniformDistributionWithPSFWidthBorder();
 		}
-		
+
 		if (settings.getDistribution().equals(DISTRIBUTION[MASK]))
-			Utils.log(TITLE + " Warning: Simulation uses a mask confinement but no confinement");
+			checkConfiguration("Simulation uses a mask confinement but no confinement");
 		return null;
+	}
+
+	private void checkConfiguration(String message) throws ConfigurationException
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage(TextUtils.wrap("Warning: " + message, 80));
+		gd.setOKLabel("Continue");
+		gd.showDialog();
+		if (gd.wasCanceled())
+			throw new ConfigurationException(message);
 	}
 
 	private SpatialIllumination createIllumination(double intensity, int pulseInterval)
