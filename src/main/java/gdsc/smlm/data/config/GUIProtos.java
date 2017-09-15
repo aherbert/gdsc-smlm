@@ -14151,6 +14151,33 @@ public final class GUIProtos {
      * <code>double lambda = 26;</code>
      */
     double getLambda();
+
+    /**
+     * <pre>
+     * Set to true to show a table of cluster statistics
+     * </pre>
+     *
+     * <code>bool show_table = 27;</code>
+     */
+    boolean getShowTable();
+
+    /**
+     * <pre>
+     * The table sort mode
+     * </pre>
+     *
+     * <code>int32 table_sort_mode = 28;</code>
+     */
+    int getTableSortMode();
+
+    /**
+     * <pre>
+     * Reverse sort the table
+     * </pre>
+     *
+     * <code>bool table_reverse_sort = 29;</code>
+     */
+    boolean getTableReverseSort();
   }
   /**
    * <pre>
@@ -14194,6 +14221,9 @@ public final class GUIProtos {
       outlineMode_ = 0;
       spanningTreeMode_ = 0;
       lambda_ = 0D;
+      showTable_ = false;
+      tableSortMode_ = 0;
+      tableReverseSort_ = false;
     }
 
     @java.lang.Override
@@ -14350,6 +14380,21 @@ public final class GUIProtos {
             case 209: {
 
               lambda_ = input.readDouble();
+              break;
+            }
+            case 216: {
+
+              showTable_ = input.readBool();
+              break;
+            }
+            case 224: {
+
+              tableSortMode_ = input.readInt32();
+              break;
+            }
+            case 232: {
+
+              tableReverseSort_ = input.readBool();
               break;
             }
           }
@@ -14755,6 +14800,45 @@ public final class GUIProtos {
       return lambda_;
     }
 
+    public static final int SHOW_TABLE_FIELD_NUMBER = 27;
+    private boolean showTable_;
+    /**
+     * <pre>
+     * Set to true to show a table of cluster statistics
+     * </pre>
+     *
+     * <code>bool show_table = 27;</code>
+     */
+    public boolean getShowTable() {
+      return showTable_;
+    }
+
+    public static final int TABLE_SORT_MODE_FIELD_NUMBER = 28;
+    private int tableSortMode_;
+    /**
+     * <pre>
+     * The table sort mode
+     * </pre>
+     *
+     * <code>int32 table_sort_mode = 28;</code>
+     */
+    public int getTableSortMode() {
+      return tableSortMode_;
+    }
+
+    public static final int TABLE_REVERSE_SORT_FIELD_NUMBER = 29;
+    private boolean tableReverseSort_;
+    /**
+     * <pre>
+     * Reverse sort the table
+     * </pre>
+     *
+     * <code>bool table_reverse_sort = 29;</code>
+     */
+    public boolean getTableReverseSort() {
+      return tableReverseSort_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -14844,6 +14928,15 @@ public final class GUIProtos {
       }
       if (lambda_ != 0D) {
         output.writeDouble(26, lambda_);
+      }
+      if (showTable_ != false) {
+        output.writeBool(27, showTable_);
+      }
+      if (tableSortMode_ != 0) {
+        output.writeInt32(28, tableSortMode_);
+      }
+      if (tableReverseSort_ != false) {
+        output.writeBool(29, tableReverseSort_);
       }
     }
 
@@ -14955,6 +15048,18 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(26, lambda_);
       }
+      if (showTable_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(27, showTable_);
+      }
+      if (tableSortMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(28, tableSortMode_);
+      }
+      if (tableReverseSort_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(29, tableReverseSort_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -15041,6 +15146,12 @@ public final class GUIProtos {
           java.lang.Double.doubleToLongBits(getLambda())
           == java.lang.Double.doubleToLongBits(
               other.getLambda()));
+      result = result && (getShowTable()
+          == other.getShowTable());
+      result = result && (getTableSortMode()
+          == other.getTableSortMode());
+      result = result && (getTableReverseSort()
+          == other.getTableReverseSort());
       return result;
     }
 
@@ -15118,6 +15229,14 @@ public final class GUIProtos {
       hash = (37 * hash) + LAMBDA_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getLambda()));
+      hash = (37 * hash) + SHOW_TABLE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowTable());
+      hash = (37 * hash) + TABLE_SORT_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getTableSortMode();
+      hash = (37 * hash) + TABLE_REVERSE_SORT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getTableReverseSort());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -15303,6 +15422,12 @@ public final class GUIProtos {
 
         lambda_ = 0D;
 
+        showTable_ = false;
+
+        tableSortMode_ = 0;
+
+        tableReverseSort_ = false;
+
         return this;
       }
 
@@ -15351,6 +15476,9 @@ public final class GUIProtos {
         result.outlineMode_ = outlineMode_;
         result.spanningTreeMode_ = spanningTreeMode_;
         result.lambda_ = lambda_;
+        result.showTable_ = showTable_;
+        result.tableSortMode_ = tableSortMode_;
+        result.tableReverseSort_ = tableReverseSort_;
         onBuilt();
         return result;
       }
@@ -15470,6 +15598,15 @@ public final class GUIProtos {
         }
         if (other.getLambda() != 0D) {
           setLambda(other.getLambda());
+        }
+        if (other.getShowTable() != false) {
+          setShowTable(other.getShowTable());
+        }
+        if (other.getTableSortMode() != 0) {
+          setTableSortMode(other.getTableSortMode());
+        }
+        if (other.getTableReverseSort() != false) {
+          setTableReverseSort(other.getTableReverseSort());
         }
         onChanged();
         return this;
@@ -16571,6 +16708,120 @@ public final class GUIProtos {
       public Builder clearLambda() {
         
         lambda_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean showTable_ ;
+      /**
+       * <pre>
+       * Set to true to show a table of cluster statistics
+       * </pre>
+       *
+       * <code>bool show_table = 27;</code>
+       */
+      public boolean getShowTable() {
+        return showTable_;
+      }
+      /**
+       * <pre>
+       * Set to true to show a table of cluster statistics
+       * </pre>
+       *
+       * <code>bool show_table = 27;</code>
+       */
+      public Builder setShowTable(boolean value) {
+        
+        showTable_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to true to show a table of cluster statistics
+       * </pre>
+       *
+       * <code>bool show_table = 27;</code>
+       */
+      public Builder clearShowTable() {
+        
+        showTable_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int tableSortMode_ ;
+      /**
+       * <pre>
+       * The table sort mode
+       * </pre>
+       *
+       * <code>int32 table_sort_mode = 28;</code>
+       */
+      public int getTableSortMode() {
+        return tableSortMode_;
+      }
+      /**
+       * <pre>
+       * The table sort mode
+       * </pre>
+       *
+       * <code>int32 table_sort_mode = 28;</code>
+       */
+      public Builder setTableSortMode(int value) {
+        
+        tableSortMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The table sort mode
+       * </pre>
+       *
+       * <code>int32 table_sort_mode = 28;</code>
+       */
+      public Builder clearTableSortMode() {
+        
+        tableSortMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean tableReverseSort_ ;
+      /**
+       * <pre>
+       * Reverse sort the table
+       * </pre>
+       *
+       * <code>bool table_reverse_sort = 29;</code>
+       */
+      public boolean getTableReverseSort() {
+        return tableReverseSort_;
+      }
+      /**
+       * <pre>
+       * Reverse sort the table
+       * </pre>
+       *
+       * <code>bool table_reverse_sort = 29;</code>
+       */
+      public Builder setTableReverseSort(boolean value) {
+        
+        tableReverseSort_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Reverse sort the table
+       * </pre>
+       *
+       * <code>bool table_reverse_sort = 29;</code>
+       */
+      public Builder clearTableReverseSort() {
+        
+        tableReverseSort_ = false;
         onChanged();
         return this;
       }
@@ -20852,7 +21103,7 @@ public final class GUIProtos {
       "n_correction\030\036 \001(\010\022\026\n\016msd_correction\030\037 \001" +
       "(\010\022\013\n\003mle\030  \001(\010\022\022\n\nfit_length\030! \001(\005\022\024\n\014f" +
       "it_restarts\030\" \001(\005\022\025\n\rjump_distance\030# \001(\005" +
-      "\"\313\004\n\016OpticsSettings\022\024\n\014input_option\030\001 \001(" +
+      "\"\224\005\n\016OpticsSettings\022\024\n\014input_option\030\001 \001(" +
       "\t\022\023\n\013optics_mode\030\002 \001(\005\022\034\n\024number_of_spli" +
       "t_sets\030\003 \001(\005\022\032\n\022use_random_vectors\030\004 \001(\010" +
       "\022\035\n\025save_approximate_sets\030\005 \001(\010\022\023\n\013sampl" +
@@ -20866,26 +21117,28 @@ public final class GUIProtos {
       "le\030\023 \001(\001\022\022\n\nimage_mode\030\024 \001(\005\022\020\n\010weighted" +
       "\030\025 \001(\010\022\021\n\tequalised\030\026 \001(\010\022\021\n\tplot_mode\030\027" +
       " \001(\005\022\024\n\014outline_mode\030\030 \001(\005\022\032\n\022spanning_t" +
-      "ree_mode\030\031 \001(\005\022\016\n\006lambda\030\032 \001(\001\"\203\001\n\017Defau" +
-      "ltTemplate\022:\n\rtemplate_type\030\001 \001(\0162#.gdsc",
-      ".smlm.data.config.TemplateType\022\014\n\004name\030\002" +
-      " \001(\t\022\020\n\010filename\030\003 \001(\t\022\024\n\014tif_filename\030\004" +
-      " \001(\t\"\\\n\027DefaultTemplateSettings\022A\n\021defau" +
-      "lt_templates\030\001 \003(\0132&.gdsc.smlm.data.conf" +
-      "ig.DefaultTemplate\"\375\001\n\035ConfigurationTemp" +
-      "lateSettings\022\016\n\006option\030\001 \001(\005\022!\n\031select_s" +
-      "tandard_templates\030\002 \001(\010\022\037\n\027select_custom" +
-      "_directory\030\003 \001(\010\022\037\n\027configuration_direct" +
-      "ory\030\004 \001(\t\022#\n\033selected_standard_templates" +
-      "\030\005 \003(\t\022!\n\031selected_custom_templates\030\006 \003(",
-      "\t\022\020\n\010template\030\007 \001(\t\022\r\n\005close\030\010 \001(\010\"\232\001\n\023N" +
-      "ucleusMaskSettings\022\014\n\004mode\030\001 \001(\005\022\023\n\013fiel" +
-      "d_width\030\002 \001(\001\022\020\n\010y_dither\030\003 \001(\001\022\020\n\010z_dit" +
-      "her\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022\024\n\014nm_pe" +
-      "r_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001*O\n\014Templ" +
-      "ateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE" +
-      "_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIP" +
-      "rotosb\006proto3"
+      "ree_mode\030\031 \001(\005\022\016\n\006lambda\030\032 \001(\001\022\022\n\nshow_t" +
+      "able\030\033 \001(\010\022\027\n\017table_sort_mode\030\034 \001(\005\022\032\n\022t",
+      "able_reverse_sort\030\035 \001(\010\"\203\001\n\017DefaultTempl" +
+      "ate\022:\n\rtemplate_type\030\001 \001(\0162#.gdsc.smlm.d" +
+      "ata.config.TemplateType\022\014\n\004name\030\002 \001(\t\022\020\n" +
+      "\010filename\030\003 \001(\t\022\024\n\014tif_filename\030\004 \001(\t\"\\\n" +
+      "\027DefaultTemplateSettings\022A\n\021default_temp" +
+      "lates\030\001 \003(\0132&.gdsc.smlm.data.config.Defa" +
+      "ultTemplate\"\375\001\n\035ConfigurationTemplateSet" +
+      "tings\022\016\n\006option\030\001 \001(\005\022!\n\031select_standard" +
+      "_templates\030\002 \001(\010\022\037\n\027select_custom_direct" +
+      "ory\030\003 \001(\010\022\037\n\027configuration_directory\030\004 \001",
+      "(\t\022#\n\033selected_standard_templates\030\005 \003(\t\022" +
+      "!\n\031selected_custom_templates\030\006 \003(\t\022\020\n\010te" +
+      "mplate\030\007 \001(\t\022\r\n\005close\030\010 \001(\010\"\232\001\n\023NucleusM" +
+      "askSettings\022\014\n\004mode\030\001 \001(\005\022\023\n\013field_width" +
+      "\030\002 \001(\001\022\020\n\010y_dither\030\003 \001(\001\022\020\n\010z_dither\030\004 \001" +
+      "(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022\024\n\014nm_per_slice" +
+      "\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001*O\n\014TemplateType" +
+      "\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLA" +
+      "TE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006" +
+      "proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -20942,7 +21195,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_OpticsSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor,
-        new java.lang.String[] { "InputOption", "OpticsMode", "NumberOfSplitSets", "UseRandomVectors", "SaveApproximateSets", "SampleMode", "GeneratingDistance", "MinPoints", "ClusteringMode", "Xi", "TopLevel", "UpperLimit", "LowerLimit", "Samples", "SampleFraction", "FractionNoise", "ClusteringDistance", "Core", "ImageScale", "ImageMode", "Weighted", "Equalised", "PlotMode", "OutlineMode", "SpanningTreeMode", "Lambda", });
+        new java.lang.String[] { "InputOption", "OpticsMode", "NumberOfSplitSets", "UseRandomVectors", "SaveApproximateSets", "SampleMode", "GeneratingDistance", "MinPoints", "ClusteringMode", "Xi", "TopLevel", "UpperLimit", "LowerLimit", "Samples", "SampleFraction", "FractionNoise", "ClusteringDistance", "Core", "ImageScale", "ImageMode", "Weighted", "Equalised", "PlotMode", "OutlineMode", "SpanningTreeMode", "Lambda", "ShowTable", "TableSortMode", "TableReverseSort", });
     internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_gdsc_smlm_data_config_DefaultTemplate_fieldAccessorTable = new

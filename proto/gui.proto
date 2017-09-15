@@ -307,6 +307,15 @@ message OpticsSettings
 	// Note that scores are monotonic with respect to Lambda so this value just effects the local contrast of outlier
 	// scores, not the actual ranking of outliers.
 	double lambda = 26;	
+	
+	// Set to true to show a table of cluster statistics
+	bool show_table = 27;
+	
+	// The table sort mode
+	int32 table_sort_mode = 28;
+	
+	// Reverse sort the table
+	bool table_reverse_sort = 29;
 }
 
 enum TemplateType
@@ -360,7 +369,6 @@ message NucleusMaskSettings
 	double y_dither = 3;
 	double z_dither = 4;
 	double nm_per_pixel = 5;
-	double nm_per_s
-	lice = 6;
+	double nm_per_slice = 6;
 	double diameter = 7;
 }

@@ -16,6 +16,7 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import gdsc.core.clustering.optics.OPTICSManager;
 import gdsc.core.clustering.optics.OPTICSManager.Option;
 import gdsc.core.clustering.optics.OPTICSResult;
 import gdsc.core.clustering.optics.SampleMode;
+import gdsc.core.ij.BufferedTextWindow;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.RandIndex;
@@ -45,7 +47,9 @@ import gdsc.core.utils.Settings;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
@@ -78,6 +82,7 @@ import ij.process.LUT;
 import ij.process.LUTHelper;
 import ij.process.LUTHelper.LUTMapper;
 import ij.process.LUTHelper.LutColour;
+import ij.text.TextWindow;
 
 /**
  * Run the OPTICS algorithm on the peak results.
@@ -562,6 +567,55 @@ public class OPTICS implements PlugIn
 		}
 
 		public static SpanningTreeMode get(int ordinal)
+		{
+			if (ordinal < 0 || ordinal >= values().length)
+				ordinal = 0;
+			return values()[ordinal];
+		}
+	}
+
+	/**
+	 * Options for sorting the table
+	 */
+	public enum TableSortMode
+	{
+		//@formatter:off
+		ID {
+			@Override
+			public String getName() { return "Id"; };
+		},
+		SIZE {
+			@Override
+			public String getName() { return "Size"; };
+		},
+		LEVEL {
+			@Override
+			public String getName() { return "Level"; };
+		},
+		AREA {
+			@Override
+			public String getName() { return "Area"; };
+		},
+		DENSITY {
+			@Override
+			public String getName() { return "Density"; };
+		};
+		//@formatter:on
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+
+		public static TableSortMode get(int ordinal)
 		{
 			if (ordinal < 0 || ordinal >= values().length)
 				ordinal = 0;
@@ -1840,6 +1894,271 @@ public class OPTICS implements PlugIn
 		}
 	}
 
+	private class TableResult
+	{
+		int id;
+		int size;
+		int level;
+		double area, density;
+		ConvexHull hull;
+		String text;
+		double toUnit = 0;
+
+		TableResult(int id, int size, int level, ConvexHull hull)
+		{
+			this.id = id;
+			this.size = size;
+			this.level = level;
+			this.hull = hull;
+
+			if (size > 2 && hull != null)
+			{
+				area = hull.getArea();
+				density = size / area;
+			}
+		}
+
+		public String getTableText(double toUnit)
+		{
+			if (text == null || this.toUnit != toUnit)
+			{
+				this.toUnit = toUnit;
+				StringBuilder sb = new StringBuilder();
+				// "Level\tId\tSize\tArea\tDensity\tBounds"
+				sb.append(level).append('\t');
+				sb.append(id).append('\t');
+				sb.append(size).append('\t');
+				if (size > 2 && hull != null)
+				{
+					double area = this.area * toUnit * toUnit;
+					sb.append(Maths.round(area)).append('\t');
+					sb.append(Maths.round(size / area)).append('\t');
+					Rectangle2D.Double bounds = hull.getFloatBounds();
+					sb.append('(').append(Maths.round(toUnit * bounds.getX())).append(',');
+					sb.append(Maths.round(toUnit * bounds.getY())).append(") ");
+					sb.append(Maths.round(toUnit * bounds.getWidth())).append('x');
+					sb.append(Maths.round(toUnit * bounds.getHeight()));
+				}
+				else
+				{
+					// What about clusters of size 1 or 2? 
+					// We currently ignore these for the bounds
+				}
+				text = sb.toString();
+			}
+			return text;
+		}
+	}
+
+	private static class IdTableResultComparator implements Comparator<TableResult>
+	{
+		public int compare(TableResult o1, TableResult o2)
+		{
+			return Integer.compare(o1.id, o2.id);
+		}
+	}
+
+	private static class SizeTableResultComparator implements Comparator<TableResult>
+	{
+		public int compare(TableResult o1, TableResult o2)
+		{
+			return Integer.compare(o1.size, o2.size);
+		}
+	}
+
+	private static class LevelTableResultComparator implements Comparator<TableResult>
+	{
+		public int compare(TableResult o1, TableResult o2)
+		{
+			return Integer.compare(o1.level, o2.level);
+		}
+	}
+
+	private static class AreaTableResultComparator implements Comparator<TableResult>
+	{
+		public int compare(TableResult o1, TableResult o2)
+		{
+			return Double.compare(o1.area, o2.area);
+		}
+	}
+
+	private static class DensityTableResultComparator implements Comparator<TableResult>
+	{
+		public int compare(TableResult o1, TableResult o2)
+		{
+			return Double.compare(o1.density, o2.density);
+		}
+	}
+
+	private class TableResultsWorker extends BaseWorker
+	{
+		TurboList<TableResult> tableResults;
+		TextWindow tw;
+		Rectangle location;
+
+		@Override
+		public boolean equalSettings(OpticsSettings current, OpticsSettings previous)
+		{
+			if (current.getShowTable() != previous.getShowTable())
+				return false;
+			if (current.getShowTable())
+			{
+				if (current.getTableReverseSort() != previous.getTableReverseSort())
+					return false;
+				if (current.getTableSortMode() != previous.getTableSortMode())
+					return false;
+			}
+			return true;
+		}
+
+		@Override
+		protected void newResults()
+		{
+			// Clear cache
+			tableResults = null;
+		}
+
+		@Override
+		public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work)
+		{
+			OpticsSettings settings = work.s;
+			Settings resultList = work.r;
+			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
+			ClusteringResult clusteringResult = (ClusteringResult) resultList.get(2);
+
+			if (clusteringResult == null || !settings.getShowTable())
+			{
+				// Hide the table
+				if (tw != null)
+				{
+					location = tw.getBounds();
+					tw.close();
+					tw = null;
+				}
+			}
+			else
+			{
+				if (tableResults == null)
+				{
+					int[] clusters;
+					int max;
+					ConvexHull[] hulls;
+					ArrayList<OPTICSCluster> allClusters = null;
+					synchronized (clusteringResult)
+					{
+						clusters = clusteringResult.getClusters();
+						max = Maths.max(clusters);
+						clusteringResult.computeConvexHulls();
+						hulls = new ConvexHull[max + 1];
+						for (int c = 1; c <= max; c++)
+						{
+							hulls[c] = clusteringResult.getConvexHull(c);
+						}
+
+						if (clusteringResult instanceof OPTICSResult)
+						{
+							OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
+							allClusters = opticsResult.getAllClusters();
+						}
+					}
+
+					// Get the cluster sizes and level
+					int[] size = new int[max + 1];
+					int[] level = new int[max + 1];
+
+					if (clusteringResult instanceof OPTICSResult)
+					{
+						for (OPTICSCluster c : allClusters)
+						{
+							level[c.getClusterId()] = c.getLevel();
+							size[c.getClusterId()] = c.size();
+						}
+					}
+					else
+					{
+						for (int i = 0; i < clusters.length; i++)
+						{
+							size[clusters[i]]++;
+						}
+					}
+
+					tableResults = new TurboList<TableResult>(max);
+					for (int c = 1; c <= max; c++)
+					{
+						tableResults.add(new TableResult(c, size[c], level[c], hulls[c]));
+					}
+				}
+
+				// TODO - Check why the algorithm creates clusters of size 1.
+
+				// TODO: Allow user to change the distance units. 
+				// Note that all clustering is currently done in pixels.
+				DistanceUnit unit = DistanceUnit.NM;
+				String name = UnitHelper.getShortName(unit);
+				String headings = String.format("Level\tId\tSize\tArea (%s^2)\tDensity (%s^-2)\tBounds (%s)", name,
+						name, name);
+				double toUnit = results.getDistanceConverter(unit).convert(1);
+
+				if (tw == null)
+				{
+					tw = new TextWindow(TITLE + " Clusters", headings, "", 800, 400);
+
+					// TODO - Add a mouse listener to allow double click on a cluster to draw 
+					// a polygon ROI of the convex hull, or point ROI if size <=2
+
+					if (location != null)
+					{
+						tw.setBounds(location);
+					}
+				}
+				else
+				{
+					tw.getTextPanel().setColumnHeadings(headings);
+				}
+
+				BufferedTextWindow bw = new BufferedTextWindow(tw);
+				bw.setIncrement(Integer.MAX_VALUE);
+
+				sort(settings);
+				for (TableResult r : tableResults)
+				{
+					bw.append(r.getTableText(toUnit));
+				}
+				bw.flush();
+				
+				tw.getTextPanel().scrollToTop();
+			}
+
+			// We have not created anything new so return the current object
+			return work;
+		}
+
+		private void sort(OpticsSettings settings)
+		{
+			tableResults.sort(createComparator(settings));
+			if (settings.getTableReverseSort())
+				tableResults.reverse();
+		}
+
+		private Comparator<? super TableResult> createComparator(OpticsSettings settings)
+		{
+			switch (TableSortMode.get(settings.getTableSortMode()))
+			{
+				case DENSITY:
+					return new DensityTableResultComparator();
+				case AREA:
+					return new AreaTableResultComparator();
+				case LEVEL:
+					return new LevelTableResultComparator();
+				case SIZE:
+					return new SizeTableResultComparator();
+				case ID:
+				default:
+					return new IdTableResultComparator();
+			}
+		}
+	}
+
 	private class KNNWorker extends BaseWorker
 	{
 		double[] profile = null;
@@ -2142,6 +2461,7 @@ public class OPTICS implements PlugIn
 		workflow.add(new RandIndexWorker(), previous);
 		workflow.add(new MemoryResultsWorker(), previous);
 		workflow.add(new ImageResultsWorker(), previous);
+		workflow.add(new TableResultsWorker(), previous);
 
 		workflow.start();
 
@@ -2164,6 +2484,7 @@ public class OPTICS implements PlugIn
 		workflow.add(new MemoryResultsWorker(), previous);
 		workflow.add(new ReachabilityResultsWorker(), previous);
 		workflow.add(new ImageResultsWorker(), previous);
+		workflow.add(new TableResultsWorker(), previous);
 
 		workflow.start();
 
@@ -2278,6 +2599,7 @@ public class OPTICS implements PlugIn
 			gd.addChoice("Clustering_mode", clusteringModes, inputSettings.getClusteringMode(),
 					new OptionListener<Integer>()
 					{
+
 						public boolean collectOptions(Integer value)
 						{
 							inputSettings.setClusteringMode(value);
@@ -2323,6 +2645,32 @@ public class OPTICS implements PlugIn
 					});
 		}
 		gd.addMessage("--- Table ---");
+		gd.addCheckbox("Show_table", inputSettings.getShowTable(), new OptionListener<Boolean>()
+		{
+			public boolean collectOptions(Boolean value)
+			{
+				inputSettings.setShowTable(value);
+				return collectOptions();
+			}
+
+			public boolean collectOptions()
+			{
+				if (!inputSettings.getShowTable())
+					return false;
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Table options");
+				OpticsSettings oldSettings = inputSettings.build();
+				String[] modes = SettingsManager.getNames((Object[]) TableSortMode.values());
+				egd.addChoice("Table_sort_mode", modes, inputSettings.getTableSortMode());
+				egd.addCheckbox("Table_reverse_sort", inputSettings.getTableReverseSort());
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				inputSettings.setTableSortMode(egd.getNextChoiceIndex());
+				inputSettings.setTableReverseSort(egd.getNextBoolean());
+				// Return true if new settings
+				return !inputSettings.build().equals(oldSettings);
+			}
+		});
 
 		gd.addMessage("--- Image ---");
 		gd.addSlider("Image_scale", 0, 15, inputSettings.getImageScale());
@@ -2461,6 +2809,15 @@ public class OPTICS implements PlugIn
 				if (inputSettings.getCore())
 					Recorder.recordOption("Core_points");
 			}
+			if (inputSettings.getShowTable())
+			{
+				Recorder.recordOption("Show_table");
+				Recorder.recordOption("Table_sort_mode",
+						TableSortMode.get(inputSettings.getTableSortMode()).toString());
+				if (inputSettings.getTableReverseSort())
+					Recorder.recordOption("Table_reverse_sort");
+			}
+
 			Recorder.recordOption("Image_scale", Double.toString(inputSettings.getImageScale()));
 			Recorder.recordOption("Image_mode", ImageMode.get(inputSettings.getImageMode()).toString());
 
@@ -2624,6 +2981,7 @@ public class OPTICS implements PlugIn
 			inputSettings.setMinPoints((int) Math.abs(gd.getNextNumber()));
 			inputSettings.setOpticsMode(gd.getNextChoiceIndex());
 			inputSettings.setClusteringMode(gd.getNextChoiceIndex());
+			inputSettings.setShowTable(gd.getNextBoolean());
 			inputSettings.setImageScale(Math.abs(gd.getNextNumber()));
 			inputSettings.setImageMode(((ImageMode) imageModeArray[gd.getNextChoiceIndex()]).ordinal());
 			inputSettings.setOutlineMode(((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]).ordinal());
@@ -2666,6 +3024,7 @@ public class OPTICS implements PlugIn
 			inputSettings.setSampleFraction(Math.abs(gd.getNextNumber() / 100));
 			inputSettings.setClusteringDistance(Math.abs(gd.getNextNumber()));
 			inputSettings.setCore(gd.getNextBoolean());
+			inputSettings.setShowTable(gd.getNextBoolean());
 			inputSettings.setImageScale(Math.abs(gd.getNextNumber()));
 			inputSettings.setImageMode(((ImageMode) imageModeArray[gd.getNextChoiceIndex()]).ordinal());
 			inputSettings.setOutlineMode(((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]).ordinal());
