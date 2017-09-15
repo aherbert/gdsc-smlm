@@ -41,11 +41,11 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	private static final String TITLE = "Nucleus Mask";
 
 	private static final String[] MODE = { "Random", "User Input" };
-	private static int mode = 0;
+	private static int mode = 1;
 
 	private static double fieldWidth = 8;
-	private static double yDither = 0;
-	private static double zDither = 0;
+	private static double yDither = 4;
+	private static double zDither = 1;
 	private static double nmPerPixel = 100;
 	private static double nmPerSlice = 20;
 	private static double diameter = 2;
