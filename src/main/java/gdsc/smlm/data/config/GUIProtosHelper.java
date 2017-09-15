@@ -179,4 +179,19 @@ public class GUIProtosHelper
 		builder.setConfigurationDirectory(System.getProperty("user.home") + File.separator + "gdsc.smlm");
 		defaultConfigurationTemplateSettings = builder.build();
 	}
+	
+	/** The default NucleusMaskSettings */
+	public static final NucleusMaskSettings defaultNucleusMaskSettings;
+	static
+	{
+		NucleusMaskSettings.Builder builder = NucleusMaskSettings.newBuilder();
+		builder.setMode(1);
+		builder.setFieldWidth(8);
+		builder.setYDither(4);
+		builder.setZDither(1);
+		builder.setNmPerPixel(100);
+		builder.setNmPerSlice(20);
+		builder.setDiameter(2);
+		defaultNucleusMaskSettings = builder.build();
+	}
 }

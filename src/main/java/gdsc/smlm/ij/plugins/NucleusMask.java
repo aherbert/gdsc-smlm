@@ -21,6 +21,8 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.DialogListener;
@@ -41,14 +43,8 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	private static final String TITLE = "Nucleus Mask";
 
 	private static final String[] MODE = { "Random", "User Input" };
-	private static int mode = 1;
 
-	private static double fieldWidth = 8;
-	private static double yDither = 4;
-	private static double zDither = 1;
-	private static double nmPerPixel = 100;
-	private static double nmPerSlice = 20;
-	private static double diameter = 2;
+	private NucleusMaskSettings.Builder settings;
 
 	private ImagePlus imp = null;
 	private ImageStack sphere = null;
@@ -68,6 +64,8 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 		createMask();
 	}
 
+	double diameter, nmPerPixel, nmPerSlice;
+
 	private boolean showDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -75,47 +73,54 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 
 		gd.addMessage("Create a mask stack using spheres");
 
-		gd.addChoice("Mode", MODE, mode);
-		gd.addNumericField("Field_width", fieldWidth, 2, 6, "um");
-		gd.addNumericField("Pixel_width", nmPerPixel, 2, 6, "nm");
-		gd.addNumericField("Pixel_depth", nmPerSlice, 2, 6, "nm");
+		settings = SettingsManager.readNucleusMaskSettings(0).toBuilder();
+		gd.addChoice("Mode", MODE, settings.getMode());
+		gd.addNumericField("Field_width", settings.getFieldWidth(), 2, 6, "um");
+		gd.addNumericField("Pixel_width", settings.getNmPerPixel(), 2, 6, "nm");
+		gd.addNumericField("Pixel_depth", settings.getNmPerSlice(), 2, 6, "nm");
 
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return false;
 
-		mode = gd.getNextChoiceIndex();
-		fieldWidth = gd.getNextNumber();
-		nmPerPixel = gd.getNextNumber();
-		nmPerSlice = gd.getNextNumber();
+		settings.setMode(gd.getNextChoiceIndex());
+		settings.setFieldWidth(gd.getNextNumber());
+		settings.setNmPerPixel(gd.getNextNumber());
+		settings.setNmPerSlice(gd.getNextNumber());
 
-		if (mode == 0)
+		if (settings.getMode() == 0)
 		{
 			gd = new ExtendedGenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
 			gd.addMessage("Create a mask stack using uniform random spheres");
 
-			gd.addNumericField("y_dither", yDither, 2, 6, "um");
-			gd.addNumericField("z_dither", zDither, 2, 6, "um");
-			gd.addNumericField("Diameter", diameter, 2, 6, "um");
+			gd.addNumericField("y_dither", settings.getYDither(), 2, 6, "um");
+			gd.addNumericField("z_dither", settings.getZDither(), 2, 6, "um");
+			gd.addNumericField("Diameter", settings.getDiameter(), 2, 6, "um");
 
 			gd.showDialog();
 
 			if (gd.wasCanceled())
 				return false;
 
-			yDither = gd.getNextNumber();
-			zDither = gd.getNextNumber();
-			diameter = gd.getNextNumber();
+			settings.setYDither(gd.getNextNumber());
+			settings.setZDither(gd.getNextNumber());
+			settings.setDiameter(gd.getNextNumber());
 		}
+
+		SettingsManager.writeSettings(settings);
 
 		return true;
 	}
 
 	private void createMask()
 	{
+		diameter = settings.getDiameter();
+		nmPerPixel = settings.getNmPerPixel();
+		nmPerSlice = settings.getNmPerSlice();
+
 		// Create the dimensions using the scale.
 		// Scale diameter in um to nm
 		final int radius = (int) Math.ceil(diameter * 500 / nmPerPixel);
@@ -123,10 +128,10 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 
 		int inc = 2 * radius + 1;
 		int incz = 2 * radiusz + 1;
-		int maxx = (fieldWidth > 0) ? (int) Math.ceil(fieldWidth * 1000 / nmPerPixel) : inc;
+		int maxx = (settings.getFieldWidth() > 0) ? (int) Math.ceil(settings.getFieldWidth() * 1000 / nmPerPixel) : inc;
 		int maxy = maxx;
-		int ditherHeight = (yDither > 0) ? (int) Math.ceil(yDither * 1000 / nmPerPixel) : 0;
-		int ditherDepth = (zDither > 0) ? (int) Math.ceil(zDither * 1000 / nmPerSlice) : 0;
+		int ditherHeight = (settings.getYDither() > 0) ? (int) Math.ceil(settings.getYDither() * 1000 / nmPerPixel) : 0;
+		int ditherDepth = (settings.getZDither() > 0) ? (int) Math.ceil(settings.getZDither() * 1000 / nmPerSlice) : 0;
 		int maxz = ditherDepth + incz;
 		ImageStack stack = new ImageStack(maxx, maxy, maxz);
 		byte[] mask = new byte[maxx * maxy];
@@ -136,7 +141,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			stack.setPixels(mask, z + 1);
 		}
 
-		if (mode == 0)
+		if (settings.getMode() == 0)
 		{
 			ImageStack stack2 = createEllipsoid(inc, inc, incz);
 
@@ -175,7 +180,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 		imp = Utils.display(TITLE, stack);
 		calibrate(imp);
 
-		if (mode == 1)
+		if (settings.getMode() == 1)
 		{
 			imp.setSlice(maxz / 2);
 
@@ -193,6 +198,12 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			gd.showDialog();
 
 			imp.getWindow().removeMouseListener(this);
+
+			if (diameter != settings.getDiameter())
+			{
+				settings.setDiameter(diameter);
+				SettingsManager.writeSettings(settings);
+			}
 		}
 	}
 

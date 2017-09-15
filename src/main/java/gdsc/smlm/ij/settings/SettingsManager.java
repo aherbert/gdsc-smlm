@@ -38,6 +38,7 @@ import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
 import gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
+import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
@@ -862,6 +863,18 @@ public class SettingsManager
 	public static CameraModelSettings readCameraModelSettings(int flags)
 	{
 		return new ConfigurationReader<CameraModelSettings>(CameraModelSettings.getDefaultInstance()).read(flags);
+	}
+
+	/**
+	 * Read the NucleusMaskSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the NucleusMaskSettings
+	 */
+	public static NucleusMaskSettings readNucleusMaskSettings(int flags)
+	{
+		return new ConfigurationReader<NucleusMaskSettings>(GUIProtosHelper.defaultNucleusMaskSettings).read(flags);
 	}
 
 	/**

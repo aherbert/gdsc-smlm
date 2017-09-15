@@ -351,3 +351,16 @@ message ConfigurationTemplateSettings
 	// Set to true to close the template when finished
 	bool close = 8;	
 }
+
+// Contains settings for the Nucleus Mask plugin
+message NucleusMaskSettings
+{
+	int32 mode = 1;
+	double field_width = 2;
+	double y_dither = 3;
+	double z_dither = 4;
+	double nm_per_pixel = 5;
+	double nm_per_s
+	lice = 6;
+	double diameter = 7;
+}

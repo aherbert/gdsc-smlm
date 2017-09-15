@@ -19850,6 +19850,850 @@ public final class GUIProtos {
 
   }
 
+  public interface NucleusMaskSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.NucleusMaskSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int32 mode = 1;</code>
+     */
+    int getMode();
+
+    /**
+     * <code>double field_width = 2;</code>
+     */
+    double getFieldWidth();
+
+    /**
+     * <code>double y_dither = 3;</code>
+     */
+    double getYDither();
+
+    /**
+     * <code>double z_dither = 4;</code>
+     */
+    double getZDither();
+
+    /**
+     * <code>double nm_per_pixel = 5;</code>
+     */
+    double getNmPerPixel();
+
+    /**
+     * <code>double nm_per_slice = 6;</code>
+     */
+    double getNmPerSlice();
+
+    /**
+     * <code>double diameter = 7;</code>
+     */
+    double getDiameter();
+  }
+  /**
+   * <pre>
+   * Contains settings for the Nucleus Mask plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.NucleusMaskSettings}
+   */
+  public  static final class NucleusMaskSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.NucleusMaskSettings)
+      NucleusMaskSettingsOrBuilder {
+    // Use NucleusMaskSettings.newBuilder() to construct.
+    private NucleusMaskSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private NucleusMaskSettings() {
+      mode_ = 0;
+      fieldWidth_ = 0D;
+      yDither_ = 0D;
+      zDither_ = 0D;
+      nmPerPixel_ = 0D;
+      nmPerSlice_ = 0D;
+      diameter_ = 0D;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private NucleusMaskSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+
+              mode_ = input.readInt32();
+              break;
+            }
+            case 17: {
+
+              fieldWidth_ = input.readDouble();
+              break;
+            }
+            case 25: {
+
+              yDither_ = input.readDouble();
+              break;
+            }
+            case 33: {
+
+              zDither_ = input.readDouble();
+              break;
+            }
+            case 41: {
+
+              nmPerPixel_ = input.readDouble();
+              break;
+            }
+            case 49: {
+
+              nmPerSlice_ = input.readDouble();
+              break;
+            }
+            case 57: {
+
+              diameter_ = input.readDouble();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_NucleusMaskSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings.class, gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings.Builder.class);
+    }
+
+    public static final int MODE_FIELD_NUMBER = 1;
+    private int mode_;
+    /**
+     * <code>int32 mode = 1;</code>
+     */
+    public int getMode() {
+      return mode_;
+    }
+
+    public static final int FIELD_WIDTH_FIELD_NUMBER = 2;
+    private double fieldWidth_;
+    /**
+     * <code>double field_width = 2;</code>
+     */
+    public double getFieldWidth() {
+      return fieldWidth_;
+    }
+
+    public static final int Y_DITHER_FIELD_NUMBER = 3;
+    private double yDither_;
+    /**
+     * <code>double y_dither = 3;</code>
+     */
+    public double getYDither() {
+      return yDither_;
+    }
+
+    public static final int Z_DITHER_FIELD_NUMBER = 4;
+    private double zDither_;
+    /**
+     * <code>double z_dither = 4;</code>
+     */
+    public double getZDither() {
+      return zDither_;
+    }
+
+    public static final int NM_PER_PIXEL_FIELD_NUMBER = 5;
+    private double nmPerPixel_;
+    /**
+     * <code>double nm_per_pixel = 5;</code>
+     */
+    public double getNmPerPixel() {
+      return nmPerPixel_;
+    }
+
+    public static final int NM_PER_SLICE_FIELD_NUMBER = 6;
+    private double nmPerSlice_;
+    /**
+     * <code>double nm_per_slice = 6;</code>
+     */
+    public double getNmPerSlice() {
+      return nmPerSlice_;
+    }
+
+    public static final int DIAMETER_FIELD_NUMBER = 7;
+    private double diameter_;
+    /**
+     * <code>double diameter = 7;</code>
+     */
+    public double getDiameter() {
+      return diameter_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (mode_ != 0) {
+        output.writeInt32(1, mode_);
+      }
+      if (fieldWidth_ != 0D) {
+        output.writeDouble(2, fieldWidth_);
+      }
+      if (yDither_ != 0D) {
+        output.writeDouble(3, yDither_);
+      }
+      if (zDither_ != 0D) {
+        output.writeDouble(4, zDither_);
+      }
+      if (nmPerPixel_ != 0D) {
+        output.writeDouble(5, nmPerPixel_);
+      }
+      if (nmPerSlice_ != 0D) {
+        output.writeDouble(6, nmPerSlice_);
+      }
+      if (diameter_ != 0D) {
+        output.writeDouble(7, diameter_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (mode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, mode_);
+      }
+      if (fieldWidth_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, fieldWidth_);
+      }
+      if (yDither_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, yDither_);
+      }
+      if (zDither_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(4, zDither_);
+      }
+      if (nmPerPixel_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(5, nmPerPixel_);
+      }
+      if (nmPerSlice_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(6, nmPerSlice_);
+      }
+      if (diameter_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(7, diameter_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings other = (gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings) obj;
+
+      boolean result = true;
+      result = result && (getMode()
+          == other.getMode());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getFieldWidth())
+          == java.lang.Double.doubleToLongBits(
+              other.getFieldWidth()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getYDither())
+          == java.lang.Double.doubleToLongBits(
+              other.getYDither()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getZDither())
+          == java.lang.Double.doubleToLongBits(
+              other.getZDither()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getNmPerPixel())
+          == java.lang.Double.doubleToLongBits(
+              other.getNmPerPixel()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getNmPerSlice())
+          == java.lang.Double.doubleToLongBits(
+              other.getNmPerSlice()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDiameter())
+          == java.lang.Double.doubleToLongBits(
+              other.getDiameter()));
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getMode();
+      hash = (37 * hash) + FIELD_WIDTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getFieldWidth()));
+      hash = (37 * hash) + Y_DITHER_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getYDither()));
+      hash = (37 * hash) + Z_DITHER_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getZDither()));
+      hash = (37 * hash) + NM_PER_PIXEL_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getNmPerPixel()));
+      hash = (37 * hash) + NM_PER_SLICE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getNmPerSlice()));
+      hash = (37 * hash) + DIAMETER_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDiameter()));
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains settings for the Nucleus Mask plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.NucleusMaskSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.NucleusMaskSettings)
+        gdsc.smlm.data.config.GUIProtos.NucleusMaskSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_NucleusMaskSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings.class, gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        mode_ = 0;
+
+        fieldWidth_ = 0D;
+
+        yDither_ = 0D;
+
+        zDither_ = 0D;
+
+        nmPerPixel_ = 0D;
+
+        nmPerSlice_ = 0D;
+
+        diameter_ = 0D;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings build() {
+        gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings result = new gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings(this);
+        result.mode_ = mode_;
+        result.fieldWidth_ = fieldWidth_;
+        result.yDither_ = yDither_;
+        result.zDither_ = zDither_;
+        result.nmPerPixel_ = nmPerPixel_;
+        result.nmPerSlice_ = nmPerSlice_;
+        result.diameter_ = diameter_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings.getDefaultInstance()) return this;
+        if (other.getMode() != 0) {
+          setMode(other.getMode());
+        }
+        if (other.getFieldWidth() != 0D) {
+          setFieldWidth(other.getFieldWidth());
+        }
+        if (other.getYDither() != 0D) {
+          setYDither(other.getYDither());
+        }
+        if (other.getZDither() != 0D) {
+          setZDither(other.getZDither());
+        }
+        if (other.getNmPerPixel() != 0D) {
+          setNmPerPixel(other.getNmPerPixel());
+        }
+        if (other.getNmPerSlice() != 0D) {
+          setNmPerSlice(other.getNmPerSlice());
+        }
+        if (other.getDiameter() != 0D) {
+          setDiameter(other.getDiameter());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int mode_ ;
+      /**
+       * <code>int32 mode = 1;</code>
+       */
+      public int getMode() {
+        return mode_;
+      }
+      /**
+       * <code>int32 mode = 1;</code>
+       */
+      public Builder setMode(int value) {
+        
+        mode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 mode = 1;</code>
+       */
+      public Builder clearMode() {
+        
+        mode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double fieldWidth_ ;
+      /**
+       * <code>double field_width = 2;</code>
+       */
+      public double getFieldWidth() {
+        return fieldWidth_;
+      }
+      /**
+       * <code>double field_width = 2;</code>
+       */
+      public Builder setFieldWidth(double value) {
+        
+        fieldWidth_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double field_width = 2;</code>
+       */
+      public Builder clearFieldWidth() {
+        
+        fieldWidth_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double yDither_ ;
+      /**
+       * <code>double y_dither = 3;</code>
+       */
+      public double getYDither() {
+        return yDither_;
+      }
+      /**
+       * <code>double y_dither = 3;</code>
+       */
+      public Builder setYDither(double value) {
+        
+        yDither_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double y_dither = 3;</code>
+       */
+      public Builder clearYDither() {
+        
+        yDither_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double zDither_ ;
+      /**
+       * <code>double z_dither = 4;</code>
+       */
+      public double getZDither() {
+        return zDither_;
+      }
+      /**
+       * <code>double z_dither = 4;</code>
+       */
+      public Builder setZDither(double value) {
+        
+        zDither_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double z_dither = 4;</code>
+       */
+      public Builder clearZDither() {
+        
+        zDither_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double nmPerPixel_ ;
+      /**
+       * <code>double nm_per_pixel = 5;</code>
+       */
+      public double getNmPerPixel() {
+        return nmPerPixel_;
+      }
+      /**
+       * <code>double nm_per_pixel = 5;</code>
+       */
+      public Builder setNmPerPixel(double value) {
+        
+        nmPerPixel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double nm_per_pixel = 5;</code>
+       */
+      public Builder clearNmPerPixel() {
+        
+        nmPerPixel_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double nmPerSlice_ ;
+      /**
+       * <code>double nm_per_slice = 6;</code>
+       */
+      public double getNmPerSlice() {
+        return nmPerSlice_;
+      }
+      /**
+       * <code>double nm_per_slice = 6;</code>
+       */
+      public Builder setNmPerSlice(double value) {
+        
+        nmPerSlice_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double nm_per_slice = 6;</code>
+       */
+      public Builder clearNmPerSlice() {
+        
+        nmPerSlice_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double diameter_ ;
+      /**
+       * <code>double diameter = 7;</code>
+       */
+      public double getDiameter() {
+        return diameter_;
+      }
+      /**
+       * <code>double diameter = 7;</code>
+       */
+      public Builder setDiameter(double value) {
+        
+        diameter_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double diameter = 7;</code>
+       */
+      public Builder clearDiameter() {
+        
+        diameter_ = 0D;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.NucleusMaskSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.NucleusMaskSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<NucleusMaskSettings>
+        PARSER = new com.google.protobuf.AbstractParser<NucleusMaskSettings>() {
+      public NucleusMaskSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new NucleusMaskSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<NucleusMaskSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<NucleusMaskSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
   private static final 
@@ -19900,6 +20744,11 @@ public final class GUIProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_NucleusMaskSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -20029,10 +20878,14 @@ public final class GUIProtos {
       "_directory\030\003 \001(\010\022\037\n\027configuration_direct" +
       "ory\030\004 \001(\t\022#\n\033selected_standard_templates" +
       "\030\005 \003(\t\022!\n\031selected_custom_templates\030\006 \003(",
-      "\t\022\020\n\010template\030\007 \001(\t\022\r\n\005close\030\010 \001(\010*O\n\014Te" +
-      "mplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOU" +
-      "RCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tG" +
-      "UIProtosb\006proto3"
+      "\t\022\020\n\010template\030\007 \001(\t\022\r\n\005close\030\010 \001(\010\"\232\001\n\023N" +
+      "ucleusMaskSettings\022\014\n\004mode\030\001 \001(\005\022\023\n\013fiel" +
+      "d_width\030\002 \001(\001\022\020\n\010y_dither\030\003 \001(\001\022\020\n\010z_dit" +
+      "her\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022\024\n\014nm_pe" +
+      "r_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001*O\n\014Templ" +
+      "ateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE" +
+      "_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIP" +
+      "rotosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -20108,6 +20961,12 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor,
         new java.lang.String[] { "Option", "SelectStandardTemplates", "SelectCustomDirectory", "ConfigurationDirectory", "SelectedStandardTemplates", "SelectedCustomTemplates", "Template", "Close", });
+    internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_gdsc_smlm_data_config_NucleusMaskSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor,
+        new java.lang.String[] { "Mode", "FieldWidth", "YDither", "ZDither", "NmPerPixel", "NmPerSlice", "Diameter", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
   }
