@@ -2201,7 +2201,10 @@ public class OPTICS implements PlugIn
 		//globalSettings = SettingsManager.loadSettings();
 		//settings = globalSettings.getClusteringSettings();
 
-		gd.addMessage("--- " + TITLE + " ---");
+		if (isDBSCAN)
+			gd.addMessage("--- Nearest-Neighbour Analysis ---");
+		else
+			gd.addMessage("--- " + TITLE + " ---");
 		gd.addNumericField("Min_points", inputSettings.getMinPoints(), 0);
 		if (isDBSCAN)
 		{
@@ -2209,40 +2212,115 @@ public class OPTICS implements PlugIn
 			gd.addSlider("Noise (%)", 0, 50, inputSettings.getFractionNoise() * 100);
 			gd.addNumericField("Samples", inputSettings.getSamples(), 0);
 			gd.addSlider("Sample_fraction (%)", 0, 15, inputSettings.getSampleFraction() * 100);
-			gd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 2, 6, "nm");
 		}
 		else
 		{
 			String[] opticsModes = SettingsManager.getNames((Object[]) OpticsMode.values());
-			gd.addChoice("OPTICS_mode", opticsModes, inputSettings.getOpticsMode());
-			gd.addNumericField("Number_of_splits", inputSettings.getNumberOfSplitSets(), 0);
-			if (extraOptions)
+			gd.addChoice("OPTICS_mode", opticsModes, inputSettings.getOpticsMode(), new OptionListener<Integer>()
 			{
-				gd.addCheckbox("Random_vectors", inputSettings.getUseRandomVectors());
-				gd.addCheckbox("Approx_sets", inputSettings.getSaveApproximateSets());
-				String[] sampleModes = SettingsManager.getNames((Object[]) SampleMode.values());
-				gd.addChoice("Sample_mode", sampleModes, inputSettings.getSampleMode());
-			}
-			gd.addNumericField("Generating_distance", inputSettings.getGeneratingDistance(), 2, 6, "nm");
+				public boolean collectOptions(Integer value)
+				{
+					inputSettings.setOpticsMode(value);
+					return collectOptions();
+				}
+
+				public boolean collectOptions()
+				{
+					OpticsMode mode = OpticsMode.get(inputSettings.getOpticsMode());
+					ExtendedGenericDialog egd = new ExtendedGenericDialog(mode.toString() + " options");
+					OpticsSettings oldSettings = inputSettings.build();
+					if (mode == OpticsMode.FAST_OPTICS)
+					{
+						egd.addMessage(TextUtils.wrap(
+								"The number of splits to compute (if below 1 it will be auto-computed using the size of the data)",
+								80));
+						egd.addNumericField("Number_of_splits", inputSettings.getNumberOfSplitSets(), 0);
+						if (extraOptions)
+						{
+							egd.addCheckbox("Random_vectors", inputSettings.getUseRandomVectors());
+							egd.addCheckbox("Approx_sets", inputSettings.getSaveApproximateSets());
+							String[] sampleModes = SettingsManager.getNames((Object[]) SampleMode.values());
+							egd.addChoice("Sample_mode", sampleModes, inputSettings.getSampleMode());
+						}
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
+							return false;
+						inputSettings.setNumberOfSplitSets((int) Math.abs(egd.getNextNumber()));
+						if (extraOptions)
+						{
+							inputSettings.setUseRandomVectors(egd.getNextBoolean());
+							inputSettings.setSaveApproximateSets(egd.getNextBoolean());
+							inputSettings.setSampleMode(egd.getNextChoiceIndex());
+						}
+					}
+					else // OPTICS
+					{
+						egd.addNumericField("Generating_distance", inputSettings.getGeneratingDistance(), 2, 6, "nm");
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
+							return false;
+						inputSettings.setGeneratingDistance(Math.abs(egd.getNextNumber()));
+					}
+					// Return true if new settings
+					return !inputSettings.build().equals(oldSettings);
+				}
+			});
 		}
 		gd.addMessage("--- Clustering ---");
 		if (isDBSCAN)
 		{
+			gd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 2, 6, "nm");
 			gd.addCheckbox("Core_points", inputSettings.getCore());
 		}
 		else
 		{
 			String[] clusteringModes = SettingsManager.getNames((Object[]) ClusteringMode.values());
-			gd.addChoice("Clustering_mode", clusteringModes, inputSettings.getClusteringMode());
-			gd.addMessage(ClusteringMode.XI.toString() + " options:\n" + ClusteringMode.XI.toString() +
-					" controls the change in reachability (profile steepness) to define a cluster");
-			gd.addNumericField("Xi", inputSettings.getXi(), 4);
-			gd.addCheckbox("Top_clusters", inputSettings.getTopLevel());
-			gd.addNumericField("Upper_limit", inputSettings.getUpperLimit(), 4);
-			gd.addNumericField("Lower_limit", inputSettings.getLowerLimit(), 4);
-			gd.addMessage(ClusteringMode.DBSCAN.toString() + " options:");
-			gd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 4);
-			gd.addCheckbox("Core_points", inputSettings.getCore());
+			gd.addChoice("Clustering_mode", clusteringModes, inputSettings.getClusteringMode(),
+					new OptionListener<Integer>()
+					{
+						public boolean collectOptions(Integer value)
+						{
+							inputSettings.setClusteringMode(value);
+							return collectOptions();
+						}
+
+						public boolean collectOptions()
+						{
+							ClusteringMode mode = ClusteringMode.get(inputSettings.getClusteringMode());
+							ExtendedGenericDialog egd = new ExtendedGenericDialog(mode.toString() + " options");
+							OpticsSettings oldSettings = inputSettings.build();
+							if (mode == ClusteringMode.XI)
+							{
+								egd.addMessage(
+										"Xi controls the change in reachability (profile steepness) to define a cluster");
+								egd.addNumericField("Xi", inputSettings.getXi(), 4);
+								egd.addCheckbox("Top_clusters", inputSettings.getTopLevel());
+								egd.addNumericField("Upper_limit", inputSettings.getUpperLimit(), 4, 10, "nm");
+								egd.addNumericField("Lower_limit", inputSettings.getLowerLimit(), 4, 10, "nm");
+								egd.showDialog(true, gd);
+								if (egd.wasCanceled())
+									return false;
+								inputSettings.setXi(Math.abs(egd.getNextNumber()));
+								inputSettings.setTopLevel(egd.getNextBoolean());
+								inputSettings.setUpperLimit(Math.abs(egd.getNextNumber()));
+								inputSettings.setLowerLimit(Math.abs(egd.getNextNumber()));
+							}
+							else // DBSCAN
+							{
+								egd.addMessage(ClusteringMode.DBSCAN.toString() + " options:");
+								egd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 4, 10,
+										"nm");
+								egd.addCheckbox("Core_points", inputSettings.getCore());
+								egd.showDialog(true, gd);
+								if (egd.wasCanceled())
+									return false;
+								inputSettings.setClusteringDistance(Math.abs(egd.getNextNumber()));
+								inputSettings.setCore(egd.getNextBoolean());
+							}
+							// Return true if new settings
+							return !inputSettings.build().equals(oldSettings);
+						}
+					});
 		}
 		gd.addMessage("--- Table ---");
 
@@ -2262,43 +2340,43 @@ public class OPTICS implements PlugIn
 				{
 					public boolean collectOptions(Integer value)
 					{
-						inputSettings.setImageMode(value);
+						inputSettings.setImageMode(((ImageMode) imageModeArray[value]).ordinal());
 						return collectOptions();
 					}
 
 					public boolean collectOptions()
 					{
-						ImageMode imageMode = ImageMode.get(inputSettings.getImageMode());
-						if (imageMode.canBeWeighted())
+						ImageMode mode = ImageMode.get(inputSettings.getImageMode());
+						ExtendedGenericDialog egd = new ExtendedGenericDialog(mode.toString() + " options");
+						if (mode.canBeWeighted())
 						{
-							ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-							boolean[] b = new boolean[2];
-							b[0] = inputSettings.getWeighted();
-							b[1] = inputSettings.getEqualised();
-							egd.addCheckbox("Weighted", b[0]);
-							egd.addCheckbox("Equalised", b[1]);
-							egd.showDialog(true, gd);
-							if (egd.wasCanceled())
-								return false;
-							boolean changed = false;
-							boolean next = egd.getNextBoolean();
-							if (next != b[0])
-								changed = true;
-							inputSettings.setWeighted(next);
-							next = egd.getNextBoolean();
-							if (next != b[1])
-								changed = true;
-							inputSettings.setEqualised(next);
-							return changed;
+							egd.addCheckbox("Weighted", inputSettings.getWeighted());
+							egd.addCheckbox("Equalised", inputSettings.getEqualised());
 						}
-						return false;
+						if (mode == ImageMode.LOOP && extraOptions)
+						{
+							egd.addNumericField("LoOP_lambda", inputSettings.getLambda(), 4);
+						}
+						if (!egd.hasFields())
+							return false;
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
+							return false;
+						OpticsSettings oldSettings = inputSettings.build();
+						if (mode.canBeWeighted())
+						{
+							inputSettings.setWeighted(egd.getNextBoolean());
+							inputSettings.setEqualised(egd.getNextBoolean());
+						}
+						if (mode == ImageMode.LOOP && extraOptions)
+						{
+							inputSettings.setLambda(Math.abs(gd.getNextNumber()));
+						}
+						// Return true if new settings
+						return !inputSettings.build().equals(oldSettings);
 					}
 				});
 
-		if (extraOptions)
-		{
-			gd.addNumericField("LoOP_lambda", inputSettings.getLambda(), 4);
-		}
 		TreeSet<OutlineMode> outlineModeSet = new TreeSet<OutlineMode>();
 		outlineModeSet.addAll(Arrays.asList(OutlineMode.values()));
 		if (isDBSCAN)
@@ -2545,27 +2623,9 @@ public class OPTICS implements PlugIn
 		{
 			inputSettings.setMinPoints((int) Math.abs(gd.getNextNumber()));
 			inputSettings.setOpticsMode(gd.getNextChoiceIndex());
-			inputSettings.setNumberOfSplitSets((int) Math.abs(gd.getNextNumber()));
-			if (extraOptions)
-			{
-				inputSettings.setUseRandomVectors(gd.getNextBoolean());
-				inputSettings.setSaveApproximateSets(gd.getNextBoolean());
-				inputSettings.setSampleMode(gd.getNextChoiceIndex());
-			}
-			inputSettings.setGeneratingDistance(Math.abs(gd.getNextNumber()));
 			inputSettings.setClusteringMode(gd.getNextChoiceIndex());
-			inputSettings.setXi(Math.abs(gd.getNextNumber()));
-			inputSettings.setTopLevel(gd.getNextBoolean());
-			inputSettings.setUpperLimit(Math.abs(gd.getNextNumber()));
-			inputSettings.setLowerLimit(Math.abs(gd.getNextNumber()));
-			inputSettings.setClusteringDistance(Math.abs(gd.getNextNumber()));
-			inputSettings.setCore(gd.getNextBoolean());
 			inputSettings.setImageScale(Math.abs(gd.getNextNumber()));
 			inputSettings.setImageMode(((ImageMode) imageModeArray[gd.getNextChoiceIndex()]).ordinal());
-			if (extraOptions)
-			{
-				inputSettings.setLambda(Math.abs(gd.getNextNumber()));
-			}
 			inputSettings.setOutlineMode(((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]).ordinal());
 			inputSettings.setSpanningTreeMode(gd.getNextChoiceIndex());
 			inputSettings.setPlotMode(gd.getNextChoiceIndex());
@@ -2608,12 +2668,6 @@ public class OPTICS implements PlugIn
 			inputSettings.setCore(gd.getNextBoolean());
 			inputSettings.setImageScale(Math.abs(gd.getNextNumber()));
 			inputSettings.setImageMode(((ImageMode) imageModeArray[gd.getNextChoiceIndex()]).ordinal());
-			inputSettings.setWeighted(gd.getNextBoolean());
-			inputSettings.setEqualised(gd.getNextBoolean());
-			if (extraOptions)
-			{
-				inputSettings.setLambda(Math.abs(gd.getNextNumber()));
-			}
 			inputSettings.setOutlineMode(((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]).ordinal());
 			preview = gd.getNextBoolean();
 			if (extraOptions)
