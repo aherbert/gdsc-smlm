@@ -14,6 +14,8 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import java.awt.AWTEvent;
+import java.awt.Checkbox;
+import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
@@ -82,7 +84,7 @@ import ij.process.LUT;
 import ij.process.LUTHelper;
 import ij.process.LUTHelper.LUTMapper;
 import ij.process.LUTHelper.LutColour;
-import ij.text.TextWindow;
+import ij.text.TextWindow2;
 
 /**
  * Run the OPTICS algorithm on the peak results.
@@ -1993,7 +1995,7 @@ public class OPTICS implements PlugIn
 	private class TableResultsWorker extends BaseWorker
 	{
 		TurboList<TableResult> tableResults;
-		TextWindow tw;
+		TextWindow2 tw;
 		Rectangle location;
 
 		@Override
@@ -2101,7 +2103,7 @@ public class OPTICS implements PlugIn
 
 				if (tw == null)
 				{
-					tw = new TextWindow(TITLE + " Clusters", headings, "", 800, 400);
+					tw = new TextWindow2(TITLE + " Clusters", headings, "", 800, 400);
 
 					// TODO - Add a mouse listener to allow double click on a cluster to draw 
 					// a polygon ROI of the convex hull, or point ROI if size <=2
@@ -2110,6 +2112,7 @@ public class OPTICS implements PlugIn
 					{
 						tw.setBounds(location);
 					}
+					tw.setVisible(true);
 				}
 				else
 				{
@@ -2931,14 +2934,23 @@ public class OPTICS implements PlugIn
 			}
 
 			if (!readSettings(gd))
-				return false;
+				return false;	
 
-			createWork();
+			// If the change was from a checkbox or selection box then we do not have to delay
+			boolean delay = true;
+			if (e != null && e.getSource() != null)
+			{
+				Object source = e.getSource();
+				if (source instanceof Checkbox || source instanceof Choice)
+					delay = false;
+			}
+			
+			createWork(delay);
 
 			return true;
 		}
 
-		private void createWork()
+		private void createWork(boolean delay)
 		{
 			// Clone so that the workflow has it's own unique reference
 			OpticsSettings settings = inputSettings.build();
@@ -2948,6 +2960,8 @@ public class OPTICS implements PlugIn
 				// Run the settings
 				if (debug)
 					System.out.println("Adding work");
+				if (!delay)
+					workflow.stopPreview();
 				workflow.run(settings, baseResults);
 				workflow.startPreview();
 			}
@@ -2967,8 +2981,9 @@ public class OPTICS implements PlugIn
 		 */
 		public void optionCollected(OptionCollectedEvent e)
 		{
-			// This occurs when any of the additional options have changed. We just add the work.
-			createWork();
+			// This occurs when any of the additional options have changed. 
+			// We just add the work with no delay.
+			createWork(false);
 		}
 
 		abstract boolean readSettings(GenericDialog gd);
