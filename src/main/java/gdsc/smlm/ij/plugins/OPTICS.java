@@ -18,6 +18,8 @@ import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +64,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -84,6 +87,7 @@ import ij.process.LUT;
 import ij.process.LUTHelper;
 import ij.process.LUTHelper.LUTMapper;
 import ij.process.LUTHelper.LutColour;
+import ij.text.TextPanel;
 import ij.text.TextWindow2;
 
 /**
@@ -649,6 +653,119 @@ public class OPTICS implements PlugIn
 		loopLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT, true);
 	}
 
+	/**
+	 * Event generated in the GUI when clusters are selected
+	 */
+	private abstract class ClusterSelectedEvent
+	{
+		int source;
+		int[] clusters;
+
+		ClusterSelectedEvent(int source)
+		{
+			this.source = source;
+		}
+
+		/**
+		 * Gets the source generating the selection.
+		 *
+		 * @return the source
+		 */
+		int getSource()
+		{
+			return source;
+		}
+
+		/**
+		 * Gets the clusters.
+		 *
+		 * @return the clusters
+		 */
+		int[] getClusters()
+		{
+			if (clusters == null)
+				clusters = computeClusters();
+			return clusters;
+		}
+
+		/**
+		 * Compute clusters.
+		 *
+		 * @return the clusters
+		 */
+		abstract int[] computeClusters();
+	}
+
+	/**
+	 * Interface for any class that can respond to cluster selected events.
+	 */
+	private interface ClusterSelectedHandler
+	{
+		void clusterSelected(ClusterSelectedEvent e);
+	}
+
+	/**
+	 * Compute which clusters were selected
+	 */
+	private class ClusterSelectedEventWorker extends WorkflowWorker<ClusterSelectedEvent, int[]>
+	{
+		@Override
+		public boolean equalSettings(ClusterSelectedEvent current, ClusterSelectedEvent previous)
+		{
+			// Return false to always run doWork
+			return false;
+		}
+
+		@Override
+		public boolean equalResults(int[] current, int[] previous)
+		{
+			// We ignore this
+			return true;
+		}
+
+		@Override
+		public Pair<ClusterSelectedEvent, int[]> doWork(Pair<ClusterSelectedEvent, int[]> work)
+		{
+			int[] clusters = work.s.getClusters();
+			return new Pair<ClusterSelectedEvent, int[]>(work.s, clusters);
+		}
+	}
+
+	/**
+	 * Relay the selected clusters to all the handlers
+	 */
+	private class ClusterSelectedWorker extends WorkflowWorker<ClusterSelectedEvent, int[]>
+	{
+		TurboList<ClusterSelectedHandler> handlers = new TurboList<ClusterSelectedHandler>();
+
+		@Override
+		public boolean equalSettings(ClusterSelectedEvent current, ClusterSelectedEvent previous)
+		{
+			// We ignore this
+			return true;
+		}
+
+		@Override
+		public boolean equalResults(int[] current, int[] previous)
+		{
+			return (Arrays.equals(current, previous));
+		}
+
+		@Override
+		public Pair<ClusterSelectedEvent, int[]> doWork(Pair<ClusterSelectedEvent, int[]> work)
+		{
+			for (ClusterSelectedHandler h : handlers)
+				h.clusterSelected(work.s);
+			return work;
+		}
+	}
+	
+	// Stack to handle events that selected certain clusters
+	private Workflow<ClusterSelectedEvent, int[]> eventWorkflow = null;
+	// The worker that will relay all the selected clusters
+	private ClusterSelectedWorker clusterSelectedWorker;
+
+	
 	private String TITLE;
 
 	private OpticsSettings.Builder inputSettings;
@@ -658,8 +775,21 @@ public class OPTICS implements PlugIn
 	// Stack to which the work is first added
 	private Workflow<OpticsSettings, Settings> workflow = new Workflow<OpticsSettings, Settings>();
 
+	private static int WORKER_ID = 0;
+
 	private abstract class BaseWorker extends WorkflowWorker<OpticsSettings, Settings>
 	{
+		final int id;
+
+		BaseWorker()
+		{
+			id = WORKER_ID++;
+			// When constructing the workflow automatically add any workers 
+			// that can handle cluster selections
+			if (this instanceof ClusterSelectedHandler)
+				clusterSelectedWorker.handlers.add((ClusterSelectedHandler) this);
+		}
+
 		@Override
 		public boolean equalResults(Settings current, Settings previous)
 		{
@@ -2058,7 +2188,7 @@ public class OPTICS implements PlugIn
 		}
 	}
 
-	private class TableResultsWorker extends BaseWorker
+	private class TableResultsWorker extends BaseWorker implements MouseListener, ClusterSelectedHandler
 	{
 		TurboList<TableResult> tableResults;
 		TextWindow2 tw;
@@ -2085,7 +2215,9 @@ public class OPTICS implements PlugIn
 		{
 			// Clear cache
 			tableResults = null;
-			previous = null;
+
+			// This should not matter so keep the same sort
+			//previous = null;
 		}
 
 		@Override
@@ -2175,6 +2307,8 @@ public class OPTICS implements PlugIn
 
 					// TODO - Add a mouse listener to allow double click on a cluster to draw 
 					// a polygon ROI of the convex hull, or point ROI if size <=2
+					final TextPanel tp = tw.getTextPanel();
+					tp.addMouseListener(this);
 
 					if (location != null)
 					{
@@ -2230,6 +2364,87 @@ public class OPTICS implements PlugIn
 					previous = new IdTableResultComparator(previous, settings.getTableReverseSort());
 			}
 			return previous;
+		}
+
+		public void mouseClicked(MouseEvent e)
+		{
+		}
+
+		public void mousePressed(MouseEvent e)
+		{
+			eventWorkflow.run(new ClusterSelectedEvent(id)
+			{
+				@Override
+				int[] computeClusters()
+				{
+					if (tw == null)
+						return null;
+					TextPanel textPanel = tw.getTextPanel();
+					int index = textPanel.getSelectionStart();
+					if (index < 0)
+						return null;
+					int index2 = textPanel.getSelectionEnd();
+					TIntArrayList clusters = new TIntArrayList(index2 - index + 1);
+					while (index <= index2)
+					{
+						String line = textPanel.getLine(index);
+						index++;
+						int i = line.indexOf('\t');
+						int j = line.indexOf('\t', i + 1);
+						if (i >= 0 && i < j)
+						{
+							int id = Integer.parseInt(line.substring(i + 1, j));
+							clusters.add(id);
+						}
+					}
+					return clusters.toArray();
+				}
+			});
+		}
+
+		public void mouseReleased(MouseEvent e)
+		{
+		}
+
+		public void mouseEntered(MouseEvent e)
+		{
+		}
+
+		public void mouseExited(MouseEvent e)
+		{
+		}
+
+		public void clusterSelected(ClusterSelectedEvent e)
+		{
+			if (tw == null || e.getSource() == id)
+				return;
+			TextPanel textPanel = tw.getTextPanel();
+			int startLine = -1, endLine = -1;
+			int[] clusters = e.getClusters();
+			if (clusters == null || clusters.length == 0)
+			{
+				textPanel.resetSelection();
+			}
+			else
+			{
+				// Find the clusters.
+				// Assume that the panel is showing the current results.
+				for (int i = 0; i < tableResults.size(); i++)
+				{
+					TableResult r = tableResults.getf(i);
+					if (r.id == clusters[0])
+					{
+						// We can only handle selecting continuous lines so 
+						// for now just select the first cluster.
+						startLine = endLine = i;
+						break;
+					}
+				}
+			}
+			if (startLine != -1)
+			{
+				textPanel.setSelection(startLine, endLine);
+			}
 		}
 	}
 
@@ -2525,6 +2740,8 @@ public class OPTICS implements PlugIn
 	{
 		TITLE = TITLE_DBSCAN;
 
+		createEventWorkflow();
+
 		// Create the workflow
 		workflow.add(new InputWorker());
 		workflow.add(new KNNWorker());
@@ -2541,12 +2758,28 @@ public class OPTICS implements PlugIn
 
 		boolean cancelled = !showDialog(true);
 
+		shutdownWorkflows(cancelled);
+	}
+
+	private void createEventWorkflow()
+	{
+		eventWorkflow = new Workflow<OPTICS.ClusterSelectedEvent, int[]>();
+		eventWorkflow.add(new ClusterSelectedEventWorker());
+		eventWorkflow.add(clusterSelectedWorker = new ClusterSelectedWorker());
+		eventWorkflow.start();
+	}
+
+	private void shutdownWorkflows(boolean cancelled)
+	{
 		workflow.shutdown(cancelled);
+		eventWorkflow.shutdown(cancelled);
 	}
 
 	private void runOPTICS()
 	{
 		TITLE = TITLE_OPTICS;
+
+		createEventWorkflow();
 
 		// Create the workflow
 		workflow.add(new InputWorker());
@@ -2564,7 +2797,7 @@ public class OPTICS implements PlugIn
 
 		boolean cancelled = !showDialog(false);
 
-		workflow.shutdown(cancelled);
+		shutdownWorkflows(cancelled);
 	}
 
 	/**
