@@ -159,6 +159,16 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		xlimit = imageWidth - 1;
 		ylimit = imageHeight - 1;
 	}
+	
+	/**
+	 * Gets the scale.
+	 *
+	 * @return the scale
+	 */
+	public float getScale()
+	{
+		return scale;
+	}
 
 	private int ceil(float f)
 	{
