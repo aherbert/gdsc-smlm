@@ -74,6 +74,7 @@ import ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
+import ij.gui.ImageCanvas;
 import ij.gui.Line;
 import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Overlay;
@@ -727,6 +728,7 @@ public class OPTICS implements PlugIn
 		public Pair<ClusterSelectedEvent, int[]> doWork(Pair<ClusterSelectedEvent, int[]> work)
 		{
 			int[] clusters = work.s.getClusters();
+			System.out.printf("ClusterSelected: %s\n", Arrays.toString(clusters));
 			return new Pair<ClusterSelectedEvent, int[]>(work.s, clusters);
 		}
 	}
@@ -758,14 +760,18 @@ public class OPTICS implements PlugIn
 				h.clusterSelected(work.s);
 			return work;
 		}
+
+		void addHandler(ClusterSelectedHandler h)
+		{
+			handlers.add(h);
+		}
 	}
-	
+
 	// Stack to handle events that selected certain clusters
 	private Workflow<ClusterSelectedEvent, int[]> eventWorkflow = null;
 	// The worker that will relay all the selected clusters
 	private ClusterSelectedWorker clusterSelectedWorker;
 
-	
 	private String TITLE;
 
 	private OpticsSettings.Builder inputSettings;
@@ -787,7 +793,7 @@ public class OPTICS implements PlugIn
 			// When constructing the workflow automatically add any workers 
 			// that can handle cluster selections
 			if (this instanceof ClusterSelectedHandler)
-				clusterSelectedWorker.handlers.add((ClusterSelectedHandler) this);
+				clusterSelectedWorker.addHandler((ClusterSelectedHandler) this);
 		}
 
 		@Override
@@ -1547,7 +1553,7 @@ public class OPTICS implements PlugIn
 		}
 	}
 
-	private class ImageResultsWorker extends BaseWorker
+	private class ImageResultsWorker extends BaseWorker implements MouseListener, ClusterSelectedHandler
 	{
 		IJImagePeakResults image = null;
 		int lastOutlineMode = -1;
@@ -1657,6 +1663,10 @@ public class OPTICS implements PlugIn
 				if (mode.isRequiresClusters())
 					image = null;
 
+				if (image != null && !image.getImagePlus().isVisible())
+					;
+				image = null;
+
 				if (image == null)
 				{
 					// Display the results ...
@@ -1670,6 +1680,7 @@ public class OPTICS implements PlugIn
 					image.setLiveImage(false);
 					image.begin();
 					ImagePlus imp = image.getImagePlus();
+					imp.getCanvas().addMouseListener(this);
 					imp.setOverlay(null);
 					if (mode != ImageMode.NONE)
 					{
@@ -2023,6 +2034,59 @@ public class OPTICS implements PlugIn
 					displayFlags |= IJImagePeakResults.DISPLAY_MAP_ZERO;
 			}
 			return displayFlags;
+		}
+
+		public void mouseClicked(MouseEvent e)
+		{
+			if (image == null || e == null)
+				return;
+			ImagePlus imp = image.getImagePlus();
+			if (!imp.isVisible())
+				return;
+			ImageCanvas ic = imp.getCanvas();
+			int cx = ic.offScreenX(e.getX());
+			int cy = ic.offScreenY(e.getY());
+
+			// Convert to pixel coordinates using the scale
+			final float x = cx / image.getScale();
+			final float y = cy / image.getScale();
+
+			eventWorkflow.run(new ClusterSelectedEvent(id)
+			{
+				@Override
+				int[] computeClusters()
+				{
+					System.out.printf("Compute cluster @ %.2f,%.2f\n", x, y);
+					return null;
+				}
+			});
+		}
+
+		public void mousePressed(MouseEvent e)
+		{
+
+		}
+
+		public void mouseReleased(MouseEvent e)
+		{
+		}
+
+		public void mouseEntered(MouseEvent e)
+		{
+		}
+
+		public void mouseExited(MouseEvent e)
+		{
+		}
+
+		public void clusterSelected(ClusterSelectedEvent e)
+		{
+			if (e.getSource() == id)
+				return;
+
+			ImagePlus imp = image.getImagePlus();
+			if (!imp.isVisible())
+				return;
 		}
 	}
 
