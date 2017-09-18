@@ -1031,7 +1031,7 @@ public class PSFDrift implements PlugIn
 		return titles;
 	}
 
-	private static ImagePSF getPSFSettings(ImagePlus imp)
+	static ImagePSF getPSFSettings(ImagePlus imp)
 	{
 		Object info = imp.getProperty("Info");
 		if (info != null)
