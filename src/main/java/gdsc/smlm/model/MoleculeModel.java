@@ -23,6 +23,7 @@ public class MoleculeModel
 	private int id;
 	protected double[] xyz;
 	protected double mass;
+	private int label;
 
 	/**
 	 * Create a new molecule
@@ -309,5 +310,26 @@ public class MoleculeModel
 			}
 		}
 		return xyz;
+	}
+
+	/**
+	 * Gets the label.
+	 *
+	 * @return the label
+	 */
+	public int getLabel()
+	{
+		return label;
+	}
+
+	/**
+	 * Sets the label. This can be used to identify subsets of molecules.
+	 *
+	 * @param label
+	 *            the new label
+	 */
+	public void setLabel(int label)
+	{
+		this.label = label;
 	}
 }

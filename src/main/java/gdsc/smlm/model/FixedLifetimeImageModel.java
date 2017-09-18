@@ -58,7 +58,7 @@ public class FixedLifetimeImageModel extends ImageModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.ImageModel#createFluorophore(int, double[])
+	 * @see gdsc.smlm.model.ImageModel#createFluorophore(int, double[], double)
 	 */
 	@Override
 	protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)

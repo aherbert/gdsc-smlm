@@ -122,6 +122,7 @@ import gdsc.smlm.results.procedures.RawResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.WidthResultProcedure;
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
@@ -759,14 +760,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, settings.getParticles(),
 					distribution, settings.getRotateInitialOrientation());
 
-			// Map the molecule ID to the compound for mixtures 
-			if (compounds.size() > 1)
-			{
-				idToCompound = new TIntIntHashMap(settings.getParticles());
-				for (CompoundMoleculeModel m : molecules)
-					idToCompound.put(m.getId(), m.getLabel());
-			}
-
 			// Activate fluorophores
 			IJ.showStatus("Creating fluorophores ...");
 
@@ -778,6 +771,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				IJ.error(TITLE, "No fluorophores created");
 				return;
 			}
+			
+			// Map the fluorophore ID to the compound for mixtures 
+			if (compounds.size() > 1)
+			{
+				idToCompound = new TIntIntHashMap(fluorophores.size());
+				for (FluorophoreSequenceModel l : fluorophores)
+				{
+					idToCompound.put(l.getId(), l.getLabel());
+				}
+			}			
 
 			IJ.showStatus("Creating localisations ...");
 
@@ -795,7 +798,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			catch (ConfigurationException e)
 			{
-				// We asked the user if it was OK to continue and the said no
+				// We asked the user if it was OK to continue and they said no
 				return;
 			}
 			// This should be optimised
@@ -1628,7 +1631,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				// Store the IDs of any moving molecules
 				if (isMoving(subset))
+				{
 					movingMolecules.add(id);
+				}
 
 				// The frames may be longer or shorter than the simulation steps. Allocate the step
 				// proportionately to each frame it overlaps:
@@ -1821,21 +1826,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private int[] getIds(List<LocalisationModel> localisations)
 	{
-		int[] ids = new int[localisations.size()];
 		if (localisations.isEmpty())
-			return ids;
-		int count = 0;
+			return new int[0];
+		TIntArrayList ids = new TIntArrayList(settings.getParticles());
+		// Assume the localisations are sorted by id
 		int id = localisations.get(0).getId();
-		ids[count++] = id;
+		ids.add(id);
 		for (LocalisationModel l : localisations)
 		{
 			if (id != l.getId())
 			{
 				id = l.getId();
-				ids[count++] = id;
+				ids.add(id);
 			}
 		}
-		return Arrays.copyOf(ids, count);
+		return ids.toArray();
 	}
 
 	//StoredDataStatistics rawPhotons = new StoredDataStatistics();
@@ -4529,7 +4534,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (!trackMode)
 			gd.addNumericField("Seconds", settings.getSeconds(), 1);
 		gd.addNumericField("Exposure_time (ms)", settings.getExposureTime(), 1);
-		gd.addSlider("Steps_per_second", 1, 15, settings.getStepsPerSecond());
+		gd.addSlider("Steps_per_second", 1, Maths.clip(15, 1000, settings.getStepsPerSecond()),
+				settings.getStepsPerSecond());
 		if (!trackMode)
 		{
 			gd.addChoice("Illumination", ILLUMINATION, settings.getIllumination());
@@ -5101,8 +5107,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					cm.setDiffusionRate(m.getDiffusionRate() * diffusionFactor);
 					cm.setDiffusionType(DiffusionType.fromString(m.getDiffusionType()));
 					compounds.add(cm);
-					compoundNames.add(String.format("Fraction=%s, D=%s", Utils.rounded(cm.getFraction()),
-							Utils.rounded(cm.getDiffusionRate())));
+					compoundNames.add(String.format("Fraction=%s, D=%s um^2/s", Utils.rounded(cm.getFraction()),
+							Utils.rounded(m.getDiffusionRate())));
 				}
 
 				// Convert coordinates from nm to pixels

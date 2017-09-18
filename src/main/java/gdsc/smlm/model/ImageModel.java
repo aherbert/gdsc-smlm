@@ -285,6 +285,7 @@ public abstract class ImageModel
 					f = createFluorophore(0, xyz, tAct);
 				if (f != null && f.getCoordinates() != null && f.getEndTime() > f.getStartTime())
 				{
+					f.setLabel(c.getLabel());
 					list.add(f);
 					fluorophores.add(f);
 				}
@@ -342,10 +343,12 @@ public abstract class ImageModel
 	protected abstract double createActivationTime(double[] xyz);
 
 	/**
-	 * Create a fluorophore with the given id, position and activation time
-	 * 
+	 * Create a fluorophore with the given id, position and activation time.
+	 *
 	 * @param id
+	 *            the id
 	 * @param xyz
+	 *            the xyz
 	 * @param tAct
 	 *            the activation time (generated using {@link #createActivationTime(double[])})
 	 * @return a fluorophore
