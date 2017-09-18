@@ -2808,7 +2808,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private void addTableResults(PeakResultsList resultsList)
 	{
 		IJTablePeakResults r = ResultsManager.addTableResults(resultsList, resultsSettings.getResultsTableSettings(),
-				resultsSettings.getShowDeviations(), false, false);
+				resultsSettings.getShowDeviations(), false, false, false);
 		if (r != null)
 		{
 			r.setShowZ(PSFHelper.is3D(resultsList.getPSF()));

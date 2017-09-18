@@ -253,7 +253,7 @@ public class ResultsManager implements PlugIn
 		//	output.setSource(TITLE);
 
 		addTableResults(outputList, resultsSettings.getResultsTableSettings(), showDeviations, showEndFrame,
-				results.is3D());
+				results.is3D(), showId);
 		addImageResults(outputList, resultsSettings.getResultsImageSettings(), bounds,
 				(extraOptions) ? FLAG_EXTRA_OPTIONS : 0);
 		addFileResults(outputList, showDeviations, showEndFrame, showId);
@@ -324,7 +324,7 @@ public class ResultsManager implements PlugIn
 	}
 
 	public static IJTablePeakResults addTableResults(PeakResultsList resultsList, ResultsTableSettings resultsSettings,
-			boolean showDeviations, boolean showEndFrame, boolean showZ)
+			boolean showDeviations, boolean showEndFrame, boolean showZ, boolean showId)
 	{
 		if (resultsSettings.getShowTable())
 		{
@@ -338,6 +338,7 @@ public class ResultsManager implements PlugIn
 			r.setShowZ(showZ);
 			r.setShowFittingData(resultsSettings.getShowFittingData());
 			r.setShowNoiseData(resultsSettings.getShowNoiseData());
+			r.setShowId(showId);
 			resultsList.addOutput(r);
 			return r;
 		}
