@@ -4,6 +4,7 @@ import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Label;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Arrays;
@@ -110,6 +111,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		private boolean[] error = new boolean[ids.length];
 		// The results text window (so we can close it)
 		private TextWindow tw = null;
+		private Rectangle windowBounds = null;
 
 		TFloatArrayList ox = new TFloatArrayList(100);
 		TFloatArrayList oy = new TFloatArrayList(100);
@@ -171,6 +173,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		{
 			if (tw != null)
 			{
+				windowBounds = tw.getBounds();
 				tw.close();
 				tw = null;
 			}
@@ -220,6 +223,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				boolean hasId = results.hasId();
 
 				// Old selected item
+				boolean is3D = false;
 				if (hasId && tw != null)
 				{
 					TextPanel tp = tw.getTextPanel();
@@ -235,27 +239,37 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 							selectedId.add(Integer.parseInt(text));
 						}
 					}
+					// Keep the z column to avoid table redraw
+					is3D = tp.getColumnHeadings().contains("\tZ");
 				}
-				
+
 				// New table
+				is3D = is3D || results.is3D();
 				table = new IJTablePeakResults(false);
 				table.setTableTitle(TITLE);
 				table.copySettings(results);
 				table.setClearAtStart(true);
 				table.setAddCounter(true);
 				table.setHideSourceText(true);
-				table.setShowZ(results.is3D());
+				table.setShowZ(is3D);
 				table.setShowId(hasId);
 				//table.setShowFittingData(true);
 				//table.setShowNoise(true);
 				table.begin();
 
-				// Position under the window
 				tw = table.getResultsWindow();
-				ImageWindow win = imp.getWindow();
-				Point p = win.getLocation();
-				p.y += win.getHeight();
-				tw.setLocation(p);
+				if (windowBounds != null)
+				{
+					tw.setBounds(windowBounds);
+				}
+				else
+				{
+					// Position under the window
+					ImageWindow win = imp.getWindow();
+					Point p = win.getLocation();
+					p.y += win.getHeight();
+					tw.setLocation(p);
+				}
 			}
 			else
 			{
