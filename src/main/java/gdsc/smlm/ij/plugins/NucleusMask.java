@@ -23,6 +23,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.DialogListener;
@@ -75,7 +76,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 
 		settings = SettingsManager.readNucleusMaskSettings(0).toBuilder();
 		gd.addChoice("Mode", MODE, settings.getMode());
-		gd.addNumericField("Field_width", settings.getFieldWidth(), 2, 6, "um");
+		gd.addNumericField("Field_width", settings.getFieldWidth(), 2, 6, "px");
 		gd.addNumericField("Pixel_width", settings.getNmPerPixel(), 2, 6, "nm");
 		gd.addNumericField("Pixel_depth", settings.getNmPerSlice(), 2, 6, "nm");
 
@@ -85,9 +86,22 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			return false;
 
 		settings.setMode(gd.getNextChoiceIndex());
-		settings.setFieldWidth(gd.getNextNumber());
+		settings.setFieldWidth((int) gd.getNextNumber());
 		settings.setNmPerPixel(gd.getNextNumber());
 		settings.setNmPerSlice(gd.getNextNumber());
+		
+		// Check arguments
+		try
+		{
+			Parameters.isAboveZero("Field width", settings.getFieldWidth());
+			Parameters.isAboveZero("Pixel width", settings.getNmPerPixel());
+			Parameters.isAboveZero("Pixel depth", settings.getNmPerSlice());
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}		
 
 		if (settings.getMode() == 0)
 		{
@@ -108,6 +122,16 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			settings.setYDither(gd.getNextNumber());
 			settings.setZDither(gd.getNextNumber());
 			settings.setDiameter(gd.getNextNumber());
+			
+			try
+			{
+				Parameters.isAboveZero("Diameter", settings.getDiameter());
+			}
+			catch (IllegalArgumentException e)
+			{
+				IJ.error(TITLE, e.getMessage());
+				return false;
+			}		
 		}
 
 		SettingsManager.writeSettings(settings);
@@ -128,7 +152,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 
 		int inc = 2 * radius + 1;
 		int incz = 2 * radiusz + 1;
-		int maxx = (settings.getFieldWidth() > 0) ? (int) Math.ceil(settings.getFieldWidth() * 1000 / nmPerPixel) : inc;
+		int maxx = settings.getFieldWidth();
 		int maxy = maxx;
 		int ditherHeight = (settings.getYDither() > 0) ? (int) Math.ceil(settings.getYDither() * 1000 / nmPerPixel) : 0;
 		int ditherDepth = (settings.getZDither() > 0) ? (int) Math.ceil(settings.getZDither() * 1000 / nmPerSlice) : 0;
@@ -181,7 +205,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 		calibrate(imp);
 
 		imp.setSlice(maxz / 2);
-		
+
 		if (settings.getMode() == 1)
 		{
 			// Allow mouse click to draw spheres

@@ -365,7 +365,8 @@ message ConfigurationTemplateSettings
 message NucleusMaskSettings
 {
 	int32 mode = 1;
-	double field_width = 2;
+	// Field width in pixels
+	int32 field_width = 2;
 	double y_dither = 3;
 	double z_dither = 4;
 	double nm_per_pixel = 5;

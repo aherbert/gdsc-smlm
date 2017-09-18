@@ -1952,41 +1952,107 @@ public class OPTICS implements PlugIn
 		}
 	}
 
-	private static class IdTableResultComparator implements Comparator<TableResult>
+	/**
+	 * Base result comparator allows chaining comparisons together
+	 */
+	private abstract static class BaseTableResultComparator implements Comparator<TableResult>
 	{
+		BaseTableResultComparator next;
+		boolean reverse;
+
+		public BaseTableResultComparator(BaseTableResultComparator next, boolean reverse)
+		{
+			this.next = next;
+			this.reverse = reverse;
+
+			// Remove instances of the same comparator
+			BaseTableResultComparator previous = this;
+			while (previous.next != null)
+			{
+				if (previous.next.getClass() == this.getClass())
+				{
+					// Skip this to remove it
+					previous.next = previous.next.next;
+				}
+				else
+				{
+					// Move forward
+					previous = previous.next;
+				}
+			}
+		}
+
 		public int compare(TableResult o1, TableResult o2)
+		{
+			int result = compareColumn(o1, o2);
+			if (result != 0)
+				return (reverse) ? -result : result;
+			return (next != null) ? next.compare(o1, o2) : 0;
+		}
+
+		public abstract int compareColumn(TableResult o1, TableResult o2);
+	}
+
+	private static class IdTableResultComparator extends BaseTableResultComparator
+	{
+		public IdTableResultComparator(BaseTableResultComparator next, boolean reverse)
+		{
+			super(next, reverse);
+		}
+
+		public int compareColumn(TableResult o1, TableResult o2)
 		{
 			return Integer.compare(o1.id, o2.id);
 		}
 	}
 
-	private static class SizeTableResultComparator implements Comparator<TableResult>
+	private static class SizeTableResultComparator extends BaseTableResultComparator
 	{
-		public int compare(TableResult o1, TableResult o2)
+		public SizeTableResultComparator(BaseTableResultComparator next, boolean reverse)
+		{
+			super(next, reverse);
+		}
+
+		public int compareColumn(TableResult o1, TableResult o2)
 		{
 			return Integer.compare(o1.size, o2.size);
 		}
 	}
 
-	private static class LevelTableResultComparator implements Comparator<TableResult>
+	private static class LevelTableResultComparator extends BaseTableResultComparator
 	{
-		public int compare(TableResult o1, TableResult o2)
+		public LevelTableResultComparator(BaseTableResultComparator next, boolean reverse)
+		{
+			super(next, reverse);
+		}
+
+		public int compareColumn(TableResult o1, TableResult o2)
 		{
 			return Integer.compare(o1.level, o2.level);
 		}
 	}
 
-	private static class AreaTableResultComparator implements Comparator<TableResult>
+	private static class AreaTableResultComparator extends BaseTableResultComparator
 	{
-		public int compare(TableResult o1, TableResult o2)
+		public AreaTableResultComparator(BaseTableResultComparator next, boolean reverse)
+		{
+			super(next, reverse);
+		}
+
+		public int compareColumn(TableResult o1, TableResult o2)
 		{
 			return Double.compare(o1.area, o2.area);
 		}
 	}
 
-	private static class DensityTableResultComparator implements Comparator<TableResult>
+	private static class DensityTableResultComparator extends BaseTableResultComparator
 	{
-		public int compare(TableResult o1, TableResult o2)
+		public DensityTableResultComparator(BaseTableResultComparator next, boolean reverse)
+		{
+			super(next, reverse);
+		}
+
+		public int compareColumn(TableResult o1, TableResult o2)
 		{
 			return Double.compare(o1.density, o2.density);
 		}
@@ -1997,6 +2063,7 @@ public class OPTICS implements PlugIn
 		TurboList<TableResult> tableResults;
 		TextWindow2 tw;
 		Rectangle location;
+		BaseTableResultComparator previous = null;
 
 		@Override
 		public boolean equalSettings(OpticsSettings current, OpticsSettings previous)
@@ -2018,6 +2085,7 @@ public class OPTICS implements PlugIn
 		{
 			// Clear cache
 			tableResults = null;
+			previous = null;
 		}
 
 		@Override
@@ -2128,7 +2196,7 @@ public class OPTICS implements PlugIn
 					bw.append(r.getTableText(toUnit));
 				}
 				bw.flush();
-				
+
 				tw.getTextPanel().scrollToTop();
 			}
 
@@ -2139,8 +2207,6 @@ public class OPTICS implements PlugIn
 		private void sort(OpticsSettings settings)
 		{
 			tableResults.sort(createComparator(settings));
-			if (settings.getTableReverseSort())
-				tableResults.reverse();
 		}
 
 		private Comparator<? super TableResult> createComparator(OpticsSettings settings)
@@ -2148,17 +2214,22 @@ public class OPTICS implements PlugIn
 			switch (TableSortMode.get(settings.getTableSortMode()))
 			{
 				case DENSITY:
-					return new DensityTableResultComparator();
+					previous = new DensityTableResultComparator(previous, settings.getTableReverseSort());
+					break;
 				case AREA:
-					return new AreaTableResultComparator();
+					previous = new AreaTableResultComparator(previous, settings.getTableReverseSort());
+					break;
 				case LEVEL:
-					return new LevelTableResultComparator();
+					previous = new LevelTableResultComparator(previous, settings.getTableReverseSort());
+					break;
 				case SIZE:
-					return new SizeTableResultComparator();
+					previous = new SizeTableResultComparator(previous, settings.getTableReverseSort());
+					break;
 				case ID:
 				default:
-					return new IdTableResultComparator();
+					previous = new IdTableResultComparator(previous, settings.getTableReverseSort());
 			}
+			return previous;
 		}
 	}
 
@@ -2934,7 +3005,7 @@ public class OPTICS implements PlugIn
 			}
 
 			if (!readSettings(gd))
-				return false;	
+				return false;
 
 			// If the change was from a checkbox or selection box then we do not have to delay
 			boolean delay = true;
@@ -2944,7 +3015,7 @@ public class OPTICS implements PlugIn
 				if (source instanceof Checkbox || source instanceof Choice)
 					delay = false;
 			}
-			
+
 			createWork(delay);
 
 			return true;

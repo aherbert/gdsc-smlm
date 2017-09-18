@@ -186,7 +186,7 @@ public class GUIProtosHelper
 	{
 		NucleusMaskSettings.Builder builder = NucleusMaskSettings.newBuilder();
 		builder.setMode(1);
-		builder.setFieldWidth(8);
+		builder.setFieldWidth(512);
 		builder.setYDither(4);
 		builder.setZDither(1);
 		builder.setNmPerPixel(100);

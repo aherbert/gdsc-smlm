@@ -20111,9 +20111,13 @@ public final class GUIProtos {
     int getMode();
 
     /**
-     * <code>double field_width = 2;</code>
+     * <pre>
+     * Field width in pixels
+     * </pre>
+     *
+     * <code>int32 field_width = 2;</code>
      */
-    double getFieldWidth();
+    int getFieldWidth();
 
     /**
      * <code>double y_dither = 3;</code>
@@ -20157,7 +20161,7 @@ public final class GUIProtos {
     }
     private NucleusMaskSettings() {
       mode_ = 0;
-      fieldWidth_ = 0D;
+      fieldWidth_ = 0;
       yDither_ = 0D;
       zDither_ = 0D;
       nmPerPixel_ = 0D;
@@ -20195,9 +20199,9 @@ public final class GUIProtos {
               mode_ = input.readInt32();
               break;
             }
-            case 17: {
+            case 16: {
 
-              fieldWidth_ = input.readDouble();
+              fieldWidth_ = input.readInt32();
               break;
             }
             case 25: {
@@ -20258,11 +20262,15 @@ public final class GUIProtos {
     }
 
     public static final int FIELD_WIDTH_FIELD_NUMBER = 2;
-    private double fieldWidth_;
+    private int fieldWidth_;
     /**
-     * <code>double field_width = 2;</code>
+     * <pre>
+     * Field width in pixels
+     * </pre>
+     *
+     * <code>int32 field_width = 2;</code>
      */
-    public double getFieldWidth() {
+    public int getFieldWidth() {
       return fieldWidth_;
     }
 
@@ -20326,8 +20334,8 @@ public final class GUIProtos {
       if (mode_ != 0) {
         output.writeInt32(1, mode_);
       }
-      if (fieldWidth_ != 0D) {
-        output.writeDouble(2, fieldWidth_);
+      if (fieldWidth_ != 0) {
+        output.writeInt32(2, fieldWidth_);
       }
       if (yDither_ != 0D) {
         output.writeDouble(3, yDither_);
@@ -20355,9 +20363,9 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, mode_);
       }
-      if (fieldWidth_ != 0D) {
+      if (fieldWidth_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(2, fieldWidth_);
+          .computeInt32Size(2, fieldWidth_);
       }
       if (yDither_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
@@ -20397,10 +20405,8 @@ public final class GUIProtos {
       boolean result = true;
       result = result && (getMode()
           == other.getMode());
-      result = result && (
-          java.lang.Double.doubleToLongBits(getFieldWidth())
-          == java.lang.Double.doubleToLongBits(
-              other.getFieldWidth()));
+      result = result && (getFieldWidth()
+          == other.getFieldWidth());
       result = result && (
           java.lang.Double.doubleToLongBits(getYDither())
           == java.lang.Double.doubleToLongBits(
@@ -20434,8 +20440,7 @@ public final class GUIProtos {
       hash = (37 * hash) + MODE_FIELD_NUMBER;
       hash = (53 * hash) + getMode();
       hash = (37 * hash) + FIELD_WIDTH_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getFieldWidth()));
+      hash = (53 * hash) + getFieldWidth();
       hash = (37 * hash) + Y_DITHER_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getYDither()));
@@ -20586,7 +20591,7 @@ public final class GUIProtos {
         super.clear();
         mode_ = 0;
 
-        fieldWidth_ = 0D;
+        fieldWidth_ = 0;
 
         yDither_ = 0D;
 
@@ -20671,7 +20676,7 @@ public final class GUIProtos {
         if (other.getMode() != 0) {
           setMode(other.getMode());
         }
-        if (other.getFieldWidth() != 0D) {
+        if (other.getFieldWidth() != 0) {
           setFieldWidth(other.getFieldWidth());
         }
         if (other.getYDither() != 0D) {
@@ -20741,28 +20746,40 @@ public final class GUIProtos {
         return this;
       }
 
-      private double fieldWidth_ ;
+      private int fieldWidth_ ;
       /**
-       * <code>double field_width = 2;</code>
+       * <pre>
+       * Field width in pixels
+       * </pre>
+       *
+       * <code>int32 field_width = 2;</code>
        */
-      public double getFieldWidth() {
+      public int getFieldWidth() {
         return fieldWidth_;
       }
       /**
-       * <code>double field_width = 2;</code>
+       * <pre>
+       * Field width in pixels
+       * </pre>
+       *
+       * <code>int32 field_width = 2;</code>
        */
-      public Builder setFieldWidth(double value) {
+      public Builder setFieldWidth(int value) {
         
         fieldWidth_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>double field_width = 2;</code>
+       * <pre>
+       * Field width in pixels
+       * </pre>
+       *
+       * <code>int32 field_width = 2;</code>
        */
       public Builder clearFieldWidth() {
         
-        fieldWidth_ = 0D;
+        fieldWidth_ = 0;
         onChanged();
         return this;
       }
@@ -21133,7 +21150,7 @@ public final class GUIProtos {
       "!\n\031selected_custom_templates\030\006 \003(\t\022\020\n\010te" +
       "mplate\030\007 \001(\t\022\r\n\005close\030\010 \001(\010\"\232\001\n\023NucleusM" +
       "askSettings\022\014\n\004mode\030\001 \001(\005\022\023\n\013field_width" +
-      "\030\002 \001(\001\022\020\n\010y_dither\030\003 \001(\001\022\020\n\010z_dither\030\004 \001" +
+      "\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022\020\n\010z_dither\030\004 \001" +
       "(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022\024\n\014nm_per_slice" +
       "\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001*O\n\014TemplateType" +
       "\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLA" +
