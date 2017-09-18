@@ -184,9 +184,17 @@ public class SummariseResults implements PlugIn
 		CalibrationReader calibration = result.getCalibrationReader();
 
 		sb.append(result.getName());
-		sb.append('\t').append(result.size());
-		int maxT = result.getMaxFrame();
-		sb.append('\t').append(maxT);
+		int maxT = 0;
+		if (result.size() == 0)
+		{
+			sb.append("\t0\t0");
+		}
+		else
+		{
+			sb.append('\t').append(result.size());
+			maxT = result.getMaxFrame();
+			sb.append('\t').append(maxT);
+		}
 		if (calibration != null && calibration.hasExposureTime())
 		{
 			sb.append('\t').append(Utils.timeToString(maxT * calibration.getExposureTime()));
