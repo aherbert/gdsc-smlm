@@ -1,5 +1,12 @@
 package gdsc.smlm.ij.plugins;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 
 /*----------------------------------------------------------------------------- 
@@ -17,22 +24,17 @@ import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.utils.XmlUtils;
-import gdsc.core.ij.Utils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Macro;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
 import ij.process.Blitter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Produces an average PSF image from multiple PSF images.
@@ -42,9 +44,8 @@ import org.apache.commons.math3.util.FastMath;
 public class PSFCombiner implements PlugIn
 {
 	private final static String TITLE = "PSF Combiner";
-	private static int zDepth = 100;
 
-	private List<String> titles = new LinkedList<String>();
+	private static List<String> selected = null;
 	private List<PSF> input = new LinkedList<PSF>();
 
 	/*
@@ -57,24 +58,43 @@ public class PSFCombiner implements PlugIn
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		// Build a list of suitable images
-		titles = createImageList();
-
-		if (titles.isEmpty())
+		final List<String> titles = createImageList();
+		if (titles.size() < 2)
 		{
-			IJ.error(TITLE, "No suitable PSF images");
+			IJ.error(TITLE, "No suitable PSF images to combine");
 			return;
 		}
 
-		try
+		MultiDialog md = new MultiDialog("Select PSFs", new MultiDialog.BaseItems()
 		{
-			while (selectNextImage())
-				;
-		}
-		catch (Exception e)
+			public int size()
+			{
+				return titles.size();
+			}
+
+			public String getFormattedName(int i)
+			{
+				return titles.get(i);
+			}
+		});
+		md.addSelected(selected);
+
+		md.showDialog();
+
+		if (md.wasCanceled())
+			return;
+
+		ArrayList<String> selected = md.getSelectedResults();
+		if (selected.size() < 2)
 		{
-			IJ.error(TITLE, e.getMessage());
+			IJ.error(TITLE, "Require at least 2 PSF images to combine");
 			return;
 		}
+
+		PSFCombiner.selected = selected;
+		
+		for (String title : selected)
+			input.add(new PSF(title));
 
 		if (input.isEmpty())
 		{
@@ -83,27 +103,26 @@ public class PSFCombiner implements PlugIn
 
 		if (input.size() < 2)
 		{
-			IJ.error(TITLE, "Require at least 2 PSF images to combine");
 			return;
 		}
 
-		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Set the maximum z-depth +/- from the PSF centre");
-		gd.addSlider("Z-depth", 20, 200, zDepth);
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return;
-		zDepth = Math.abs((int) gd.getNextNumber());
-
-		for (PSF psf : input)
-			psf.crop(zDepth);
+		//		GenericDialog gd = new GenericDialog(TITLE);
+		//		gd.addMessage("Set the maximum z-depth +/- from the PSF centre");
+		//		gd.addSlider("Z-depth", 20, 200, zDepth);
+		//		gd.showDialog();
+		//		if (gd.wasCanceled())
+		//			return;
+		//		zDepth = Math.abs((int) gd.getNextNumber());
+		//
+		//		for (PSF psf : input)
+		//			psf.crop(zDepth);
 
 		combineImages();
 	}
 
 	public static List<String> createImageList()
 	{
-		List<String> titles = new LinkedList<String>();
+		List<String> titles = new TurboList<String>();
 		int[] ids = WindowManager.getIDList();
 		if (ids != null)
 		{
@@ -132,54 +151,7 @@ public class PSFCombiner implements PlugIn
 
 	private static boolean containsPSF(ImagePlus imp)
 	{
-		Object info = imp.getProperty("Info");
-		if (info != null)
-		{
-			return ImagePSFHelper.fromString(info.toString()) != null;
-		}
-		return false;
-	}
-
-	private boolean selectNextImage()
-	{
-		// Show a dialog allowing the user to select an input image
-		if (titles.isEmpty())
-			return false;
-
-		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Select the next input PSF image.\n(Each PSF must have the nm/pixel scale)");
-		int n = (input.size() + 1);
-
-		// If in macro mode then we must just use the String input field to allow the macro
-		// IJ to return the field values from the macro arguments. Using a Choice input
-		// will always return a field value.
-
-		if (IJ.isMacro())
-			gd.addStringField("PSF_" + n, "");
-		else
-			gd.addChoice("PSF_" + n, titles.toArray(new String[titles.size()]), "");
-
-		gd.addMessage("Cancel to finish");
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return false;
-
-		String title;
-		if (IJ.isMacro())
-			title = gd.getNextString();
-		else
-			title = gd.getNextChoice();
-
-		// Check the image exists. If not then exit. This is mainly relevant for Macro mode since
-		// the
-		// loop will continue otherwise since the titles list is not empty.
-		ImagePlus imp = WindowManager.getImage(title);
-		if (imp == null)
-			return false;
-
-		titles.remove(title);
-		input.add(new PSF(title));
-		return true;
+		return PSFDrift.getPSFSettings(imp) != null;
 	}
 
 	private void combineImages()
@@ -191,32 +163,82 @@ public class PSFCombiner implements PlugIn
 		if (nmPerPixel <= 0)
 			return;
 
-		// Find the lowest start point
-		int min = 0;
+		// Find the lowest & highest dimensions
+		int minStart = Integer.MAX_VALUE, maxStart = Integer.MIN_VALUE;
+		int minEnd = Integer.MAX_VALUE, maxEnd = Integer.MIN_VALUE;
+		int minSize = Integer.MAX_VALUE, maxSize = 0;
 		for (PSF psf : input)
 		{
-			if (min > psf.start)
-				min = psf.start;
+			if (minStart > psf.start)
+				minStart = psf.start;
+			if (maxStart < psf.start)
+				maxStart = psf.start;
+			if (maxEnd < psf.getEnd())
+				maxEnd = psf.getEnd();
+			if (minEnd > psf.getEnd())
+				minEnd = psf.getEnd();
+			if (maxSize < psf.getSize())
+				maxSize = psf.getSize();
+			if (minSize > psf.getSize())
+				minSize = psf.getSize();
 		}
 
-		// Shift all stacks and find the dimensions
-		final int shift = -min;
-		int max = 0, size = 0;
+		int size = maxSize;
+		int shift = -minStart;
+		int depth = maxEnd - minStart + 1;
+
+		// Option to crop. Do this before processing as it will make the plugin faster
+		if (minStart < maxStart || minEnd < maxEnd || minSize < maxSize)
+		{
+			boolean crop;
+			if (Utils.isMacro())
+			{
+				String options = Macro.getOptions();
+				crop = options.contains(" crop");
+			}
+			else
+			{
+				GenericDialog gd = new GenericDialog(TITLE);
+				gd.addMessage(String.format(
+						"The range of the PSFs is different:\nStart %d to %d\nEnd %d to %d\nSize %d to %d\n \nCrop to the smallest?",
+						minStart, maxStart, minEnd, maxEnd, minSize, maxSize));
+				gd.enableYesNoCancel();
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return;
+				crop = gd.wasOKed(); 
+			}
+			
+			if (crop)
+			{
+				Recorder.recordOption("crop");
+				
+				for (PSF psf : input)
+					psf.crop(maxStart, minEnd, minSize);
+
+				size = minSize;
+				shift = -maxStart;
+				depth = minEnd - maxStart + 1;
+			}
+		}
+
+		// Shift all stacks
 		int totalImages = 0;
 		for (PSF psf : input)
 		{
 			psf.start += shift;
 			totalImages += psf.psfSettings.getImageCount();
-			if (max < psf.getEnd())
-				max = psf.getEnd();
-			if (size < psf.getSize())
-				size = psf.getSize();
 		}
 
 		// Create a stack to hold all the images
-		ImageStack stack = new ImageStack(size, size, max);
-		for (int n = 1; n <= max; n++)
+		// Create a stack to hold the sum of the weights
+		ImageStack stack = new ImageStack(size, size, depth);
+		ImageStack stackW = new ImageStack(size, size, depth);
+		for (int n = 1; n <= depth; n++)
+		{
 			stack.setPixels(new float[size * size], n);
+			stackW.setPixels(new float[size * size], n);
+		}
 
 		// Insert all the PSFs
 		IJ.showStatus("Creating combined image ...");
@@ -226,10 +248,12 @@ public class PSFCombiner implements PlugIn
 		{
 			double progress = imageNo * fraction;
 			ImageStack psfStack = psf.psfStack;
-			final int offsetXY = (psf.getSize() - size) / 2;
-			final int offsetZ = psf.start;
 			final int w = psf.getSize();
+			final int offsetXY = (size - w) / 2;
+			final int offsetZ = psf.start;
 			final double weight = (1.0 * psf.psfSettings.getImageCount()) / totalImages;
+			FloatProcessor wp = new FloatProcessor(w, w,
+					SimpleArrayUtils.newFloatArray(psfStack.getWidth() * psfStack.getHeight(), (float) weight));
 			final double increment = fraction / psfStack.getSize();
 			for (int n = 1; n <= psfStack.getSize(); n++)
 			{
@@ -241,11 +265,20 @@ public class PSFCombiner implements PlugIn
 					psfData[i] *= weight;
 
 				// Insert into the combined PSF
-				ImageProcessor ip = stack.getProcessor(n + offsetZ);
-				ip.copyBits(new FloatProcessor(w, w, psfData, null), offsetXY, offsetXY, Blitter.ADD);
+				int slice = n + offsetZ;
+				ImageProcessor ip = stack.getProcessor(slice);
+				ip.copyBits(new FloatProcessor(w, w, psfData), offsetXY, offsetXY, Blitter.ADD);
+
+				// Insert the weights
+				ip = stackW.getProcessor(slice);
+				ip.copyBits(wp, offsetXY, offsetXY, Blitter.ADD);
 			}
 			imageNo++;
 		}
+
+		// Normalise
+		for (int n = 1; n <= depth; n++)
+			stack.getProcessor(n).copyBits(stackW.getProcessor(n), 0, 0, Blitter.DIVIDE);
 
 		// IJ.showStatus("Normalising ...");
 		// PSFCreator.normalise(stack, 1 + shift);
@@ -302,21 +335,19 @@ public class PSFCombiner implements PlugIn
 
 	private class PSF
 	{
-		private ImagePlus imp;
 		ImagePSF psfSettings;
 		int start;
 		ImageStack psfStack;
 
 		public PSF(String title)
 		{
-			imp = WindowManager.getImage(title);
+			ImagePlus imp = WindowManager.getImage(title);
 			if (imp == null)
 				throw new RuntimeException("No image with title: " + title);
 
-			Object o = XmlUtils.fromXML(imp.getProperty("Info").toString());
-			if (!(o != null && o instanceof ImagePSF))
+			this.psfSettings = PSFDrift.getPSFSettings(imp);
+			if (psfSettings == null)
 				throw new RuntimeException("Unknown PSF settings for image: " + title);
-			this.psfSettings = (ImagePSF) o;
 			int zCentre = psfSettings.getCentreImage();
 			if (zCentre < 1 || zCentre > imp.getStackSize())
 				throw new RuntimeException("z-centre must be within the stack size: " + imp.getStackSize());
@@ -324,19 +355,24 @@ public class PSFCombiner implements PlugIn
 			psfStack = imp.getImageStack();
 		}
 
-		/**
-		 * Remove frames above and below the centre to the specified depth
-		 * 
-		 * @param zDepth
-		 */
-		public void crop(int zDepth)
+		public void crop(int maxStart, int minEnd, int size)
 		{
-			int minZ = FastMath.max(1, psfSettings.getCentreImage() - zDepth);
-			int maxZ = FastMath.min(psfStack.getSize(), psfSettings.getCentreImage() + zDepth);
-			psfStack = psfStack.crop(0, 0, minZ, psfStack.getWidth(), psfStack.getHeight(), maxZ - minZ + 1);
+			final int removeBorder = (getSize() - size) / 2;
 
-			// Update range
-			start += minZ - 1;
+			int removeStart = maxStart - start; // Should be positive
+			int removeEnd = getEnd() - minEnd; // Should be positive
+
+			if (removeStart < 0 || removeEnd < 0 || removeBorder < 0)
+				throw new RuntimeException("Bad PSF crop");
+
+			if (removeStart > 0 || removeEnd > 0 || removeBorder > 0)
+			{
+				int depth = psfStack.getSize() - removeStart - removeEnd;
+				psfStack = psfStack.crop(removeBorder, removeBorder, removeStart, size, size, depth);
+
+				// Update range
+				start += removeStart;
+			}
 		}
 
 		public int getEnd()
@@ -346,7 +382,7 @@ public class PSFCombiner implements PlugIn
 
 		public int getSize()
 		{
-			return imp.getWidth();
+			return psfStack.getWidth();
 		}
 	}
 }
