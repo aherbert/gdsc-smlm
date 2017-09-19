@@ -40,6 +40,8 @@ import gdsc.core.clustering.optics.OPTICSManager;
 import gdsc.core.clustering.optics.OPTICSManager.Option;
 import gdsc.core.clustering.optics.OPTICSResult;
 import gdsc.core.clustering.optics.SampleMode;
+import gdsc.core.data.detection.BinarySearchDetectionGrid;
+import gdsc.core.data.detection.DetectionGrid;
 import gdsc.core.ij.BufferedTextWindow;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
@@ -64,6 +66,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.ImagePlus;
@@ -728,7 +731,7 @@ public class OPTICS implements PlugIn
 		public Pair<ClusterSelectedEvent, int[]> doWork(Pair<ClusterSelectedEvent, int[]> work)
 		{
 			int[] clusters = work.s.getClusters();
-			System.out.printf("ClusterSelected: %s\n", Arrays.toString(clusters));
+			//System.out.printf("ClusterSelected: %s\n", Arrays.toString(clusters));
 			return new Pair<ClusterSelectedEvent, int[]>(work.s, clusters);
 		}
 	}
@@ -1564,6 +1567,11 @@ public class OPTICS implements PlugIn
 		int lastMinPoints;
 		float[] loop = null;
 
+		// For detecting the cluster from mouse click
+		DetectionGrid grid = null;
+		double[] area = null;
+		ConvexHull[] hulls = null;
+
 		@Override
 		public boolean equalSettings(OpticsSettings current, OpticsSettings previous)
 		{
@@ -1633,6 +1641,7 @@ public class OPTICS implements PlugIn
 			outline = null;
 			lastSpanningTreeMode = -1;
 			spanningTree = null;
+			grid = null;
 		}
 
 		@Override
@@ -1664,8 +1673,7 @@ public class OPTICS implements PlugIn
 					image = null;
 
 				if (image != null && !image.getImagePlus().isVisible())
-					;
-				image = null;
+					image = null;
 
 				if (image == null)
 				{
@@ -1680,18 +1688,42 @@ public class OPTICS implements PlugIn
 					image.setLiveImage(false);
 					image.begin();
 					ImagePlus imp = image.getImagePlus();
-					imp.getCanvas().addMouseListener(this);
 					imp.setOverlay(null);
+
+					// Allow clicking to select a cluster
+					if (grid == null)
+					{
+						synchronized (clusteringResult)
+						{
+							clusters = clusteringResult.getClusters();
+							clusteringResult.computeConvexHulls();
+						}
+						max = Maths.max(clusters);
+						hulls = new ConvexHull[max + 1];
+						area = SimpleArrayUtils.newDoubleArray(hulls.length, -1);
+						Rectangle2D[] clusterBounds = new Rectangle2D[max];
+						for (int c = 1; c <= max; c++)
+						{
+							clusterBounds[c - 1] = clusteringResult.getBounds(c);
+							hulls[c] = clusteringResult.getConvexHull(c);
+						}
+						grid = new BinarySearchDetectionGrid(clusterBounds);
+					}
+					imp.getCanvas().addMouseListener(this);
+
 					if (mode != ImageMode.NONE)
 					{
 						float[] map = null; // Used to map clusters to a display value
 
-						synchronized (clusteringResult)
+						if (clusteringResult instanceof OPTICSResult)
 						{
-							clusters = clusteringResult.getClusters();
-							max = Maths.max(clusters);
-							if (clusteringResult instanceof OPTICSResult)
+							synchronized (clusteringResult)
 							{
+								if (clusters == null)
+								{
+									clusters = clusteringResult.getClusters();
+									max = Maths.max(clusters);
+								}
 								OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
 								if (mode == ImageMode.CLUSTER_ORDER)
 								{
@@ -1806,15 +1838,6 @@ public class OPTICS implements PlugIn
 						}
 
 						outline = new Overlay();
-						ConvexHull[] hulls = new ConvexHull[max + 1];
-						synchronized (clusteringResult)
-						{
-							clusteringResult.computeConvexHulls();
-							for (int c = 1; c <= max; c++)
-							{
-								hulls[c] = clusteringResult.getConvexHull(c);
-							}
-						}
 
 						// Create a colour to match the LUT of the image
 						LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, max2);
@@ -1830,15 +1853,7 @@ public class OPTICS implements PlugIn
 							ConvexHull hull = hulls[c];
 							if (hull != null)
 							{
-								// Convert the Hull to the correct image scale.
-								float[] x2 = hull.x.clone();
-								float[] y2 = hull.y.clone();
-								for (int i = 0; i < x2.length; i++)
-								{
-									x2[i] = image.mapX(x2[i]);
-									y2[i] = image.mapY(y2[i]);
-								}
-								PolygonRoi roi = new PolygonRoi(x2, y2, Roi.POLYGON);
+								PolygonRoi roi = createRoi(hull);
 								roi.setStrokeColor(colors[map[c]]);
 								// TODO: Options to set a fill colour?
 								outline.add(roi);
@@ -1994,6 +2009,20 @@ public class OPTICS implements PlugIn
 					new Settings(results, opticsManager, clusteringResult, clusterCount, image));
 		}
 
+		private PolygonRoi createRoi(ConvexHull hull)
+		{
+			// Convert the Hull to the correct image scale.
+			float[] x2 = hull.x.clone();
+			float[] y2 = hull.y.clone();
+			for (int i = 0; i < x2.length; i++)
+			{
+				x2[i] = image.mapX(x2[i]);
+				y2[i] = image.mapY(y2[i]);
+			}
+			PolygonRoi roi = new PolygonRoi(x2, y2, Roi.POLYGON);
+			return roi;
+		}
+
 		private void createLoopData(OpticsSettings settings, OPTICSManager opticsManager)
 		{
 			if (requiresLoop(settings) && loop == null)
@@ -2038,28 +2067,80 @@ public class OPTICS implements PlugIn
 
 		public void mouseClicked(MouseEvent e)
 		{
-			if (image == null || e == null)
+			if (!eventWorkflow.isRunning())
+			{
+				if (image != null)
+				{
+					ImagePlus imp = image.getImagePlus();
+					if (imp.getCanvas() != null)
+						imp.getCanvas().removeMouseListener(this);
+				}
+				return;
+			}
+
+			if (image == null)
 				return;
 			ImagePlus imp = image.getImagePlus();
-			if (!imp.isVisible())
-				return;
 			ImageCanvas ic = imp.getCanvas();
-			int cx = ic.offScreenX(e.getX());
-			int cy = ic.offScreenY(e.getY());
+			double cx = ic.offScreenXD(e.getX());
+			double cy = ic.offScreenYD(e.getY());
 
 			// Convert to pixel coordinates using the scale
-			final float x = cx / image.getScale();
-			final float y = cy / image.getScale();
+			final float x = (float) (cx / image.getScale());
+			final float y = (float) (cy / image.getScale());
 
 			eventWorkflow.run(new ClusterSelectedEvent(id)
 			{
 				@Override
 				int[] computeClusters()
 				{
-					System.out.printf("Compute cluster @ %.2f,%.2f\n", x, y);
+					//System.out.printf("Compute cluster @ %.2f,%.2f\n", x, y);
+
+					// Find the regions that could have been clicked
+					if (grid == null)
+						return null;
+					int[] candidates = grid.find(x, y);
+					if (candidates.length == 0)
+						return null;
+
+					// Return the smallest region clicked for which we have an area.
+
+					// Since collision detection is costly first rank by area (which
+					// is faster and can be precomputed)
+					TIntArrayList ids = new TIntArrayList(candidates.length);
+					TDoubleArrayList area = new TDoubleArrayList(candidates.length);
+					for (int index : candidates)
+					{
+						int clusterId = index + 1;
+						ConvexHull hull = hulls[clusterId];
+						if (hull != null)
+						{
+							ids.add(clusterId);
+							area.add(getArea(clusterId, hull));
+						}
+
+					}
+
+					if (ids.isEmpty())
+						return null;
+
+					// Sort ascending
+					candidates = ids.toArray();
+					Sort.sortArrays(candidates, area.toArray(), true);
+					for (int clusterId : candidates)
+						if (hulls[clusterId].contains(x, y))
+							return new int[] { clusterId };
+
 					return null;
 				}
 			});
+		}
+
+		protected double getArea(int clusterId, ConvexHull hull)
+		{
+			if (area[clusterId] == -1)
+				area[clusterId] = hull.getArea();
+			return area[clusterId];
 		}
 
 		public void mousePressed(MouseEvent e)
@@ -2081,12 +2162,47 @@ public class OPTICS implements PlugIn
 
 		public void clusterSelected(ClusterSelectedEvent e)
 		{
-			if (e.getSource() == id)
-				return;
+			// We do want to process this even if we are the source
+			//if (e.getSource() == id)
+			//	return;
 
+			if (image == null)
+				return;
 			ImagePlus imp = image.getImagePlus();
 			if (!imp.isVisible())
 				return;
+
+			int[] clusters = e.getClusters();
+			Roi roi = null;
+			if (clusters != null && clusters.length > 0)
+			{
+				ConvexHull hull = hulls[clusters[0]];
+				if (hull != null)
+				{
+					roi = createRoi(hull);
+				}
+			}
+			imp.setRoi(roi);
+
+			if (roi != null)
+			{
+				ImageCanvas ic = imp.getCanvas();
+				Rectangle source = ic.getSrcRect();
+				Rectangle target = roi.getBounds();
+				if (!source.contains(target))
+				{
+					// Shift to centre
+					int cx1 = target.x + target.width / 2;
+					int cy1 = target.y + target.height / 2;
+					int cx2 = source.x + source.width / 2;
+					int cy2 = source.y + source.height / 2;
+					int shiftx = cx1 - cx2;
+					int shifty = cy1 - cy2;
+					source.x += shiftx;
+					source.y += shifty;
+					ic.setSourceRect(source);
+				}
+			}
 		}
 	}
 
@@ -2369,7 +2485,7 @@ public class OPTICS implements PlugIn
 				{
 					tw = new TextWindow2(TITLE + " Clusters", headings, "", 800, 400);
 
-					// TODO - Add a mouse listener to allow double click on a cluster to draw 
+					// Add a mouse listener to allow double click on a cluster to draw 
 					// a polygon ROI of the convex hull, or point ROI if size <=2
 					final TextPanel tp = tw.getTextPanel();
 					tp.addMouseListener(this);
@@ -2436,6 +2552,16 @@ public class OPTICS implements PlugIn
 
 		public void mousePressed(MouseEvent e)
 		{
+			if (!eventWorkflow.isRunning())
+			{
+				if (tw != null)
+				{
+					final TextPanel tp = tw.getTextPanel();
+					tp.removeMouseListener(this);
+				}
+				return;
+			}
+
 			eventWorkflow.run(new ClusterSelectedEvent(id)
 			{
 				@Override

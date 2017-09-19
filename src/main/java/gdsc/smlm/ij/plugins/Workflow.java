@@ -342,6 +342,11 @@ public class Workflow<S, R>
 			threads = null;
 		}
 	}
+	
+	public boolean isRunning()
+	{
+		return threads != null;
+	}
 
 	private ArrayList<Thread> startWorkers(ArrayList<RunnableWorker> workers)
 	{
