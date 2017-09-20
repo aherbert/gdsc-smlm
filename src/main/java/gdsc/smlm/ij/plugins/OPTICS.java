@@ -83,8 +83,10 @@ import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.Plot2;
+import ij.gui.PointRoi;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.gui.ShapeRoi;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.process.LUT;
@@ -731,7 +733,8 @@ public class OPTICS implements PlugIn
 		public Pair<ClusterSelectedEvent, int[]> doWork(Pair<ClusterSelectedEvent, int[]> work)
 		{
 			int[] clusters = work.s.getClusters();
-			//System.out.printf("ClusterSelected: %s\n", Arrays.toString(clusters));
+			if (IJ.debugMode)
+				IJ.log("ClusterSelected: " + Arrays.toString(clusters));
 			return new Pair<ClusterSelectedEvent, int[]>(work.s, clusters);
 		}
 	}
@@ -835,6 +838,270 @@ public class OPTICS implements PlugIn
 		}
 	}
 
+	/**
+	 * Encapsulate the clustering result and provide cached access to all the desired properties via synchronised blocks
+	 * around the clustering result.
+	 */
+	private static class CachedClusteringResult
+	{
+		// To allow detection of stale cached data
+		static int ID;
+		final int id;
+
+		final boolean isOPTICS;
+		final ClusteringResult clusteringResult;
+
+		// All data that any worker may want to access.
+		// This only need be computed once for each new clustering result.
+		int max;
+		int[] clusters;
+		int[] topClusters;
+		double[] profile;
+		int[] order;
+		int[] predecessor;
+		ArrayList<OPTICSCluster> allClusters;
+		Rectangle2D[] bounds;
+		ConvexHull[] hulls;
+		int[] size;
+		int[] level;
+
+		CachedClusteringResult(ClusteringResult clusteringResult)
+		{
+			id = ++ID;
+			this.clusteringResult = clusteringResult;
+			if (clusteringResult != null)
+			{
+				isOPTICS = clusteringResult instanceof OPTICSResult;
+			}
+			else
+			{
+				isOPTICS = false;
+			}
+		}
+
+		/**
+		 * Checks if this is the current clustering result. If new results have been created then the cached results are
+		 * effectively stale and should not be trusted.
+		 * <p>
+		 * This should be used by any worker that keeps a copy of the cached results, e.g. when responding to
+		 * ClusterSelectedEvents there is no point responding when the represented results are not current so avoiding
+		 * cluster ID mismatches.
+		 *
+		 * @return true, if is current
+		 */
+		boolean isCurrent()
+		{
+			return id == ID;
+		}
+
+		/**
+		 * Gets the OPTICS result.
+		 *
+		 * @return the OPTICS result
+		 */
+		OPTICSResult getOPTICSResult()
+		{
+			return (isOPTICS) ? (OPTICSResult) clusteringResult : null;
+		}
+
+		/**
+		 * Gets the DBSCAN result.
+		 *
+		 * @return the DBSCAN result
+		 */
+		DBSCANResult getDBSCANResult()
+		{
+			return (isOPTICS) ? null : (DBSCANResult) clusteringResult;
+		}
+
+		/**
+		 * Checks if is a valid clustering result.
+		 *
+		 * @return true, if is valid
+		 */
+		boolean isValid()
+		{
+			return clusteringResult != null;
+		}
+
+		int[] getClusters()
+		{
+			if (clusters == null)
+			{
+				synchronized (clusteringResult)
+				{
+					if (clusters == null)
+					{
+						clusters = clusteringResult.getClusters();
+						max = Maths.max(clusters);
+						if (isOPTICS)
+						{
+							topClusters = ((OPTICSResult) clusteringResult).getTopLevelClusters(false);
+						}
+					}
+				}
+			}
+			return clusters;
+		}
+
+		int getMaxClusterId()
+		{
+			getClusters();
+			return max;
+		}
+
+		int[] getTopClusters()
+		{
+			if (isOPTICS)
+			{
+				getClusters();
+			}
+			return topClusters;
+		}
+
+		double[] getProfile(double nmPerPixel)
+		{
+			if (isOPTICS && profile == null)
+			{
+				synchronized (clusteringResult)
+				{
+					// Check it has not already been created by another thread
+					if (profile == null)
+					{
+						profile = ((OPTICSResult) clusteringResult).getReachabilityDistanceProfile(true);
+						if (nmPerPixel != 1)
+						{
+							for (int i = 0; i < profile.length; i++)
+								profile[i] *= nmPerPixel;
+						}
+					}
+				}
+			}
+			return profile;
+		}
+
+		int[] getOrder()
+		{
+			if (isOPTICS && order == null)
+			{
+				synchronized (clusteringResult)
+				{
+					// Check it has not already been created by another thread
+					if (order == null)
+						order = ((OPTICSResult) clusteringResult).getOrder();
+				}
+			}
+			return order;
+		}
+
+		int[] getPredecessor()
+		{
+			if (isOPTICS && predecessor == null)
+			{
+				synchronized (clusteringResult)
+				{
+					// Check it has not already been created by another thread
+					if (predecessor == null)
+						predecessor = ((OPTICSResult) clusteringResult).getPredecessor();
+				}
+			}
+			return predecessor;
+		}
+
+		ArrayList<OPTICSCluster> getAllClusters()
+		{
+			if (isOPTICS && allClusters == null)
+			{
+				synchronized (clusteringResult)
+				{
+					// Check it has not already been created by another thread
+					if (allClusters == null)
+						allClusters = ((OPTICSResult) clusteringResult).getAllClusters();
+				}
+			}
+			return allClusters;
+		}
+
+		/**
+		 * Gets the bounds. The bounds are stored for each cluster id. Index 0 is null as this is not a cluster ID.
+		 *
+		 * @return the bounds
+		 */
+		Rectangle2D[] getBounds()
+		{
+			if (bounds == null)
+			{
+				synchronized (clusteringResult)
+				{
+					// Check it has not already been created by another thread
+					if (bounds == null)
+					{
+						clusteringResult.computeConvexHulls();
+						bounds = new Rectangle2D[getMaxClusterId() + 1];
+						hulls = new ConvexHull[bounds.length];
+						for (int c = 1; c <= max; c++)
+						{
+							bounds[c] = clusteringResult.getBounds(c);
+							hulls[c] = clusteringResult.getConvexHull(c);
+						}
+					}
+				}
+			}
+			return bounds;
+		}
+
+		/**
+		 * Gets the hulls. The hulls are stored for each cluster id. Index 0 is null as this is not a cluster ID.
+		 *
+		 * @return the hulls
+		 */
+		ConvexHull[] getHulls()
+		{
+			getBounds();
+			return hulls;
+		}
+
+		int[] getSize()
+		{
+			if (size == null)
+			{
+				synchronized (clusteringResult)
+				{
+					// Check it has not already been created by another thread
+					if (size == null)
+					{
+						size = new int[getMaxClusterId() + 1];
+						level = new int[size.length];
+						if (isOPTICS)
+						{
+							// We need to account for hierarchical clusters
+							for (OPTICSCluster c : getAllClusters())
+							{
+								level[c.getClusterId()] = c.getLevel();
+								size[c.getClusterId()] = c.size();
+							}
+						}
+						else
+						{
+							// Flat clustering (i.e. no levels)
+							for (int i = 0; i < clusters.length; i++)
+							{
+								size[clusters[i]]++;
+							}
+						}
+					}
+				}
+			}
+			return size;
+		}
+
+		int[] getLevel()
+		{
+			getSize();
+			return level;
+		}
+	}
+
 	private class OpticsWorker extends BaseWorker
 	{
 		@Override
@@ -931,14 +1198,13 @@ public class OPTICS implements PlugIn
 				}
 			}
 			// It may be null if cancelled. However return null Work will close down the next thread
-			return new Pair<OpticsSettings, Settings>(settings, new Settings(results, opticsManager, opticsResult));
+			return new Pair<OpticsSettings, Settings>(settings,
+					new Settings(results, opticsManager, new CachedClusteringResult(opticsResult)));
 		}
 	}
 
 	private class OpticsClusterWorker extends BaseWorker
 	{
-		int clusterCount = 0;
-
 		@Override
 		public boolean equalSettings(OpticsSettings current, OpticsSettings previous)
 		{
@@ -973,10 +1239,12 @@ public class OPTICS implements PlugIn
 
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
-			OPTICSResult opticsResult = (OPTICSResult) resultList.get(2);
-			// It may be null if cancelled.
-			if (opticsResult != null)
+			CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
+			// It may be invalid if cancelled.
+			if (clusteringResult.isValid())
 			{
+				OPTICSResult opticsResult = clusteringResult.getOPTICSResult();
+
 				int nClusters = 0;
 				synchronized (opticsResult)
 				{
@@ -1030,13 +1298,16 @@ public class OPTICS implements PlugIn
 					// We must scramble after extracting the clusters since the cluster Ids have been rewritten
 					scrambleClusters(opticsResult);
 				}
-				// We created a new clustering
-				clusterCount++;
+
 				Utils.log("Clustering mode: %s = %s", settings.getClusteringMode(),
 						TextUtils.pleural(nClusters, "Cluster"));
+
+				// We created a new clustering so create a new WorkerResult
+				clusteringResult = new CachedClusteringResult(opticsResult);
+				return new Pair<OpticsSettings, Settings>(settings,
+						new Settings(results, opticsManager, clusteringResult));
 			}
-			return new Pair<OpticsSettings, Settings>(settings,
-					new Settings(results, opticsManager, opticsResult, clusterCount));
+			return work;
 		}
 	}
 
@@ -1055,8 +1326,8 @@ public class OPTICS implements PlugIn
 		{
 			Settings resultList = work.r;
 			// The result is in position 2.
-			// It may be null if cancelled.
-			if (resultList.get(2) == null)
+			CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
+			if (!clusteringResult.isValid())
 			{
 				// Only log here so it happens once
 				IJ.log(TITLE + ": No results to display");
@@ -1110,19 +1381,12 @@ public class OPTICS implements PlugIn
 		public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work)
 		{
 			Settings resultList = work.r;
-			ClusteringResult clusteringResult = (ClusteringResult) resultList.get(2);
-			if (clusteringResult == null)
+			CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
+			if (!clusteringResult.isValid())
 				return work;
 
-			int[] clusters, topClusters = null;
-			synchronized (clusteringResult)
-			{
-				clusters = clusteringResult.getClusters();
-				if (clusteringResult instanceof OPTICSResult)
-				{
-					topClusters = ((OPTICSResult) clusteringResult).getTopLevelClusters(false);
-				}
-			}
+			int[] clusters = clusteringResult.getClusters();
+			int[] topClusters = clusteringResult.getTopClusters();
 
 			ClusterResult current = new ClusterResult(clusters, topClusters);
 
@@ -1188,9 +1452,8 @@ public class OPTICS implements PlugIn
 			Settings resultList = work.r;
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			//OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
-			ClusteringResult clusteringResult = (ClusteringResult) resultList.get(2);
-			// It may be null if cancelled.
-			if (clusteringResult != null)
+			CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
+			if (clusteringResult.isValid())
 			{
 				final int[] clusters;
 				synchronized (clusteringResult)
@@ -1237,12 +1500,9 @@ public class OPTICS implements PlugIn
 		{
 			OpticsSettings settings = work.s;
 			Settings resultList = work.r;
-			OPTICSResult opticsResult = (OPTICSResult) resultList.get(2);
-			// It may be null if cancelled.
-			if (opticsResult == null)
-			{
+			CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
+			if (!clusteringResult.isValid())
 				return work;
-			}
 
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			double nmPerPixel = getNmPerPixel(results);
@@ -1251,17 +1511,11 @@ public class OPTICS implements PlugIn
 			PlotMode mode = PlotMode.get(settings.getPlotMode());
 			if (mode != PlotMode.OFF)
 			{
-				double[] profile;
-				synchronized (opticsResult)
-				{
-					profile = opticsResult.getReachabilityDistanceProfile(true);
-				}
+				double[] profile = clusteringResult.getProfile(nmPerPixel);
 				String units = " (px)";
 				if (nmPerPixel != 1)
 				{
 					units = " (nm)";
-					for (int i = 0; i < profile.length; i++)
-						profile[i] *= nmPerPixel;
 				}
 
 				double[] order = SimpleArrayUtils.newArray(profile.length, 1.0, 1.0);
@@ -1278,18 +1532,13 @@ public class OPTICS implements PlugIn
 
 				if (mode.requiresClusters())
 				{
-					synchronized (opticsResult)
-					{
-						clusters = opticsResult.getAllClusters();
-					}
-
+					clusters = clusteringResult.getAllClusters();
 					for (OPTICSCluster cluster : clusters)
 					{
 						if (maxLevel < cluster.getLevel())
 							maxLevel = cluster.getLevel();
-						if (maxClusterId < cluster.getClusterId())
-							maxClusterId = cluster.getClusterId();
 					}
+					maxClusterId = clusteringResult.getMaxClusterId();
 				}
 
 				if (settings.getOpticsMode() == OpticsMode.FAST_OPTICS.ordinal())
@@ -1473,7 +1722,7 @@ public class OPTICS implements PlugIn
 					else
 					{
 						// Ensure that the distance is valid
-						distance = opticsResult.generatingDistance * nmPerPixel;
+						distance = clusteringResult.getOPTICSResult().generatingDistance * nmPerPixel;
 						if (settings.getClusteringDistance() > 0)
 							distance = Math.min(settings.getClusteringDistance(), distance);
 					}
@@ -1570,7 +1819,7 @@ public class OPTICS implements PlugIn
 		// For detecting the cluster from mouse click
 		DetectionGrid grid = null;
 		double[] area = null;
-		ConvexHull[] hulls = null;
+		CachedClusteringResult clusteringResult = null;
 
 		@Override
 		public boolean equalSettings(OpticsSettings current, OpticsSettings previous)
@@ -1635,6 +1884,9 @@ public class OPTICS implements PlugIn
 		private void clearCache(boolean clearImage)
 		{
 			// Clear cache
+			if (image != null)
+				image.getImagePlus().killRoi();
+
 			if (clearImage)
 				image = null;
 			lastOutlineMode = -1;
@@ -1642,6 +1894,7 @@ public class OPTICS implements PlugIn
 			lastSpanningTreeMode = -1;
 			spanningTree = null;
 			grid = null;
+			clusteringResult = null;
 		}
 
 		@Override
@@ -1651,18 +1904,15 @@ public class OPTICS implements PlugIn
 			Settings resultList = work.r;
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
-			ClusteringResult clusteringResult = (ClusteringResult) resultList.get(2);
-			int clusterCount = (Integer) resultList.get(3);
-			// It may be null if cancelled.
-			if (clusteringResult == null)
+			CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
+
+			if (!clusteringResult.isValid())
 			{
 				clearCache(true);
 				return new Pair<OpticsSettings, Settings>(settings,
-						new Settings(results, opticsManager, clusteringResult, clusterCount, image));
+						new Settings(results, opticsManager, clusteringResult, image));
 			}
 
-			int[] clusters = null, order = null;
-			int max = 0; // max cluster value
 			ImageMode mode = ImageMode.get(settings.getImageMode());
 			final StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
 
@@ -1674,6 +1924,17 @@ public class OPTICS implements PlugIn
 
 				if (image != null && !image.getImagePlus().isVisible())
 					image = null;
+
+				if (grid == null)
+				{
+					int max = clusteringResult.getMaxClusterId();
+					area = SimpleArrayUtils.newDoubleArray(max + 1, -1);
+					// We need to ignore the first entry as this is not a cluster
+					Rectangle2D[] clusterBounds = new Rectangle2D[max];
+					System.arraycopy(clusteringResult.getBounds(), 1, clusterBounds, 0, max);
+					grid = new BinarySearchDetectionGrid(clusterBounds);
+					this.clusteringResult = clusteringResult;
+				}
 
 				if (image == null)
 				{
@@ -1691,51 +1952,25 @@ public class OPTICS implements PlugIn
 					imp.setOverlay(null);
 
 					// Allow clicking to select a cluster
-					if (grid == null)
-					{
-						synchronized (clusteringResult)
-						{
-							clusters = clusteringResult.getClusters();
-							clusteringResult.computeConvexHulls();
-						}
-						max = Maths.max(clusters);
-						hulls = new ConvexHull[max + 1];
-						area = SimpleArrayUtils.newDoubleArray(hulls.length, -1);
-						Rectangle2D[] clusterBounds = new Rectangle2D[max];
-						for (int c = 1; c <= max; c++)
-						{
-							clusterBounds[c - 1] = clusteringResult.getBounds(c);
-							hulls[c] = clusteringResult.getConvexHull(c);
-						}
-						grid = new BinarySearchDetectionGrid(clusterBounds);
-					}
 					imp.getCanvas().addMouseListener(this);
 
 					if (mode != ImageMode.NONE)
 					{
 						float[] map = null; // Used to map clusters to a display value
+						int[] order = null;
 
-						if (clusteringResult instanceof OPTICSResult)
+						if (clusteringResult.isOPTICS)
 						{
-							synchronized (clusteringResult)
+							if (mode == ImageMode.CLUSTER_ORDER)
 							{
-								if (clusters == null)
-								{
-									clusters = clusteringResult.getClusters();
-									max = Maths.max(clusters);
-								}
-								OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
-								if (mode == ImageMode.CLUSTER_ORDER)
-								{
-									order = opticsResult.getOrder();
-								}
-								else if (mode == ImageMode.CLUSTER_DEPTH)
-								{
-									ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
-									map = new float[max + 1];
-									for (OPTICSCluster c : allClusters)
-										map[c.getClusterId()] = c.getLevel() + 1;
-								}
+								order = clusteringResult.getOrder();
+							}
+							else if (mode == ImageMode.CLUSTER_DEPTH)
+							{
+								ArrayList<OPTICSCluster> allClusters = clusteringResult.getAllClusters();
+								map = new float[clusteringResult.getMaxClusterId() + 1];
+								for (OPTICSCluster c : allClusters)
+									map[c.getClusterId()] = c.getLevel() + 1;
 							}
 						}
 						createLoopData(settings, opticsManager);
@@ -1768,6 +2003,7 @@ public class OPTICS implements PlugIn
 						// Add in a single batch
 						sp.getIXY();
 						OrderProvider op = (order == null) ? new OrderProvider() : new RealOrderProvider(order);
+						int[] clusters = clusteringResult.getClusters();
 						for (int i = sp.size(); i-- > 0;)
 						{
 							sp.intensity[i] = mapper.mapf(mode.getValue(sp.intensity[i], clusters[i], op.getOrder(i)));
@@ -1797,43 +2033,29 @@ public class OPTICS implements PlugIn
 				ImagePlus imp = image.getImagePlus();
 				Overlay overlay = null;
 
-				int[] map = null; // Used to map clusters to a display value
-				int max2 = 0; // max mapped cluster value
-
 				OutlineMode outlineMode = OutlineMode.get(settings.getOutlineMode());
 				if (outlineMode.isOutline())
 				{
 					if (outline == null)
 					{
 						lastOutlineMode = settings.getOutlineMode();
-						if (clusters == null)
-						{
-							synchronized (clusteringResult)
-							{
-								clusters = clusteringResult.getClusters();
-								max = Maths.max(clusters);
-							}
-						}
 
-						max2 = max;
-						map = SimpleArrayUtils.newArray(max + 1, 0, 1);
+						int max = clusteringResult.getMaxClusterId();
+						int max2 = max;
+						int[] map = SimpleArrayUtils.newArray(max + 1, 0, 1);
 
 						LUT lut = clusterLut;
 
-						if (clusteringResult instanceof OPTICSResult)
+						if (clusteringResult.isOPTICS)
 						{
 							if (outlineMode.isColourByDepth())
 							{
 								lut = clusterDepthLut;
-								synchronized (clusteringResult)
-								{
-									OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
-									ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
-									Arrays.fill(map, 0);
-									for (OPTICSCluster c : allClusters)
-										map[c.getClusterId()] = c.getLevel() + 1;
-									max2 = Maths.max(map);
-								}
+								ArrayList<OPTICSCluster> allClusters = clusteringResult.getAllClusters();
+								Arrays.fill(map, 0);
+								for (OPTICSCluster c : allClusters)
+									map[c.getClusterId()] = c.getLevel() + 1;
+								max2 = Maths.max(map);
 							}
 						}
 
@@ -1848,12 +2070,13 @@ public class OPTICS implements PlugIn
 							colors[c] = mapper.getColour(lut, c);
 
 						// Extract the ConvexHull of each cluster
+						ConvexHull[] hulls = clusteringResult.getHulls();
 						for (int c = 1; c <= max; c++)
 						{
 							ConvexHull hull = hulls[c];
 							if (hull != null)
 							{
-								PolygonRoi roi = createRoi(hull);
+								Roi roi = createRoi(hull, true);
 								roi.setStrokeColor(colors[map[c]]);
 								// TODO: Options to set a fill colour?
 								outline.add(roi);
@@ -1863,34 +2086,18 @@ public class OPTICS implements PlugIn
 					overlay = outline;
 				}
 
-				if (SpanningTreeMode.get(settings.getSpanningTreeMode()).isSpanningTree() &&
-						clusteringResult instanceof OPTICSResult)
+				if (clusteringResult.isOPTICS && SpanningTreeMode.get(settings.getSpanningTreeMode()).isSpanningTree())
 				{
 					if (spanningTree == null)
 					{
-						OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
 						lastSpanningTreeMode = settings.getSpanningTreeMode();
 
-						int[] predecessor, topLevelClusters;
-						synchronized (opticsResult)
-						{
-							predecessor = opticsResult.getPredecessor();
-							if (order == null)
-								order = opticsResult.getOrder();
-							topLevelClusters = opticsResult.getTopLevelClusters(false);
-
-							if (clusters == null)
-							{
-								clusters = opticsResult.getClusters();
-								max = Maths.max(clusters);
-							}
-						}
-
-						if (map == null)
-						{
-							max2 = max;
-							map = SimpleArrayUtils.newArray(max + 1, 0, 1);
-						}
+						int[] predecessor = clusteringResult.getPredecessor();
+						int[] clusters = clusteringResult.getClusters();
+						//int[] topLevelClusters = clusteringResult.getTopClusters();
+						int max = clusteringResult.getMaxClusterId();
+						int max2 = max;
+						int[] map = SimpleArrayUtils.newArray(max + 1, 0, 1);
 
 						LUT lut = clusterLut;
 
@@ -1903,7 +2110,7 @@ public class OPTICS implements PlugIn
 							lut = clusterDepthLut;
 							synchronized (clusteringResult)
 							{
-								ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
+								ArrayList<OPTICSCluster> allClusters = clusteringResult.getAllClusters();
 								Arrays.fill(map, 0);
 								for (OPTICSCluster c : allClusters)
 									map[c.getClusterId()] = c.getLevel() + 1;
@@ -1929,9 +2136,11 @@ public class OPTICS implements PlugIn
 						LUTMapper mapper;
 
 						boolean useMap = false, useLoop = false;
+						int[] order = null;
 						if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_ORDER.ordinal())
 						{
 							// We will use the order for the colour
+							order = clusteringResult.getOrder();
 							mapper = new LUTHelper.DefaultLUTMapper(0, 255);
 							colors = new Color[256];
 							for (int c = 1; c < colors.length; c++)
@@ -1967,10 +2176,11 @@ public class OPTICS implements PlugIn
 
 							int j = predecessor[i];
 
+							// XXX: This is probably an older version before we used the predecessor
 							// The spanning tree can jump across hierachical clusters.
 							// Prevent jumps across top-level clusters
-							if (topLevelClusters[i] != topLevelClusters[i])
-								continue;
+							//if (topLevelClusters[i] != topLevelClusters[j])
+							//	continue;
 
 							float xi = image.mapX(sp.x[i]);
 							float yi = image.mapY(sp.y[i]);
@@ -2006,10 +2216,10 @@ public class OPTICS implements PlugIn
 			}
 
 			return new Pair<OpticsSettings, Settings>(settings,
-					new Settings(results, opticsManager, clusteringResult, clusterCount, image));
+					new Settings(results, opticsManager, clusteringResult, image));
 		}
 
-		private PolygonRoi createRoi(ConvexHull hull)
+		private Roi createRoi(ConvexHull hull, boolean forcePolygon)
 		{
 			// Convert the Hull to the correct image scale.
 			float[] x2 = hull.x.clone();
@@ -2019,8 +2229,25 @@ public class OPTICS implements PlugIn
 				x2[i] = image.mapX(x2[i]);
 				y2[i] = image.mapY(y2[i]);
 			}
-			PolygonRoi roi = new PolygonRoi(x2, y2, Roi.POLYGON);
-			return roi;
+			// Note: The hull can be a single point or a line
+			if (!forcePolygon)
+			{
+				if (x2.length == 1)
+					return new PointRoi(x2[0], y2[0]);
+				if (x2.length == 2)
+					return new Line(x2[0], y2[0], x2[1], y2[1]);
+			}
+			return new PolygonRoi(x2, y2, Roi.POLYGON);
+		}
+
+		private Roi createRoi(Rectangle2D bounds, int size)
+		{
+			if (bounds.getWidth() == 0 && bounds.getHeight() == 0)
+				return new PointRoi(bounds.getX(), bounds.getY());
+			// It may be a cluster of size 2 so we should create a line for these.
+			if (size == 2)
+				return new Line(bounds.getX(), bounds.getY(), bounds.getMaxX(), bounds.getMaxY());
+			return new Roi(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
 		}
 
 		private void createLoopData(OpticsSettings settings, OPTICSManager opticsManager)
@@ -2099,6 +2326,10 @@ public class OPTICS implements PlugIn
 					// Find the regions that could have been clicked
 					if (grid == null)
 						return null;
+					CachedClusteringResult clusteringResult = ImageResultsWorker.this.clusteringResult;
+					if (clusteringResult == null || !clusteringResult.isCurrent())
+						return null;
+
 					int[] candidates = grid.find(x, y);
 					if (candidates.length == 0)
 						return null;
@@ -2109,6 +2340,7 @@ public class OPTICS implements PlugIn
 					// is faster and can be precomputed)
 					TIntArrayList ids = new TIntArrayList(candidates.length);
 					TDoubleArrayList area = new TDoubleArrayList(candidates.length);
+					ConvexHull[] hulls = clusteringResult.getHulls();
 					for (int index : candidates)
 					{
 						int clusterId = index + 1;
@@ -2118,7 +2350,6 @@ public class OPTICS implements PlugIn
 							ids.add(clusterId);
 							area.add(getArea(clusterId, hull));
 						}
-
 					}
 
 					if (ids.isEmpty())
@@ -2172,14 +2403,62 @@ public class OPTICS implements PlugIn
 			if (!imp.isVisible())
 				return;
 
+			CachedClusteringResult clusteringResult = ImageResultsWorker.this.clusteringResult;
+			if (clusteringResult == null || !clusteringResult.isCurrent())
+				return;
+
 			int[] clusters = e.getClusters();
 			Roi roi = null;
+			ConvexHull[] hulls = clusteringResult.getHulls();
+
 			if (clusters != null && clusters.length > 0)
 			{
-				ConvexHull hull = hulls[clusters[0]];
-				if (hull != null)
+				TurboList<Roi> rois = new TurboList<Roi>(clusters.length);
+				for (int clusterId : clusters)
 				{
-					roi = createRoi(hull);
+					ConvexHull hull = hulls[clusterId];
+					if (hull != null)
+					{
+						rois.add(createRoi(hull, false));
+					}
+					else
+					{
+						rois.add(createRoi(clusteringResult.getBounds()[clusterId],
+								clusteringResult.getSize()[clusterId]));
+					}
+				}
+				if (rois.size() == 1)
+				{
+					roi = rois.getf(0);
+				}
+				else if (rois.size() > 1)
+				{
+					// If all are points then create a multi-point ROI.
+					// This is useful to see where the tiny clusters are.
+					if (allPoints(rois))
+					{
+						float[] x = new float[rois.size()];
+						float[] y = new float[x.length];
+						for (int i=0; i<rois.size(); i++)
+						{
+							Rectangle2D.Double b = rois.getf(i).getFloatBounds();
+							x[i] = (float)b.getX();
+							y[i] = (float)b.getY();
+						}
+						roi = new PointRoi(x, y);
+					}
+					else
+					{
+						// We cannot handle combining points and polygons unless
+						// we draw in the overlay. So for now the tiny shape will
+						// be invisible.
+
+						// Combine into a shape
+						ShapeRoi shapeRoi = new ShapeRoi(rois.getf(0));
+						for (int i = 1; i < rois.size(); i++)
+							shapeRoi.or(new ShapeRoi(rois.getf(i)));
+						roi = shapeRoi;
+					}
 				}
 			}
 			imp.setRoi(roi);
@@ -2200,9 +2479,37 @@ public class OPTICS implements PlugIn
 					int shifty = cy1 - cy2;
 					source.x += shiftx;
 					source.y += shifty;
+
+					if (target.width > source.width)
+					{
+						// Reduce magnification to fit
+						int pad = target.width - source.width;
+						source.width += pad;
+						source.x -= pad / 2;
+						// Shift
+						//source.x = target.x;
+					}
+					if (target.height > source.height)
+					{
+						// Reduce magnification to fit
+						int pad = target.height - source.height;
+						source.height += pad;
+						source.y -= pad / 2;
+						// Shift
+						//source.y = target.y;
+					}
+
 					ic.setSourceRect(source);
 				}
 			}
+		}
+
+		private boolean allPoints(TurboList<Roi> rois)
+		{
+			for (Roi r : rois)
+				if (!(r instanceof PointRoi))
+					return false;
+			return true;
 		}
 	}
 
@@ -2212,16 +2519,18 @@ public class OPTICS implements PlugIn
 		int size;
 		int level;
 		double area, density;
-		ConvexHull hull;
+		//ConvexHull hull;
+		Rectangle2D bounds;
 		String text;
 		double toUnit = 0;
 
-		TableResult(int id, int size, int level, ConvexHull hull)
+		TableResult(int id, int size, int level, ConvexHull hull, Rectangle2D bounds)
 		{
 			this.id = id;
 			this.size = size;
 			this.level = level;
-			this.hull = hull;
+			//this.hull = hull;
+			this.bounds = bounds;
 
 			if (size > 2 && hull != null)
 			{
@@ -2240,22 +2549,20 @@ public class OPTICS implements PlugIn
 				sb.append(level).append('\t');
 				sb.append(id).append('\t');
 				sb.append(size).append('\t');
-				if (size > 2 && hull != null)
+				if (area > 0)
 				{
 					double area = this.area * toUnit * toUnit;
 					sb.append(Maths.round(area)).append('\t');
 					sb.append(Maths.round(size / area)).append('\t');
-					Rectangle2D.Double bounds = hull.getFloatBounds();
-					sb.append('(').append(Maths.round(toUnit * bounds.getX())).append(',');
-					sb.append(Maths.round(toUnit * bounds.getY())).append(") ");
-					sb.append(Maths.round(toUnit * bounds.getWidth())).append('x');
-					sb.append(Maths.round(toUnit * bounds.getHeight()));
 				}
 				else
 				{
-					// What about clusters of size 1 or 2? 
-					// We currently ignore these for the bounds
+					sb.append("0\t\t");
 				}
+				sb.append('(').append(Maths.round(toUnit * bounds.getX())).append(',');
+				sb.append(Maths.round(toUnit * bounds.getY())).append(") ");
+				sb.append(Maths.round(toUnit * bounds.getWidth())).append('x');
+				sb.append(Maths.round(toUnit * bounds.getHeight()));
 				text = sb.toString();
 			}
 			return text;
@@ -2406,9 +2713,8 @@ public class OPTICS implements PlugIn
 			OpticsSettings settings = work.s;
 			Settings resultList = work.r;
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
-			ClusteringResult clusteringResult = (ClusteringResult) resultList.get(2);
-
-			if (clusteringResult == null || !settings.getShowTable())
+			CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
+			if (!clusteringResult.isValid() || !settings.getShowTable())
 			{
 				// Hide the table
 				if (tw != null)
@@ -2422,56 +2728,19 @@ public class OPTICS implements PlugIn
 			{
 				if (tableResults == null)
 				{
-					int[] clusters;
-					int max;
-					ConvexHull[] hulls;
-					ArrayList<OPTICSCluster> allClusters = null;
-					synchronized (clusteringResult)
-					{
-						clusters = clusteringResult.getClusters();
-						max = Maths.max(clusters);
-						clusteringResult.computeConvexHulls();
-						hulls = new ConvexHull[max + 1];
-						for (int c = 1; c <= max; c++)
-						{
-							hulls[c] = clusteringResult.getConvexHull(c);
-						}
-
-						if (clusteringResult instanceof OPTICSResult)
-						{
-							OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
-							allClusters = opticsResult.getAllClusters();
-						}
-					}
+					ConvexHull[] hulls = clusteringResult.getHulls();
+					Rectangle2D[] bounds = clusteringResult.getBounds();
 
 					// Get the cluster sizes and level
-					int[] size = new int[max + 1];
-					int[] level = new int[max + 1];
+					int[] size = clusteringResult.getSize();
+					int[] level = clusteringResult.getLevel();
 
-					if (clusteringResult instanceof OPTICSResult)
+					tableResults = new TurboList<TableResult>(size.length);
+					for (int c = 1; c < size.length; c++)
 					{
-						for (OPTICSCluster c : allClusters)
-						{
-							level[c.getClusterId()] = c.getLevel();
-							size[c.getClusterId()] = c.size();
-						}
-					}
-					else
-					{
-						for (int i = 0; i < clusters.length; i++)
-						{
-							size[clusters[i]]++;
-						}
-					}
-
-					tableResults = new TurboList<TableResult>(max);
-					for (int c = 1; c <= max; c++)
-					{
-						tableResults.add(new TableResult(c, size[c], level[c], hulls[c]));
+						tableResults.add(new TableResult(c, size[c], level[c], hulls[c], bounds[c]));
 					}
 				}
-
-				// TODO - Check why the algorithm creates clusters of size 1.
 
 				// TODO: Allow user to change the distance units. 
 				// Note that all clustering is currently done in pixels.
@@ -2851,14 +3120,13 @@ public class OPTICS implements PlugIn
 				scrambleClusters(dbscanResult);
 			}
 			// It may be null if cancelled. However return null Work will close down the next thread
-			return new Pair<OpticsSettings, Settings>(settings, new Settings(results, opticsManager, dbscanResult));
+			return new Pair<OpticsSettings, Settings>(settings,
+					new Settings(results, opticsManager, new CachedClusteringResult(dbscanResult)));
 		}
 	}
 
 	private class DBSCANClusterWorker extends BaseWorker
 	{
-		int clusterCount = 0;
-
 		@Override
 		public boolean equalSettings(OpticsSettings current, OpticsSettings previous)
 		{
@@ -2874,19 +3142,20 @@ public class OPTICS implements PlugIn
 			Settings resultList = work.r;
 			MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
 			OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
-			DBSCANResult dbscanResult = (DBSCANResult) resultList.get(2);
+			CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
 			// It may be null if cancelled.
-			if (dbscanResult != null)
+			if (clusteringResult.isValid())
 			{
+				DBSCANResult dbscanResult = clusteringResult.getDBSCANResult();
 				synchronized (dbscanResult)
 				{
 					dbscanResult.extractClusters(settings.getCore());
 				}
 				// We created a new clustering
-				clusterCount++;
+				return new Pair<OpticsSettings, Settings>(settings,
+						new Settings(results, opticsManager, new CachedClusteringResult(dbscanResult)));
 			}
-			return new Pair<OpticsSettings, Settings>(settings,
-					new Settings(results, opticsManager, dbscanResult, clusterCount));
+			return work;
 		}
 	}
 
