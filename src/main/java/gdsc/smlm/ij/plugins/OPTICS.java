@@ -2439,11 +2439,11 @@ public class OPTICS implements PlugIn
 					{
 						float[] x = new float[rois.size()];
 						float[] y = new float[x.length];
-						for (int i=0; i<rois.size(); i++)
+						for (int i = 0; i < rois.size(); i++)
 						{
 							Rectangle2D.Double b = rois.getf(i).getFloatBounds();
-							x[i] = (float)b.getX();
-							y[i] = (float)b.getY();
+							x[i] = (float) b.getX();
+							y[i] = (float) b.getY();
 						}
 						roi = new PointRoi(x, y);
 					}
@@ -2532,10 +2532,19 @@ public class OPTICS implements PlugIn
 			//this.hull = hull;
 			this.bounds = bounds;
 
-			if (size > 2 && hull != null)
+			if (hull != null)
 			{
 				area = hull.getArea();
-				density = size / area;
+
+				if (area != 0)
+				{
+					density = size / area;
+				}
+				else
+				{
+					//System.out.printf("Weird: %d\n%s\n%s\n", size, Arrays.toString(hull.x), Arrays.toString(hull.y));
+					density = Double.MAX_VALUE; // Just used for sorting
+				}
 			}
 		}
 
