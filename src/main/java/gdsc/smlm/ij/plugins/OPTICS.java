@@ -738,7 +738,7 @@ public class OPTICS implements PlugIn
 		public Pair<ClusterSelectedEvent, int[]> doWork(Pair<ClusterSelectedEvent, int[]> work)
 		{
 			int[] clusters = work.s.getClusters();
-			//if (IJ.debugMode)
+			if (IJ.debugMode)
 				IJ.log("ClusterSelected: " + Arrays.toString(clusters));
 			return new Pair<ClusterSelectedEvent, int[]>(work.s, clusters);
 		}
@@ -1500,6 +1500,11 @@ public class OPTICS implements PlugIn
 		{
 			if (current.getPlotMode() != previous.getPlotMode())
 				return false;
+			if (lastCanvas != null)
+			{
+				if (!lastCanvas.isValid())
+					return false;
+			}
 			return true;
 		}
 
@@ -1830,8 +1835,20 @@ public class OPTICS implements PlugIn
 					CachedClusteringResult clusteringResult = ReachabilityResultsWorker.this.clusteringResult;
 					if (clusteringResult == null || !clusteringResult.isCurrent())
 						return null;
+					// Allow drag both ways
+					int start, end;
+					if (endX < startX)
+					{
+						start = (int) endX;
+						end = (int) startX;
+					}
+					else
+					{
+						start = (int) startX;
+						end = (int) endX;
+					}
 					// Ignore the hierarchy as we only want to find the parent clusters
-					return clusteringResult.getOPTICSResult().getClustersFromOrder((int) startX, (int) endX, false);
+					return clusteringResult.getOPTICSResult().getClustersFromOrder(start, end, false);
 				}
 			});
 		}
@@ -1925,6 +1942,9 @@ public class OPTICS implements PlugIn
 				return false;
 			}
 			boolean result = true;
+			if (image != null && !image.getImagePlus().isVisible())
+				result = false;
+
 			if (current.getOutlineMode() != previous.getOutlineMode())
 			{
 				if (OutlineMode.get(current.getOutlineMode()).isOutline() &&
@@ -1979,7 +1999,10 @@ public class OPTICS implements PlugIn
 		{
 			// Clear cache
 			if (image != null)
+			{
+				image.getImagePlus().setOverlay(null);
 				image.getImagePlus().killRoi();
+			}
 
 			if (clearImage)
 				image = null;
@@ -2044,6 +2067,7 @@ public class OPTICS implements PlugIn
 					image.begin();
 					ImagePlus imp = image.getImagePlus();
 					imp.setOverlay(null);
+					imp.killRoi();
 
 					// Allow clicking to select a cluster
 					imp.getCanvas().addMouseListener(this);
@@ -2817,6 +2841,8 @@ public class OPTICS implements PlugIn
 				return false;
 			if (current.getShowTable())
 			{
+				if (tw != null && !tw.isVisible())
+					return false;
 				if (current.getTableReverseSort() != previous.getTableReverseSort())
 					return false;
 				if (current.getTableSortMode() != previous.getTableSortMode())
@@ -2878,7 +2904,7 @@ public class OPTICS implements PlugIn
 						name, name);
 				double toUnit = results.getDistanceConverter(unit).convert(1);
 
-				if (tw == null)
+				if (tw == null || !tw.isVisible())
 				{
 					tw = new TextWindow2(TITLE + " Clusters", headings, "", 800, 400);
 
