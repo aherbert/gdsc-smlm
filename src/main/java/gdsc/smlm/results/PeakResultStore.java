@@ -3,6 +3,8 @@ package gdsc.smlm.results;
 import java.util.Collection;
 import java.util.Comparator;
 
+import org.apache.commons.math3.random.RandomGenerator;
+
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
@@ -133,4 +135,12 @@ public interface PeakResultStore
 	 * @return the results
 	 */
 	public PeakResult[] subset(PeakResultPredicate filter);
+
+	/**
+	 * Shuffle the results.
+	 *
+	 * @param randomGenerator
+	 *            the random generator
+	 */
+	public void shuffle(final RandomGenerator randomGenerator);
 }

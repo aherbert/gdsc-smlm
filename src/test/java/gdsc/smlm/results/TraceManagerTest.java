@@ -1,10 +1,9 @@
 package gdsc.smlm.results;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -156,14 +155,20 @@ public class TraceManagerTest
 		return Gaussian2DPeakResultHelper.createOneAxisParams(0, 1, rand.next() * 256f, rand.next() * 256f, 0, 1);
 	}
 
+	static RandomGenerator r;
+
 	private MemoryPeakResults toPeakResults(Trace... traces)
 	{
-		ArrayList<PeakResult> results = new ArrayList<PeakResult>();
+		PeakResultStore results = new ArrayPeakResultStore(traces.length);
 		for (Trace t : traces)
 		{
-			results.addAll(t.getPoints());
+			results.addStore(t.getPoints());
 		}
-		Collections.shuffle(results);
+		// Shuffle
+		RandomGenerator rnd = r;
+		if (rnd == null)
+			rnd = r = new Random();
+		results.shuffle(rnd);
 		return new MemoryPeakResults(results);
 	}
 
@@ -178,8 +183,8 @@ public class TraceManagerTest
 
 		for (int i = 0; i < expected.length; i++)
 		{
-			ArrayList<PeakResult> e = expected[i].getPoints();
-			ArrayList<PeakResult> a = actual[i].getPoints();
+			PeakResultStore e = expected[i].getPoints();
+			PeakResultStore a = actual[i].getPoints();
 			Assert.assertEquals("Points are different lengths [" + i + "]", e.size(), a.size());
 			for (int j = 0; j < e.size(); j++)
 			{

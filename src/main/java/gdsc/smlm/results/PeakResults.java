@@ -77,6 +77,14 @@ public interface PeakResults
 	public void addAll(PeakResult[] results);
 
 	/**
+	 * Add a series of fitted peak results.
+	 *
+	 * @param results
+	 *            the results
+	 */
+	public void addAll(PeakResultStore results);
+
+	/**
 	 * @return The number of results added since begin()
 	 */
 	public int size();

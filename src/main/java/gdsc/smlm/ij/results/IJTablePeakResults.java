@@ -1,7 +1,6 @@
 package gdsc.smlm.ij.results;
 
 import java.awt.Frame;
-import java.util.Collection;
 import java.util.HashMap;
 
 import gdsc.core.data.utils.ConversionException;
@@ -459,16 +458,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	{
 		addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.origX, result.origY, result.origValue,
 				result.error, result.noise, result.getParameters(), result.getParameterDeviations());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.AbstractPeakResults#addAll(java.util.Collection)
-	 */
-	public void addAll(Collection<PeakResult> results)
-	{
-		addAll(results.toArray(new PeakResult[results.size()]));
 	}
 
 	/*

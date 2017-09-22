@@ -159,9 +159,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * Add all results.
-	 *
-	 * @param results
-	 *            the results
+	 * <p>
+	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
+	 * 
+	 * @see gdsc.smlm.results.AbstractPeakResults#addAll(gdsc.smlm.results.PeakResultStore)
 	 */
 	public void addAll(PeakResultStore results)
 	{

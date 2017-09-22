@@ -28,6 +28,7 @@ import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.InterlacedImageSource;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResultStore;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.ThreadSafePeakResults;
 import ij.IJ;
@@ -830,6 +831,11 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 					result.getParameters(), result.getParameterDeviations());
 	}
 
+	public void addAll(PeakResultStore results)
+	{
+		addAll(results.toArray());
+	}
+	
 	public int size()
 	{
 		return (int) sampleNew[X].getN();

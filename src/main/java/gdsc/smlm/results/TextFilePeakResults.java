@@ -32,6 +32,7 @@ import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
  * Saves the fit results to file
@@ -391,25 +392,28 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		if (!isShowId() || cluster.getId() == 0)
 		{
-			addAll(cluster.getPoints());
+			addAll(cluster.getPoints().toArray());
 		}
 		else
 		{
 			// Store the ID from the trace
 			final int id = cluster.getId();
-			ArrayList<PeakResult> results = cluster.getPoints();
-			ArrayList<PeakResult> results2 = new ArrayList<PeakResult>(results.size());
-			for (PeakResult result : results)
+			final ArrayPeakResultStore results2 = new ArrayPeakResultStore(cluster.size());
+			cluster.getPoints().forEach(new PeakResultProcedure()
 			{
-				if (result.getId() == id)
-					results2.add(result);
-				else
+				public void execute(PeakResult result)
 				{
-					results2.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue,
-							result.error, result.noise, result.params, result.paramStdDevs, result.getEndFrame(), id));
+					if (result.getId() == id)
+						results2.add(result);
+					else
+					{
+						results2.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY,
+								result.origValue, result.error, result.noise, result.params, result.paramStdDevs,
+								result.getEndFrame(), id));
+					}
 				}
-			}
-			addAll(results2);
+			});
+			addAll(results2.toArray());
 		}
 	}
 

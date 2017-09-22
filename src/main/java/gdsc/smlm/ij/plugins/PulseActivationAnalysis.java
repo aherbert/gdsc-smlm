@@ -59,6 +59,7 @@ import gdsc.smlm.results.Cluster.CentroidMethod;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResultStore;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.results.Trace;
@@ -559,7 +560,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		{
 			trace.sort(); // Time-order
 
-			ArrayList<PeakResult> points = trace.getPoints();
+			PeakResultStore points = trace.getPoints();
 
 			// Define the frame for a new activation 
 			int nextActivationStartFrame = Integer.MIN_VALUE;

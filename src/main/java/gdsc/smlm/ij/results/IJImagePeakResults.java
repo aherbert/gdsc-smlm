@@ -2,7 +2,6 @@ package gdsc.smlm.ij.results;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
-import java.util.Collection;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
@@ -1024,16 +1023,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	{
 		add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
 				result.getParameters(), null);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.AbstractPeakResults#addAll(java.util.Collection)
-	 */
-	public void addAll(Collection<PeakResult> results)
-	{
-		addAll(results.toArray(new PeakResult[results.size()]));
 	}
 
 	/*

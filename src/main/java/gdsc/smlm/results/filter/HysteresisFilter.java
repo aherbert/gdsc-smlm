@@ -332,9 +332,9 @@ public abstract class HysteresisFilter extends Filter
 			{
 				// Check if the trace touches a valid point
 				boolean isOk = false;
-				for (PeakResult result : trace.getPoints())
+				for (int i = 0; i < trace.size(); i++)
 				{
-					if (ok.contains(result))
+					if (ok.contains(trace.get(i)))
 					{
 						isOk = true;
 						break;
@@ -343,9 +343,9 @@ public abstract class HysteresisFilter extends Filter
 				// Add the entire trace to the OK points
 				if (isOk)
 				{
-					for (PeakResult result : trace.getPoints())
+					for (int i = 0; i < trace.size(); i++)
 					{
-						ok.add(result);
+						ok.add(trace.get(i));
 					}
 				}
 			}

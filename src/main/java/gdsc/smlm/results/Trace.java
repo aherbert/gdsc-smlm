@@ -44,7 +44,7 @@ public class Trace extends Cluster
 	{
 		if (nBlinks == -1)
 		{
-			if (results.isEmpty())
+			if (isEmpty())
 			{
 				nBlinks = 0;
 				onTimes = offTimes = null;

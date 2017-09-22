@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 
+import org.apache.commons.math3.random.RandomGenerator;
+
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
@@ -304,5 +306,22 @@ public class ArrayPeakResultStore implements PeakResultStore
 			if (filter.test(results[i]))
 				list.add(results[i]);
 		return list.toArray();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#shuffle(org.apache.commons.math3.random.RandomGenerator)
+	 */
+	public void shuffle(RandomGenerator randomGenerator)
+	{
+		// Fisher-Yates shuffle
+		for (int i = size; i-- > 1;)
+		{
+			int j = randomGenerator.nextInt(i + 1);
+			PeakResult tmp = results[i];
+			results[i] = results[j];
+			results[j] = tmp;
+		}
 	}
 }

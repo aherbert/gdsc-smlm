@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
+import org.apache.commons.math3.random.RandomAdaptor;
+import org.apache.commons.math3.random.RandomGenerator;
+
 import gdsc.core.utils.TurboList;
 import gdsc.core.utils.TurboList.SimplePredicate;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
@@ -204,7 +207,7 @@ public class ArrayListPeakResultStore implements PeakResultStore
 		}
 		return false;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -215,6 +218,7 @@ public class ArrayListPeakResultStore implements PeakResultStore
 		for (int i = 0, size = size(); i < size; i++)
 			procedure.execute(results.get(i));
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -227,5 +231,15 @@ public class ArrayListPeakResultStore implements PeakResultStore
 			if (filter.test(results.get(i)))
 				list.add(results.get(i));
 		return list.toArray();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#shuffle(org.apache.commons.math3.random.RandomGenerator)
+	 */
+	public void shuffle(RandomGenerator randomGenerator)
+	{
+		Collections.shuffle(results, RandomAdaptor.createAdaptor(randomGenerator));
 	}
 }

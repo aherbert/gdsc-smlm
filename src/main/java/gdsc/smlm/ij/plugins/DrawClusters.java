@@ -196,8 +196,9 @@ public class DrawClusters implements PlugIn
 			int j = 0;
 			if (isUseStackPosition)
 				frames[i] = new int[nPoints];
-			for (PeakResult result : trace.getPoints())
+			for (int k = 0; k < trace.size(); k++)
 			{
+				PeakResult result = trace.get(k);
 				xPoints[j] = (result.getXPosition() - bounds.x) * xScale;
 				yPoints[j] = (result.getYPosition() - bounds.y) * yScale;
 				if (isUseStackPosition)

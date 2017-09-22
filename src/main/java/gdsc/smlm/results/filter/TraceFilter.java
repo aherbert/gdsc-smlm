@@ -66,9 +66,9 @@ public class TraceFilter extends Filter
 		{
 			if (trace.size() > 1)
 			{
-				for (PeakResult result : trace.getPoints())
+				for (int i = 0; i < trace.size(); i++)
 				{
-					ok.add(result);
+					ok.add(trace.get(i));
 				}
 			}
 		}

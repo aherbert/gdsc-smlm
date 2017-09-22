@@ -56,6 +56,17 @@ public abstract class AbstractPeakResults implements PeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResultStore)
+	 */
+	public void addAll(PeakResultStore results)
+	{
+		// Utility function 
+		addAll(results.toArray());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#setSource(java.lang.String)
 	 */
 	public void setSource(ImageSource source)

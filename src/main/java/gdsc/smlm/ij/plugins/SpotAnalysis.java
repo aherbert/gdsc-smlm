@@ -1159,8 +1159,11 @@ public class SpotAnalysis extends PlugInFrame
 				writeLine(files[3], Integer.toString(nBlinks));
 				writeLine(files[4], String.format("# Id=%d, Blinks=%d, Signal=%f", traceResult.spot.frame, nBlinks,
 						traceResult.spot.signal));
-				for (PeakResult r : traceResult.trace.getPoints())
+				for (int k = 0; k < traceResult.trace.size(); k++)
+				{
+					PeakResult r = traceResult.trace.get(k);
 					writeLine(files[4], String.format("%d %f", r.getFrame(), r.getSignal()));
+				}
 			}
 		}
 		catch (Exception e)

@@ -2070,16 +2070,17 @@ public class TraceMolecules implements PlugIn
 		float[] data = new float[width * height];
 		float sumBackground = 0;
 		double noise = 0;
-		for (PeakResult result : trace.getPoints())
+		for (int i = 0; i < trace.size(); i++)
 		{
+			PeakResult result  = trace.get(i);
 			noise += result.noise * result.noise;
 
 			float[] sourceData = source.get(result.getFrame(), bounds);
 			final float background = result.getBackground();
 			sumBackground += background;
-			for (int i = 0; i < data.length; i++)
+			for (int j = 0; j < data.length; j++)
 			{
-				data[i] += sourceData[i] - background;
+				data[j] += sourceData[j] - background;
 			}
 			if (createStack)
 				slices.addSlice(new FloatProcessor(width, height, sourceData, null));
@@ -2106,8 +2107,9 @@ public class TraceMolecules implements PlugIn
 	private double getCombinedNoise(Trace trace)
 	{
 		double noise = 0;
-		for (PeakResult result : trace.getPoints())
+		for (int i = 0; i < trace.size(); i++)
 		{
+			PeakResult result  = trace.get(i);
 			noise += result.noise * result.noise;
 		}
 		// Combined noise is the sqrt of the sum-of-squares

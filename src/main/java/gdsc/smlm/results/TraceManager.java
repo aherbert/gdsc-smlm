@@ -621,7 +621,7 @@ public class TraceManager
 				float[] centroid = traces[i].getCentroid();
 				float background = 0;
 				double noise = 0;
-				for (PeakResult r : traces[i].getPoints())
+				for (PeakResult r : traces[i].getPoints().toArray())
 				{
 					noise += r.noise * r.noise;
 					background += r.getBackground();
@@ -679,7 +679,7 @@ public class TraceManager
 	public static MemoryPeakResults toPeakResults(final Trace[] traces, final Calibration calibration, boolean newId)
 	{
 		int capacity = 1 + ((traces != null) ? traces.length : 0);
-		MemoryPeakResults results = new MemoryPeakResults(capacity);
+		final MemoryPeakResults results = new MemoryPeakResults(capacity);
 		results.setCalibration(calibration);
 		if (traces != null)
 		{
@@ -691,11 +691,15 @@ public class TraceManager
 					continue;
 
 				final int traceId = (newId) ? ++id : trace.getId();
-				for (PeakResult result : trace.getPoints())
+				trace.getPoints().forEach(new PeakResultProcedure()
 				{
-					results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue,
-							0, result.noise, result.params, null, 0, traceId));
-				}
+					public void execute(PeakResult result)
+					{
+						results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY,
+								result.origValue, 0, result.noise, result.params, null, 0, traceId));
+
+					}
+				});
 			}
 		}
 		return results;
