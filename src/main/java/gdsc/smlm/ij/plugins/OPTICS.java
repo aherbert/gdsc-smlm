@@ -1111,12 +1111,19 @@ public class OPTICS implements PlugIn
 			return level;
 		}
 
-		public int[] getParents(int[] clustersIds)
+		int[] lastClusterIds;
+		int[] parents;
+
+		public synchronized int[] getParents(int[] clusterIds)
 		{
-			// This cannot be cached
+			// This can be cached if the ids are the same
+			if (Arrays.equals(lastClusterIds, clusterIds))
+				return parents;
+
+			lastClusterIds = clusterIds;
 			synchronized (clusteringResult)
 			{
-				return clusteringResult.getParents(clustersIds);
+				return parents = clusteringResult.getParents(clusterIds);
 			}
 		}
 	}
@@ -1880,7 +1887,67 @@ public class OPTICS implements PlugIn
 				return;
 
 			// TODO Move the profile to the first selected cluster
+			PlotCanvas pc = lastCanvas;
+			if (pc == null)
+				return;
 
+			int[] selectedClusters = e.getClusters();
+			int[] parents = clusteringResult.getParents(selectedClusters);
+			if (parents == null || parents.length == 0)
+				return;
+
+			int[] order = clusteringResult.getOrder();
+
+			int min = Integer.MAX_VALUE;
+			int max = 0;
+			for (int i : parents)
+			{
+				int o = order[i];
+				if (min > o)
+					min = o;
+				if (max < o)
+					max = o;
+			}
+			
+			// TODO - Fix this for tiny clusters
+			if (max == min)
+			{
+				max++;
+			}
+
+			// Find the range of the profile
+			double minR = Double.POSITIVE_INFINITY, maxR = 0;
+
+			// The scale should not matter as the result is cached
+			double[] profile = clusteringResult.getProfile(Double.NaN);
+			for (int i = min; i < max; i++)
+			{
+				double r = profile[i];
+				if (minR > r)
+					minR = r;
+				if (maxR < r)
+					maxR = r;
+			}
+			
+			// Pad?
+			double padR = Math.max(1, maxR - minR) * 0.05;
+			maxR += padR;
+			minR -= padR;
+			
+			// TODO - Optionally add y-range of the clusters drawn underneath
+
+			// Fix this to get the range for the order and the reachability plot
+			// and scale appropriately to fit
+			Plot plot = pc.getPlot();
+
+			int x = (int) plot.scaleXtoPxl(min);
+			int y = (int) plot.scaleYtoPxl(maxR);
+			int endX = (int) plot.scaleXtoPxl(max);
+			int endY = (int) plot.scaleYtoPxl(minR);
+			//System.out.printf("%d,%d to %d,%d\n", x, y, endX, endY);
+
+			pc.getImage().setRoi(new Roi(x, y, endX - x, endY - y));
+			pc.zoom("to");
 		}
 	}
 
@@ -3108,13 +3175,13 @@ public class OPTICS implements PlugIn
 			{
 				// Check for a closed table
 				saveOldLocation();
-				
+
 				// If new results then copy the settings (for calibration)
 				if (newResults != results && table != null)
 				{
 					table.copySettings(newResults);
 				}
-				
+
 				// Clear the table
 				if (tw != null)
 					tw.getTextPanel().clear();
@@ -3154,8 +3221,12 @@ public class OPTICS implements PlugIn
 			int[] selectedClusters = e.getClusters();
 			int[] parents = clusteringResult.getParents(selectedClusters);
 			if (parents == null || parents.length == 0)
+			{
+				if (table != null)
+					table.clear();
 				return;
-			
+			}
+
 			// Create the table if needed
 			if (tw == null)
 			{
@@ -3181,7 +3252,7 @@ public class OPTICS implements PlugIn
 							bounds.y = f.getY() + 30;
 							break;
 						}
-					}						
+					}
 				}
 				if (bounds != null && table.isNewWindow())
 				{
@@ -3203,7 +3274,7 @@ public class OPTICS implements PlugIn
 						p.getParameters(), p.getParameterDeviations(), clusters[i]);
 				table.add(r);
 			}
-			
+
 			table.flush();
 			tw.getTextPanel().scrollToTop();
 		}
