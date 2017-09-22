@@ -1631,7 +1631,8 @@ public class OPTICS implements PlugIn
 					limits[0] = -range; //start - (maxLevel + 1) * separation;
 				}
 
-				plot.setLimits(1, order.length, limits[0], limits[1]);
+				// Pad order by 0.5 so we can see the ends of the plot
+				plot.setLimits(0.5, order.length + 0.5, limits[0], limits[1]);
 
 				// Create the colour for each point on the line:
 				// We draw lines between from and to of the same colour
@@ -1886,7 +1887,6 @@ public class OPTICS implements PlugIn
 			if (e.getSource() == id)
 				return;
 
-			// TODO Move the profile to the first selected cluster
 			PlotCanvas pc = lastCanvas;
 			if (pc == null)
 				return;
@@ -1896,6 +1896,7 @@ public class OPTICS implements PlugIn
 			if (parents == null || parents.length == 0)
 				return;
 
+			// Move the profile to the cover the range of the selected clusters
 			int[] order = clusteringResult.getOrder();
 
 			int min = Integer.MAX_VALUE;
@@ -1907,12 +1908,6 @@ public class OPTICS implements PlugIn
 					min = o;
 				if (max < o)
 					max = o;
-			}
-			
-			// TODO - Fix this for tiny clusters
-			if (max == min)
-			{
-				max++;
 			}
 
 			// Find the range of the profile
@@ -1928,24 +1923,25 @@ public class OPTICS implements PlugIn
 				if (maxR < r)
 					maxR = r;
 			}
-			
+
 			// Pad?
-			double padR = Math.max(1, maxR - minR) * 0.05;
+			double padR = Math.max(0.5, (maxR - minR) * 0.05);
 			maxR += padR;
 			minR -= padR;
-			
+
 			// TODO - Optionally add y-range of the clusters drawn underneath
 
-			// Fix this to get the range for the order and the reachability plot
-			// and scale appropriately to fit
 			Plot plot = pc.getPlot();
 
-			int x = (int) plot.scaleXtoPxl(min);
+			// Pad order by 0.5 so we can see the ends of the range
+			int x = (int) plot.scaleXtoPxl(min - 0.5);
+			int endX = (int) Math.ceil(plot.scaleXtoPxl(max + 0.5));
 			int y = (int) plot.scaleYtoPxl(maxR);
-			int endX = (int) plot.scaleXtoPxl(max);
-			int endY = (int) plot.scaleYtoPxl(minR);
+			int endY = (int) Math.ceil(plot.scaleYtoPxl(minR));
 			//System.out.printf("%d,%d to %d,%d\n", x, y, endX, endY);
 
+			// Setting an ROI and calling zoom will reset the view window
+			// and then kill the ROI
 			pc.getImage().setRoi(new Roi(x, y, endX - x, endY - y));
 			pc.zoom("to");
 		}
@@ -2367,12 +2363,6 @@ public class OPTICS implements PlugIn
 								continue;
 
 							int j = predecessor[i];
-
-							// XXX: This is probably an older version before we used the predecessor
-							// The spanning tree can jump across hierachical clusters.
-							// Prevent jumps across top-level clusters
-							//if (topLevelClusters[i] != topLevelClusters[j])
-							//	continue;
 
 							float xi = image.mapX(sp.x[i]);
 							float yi = image.mapY(sp.y[i]);
