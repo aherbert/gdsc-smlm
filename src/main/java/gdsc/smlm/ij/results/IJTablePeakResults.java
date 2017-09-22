@@ -71,6 +71,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private String source = null;
 	private String sourceText = null;
 	private String tableTitle = "Fit Results";
+	private boolean newWindow;
 	private TextWindow resultsWindow;
 	private TextPanel tp;
 	private ImageROIPainter roiPainter;
@@ -201,8 +202,10 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			}
 		}
 
+		newWindow = false;
 		if (resultsWindow == null || !resultsWindow.isShowing())
 		{
+			newWindow = true;
 			resultsWindow = new TextWindow(tableTitle, header, "", 800, 300);
 			roiPainter = new ImageROIPainter(resultsWindow.getTextPanel(), "", this);
 
@@ -245,6 +248,17 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			}
 		}
 	}
+	
+	/**
+	 * Checks if is new window.
+	 *
+	 * @return true, if is new window
+	 */
+	public boolean isNewWindow()
+	{
+		return newWindow;
+	}
+	
 
 	private String createResultsHeader()
 	{
