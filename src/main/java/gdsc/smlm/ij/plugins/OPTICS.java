@@ -17,6 +17,7 @@ import java.awt.AWTEvent;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
+import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
@@ -75,6 +76,7 @@ import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
+import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
@@ -3071,6 +3073,8 @@ public class OPTICS implements PlugIn
 		MemoryPeakResults results;
 		CachedClusteringResult clusteringResult;
 
+		// TODO - make display of this table optional and show/hide it
+		boolean display = true;
 		IJTablePeakResults table;
 		TextWindow tw;
 		Rectangle bounds;
@@ -3099,29 +3103,21 @@ public class OPTICS implements PlugIn
 			clusteringResult = (CachedClusteringResult) resultList.get(2);
 
 			// TODO - make display of this table optional and show/hide it
-			boolean display = true;
+			// Optionally hide the window using 
 			if (display)
 			{
-				// Create the table.
-				// Only create a new table if the results are different. 
+				// Check for a closed table
 				saveOldLocation();
-				if (newResults != results || tw == null)
+				
+				// If new results then copy the settings (for calibration)
+				if (newResults != results && table != null)
 				{
-					table = new IJTablePeakResults(false, TITLE, true);
 					table.copySettings(newResults);
-					table.setDistanceUnit(DistanceUnit.NM);
-					table.setHideSourceText(true);
-					table.setShowId(true);
-					table.begin();
-					tw = table.getResultsWindow();
-					if (bounds != null)
-						tw.setBounds(bounds);
 				}
-				else
-				{
-					// Just clear the table
+				
+				// Clear the table
+				if (tw != null)
 					tw.getTextPanel().clear();
-				}
 			}
 			else
 			{
@@ -3150,14 +3146,53 @@ public class OPTICS implements PlugIn
 		public void clusterSelected(ClusterSelectedEvent e)
 		{
 			saveOldLocation();
-			if (results == null || tw == null)
+			if (!display)
 				return;
-
-			tw.getTextPanel().clear();
+			if (results == null)
+				return;
 
 			int[] parents = clusteringResult.getParents(e.getClusters());
 			if (parents == null || parents.length == 0)
 				return;
+			
+			// Create the table if needed
+			if (tw == null)
+			{
+				table = new IJTablePeakResults(false, TITLE, true);
+				table.setTableTitle(TITLE + " Selected Clusters");
+				table.copySettings(results);
+				table.setDistanceUnit(DistanceUnit.NM);
+				table.setHideSourceText(true);
+				table.setShowId(true);
+				table.begin();
+				tw = table.getResultsWindow();
+				if (table.isNewWindow())
+				{
+					// Position under the Clusters window
+					String tableTitle = TITLE + " Clusters";
+					for (Frame f : WindowManager.getNonImageWindows())
+					{
+						if (f != null && tableTitle.equals(f.getTitle()))
+						{
+							// Cascade
+							bounds = tw.getBounds();
+							bounds.x = f.getX() + 30;
+							bounds.y = f.getY() + 30;
+							break;
+						}
+					}						
+				}
+				if (bounds != null)
+				{
+					tw.setBounds(bounds);
+				}
+			}
+			else
+			{
+				// Just clear the table
+				tw.getTextPanel().clear();
+			}
+
 			int[] clusters = clusteringResult.getClusters();
 
 			for (int i : parents)
@@ -3167,6 +3202,8 @@ public class OPTICS implements PlugIn
 						p.getParameters(), p.getParameterDeviations(), clusters[i]);
 				table.add(r);
 			}
+			
+			tw.getTextPanel().scrollToTop();
 		}
 	}
 
