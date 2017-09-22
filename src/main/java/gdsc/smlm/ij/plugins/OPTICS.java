@@ -3280,7 +3280,7 @@ public class OPTICS implements PlugIn
 						profile[i] = d[i];
 				}
 				Arrays.sort(profile);
-				Sort.reverse(profile);
+				SimpleArrayUtils.reverse(profile);
 				if (nmPerPixel != 1)
 				{
 					for (int i = 0; i < profile.length; i++)

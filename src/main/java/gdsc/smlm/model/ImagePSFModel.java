@@ -7,7 +7,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 //import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.utils.Sort;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.Erf;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
@@ -211,7 +211,7 @@ public class ImagePSFModel extends PSFModel
 			scratch[i] = image[i];
 		}
 		Arrays.sort(scratch);
-		Sort.reverse(scratch);
+		SimpleArrayUtils.reverse(scratch);
 		// Find the cut-off using the sum and the noise fraction
 		final double cutoff = sum - noiseFraction * sum;
 		sum = 0;

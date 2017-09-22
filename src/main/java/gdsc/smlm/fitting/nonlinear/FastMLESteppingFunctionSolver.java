@@ -367,8 +367,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 							for (int i = 0; i < slopeComponents.length; i++)
 								slopeComponents[i] = gradient[i] * searchDirection[gradientIndices[i]];
 							int[] indices = SimpleArrayUtils.newArray(slopeComponents.length, 0, 1);
-							Sort.sort(indices, slopeComponents);
-							Sort.reverse(indices);
+							Sort.sortAscending(indices, slopeComponents);
 							int j = 0;
 							while (slope <= 0 && j < slopeComponents.length && slopeComponents[indices[j]] <= 0)
 							{

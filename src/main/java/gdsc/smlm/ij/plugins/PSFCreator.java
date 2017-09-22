@@ -2079,11 +2079,7 @@ public class PSFCreator implements PlugInFilter
 
 			// Sort
 			int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
-			Sort.sort(indices, d, true);
-
-			// The sort is made in descending order so invert
-			Sort.reverse(indices);
-			Sort.reverse(d);
+			Sort.sortAscending(indices, d, true);
 
 			// Store a unique cumulative index for each distance
 			double lastD = d[0];

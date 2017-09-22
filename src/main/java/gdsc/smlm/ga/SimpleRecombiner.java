@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import gdsc.core.utils.Sort;
+import gdsc.core.utils.SimpleArrayUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -99,7 +99,7 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 		}
 
 		// Reverse the array because the end is random
-		Sort.reverse(positions);
+		SimpleArrayUtils.reverse(positions);
 		positions = Arrays.copyOf(positions, nCrossovers);
 		// Get the positions in order
 		if (nCrossovers != 1)
