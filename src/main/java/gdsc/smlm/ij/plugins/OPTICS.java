@@ -3151,7 +3151,8 @@ public class OPTICS implements PlugIn
 			if (results == null)
 				return;
 
-			int[] parents = clusteringResult.getParents(e.getClusters());
+			int[] selectedClusters = e.getClusters();
+			int[] parents = clusteringResult.getParents(selectedClusters);
 			if (parents == null || parents.length == 0)
 				return;
 			
@@ -3166,7 +3167,7 @@ public class OPTICS implements PlugIn
 				table.setShowId(true);
 				table.begin();
 				tw = table.getResultsWindow();
-				if (table.isNewWindow())
+				if (bounds == null)
 				{
 					// Position under the Clusters window
 					String tableTitle = TITLE + " Clusters";
@@ -3182,7 +3183,7 @@ public class OPTICS implements PlugIn
 						}
 					}						
 				}
-				if (bounds != null)
+				if (bounds != null && table.isNewWindow())
 				{
 					tw.setBounds(bounds);
 				}
@@ -3190,7 +3191,7 @@ public class OPTICS implements PlugIn
 			else
 			{
 				// Just clear the table
-				tw.getTextPanel().clear();
+				table.clear();
 			}
 
 			int[] clusters = clusteringResult.getClusters();
@@ -3203,6 +3204,7 @@ public class OPTICS implements PlugIn
 				table.add(r);
 			}
 			
+			table.flush();
 			tw.getTextPanel().scrollToTop();
 		}
 	}

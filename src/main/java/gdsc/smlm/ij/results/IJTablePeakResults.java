@@ -176,6 +176,18 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	}
 
 	/**
+	 * Clear the table contents.
+	 */
+	public void clear()
+	{
+		tp.clear();
+		size = 0;
+		// Let some results appear before drawing.
+		// ImageJ will auto-layout columns if it has less than 10 rows
+		nextRepaintSize = 9;
+	}
+
+	/**
 	 * Create the result window (if it is not available)
 	 */
 	private void createResultsWindow()
@@ -248,7 +260,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			}
 		}
 	}
-	
+
 	/**
 	 * Checks if is new window.
 	 *
@@ -258,7 +270,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	{
 		return newWindow;
 	}
-	
 
 	private String createResultsHeader()
 	{
@@ -516,6 +527,14 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void end()
 	{
 		tableActive = false;
+		drawTable();
+	}
+	
+	/**
+	 * Forces the table to be updated with the current contents.
+	 */
+	public void flush()
+	{
 		drawTable();
 	}
 
