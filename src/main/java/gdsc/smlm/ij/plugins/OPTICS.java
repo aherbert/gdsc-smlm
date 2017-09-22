@@ -61,8 +61,10 @@ import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
+import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.Counter;
+import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -99,6 +101,7 @@ import ij.process.LUTHelper;
 import ij.process.LUTHelper.LUTMapper;
 import ij.process.LUTHelper.LutColour;
 import ij.text.TextPanel;
+import ij.text.TextWindow;
 import ij.text.TextWindow2;
 
 /**
@@ -1105,6 +1108,15 @@ public class OPTICS implements PlugIn
 			getSize();
 			return level;
 		}
+
+		public int[] getParents(int[] clustersIds)
+		{
+			// This cannot be cached
+			synchronized (clusteringResult)
+			{
+				return clusteringResult.getParents(clustersIds);
+			}
+		}
 	}
 
 	private class OpticsWorker extends BaseWorker
@@ -1460,12 +1472,8 @@ public class OPTICS implements PlugIn
 			CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
 			if (clusteringResult.isValid())
 			{
-				final int[] clusters;
-				synchronized (clusteringResult)
-				{
-					clusters = clusteringResult.getClusters();
-				}
-				int max = Maths.max(clusters);
+				final int[] clusters = clusteringResult.getClusters();
+				int max = clusteringResult.getMaxClusterId();
 
 				// Save the clusters to memory
 				final Trace[] traces = new Trace[max + 1];
@@ -2226,14 +2234,11 @@ public class OPTICS implements PlugIn
 						else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_DEPTH.ordinal() && max == max2)
 						{
 							lut = clusterDepthLut;
-							synchronized (clusteringResult)
-							{
-								ArrayList<OPTICSCluster> allClusters = clusteringResult.getAllClusters();
-								Arrays.fill(map, 0);
-								for (OPTICSCluster c : allClusters)
-									map[c.getClusterId()] = c.getLevel() + 1;
-								max2 = Maths.max(map);
-							}
+							ArrayList<OPTICSCluster> allClusters = clusteringResult.getAllClusters();
+							Arrays.fill(map, 0);
+							for (OPTICSCluster c : allClusters)
+								map[c.getClusterId()] = c.getLevel() + 1;
+							max2 = Maths.max(map);
 						}
 						else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_LOOP.ordinal())
 						{
@@ -3061,6 +3066,110 @@ public class OPTICS implements PlugIn
 		}
 	}
 
+	private class ClusterSelectedTableWorker extends BaseWorker implements ClusterSelectedHandler
+	{
+		MemoryPeakResults results;
+		CachedClusteringResult clusteringResult;
+
+		IJTablePeakResults table;
+		TextWindow tw;
+		Rectangle bounds;
+
+		@Override
+		public boolean equalSettings(OpticsSettings current, OpticsSettings previous)
+		{
+			// No settings for this worker
+			return true;
+		}
+
+		@Override
+		protected void newResults()
+		{
+			// Clear cache
+			results = null;
+			clusteringResult = null;
+		}
+
+		@Override
+		public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work)
+		{
+			//OpticsSettings settings = work.s;
+			Settings resultList = work.r;
+			MemoryPeakResults newResults = (MemoryPeakResults) resultList.get(0);
+			clusteringResult = (CachedClusteringResult) resultList.get(2);
+
+			// TODO - make display of this table optional and show/hide it
+			boolean display = true;
+			if (display)
+			{
+				// Create the table.
+				// Only create a new table if the results are different. 
+				saveOldLocation();
+				if (newResults != results || tw == null)
+				{
+					table = new IJTablePeakResults(false, TITLE, true);
+					table.copySettings(newResults);
+					table.setDistanceUnit(DistanceUnit.NM);
+					table.setHideSourceText(true);
+					table.setShowId(true);
+					table.begin();
+					tw = table.getResultsWindow();
+					if (bounds != null)
+						tw.setBounds(bounds);
+				}
+				else
+				{
+					// Just clear the table
+					tw.getTextPanel().clear();
+				}
+			}
+			else
+			{
+				if (tw != null)
+				{
+					bounds = tw.getBounds();
+					tw.close();
+					tw = null;
+				}
+			}
+			results = newResults;
+
+			// We have not created anything new so return the current object
+			return work;
+		}
+
+		private void saveOldLocation()
+		{
+			if (tw != null && !tw.isShowing())
+			{
+				bounds = tw.getBounds();
+				tw = null;
+			}
+		}
+
+		public void clusterSelected(ClusterSelectedEvent e)
+		{
+			saveOldLocation();
+			if (results == null || tw == null)
+				return;
+
+			tw.getTextPanel().clear();
+
+			int[] parents = clusteringResult.getParents(e.getClusters());
+			if (parents == null || parents.length == 0)
+				return;
+			int[] clusters = clusteringResult.getClusters();
+
+			for (int i : parents)
+			{
+				PeakResult p = results.get(i);
+				IdPeakResult r = new IdPeakResult(p.getFrame(), p.origX, p.origY, p.origValue, p.error, p.noise,
+						p.getParameters(), p.getParameterDeviations(), clusters[i]);
+				table.add(r);
+			}
+		}
+	}
+
 	private class KNNWorker extends BaseWorker
 	{
 		double[] profile = null;
@@ -3366,6 +3475,7 @@ public class OPTICS implements PlugIn
 		workflow.add(new MemoryResultsWorker(), previous);
 		workflow.add(new ImageResultsWorker(), previous);
 		workflow.add(new TableResultsWorker(), previous);
+		workflow.add(new ClusterSelectedTableWorker(), previous);
 
 		workflow.start();
 
@@ -3405,6 +3515,7 @@ public class OPTICS implements PlugIn
 		workflow.add(new ReachabilityResultsWorker(), previous);
 		workflow.add(new ImageResultsWorker(), previous);
 		workflow.add(new TableResultsWorker(), previous);
+		workflow.add(new ClusterSelectedTableWorker(), previous);
 
 		workflow.start();
 
