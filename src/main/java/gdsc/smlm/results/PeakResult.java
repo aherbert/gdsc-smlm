@@ -16,7 +16,7 @@ package gdsc.smlm.results;
 /**
  * Specifies a peak fitting result
  */
-public class PeakResult implements Comparable<PeakResult>
+public class PeakResult implements Comparable<PeakResult>, Cloneable
 {
 	/** Index of the background in the parameters array */
 	public static final int BACKGROUND = 0;
@@ -236,7 +236,7 @@ public class PeakResult implements Comparable<PeakResult>
 		}
 		else if (r2.paramStdDevs != null)
 			return false;
-		
+
 		return true;
 	}
 
@@ -596,5 +596,26 @@ public class PeakResult implements Comparable<PeakResult>
 	public float getParameterDeviation(int i)
 	{
 		return paramStdDevs[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public PeakResult clone()
+	{
+		try
+		{
+			PeakResult result = (PeakResult) super.clone();
+			result.params = params.clone();
+			if (paramStdDevs != null)
+				result.paramStdDevs = paramStdDevs.clone();
+			return result;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
 	}
 }
