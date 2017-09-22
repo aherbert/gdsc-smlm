@@ -158,6 +158,17 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Add all results.
+	 *
+	 * @param results
+	 *            the results
+	 */
+	public void addAll(PeakResultStore results)
+	{
+		this.results.addStore(results);
+	}
+
+	/**
 	 * Adds the results.
 	 *
 	 * @param results
