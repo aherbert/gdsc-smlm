@@ -13892,6 +13892,839 @@ public final class GUIProtos {
 
   }
 
+  public interface OpticsEventSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.OpticsEventSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>bool show_selection_table = 1;</code>
+     */
+    boolean getShowSelectionTable();
+
+    /**
+     * <code>bool table_create_selection = 2;</code>
+     */
+    boolean getTableCreateSelection();
+
+    /**
+     * <code>bool image_create_selection = 3;</code>
+     */
+    boolean getImageCreateSelection();
+
+    /**
+     * <code>bool plot_create_selection = 4;</code>
+     */
+    boolean getPlotCreateSelection();
+
+    /**
+     * <code>bool table_show_selection = 5;</code>
+     */
+    boolean getTableShowSelection();
+
+    /**
+     * <code>bool image_show_selection = 6;</code>
+     */
+    boolean getImageShowSelection();
+
+    /**
+     * <code>bool plot_show_selection = 7;</code>
+     */
+    boolean getPlotShowSelection();
+  }
+  /**
+   * <pre>
+   * Contains the settings for the events in the OPTICS GUI
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.OpticsEventSettings}
+   */
+  public  static final class OpticsEventSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.OpticsEventSettings)
+      OpticsEventSettingsOrBuilder {
+    // Use OpticsEventSettings.newBuilder() to construct.
+    private OpticsEventSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private OpticsEventSettings() {
+      showSelectionTable_ = false;
+      tableCreateSelection_ = false;
+      imageCreateSelection_ = false;
+      plotCreateSelection_ = false;
+      tableShowSelection_ = false;
+      imageShowSelection_ = false;
+      plotShowSelection_ = false;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private OpticsEventSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+
+              showSelectionTable_ = input.readBool();
+              break;
+            }
+            case 16: {
+
+              tableCreateSelection_ = input.readBool();
+              break;
+            }
+            case 24: {
+
+              imageCreateSelection_ = input.readBool();
+              break;
+            }
+            case 32: {
+
+              plotCreateSelection_ = input.readBool();
+              break;
+            }
+            case 40: {
+
+              tableShowSelection_ = input.readBool();
+              break;
+            }
+            case 48: {
+
+              imageShowSelection_ = input.readBool();
+              break;
+            }
+            case 56: {
+
+              plotShowSelection_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsEventSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsEventSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.class, gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder.class);
+    }
+
+    public static final int SHOW_SELECTION_TABLE_FIELD_NUMBER = 1;
+    private boolean showSelectionTable_;
+    /**
+     * <code>bool show_selection_table = 1;</code>
+     */
+    public boolean getShowSelectionTable() {
+      return showSelectionTable_;
+    }
+
+    public static final int TABLE_CREATE_SELECTION_FIELD_NUMBER = 2;
+    private boolean tableCreateSelection_;
+    /**
+     * <code>bool table_create_selection = 2;</code>
+     */
+    public boolean getTableCreateSelection() {
+      return tableCreateSelection_;
+    }
+
+    public static final int IMAGE_CREATE_SELECTION_FIELD_NUMBER = 3;
+    private boolean imageCreateSelection_;
+    /**
+     * <code>bool image_create_selection = 3;</code>
+     */
+    public boolean getImageCreateSelection() {
+      return imageCreateSelection_;
+    }
+
+    public static final int PLOT_CREATE_SELECTION_FIELD_NUMBER = 4;
+    private boolean plotCreateSelection_;
+    /**
+     * <code>bool plot_create_selection = 4;</code>
+     */
+    public boolean getPlotCreateSelection() {
+      return plotCreateSelection_;
+    }
+
+    public static final int TABLE_SHOW_SELECTION_FIELD_NUMBER = 5;
+    private boolean tableShowSelection_;
+    /**
+     * <code>bool table_show_selection = 5;</code>
+     */
+    public boolean getTableShowSelection() {
+      return tableShowSelection_;
+    }
+
+    public static final int IMAGE_SHOW_SELECTION_FIELD_NUMBER = 6;
+    private boolean imageShowSelection_;
+    /**
+     * <code>bool image_show_selection = 6;</code>
+     */
+    public boolean getImageShowSelection() {
+      return imageShowSelection_;
+    }
+
+    public static final int PLOT_SHOW_SELECTION_FIELD_NUMBER = 7;
+    private boolean plotShowSelection_;
+    /**
+     * <code>bool plot_show_selection = 7;</code>
+     */
+    public boolean getPlotShowSelection() {
+      return plotShowSelection_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (showSelectionTable_ != false) {
+        output.writeBool(1, showSelectionTable_);
+      }
+      if (tableCreateSelection_ != false) {
+        output.writeBool(2, tableCreateSelection_);
+      }
+      if (imageCreateSelection_ != false) {
+        output.writeBool(3, imageCreateSelection_);
+      }
+      if (plotCreateSelection_ != false) {
+        output.writeBool(4, plotCreateSelection_);
+      }
+      if (tableShowSelection_ != false) {
+        output.writeBool(5, tableShowSelection_);
+      }
+      if (imageShowSelection_ != false) {
+        output.writeBool(6, imageShowSelection_);
+      }
+      if (plotShowSelection_ != false) {
+        output.writeBool(7, plotShowSelection_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (showSelectionTable_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(1, showSelectionTable_);
+      }
+      if (tableCreateSelection_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, tableCreateSelection_);
+      }
+      if (imageCreateSelection_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, imageCreateSelection_);
+      }
+      if (plotCreateSelection_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, plotCreateSelection_);
+      }
+      if (tableShowSelection_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, tableShowSelection_);
+      }
+      if (imageShowSelection_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(6, imageShowSelection_);
+      }
+      if (plotShowSelection_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(7, plotShowSelection_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.OpticsEventSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.OpticsEventSettings other = (gdsc.smlm.data.config.GUIProtos.OpticsEventSettings) obj;
+
+      boolean result = true;
+      result = result && (getShowSelectionTable()
+          == other.getShowSelectionTable());
+      result = result && (getTableCreateSelection()
+          == other.getTableCreateSelection());
+      result = result && (getImageCreateSelection()
+          == other.getImageCreateSelection());
+      result = result && (getPlotCreateSelection()
+          == other.getPlotCreateSelection());
+      result = result && (getTableShowSelection()
+          == other.getTableShowSelection());
+      result = result && (getImageShowSelection()
+          == other.getImageShowSelection());
+      result = result && (getPlotShowSelection()
+          == other.getPlotShowSelection());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + SHOW_SELECTION_TABLE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowSelectionTable());
+      hash = (37 * hash) + TABLE_CREATE_SELECTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getTableCreateSelection());
+      hash = (37 * hash) + IMAGE_CREATE_SELECTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getImageCreateSelection());
+      hash = (37 * hash) + PLOT_CREATE_SELECTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getPlotCreateSelection());
+      hash = (37 * hash) + TABLE_SHOW_SELECTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getTableShowSelection());
+      hash = (37 * hash) + IMAGE_SHOW_SELECTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getImageShowSelection());
+      hash = (37 * hash) + PLOT_SHOW_SELECTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getPlotShowSelection());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.OpticsEventSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains the settings for the events in the OPTICS GUI
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.OpticsEventSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.OpticsEventSettings)
+        gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsEventSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsEventSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.class, gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        showSelectionTable_ = false;
+
+        tableCreateSelection_ = false;
+
+        imageCreateSelection_ = false;
+
+        plotCreateSelection_ = false;
+
+        tableShowSelection_ = false;
+
+        imageShowSelection_ = false;
+
+        plotShowSelection_ = false;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_OpticsEventSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings build() {
+        gdsc.smlm.data.config.GUIProtos.OpticsEventSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.OpticsEventSettings result = new gdsc.smlm.data.config.GUIProtos.OpticsEventSettings(this);
+        result.showSelectionTable_ = showSelectionTable_;
+        result.tableCreateSelection_ = tableCreateSelection_;
+        result.imageCreateSelection_ = imageCreateSelection_;
+        result.plotCreateSelection_ = plotCreateSelection_;
+        result.tableShowSelection_ = tableShowSelection_;
+        result.imageShowSelection_ = imageShowSelection_;
+        result.plotShowSelection_ = plotShowSelection_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.OpticsEventSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.OpticsEventSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.OpticsEventSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance()) return this;
+        if (other.getShowSelectionTable() != false) {
+          setShowSelectionTable(other.getShowSelectionTable());
+        }
+        if (other.getTableCreateSelection() != false) {
+          setTableCreateSelection(other.getTableCreateSelection());
+        }
+        if (other.getImageCreateSelection() != false) {
+          setImageCreateSelection(other.getImageCreateSelection());
+        }
+        if (other.getPlotCreateSelection() != false) {
+          setPlotCreateSelection(other.getPlotCreateSelection());
+        }
+        if (other.getTableShowSelection() != false) {
+          setTableShowSelection(other.getTableShowSelection());
+        }
+        if (other.getImageShowSelection() != false) {
+          setImageShowSelection(other.getImageShowSelection());
+        }
+        if (other.getPlotShowSelection() != false) {
+          setPlotShowSelection(other.getPlotShowSelection());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.OpticsEventSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.OpticsEventSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private boolean showSelectionTable_ ;
+      /**
+       * <code>bool show_selection_table = 1;</code>
+       */
+      public boolean getShowSelectionTable() {
+        return showSelectionTable_;
+      }
+      /**
+       * <code>bool show_selection_table = 1;</code>
+       */
+      public Builder setShowSelectionTable(boolean value) {
+        
+        showSelectionTable_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool show_selection_table = 1;</code>
+       */
+      public Builder clearShowSelectionTable() {
+        
+        showSelectionTable_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean tableCreateSelection_ ;
+      /**
+       * <code>bool table_create_selection = 2;</code>
+       */
+      public boolean getTableCreateSelection() {
+        return tableCreateSelection_;
+      }
+      /**
+       * <code>bool table_create_selection = 2;</code>
+       */
+      public Builder setTableCreateSelection(boolean value) {
+        
+        tableCreateSelection_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool table_create_selection = 2;</code>
+       */
+      public Builder clearTableCreateSelection() {
+        
+        tableCreateSelection_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean imageCreateSelection_ ;
+      /**
+       * <code>bool image_create_selection = 3;</code>
+       */
+      public boolean getImageCreateSelection() {
+        return imageCreateSelection_;
+      }
+      /**
+       * <code>bool image_create_selection = 3;</code>
+       */
+      public Builder setImageCreateSelection(boolean value) {
+        
+        imageCreateSelection_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool image_create_selection = 3;</code>
+       */
+      public Builder clearImageCreateSelection() {
+        
+        imageCreateSelection_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean plotCreateSelection_ ;
+      /**
+       * <code>bool plot_create_selection = 4;</code>
+       */
+      public boolean getPlotCreateSelection() {
+        return plotCreateSelection_;
+      }
+      /**
+       * <code>bool plot_create_selection = 4;</code>
+       */
+      public Builder setPlotCreateSelection(boolean value) {
+        
+        plotCreateSelection_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool plot_create_selection = 4;</code>
+       */
+      public Builder clearPlotCreateSelection() {
+        
+        plotCreateSelection_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean tableShowSelection_ ;
+      /**
+       * <code>bool table_show_selection = 5;</code>
+       */
+      public boolean getTableShowSelection() {
+        return tableShowSelection_;
+      }
+      /**
+       * <code>bool table_show_selection = 5;</code>
+       */
+      public Builder setTableShowSelection(boolean value) {
+        
+        tableShowSelection_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool table_show_selection = 5;</code>
+       */
+      public Builder clearTableShowSelection() {
+        
+        tableShowSelection_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean imageShowSelection_ ;
+      /**
+       * <code>bool image_show_selection = 6;</code>
+       */
+      public boolean getImageShowSelection() {
+        return imageShowSelection_;
+      }
+      /**
+       * <code>bool image_show_selection = 6;</code>
+       */
+      public Builder setImageShowSelection(boolean value) {
+        
+        imageShowSelection_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool image_show_selection = 6;</code>
+       */
+      public Builder clearImageShowSelection() {
+        
+        imageShowSelection_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean plotShowSelection_ ;
+      /**
+       * <code>bool plot_show_selection = 7;</code>
+       */
+      public boolean getPlotShowSelection() {
+        return plotShowSelection_;
+      }
+      /**
+       * <code>bool plot_show_selection = 7;</code>
+       */
+      public Builder setPlotShowSelection(boolean value) {
+        
+        plotShowSelection_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool plot_show_selection = 7;</code>
+       */
+      public Builder clearPlotShowSelection() {
+        
+        plotShowSelection_ = false;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.OpticsEventSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.OpticsEventSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.OpticsEventSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.OpticsEventSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<OpticsEventSettings>
+        PARSER = new com.google.protobuf.AbstractParser<OpticsEventSettings>() {
+      public OpticsEventSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new OpticsEventSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<OpticsEventSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<OpticsEventSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface OpticsSettingsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.OpticsSettings)
       com.google.protobuf.MessageOrBuilder {
@@ -14178,6 +15011,31 @@ public final class GUIProtos {
      * <code>bool table_reverse_sort = 29;</code>
      */
     boolean getTableReverseSort();
+
+    /**
+     * <pre>
+     * Event settings
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+     */
+    boolean hasOpticsEventSettings();
+    /**
+     * <pre>
+     * Event settings
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+     */
+    gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getOpticsEventSettings();
+    /**
+     * <pre>
+     * Event settings
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+     */
+    gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder getOpticsEventSettingsOrBuilder();
   }
   /**
    * <pre>
@@ -14395,6 +15253,19 @@ public final class GUIProtos {
             case 232: {
 
               tableReverseSort_ = input.readBool();
+              break;
+            }
+            case 242: {
+              gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder subBuilder = null;
+              if (opticsEventSettings_ != null) {
+                subBuilder = opticsEventSettings_.toBuilder();
+              }
+              opticsEventSettings_ = input.readMessage(gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(opticsEventSettings_);
+                opticsEventSettings_ = subBuilder.buildPartial();
+              }
+
               break;
             }
           }
@@ -14839,6 +15710,39 @@ public final class GUIProtos {
       return tableReverseSort_;
     }
 
+    public static final int OPTICS_EVENT_SETTINGS_FIELD_NUMBER = 30;
+    private gdsc.smlm.data.config.GUIProtos.OpticsEventSettings opticsEventSettings_;
+    /**
+     * <pre>
+     * Event settings
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+     */
+    public boolean hasOpticsEventSettings() {
+      return opticsEventSettings_ != null;
+    }
+    /**
+     * <pre>
+     * Event settings
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+     */
+    public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getOpticsEventSettings() {
+      return opticsEventSettings_ == null ? gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance() : opticsEventSettings_;
+    }
+    /**
+     * <pre>
+     * Event settings
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+     */
+    public gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder getOpticsEventSettingsOrBuilder() {
+      return getOpticsEventSettings();
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -14937,6 +15841,9 @@ public final class GUIProtos {
       }
       if (tableReverseSort_ != false) {
         output.writeBool(29, tableReverseSort_);
+      }
+      if (opticsEventSettings_ != null) {
+        output.writeMessage(30, getOpticsEventSettings());
       }
     }
 
@@ -15060,6 +15967,10 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(29, tableReverseSort_);
       }
+      if (opticsEventSettings_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(30, getOpticsEventSettings());
+      }
       memoizedSize = size;
       return size;
     }
@@ -15152,6 +16063,11 @@ public final class GUIProtos {
           == other.getTableSortMode());
       result = result && (getTableReverseSort()
           == other.getTableReverseSort());
+      result = result && (hasOpticsEventSettings() == other.hasOpticsEventSettings());
+      if (hasOpticsEventSettings()) {
+        result = result && getOpticsEventSettings()
+            .equals(other.getOpticsEventSettings());
+      }
       return result;
     }
 
@@ -15237,6 +16153,10 @@ public final class GUIProtos {
       hash = (37 * hash) + TABLE_REVERSE_SORT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getTableReverseSort());
+      if (hasOpticsEventSettings()) {
+        hash = (37 * hash) + OPTICS_EVENT_SETTINGS_FIELD_NUMBER;
+        hash = (53 * hash) + getOpticsEventSettings().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -15428,6 +16348,12 @@ public final class GUIProtos {
 
         tableReverseSort_ = false;
 
+        if (opticsEventSettingsBuilder_ == null) {
+          opticsEventSettings_ = null;
+        } else {
+          opticsEventSettings_ = null;
+          opticsEventSettingsBuilder_ = null;
+        }
         return this;
       }
 
@@ -15479,6 +16405,11 @@ public final class GUIProtos {
         result.showTable_ = showTable_;
         result.tableSortMode_ = tableSortMode_;
         result.tableReverseSort_ = tableReverseSort_;
+        if (opticsEventSettingsBuilder_ == null) {
+          result.opticsEventSettings_ = opticsEventSettings_;
+        } else {
+          result.opticsEventSettings_ = opticsEventSettingsBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -15607,6 +16538,9 @@ public final class GUIProtos {
         }
         if (other.getTableReverseSort() != false) {
           setTableReverseSort(other.getTableReverseSort());
+        }
+        if (other.hasOpticsEventSettings()) {
+          mergeOpticsEventSettings(other.getOpticsEventSettings());
         }
         onChanged();
         return this;
@@ -16824,6 +17758,159 @@ public final class GUIProtos {
         tableReverseSort_ = false;
         onChanged();
         return this;
+      }
+
+      private gdsc.smlm.data.config.GUIProtos.OpticsEventSettings opticsEventSettings_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.GUIProtos.OpticsEventSettings, gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder, gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder> opticsEventSettingsBuilder_;
+      /**
+       * <pre>
+       * Event settings
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+       */
+      public boolean hasOpticsEventSettings() {
+        return opticsEventSettingsBuilder_ != null || opticsEventSettings_ != null;
+      }
+      /**
+       * <pre>
+       * Event settings
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+       */
+      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings getOpticsEventSettings() {
+        if (opticsEventSettingsBuilder_ == null) {
+          return opticsEventSettings_ == null ? gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance() : opticsEventSettings_;
+        } else {
+          return opticsEventSettingsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Event settings
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+       */
+      public Builder setOpticsEventSettings(gdsc.smlm.data.config.GUIProtos.OpticsEventSettings value) {
+        if (opticsEventSettingsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          opticsEventSettings_ = value;
+          onChanged();
+        } else {
+          opticsEventSettingsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Event settings
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+       */
+      public Builder setOpticsEventSettings(
+          gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder builderForValue) {
+        if (opticsEventSettingsBuilder_ == null) {
+          opticsEventSettings_ = builderForValue.build();
+          onChanged();
+        } else {
+          opticsEventSettingsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Event settings
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+       */
+      public Builder mergeOpticsEventSettings(gdsc.smlm.data.config.GUIProtos.OpticsEventSettings value) {
+        if (opticsEventSettingsBuilder_ == null) {
+          if (opticsEventSettings_ != null) {
+            opticsEventSettings_ =
+              gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.newBuilder(opticsEventSettings_).mergeFrom(value).buildPartial();
+          } else {
+            opticsEventSettings_ = value;
+          }
+          onChanged();
+        } else {
+          opticsEventSettingsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Event settings
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+       */
+      public Builder clearOpticsEventSettings() {
+        if (opticsEventSettingsBuilder_ == null) {
+          opticsEventSettings_ = null;
+          onChanged();
+        } else {
+          opticsEventSettings_ = null;
+          opticsEventSettingsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Event settings
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+       */
+      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder getOpticsEventSettingsBuilder() {
+        
+        onChanged();
+        return getOpticsEventSettingsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Event settings
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+       */
+      public gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder getOpticsEventSettingsOrBuilder() {
+        if (opticsEventSettingsBuilder_ != null) {
+          return opticsEventSettingsBuilder_.getMessageOrBuilder();
+        } else {
+          return opticsEventSettings_ == null ?
+              gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.getDefaultInstance() : opticsEventSettings_;
+        }
+      }
+      /**
+       * <pre>
+       * Event settings
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.OpticsEventSettings optics_event_settings = 30;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.GUIProtos.OpticsEventSettings, gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder, gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder> 
+          getOpticsEventSettingsFieldBuilder() {
+        if (opticsEventSettingsBuilder_ == null) {
+          opticsEventSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              gdsc.smlm.data.config.GUIProtos.OpticsEventSettings, gdsc.smlm.data.config.GUIProtos.OpticsEventSettings.Builder, gdsc.smlm.data.config.GUIProtos.OpticsEventSettingsOrBuilder>(
+                  getOpticsEventSettings(),
+                  getParentForChildren(),
+                  isClean());
+          opticsEventSettings_ = null;
+        }
+        return opticsEventSettingsBuilder_;
       }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -20993,6 +22080,11 @@ public final class GUIProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_ClusteringSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_OpticsEventSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_OpticsEventSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -21120,42 +22212,49 @@ public final class GUIProtos {
       "n_correction\030\036 \001(\010\022\026\n\016msd_correction\030\037 \001" +
       "(\010\022\013\n\003mle\030  \001(\010\022\022\n\nfit_length\030! \001(\005\022\024\n\014f" +
       "it_restarts\030\" \001(\005\022\025\n\rjump_distance\030# \001(\005" +
-      "\"\224\005\n\016OpticsSettings\022\024\n\014input_option\030\001 \001(" +
-      "\t\022\023\n\013optics_mode\030\002 \001(\005\022\034\n\024number_of_spli" +
-      "t_sets\030\003 \001(\005\022\032\n\022use_random_vectors\030\004 \001(\010" +
-      "\022\035\n\025save_approximate_sets\030\005 \001(\010\022\023\n\013sampl" +
-      "e_mode\030\006 \001(\005\022\033\n\023generating_distance\030\007 \001(" +
-      "\001\022\022\n\nmin_points\030\010 \001(\005\022\027\n\017clustering_mode",
-      "\030\t \001(\005\022\n\n\002xi\030\n \001(\001\022\020\n\010topLevel\030\013 \001(\010\022\023\n\013" +
-      "upper_limit\030\014 \001(\001\022\023\n\013lower_limit\030\r \001(\001\022\017" +
-      "\n\007samples\030\016 \001(\005\022\027\n\017sample_fraction\030\017 \001(\001" +
-      "\022\026\n\016fraction_noise\030\020 \001(\001\022\033\n\023clustering_d" +
-      "istance\030\021 \001(\001\022\014\n\004core\030\022 \001(\010\022\023\n\013image_sca" +
-      "le\030\023 \001(\001\022\022\n\nimage_mode\030\024 \001(\005\022\020\n\010weighted" +
-      "\030\025 \001(\010\022\021\n\tequalised\030\026 \001(\010\022\021\n\tplot_mode\030\027" +
-      " \001(\005\022\024\n\014outline_mode\030\030 \001(\005\022\032\n\022spanning_t" +
-      "ree_mode\030\031 \001(\005\022\016\n\006lambda\030\032 \001(\001\022\022\n\nshow_t" +
-      "able\030\033 \001(\010\022\027\n\017table_sort_mode\030\034 \001(\005\022\032\n\022t",
-      "able_reverse_sort\030\035 \001(\010\"\203\001\n\017DefaultTempl" +
-      "ate\022:\n\rtemplate_type\030\001 \001(\0162#.gdsc.smlm.d" +
-      "ata.config.TemplateType\022\014\n\004name\030\002 \001(\t\022\020\n" +
-      "\010filename\030\003 \001(\t\022\024\n\014tif_filename\030\004 \001(\t\"\\\n" +
-      "\027DefaultTemplateSettings\022A\n\021default_temp" +
-      "lates\030\001 \003(\0132&.gdsc.smlm.data.config.Defa" +
-      "ultTemplate\"\375\001\n\035ConfigurationTemplateSet" +
-      "tings\022\016\n\006option\030\001 \001(\005\022!\n\031select_standard" +
-      "_templates\030\002 \001(\010\022\037\n\027select_custom_direct" +
-      "ory\030\003 \001(\010\022\037\n\027configuration_directory\030\004 \001",
-      "(\t\022#\n\033selected_standard_templates\030\005 \003(\t\022" +
-      "!\n\031selected_custom_templates\030\006 \003(\t\022\020\n\010te" +
-      "mplate\030\007 \001(\t\022\r\n\005close\030\010 \001(\010\"\232\001\n\023NucleusM" +
-      "askSettings\022\014\n\004mode\030\001 \001(\005\022\023\n\013field_width" +
-      "\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022\020\n\010z_dither\030\004 \001" +
-      "(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022\024\n\014nm_per_slice" +
-      "\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001*O\n\014TemplateType" +
-      "\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLA" +
-      "TE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006" +
-      "proto3"
+      "\"\353\001\n\023OpticsEventSettings\022\034\n\024show_selecti" +
+      "on_table\030\001 \001(\010\022\036\n\026table_create_selection" +
+      "\030\002 \001(\010\022\036\n\026image_create_selection\030\003 \001(\010\022\035" +
+      "\n\025plot_create_selection\030\004 \001(\010\022\034\n\024table_s" +
+      "how_selection\030\005 \001(\010\022\034\n\024image_show_select" +
+      "ion\030\006 \001(\010\022\033\n\023plot_show_selection\030\007 \001(\010\"\337",
+      "\005\n\016OpticsSettings\022\024\n\014input_option\030\001 \001(\t\022" +
+      "\023\n\013optics_mode\030\002 \001(\005\022\034\n\024number_of_split_" +
+      "sets\030\003 \001(\005\022\032\n\022use_random_vectors\030\004 \001(\010\022\035" +
+      "\n\025save_approximate_sets\030\005 \001(\010\022\023\n\013sample_" +
+      "mode\030\006 \001(\005\022\033\n\023generating_distance\030\007 \001(\001\022" +
+      "\022\n\nmin_points\030\010 \001(\005\022\027\n\017clustering_mode\030\t" +
+      " \001(\005\022\n\n\002xi\030\n \001(\001\022\020\n\010topLevel\030\013 \001(\010\022\023\n\013up" +
+      "per_limit\030\014 \001(\001\022\023\n\013lower_limit\030\r \001(\001\022\017\n\007" +
+      "samples\030\016 \001(\005\022\027\n\017sample_fraction\030\017 \001(\001\022\026" +
+      "\n\016fraction_noise\030\020 \001(\001\022\033\n\023clustering_dis",
+      "tance\030\021 \001(\001\022\014\n\004core\030\022 \001(\010\022\023\n\013image_scale" +
+      "\030\023 \001(\001\022\022\n\nimage_mode\030\024 \001(\005\022\020\n\010weighted\030\025" +
+      " \001(\010\022\021\n\tequalised\030\026 \001(\010\022\021\n\tplot_mode\030\027 \001" +
+      "(\005\022\024\n\014outline_mode\030\030 \001(\005\022\032\n\022spanning_tre" +
+      "e_mode\030\031 \001(\005\022\016\n\006lambda\030\032 \001(\001\022\022\n\nshow_tab" +
+      "le\030\033 \001(\010\022\027\n\017table_sort_mode\030\034 \001(\005\022\032\n\022tab" +
+      "le_reverse_sort\030\035 \001(\010\022I\n\025optics_event_se" +
+      "ttings\030\036 \001(\0132*.gdsc.smlm.data.config.Opt" +
+      "icsEventSettings\"\203\001\n\017DefaultTemplate\022:\n\r" +
+      "template_type\030\001 \001(\0162#.gdsc.smlm.data.con",
+      "fig.TemplateType\022\014\n\004name\030\002 \001(\t\022\020\n\010filena" +
+      "me\030\003 \001(\t\022\024\n\014tif_filename\030\004 \001(\t\"\\\n\027Defaul" +
+      "tTemplateSettings\022A\n\021default_templates\030\001" +
+      " \003(\0132&.gdsc.smlm.data.config.DefaultTemp" +
+      "late\"\375\001\n\035ConfigurationTemplateSettings\022\016" +
+      "\n\006option\030\001 \001(\005\022!\n\031select_standard_templa" +
+      "tes\030\002 \001(\010\022\037\n\027select_custom_directory\030\003 \001" +
+      "(\010\022\037\n\027configuration_directory\030\004 \001(\t\022#\n\033s" +
+      "elected_standard_templates\030\005 \003(\t\022!\n\031sele" +
+      "cted_custom_templates\030\006 \003(\t\022\020\n\010template\030",
+      "\007 \001(\t\022\r\n\005close\030\010 \001(\010\"\232\001\n\023NucleusMaskSett" +
+      "ings\022\014\n\004mode\030\001 \001(\005\022\023\n\013field_width\030\002 \001(\005\022" +
+      "\020\n\010y_dither\030\003 \001(\001\022\020\n\010z_dither\030\004 \001(\001\022\024\n\014n" +
+      "m_per_pixel\030\005 \001(\001\022\024\n\014nm_per_slice\030\006 \001(\001\022" +
+      "\020\n\010diameter\030\007 \001(\001*O\n\014TemplateType\022\023\n\017INL" +
+      "INE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n" +
+      "\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -21207,32 +22306,38 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor,
         new java.lang.String[] { "DistanceThreshold", "DistanceExclusion", "TimeThreshold", "TimeUnit", "TraceMode", "ClusteringAlgorithm", "PulseInterval", "PulseWindow", "SplitPulses", "BlinkingRate", "Optimise", "MinDistanceThreshold", "MaxDistanceThreshold", "MinTimeThreshold", "MaxTimeThreshold", "OptimiserSteps", "OptimiserPlot", "SaveTraces", "ShowHistograms", "SaveTraceData", "TraceDataDirectory", "HistogramBins", "RemoveOutliers", "RefitOption", "MinimumTraceLength", "Truncate", "InternalDistances", "SubSampledDistances", "IgnoreEnds", "PrecisionCorrection", "MsdCorrection", "Mle", "FitLength", "FitRestarts", "JumpDistance", });
-    internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor =
+    internal_static_gdsc_smlm_data_config_OpticsEventSettings_descriptor =
       getDescriptor().getMessageTypes().get(6);
+    internal_static_gdsc_smlm_data_config_OpticsEventSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_OpticsEventSettings_descriptor,
+        new java.lang.String[] { "ShowSelectionTable", "TableCreateSelection", "ImageCreateSelection", "PlotCreateSelection", "TableShowSelection", "ImageShowSelection", "PlotShowSelection", });
+    internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor =
+      getDescriptor().getMessageTypes().get(7);
     internal_static_gdsc_smlm_data_config_OpticsSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_OpticsSettings_descriptor,
-        new java.lang.String[] { "InputOption", "OpticsMode", "NumberOfSplitSets", "UseRandomVectors", "SaveApproximateSets", "SampleMode", "GeneratingDistance", "MinPoints", "ClusteringMode", "Xi", "TopLevel", "UpperLimit", "LowerLimit", "Samples", "SampleFraction", "FractionNoise", "ClusteringDistance", "Core", "ImageScale", "ImageMode", "Weighted", "Equalised", "PlotMode", "OutlineMode", "SpanningTreeMode", "Lambda", "ShowTable", "TableSortMode", "TableReverseSort", });
+        new java.lang.String[] { "InputOption", "OpticsMode", "NumberOfSplitSets", "UseRandomVectors", "SaveApproximateSets", "SampleMode", "GeneratingDistance", "MinPoints", "ClusteringMode", "Xi", "TopLevel", "UpperLimit", "LowerLimit", "Samples", "SampleFraction", "FractionNoise", "ClusteringDistance", "Core", "ImageScale", "ImageMode", "Weighted", "Equalised", "PlotMode", "OutlineMode", "SpanningTreeMode", "Lambda", "ShowTable", "TableSortMode", "TableReverseSort", "OpticsEventSettings", });
     internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_gdsc_smlm_data_config_DefaultTemplate_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_DefaultTemplate_descriptor,
         new java.lang.String[] { "TemplateType", "Name", "Filename", "TifFilename", });
     internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_DefaultTemplateSettings_descriptor,
         new java.lang.String[] { "DefaultTemplates", });
     internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ConfigurationTemplateSettings_descriptor,
         new java.lang.String[] { "Option", "SelectStandardTemplates", "SelectCustomDirectory", "ConfigurationDirectory", "SelectedStandardTemplates", "SelectedCustomTemplates", "Template", "Close", });
     internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_gdsc_smlm_data_config_NucleusMaskSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_NucleusMaskSettings_descriptor,

@@ -212,6 +212,18 @@ message ClusteringSettings
 	int32 jump_distance = 35;
 }
 
+// Contains the settings for the events in the OPTICS GUI
+message OpticsEventSettings
+{
+	bool show_selection_table = 1;
+	bool table_create_selection = 2;
+	bool image_create_selection = 3;
+	bool plot_create_selection = 4;
+	bool table_show_selection = 5;
+	bool image_show_selection = 6;
+	bool plot_show_selection = 7;
+}
+
 // Contain the settings for the OPTICS clustering algorithm
 message OpticsSettings
 {
@@ -316,6 +328,9 @@ message OpticsSettings
 	
 	// Reverse sort the table
 	bool table_reverse_sort = 29;
+	
+	// Event settings
+	OpticsEventSettings optics_event_settings = 30;
 }
 
 enum TemplateType

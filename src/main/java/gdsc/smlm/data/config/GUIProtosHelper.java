@@ -166,6 +166,14 @@ public class GUIProtosHelper
 		builder.setOutlineMode(OutlineMode.COLOURED_BY_CLUSTER.ordinal());
 		builder.setSpanningTreeMode(SpanningTreeMode.OFF.ordinal());
 		builder.setLambda(3);
+		OpticsEventSettings.Builder b = builder.getOpticsEventSettingsBuilder();
+		b.setShowSelectionTable(true);
+		b.setTableCreateSelection(true);
+		b.setTableShowSelection(true);
+		b.setImageCreateSelection(true);
+		b.setImageShowSelection(true);
+		b.setPlotCreateSelection(true);
+		b.setPlotShowSelection(true);
 		defaultOpticsSettings = builder.build();
 	}
 	
