@@ -771,7 +771,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				IJ.error(TITLE, "No fluorophores created");
 				return;
 			}
-			
+
 			// Map the fluorophore ID to the compound for mixtures 
 			if (compounds.size() > 1)
 			{
@@ -780,7 +780,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				{
 					idToCompound.put(l.getId(), l.getLabel());
 				}
-			}			
+			}
 
 			IJ.showStatus("Creating localisations ...");
 
@@ -2223,6 +2223,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
+	/**
+	 * Extract the image stack using a range of stack indices. The index is 0-based.
+	 *
+	 * @param imp
+	 *            the imp
+	 * @param start
+	 *            the start index
+	 * @param end
+	 *            the end index
+	 * @return the float image stack
+	 */
 	public static float[][] extractImageStack(ImagePlus imp, int start, int end)
 	{
 		int size = end - start + 1;
