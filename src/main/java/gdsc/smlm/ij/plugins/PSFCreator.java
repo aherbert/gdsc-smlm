@@ -3242,6 +3242,8 @@ public class PSFCreator implements PlugInFilter
 				sx[i] = f.getXSplinePosition(Math.min(i * step, maxX));
 			}
 
+			// TODO - Use the thread pool for this
+			
 			//IJ.showStatus("Interpolating");
 			double maxZ = f.getMaxZ();
 			for (int z = 0; z < psf2.length; z++)
