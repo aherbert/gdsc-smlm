@@ -337,7 +337,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			ImageProcessor ip2 = sphere.getProcessor(slice);
 			ip.copyBits(ip2, xloc, yloc, Blitter.MAX);
 		}
-
+		imp.updateAndDraw();
 	}
 
 	public void mousePressed(MouseEvent e)
