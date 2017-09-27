@@ -221,7 +221,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			gd.setOKLabel("Close");
 			gd.showDialog();
 
-			imp.getWindow().removeMouseListener(this);
+			imp.getCanvas().removeMouseListener(this);
 
 			if (diameter != settings.getDiameter())
 			{
