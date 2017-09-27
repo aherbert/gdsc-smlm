@@ -4,7 +4,6 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Point;
-import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,8 +20,16 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.data.utils.Rounder;
+import gdsc.core.data.utils.RounderFactory;
+import gdsc.core.ij.AlignImagesFFT;
+import gdsc.core.ij.AlignImagesFFT.SubPixelMethod;
+import gdsc.core.ij.AlignImagesFFT.WindowMethod;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
+import gdsc.core.math.interpolation.CubicSplinePosition;
+import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
+import gdsc.core.math.interpolation.CustomTricubicInterpolator;
 import gdsc.core.utils.DoubleData;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.ImageWindow;
@@ -32,6 +39,7 @@ import gdsc.core.utils.Sort;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
@@ -68,6 +76,7 @@ import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.results.procedures.HeightResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.WidthResultProcedure;
+import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -76,15 +85,20 @@ import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
+import ij.gui.ImageCanvas;
+import ij.gui.NonBlockingGenericDialog;
+import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
-import ij.gui.PolygonRoi;
+import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.io.FileInfo;
+import ij.measure.Calibration;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.Blitter;
 import ij.process.ByteProcessor;
+import ij.process.FloatPolygon;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
@@ -104,7 +118,7 @@ public class PSFCreator implements PlugInFilter
 	private final static String[] MODE = { "Projection", "Gaussian Fitting" };
 	private static int mode = 0;
 
-	private static double nmPerSlice = 20;
+	private static double nmPerSlice = 0;
 	private static double radius = 10;
 	private static double amplitudeFraction = 0.2;
 	private static int startBackgroundFrames = 5;
@@ -118,7 +132,11 @@ public class PSFCreator implements PlugInFilter
 
 	private int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 	private ImagePlus imp, psfImp;
-	private double nmPerPixel;
+
+	private static double nmPerPixel;
+	private static int projectionMagnification = 2;
+	private static int psfMagnification = 4;
+
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig;
 	private int boxRadius;
@@ -200,22 +218,23 @@ public class PSFCreator implements PlugInFilter
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage(
-				"Produces an average PSF using selected diffraction limited spots.\nUses the current fit configuration to fit spots.");
+		guessScale();
+
+		gd.addMessage("Produces an average PSF using selected diffraction limited spots.");
 
 		gd.addChoice("Mode", MODE, mode);
-		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
+		//		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
 		gd.addSlider("Radius", 3, 20, radius);
-		gd.addSlider("Amplitude_fraction", 0.01, 0.5, amplitudeFraction);
-		gd.addSlider("Start_background_frames", 1, 20, startBackgroundFrames);
-		gd.addSlider("End_background_frames", 1, 20, endBackgroundFrames);
-		gd.addSlider("Magnification", 5, 15, magnification);
-		gd.addSlider("Smoothing", 0.25, 0.5, smoothing);
-		gd.addCheckbox("Centre_each_slice", centreEachSlice);
-		gd.addNumericField("CoM_cut_off", comCutOff, -2);
+		//		gd.addSlider("Amplitude_fraction", 0.01, 0.5, amplitudeFraction);
+		//		gd.addSlider("Start_background_frames", 1, 20, startBackgroundFrames);
+		//		gd.addSlider("End_background_frames", 1, 20, endBackgroundFrames);
+		//		gd.addSlider("Magnification", 5, 15, magnification);
+		//		gd.addSlider("Smoothing", 0.25, 0.5, smoothing);
+		//		gd.addCheckbox("Centre_each_slice", centreEachSlice);
+		//		gd.addNumericField("CoM_cut_off", comCutOff, -2);
 		gd.addCheckbox("Interactive_mode", interactiveMode);
-		String[] methods = ImageProcessor.getInterpolationMethods();
-		gd.addChoice("Interpolation", methods, methods[interpolationMethod]);
+		//		String[] methods = ImageProcessor.getInterpolationMethods();
+		//		gd.addChoice("Interpolation", methods, methods[interpolationMethod]);
 
 		gd.showDialog();
 
@@ -223,8 +242,86 @@ public class PSFCreator implements PlugInFilter
 			return DONE;
 
 		mode = gd.getNextChoiceIndex();
-		nmPerSlice = gd.getNextNumber();
+		//		nmPerSlice = gd.getNextNumber();
 		radius = gd.getNextNumber();
+		//		amplitudeFraction = gd.getNextNumber();
+		//		startBackgroundFrames = (int) gd.getNextNumber();
+		//		endBackgroundFrames = (int) gd.getNextNumber();
+		//		magnification = (int) gd.getNextNumber();
+		//		smoothing = gd.getNextNumber();
+		//		centreEachSlice = gd.getNextBoolean();
+		//		comCutOff = Maths.max(0, gd.getNextNumber());
+		interactiveMode = gd.getNextBoolean();
+		//		interpolationMethod = gd.getNextChoiceIndex();
+
+		// Check arguments
+		try
+		{
+			//			Parameters.isPositive("nm/slice", nmPerSlice);
+			Parameters.isAbove("Radius", radius, 2);
+			//			Parameters.isAbove("Amplitude fraction", amplitudeFraction, 0.01);
+			//			Parameters.isBelow("Amplitude fraction", amplitudeFraction, 0.9);
+			//			Parameters.isPositive("Start background frames", startBackgroundFrames);
+			//			Parameters.isPositive("End background frames", endBackgroundFrames);
+			//			Parameters.isAbove("Total background frames", startBackgroundFrames + endBackgroundFrames, 1);
+			//			Parameters.isAbove("Magnification", magnification, 1);
+			//			Parameters.isAbove("Smoothing", smoothing, 0);
+			//			Parameters.isBelow("Smoothing", smoothing, 1);
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return DONE;
+		}
+
+		return flags;
+	}
+
+	private void guessScale()
+	{
+		if (nmPerPixel == 0 || nmPerSlice == 0)
+		{
+			Calibration c = imp.getCalibration();
+			nmPerPixel = guessScale(c.getXUnit(), c.pixelWidth);
+			nmPerSlice = guessScale(c.getZUnit(), c.pixelDepth);
+		}
+	}
+
+	private double guessScale(String unit, double units)
+	{
+		unit = unit.toLowerCase();
+		if (unit.equals("nm") || unit.startsWith("nanomet"))
+			return units;
+		if (unit.equals("\u00B5m") || // Sanitised version of um
+				unit.startsWith("micron"))
+			return units * 1000;
+		return 0;
+	}
+
+	private boolean showFittingDialog()
+	{
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		gd.addMessage("Use PSF fitting to create a combined PSF");
+
+		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
+		gd.addSlider("Amplitude_fraction", 0.01, 0.5, amplitudeFraction);
+		gd.addSlider("Start_background_frames", 1, 20, startBackgroundFrames);
+		gd.addSlider("End_background_frames", 1, 20, endBackgroundFrames);
+		gd.addSlider("Magnification", 5, 15, magnification);
+		gd.addSlider("Smoothing", 0.25, 0.5, smoothing);
+		gd.addCheckbox("Centre_each_slice", centreEachSlice);
+		gd.addNumericField("CoM_cut_off", comCutOff, -2);
+		String[] methods = ImageProcessor.getInterpolationMethods();
+		gd.addChoice("Interpolation", methods, methods[interpolationMethod]);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		nmPerSlice = gd.getNextNumber();
 		amplitudeFraction = gd.getNextNumber();
 		startBackgroundFrames = (int) gd.getNextNumber();
 		endBackgroundFrames = (int) gd.getNextNumber();
@@ -232,14 +329,12 @@ public class PSFCreator implements PlugInFilter
 		smoothing = gd.getNextNumber();
 		centreEachSlice = gd.getNextBoolean();
 		comCutOff = Maths.max(0, gd.getNextNumber());
-		interactiveMode = gd.getNextBoolean();
 		interpolationMethod = gd.getNextChoiceIndex();
 
 		// Check arguments
 		try
 		{
 			Parameters.isPositive("nm/slice", nmPerSlice);
-			Parameters.isAbove("Radius", radius, 2);
 			Parameters.isAbove("Amplitude fraction", amplitudeFraction, 0.01);
 			Parameters.isBelow("Amplitude fraction", amplitudeFraction, 0.9);
 			Parameters.isPositive("Start background frames", startBackgroundFrames);
@@ -252,10 +347,10 @@ public class PSFCreator implements PlugInFilter
 		catch (IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
-			return DONE;
+			return false;
 		}
 
-		return flags;
+		return true;
 	}
 
 	/*
@@ -269,14 +364,22 @@ public class PSFCreator implements PlugInFilter
 			runUsingProjections();
 		else
 			runUsingFitting();
+
+		if (threadPool != null)
+		{
+			threadPool.shutdownNow();
+			threadPool = null;
+		}
 	}
 
 	private void runUsingFitting()
 	{
+		if (!showFittingDialog())
+			return;
 		if (!loadConfiguration())
 			return;
-		
-		BasePoint[] spots = getSpots();
+
+		BasePoint[] spots = getSpots(0);
 		if (spots.length == 0)
 		{
 			IJ.error(TITLE, "No spots without neighbours within " + (boxRadius * 2) + "px");
@@ -508,11 +611,6 @@ public class PSFCreator implements PlugInFilter
 		}
 
 		IJ.showProgress(1);
-		if (threadPool != null)
-		{
-			threadPool.shutdownNow();
-			threadPool = null;
-		}
 
 		if (!ok || stats.getN() == 0)
 			return;
@@ -1422,13 +1520,13 @@ public class PSFCreator implements PlugInFilter
 		Configuration c = new Configuration();
 		// TODO: We could have a different fit configuration just for the PSF Creator.
 		// This would allow it to be saved and not effect PeakFit settings.
-		boolean save = true; 
+		boolean save = true;
 		if (!c.showDialog(save))
 		{
 			IJ.error(TITLE, "No fit configuration loaded");
 			return false;
 		}
-		
+
 		config = c.getFitEngineConfiguration();
 		config.configureOutputUnits();
 		config.setResidualsThreshold(1);
@@ -1446,19 +1544,26 @@ public class PSFCreator implements PlugInFilter
 	/**
 	 * @return Extract all the ROI points that are not within twice the box radius of any other spot
 	 */
-	private BasePoint[] getSpots()
+	private BasePoint[] getSpots(float offset)
 	{
+		float z = imp.getStackSize() / 2;
 		Roi roi = imp.getRoi();
 		if (roi != null && roi.getType() == Roi.POINT)
 		{
-			Polygon p = ((PolygonRoi) roi).getNonSplineCoordinates();
+			FloatPolygon p = roi.getFloatPolygon();
 			int n = p.npoints;
-			Rectangle bounds = roi.getBounds();
+
+			if (offset != 0)
+			{
+				// Check if already float coordinates
+				if (!SimpleArrayUtils.isInteger(p.xpoints) || !SimpleArrayUtils.isInteger(p.ypoints))
+					offset = 0;
+			}
 
 			BasePoint[] roiPoints = new BasePoint[n];
 			for (int i = 0; i < n; i++)
 			{
-				roiPoints[i] = new BasePoint(bounds.x + p.xpoints[i], bounds.y + p.ypoints[i], 0);
+				roiPoints[i] = new BasePoint(p.xpoints[i] + offset, p.ypoints[i] + offset, z);
 			}
 
 			// All vs all distance matrix
@@ -1479,6 +1584,28 @@ public class PSFCreator implements PlugInFilter
 			return Arrays.copyOf(roiPoints, ok);
 		}
 		return new BasePoint[0];
+	}
+
+	/**
+	 * Check spots box region do not overlap.
+	 *
+	 * @param centres
+	 *            the centres
+	 * @return true, if successful
+	 */
+	private boolean checkSpots(BasePoint[] centres)
+	{
+		int n = centres.length;
+
+		// Spots must be twice as far apart to have no overlap of the extracted box region
+		double d2 = boxRadius * boxRadius * 4;
+
+		for (int i = 0; i < n; i++)
+			for (int j = i + 1; j < n; j++)
+				if (centres[i].distanceXY2(centres[j]) < d2)
+					return false;
+
+		return true;
 	}
 
 	/**
@@ -2272,6 +2399,881 @@ public class PSFCreator implements PlugInFilter
 
 	private void runUsingProjections()
 	{
-		IJ.error(TITLE, "Not yet implemented");
+		if (!showProjectionDialog())
+			return;
+
+		boxRadius = (int) Math.ceil(radius);
+
+		// Find the selected PSF spots x,y,z centre
+		// We offset the centre to the middle of pixel.
+		BasePoint[] centres = getSpots(0.5f);
+		if (centres.length == 0)
+		{
+			IJ.error(TITLE, "No spots without neighbours within " + (boxRadius * 2) + "px");
+			return;
+		}
+
+		// Extract the image data for processing as float
+		float[][] image = CreateData.extractImageStack(imp, 0, imp.getStackSize() - 1);
+
+		// Multi-thread for speed
+		if (threadPool == null)
+			threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+
+		// Relocate the initial centres using a CoM
+		centres = relocateUsingCentreOfMass(image, centres);
+
+		// Extract each PSF into a scaled PSF
+		ExtractedPSF[] psfs = extractPSFs(image, centres);
+
+		// Iterate until centres have converged
+		boolean converged = false;
+		for (int iter = 0; !converged && iter < 20; iter++)
+		{
+			// Combine all PSFs
+			ExtractedPSF combined = combine(psfs);
+			combined.createProjections();
+
+			// Align each to the combined projection
+			float[][] translation = align(combined, psfs);
+
+			// Find the new centre using the old centre plus the alignment shift
+			for (int j = 0; j < psfs.length; j++)
+			{
+				centres[j] = psfs[j].shift(translation[j]);
+				// Update to get the correct scale
+				translation[j][0] = centres[j].getX() - psfs[j].centre.getX();
+				translation[j][1] = centres[j].getY() - psfs[j].centre.getY();
+				translation[j][2] = centres[j].getZ() - psfs[j].centre.getZ();
+			}
+
+			if (interactiveMode)
+			{
+				combined.show("Combined PSF");
+
+				// Ask about each centre in turn.
+				// Update Point ROI using float coordinates and set image slice to 
+				// correct z-centre.
+				//imp.saveRoi();
+				imp.killRoi();
+				ImageCanvas ic = imp.getCanvas();
+				//ic.setMagnification(16);
+				int reject = 0;
+				Point location = null;
+				float box = boxRadius + 0.5f;
+				for (int j = 0; j < centres.length; j++)
+				{
+					psfs[j].show("PSF");
+
+					Overlay o = new Overlay();
+					o.add(createRoi(psfs[j].centre.getX(), psfs[j].centre.getY(), Color.RED));
+					float cx = centres[j].getX();
+					float cy = centres[j].getY();
+					o.add(createRoi(cx, cy, Color.GREEN));
+					Roi roi = new Roi(cx - box, cy - box, 2 * box, 2 * box);
+					o.add(roi);
+					imp.setSlice(Maths.clip(1, imp.getStackSize(), centres[j].getZint() + 1));
+					Rectangle r = ic.getSrcRect();
+					int x = centres[j].getXint();
+					int y = centres[j].getYint();
+					if (!r.contains(x, y))
+					{
+						r.x = x - r.width / 2;
+						r.y = y - r.height / 2;
+						ic.setSourceRect(r);
+					}
+					imp.setOverlay(o);
+					imp.updateAndDraw();
+					NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+					gd.addMessage(
+							String.format("Shift X = %s\nShift Y = %s\nShift Z = %s", Utils.rounded(translation[j][0]),
+									Utils.rounded(translation[j][1]), Utils.rounded(translation[j][2])));
+					gd.enableYesNoCancel("Accept", "Reject");
+					if (location != null)
+						gd.setLocation(location.x, location.y);
+					gd.showDialog();
+					if (gd.wasCanceled())
+						return;
+					if (!gd.wasOKed())
+					{
+						reject++;
+						centres[j] = psfs[j].centre;
+						Arrays.fill(translation[j], 0f); // For RMSD computation
+					}
+					location = gd.getLocation();
+				}
+				imp.restoreRoi();
+				imp.setOverlay(null);
+				if (reject == psfs.length)
+				{
+					IJ.error(TITLE, "No centre translations were accepted");
+					return;
+				}
+			}
+			else
+			{
+				if (!checkSpots(centres))
+				{
+					IJ.error(TITLE, "New spots centers create overlap within " + (boxRadius * 2) + "px");
+					return;
+				}
+			}
+
+			// Find the change in centres
+			double[] rmsd = new double[2];
+			for (int j = 0; j < psfs.length; j++)
+			{
+				rmsd[0] += Maths.pow2(translation[j][0]) + Maths.pow2(translation[j][1]);
+				rmsd[1] += Maths.pow2(translation[j][2]);
+			}
+			for (int j = 0; j < 2; j++)
+				rmsd[j] = Math.sqrt(rmsd[j] / psfs.length);
+
+			double[] shift = combined.getCentreOfMassShift();
+			double shiftd = Math.sqrt(shift[0] * shift[0] + shift[1] * shift[1]);
+
+			if (interactiveMode)
+			{
+				// Ask if OK to continue?
+				GenericDialog gd = new GenericDialog(TITLE);
+				gd.addMessage(String.format("RMSD XY = %s\nRMSD Z = %s\nCombined CoM shift = %s,%s (%s)",
+						Utils.rounded(rmsd[0]), Utils.rounded(rmsd[1]), Utils.rounded(shift[0]),
+						Utils.rounded(shift[1]), Utils.rounded(shiftd)));
+				gd.enableYesNoCancel("Converged", "Continue");
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return;
+				converged = gd.wasOKed();
+			}
+			else
+			{
+				// Sensible convergence on minimal shift
+				converged = rmsd[0] < 0.01 && rmsd[1] < 0.05 && shiftd < 0.001;
+			}
+
+			// Update the centres using the centre-of-mass of the combined PSF
+			centres = updateUsingCentreOfMassShift(shift, shiftd, combined, centres);
+
+			// Extract each PSF into a scaled PSF
+			psfs = extractPSFs(image, centres);
+		}
+
+		// Update ROI
+		float[] ox = new float[centres.length];
+		float[] oy = new float[centres.length];
+		for (int i = 0; i < centres.length; i++)
+		{
+			ox[i] = centres[i].getX();
+			oy[i] = centres[i].getY();
+		}
+		imp.setRoi(new PointRoi(ox, oy));
+
+		// Combine all
+		ExtractedPSF combined = combine(psfs);
+
+		// Enlarge the combined PSF
+		combined = combined.enlarge(psfMagnification);
+
+		combined.createProjections();
+		combined.show("Combined PSF");
+
+		double[] com = combined.getCentreOfMass();
+		int zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
+
+		// TODO - 
+		// show a dialog to collect processing options 
+		// - non blocking dialog to find z centre
+		// - fraction of pixels as background
+
+		// Find background interactively
+
+		// When click ok the background is subtracted from the PSF
+		// All pixels below the background are set to zero
+		// Apply a Tukey window to roll-off to zero at the outer pixels
+		// Normalise so the z centre is 1.
+
+		// Create a new extracted PSF and show
+
+	}
+
+	private BasePoint[] relocateUsingCentreOfMass(float[][] image, BasePoint[] centres)
+	{
+		int w = imp.getWidth();
+		int h = imp.getHeight();
+
+		// Just for getting the bounds
+		ImageExtractor ie = new ImageExtractor(image[0], w, h);
+
+		// This can be reused as a buffer
+		float[][] psf = new float[image.length][];
+
+		Rounder rounder = RounderFactory.create(4);
+		for (int i = 0; i < centres.length; i++)
+		{
+			// Extract stack
+			int x = centres[i].getXint();
+			int y = centres[i].getYint();
+			Rectangle bounds = ie.getBoxRegionBounds(x, y, boxRadius);
+			for (int z = 0; z < image.length; z++)
+				psf[z] = ImageConverter.getData(image[z], w, h, bounds, psf[z]);
+			Projection p = new Projection(psf, bounds.width, bounds.height);
+			double[] com = p.getCentreOfMass();
+			float dx = (float) (com[0] + bounds.x - centres[i].getX());
+			float dy = (float) (com[1] + bounds.y - centres[i].getY());
+			float dz = (float) (com[2] - centres[i].getZ());
+			Utils.log("Centre %d : %s,%s,%s updated to CoM by %s,%s,%s", i + 1, rounder.toString(centres[i].getX()),
+					rounder.toString(centres[i].getY()), rounder.toString(centres[i].getZ()), rounder.toString(dx),
+					rounder.toString(dy), rounder.toString(dz));
+			centres[i] = centres[i].shift(dx, dy, dz);
+		}
+
+		return centres;
+	}
+
+	private Roi createRoi(float x, float y, Color color)
+	{
+		Roi roi = new PointRoi(x, y);
+		roi.setStrokeColor(color);
+		roi.setFillColor(color);
+		return roi;
+	}
+
+	private ExtractedPSF combine(ExtractedPSF[] psfs)
+	{
+		// All PSFs have the same size.
+		// Just find the range of the relative centres;
+		int min = psfs[0].relativeCentre;
+		int max = min;
+		for (int i = 1; i < psfs.length; i++)
+		{
+			min = Math.min(min, psfs[i].relativeCentre);
+			max = Math.max(max, psfs[i].relativeCentre);
+		}
+		int range = max - min;
+		int totalDepth = psfs[0].psf.length + range;
+		float[][] combined = new float[totalDepth][psfs[0].psf[0].length];
+		int size = psfs[0].size;
+		BasePoint centre = new BasePoint(size / 2f, size / 2f, (min + max) / 2f);
+		int[] count = new int[totalDepth];
+		for (int i = 1; i < psfs.length; i++)
+		{
+			int offset = psfs[i].relativeCentre - min;
+			for (int j = 0; j < psfs[i].psf.length; j++)
+			{
+				float[] from = psfs[i].psf[j];
+				float[] to = combined[j + offset];
+				count[j + offset]++;
+				for (int k = 0; k < to.length; k++)
+					to[k] += from[k];
+			}
+		}
+		// Normalise
+		for (int j = 0; j < combined.length; j++)
+		{
+			float[] to = combined[j];
+			int c = count[j];
+			for (int k = 0; k < to.length; k++)
+				to[k] /= c;
+		}
+		return new ExtractedPSF(combined, size, centre, psfs[0].magnification);
+	}
+
+	private boolean showProjectionDialog()
+	{
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		gd.addMessage("Use X,Y,Z-projection alignment to create a combined PSF");
+
+		gd.addNumericField("nm_per_pixel", nmPerPixel, 2);
+		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
+		gd.addSlider("Projection_magnification", 1, 8, projectionMagnification);
+		gd.addSlider("PSF_magnification", 1, 8, psfMagnification);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		nmPerPixel = gd.getNextNumber();
+		nmPerSlice = gd.getNextNumber();
+		projectionMagnification = (int) gd.getNextNumber();
+		psfMagnification = (int) gd.getNextNumber();
+
+		// Check arguments
+		try
+		{
+			Parameters.isPositive("nm/pixel", nmPerPixel);
+			Parameters.isPositive("nm/slice", nmPerSlice);
+			Parameters.isEqualOrAbove("Projection magnification", projectionMagnification, 1);
+			Parameters.isEqualOrAbove("PSF magnification", psfMagnification, 1);
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}
+
+		return true;
+	}
+
+	private ExtractedPSF[] extractPSFs(final float[][] image, final BasePoint[] centres)
+	{
+		List<Future<?>> futures = new TurboList<Future<?>>(centres.length);
+
+		final int w = imp.getWidth();
+		final int h = imp.getHeight();
+
+		final ExtractedPSF[] psfs = new ExtractedPSF[centres.length];
+		for (int i = 0; i < centres.length; i++)
+		{
+			final int index = i;
+			futures.add(threadPool.submit(new Runnable()
+			{
+				public void run()
+				{
+					psfs[index] = new ExtractedPSF(image, w, h, centres[index], boxRadius, projectionMagnification);
+					// Do this here within the thread
+					psfs[index].createProjections();
+
+					//psfs[index].show(TITLE + index);
+				}
+			}));
+		}
+
+		Utils.waitForCompletion(futures);
+
+		return psfs;
+	}
+
+	private static class Projection
+	{
+		static final int X = 0;
+		static final int Y = 1;
+		static final int Z = 2;
+
+		int x, y, z;
+		float[] xp, yp, zp;
+
+		Projection(float[][] psf, int x, int y)
+		{
+			// Maximum project each PSF: X, Y, Z projections
+			this.x = x;
+			this.y = y;
+			z = psf.length;
+			xp = new float[y * z];
+			yp = new float[x * z];
+			zp = new float[x * y];
+			float[] stripx = new float[x];
+			float[] stripy = new float[y];
+			for (int zz = 0; zz < z; zz++)
+			{
+				float[] data = psf[zz];
+
+				// Z-projection
+				if (zz == 0)
+				{
+					System.arraycopy(data, 0, zp, 0, zp.length);
+				}
+				else
+				{
+					for (int i = 0; i < zp.length; i++)
+						if (zp[i] < data[i])
+							zp[i] = data[i];
+				}
+
+				// X projection
+				for (int yy = 0; yy < y; yy++)
+				{
+					System.arraycopy(data, yy * x, stripx, 0, x);
+					xp[yy * z + zz] = Maths.max(stripx);
+				}
+
+				// Y projection
+				for (int xx = 0; xx < x; xx++)
+				{
+					for (int yy = 0; yy < y; yy++)
+						stripy[yy] = data[yy * x + xx];
+					yp[zz * x + xx] = Maths.max(stripy);
+				}
+			}
+		}
+
+		int[] getDimensions()
+		{
+			return new int[] { x, y, z };
+		}
+
+		public double[] getCentreOfMass()
+		{
+			// Start in the centre of the image
+			double[] com = new double[] { x / 2.0, y / 2.0, z / 2.0 };
+			for (int i = 0; i < 3; i++)
+			{
+				FloatProcessor fp = getProjection(i);
+				double[] c = getCentreOfProjection(fp);
+				// Get the shift relative to the centre
+				double dx = c[0] - fp.getWidth() * 0.5;
+				double dy = c[1] - fp.getHeight() * 0.5;
+				//System.out.printf("[%d]  [%d] %.2f = %.2f, [%d] %.2f = %.2f\n", i,
+				//		Projection.getXDimension(i), c[0], dx,
+				//		Projection.getYDimension(i), c[1], dy);
+				// Add the shift to the current centre
+				//com[Projection.getXDimension(i)] -= Projection.getXShiftDirection(i) * dx / 2;
+				//com[Projection.getYDimension(i)] -= Projection.getYShiftDirection(i) * dy / 2;
+				com[Projection.getXDimension(i)] += dx / 2;
+				com[Projection.getYDimension(i)] += dy / 2;
+			}
+			return com;
+		}
+
+		public double[] getCentreOfProjection(FloatProcessor fp)
+		{
+			return centreOfMass((float[]) fp.getPixels(), fp.getWidth(), fp.getHeight());
+		}
+
+		private double[] centreOfMass(float[] data, int w, int h)
+		{
+			double cx = 0;
+			double cy = 0;
+			double sum = 0;
+			for (int v = 0, j = 0; v < h; v++)
+			{
+				double sumU = 0;
+				for (int u = 0; u < w; u++)
+				{
+					float f = data[j++];
+					sumU += f;
+					cx += f * u;
+				}
+				sum += sumU;
+				cy += sumU * v;
+			}
+			// Find centre with 0.5 as the centre of the pixel
+			cx = 0.5 + cx / sum;
+			cy = 0.5 + cy / sum;
+			return new double[] { cx, cy };
+		}
+
+		FloatProcessor getProjection(int i)
+		{
+			switch (i)
+			{
+				case X:
+					return new FloatProcessor(z, y, xp);
+				case Y:
+					return new FloatProcessor(x, z, yp);
+				case Z:
+					return new FloatProcessor(x, y, zp);
+			}
+			return null;
+		}
+
+		static int getXDimension(int i)
+		{
+			switch (i)
+			{
+				case X:
+					return Z;
+				case Y:
+					return X;
+				case Z:
+					return X;
+			}
+			return -1;
+		}
+
+		static int getYDimension(int i)
+		{
+			switch (i)
+			{
+				case X:
+					return Y;
+				case Y:
+					return Z;
+				case Z:
+					return Y;
+			}
+			return -1;
+		}
+
+		//		static int getXShiftDirection(int i)
+		//		{
+		//			switch (i)
+		//			{
+		//				case X:
+		//					return -1;
+		//				case Y:
+		//					return -1;
+		//				case Z:
+		//					return -1;
+		//			}
+		//			return 0;
+		//		}
+		//
+		//		static int getYShiftDirection(int i)
+		//		{
+		//			switch (i)
+		//			{
+		//				case X:
+		//					return -1;
+		//				case Y:
+		//					return -1;
+		//				case Z:
+		//					return -1;
+		//			}
+		//			return 0;
+		//		}
+	}
+
+	private static class ExtractedPSF
+	{
+		BasePoint centre;
+		/**
+		 * The relative centre. This is just used as a relative position when combining PSFs.
+		 */
+		int relativeCentre;
+		float[][] psf;
+		int size;
+		Projection projection;
+		final int magnification;
+		Calibration c = null;
+
+		Calibration getCalibration()
+		{
+			if (c == null)
+			{
+				c = new Calibration();
+				c.setUnit("nm");
+				c.pixelWidth = c.pixelHeight = nmPerPixel / magnification;
+				c.pixelDepth = nmPerSlice / magnification;
+			}
+			return c;
+		}
+
+		ExtractedPSF(float[][] psf, int size, BasePoint centre, int magnification)
+		{
+			this.centre = centre;
+			this.magnification = magnification;
+			relativeCentre = (int) Math.floor(centre.getZint());
+			this.psf = psf;
+			this.size = size;
+		}
+
+		ExtractedPSF(float[][] image, int w, int h, BasePoint centre, int boxRadius, int magnification)
+		{
+			this.centre = centre;
+			this.magnification = magnification;
+
+			// Build using tri-cubic interpolation.
+
+			// Create the ranges we want to interpolate. 
+			// Ensure the size is odd so there is a definite centre pixel.
+			size = 2 * boxRadius * magnification + 1;
+			double[] y0 = new double[size];
+			double[] x0 = new double[size];
+			double pc = 1.0 / magnification; // Pixel centre in scaled image
+			for (int i = 0, j = -size / 2; i < size; i++, j++)
+			{
+				double delta = pc * j;
+				x0[i] = centre.getX() + delta;
+				y0[i] = centre.getY() + delta;
+			}
+
+			// Extract the data for interpolation. 
+			// Account for the centre of the pixel being 0.5.
+			int lx = (int) Math.floor(x0[0] - 0.5);
+			int ly = (int) Math.floor(y0[0] - 0.5);
+			// To interpolate up to we need to have the value after.
+			int ux = (int) Math.ceil(x0[size - 1] + 0.5);
+			int uy = (int) Math.ceil(y0[size - 1] + 0.5);
+
+			int rangex = ux - lx + 1;
+			int rangey = uy - ly + 1;
+
+			// Build an interpolating function
+			// We pad with an extra pixel (or a duplicate pixel if at the bounds)
+			double[] xval = new double[rangex];
+			double[] yval = new double[rangey];
+			double[] zval = new double[image.length + 2];
+			double[][][] fval = new double[rangex][rangey][zval.length];
+			int[] xi = new int[xval.length];
+			int[] yi = new int[yval.length];
+			for (int i = 0; i < xval.length; i++)
+			{
+				xval[i] = lx + i + 0.5;
+				// Keep within data bounds for the indices
+				xi[i] = Maths.clip(0, w - 1, (int) xval[i]);
+			}
+			for (int i = 0; i < yval.length; i++)
+			{
+				yval[i] = ly + i + 0.5;
+				// Keep within data bounds for the indices
+				yi[i] = Maths.clip(0, h - 1, (int) yval[i]);
+			}
+
+			for (int z = 0; z < zval.length; z++)
+			{
+				zval[z] = z - 1;
+
+				// Keep within data bounds for the indices
+				float[] data = image[Maths.clip(0, image.length - 1, z - 1)];
+
+				for (int y = 0; y < yval.length; y++)
+				{
+					final int index = w * yi[y];
+					for (int x = 0; x < xval.length; x++)
+					{
+						fval[x][y][z] = data[index + xi[x]];
+					}
+				}
+			}
+
+			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(xval, yval, zval,
+					fval);
+
+			// Interpolate
+
+			// Zoom the z-range too
+			TDoubleArrayList list = new TDoubleArrayList(image.length * magnification);
+			float cz = centre.getZ();
+			list.add(cz);
+			for (int i = 1;; i++)
+			{
+				double z = cz + i * pc;
+				// Check if possible to interpolate
+				if (z >= image.length)
+					break;
+				list.add(z);
+			}
+			for (int i = 1;; i++)
+			{
+				double z = cz - i * pc;
+				// Check if possible to interpolate
+				if (z < 0)
+					break;
+				list.add(z);
+			}
+			double[] z0 = list.toArray();
+			Arrays.sort(z0);
+			relativeCentre = Arrays.binarySearch(z0, cz);
+
+			psf = new float[z0.length][size * size];
+
+			// Pre-compute spline positions
+			CubicSplinePosition[] sx = new CubicSplinePosition[size];
+			CubicSplinePosition[] sy = new CubicSplinePosition[size];
+			for (int i = 0; i < size; i++)
+			{
+				sx[i] = f.getXSplinePosition(x0[i]);
+				sy[i] = f.getYSplinePosition(y0[i]);
+			}
+
+			for (int z = 0; z < z0.length; z++)
+			{
+				CubicSplinePosition sz = f.getZSplinePosition(z0[z]);
+				float[] data = psf[z];
+				for (int y = 0, i = 0; y < size; y++)
+				{
+					for (int x = 0; x < size; x++, i++)
+					{
+						data[i] = (float) f.value(sx[x], sy[y], sz);
+					}
+				}
+			}
+		}
+
+		void createProjections()
+		{
+			projection = new Projection(psf, size, size);
+		}
+
+		void show(String title)
+		{
+			ImageStack stack = new ImageStack(size, size);
+			for (float[] pixels : psf)
+				stack.addSlice(null, pixels);
+			setCalibration(Utils.display(title, stack));
+
+			// Show the projections
+			if (projection == null)
+				return;
+
+			setCalibration(Utils.display(title + " X-projection", getProjection(0)));
+			setCalibration(Utils.display(title + " Y-projection", getProjection(1)));
+			setCalibration(Utils.display(title + " Z-projection", getProjection(2)));
+		}
+
+		void setCalibration(ImagePlus imp)
+		{
+			imp.setCalibration(getCalibration());
+		}
+
+		FloatProcessor getProjection(int i)
+		{
+			return projection.getProjection(i);
+		}
+
+		/**
+		 * Create a new centre using the shift computed from the projection.
+		 *
+		 * @param translation
+		 *            the translation
+		 * @return the new base point
+		 */
+		BasePoint shift(float[] translation)
+		{
+			return centre.shift(translation[0] / magnification, translation[1] / magnification,
+					translation[2] / magnification);
+		}
+
+		/**
+		 * Compute the centre of mass of each projection and then combine
+		 *
+		 * @return the centre of mass
+		 */
+		public double[] getCentreOfMass()
+		{
+			return projection.getCentreOfMass();
+		}
+
+		/**
+		 * Compute the centre of mass of each projection and then the shift of the CoM from the centre of the projection
+		 * image.
+		 *
+		 * @return the centre of mass shift
+		 */
+		public double[] getCentreOfMassShift()
+		{
+			double[] shift = projection.getCentreOfMass();
+			// Turn into a shift relative to the centre
+			int[] d = projection.getDimensions();
+			for (int i = 0; i < 3; i++)
+			{
+				shift[i] -= d[i] / 2.0;
+				// Account for magnification
+				shift[i] /= magnification;
+			}
+			return shift;
+		}
+
+		public ExtractedPSF enlarge(int extraMagnification)
+		{
+			// The scales are actually arbitrary
+			// We can enlarge by interpolation between the start and end
+			double[] xval = SimpleArrayUtils.newArray(size, 0, 1.0);
+			double[] yval = xval;
+			double[] zval = SimpleArrayUtils.newArray(psf.length, 0, 1.0);
+			double[][][] fval = new double[size][size][psf.length];
+			for (int z = 0; z < psf.length; z++)
+			{
+				float[] data = psf[z];
+				for (int y = 0, i = 0; y < size; y++)
+				{
+					for (int x = 0; x < size; x++, i++)
+					{
+						fval[x][y][z] = data[i];
+					}
+				}
+			}
+
+			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(xval, yval, zval,
+					fval);
+
+			// Interpolate
+			int maxx = (size - 1) * extraMagnification + 1;
+			int maxy = maxx;
+			int maxz = (psf.length - 1) * extraMagnification + 1;
+			double step = 1.0 / extraMagnification;
+			float[][] psf2 = new float[maxz + 1][(maxx + 1) * (maxy + 1)];
+
+			// Pre-compute spline positions
+			CubicSplinePosition[] sx = new CubicSplinePosition[maxx + 1];
+			CubicSplinePosition[] sy = sx;
+			for (int i = 0; i < sx.length; i++)
+			{
+				sx[i] = f.getXSplinePosition(i * step);
+			}
+
+			for (int z = 0; z < psf2.length; z++)
+			{
+				CubicSplinePosition sz = f.getZSplinePosition(z * step);
+				float[] data = psf2[z];
+				for (int y = 0, i = 0; y <= maxy; y++)
+				{
+					for (int x = 0; x <= maxx; x++, i++)
+					{
+						data[i] = (float) f.value(sx[x], sy[y], sz);
+					}
+				}
+			}
+
+			BasePoint newCentre = new BasePoint(maxx / 2.0f, maxy / 2.0f, maxz / 2.0f);
+			return new ExtractedPSF(psf2, maxx + 1, newCentre, magnification * extraMagnification);
+		}
+	}
+
+	private float[][] align(ExtractedPSF combined, final ExtractedPSF[] psfs)
+	{
+		int n = psfs.length * 3;
+		List<Future<?>> futures = new TurboList<Future<?>>(n);
+
+		final AlignImagesFFT[] align = new AlignImagesFFT[3];
+		final Rectangle[] bounds = new Rectangle[3];
+		for (int i = 0; i < 3; i++)
+		{
+			align[i] = new AlignImagesFFT();
+			FloatProcessor fp1 = combined.getProjection(i);
+			FloatProcessor fp2 = psfs[0].getProjection(i);
+			align[i].init(fp1, WindowMethod.TUKEY, false);
+			bounds[i] = AlignImagesFFT.createHalfMaxBounds(fp1.getWidth(), fp1.getHeight(), fp2.getWidth(),
+					fp2.getHeight());
+		}
+
+		final float[][] results = new float[psfs.length][3];
+
+		for (int j = 0; j < psfs.length; j++)
+		{
+			final int jj = j;
+			for (int i = 0; i < 3; i++)
+			{
+				final int ii = i;
+				futures.add(threadPool.submit(new Runnable()
+				{
+					public void run()
+					{
+						ExtractedPSF psf = psfs[jj];
+						double[] result = align[ii].align(psf.getProjection(ii), WindowMethod.TUKEY, bounds[ii],
+								SubPixelMethod.CUBIC);
+						// We just average the shift from each projection. There should be
+						// two shifts for each dimension
+						results[jj][Projection.getXDimension(ii)] -= result[0] / 2;
+						results[jj][Projection.getYDimension(ii)] -= result[1] / 2;
+						//psfs[index].show(TITLE + index);
+					}
+				}));
+			}
+		}
+
+		Utils.waitForCompletion(futures);
+
+		return results;
+	}
+
+	private BasePoint[] updateUsingCentreOfMassShift(double[] shift, double shiftd, ExtractedPSF combined,
+			BasePoint[] centres)
+	{
+		float dx = (float) shift[0];
+		float dy = (float) shift[1];
+		// Ignore this. We just want to keep the PSF spot in the middle of the combined stack.
+		// Its z-centre in the entire stack does not matter.
+		float dz = 0; //(float) shift[2]; 
+		Utils.log("Combined PSF has CoM shift %s,%s (%s)", Utils.rounded(shift[0]), Utils.rounded(shift[1]),
+				Utils.rounded(shiftd));
+		for (int i = 0; i < centres.length; i++)
+		{
+			centres[i] = centres[i].shift(dx, dy, dz);
+		}
+		return centres;
 	}
 }
