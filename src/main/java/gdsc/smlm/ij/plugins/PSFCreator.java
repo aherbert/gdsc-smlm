@@ -2440,7 +2440,7 @@ public class PSFCreator implements PlugInFilter
 			// Find the new centre using the old centre plus the alignment shift
 			for (int j = 0; j < psfs.length; j++)
 			{
-				centres[j] = psfs[j].shift(translation[j]);
+				centres[j] = psfs[j].updateCentre(translation[j]);
 				// Update to get the correct scale
 				translation[j][0] = centres[j].getX() - psfs[j].centre.getX();
 				translation[j][1] = centres[j].getY() - psfs[j].centre.getY();
@@ -2461,6 +2461,7 @@ public class PSFCreator implements PlugInFilter
 				int reject = 0;
 				Point location = null;
 				float box = boxRadius + 0.5f;
+				int n = imp.getStackSize();
 				for (int j = 0; j < centres.length; j++)
 				{
 					psfs[j].show("PSF");
@@ -2472,7 +2473,8 @@ public class PSFCreator implements PlugInFilter
 					o.add(createRoi(cx, cy, Color.GREEN));
 					Roi roi = new Roi(cx - box, cy - box, 2 * box, 2 * box);
 					o.add(roi);
-					imp.setSlice(Maths.clip(1, imp.getStackSize(), centres[j].getZint() + 1));
+					// The centre is relative to the combined PSF so use as an offset
+					imp.setSlice(Maths.clip(1, n, centres[j].getZint() + 1 + n / 2));
 					Rectangle r = ic.getSrcRect();
 					int x = centres[j].getXint();
 					int y = centres[j].getYint();
@@ -2493,7 +2495,11 @@ public class PSFCreator implements PlugInFilter
 						gd.setLocation(location.x, location.y);
 					gd.showDialog();
 					if (gd.wasCanceled())
+					{
+						imp.restoreRoi();
+						imp.setOverlay(null);
 						return;
+					}
 					if (!gd.wasOKed())
 					{
 						reject++;
@@ -2607,6 +2613,8 @@ public class PSFCreator implements PlugInFilter
 		// This can be reused as a buffer
 		float[][] psf = new float[image.length][];
 
+		double mean = 0;
+
 		Rounder rounder = RounderFactory.create(4);
 		for (int i = 0; i < centres.length; i++)
 		{
@@ -2625,7 +2633,13 @@ public class PSFCreator implements PlugInFilter
 					rounder.toString(centres[i].getY()), rounder.toString(centres[i].getZ()), rounder.toString(dx),
 					rounder.toString(dy), rounder.toString(dz));
 			centres[i] = centres[i].shift(dx, dy, dz);
+			mean += centres[i].getZ();
 		}
+
+		// z-centres should be relative to the combined stack, not absolute
+		mean /= centres.length;
+		for (int i = 0; i < centres.length; i++)
+			centres[i] = new BasePoint(centres[i].getX(), centres[i].getY(), (float) (centres[i].getZ() - mean));
 
 		return centres;
 	}
@@ -2655,9 +2669,11 @@ public class PSFCreator implements PlugInFilter
 		int size = psfs[0].size;
 		BasePoint centre = new BasePoint(size / 2f, size / 2f, (min + max) / 2f);
 		int[] count = new int[totalDepth];
-		for (int i = 1; i < psfs.length; i++)
+		for (int i = 0; i < psfs.length; i++)
 		{
-			int offset = psfs[i].relativeCentre - min;
+			// Note: If a stack relative centre is below the centre of the stack then
+			// it should be inserted later.
+			int offset = max - psfs[i].relativeCentre;
 			for (int j = 0; j < psfs[i].psf.length; j++)
 			{
 				float[] from = psfs[i].psf[j];
@@ -2672,8 +2688,8 @@ public class PSFCreator implements PlugInFilter
 		{
 			float[] to = combined[j];
 			int c = count[j];
-			for (int k = 0; k < to.length; k++)
-				to[k] /= c;
+			//			for (int k = 0; k < to.length; k++)
+			//				to[k] /= c;
 		}
 		return new ExtractedPSF(combined, size, centre, psfs[0].magnification);
 	}
@@ -2955,7 +2971,7 @@ public class PSFCreator implements PlugInFilter
 		{
 			this.centre = centre;
 			this.magnification = magnification;
-			relativeCentre = (int) Math.floor(centre.getZint());
+			relativeCentre = -1; // Not used
 			this.psf = psf;
 			this.size = size;
 		}
@@ -3036,7 +3052,14 @@ public class PSFCreator implements PlugInFilter
 
 			// Zoom the z-range too
 			TDoubleArrayList list = new TDoubleArrayList(image.length * magnification);
-			float cz = centre.getZ();
+			// The centre is a shift relative to the centre of the combined PSF in the 
+			// original scale
+			int cx = (int) Math.floor(centre.getZint());
+			// The centre is relative to the combined stack so for interpolation
+			// just get an offset from the stack centre
+			double cz = (image.length - 1) / 2.0 + centre.getZ() - cx;
+			// Set the relative centre after scaling
+			relativeCentre = cx * magnification;
 			list.add(cz);
 			for (int i = 1;; i++)
 			{
@@ -3056,7 +3079,7 @@ public class PSFCreator implements PlugInFilter
 			}
 			double[] z0 = list.toArray();
 			Arrays.sort(z0);
-			relativeCentre = Arrays.binarySearch(z0, cz);
+			//relativeCentre = Arrays.binarySearch(z0, cz);
 
 			psf = new float[z0.length][size * size];
 
@@ -3121,9 +3144,12 @@ public class PSFCreator implements PlugInFilter
 		 *            the translation
 		 * @return the new base point
 		 */
-		BasePoint shift(float[] translation)
+		BasePoint updateCentre(float[] translation)
 		{
-			return centre.shift(translation[0] / magnification, translation[1] / magnification,
+			return new BasePoint(
+					// Centre in X,Y refer to the position extracted from the image
+					centre.getX() + translation[0] / magnification, centre.getY() + translation[1] / magnification,
+					// The z-position is used as relative to the combined PSF 
 					translation[2] / magnification);
 		}
 
@@ -3265,8 +3291,8 @@ public class PSFCreator implements PlugInFilter
 	{
 		float dx = (float) shift[0];
 		float dy = (float) shift[1];
-		// Ignore this. We just want to keep the PSF spot in the middle of the combined stack.
-		// Its z-centre in the entire stack does not matter.
+		// Ignore this. We just want to keep the centres relative to the combined stack.
+		// The actual z-centre of the combined stack does not matter.
 		float dz = 0; //(float) shift[2]; 
 		Utils.log("Combined PSF has CoM shift %s,%s (%s)", Utils.rounded(shift[0]), Utils.rounded(shift[1]),
 				Utils.rounded(shiftd));
