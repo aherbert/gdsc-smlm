@@ -136,6 +136,7 @@ public class PSFCreator implements PlugInFilter
 	private static double nmPerPixel;
 	private static int projectionMagnification = 2;
 	private static int psfMagnification = 4;
+	private static Rounder rounder = RounderFactory.create(4);
 
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig;
@@ -2445,6 +2446,9 @@ public class PSFCreator implements PlugInFilter
 				translation[j][0] = centres[j].getX() - psfs[j].centre.getX();
 				translation[j][1] = centres[j].getY() - psfs[j].centre.getY();
 				translation[j][2] = centres[j].getZ() - psfs[j].centre.getZ();
+				Utils.log("Centre %d : Shift X = %s : Shift Y = %s : Shift Z = %s", j + 1,
+						rounder.toString(translation[j][0]), rounder.toString(translation[j][1]),
+						rounder.toString(translation[j][2]));
 			}
 
 			if (interactiveMode)
@@ -2487,9 +2491,9 @@ public class PSFCreator implements PlugInFilter
 					imp.setOverlay(o);
 					imp.updateAndDraw();
 					NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
-					gd.addMessage(
-							String.format("Shift X = %s\nShift Y = %s\nShift Z = %s", Utils.rounded(translation[j][0]),
-									Utils.rounded(translation[j][1]), Utils.rounded(translation[j][2])));
+					gd.addMessage(String.format("Shift X = %s\nShift Y = %s\nShift Z = %s",
+							rounder.toString(translation[j][0]), rounder.toString(translation[j][1]),
+							rounder.toString(translation[j][2])));
 					gd.enableYesNoCancel("Accept", "Reject");
 					if (location != null)
 						gd.setLocation(location.x, location.y);
@@ -2543,8 +2547,8 @@ public class PSFCreator implements PlugInFilter
 				// Ask if OK to continue?
 				GenericDialog gd = new GenericDialog(TITLE);
 				gd.addMessage(String.format("RMSD XY = %s\nRMSD Z = %s\nCombined CoM shift = %s,%s (%s)",
-						Utils.rounded(rmsd[0]), Utils.rounded(rmsd[1]), Utils.rounded(shift[0]),
-						Utils.rounded(shift[1]), Utils.rounded(shiftd)));
+						rounder.toString(rmsd[0]), rounder.toString(rmsd[1]), rounder.toString(shift[0]),
+						rounder.toString(shift[1]), rounder.toString(shiftd)));
 				gd.enableYesNoCancel("Converged", "Continue");
 				gd.showDialog();
 				if (gd.wasCanceled())
@@ -2615,7 +2619,6 @@ public class PSFCreator implements PlugInFilter
 
 		double mean = 0;
 
-		Rounder rounder = RounderFactory.create(4);
 		for (int i = 0; i < centres.length; i++)
 		{
 			// Extract stack
@@ -2953,19 +2956,6 @@ public class PSFCreator implements PlugInFilter
 		int size;
 		Projection projection;
 		final int magnification;
-		Calibration c = null;
-
-		Calibration getCalibration()
-		{
-			if (c == null)
-			{
-				c = new Calibration();
-				c.setUnit("nm");
-				c.pixelWidth = c.pixelHeight = nmPerPixel / magnification;
-				c.pixelDepth = nmPerSlice / magnification;
-			}
-			return c;
-		}
 
 		ExtractedPSF(float[][] psf, int size, BasePoint centre, int magnification)
 		{
@@ -3116,20 +3106,43 @@ public class PSFCreator implements PlugInFilter
 			ImageStack stack = new ImageStack(size, size);
 			for (float[] pixels : psf)
 				stack.addSlice(null, pixels);
-			setCalibration(Utils.display(title, stack));
+			setCalibration(Utils.display(title, stack), 2);
 
 			// Show the projections
 			if (projection == null)
 				return;
 
-			setCalibration(Utils.display(title + " X-projection", getProjection(0)));
-			setCalibration(Utils.display(title + " Y-projection", getProjection(1)));
-			setCalibration(Utils.display(title + " Z-projection", getProjection(2)));
+			setCalibration(Utils.display(title + " X-projection", getProjection(0)), 0);
+			setCalibration(Utils.display(title + " Y-projection", getProjection(1)), 1);
+			setCalibration(Utils.display(title + " Z-projection", getProjection(2)), 2);
 		}
 
-		void setCalibration(ImagePlus imp)
+		void setCalibration(ImagePlus imp, int dimension)
 		{
-			imp.setCalibration(getCalibration());
+			imp.setCalibration(getCalibration(dimension));
+		}
+
+		Calibration getCalibration(int dimension)
+		{
+			Calibration c = new Calibration();
+			c.setUnit("nm");
+			switch (dimension)
+			{
+				case Projection.X:
+					c.pixelWidth = nmPerSlice / magnification;
+					c.pixelHeight = nmPerPixel / magnification;
+					break;
+				case Projection.Y:
+					c.pixelWidth = nmPerPixel / magnification;
+					c.pixelHeight = nmPerSlice / magnification;
+					break;
+				case Projection.Z:
+					c.pixelWidth = nmPerPixel / magnification;
+					c.pixelHeight = nmPerPixel / magnification;
+					c.pixelDepth = nmPerSlice / magnification;
+					break;
+			}
+			return c;
 		}
 
 		FloatProcessor getProjection(int i)
@@ -3207,23 +3220,25 @@ public class PSFCreator implements PlugInFilter
 					fval);
 
 			// Interpolate
-			int maxx = (size - 1) * extraMagnification + 1;
+			int maxx = (size - 1) * extraMagnification;
 			int maxy = maxx;
-			int maxz = (psf.length - 1) * extraMagnification + 1;
+			int maxz = (psf.length - 1) * extraMagnification;
 			double step = 1.0 / extraMagnification;
 			float[][] psf2 = new float[maxz + 1][(maxx + 1) * (maxy + 1)];
 
 			// Pre-compute spline positions
 			CubicSplinePosition[] sx = new CubicSplinePosition[maxx + 1];
 			CubicSplinePosition[] sy = sx;
+			double maxX = f.getMaxX();
 			for (int i = 0; i < sx.length; i++)
 			{
-				sx[i] = f.getXSplinePosition(i * step);
+				sx[i] = f.getXSplinePosition(Math.min(i * step, maxX));
 			}
 
+			double maxZ = f.getMaxZ();
 			for (int z = 0; z < psf2.length; z++)
 			{
-				CubicSplinePosition sz = f.getZSplinePosition(z * step);
+				CubicSplinePosition sz = f.getZSplinePosition(Math.min(z * step, maxZ));
 				float[] data = psf2[z];
 				for (int y = 0, i = 0; y <= maxy; y++)
 				{
@@ -3234,8 +3249,8 @@ public class PSFCreator implements PlugInFilter
 				}
 			}
 
-			BasePoint newCentre = new BasePoint(maxx / 2.0f, maxy / 2.0f, maxz / 2.0f);
-			return new ExtractedPSF(psf2, maxx + 1, newCentre, magnification * extraMagnification);
+			BasePoint newCentre = new BasePoint(sx.length / 2.0f, sy.length / 2.0f, psf2.length / 2.0f);
+			return new ExtractedPSF(psf2, sx.length, newCentre, magnification * extraMagnification);
 		}
 	}
 
@@ -3294,8 +3309,8 @@ public class PSFCreator implements PlugInFilter
 		// Ignore this. We just want to keep the centres relative to the combined stack.
 		// The actual z-centre of the combined stack does not matter.
 		float dz = 0; //(float) shift[2]; 
-		Utils.log("Combined PSF has CoM shift %s,%s (%s)", Utils.rounded(shift[0]), Utils.rounded(shift[1]),
-				Utils.rounded(shiftd));
+		Utils.log("Combined PSF has CoM shift %s,%s (%s)", rounder.toString(shift[0]), rounder.toString(shift[1]),
+				rounder.toString(shiftd));
 		for (int i = 0; i < centres.length; i++)
 		{
 			centres[i] = centres[i].shift(dx, dy, dz);
