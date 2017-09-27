@@ -3106,7 +3106,11 @@ public class PSFCreator implements PlugInFilter
 			ImageStack stack = new ImageStack(size, size);
 			for (float[] pixels : psf)
 				stack.addSlice(null, pixels);
-			setCalibration(Utils.display(title, stack), 2);
+			ImagePlus imp = Utils.display(title, stack);
+			// The centre is relative to the combined PSF in the original scale so use as an offset
+			int n = psf.length;
+			imp.setSlice(Maths.clip(1, n, centre.getZint() * magnification + 1 + n / 2));
+			setCalibration(imp, 2);
 
 			// Show the projections
 			if (projection == null)
@@ -3120,6 +3124,7 @@ public class PSFCreator implements PlugInFilter
 		void setCalibration(ImagePlus imp, int dimension)
 		{
 			imp.setCalibration(getCalibration(dimension));
+			imp.resetDisplayRange();
 		}
 
 		Calibration getCalibration(int dimension)
@@ -3198,6 +3203,8 @@ public class PSFCreator implements PlugInFilter
 
 		public ExtractedPSF enlarge(int extraMagnification)
 		{
+			IJ.showStatus("Enlarging combined PSF");
+			
 			// The scales are actually arbitrary
 			// We can enlarge by interpolation between the start and end
 			double[] xval = SimpleArrayUtils.newArray(size, 0, 1.0);
@@ -3218,7 +3225,7 @@ public class PSFCreator implements PlugInFilter
 
 			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(xval, yval, zval,
 					fval);
-
+			
 			// Interpolate
 			int maxx = (size - 1) * extraMagnification;
 			int maxy = maxx;
@@ -3235,9 +3242,11 @@ public class PSFCreator implements PlugInFilter
 				sx[i] = f.getXSplinePosition(Math.min(i * step, maxX));
 			}
 
+			//IJ.showStatus("Interpolating");
 			double maxZ = f.getMaxZ();
 			for (int z = 0; z < psf2.length; z++)
 			{
+				IJ.showProgress(z, psf2.length);
 				CubicSplinePosition sz = f.getZSplinePosition(Math.min(z * step, maxZ));
 				float[] data = psf2[z];
 				for (int y = 0, i = 0; y <= maxy; y++)
@@ -3248,6 +3257,9 @@ public class PSFCreator implements PlugInFilter
 					}
 				}
 			}
+			
+			IJ.showProgress(1);
+			IJ.showStatus("");
 
 			BasePoint newCentre = new BasePoint(sx.length / 2.0f, sy.length / 2.0f, psf2.length / 2.0f);
 			return new ExtractedPSF(psf2, sx.length, newCentre, magnification * extraMagnification);
