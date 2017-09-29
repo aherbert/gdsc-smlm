@@ -34,7 +34,6 @@ import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolator;
 import gdsc.core.utils.DoubleData;
-import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.Maths;
@@ -90,6 +89,8 @@ import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
+import ij.gui.ImageRoi;
+import ij.gui.Line;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
@@ -105,6 +106,8 @@ import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import ij.process.LUTHelper;
+import ij.process.LUTHelper.LutColour;
 
 /**
  * Produces an average PSF image using selected diffraction limited spots from a sample image.
@@ -118,6 +121,8 @@ public class PSFCreator implements PlugInFilter
 	private final static String TITLE_AMPLITUDE = "Spot Amplitude";
 	private final static String TITLE_PSF_PARAMETERS = "Spot PSF";
 	private final static String TITLE_INTENSITY = "Spot Intensity";
+	private final static String TITLE_WINDOW = "PSF Window Function";
+	private final static String TITLE_BACKGROUND = "PSF Cumulative Intensity";
 
 	private final static String[] MODE = { "Projection", "Gaussian Fitting" };
 	private static int mode = 0;
@@ -139,7 +144,11 @@ public class PSFCreator implements PlugInFilter
 
 	private static double nmPerPixel;
 	private static int projectionMagnification = 2;
+	private static int maxIterations = 20;
 	private static int psfMagnification = 4;
+	private static double backgroundCutoff = 5;
+	private float background = 0;
+	private static double windowAlpha = 0.25;
 	private static Rounder rounder = RounderFactory.create(4);
 
 	private FitEngineConfiguration config = null;
@@ -152,6 +161,7 @@ public class PSFCreator implements PlugInFilter
 
 	// Private variables that are used during background threaded plotting of the cumulative signal 
 	private ImageStack psf = null;
+	private ImagePlus[] psfOut = null;
 	private int zCentre = 0;
 	private double psfWidth = 0;
 	private double psfNmPerPixel = 0;
@@ -2433,7 +2443,7 @@ public class PSFCreator implements PlugInFilter
 
 		// Iterate until centres have converged
 		boolean converged = false;
-		for (int iter = 0; !converged && iter < 20; iter++)
+		for (int iter = 0; !converged && iter < maxIterations; iter++)
 		{
 			// Combine all PSFs
 			ExtractedPSF combined = combine(psfs);
@@ -2593,17 +2603,30 @@ public class PSFCreator implements PlugInFilter
 		combined = combined.enlarge(psfMagnification);
 
 		combined.createProjections();
-		combined.show("Combined PSF");
+		psfOut = combined.show("Combined PSF");
 
 		double[] com = combined.getCentreOfMass();
-		int zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
+		zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
 
 		// TODO - 
-		// show a dialog to collect processing options 
+		// show a dialog to collect processing options
 		// - non blocking dialog to find z centre
 		// - fraction of pixels as background
-
 		// Find background interactively
+		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+		gd.addMessage("Configure the output PSF.\nZ-centre = " + zCentre);
+		gd.addSlider("Background_slice", 1, combined.psf.length, zCentre);
+		gd.addSlider("Background_cutoff (%)", 1, 50, backgroundCutoff);
+		gd.addSlider("Window", 0, 0.95, windowAlpha);
+		if (Utils.isShowGenericDialog())
+		{
+			drawPSFPlots();
+			gd.addDialogListener(new InteractivePSFListener());
+		}
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		drawPSFPlots();
 
 		// When click ok the background is subtracted from the PSF
 		// All pixels below the background are set to zero
@@ -2612,6 +2635,180 @@ public class PSFCreator implements PlugInFilter
 
 		// Create a new extracted PSF and show
 
+	}
+
+	private class InteractivePSFListener implements DialogListener
+	{
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			zCentre = (int) gd.getNextNumber();
+			backgroundCutoff = gd.getNextNumber();
+			windowAlpha = gd.getNextNumber();
+
+			drawPSFPlots();
+			return true;
+		}
+	}
+
+	private void drawPSFPlots()
+	{
+		updateWindowPlot();
+		updateBackgroundPlot();
+		updatePSF();
+	}
+
+	double plotWindowAlpha = -1;
+
+	private void updateWindowPlot()
+	{
+		if (aquirePlotLock1())
+		{
+			// Run in a new thread to allow the GUI to continue updating
+			new Thread(new Runnable()
+			{
+				public void run()
+				{
+					try
+					{
+						// Continue while the parameter is changing
+						while (plotWindowAlpha != windowAlpha)
+						{
+							// Store the parameters to be processed
+							plotWindowAlpha = windowAlpha;
+
+							int size = psfOut[0].getWidth();
+							double[] x = SimpleArrayUtils.newArray(size, 0, 1.0);
+							double[] w = ImageWindow.tukey(size, plotWindowAlpha);
+
+							Plot2 plot = new Plot2(TITLE_WINDOW, "x", "Weight", x, w);
+							plot.setLimits(0, size - 1, 0, 1.05);
+							Utils.display(TITLE_WINDOW, plot);
+						}
+					}
+					finally
+					{
+						// Ensure the running flag is reset
+						plotLock1 = false;
+					}
+				}
+			}).start();
+		}
+	}
+
+	private int plotZCentre = -1;
+	private double plotBackgroundCutoff = -1;
+
+	private void updateBackgroundPlot()
+	{
+		if (aquirePlotLock2())
+		{
+			// Run in a new thread to allow the GUI to continue updating
+			new Thread(new Runnable()
+			{
+				public void run()
+				{
+					try
+					{
+						// Continue while the parameter is changing
+						while (plotZCentre != zCentre || plotBackgroundCutoff != backgroundCutoff)
+						{
+							// Store the parameters to be processed
+							plotZCentre = zCentre;
+							plotBackgroundCutoff = backgroundCutoff;
+
+							// Show a plot of the background using the cumulative histogram of the
+							// pixel values
+							float[] pixels = (float[]) psfOut[0].getImageStack().getPixels(plotZCentre);
+							double[] values = SimpleArrayUtils.toDouble(pixels);
+							double p = plotBackgroundCutoff / 100;
+							double[][] h = Maths.cumulativeHistogram(values, true);
+							double[] x = h[0];
+							double[] y = h[1];
+							int i = Arrays.binarySearch(y, p);
+							if (i < 0)
+							{
+								int after = Maths.clip(0, x.length - 1, -(i + 1));
+								int before = Maths.clip(0, x.length - 1, after - 1);
+								background = (float) Maths.interpolateX(x[before], y[before], x[after], y[after], p);
+							}
+							else
+							{
+								background = (float) values[i];
+							}
+
+							final byte ON = (byte) 255;
+							ByteProcessor bp = new ByteProcessor(psfOut[0].getWidth(), psfOut[0].getHeight());
+							bp.setLut(LUTHelper.createLUT(LutColour.BLUE, true));
+							byte[] bpixels = (byte[]) bp.getPixels();
+							for (int j = 0; j < pixels.length; j++)
+								if (pixels[j] < background)
+									bpixels[j] = ON;
+							ImageRoi roi = new ImageRoi(0, 0, bp);
+							roi.setZeroTransparent(true);
+							Overlay o = new Overlay(roi);
+							psfOut[0].setOverlay(o);
+
+							Plot2 plot = new Plot2(TITLE_BACKGROUND, "Intensity", "Fraction", x, y);
+							plot.setLimits(x[0], x[x.length - 1], 0, 1.05);
+							plot.addLabel(0, 0, String.format("Background = %s @ %s %%", Utils.rounded(background),
+									plotBackgroundCutoff));
+							plot.setColor(Color.BLUE);
+							plot.drawLine(background, 0, background, 1.05);
+							plot.setColor(Color.BLACK);
+							if (x[0] > 0)
+								plot.setLogScaleX();
+							Utils.display(TITLE_BACKGROUND, plot);
+						}
+					}
+					finally
+					{
+						// Ensure the running flag is reset
+						plotLock2 = false;
+					}
+				}
+			}).start();
+		}
+	}
+
+	private int psfZCentre = -1;
+
+	private void updatePSF()
+	{
+		if (aquirePlotLock3())
+		{
+			// Run in a new thread to allow the GUI to continue updating
+			new Thread(new Runnable()
+			{
+				public void run()
+				{
+					try
+					{
+						// Continue while the parameter is changing
+						while (psfZCentre != zCentre)
+						{
+							// Store the parameters to be processed
+							psfZCentre = zCentre;
+
+							// Select the z-centre
+							psfOut[0].setSlice(psfZCentre);
+							psfOut[0].resetDisplayRange();
+							psfOut[0].updateAndDraw();
+
+							// Mark projections
+							// X-projection
+							psfOut[1].setRoi(new Line(psfZCentre, 0, psfZCentre, psfOut[1].getHeight()));
+							// Y-projection
+							psfOut[2].setRoi(new Line(0, psfZCentre, psfOut[2].getWidth(), psfZCentre));
+						}
+					}
+					finally
+					{
+						// Ensure the running flag is reset
+						plotLock3 = false;
+					}
+				}
+			}).start();
+		}
 	}
 
 	private BasePoint[] relocateUsingCentreOfMass(float[][] image, BasePoint[] centres)
@@ -2694,13 +2891,13 @@ public class PSFCreator implements PlugInFilter
 					to[k] += from[k];
 			}
 		}
-		// Normalise
+		// Q. Should the normalisation be done?
 		for (int j = 0; j < combined.length; j++)
 		{
 			float[] to = combined[j];
 			int c = count[j];
-			//			for (int k = 0; k < to.length; k++)
-			//				to[k] /= c;
+			for (int k = 0; k < to.length; k++)
+				to[k] /= c;
 		}
 		return new ExtractedPSF(combined, size, centre, psfs[0].magnification);
 	}
@@ -2715,6 +2912,7 @@ public class PSFCreator implements PlugInFilter
 		gd.addNumericField("nm_per_pixel", nmPerPixel, 2);
 		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
 		gd.addSlider("Projection_magnification", 1, 8, projectionMagnification);
+		gd.addSlider("Max_iterations", 1, 20, maxIterations);
 		gd.addSlider("PSF_magnification", 1, 8, psfMagnification);
 
 		gd.showDialog();
@@ -2725,6 +2923,7 @@ public class PSFCreator implements PlugInFilter
 		nmPerPixel = gd.getNextNumber();
 		nmPerSlice = gd.getNextNumber();
 		projectionMagnification = (int) gd.getNextNumber();
+		maxIterations = (int) gd.getNextNumber();
 		psfMagnification = (int) gd.getNextNumber();
 
 		// Check arguments
@@ -2733,6 +2932,7 @@ public class PSFCreator implements PlugInFilter
 			Parameters.isPositive("nm/pixel", nmPerPixel);
 			Parameters.isPositive("nm/slice", nmPerSlice);
 			Parameters.isEqualOrAbove("Projection magnification", projectionMagnification, 1);
+			Parameters.isEqualOrAbove("Max iterations", maxIterations, 1);
 			Parameters.isEqualOrAbove("PSF magnification", psfMagnification, 1);
 		}
 		catch (IllegalArgumentException e)
@@ -3109,8 +3309,9 @@ public class PSFCreator implements PlugInFilter
 			projection = new Projection(psf, size, size);
 		}
 
-		void show(String title)
+		ImagePlus[] show(String title)
 		{
+			ImagePlus[] out = new ImagePlus[4];
 			ImageStack stack = new ImageStack(size, size);
 			for (float[] pixels : psf)
 				stack.addSlice(null, pixels);
@@ -3120,20 +3321,24 @@ public class PSFCreator implements PlugInFilter
 			imp.setSlice(Maths.clip(1, n, centre.getZint() * magnification + 1 + n / 2));
 			setCalibration(imp, 2);
 
+			out[0] = imp;
+
 			// Show the projections
 			if (projection == null)
-				return;
+				return out;
 
-			setCalibration(Utils.display(title + " X-projection (ZY)", getProjection(0)), 0);
-			setCalibration(Utils.display(title + " Y-projection (XZ)", getProjection(1)), 1);
-			setCalibration(Utils.display(title + " Z-projection (XY)", getProjection(2)), 2);
+			out[1] = setCalibration(Utils.display(title + " X-projection (ZY)", getProjection(0)), 0);
+			out[2] = setCalibration(Utils.display(title + " Y-projection (XZ)", getProjection(1)), 1);
+			out[3] = setCalibration(Utils.display(title + " Z-projection (XY)", getProjection(2)), 2);
+			return out;
 		}
 
-		void setCalibration(ImagePlus imp, int dimension)
+		ImagePlus setCalibration(ImagePlus imp, int dimension)
 		{
 			imp.setCalibration(getCalibration(dimension));
 			imp.resetDisplayRange();
 			imp.updateAndDraw();
+			return imp;
 		}
 
 		Calibration getCalibration(int dimension)
@@ -3233,8 +3438,8 @@ public class PSFCreator implements PlugInFilter
 				}
 			}
 
-			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(xval, yval, zval,
-					fval, new IJTrackProgress());
+			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(xval, yval, zval, fval,
+					new IJTrackProgress());
 
 			// Interpolate
 			int maxx = (size - 1) * n;
