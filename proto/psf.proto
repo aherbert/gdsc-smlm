@@ -57,7 +57,7 @@ message ImagePSF
 {
 	// The number of images in the PSF
 	int32 image_count = 1;
-    // The image containing the focal plane of the PSF
+    // The image containing the focal plane of the PSF. This is 1-indexed.
 	int32 centre_image = 2;
 	// The size of the PSF pixel in nanometers
 	double pixel_size = 3;
@@ -72,4 +72,14 @@ message ImagePSF
 	// determined by PSF fitting.
 	// If missing then the alignment is assumed to be 0,0.
 	map<int32, Offset> offsets = 7;
+	// X-centre. This can be used instead of the offsets. This is the distance
+	// through the image width that is the x-centre. 
+	double x_centre = 8;
+	// Y-centre. This can be used instead of the offsets. This is the distance
+	// through the image width that is the y-centre. 
+	double y_centre = 9;
+	// Z-centre. This can be used instead of the centre_image. This is the distance
+	// through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+	// should use rounding to the nearest integer and then add 1. 
+	double z_centre = 10;
 }

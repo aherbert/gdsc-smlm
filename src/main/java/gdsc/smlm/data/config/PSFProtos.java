@@ -2618,7 +2618,7 @@ public final class PSFProtos {
 
     /**
      * <pre>
-     * The image containing the focal plane of the PSF
+     * The image containing the focal plane of the PSF. This is 1-indexed.
      * </pre>
      *
      * <code>int32 centre_image = 2;</code>
@@ -2774,6 +2774,37 @@ public final class PSFProtos {
 
     gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrThrow(
         int key);
+
+    /**
+     * <pre>
+     * X-centre. This can be used instead of the offsets. This is the distance
+     * through the image width that is the x-centre. 
+     * </pre>
+     *
+     * <code>double x_centre = 8;</code>
+     */
+    double getXCentre();
+
+    /**
+     * <pre>
+     * Y-centre. This can be used instead of the offsets. This is the distance
+     * through the image width that is the y-centre. 
+     * </pre>
+     *
+     * <code>double y_centre = 9;</code>
+     */
+    double getYCentre();
+
+    /**
+     * <pre>
+     * Z-centre. This can be used instead of the centre_image. This is the distance
+     * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+     * should use rounding to the nearest integer and then add 1. 
+     * </pre>
+     *
+     * <code>double z_centre = 10;</code>
+     */
+    double getZCentre();
   }
   /**
    * <pre>
@@ -2796,6 +2827,9 @@ public final class PSFProtos {
       pixelSize_ = 0D;
       pixelDepth_ = 0D;
       fwhm_ = 0D;
+      xCentre_ = 0D;
+      yCentre_ = 0D;
+      zCentre_ = 0D;
     }
 
     @java.lang.Override
@@ -2874,6 +2908,21 @@ public final class PSFProtos {
                   offsets__.getKey(), offsets__.getValue());
               break;
             }
+            case 65: {
+
+              xCentre_ = input.readDouble();
+              break;
+            }
+            case 73: {
+
+              yCentre_ = input.readDouble();
+              break;
+            }
+            case 81: {
+
+              zCentre_ = input.readDouble();
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -2928,7 +2977,7 @@ public final class PSFProtos {
     private int centreImage_;
     /**
      * <pre>
-     * The image containing the focal plane of the PSF
+     * The image containing the focal plane of the PSF. This is 1-indexed.
      * </pre>
      *
      * <code>int32 centre_image = 2;</code>
@@ -3172,6 +3221,49 @@ public final class PSFProtos {
       return map.get(key);
     }
 
+    public static final int X_CENTRE_FIELD_NUMBER = 8;
+    private double xCentre_;
+    /**
+     * <pre>
+     * X-centre. This can be used instead of the offsets. This is the distance
+     * through the image width that is the x-centre. 
+     * </pre>
+     *
+     * <code>double x_centre = 8;</code>
+     */
+    public double getXCentre() {
+      return xCentre_;
+    }
+
+    public static final int Y_CENTRE_FIELD_NUMBER = 9;
+    private double yCentre_;
+    /**
+     * <pre>
+     * Y-centre. This can be used instead of the offsets. This is the distance
+     * through the image width that is the y-centre. 
+     * </pre>
+     *
+     * <code>double y_centre = 9;</code>
+     */
+    public double getYCentre() {
+      return yCentre_;
+    }
+
+    public static final int Z_CENTRE_FIELD_NUMBER = 10;
+    private double zCentre_;
+    /**
+     * <pre>
+     * Z-centre. This can be used instead of the centre_image. This is the distance
+     * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+     * should use rounding to the nearest integer and then add 1. 
+     * </pre>
+     *
+     * <code>double z_centre = 10;</code>
+     */
+    public double getZCentre() {
+      return zCentre_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -3211,6 +3303,15 @@ public final class PSFProtos {
           internalGetOffsets(),
           OffsetsDefaultEntryHolder.defaultEntry,
           7);
+      if (xCentre_ != 0D) {
+        output.writeDouble(8, xCentre_);
+      }
+      if (yCentre_ != 0D) {
+        output.writeDouble(9, yCentre_);
+      }
+      if (zCentre_ != 0D) {
+        output.writeDouble(10, zCentre_);
+      }
     }
 
     public int getSerializedSize() {
@@ -3258,6 +3359,18 @@ public final class PSFProtos {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(7, offsets__);
       }
+      if (xCentre_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(8, xCentre_);
+      }
+      if (yCentre_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(9, yCentre_);
+      }
+      if (zCentre_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(10, zCentre_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -3294,6 +3407,18 @@ public final class PSFProtos {
           other.internalGetNotes());
       result = result && internalGetOffsets().equals(
           other.internalGetOffsets());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getXCentre())
+          == java.lang.Double.doubleToLongBits(
+              other.getXCentre()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getYCentre())
+          == java.lang.Double.doubleToLongBits(
+              other.getYCentre()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getZCentre())
+          == java.lang.Double.doubleToLongBits(
+              other.getZCentre()));
       return result;
     }
 
@@ -3325,6 +3450,15 @@ public final class PSFProtos {
         hash = (37 * hash) + OFFSETS_FIELD_NUMBER;
         hash = (53 * hash) + internalGetOffsets().hashCode();
       }
+      hash = (37 * hash) + X_CENTRE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getXCentre()));
+      hash = (37 * hash) + Y_CENTRE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getYCentre()));
+      hash = (37 * hash) + Z_CENTRE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getZCentre()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3496,6 +3630,12 @@ public final class PSFProtos {
 
         internalGetMutableNotes().clear();
         internalGetMutableOffsets().clear();
+        xCentre_ = 0D;
+
+        yCentre_ = 0D;
+
+        zCentre_ = 0D;
+
         return this;
       }
 
@@ -3529,6 +3669,9 @@ public final class PSFProtos {
         result.notes_.makeImmutable();
         result.offsets_ = internalGetOffsets();
         result.offsets_.makeImmutable();
+        result.xCentre_ = xCentre_;
+        result.yCentre_ = yCentre_;
+        result.zCentre_ = zCentre_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -3590,6 +3733,15 @@ public final class PSFProtos {
             other.internalGetNotes());
         internalGetMutableOffsets().mergeFrom(
             other.internalGetOffsets());
+        if (other.getXCentre() != 0D) {
+          setXCentre(other.getXCentre());
+        }
+        if (other.getYCentre() != 0D) {
+          setYCentre(other.getYCentre());
+        }
+        if (other.getZCentre() != 0D) {
+          setZCentre(other.getZCentre());
+        }
         onChanged();
         return this;
       }
@@ -3658,7 +3810,7 @@ public final class PSFProtos {
       private int centreImage_ ;
       /**
        * <pre>
-       * The image containing the focal plane of the PSF
+       * The image containing the focal plane of the PSF. This is 1-indexed.
        * </pre>
        *
        * <code>int32 centre_image = 2;</code>
@@ -3668,7 +3820,7 @@ public final class PSFProtos {
       }
       /**
        * <pre>
-       * The image containing the focal plane of the PSF
+       * The image containing the focal plane of the PSF. This is 1-indexed.
        * </pre>
        *
        * <code>int32 centre_image = 2;</code>
@@ -3681,7 +3833,7 @@ public final class PSFProtos {
       }
       /**
        * <pre>
-       * The image containing the focal plane of the PSF
+       * The image containing the focal plane of the PSF. This is 1-indexed.
        * </pre>
        *
        * <code>int32 centre_image = 2;</code>
@@ -4129,6 +4281,132 @@ public final class PSFProtos {
             .putAll(values);
         return this;
       }
+
+      private double xCentre_ ;
+      /**
+       * <pre>
+       * X-centre. This can be used instead of the offsets. This is the distance
+       * through the image width that is the x-centre. 
+       * </pre>
+       *
+       * <code>double x_centre = 8;</code>
+       */
+      public double getXCentre() {
+        return xCentre_;
+      }
+      /**
+       * <pre>
+       * X-centre. This can be used instead of the offsets. This is the distance
+       * through the image width that is the x-centre. 
+       * </pre>
+       *
+       * <code>double x_centre = 8;</code>
+       */
+      public Builder setXCentre(double value) {
+        
+        xCentre_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * X-centre. This can be used instead of the offsets. This is the distance
+       * through the image width that is the x-centre. 
+       * </pre>
+       *
+       * <code>double x_centre = 8;</code>
+       */
+      public Builder clearXCentre() {
+        
+        xCentre_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double yCentre_ ;
+      /**
+       * <pre>
+       * Y-centre. This can be used instead of the offsets. This is the distance
+       * through the image width that is the y-centre. 
+       * </pre>
+       *
+       * <code>double y_centre = 9;</code>
+       */
+      public double getYCentre() {
+        return yCentre_;
+      }
+      /**
+       * <pre>
+       * Y-centre. This can be used instead of the offsets. This is the distance
+       * through the image width that is the y-centre. 
+       * </pre>
+       *
+       * <code>double y_centre = 9;</code>
+       */
+      public Builder setYCentre(double value) {
+        
+        yCentre_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Y-centre. This can be used instead of the offsets. This is the distance
+       * through the image width that is the y-centre. 
+       * </pre>
+       *
+       * <code>double y_centre = 9;</code>
+       */
+      public Builder clearYCentre() {
+        
+        yCentre_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double zCentre_ ;
+      /**
+       * <pre>
+       * Z-centre. This can be used instead of the centre_image. This is the distance
+       * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+       * should use rounding to the nearest integer and then add 1. 
+       * </pre>
+       *
+       * <code>double z_centre = 10;</code>
+       */
+      public double getZCentre() {
+        return zCentre_;
+      }
+      /**
+       * <pre>
+       * Z-centre. This can be used instead of the centre_image. This is the distance
+       * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+       * should use rounding to the nearest integer and then add 1. 
+       * </pre>
+       *
+       * <code>double z_centre = 10;</code>
+       */
+      public Builder setZCentre(double value) {
+        
+        zCentre_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Z-centre. This can be used instead of the centre_image. This is the distance
+       * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+       * should use rounding to the nearest integer and then add 1. 
+       * </pre>
+       *
+       * <code>double z_centre = 10;</code>
+       */
+      public Builder clearZCentre() {
+        
+        zCentre_ = 0D;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -4224,22 +4502,23 @@ public final class PSFProtos {
       "\036.gdsc.smlm.data.config.PSFType\0227\n\nparam" +
       "eters\030\002 \003(\0132#.gdsc.smlm.data.config.PSFP" +
       "arameter\" \n\006Offset\022\n\n\002cx\030\002 \001(\001\022\n\n\002cy\030\003 \001" +
-      "(\001\"\343\002\n\010ImagePSF\022\023\n\013image_count\030\001 \001(\005\022\024\n\014" +
+      "(\001\"\231\003\n\010ImagePSF\022\023\n\013image_count\030\001 \001(\005\022\024\n\014" +
       "centre_image\030\002 \001(\005\022\022\n\npixel_size\030\003 \001(\001\022\023" +
       "\n\013pixel_depth\030\004 \001(\001\022\014\n\004fwhm\030\005 \001(\001\0229\n\005not",
       "es\030\006 \003(\0132*.gdsc.smlm.data.config.ImagePS" +
       "F.NotesEntry\022=\n\007offsets\030\007 \003(\0132,.gdsc.sml" +
-      "m.data.config.ImagePSF.OffsetsEntry\032,\n\nN" +
-      "otesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028" +
-      "\001\032M\n\014OffsetsEntry\022\013\n\003key\030\001 \001(\005\022,\n\005value\030" +
-      "\002 \001(\0132\035.gdsc.smlm.data.config.Offset:\0028\001" +
-      "*\232\001\n\007PSFType\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXI" +
-      "S_GAUSSIAN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020" +
-      "\002\022\"\n\036TWO_AXIS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n" +
-      "\026ASTIGMATIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n",
-      "\020PSFParameterUnit\022\031\n\025PSF_PARAMETER_UNIT_" +
-      "NA\020\000\022\014\n\010DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANG" +
-      "LE\020\003B\013B\tPSFProtosb\006proto3"
+      "m.data.config.ImagePSF.OffsetsEntry\022\020\n\010x" +
+      "_centre\030\010 \001(\001\022\020\n\010y_centre\030\t \001(\001\022\020\n\010z_cen" +
+      "tre\030\n \001(\001\032,\n\nNotesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005" +
+      "value\030\002 \001(\t:\0028\001\032M\n\014OffsetsEntry\022\013\n\003key\030\001" +
+      " \001(\005\022,\n\005value\030\002 \001(\0132\035.gdsc.smlm.data.con" +
+      "fig.Offset:\0028\001*\232\001\n\007PSFType\022\017\n\013PSF_TYPE_N" +
+      "A\020\000\022\030\n\024ONE_AXIS_GAUSSIAN_2D\020\001\022\030\n\024TWO_AXI" +
+      "S_GAUSSIAN_2D\020\002\022\"\n\036TWO_AXIS_AND_THETA_GA",
+      "USSIAN_2D\020\003\022\032\n\026ASTIGMATIC_GAUSSIAN_2D\020\004\022" +
+      "\n\n\006CUSTOM\020\005*U\n\020PSFParameterUnit\022\031\n\025PSF_P" +
+      "ARAMETER_UNIT_NA\020\000\022\014\n\010DISTANCE\020\001\022\r\n\tINTE" +
+      "NSITY\020\002\022\t\n\005ANGLE\020\003B\013B\tPSFProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -4276,7 +4555,7 @@ public final class PSFProtos {
     internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImagePSF_descriptor,
-        new java.lang.String[] { "ImageCount", "CentreImage", "PixelSize", "PixelDepth", "Fwhm", "Notes", "Offsets", });
+        new java.lang.String[] { "ImageCount", "CentreImage", "PixelSize", "PixelDepth", "Fwhm", "Notes", "Offsets", "XCentre", "YCentre", "ZCentre", });
     internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor =
       internal_static_gdsc_smlm_data_config_ImagePSF_descriptor.getNestedTypes().get(0);
     internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_fieldAccessorTable = new

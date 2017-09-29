@@ -689,6 +689,7 @@ public class PSFDrift implements PlugIn
 		{
 			positionsToAverage = Math.abs((int) gd.getNextNumber());
 			Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
+			boolean useOldOffset = useOffset && !oldOffset.isEmpty(); 
 			TurboList<double[]> offset = new TurboList<double[]>();
 			final double pitch = psfSettings.getPixelSize();
 			int j = 0;
@@ -703,11 +704,14 @@ public class PSFDrift implements PlugIn
 				// The offset should store the difference to the centre in pixels so divide by the pixel pitch
 				double cx = smoothx[1][j] / pitch;
 				double cy = smoothy[1][j] / pitch;
-				Offset o = oldOffset.get(slice);
-				if (o != null)
+				if (useOldOffset)
 				{
-					cx += o.getCx();
-					cy += o.getCy();
+					Offset o = oldOffset.get(slice);
+					if (o != null)
+					{
+						cx += o.getCx();
+						cy += o.getCy();
+					}
 				}
 				offset.add(new double[] { slice, cx, cy });
 			}
@@ -908,19 +912,33 @@ public class PSFDrift implements PlugIn
 
 		// Extract data uses index not slice number as arguments so subtract 1
 		double noiseFraction = 1e-3;
-		ImagePSFModel model = new ImagePSFModel(CreateData.extractImageStack(imp, lower - 1, upper - 1),
+		float[][] image = CreateData.extractImageStack(imp, lower - 1, upper - 1);
+		ImagePSFModel model = new ImagePSFModel(image,
 				zCentre - lower, unitsPerPixel, unitsPerSlice, psfSettings.getFwhm(), noiseFraction);
 
 		// Add the calibrated centres
-		if (psfSettings.getOffsetsMap() != null && useOffset)
+		Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
+		if (useOffset && !oldOffset.isEmpty())
 		{
 			int sliceOffset = lower;
-			for (Entry<Integer, Offset> entry : psfSettings.getOffsetsMap().entrySet())
+			for (Entry<Integer, Offset> entry : oldOffset.entrySet())
 			{
 				model.setRelativeCentre(entry.getKey() - sliceOffset, entry.getValue().getCx(),
 						entry.getValue().getCy());
 			}
 		}
+		else
+		{
+			// Use the CoM if present
+			double cx = psfSettings.getXCentre();
+			double cy = psfSettings.getYCentre();
+			if (cx != 0 || cy != 0)
+			{
+				for (int slice = 0; slice < image.length; slice++)
+					model.setCentre(slice, cx, cy);
+			}
+		}
+		
 
 		return model;
 	}

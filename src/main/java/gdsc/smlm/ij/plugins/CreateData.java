@@ -2195,19 +2195,31 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 
 			final double noiseFraction = 1e-3;
-			final ImagePSFModel model = new ImagePSFModel(extractImageStack(imp, lower, upper), zCentre - lower,
+			float[][] image = extractImageStack(imp, lower, upper);
+			final ImagePSFModel model = new ImagePSFModel(image, zCentre - lower,
 					psfSettings.getPixelSize() / settings.getPixelPitch(), unitsPerSlice, psfSettings.getFwhm(),
 					noiseFraction);
 
-			// Add the calibrated centres
+			// Add the calibrated centres. The map will not be null
 			Map<Integer, Offset> map = psfSettings.getOffsetsMap();
-			if (map != null)
+			if (!map.isEmpty())
 			{
 				final int sliceOffset = lower + 1;
 				for (Entry<Integer, Offset> entry : map.entrySet())
 				{
 					model.setRelativeCentre(entry.getKey() - sliceOffset, entry.getValue().getCx(),
 							entry.getValue().getCy());
+				}
+			}
+			else
+			{
+				// Use the CoM if present
+				double cx = psfSettings.getXCentre();
+				double cy = psfSettings.getYCentre();
+				if (cx != 0 || cy != 0)
+				{
+					for (int slice = 0; slice < image.length; slice++)
+						model.setCentre(slice, cx, cy);
 				}
 			}
 

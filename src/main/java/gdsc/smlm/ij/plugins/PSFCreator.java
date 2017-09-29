@@ -28,11 +28,11 @@ import gdsc.core.ij.AlignImagesFFT.WindowMethod;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
-import gdsc.core.math.interpolation.IndexedCubicSplinePosition;
 import gdsc.core.math.interpolation.CubicSplinePosition;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolator;
+import gdsc.core.math.interpolation.IndexedCubicSplinePosition;
 import gdsc.core.utils.DoubleData;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.ImageWindow;
@@ -45,6 +45,7 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
@@ -146,9 +147,9 @@ public class PSFCreator implements PlugInFilter
 	private static int projectionMagnification = 2;
 	private static int maxIterations = 20;
 	private static int psfMagnification = 4;
-	private static double backgroundCutoff = 5;
+	private static double backgroundCutoff = 2;
 	private float background = 0;
-	private static double windowAlpha = 0.25;
+	private static double windowAlpha = 0.1;
 	private static Rounder rounder = RounderFactory.create(4);
 
 	private FitEngineConfiguration config = null;
@@ -2467,7 +2468,7 @@ public class PSFCreator implements PlugInFilter
 
 			if (interactiveMode)
 			{
-				combined.show("Combined PSF");
+				combined.show("PSF");
 
 				// Ask about each centre in turn.
 				// Update Point ROI using float coordinates and set image slice to 
@@ -2482,7 +2483,7 @@ public class PSFCreator implements PlugInFilter
 				int n = imp.getStackSize();
 				for (int j = 0; j < centres.length; j++)
 				{
-					psfs[j].show("PSF");
+					psfs[j].show("Spot PSF");
 
 					Overlay o = new Overlay();
 					o.add(createRoi(psfs[j].centre.getX(), psfs[j].centre.getY(), Color.RED));
@@ -2603,16 +2604,13 @@ public class PSFCreator implements PlugInFilter
 		combined = combined.enlarge(psfMagnification);
 
 		combined.createProjections();
-		psfOut = combined.show("Combined PSF");
+		psfOut = combined.show("PSF");
 
 		double[] com = combined.getCentreOfMass();
 		zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
 
-		// TODO - 
-		// show a dialog to collect processing options
-		// - non blocking dialog to find z centre
-		// - fraction of pixels as background
-		// Find background interactively
+		// Show a dialog to collect processing options and 
+		// find background interactively
 		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 		gd.addMessage("Configure the output PSF.\nZ-centre = " + zCentre);
 		gd.addSlider("Background_slice", 1, combined.psf.length, zCentre);
@@ -2628,13 +2626,119 @@ public class PSFCreator implements PlugInFilter
 			return;
 		drawPSFPlots();
 
+		// Remove interactive guides		
+		psfOut[0].killRoi();
+		psfOut[0].setOverlay(null);
+		psfOut[1].killRoi();
+		psfOut[2].killRoi();
+
 		// When click ok the background is subtracted from the PSF
 		// All pixels below the background are set to zero
 		// Apply a Tukey window to roll-off to zero at the outer pixels
+
+		double[] wx = ImageWindow.tukey(combined.size, windowAlpha);
+		double[] wz = ImageWindow.tukey(combined.psf.length, windowAlpha);
+
 		// Normalise so the z centre is 1.
+		float[][] psf = combined.psf;
+
+		int cz = zCentre - 1;
+		float[] data = psf[cz];
+		// Apply background and window with no normalisation
+		normalise(data, cz, wx, wz, 1.0);
+		// Copmute normalisation from z-centre and apply
+		double norm = 1.0 / Maths.sum(data);
+		for (int i = 0; i < data.length; i++)
+			data[i] *= norm;
+		// Normalise the rest
+		for (int z = 0; z < psf.length; z++)
+		{
+			if (z != cz)
+				normalise(psf[z], z, wx, wz, norm);
+		}
 
 		// Create a new extracted PSF and show
+		int magnification = combined.magnification;
+		combined = new ExtractedPSF(psf, combined.size, combined.centre, magnification);
+		combined.createProjections();
+		psfOut = combined.show("PSF");
+		psfImp = psfOut[0];
+		com = combined.getCentreOfMass();
 
+		// Add image info
+		int imageCount = centres.length;
+		zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
+		ImagePSF.Builder imagePsf = ImagePSFHelper
+				.create(zCentre, nmPerPixel / magnification, nmPerSlice, imageCount, 0, createNote()).toBuilder();
+		// Add the CoM
+		imagePsf.setXCentre(com[0]);
+		imagePsf.setYCentre(com[1]);
+		imagePsf.setZCentre(com[2]);
+		// This is a bit redundant ...
+		//		Offset.Builder offsetBuilder = Offset.newBuilder();
+		//		offsetBuilder.setCx(com[0]);
+		//		offsetBuilder.setCy(com[1]);
+		//		Offset offset = offsetBuilder.build();
+		//		for (int z = 1; z <= psf.length; z++)
+		//			imagePsf.putOffsets(z, offset);
+		psfImp.setProperty("Info", ImagePSFHelper.toString(imagePsf));
+
+		psfImp.setRoi(new PointRoi(com[0], com[1]));
+		psfImp.setSlice(zCentre);
+		psfImp.resetDisplayRange();
+		psfImp.updateAndDraw();
+
+		Utils.log("Final Centre-of-mass = %s,%s,%s\n", rounder.toString(com[0]), rounder.toString(com[1]),
+				rounder.toString(com[2]));
+		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images\n", psfImp.getTitle(), zCentre,
+				Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3), imageCount);
+	}
+
+	/**
+	 * Normalise the slice from the PSF using the XY and Z weighting window. The background is subtracted from the data,
+	 * the window applied and then the result is normalised.
+	 *
+	 * @param data
+	 *            the data
+	 * @param z
+	 *            the z position of the PSF data
+	 * @param wx
+	 *            the XY weighting
+	 * @param wz
+	 *            the Z weighting
+	 * @param norm
+	 *            the normalisation factor
+	 */
+	private void normalise(float[] data, int z, double[] wx, double[] wz, double norm)
+	{
+		// Weight by the stack position 
+		double[] w;
+		if (wz[z] == 1)
+		{
+			w = wx;
+		}
+		else
+		{
+			w = wx.clone();
+			for (int i = 0; i < w.length; i++)
+				w[i] *= wz[z];
+		}
+
+		final int size = wx.length;
+		for (int y = 0, i = 0; y < size; y++)
+		{
+			double weight = w[y] * norm;
+			for (int x = 0; x < size; x++, i++)
+			{
+				// Subtract background
+				float f = (data[i] - background);
+				if (f <= 0)
+					data[i] = 0;
+				else
+					// Window function and normalise
+					data[i] = (float) (f * w[x] * weight);
+			}
+		}
 	}
 
 	private class InteractivePSFListener implements DialogListener
@@ -2683,6 +2787,19 @@ public class PSFCreator implements PlugInFilter
 							Plot2 plot = new Plot2(TITLE_WINDOW, "x", "Weight", x, w);
 							plot.setLimits(0, size - 1, 0, 1.05);
 							Utils.display(TITLE_WINDOW, plot);
+
+							// Find the region where windowing will start
+							int i = 0;
+							while (i < x.length && w[i] < 1)
+								i++;
+
+							Roi roi = null;
+							if (i > 0 && i != x.length)
+							{
+								int width = x.length - 2 * i;
+								roi = new Roi(i, i, width, width);
+							}
+							psfOut[0].setRoi(roi);
 						}
 					}
 					finally
