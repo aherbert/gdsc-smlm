@@ -1229,7 +1229,7 @@ public class PSFDrift implements PlugIn
 					if (updateCentre)
 						b.setCentreImage(newCentre);
 					if (updateHWHM)
-						b.setFwhm(newFWHM * scale);
+						b.setFwhm(newFWHM);
 					imp.setProperty("Info", ImagePSFHelper.toString(b));
 				}
 			}

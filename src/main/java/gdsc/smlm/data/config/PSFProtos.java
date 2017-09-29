@@ -2645,7 +2645,7 @@ public final class PSFProtos {
 
     /**
      * <pre>
-     * The Full Width at Half Maxima (FWHM) in nanometers
+     * The Full Width at Half Maxima (FWHM) in image pixels
      * </pre>
      *
      * <code>double fwhm = 5;</code>
@@ -3016,7 +3016,7 @@ public final class PSFProtos {
     private double fwhm_;
     /**
      * <pre>
-     * The Full Width at Half Maxima (FWHM) in nanometers
+     * The Full Width at Half Maxima (FWHM) in image pixels
      * </pre>
      *
      * <code>double fwhm = 5;</code>
@@ -3924,7 +3924,7 @@ public final class PSFProtos {
       private double fwhm_ ;
       /**
        * <pre>
-       * The Full Width at Half Maxima (FWHM) in nanometers
+       * The Full Width at Half Maxima (FWHM) in image pixels
        * </pre>
        *
        * <code>double fwhm = 5;</code>
@@ -3934,7 +3934,7 @@ public final class PSFProtos {
       }
       /**
        * <pre>
-       * The Full Width at Half Maxima (FWHM) in nanometers
+       * The Full Width at Half Maxima (FWHM) in image pixels
        * </pre>
        *
        * <code>double fwhm = 5;</code>
@@ -3947,7 +3947,7 @@ public final class PSFProtos {
       }
       /**
        * <pre>
-       * The Full Width at Half Maxima (FWHM) in nanometers
+       * The Full Width at Half Maxima (FWHM) in image pixels
        * </pre>
        *
        * <code>double fwhm = 5;</code>

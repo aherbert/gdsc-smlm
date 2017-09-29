@@ -63,7 +63,7 @@ message ImagePSF
 	double pixel_size = 3;
 	// The depth of the PSF pixel in nanometers
 	double pixel_depth = 4;
-	// The Full Width at Half Maxima (FWHM) in nanometers
+	// The Full Width at Half Maxima (FWHM) in image pixels
 	double fwhm = 5;
 	// Notes about the PSF, added as Key-Value pairs.
 	map<string, string> notes = 6;
