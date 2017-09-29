@@ -25,12 +25,16 @@ import gdsc.core.data.utils.RounderFactory;
 import gdsc.core.ij.AlignImagesFFT;
 import gdsc.core.ij.AlignImagesFFT.SubPixelMethod;
 import gdsc.core.ij.AlignImagesFFT.WindowMethod;
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
+import gdsc.core.math.interpolation.IndexedCubicSplinePosition;
 import gdsc.core.math.interpolation.CubicSplinePosition;
+import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolator;
 import gdsc.core.utils.DoubleData;
+import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.Maths;
@@ -2446,7 +2450,7 @@ public class PSFCreator implements PlugInFilter
 				translation[j][0] = centres[j].getX() - psfs[j].centre.getX();
 				translation[j][1] = centres[j].getY() - psfs[j].centre.getY();
 				translation[j][2] = centres[j].getZ() - psfs[j].centre.getZ();
-				Utils.log("Centre %d : Shift X = %s : Shift Y = %s : Shift Z = %s", j + 1,
+				Utils.log("[%d] Centre %d : Shift X = %s : Shift Y = %s : Shift Z = %s", iter, j + 1,
 						rounder.toString(translation[j][0]), rounder.toString(translation[j][1]),
 						rounder.toString(translation[j][2]));
 			}
@@ -2541,6 +2545,10 @@ public class PSFCreator implements PlugInFilter
 
 			double[] shift = combined.getCentreOfMassShift();
 			double shiftd = Math.sqrt(shift[0] * shift[0] + shift[1] * shift[1]);
+
+			Utils.log("[%d] RMSD XY = %s : RMSD Z = %s : Combined CoM shift = %s,%s (%s)", iter,
+					rounder.toString(rmsd[0]), rounder.toString(rmsd[1]), rounder.toString(shift[0]),
+					rounder.toString(shift[1]), rounder.toString(shiftd));
 
 			if (interactiveMode)
 			{
@@ -3074,8 +3082,8 @@ public class PSFCreator implements PlugInFilter
 			psf = new float[z0.length][size * size];
 
 			// Pre-compute spline positions
-			CubicSplinePosition[] sx = new CubicSplinePosition[size];
-			CubicSplinePosition[] sy = new CubicSplinePosition[size];
+			IndexedCubicSplinePosition[] sx = new IndexedCubicSplinePosition[size];
+			IndexedCubicSplinePosition[] sy = new IndexedCubicSplinePosition[size];
 			for (int i = 0; i < size; i++)
 			{
 				sx[i] = f.getXSplinePosition(x0[i]);
@@ -3084,7 +3092,7 @@ public class PSFCreator implements PlugInFilter
 
 			for (int z = 0; z < z0.length; z++)
 			{
-				CubicSplinePosition sz = f.getZSplinePosition(z0[z]);
+				IndexedCubicSplinePosition sz = f.getZSplinePosition(z0[z]);
 				float[] data = psf[z];
 				for (int y = 0, i = 0; y < size; y++)
 				{
@@ -3116,15 +3124,16 @@ public class PSFCreator implements PlugInFilter
 			if (projection == null)
 				return;
 
-			setCalibration(Utils.display(title + " X-projection", getProjection(0)), 0);
-			setCalibration(Utils.display(title + " Y-projection", getProjection(1)), 1);
-			setCalibration(Utils.display(title + " Z-projection", getProjection(2)), 2);
+			setCalibration(Utils.display(title + " X-projection (ZY)", getProjection(0)), 0);
+			setCalibration(Utils.display(title + " Y-projection (XZ)", getProjection(1)), 1);
+			setCalibration(Utils.display(title + " Z-projection (XY)", getProjection(2)), 2);
 		}
 
 		void setCalibration(ImagePlus imp, int dimension)
 		{
 			imp.setCalibration(getCalibration(dimension));
 			imp.resetDisplayRange();
+			imp.updateAndDraw();
 		}
 
 		Calibration getCalibration(int dimension)
@@ -3201,12 +3210,13 @@ public class PSFCreator implements PlugInFilter
 			return shift;
 		}
 
-		public ExtractedPSF enlarge(int extraMagnification)
+		public ExtractedPSF enlarge(int n)
 		{
-			IJ.showStatus("Enlarging combined PSF");
-			
+			IJ.showStatus("Enlarging ... creating spline");
+
 			// The scales are actually arbitrary
 			// We can enlarge by interpolation between the start and end
+			// by evenly sampling each spline node
 			double[] xval = SimpleArrayUtils.newArray(size, 0, 1.0);
 			double[] yval = xval;
 			double[] zval = SimpleArrayUtils.newArray(psf.length, 0, 1.0);
@@ -3224,47 +3234,103 @@ public class PSFCreator implements PlugInFilter
 			}
 
 			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(xval, yval, zval,
-					fval);
-			
+					fval, new IJTrackProgress());
+
 			// Interpolate
-			int maxx = (size - 1) * extraMagnification;
+			int maxx = (size - 1) * n;
 			int maxy = maxx;
-			int maxz = (psf.length - 1) * extraMagnification;
-			double step = 1.0 / extraMagnification;
+			int maxz = (psf.length - 1) * n;
+			double step = 1.0 / n;
 			float[][] psf2 = new float[maxz + 1][(maxx + 1) * (maxy + 1)];
 
-			// Pre-compute spline positions
-			CubicSplinePosition[] sx = new CubicSplinePosition[maxx + 1];
-			CubicSplinePosition[] sy = sx;
-			double maxX = f.getMaxX();
-			for (int i = 0; i < sx.length; i++)
+			// Pre-compute interpolation tables
+			// Use an extra one to have the final x=1 interpolation point.
+			int n1 = n + 1;
+			double[][] tables = new double[Maths.pow3(n1)][];
+			CubicSplinePosition[] s = new CubicSplinePosition[n1];
+			for (int x = 0; x < n; x++)
+				s[x] = new CubicSplinePosition(x * step);
+			// Final interpolation point
+			s[n] = new CubicSplinePosition(1);
+			for (int z = 0, i = 0; z < n1; z++)
 			{
-				sx[i] = f.getXSplinePosition(Math.min(i * step, maxX));
-			}
-
-			// TODO - Use the thread pool for this
-			
-			//IJ.showStatus("Interpolating");
-			double maxZ = f.getMaxZ();
-			for (int z = 0; z < psf2.length; z++)
-			{
-				IJ.showProgress(z, psf2.length);
-				CubicSplinePosition sz = f.getZSplinePosition(Math.min(z * step, maxZ));
-				float[] data = psf2[z];
-				for (int y = 0, i = 0; y <= maxy; y++)
+				CubicSplinePosition sz = s[z];
+				for (int y = 0; y < n1; y++)
 				{
-					for (int x = 0; x <= maxx; x++, i++)
+					CubicSplinePosition sy = s[y];
+					for (int x = 0; x < n1; x++, i++)
 					{
-						data[i] = (float) f.value(sx[x], sy[y], sz);
+						tables[i] = CustomTricubicFunction.computePowerTable(s[x], sy, sz);
 					}
 				}
 			}
-			
+
+			//			// TODO - remove the old interpolation code
+			//			// Pre-compute spline positions
+			//			IndexedCubicSplinePosition[] sx = new IndexedCubicSplinePosition[maxx + 1];
+			//			IndexedCubicSplinePosition[] sy = sx;
+			//			double maxX = f.getMaxX();
+			//			for (int i = 0; i < sx.length; i++)
+			//			{
+			//				sx[i] = f.getXSplinePosition(Math.min(i * step, maxX));
+			//			}
+
+			IJ.showStatus("Enlarging ... interpolating");
+			//			double maxZ = f.getMaxZ();
+			for (int z = 0; z <= maxz; z++)
+			{
+				IJ.showProgress(z, psf2.length);
+				float[] data = psf2[z];
+
+				int zposition = z / n;
+				int ztable = z % n;
+				if (z == maxz)
+				{
+					// Final interpolation point
+					zposition--;
+					ztable = n;
+				}
+
+				//				IndexedCubicSplinePosition sz = f.getZSplinePosition(Math.min(z * step, maxZ));
+				for (int y = 0, i = 0; y <= maxy; y++)
+				{
+					int yposition = y / n;
+					int ytable = y % n;
+					if (y == maxy)
+					{
+						// Final interpolation point
+						yposition--;
+						ytable = n;
+					}
+					int j = n1 * (ytable + n1 * ztable);
+
+					for (int x = 0; x <= maxx; x++, i++)
+					{
+						int xposition = x / n;
+						int xtable = x % n;
+						if (x == maxx)
+						{
+							// Final interpolation point
+							xposition--;
+							xtable = n;
+						}
+
+						//						float f1 = (float) f.value(sx[x], sy[y], sz);
+						float f2 = (float) f.value(xposition, yposition, zposition, tables[j + xtable]);
+
+						//						double e = DoubleEquality.relativeError(f1, f2);
+						//						if (e > 1e-6)
+						//							System.out.printf("%f vs %f  = %f\n", f1, f2, e);
+						data[i] = f2;
+					}
+				}
+			}
+
 			IJ.showProgress(1);
 			IJ.showStatus("");
 
-			BasePoint newCentre = new BasePoint(sx.length / 2.0f, sy.length / 2.0f, psf2.length / 2.0f);
-			return new ExtractedPSF(psf2, sx.length, newCentre, magnification * extraMagnification);
+			BasePoint newCentre = new BasePoint((maxx + 1) / 2.0f, (maxy + 1) / 2.0f, (maxz + 1) / 2.0f);
+			return new ExtractedPSF(psf2, (maxx + 1), newCentre, magnification * n);
 		}
 	}
 
