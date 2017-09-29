@@ -17,7 +17,6 @@ import org.apache.commons.math3.random.Well19937c;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
-import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
@@ -48,6 +47,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.ImagePSFModel;
+import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -85,6 +85,9 @@ public class PSFDrift implements PlugIn
 	private static double photonLimit = 0.25;
 	private static int positionsToAverage = 5;
 	private static double smoothing = 0.1;
+
+	private static boolean updateCentre = true;
+	private static boolean updateHWHM = true;
 
 	private ImagePlus imp;
 	private ImagePSF psfSettings;
@@ -399,7 +402,7 @@ public class PSFDrift implements PlugIn
 			IJ.error(TITLE, "No suitable PSF images");
 			return;
 		}
-		
+
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select the input PSF image");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
@@ -689,7 +692,7 @@ public class PSFDrift implements PlugIn
 		{
 			positionsToAverage = Math.abs((int) gd.getNextNumber());
 			Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
-			boolean useOldOffset = useOffset && !oldOffset.isEmpty(); 
+			boolean useOldOffset = useOffset && !oldOffset.isEmpty();
 			TurboList<double[]> offset = new TurboList<double[]>();
 			final double pitch = psfSettings.getPixelSize();
 			int j = 0;
@@ -913,8 +916,8 @@ public class PSFDrift implements PlugIn
 		// Extract data uses index not slice number as arguments so subtract 1
 		double noiseFraction = 1e-3;
 		float[][] image = CreateData.extractImageStack(imp, lower - 1, upper - 1);
-		ImagePSFModel model = new ImagePSFModel(image,
-				zCentre - lower, unitsPerPixel, unitsPerSlice, psfSettings.getFwhm(), noiseFraction);
+		ImagePSFModel model = new ImagePSFModel(image, zCentre - lower, unitsPerPixel, unitsPerSlice,
+				psfSettings.getFwhm(), noiseFraction);
 
 		// Add the calibrated centres
 		Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
@@ -938,7 +941,6 @@ public class PSFDrift implements PlugIn
 					model.setCentre(slice, cx, cy);
 			}
 		}
-		
 
 		return model;
 	}
@@ -1074,7 +1076,7 @@ public class PSFDrift implements PlugIn
 			IJ.error(TITLE, "No suitable PSF images");
 			return;
 		}
-		
+
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Approximate the volume of the PSF as a Gaussian and\ncompute the equivalent Gaussian width.");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
@@ -1107,26 +1109,71 @@ public class PSFDrift implements PlugIn
 
 		double[] w0 = psf.getAllHWHM0();
 		double[] w1 = psf.getAllHWHM1();
-		double[] slice = SimpleArrayUtils.newArray(w0.length, 1, 1.0);
 
 		// Get current centre
 		int centre = psfSettings.getCentreImage();
+
+		// Extract valid values (some can be NaN)
+		double[] slice0, slice1;
+		double[] sw0 = new double[w0.length], sw1 = new double[w1.length];
+		{
+			TDoubleArrayList s0 = new TDoubleArrayList(w0.length);
+			TDoubleArrayList s1 = new TDoubleArrayList(w0.length);
+			int c0 = 0, c1 = 0;
+			for (int i = 0; i < w0.length; i++)
+			{
+				if (Maths.isFinite(w0[i]))
+				{
+					s0.add(i + 1);
+					sw0[c0++] = w0[i];
+				}
+				if (Maths.isFinite(w1[i]))
+				{
+					s1.add(i + 1);
+					sw1[c1++] = w1[i];
+				}
+			}
+			if (c0 == 0 && c1 == 0)
+			{
+				IJ.error(TITLE, "No computed HWHM for image: " + title);
+				return;
+			}
+			slice0 = s0.toArray();
+			sw0 = Arrays.copyOf(sw0, c0);
+			slice1 = s1.toArray();
+			sw1 = Arrays.copyOf(sw1, c1);
+		}
 
 		// Smooth 
 		if (smoothing > 0)
 		{
 			LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
-			w0 = loess.smooth(slice, w0);
-			w1 = loess.smooth(slice, w1);
+			sw0 = loess.smooth(slice0, sw0);
+			sw1 = loess.smooth(slice1, sw1);
 		}
 
-		// Get min of both widths as the proposed centre
 		int newCentre = 0;
 		double minW = Double.POSITIVE_INFINITY;
-		for (int i = 0; i < slice.length; i++)
+		for (int i = 0; i < w0.length; i++)
 		{
-			double w = w0[i] * w1[i];
-			if (minW > w)
+			double w = 0;
+			if (Maths.isFinite(w0[i]))
+			{
+				if (Maths.isFinite(w1[i]))
+				{
+					w = w0[i] * w1[i];
+				}
+				else
+				{
+					w = w0[i] * w0[i];
+				}
+			}
+			else if (Maths.isFinite(w1[i]))
+			{
+				w = w1[i] * w1[i];
+			}
+
+			if (w != 0 && minW > w)
 			{
 				minW = w;
 				newCentre = i + 1;
@@ -1139,14 +1186,14 @@ public class PSFDrift implements PlugIn
 		// Widths are in pixels
 		String title = TITLE + " HWHM";
 		Plot plot = new Plot(title, "Slice", "HWHM (px)");
-		double[] limits = Maths.limits(w0);
-		limits = Maths.limits(limits, w1);
+		double[] limits = Maths.limits(sw0);
+		limits = Maths.limits(limits, sw1);
 		double maxY = limits[1] * 1.05;
 		plot.setLimits(1, size, 0, maxY);
 		plot.setColor(Color.red);
-		plot.addPoints(slice, w0, Plot.LINE);
+		plot.addPoints(slice0, sw0, Plot.LINE);
 		plot.setColor(Color.blue);
-		plot.addPoints(slice, w1, Plot.LINE);
+		plot.addPoints(slice1, sw1, Plot.LINE);
 		if (centre != 0)
 		{
 			plot.setColor(Color.MAGENTA);
@@ -1160,19 +1207,31 @@ public class PSFDrift implements PlugIn
 
 		if (centre != newCentre || newFWHM != fwhm)
 		{
+			double scale = psfSettings.getPixelSize();
+			double sd = newFWHM / Gaussian2DFunction.SD_TO_FWHM_FACTOR;
 			gd = new GenericDialog(TITLE);
 			gd.addMessage(String.format(
-					"Update the centre to the point of the minimum width?\n \nCurrent = %d, FHWM = %s\nNew = %d, FWHM = %s",
-					centre, Utils.rounded(fwhm), newCentre, Utils.rounded(newFWHM)));
+					"Update the centre to the point of the minimum width?\n \nCurrent = %d, FHWM = %s px (%s nm)\nNew = %d, FWHM = %s px (%s nm)\n \nGaussian Equivalent SD = %s px (%s nm)",
+					centre, Utils.rounded(fwhm), Utils.rounded(fwhm * scale), newCentre, Utils.rounded(newFWHM),
+					Utils.rounded(newFWHM * scale), Utils.rounded(sd), Utils.rounded(sd * scale)));
+			gd.addCheckbox("Update_centre", updateCentre);
+			gd.addCheckbox("Update_HWHM", updateHWHM);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
 			gd.showDialog();
 			if (gd.wasOKed())
 			{
-				ImagePSF.Builder b = psfSettings.toBuilder();
-				b.setCentreImage(newCentre);
-				b.setFwhm(newFWHM);
-				imp.setProperty("Info", ImagePSFHelper.toString(b));
+				updateCentre = gd.getNextBoolean();
+				updateHWHM = gd.getNextBoolean();
+				if (updateCentre || updateHWHM)
+				{
+					ImagePSF.Builder b = psfSettings.toBuilder();
+					if (updateCentre)
+						b.setCentreImage(newCentre);
+					if (updateHWHM)
+						b.setFwhm(newFWHM * scale);
+					imp.setProperty("Info", ImagePSFHelper.toString(b));
+				}
 			}
 		}
 	}

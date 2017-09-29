@@ -1140,12 +1140,19 @@ public class ImagePSFModel extends PSFModel
 		final int end = cumulativeImage[0].length - 1;
 		for (int slice = 0; slice < hwhm0.length; slice++)
 		{
+			// Identify the total sum
+			final double total = cumulativeImage[slice][end];
+			if (total == 0)
+			{
+				// No data in image
+				hwhm1[slice] = Double.NaN;
+				continue;
+			}
+			
 			// Identify the centre
 			int cx = (int) xyCentre[slice][0];
 			int cy = (int) xyCentre[slice][1];
 
-			// Identify the total sum
-			final double total = cumulativeImage[slice][end];
 			final double target = total * integral;
 
 			// Compute the sum around the centre until we reach half
