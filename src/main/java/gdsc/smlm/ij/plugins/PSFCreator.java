@@ -2604,10 +2604,9 @@ public class PSFCreator implements PlugInFilter
 		combined = combined.enlarge(psfMagnification);
 
 		combined.createProjections();
-		psfOut = combined.show("PSF");
-
 		double[] com = combined.getCentreOfMass();
 		zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
+		psfOut = combined.show("PSF", zCentre);
 
 		// Show a dialog to collect processing options and 
 		// find background interactively
@@ -2646,10 +2645,11 @@ public class PSFCreator implements PlugInFilter
 		float[] data = psf[cz];
 		// Apply background and window with no normalisation
 		normalise(data, cz, wx, wz, 1.0);
-		// Copmute normalisation from z-centre and apply
+		// Compute normalisation from z-centre and apply
 		double norm = 1.0 / Maths.sum(data);
 		for (int i = 0; i < data.length; i++)
 			data[i] *= norm;
+
 		// Normalise the rest
 		for (int z = 0; z < psf.length; z++)
 		{
@@ -2661,15 +2661,16 @@ public class PSFCreator implements PlugInFilter
 		int magnification = combined.magnification;
 		combined = new ExtractedPSF(psf, combined.size, combined.centre, magnification);
 		combined.createProjections();
-		psfOut = combined.show("PSF");
-		psfImp = psfOut[0];
 		com = combined.getCentreOfMass();
+		zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
+		psfOut = combined.show("PSF", zCentre);
+		psfImp = psfOut[0];
 
 		// Add image info
 		int imageCount = centres.length;
-		zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
 		ImagePSF.Builder imagePsf = ImagePSFHelper
-				.create(zCentre, nmPerPixel / magnification, nmPerSlice, imageCount, 0, createNote()).toBuilder();
+				.create(zCentre, nmPerPixel / magnification, nmPerSlice / magnification, imageCount, 0, createNote())
+				.toBuilder();
 		// Add the CoM
 		imagePsf.setXCentre(com[0]);
 		imagePsf.setYCentre(com[1]);
@@ -3428,14 +3429,21 @@ public class PSFCreator implements PlugInFilter
 
 		ImagePlus[] show(String title)
 		{
+			// The centre is relative to the combined PSF in the original scale so use as an offset
+			int n = psf.length;
+			int slice = centre.getZint() * magnification + 1 + n / 2;			
+			return show(title, slice);		
+		}
+		
+		ImagePlus[] show(String title, int slice)
+		{
 			ImagePlus[] out = new ImagePlus[4];
 			ImageStack stack = new ImageStack(size, size);
 			for (float[] pixels : psf)
 				stack.addSlice(null, pixels);
 			ImagePlus imp = Utils.display(title, stack);
-			// The centre is relative to the combined PSF in the original scale so use as an offset
 			int n = psf.length;
-			imp.setSlice(Maths.clip(1, n, centre.getZint() * magnification + 1 + n / 2));
+			imp.setSlice(Maths.clip(1, n, slice));
 			setCalibration(imp, 2);
 
 			out[0] = imp;
@@ -3651,8 +3659,13 @@ public class PSFCreator implements PlugInFilter
 			IJ.showProgress(1);
 			IJ.showStatus("");
 
-			BasePoint newCentre = new BasePoint((maxx + 1) / 2.0f, (maxy + 1) / 2.0f, (maxz + 1) / 2.0f);
-			return new ExtractedPSF(psf2, (maxx + 1), newCentre, magnification * n);
+			int mag = magnification * n;
+			BasePoint newCentre = new BasePoint(
+    			(maxx + 1) / 2.0f, 
+    			(maxy + 1) / 2.0f, 
+				// z-centre is used relative to the original input image 
+    			(maxz + 1) / 2.0f / mag);
+			return new ExtractedPSF(psf2, (maxx + 1), newCentre, mag);
 		}
 	}
 
