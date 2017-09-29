@@ -3681,7 +3681,7 @@ public class PSFCreator implements PlugInFilter
 			align[i] = new AlignImagesFFT();
 			FloatProcessor fp1 = combined.getProjection(i);
 			FloatProcessor fp2 = psfs[0].getProjection(i);
-			align[i].init(fp1, WindowMethod.TUKEY, false);
+			align[i].init(fp1, WindowMethod.TUKEY, true);
 			bounds[i] = AlignImagesFFT.createHalfMaxBounds(fp1.getWidth(), fp1.getHeight(), fp2.getWidth(),
 					fp2.getHeight());
 		}
