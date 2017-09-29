@@ -385,21 +385,21 @@ public class PSFDrift implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
+		if ("hwhm".equals(arg))
+		{
+			showHWHM();
+			return;
+		}
+
 		// Build a list of suitable images
-		List<String> titles = createImageList();
+		List<String> titles = createImageList(true);
 
 		if (titles.isEmpty())
 		{
 			IJ.error(TITLE, "No suitable PSF images");
 			return;
 		}
-
-		if ("hwhm".equals(arg))
-		{
-			showHWHM(titles);
-			return;
-		}
-
+		
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select the input PSF image");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
@@ -996,7 +996,7 @@ public class PSFDrift implements PlugIn
 		return (comFitting) ? n + 1 : n;
 	}
 
-	public static List<String> createImageList()
+	public static List<String> createImageList(boolean requireFwhm)
 	{
 		List<String> titles = new LinkedList<String>();
 		int[] ids = WindowManager.getIDList();
@@ -1033,7 +1033,7 @@ public class PSFDrift implements PlugIn
 									Utils.log(TITLE + ": Unknown PSF nm/slice setting for image: " + imp.getTitle());
 									continue;
 								}
-								if (psfSettings.getFwhm() <= 0)
+								if (requireFwhm && psfSettings.getFwhm() <= 0)
 								{
 									Utils.log(TITLE + ": Unknown PSF FWHM setting for image: " + imp.getTitle());
 									continue;
@@ -1064,8 +1064,17 @@ public class PSFDrift implements PlugIn
 		return psfDrift.getStartPoints();
 	}
 
-	private void showHWHM(List<String> titles)
+	private void showHWHM()
 	{
+		// Build a list of suitable images
+		List<String> titles = createImageList(false);
+
+		if (titles.isEmpty())
+		{
+			IJ.error(TITLE, "No suitable PSF images");
+			return;
+		}
+		
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Approximate the volume of the PSF as a Gaussian and\ncompute the equivalent Gaussian width.");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
