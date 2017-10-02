@@ -31,6 +31,7 @@ import ij.process.FHT2;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
+// TODO: Auto-generated Javadoc
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
  * <p>
@@ -43,6 +44,8 @@ import ij.process.ImageProcessor;
  */
 public class FRC
 {
+	
+	/** The jtransforms. */
 	private static boolean JTRANSFORMS;
 	static
 	{
@@ -66,17 +69,36 @@ public class FRC
 	 */
 	public enum ThresholdMethod
 	{
+		
+		/** The fixed 1 over 7. */
 		//@formatter:off
 		FIXED_1_OVER_7{ public String getName() { return "Fixed 1/7"; }}, 
+		
+		/** The half bit. */
 		HALF_BIT{ public String getName() { return "Half-bit"; }}, 
+		
+		/** The one bit. */
 		ONE_BIT{ public String getName() { return "One-bit"; }}, 
+		
+		/** The two bit. */
 		TWO_BIT{ public String getName() { return "Two-bit"; }}, 
+		
+		/** The one sigma. */
 		ONE_SIGMA{ public String getName() { return "One sigma"; }},
+		
+		/** The two sigma. */
 		TWO_SIGMA{ public String getName() { return "Two sigma"; }},
+		
+		/** The three sigma. */
 		THREE_SIGMA{ public String getName() { return "Three sigma"; }},
+		
+		/** The four sigma. */
 		FOUR_SIGMA{ public String getName() { return "Four sigma"; }};
 		//@formatter:on
 
+		/* (non-Javadoc)
+		 * @see java.lang.Enum#toString()
+		 */
 		@Override
 		public String toString()
 		{
@@ -110,6 +132,9 @@ public class FRC
 		INTERPOLATED_CIRCLE{ public String getName() { return "Interpolated Circle"; }}; 
 		//@formatter:on
 
+		/* (non-Javadoc)
+		 * @see java.lang.Enum#toString()
+		 */
 		@Override
 		public String toString()
 		{
@@ -125,21 +150,21 @@ public class FRC
 	}
 
 	/**
-	 * Specify the method used to compute the Fourier transform
+	 * Specify the method used to compute the Fourier transform.
 	 */
 	public enum FourierMethod
 	{
 		//@formatter:off
-		/**
-		 * Use the JTransforms Java library
-		 */
+		/** Use the JTransforms Java library. */
 		JTRANSFORMS{ public String getName() { return "JTransforms"; }},
-		/**
-		 * Use ImageJ's Fast Hartley Transform
-		 */
+		
+		/** Use ImageJ's Fast Hartley Transform. */
 		FHT{ public String getName() { return "FHT"; }}; 
 		//@formatter:on
 
+		/* (non-Javadoc)
+		 * @see java.lang.Enum#toString()
+		 */
 		@Override
 		public String toString()
 		{
@@ -165,11 +190,21 @@ public class FRC
 		/** The number of samples on the ring. */
 		private final int nSamples;
 
+		/** The denominator. */
 		private final double numerator, sum1, sum2, denominator;
 
 		/** The correlation. */
 		private double correlation;
 
+		/**
+		 * Instantiates a new FRC curve result.
+		 *
+		 * @param radius the radius
+		 * @param nSamples the n samples
+		 * @param sum0 the sum 0
+		 * @param sum1 the sum 1
+		 * @param sum2 the sum 2
+		 */
 		private FRCCurveResult(int radius, int nSamples, double sum0, double sum1, double sum2)
 		{
 			this.radius = radius;
@@ -212,6 +247,11 @@ public class FRC
 			return correlation;
 		}
 
+		/**
+		 * Sets the correlation.
+		 *
+		 * @param correlation the new correlation
+		 */
 		private void setCorrelation(double correlation)
 		{
 			this.correlation = Maths.clip(-1, 1, correlation);
@@ -260,6 +300,9 @@ public class FRC
 			return sum2;
 		}
 
+		/* (non-Javadoc)
+		 * @see java.lang.Object#clone()
+		 */
 		@Override
 		public FRCCurveResult clone()
 		{
@@ -279,10 +322,11 @@ public class FRC
 	 */
 	public static class FRCCurve implements Cloneable
 	{
-		/** The nm per pixel for the super-resolution images */
+		
+		/**  The nm per pixel for the super-resolution images. */
 		final public double nmPerPixel;
 
-		/** The size of the field of view in the Fourier image (named L) */
+		/**  The size of the field of view in the Fourier image (named L). */
 		final public int fieldOfView;
 
 		/** The mean of the first input image after application of the Tukey window taper. */
@@ -290,8 +334,18 @@ public class FRC
 		/** The mean of the second input image after application of the Tukey window taper. */
 		final public double mean2;
 
+		/** The results. */
 		private FRCCurveResult[] results;
 
+		/**
+		 * Instantiates a new FRC curve.
+		 *
+		 * @param nmPerPixel the nm per pixel
+		 * @param fieldOfView the field of view
+		 * @param mean1 the mean 1
+		 * @param mean2 the mean 2
+		 * @param results the results
+		 */
 		private FRCCurve(double nmPerPixel, int fieldOfView, double mean1, double mean2, FRCCurveResult[] results)
 		{
 			this.nmPerPixel = nmPerPixel;
@@ -386,7 +440,7 @@ public class FRC
 
 	/**
 	 * Contains the Fourier Image Resolution (FIRE) result computed from the intersection of the FRC curve and a
-	 * threshold curve
+	 * threshold curve.
 	 */
 	public static class FIREResult
 	{
@@ -396,6 +450,12 @@ public class FRC
 		/** The correlation. */
 		final public double correlation;
 
+		/**
+		 * Instantiates a new FIRE result.
+		 *
+		 * @param fireNumber the fire number
+		 * @param correlation the correlation
+		 */
 		private FIREResult(double fireNumber, double correlation)
 		{
 			this.fireNumber = fireNumber;
@@ -478,6 +538,7 @@ public class FRC
 		this.samplingMethod = samplingMethod;
 	}
 
+	/** The fourier method. */
 	private FourierMethod fourierMethod = FourierMethod.JTRANSFORMS;
 
 	/**
@@ -502,16 +563,34 @@ public class FRC
 	}
 
 	/** Used to track the progess within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}. */
-	public TrackProgress progress = null;
+	private TrackProgress progress = null;
 
+	/**
+	 * Sets the track progress.
+	 * <p>
+	 * Used to track the progess within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}.
+	 *
+	 * @param progress the new track progress
+	 */
+	public void setTrackProgress(TrackProgress progress)
+	{
+		this.progress = progress;
+	}
+	
+	/**
+	 * Gets the track progress.
+	 *
+	 * @return the track progress
+	 */
 	private TrackProgress getTrackProgress()
 	{
-		if (progress == null)
-			return new NullTrackProgress();
-		return progress;
+		return progress = NullTrackProgress.createIfNull(progress);
 	}
 
+	/** The Constant THIRD. */
 	private static final double THIRD = 1.0 / 3.0;
+	
+	/** The Constant LAST_THIRD. */
 	private static final double LAST_THIRD = 1.0 - 2 * THIRD;
 
 	/**
@@ -733,6 +812,17 @@ public class FRC
 		return new FRCCurve(nmPerPixel, fieldOfView, mean1, mean2, results);
 	}
 
+	/**
+	 * Compute.
+	 *
+	 * @param conjMult the conj mult
+	 * @param absFFT1 the abs FFT 1
+	 * @param absFFT2 the abs FFT 2
+	 * @param re1 the re 1
+	 * @param im1 the im 1
+	 * @param re2 the re 2
+	 * @param im2 the im 2
+	 */
 	// Package level to allow JUnit test
 	static void compute(float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1, float[] im1, float[] re2,
 			float[] im2)
@@ -743,6 +833,18 @@ public class FRC
 		}
 	}
 
+	/**
+	 * Compute mirrored.
+	 *
+	 * @param size the size
+	 * @param conjMult the conj mult
+	 * @param absFFT1 the abs FFT 1
+	 * @param absFFT2 the abs FFT 2
+	 * @param re1 the re 1
+	 * @param im1 the im 1
+	 * @param re2 the re 2
+	 * @param im2 the im 2
+	 */
 	// Package level to allow JUnit test
 	static void computeMirrored(int size, float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1, float[] im1,
 			float[] re2, float[] im2)
@@ -791,6 +893,18 @@ public class FRC
 		}
 	}
 
+	/**
+	 * Compute mirrored fast.
+	 *
+	 * @param size the size
+	 * @param conjMult the conj mult
+	 * @param absFFT1 the abs FFT 1
+	 * @param absFFT2 the abs FFT 2
+	 * @param re1 the re 1
+	 * @param im1 the im 1
+	 * @param re2 the re 2
+	 * @param im2 the im 2
+	 */
 	// Package level to allow JUnit test
 	static void computeMirroredFast(int size, float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1,
 			float[] im1, float[] re2, float[] im2)
@@ -837,6 +951,18 @@ public class FRC
 		}
 	}
 
+	/**
+	 * Compute.
+	 *
+	 * @param conjMult the conj mult
+	 * @param absFFT1 the abs FFT 1
+	 * @param absFFT2 the abs FFT 2
+	 * @param re1 the re 1
+	 * @param im1 the im 1
+	 * @param re2 the re 2
+	 * @param im2 the im 2
+	 * @param i the i
+	 */
 	private static void compute(float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1, float[] im1,
 			float[] re2, float[] im2, int i)
 	{
@@ -849,6 +975,13 @@ public class FRC
 		absFFT2[i] = re2i * re2i + im2i * im2i;
 	}
 
+	/**
+	 * Check symmetry.
+	 *
+	 * @param data the data
+	 * @param size the size
+	 * @return true, if successful
+	 */
 	static boolean checkSymmetry(float[] data, int size)
 	{
 		// Symmetry is around the centre
@@ -891,6 +1024,14 @@ public class FRC
 		return Math.sqrt(1 - (cosA * cosA)) * ((angle > Math.PI) ? -1 : 1); // Place in correct domain
 	}
 
+	/**
+	 * Pad.
+	 *
+	 * @param ip the ip
+	 * @param width the width
+	 * @param height the height
+	 * @return the image processor
+	 */
 	private ImageProcessor pad(ImageProcessor ip, int width, int height)
 	{
 		if (ip.getWidth() != width || ip.getHeight() != height)
@@ -903,10 +1044,9 @@ public class FRC
 	}
 
 	/**
-	 * Convert an image into a Fourier image with real and imaginary parts
-	 * 
-	 * @param ip
-	 *            The image
+	 * Convert an image into a Fourier image with real and imaginary parts.
+	 *
+	 * @param ip            The image
 	 * @return the real and imaginary parts
 	 */
 	public FloatProcessor[] getComplexFFT(ImageProcessor ip)
@@ -921,6 +1061,12 @@ public class FRC
 		return getProcessors(stack1);
 	}
 
+	/**
+	 * Gets the processors.
+	 *
+	 * @param stack1 the stack 1
+	 * @return the processors
+	 */
 	private FloatProcessor[] getProcessors(ImageStack stack1)
 	{
 		FloatProcessor[] ret = new FloatProcessor[2];
@@ -936,9 +1082,8 @@ public class FRC
 	 * Returns the closest power-of-two number greater than or equal to x.
 	 * <p>
 	 * Copied from the JTransforms library class edu.emory.mathcs.utils.ConcurrencyUtils.
-	 * 
-	 * 
-	 * @param x
+	 *
+	 * @param x the x
 	 * @return the closest power-of-two number greater than or equal to x
 	 */
 	public static int nextPow2(int x)
@@ -958,12 +1103,13 @@ public class FRC
 		return x + 1;
 	}
 
+	/** The tapered image mean. */
 	private double taperedImageMean;
 
 	/**
 	 * Applies a Tukey window function to the image and then pads it to the next square size power of two.
-	 * 
-	 * @param dataImage
+	 *
+	 * @param dataImage the data image
 	 * @return The square tapered image
 	 */
 	public FloatProcessor getSquareTaperedImage(ImageProcessor dataImage)
@@ -1006,9 +1152,16 @@ public class FRC
 
 	// Cache the Tukey window function.
 	// Using methods to check the length should make it thread safe since we create an instance reference
+	/** The taper Y. */
 	// to an array of the correct length.
 	private static float[] taperX = new float[0], taperY = new float[0];
 
+	/**
+	 * Gets the window function X.
+	 *
+	 * @param size the size
+	 * @return the window function X
+	 */
 	private static float[] getWindowFunctionX(int size)
 	{
 		float[] taper = getWindowFunction(taperX, size);
@@ -1016,6 +1169,12 @@ public class FRC
 		return taper;
 	}
 
+	/**
+	 * Gets the window function Y.
+	 *
+	 * @param size the size
+	 * @return the window function Y
+	 */
 	private static float[] getWindowFunctionY(int size)
 	{
 		float[] taper = getWindowFunction(taperY, size);
@@ -1023,6 +1182,13 @@ public class FRC
 		return taper;
 	}
 
+	/**
+	 * Gets the window function.
+	 *
+	 * @param taper the taper
+	 * @param size the size
+	 * @return the window function
+	 */
 	private static float[] getWindowFunction(float[] taper, int size)
 	{
 		if (taper.length != size)
@@ -1039,11 +1205,24 @@ public class FRC
 		return taper;
 	}
 
+	/**
+	 * Check.
+	 *
+	 * @param taper the taper
+	 * @param size the size
+	 * @return the float[]
+	 */
 	private static float[] check(float[] taper, int size)
 	{
 		return (taper.length == size) ? taper : null;
 	}
 
+	/**
+	 * Gets the tukey window function.
+	 *
+	 * @param size the size
+	 * @return the tukey window function
+	 */
 	private static float[] getTukeyWindowFunction(int size)
 	{
 		float[] taper = new float[size];
@@ -1097,10 +1276,12 @@ public class FRC
 	 * Adapted from ij.process.ImageProcessor.getInterpolatedValue(int,int).
 	 * <p>
 	 * Removed bounds checking and compute multiple values at the same time for multiple images.
-	 * 
-	 * @param x
-	 * @param y
-	 * @return
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param images the images
+	 * @param maxx the maxx
+	 * @return the interpolated values
 	 */
 	private double[] getInterpolatedValues(final double x, final double y, float[][] images, final int maxx)
 	{
@@ -1204,15 +1385,16 @@ public class FRC
 		return getSmoothedCurve(frcCurve, bandwidth, robustness, inPlace);
 	}
 
+	/** The Constant TWO_PI. */
 	private final static double TWO_PI = 2.0 * Math.PI;
 
 	/**
 	 * Calculate the curve representing the minimum correlation required to distinguish two images for each
 	 * resolution
 	 * in the input FRC curve.
-	 * 
-	 * @param frcCurve
-	 * @param thresholdMethod
+	 *
+	 * @param frcCurve the frc curve
+	 * @param thresholdMethod the threshold method
 	 * @return The threshold curve representing the threshold for each input spatial frequency
 	 */
 	public static double[] calculateThresholdCurve(FRCCurve frcCurve, ThresholdMethod thresholdMethod)
@@ -1291,10 +1473,10 @@ public class FRC
 	}
 
 	/**
-	 * Compute the threshold curve for the given number of bits
-	 * 
-	 * @param threshold
-	 * @param bits
+	 * Compute the threshold curve for the given number of bits.
+	 *
+	 * @param threshold the threshold
+	 * @param bits the bits
 	 */
 	private static void calculateBitCurve(final double[] threshold, double bits)
 	{
@@ -1332,11 +1514,10 @@ public class FRC
 	 * Computes the crossing points of the FRC curve and the threshold curve. The intersections can be used to
 	 * determine
 	 * the image resolution using {@link #getCorrectIntersection(ArrayList, ThresholdMethod)}
-	 * 
-	 * @param frcCurve
-	 * @param thresholdCurve
-	 * @param max
-	 *            The maximum number of intersections to compute
+	 *
+	 * @param frcCurve the frc curve
+	 * @param thresholdCurve the threshold curve
+	 * @param max            The maximum number of intersections to compute
 	 * @return The crossing points
 	 */
 	public static double[][] getIntersections(FRCCurve frcCurve, double[] thresholdCurve, int max)
@@ -1423,9 +1604,9 @@ public class FRC
 	 * <p>
 	 * The intersection corresponds the lowest spatial frequency at which there is no significant correlation
 	 * between the images.
-	 * 
-	 * @param intersections
-	 * @param thresholdMethod
+	 *
+	 * @param intersections the intersections
+	 * @param thresholdMethod the threshold method
 	 * @return The intersection (or null if no crossings)
 	 */
 	public static double[] getCorrectIntersection(double[][] intersections, ThresholdMethod thresholdMethod)
@@ -1551,6 +1732,12 @@ public class FRC
 		return null;
 	}
 
+	/**
+	 * Perfect.
+	 *
+	 * @param frcCurve the frc curve
+	 * @return true, if successful
+	 */
 	private static boolean perfect(FRCCurve frcCurve)
 	{
 		for (int i = 0; i < frcCurve.getSize(); i++)
@@ -1627,6 +1814,12 @@ public class FRC
 		}
 	}
 
+	/**
+	 * Sinc.
+	 *
+	 * @param x the x
+	 * @return the double
+	 */
 	private static double sinc(double x)
 	{
 		return Math.sin(x) / x;

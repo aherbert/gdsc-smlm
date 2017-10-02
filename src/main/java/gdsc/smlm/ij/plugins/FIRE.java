@@ -1412,7 +1412,7 @@ public class FIRE implements PlugIn
 		// Allow a progress tracker to be input.
 		// This should be setup for the total number of repeats. 
 		// If parallelised then do not output the text status messages as they conflict. 
-		frc.progress = progress;
+		frc.setTrackProgress(progress);
 		frc.setFourierMethod(fourierMethod);
 		frc.setSamplingMethod(samplingMethod);
 		frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
@@ -1498,7 +1498,7 @@ public class FIRE implements PlugIn
 		//IJ.save(new ImagePlus("i2", images.ip2), "/scratch/i2.tif");
 
 		FRC frc = new FRC();
-		frc.progress = progress;
+		frc.setTrackProgress(progress);
 		frc.setFourierMethod(fourierMethod);
 		frc.setSamplingMethod(samplingMethod);
 		frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
