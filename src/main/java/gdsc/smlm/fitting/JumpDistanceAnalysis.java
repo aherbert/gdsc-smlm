@@ -118,9 +118,7 @@ public class JumpDistanceAnalysis
 	 */
 	public JumpDistanceAnalysis(Logger logger)
 	{
-		if (logger == null)
-			logger = new NullLogger();
-		this.logger = logger;
+		this.logger = NullLogger.createIfNull(logger);
 		resetFitResult();
 	}
 
