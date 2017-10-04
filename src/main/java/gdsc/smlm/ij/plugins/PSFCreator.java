@@ -92,6 +92,7 @@ import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.gui.ImageRoi;
 import ij.gui.Line;
+import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
@@ -149,7 +150,7 @@ public class PSFCreator implements PlugInFilter
 	private static int psfMagnification = 4;
 	private static double backgroundCutoff = 2;
 	private float background = 0;
-	private static double windowAlpha = 0.1;
+	private static int window = 3;
 	private static Rounder rounder = RounderFactory.create(4);
 
 	private FitEngineConfiguration config = null;
@@ -231,7 +232,7 @@ public class PSFCreator implements PlugInFilter
 
 	private int showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		guessScale();
@@ -239,50 +240,25 @@ public class PSFCreator implements PlugInFilter
 		gd.addMessage("Produces an average PSF using selected diffraction limited spots.");
 
 		gd.addChoice("Mode", MODE, mode);
-		//		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
 		gd.addSlider("Radius", 3, 20, radius);
-		//		gd.addSlider("Amplitude_fraction", 0.01, 0.5, amplitudeFraction);
-		//		gd.addSlider("Start_background_frames", 1, 20, startBackgroundFrames);
-		//		gd.addSlider("End_background_frames", 1, 20, endBackgroundFrames);
-		//		gd.addSlider("Magnification", 5, 15, magnification);
-		//		gd.addSlider("Smoothing", 0.25, 0.5, smoothing);
-		//		gd.addCheckbox("Centre_each_slice", centreEachSlice);
-		//		gd.addNumericField("CoM_cut_off", comCutOff, -2);
 		gd.addCheckbox("Interactive_mode", interactiveMode);
-		//		String[] methods = ImageProcessor.getInterpolationMethods();
-		//		gd.addChoice("Interpolation", methods, methods[interpolationMethod]);
+
+		InteractiveInputListener l = new InteractiveInputListener();
+		gd.addDialogListener(l);
 
 		gd.showDialog();
+
+		// Clear the bounding box
+		if (plotRadius != -1)
+			imp.setOverlay(null);
 
 		if (gd.wasCanceled())
 			return DONE;
 
-		mode = gd.getNextChoiceIndex();
-		//		nmPerSlice = gd.getNextNumber();
-		radius = gd.getNextNumber();
-		//		amplitudeFraction = gd.getNextNumber();
-		//		startBackgroundFrames = (int) gd.getNextNumber();
-		//		endBackgroundFrames = (int) gd.getNextNumber();
-		//		magnification = (int) gd.getNextNumber();
-		//		smoothing = gd.getNextNumber();
-		//		centreEachSlice = gd.getNextBoolean();
-		//		comCutOff = Maths.max(0, gd.getNextNumber());
-		interactiveMode = gd.getNextBoolean();
-		//		interpolationMethod = gd.getNextChoiceIndex();
-
 		// Check arguments
 		try
 		{
-			//			Parameters.isPositive("nm/slice", nmPerSlice);
 			Parameters.isAbove("Radius", radius, 2);
-			//			Parameters.isAbove("Amplitude fraction", amplitudeFraction, 0.01);
-			//			Parameters.isBelow("Amplitude fraction", amplitudeFraction, 0.9);
-			//			Parameters.isPositive("Start background frames", startBackgroundFrames);
-			//			Parameters.isPositive("End background frames", endBackgroundFrames);
-			//			Parameters.isAbove("Total background frames", startBackgroundFrames + endBackgroundFrames, 1);
-			//			Parameters.isAbove("Magnification", magnification, 1);
-			//			Parameters.isAbove("Smoothing", smoothing, 0);
-			//			Parameters.isBelow("Smoothing", smoothing, 1);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -312,6 +288,79 @@ public class PSFCreator implements PlugInFilter
 				unit.startsWith("micron"))
 			return units * 1000;
 		return 0;
+	}
+
+	private class InteractiveInputListener implements DialogListener
+	{
+		final boolean draw;;
+
+		InteractiveInputListener()
+		{
+			draw = Utils.isShowGenericDialog();
+			if (draw)
+			{
+				imp.setSlice(imp.getStackSize() / 2);
+				drawBoundingBox();
+			}
+		}
+
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			mode = gd.getNextChoiceIndex();
+			radius = gd.getNextNumber();
+			interactiveMode = gd.getNextBoolean();
+
+			if (draw)
+				drawBoundingBox();
+
+			return radius > 2;
+		}
+	}
+
+	double plotRadius = -1;
+
+	private void drawBoundingBox()
+	{
+		if (aquirePlotLock1())
+		{
+			// Get the spots here as the user may want to interactively pick new ones 
+			final BasePoint[] points = getSpots();
+
+			// Run in a new thread to allow the GUI to continue updating
+			new Thread(new Runnable()
+			{
+				public void run()
+				{
+					try
+					{
+						// Continue while the parameter is changing
+						while (plotRadius != radius)
+						{
+							// Store the parameters to be processed
+							plotRadius = radius;
+							int boxRadius = (int) Math.ceil(plotRadius);
+							int w = 2 * boxRadius + 1;
+
+							Overlay o = new Overlay();
+
+							for (BasePoint p : points)
+							{
+								int cx = p.getXint();
+								int cy = p.getYint();
+								o.add(new Roi(cx - plotRadius, cy - plotRadius, w, w));
+							}
+
+							imp.setOverlay(o);
+						}
+					}
+					finally
+					{
+						// Ensure the running flag is reset
+						plotLock1 = false;
+					}
+				}
+			}).start();
+		}
 	}
 
 	private boolean showFittingDialog()
@@ -1558,6 +1607,34 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	/**
+	 * @return Extract all the ROI points
+	 */
+	private BasePoint[] getSpots()
+	{
+		float z = imp.getStackSize() / 2;
+		Roi roi = imp.getRoi();
+		if (roi != null && roi.getType() == Roi.POINT)
+		{
+			FloatPolygon p = roi.getFloatPolygon();
+			int n = p.npoints;
+
+			float offset = 0.5f;
+
+			// Check if already float coordinates
+			if (!SimpleArrayUtils.isInteger(p.xpoints) || !SimpleArrayUtils.isInteger(p.ypoints))
+				offset = 0;
+
+			BasePoint[] roiPoints = new BasePoint[n];
+			for (int i = 0; i < n; i++)
+			{
+				roiPoints[i] = new BasePoint(p.xpoints[i] + offset, p.ypoints[i] + offset, z);
+			}
+			return roiPoints;
+		}
+		return new BasePoint[0];
+	}
+
+	/**
 	 * @return Extract all the ROI points that are not within twice the box radius of any other spot
 	 */
 	private BasePoint[] getSpots(float offset)
@@ -2614,16 +2691,17 @@ public class PSFCreator implements PlugInFilter
 		gd.addMessage("Configure the output PSF.\nZ-centre = " + zCentre);
 		gd.addSlider("Background_slice", 1, combined.psf.length, zCentre);
 		gd.addSlider("Background_cutoff (%)", 1, 50, backgroundCutoff);
-		gd.addSlider("Window", 0, 0.95, windowAlpha);
+		gd.addSlider("Window", 0, combined.size / 2, window);
+		gd.addDialogListener(new InteractivePSFListener());
 		if (Utils.isShowGenericDialog())
 		{
 			drawPSFPlots();
-			gd.addDialogListener(new InteractivePSFListener());
 		}
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		drawPSFPlots();
+
+		// We do not read the dialog as that is done in the DialogListener
 
 		// Remove interactive guides		
 		psfOut[0].killRoi();
@@ -2635,8 +2713,8 @@ public class PSFCreator implements PlugInFilter
 		// All pixels below the background are set to zero
 		// Apply a Tukey window to roll-off to zero at the outer pixels
 
-		double[] wx = ImageWindow.tukey(combined.size, windowAlpha);
-		double[] wz = ImageWindow.tukey(combined.psf.length, windowAlpha);
+		double[] wx = ImageWindow.tukeyEdge(combined.size, window);
+		double[] wz = ImageWindow.tukeyEdge(combined.psf.length, window);
 
 		// Normalise so the z centre is 1.
 		float[][] psf = combined.psf;
@@ -2748,7 +2826,7 @@ public class PSFCreator implements PlugInFilter
 		{
 			zCentre = (int) gd.getNextNumber();
 			backgroundCutoff = gd.getNextNumber();
-			windowAlpha = gd.getNextNumber();
+			window = (int) gd.getNextNumber();
 
 			drawPSFPlots();
 			return true;
@@ -2762,7 +2840,7 @@ public class PSFCreator implements PlugInFilter
 		updatePSF();
 	}
 
-	double plotWindowAlpha = -1;
+	double plotWindow = -1;
 
 	private void updateWindowPlot()
 	{
@@ -2776,14 +2854,15 @@ public class PSFCreator implements PlugInFilter
 					try
 					{
 						// Continue while the parameter is changing
-						while (plotWindowAlpha != windowAlpha)
+						while (plotWindow != window)
 						{
 							// Store the parameters to be processed
-							plotWindowAlpha = windowAlpha;
+							plotWindow = window;
 
 							int size = psfOut[0].getWidth();
 							double[] x = SimpleArrayUtils.newArray(size, 0, 1.0);
-							double[] w = ImageWindow.tukey(size, plotWindowAlpha);
+							// Convert to an alpha
+							double[] w = ImageWindow.tukeyEdge(size, window);
 
 							Plot2 plot = new Plot2(TITLE_WINDOW, "x", "Weight", x, w);
 							plot.setLimits(0, size - 1, 0, 1.05);
@@ -3431,10 +3510,10 @@ public class PSFCreator implements PlugInFilter
 		{
 			// The centre is relative to the combined PSF in the original scale so use as an offset
 			int n = psf.length;
-			int slice = centre.getZint() * magnification + 1 + n / 2;			
-			return show(title, slice);		
+			int slice = centre.getZint() * magnification + 1 + n / 2;
+			return show(title, slice);
 		}
-		
+
 		ImagePlus[] show(String title, int slice)
 		{
 			ImagePlus[] out = new ImagePlus[4];
@@ -3660,11 +3739,9 @@ public class PSFCreator implements PlugInFilter
 			IJ.showStatus("");
 
 			int mag = magnification * n;
-			BasePoint newCentre = new BasePoint(
-    			(maxx + 1) / 2.0f, 
-    			(maxy + 1) / 2.0f, 
-				// z-centre is used relative to the original input image 
-    			(maxz + 1) / 2.0f / mag);
+			BasePoint newCentre = new BasePoint((maxx + 1) / 2.0f, (maxy + 1) / 2.0f,
+					// z-centre is used relative to the original input image 
+					(maxz + 1) / 2.0f / mag);
 			return new ExtractedPSF(psf2, (maxx + 1), newCentre, mag);
 		}
 	}
