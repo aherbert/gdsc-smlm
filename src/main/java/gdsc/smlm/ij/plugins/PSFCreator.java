@@ -3,6 +3,7 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Frame;
+import java.awt.Label;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.text.SimpleDateFormat;
@@ -71,6 +72,7 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
+import gdsc.smlm.filters.BlockMeanFilter;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Counter;
@@ -90,7 +92,6 @@ import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
-import ij.gui.ImageRoi;
 import ij.gui.Line;
 import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.NonBlockingGenericDialog;
@@ -108,8 +109,6 @@ import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import ij.process.LUTHelper;
-import ij.process.LUTHelper.LutColour;
 
 /**
  * Produces an average PSF image using selected diffraction limited spots from a sample image.
@@ -124,7 +123,6 @@ public class PSFCreator implements PlugInFilter
 	private final static String TITLE_PSF_PARAMETERS = "Spot PSF";
 	private final static String TITLE_INTENSITY = "Spot Intensity";
 	private final static String TITLE_WINDOW = "PSF Window Function";
-	private final static String TITLE_BACKGROUND = "PSF Cumulative Intensity";
 
 	private final static String[] MODE = { "Projection", "Gaussian Fitting" };
 	private static int mode = 0;
@@ -145,11 +143,14 @@ public class PSFCreator implements PlugInFilter
 	private ImagePlus imp, psfImp;
 
 	private static double nmPerPixel;
+	private static int backgroundWindow = 2;
+	private static boolean comUsingProjection = false;
 	private static int projectionMagnification = 2;
 	private static int maxIterations = 20;
 	private static int psfMagnification = 4;
-	private static double backgroundCutoff = 2;
+	private int finalBackgroundWindow = 0;
 	private float background = 0;
+	private Label backgroundLabel = null;
 	private static int window = 3;
 	private static Rounder rounder = RounderFactory.create(4);
 
@@ -240,7 +241,7 @@ public class PSFCreator implements PlugInFilter
 		gd.addMessage("Produces an average PSF using selected diffraction limited spots.");
 
 		gd.addChoice("Mode", MODE, mode);
-		gd.addSlider("Radius", 3, 20, radius);
+		gd.addSlider("Radius", 3, Maths.max(10, imp.getWidth(), imp.getHeight()) / 2, radius);
 		gd.addCheckbox("Interactive_mode", interactiveMode);
 
 		InteractiveInputListener l = new InteractiveInputListener();
@@ -325,6 +326,8 @@ public class PSFCreator implements PlugInFilter
 		{
 			// Get the spots here as the user may want to interactively pick new ones 
 			final BasePoint[] points = getSpots();
+			final Rectangle[] bounds = new Rectangle[points.length];
+			final Roi[] rois = new Roi[points.length];
 
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
@@ -341,15 +344,28 @@ public class PSFCreator implements PlugInFilter
 							int boxRadius = (int) Math.ceil(plotRadius);
 							int w = 2 * boxRadius + 1;
 
-							Overlay o = new Overlay();
-
-							for (BasePoint p : points)
+							for (int i = 0; i < points.length; i++)
 							{
+								BasePoint p = points[i];
 								int cx = p.getXint();
 								int cy = p.getYint();
-								o.add(new Roi(cx - plotRadius, cy - plotRadius, w, w));
+								Roi r = new Roi(cx - plotRadius, cy - plotRadius, w, w);
+								bounds[i] = r.getBounds();
+								rois[i] = r;
+								// Check for overlap
+								for (int j = i; j-- > 0;)
+								{
+									if (bounds[i].intersects(bounds[j]))
+									{
+										rois[j].setStrokeColor(Color.RED);
+										r.setStrokeColor(Color.RED);
+									}
+								}
 							}
 
+							Overlay o = new Overlay();
+							for (Roi roi : rois)
+								o.add(roi);
 							imp.setOverlay(o);
 						}
 					}
@@ -2497,6 +2513,9 @@ public class PSFCreator implements PlugInFilter
 
 		boxRadius = (int) Math.ceil(radius);
 
+		// Limit this
+		backgroundWindow = Math.min(backgroundWindow, boxRadius / 2);
+
 		// Find the selected PSF spots x,y,z centre
 		// We offset the centre to the middle of pixel.
 		BasePoint[] centres = getSpots(0.5f);
@@ -2631,7 +2650,7 @@ public class PSFCreator implements PlugInFilter
 			for (int j = 0; j < 2; j++)
 				rmsd[j] = Math.sqrt(rmsd[j] / psfs.length);
 
-			double[] shift = combined.getCentreOfMassShift();
+			double[] shift = combined.getCentreOfMassShift(comUsingProjection);
 			double shiftd = Math.sqrt(shift[0] * shift[0] + shift[1] * shift[1]);
 
 			Utils.log("[%d] RMSD XY = %s : RMSD Z = %s : Combined CoM shift = %s,%s (%s)", iter,
@@ -2681,20 +2700,22 @@ public class PSFCreator implements PlugInFilter
 		combined = combined.enlarge(psfMagnification);
 
 		combined.createProjections();
-		double[] com = combined.getCentreOfMass();
+		double[] com = combined.getCentreOfMass(comUsingProjection);
 		zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
 		psfOut = combined.show("PSF", zCentre);
 
 		// Show a dialog to collect processing options and 
 		// find background interactively
-		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addMessage("Configure the output PSF.\nZ-centre = " + zCentre);
 		gd.addSlider("Background_slice", 1, combined.psf.length, zCentre);
-		gd.addSlider("Background_cutoff (%)", 1, 50, backgroundCutoff);
-		gd.addSlider("Window", 0, combined.size / 2, window);
+		gd.addSliderIncludeDefault("Final_background_window", 0, 50, backgroundWindow * combined.magnification);
+		gd.addSlider("Edge_window", 0, combined.size / 2, window);
 		gd.addDialogListener(new InteractivePSFListener());
 		if (Utils.isShowGenericDialog())
 		{
+			gd.addMessage("");
+			backgroundLabel = gd.getLastLabel();
 			drawPSFPlots();
 		}
 		gd.showDialog();
@@ -2739,7 +2760,7 @@ public class PSFCreator implements PlugInFilter
 		int magnification = combined.magnification;
 		combined = new ExtractedPSF(psf, combined.size, combined.centre, magnification);
 		combined.createProjections();
-		com = combined.getCentreOfMass();
+		com = combined.getCentreOfMass(comUsingProjection);
 		zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
 		psfOut = combined.show("PSF", zCentre);
 		psfImp = psfOut[0];
@@ -2825,7 +2846,7 @@ public class PSFCreator implements PlugInFilter
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			zCentre = (int) gd.getNextNumber();
-			backgroundCutoff = gd.getNextNumber();
+			finalBackgroundWindow = (int) gd.getNextNumber();
 			window = (int) gd.getNextNumber();
 
 			drawPSFPlots();
@@ -2893,12 +2914,17 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	private int plotZCentre = -1;
-	private double plotBackgroundCutoff = -1;
+	private int plotBackgroundWindow = -1;
 
 	private void updateBackgroundPlot()
 	{
 		if (aquirePlotLock2())
 		{
+			final BlockMeanFilter filter = new BlockMeanFilter();
+			final ImageStack stack = psfOut[0].getImageStack();
+			final int maxx = stack.getWidth();
+			final int maxy = stack.getHeight();
+
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
@@ -2907,54 +2933,33 @@ public class PSFCreator implements PlugInFilter
 					try
 					{
 						// Continue while the parameter is changing
-						while (plotZCentre != zCentre || plotBackgroundCutoff != backgroundCutoff)
+						while (plotZCentre != zCentre || plotBackgroundWindow != finalBackgroundWindow)
 						{
 							// Store the parameters to be processed
 							plotZCentre = zCentre;
-							plotBackgroundCutoff = backgroundCutoff;
+							plotBackgroundWindow = finalBackgroundWindow;
 
-							// Show a plot of the background using the cumulative histogram of the
-							// pixel values
-							float[] pixels = (float[]) psfOut[0].getImageStack().getPixels(plotZCentre);
-							double[] values = SimpleArrayUtils.toDouble(pixels);
-							double p = plotBackgroundCutoff / 100;
-							double[][] h = Maths.cumulativeHistogram(values, true);
-							double[] x = h[0];
-							double[] y = h[1];
-							int i = Arrays.binarySearch(y, p);
-							if (i < 0)
+							float[] pixels = (float[]) stack.getPixels(plotZCentre);
+							if (plotBackgroundWindow > 0)
 							{
-								int after = Maths.clip(0, x.length - 1, -(i + 1));
-								int before = Maths.clip(0, x.length - 1, after - 1);
-								background = (float) Maths.interpolateX(x[before], y[before], x[after], y[after], p);
-							}
-							else
-							{
-								background = (float) values[i];
+								pixels = pixels.clone();
+								filter.rollingBlockFilterInternal(pixels, maxx, maxy, plotBackgroundWindow);
 							}
 
-							final byte ON = (byte) 255;
-							ByteProcessor bp = new ByteProcessor(psfOut[0].getWidth(), psfOut[0].getHeight());
-							bp.setLut(LUTHelper.createLUT(LutColour.BLUE, true));
-							byte[] bpixels = (byte[]) bp.getPixels();
-							for (int j = 0; j < pixels.length; j++)
-								if (pixels[j] < background)
-									bpixels[j] = ON;
-							ImageRoi roi = new ImageRoi(0, 0, bp);
-							roi.setZeroTransparent(true);
-							Overlay o = new Overlay(roi);
-							psfOut[0].setOverlay(o);
+							int min = findMinIndex(pixels, maxx, maxy, plotBackgroundWindow);
+							background = pixels[min];
 
-							Plot2 plot = new Plot2(TITLE_BACKGROUND, "Intensity", "Fraction", x, y);
-							plot.setLimits(x[0], x[x.length - 1], 0, 1.05);
-							plot.addLabel(0, 0, String.format("Background = %s @ %s %%", Utils.rounded(background),
-									plotBackgroundCutoff));
-							plot.setColor(Color.BLUE);
-							plot.drawLine(background, 0, background, 1.05);
-							plot.setColor(Color.BLACK);
-							if (x[0] > 0)
-								plot.setLogScaleX();
-							Utils.display(TITLE_BACKGROUND, plot);
+							// Display the background
+							if (backgroundLabel != null)
+								backgroundLabel.setText("Background = " + Utils.rounded(background));
+
+							// Draw a region on the image
+							int cx = min / maxy;
+							int cy = min % maxy;
+							int y = cx - plotBackgroundWindow;
+							int x = cy - plotBackgroundWindow;
+							int w = 2 * plotBackgroundWindow + 1;
+							psfOut[0].setOverlay(new Roi(x, y, w, w), Color.YELLOW, 1, null);
 						}
 					}
 					finally
@@ -3028,9 +3033,24 @@ public class PSFCreator implements PlugInFilter
 			int y = centres[i].getYint();
 			Rectangle bounds = ie.getBoxRegionBounds(x, y, boxRadius);
 			for (int z = 0; z < image.length; z++)
+			{
 				psf[z] = ImageConverter.getData(image[z], w, h, bounds, psf[z]);
-			Projection p = new Projection(psf, bounds.width, bounds.height);
-			double[] com = p.getCentreOfMass();
+			}
+			// Subtract background
+			float b = -(getBackground(psf, bounds.width, bounds.height, backgroundWindow));
+			for (int z = 0; z < image.length; z++)
+			{
+				SimpleArrayUtils.add(psf[z], b);
+			}
+
+			double[] com;
+			if (comUsingProjection)
+			{
+				Projection p = new Projection(psf, bounds.width, bounds.height);
+				com = p.getCentreOfMass();
+			}
+			else
+				com = getCentreOfMass(psf, bounds.width, bounds.height);
 			float dx = (float) (com[0] + bounds.x - centres[i].getX());
 			float dy = (float) (com[1] + bounds.y - centres[i].getY());
 			float dz = (float) (com[2] - centres[i].getZ());
@@ -3108,6 +3128,8 @@ public class PSFCreator implements PlugInFilter
 
 		gd.addNumericField("nm_per_pixel", nmPerPixel, 2);
 		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
+		gd.addSlider("Background_window", 0, 8, backgroundWindow);
+		gd.addCheckbox("Center_using_projection", comUsingProjection);
 		gd.addSlider("Projection_magnification", 1, 8, projectionMagnification);
 		gd.addSlider("Max_iterations", 1, 20, maxIterations);
 		gd.addSlider("PSF_magnification", 1, 8, psfMagnification);
@@ -3119,6 +3141,8 @@ public class PSFCreator implements PlugInFilter
 
 		nmPerPixel = gd.getNextNumber();
 		nmPerSlice = gd.getNextNumber();
+		backgroundWindow = (int) gd.getNextNumber();
+		comUsingProjection = gd.getNextBoolean();
 		projectionMagnification = (int) gd.getNextNumber();
 		maxIterations = (int) gd.getNextNumber();
 		psfMagnification = (int) gd.getNextNumber();
@@ -3168,6 +3192,100 @@ public class PSFCreator implements PlugInFilter
 		Utils.waitForCompletion(futures);
 
 		return psfs;
+	}
+
+	private static float getBackground(float[][] psf, int x, int y, int n)
+	{
+		BlockMeanFilter filter = new BlockMeanFilter();
+		float background = Float.POSITIVE_INFINITY;
+		for (int zz = 0; zz < psf.length; zz++)
+		{
+			float[] data = psf[zz];
+			if (n > 0)
+			{
+				data = data.clone();
+				filter.rollingBlockFilterInternal(data, x, y, n);
+			}
+			background = Math.min(background, findMin(data, x, y, n));
+		}
+		return background;
+	}
+
+	/**
+	 * Find min value. This must put the entire region within the image
+	 * 
+	 * @param data
+	 *            the data
+	 * @param maxx
+	 *            the maxx
+	 * @param maxy
+	 *            the maxy
+	 * @param n
+	 *            the block size of the region
+	 * @return the min value
+	 */
+	private static float findMin(float[] data, int maxx, int maxy, int n)
+	{
+		return data[findMinIndex(data, maxx, maxy, n)];
+	}
+
+	/**
+	 * Find min index. This must put the entire region within the image
+	 * 
+	 * @param data
+	 *            the data
+	 * @param maxx
+	 *            the maxx
+	 * @param maxy
+	 *            the maxy
+	 * @param n
+	 *            the block size of the region
+	 * @return the min index
+	 */
+	private static int findMinIndex(float[] data, int maxx, int maxy, int n)
+	{
+		int min = n * maxx + n;
+		for (int y = n; y < maxy - n; y++)
+		{
+			for (int x = n, i = y * maxx + n; x < maxx - n; x++)
+			{
+				if (data[i] < data[min])
+					min = i;
+			}
+		}
+		return min;
+	}
+
+	private static double[] getCentreOfMass(float[][] psf, int w, int h)
+	{
+		double cx = 0;
+		double cy = 0;
+		double cz = 0;
+		double sumXYZ = 0;
+		for (int z = 0; z < psf.length; z++)
+		{
+			float[] data = psf[z];
+			double sumXY = 0;
+			for (int y = 0, j = 0; y < h; y++)
+			{
+				double sumX = 0;
+				for (int x = 0; x < w; x++)
+				{
+					float f = data[j++];
+					sumX += f;
+					cx += f * x;
+				}
+				sumXY += sumX;
+				cy += sumX * y;
+			}
+			cz += sumXY * z;
+			sumXYZ += sumXY;
+		}
+		// Find centre with 0.5 as the centre of the pixel
+		cx = 0.5 + cx / sumXYZ;
+		cy = 0.5 + cy / sumXYZ;
+		cz = 0.5 + cz / sumXYZ;
+		return new double[] { cx, cy, cz };
 	}
 
 	private static class Projection
@@ -3228,6 +3346,11 @@ public class PSFCreator implements PlugInFilter
 			return new int[] { x, y, z };
 		}
 
+		/**
+		 * Gets the centre of mass of each projection and then combine.
+		 *
+		 * @return the centre of mass
+		 */
 		public double[] getCentreOfMass()
 		{
 			// Start in the centre of the image
@@ -3253,7 +3376,19 @@ public class PSFCreator implements PlugInFilter
 
 		public double[] getCentreOfProjection(FloatProcessor fp)
 		{
-			return centreOfMass((float[]) fp.getPixels(), fp.getWidth(), fp.getHeight());
+			float[] data = (float[]) fp.getPixels();
+			double[] com = centreOfMass(data, fp.getWidth(), fp.getHeight());
+
+			//			// Compare will background subtracted centre
+			//			float min = Maths.min(data);
+			//			float[] data2 = new float[data.length];
+			//			for (int i = 0; i < data.length; i++)
+			//				data2[i] = data[i] - min;
+			//			double[] com2 = centreOfMass(data2, fp.getWidth(), fp.getHeight());
+			//			
+			//			System.out.printf("COM shift %f,%f\n", com[0]-com2[0], com[1]-com2[1]);
+
+			return com;
 		}
 
 		private double[] centreOfMass(float[] data, int w, int h)
@@ -3359,6 +3494,7 @@ public class PSFCreator implements PlugInFilter
 		int relativeCentre;
 		float[][] psf;
 		int size;
+		float background;
 		Projection projection;
 		final int magnification;
 
@@ -3423,22 +3559,43 @@ public class PSFCreator implements PlugInFilter
 				yi[i] = Maths.clip(0, h - 1, (int) yval[i]);
 			}
 
+			// Extract to a stack to extract the background
+			psf = new float[zval.length][rangex * rangey];
+
 			for (int z = 0; z < zval.length; z++)
 			{
 				zval[z] = z - 1;
 
 				// Keep within data bounds for the indices
 				float[] data = image[Maths.clip(0, image.length - 1, z - 1)];
+				float[] slice = psf[z];
 
-				for (int y = 0; y < yval.length; y++)
+				for (int y = 0, i = 0; y < yval.length; y++)
 				{
 					final int index = w * yi[y];
-					for (int x = 0; x < xval.length; x++)
+					for (int x = 0; x < xval.length; x++, i++)
 					{
-						fval[x][y][z] = data[index + xi[x]];
+						slice[i] = data[index + xi[x]];
 					}
 				}
 			}
+
+			background = getBackground(psf, rangex, rangey, backgroundWindow);
+
+			// Convert to the format for the function
+			for (int z = 0; z < zval.length; z++)
+			{
+				float[] slice = psf[z];
+				for (int y = 0, i = 0; y < yval.length; y++)
+				{
+					for (int x = 0; x < xval.length; x++, i++)
+					{
+						fval[x][y][z] = slice[i] - background;
+					}
+				}
+				psf[z] = null;
+			}
+			psf = null;
 
 			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(xval, yval, zval,
 					fval);
@@ -3590,13 +3747,17 @@ public class PSFCreator implements PlugInFilter
 		}
 
 		/**
-		 * Compute the centre of mass of each projection and then combine
+		 * Compute the centre of mass.
 		 *
+		 * @param useProjection
+		 *            the use projection
 		 * @return the centre of mass
 		 */
-		public double[] getCentreOfMass()
+		public double[] getCentreOfMass(boolean useProjection)
 		{
-			return projection.getCentreOfMass();
+			if (useProjection)
+				return projection.getCentreOfMass();
+			return PSFCreator.getCentreOfMass(psf, size, size);
 		}
 
 		/**
@@ -3605,9 +3766,9 @@ public class PSFCreator implements PlugInFilter
 		 *
 		 * @return the centre of mass shift
 		 */
-		public double[] getCentreOfMassShift()
+		public double[] getCentreOfMassShift(boolean useProjection)
 		{
-			double[] shift = projection.getCentreOfMass();
+			double[] shift = getCentreOfMass(useProjection);
 			// Turn into a shift relative to the centre
 			int[] d = projection.getDimensions();
 			for (int i = 0; i < 3; i++)
