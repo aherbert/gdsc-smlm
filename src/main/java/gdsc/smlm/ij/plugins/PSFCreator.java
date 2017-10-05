@@ -21,6 +21,10 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.data.DoubleArrayValueProvider;
+import gdsc.core.data.FloatStackTrivalueProvider;
+import gdsc.core.data.TrivalueProvider;
+import gdsc.core.data.ValueProvider;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
 import gdsc.core.ij.AlignImagesFFT;
@@ -83,6 +87,7 @@ import gdsc.smlm.results.procedures.HeightResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.WidthResultProcedure;
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -2697,7 +2702,7 @@ public class PSFCreator implements PlugInFilter
 		ExtractedPSF combined = combine(psfs);
 
 		// Enlarge the combined PSF
-		combined = combined.enlarge(psfMagnification);
+		combined = combined.enlarge(psfMagnification, threadPool);
 
 		combined.createProjections();
 		double[] com = combined.getCentreOfMass(comUsingProjection);
@@ -3543,7 +3548,6 @@ public class PSFCreator implements PlugInFilter
 			double[] xval = new double[rangex];
 			double[] yval = new double[rangey];
 			double[] zval = new double[image.length + 2];
-			double[][][] fval = new double[rangex][rangey][zval.length];
 			int[] xi = new int[xval.length];
 			int[] yi = new int[yval.length];
 			for (int i = 0; i < xval.length; i++)
@@ -3590,15 +3594,14 @@ public class PSFCreator implements PlugInFilter
 				{
 					for (int x = 0; x < xval.length; x++, i++)
 					{
-						fval[x][y][z] = slice[i] - background;
+						slice[i] -= background;
 					}
 				}
-				psf[z] = null;
 			}
-			psf = null;
 
-			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(xval, yval, zval,
-					fval);
+			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(
+					new DoubleArrayValueProvider(xval), new DoubleArrayValueProvider(yval),
+					new DoubleArrayValueProvider(zval), new FloatStackTrivalueProvider(psf, rangex, rangey));
 
 			// Interpolate
 
@@ -3636,6 +3639,11 @@ public class PSFCreator implements PlugInFilter
 			psf = new float[z0.length][size * size];
 
 			// Pre-compute spline positions
+			// Cache tables of interpolation x,y,z.
+			// We can do this as we evenly sample an integer grid at a given magnification
+			// so the x,y,z offsets repeat on the interval of the magnification
+			TIntObjectHashMap<double[]> tables = new TIntObjectHashMap<double[]>(Maths.pow3(magnification));
+			
 			IndexedCubicSplinePosition[] sx = new IndexedCubicSplinePosition[size];
 			IndexedCubicSplinePosition[] sy = new IndexedCubicSplinePosition[size];
 			for (int i = 0; i < size; i++)
@@ -3648,14 +3656,26 @@ public class PSFCreator implements PlugInFilter
 			{
 				IndexedCubicSplinePosition sz = f.getZSplinePosition(z0[z]);
 				float[] data = psf[z];
+				int iz = z % magnification;
 				for (int y = 0, i = 0; y < size; y++)
 				{
+					int iy = y % magnification;
 					for (int x = 0; x < size; x++, i++)
 					{
-						data[i] = (float) f.value(sx[x], sy[y], sz);
+						int ix = x % magnification;
+						int index = ix + magnification * (iy + magnification * iz);
+						double[] table = tables.get(index);
+						if (table == null)
+						{
+							table = CustomTricubicFunction.computePowerTable(sx[x], sy[y], sz);
+							tables.put(index, table);
+						}
+						data[i] = (float) f.value(sx[x].index, sy[y].index, sz.index, table);
+						//data[i] = (float) f.value(sx[x], sy[y], sz);
 					}
 				}
 			}
+			//System.out.printf("Map size = %d\n", tables.size());
 		}
 
 		void createProjections()
@@ -3780,31 +3800,22 @@ public class PSFCreator implements PlugInFilter
 			return shift;
 		}
 
-		public ExtractedPSF enlarge(int n)
+		public ExtractedPSF enlarge(int n, ExecutorService threadPool)
 		{
 			IJ.showStatus("Enlarging ... creating spline");
 
 			// The scales are actually arbitrary
 			// We can enlarge by interpolation between the start and end
 			// by evenly sampling each spline node
-			double[] xval = SimpleArrayUtils.newArray(size, 0, 1.0);
-			double[] yval = xval;
-			double[] zval = SimpleArrayUtils.newArray(psf.length, 0, 1.0);
-			double[][][] fval = new double[size][size][psf.length];
-			for (int z = 0; z < psf.length; z++)
-			{
-				float[] data = psf[z];
-				for (int y = 0, i = 0; y < size; y++)
-				{
-					for (int x = 0; x < size; x++, i++)
-					{
-						fval[x][y][z] = data[i];
-					}
-				}
-			}
+			ValueProvider xval = new DoubleArrayValueProvider(SimpleArrayUtils.newArray(size, 0, 1.0));
+			ValueProvider yval = xval;
+			ValueProvider zval = new DoubleArrayValueProvider(SimpleArrayUtils.newArray(psf.length, 0, 1.0));
+			TrivalueProvider fval = new FloatStackTrivalueProvider(psf, size, size);
 
-			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(xval, yval, zval, fval,
-					new IJTrackProgress());
+			CustomTricubicInterpolator interpolator = new CustomTricubicInterpolator();
+			interpolator.setProgress(new IJTrackProgress());
+			interpolator.setThreadPool(threadPool);
+			CustomTricubicInterpolatingFunction f = interpolator.interpolate(xval, yval, zval, fval);
 
 			// Interpolate
 			int maxx = (size - 1) * n;
