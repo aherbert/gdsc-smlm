@@ -3814,7 +3814,7 @@ public class PSFCreator implements PlugInFilter
 
 			CustomTricubicInterpolator interpolator = new CustomTricubicInterpolator();
 			interpolator.setProgress(new IJTrackProgress());
-			interpolator.setThreadPool(threadPool);
+			interpolator.setExecutorService(threadPool);
 			CustomTricubicInterpolatingFunction f = interpolator.interpolate(xval, yval, zval, fval);
 
 			// Interpolate
