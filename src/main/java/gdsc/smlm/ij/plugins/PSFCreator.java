@@ -2757,7 +2757,7 @@ public class PSFCreator implements PlugInFilter
 			}
 
 			// Update the centres using the centre-of-mass of the combined PSF
-			centres = updateUsingCentreOfMassShift(shift, shiftd, combined, centres);
+			centres = updateUsingCentreOfMassXYShift(shift, shiftd, combined, centres);
 
 			// Extract each PSF into a scaled PSF
 			psfs = extractPSFs(image, centres);
@@ -4142,14 +4142,12 @@ public class PSFCreator implements PlugInFilter
 		return results;
 	}
 
-	private BasePoint[] updateUsingCentreOfMassShift(double[] shift, double shiftd, ExtractedPSF combined,
+	private BasePoint[] updateUsingCentreOfMassXYShift(double[] shift, double shiftd, ExtractedPSF combined,
 			BasePoint[] centres)
 	{
 		float dx = (float) shift[0];
 		float dy = (float) shift[1];
-		// Ignore this. We just want to keep the centres relative to the combined stack.
-		// The actual z-centre of the combined stack does not matter.
-		float dz = 0; //(float) shift[2]; 
+		float dz = 0; 
 		Utils.log("Combined PSF has CoM shift %s,%s (%s)", rounder.toString(shift[0]), rounder.toString(shift[1]),
 				rounder.toString(shiftd));
 		for (int i = 0; i < centres.length; i++)
