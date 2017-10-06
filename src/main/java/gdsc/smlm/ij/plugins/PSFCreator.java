@@ -25,6 +25,7 @@ import gdsc.core.data.DoubleArrayValueProvider;
 import gdsc.core.data.FloatStackTrivalueProvider;
 import gdsc.core.data.TrivalueProvider;
 import gdsc.core.data.ValueProvider;
+import gdsc.core.data.procedures.FloatStackTrivalueProcedure;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
 import gdsc.core.ij.AlignImagesFFT;
@@ -33,7 +34,6 @@ import gdsc.core.ij.AlignImagesFFT.WindowMethod;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
-import gdsc.core.math.interpolation.CubicSplinePosition;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolator;
@@ -3813,108 +3813,23 @@ public class PSFCreator implements PlugInFilter
 			TrivalueProvider fval = new FloatStackTrivalueProvider(psf, size, size);
 
 			CustomTricubicInterpolator interpolator = new CustomTricubicInterpolator();
-			interpolator.setProgress(new IJTrackProgress());
+			IJTrackProgress progress = new IJTrackProgress();
+			interpolator.setProgress(progress);
 			interpolator.setExecutorService(threadPool);
 			CustomTricubicInterpolatingFunction f = interpolator.interpolate(xval, yval, zval, fval);
 
-			// Interpolate
-			int maxx = (size - 1) * n;
-			int maxy = maxx;
-			int maxz = (psf.length - 1) * n;
-			double step = 1.0 / n;
-			float[][] psf2 = new float[maxz + 1][(maxx + 1) * (maxy + 1)];
-
-			// Pre-compute interpolation tables
-			// Use an extra one to have the final x=1 interpolation point.
-			int n1 = n + 1;
-			double[][] tables = new double[Maths.pow3(n1)][];
-			CubicSplinePosition[] s = new CubicSplinePosition[n1];
-			for (int x = 0; x < n; x++)
-				s[x] = new CubicSplinePosition(x * step);
-			// Final interpolation point
-			s[n] = new CubicSplinePosition(1);
-			for (int z = 0, i = 0; z < n1; z++)
-			{
-				CubicSplinePosition sz = s[z];
-				for (int y = 0; y < n1; y++)
-				{
-					CubicSplinePosition sy = s[y];
-					for (int x = 0; x < n1; x++, i++)
-					{
-						tables[i] = CustomTricubicFunction.computePowerTable(s[x], sy, sz);
-					}
-				}
-			}
-
-			//			// TODO - remove the old interpolation code
-			//			// Pre-compute spline positions
-			//			IndexedCubicSplinePosition[] sx = new IndexedCubicSplinePosition[maxx + 1];
-			//			IndexedCubicSplinePosition[] sy = sx;
-			//			double maxX = f.getMaxX();
-			//			for (int i = 0; i < sx.length; i++)
-			//			{
-			//				sx[i] = f.getXSplinePosition(Math.min(i * step, maxX));
-			//			}
-
 			IJ.showStatus("Enlarging ... interpolating");
-			//			double maxZ = f.getMaxZ();
-			for (int z = 0; z <= maxz; z++)
-			{
-				IJ.showProgress(z, psf2.length);
-				float[] data = psf2[z];
+			
+			FloatStackTrivalueProcedure p = new FloatStackTrivalueProcedure();
+			f.sample(n, p, progress);
 
-				int zposition = z / n;
-				int ztable = z % n;
-				if (z == maxz)
-				{
-					// Final interpolation point
-					zposition--;
-					ztable = n;
-				}
-
-				//				IndexedCubicSplinePosition sz = f.getZSplinePosition(Math.min(z * step, maxZ));
-				for (int y = 0, i = 0; y <= maxy; y++)
-				{
-					int yposition = y / n;
-					int ytable = y % n;
-					if (y == maxy)
-					{
-						// Final interpolation point
-						yposition--;
-						ytable = n;
-					}
-					int j = n1 * (ytable + n1 * ztable);
-
-					for (int x = 0; x <= maxx; x++, i++)
-					{
-						int xposition = x / n;
-						int xtable = x % n;
-						if (x == maxx)
-						{
-							// Final interpolation point
-							xposition--;
-							xtable = n;
-						}
-
-						//						float f1 = (float) f.value(sx[x], sy[y], sz);
-						float f2 = (float) f.value(xposition, yposition, zposition, tables[j + xtable]);
-
-						//						double e = DoubleEquality.relativeError(f1, f2);
-						//						if (e > 1e-6)
-						//							System.out.printf("%f vs %f  = %f\n", f1, f2, e);
-						data[i] = f2;
-					}
-				}
-			}
-
-			IJ.showProgress(1);
 			IJ.showStatus("");
 
 			int mag = magnification * n;
-			BasePoint newCentre = new BasePoint((maxx + 1) / 2.0f, (maxy + 1) / 2.0f,
+			BasePoint newCentre = new BasePoint(p.x.length / 2.0f, p.y.length  / 2.0f,
 					// z-centre is used relative to the original input image 
-					(maxz + 1) / 2.0f / mag);
-			return new ExtractedPSF(psf2, (maxx + 1), newCentre, mag);
+					p.z.length / 2.0f / mag);
+			return new ExtractedPSF(p.value, p.x.length, newCentre, mag);
 		}
 	}
 
