@@ -21,10 +21,7 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.data.DoubleArrayValueProvider;
 import gdsc.core.data.FloatStackTrivalueProvider;
-import gdsc.core.data.TrivalueProvider;
-import gdsc.core.data.ValueProvider;
 import gdsc.core.data.procedures.FloatStackTrivalueProcedure;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
@@ -3599,9 +3596,14 @@ public class PSFCreator implements PlugInFilter
 				}
 			}
 
-			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator().interpolate(
-					new DoubleArrayValueProvider(xval), new DoubleArrayValueProvider(yval),
-					new DoubleArrayValueProvider(zval), new FloatStackTrivalueProvider(psf, rangex, rangey));
+			//@formatter:off
+			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator.Builder()
+					.setXValue(xval) 
+					.setYValue(xval) 
+					.setZValue(zval)
+					.setFValue(new FloatStackTrivalueProvider(psf, rangex, rangey))
+					.interpolate();
+			//@formatter:on
 
 			// Interpolate
 
@@ -3807,16 +3809,20 @@ public class PSFCreator implements PlugInFilter
 			// The scales are actually arbitrary
 			// We can enlarge by interpolation between the start and end
 			// by evenly sampling each spline node
-			ValueProvider xval = new DoubleArrayValueProvider(SimpleArrayUtils.newArray(size, 0, 1.0));
-			ValueProvider yval = xval;
-			ValueProvider zval = new DoubleArrayValueProvider(SimpleArrayUtils.newArray(psf.length, 0, 1.0));
-			TrivalueProvider fval = new FloatStackTrivalueProvider(psf, size, size);
-
-			CustomTricubicInterpolator interpolator = new CustomTricubicInterpolator();
+			double[] xval = SimpleArrayUtils.newArray(size, 0, 1.0);
+			double[] zval = SimpleArrayUtils.newArray(psf.length, 0, 1.0);
 			IJTrackProgress progress = new IJTrackProgress();
-			interpolator.setProgress(progress);
-			interpolator.setExecutorService(threadPool);
-			CustomTricubicInterpolatingFunction f = interpolator.interpolate(xval, yval, zval, fval);
+
+			//@formatter:off
+			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator.Builder()
+					.setXValue(xval) 
+					.setYValue(xval) 
+					.setZValue(zval)
+					.setFValue(new FloatStackTrivalueProvider(psf, size, size))
+					.setProgress(progress)
+					.setExecutorService(threadPool)
+					.interpolate();
+			//@formatter:on
 
 			IJ.showStatus("Enlarging ... interpolating");
 			
