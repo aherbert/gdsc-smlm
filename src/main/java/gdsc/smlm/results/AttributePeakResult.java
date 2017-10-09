@@ -22,9 +22,9 @@ public class AttributePeakResult extends PeakResult
 	// Provide assignable attributes for all the attribute methods in the super class
 
 	// State flags
-	private static int FIELD_ID = 0x00000001;
-	private static int FIELD_END_FRAME = 0x00000002;
-	private static int FIELD_PRECISION = 0x00000004;
+	private static final int FIELD_ID = 0x00000001;
+	private static final int FIELD_END_FRAME = 0x00000002;
+	private static final int FIELD_PRECISION = 0x00000004;
 	private int fields = 0;
 
 	private int id;

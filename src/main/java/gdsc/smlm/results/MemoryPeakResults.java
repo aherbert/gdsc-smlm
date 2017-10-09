@@ -63,7 +63,7 @@ import gdsc.smlm.results.procedures.XYZResultProcedure;
  */
 public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 {
-	private static LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<String, MemoryPeakResults>();
+	private static final LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<String, MemoryPeakResults>();
 	private static final Runtime s_runtime = Runtime.getRuntime();
 	private static int byteSize = 0;
 	private static int byteSizeWithDeviations = 0;
@@ -829,13 +829,26 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public MemoryPeakResults copy()
 	{
+		return copy(false);
+	}
+
+	/**
+	 * Copy the results. Create new objects for the properties (avoiding a shallow copy) and optionally a deep copy all
+	 * of the peak results. Copying the peak result allows modification of their properties.
+	 *
+	 * @param copyResults
+	 *            Set to true to copy peak result objects
+	 * @return the memory peak results
+	 */
+	public MemoryPeakResults copy(boolean copyResults)
+	{
 		MemoryPeakResults copy = clone();
 		if (copy != null)
 		{
 			// Deep copy the objects that are not immutable
 			if (getBounds() != null)
 				copy.setBounds(new Rectangle(getBounds()));
-			copy.results = results.copy();
+			copy.results = results.copy(copyResults);
 		}
 		return copy;
 	}

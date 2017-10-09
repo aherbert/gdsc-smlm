@@ -234,6 +234,24 @@ public class ArrayPeakResultStore implements PeakResultStore
 		return new ArrayPeakResultStore(this);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#copy(boolean)
+	 */
+	public PeakResultStore copy(boolean deepCopy)
+	{
+		if (deepCopy)
+		{
+			ArrayPeakResultStore copy = new ArrayPeakResultStore(size());
+			for (int i = 0, size = size(); i < size; i++)
+				copy.add(results[i].clone());
+			return copy;
+		}
+		return copy();
+	}
+	
+	
 	/**
 	 * {@inheritDoc}
 	 * <p>

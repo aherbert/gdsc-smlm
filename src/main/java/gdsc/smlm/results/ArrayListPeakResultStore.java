@@ -187,6 +187,23 @@ public class ArrayListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#copy(boolean)
+	 */
+	public PeakResultStore copy(boolean deepCopy)
+	{
+		if (deepCopy)
+		{
+			ArrayListPeakResultStore copy = new ArrayListPeakResultStore(size());
+			for (int i = 0, size = size(); i < size; i++)
+				copy.add(results.get(i).clone());
+			return copy;
+		}
+		return copy();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#removeIf(gdsc.smlm.results.PeakResultPredicate)
 	 */
 	public boolean removeIf(final PeakResultPredicate filter)

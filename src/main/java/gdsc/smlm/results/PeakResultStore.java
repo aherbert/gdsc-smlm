@@ -111,6 +111,15 @@ public interface PeakResultStore
 	public PeakResultStore copy();
 
 	/**
+	 * Copy the results.
+	 *
+	 * @param deepCopy
+	 *            Set to true to perform a deep copy
+	 * @return the peak result store
+	 */
+	public PeakResultStore copy(boolean deepCopy);
+
+	/**
 	 * Removes the result if it matches the filter. If objects are removed then the order of elements may change.
 	 *
 	 * @param filter
