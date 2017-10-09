@@ -6,6 +6,9 @@ import java.awt.Frame;
 import java.awt.Label;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +47,7 @@ import gdsc.core.utils.Sort;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtosHelper;
@@ -128,7 +132,7 @@ public class PSFCreator implements PlugInFilter
 	private final static String TITLE_WINDOW = "PSF Window Function";
 	private final static String TITLE_BACKGROUND = "PSF Background";
 	private final static String TITLE_FOREGROUND = "PSF Foreground";
-	private final static String TITLE_CONTRAST = "PSF Contrast";
+	//private final static String TITLE_CONTRAST = "PSF Contrast";
 	private final static String TITLE_PSF = "PSF";
 	private final static String TITLE_SPOT_PSF = "Spot PSF";
 
@@ -152,16 +156,16 @@ public class PSFCreator implements PlugInFilter
 
 	private static double nmPerPixel;
 	private static int bias = 0;
-	private static int analysisWindow = 2;
-	private static int comWindow = 2;
+	private static double analysisWindow = 1; // Double as this is scaled by the current magnification
+	private static int comWindow = 2; // z-slices around the z centre
 	private static int projectionMagnification = 2;
 	private static int maxIterations = 20;
+	private static boolean checkAlignments = false;
+	private boolean myCheckAlignments;
 	private static int psfMagnification = 4;
-	private int finalBackgroundWindow = 0;
-	private float background = 0;
-	private Label backgroundLabel = null;
 	private static int window = 3;
 	private static Rounder rounder = RounderFactory.create(4);
+	private PSFCentreSelector zSelector;
 
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig;
@@ -2609,6 +2613,8 @@ public class PSFCreator implements PlugInFilter
 		if (threadPool == null)
 			threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
 
+		zSelector = new PSFCentreSelector();
+				
 		// Relocate the initial centres
 		centres = relocateCentres(image, centres);
 		if (centres == null)
@@ -2641,7 +2647,7 @@ public class PSFCreator implements PlugInFilter
 						rounder.toString(translation[j][2]));
 			}
 
-			if (interactiveMode)
+			if (myCheckAlignments)
 			{
 				combined.show(TITLE_PSF);
 
@@ -2729,8 +2735,20 @@ public class PSFCreator implements PlugInFilter
 			for (int j = 0; j < 2; j++)
 				rmsd[j] = Math.sqrt(rmsd[j] / psfs.length);
 
+			// Get the current combined z-centre. 
+			// This is used to get the centre of mass for repositioning. 
+			zSelector.setPSF(combined);
+			zSelector.analyse();
+			zSelector.guessZCentreFromForeground();
+			if (interactiveMode)
+			{
+				double dz = zSelector.run(true, false, null);
+				if (dz < 0)
+					return;
+			}			
+			
 			// Compute CoM shift using the current z-centre and z-window
-			double[] shift = combined.getCentreOfMassXYShift();
+			double[] shift = combined.getCentreOfMassXYShift(zSelector.getCentreSlice());
 			double shiftd = Math.sqrt(shift[0] * shift[0] + shift[1] * shift[1]);
 
 			Utils.log("[%d] RMSD XY = %s : RMSD Z = %s : Combined CoM shift = %s,%s (%s)", iter,
@@ -2779,41 +2797,17 @@ public class PSFCreator implements PlugInFilter
 		// Enlarge the combined PSF
 		combined = combined.enlarge(psfMagnification, threadPool);
 
-		// XXX - make this generic selection of PSF z-centre
-
-		combined.createProjections();
-		double[] com = combined.getCentreOfMass(false);
-		zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
-		psfOut = combined.show(TITLE_PSF, zCentre);
-
-		// Show a dialog to collect processing options and 
-		// find background interactively
-		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-		gd.addMessage("Configure the output PSF.\nZ-centre = " + zCentre);
-		gd.addSlider("Background_slice", 1, combined.psf.length, zCentre);
-		gd.addSliderIncludeDefault("Final_background_window", 0, 50, analysisWindow * combined.magnification);
-		gd.addSlider("Edge_window", 0, combined.maxx / 2, window);
-		gd.addDialogListener(new InteractivePSFListener());
-		if (Utils.isShowGenericDialog())
-		{
-			gd.addMessage("");
-			backgroundLabel = gd.getLastLabel();
-			drawPSFPlots();
-		}
-		gd.showDialog();
-
-		// Remove interactive guides		
-		psfOut[0].killRoi();
-		psfOut[0].setOverlay(null);
-		psfOut[1].killRoi();
-		psfOut[2].killRoi();
-
-		if (gd.wasCanceled())
+		// Show a dialog to collect final z-centre interactively
+		//PSFCentreSelector zSelector = new PSFCentreSelector(combined);
+		zSelector.setPSF(combined);
+		zSelector.analyse();
+		//zSelector.zCentre = combined.psf.length / 2.0;
+		zSelector.guessZCentreFromForeground();
+		double dz = zSelector.run(true, true, null);
+		if (dz < 0)
 			return;
 
-		// XXX ---- 
-
-		// We do not read the dialog as that is done in the DialogListener
+		zCentre = zSelector.getCentreSlice();
 
 		// When click ok the background is subtracted from the PSF
 		// All pixels below the background are set to zero
@@ -2828,8 +2822,9 @@ public class PSFCreator implements PlugInFilter
 		int cz = zCentre - 1;
 		float[] data = psf[cz];
 		// Apply background and window with no normalisation
-		normalise(data, cz, wx, wz, 1.0);
-		// Compute normalisation from z-centre and apply
+		normalise(data, cz, wx, wz, 1.0, zSelector.background);
+		// Compute normalisation from z-centre and apply.
+		// XXX should the normalisation be done so the max intensity frame is zero?
 		double norm = 1.0 / Maths.sum(data);
 		for (int i = 0; i < data.length; i++)
 			data[i] *= norm;
@@ -2838,27 +2833,32 @@ public class PSFCreator implements PlugInFilter
 		for (int z = 0; z < psf.length; z++)
 		{
 			if (z != cz)
-				normalise(psf[z], z, wx, wz, norm);
+				normalise(psf[z], z, wx, wz, norm, zSelector.background);
 		}
+		
+		// TODO - Show a plot of the normalised intensity per frame.
+		
 
 		// Create a new extracted PSF and show
 		int magnification = combined.magnification;
 		combined = new ExtractedPSF(psf, combined.maxx, combined.centre, magnification);
 		combined.createProjections();
-		com = combined.getCentreOfMass(false);
-		zCentre = Maths.clip(1, combined.psf.length, (int) Math.round(1 + com[2]));
 		psfOut = combined.show(TITLE_PSF, zCentre);
 		psfImp = psfOut[0];
-
+		
 		// Add image info
 		int imageCount = centres.length;
 		ImagePSF.Builder imagePsf = ImagePSFHelper
 				.create(zCentre, nmPerPixel / magnification, nmPerSlice / magnification, imageCount, 0, createNote())
 				.toBuilder();
+
 		// Add the CoM
+		// Find the XY centre around the z centre 
+		double[] com = getCentreOfMassXY(combined.psf, combined.maxx, combined.maxy, zCentre - 1, comWindow);
+
 		imagePsf.setXCentre(com[0]);
 		imagePsf.setYCentre(com[1]);
-		imagePsf.setZCentre(com[2]);
+		imagePsf.setZCentre(zCentre - 1);
 		// This is a bit redundant ...
 		//		Offset.Builder offsetBuilder = Offset.newBuilder();
 		//		offsetBuilder.setCx(com[0]);
@@ -2873,230 +2873,9 @@ public class PSFCreator implements PlugInFilter
 		psfImp.resetDisplayRange();
 		psfImp.updateAndDraw();
 
-		Utils.log("Final Centre-of-mass = %s,%s,%s\n", rounder.toString(com[0]), rounder.toString(com[1]),
-				rounder.toString(com[2]));
+		Utils.log("Final Centre-of-mass = %s,%s\n", rounder.toString(com[0]), rounder.toString(com[1]));
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images\n", psfImp.getTitle(), zCentre,
 				Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3), imageCount);
-	}
-
-	/**
-	 * Normalise the slice from the PSF using the XY and Z weighting window. The background is subtracted from the data,
-	 * the window applied and then the result is normalised.
-	 *
-	 * @param data
-	 *            the data
-	 * @param z
-	 *            the z position of the PSF data
-	 * @param wx
-	 *            the XY weighting
-	 * @param wz
-	 *            the Z weighting
-	 * @param norm
-	 *            the normalisation factor
-	 */
-	private void normalise(float[] data, int z, double[] wx, double[] wz, double norm)
-	{
-		// Weight by the stack position 
-		double[] w;
-		if (wz[z] == 1)
-		{
-			w = wx;
-		}
-		else
-		{
-			w = wx.clone();
-			for (int i = 0; i < w.length; i++)
-				w[i] *= wz[z];
-		}
-
-		final int size = wx.length;
-		for (int y = 0, i = 0; y < size; y++)
-		{
-			double weight = w[y] * norm;
-			for (int x = 0; x < size; x++, i++)
-			{
-				// Subtract background
-				float f = (data[i] - background);
-				if (f <= 0)
-					data[i] = 0;
-				else
-					// Window function and normalise
-					data[i] = (float) (f * w[x] * weight);
-			}
-		}
-	}
-
-	private class InteractivePSFListener implements DialogListener
-	{
-		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
-		{
-			zCentre = (int) gd.getNextNumber();
-			finalBackgroundWindow = (int) gd.getNextNumber();
-			window = (int) gd.getNextNumber();
-
-			drawPSFPlots();
-			return true;
-		}
-	}
-
-	private void drawPSFPlots()
-	{
-		updateWindowPlot();
-		updateBackgroundPlot();
-		updatePSF();
-	}
-
-	double plotWindow = -1;
-
-	private void updateWindowPlot()
-	{
-		if (aquirePlotLock1())
-		{
-			// Run in a new thread to allow the GUI to continue updating
-			new Thread(new Runnable()
-			{
-				public void run()
-				{
-					try
-					{
-						// Continue while the parameter is changing
-						while (plotWindow != window)
-						{
-							// Store the parameters to be processed
-							plotWindow = window;
-
-							int size = psfOut[0].getWidth();
-							double[] x = SimpleArrayUtils.newArray(size, 0, 1.0);
-							// Convert to an alpha
-							double[] w = ImageWindow.tukeyEdge(size, window);
-
-							Plot2 plot = new Plot2(TITLE_WINDOW, "x", "Weight", x, w);
-							plot.setLimits(0, size - 1, 0, 1.05);
-							Utils.display(TITLE_WINDOW, plot);
-
-							// Find the region where windowing will start
-							int i = 0;
-							while (i < x.length && w[i] < 1)
-								i++;
-
-							Roi roi = null;
-							if (i > 0 && i != x.length)
-							{
-								int width = x.length - 2 * i;
-								roi = new Roi(i, i, width, width);
-							}
-							psfOut[0].setRoi(roi);
-						}
-					}
-					finally
-					{
-						// Ensure the running flag is reset
-						plotLock1 = false;
-					}
-				}
-			}).start();
-		}
-	}
-
-	private int plotZCentre = -1;
-	private int plotBackgroundWindow = -1;
-
-	private void updateBackgroundPlot()
-	{
-		if (aquirePlotLock2())
-		{
-			final BlockMeanFilter filter = new BlockMeanFilter();
-			final ImageStack stack = psfOut[0].getImageStack();
-			final int maxx = stack.getWidth();
-			final int maxy = stack.getHeight();
-
-			// Run in a new thread to allow the GUI to continue updating
-			new Thread(new Runnable()
-			{
-				public void run()
-				{
-					try
-					{
-						// Continue while the parameter is changing
-						while (plotZCentre != zCentre || plotBackgroundWindow != finalBackgroundWindow)
-						{
-							// Store the parameters to be processed
-							plotZCentre = zCentre;
-							plotBackgroundWindow = finalBackgroundWindow;
-
-							float[] pixels = (float[]) stack.getPixels(plotZCentre);
-							if (plotBackgroundWindow > 0)
-							{
-								pixels = pixels.clone();
-								filter.rollingBlockFilterInternal(pixels, maxx, maxy, plotBackgroundWindow);
-							}
-
-							int[] limits = findLimitsIndex(pixels, maxx, maxy, plotBackgroundWindow);
-							int min = limits[0];
-							background = pixels[min];
-
-							// Display the background
-							if (backgroundLabel != null)
-								backgroundLabel.setText("Background = " + Utils.rounded(background));
-
-							// Draw a region on the image
-							int cx = min / maxy;
-							int cy = min % maxy;
-							int y = cx - plotBackgroundWindow;
-							int x = cy - plotBackgroundWindow;
-							int w = 2 * plotBackgroundWindow + 1;
-							psfOut[0].setOverlay(new Roi(x, y, w, w), Color.YELLOW, 1, null);
-						}
-					}
-					finally
-					{
-						// Ensure the running flag is reset
-						plotLock2 = false;
-					}
-				}
-			}).start();
-		}
-	}
-
-	private int psfZCentre = -1;
-
-	private void updatePSF()
-	{
-		if (aquirePlotLock3())
-		{
-			// Run in a new thread to allow the GUI to continue updating
-			new Thread(new Runnable()
-			{
-				public void run()
-				{
-					try
-					{
-						// Continue while the parameter is changing
-						while (psfZCentre != zCentre)
-						{
-							// Store the parameters to be processed
-							psfZCentre = zCentre;
-
-							// Select the z-centre
-							psfOut[0].setSlice(psfZCentre);
-							psfOut[0].resetDisplayRange();
-							psfOut[0].updateAndDraw();
-
-							// Mark projections
-							// X-projection
-							psfOut[1].setRoi(new Line(psfZCentre, 0, psfZCentre, psfOut[1].getHeight()));
-							// Y-projection
-							psfOut[2].setRoi(new Line(0, psfZCentre, psfOut[2].getWidth(), psfZCentre));
-						}
-					}
-					finally
-					{
-						// Ensure the running flag is reset
-						plotLock3 = false;
-					}
-				}
-			}).start();
-		}
 	}
 
 	private BasePoint[] relocateCentres(float[][] image, BasePoint[] centres)
@@ -3112,10 +2891,7 @@ public class PSFCreator implements PlugInFilter
 
 		double mean = 0;
 
-		Smoother bsmoother = new Smoother();
-		Smoother fsmoother = new Smoother();
-
-		double[] slice = SimpleArrayUtils.newArray(image.length, 1, 1.0);
+		//PSFCentreSelector zSelector = new PSFCentreSelector();
 
 		for (int i = 0; i < centres.length; i++)
 		{
@@ -3128,104 +2904,58 @@ public class PSFCreator implements PlugInFilter
 				psf[z] = ImageConverter.getData(image[z], w, h, bounds, psf[z]);
 			}
 
-			// Create a PSF
+			if (interactiveMode)
+			{
+				Overlay o = new Overlay();
+				Roi roi = new Roi(bounds);
+				o.add(roi);
+				imp.setOverlay(o);
+				imp.updateAndDraw();
+			}
 
-			// Abstract out the selection of the z-centre.
-			// New class which is passed a PSF. At the end it has modified the PSF centre.
-			// Optional selection of a window function so the same class can be used
-			// at the end.
-
-			// Start with just using the middle of the stack.
-			// Display a dialog allowing the centre to be selected.
-			// Input for z-centre, CoM depth (around centre slice)
-			// This interactively moves the slice and updates:
-			// - x projection
-			// - y projection
-			// - Draw CoM on the image
-
-			// When OK'd we update the PSF centre
-
-			// This can be used to pick the initial centres, 
-			// relocate the combined PSF during fitting and the final PSF. 
-
-			// Analyse the background, foreground, contrast
-
-			// Guess z-centre:
-			// - CoM projection
-			// - CoM
-			// - max contrast
-			// - min FWHM of X-projection
-			// - min FWHM of Y-projection
-			// - min FWHM of both-projections
-			// - Double Helix - min FHWM in one projection and max peaks separation is other
-
-			// Ask user for z-centre confirmation
-
-			// Update centre
-
-			// Analyse
-			float[][] limits = getLimits(psf, bounds.width, bounds.height, analysisWindow);
-
-			float[] bdata = bsmoother.smooth(limits[0]).getFSmooth();
-			float[] fdata = fsmoother.smooth(limits[1]).getFSmooth();
-			double[] contrast = getConstrast(bdata, fdata);
-
-			int bIndex = SimpleArrayUtils.findMinIndex(bdata);
-			float background = bdata[bIndex];
-			int fIndex = SimpleArrayUtils.findMaxIndex(fdata);
-			float foreground = fdata[fIndex];
-			int cIndex = SimpleArrayUtils.findMaxIndex(contrast);
-
-			int zCentre = cIndex + 1;
+			// Create a PSF and select the z-centre
+			zSelector.setPSF(new ExtractedPSF(psf, bounds.width, bounds.height));
+			zSelector.analyse();
+			zSelector.guessZCentreFromForeground();
 
 			if (interactiveMode)
 			{
-				ExtractedPSF p = new ExtractedPSF(psf, bounds.width, bounds.height);
-				p.createProjections();
-				p.show(TITLE_SPOT_PSF);
+				imp.setSlice(zSelector.getCentreSlice());
+				imp.updateAndDraw();
 
-				WindowOrganiser wo = new WindowOrganiser();
-
-				Plot plot = new Plot(TITLE_BACKGROUND, "Slice", "Background");
-				plot.setLimits(1, psf.length, Maths.min(limits[0]), Maths.max(limits[0]));
-				plot.setColor(Color.blue);
-				plot.addPoints(slice, bsmoother.getDSmooth(), Plot.LINE);
-				plot.setColor(Color.black);
-				plot.addPoints(slice, SimpleArrayUtils.toDouble(limits[0]), Plot.LINE);
-				PlotWindow pw = Utils.display(TITLE_BACKGROUND, plot);
-				if (Utils.isNewWindow())
-					wo.add(pw);
-
-				//				wo.add(Utils.display(TITLE_FOREGROUND,
-				//						new Plot(TITLE_FOREGROUND, "Slice", "Foreground", slice, fsmoother.getDSmooth())));
-				//				wo.add(Utils.display(TITLE_CONTRAST, new Plot(TITLE_CONTRAST, "Slice", "Contrast", slice, contrast)));
-				wo.tile();
-
-				NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-				gd.addSlider("z-centre_" + (i + 1), 1, image.length, zCentre);
-
-				gd.showDialog();
-				if (gd.wasCanceled())
+				// Ask user for z-centre confirmation
+				double dz = zSelector.run(true, false, Integer.toString(i + 1));
+				if (dz < 0)
+				{
+					imp.setOverlay(null);
 					return null;
-
-				zCentre = (int) gd.getNextNumber();
+				}
 			}
+
+			zCentre = zSelector.getCentreSlice() - 1;
 
 			// Subtract background
+			final float adjust = -zSelector.background;
 			for (int z = 0; z < image.length; z++)
 			{
-				SimpleArrayUtils.add(psf[z], -background);
+				SimpleArrayUtils.add(psf[z], adjust);
 			}
 
-			double[] com = getCentreOfMass(psf, bounds.width, bounds.height);
+			// Update centre
+			double[] com = getCentreOfMassXY(psf, bounds.width, bounds.height, zCentre, comWindow);
 			float dx = (float) (com[0] + bounds.x - centres[i].getX());
 			float dy = (float) (com[1] + bounds.y - centres[i].getY());
-			float dz = (float) (com[2] - centres[i].getZ());
-			Utils.log("Centre %d : %s,%s,%s updated to CoM by %s,%s,%s", i + 1, rounder.toString(centres[i].getX()),
+			float dz = (float) (zSelector.zCentre - centres[i].getZ());
+			Utils.log("Centre %d : %s,%s,%s updated by %s,%s,%s", i + 1, rounder.toString(centres[i].getX()),
 					rounder.toString(centres[i].getY()), rounder.toString(centres[i].getZ()), rounder.toString(dx),
 					rounder.toString(dy), rounder.toString(dz));
 			centres[i] = centres[i].shift(dx, dy, dz);
 			mean += centres[i].getZ();
+		}
+
+		if (interactiveMode)
+		{
+			imp.setOverlay(null);
 		}
 
 		// z-centres should be relative to the combined stack, not absolute
@@ -3234,6 +2964,375 @@ public class PSFCreator implements PlugInFilter
 			centres[i] = new BasePoint(centres[i].getX(), centres[i].getY(), (float) (centres[i].getZ() - mean));
 
 		return centres;
+	}
+
+	private class PSFCentreSelector implements DialogListener
+	{
+		ExtractedPSF psf;
+		double zCentre;
+		Point location = null;
+
+		Smoother bsmoother = new Smoother();
+		Smoother fsmoother = new Smoother();
+		float[][] limits;
+
+		float[] bdata;
+		float[] fdata;
+		int bIndex, fIndex;
+		float background;
+		private Label backgroundLabel = null;
+
+		boolean plotBackground, plotEdgeWindow;
+
+		public PSFCentreSelector()
+		{
+		}
+
+		public int getCentreSlice()
+		{
+			return Maths.clip(1, psf.psf.length, (int) Math.round(1 + zCentre));
+		}
+
+		public int getAnalysisWindow()
+		{
+			return (int) Math.round(analysisWindow * psf.magnification);
+		}
+
+		public PSFCentreSelector(ExtractedPSF psf)
+		{
+			setPSF(psf);
+		}
+
+		public void setPSF(ExtractedPSF psf)
+		{
+			this.psf = psf;
+			zCentre = psf.centre.getZ();
+
+			// Reset
+			bIndex = -1;
+			background = Float.NaN;
+		}
+
+		public void analyse()
+		{
+			int window = getAnalysisWindow();
+			limits = getLimits(psf.psf, psf.maxx, psf.maxy, window);
+
+			bdata = bsmoother.smooth(limits[0]).getFSmooth();
+			fdata = fsmoother.smooth(limits[1]).getFSmooth();
+
+			bIndex = SimpleArrayUtils.findMinIndex(bdata);
+			fIndex = SimpleArrayUtils.findMaxIndex(fdata);
+			background = bdata[bIndex];
+		}
+
+		public void guessZCentreFromForeground()
+		{
+			zCentre = fIndex;
+		}
+
+		public double run(boolean plotBackground, boolean plotEdgeWindow, String id)
+		{
+			this.plotBackground = plotBackground;
+			this.plotEdgeWindow = plotEdgeWindow;
+
+			int slice = getCentreSlice();
+
+			psf.createProjections();
+			psfOut = psf.show(TITLE_PSF, slice);
+
+			// Show a dialog to collect processing options and 
+			// find background interactively
+			NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+			gd.addMessage("Configure the PSF.\nCurrent Z-centre = " + Utils.rounded(1 + zCentre));
+			String label = "z-centre";
+			if (!TextUtils.isNullOrEmpty(id))
+				label += "_" + id;
+			gd.addSlider(label, 1, psf.psf.length, 1 + zCentre);
+			final TextField tf = gd.getLastTextField();
+			final String defaultZ = tf.getText();
+			gd.addAndGetButton("Reset", new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					tf.setText(defaultZ);
+				}
+			});
+			gd.addSlider("CoM_z_window", 0, 8, comWindow);
+			if (plotBackground)
+			{
+				String label2 = "Analysis_window";
+				if (psf.magnification != 1)
+					label2 += "_mag_x" + psf.magnification;
+				gd.addSliderIncludeDefault(label2, 0, Math.max(3, psf.maxx / 4), analysisWindow * psf.magnification);
+			}
+			if (plotEdgeWindow)
+			{
+				gd.addSlider("Edge_window", 0, psf.maxx / 2, window);
+			}
+			gd.addDialogListener(this);
+			if (Utils.isShowGenericDialog())
+			{
+				gd.addMessage("");
+				backgroundLabel = gd.getLastLabel();
+				drawPSFPlots();
+			}
+			gd.setLocation(location);
+			gd.showDialog(true);
+
+			// Remove interactive guides		
+			psfOut[0].killRoi();
+			psfOut[0].setOverlay(null);
+			psfOut[1].killRoi();
+			psfOut[2].killRoi();
+
+			location = gd.getLocation();
+
+			if (gd.wasCanceled())
+				return -1;
+
+			return zCentre;
+		}
+
+		private void drawPSFPlots()
+		{
+			if (plotEdgeWindow)
+				drawEdgeWindowPlot();
+			if (plotBackground)
+				drawIntensityPlot();
+			drawPSFCentre();
+		}
+
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			zCentre = gd.getNextNumber() - 1;
+			comWindow = (int) gd.getNextNumber();
+			if (plotBackground)
+				analysisWindow = gd.getNextNumber() / psf.magnification;
+			if (plotEdgeWindow)
+				window = (int) gd.getNextNumber();
+
+			updatePSFPlots();
+			return true;
+		}
+
+		private void updatePSFPlots()
+		{
+			if (plotEdgeWindow)
+				updateEdgeWindowPlot();
+			if (plotBackground)
+				updateIntensityPlot();
+			updatePSFCentre();
+		}
+
+		int plotWindow = -1;
+
+		private void drawEdgeWindowPlot()
+		{
+			plotWindow = window;
+
+			int size = psf.maxx;
+			double[] x = SimpleArrayUtils.newArray(size, 0, 1.0);
+			// Convert to an alpha
+			double[] w = ImageWindow.tukeyEdge(size, plotWindow);
+
+			Plot2 plot = new Plot2(TITLE_WINDOW, "x", "Weight", x, w);
+			plot.setLimits(0, size - 1, 0, 1.05);
+			Utils.display(TITLE_WINDOW, plot);
+
+			// Find the region where windowing will start
+			int i = 0;
+			while (i < x.length && w[i] < 1)
+				i++;
+
+			Roi roi = null;
+			if (i > 0 && i != x.length)
+			{
+				int width = x.length - 2 * i;
+				roi = new Roi(i, i, width, width);
+			}
+			psfOut[0].setRoi(roi);
+		}
+
+		private void updateEdgeWindowPlot()
+		{
+			if (aquirePlotLock1())
+			{
+				// Run in a new thread to allow the GUI to continue updating
+				new Thread(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							// Continue while the parameter is changing
+							while (plotWindow != window)
+							{
+								drawEdgeWindowPlot();
+							}
+						}
+						finally
+						{
+							// Ensure the running flag is reset
+							plotLock1 = false;
+						}
+					}
+				}).start();
+			}
+		}
+
+		private int plotBackgroundWindow = -1;
+		private PlotWindow pwBackground, pwForeground;
+		private float[] rangeB, rangeF;
+
+		private void drawIntensityPlot()
+		{
+			plotBackgroundWindow = getAnalysisWindow();
+
+			int length = psf.psf.length;
+			double[] slice = SimpleArrayUtils.newArray(length, 1, 1.0);
+
+			WindowOrganiser wo = new WindowOrganiser();
+
+			Plot plot = new Plot(TITLE_BACKGROUND, "Slice", "Background");
+			rangeB = Maths.limits(limits[0]);
+			plot.setLimits(1, length, rangeB[0], rangeB[1]);
+			plot.setColor(Color.blue);
+			plot.addPoints(slice, bsmoother.getDSmooth(), Plot.LINE);
+			plot.setColor(Color.black);
+			plot.addPoints(slice, SimpleArrayUtils.toDouble(limits[0]), Plot.LINE);
+			String msgB = "Background = " + Utils.rounded(background);
+			plot.addLabel(0, 0, msgB);
+			pwBackground = Utils.display(TITLE_BACKGROUND, plot);
+			if (Utils.isNewWindow())
+				wo.add(pwBackground);
+
+			plot = new Plot(TITLE_FOREGROUND, "Slice", "Foreground");
+			rangeF = Maths.limits(limits[1]);
+			plot.setLimits(1, length, rangeF[0], rangeF[1]);
+			plot.setColor(Color.blue);
+			plot.addPoints(slice, fsmoother.getDSmooth(), Plot.LINE);
+			plot.setColor(Color.black);
+			plot.addPoints(slice, SimpleArrayUtils.toDouble(limits[1]), Plot.LINE);
+			String msgF = "Foreground = " + Utils.rounded(fdata[fIndex]);
+			plot.addLabel(0, 0, msgF);
+			pwForeground = Utils.display(TITLE_FOREGROUND, plot);
+			if (Utils.isNewWindow())
+				wo.add(pwForeground);
+
+			wo.tile();
+
+			drawCentreOnIntensityPlot();
+
+			// Draw a region on the image which contains the background.
+			// This is not really useful as it is not linked to the current frame.
+			//int cx = bIndex / psf.maxx;
+			//int cy = bIndex % psf.maxx;
+			//int y = cx - plotBackgroundWindow;
+			//int x = cy - plotBackgroundWindow;
+			//int w = 2 * plotBackgroundWindow + 1;
+			//psfOut[0].setOverlay(new Roi(x, y, w, w), Color.YELLOW, 1, null);
+
+			if (backgroundLabel != null)
+			{
+				backgroundLabel.setText(msgB + ", " + msgF);
+			}
+		}
+
+		private void drawCentreOnIntensityPlot()
+		{
+			drawCentreOnPlot(pwBackground, rangeB);
+			drawCentreOnPlot(pwForeground, rangeF);
+		}
+
+		private void drawCentreOnPlot(PlotWindow pw, float[] rangeB)
+		{
+			if (pw != null)
+			{
+				Plot plot = pw.getPlot();
+				int slice = getCentreSlice();
+
+				double x = plot.scaleXtoPxl(slice);
+				double min = plot.scaleYtoPxl(rangeB[0]);
+				double max = plot.scaleYtoPxl(rangeB[1]);
+
+				pw.getImagePlus().setRoi(new Line(x, min, x, max));
+			}
+		}
+
+		private void updateIntensityPlot()
+		{
+			if (aquirePlotLock2())
+			{
+				// Run in a new thread to allow the GUI to continue updating
+				new Thread(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							// Continue while the parameter is changing
+							while (plotBackgroundWindow != getAnalysisWindow())
+							{
+								analyse();
+								drawIntensityPlot();
+							}
+						}
+						finally
+						{
+							// Ensure the running flag is reset
+							plotLock2 = false;
+						}
+					}
+				}).start();
+			}
+		}
+
+		private int psfZCentre = -1;
+
+		private void drawPSFCentre()
+		{
+			psfZCentre = getCentreSlice();
+
+			// Select the z-centre
+			psfOut[0].setSlice(psfZCentre);
+			psfOut[0].resetDisplayRange();
+			psfOut[0].updateAndDraw();
+
+			// Mark projections
+			// X-projection
+			psfOut[1].setRoi(new Line(psfZCentre, 0, psfZCentre, psfOut[1].getHeight()));
+			// Y-projection
+			psfOut[2].setRoi(new Line(0, psfZCentre, psfOut[2].getWidth(), psfZCentre));
+		}
+
+		private void updatePSFCentre()
+		{
+			if (aquirePlotLock3())
+			{
+				// Run in a new thread to allow the GUI to continue updating
+				new Thread(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							// Continue while the parameter is changing
+							while (psfZCentre != getCentreSlice())
+							{
+								drawPSFCentre();
+								drawCentreOnIntensityPlot();
+							}
+						}
+						finally
+						{
+							// Ensure the running flag is reset
+							plotLock3 = false;
+						}
+					}
+				}).start();
+			}
+		}
 	}
 
 	private Roi createRoi(float x, float y, Color color)
@@ -3301,6 +3400,8 @@ public class PSFCreator implements PlugInFilter
 		gd.addSlider("z-centre_window", 0, 8, comWindow);
 		gd.addSlider("Projection_magnification", 1, 8, projectionMagnification);
 		gd.addSlider("Max_iterations", 1, 20, maxIterations);
+		if (interactiveMode)
+			gd.addCheckbox("Check_alignments", checkAlignments);
 		gd.addSlider("PSF_magnification", 1, 8, psfMagnification);
 
 		gd.showDialog();
@@ -3316,6 +3417,8 @@ public class PSFCreator implements PlugInFilter
 		comWindow = (int) gd.getNextNumber();
 		projectionMagnification = (int) gd.getNextNumber();
 		maxIterations = (int) gd.getNextNumber();
+		if (interactiveMode)
+			myCheckAlignments = checkAlignments = gd.getNextBoolean();
 		psfMagnification = (int) gd.getNextNumber();
 
 		// Check arguments
@@ -3834,7 +3937,9 @@ public class PSFCreator implements PlugInFilter
 				}
 			}
 
-			background = getBackground(fval, rangex, rangey, analysisWindow);
+			int window = (int) Math.round(analysisWindow * magnification);
+			// Should the interpolated data be smoothed?
+			background = getBackground(fval, rangex, rangey, window);
 
 			// Convert to the format for the function
 			for (int z = 0; z < zval.length; z++)
@@ -3864,12 +3969,12 @@ public class PSFCreator implements PlugInFilter
 			TDoubleArrayList list = new TDoubleArrayList(image.length * magnification);
 			// The centre is a shift relative to the centre of the combined PSF in the 
 			// original scale
-			int cx = (int) Math.floor(centre.getZint());
+			int zint = (int) Math.floor(centre.getZ());
 			// The centre is relative to the combined stack so for interpolation
 			// just get an offset from the stack centre
-			double cz = (image.length - 1) / 2.0 + centre.getZ() - cx;
+			double cz = (image.length - 1) / 2.0 + centre.getZ() - zint;
 			// Set the relative centre after scaling
-			relativeCentre = cx * magnification;
+			relativeCentre = zint * magnification;
 			list.add(cz);
 			for (int i = 1;; i++)
 			{
@@ -4042,9 +4147,8 @@ public class PSFCreator implements PlugInFilter
 		 *
 		 * @return the centre of mass shift
 		 */
-		public double[] getCentreOfMassXYShift()
+		public double[] getCentreOfMassXYShift(int zCentre)
 		{
-			int zCentre = centre.getZint();
 			double[] shift = PSFCreator.getCentreOfMassXY(psf, maxx, maxy, zCentre, comWindow);
 			// Turn into a shift relative to the centre
 			int[] d = new int[] { maxx, maxy };
@@ -4147,7 +4251,7 @@ public class PSFCreator implements PlugInFilter
 	{
 		float dx = (float) shift[0];
 		float dy = (float) shift[1];
-		float dz = 0; 
+		float dz = 0;
 		Utils.log("Combined PSF has CoM shift %s,%s (%s)", rounder.toString(shift[0]), rounder.toString(shift[1]),
 				rounder.toString(shiftd));
 		for (int i = 0; i < centres.length; i++)
@@ -4155,5 +4259,54 @@ public class PSFCreator implements PlugInFilter
 			centres[i] = centres[i].shift(dx, dy, dz);
 		}
 		return centres;
+	}
+
+	/**
+	 * Normalise the slice from the PSF using the XY and Z weighting window. The background is subtracted from the data,
+	 * the window applied and then the result is normalised.
+	 *
+	 * @param data
+	 *            the data
+	 * @param z
+	 *            the z position of the PSF data
+	 * @param wx
+	 *            the XY weighting
+	 * @param wz
+	 *            the Z weighting
+	 * @param norm
+	 *            the normalisation factor
+	 * @param background
+	 *            the background
+	 */
+	private static void normalise(float[] data, int z, double[] wx, double[] wz, double norm, float background)
+	{
+		// Weight by the stack position 
+		double[] w;
+		if (wz[z] == 1)
+		{
+			w = wx;
+		}
+		else
+		{
+			w = wx.clone();
+			for (int i = 0; i < w.length; i++)
+				w[i] *= wz[z];
+		}
+
+		final int size = wx.length;
+		for (int y = 0, i = 0; y < size; y++)
+		{
+			double weight = w[y] * norm;
+			for (int x = 0; x < size; x++, i++)
+			{
+				// Subtract background
+				float f = (data[i] - background);
+				if (f <= 0)
+					data[i] = 0;
+				else
+					// Window function and normalise
+					data[i] = (float) (f * w[x] * weight);
+			}
+		}
 	}
 }
