@@ -1019,6 +1019,34 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * Gets the first result.
+	 *
+	 * @return the first result
+	 * @throws IllegalStateException
+	 *             If the size is zero
+	 */
+	public PeakResult getFirst()
+	{
+		if (isEmpty())
+			throw new IllegalStateException("Empty");
+		return getf(0);
+	}
+
+	/**
+	 * Gets the last result.
+	 *
+	 * @return the last result
+	 * @throws IllegalStateException
+	 *             If the size is zero
+	 */
+	public PeakResult getLast()
+	{
+		if (isEmpty())
+			throw new IllegalStateException("Empty");
+		return getf(size() - 1);
+	}
+	
+	/**
 	 * Gets the first frame.
 	 * <p>
 	 * This may be different from {@link #getMinFrame()} if the results are not sorted by frame.
