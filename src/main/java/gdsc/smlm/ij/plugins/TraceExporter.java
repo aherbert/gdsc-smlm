@@ -15,6 +15,7 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.ij.plugins.MultiDialog.MemoryResultsItems;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.AttributePeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
@@ -55,6 +56,7 @@ public class TraceExporter implements PlugIn
 	private static ArrayList<String> selected;
 	private static String directory = "";
 	private static int minLength = 2;
+	private static int maxJump = 1;
 
 	private static Comparator<PeakResult> comp;
 	private static String[] FORMAT_NAMES;
@@ -125,12 +127,15 @@ public class TraceExporter implements PlugIn
 		gd.addMessage("Export traces to a directory");
 		gd.addDirectoryField("Directory", directory, 30);
 		gd.addNumericField("Min_length", minLength, 0);
+		gd.addMessage("Specify the maximum jump allowed within a trace.\nTraces with larger jumps will be split.");
+		gd.addNumericField("Max_jump", maxJump, 0);
 		gd.addChoice("Format", FORMAT_NAMES, FORMAT_NAMES[format]);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
 		directory = gd.getNextString();
 		minLength = (int) Math.abs(gd.getNextNumber());
+		maxJump = (int) Math.abs(gd.getNextNumber());
 		format = gd.getNextChoiceIndex();
 		return true;
 	}
@@ -187,8 +192,12 @@ public class TraceExporter implements PlugIn
 		// Sort by ID then time
 		results.sort(comp);
 
+		// Split traces with big jumps
+		results = splitTraces(results);
+
 		// Count each ID and remove short traces
-		int count = 0, id = 0;
+		int id = 0;
+		int count = 0;
 		final TIntHashSet remove = new TIntHashSet();
 		for (int i = 0, size = results.size(); i < size; i++)
 		{
@@ -225,6 +234,56 @@ public class TraceExporter implements PlugIn
 		}
 	}
 
+	private MemoryPeakResults splitTraces(MemoryPeakResults results)
+	{
+		if (maxJump < 1)
+			// Disabled
+			return results;
+
+		int id = 0;
+		int lastT = 0;
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			PeakResult r = results.get(i);
+			if (r.getId() != id)
+			{
+				id = r.getId();
+			}
+			else if (r.getFrame() - lastT > maxJump)
+			{
+				return doSplit(results);
+			}
+		}
+		return results;
+	}
+
+	private MemoryPeakResults doSplit(MemoryPeakResults results)
+	{
+		MemoryPeakResults results2 = new MemoryPeakResults(results.size());
+		results2.copySettings(results);
+		int nextId = results.getLast().getId();
+		int id = 0, idOut = 0;
+		int lastT = 0;
+		for (int i = 0, size = results.size(); i < size; i++)
+		{
+			PeakResult r = results.get(i);
+			if (r.getId() != id)
+			{
+				id = r.getId();
+				idOut = id;
+			}
+			else if (r.getFrame() - lastT > maxJump)
+			{
+				idOut = ++nextId;
+			}
+			AttributePeakResult r2 = new AttributePeakResult(r);
+			r2.setId(idOut);
+			results2.add(r2);
+			lastT = r.getEndFrame();
+		}
+		return results2;
+	}
+
 	private void exportSpotOn(MemoryPeakResults results)
 	{
 		// Simple Spot-On CSV file format:
@@ -250,16 +309,38 @@ public class TraceExporter implements PlugIn
 				{
 					try
 					{
-						writer.write(Integer.toString(result.getFrame()));
-						writer.write(",");
-						writer.write(Float.toString(converter.convert(result.getFrame())));
-						writer.write(",");
-						writer.write(Integer.toString(result.getId()));
-						writer.write(",");
-						writer.write(Float.toString(x));
-						writer.write(",");
-						writer.write(Float.toString(y));
-						writer.newLine();
+						if (result.hasEndFrame())
+						{
+							String sId = Integer.toString(result.getId());
+							String sx = Float.toString(x);
+							String sy = Float.toString(y);
+							for (int t = result.getFrame(); t <= result.getEndFrame(); t++)
+							{
+								writer.write(Integer.toString(t));
+								writer.write(",");
+								writer.write(Float.toString(converter.convert(t)));
+								writer.write(",");
+								writer.write(sId);
+								writer.write(",");
+								writer.write(sx);
+								writer.write(",");
+								writer.write(sy);
+								writer.newLine();
+							}
+						}
+						else
+						{
+							writer.write(Integer.toString(result.getFrame()));
+							writer.write(",");
+							writer.write(Float.toString(converter.convert(result.getFrame())));
+							writer.write(",");
+							writer.write(Integer.toString(result.getId()));
+							writer.write(",");
+							writer.write(Float.toString(x));
+							writer.write(",");
+							writer.write(Float.toString(y));
+							writer.newLine();
+						}
 					}
 					catch (IOException e)
 					{
