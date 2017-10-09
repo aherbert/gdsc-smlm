@@ -236,4 +236,24 @@ public class AttributePeakResult extends PeakResult
 	{
 		super(x, y, intensity);
 	}
+
+	/**
+	 * Instantiates a new attribute peak result copying all the attributes from the result.
+	 * This is a deep copy of all the result data.
+	 *
+	 * @param peakResult
+	 *            the peak result
+	 */
+	public AttributePeakResult(PeakResult peakResult)
+	{
+		super(peakResult.getFrame(), peakResult.origX, peakResult.origY, peakResult.origValue, peakResult.error,
+				peakResult.noise, peakResult.params.clone(),
+				(peakResult.paramStdDevs == null) ? null : peakResult.paramStdDevs.clone());
+		if (peakResult.hasId())
+			setId(peakResult.getId());
+		if (peakResult.hasEndFrame())
+			setEndFrame(peakResult.getEndFrame());
+		if (peakResult.hasPrecision())
+			setPrecision(peakResult.getPrecision());
+	}
 }
