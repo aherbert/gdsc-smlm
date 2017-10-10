@@ -1,6 +1,11 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.AWTEvent;
 import java.awt.Color;
+import java.awt.Label;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,6 +22,7 @@ import org.apache.commons.math3.random.Well19937c;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
@@ -52,8 +58,11 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.WindowManager;
+import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
+import ij.gui.Line;
+import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
@@ -1152,8 +1161,10 @@ public class PSFDrift implements PlugIn
 			sw1 = loess.smooth(slice1, sw1);
 		}
 
-		int newCentre = 0;
-		double minW = Double.POSITIVE_INFINITY;
+		//int newCentre = 0;
+		//double minW = Double.POSITIVE_INFINITY;
+		TDoubleArrayList minWX = new TDoubleArrayList();
+		TDoubleArrayList minWY = new TDoubleArrayList();
 		for (int i = 0; i < w0.length; i++)
 		{
 			double w = 0;
@@ -1173,14 +1184,24 @@ public class PSFDrift implements PlugIn
 				w = w1[i] * w1[i];
 			}
 
-			if (w != 0 && minW > w)
+			if (w != 0)
 			{
-				minW = w;
-				newCentre = i + 1;
+				minWX.add(i + 1);
+				minWY.add(Math.sqrt(w));
 			}
 		}
+
+		// Smooth the combined line
+		double[] cx = minWX.toArray();
+		double[] cy = minWY.toArray();
+		if (smoothing > 0)
+		{
+			LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
+			cy = loess.smooth(cx, cy);
+		}
+		final int newCentre = SimpleArrayUtils.findMinIndex(cy);
+
 		// Convert to FWHM
-		double newFWHM = 2 * Math.sqrt(minW);
 		double fwhm = psfSettings.getFwhm();
 
 		// Widths are in pixels
@@ -1194,45 +1215,103 @@ public class PSFDrift implements PlugIn
 		plot.addPoints(slice0, sw0, Plot.LINE);
 		plot.setColor(Color.blue);
 		plot.addPoints(slice1, sw1, Plot.LINE);
-		if (centre != 0)
-		{
-			plot.setColor(Color.MAGENTA);
-			plot.drawLine(centre, 0, centre, maxY);
-			if (centre != newCentre)
-				plot.drawDottedLine(newCentre, 0, newCentre, maxY, 2);
-		}
+		plot.setColor(Color.magenta);
+		plot.addPoints(cx, cy, Plot.LINE);
 		plot.setColor(Color.black);
-		plot.addLabel(0, 0, "X=red; Y=blue; Center=" + newCentre + "; FWHM=" + Utils.rounded(newFWHM));
-		Utils.display(title, plot);
+		plot.addLabel(0, 0, "X=red; Y=blue, Combined=Magenta");
+		PlotWindow pw = Utils.display(title, plot);
 
-		if (centre != newCentre || newFWHM != fwhm)
+		// Show a non-blocking dialog to allow the centre to be updated ...
+		// Add a label and dynamically update when the centre is moved.
+		NonBlockingExtendedGenericDialog gd2 = new NonBlockingExtendedGenericDialog(TITLE);
+		double scale = psfSettings.getPixelSize();
+		//@formatter:off
+		gd2.addMessage(String.format(
+				"Update the PSF information?\n \n" +
+				"Current z-centre = %d, FHWM = %s px (%s nm)\n",
+				centre, Utils.rounded(fwhm), Utils.rounded(fwhm * scale)));
+		//@formatter:on
+		gd2.addSlider("z-centre", 1, size, newCentre);
+		final TextField tf = gd2.getLastTextField();
+		gd2.addMessage("");
+		gd2.addAndGetButton("Reset", new ActionListener()
 		{
-			double scale = psfSettings.getPixelSize();
-			double sd = newFWHM / Gaussian2DFunction.SD_TO_FWHM_FACTOR;
-			gd = new GenericDialog(TITLE);
-			gd.addMessage(String.format(
-					"Update the centre to the point of the minimum width?\n \nCurrent = %d, FHWM = %s px (%s nm)\nNew = %d, FWHM = %s px (%s nm)\n \nGaussian Equivalent SD = %s px (%s nm)",
-					centre, Utils.rounded(fwhm), Utils.rounded(fwhm * scale), newCentre, Utils.rounded(newFWHM),
-					Utils.rounded(newFWHM * scale), Utils.rounded(sd), Utils.rounded(sd * scale)));
-			gd.addCheckbox("Update_centre", updateCentre);
-			gd.addCheckbox("Update_HWHM", updateHWHM);
-			gd.enableYesNoCancel();
-			gd.hideCancelButton();
-			gd.showDialog();
-			if (gd.wasOKed())
+			public void actionPerformed(ActionEvent e)
 			{
-				updateCentre = gd.getNextBoolean();
-				updateHWHM = gd.getNextBoolean();
-				if (updateCentre || updateHWHM)
-				{
-					ImagePSF.Builder b = psfSettings.toBuilder();
-					if (updateCentre)
-						b.setCentreImage(newCentre);
-					if (updateHWHM)
-						b.setFwhm(newFWHM);
-					imp.setProperty("Info", ImagePSFHelper.toString(b));
-				}
+				tf.setText(Integer.toString(newCentre));
 			}
+		});
+		Label label = gd2.getLastLabel();
+		gd2.addCheckbox("Update_centre", updateCentre);
+		gd2.addCheckbox("Update_HWHM", updateHWHM);
+		gd2.enableYesNoCancel();
+		gd2.hideCancelButton();
+		UpdateDialogListener dl = new UpdateDialogListener(cy, maxY, newCentre, scale, pw, label);
+		gd2.addDialogListener(dl);
+		gd2.showDialog();
+		if (gd2.wasOKed())
+		{
+			if (updateCentre || updateHWHM)
+			{
+				ImagePSF.Builder b = psfSettings.toBuilder();
+				if (updateCentre)
+					b.setCentreImage(dl.centre);
+				if (updateHWHM)
+					b.setFwhm(dl.getFWHM());
+				imp.setProperty("Info", ImagePSFHelper.toString(b));
+			}
+		}
+	}
+
+	private class UpdateDialogListener implements DialogListener
+	{
+		double[] cy;
+		double maxY;
+		int centre;
+		double scale;
+		PlotWindow pw;
+		Label label;
+		boolean drawing;
+
+		UpdateDialogListener(double[] cy, double maxY, int centre, double scale, PlotWindow pw, Label label)
+		{
+			this.cy = cy;
+			this.maxY = maxY;
+			this.centre = centre;
+			this.scale = scale;
+			this.pw = pw;
+			this.label = label;
+			drawing = Utils.isShowGenericDialog();
+			if (drawing)
+				update();
+		}
+
+		private void update()
+		{
+			double fwhm = getFWHM();
+			label.setText(String.format("FWHM = %s px (%s nm)", Utils.rounded(fwhm), Utils.rounded(fwhm * scale)));
+
+			Plot plot = pw.getPlot();
+
+			double x = plot.scaleXtoPxl(centre);
+			double min = plot.scaleYtoPxl(0);
+			double max = plot.scaleYtoPxl(maxY);
+
+			pw.getImagePlus().setRoi(new Line(x, min, x, max));
+		}
+
+		public double getFWHM()
+		{
+			return 2 * cy[centre];
+		}
+
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			centre = (int) gd.getNextNumber();
+			updateCentre = gd.getNextBoolean();
+			updateHWHM = gd.getNextBoolean();
+			update();
+			return true;
 		}
 	}
 }
