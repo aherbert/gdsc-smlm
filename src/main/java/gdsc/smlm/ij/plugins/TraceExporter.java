@@ -8,6 +8,9 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
+
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.UnitConverterFactory;
@@ -19,6 +22,7 @@ import gdsc.smlm.results.AttributePeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
+import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
@@ -57,6 +61,7 @@ public class TraceExporter implements PlugIn
 	private static String directory = "";
 	private static int minLength = 2;
 	private static int maxJump = 1;
+	private static double wobble = 0;
 
 	private static Comparator<PeakResult> comp;
 	private static String[] FORMAT_NAMES;
@@ -129,6 +134,8 @@ public class TraceExporter implements PlugIn
 		gd.addNumericField("Min_length", minLength, 0);
 		gd.addMessage("Specify the maximum jump allowed within a trace.\nTraces with larger jumps will be split.");
 		gd.addNumericField("Max_jump", maxJump, 0);
+		gd.addMessage("Specify localistion precision (wobble) to add");
+		gd.addNumericField("Wobble", wobble, 0, 6, "nm");
 		gd.addChoice("Format", FORMAT_NAMES, FORMAT_NAMES[format]);
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -136,6 +143,7 @@ public class TraceExporter implements PlugIn
 		directory = gd.getNextString();
 		minLength = (int) Math.abs(gd.getNextNumber());
 		maxJump = (int) Math.abs(gd.getNextNumber());
+		wobble = Math.abs(gd.getNextNumber());
 		format = gd.getNextChoiceIndex();
 		return true;
 	}
@@ -224,6 +232,26 @@ public class TraceExporter implements PlugIn
 				}
 			});
 			results.sort(comp);
+		}
+
+		if (wobble > 0)
+		{
+			// Just leave any exceptions to trickle up and kill the plugin
+			TypeConverter<DistanceUnit> c = results.getDistanceConverter(DistanceUnit.NM);
+			final double w = c.convertBack(wobble);
+			final RandomGenerator r = new Well19937c();
+			final boolean is3D = results.is3D();
+			results.forEach(new PeakResultProcedure()
+			{
+				public void execute(PeakResult peakResult)
+				{
+					peakResult.setXPosition((float) (peakResult.getXPosition() + w * r.nextGaussian()));
+					peakResult.setYPosition((float) (peakResult.getYPosition() + w * r.nextGaussian()));
+					if (is3D)
+						peakResult.setZPosition((float) (peakResult.getZPosition() + w * r.nextGaussian()));
+				}
+			});
+
 		}
 
 		switch (exportFormat)
