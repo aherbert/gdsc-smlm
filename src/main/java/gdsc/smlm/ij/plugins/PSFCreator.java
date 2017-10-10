@@ -28,6 +28,7 @@ import gdsc.core.data.FloatStackTrivalueProvider;
 import gdsc.core.data.procedures.FloatStackTrivalueProcedure;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.AlignImagesFFT;
 import gdsc.core.ij.AlignImagesFFT.SubPixelMethod;
 import gdsc.core.ij.AlignImagesFFT.WindowMethod;
@@ -49,12 +50,15 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
+import gdsc.smlm.data.config.UnitConverterFactory;
+import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitConfiguration;
@@ -78,8 +82,13 @@ import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.filters.BlockMeanFilter;
+import gdsc.smlm.function.Erf;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
+import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.model.camera.CameraModel;
+import gdsc.smlm.model.camera.FixedPixelCameraModel;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -87,6 +96,7 @@ import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.results.procedures.HeightResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.WidthResultProcedure;
+import gdsc.smlm.utils.Tensor2D;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
@@ -132,6 +142,9 @@ public class PSFCreator implements PlugInFilter
 	private final static String TITLE_WINDOW = "PSF Window Function";
 	private final static String TITLE_BACKGROUND = "PSF Background";
 	private final static String TITLE_FOREGROUND = "PSF Foreground";
+	private final static String TITLE_SIGNAL = "PSF Signal";
+	private final static String TITLE_HWHM = "PSF HWHM";
+	private final static String TITLE_ANGLE = "PSF Angle";
 	//private final static String TITLE_CONTRAST = "PSF Contrast";
 	private final static String TITLE_PSF = "PSF";
 	private final static String TITLE_SPOT_PSF = "Spot PSF";
@@ -154,8 +167,15 @@ public class PSFCreator implements PlugInFilter
 	private int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 	private ImagePlus imp, psfImp;
 
+	private static String[] PSF_TYPE = { "Spot", "Double Helix" };
+	private static int psfType = 0;
 	private static double nmPerPixel;
-	private static int bias = 0;
+	// For the camera calibration
+	private static CalibrationWriter calibration = new CalibrationWriter();
+	static
+	{
+		//calibration.setCameraType(CameraType.EMCCD);
+	}
 	private static double analysisWindow = 1; // Double as this is scaled by the current magnification
 	private static int comWindow = 2; // z-slices around the z centre
 	private static int projectionMagnification = 2;
@@ -2604,17 +2624,34 @@ public class PSFCreator implements PlugInFilter
 			return;
 		}
 
+		CameraModel cameraModel = null;
+		if (calibration.isSCMOS())
+		{
+			cameraModel = CameraModelManager.load(fitConfig.getCameraModelName());
+			if (cameraModel == null)
+			{
+				IJ.error(TITLE, "No camera model");
+				return;
+			}
+			cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(), 0, 0, true);
+		}
+		else
+		{
+			cameraModel = new FixedPixelCameraModel(calibration.getBias(), 1);
+		}
+
 		// Extract the image data for processing as float
 		float[][] image = CreateData.extractImageStack(imp, 0, imp.getStackSize() - 1);
+
 		for (float[] data : image)
-			SimpleArrayUtils.add(data, -bias);
+			cameraModel.removeBiasAndGain(data);
 
 		// Multi-thread for speed
 		if (threadPool == null)
 			threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
 
 		zSelector = new PSFCentreSelector();
-				
+
 		// Relocate the initial centres
 		centres = relocateCentres(image, centres);
 		if (centres == null)
@@ -2739,14 +2776,17 @@ public class PSFCreator implements PlugInFilter
 			// This is used to get the centre of mass for repositioning. 
 			zSelector.setPSF(combined);
 			zSelector.analyse();
-			zSelector.guessZCentreFromForeground();
+			// TODO - better automated z-centering using the type of PSF
+			// Have an input PSF type: spot / DH 
+			// Try and guess the centre using different methods
+			zSelector.guessZCentre();
 			if (interactiveMode)
 			{
 				double dz = zSelector.run(true, false, null);
 				if (dz < 0)
 					return;
-			}			
-			
+			}
+
 			// Compute CoM shift using the current z-centre and z-window
 			double[] shift = combined.getCentreOfMassXYShift(zSelector.getCentreSlice());
 			double shiftd = Math.sqrt(shift[0] * shift[0] + shift[1] * shift[1]);
@@ -2802,7 +2842,7 @@ public class PSFCreator implements PlugInFilter
 		zSelector.setPSF(combined);
 		zSelector.analyse();
 		//zSelector.zCentre = combined.psf.length / 2.0;
-		zSelector.guessZCentreFromForeground();
+		zSelector.guessZCentre();
 		double dz = zSelector.run(true, true, null);
 		if (dz < 0)
 			return;
@@ -2835,9 +2875,8 @@ public class PSFCreator implements PlugInFilter
 			if (z != cz)
 				normalise(psf[z], z, wx, wz, norm, zSelector.background);
 		}
-		
+
 		// TODO - Show a plot of the normalised intensity per frame.
-		
 
 		// Create a new extracted PSF and show
 		int magnification = combined.magnification;
@@ -2845,7 +2884,7 @@ public class PSFCreator implements PlugInFilter
 		combined.createProjections();
 		psfOut = combined.show(TITLE_PSF, zCentre);
 		psfImp = psfOut[0];
-		
+
 		// Add image info
 		int imageCount = centres.length;
 		ImagePSF.Builder imagePsf = ImagePSFHelper
@@ -2916,7 +2955,7 @@ public class PSFCreator implements PlugInFilter
 			// Create a PSF and select the z-centre
 			zSelector.setPSF(new ExtractedPSF(psf, bounds.width, bounds.height));
 			zSelector.analyse();
-			zSelector.guessZCentreFromForeground();
+			zSelector.guessZCentre();
 
 			if (interactiveMode)
 			{
@@ -2966,23 +3005,42 @@ public class PSFCreator implements PlugInFilter
 		return centres;
 	}
 
+	private static final TypeConverter<AngleUnit> angleConverter = UnitConverterFactory
+			.createConverter(AngleUnit.RADIAN, AngleUnit.DEGREE);
+
 	private class PSFCentreSelector implements DialogListener
 	{
+		// The concept of HWHM only applies to a PSF that is a peaked maxima.
+		// This may not be true for an image. To approximate this we assume that
+		// the peak is Gaussian and find the sum which equals the integral of 
+		// a Gaussian at HWHM = SD * 1.17741 (i.e. Gaussian2DFunction.SD_TO_FWHM_FACTOR)
+		final double integral = Erf.erf(Gaussian2DFunction.SD_TO_HWHM_FACTOR / Math.sqrt(2));
+
 		ExtractedPSF psf;
 		double zCentre;
 		Point location = null;
 
 		Smoother bsmoother = new Smoother();
 		Smoother fsmoother = new Smoother();
+		Smoother ssmoother = new Smoother();
+		Smoother w0smoother = new Smoother();
+		Smoother w1smoother = new Smoother();
+		Smoother asmoother = new Smoother();
 		float[][] limits;
 
 		float[] bdata;
 		float[] fdata;
-		int bIndex, fIndex;
+		float[] sdata;
+		double[] w0, w1, w01;
+		double[] adata;
+		int bIndex, fIndex, sIndex, wIndex, aIndex;
 		float background;
 		private Label backgroundLabel = null;
 
 		boolean plotBackground, plotEdgeWindow;
+
+		// We choose the angle with the first spot
+		double targetAngle = -360;
 
 		public PSFCentreSelector()
 		{
@@ -2998,11 +3056,6 @@ public class PSFCreator implements PlugInFilter
 			return (int) Math.round(analysisWindow * psf.magnification);
 		}
 
-		public PSFCentreSelector(ExtractedPSF psf)
-		{
-			setPSF(psf);
-		}
-
 		public void setPSF(ExtractedPSF psf)
 		{
 			this.psf = psf;
@@ -3011,10 +3064,12 @@ public class PSFCreator implements PlugInFilter
 			// Reset
 			bIndex = -1;
 			background = Float.NaN;
+			sdata = null;
 		}
 
 		public void analyse()
 		{
+			// These are window dependent
 			int window = getAnalysisWindow();
 			limits = getLimits(psf.psf, psf.maxx, psf.maxy, window);
 
@@ -3024,11 +3079,190 @@ public class PSFCreator implements PlugInFilter
 			bIndex = SimpleArrayUtils.findMinIndex(bdata);
 			fIndex = SimpleArrayUtils.findMaxIndex(fdata);
 			background = bdata[bIndex];
+
+			if (sdata == null)
+			{
+				int maxx = psf.maxx;
+				int maxy = psf.maxy;
+				int maxz = psf.psf.length;
+
+				// These can be computed once per PSF
+				sdata = new float[maxz];
+				for (int z = 0; z < maxz; z++)
+					sdata[z] = (float) Maths.sum(psf.psf[z]);
+				ssmoother.smooth(sdata);
+				sIndex = SimpleArrayUtils.findMaxIndex(ssmoother.getDSmooth());
+
+				if (psfType == 1)
+				{
+					// DoubleHelix - get rotation of moment of inertia
+					adata = new double[maxz];
+					double lastA = 0;
+					for (int z = 0; z < maxz; z++)
+					{
+						Tensor2D t = new Tensor2D(psf.psf[z], maxx, maxy);
+						double[][] v = t.getEigenVectors();
+						// Q. Which vector to use, small or big Eigen value?
+						double a1 = Math.atan2(v[1][1], v[1][0]);
+						double a2 = Math.atan2(-v[1][1], -v[1][0]);
+						// Closest to last angle
+						double d1 = a1 - lastA;
+						d1 += (d1 > Math.PI) ? -2 * Math.PI : (d1 < -Math.PI) ? 2 * Math.PI : 0;
+						double d2 = a2 - lastA;
+						d2 += (d2 > Math.PI) ? -2 * Math.PI : (d2 < -Math.PI) ? 2 * Math.PI : 0;
+						double a = (Math.abs(d1) < Math.abs(d2)) ? a1 : a2;
+						lastA = a;
+						adata[z] = angleConverter.convert(a);
+					}
+					asmoother.smooth(adata);
+					if (targetAngle == -360)
+					{
+						// Closest to the index which is our best guess at the z-centre
+						// Use total signal for now. Assumes the helix loses light as it 
+						// moves out of focus.
+						double[] data = asmoother.getDSmooth();
+						int best = data.length;
+						for (int angle = -180; angle <= 180; angle += 15)
+						{
+							int i = findIndex(data, sIndex, angle);
+							int d = Math.abs(i - sIndex);
+							if (d < best)
+							{
+								aIndex = i;
+								best = d;
+								targetAngle = angle;
+							}
+						}
+					}
+					else
+					{
+						aIndex = findIndex(asmoother.getDSmooth(), sIndex, targetAngle);
+					}
+				}
+				else
+				{
+					// Spot - get FWHM of the X and Y sum projections
+					w0 = new double[maxz];
+					w1 = new double[maxz];
+					double[] xp = new double[maxy];
+					double[] yp = new double[maxx];
+					for (int z = 0; z < maxz; z++)
+					{
+						float[] data = psf.psf[z];
+						// Ensure the sum is positive
+						float min = Maths.min(data);
+						double min_by_x = min * maxx;
+						double min_by_y = min * maxy;
+						// rolling sums for each column/row
+						double sr = 0, sc = 0;
+						for (int x = 0; x < maxx; x++)
+						{
+							for (int y = 0, i = x; y < maxy; y++, i += maxx)
+								sc += data[i];
+							sc -= min_by_y;
+							xp[x] = sc;
+						}
+						for (int y = 0, i = 0; y < maxy; y++)
+						{
+							for (int x = 0; x < maxx; x++, i++)
+								sr += data[i];
+							sr -= min_by_x;
+							yp[y] = sr;
+						}
+						// Find centre
+						w0[z] = hwhm(yp);
+						w1[z] = hwhm(xp);
+					}
+					w0smoother.smooth(w0);
+					w1smoother.smooth(w1);
+					// Find min combined
+					w01 = new double[maxz];
+					for (int z = 0; z < maxz; z++)
+					{
+						w01[z] = Math.sqrt(w0[z] * w1[z]);
+					}
+					w01 = new Smoother().smooth(w01).getDSmooth();
+					wIndex = SimpleArrayUtils.findMinIndex(w01);
+				}
+			}
 		}
 
-		public void guessZCentreFromForeground()
+		private int findIndex(double[] data, int start, double target)
 		{
-			zCentre = fIndex;
+			// Slide along looking for minimim to the target
+			int min = 0;
+			int minD = data.length;
+
+			// Sliding window of 3
+			double d0;
+			double d1 = Math.abs(data[0] - target);
+			double d2 = Math.abs(data[1] - target);
+			for (int i = 2; i < data.length; i++)
+			{
+				d0 = d1;
+				d1 = d2;
+				d2 = Math.abs(data[i] - target);
+				// Check for a minimum
+				if (d1 < d0 && d1 < d2)
+				{
+					int d = Math.abs(start - (i - 1));
+					if (d < minD)
+					{
+						min = i - 1;
+						minD = d;
+					}
+				}
+			}
+			return min;
+		}
+
+		private double hwhm(double[] xp)
+		{
+			int upper = xp.length - 1;
+			int lx = Arrays.binarySearch(xp, xp[upper] / 2);
+			if (lx < 0)
+				lx = -(lx + 1);
+			int ux = lx + 1;
+			if (ux > upper)
+				ux = upper;
+			double target = integral * xp[upper];
+			double s = xp[ux] - xp[lx];
+			double lastS = s;
+			// Work outwards from the centre
+			while (s < target)
+			{
+				lastS = s;
+				lx--;
+				if (lx < 0)
+					lx = 0;
+				ux++;
+				if (ux > upper)
+					ux = upper;
+				s = xp[ux] - xp[lx];
+			}
+			if (lastS != s)
+			{
+				double fraction = (target - s) / (lastS - s);
+				return ((ux - lx) / 2 - fraction);
+			}
+			return (ux - lx) / 2;
+		}
+
+		public void guessZCentre()
+		{
+			if (psfType == 1)
+			{
+				// DoubleHelix
+				// Use foreground
+				//zCentre = fIndex;
+				// Use angle
+				zCentre = aIndex;
+			}
+			else
+			{
+				// Use min width
+				zCentre = wIndex;
+			}
 		}
 
 		public double run(boolean plotBackground, boolean plotEdgeWindow, String id)
@@ -3099,7 +3333,7 @@ public class PSFCreator implements PlugInFilter
 			if (plotEdgeWindow)
 				drawEdgeWindowPlot();
 			if (plotBackground)
-				drawIntensityPlot();
+				drawIntensityPlot(true);
 			drawPSFCentre();
 		}
 
@@ -3182,10 +3416,10 @@ public class PSFCreator implements PlugInFilter
 		}
 
 		private int plotBackgroundWindow = -1;
-		private PlotWindow pwBackground, pwForeground;
-		private float[] rangeB, rangeF;
+		private PlotWindow pwBackground, pwForeground, pwSignal, pwWidth, pwAngle;
+		private float[] rangeB, rangeF, rangeS, rangeW, rangeA;
 
-		private void drawIntensityPlot()
+		private void drawIntensityPlot(boolean newData)
 		{
 			plotBackgroundWindow = getAnalysisWindow();
 
@@ -3220,6 +3454,64 @@ public class PSFCreator implements PlugInFilter
 			if (Utils.isNewWindow())
 				wo.add(pwForeground);
 
+			plot = new Plot(TITLE_SIGNAL, "Slice", "Signal");
+			rangeS = Maths.limits(sdata);
+			plot.setLimits(1, length, rangeS[0], rangeS[1]);
+			plot.setColor(Color.blue);
+			plot.addPoints(slice, ssmoother.getDSmooth(), Plot.LINE);
+			plot.setColor(Color.black);
+			plot.addPoints(slice, SimpleArrayUtils.toDouble(sdata), Plot.LINE);
+			String msgS = "Signal = " + Utils.rounded(sdata[sIndex]);
+			plot.addLabel(0, 0, msgS);
+			pwSignal = Utils.display(TITLE_SIGNAL, plot);
+			if (Utils.isNewWindow())
+				wo.add(pwSignal);
+
+			if (newData)
+			{
+				if (psfType == 1)
+				{
+					// Double-Helix
+					plot = new Plot(TITLE_ANGLE, "Slice", "Angle");
+					double[] range = Maths.limits(adata);
+					rangeA = SimpleArrayUtils.toFloat(range);
+					plot.setLimits(1, length, range[0], range[1]);
+					plot.setColor(Color.blue);
+					plot.addPoints(slice, asmoother.getDSmooth(), Plot.LINE);
+					plot.setColor(Color.black);
+					plot.addPoints(slice, adata, Plot.LINE);
+					String msgA = "Angle = " + Utils.rounded(asmoother.getDSmooth()[aIndex]);
+					plot.addLabel(0, 0, msgA);
+					pwAngle = Utils.display(TITLE_ANGLE, plot);
+					if (Utils.isNewWindow())
+						wo.add(pwAngle);
+				}
+				else
+				{
+					// Spot
+					plot = new Plot(TITLE_HWHM, "Slice", "Width");
+					double max = Maths.maxDefault(Maths.max(w0), w1);
+					rangeW = new float[] { 0, (float) max };
+					plot.setLimits(1, length, rangeW[0], rangeW[1]);
+					plot.setColor(Color.blue);
+					plot.addPoints(slice, w0smoother.getDSmooth(), Plot.LINE);
+					plot.setColor(Color.blue.darker());
+					plot.addPoints(slice, w0, Plot.LINE);
+					plot.setColor(Color.red);
+					plot.addPoints(slice, w1smoother.getDSmooth(), Plot.LINE);
+					plot.setColor(Color.red.darker());
+					plot.addPoints(slice, w1, Plot.LINE);
+					plot.setColor(Color.magenta);
+					plot.addPoints(slice, w01, Plot.LINE);
+					plot.setColor(Color.black);
+					String msgW = "Width = " + Utils.rounded(w01[wIndex]);
+					plot.addLabel(0, 0, msgW);
+					pwWidth = Utils.display(TITLE_HWHM, plot);
+					if (Utils.isNewWindow())
+						wo.add(pwWidth);
+				}
+			}
+
 			wo.tile();
 
 			drawCentreOnIntensityPlot();
@@ -3235,7 +3527,7 @@ public class PSFCreator implements PlugInFilter
 
 			if (backgroundLabel != null)
 			{
-				backgroundLabel.setText(msgB + ", " + msgF);
+				backgroundLabel.setText(msgB + ", " + msgS);
 			}
 		}
 
@@ -3243,6 +3535,9 @@ public class PSFCreator implements PlugInFilter
 		{
 			drawCentreOnPlot(pwBackground, rangeB);
 			drawCentreOnPlot(pwForeground, rangeF);
+			drawCentreOnPlot(pwSignal, rangeS);
+			drawCentreOnPlot(pwWidth, rangeW);
+			drawCentreOnPlot(pwAngle, rangeA);
 		}
 
 		private void drawCentreOnPlot(PlotWindow pw, float[] rangeB)
@@ -3275,7 +3570,7 @@ public class PSFCreator implements PlugInFilter
 							while (plotBackgroundWindow != getAnalysisWindow())
 							{
 								analyse();
-								drawIntensityPlot();
+								drawIntensityPlot(false);
 							}
 						}
 						finally
@@ -3392,9 +3687,10 @@ public class PSFCreator implements PlugInFilter
 
 		gd.addMessage("Use X,Y,Z-projection alignment to create a combined PSF");
 
+		gd.addChoice("PSF_type", PSF_TYPE, psfType);
 		gd.addNumericField("nm_per_pixel", nmPerPixel, 2);
 		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
-		gd.addNumericField("Bias", bias, 0);
+		PeakFit.addCameraOptions(gd, PeakFit.FLAG_NO_GAIN, calibration);
 		gd.addSlider("Analysis_window", 0, 8, analysisWindow);
 		gd.addSlider("Smoothing", 0.1, 0.5, smoothing);
 		gd.addSlider("z-centre_window", 0, 8, comWindow);
@@ -3409,9 +3705,10 @@ public class PSFCreator implements PlugInFilter
 		if (gd.wasCanceled())
 			return false;
 
+		psfType = gd.getNextChoiceIndex();
 		nmPerPixel = gd.getNextNumber();
 		nmPerSlice = gd.getNextNumber();
-		bias = (int) gd.getNextNumber();
+		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		analysisWindow = (int) gd.getNextNumber();
 		smoothing = gd.getNextNumber();
 		comWindow = (int) gd.getNextNumber();
@@ -3421,12 +3718,15 @@ public class PSFCreator implements PlugInFilter
 			myCheckAlignments = checkAlignments = gd.getNextBoolean();
 		psfMagnification = (int) gd.getNextNumber();
 
+		gd.collectOptions();
+
 		// Check arguments
 		try
 		{
 			Parameters.isPositive("nm/pixel", nmPerPixel);
 			Parameters.isPositive("nm/slice", nmPerSlice);
-			Parameters.isAboveZero("Bias", bias);
+			if (!calibration.isSCMOS())
+				Parameters.isAboveZero("Bias", calibration.getBias());
 			Parameters.isEqualOrAbove("Projection magnification", projectionMagnification, 1);
 			Parameters.isEqualOrAbove("Max iterations", maxIterations, 1);
 			Parameters.isEqualOrAbove("PSF magnification", psfMagnification, 1);
