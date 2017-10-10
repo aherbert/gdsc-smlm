@@ -1108,6 +1108,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public static final int FLAG_READ_NOISE = 0x00000001;
 	/** Flag to indicate that quantum efficiency should be configured. */
 	public static final int FLAG_QUANTUM_EFFICIENCY = 0x00000002;
+	/** Flag to indicate that gain should not be configured. */
+	public static final int FLAG_NO_GAIN = 0x00000004;
 
 	/**
 	 * Adds the camera options.
@@ -1142,7 +1144,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 						if (calibration.isCCDCamera())
 						{
 							egd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
-							egd.addNumericField("Gain", calibration.getCountPerPhoton(), 4, 6, "Count/photon");
+							if (BitFlags.anyNotSet(options, FLAG_NO_GAIN))
+								egd.addNumericField("Gain", calibration.getCountPerPhoton(), 4, 6, "Count/photon");
 							if (BitFlags.areSet(options, FLAG_READ_NOISE))
 								egd.addNumericField("Read_noise", calibration.getReadNoise(), 4, 6, "Count");
 							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
@@ -1170,7 +1173,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 						if (calibration.isCCDCamera())
 						{
 							calibration.setBias(Math.abs(egd.getNextNumber()));
-							calibration.setCountPerPhoton(Math.abs(egd.getNextNumber()));
+							if (BitFlags.anyNotSet(options, FLAG_NO_GAIN))
+								calibration.setCountPerPhoton(Math.abs(egd.getNextNumber()));
 							if (BitFlags.areSet(options, FLAG_READ_NOISE))
 								calibration.setReadNoise(Math.abs(egd.getNextNumber()));
 							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
