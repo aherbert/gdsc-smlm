@@ -152,7 +152,11 @@ public class PSFCreator implements PlugInFilter
 	private final static String TITLE_SPOT_PSF = "Spot PSF";
 
 	private final static String[] MODE = { "Projection", "Gaussian Fitting" };
-	private static String[] PSF_TYPE = { "Spot", "Double Helix" };
+	private static String[] PSF_TYPE = { "Spot", "Astigmatism", "Double Helix" };
+	@SuppressWarnings("unused")
+	private static final int PSF_TYPE_SPOT = 0;
+	private static final int PSF_TYPE_ASTIGMATISM = 1;
+	private static final int PSF_TYPE_DH = 2;
 
 	private PSFCreatorSettings.Builder settings;
 
@@ -3119,7 +3123,7 @@ public class PSFCreator implements PlugInFilter
 				ssmoother.smooth(sdata);
 				sIndex = SimpleArrayUtils.findMaxIndex(ssmoother.getDSmooth());
 
-				if (settings.getPsfType() == 1)
+				if (settings.getPsfType() == PSF_TYPE_DH)
 				{
 					// DoubleHelix - get rotation of moment of inertia.
 					// Since we are interested in seeing the change in angle we track that
@@ -3310,13 +3314,44 @@ public class PSFCreator implements PlugInFilter
 
 		public void guessZCentre()
 		{
-			if (settings.getPsfType() == 1)
+			if (settings.getPsfType() == PSF_TYPE_DH)
 			{
 				// DoubleHelix
 				// Use foreground
 				//zCentre = fIndex;
 				// Use angle
 				zCentre = aIndex;
+			}
+			else if (settings.getPsfType() == PSF_TYPE_ASTIGMATISM)
+			{
+				// Use intersection between widths ...
+				// Use closest to min width
+				zCentre = wIndex;
+
+				// Use the smoothed data
+				double[] w0 = w0smoother.getDSmooth();
+				double[] w1 = w1smoother.getDSmooth();
+				
+				int mind = w0.length;
+
+				for (int i = 1; i < w0.length; i++)
+				{
+					final double y1 = w0[i - 1];
+					final double y2 = w0[i];
+					final double y3 = w1[i - 1];
+					final double y4 = w1[i];
+
+					// Check if they cross
+					if (!((y3 >= y1 && y4 < y2) || (y1 >= y3 && y2 < y4)))
+						continue;
+
+					int d = Math.abs(i - wIndex);
+					if (mind > d)
+					{
+						mind = d;
+						zCentre = i;
+					}
+				}
 			}
 			else
 			{
@@ -3532,7 +3567,7 @@ public class PSFCreator implements PlugInFilter
 
 			if (newData)
 			{
-				if (settings.getPsfType() == 1)
+				if (settings.getPsfType() == PSF_TYPE_DH)
 				{
 					// Double-Helix
 					plot = new Plot(TITLE_ANGLE, "Slice", "Angle");
