@@ -167,6 +167,8 @@ public class PSFCreator implements PlugInFilter
 	private int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 	private ImagePlus imp, psfImp;
 
+	// TODO - Move the projection settings to a Proto object so they are saved
+
 	private static String[] PSF_TYPE = { "Spot", "Double Helix" };
 	private static int psfType = 0;
 	private static double nmPerPixel;
@@ -3032,7 +3034,7 @@ public class PSFCreator implements PlugInFilter
 		float[] fdata;
 		float[] sdata;
 		double[] w0, w1, w01;
-		double[] adata;
+		double[] adata, asdata;
 		int bIndex, fIndex, sIndex, wIndex, aIndex;
 		float background;
 		private Label backgroundLabel = null;
@@ -3095,34 +3097,68 @@ public class PSFCreator implements PlugInFilter
 
 				if (psfType == 1)
 				{
-					// DoubleHelix - get rotation of moment of inertia
+					// DoubleHelix - get rotation of moment of inertia.
+					// Since we are interested in seeing the change in angle we track that
+					// to avoid problems with wrapping the angle in the circle.
 					adata = new double[maxz];
-					double lastA = 0;
+					double lastA = 180;
+					double origin = 0;
 					for (int z = 0; z < maxz; z++)
 					{
 						Tensor2D t = new Tensor2D(psf.psf[z], maxx, maxy);
 						double[][] v = t.getEigenVectors();
 						// Q. Which vector to use, small or big Eigen value?
-						double a1 = Math.atan2(v[1][1], v[1][0]);
-						double a2 = Math.atan2(-v[1][1], -v[1][0]);
-						// Closest to last angle
-						double d1 = a1 - lastA;
-						d1 += (d1 > Math.PI) ? -2 * Math.PI : (d1 < -Math.PI) ? 2 * Math.PI : 0;
-						double d2 = a2 - lastA;
-						d2 += (d2 > Math.PI) ? -2 * Math.PI : (d2 < -Math.PI) ? 2 * Math.PI : 0;
-						double a = (Math.abs(d1) < Math.abs(d2)) ? a1 : a2;
+						// Since they are orthogonal it does not matter.
+						// Use arc tan to get the result in the domain -pi to pi
+						double a = angleConverter.convert(Math.atan2(v[1][1], v[1][0]));
+						double d = a - lastA;
+						d += (d > 180.0) ? -360.0 : (d < -180.0) ? 360.0 : 0;
+						
+						// We can adjust to the opposite direction to get closer
+						if (d > 90.0)
+						{
+							d -= 180.0;
+							a -= 180.0;
+						}
+						else if (d < -90.0)
+						{
+							d += 180.0;
+							a += 180.0;
+						}
+						
 						lastA = a;
-						adata[z] = angleConverter.convert(a);
+						adata[z] = d;
+						
+						if (z == 0)
+						{
+							origin = lastA;
+							adata[z] = 0;
+						}
 					}
-					asmoother.smooth(adata);
+					// Reconstruct the angle from the deltas. 
+					// The angle now may be outside the domain -180 to 180
+					adata[0] = origin;
+					for (int z = 1; z < maxz; z++)
+					{
+						adata[z] += adata[z - 1];
+					}
+					asdata = asmoother.smooth(adata).getDSmooth().clone();
+					// Convert smoothed to the domain 0 to 180 for finding the centre
+					// (We do not care about the direction so we discard the full 0 - 360 domain) 
+					for (int z = 0; z < maxz; z++)
+					{
+						asdata[z] = asdata[z] % 180;
+						if (asdata[z] < 0)
+							asdata[z] += 180;
+					}
 					if (targetAngle == -360)
 					{
 						// Closest to the index which is our best guess at the z-centre
 						// Use total signal for now. Assumes the helix loses light as it 
 						// moves out of focus.
-						double[] data = asmoother.getDSmooth();
+						double[] data = asdata;
 						int best = data.length;
-						for (int angle = -180; angle <= 180; angle += 15)
+						for (int angle = 0; angle < 180; angle += 15)
 						{
 							int i = findIndex(data, sIndex, angle);
 							int d = Math.abs(i - sIndex);
@@ -3136,7 +3172,7 @@ public class PSFCreator implements PlugInFilter
 					}
 					else
 					{
-						aIndex = findIndex(asmoother.getDSmooth(), sIndex, targetAngle);
+						aIndex = findIndex(asdata, sIndex, targetAngle);
 					}
 				}
 				else
@@ -3480,7 +3516,7 @@ public class PSFCreator implements PlugInFilter
 					plot.addPoints(slice, asmoother.getDSmooth(), Plot.LINE);
 					plot.setColor(Color.black);
 					plot.addPoints(slice, adata, Plot.LINE);
-					String msgA = "Angle = " + Utils.rounded(asmoother.getDSmooth()[aIndex]);
+					String msgA = "Angle = " + Utils.rounded(asdata[aIndex]);
 					plot.addLabel(0, 0, msgA);
 					pwAngle = Utils.display(TITLE_ANGLE, plot);
 					if (Utils.isNewWindow())
