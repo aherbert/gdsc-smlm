@@ -3331,11 +3331,23 @@ public class PSFCreator implements PlugInFilter
 				// Use the smoothed data
 				double[] w0 = w0smoother.getDSmooth();
 				double[] w1 = w1smoother.getDSmooth();
-				
-				int mind = w0.length;
+
+				double mind = w0.length;
 
 				for (int i = 1; i < w0.length; i++)
 				{
+					// http://en.wikipedia.org/wiki/Line-line_intersection
+					//
+					//     x1,y1            x4,y4      
+					//         **        ++ 
+					//           **    ++
+					//             **++ P(x,y)
+					//            ++ **
+					//          ++     **
+					//        ++         **
+					//    x3,y3            ** 
+					//                       x2,y2
+
 					final double y1 = w0[i - 1];
 					final double y2 = w0[i];
 					final double y3 = w1[i - 1];
@@ -3345,13 +3357,50 @@ public class PSFCreator implements PlugInFilter
 					if (!((y3 >= y1 && y4 < y2) || (y1 >= y3 && y2 < y4)))
 						continue;
 
-					int d = Math.abs(i - wIndex);
-					if (mind > d)
+					final double x1 = i - 1;
+					final double x2 = i;
+					final double x3 = x1;
+					final double x4 = x2;
+
+					final double x1_x2 = -1.0; //x1 - x2;
+					final double x3_x4 = -1.0; //x3 - x4;
+					final double y1_y2 = y1 - y2;
+					final double y3_y4 = y3 - y4;
+
+					// Check if lines are parallel
+					if (x1_x2 * y3_y4 - y1_y2 * x3_x4 == 0)
 					{
-						mind = d;
-						zCentre = i;
+						if (y1 == y3)
+						{
+							double d = Math.abs(x1 - wIndex);
+							if (mind > d)
+							{
+								mind = d;
+								zCentre = x1;
+							}
+						}
+					}
+					else
+					{
+						// Find intersection
+						double px = ((x1 * y2 - y1 * x2) * x3_x4 - x1_x2 * (x3 * y4 - y3 * x4)) /
+								(x1_x2 * y3_y4 - y1_y2 * x3_x4);
+
+						// Check if the intersection is within the two points
+						// Q. Is this necessary given the intersection check above?
+						if (px >= x1 && px < x2)
+						{
+							double d = Math.abs(px - wIndex);
+							if (mind > d)
+							{
+								mind = d;
+								zCentre = px;
+							}
+						}
 					}
 				}
+
+				zCentre = (int) Math.round(zCentre);
 			}
 			else
 			{
