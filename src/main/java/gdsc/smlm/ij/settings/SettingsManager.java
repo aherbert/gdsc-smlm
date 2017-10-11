@@ -41,6 +41,7 @@ import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
+import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import gdsc.smlm.data.config.GUIProtosHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
@@ -875,6 +876,18 @@ public class SettingsManager
 	public static NucleusMaskSettings readNucleusMaskSettings(int flags)
 	{
 		return new ConfigurationReader<NucleusMaskSettings>(GUIProtosHelper.defaultNucleusMaskSettings).read(flags);
+	}
+
+	/**
+	 * Read the PSFCreatorSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the PSFCreatorSettings
+	 */
+	public static PSFCreatorSettings readPSFCreatorSettings(int flags)
+	{
+		return new ConfigurationReader<PSFCreatorSettings>(GUIProtosHelper.defaultPSFCreatorSettings).read(flags);
 	}
 
 	/**

@@ -202,4 +202,31 @@ public class GUIProtosHelper
 		builder.setDiameter(2);
 		defaultNucleusMaskSettings = builder.build();
 	}
+	
+	/** The default PSFCreatorSettings */
+	public static final PSFCreatorSettings defaultPSFCreatorSettings;
+	static
+	{
+		PSFCreatorSettings.Builder builder = PSFCreatorSettings.newBuilder();
+		builder.setRadius(10);
+		builder.setAmplitudeFraction(0.2);
+		builder.setStartBackgroundFrames(5);
+		builder.setEndBackgroundFrames(5);
+		builder.setMagnification(10);
+		builder.setSmoothing(0.1);
+		builder.setCentreEachSlice(false);
+		builder.setComCutOff(5e-2);
+		builder.setInteractiveMode(false);
+		builder.setInterpolationMethod(2); // ImageProcessor.BICUBIC
+		builder.setPsfType(0);
+		builder.setAnalysisWindow(1);
+		builder.setComWindow(2);
+		builder.setProjectionMagnification(2);
+		builder.setMaxIterations(20);
+		builder.setCheckAlignments(false);
+		builder.setPsfMagnification(4);
+		builder.setWindow(3);
+		builder.setSmoothStackSignal(true);
+		defaultPSFCreatorSettings = builder.build();
+	}
 }
