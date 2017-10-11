@@ -83,7 +83,7 @@ public class Tensor3D
 			{
 				final double dy = y - cy;
 				final double dy2 = dy * dy;
-				double summ = 0; 
+				double summ = 0;
 				double summdx = 0;
 				double summdx2 = 0;
 				for (int x = 0; x < w; x++)
@@ -144,19 +144,19 @@ public class Tensor3D
 			eigenVectors[i] = decomp.getEigenVector(i).data;
 		}
 
-		// Sort
-		eigen_sort(eigenValues, eigenVectors);
+		sort3xN(eigenValues, eigenVectors);
 	}
 
 	/**
-	 * Vector sorting routine for 3x3 set of vectors
+	 * Vector sorting routine for 3xn set of vectors. On output the weights (and corresponding vectors) will be in
+	 * descending order.
 	 * 
 	 * @param w
 	 *            Vector weights
 	 * @param v
 	 *            Vectors
 	 */
-	private static void eigen_sort(double[] w, double[][] v)
+	private static void sort3xN(double[] w, double[][] v)
 	{
 		int k, j, i;
 		double p;
@@ -207,11 +207,11 @@ public class Tensor3D
 	{
 		return eigenValues != null;
 	}
-	
+
 	/**
 	 * Gets the eigen values. These are sorted from large to small.
 	 * <p>
-	 * Note: The minor moment of inertia will be around the longest axis of the object 
+	 * Note: The minor moment of inertia will be around the longest axis of the object
 	 *
 	 * @return the eigen values
 	 */
