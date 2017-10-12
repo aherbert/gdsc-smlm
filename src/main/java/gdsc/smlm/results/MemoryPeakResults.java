@@ -1210,7 +1210,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		PeakResultsHelper helper = new PeakResultsHelper(getCalibration(), getPSF());
 		helper.setIntensityUnit(intensityUnit);
 		helper.setDistanceUnit(distanceUnit);
-		helper.setAngleUnit(angleUnit);
+		if (PSFHelper.hasAngleParameters(getPSF()))
+				helper.setAngleUnit(angleUnit);
 		final Converter[] converters = helper.getConverters();
 
 		if (!helper.isCalibrationChanged())

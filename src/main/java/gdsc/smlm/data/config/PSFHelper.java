@@ -5,6 +5,7 @@ import java.util.List;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFOrBuilder;
 import gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.results.PeakResult;
 
@@ -371,5 +372,23 @@ public class PSFHelper
 			default:
 				return false;
 		}
+	}
+
+	/**
+	 * Checks for angle parameters.
+	 *
+	 * @param psf
+	 *            the psf
+	 * @return true, if successful
+	 */
+	public static boolean hasAngleParameters(PSFOrBuilder psf)
+	{
+		if (psf != null)
+		{
+			for (PSFParameter p : getParameters(psf))
+				if (p.getUnit() == PSFParameterUnit.ANGLE)
+					return true;
+		}
+		return false;
 	}
 }
