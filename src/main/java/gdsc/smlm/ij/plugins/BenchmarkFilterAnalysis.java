@@ -621,7 +621,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 								{
 									matched[id] = true;
 									// Depth is stored in the error field
-									depthFitStats.add(actual[j].error);
+									depthFitStats.add(actual[j].getZPosition());
 								}
 
 								// Accumulate for all possible matches						
@@ -2600,7 +2600,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					for (int i = 0; i < assignments.length; i++)
 					{
 						final CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
-						if (Math.abs(c.peak.error) <= range)
+						if (Math.abs(c.peak.getZPosition()) <= range)
 							tp += c.getScore();
 						d += c.d;
 						sf += c.getSignalFactor();
@@ -5447,7 +5447,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			for (int i = 0; i < assignments.length; i++)
 			{
 				final CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
-				depths2[count++] = c.peak.error;
+				depths2[count++] = c.peak.getZPosition();
 			}
 		}
 		depths2 = Arrays.copyOf(depths2, count);

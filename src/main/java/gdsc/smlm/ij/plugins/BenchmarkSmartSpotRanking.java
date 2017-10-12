@@ -363,7 +363,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			for (int i = 0; i < actual.length; i++)
 			{
 				PeakResultPoint p = (PeakResultPoint) actual[i];
-				zPosition[i] = p.peakResult.error;
+				zPosition[i] = p.peakResult.getZPosition();
 			}
 
 			RankResults results = new RankResults(spots, zPosition);

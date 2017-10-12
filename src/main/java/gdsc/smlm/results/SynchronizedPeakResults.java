@@ -43,8 +43,28 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults
 	}
 
 	/**
+	 * Creates a PeakResults object that is synchronized if not already a thread-safe instance.
+	 * <p>
+	 * The input is unchanged if already a thread-safe instance.
+	 *
+	 * @param peakResults
+	 *            the peak results
+	 * @return the peak results
+	 * @throws IllegalArgumentException
+	 *             if the results are null
+	 */
+	public static PeakResults create(PeakResults peakResults)
+	{
+		if (peakResults instanceof ThreadSafePeakResults)
+			return peakResults;
+		return new SynchronizedPeakResults(peakResults);
+	}
+
+	/**
 	 * Creates a PeakResults object that is synchronized if the thread count is above 1, otherwise the input results are
 	 * returned.
+	 * <p>
+	 * The input is unchanged if already a thread-safe instance.
 	 *
 	 * @param peakResults
 	 *            the peak results
@@ -56,7 +76,9 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults
 	 */
 	public static PeakResults create(PeakResults peakResults, int threadCount)
 	{
-		return (threadCount <= 1) ? peakResults : new SynchronizedPeakResults(peakResults);
+		if (threadCount <= 1 || peakResults instanceof ThreadSafePeakResults)
+			return peakResults;
+		return new SynchronizedPeakResults(peakResults);
 	}
 
 	//@formatter:off

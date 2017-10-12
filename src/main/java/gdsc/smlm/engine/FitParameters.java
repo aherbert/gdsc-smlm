@@ -54,7 +54,7 @@ public class FitParameters
 	 */
 	public Spot[] spots = null;
 	/**
-	 * The maximum candidate spot to fit. This should be equal to spots.lnegth or less. It is used when additional
+	 * The maximum candidate spot to fit. This should be equal to spots.length or less. It is used when additional
 	 * candidates have been added to the spots list that are neighbours of the primary spot candidates.
 	 */
 	public int maxCandidate;

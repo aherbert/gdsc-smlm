@@ -247,7 +247,7 @@ public class LoadLocalisations implements PlugIn
 			{
 				public void execute(PeakResult peak)
 				{
-					if (peak.error >= minz && peak.error <= maxz)
+					if (peak.getZPosition() >= minz && peak.getZPosition() <= maxz)
 						results2.add(peak);
 				}
 			});

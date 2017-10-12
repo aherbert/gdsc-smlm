@@ -425,8 +425,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		FitParameters params = job.getFitParameters();
 		this.endT = (params != null) ? params.endT : -1;
 
-		// TODO - Update this to support filtering using per pixel read noise as a weight as 
-		// per the Fast MLE method of Smith, et al (2010).
 		candidates = indentifySpots(job, width, height, params);
 
 		if (candidates.getSize() == 0)

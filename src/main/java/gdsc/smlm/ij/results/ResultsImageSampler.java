@@ -544,8 +544,7 @@ public class ResultsImageSampler
 					sb.append(position).append(' ');
 					sb.append(Utils.rounded(ox[i] * nmPerPixel)).append(' ');
 					sb.append(Utils.rounded(oy[i] * nmPerPixel)).append(' ');
-					// Z can be stored in the error field
-					sb.append(Utils.rounded(p.error * nmPerPixel)).append(' ');
+					sb.append(Utils.rounded(p.getZPosition() * nmPerPixel)).append(' ');
 					sb.append(Utils.rounded(p.getSignal())).append('\n');
 				}
 				PointRoi roi = new PointRoi(ox, oy, size);

@@ -80,6 +80,7 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResults;
+import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.CoordinateStoreFactory;
 import gdsc.smlm.results.filter.DirectFilter;
@@ -729,7 +730,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				for (int i = 0; i < actual.length; i++)
 				{
 					PeakResultPoint p = (PeakResultPoint) actual[i];
-					zPosition[i] = p.peakResult.error;
+					zPosition[i] = p.peakResult.getZPosition();
 				}
 
 				// Allow for doublets the predicted array
@@ -789,7 +790,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 									if (signalScore != null)
 									{
 										final PeakResultPoint p3 = (PeakResultPoint) actual[ii];
-										double sf = getSignalFactor(predicted.get(jj).result.getSignal(),
+										// Assume the simulation is in photons
+										double sf = getSignalFactor(predicted.get(jj).result.getPhotons(),
 												p3.peakResult.getSignal());
 										score *= signalScore.score(Math.abs(sf));
 
@@ -868,12 +870,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 									final double a = p3.peakResult.getSignal(); // Should be in photons
 									final double p = point.result.getPhotons();
 
-									match[matchCount++] = new FitMatch(point, d, p3.peakResult.error, p, a);
+									match[matchCount++] = new FitMatch(point, d, p3.peakResult.getZPosition(), p, a);
 								}
 								else
 								{
 									// This is a candidate that could not be fitted
-									match[matchCount++] = new CandidateMatch(point.i, d, p3.peakResult.error);
+									match[matchCount++] = new CandidateMatch(point.i, d, p3.peakResult.getZPosition());
 								}
 							}
 						}
@@ -1217,6 +1219,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitConfig.setReadNoise(simulationParameters.readNoise);
 			fitConfig.setBias(simulationParameters.bias);
 			fitConfig.setCameraType(simulationParameters.cameraType);
+			fitConfig.setCameraModel(CreateData.getCameraModel(simulationParameters));
 		}
 		if (!PeakFit.configureFitSolver(config, imp.getWidth(), imp.getHeight(),
 				(extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
@@ -1275,16 +1278,19 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		MemoryPeakResults peakResults = new MemoryPeakResults();
 		peakResults.copySettings(this.results);
 		peakResults.setName(TITLE);
+		config.configureOutputUnits();
+		peakResults.setCalibration(fitConfig.getCalibration());
 		MemoryPeakResults.addResults(peakResults);
-
+		
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
 		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
 		List<Worker> workers = new LinkedList<Worker>();
 		List<Thread> threads = new LinkedList<Thread>();
+		PeakResults syncResults = SynchronizedPeakResults.create(results, nThreads);
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, actualCoordinates, filterCandidates, peakResults);
+			Worker worker = new Worker(jobs, stack, actualCoordinates, filterCandidates, syncResults);
 			Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
@@ -1334,6 +1340,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		IJ.showStatus("Collecting results ...");
 
+		if (fitConfig.isFitCameraCounts())
+		{
+			// Convert to photons for consistency
+			results.convertToPreferredUnits();
+		}
+		
 		fitResultsId++;
 		fitResults = new TIntObjectHashMap<FilterCandidates>();
 		for (Worker w : workers)
@@ -1680,6 +1692,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			}
 		}
 
+		if (tp == 0)
+		{
+			IJ.error(TITLE, "No fit results matched the simulation actual results");
+			return;
+		}
+		
 		// Store data for computing correlation
 		double[] i1 = new double[depthStats.getN()];
 		double[] i2 = new double[i1.length];
