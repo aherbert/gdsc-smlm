@@ -326,10 +326,7 @@ public class MultiPathFilter implements Cloneable
 	}
 
 	/** The null fraction result store. */
-	private static NullFractionScoreStore nullFractionScoreStore = new NullFractionScoreStore();
-
-	/** The null fraction result store. */
-	private static NullCoordinateStore nullCoordinateStore = new NullCoordinateStore();
+	private static final NullFractionScoreStore nullFractionScoreStore = new NullFractionScoreStore();
 
 	/** The direct filter to apply to the results. */
 	final IDirectFilter filter;
@@ -1015,8 +1012,7 @@ public class MultiPathFilter implements Cloneable
 
 		if (store == null)
 			store = new SimpleSelectedResultStore(multiPathResults.getTotalCandidates());
-		if (coordinateStore == null)
-			coordinateStore = nullCoordinateStore;
+		coordinateStore = NullCoordinateStore.replaceIfNull(coordinateStore);
 
 		//		// Debugging the results that are scored
 		//		java.io.OutputStreamWriter out = null;
@@ -1662,8 +1658,7 @@ public class MultiPathFilter implements Cloneable
 		setup();
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
 
-		if (coordinateStore == null)
-			coordinateStore = nullCoordinateStore;
+		coordinateStore = NullCoordinateStore.replaceIfNull(coordinateStore);
 
 		final ArrayList<PreprocessedPeakResult> list = new ArrayList<PreprocessedPeakResult>(results.length);
 		for (int k = 0; k < results.length; k++)
@@ -2293,8 +2288,7 @@ public class MultiPathFilter implements Cloneable
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
 		if (scoreStore == null)
 			scoreStore = nullFractionScoreStore;
-		if (coordinateStore == null)
-			coordinateStore = nullCoordinateStore;
+		coordinateStore = NullCoordinateStore.replaceIfNull(coordinateStore);
 		final boolean save = allAssignments != null;
 
 		setup();

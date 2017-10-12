@@ -18,15 +18,28 @@ package gdsc.smlm.results.filter;
  */
 public class NullCoordinateStore implements CoordinateStore
 {
-	// Note: We have package level constructors so that the factory must be used to create an instance.
-
+	/** An instance to ignore calls to the CoordinateStore interface */
+	public static final NullCoordinateStore INSTANCE = new NullCoordinateStore();
+	
 	/**
 	 * Instantiates a new null coordinate store.
 	 */
-	NullCoordinateStore()
+	private NullCoordinateStore()
 	{
 	}
 
+	/**
+	 * Creates an instance if the argument is null, else return the argument.
+	 *
+	 * @param coordinateStore
+	 *            the coordinate store (may be null)
+	 * @return the coordinate store (not null)
+	 */
+	public static CoordinateStore replaceIfNull(CoordinateStore coordinateStore)
+	{
+		return (coordinateStore == null) ? INSTANCE : coordinateStore;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

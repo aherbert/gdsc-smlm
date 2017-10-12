@@ -62,7 +62,7 @@ public class CoordinateStoreFactory
 			double zResolution)
 	{
 		if (xyResolution < 0)
-			return new NullCoordinateStore();
+			return NullCoordinateStore.INSTANCE;
 
 		// This should be faster (for additions and block lookup) as it has a fixed block resolution of 1.
 		// However it may be slower if the distance is much lower than 1 and there are many points close 
