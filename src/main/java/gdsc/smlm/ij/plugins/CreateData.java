@@ -5310,6 +5310,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setSource(imageSource);
 
 		// Get the calibration
+		settings = SettingsManager.readCreateDataSettings(0).toBuilder();
+		
 		simulationParameters = showSimulationParametersDialog(imp, results);
 		if (simulationParameters != null)
 		{
@@ -5389,8 +5391,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (benchmarkAuto)
 		{
 			// Load directly from a results file. This is mainly to be used to load simulations 
-			// saved to memory then saved to file. This is because the z-depth must be in the 
-			// error field of the results.
+			// saved to memory then saved to file.
 			PeakResultsReader r = new PeakResultsReader(benchmarkFile);
 			MemoryPeakResults results = r.getResults();
 			if (results != null)
@@ -5402,7 +5403,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Load using a universal text file
 		LocalisationList localisations = LoadLocalisations.loadLocalisations(benchmarkFile);
-		if (localisations.isEmpty())
+		if (localisations == null || localisations.isEmpty())
 			return null;
 
 		return localisations.toPeakResults();
@@ -5502,7 +5503,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					public boolean collectOptions()
 					{
 						CameraType cameraType = settings.getCameraType();
-						boolean isCCD = cal.isCCD();
+						boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
 						if (isCCD)
 						{
