@@ -1145,6 +1145,7 @@ public class ImagePSFModel extends PSFModel
 			if (total == 0)
 			{
 				// No data in image
+				hwhm0[slice] = Double.NaN;
 				hwhm1[slice] = Double.NaN;
 				continue;
 			}
