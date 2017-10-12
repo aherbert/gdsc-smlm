@@ -53,7 +53,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
-		if (peak.getPhotons() < signal)
+		if (peak.getSignal() < signal)
 			return V_PHOTONS;
 		return 0;
 	}

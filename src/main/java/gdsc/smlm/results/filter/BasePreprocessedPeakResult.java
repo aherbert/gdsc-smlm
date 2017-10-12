@@ -31,7 +31,6 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private final int id;
 	private final int candidateId;
 	private final float signal;
-	private final float photons;
 	private final float snr;
 	private final float noise;
 	private final float sd;
@@ -67,10 +66,9 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * @param frame The frame
 	 * @param id the id
 	 * @param candidateId the candidate id
-	 * @param signal The signal
-	 * @param photons The signal calibrated as photons
+	 * @param signal The signal (in photons)
 	 * @param noise the noise estimate
-	 * @param b The background level
+	 * @param b The background level (in photons)
 	 * @param angle The angle of the fit
 	 * @param x The x-position
 	 * @param y The y-position
@@ -90,7 +88,6 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 			int id,
 			int candidateId,
 			double signal,
-			double photons,
 			double noise,
 			double b,
 			double angle,
@@ -113,7 +110,6 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		this.id = id;
 		this.candidateId = candidateId;
 		this.signal = (float) (signal);
-		this.photons = (float) (photons);
 		this.snr = (float) (signal / noise);
 		this.noise = (float) (noise);
 		this.sd = (float) (Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd));
@@ -163,11 +159,6 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	public float getSignal()
 	{
 		return signal;
-	}
-
-	public float getPhotons()
-	{
-		return photons;
 	}
 
 	public float getSNR()

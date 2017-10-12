@@ -52,17 +52,9 @@ public interface PreprocessedPeakResult
 	/**
 	 * Get the signal strength (i.e. the volume under the Gaussian peak, amplitude * 2 * pi * sx * sy)
 	 * 
-	 * @return The signal (non calibrated)
+	 * @return The signal (in photons)
 	 */
 	float getSignal();
-
-	/**
-	 * Get the signal strength (i.e. the volume under the Gaussian peak, amplitude * 2 * pi * sx * sy) calibrated to
-	 * photons
-	 * 
-	 * @return The signal in photons
-	 */
-	float getPhotons();
 
 	/**
 	 * Get the signal-to-noise ratio (SNR)
@@ -74,7 +66,7 @@ public interface PreprocessedPeakResult
 	/**
 	 * Get the background noise
 	 * 
-	 * @return The noise
+	 * @return The noise (in photons)
 	 */
 	float getNoise();
 

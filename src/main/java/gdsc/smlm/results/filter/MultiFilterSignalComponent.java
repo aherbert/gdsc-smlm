@@ -32,7 +32,7 @@ public class MultiFilterSignalComponent extends MultiFilterComponent
 	 */
 	public boolean fail(final PreprocessedPeakResult peak)
 	{
-		return peak.getPhotons() < this.signal;
+		return peak.getSignal() < this.signal;
 	}
 
 	/*

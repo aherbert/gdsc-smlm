@@ -791,7 +791,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 									{
 										final PeakResultPoint p3 = (PeakResultPoint) actual[ii];
 										// Assume the simulation is in photons
-										double sf = getSignalFactor(predicted.get(jj).result.getPhotons(),
+										double sf = getSignalFactor(predicted.get(jj).result.getSignal(),
 												p3.peakResult.getSignal());
 										score *= signalScore.score(Math.abs(sf));
 
@@ -868,7 +868,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 									// This is a fitted candidate
 
 									final double a = p3.peakResult.getSignal(); // Should be in photons
-									final double p = point.result.getPhotons();
+									final double p = point.result.getSignal();
 
 									match[matchCount++] = new FitMatch(point, d, p3.peakResult.getZPosition(), p, a);
 								}
@@ -1281,7 +1281,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		config.configureOutputUnits();
 		peakResults.setCalibration(fitConfig.getCalibration());
 		MemoryPeakResults.addResults(peakResults);
-		
+
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
 		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
@@ -1345,7 +1345,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			// Convert to photons for consistency
 			results.convertToPreferredUnits();
 		}
-		
+
 		fitResultsId++;
 		fitResults = new TIntObjectHashMap<FilterCandidates>();
 		for (Worker w : workers)
@@ -1697,7 +1697,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			IJ.error(TITLE, "No fit results matched the simulation actual results");
 			return;
 		}
-		
+
 		// Store data for computing correlation
 		double[] i1 = new double[depthStats.getN()];
 		double[] i2 = new double[i1.length];
@@ -1729,7 +1729,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			int frame = frames[i];
 			MultiPathFitResult[] multiPathFitResults = candidates[i].fitResult;
 			int totalCandidates = candidates[i].spots.length;
-			int nActual = actualCoordinates.get(frame).size();
+			ArrayList<Coordinate> list = actualCoordinates.get(frame);
+			int nActual = (list == null) ? 0 : list.size();
 			multiPathResults.add(new MultiPathFitResults(frame, multiPathFitResults, totalCandidates, nActual));
 		}
 		// Score the results and count the number returned
@@ -1746,9 +1747,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Filter with no filter
 		MultiPathFilter mpf = new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
 		FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults, Integer.MAX_VALUE,
-				this.results.size(), assignments, scoreStore,
-				CoordinateStoreFactory.create(0, 0, imp.getWidth(), imp.getHeight(), 
-						config.convertUsingHWHMax(config.getDuplicateDistanceParameter())));
+				this.results.size(), assignments, scoreStore, CoordinateStoreFactory.create(0, 0, imp.getWidth(),
+						imp.getHeight(), config.convertUsingHWHMax(config.getDuplicateDistanceParameter())));
 		double nPredicted = fractionResult.getTP() + fractionResult.getFP();
 
 		final double[][] matchScores = new double[set.size()][];

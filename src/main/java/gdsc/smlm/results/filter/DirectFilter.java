@@ -133,7 +133,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		StringBuilder sb = new StringBuilder();
 		//@formatter:off
 		if (areSet(flags, V_AMPLITUDE))	         append(sb, "Amplitude",        peak.getAmplitude());
-		if (areSet(flags, V_PHOTONS))            append(sb, "Photon",           peak.getPhotons());
+		if (areSet(flags, V_PHOTONS))            append(sb, "Signal",           peak.getSignal());
 		if (areSet(flags, V_SNR))                append(sb, "SNR",              peak.getSNR());
 		if (areSet(flags, V_NOISE))              append(sb, "Noise",            peak.getNoise());
 		if (areSet(flags, V_LOCATION_VARIANCE))  append(sb, "Precision",        Math.sqrt(peak.getLocationVariance()));
@@ -177,7 +177,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		StringBuilder sb = new StringBuilder();
 		//@formatter:off
 		if (areSet(flags, V_AMPLITUDE))	         append(sb, "Amplitude");
-		if (areSet(flags, V_PHOTONS))            append(sb, "Photon");
+		if (areSet(flags, V_PHOTONS))            append(sb, "Signal");
 		if (areSet(flags, V_SNR))                append(sb, "SNR");
 		if (areSet(flags, V_NOISE))              append(sb, "Noise");
 		if (areSet(flags, V_LOCATION_VARIANCE))  append(sb, "Precision");

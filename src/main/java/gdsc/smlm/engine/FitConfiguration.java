@@ -96,7 +96,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private boolean isTwoAxisGaussian2D;
 	private double nmPerPixel = 0;
 	private double gain = 0;
-	private double signalToPhotons, signalToCount;
+	private double signalToPhotons;
 	private boolean emCCD = false;
 	private double noise = 0;
 	private double minWidthFactor = 0.5;
@@ -339,12 +339,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (isFitCameraCounts())
 		{
 			signalToPhotons = 1.0 / gain;
-			signalToCount = 1;
 		}
 		else
 		{
 			signalToPhotons = 1;
-			signalToCount = gain;
 		}
 
 		updateSignalThreshold();
@@ -2070,11 +2068,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		public float getSignal()
 		{
-			return (float) (params[Gaussian2DFunction.SIGNAL + offset] * signalToCount);
-		}
-
-		public float getPhotons()
-		{
 			return (float) (params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons);
 		}
 
@@ -2389,8 +2382,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			float offsetx, float offsety)
 	{
 		final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
-		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL] * signalToCount;
-		final double photons = parameters[offset + Gaussian2DFunction.SIGNAL] * signalToPhotons;
+		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL] * signalToPhotons;
 		final double b = signalToPhotons *
 				((localBackground > 0) ? localBackground : parameters[Gaussian2DFunction.BACKGROUND]);
 		final double angle = parameters[offset + Gaussian2DFunction.ANGLE];
@@ -2420,7 +2412,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		// This uses the local fitted background to estimate the noise
 		final double noise = (b > 0) ? PeakResultHelper.localBackgroundToNoise(b, 1.0, this.emCCD) : this.noise;
-		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, noise, b, angle, x, y, z, x0, y0,
+		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, noise, b, angle, x, y, z, x0, y0,
 				xsd, ysd, xsd0, ysd0, variance, variance2, resultType);
 	}
 
@@ -2936,7 +2928,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return 0;
 
 		// Do filtering 
-		if (peak.getPhotons() < getMinPhotons())
+		if (peak.getSignal() < getMinPhotons())
 			return V_PHOTONS;
 		if (peak.getSNR() < getSignalStrength())
 			return V_SNR;
