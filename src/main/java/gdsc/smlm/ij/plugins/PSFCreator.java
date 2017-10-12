@@ -37,6 +37,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
+import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction.Size;
 import gdsc.core.math.interpolation.CustomTricubicInterpolator;
 import gdsc.core.math.interpolation.IndexedCubicSplinePosition;
 import gdsc.core.utils.DoubleData;
@@ -2854,6 +2855,12 @@ public class PSFCreator implements PlugInFilter
 		// Combine all
 		ExtractedPSF combined = combine(psfs);
 
+		// Show an interactive dialog for cropping the PSF
+		PSFCropSelector cropSelector = new PSFCropSelector(combined);
+		combined = cropSelector.run();
+		if (combined == null)
+			return;
+
 		// Enlarge the combined PSF
 		combined = combined.enlarge(settings.getPsfMagnification(), threadPool);
 
@@ -3404,8 +3411,12 @@ public class PSFCreator implements PlugInFilter
 			}
 			else
 			{
+				// Use foreground
+				zCentre = fIndex;
 				// Use min width
-				zCentre = wIndex;
+				// Note: The spot can move to a double ring Airy pattern which has no 
+				// width so this doesn't work if the depth-of-field is high
+				//zCentre = wIndex;
 			}
 		}
 
@@ -3789,6 +3800,155 @@ public class PSFCreator implements PlugInFilter
 					}
 				}).start();
 			}
+		}
+	}
+
+	private class PSFCropSelector implements DialogListener
+	{
+		ExtractedPSF psf;
+		Label label1, label2;
+		ImagePlus imp;
+
+		public PSFCropSelector(ExtractedPSF psf)
+		{
+			this.psf = psf;
+		}
+
+		public ExtractedPSF run()
+		{
+			// Show a dialog to collect processing options and 
+			// find background interactively
+			NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+			gd.addMessage("Crop the final PSF");
+			int size = psf.psf.length;
+			gd.addSlider("Slice", 1, size, size / 2);
+			// Take away 1 from the limits to avoid having dimensions 1 on an axis
+			gd.addSlider("Crop_border", 0, Math.min(psf.maxx, psf.maxy) / 2 - 1, settings.getCropBorder());
+			gd.addSlider("Crop_start", 0, size / 2 - 1, settings.getCropStart());
+			gd.addSlider("Crop_end", 0, size / 2 - 1, settings.getCropEnd());
+			gd.addCheckbox("Single_precision", settings.getSinglePrecision());
+			gd.addSlider("Derivative_order", 0, 2, settings.getDerivativeOrder());
+			gd.addSlider("PSF_magnification", 1, 8, settings.getPsfMagnification());
+
+			gd.addDialogListener(this);
+			if (Utils.isShowGenericDialog())
+			{
+				gd.addMessage("");
+				label1 = gd.getLastLabel();
+				gd.addMessage("");
+				label2 = gd.getLastLabel();
+				
+				// XXX - Get X and Y projections and use those to show crop start and end
+				// with a line ROI
+				// Maybe show an intensity profile too ...
+				
+				imp = psf.show(TITLE_PSF)[0];
+				drawLabel();
+			}
+			gd.showDialog(true);
+
+			if (gd.wasCanceled())
+				return null;
+			
+			// XXX - do the crop
+			return psf;
+		}
+
+		int cropBorder = -1;
+		int cropStart = -1;
+		int cropEnd = -1;
+		int psfMagnification;
+		boolean singlePrecision = false;
+		int order;
+
+		private void drawLabel()
+		{
+			cropBorder = settings.getCropBorder();
+			cropStart = settings.getCropStart();
+			cropEnd = settings.getCropEnd();
+			psfMagnification = settings.getPsfMagnification();
+			singlePrecision = settings.getSinglePrecision();
+			order = settings.getDerivativeOrder();
+
+			int[] dimensions = psf.getDimensions();
+			dimensions[0] -= 2 * cropBorder;
+			dimensions[1] -= 2 * cropBorder;
+			dimensions[2] -= (cropStart + cropEnd);
+
+			Size size = CustomTricubicInterpolatingFunction.estimateSize(dimensions);
+			long current = size.getMemoryFootprint(false, 0);
+			Size next = size.enlarge(psfMagnification);
+			long future = next.getMemoryFootprint(singlePrecision, order);
+			String currentS = Utils.rounded((double) (current / 1048576));
+			String futureS = Utils.rounded((double) (future / 1048576));
+			label1.setText(String.format("Size required for enlargment = %s MB", currentS));
+			label2.setText(String.format("Size for PSF cubic spline = %s MB", futureS));
+
+			// Draw ROI in the image
+			if (cropBorder > 0)
+			{
+				imp.setRoi(cropBorder, cropBorder, dimensions[0], dimensions[1]);
+			}
+			else
+			{
+				imp.killRoi();
+			}
+		}
+
+		private void updateLabel()
+		{
+			// Get the dimensions after the crop
+			if (aquirePlotLock1())
+			{
+				// Run in a new thread to allow the GUI to continue updating
+				new Thread(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							// Continue while the parameter is changing
+							//@formatter:off
+							while (cropBorder != settings.getCropBorder() || 
+									cropStart != settings.getCropStart() ||
+									cropEnd != settings.getCropEnd() ||
+									psfMagnification != settings.getPsfMagnification() ||
+									singlePrecision != settings.getSinglePrecision() ||
+									order != settings.getDerivativeOrder())
+							//@formatter:on
+							{
+								drawLabel();
+							}
+						}
+						finally
+						{
+							// Ensure the running flag is reset
+							plotLock1 = false;
+						}
+					}
+				}).start();
+			}
+		}
+
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			int slice = (int) gd.getNextNumber();
+			settings.setCropBorder((int) gd.getNextNumber());
+			settings.setCropStart((int) gd.getNextNumber());
+			settings.setCropEnd((int) gd.getNextNumber());
+			settings.setSinglePrecision(gd.getNextBoolean());
+			settings.setDerivativeOrder((int) gd.getNextNumber());
+			settings.setPsfMagnification((int) gd.getNextNumber());
+
+			if (imp.getSlice() != slice)
+			{
+				imp.setSlice(slice);
+				imp.resetDisplayRange();
+				imp.updateAndDraw();
+			}
+
+			updateLabel();
+			return true;
 		}
 	}
 
@@ -4703,6 +4863,11 @@ public class PSFCreator implements PlugInFilter
 					// z-centre is used relative to the original input image 
 					p.z.length / 2.0f / mag);
 			return new ExtractedPSF(p.value, p.x.length, newCentre, mag);
+		}
+
+		public int[] getDimensions()
+		{
+			return new int[] { maxx, maxy, psf.length };
 		}
 	}
 

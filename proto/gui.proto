@@ -424,4 +424,9 @@ message PSFCreatorSettings
 	int32 psf_magnification = 22;
 	int32 window = 23;
 	bool smooth_stack_signal = 24;
+	bool single_precision = 25;
+	int32 crop_border = 26;
+	int32 crop_start = 27;
+	int32 crop_end = 28;
+	int32 derivative_order = 29;
 }

@@ -227,6 +227,7 @@ public class GUIProtosHelper
 		builder.setPsfMagnification(4);
 		builder.setWindow(3);
 		builder.setSmoothStackSignal(true);
+		builder.setDerivativeOrder(1);
 		defaultPSFCreatorSettings = builder.build();
 	}
 }
