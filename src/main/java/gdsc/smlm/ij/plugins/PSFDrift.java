@@ -16,7 +16,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
@@ -1231,7 +1233,7 @@ public class PSFDrift implements PlugIn
 				"Current z-centre = %d, FHWM = %s px (%s nm)\n",
 				centre, Utils.rounded(fwhm), Utils.rounded(fwhm * scale)));
 		//@formatter:on
-		gd2.addSlider("z-centre", 1, size, newCentre);
+		gd2.addSlider("z-centre", cx[0], cx[cx.length - 1], newCentre);
 		final TextField tf = gd2.getLastTextField();
 		gd2.addMessage("");
 		gd2.addAndGetButton("Reset", new ActionListener()
@@ -1246,7 +1248,7 @@ public class PSFDrift implements PlugIn
 		gd2.addCheckbox("Update_HWHM", updateHWHM);
 		gd2.enableYesNoCancel();
 		gd2.hideCancelButton();
-		UpdateDialogListener dl = new UpdateDialogListener(cy, maxY, newCentre, scale, pw, label);
+		UpdateDialogListener dl = new UpdateDialogListener(cx, cy, maxY, newCentre, scale, pw, label);
 		gd2.addDialogListener(dl);
 		gd2.showDialog();
 		if (gd2.wasOKed())
@@ -1265,6 +1267,7 @@ public class PSFDrift implements PlugIn
 
 	private class UpdateDialogListener implements DialogListener
 	{
+		int offset;
 		double[] cy;
 		double maxY;
 		int centre;
@@ -1273,9 +1276,24 @@ public class PSFDrift implements PlugIn
 		Label label;
 		boolean drawing;
 
-		UpdateDialogListener(double[] cy, double maxY, int centre, double scale, PlotWindow pw, Label label)
+		UpdateDialogListener(double[] cx, double[] cy, double maxY, int centre, double scale, PlotWindow pw,
+				Label label)
 		{
+			offset = (int) cx[0];
 			this.cy = cy;
+
+			// Interpolate missing values
+			int upper = cx.length - 1;
+			if (cx[upper] - cx[0] != upper)
+			{
+				LinearInterpolator in = new LinearInterpolator();
+				PolynomialSplineFunction f = in.interpolate(cx, cy);
+				cx = SimpleArrayUtils.newArray(upper + 1, cx[0], 1.0);
+				cy = new double[cx.length];
+				for (int i = 0; i < cx.length; i++)
+					cy[i] = f.value(cx[i]);
+			}
+
 			this.maxY = maxY;
 			this.centre = centre;
 			this.scale = scale;
@@ -1302,7 +1320,7 @@ public class PSFDrift implements PlugIn
 
 		public double getFWHM()
 		{
-			return 2 * cy[centre];
+			return 2 * cy[centre - offset];
 		}
 
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
