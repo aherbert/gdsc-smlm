@@ -16,12 +16,12 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.ij.BufferedTextWindow;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.AUCCalculator;
+import gdsc.core.match.AssignmentComparator;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.ImmutableFractionalAssignment;
-import gdsc.core.match.RankedScoreCalculator;
 import gdsc.core.utils.FastCorrelator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
@@ -412,17 +412,15 @@ public class BenchmarkSpotFilter implements PlugIn
 	public class FilterResult
 	{
 		final int frame;
-		final RankedScoreCalculator calc;
 		final FractionClassificationResult result;
 		final ScoredSpot[] spots;
 		final PSFSpot[] actual;
 		final boolean[] actualAssignment;
 
-		public FilterResult(int frame, RankedScoreCalculator calc, FractionClassificationResult result,
+		public FilterResult(int frame, FractionClassificationResult result,
 				ScoredSpot[] spots, PSFSpot[] actual, boolean[] actualAssignment)
 		{
 			this.frame = frame;
-			this.calc = calc;
 			this.result = result;
 			this.spots = spots;
 			this.actual = actual;
@@ -775,7 +773,6 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			ScoredSpot[] scoredSpots = new ScoredSpot[spots.length];
 			FractionClassificationResult result;
-			RankedScoreCalculator calc = null;
 
 			// Store the count of false positives since the last true positive
 			int fails = 0;
@@ -849,8 +846,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 				FractionalAssignment[] assignments = fractionalAssignments
 						.toArray(new FractionalAssignment[fractionalAssignments.size()]);
-				// The constructor will sort the assignments
-				calc = new RankedScoreCalculator(assignments);
+				// sort the assignments
+				AssignmentComparator.sort(assignments);
 
 				// Assign matches
 				double tp = 0;
@@ -1013,7 +1010,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						result.getTP(), result.getFP(), result.getRecall(), result.getPrecision());
 			}
 
-			results.put(frame, new FilterResult(frame, calc, result, scoredSpots, actual, actualAssignment));
+			results.put(frame, new FilterResult(frame, result, scoredSpots, actual, actualAssignment));
 		}
 
 		private double getWeight(float x, float y, int analysisBorder, int xlimit, int ylimit, RampedScore weighting)
@@ -1175,7 +1172,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			{
 				// Batch runs use absolute distance
 				config.setSearch(search, true);
-				
+
 				// Run all, store the results for plotting.
 				// Allow re-use of these if they are cached to allow quick reanalysis of results.
 				if (batchMean)
@@ -1359,7 +1356,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (best != null)
 		{
 			// Rerun to get the best result and show in the summary table
-			
+
 			// Support difference filters second parameter
 			if (best.param2 > 0)
 			{
@@ -1846,8 +1843,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
 		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
-		List<Worker> workers = new LinkedList<Worker>();
-		List<Thread> threads = new LinkedList<Thread>();
+		List<Worker> workers = new TurboList<Worker>(nThreads);
+		List<Thread> threads = new TurboList<Thread>(nThreads);
 		for (int i = 0; i < nThreads; i++)
 		{
 			Worker worker = new Worker(jobs, stack, spotFilter, background);
@@ -1891,13 +1888,26 @@ public class BenchmarkSpotFilter implements PlugIn
 			IJ.showStatus("Collecting results ...");
 		}
 
-		TIntObjectHashMap<FilterResult> filterResults = new TIntObjectHashMap<FilterResult>();
+		TIntObjectHashMap<FilterResult> filterResults = null;
 		time = 0;
-		for (Worker w : workers)
+		for (int i = 0; i < workers.size(); i++)
 		{
+			Worker w = workers.get(i);
 			time += w.time;
-			filterResults.putAll(w.results);
+			if (i == 0)
+			{
+				filterResults = w.results;
+			}
+			else
+			{
+				filterResults.putAll(w.results);
+				w.results.clear();
+				w.results.compact();
+			}
 		}
+		filterResults.compact();
+
+		IJ.showStatus("Summarising results ...");
 
 		// Show a table of the results
 		BenchmarkFilterResult filterResult = summariseResults(filterResults, config, spotFilter, batchSummary);
