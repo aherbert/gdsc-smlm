@@ -81,7 +81,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * The results.
 	 * This is encapsulated to allow changing the data structure used to store the results.
 	 */
-	private PeakResultStore results;
+	protected PeakResultStore results;
 
 	/**
 	 * Gets the result.
@@ -2133,7 +2133,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *
 	 * @return the view
 	 */
-	public PeakResultView getView()
+	public PeakResultView getPeakResultView()
 	{
 		return new DynamicPeakResultView(results);
 	}
@@ -2144,7 +2144,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 *
 	 * @return the view
 	 */
-	public PeakResultView getSnapshotView()
+	public PeakResultView getSnapshotPeakResultView()
 	{
 		return new CachedPeakResultView(results);
 	}

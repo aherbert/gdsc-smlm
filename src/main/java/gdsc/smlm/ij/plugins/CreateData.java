@@ -110,6 +110,7 @@ import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FrameCounter;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
+import gdsc.smlm.results.ImmutableMemoryPeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
@@ -5268,9 +5269,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 *
 	 * @return the results
 	 */
-	public static MemoryPeakResults getResults()
+	public static ImmutableMemoryPeakResults getResults()
 	{
-		return MemoryPeakResults.getResults(benchmarkResultsName);
+		MemoryPeakResults r = MemoryPeakResults.getResults(benchmarkResultsName);
+		if (r == null)
+			return null;
+		return new ImmutableMemoryPeakResults(r);
 	}
 
 	/**
@@ -5311,7 +5315,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Get the calibration
 		settings = SettingsManager.readCreateDataSettings(0).toBuilder();
-		
+
 		simulationParameters = showSimulationParametersDialog(imp, results);
 		if (simulationParameters != null)
 		{
