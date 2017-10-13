@@ -94,7 +94,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (index >= size())
 			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
-		return getf(index);
+		return getfX(index);
 	}
 
 	/**
@@ -106,6 +106,19 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @return the peak result
 	 */
 	PeakResult getf(int index)
+	{
+		return this.results.get(index);
+	}
+
+	/**
+	 * Gets the result for external use or modification. Note that this uses the get(int) method from the backing
+	 * PeakResultStore which may return stale data if index is outside of the current size.
+	 *
+	 * @param index
+	 *            the index
+	 * @return the peak result
+	 */
+	PeakResult getfX(int index)
 	{
 		return this.results.get(index);
 	}
@@ -1029,7 +1042,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (isEmpty())
 			throw new IllegalStateException("Empty");
-		return getf(0);
+		return getfX(0);
 	}
 
 	/**
@@ -1043,9 +1056,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (isEmpty())
 			throw new IllegalStateException("Empty");
-		return getf(size() - 1);
+		return getfX(size() - 1);
 	}
-	
+
 	/**
 	 * Gets the first frame.
 	 * <p>
@@ -1211,7 +1224,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		helper.setIntensityUnit(intensityUnit);
 		helper.setDistanceUnit(distanceUnit);
 		if (PSFHelper.hasAngleParameters(getPSF()))
-				helper.setAngleUnit(angleUnit);
+			helper.setAngleUnit(angleUnit);
 		final Converter[] converters = helper.getConverters();
 
 		if (!helper.isCalibrationChanged())
@@ -1228,7 +1241,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			PeakResult p = getf(i);
+			PeakResult p = getfX(i);
 			p.noise = noiseConverter.convert(p.noise);
 			final float[] params = p.params;
 			final float[] paramsStdDev = p.paramStdDevs;
@@ -1269,7 +1282,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			procedure.execute(getf(i));
+			procedure.execute(getfX(i));
 		}
 	}
 
@@ -1283,7 +1296,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		if (isEmpty())
 			return;
-		procedure.execute(getf(0));
+		procedure.execute(getfX(0));
 	}
 
 	/**
@@ -1297,7 +1310,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (procedure.execute(getf(i)))
+			if (procedure.execute(getfX(i)))
 				return true;
 		}
 		return false;
@@ -1566,7 +1579,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = getf(i);
+			final PeakResult r = getfX(i);
 			//@formatter:off
 			procedure.executeIXYR(
 					ic.convert(r.getSignal()), 
@@ -1817,7 +1830,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = getf(i);
+			final PeakResult r = getfX(i);
 			//@formatter:off
 			procedure.executeXYR(
 					dc.convert(r.getXPosition()),
@@ -1996,7 +2009,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = getf(i);
+			final PeakResult r = getfX(i);
 			r.origX += x;
 			r.origY += y;
 			r.params[PeakResult.X] += xx;
@@ -2111,9 +2124,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = getf(i);
-			if (r.params[0] == 0)
-				r.params[0] = newBackground;
+			final PeakResult r = getfX(i);
+			if (r.getBackground() == 0)
+				r.setBackground(newBackground);
 		}
 	}
 

@@ -55,6 +55,12 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults
 		copySettings(results);
 		built = true;
 	}
+	
+	@Override
+	PeakResult getfX(int index)
+	{
+		return new ImmutablePeakResult(super.getfX(index));
+	}	
 
 	@Override
 	public void setSource(ImageSource source)
@@ -70,6 +76,13 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults
 		if (built)
 			throw new DataException("This results set is immutable");
 		super.setBounds(bounds);
+	}
+	
+	@Override
+	public Rectangle getBounds()
+	{
+		// Prevent modification
+		return new Rectangle(super.getBounds());
 	}
 
 	@Override
@@ -170,4 +183,16 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults
 	{
 		throw new DataException("This results set is immutable");
 	}
+	
+	@Override
+	public PeakResultView getPeakResultView()
+	{
+		return new DynamicPeakResultView(new ImmutablePeakResultStore(results));
+	}
+
+	@Override
+	public PeakResultView getSnapshotPeakResultView()
+	{
+		return new CachedPeakResultView(new ImmutablePeakResultStore(results));
+	}	
 }
