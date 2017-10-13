@@ -1,8 +1,11 @@
 package gdsc.smlm.results;
 
+import java.awt.Rectangle;
 import java.util.Collection;
 
 import gdsc.core.data.DataException;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 
 /*----------------------------------------------------------------------------- 
@@ -25,6 +28,8 @@ import gdsc.smlm.results.predicates.PeakResultPredicate;
  */
 public class ImmutableMemoryPeakResults extends MemoryPeakResults
 {
+	private boolean built = false;
+
 	/**
 	 * Instantiates a new immutable memory peak results with the original results store.
 	 *
@@ -33,7 +38,7 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults
 	 */
 	public ImmutableMemoryPeakResults(MemoryPeakResults results)
 	{
-		super(results.results);
+		this(results, false);
 	}
 
 	/**
@@ -42,119 +47,125 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults
 	 * @param results
 	 *            the results
 	 * @param copy
-	 *            the copy
+	 *            Set to true to copy the original results store
 	 */
 	public ImmutableMemoryPeakResults(MemoryPeakResults results, boolean copy)
 	{
 		super((copy) ? results.results.copy() : results.results);
+		copySettings(results);
+		built = true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#add(gdsc.smlm.results.PeakResult)
-	 */
+	@Override
+	public void setSource(ImageSource source)
+	{
+		if (built)
+			throw new DataException("This results set is immutable");
+		super.setSource(source);
+	}
+
+	@Override
+	public void setBounds(Rectangle bounds)
+	{
+		if (built)
+			throw new DataException("This results set is immutable");
+		super.setBounds(bounds);
+	}
+
+	@Override
+	public void setCalibration(Calibration calibration)
+	{
+		if (built)
+			throw new DataException("This results set is immutable");
+		super.setCalibration(calibration);
+	}
+
+	@Override
+	public void setPSF(PSF psf)
+	{
+		if (built)
+			throw new DataException("This results set is immutable");
+		super.setPSF(psf);
+	}
+
+	@Override
+	public void setConfiguration(String configuration)
+	{
+		if (built)
+			throw new DataException("This results set is immutable");
+		super.setConfiguration(configuration);
+	}
+
+	@Override
+	public void setName(String name)
+	{
+		if (built)
+			throw new DataException("This results set is immutable");
+		super.setName(name);
+	}
+
+	@Override
 	public void add(PeakResult result)
 	{
 		throw new DataException("This results set is immutable");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#addAll(java.util.Collection)
-	 */
+	@Override
 	public void addAll(Collection<PeakResult> results)
 	{
 		throw new DataException("This results set is immutable");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#addAll(gdsc.smlm.results.PeakResult[])
-	 */
+	@Override
 	public void addAll(PeakResult[] results)
 	{
 		throw new DataException("This results set is immutable");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#addAll(gdsc.smlm.results.PeakResultStore)
-	 */
+	@Override
 	public void addAll(PeakResultStore results)
 	{
 		throw new DataException("This results set is immutable");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#add(gdsc.smlm.results.MemoryPeakResults)
-	 */
+	@Override
 	public void add(MemoryPeakResults results)
 	{
 		throw new DataException("This results set is immutable");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#removeNullResults()
-	 */
+	@Override
 	public void removeNullResults()
 	{
 		throw new DataException("This results set is immutable");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#removeIf(gdsc.smlm.results.predicates.PeakResultPredicate)
-	 */
+	@Override
 	public boolean removeIf(PeakResultPredicate filter)
 	{
 		throw new DataException("This results set is immutable");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#begin()
-	 */
+	@Override
 	public void begin()
 	{
 		throw new DataException("This results set is immutable");
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#add(int, int, int, float, double, float, float[], float[])
-	 */
+	
+	@Override
 	public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise, float[] params,
 			float[] paramsStdDev)
 	{
 		throw new DataException("This results set is immutable");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#end()
-	 */
+	@Override
 	public void end()
 	{
 		throw new DataException("This results set is immutable");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.MemoryPeakResults#isActive()
-	 */
+	@Override
 	public boolean isActive()
 	{
 		throw new DataException("This results set is immutable");
