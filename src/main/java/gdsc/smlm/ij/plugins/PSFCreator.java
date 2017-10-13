@@ -3219,6 +3219,13 @@ public class PSFCreator implements PlugInFilter
 				}
 				else
 				{
+					// TODO - check if this is working
+					// The PSF should be background subtracted.
+					// Perhaps just get the profile, find the centre
+					// and the max and then move outward until at half-max
+					// If there is more than one peak then the width
+					// is invalid.
+					
 					// Spot - get FWHM of the X and Y sum projections
 					w0 = new double[maxz];
 					w1 = new double[maxz];
@@ -3333,9 +3340,9 @@ public class PSFCreator implements PlugInFilter
 			if (lastS != s)
 			{
 				double fraction = (target - s) / (lastS - s);
-				return ((ux - lx) / 2 - fraction);
+				return ((ux - lx) / 2.0 - fraction);
 			}
-			return (ux - lx) / 2;
+			return (ux - lx) / 2.0;
 		}
 
 		public void guessZCentre()
