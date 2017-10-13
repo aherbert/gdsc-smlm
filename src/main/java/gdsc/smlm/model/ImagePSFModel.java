@@ -1178,7 +1178,7 @@ public class ImagePSFModel extends PSFModel
 
 			// Interpolate to half-width
 			fraction = (target - s) / (lastS - s);
-			hwhm0[slice] = unitsPerPixel * ((upperU - lowerU) / 2 - fraction);
+			hwhm0[slice] = unitsPerPixel * ((upperU - lowerU) / 2.0 - fraction);
 
 			// x0 direction
 			lowerU = 0;
@@ -1196,7 +1196,7 @@ public class ImagePSFModel extends PSFModel
 
 			// Interpolate
 			fraction = (target - s) / (lastS - s);
-			hwhm1[slice] = unitsPerPixel * ((upperV - lowerV) / 2 - fraction);
+			hwhm1[slice] = unitsPerPixel * ((upperV - lowerV) / 2.0 - fraction);
 		}
 	}
 }
