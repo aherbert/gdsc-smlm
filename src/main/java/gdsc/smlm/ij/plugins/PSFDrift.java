@@ -1316,6 +1316,10 @@ public class PSFDrift implements PlugIn
 			double max = plot.scaleYtoPxl(maxY);
 
 			pw.getImagePlus().setRoi(new Line(x, min, x, max));
+			
+			imp.setSlice(centre);
+			imp.resetDisplayRange();
+			imp.updateAndDraw();
 		}
 
 		public double getFWHM()
