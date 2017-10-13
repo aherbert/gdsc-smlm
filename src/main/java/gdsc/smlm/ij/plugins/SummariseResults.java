@@ -175,7 +175,7 @@ public class SummariseResults implements PlugIn
 				{
 					public void execute(PeakResult peakResult)
 					{
-						stats[1].addValue(peakResult.getSignal() / peakResult.noise);
+						stats[1].addValue(peakResult.getSignal() / peakResult.getNoise());
 					}
 				});
 			}

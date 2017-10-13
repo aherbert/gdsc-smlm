@@ -2239,7 +2239,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		// We add them as if tracing is perfect. So each peak result has a new ID.
 		// This allows the output of the simulation to be used directly by the pulse analysis code.
 		IdPeakResult r = new IdPeakResult(t, x, y, 1, ++id);
-		r.noise = 1; // So it appears calibrated
+		r.setNoise(1); // So it appears calibrated
 		return r;
 	}
 

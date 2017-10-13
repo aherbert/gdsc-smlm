@@ -375,7 +375,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		{
 			case 9: // Shift
 				// We do not have the original centroid so use the original X/Y
-				score = FastMath.max(sp.x[i] - r.origX + 0.5f, sp.y[i] - r.origY + 0.5f);
+				score = FastMath.max(sp.x[i] - r.getOrigX() + 0.5f, sp.y[i] - r.getOrigY() + 0.5f);
 				negative = true;
 				break;
 			case 8: // Width factor
@@ -391,10 +391,10 @@ public class SpotInspector implements PlugIn, MouseListener
 				negative = true;
 				break;
 			case 5: // Original value
-				score = (float) r.origValue;
+				score = (float) r.getOrigValue();
 				break;
 			case 4: // Error
-				score = (float) r.error;
+				score = (float) r.getError();
 				negative = true;
 				break;
 			case 3: // Signal
@@ -408,7 +408,7 @@ public class SpotInspector implements PlugIn, MouseListener
 				negative = true;
 				break;
 			default: // SNR
-				score = r.getSignal() / r.noise;
+				score = r.getSignal() / r.getNoise();
 		}
 		return new float[] { (negative) ? -score : score, score };
 	}

@@ -353,7 +353,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		public IdPeakResult(int id, int uniqueId, PeakResult result)
 		{
-			super(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
+			super(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
 					result.getParameters(), null);
 			this.id = id;
 			this.uniqueId = uniqueId;

@@ -1,5 +1,7 @@
 package gdsc.smlm.results;
 
+import java.util.Arrays;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -32,19 +34,22 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	public static final int STANDARD_PARAMETERS = 5;
 
 	private int frame;
-	public int origX;
-	public int origY;
-	public float origValue;
-	public double error;
-	public float noise;
+	private int origX;
+	private int origY;
+	private float origValue;
+	private double error;
+	private float noise;
 
-	/** The parameters (for the standard parameters plus any PSF specific parameters). This is never null. */
-	float[] params;
+	/**
+	 * The parameters (for the standard parameters plus any PSF specific parameters).
+	 * This is never null.
+	 */
+	private float[] params;
 	/**
 	 * The parameter standard deviations (for the standard parameters plus any PSF specific parameters). This may be
 	 * null or the same length as {@link #params}.
 	 */
-	float[] paramStdDevs;
+	private float[] paramStdDevs;
 
 	/**
 	 * Instantiates a new peak result.
@@ -359,6 +364,111 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	}
 
 	/**
+	 * Gets the original X position in the fitted frame.
+	 *
+	 * @return the original X position
+	 */
+	public int getOrigX()
+	{
+		return origX;
+	}
+
+	/**
+	 * Sets the original X position in the fitted frame.
+	 *
+	 * @param origX
+	 *            the original X position in the fitted frame.
+	 */
+	public void setOrigX(int origX)
+	{
+		this.origX = origX;
+	}
+
+	/**
+	 * Gets the original Y position in the fitted frame.
+	 *
+	 * @return the original Y position in the fitted frame.
+	 */
+	public int getOrigY()
+	{
+		return origY;
+	}
+
+	/**
+	 * Sets the original Y position in the fitted frame.
+	 *
+	 * @param origY
+	 *            the original Y position in the fitted frame.
+	 */
+	public void setOrigY(int origY)
+	{
+		this.origY = origY;
+	}
+
+	/**
+	 * Gets the original value in the fitted frame.
+	 *
+	 * @return the original value in the fitted frame.
+	 */
+	public float getOrigValue()
+	{
+		return origValue;
+	}
+
+	/**
+	 * Sets the original value in the fitted frame.
+	 *
+	 * @param origValue
+	 *            the original value in the fitted frame.
+	 */
+	public void setOrigValue(float origValue)
+	{
+		this.origValue = origValue;
+	}
+
+	/**
+	 * Gets the error.
+	 *
+	 * @return the error
+	 */
+	public double getError()
+	{
+		return error;
+	}
+
+	/**
+	 * Sets the error.
+	 *
+	 * @param error
+	 *            the new error
+	 */
+	public void setError(double error)
+	{
+		this.error = error;
+	}
+
+	/**
+	 * Gets the noise.
+	 *
+	 * @return the noise
+	 */
+	public float getNoise()
+	{
+		return noise;
+	}
+
+	/**
+	 * Sets the noise.
+	 *
+	 * @param noise
+	 *            the new noise
+	 */
+	public void setNoise(float noise)
+	{
+		this.noise = noise;
+	}
+
+	/**
 	 * Checks for end frame. Derived classes can override this.
 	 *
 	 * @return true, if successful
@@ -535,16 +645,6 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	}
 
 	/**
-	 * Gets the noise.
-	 *
-	 * @return the noise
-	 */
-	public float getNoise()
-	{
-		return noise;
-	}
-
-	/**
 	 * Gets the parameters. This is a direct reference to the instance parameter array so use with caution.
 	 *
 	 * @return the parameters
@@ -552,6 +652,16 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	public float[] getParameters()
 	{
 		return params;
+	}
+
+	/**
+	 * Checks for parameter deviations.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasParameterDeviations()
+	{
+		return paramStdDevs != null;
 	}
 
 	/**
@@ -587,6 +697,18 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	}
 
 	/**
+	 * Sets the parameter for the given index.
+	 *
+	 * @param i
+	 *            the index
+	 * @return the parameter
+	 */
+	public void setParameter(int i, float value)
+	{
+		params[i] = value;
+	}
+
+	/**
 	 * Gets the parameter deviation for the given index.
 	 *
 	 * @param i
@@ -596,6 +718,40 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	public float getParameterDeviation(int i)
 	{
 		return paramStdDevs[i];
+	}
+
+	/**
+	 * Sets the parameter deviation for the given index.
+	 *
+	 * @param i
+	 *            the index
+	 * @return the parameter
+	 */
+	public void setParameterDeviation(int i, float value)
+	{
+		paramStdDevs[i] = value;
+	}
+
+	/**
+	 * Resize the parameters.
+	 *
+	 * @param length
+	 *            the new length
+	 */
+	void resizeParameters(int length)
+	{
+		params = Arrays.copyOf(params, length);
+	}
+
+	/**
+	 * Resize parameter deviations.
+	 *
+	 * @param length
+	 *            the length
+	 */
+	void resizeParameterDeviations(int length)
+	{
+		paramStdDevs = Arrays.copyOf(paramStdDevs, length);
 	}
 
 	/*

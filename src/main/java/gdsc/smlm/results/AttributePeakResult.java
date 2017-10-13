@@ -246,9 +246,9 @@ public class AttributePeakResult extends PeakResult
 	 */
 	public AttributePeakResult(PeakResult peakResult)
 	{
-		super(peakResult.getFrame(), peakResult.origX, peakResult.origY, peakResult.origValue, peakResult.error,
-				peakResult.noise, peakResult.params.clone(),
-				(peakResult.paramStdDevs == null) ? null : peakResult.paramStdDevs.clone());
+		super(peakResult.getFrame(), peakResult.getOrigX(), peakResult.getOrigY(), peakResult.getOrigValue(), peakResult.getError(),
+				peakResult.getNoise(), peakResult.getParameters().clone(),
+				(peakResult.getParameterDeviations() == null) ? null : peakResult.getParameterDeviations().clone());
 		if (peakResult.hasId())
 			setId(peakResult.getId());
 		if (peakResult.hasEndFrame())

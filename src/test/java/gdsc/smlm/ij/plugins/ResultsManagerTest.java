@@ -278,11 +278,11 @@ public class ResultsManagerTest
 
 			Assert.assertEquals("Peak mismatch @ " + i, p1.getFrame(), p2.getFrame());
 
-			Assert.assertEquals("Orig X mismatch @ " + i, p1.origX, p2.origX);
-			Assert.assertEquals("Orig Y mismatch @ " + i, p1.origY, p2.origY);
-			Assert.assertEquals("Orig value mismatch @ " + i, p1.origValue, p2.origValue, delta);
-			Assert.assertEquals("Error mismatch @ " + i, p1.error, p2.error, 1e-6);
-			Assert.assertEquals("Noise mismatch @ " + i, p1.noise, p2.noise, delta);
+			Assert.assertEquals("Orig X mismatch @ " + i, p1.getOrigX(), p2.getOrigX());
+			Assert.assertEquals("Orig Y mismatch @ " + i, p1.getOrigY(), p2.getOrigY());
+			Assert.assertEquals("Orig value mismatch @ " + i, p1.getOrigValue(), p2.getOrigValue(), delta);
+			Assert.assertEquals("Error mismatch @ " + i, p1.getError(), p2.getError(), 1e-6);
+			Assert.assertEquals("Noise mismatch @ " + i, p1.getNoise(), p2.getNoise(), delta);
 			Assert.assertNotNull("Params is null @ " + i, p2.getParameters());
 
 			Assert.assertEquals("Background mismatch @ " + i, p1.getBackground(), p2.getBackground(), delta);

@@ -660,7 +660,7 @@ public class PeakResultsReader
 			{
 				if (results.getPSF() != null)
 				{
-					// The TSF reader may set the PSF so copy if back
+					// The TSF reader may set the PSF so copy it back
 					psf = results.getPSF();
 					simplifyPSF(results);
 				}
@@ -710,7 +710,8 @@ public class PeakResultsReader
 		{
 			public boolean execute(PeakResult peakResult)
 			{
-				return (peakResult.params[ia] != 0 && peakResult.params[isx] != peakResult.params[isy]);
+				return (peakResult.getParameter(ia) != 0 &&
+						peakResult.getParameter(isx) != peakResult.getParameter(isy));
 			}
 		}))
 		{
@@ -745,7 +746,7 @@ public class PeakResultsReader
 		{
 			public boolean execute(PeakResult peakResult)
 			{
-				return (peakResult.params[isx] != peakResult.params[isy]);
+				return (peakResult.getParameter(isx) != peakResult.getParameter(isy));
 			}
 		}))
 		{
@@ -771,14 +772,14 @@ public class PeakResultsReader
 
 		// Update the results.
 		// We can directly manipulate the params array
-		final int newLength = results.getf(0).params.length - remove;
+		final int newLength = results.getf(0).getNumberOfParameters() - remove;
 		if (!deviations)
 		{
 			results.forEach(new PeakResultProcedure()
 			{
 				public void execute(PeakResult peakResult)
 				{
-					peakResult.params = Arrays.copyOf(peakResult.params, newLength);
+					peakResult.resizeParameters(newLength);
 				}
 			});
 		}
@@ -788,8 +789,8 @@ public class PeakResultsReader
 			{
 				public void execute(PeakResult peakResult)
 				{
-					peakResult.params = Arrays.copyOf(peakResult.params, newLength);
-					peakResult.paramStdDevs = Arrays.copyOf(peakResult.paramStdDevs, newLength);
+					peakResult.resizeParameters(newLength);
+					peakResult.resizeParameterDeviations(newLength);
 				}
 			});
 		}
@@ -2223,10 +2224,10 @@ public class PeakResultsReader
 			{
 				if (p.getFrame() == p.getEndFrame())
 				{
-					float height = p.origValue;
-					float intensity = p.params[PeakResult.INTENSITY];
-					float sd0 = p.params[isx];
-					float sd1 = p.params[isy];
+					float height = p.getOrigValue();
+					float intensity = p.getParameter(PeakResult.INTENSITY);
+					float sd0 = p.getParameter(isx);
+					float sd1 = p.getParameter(isy);
 					pixelPitch.add(Math.sqrt(height * twoPi * sd0 * sd1 / intensity));
 					// Stop when we have enough for a good guess
 					return (pixelPitch.getN() > 100);

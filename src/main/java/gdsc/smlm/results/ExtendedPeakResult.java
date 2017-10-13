@@ -84,7 +84,7 @@ public class ExtendedPeakResult extends IdPeakResult
 	{
 		super(x, y, intensity, id);
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

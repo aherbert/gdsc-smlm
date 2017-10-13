@@ -71,7 +71,7 @@ public class PeakResultStoreTest
 		{
 			public int compare(PeakResult o1, PeakResult o2)
 			{
-				return o1.origX - o2.origX;
+				return o1.getOrigX() - o2.getOrigX();
 			}
 		};
 		Arrays.sort(list, 0, size, c);

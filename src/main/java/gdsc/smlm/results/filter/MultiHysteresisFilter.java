@@ -187,7 +187,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 			return PeakStatus.REJECT;
 		if (Math.abs(result.getXPosition()) > weakOffset || Math.abs(result.getYPosition()) > weakOffset)
 			return PeakStatus.REJECT;
-		final double variance = calculator.getLSEVariance(result.getParameters(), result.noise);
+		final double variance = calculator.getLSEVariance(result.getParameters(), result.getNoise());
 		if (variance > weakVariance)
 			return PeakStatus.REJECT;
 

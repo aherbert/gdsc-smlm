@@ -431,36 +431,31 @@ public class PeakResultsReaderTest
 	@Test
 	public void readTextWithNonScannerIsFasterThanScanner()
 	{
-		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TEXT, true, ResultsFileFormat.TEXT,
-				false, 1);
+		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TEXT, true, ResultsFileFormat.TEXT, false, 1);
 	}
 
 	@Test
 	public void readTextWithNonScannerIsFasterThanScannerWithDeviationsWithEndFrameWithId()
 	{
-		readWith2IsFasterThan1(true, true, true, ResultsFileFormat.TEXT, true, ResultsFileFormat.TEXT, false,
-				1);
+		readWith2IsFasterThan1(true, true, true, ResultsFileFormat.TEXT, true, ResultsFileFormat.TEXT, false, 1);
 	}
 
 	@Test
 	public void readWithMALKIsFasterThanText()
 	{
-		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TEXT, false, ResultsFileFormat.MALK, false,
-				2);
+		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TEXT, false, ResultsFileFormat.MALK, false, 2);
 	}
 
 	@Test
 	public void readWithBinaryIsFasterThanText()
 	{
-		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TEXT, false, ResultsFileFormat.BINARY,
-				false, 2);
+		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TEXT, false, ResultsFileFormat.BINARY, false, 2);
 	}
 
 	@Test
 	public void readWithBinaryIsFasterThanTSF()
 	{
-		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TSF, false, ResultsFileFormat.BINARY, false,
-				20);
+		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TSF, false, ResultsFileFormat.BINARY, false, 20);
 	}
 
 	@Test
@@ -579,7 +574,7 @@ public class PeakResultsReaderTest
 		{
 			public void execute(PeakResult peakResult)
 			{
-				peakResult.params = Arrays.copyOf(peakResult.params, twoAxisLength);
+				peakResult.resizeParameters(twoAxisLength);
 			}
 		});
 
@@ -609,7 +604,7 @@ public class PeakResultsReaderTest
 		{
 			public void execute(PeakResult peakResult)
 			{
-				peakResult.params = Arrays.copyOf(peakResult.params, oneAxisLength);
+				peakResult.resizeParameters(oneAxisLength);
 			}
 		});
 
@@ -735,17 +730,18 @@ public class PeakResultsReaderTest
 				continue;
 			}
 
-			Assert.assertEquals("Orig X mismatch @ " + i, p1.origX, p2.origX);
-			Assert.assertEquals("Orig Y mismatch @ " + i, p1.origY, p2.origY);
-			Assert.assertEquals("Orig value mismatch @ " + i, p1.origValue, p2.origValue, delta);
-			Assert.assertEquals("Error mismatch @ " + i, p1.error, p2.error, 1e-6);
-			Assert.assertEquals("Noise mismatch @ " + i, p1.noise, p2.noise, delta);
-			Assert.assertNotNull("Params is null @ " + i, p2.params);
-			Assert.assertArrayEquals("Params mismatch @ " + i, p1.params, p2.params, delta);
+			Assert.assertEquals("Orig X mismatch @ " + i, p1.getOrigX(), p2.getOrigX());
+			Assert.assertEquals("Orig Y mismatch @ " + i, p1.getOrigY(), p2.getOrigY());
+			Assert.assertEquals("Orig value mismatch @ " + i, p1.getOrigValue(), p2.getOrigValue(), delta);
+			Assert.assertEquals("Error mismatch @ " + i, p1.getError(), p2.getError(), 1e-6);
+			Assert.assertEquals("Noise mismatch @ " + i, p1.getNoise(), p2.getNoise(), delta);
+			Assert.assertNotNull("Params is null @ " + i, p2.getParameters());
+			Assert.assertArrayEquals("Params mismatch @ " + i, p1.getParameters(), p2.getParameters(), delta);
 			if (showDeviations)
 			{
-				Assert.assertNotNull(p2.paramStdDevs);
-				Assert.assertArrayEquals("Params StdDev mismatch @ " + i, p1.paramStdDevs, p2.paramStdDevs, delta);
+				Assert.assertNotNull(p2.getParameterDeviations());
+				Assert.assertArrayEquals("Params StdDev mismatch @ " + i, p1.getParameterDeviations(),
+						p2.getParameterDeviations(), delta);
 			}
 			if (showEndFrame)
 			{
@@ -916,8 +912,8 @@ public class PeakResultsReaderTest
 			{
 				public void execute(PeakResult peak)
 				{
-					out.add(peak.getFrame(), peak.origX, peak.origY, peak.origValue, peak.error, peak.noise,
-							peak.params, peak.paramStdDevs);
+					out.add(peak.getFrame(), peak.getOrigX(), peak.getOrigY(), peak.getOrigValue(), peak.getError(),
+							peak.getNoise(), peak.getParameters(), peak.getParameterDeviations());
 				}
 			});
 		}

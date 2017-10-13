@@ -78,7 +78,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	protected PeakStatus getStatus(PeakResult result)
 	{
 		// Use the background noise to estimate precision 
-		final double variance = calculator.getLSEVariance(result.getParameters(), result.noise);
+		final double variance = calculator.getLSEVariance(result.getParameters(), result.getNoise());
 		if (variance <= lowerVariance)
 			return PeakStatus.OK;
 		else if (variance <= upperVariance)

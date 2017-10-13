@@ -332,7 +332,7 @@ public class FilterAnalysis implements PlugIn
 			{
 				public void execute(PeakResult p)
 				{
-					if (p.origValue != 0)
+					if (p.getOrigValue() != 0)
 						tp.increment();
 				}
 			});

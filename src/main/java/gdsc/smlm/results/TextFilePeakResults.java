@@ -299,14 +299,14 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 
 	private void add(StringBuilder sb, PeakResult result)
 	{
-		addStandardData(sb, result.getId(), result.getFrame(), result.getEndFrame(), result.origX, result.origY,
-				result.origValue, result.error, result.noise);
+		addStandardData(sb, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
+				result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise());
 
 		// Add the parameters		
-		final float[] params = result.params;
+		final float[] params = result.getParameters();
 		if (isShowDeviations())
 		{
-			final float[] paramsStdDev = result.paramStdDevs;
+			final float[] paramsStdDev = result.getParameterDeviations();
 			if (paramsStdDev != null)
 			{
 				checkSize(converters.length, params, paramsStdDev);
@@ -336,7 +336,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		}
 		if (canComputePrecision)
 		{
-			addResult(sb, (float) calculator.getLSEPrecision(params, result.noise));
+			addResult(sb, (float) calculator.getLSEPrecision(params, result.getNoise()));
 		}
 		sb.append('\n');
 	}
@@ -407,9 +407,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 						results2.add(result);
 					else
 					{
-						results2.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY,
-								result.origValue, result.error, result.noise, result.params, result.paramStdDevs,
-								result.getEndFrame(), id));
+						results2.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(), result.getOrigY(),
+								result.getOrigValue(), result.getError(), result.getNoise(), result.getParameters(),
+								result.getParameterDeviations(), result.getEndFrame(), id));
 					}
 				}
 			});

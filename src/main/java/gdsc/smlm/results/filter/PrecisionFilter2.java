@@ -70,7 +70,7 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 			return calculator.getLSEPrecision(peak.getParameters()) <= variance;
 		}
 		// Use the background noise to estimate precision 
-		return calculator.getLSEPrecision(peak.getParameters(), peak.noise) <= variance;
+		return calculator.getLSEPrecision(peak.getParameters(), peak.getNoise()) <= variance;
 	}
 
 	@Override

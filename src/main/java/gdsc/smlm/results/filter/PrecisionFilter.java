@@ -55,7 +55,7 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 	public boolean accept(PeakResult peak)
 	{
 		// Use the background noise to estimate precision 
-		return calculator.getLSEVariance(peak.getParameters(), peak.noise) <= variance;
+		return calculator.getLSEVariance(peak.getParameters(), peak.getNoise()) <= variance;
 	}
 
 	@Override

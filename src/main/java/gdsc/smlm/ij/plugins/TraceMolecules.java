@@ -2073,7 +2073,7 @@ public class TraceMolecules implements PlugIn
 		for (int i = 0; i < trace.size(); i++)
 		{
 			PeakResult result  = trace.get(i);
-			noise += result.noise * result.noise;
+			noise += result.getNoise() * result.getNoise();
 
 			float[] sourceData = source.get(result.getFrame(), bounds);
 			final float background = result.getBackground();
@@ -2110,7 +2110,7 @@ public class TraceMolecules implements PlugIn
 		for (int i = 0; i < trace.size(); i++)
 		{
 			PeakResult result  = trace.get(i);
-			noise += result.noise * result.noise;
+			noise += result.getNoise() * result.getNoise();
 		}
 		// Combined noise is the sqrt of the sum-of-squares
 		return Math.sqrt(noise);

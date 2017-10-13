@@ -211,14 +211,14 @@ public class FilterResults implements PlugIn
 
 	private float getDrift(PeakResult result, float x, float y)
 	{
-		return FastMath.max(Math.abs(result.origX + 0.5f - x), Math.abs(result.origY + 0.5f - y));
+		return FastMath.max(Math.abs(result.getOrigX() + 0.5f - x), Math.abs(result.getOrigY() + 0.5f - y));
 	}
 
 	private float getSnr(PeakResult result)
 	{
-		if (result.noise <= 0)
+		if (result.getNoise() <= 0)
 			return 0;
-		return result.getSignal() / result.noise;
+		return result.getSignal() / result.getNoise();
 	}
 
 	/**

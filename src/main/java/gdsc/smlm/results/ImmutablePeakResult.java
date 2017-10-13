@@ -75,6 +75,36 @@ public class ImmutablePeakResult extends AttributePeakResult
 	}
 
 	@Override
+	public void setOrigX(int origX)
+	{
+		throw new DataException("This result is immutable");
+	}
+
+	@Override
+	public void setOrigY(int origY)
+	{
+		throw new DataException("This result is immutable");
+	}
+
+	@Override
+	public void setOrigValue(float origValue)
+	{
+		throw new DataException("This result is immutable");
+	}
+
+	@Override
+	public void setError(double error)
+	{
+		throw new DataException("This result is immutable");
+	}
+
+	@Override
+	public void setNoise(float noise)
+	{
+		throw new DataException("This result is immutable");
+	}
+
+	@Override
 	public void setId(int id)
 	{
 		if (built)
@@ -97,6 +127,36 @@ public class ImmutablePeakResult extends AttributePeakResult
 			throw new DataException("This result is immutable");
 		super.setPrecision(precision);
 	}
+	
+	@Override
+	public void setParameter(int i, float value)
+	{
+		throw new DataException("This result is immutable");
+	}
+	
+	@Override
+	public void setParameterDeviation(int i, float value)
+	{
+		throw new DataException("This result is immutable");
+	}
+	
+	@Override
+	public void clearHasEndFrame()
+	{
+		throw new DataException("This result is immutable");
+	}
+	
+	@Override
+	public void clearHasId()
+	{
+		throw new DataException("This result is immutable");
+	}
+	
+	@Override
+	public void clearHasPrecision()
+	{
+		throw new DataException("This result is immutable");
+	}	
 
 	/**
 	 * Gets a copy of the parameters.
@@ -106,7 +166,7 @@ public class ImmutablePeakResult extends AttributePeakResult
 	@Override
 	public float[] getParameters()
 	{
-		return params.clone();
+		return super.getParameters().clone();
 	}
 
 	/**
@@ -117,6 +177,18 @@ public class ImmutablePeakResult extends AttributePeakResult
 	@Override
 	public float[] getParameterDeviations()
 	{
-		return (paramStdDevs == null) ? null : paramStdDevs.clone();
+		return (super.getParameterDeviations() == null) ? null : super.getParameterDeviations().clone();
+	}
+
+	@Override
+	void resizeParameters(int length)
+	{
+		throw new DataException("This result is immutable");
+	}
+
+	@Override
+	void resizeParameterDeviations(int length)
+	{
+		throw new DataException("This result is immutable");
 	}
 }

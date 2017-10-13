@@ -481,8 +481,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	public void add(PeakResult result)
 	{
-		addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.origX, result.origY, result.origValue,
-				result.error, result.noise, result.getParameters(), result.getParameterDeviations());
+		addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
+				result.getError(), result.getNoise(), result.getParameters(), result.getParameterDeviations());
 	}
 
 	/*
@@ -497,8 +497,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		int n = 0;
 		for (PeakResult result : results)
 		{
-			addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.origX, result.origY,
-					result.origValue, result.error, result.noise, result.getParameters(),
+			addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(), result.getOrigY(),
+					result.getOrigValue(), result.getError(), result.getNoise(), result.getParameters(),
 					result.getParameterDeviations());
 			if (n++ > 31)
 			{

@@ -563,8 +563,8 @@ public class TraceManager
 				final float signal = (float) traces[i].getSignal();
 				final float[] params = new float[] { background, signal, 0, centroid[0], centroid[1], sd, sd };
 				final int endFrame = traces[i].getTail().getEndFrame();
-				results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY, result.origValue, 0,
-						0, params, null, endFrame, i + 1));
+				results.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(), result.getOrigY(),
+						result.getOrigValue(), 0, 0, params, null, endFrame, i + 1));
 			}
 		}
 		return results;
@@ -606,8 +606,9 @@ public class TraceManager
 				PeakResult result = traces[i].getHead();
 				if (traces[i].size() == 1)
 				{
-					AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(), result.origX,
-							result.origY, result.origValue, 0, result.noise, result.params, null);
+					AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(), result.getOrigX(),
+							result.getOrigY(), result.getOrigValue(), 0, result.getNoise(), result.getParameters(),
+							null);
 					peakResult.setId(traces[i].getId());
 					peakResult.setEndFrame(result.getEndFrame());
 					if (converter != null)
@@ -623,7 +624,7 @@ public class TraceManager
 				double noise = 0;
 				for (PeakResult r : traces[i].getPoints().toArray())
 				{
-					noise += r.noise * r.noise;
+					noise += r.getNoise() * r.getNoise();
 					background += r.getBackground();
 				}
 				noise = Math.sqrt(noise);
@@ -634,11 +635,11 @@ public class TraceManager
 						(float) signal);
 				// Build standard peak data
 				peakResult.setBackground(background);
-				peakResult.noise = (float) noise;
+				peakResult.setNoise((float) noise);
 				// These could be weighted, at the moment we use the first peak 
-				peakResult.origX = result.origX;
-				peakResult.origY = result.origY;
-				peakResult.origValue = result.origValue;
+				peakResult.setOrigX(result.getOrigX());
+				peakResult.setOrigY(result.getOrigY());
+				peakResult.setOrigValue(result.getOrigValue());
 
 				peakResult.setId(traces[i].getId());
 				peakResult.setEndFrame(endFrame);
@@ -695,8 +696,8 @@ public class TraceManager
 				{
 					public void execute(PeakResult result)
 					{
-						results.add(new ExtendedPeakResult(result.getFrame(), result.origX, result.origY,
-								result.origValue, 0, result.noise, result.params, null, 0, traceId));
+						results.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(), result.getOrigY(),
+								result.getOrigValue(), 0, result.getNoise(), result.getParameters(), null, 0, traceId));
 
 					}
 				});

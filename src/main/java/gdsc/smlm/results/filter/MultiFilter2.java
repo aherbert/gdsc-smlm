@@ -247,7 +247,7 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 		}
 		else
 		{
-			if (calculator.getLSEVariance(peak.getParameters(), peak.noise) > variance)
+			if (calculator.getLSEVariance(peak.getParameters(), peak.getNoise()) > variance)
 				return false;
 		}
 

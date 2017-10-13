@@ -523,7 +523,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					for (int k = 0; k < trace.size(); k++)
 					{
 						PeakResult r = trace.get(k);
-						precision += calculator.getLSEPrecision(r.getParameters(), r.noise);
+						precision += calculator.getLSEPrecision(r.getParameters(), r.getNoise());
 					}
 					n += trace.size();
 				}

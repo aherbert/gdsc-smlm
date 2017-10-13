@@ -367,7 +367,7 @@ public abstract class HysteresisFilter extends Filter
 		double sum = 0;
 		for (PeakResult peakResult : candidates)
 		{
-			sum += calculator.getLSEPrecision(peakResult.getParameters(), peakResult.noise);
+			sum += calculator.getLSEPrecision(peakResult.getParameters(), peakResult.getNoise());
 		}
 		final double nmPerPixel = peakResults.getNmPerPixel();
 		double distanceThreshold = (sum / candidates.size()) * searchDistance / nmPerPixel;

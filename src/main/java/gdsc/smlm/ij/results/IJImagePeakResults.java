@@ -1021,7 +1021,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 */
 	public void add(PeakResult result)
 	{
-		add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
+		add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
 				result.getParameters(), null);
 	}
 
@@ -1067,7 +1067,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 				updateToFrame(result.getFrame());
 			}
 
-			getValue(result.getFrame(), result.getParameters(), result.error, x, y, indices, values);
+			getValue(result.getFrame(), result.getParameters(), result.getError(), x, y, indices, values);
 
 			for (int i = indices[4]; i-- > 0;)
 			{

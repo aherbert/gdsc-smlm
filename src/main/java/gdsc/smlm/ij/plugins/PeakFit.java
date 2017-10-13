@@ -3317,7 +3317,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			else
 			{
 				// Fit single frame results.
-				maxIndices[count++] = result.origX + bounds.width * result.origY;
+				maxIndices[count++] = result.getOrigX() + bounds.width * result.getOrigY();
 			}
 		}
 

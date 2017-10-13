@@ -242,8 +242,9 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 		try
 		{
-			addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.origX, result.origY,
-					result.origValue, result.error, result.noise, result.params, result.paramStdDevs);
+			addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
+					result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
+					result.getParameters(), result.getParameterDeviations());
 			buffer.flush();
 		}
 		catch (IOException e)
@@ -275,8 +276,9 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		{
 			try
 			{
-				addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.origX, result.origY,
-						result.origValue, result.error, result.noise, result.params, result.paramStdDevs);
+				addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
+						result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
+						result.getParameters(), result.getParameterDeviations());
 			}
 			catch (IOException e)
 			{

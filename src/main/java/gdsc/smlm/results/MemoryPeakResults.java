@@ -479,7 +479,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		long memorySize = 0;
 		if (r != null && r.size() > 0)
 		{
-			boolean includeDeviations = r.getf(0).paramStdDevs != null;
+			boolean includeDeviations = r.getf(0).hasParameterDeviations();
 			memorySize = MemoryPeakResults.estimateMemorySize(r.size(), includeDeviations);
 		}
 		return memorySize;
@@ -910,7 +910,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (getf(i).noise > 0)
+			if (getf(i).getNoise() > 0)
 				return true;
 		}
 		return false;
@@ -940,7 +940,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (getf(i).paramStdDevs == null)
+			if (!getf(i).hasParameterDeviations())
 				return false;
 		}
 		return !isEmpty();
@@ -1242,21 +1242,19 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			PeakResult p = getfX(i);
-			p.noise = noiseConverter.convert(p.noise);
-			final float[] params = p.params;
-			final float[] paramsStdDev = p.paramStdDevs;
-			if (paramsStdDev == null)
+			p.setNoise(noiseConverter.convert(p.getNoise()));
+			if (p.hasParameterDeviations())
 			{
 				for (int j = 0; j < converters.length; j++)
-					params[j] = converters[j].convert(params[j]);
+				{
+					p.setParameter(j, converters[j].convert(p.getParameter(j)));
+					p.setParameterDeviation(j, converters[j].convert(p.getParameterDeviation(j)));
+				}
 			}
 			else
 			{
 				for (int j = 0; j < converters.length; j++)
-				{
-					params[j] = converters[j].convert(params[j]);
-					paramsStdDev[j] = converters[j].convert(paramsStdDev[j]);
-				}
+					p.setParameter(j, converters[j].convert(p.getParameter(j)));
 			}
 		}
 
@@ -1893,7 +1891,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = getf(i);
-			procedure.executeLSEPrecision(calculator.getLSEPrecision(r.params, r.noise));
+			procedure.executeLSEPrecision(calculator.getLSEPrecision(r.getParameters(), r.getNoise()));
 		}
 	}
 
@@ -1918,7 +1916,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			procedure.executeLSEPrecisionB(calculator.getLSEPrecision(getf(i).params));
+			procedure.executeLSEPrecisionB(calculator.getLSEPrecision(getf(i).getParameters()));
 		}
 	}
 
@@ -1944,7 +1942,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = getf(i);
-			procedure.executeMLEPrecision(calculator.getMLEPrecision(r.params, r.noise));
+			procedure.executeMLEPrecision(calculator.getMLEPrecision(r.getParameters(), r.getNoise()));
 		}
 	}
 
@@ -1969,7 +1967,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			procedure.executeMLEPrecisionB(calculator.getMLEPrecision(getf(i).params));
+			procedure.executeMLEPrecisionB(calculator.getMLEPrecision(getf(i).getParameters()));
 		}
 	}
 
@@ -2010,10 +2008,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = getfX(i);
-			r.origX += x;
-			r.origY += y;
-			r.params[PeakResult.X] += xx;
-			r.params[PeakResult.Y] += yy;
+			r.setOrigX(r.getOrigX() + x);
+			r.setOrigY(r.getOrigY() + y);
+			r.setXPosition(r.getXPosition() + xx);
+			r.setYPosition(r.getYPosition() + yy);
 		}
 	}
 

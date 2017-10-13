@@ -3304,7 +3304,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					public void execute(PeakResult r)
 					{
 						int density = allDensity[counter.getAndIncrement()];
-						r.origValue = density;
+						r.setOrigValue(density);
 						if (density == 0)
 							singles.add(r);
 						else
@@ -5385,7 +5385,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			public void execute(PeakResult p)
 			{
 				if (p.getFrame() < noise.length)
-					p.noise = noise[p.getFrame()];
+					p.setNoise(noise[p.getFrame()]);
 			}
 		});
 	}

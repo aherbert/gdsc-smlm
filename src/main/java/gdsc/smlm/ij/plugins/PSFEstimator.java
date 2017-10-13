@@ -813,21 +813,21 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	public void add(PeakResult result)
 	{
-		add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
+		add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
 				result.getParameters(), result.getParameterDeviations());
 	}
 
 	public synchronized void addAll(PeakResult[] results)
 	{
 		for (PeakResult result : results)
-			add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
+			add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
 					result.getParameters(), result.getParameterDeviations());
 	}
 
 	public synchronized void addAll(Collection<PeakResult> results)
 	{
 		for (PeakResult result : results)
-			add(result.getFrame(), result.origX, result.origY, result.origValue, result.error, result.noise,
+			add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
 					result.getParameters(), result.getParameterDeviations());
 	}
 

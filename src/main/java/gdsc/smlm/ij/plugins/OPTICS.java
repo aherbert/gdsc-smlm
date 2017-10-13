@@ -3276,7 +3276,7 @@ public class OPTICS implements PlugIn
 			for (int i : parents)
 			{
 				PeakResult p = results.get(i);
-				IdPeakResult r = new IdPeakResult(p.getFrame(), p.origX, p.origY, p.origValue, p.error, p.noise,
+				IdPeakResult r = new IdPeakResult(p.getFrame(), p.getOrigX(), p.getOrigY(), p.getOrigValue(), p.getError(), p.getNoise(),
 						p.getParameters(), p.getParameterDeviations(), clusters[i]);
 				table.add(r);
 			}

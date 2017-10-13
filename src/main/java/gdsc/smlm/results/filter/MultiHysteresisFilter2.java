@@ -209,7 +209,7 @@ public class MultiHysteresisFilter2 extends HysteresisFilter
 		}
 		else
 		{
-			variance = calculator.getLSEVariance(result.getParameters(), result.noise);
+			variance = calculator.getLSEVariance(result.getParameters(), result.getNoise());
 		}
 		if (variance > weakVariance)
 			return PeakStatus.REJECT;

@@ -200,15 +200,15 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 	public void add(PeakResult result)
 	{
-		final float[] params = result.params;
+		final float[] params = result.getParameters();
 
 		Spot.Builder builder = Spot.newBuilder();
 		builder.setMolecule(id.incrementAndGet());
 		builder.setChannel(1);
 		builder.setFluorophoreType(1);
 		builder.setFrame(result.getFrame());
-		builder.setXPosition(result.origX);
-		builder.setYPosition(result.origY);
+		builder.setXPosition(result.getOrigX());
+		builder.setYPosition(result.getOrigY());
 
 		setParam(params, builder);
 
@@ -223,13 +223,13 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		if (result.hasId())
 			builder.setCluster(result.getId());
 
-		builder.setError(result.error);
-		builder.setNoise(result.noise);
+		builder.setError(result.getError());
+		builder.setNoise(result.getNoise());
 		if (result.hasEndFrame())
 			builder.setEndFrame(result.getEndFrame());
-		builder.setOriginalValue(result.origValue);
-		if (result.paramStdDevs != null)
-			addNewParamStdDevs(builder, result.paramStdDevs);
+		builder.setOriginalValue(result.getOrigValue());
+		if (result.hasParameterDeviations())
+			addNewParamStdDevs(builder, result.getParameterDeviations());
 
 		Spot spot = builder.build();
 
@@ -298,14 +298,14 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		Spot.Builder builder = Spot.newBuilder();
 		for (PeakResult result : results)
 		{
-			final float[] params = result.params;
+			final float[] params = result.getParameters();
 
 			builder.setMolecule(id.incrementAndGet());
 			builder.setChannel(1);
 			builder.setFluorophoreType(1);
 			builder.setFrame(result.getFrame());
-			builder.setXPosition(result.origX);
-			builder.setYPosition(result.origY);
+			builder.setXPosition(result.getOrigX());
+			builder.setYPosition(result.getOrigY());
 
 			setParam(params, builder);
 
@@ -322,14 +322,14 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			else
 				builder.clearCluster();
 
-			builder.setError(result.error);
-			builder.setNoise(result.noise);
+			builder.setError(result.getError());
+			builder.setNoise(result.getNoise());
 			if (result.hasEndFrame())
 				builder.setEndFrame(result.getEndFrame());
 			else
 				builder.clearEndFrame();
-			builder.setOriginalValue(result.origValue);
-			addParamStdDevs(builder, result.paramStdDevs);
+			builder.setOriginalValue(result.getOrigValue());
+			addParamStdDevs(builder, result.getParameterDeviations());
 
 			spots[count++] = builder.build();
 
