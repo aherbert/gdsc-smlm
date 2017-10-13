@@ -228,6 +228,7 @@ public class GUIProtosHelper
 		builder.setWindow(3);
 		builder.setSmoothStackSignal(true);
 		builder.setDerivativeOrder(1);
+		builder.setComBorder(0.40); // Right in the middle of a spot
 		defaultPSFCreatorSettings = builder.build();
 	}
 }

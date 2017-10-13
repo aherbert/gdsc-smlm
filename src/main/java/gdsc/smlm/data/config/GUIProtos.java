@@ -22175,7 +22175,7 @@ public final class GUIProtos {
     double getAnalysisWindow();
 
     /**
-     * <code>int32 comWindow = 18;</code>
+     * <code>int32 com_window = 18;</code>
      */
     int getComWindow();
 
@@ -22233,6 +22233,11 @@ public final class GUIProtos {
      * <code>int32 derivative_order = 29;</code>
      */
     int getDerivativeOrder();
+
+    /**
+     * <code>double com_border = 30;</code>
+     */
+    double getComBorder();
   }
   /**
    * <pre>
@@ -22276,6 +22281,7 @@ public final class GUIProtos {
       cropStart_ = 0;
       cropEnd_ = 0;
       derivativeOrder_ = 0;
+      comBorder_ = 0D;
     }
 
     @java.lang.Override
@@ -22470,6 +22476,11 @@ public final class GUIProtos {
             case 232: {
 
               derivativeOrder_ = input.readInt32();
+              break;
+            }
+            case 241: {
+
+              comBorder_ = input.readDouble();
               break;
             }
           }
@@ -22696,10 +22707,10 @@ public final class GUIProtos {
       return analysisWindow_;
     }
 
-    public static final int COMWINDOW_FIELD_NUMBER = 18;
+    public static final int COM_WINDOW_FIELD_NUMBER = 18;
     private int comWindow_;
     /**
-     * <code>int32 comWindow = 18;</code>
+     * <code>int32 com_window = 18;</code>
      */
     public int getComWindow() {
       return comWindow_;
@@ -22804,6 +22815,15 @@ public final class GUIProtos {
       return derivativeOrder_;
     }
 
+    public static final int COM_BORDER_FIELD_NUMBER = 30;
+    private double comBorder_;
+    /**
+     * <code>double com_border = 30;</code>
+     */
+    public double getComBorder() {
+      return comBorder_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -22902,6 +22922,9 @@ public final class GUIProtos {
       }
       if (derivativeOrder_ != 0) {
         output.writeInt32(29, derivativeOrder_);
+      }
+      if (comBorder_ != 0D) {
+        output.writeDouble(30, comBorder_);
       }
     }
 
@@ -23026,6 +23049,10 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(29, derivativeOrder_);
       }
+      if (comBorder_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(30, comBorder_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -23121,6 +23148,10 @@ public final class GUIProtos {
           == other.getCropEnd());
       result = result && (getDerivativeOrder()
           == other.getDerivativeOrder());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getComBorder())
+          == java.lang.Double.doubleToLongBits(
+              other.getComBorder()));
       return result;
     }
 
@@ -23179,7 +23210,7 @@ public final class GUIProtos {
       hash = (37 * hash) + ANALYSIS_WINDOW_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getAnalysisWindow()));
-      hash = (37 * hash) + COMWINDOW_FIELD_NUMBER;
+      hash = (37 * hash) + COM_WINDOW_FIELD_NUMBER;
       hash = (53 * hash) + getComWindow();
       hash = (37 * hash) + PROJECTION_MAGNIFICATION_FIELD_NUMBER;
       hash = (53 * hash) + getProjectionMagnification();
@@ -23206,6 +23237,9 @@ public final class GUIProtos {
       hash = (53 * hash) + getCropEnd();
       hash = (37 * hash) + DERIVATIVE_ORDER_FIELD_NUMBER;
       hash = (53 * hash) + getDerivativeOrder();
+      hash = (37 * hash) + COM_BORDER_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getComBorder()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -23409,6 +23443,8 @@ public final class GUIProtos {
 
         derivativeOrder_ = 0;
 
+        comBorder_ = 0D;
+
         return this;
       }
 
@@ -23472,6 +23508,7 @@ public final class GUIProtos {
         result.cropStart_ = cropStart_;
         result.cropEnd_ = cropEnd_;
         result.derivativeOrder_ = derivativeOrder_;
+        result.comBorder_ = comBorder_;
         onBuilt();
         return result;
       }
@@ -23599,6 +23636,9 @@ public final class GUIProtos {
         }
         if (other.getDerivativeOrder() != 0) {
           setDerivativeOrder(other.getDerivativeOrder());
+        }
+        if (other.getComBorder() != 0D) {
+          setComBorder(other.getComBorder());
         }
         onChanged();
         return this;
@@ -24379,13 +24419,13 @@ public final class GUIProtos {
 
       private int comWindow_ ;
       /**
-       * <code>int32 comWindow = 18;</code>
+       * <code>int32 com_window = 18;</code>
        */
       public int getComWindow() {
         return comWindow_;
       }
       /**
-       * <code>int32 comWindow = 18;</code>
+       * <code>int32 com_window = 18;</code>
        */
       public Builder setComWindow(int value) {
         
@@ -24394,7 +24434,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>int32 comWindow = 18;</code>
+       * <code>int32 com_window = 18;</code>
        */
       public Builder clearComWindow() {
         
@@ -24688,6 +24728,32 @@ public final class GUIProtos {
         onChanged();
         return this;
       }
+
+      private double comBorder_ ;
+      /**
+       * <code>double com_border = 30;</code>
+       */
+      public double getComBorder() {
+        return comBorder_;
+      }
+      /**
+       * <code>double com_border = 30;</code>
+       */
+      public Builder setComBorder(double value) {
+        
+        comBorder_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double com_border = 30;</code>
+       */
+      public Builder clearComBorder() {
+        
+        comBorder_ = 0D;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -24946,7 +25012,7 @@ public final class GUIProtos {
       "\022\023\n\013field_width\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022" +
       "\020\n\010z_dither\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022" +
       "\024\n\014nm_per_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001\"" +
-      "\246\006\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
+      "\273\006\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
       "radius\030\002 \001(\001\022\030\n\020interactive_mode\030\003 \001(\010\022\024" +
       "\n\014nm_per_slice\030\004 \001(\001\022E\n\023fit_engine_setti" +
       "ngs\030\005 \001(\0132(.gdsc.smlm.data.config.FitEng" +
@@ -24959,16 +25025,17 @@ public final class GUIProtos {
       "terpolation_method\030\016 \001(\005\022\017\n\007psfType\030\017 \001(" +
       "\005\0227\n\013calibration\030\020 \001(\0132\".gdsc.smlm.data." +
       "config.Calibration\022\027\n\017analysis_window\030\021 " +
-      "\001(\001\022\021\n\tcomWindow\030\022 \001(\005\022 \n\030projection_mag" +
-      "nification\030\023 \001(\005\022\025\n\rmaxIterations\030\024 \001(\005\022",
-      "\030\n\020check_alignments\030\025 \001(\010\022\031\n\021psf_magnifi" +
-      "cation\030\026 \001(\005\022\016\n\006window\030\027 \001(\005\022\033\n\023smooth_s" +
-      "tack_signal\030\030 \001(\010\022\030\n\020single_precision\030\031 " +
-      "\001(\010\022\023\n\013crop_border\030\032 \001(\005\022\022\n\ncrop_start\030\033" +
-      " \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\030\n\020derivative_ord" +
-      "er\030\035 \001(\005*O\n\014TemplateType\022\023\n\017INLINE_TEMPL" +
-      "ATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_T" +
-      "EMPLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "\001(\001\022\022\n\ncom_window\030\022 \001(\005\022 \n\030projection_ma" +
+      "gnification\030\023 \001(\005\022\025\n\rmaxIterations\030\024 \001(\005",
+      "\022\030\n\020check_alignments\030\025 \001(\010\022\031\n\021psf_magnif" +
+      "ication\030\026 \001(\005\022\016\n\006window\030\027 \001(\005\022\033\n\023smooth_" +
+      "stack_signal\030\030 \001(\010\022\030\n\020single_precision\030\031" +
+      " \001(\010\022\023\n\013crop_border\030\032 \001(\005\022\022\n\ncrop_start\030" +
+      "\033 \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\030\n\020derivative_or" +
+      "der\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001*O\n\014Templat" +
+      "eType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_T" +
+      "EMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIPro" +
+      "tosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -25063,7 +25130,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor,
-        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "DerivativeOrder", });
+        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "DerivativeOrder", "ComBorder", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

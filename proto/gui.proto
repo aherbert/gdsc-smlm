@@ -417,7 +417,7 @@ message PSFCreatorSettings
 	int32 psfType = 15;
 	Calibration calibration = 16;
 	double analysis_window = 17;
-	int32 comWindow = 18;
+	int32 com_window = 18;
 	int32 projection_magnification = 19;
 	int32 maxIterations = 20;
 	bool check_alignments = 21;
@@ -429,4 +429,5 @@ message PSFCreatorSettings
 	int32 crop_start = 27;
 	int32 crop_end = 28;
 	int32 derivative_order = 29;
+	double com_border = 30;
 }

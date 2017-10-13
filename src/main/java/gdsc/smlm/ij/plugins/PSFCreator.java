@@ -2929,7 +2929,7 @@ public class PSFCreator implements PlugInFilter
 		// Add the CoM
 		// Find the XY centre around the z centre 
 		double[] com = getCentreOfMassXY(combined.psf, combined.maxx, combined.maxy, zCentre - 1,
-				settings.getComWindow());
+				settings.getComWindow(), getCoMXYBorder(combined.maxx, combined.maxy));
 
 		imagePsf.setXCentre(com[0]);
 		imagePsf.setYCentre(com[1]);
@@ -2951,6 +2951,12 @@ public class PSFCreator implements PlugInFilter
 		Utils.log("Final Centre-of-mass = %s,%s\n", rounder.toString(com[0]), rounder.toString(com[1]));
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images\n", psfImp.getTitle(), zCentre,
 				Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(settings.getNmPerSlice(), 3), imageCount);
+	}
+
+	private int getCoMXYBorder(int maxx, int maxy)
+	{
+		int w = Math.min(maxx, maxy);
+		return Maths.clip(0, w / 2 - 1, (int) Math.round(w * settings.getComBorder()));
 	}
 
 	private BasePoint[] relocateCentres(float[][] image, BasePoint[] centres)
@@ -3017,7 +3023,8 @@ public class PSFCreator implements PlugInFilter
 			}
 
 			// Update centre
-			double[] com = getCentreOfMassXY(psf, bounds.width, bounds.height, zCentre, settings.getComWindow());
+			double[] com = getCentreOfMassXY(psf, bounds.width, bounds.height, zCentre, settings.getComWindow(),
+					getCoMXYBorder(bounds.width, bounds.height));
 			float dx = (float) (com[0] + bounds.x - centres[i].getX());
 			float dy = (float) (com[1] + bounds.y - centres[i].getY());
 			float dz = (float) (zSelector.zCentre - centres[i].getZ());
@@ -3246,14 +3253,26 @@ public class PSFCreator implements PlugInFilter
 					}
 					w0smoother.smooth(w0);
 					w1smoother.smooth(w1);
-					// Find min combined
+
+					// Combine
 					w01 = new double[maxz];
 					for (int z = 0; z < maxz; z++)
 					{
 						w01[z] = Math.sqrt(w0[z] * w1[z]);
 					}
 					w01 = new Smoother().smooth(w01).getDSmooth();
-					wIndex = SimpleArrayUtils.findMinIndex(w01);
+
+					if (settings.getPsfType() == PSF_TYPE_ASTIGMATISM)
+					{
+						// Find half-way between min of each
+						wIndex = (SimpleArrayUtils.findMinIndex(w0smoother.getDSmooth()) +
+								SimpleArrayUtils.findMinIndex(w1smoother.getDSmooth())) / 2;
+					}
+					else
+					{
+						// Find min combined
+						wIndex = SimpleArrayUtils.findMinIndex(w01);
+					}
 				}
 			}
 		}
@@ -3331,83 +3350,83 @@ public class PSFCreator implements PlugInFilter
 			}
 			else if (settings.getPsfType() == PSF_TYPE_ASTIGMATISM)
 			{
-				// Use intersection between widths ...
 				// Use closest to min width
 				zCentre = wIndex;
 
-				// Use the smoothed data
-				double[] w0 = w0smoother.getDSmooth();
-				double[] w1 = w1smoother.getDSmooth();
-
-				double mind = w0.length;
-
-				for (int i = 1; i < w0.length; i++)
-				{
-					// http://en.wikipedia.org/wiki/Line-line_intersection
-					//
-					//     x1,y1            x4,y4      
-					//         **        ++ 
-					//           **    ++
-					//             **++ P(x,y)
-					//            ++ **
-					//          ++     **
-					//        ++         **
-					//    x3,y3            ** 
-					//                       x2,y2
-
-					final double y1 = w0[i - 1];
-					final double y2 = w0[i];
-					final double y3 = w1[i - 1];
-					final double y4 = w1[i];
-
-					// Check if they cross
-					if (!((y3 >= y1 && y4 < y2) || (y1 >= y3 && y2 < y4)))
-						continue;
-
-					final double x1 = i - 1;
-					final double x2 = i;
-					final double x3 = x1;
-					final double x4 = x2;
-
-					final double x1_x2 = -1.0; //x1 - x2;
-					final double x3_x4 = -1.0; //x3 - x4;
-					final double y1_y2 = y1 - y2;
-					final double y3_y4 = y3 - y4;
-
-					// Check if lines are parallel
-					if (x1_x2 * y3_y4 - y1_y2 * x3_x4 == 0)
-					{
-						if (y1 == y3)
-						{
-							double d = Math.abs(x1 - wIndex);
-							if (mind > d)
-							{
-								mind = d;
-								zCentre = x1;
-							}
-						}
-					}
-					else
-					{
-						// Find intersection
-						double px = ((x1 * y2 - y1 * x2) * x3_x4 - x1_x2 * (x3 * y4 - y3 * x4)) /
-								(x1_x2 * y3_y4 - y1_y2 * x3_x4);
-
-						// Check if the intersection is within the two points
-						// Q. Is this necessary given the intersection check above?
-						if (px >= x1 && px < x2)
-						{
-							double d = Math.abs(px - wIndex);
-							if (mind > d)
-							{
-								mind = d;
-								zCentre = px;
-							}
-						}
-					}
-				}
-
-				zCentre = (int) Math.round(zCentre);
+				//// Use intersection between widths ...
+				//// Use the smoothed data
+				//double[] w0 = w0smoother.getDSmooth();
+				//double[] w1 = w1smoother.getDSmooth();
+				//
+				//double mind = w0.length;
+				//
+				//for (int i = 1; i < w0.length; i++)
+				//{
+				//	// http://en.wikipedia.org/wiki/Line-line_intersection
+				//	//
+				//	//     x1,y1            x4,y4      
+				//	//         **        ++ 
+				//	//           **    ++
+				//	//             **++ P(x,y)
+				//	//            ++ **
+				//	//          ++     **
+				//	//        ++         **
+				//	//    x3,y3            ** 
+				//	//                       x2,y2
+				//
+				//	final double y1 = w0[i - 1];
+				//	final double y2 = w0[i];
+				//	final double y3 = w1[i - 1];
+				//	final double y4 = w1[i];
+				//
+				//	// Check if they cross
+				//	if (!((y3 >= y1 && y4 < y2) || (y1 >= y3 && y2 < y4)))
+				//		continue;
+				//
+				//	final double x1 = i - 1;
+				//	final double x2 = i;
+				//	final double x3 = x1;
+				//	final double x4 = x2;
+				//
+				//	final double x1_x2 = -1.0; //x1 - x2;
+				//	final double x3_x4 = -1.0; //x3 - x4;
+				//	final double y1_y2 = y1 - y2;
+				//	final double y3_y4 = y3 - y4;
+				//
+				//	// Check if lines are parallel
+				//	if (x1_x2 * y3_y4 - y1_y2 * x3_x4 == 0)
+				//	{
+				//		if (y1 == y3)
+				//		{
+				//			double d = Math.abs(x1 - wIndex);
+				//			if (mind > d)
+				//			{
+				//				mind = d;
+				//				zCentre = x1;
+				//			}
+				//		}
+				//	}
+				//	else
+				//	{
+				//		// Find intersection
+				//		double px = ((x1 * y2 - y1 * x2) * x3_x4 - x1_x2 * (x3 * y4 - y3 * x4)) /
+				//				(x1_x2 * y3_y4 - y1_y2 * x3_x4);
+				//
+				//		// Check if the intersection is within the two points
+				//		// Q. Is this necessary given the intersection check above?
+				//		if (px >= x1 && px < x2)
+				//		{
+				//			double d = Math.abs(px - wIndex);
+				//			if (mind > d)
+				//			{
+				//				mind = d;
+				//				zCentre = px;
+				//			}
+				//		}
+				//	}
+				//}
+				//
+				//zCentre = (int) Math.round(zCentre);
 			}
 			else
 			{
@@ -3448,6 +3467,7 @@ public class PSFCreator implements PlugInFilter
 				}
 			});
 			gd.addSlider("CoM_z_window", 0, 8, settings.getComWindow());
+			gd.addSlider("CoM_border", 0, 0.5, settings.getComBorder());
 			if (plotBackground)
 			{
 				String label2 = "Analysis_window";
@@ -3470,11 +3490,13 @@ public class PSFCreator implements PlugInFilter
 			gd.setLocation(location);
 			gd.showDialog(true);
 
-			// Remove interactive guides		
-			psfOut[0].killRoi();
-			psfOut[0].setOverlay(null);
-			psfOut[1].killRoi();
-			psfOut[2].killRoi();
+			// Remove interactive guides
+			if (Utils.isShowGenericDialog())
+			{
+				for (int i = 0; i < 4; i++)
+					psfOut[i].killRoi();
+				psfOut[0].setOverlay(null);
+			}
 
 			removeCentreOnPlots();
 
@@ -3493,12 +3515,14 @@ public class PSFCreator implements PlugInFilter
 			if (plotBackground)
 				drawIntensityPlot(true);
 			drawPSFCentre();
+			drawCoMBorder();
 		}
 
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			zCentre = gd.getNextNumber() - 1;
 			settings.setComWindow((int) gd.getNextNumber());
+			settings.setComBorder(gd.getNextNumber());
 			if (plotBackground)
 				settings.setAnalysisWindow(gd.getNextNumber() / psf.magnification);
 			if (plotEdgeWindow)
@@ -3515,6 +3539,7 @@ public class PSFCreator implements PlugInFilter
 			if (plotBackground)
 				updateIntensityPlot();
 			updatePSFCentre();
+			updateCoMBorder();
 		}
 
 		int plotWindow = -1;
@@ -3612,21 +3637,21 @@ public class PSFCreator implements PlugInFilter
 			if (Utils.isNewWindow())
 				wo.add(pwForeground);
 
-			plot = new Plot(TITLE_SIGNAL, "Slice", "Signal");
-			rangeS = Maths.limits(sdata);
-			plot.setLimits(1, length, rangeS[0], rangeS[1]);
-			plot.setColor(Color.blue);
-			plot.addPoints(slice, ssmoother.getDSmooth(), Plot.LINE);
-			plot.setColor(Color.black);
-			plot.addPoints(slice, SimpleArrayUtils.toDouble(sdata), Plot.LINE);
-			String msgS = "Signal = " + Utils.rounded(sdata[sIndex]);
-			plot.addLabel(0, 0, msgS);
-			pwSignal = Utils.display(TITLE_SIGNAL, plot);
-			if (Utils.isNewWindow())
-				wo.add(pwSignal);
-
 			if (newData)
 			{
+				plot = new Plot(TITLE_SIGNAL, "Slice", "Signal");
+				rangeS = Maths.limits(sdata);
+				plot.setLimits(1, length, rangeS[0], rangeS[1]);
+				plot.setColor(Color.blue);
+				plot.addPoints(slice, ssmoother.getDSmooth(), Plot.LINE);
+				plot.setColor(Color.black);
+				plot.addPoints(slice, SimpleArrayUtils.toDouble(sdata), Plot.LINE);
+				String msgS = "Signal = " + Utils.rounded(sdata[sIndex]);
+				plot.addLabel(0, 0, msgS);
+				pwSignal = Utils.display(TITLE_SIGNAL, plot);
+				if (Utils.isNewWindow())
+					wo.add(pwSignal);
+
 				if (settings.getPsfType() == PSF_TYPE_DH)
 				{
 					// Double-Helix
@@ -3685,7 +3710,7 @@ public class PSFCreator implements PlugInFilter
 
 			if (backgroundLabel != null)
 			{
-				backgroundLabel.setText(msgB + ", " + msgS);
+				backgroundLabel.setText(msgB);
 			}
 		}
 
@@ -3767,6 +3792,10 @@ public class PSFCreator implements PlugInFilter
 			psfOut[0].resetDisplayRange();
 			psfOut[0].updateAndDraw();
 
+			// Show border
+			int border = getCoMXYBorder(psf.maxx, psf.maxy);
+			psfOut[0].setRoi(border, border, psf.maxx - 2 * border, psf.maxy - 2 * border);
+
 			// Mark projections
 			// X-projection
 			psfOut[1].setRoi(new Line(psfZCentre, 0, psfZCentre, psfOut[1].getHeight()));
@@ -3801,13 +3830,50 @@ public class PSFCreator implements PlugInFilter
 				}).start();
 			}
 		}
+
+		private int psfXYBorder = -1;
+
+		private void drawCoMBorder()
+		{
+			// Show border
+			psfXYBorder = getCoMXYBorder(psf.maxx, psf.maxy);
+			psfOut[0].setRoi(psfXYBorder, psfXYBorder, psf.maxx - 2 * psfXYBorder, psf.maxy - 2 * psfXYBorder);
+			psfOut[Projection.Z + 1].setRoi(psfOut[0].getRoi());
+		}
+
+		private void updateCoMBorder()
+		{
+			if (aquirePlotLock4())
+			{
+				// Run in a new thread to allow the GUI to continue updating
+				new Thread(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							// Continue while the parameter is changing
+							while (psfXYBorder != getCoMXYBorder(psf.maxx, psf.maxy))
+							{
+								drawCoMBorder();
+							}
+						}
+						finally
+						{
+							// Ensure the running flag is reset
+							plotLock4 = false;
+						}
+					}
+				}).start();
+			}
+		}
 	}
 
 	private class PSFCropSelector implements DialogListener
 	{
 		ExtractedPSF psf;
 		Label label1, label2;
-		ImagePlus imp;
+		int slice;
 
 		public PSFCropSelector(ExtractedPSF psf)
 		{
@@ -3820,12 +3886,12 @@ public class PSFCreator implements PlugInFilter
 			// find background interactively
 			NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 			gd.addMessage("Crop the final PSF");
-			int size = psf.psf.length;
-			gd.addSlider("Slice", 1, size, size / 2);
+			int maxz = psf.psf.length;
+			gd.addSlider("Slice", 1, maxz, maxz / 2);
 			// Take away 1 from the limits to avoid having dimensions 1 on an axis
 			gd.addSlider("Crop_border", 0, Math.min(psf.maxx, psf.maxy) / 2 - 1, settings.getCropBorder());
-			gd.addSlider("Crop_start", 0, size / 2 - 1, settings.getCropStart());
-			gd.addSlider("Crop_end", 0, size / 2 - 1, settings.getCropEnd());
+			gd.addSlider("Crop_start", 0, maxz / 2 - 1, settings.getCropStart());
+			gd.addSlider("Crop_end", 0, maxz / 2 - 1, settings.getCropEnd());
 			gd.addCheckbox("Single_precision", settings.getSinglePrecision());
 			gd.addSlider("Derivative_order", 0, 2, settings.getDerivativeOrder());
 			gd.addSlider("PSF_magnification", 1, 8, settings.getPsfMagnification());
@@ -3837,21 +3903,67 @@ public class PSFCreator implements PlugInFilter
 				label1 = gd.getLastLabel();
 				gd.addMessage("");
 				label2 = gd.getLastLabel();
-				
+
 				// XXX - Get X and Y projections and use those to show crop start and end
 				// with a line ROI
 				// Maybe show an intensity profile too ...
-				
-				imp = psf.show(TITLE_PSF)[0];
-				drawLabel();
+
+				psf.createProjections();
+				psfOut = psf.show(TITLE_PSF);
+				draw();
 			}
 			gd.showDialog(true);
 
+			// Remove interactive guides
+			if (Utils.isShowGenericDialog())
+			{
+				for (int i = 0; i < 4; i++)
+					psfOut[i].killRoi();
+				//psfOut[0].setOverlay(null);
+				psfOut[1].setOverlay(null);
+				psfOut[2].setOverlay(null);
+			}
+
 			if (gd.wasCanceled())
 				return null;
-			
-			// XXX - do the crop
-			return psf;
+
+			int start = settings.getCropStart();
+			int end = maxz - settings.getCropEnd();
+			int size = end - start;
+			if (size == maxz && settings.getCropBorder() == 0)
+				return psf;
+
+			int maxx = psf.maxx;
+			int maxy = psf.maxy;
+
+			Rectangle bounds = new Rectangle(settings.getCropBorder(), settings.getCropBorder(),
+					maxx - 2 * settings.getCropBorder(), maxy - 2 * settings.getCropBorder());
+			if (size < 2 || bounds.width < 2 || bounds.height < 2)
+			{
+				IJ.error(TITLE, "Invalid crop");
+				return null;
+			}
+
+			float[][] psf2 = new float[size][];
+			for (int z = start, i = 0; z < end; z++, i++)
+			{
+				ImageExtractor ie = new ImageExtractor(psf.psf[z], maxx, maxy);
+				psf2[i] = ie.crop(bounds);
+			}
+
+			return new ExtractedPSF(psf2, bounds.width, bounds.height);
+		}
+
+		private void draw()
+		{
+			drawLabel();
+			drawCentre();
+		}
+
+		private void update()
+		{
+			updateLabel();
+			updateCentre();
 		}
 
 		int cropBorder = -1;
@@ -3871,6 +3983,9 @@ public class PSFCreator implements PlugInFilter
 			order = settings.getDerivativeOrder();
 
 			int[] dimensions = psf.getDimensions();
+			// Set limits
+			int[] min = new int[] { cropBorder, cropBorder, cropStart };
+			int[] max = new int[] { dimensions[0] - cropBorder, dimensions[1] - cropBorder, dimensions[2] - cropEnd };
 			dimensions[0] -= 2 * cropBorder;
 			dimensions[1] -= 2 * cropBorder;
 			dimensions[2] -= (cropStart + cropEnd);
@@ -3885,13 +4000,12 @@ public class PSFCreator implements PlugInFilter
 			label2.setText(String.format("Size for PSF cubic spline = %s MB", futureS));
 
 			// Draw ROI in the image
-			if (cropBorder > 0)
+			psfOut[0].setRoi(min[0], min[1], max[0] - min[0], max[1] - min[1]);
+			for (int i = 0; i < 3; i++)
 			{
-				imp.setRoi(cropBorder, cropBorder, dimensions[0], dimensions[1]);
-			}
-			else
-			{
-				imp.killRoi();
+				int xd = Projection.getXDimension(i);
+				int yd = Projection.getYDimension(i);
+				psfOut[i + 1].setRoi(min[xd], min[yd], max[xd] - min[xd], max[yd] - min[yd]);
 			}
 		}
 
@@ -3930,9 +4044,56 @@ public class PSFCreator implements PlugInFilter
 			}
 		}
 
+		private int centre = -1;
+
+		private void drawCentre()
+		{
+			centre = slice;
+
+			if (psfOut[0].getSlice() != centre)
+			{
+				psfOut[0].setSlice(centre);
+				psfOut[0].resetDisplayRange();
+				psfOut[0].updateAndDraw();
+			}
+
+			// Mark projections using an overlay
+			// X-projection
+			psfOut[1].setOverlay(new Line(centre, 0, centre, psfOut[1].getHeight()), Color.blue, 1, Color.blue);
+			// Y-projection
+			psfOut[2].setOverlay(new Line(0, centre, psfOut[2].getWidth(), centre), Color.blue, 1, Color.blue);
+		}
+
+		private void updateCentre()
+		{
+			if (aquirePlotLock2())
+			{
+				// Run in a new thread to allow the GUI to continue updating
+				new Thread(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							// Continue while the parameter is changing
+							while (centre != slice)
+							{
+								drawCentre();
+							}
+						}
+						finally
+						{
+							// Ensure the running flag is reset
+							plotLock2 = false;
+						}
+					}
+				}).start();
+			}
+		}
+
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
-			int slice = (int) gd.getNextNumber();
+			slice = (int) gd.getNextNumber();
 			settings.setCropBorder((int) gd.getNextNumber());
 			settings.setCropStart((int) gd.getNextNumber());
 			settings.setCropEnd((int) gd.getNextNumber());
@@ -3940,14 +4101,7 @@ public class PSFCreator implements PlugInFilter
 			settings.setDerivativeOrder((int) gd.getNextNumber());
 			settings.setPsfMagnification((int) gd.getNextNumber());
 
-			if (imp.getSlice() != slice)
-			{
-				imp.setSlice(slice);
-				imp.resetDisplayRange();
-				imp.updateAndDraw();
-			}
-
-			updateLabel();
+			update();
 			return true;
 		}
 	}
@@ -4017,7 +4171,8 @@ public class PSFCreator implements PlugInFilter
 		PeakFit.addCameraOptions(gd, PeakFit.FLAG_NO_GAIN, cw);
 		gd.addSlider("Analysis_window", 0, 8, settings.getAnalysisWindow());
 		gd.addSlider("Smoothing", 0.1, 0.5, settings.getSmoothing());
-		gd.addSlider("z-centre_window", 0, 8, settings.getComWindow());
+		gd.addSlider("CoM_z_window", 0, 8, settings.getComWindow());
+		gd.addSlider("CoM_border", 0, 0.5, settings.getComBorder());
 		gd.addSlider("Projection_magnification", 1, 8, settings.getProjectionMagnification());
 		gd.addCheckbox("Smooth_stack_signal", settings.getSmoothStackSignal());
 		gd.addSlider("Max_iterations", 1, 20, settings.getMaxIterations());
@@ -4037,6 +4192,7 @@ public class PSFCreator implements PlugInFilter
 		settings.setAnalysisWindow((int) gd.getNextNumber());
 		settings.setSmoothing(gd.getNextNumber());
 		settings.setComWindow((int) gd.getNextNumber());
+		settings.setComBorder(gd.getNextNumber());
 		settings.setProjectionMagnification((int) gd.getNextNumber());
 		settings.setSmoothStackSignal(gd.getNextBoolean());
 		settings.setMaxIterations((int) gd.getNextNumber());
@@ -4233,7 +4389,7 @@ public class PSFCreator implements PlugInFilter
 		return new double[] { cx, cy, cz };
 	}
 
-	private static double[] getCentreOfMassXY(float[][] psf, int w, int h, int zCentre, int n)
+	private static double[] getCentreOfMassXY(float[][] psf, int w, int h, int zCentre, int n, int border)
 	{
 		double cx = 0;
 		double cy = 0;
@@ -4250,10 +4406,10 @@ public class PSFCreator implements PlugInFilter
 			float[] data = psf[z];
 
 			double sumXY = 0;
-			for (int y = 0, j = 0; y < h; y++)
+			for (int y = border; y < h - border; y++)
 			{
 				double sumX = 0;
-				for (int x = 0; x < w; x++)
+				for (int x = border, j = y * w + border; x < w - border; x++)
 				{
 					float f = data[j++];
 					sumX += f;
@@ -4816,7 +4972,8 @@ public class PSFCreator implements PlugInFilter
 		 */
 		public double[] getCentreOfMassXYShift(int zCentre)
 		{
-			double[] shift = PSFCreator.getCentreOfMassXY(psf, maxx, maxy, zCentre, settings.getComWindow());
+			double[] shift = PSFCreator.getCentreOfMassXY(psf, maxx, maxy, zCentre, settings.getComWindow(),
+					getCoMXYBorder(maxx, maxy));
 			// Turn into a shift relative to the centre
 			int[] d = new int[] { maxx, maxy };
 			for (int i = 0; i < d.length; i++)
