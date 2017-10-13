@@ -1287,7 +1287,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
 		List<Worker> workers = new LinkedList<Worker>();
 		List<Thread> threads = new LinkedList<Thread>();
-		PeakResults syncResults = SynchronizedPeakResults.create(results, nThreads);
+		PeakResults syncResults = SynchronizedPeakResults.create(peakResults, nThreads);
 		for (int i = 0; i < nThreads; i++)
 		{
 			Worker worker = new Worker(jobs, stack, actualCoordinates, filterCandidates, syncResults);
