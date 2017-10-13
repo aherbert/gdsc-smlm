@@ -39,6 +39,7 @@ public class CropResults implements PlugIn
 	private static double x = 0, y = 0, width = 0, height = 0;
 	private static boolean selectRegion, overwrite, useRoi;
 	private static String roiImage = "";
+	private static boolean resetOrigin = false;
 	private boolean myUseRoi;
 
 	private MemoryPeakResults results;
@@ -113,6 +114,7 @@ public class CropResults implements PlugIn
 			gd.addChoice("Image", items, roiImage);
 		}
 		gd.addCheckbox("Overwrite", overwrite);
+		gd.addCheckbox("Reset_origin", resetOrigin);
 
 		gd.showDialog();
 
@@ -131,6 +133,7 @@ public class CropResults implements PlugIn
 			roiImage = gd.getNextChoice();
 		}
 		overwrite = gd.getNextBoolean();
+		resetOrigin = gd.getNextBoolean();
 
 		return true;
 	}
@@ -203,6 +206,12 @@ public class CropResults implements PlugIn
 			newResults.setName(results.getName() + " Cropped");
 		}
 		MemoryPeakResults.addResults(newResults);
+		
+		if (resetOrigin)
+		{
+			Rectangle b = newResults.getBounds(); 
+			newResults.translate(-b.x, -b.y);
+		}
 
 		IJ.showStatus(newResults.size() + " Cropped localisations");
 	}
