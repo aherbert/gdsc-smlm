@@ -27,16 +27,21 @@ public class CubicSplineCalculatorTest
 		for (int i = 0; i < 4; i++)
 			s[i] = new CubicSplinePosition((double) i / 3);
 		double[][][] value = new double[4][4][4];
+		double[] b = new double[64];
+		c = 0;
 		for (int k = 0; k < 4; k++)
 			for (int j = 0; j < 4; j++)
 				for (int i = 0; i < 4; i++)
 				{
 					value[i][j][k] = f.value(s[i], s[j], s[k]);
+					b[c++] = value[i][j][k]; 
 				}
 
 		CubicSplineCalculator calc = new CubicSplineCalculator();
 		double[] o = calc.compute(value);
-
+		Assert.assertArrayEquals(e, o, 1e-6);
+		
+		o = calc.compute(b);
 		Assert.assertArrayEquals(e, o, 1e-6);
 	}
 
@@ -58,16 +63,21 @@ public class CubicSplineCalculatorTest
 		for (int i = 0; i < 4; i++)
 			s[i] = new CubicSplinePosition((double) i / 3);
 		double[][][] value = new double[4][4][4];
+		double[] b = new double[64];
+		int c = 0;
 		for (int k = 0; k < 4; k++)
 			for (int j = 0; j < 4; j++)
 				for (int i = 0; i < 4; i++)
 				{
 					value[i][j][k] = f.value(s[i], s[j], s[k]);
+					b[c++] = value[i][j][k]; 
 				}
 		
 		CubicSplineCalculator calc = new CubicSplineCalculator();
 		double[] o = calc.compute(value);
-
+		Assert.assertArrayEquals(e, o, 1e-6);
+		
+		o = calc.compute(b);
 		Assert.assertArrayEquals(e, o, 1e-6);
 	}
 

@@ -26,6 +26,9 @@ import gdsc.core.math.interpolation.CustomTricubicFunction;
  */
 public class CubicSplineCalculator
 {
+	// Based on the code provided by Hazen Babcock for 3D spline fitting
+	// https://github.com/ZhuangLab/storm-analysis/blob/master/storm_analysis/spliner/spline3D.py
+
 	private static final DenseMatrix64F A;
 	static
 	{
@@ -97,6 +100,21 @@ public class CubicSplineCalculator
 			for (int j = 0; j < 4; j++)
 				for (int i = 0; i < 4; i++)
 					B.data[c++] = value.get(i, j, k);
+		solver.solve(B, B);
+		return B.data;
+	}
+
+	/**
+	 * Compute the coefficients given the spline node value at interpolated points. The value should be interpolated at
+	 * [0,1/3,2/3,1] in each dimension.
+	 *
+	 * @param value
+	 *            the value (packed in order : i = z*16+4*y+x) for x,y,z in [0,1,2,3])
+	 * @return the coefficients (or null if computation failed)
+	 */
+	public double[] compute(double[] value)
+	{
+		DenseMatrix64F B = DenseMatrix64F.wrap(64, 1, value);
 		solver.solve(B, B);
 		return B.data;
 	}
