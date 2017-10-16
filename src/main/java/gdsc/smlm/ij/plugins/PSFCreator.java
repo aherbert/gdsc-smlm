@@ -25,7 +25,6 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.data.FloatStackTrivalueProvider;
-import gdsc.core.data.TrivalueProvider;
 import gdsc.core.data.procedures.FloatStackTrivalueProcedure;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
@@ -2804,8 +2803,8 @@ public class PSFCreator implements PlugInFilter
 			for (int j = 0; j < 2; j++)
 				rmsd[j] = Math.sqrt(rmsd[j] / psfs.length);
 
-			Utils.showStatus(String.format("[%d] Checking combined PSF", iter+1));
-			
+			Utils.showStatus(String.format("[%d] Checking combined PSF", iter + 1));
+
 			// Get the current combined z-centre. 
 			// This is used to get the centre of mass for repositioning. 
 			zSelector.setPSF(combined);
@@ -2853,7 +2852,7 @@ public class PSFCreator implements PlugInFilter
 			centres = updateUsingCentreOfMassXYShift(shift, shiftd, combined, centres);
 
 			// Extract each PSF into a scaled PSF
-			Utils.showStatus(String.format("[%d] Extracting PSFs", iter+1));
+			Utils.showStatus(String.format("[%d] Extracting PSFs", iter + 1));
 			psfs = extractPSFs(image, centres);
 		}
 
@@ -5243,12 +5242,11 @@ public class PSFCreator implements PlugInFilter
 		return sum;
 	}
 
-	private class CSplineBuilder implements TrivalueProvider
+	private class CSplineBuilder
 	{
 		float[][] psf;
 		final int maxi, maxj, maxk;
 		final int maxx;
-		int index0, z;
 		CustomTricubicFunction[][][] splines;
 
 		CSplineBuilder(ExtractedPSF psf)
@@ -5261,65 +5259,67 @@ public class PSFCreator implements PlugInFilter
 			maxx = psf.maxx;
 		}
 
-		public int getMaxX()
-		{
-			return 4;
-		}
-
-		public int getMaxY()
-		{
-			return 4;
-		}
-
-		public int getMaxZ()
-		{
-			return 4;
-		}
-
-		public double get(int x, int y, int z)
-		{
-			return psf[this.z + z][index0 + y * maxx + x];
-		}
-
-		public void get(int x, int y, int z, double[][][] values)
-		{
-			values[x][y][z] = get(x, y, z);
-		}
-
-		public double[][][] toArray()
-		{
-			return null;
-		}
-
 		void build()
 		{
-			CubicSplineCalculator calc = new CubicSplineCalculator();
 			splines = new CustomTricubicFunction[maxi][maxj][maxk];
-			Ticker ticker = Ticker.create(new IJTrackProgress(), (long) maxi * maxj * maxk, false);
+			final Ticker ticker = Ticker.create(new IJTrackProgress(), (long) maxi * maxj * maxk, true);
 			ticker.start();
-			// Create all the spline nodes by processing continuous blocks of 4x4x4 from the image stack
+			TurboList<Future<?>> futures = new TurboList<Future<?>>(maxk);
+			// Create all the spline nodes by processing continuous blocks of 4x4x4 from the image stack.
+			// Note that the function is enlarge x3 so a 4x4x4 block samples the voxel at [0,1/3,2/3,1]
+			// in each dimension. There should be a final pixel on the end of the data for the final 
+			// spline node along each dimension, i.e. dimension length = n*3 + 1 with n the number of nodes.
+			for (int k = 0; k < maxk; k++)
+			{
+				final int kk = k;
+				futures.add(threadPool.submit(new Runnable()
+				{
+					public void run()
+					{
+						CubicSplineCalculator calc = new CubicSplineCalculator();
+						double[] value = new double[64];
+						final int zz = 3 * kk;
+						for (int j = 0; j < maxj; j++)
+						{
+							// 4x4 block origin in the XY data
+							int index0 = 3 * j * maxx;
+							for (int i = 0; i < maxi; i++)
+							{
+								ticker.tick();
+								int c = 0;
+								for (int z = 0; z < 4; z++)
+								{
+									final float[] data = psf[zz + z];
+									for (int y = 0; y < 4; y++)
+										for (int x = 0, ii = index0 + y * maxx; x < 4; x++)
+											value[c++] = data[ii++];
+								}
+								splines[i][j][kk] = CustomTricubicFunction.create(calc.compute(value));
+								index0 += 3;
+							}
+						}
+					}
+				}));
+			}
+			ticker.stop();
+
+			Utils.waitForCompletion(futures);
+
+			// Normalise
 			double maxSum = 0;
 			for (int k = 0; k < maxk; k++)
 			{
-				z = 3 * k;
 				double sum = 0;
 				for (int j = 0; j < maxj; j++)
 				{
-					index0 = 3 * j * maxx;
 					for (int i = 0; i < maxi; i++)
 					{
-						ticker.tick();
-						splines[i][j][k] = CustomTricubicFunction.create(calc.compute(this));
 						sum += splines[i][j][k].value000();
-						index0 += 3;
 					}
 				}
 				if (maxSum < sum)
 					maxSum = sum;
 			}
-			ticker.stop();
-
-			// Normalise
 			if (maxSum == 0)
 				throw new IllegalStateException("The cubic spline has no maximum signal");
 			final double scale = 1.0 / maxSum;
