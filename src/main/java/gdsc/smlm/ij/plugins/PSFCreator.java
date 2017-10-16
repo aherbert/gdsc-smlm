@@ -109,6 +109,9 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
+import ij.gui.ExtendedGenericDialog.OptionCollectedListener;
+import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.gui.Line;
@@ -158,6 +161,9 @@ public class PSFCreator implements PlugInFilter
 	private static final int PSF_TYPE_SPOT = 0;
 	private static final int PSF_TYPE_ASTIGMATISM = 1;
 	private static final int PSF_TYPE_DH = 2;
+	private static final String[] OUTPUT_TYPE = { "CSpline", "Image PSF" };
+	private static final int OUTPUT_TYPE_CSPLINE = 0;
+	private static final int OUTPUT_TYPE_IMAGE_PSF = 1;
 
 	private PSFCreatorSettings.Builder settings;
 
@@ -2855,20 +2861,37 @@ public class PSFCreator implements PlugInFilter
 		// Combine all
 		ExtractedPSF combined = combine(psfs);
 
-		// Show an interactive dialog for cropping the PSF
-		PSFCropSelector cropSelector = new PSFCropSelector(combined);
+		// Show an interactive dialog for cropping the PSF and choosing the 
+		// final output
+		PSFOutputSelector cropSelector = new PSFOutputSelector(combined);
 		combined = cropSelector.run();
 		if (combined == null)
 			return;
 
-		// Enlarge the combined PSF
-		combined = combined.enlarge(settings.getPsfMagnification(), threadPool);
+		// For an image PSF we can just enlarge the PSF and window.
+		// For a CSpline then we already have the 3D cubic spline function.
+		// However we want to post-process the function to allow windowing and 
+		// normalisation. So we enlarge by 3 in each dimension.
+		// The CSpline can be created by solving the coefficients for the 
+		// 4x4x4 (64) sampled points on each node. 
+		
+		int magnification;
+		if (settings.getOutputType() == OUTPUT_TYPE_IMAGE_PSF)
+		{
+			magnification = settings.getPsfMagnification();
+		}
+		else
+		{
+			magnification = 3;
+		}
 
+		// Enlarge the combined PSF for final processing
+		ExtractedPSF finalPSF = combined.enlarge(3, threadPool);
+		
 		// Show a dialog to collect final z-centre interactively
-		//PSFCentreSelector zSelector = new PSFCentreSelector(combined);
-		zSelector.setPSF(combined);
+		zSelector.setPSF(finalPSF);
 		zSelector.analyse();
-		//zSelector.zCentre = combined.psf.length / 2.0;
+		//zSelector.zCentre = finalPSF.psf.length / 2.0;
 		zSelector.guessZCentre();
 		double dz = zSelector.run(true, true, null);
 		if (dz < 0)
@@ -2880,11 +2903,11 @@ public class PSFCreator implements PlugInFilter
 		// All pixels below the background are set to zero
 		// Apply a Tukey window to roll-off to zero at the outer pixels
 
-		double[] wx = ImageWindow.tukeyEdge(combined.maxx, settings.getWindow());
-		double[] wz = ImageWindow.tukeyEdge(combined.psf.length, settings.getWindow());
+		double[] wx = ImageWindow.tukeyEdge(finalPSF.maxx, settings.getWindow());
+		double[] wz = ImageWindow.tukeyEdge(finalPSF.psf.length, settings.getWindow());
 
 		// Normalisation so the max intensity frame is one
-		float[][] psf = combined.psf;
+		float[][] psf = finalPSF.psf;
 		int maxz = psf.length;
 		double[] sum = new double[maxz];
 		for (int z = 0; z < maxz; z++)
@@ -2915,10 +2938,10 @@ public class PSFCreator implements PlugInFilter
 		Utils.display(TITLE_SIGNAL, plot);
 
 		// Create a new extracted PSF and show
-		int magnification = combined.magnification;
-		combined = new ExtractedPSF(psf, combined.maxx, combined.centre, magnification);
-		combined.createProjections();
-		psfOut = combined.show(TITLE_PSF, zCentre);
+		magnification = finalPSF.magnification;
+		finalPSF = new ExtractedPSF(psf, finalPSF.maxx, finalPSF.centre, magnification);
+		finalPSF.createProjections();
+		psfOut = finalPSF.show(TITLE_PSF, zCentre);
 		psfImp = psfOut[0];
 
 		// Add image info
@@ -2928,19 +2951,12 @@ public class PSFCreator implements PlugInFilter
 
 		// Add the CoM
 		// Find the XY centre around the z centre 
-		double[] com = getCentreOfMassXY(combined.psf, combined.maxx, combined.maxy, zCentre - 1,
-				settings.getComWindow(), getCoMXYBorder(combined.maxx, combined.maxy));
+		double[] com = getCentreOfMassXY(finalPSF.psf, finalPSF.maxx, finalPSF.maxy, zCentre - 1,
+				settings.getComWindow(), getCoMXYBorder(finalPSF.maxx, finalPSF.maxy));
 
 		imagePsf.setXCentre(com[0]);
 		imagePsf.setYCentre(com[1]);
 		imagePsf.setZCentre(zCentre - 1);
-		// This is a bit redundant ...
-		//		Offset.Builder offsetBuilder = Offset.newBuilder();
-		//		offsetBuilder.setCx(com[0]);
-		//		offsetBuilder.setCy(com[1]);
-		//		Offset offset = offsetBuilder.build();
-		//		for (int z = 1; z <= psf.length; z++)
-		//			imagePsf.putOffsets(z, offset);
 		psfImp.setProperty("Info", ImagePSFHelper.toString(imagePsf));
 
 		psfImp.setRoi(new PointRoi(com[0], com[1]));
@@ -2951,6 +2967,17 @@ public class PSFCreator implements PlugInFilter
 		Utils.log("Final Centre-of-mass = %s,%s\n", rounder.toString(com[0]), rounder.toString(com[1]));
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images\n", psfImp.getTitle(), zCentre,
 				Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(settings.getNmPerSlice(), 3), imageCount);
+		
+		if (settings.getOutputType() == OUTPUT_TYPE_CSPLINE)
+		{
+			// Need a CSpline object representation that can be saved and loaded 
+			// from file.
+			// Need method to compute coefficients from 64 interpolated points in the voxel
+			// for all windowed points.
+			// Method to update the coefficients in the spline.
+			// Perhaps put this into a package class to apply a window to the current spline.
+			
+		}
 	}
 
 	private int getCoMXYBorder(int maxx, int maxy)
@@ -3225,7 +3252,7 @@ public class PSFCreator implements PlugInFilter
 					// and the max and then move outward until at half-max
 					// If there is more than one peak then the width
 					// is invalid.
-					
+
 					// Spot - get FWHM of the X and Y sum projections
 					w0 = new double[maxz];
 					w1 = new double[maxz];
@@ -3876,13 +3903,13 @@ public class PSFCreator implements PlugInFilter
 		}
 	}
 
-	private class PSFCropSelector implements DialogListener
+	private class PSFOutputSelector implements DialogListener
 	{
 		ExtractedPSF psf;
-		Label label1, label2;
+		Label label1;
 		int slice;
 
-		public PSFCropSelector(ExtractedPSF psf)
+		public PSFOutputSelector(ExtractedPSF psf)
 		{
 			this.psf = psf;
 		}
@@ -3891,7 +3918,7 @@ public class PSFCreator implements PlugInFilter
 		{
 			// Show a dialog to collect processing options and 
 			// find background interactively
-			NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+			final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 			gd.addMessage("Crop the final PSF");
 			int maxz = psf.psf.length;
 			gd.addSlider("Slice", 1, maxz, maxz / 2);
@@ -3899,21 +3926,61 @@ public class PSFCreator implements PlugInFilter
 			gd.addSlider("Crop_border", 0, Math.min(psf.maxx, psf.maxy) / 2 - 1, settings.getCropBorder());
 			gd.addSlider("Crop_start", 0, maxz / 2 - 1, settings.getCropStart());
 			gd.addSlider("Crop_end", 0, maxz / 2 - 1, settings.getCropEnd());
-			gd.addCheckbox("Single_precision", settings.getSinglePrecision());
-			gd.addSlider("Derivative_order", 0, 2, settings.getDerivativeOrder());
-			gd.addSlider("PSF_magnification", 1, 8, settings.getPsfMagnification());
+			gd.addChoice("Output_type", OUTPUT_TYPE, settings.getOutputType(), new OptionListener<Integer>()
+			{
+				public boolean collectOptions(Integer value)
+				{
+					settings.setOutputType(value);
+					return collectOptions();
+				}
+
+				public boolean collectOptions()
+				{
+					int outputType = settings.getOutputType();
+					ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+					if (outputType == OUTPUT_TYPE_IMAGE_PSF)
+					{
+						// Image PSF
+						egd.addSlider("PSF_magnification", 1, 8, settings.getPsfMagnification());
+					}
+					else
+					{
+						// CSpline
+						egd.addCheckbox("Single_precision", settings.getSinglePrecision());
+					}
+					egd.showDialog(true, gd);
+					if (egd.wasCanceled())
+						return false;
+					if (outputType == OUTPUT_TYPE_IMAGE_PSF)
+					{
+						// Image PSF
+						settings.setPsfMagnification((int) egd.getNextNumber());
+					}
+					else
+					{
+						// CSpline
+						settings.setSinglePrecision(egd.getNextBoolean());
+					}
+					return true;
+				}
+			});
 
 			gd.addDialogListener(this);
 			if (Utils.isShowGenericDialog())
 			{
+				gd.addOptionCollectedListener(new OptionCollectedListener()
+				{
+					public void optionCollected(OptionCollectedEvent e)
+					{
+						update();
+					}
+				});
 				gd.addMessage("");
 				label1 = gd.getLastLabel();
-				gd.addMessage("");
-				label2 = gd.getLastLabel();
 
-				// XXX - Get X and Y projections and use those to show crop start and end
-				// with a line ROI
-				// Maybe show an intensity profile too ...
+				// Get X and Y projections and use those to show crop start and end
+				// with a line ROI.
+				// TODO - Maybe show an intensity profile too ...
 
 				psf.createProjections();
 				psfOut = psf.show(TITLE_PSF);
@@ -3933,6 +4000,8 @@ public class PSFCreator implements PlugInFilter
 
 			if (gd.wasCanceled())
 				return null;
+
+			gd.collectOptions();
 
 			int start = settings.getCropStart();
 			int end = maxz - settings.getCropEnd();
@@ -3961,6 +4030,18 @@ public class PSFCreator implements PlugInFilter
 			return new ExtractedPSF(psf2, bounds.width, bounds.height);
 		}
 
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			slice = (int) gd.getNextNumber();
+			settings.setCropBorder((int) gd.getNextNumber());
+			settings.setCropStart((int) gd.getNextNumber());
+			settings.setCropEnd((int) gd.getNextNumber());
+			settings.setOutputType(gd.getNextChoiceIndex());
+
+			update();
+			return true;
+		}
+
 		private void draw()
 		{
 			drawLabel();
@@ -3976,18 +4057,18 @@ public class PSFCreator implements PlugInFilter
 		int cropBorder = -1;
 		int cropStart = -1;
 		int cropEnd = -1;
+		int outputType = -1;
 		int psfMagnification;
 		boolean singlePrecision = false;
-		int order;
 
 		private void drawLabel()
 		{
 			cropBorder = settings.getCropBorder();
 			cropStart = settings.getCropStart();
 			cropEnd = settings.getCropEnd();
+			outputType = settings.getOutputType();
 			psfMagnification = settings.getPsfMagnification();
 			singlePrecision = settings.getSinglePrecision();
-			order = settings.getDerivativeOrder();
 
 			int[] dimensions = psf.getDimensions();
 			// Set limits
@@ -3998,13 +4079,19 @@ public class PSFCreator implements PlugInFilter
 			dimensions[2] -= (cropStart + cropEnd);
 
 			Size size = CustomTricubicInterpolatingFunction.estimateSize(dimensions);
-			long current = size.getMemoryFootprint(false, 0);
-			Size next = size.enlarge(psfMagnification);
-			long future = next.getMemoryFootprint(singlePrecision, order);
-			String currentS = Utils.rounded((double) (current / 1048576));
-			String futureS = Utils.rounded((double) (future / 1048576));
-			label1.setText(String.format("Size required for enlargment = %s MB", currentS));
-			label2.setText(String.format("Size for PSF cubic spline = %s MB", futureS));
+			if (outputType == OUTPUT_TYPE_IMAGE_PSF)
+			{
+				Size next = size.enlarge(psfMagnification);
+				long future = next.getTotalFunctionPoints() * 4; // 4 bytes for a float
+				String futureS = Utils.rounded((double) (future / 1048576));
+				label1.setText(String.format("Size for Image PSF = %s MB", futureS));
+			}
+			else
+			{
+				long current = size.getMemoryFootprint(singlePrecision);
+				String currentS = Utils.rounded((double) (current / 1048576));
+				label1.setText(String.format("Size of Cubic Spline = %s MB", currentS));
+			}
 
 			// Draw ROI in the image
 			psfOut[0].setRoi(min[0], min[1], max[0] - min[0], max[1] - min[1]);
@@ -4033,9 +4120,9 @@ public class PSFCreator implements PlugInFilter
 							while (cropBorder != settings.getCropBorder() || 
 									cropStart != settings.getCropStart() ||
 									cropEnd != settings.getCropEnd() ||
+									outputType != settings.getOutputType() ||
 									psfMagnification != settings.getPsfMagnification() ||
-									singlePrecision != settings.getSinglePrecision() ||
-									order != settings.getDerivativeOrder())
+									singlePrecision != settings.getSinglePrecision())
 							//@formatter:on
 							{
 								drawLabel();
@@ -4096,20 +4183,6 @@ public class PSFCreator implements PlugInFilter
 					}
 				}).start();
 			}
-		}
-
-		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
-		{
-			slice = (int) gd.getNextNumber();
-			settings.setCropBorder((int) gd.getNextNumber());
-			settings.setCropStart((int) gd.getNextNumber());
-			settings.setCropEnd((int) gd.getNextNumber());
-			settings.setSinglePrecision(gd.getNextBoolean());
-			settings.setDerivativeOrder((int) gd.getNextNumber());
-			settings.setPsfMagnification((int) gd.getNextNumber());
-
-			update();
-			return true;
 		}
 	}
 
@@ -4994,6 +5067,9 @@ public class PSFCreator implements PlugInFilter
 
 		public ExtractedPSF enlarge(int n, ExecutorService threadPool)
 		{
+			if (n <= 1)
+				return this;
+
 			IJ.showStatus("Enlarging ... creating spline");
 
 			// The scales are actually arbitrary
