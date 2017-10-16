@@ -9,6 +9,9 @@ import java.awt.Rectangle;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2993,9 +2996,21 @@ public class PSFCreator implements PlugInFilter
 			// from file.
 			IJ.showStatus("Creating cubic spline");
 			CSplineBuilder value = new CSplineBuilder(combined);
-			value.build();
+			CustomTricubicInterpolatingFunction f  = value.build();
 
-			// Save the result ...
+			// Save the result ...			
+			try
+			{
+				f.write(new FileOutputStream("/tmp/f.bin"));
+			}
+			catch (FileNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
 		}
 		IJ.showStatus("");
 	}
@@ -5248,6 +5263,7 @@ public class PSFCreator implements PlugInFilter
 		final int maxi, maxj, maxk;
 		final int maxx;
 		CustomTricubicFunction[][][] splines;
+		final int magnification;
 
 		CSplineBuilder(ExtractedPSF psf)
 		{
@@ -5257,9 +5273,10 @@ public class PSFCreator implements PlugInFilter
 			maxj = size.getSplinePoints(1);
 			maxk = size.getSplinePoints(2);
 			maxx = psf.maxx;
+			magnification = psf.magnification;
 		}
 
-		void build()
+		CustomTricubicInterpolatingFunction build()
 		{
 			splines = new CustomTricubicFunction[maxi][maxj][maxk];
 			final Ticker ticker = Ticker.create(new IJTrackProgress(), (long) maxi * maxj * maxk, true);
@@ -5333,6 +5350,12 @@ public class PSFCreator implements PlugInFilter
 					}
 				}
 			}
+			
+			double inc = magnification / 3.0;
+			return new CustomTricubicInterpolatingFunction(
+					SimpleArrayUtils.newArray(maxi+1, 0.5, inc), 
+					SimpleArrayUtils.newArray(maxj+1, 0.5, inc), 
+					SimpleArrayUtils.newArray(maxk+1, 0.5, inc), splines);
 		}
 	}
 }
