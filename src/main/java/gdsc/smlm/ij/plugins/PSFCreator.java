@@ -2973,7 +2973,10 @@ public class PSFCreator implements PlugInFilter
 
 		if (settings.getOutputType() == OUTPUT_TYPE_CSPLINE)
 		{
-			// TODO
+			// TODO - Show dialog with option to save the cubic spline
+			// - filename
+			// - single/double precision
+			
 			// Need a CSpline object representation that can be saved and loaded 
 			// from file.
 			// Need method to compute coefficients from 64 interpolated points in the voxel
