@@ -22230,14 +22230,19 @@ public final class GUIProtos {
     int getCropEnd();
 
     /**
-     * <code>int32 derivative_order = 29;</code>
+     * <code>int32 psf_z_magnification = 29;</code>
      */
-    int getDerivativeOrder();
+    int getPsfZMagnification();
 
     /**
      * <code>double com_border = 30;</code>
      */
     double getComBorder();
+
+    /**
+     * <code>int32 output_type = 31;</code>
+     */
+    int getOutputType();
   }
   /**
    * <pre>
@@ -22280,8 +22285,9 @@ public final class GUIProtos {
       cropBorder_ = 0;
       cropStart_ = 0;
       cropEnd_ = 0;
-      derivativeOrder_ = 0;
+      psfZMagnification_ = 0;
       comBorder_ = 0D;
+      outputType_ = 0;
     }
 
     @java.lang.Override
@@ -22475,12 +22481,17 @@ public final class GUIProtos {
             }
             case 232: {
 
-              derivativeOrder_ = input.readInt32();
+              psfZMagnification_ = input.readInt32();
               break;
             }
             case 241: {
 
               comBorder_ = input.readDouble();
+              break;
+            }
+            case 248: {
+
+              outputType_ = input.readInt32();
               break;
             }
           }
@@ -22806,13 +22817,13 @@ public final class GUIProtos {
       return cropEnd_;
     }
 
-    public static final int DERIVATIVE_ORDER_FIELD_NUMBER = 29;
-    private int derivativeOrder_;
+    public static final int PSF_Z_MAGNIFICATION_FIELD_NUMBER = 29;
+    private int psfZMagnification_;
     /**
-     * <code>int32 derivative_order = 29;</code>
+     * <code>int32 psf_z_magnification = 29;</code>
      */
-    public int getDerivativeOrder() {
-      return derivativeOrder_;
+    public int getPsfZMagnification() {
+      return psfZMagnification_;
     }
 
     public static final int COM_BORDER_FIELD_NUMBER = 30;
@@ -22822,6 +22833,15 @@ public final class GUIProtos {
      */
     public double getComBorder() {
       return comBorder_;
+    }
+
+    public static final int OUTPUT_TYPE_FIELD_NUMBER = 31;
+    private int outputType_;
+    /**
+     * <code>int32 output_type = 31;</code>
+     */
+    public int getOutputType() {
+      return outputType_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -22920,11 +22940,14 @@ public final class GUIProtos {
       if (cropEnd_ != 0) {
         output.writeInt32(28, cropEnd_);
       }
-      if (derivativeOrder_ != 0) {
-        output.writeInt32(29, derivativeOrder_);
+      if (psfZMagnification_ != 0) {
+        output.writeInt32(29, psfZMagnification_);
       }
       if (comBorder_ != 0D) {
         output.writeDouble(30, comBorder_);
+      }
+      if (outputType_ != 0) {
+        output.writeInt32(31, outputType_);
       }
     }
 
@@ -23045,13 +23068,17 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(28, cropEnd_);
       }
-      if (derivativeOrder_ != 0) {
+      if (psfZMagnification_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(29, derivativeOrder_);
+          .computeInt32Size(29, psfZMagnification_);
       }
       if (comBorder_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(30, comBorder_);
+      }
+      if (outputType_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(31, outputType_);
       }
       memoizedSize = size;
       return size;
@@ -23146,12 +23173,14 @@ public final class GUIProtos {
           == other.getCropStart());
       result = result && (getCropEnd()
           == other.getCropEnd());
-      result = result && (getDerivativeOrder()
-          == other.getDerivativeOrder());
+      result = result && (getPsfZMagnification()
+          == other.getPsfZMagnification());
       result = result && (
           java.lang.Double.doubleToLongBits(getComBorder())
           == java.lang.Double.doubleToLongBits(
               other.getComBorder()));
+      result = result && (getOutputType()
+          == other.getOutputType());
       return result;
     }
 
@@ -23235,11 +23264,13 @@ public final class GUIProtos {
       hash = (53 * hash) + getCropStart();
       hash = (37 * hash) + CROP_END_FIELD_NUMBER;
       hash = (53 * hash) + getCropEnd();
-      hash = (37 * hash) + DERIVATIVE_ORDER_FIELD_NUMBER;
-      hash = (53 * hash) + getDerivativeOrder();
+      hash = (37 * hash) + PSF_Z_MAGNIFICATION_FIELD_NUMBER;
+      hash = (53 * hash) + getPsfZMagnification();
       hash = (37 * hash) + COM_BORDER_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getComBorder()));
+      hash = (37 * hash) + OUTPUT_TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getOutputType();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -23441,9 +23472,11 @@ public final class GUIProtos {
 
         cropEnd_ = 0;
 
-        derivativeOrder_ = 0;
+        psfZMagnification_ = 0;
 
         comBorder_ = 0D;
+
+        outputType_ = 0;
 
         return this;
       }
@@ -23507,8 +23540,9 @@ public final class GUIProtos {
         result.cropBorder_ = cropBorder_;
         result.cropStart_ = cropStart_;
         result.cropEnd_ = cropEnd_;
-        result.derivativeOrder_ = derivativeOrder_;
+        result.psfZMagnification_ = psfZMagnification_;
         result.comBorder_ = comBorder_;
+        result.outputType_ = outputType_;
         onBuilt();
         return result;
       }
@@ -23634,11 +23668,14 @@ public final class GUIProtos {
         if (other.getCropEnd() != 0) {
           setCropEnd(other.getCropEnd());
         }
-        if (other.getDerivativeOrder() != 0) {
-          setDerivativeOrder(other.getDerivativeOrder());
+        if (other.getPsfZMagnification() != 0) {
+          setPsfZMagnification(other.getPsfZMagnification());
         }
         if (other.getComBorder() != 0D) {
           setComBorder(other.getComBorder());
+        }
+        if (other.getOutputType() != 0) {
+          setOutputType(other.getOutputType());
         }
         onChanged();
         return this;
@@ -24703,28 +24740,28 @@ public final class GUIProtos {
         return this;
       }
 
-      private int derivativeOrder_ ;
+      private int psfZMagnification_ ;
       /**
-       * <code>int32 derivative_order = 29;</code>
+       * <code>int32 psf_z_magnification = 29;</code>
        */
-      public int getDerivativeOrder() {
-        return derivativeOrder_;
+      public int getPsfZMagnification() {
+        return psfZMagnification_;
       }
       /**
-       * <code>int32 derivative_order = 29;</code>
+       * <code>int32 psf_z_magnification = 29;</code>
        */
-      public Builder setDerivativeOrder(int value) {
+      public Builder setPsfZMagnification(int value) {
         
-        derivativeOrder_ = value;
+        psfZMagnification_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 derivative_order = 29;</code>
+       * <code>int32 psf_z_magnification = 29;</code>
        */
-      public Builder clearDerivativeOrder() {
+      public Builder clearPsfZMagnification() {
         
-        derivativeOrder_ = 0;
+        psfZMagnification_ = 0;
         onChanged();
         return this;
       }
@@ -24751,6 +24788,32 @@ public final class GUIProtos {
       public Builder clearComBorder() {
         
         comBorder_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int outputType_ ;
+      /**
+       * <code>int32 output_type = 31;</code>
+       */
+      public int getOutputType() {
+        return outputType_;
+      }
+      /**
+       * <code>int32 output_type = 31;</code>
+       */
+      public Builder setOutputType(int value) {
+        
+        outputType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 output_type = 31;</code>
+       */
+      public Builder clearOutputType() {
+        
+        outputType_ = 0;
         onChanged();
         return this;
       }
@@ -25012,7 +25075,7 @@ public final class GUIProtos {
       "\022\023\n\013field_width\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022" +
       "\020\n\010z_dither\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022" +
       "\024\n\014nm_per_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001\"" +
-      "\273\006\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
+      "\323\006\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
       "radius\030\002 \001(\001\022\030\n\020interactive_mode\030\003 \001(\010\022\024" +
       "\n\014nm_per_slice\030\004 \001(\001\022E\n\023fit_engine_setti" +
       "ngs\030\005 \001(\0132(.gdsc.smlm.data.config.FitEng" +
@@ -25031,11 +25094,11 @@ public final class GUIProtos {
       "ication\030\026 \001(\005\022\016\n\006window\030\027 \001(\005\022\033\n\023smooth_" +
       "stack_signal\030\030 \001(\010\022\030\n\020single_precision\030\031" +
       " \001(\010\022\023\n\013crop_border\030\032 \001(\005\022\022\n\ncrop_start\030" +
-      "\033 \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\030\n\020derivative_or" +
-      "der\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001*O\n\014Templat" +
-      "eType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_T" +
-      "EMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIPro" +
-      "tosb\006proto3"
+      "\033 \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\033\n\023psf_z_magnifi" +
+      "cation\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023\n\013outp" +
+      "ut_type\030\037 \001(\005*O\n\014TemplateType\022\023\n\017INLINE_" +
+      "TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUS" +
+      "TOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -25130,7 +25193,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor,
-        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "DerivativeOrder", "ComBorder", });
+        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();
