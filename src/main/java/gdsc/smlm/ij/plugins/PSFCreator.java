@@ -2682,11 +2682,13 @@ public class PSFCreator implements PlugInFilter
 		zSelector = new PSFCentreSelector();
 
 		// Relocate the initial centres
+		Utils.showStatus("Relocating intital centres");
 		centres = relocateCentres(image, centres);
 		if (centres == null)
 			return;
 
 		// Extract each PSF into a scaled PSF
+		Utils.showStatus(String.format("[%d] Extracting PSFs", 0));
 		ExtractedPSF[] psfs = extractPSFs(image, centres);
 
 		// Iterate until centres have converged
@@ -2694,6 +2696,7 @@ public class PSFCreator implements PlugInFilter
 		for (int iter = 0; !converged && iter < settings.getMaxIterations(); iter++)
 		{
 			// Combine all PSFs
+			Utils.showStatus(String.format("[%d] Aligning PSFs", iter + 1));
 			ExtractedPSF combined = combine(psfs);
 			combined.createProjections();
 
@@ -2801,6 +2804,8 @@ public class PSFCreator implements PlugInFilter
 			for (int j = 0; j < 2; j++)
 				rmsd[j] = Math.sqrt(rmsd[j] / psfs.length);
 
+			Utils.showStatus(String.format("[%d] Checking combined PSF", iter+1));
+			
 			// Get the current combined z-centre. 
 			// This is used to get the centre of mass for repositioning. 
 			zSelector.setPSF(combined);
@@ -2848,6 +2853,7 @@ public class PSFCreator implements PlugInFilter
 			centres = updateUsingCentreOfMassXYShift(shift, shiftd, combined, centres);
 
 			// Extract each PSF into a scaled PSF
+			Utils.showStatus(String.format("[%d] Extracting PSFs", iter+1));
 			psfs = extractPSFs(image, centres);
 		}
 
@@ -2892,6 +2898,7 @@ public class PSFCreator implements PlugInFilter
 		ExtractedPSF finalPSF = combined.enlarge(magnification, threadPool);
 
 		// Show a dialog to collect final z-centre interactively
+		Utils.showStatus("Analysing PSF");
 		zSelector.setPSF(finalPSF);
 		zSelector.analyse();
 		//zSelector.zCentre = finalPSF.psf.length / 2.0;
@@ -2906,6 +2913,7 @@ public class PSFCreator implements PlugInFilter
 		// All pixels below the background are set to zero
 		// Apply a Tukey window to roll-off to zero at the outer pixels
 
+		Utils.showStatus("Windowing PSF");
 		double[] wx = ImageWindow.tukeyEdge(finalPSF.maxx, settings.getWindow());
 		double[] wz = ImageWindow.tukeyEdge(finalPSF.psf.length, settings.getWindow());
 
@@ -2919,6 +2927,7 @@ public class PSFCreator implements PlugInFilter
 		}
 
 		// Smooth the intensity
+		Utils.showStatus("Normalising PSF");
 		Smoother smoother = zSelector.ssmoother;
 		double[] ssum = smoother.smooth(sum).getDSmooth();
 
@@ -2941,6 +2950,7 @@ public class PSFCreator implements PlugInFilter
 		Utils.display(TITLE_SIGNAL, plot);
 
 		// Create a new extracted PSF and show
+		Utils.showStatus("Displaying PSF");
 		magnification = finalPSF.magnification;
 		finalPSF = new ExtractedPSF(psf, finalPSF.maxx, finalPSF.centre, magnification);
 		finalPSF.createProjections();
@@ -2976,7 +2986,7 @@ public class PSFCreator implements PlugInFilter
 			// TODO - Show dialog with option to save the cubic spline
 			// - filename
 			// - single/double precision
-			
+
 			// Need a CSpline object representation that can be saved and loaded 
 			// from file.
 			// Need method to compute coefficients from 64 interpolated points in the voxel
@@ -2989,6 +2999,7 @@ public class PSFCreator implements PlugInFilter
 
 			// Save the result ...
 		}
+		IJ.showStatus("");
 	}
 
 	private int getCoMXYBorder(int maxx, int maxy)
@@ -5081,7 +5092,7 @@ public class PSFCreator implements PlugInFilter
 			if (n <= 1)
 				return this;
 
-			IJ.showStatus("Enlarging ... creating spline");
+			Utils.showStatus("Enlarging ... creating spline");
 
 			// The scales are actually arbitrary
 			// We can enlarge by interpolation between the start and end
@@ -5102,7 +5113,7 @@ public class PSFCreator implements PlugInFilter
 					.interpolate();
 			//@formatter:on
 
-			IJ.showStatus("Enlarging ... interpolating");
+			Utils.showStatus("Enlarging ... interpolating");
 
 			FloatStackTrivalueProcedure p = new FloatStackTrivalueProcedure();
 			f.sample(n, p, progress);
