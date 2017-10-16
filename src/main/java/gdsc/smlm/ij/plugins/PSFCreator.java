@@ -25,6 +25,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.data.FloatStackTrivalueProvider;
+import gdsc.core.data.TrivalueProvider;
 import gdsc.core.data.procedures.FloatStackTrivalueProcedure;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
@@ -34,6 +35,7 @@ import gdsc.core.ij.AlignImagesFFT.SubPixelMethod;
 import gdsc.core.ij.AlignImagesFFT.WindowMethod;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
+import gdsc.core.logging.Ticker;
 import gdsc.core.match.BasePoint;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
@@ -86,6 +88,7 @@ import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.filters.BlockMeanFilter;
 import gdsc.smlm.function.Erf;
+import gdsc.smlm.function.cspline.CubicSplineCalculator;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -2874,7 +2877,7 @@ public class PSFCreator implements PlugInFilter
 		// normalisation. So we enlarge by 3 in each dimension.
 		// The CSpline can be created by solving the coefficients for the 
 		// 4x4x4 (64) sampled points on each node. 
-		
+
 		int magnification;
 		if (settings.getOutputType() == OUTPUT_TYPE_IMAGE_PSF)
 		{
@@ -2886,8 +2889,8 @@ public class PSFCreator implements PlugInFilter
 		}
 
 		// Enlarge the combined PSF for final processing
-		ExtractedPSF finalPSF = combined.enlarge(3, threadPool);
-		
+		ExtractedPSF finalPSF = combined.enlarge(magnification, threadPool);
+
 		// Show a dialog to collect final z-centre interactively
 		zSelector.setPSF(finalPSF);
 		zSelector.analyse();
@@ -2967,16 +2970,21 @@ public class PSFCreator implements PlugInFilter
 		Utils.log("Final Centre-of-mass = %s,%s\n", rounder.toString(com[0]), rounder.toString(com[1]));
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images\n", psfImp.getTitle(), zCentre,
 				Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(settings.getNmPerSlice(), 3), imageCount);
-		
+
 		if (settings.getOutputType() == OUTPUT_TYPE_CSPLINE)
 		{
+			// TODO
 			// Need a CSpline object representation that can be saved and loaded 
 			// from file.
 			// Need method to compute coefficients from 64 interpolated points in the voxel
 			// for all windowed points.
 			// Method to update the coefficients in the spline.
 			// Perhaps put this into a package class to apply a window to the current spline.
-			
+			IJ.showStatus("Creating cubic spline");
+			CSplineBuilder value = new CSplineBuilder(combined);
+			value.build();
+
+			// Save the result ...
 		}
 	}
 
@@ -5220,5 +5228,98 @@ public class PSFCreator implements PlugInFilter
 			}
 		}
 		return sum;
+	}
+
+	private class CSplineBuilder implements TrivalueProvider
+	{
+		float[][] psf;
+		final int maxi, maxj, maxk;
+		final int maxx;
+		int index0, z;
+		CustomTricubicFunction[][][] splines;
+
+		CSplineBuilder(ExtractedPSF psf)
+		{
+			this.psf = psf.psf;
+			Size size = CustomTricubicInterpolatingFunction.estimateSize(psf.getDimensions());
+			maxi = size.getSplinePoints(0);
+			maxj = size.getSplinePoints(1);
+			maxk = size.getSplinePoints(2);
+			maxx = psf.maxx;
+		}
+
+		public int getMaxX()
+		{
+			return 4;
+		}
+
+		public int getMaxY()
+		{
+			return 4;
+		}
+
+		public int getMaxZ()
+		{
+			return 4;
+		}
+
+		public double get(int x, int y, int z)
+		{
+			return psf[this.z + z][index0 + y * maxx + x];
+		}
+
+		public void get(int x, int y, int z, double[][][] values)
+		{
+			values[x][y][z] = get(x, y, z);
+		}
+
+		public double[][][] toArray()
+		{
+			return null;
+		}
+
+		void build()
+		{
+			CubicSplineCalculator calc = new CubicSplineCalculator();
+			splines = new CustomTricubicFunction[maxi][maxj][maxk];
+			Ticker ticker = Ticker.create(new IJTrackProgress(), (long) maxi * maxj * maxk, false);
+			ticker.start();
+			// Create all the spline nodes by processing continuous blocks of 4x4x4 from the image stack
+			double maxSum = 0;
+			for (int k = 0; k < maxk; k++)
+			{
+				z = 3 * k;
+				double sum = 0;
+				for (int j = 0; j < maxj; j++)
+				{
+					index0 = 3 * j * maxx;
+					for (int i = 0; i < maxi; i++)
+					{
+						ticker.tick();
+						splines[i][j][k] = CustomTricubicFunction.create(calc.compute(this));
+						sum += splines[i][j][k].value000();
+						index0 += 3;
+					}
+				}
+				if (maxSum < sum)
+					maxSum = sum;
+			}
+			ticker.stop();
+
+			// Normalise
+			if (maxSum == 0)
+				throw new IllegalStateException("The cubic spline has no maximum signal");
+			final double scale = 1.0 / maxSum;
+			for (int k = 0; k < maxk; k++)
+			{
+				for (int j = 0; j < maxj; j++)
+				{
+					for (int i = 0; i < maxi; i++)
+					{
+						splines[i][j][k].scale(scale);
+					}
+				}
+			}
+		}
 	}
 }
