@@ -2999,9 +2999,10 @@ public class PSFCreator implements PlugInFilter
 			CustomTricubicInterpolatingFunction f  = value.build();
 
 			// Save the result ...			
+			IJ.showStatus("Saving cubic spline");
 			try
 			{
-				f.write(new FileOutputStream("/tmp/f.bin"));
+				f.write(new FileOutputStream("/tmp/f.bin"), new IJTrackProgress());
 			}
 			catch (FileNotFoundException e)
 			{
