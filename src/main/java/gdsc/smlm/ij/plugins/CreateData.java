@@ -4220,7 +4220,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			return false;
 		}
 
-		if (settings.getDistribution().equals(DISTRIBUTION[MASK]))
+		if (!benchmarkMode && settings.getDistribution().equals(DISTRIBUTION[MASK]))
 		{
 			String[] maskImages = createDistributionImageList();
 			if (maskImages != null)
