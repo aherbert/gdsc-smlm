@@ -2984,15 +2984,14 @@ public class PSFCreator implements PlugInFilter
 		if (settings.getOutputType() == OUTPUT_TYPE_CSPLINE)
 		{
 			// TODO - Show dialog with option to save the cubic spline
+			// Message to state that PSFs can be combined before creating the spline 
+			// if using multiple source images.
+			// TODO - allow more than one input image ...
 			// - filename
 			// - single/double precision
 
 			// Need a CSpline object representation that can be saved and loaded 
 			// from file.
-			// Need method to compute coefficients from 64 interpolated points in the voxel
-			// for all windowed points.
-			// Method to update the coefficients in the spline.
-			// Perhaps put this into a package class to apply a window to the current spline.
 			IJ.showStatus("Creating cubic spline");
 			CSplineBuilder value = new CSplineBuilder(combined);
 			value.build();
