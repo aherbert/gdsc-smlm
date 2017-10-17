@@ -9,9 +9,6 @@ import java.awt.Rectangle;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +34,6 @@ import gdsc.core.ij.AlignImagesFFT.SubPixelMethod;
 import gdsc.core.ij.AlignImagesFFT.WindowMethod;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
-import gdsc.core.logging.Ticker;
 import gdsc.core.match.BasePoint;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
@@ -90,8 +86,8 @@ import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.filters.BlockMeanFilter;
 import gdsc.smlm.function.Erf;
-import gdsc.smlm.function.cspline.CubicSplineCalculator;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.plugins.CubicSplineManager.CubicSplinePSF;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -2981,36 +2977,31 @@ public class PSFCreator implements PlugInFilter
 
 		Utils.log("Final Centre-of-mass = %s,%s\n", rounder.toString(com[0]), rounder.toString(com[1]));
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images\n", psfImp.getTitle(), zCentre,
-				Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(settings.getNmPerSlice(), 3), imageCount);
+				Utils.rounded(imagePsf.getPixelSize(), 3), Utils.rounded(imagePsf.getPixelDepth(), 3), imageCount);
 
 		if (settings.getOutputType() == OUTPUT_TYPE_CSPLINE)
 		{
-			// TODO - Show dialog with option to save the cubic spline
-			// Message to state that PSFs can be combined before creating the spline 
-			// if using multiple source images.
-			// TODO - allow more than one input image ...
-			// - filename
-			// - single/double precision
-
-			// Need a CSpline object representation that can be saved and loaded 
-			// from file.
-			IJ.showStatus("Creating cubic spline");
-			CSplineBuilder value = new CSplineBuilder(combined);
-			CustomTricubicInterpolatingFunction f  = value.build();
-
-			// Save the result ...			
-			IJ.showStatus("Saving cubic spline");
-			try
+			if (TextUtils.isNullOrEmpty(settings.getSplineFilename()))
 			{
-				f.write(new FileOutputStream("/tmp/f.bin"), new IJTrackProgress());
+				final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+				gd.addFilenameField("Spline_filename", settings.getSplineFilename());
+				gd.showDialog(true);
+				if (gd.wasCanceled())
+					return;
+				settings.setSplineFilename(gd.getNextString());
 			}
-			catch (FileNotFoundException e)
+			if (!TextUtils.isNullOrEmpty(settings.getSplineFilename()))
 			{
-				e.printStackTrace();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
+				// Save the result ...
+				IJ.showStatus("Creating cubic spline");
+				CubicSplinePSF cubicSplinePSF = CubicSplineManager.createCubicSpline(imagePsf, psfImp.getImageStack(),
+						settings.getSinglePrecision());
+
+				IJ.showStatus("Saving cubic spline");
+				CubicSplineManager.save(cubicSplinePSF, settings.getSplineFilename());
+
+				IJ.showStatus("Spline saved to " + settings.getSplineFilename());
+				return; // To leave the status message
 			}
 		}
 		IJ.showStatus("");
@@ -3580,10 +3571,12 @@ public class PSFCreator implements PlugInFilter
 
 		private void drawPSFPlots()
 		{
+			WindowOrganiser wo = new WindowOrganiser();
 			if (plotEdgeWindow)
-				drawEdgeWindowPlot();
+				drawEdgeWindowPlot(wo);
 			if (plotBackground)
-				drawIntensityPlot(true);
+				drawIntensityPlot(true, wo);
+			wo.tile();
 			drawPSFCentre();
 			drawCoMBorder();
 		}
@@ -3614,7 +3607,7 @@ public class PSFCreator implements PlugInFilter
 
 		int plotWindow = -1;
 
-		private void drawEdgeWindowPlot()
+		private void drawEdgeWindowPlot(WindowOrganiser wo)
 		{
 			plotWindow = settings.getWindow();
 
@@ -3625,7 +3618,9 @@ public class PSFCreator implements PlugInFilter
 
 			Plot2 plot = new Plot2(TITLE_WINDOW, "x", "Weight", x, w);
 			plot.setLimits(0, size - 1, 0, 1.05);
-			Utils.display(TITLE_WINDOW, plot);
+			PlotWindow pw = Utils.display(TITLE_WINDOW, plot);
+			if (wo != null && Utils.isNewWindow())
+				wo.add(pw);
 
 			// Find the region where windowing will start
 			int i = 0;
@@ -3655,7 +3650,7 @@ public class PSFCreator implements PlugInFilter
 							// Continue while the parameter is changing
 							while (plotWindow != settings.getWindow())
 							{
-								drawEdgeWindowPlot();
+								drawEdgeWindowPlot(null);
 							}
 						}
 						finally
@@ -3672,14 +3667,12 @@ public class PSFCreator implements PlugInFilter
 		private PlotWindow pwBackground, pwForeground, pwSignal, pwWidth, pwAngle;
 		private float[] rangeB, rangeF, rangeS, rangeW, rangeA;
 
-		private void drawIntensityPlot(boolean newData)
+		private void drawIntensityPlot(boolean newData, WindowOrganiser wo)
 		{
 			plotBackgroundWindow = getAnalysisWindow();
 
 			int length = psf.psf.length;
 			double[] slice = SimpleArrayUtils.newArray(length, 1, 1.0);
-
-			WindowOrganiser wo = new WindowOrganiser();
 
 			Plot plot = new Plot(TITLE_BACKGROUND, "Slice", "Background");
 			rangeB = Maths.limits(limits[0]);
@@ -3691,7 +3684,7 @@ public class PSFCreator implements PlugInFilter
 			String msgB = "Background = " + Utils.rounded(background);
 			plot.addLabel(0, 0, msgB);
 			pwBackground = Utils.display(TITLE_BACKGROUND, plot);
-			if (Utils.isNewWindow())
+			if (wo != null && Utils.isNewWindow())
 				wo.add(pwBackground);
 
 			plot = new Plot(TITLE_FOREGROUND, "Slice", "Foreground");
@@ -3704,7 +3697,7 @@ public class PSFCreator implements PlugInFilter
 			String msgF = "Foreground = " + Utils.rounded(fdata[fIndex]);
 			plot.addLabel(0, 0, msgF);
 			pwForeground = Utils.display(TITLE_FOREGROUND, plot);
-			if (Utils.isNewWindow())
+			if (wo != null && Utils.isNewWindow())
 				wo.add(pwForeground);
 
 			if (newData)
@@ -3719,7 +3712,7 @@ public class PSFCreator implements PlugInFilter
 				String msgS = "Signal = " + Utils.rounded(sdata[sIndex]);
 				plot.addLabel(0, 0, msgS);
 				pwSignal = Utils.display(TITLE_SIGNAL, plot);
-				if (Utils.isNewWindow())
+				if (wo != null && Utils.isNewWindow())
 					wo.add(pwSignal);
 
 				if (settings.getPsfType() == PSF_TYPE_DH)
@@ -3736,7 +3729,7 @@ public class PSFCreator implements PlugInFilter
 					String msgA = "Angle = " + Utils.rounded(asdata[aIndex]);
 					plot.addLabel(0, 0, msgA);
 					pwAngle = Utils.display(TITLE_ANGLE, plot);
-					if (Utils.isNewWindow())
+					if (wo != null && Utils.isNewWindow())
 						wo.add(pwAngle);
 				}
 				else
@@ -3760,12 +3753,10 @@ public class PSFCreator implements PlugInFilter
 					String msgW = "Width = " + Utils.rounded(w01[wIndex]);
 					plot.addLabel(0, 0, msgW);
 					pwWidth = Utils.display(TITLE_HWHM, plot);
-					if (Utils.isNewWindow())
+					if (wo != null && Utils.isNewWindow())
 						wo.add(pwWidth);
 				}
 			}
-
-			wo.tile();
 
 			drawCentreOnPlots();
 
@@ -3838,7 +3829,7 @@ public class PSFCreator implements PlugInFilter
 							while (plotBackgroundWindow != getAnalysisWindow())
 							{
 								analyse();
-								drawIntensityPlot(false);
+								drawIntensityPlot(false, null);
 							}
 						}
 						finally
@@ -3983,6 +3974,7 @@ public class PSFCreator implements PlugInFilter
 					{
 						// CSpline
 						egd.addCheckbox("Single_precision", settings.getSinglePrecision());
+						egd.addFilenameField("Spline_filename", settings.getSplineFilename());
 					}
 					egd.showDialog(true, gd);
 					if (egd.wasCanceled())
@@ -3996,6 +3988,7 @@ public class PSFCreator implements PlugInFilter
 					{
 						// CSpline
 						settings.setSinglePrecision(egd.getNextBoolean());
+						settings.setSplineFilename(egd.getNextString());
 					}
 					return true;
 				}
@@ -4294,7 +4287,7 @@ public class PSFCreator implements PlugInFilter
 		gd.addSlider("Max_iterations", 1, 20, settings.getMaxIterations());
 		if (settings.getInteractiveMode())
 			gd.addCheckbox("Check_alignments", settings.getCheckAlignments());
-		gd.addSlider("PSF_magnification", 1, 8, settings.getPsfMagnification());
+		//gd.addSlider("PSF_magnification", 1, 8, settings.getPsfMagnification());
 
 		gd.showDialog();
 
@@ -4317,7 +4310,7 @@ public class PSFCreator implements PlugInFilter
 			checkAlignments = gd.getNextBoolean();
 			settings.setCheckAlignments(checkAlignments);
 		}
-		settings.setPsfMagnification((int) gd.getNextNumber());
+		//settings.setPsfMagnification((int) gd.getNextNumber());
 
 		gd.collectOptions();
 
@@ -5256,107 +5249,5 @@ public class PSFCreator implements PlugInFilter
 			}
 		}
 		return sum;
-	}
-
-	private class CSplineBuilder
-	{
-		float[][] psf;
-		final int maxi, maxj, maxk;
-		final int maxx;
-		CustomTricubicFunction[][][] splines;
-		final int magnification;
-
-		CSplineBuilder(ExtractedPSF psf)
-		{
-			this.psf = psf.psf;
-			Size size = CustomTricubicInterpolatingFunction.estimateSize(psf.getDimensions());
-			maxi = size.getSplinePoints(0);
-			maxj = size.getSplinePoints(1);
-			maxk = size.getSplinePoints(2);
-			maxx = psf.maxx;
-			magnification = psf.magnification;
-		}
-
-		CustomTricubicInterpolatingFunction build()
-		{
-			splines = new CustomTricubicFunction[maxi][maxj][maxk];
-			final Ticker ticker = Ticker.create(new IJTrackProgress(), (long) maxi * maxj * maxk, true);
-			ticker.start();
-			TurboList<Future<?>> futures = new TurboList<Future<?>>(maxk);
-			// Create all the spline nodes by processing continuous blocks of 4x4x4 from the image stack.
-			// Note that the function is enlarge x3 so a 4x4x4 block samples the voxel at [0,1/3,2/3,1]
-			// in each dimension. There should be a final pixel on the end of the data for the final 
-			// spline node along each dimension, i.e. dimension length = n*3 + 1 with n the number of nodes.
-			for (int k = 0; k < maxk; k++)
-			{
-				final int kk = k;
-				futures.add(threadPool.submit(new Runnable()
-				{
-					public void run()
-					{
-						CubicSplineCalculator calc = new CubicSplineCalculator();
-						double[] value = new double[64];
-						final int zz = 3 * kk;
-						for (int j = 0; j < maxj; j++)
-						{
-							// 4x4 block origin in the XY data
-							int index0 = 3 * j * maxx;
-							for (int i = 0; i < maxi; i++)
-							{
-								ticker.tick();
-								int c = 0;
-								for (int z = 0; z < 4; z++)
-								{
-									final float[] data = psf[zz + z];
-									for (int y = 0; y < 4; y++)
-										for (int x = 0, ii = index0 + y * maxx; x < 4; x++)
-											value[c++] = data[ii++];
-								}
-								splines[i][j][kk] = CustomTricubicFunction.create(calc.compute(value));
-								index0 += 3;
-							}
-						}
-					}
-				}));
-			}
-			ticker.stop();
-
-			Utils.waitForCompletion(futures);
-
-			// Normalise
-			double maxSum = 0;
-			for (int k = 0; k < maxk; k++)
-			{
-				double sum = 0;
-				for (int j = 0; j < maxj; j++)
-				{
-					for (int i = 0; i < maxi; i++)
-					{
-						sum += splines[i][j][k].value000();
-					}
-				}
-				if (maxSum < sum)
-					maxSum = sum;
-			}
-			if (maxSum == 0)
-				throw new IllegalStateException("The cubic spline has no maximum signal");
-			final double scale = 1.0 / maxSum;
-			for (int k = 0; k < maxk; k++)
-			{
-				for (int j = 0; j < maxj; j++)
-				{
-					for (int i = 0; i < maxi; i++)
-					{
-						splines[i][j][k].scale(scale);
-					}
-				}
-			}
-			
-			double inc = magnification / 3.0;
-			return new CustomTricubicInterpolatingFunction(
-					SimpleArrayUtils.newArray(maxi+1, 0.5, inc), 
-					SimpleArrayUtils.newArray(maxj+1, 0.5, inc), 
-					SimpleArrayUtils.newArray(maxk+1, 0.5, inc), splines);
-		}
 	}
 }
