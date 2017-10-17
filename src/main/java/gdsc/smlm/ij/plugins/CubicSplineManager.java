@@ -19,8 +19,6 @@ import gdsc.core.ij.Utils;
 import gdsc.core.logging.Ticker;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
-import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
-import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.PSFProtos.CubicSplineResource;
@@ -29,6 +27,7 @@ import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.ImagePSFOrBuilder;
 import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.cspline.CubicSplineCalculator;
+import gdsc.smlm.function.cspline.CubicSplineData;
 import gdsc.smlm.function.cspline.CubicSplineFunction;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -52,31 +51,30 @@ public class CubicSplineManager implements PlugIn
 	public static class CubicSplinePSF
 	{
 		ImagePSF imagePSF;
-		CustomTricubicInterpolatingFunction function;
+		CubicSplineData splineData;
 
 		/**
 		 * Instantiates a new cubic spline PSF.
 		 *
 		 * @param imagePSF
 		 *            the image PSF
-		 * @param function
-		 *            the function
+		 * @param splineData
+		 *            the spline data
 		 * @throws IllegalArgumentException
 		 *             If the centre is not within the function range
 		 */
-		public CubicSplinePSF(ImagePSF imagePSF, CustomTricubicInterpolatingFunction function)
-				throws IllegalArgumentException
+		public CubicSplinePSF(ImagePSF imagePSF, CubicSplineData splineData) throws IllegalArgumentException
 		{
 			this.imagePSF = imagePSF;
-			this.function = function;
+			this.splineData = splineData;
 			if (
 			//@formatter:off
-					imagePSF.getXCentre() < function.getMinX() ||
-					imagePSF.getYCentre() < function.getMinY() ||
-					imagePSF.getZCentre() < function.getMinZ() ||
-					imagePSF.getXCentre() > function.getMaxX() ||
-					imagePSF.getYCentre() > function.getMaxY() ||
-					imagePSF.getZCentre() > function.getMaxZ() 
+					imagePSF.getXCentre() < 0 ||
+					imagePSF.getYCentre() < 0||
+					imagePSF.getZCentre() < 0 ||
+					imagePSF.getXCentre() > splineData.getMaxX() ||
+					imagePSF.getYCentre() > splineData.getMaxY() ||
+					imagePSF.getZCentre() > splineData.getMaxZ() 
 					//@formatter:on
 			)
 				throw new IllegalArgumentException("The centre is not within the function");
@@ -84,7 +82,7 @@ public class CubicSplineManager implements PlugIn
 
 		public CubicSplineFunction createCubicSplineFunction(int maxy, int maxx, int scale)
 		{
-			CubicSplineFunction f = new CubicSplineFunction(function, maxx, maxy);
+			CubicSplineFunction f = new CubicSplineFunction(splineData, maxx, maxy);
 			f.setCentreX(imagePSF.getXCentre());
 			f.setCentreY(imagePSF.getYCentre());
 			f.setScale(scale);
@@ -136,7 +134,8 @@ public class CubicSplineManager implements PlugIn
 		final int maxj = (maxy - 1) / 3;
 		final int maxk = (maxz - 1) / 3;
 
-		final CustomTricubicFunction[][][] splines = new CustomTricubicFunction[maxi][maxj][maxk];
+		int size = maxi * maxj;
+		final CustomTricubicFunction[][] splines = new CustomTricubicFunction[maxk][size];
 		final Ticker ticker = Ticker.create(new IJTrackProgress(), (long) maxi * maxj * maxk, true);
 		ticker.start();
 		ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
@@ -155,11 +154,11 @@ public class CubicSplineManager implements PlugIn
 					CubicSplineCalculator calc = new CubicSplineCalculator();
 					double[] value = new double[64];
 					final int zz = 3 * kk;
-					for (int j = 0; j < maxj; j++)
+					for (int j = 0, index = 0; j < maxj; j++)
 					{
 						// 4x4 block origin in the XY data
 						int index0 = 3 * j * maxx;
-						for (int i = 0; i < maxi; i++)
+						for (int i = 0; i < maxi; i++, index++)
 						{
 							ticker.tick();
 							int c = 0;
@@ -170,9 +169,9 @@ public class CubicSplineManager implements PlugIn
 									for (int x = 0, ii = index0 + y * maxx; x < 4; x++)
 										value[c++] = data[ii++];
 							}
-							splines[i][j][kk] = CustomTricubicFunction.create(calc.compute(value));
+							splines[kk][index] = CustomTricubicFunction.create(calc.compute(value));
 							if (singlePrecision)
-								splines[i][j][kk] = splines[i][j][kk].toSinglePrecision();
+								splines[kk][index] = splines[kk][index].toSinglePrecision();
 							index0 += 3;
 						}
 					}
@@ -190,13 +189,8 @@ public class CubicSplineManager implements PlugIn
 		for (int k = 0; k < maxk; k++)
 		{
 			double sum = 0;
-			for (int j = 0; j < maxj; j++)
-			{
-				for (int i = 0; i < maxi; i++)
-				{
-					sum += splines[i][j][k].value000();
-				}
-			}
+			for (int i = 0; i < size; i++)
+				sum += splines[k][i].value000();
 			if (maxSum < sum)
 				maxSum = sum;
 		}
@@ -205,19 +199,12 @@ public class CubicSplineManager implements PlugIn
 		final double scale = 1.0 / maxSum;
 		for (int k = 0; k < maxk; k++)
 		{
-			for (int j = 0; j < maxj; j++)
-			{
-				for (int i = 0; i < maxi; i++)
-				{
-					splines[i][j][k].scale(scale);
-				}
-			}
+			for (int i = 0; i < size; i++)
+				splines[k][i].scale(scale);
 		}
 
 		// Create on an integer scale
-		CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolatingFunction(
-				SimpleArrayUtils.newArray(maxi + 1, 0, 1.0), SimpleArrayUtils.newArray(maxj + 1, 0, 1.0),
-				SimpleArrayUtils.newArray(maxk + 1, 0, 1.0), splines);
+		CubicSplineData f = new CubicSplineData(maxi, maxj, splines);
 
 		// Create a new info with the PSF details
 		ImagePSF.Builder b = ImagePSF.newBuilder();
@@ -270,7 +257,7 @@ public class CubicSplineManager implements PlugIn
 			os = new FileOutputStream(filename);
 
 			psfModel.imagePSF.writeDelimitedTo(os);
-			psfModel.function.write(os, progress);
+			psfModel.splineData.write(os, progress);
 
 			saveResource(psfModel, filename, getName(filename));
 
@@ -348,7 +335,7 @@ public class CubicSplineManager implements PlugIn
 			is = new BufferedInputStream(new FileInputStream(filename));
 
 			ImagePSF imagePSF = ImagePSF.parseDelimitedFrom(is);
-			CustomTricubicInterpolatingFunction function = CustomTricubicInterpolatingFunction.read(is, progress);
+			CubicSplineData function = CubicSplineData.read(is, progress);
 
 			return new CubicSplinePSF(imagePSF, function);
 		}
@@ -424,7 +411,7 @@ public class CubicSplineManager implements PlugIn
 			return 0;
 		double factor = nmPerPixel / splineSize;
 		int i = (int) Math.round(factor);
-		if (Math.abs(factor - i) < CustomTricubicInterpolatingFunction.INTEGER_TOLERANCE)
+		if (Math.abs(factor - i) < 1e-6)
 			return i;
 		return 0;
 	}
@@ -531,10 +518,10 @@ public class CubicSplineManager implements PlugIn
 		// Find the limits of the model. This works if the centre is within the image
 		ImagePSF imagePSF = psfModel.imagePSF;
 		int scale = getScale(psfModel.imagePSF.getPixelSize(), nmPerPixel);
-		CustomTricubicInterpolatingFunction function = psfModel.function;
-		int padX = (int) Math.max(Math.ceil((imagePSF.getXCentre() - function.getMinX()) / scale),
+		CubicSplineData function = psfModel.splineData;
+		int padX = (int) Math.max(Math.ceil((imagePSF.getXCentre()) / scale),
 				Math.ceil((function.getMaxX() - imagePSF.getXCentre()) / scale));
-		int padY = (int) Math.max(Math.ceil((imagePSF.getYCentre() - function.getMinY()) / scale),
+		int padY = (int) Math.max(Math.ceil((imagePSF.getYCentre()) / scale),
 				Math.ceil((function.getMaxY() - imagePSF.getYCentre()) / scale));
 
 		// Create a function
@@ -653,7 +640,7 @@ public class CubicSplineManager implements PlugIn
 
 		IJ.showStatus("Drawing cubic spline");
 		FloatStackTrivalueProcedure p = new FloatStackTrivalueProcedure();
-		psfModel.function.sample(magnification, p, new IJTrackProgress());
+		psfModel.splineData.sample(magnification, p, new IJTrackProgress());
 
 		ImageStack stack = new ImageStack(p.x.length, p.y.length);
 		for (float[] pixels : p.value)
