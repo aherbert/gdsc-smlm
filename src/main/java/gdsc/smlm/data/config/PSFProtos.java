@@ -4456,6 +4456,1343 @@ public final class PSFProtos {
 
   }
 
+  public interface CubicSplineResourceOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CubicSplineResource)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The filename where the spline data is stored
+     * </pre>
+     *
+     * <code>string filename = 1;</code>
+     */
+    java.lang.String getFilename();
+    /**
+     * <pre>
+     * The filename where the spline data is stored
+     * </pre>
+     *
+     * <code>string filename = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getFilenameBytes();
+
+    /**
+     * <pre>
+     * The size of the spline scale in nanometers
+     * </pre>
+     *
+     * <code>double spline_scale = 2;</code>
+     */
+    double getSplineScale();
+  }
+  /**
+   * <pre>
+   * Define a cubic spline resource that can be loaded
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.CubicSplineResource}
+   */
+  public  static final class CubicSplineResource extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CubicSplineResource)
+      CubicSplineResourceOrBuilder {
+    // Use CubicSplineResource.newBuilder() to construct.
+    private CubicSplineResource(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CubicSplineResource() {
+      filename_ = "";
+      splineScale_ = 0D;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private CubicSplineResource(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              filename_ = s;
+              break;
+            }
+            case 17: {
+
+              splineScale_ = input.readDouble();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.PSFProtos.CubicSplineResource.class, gdsc.smlm.data.config.PSFProtos.CubicSplineResource.Builder.class);
+    }
+
+    public static final int FILENAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object filename_;
+    /**
+     * <pre>
+     * The filename where the spline data is stored
+     * </pre>
+     *
+     * <code>string filename = 1;</code>
+     */
+    public java.lang.String getFilename() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        filename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The filename where the spline data is stored
+     * </pre>
+     *
+     * <code>string filename = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFilenameBytes() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        filename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SPLINE_SCALE_FIELD_NUMBER = 2;
+    private double splineScale_;
+    /**
+     * <pre>
+     * The size of the spline scale in nanometers
+     * </pre>
+     *
+     * <code>double spline_scale = 2;</code>
+     */
+    public double getSplineScale() {
+      return splineScale_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, filename_);
+      }
+      if (splineScale_ != 0D) {
+        output.writeDouble(2, splineScale_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, filename_);
+      }
+      if (splineScale_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, splineScale_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineResource)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.PSFProtos.CubicSplineResource other = (gdsc.smlm.data.config.PSFProtos.CubicSplineResource) obj;
+
+      boolean result = true;
+      result = result && getFilename()
+          .equals(other.getFilename());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSplineScale())
+          == java.lang.Double.doubleToLongBits(
+              other.getSplineScale()));
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFilename().hashCode();
+      hash = (37 * hash) + SPLINE_SCALE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSplineScale()));
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.CubicSplineResource prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define a cubic spline resource that can be loaded
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.CubicSplineResource}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CubicSplineResource)
+        gdsc.smlm.data.config.PSFProtos.CubicSplineResourceOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.PSFProtos.CubicSplineResource.class, gdsc.smlm.data.config.PSFProtos.CubicSplineResource.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.PSFProtos.CubicSplineResource.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        filename_ = "";
+
+        splineScale_ = 0D;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.PSFProtos.CubicSplineResource.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.CubicSplineResource build() {
+        gdsc.smlm.data.config.PSFProtos.CubicSplineResource result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.CubicSplineResource buildPartial() {
+        gdsc.smlm.data.config.PSFProtos.CubicSplineResource result = new gdsc.smlm.data.config.PSFProtos.CubicSplineResource(this);
+        result.filename_ = filename_;
+        result.splineScale_ = splineScale_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineResource) {
+          return mergeFrom((gdsc.smlm.data.config.PSFProtos.CubicSplineResource)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.CubicSplineResource other) {
+        if (other == gdsc.smlm.data.config.PSFProtos.CubicSplineResource.getDefaultInstance()) return this;
+        if (!other.getFilename().isEmpty()) {
+          filename_ = other.filename_;
+          onChanged();
+        }
+        if (other.getSplineScale() != 0D) {
+          setSplineScale(other.getSplineScale());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.PSFProtos.CubicSplineResource parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.PSFProtos.CubicSplineResource) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object filename_ = "";
+      /**
+       * <pre>
+       * The filename where the spline data is stored
+       * </pre>
+       *
+       * <code>string filename = 1;</code>
+       */
+      public java.lang.String getFilename() {
+        java.lang.Object ref = filename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          filename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The filename where the spline data is stored
+       * </pre>
+       *
+       * <code>string filename = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFilenameBytes() {
+        java.lang.Object ref = filename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          filename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The filename where the spline data is stored
+       * </pre>
+       *
+       * <code>string filename = 1;</code>
+       */
+      public Builder setFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        filename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The filename where the spline data is stored
+       * </pre>
+       *
+       * <code>string filename = 1;</code>
+       */
+      public Builder clearFilename() {
+        
+        filename_ = getDefaultInstance().getFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The filename where the spline data is stored
+       * </pre>
+       *
+       * <code>string filename = 1;</code>
+       */
+      public Builder setFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        filename_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double splineScale_ ;
+      /**
+       * <pre>
+       * The size of the spline scale in nanometers
+       * </pre>
+       *
+       * <code>double spline_scale = 2;</code>
+       */
+      public double getSplineScale() {
+        return splineScale_;
+      }
+      /**
+       * <pre>
+       * The size of the spline scale in nanometers
+       * </pre>
+       *
+       * <code>double spline_scale = 2;</code>
+       */
+      public Builder setSplineScale(double value) {
+        
+        splineScale_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The size of the spline scale in nanometers
+       * </pre>
+       *
+       * <code>double spline_scale = 2;</code>
+       */
+      public Builder clearSplineScale() {
+        
+        splineScale_ = 0D;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CubicSplineResource)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CubicSplineResource)
+    private static final gdsc.smlm.data.config.PSFProtos.CubicSplineResource DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.CubicSplineResource();
+    }
+
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CubicSplineResource>
+        PARSER = new com.google.protobuf.AbstractParser<CubicSplineResource>() {
+      public CubicSplineResource parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new CubicSplineResource(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CubicSplineResource> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CubicSplineResource> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CubicSplineSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CubicSplineSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+     */
+    int getCubicSplineResourcesCount();
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+     */
+    boolean containsCubicSplineResources(
+        java.lang.String key);
+    /**
+     * Use {@link #getCubicSplineResourcesMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
+    getCubicSplineResources();
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+     */
+    java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
+    getCubicSplineResourcesMap();
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+     */
+
+    gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrDefault(
+        java.lang.String key,
+        gdsc.smlm.data.config.PSFProtos.CubicSplineResource defaultValue);
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+     */
+
+    gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrThrow(
+        java.lang.String key);
+  }
+  /**
+   * <pre>
+   * Define the cubic spline settings
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.CubicSplineSettings}
+   */
+  public  static final class CubicSplineSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CubicSplineSettings)
+      CubicSplineSettingsOrBuilder {
+    // Use CubicSplineSettings.newBuilder() to construct.
+    private CubicSplineSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CubicSplineSettings() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private CubicSplineSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                cubicSplineResources_ = com.google.protobuf.MapField.newMapField(
+                    CubicSplineResourcesDefaultEntryHolder.defaultEntry);
+                mutable_bitField0_ |= 0x00000001;
+              }
+              com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
+              cubicSplineResources__ = input.readMessage(
+                  CubicSplineResourcesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              cubicSplineResources_.getMutableMap().put(
+                  cubicSplineResources__.getKey(), cubicSplineResources__.getValue());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 1:
+          return internalGetCubicSplineResources();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.class, gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.Builder.class);
+    }
+
+    public static final int CUBIC_SPLINE_RESOURCES_FIELD_NUMBER = 1;
+    private static final class CubicSplineResourcesDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>newDefaultInstance(
+                  gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  gdsc.smlm.data.config.PSFProtos.CubicSplineResource.getDefaultInstance());
+    }
+    private com.google.protobuf.MapField<
+        java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> cubicSplineResources_;
+    private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
+    internalGetCubicSplineResources() {
+      if (cubicSplineResources_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            CubicSplineResourcesDefaultEntryHolder.defaultEntry);
+      }
+      return cubicSplineResources_;
+    }
+
+    public int getCubicSplineResourcesCount() {
+      return internalGetCubicSplineResources().getMap().size();
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+     */
+
+    public boolean containsCubicSplineResources(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetCubicSplineResources().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getCubicSplineResourcesMap()} instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResources() {
+      return getCubicSplineResourcesMap();
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+     */
+
+    public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResourcesMap() {
+      return internalGetCubicSplineResources().getMap();
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+     */
+
+    public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrDefault(
+        java.lang.String key,
+        gdsc.smlm.data.config.PSFProtos.CubicSplineResource defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map =
+          internalGetCubicSplineResources().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+     */
+
+    public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map =
+          internalGetCubicSplineResources().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetCubicSplineResources(),
+          CubicSplineResourcesDefaultEntryHolder.defaultEntry,
+          1);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (java.util.Map.Entry<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> entry
+           : internalGetCubicSplineResources().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
+        cubicSplineResources__ = CubicSplineResourcesDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, cubicSplineResources__);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.PSFProtos.CubicSplineSettings other = (gdsc.smlm.data.config.PSFProtos.CubicSplineSettings) obj;
+
+      boolean result = true;
+      result = result && internalGetCubicSplineResources().equals(
+          other.internalGetCubicSplineResources());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (!internalGetCubicSplineResources().getMap().isEmpty()) {
+        hash = (37 * hash) + CUBIC_SPLINE_RESOURCES_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetCubicSplineResources().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.CubicSplineSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define the cubic spline settings
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.CubicSplineSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CubicSplineSettings)
+        gdsc.smlm.data.config.PSFProtos.CubicSplineSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMapField(
+          int number) {
+        switch (number) {
+          case 1:
+            return internalGetCubicSplineResources();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMutableMapField(
+          int number) {
+        switch (number) {
+          case 1:
+            return internalGetMutableCubicSplineResources();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.class, gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        internalGetMutableCubicSplineResources().clear();
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings build() {
+        gdsc.smlm.data.config.PSFProtos.CubicSplineSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings buildPartial() {
+        gdsc.smlm.data.config.PSFProtos.CubicSplineSettings result = new gdsc.smlm.data.config.PSFProtos.CubicSplineSettings(this);
+        int from_bitField0_ = bitField0_;
+        result.cubicSplineResources_ = internalGetCubicSplineResources();
+        result.cubicSplineResources_.makeImmutable();
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineSettings) {
+          return mergeFrom((gdsc.smlm.data.config.PSFProtos.CubicSplineSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.CubicSplineSettings other) {
+        if (other == gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.getDefaultInstance()) return this;
+        internalGetMutableCubicSplineResources().mergeFrom(
+            other.internalGetCubicSplineResources());
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.PSFProtos.CubicSplineSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.MapField<
+          java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> cubicSplineResources_;
+      private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
+      internalGetCubicSplineResources() {
+        if (cubicSplineResources_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              CubicSplineResourcesDefaultEntryHolder.defaultEntry);
+        }
+        return cubicSplineResources_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
+      internalGetMutableCubicSplineResources() {
+        onChanged();;
+        if (cubicSplineResources_ == null) {
+          cubicSplineResources_ = com.google.protobuf.MapField.newMapField(
+              CubicSplineResourcesDefaultEntryHolder.defaultEntry);
+        }
+        if (!cubicSplineResources_.isMutable()) {
+          cubicSplineResources_ = cubicSplineResources_.copy();
+        }
+        return cubicSplineResources_;
+      }
+
+      public int getCubicSplineResourcesCount() {
+        return internalGetCubicSplineResources().getMap().size();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+       */
+
+      public boolean containsCubicSplineResources(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        return internalGetCubicSplineResources().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getCubicSplineResourcesMap()} instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResources() {
+        return getCubicSplineResourcesMap();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+       */
+
+      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResourcesMap() {
+        return internalGetCubicSplineResources().getMap();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+       */
+
+      public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrDefault(
+          java.lang.String key,
+          gdsc.smlm.data.config.PSFProtos.CubicSplineResource defaultValue) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map =
+            internalGetCubicSplineResources().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+       */
+
+      public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map =
+            internalGetCubicSplineResources().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearCubicSplineResources() {
+        internalGetMutableCubicSplineResources().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+       */
+
+      public Builder removeCubicSplineResources(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableCubicSplineResources().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
+      getMutableCubicSplineResources() {
+        return internalGetMutableCubicSplineResources().getMutableMap();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+       */
+      public Builder putCubicSplineResources(
+          java.lang.String key,
+          gdsc.smlm.data.config.PSFProtos.CubicSplineResource value) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (value == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableCubicSplineResources().getMutableMap()
+            .put(key, value);
+        return this;
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+       */
+
+      public Builder putAllCubicSplineResources(
+          java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> values) {
+        internalGetMutableCubicSplineResources().getMutableMap()
+            .putAll(values);
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CubicSplineSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CubicSplineSettings)
+    private static final gdsc.smlm.data.config.PSFProtos.CubicSplineSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.CubicSplineSettings();
+    }
+
+    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CubicSplineSettings>
+        PARSER = new com.google.protobuf.AbstractParser<CubicSplineSettings>() {
+      public CubicSplineSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new CubicSplineSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CubicSplineSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CubicSplineSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_PSFParameter_descriptor;
   private static final 
@@ -4486,6 +5823,21 @@ public final class PSFProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -4512,13 +5864,21 @@ public final class PSFProtos {
       "tre\030\n \001(\001\032,\n\nNotesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005" +
       "value\030\002 \001(\t:\0028\001\032M\n\014OffsetsEntry\022\013\n\003key\030\001" +
       " \001(\005\022,\n\005value\030\002 \001(\0132\035.gdsc.smlm.data.con" +
-      "fig.Offset:\0028\001*\232\001\n\007PSFType\022\017\n\013PSF_TYPE_N" +
-      "A\020\000\022\030\n\024ONE_AXIS_GAUSSIAN_2D\020\001\022\030\n\024TWO_AXI" +
-      "S_GAUSSIAN_2D\020\002\022\"\n\036TWO_AXIS_AND_THETA_GA",
-      "USSIAN_2D\020\003\022\032\n\026ASTIGMATIC_GAUSSIAN_2D\020\004\022" +
-      "\n\n\006CUSTOM\020\005*U\n\020PSFParameterUnit\022\031\n\025PSF_P" +
-      "ARAMETER_UNIT_NA\020\000\022\014\n\010DISTANCE\020\001\022\r\n\tINTE" +
-      "NSITY\020\002\022\t\n\005ANGLE\020\003B\013B\tPSFProtosb\006proto3"
+      "fig.Offset:\0028\001\"=\n\023CubicSplineResource\022\020\n" +
+      "\010filename\030\001 \001(\t\022\024\n\014spline_scale\030\002 \001(\001\"\344\001" +
+      "\n\023CubicSplineSettings\022d\n\026cubic_spline_re",
+      "sources\030\001 \003(\0132D.gdsc.smlm.data.config.Cu" +
+      "bicSplineSettings.CubicSplineResourcesEn" +
+      "try\032g\n\031CubicSplineResourcesEntry\022\013\n\003key\030" +
+      "\001 \001(\t\0229\n\005value\030\002 \001(\0132*.gdsc.smlm.data.co" +
+      "nfig.CubicSplineResource:\0028\001*\232\001\n\007PSFType" +
+      "\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAUSSIAN_2" +
+      "D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036TWO_AXI" +
+      "S_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTIGMATIC_" +
+      "GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFParamete" +
+      "rUnit\022\031\n\025PSF_PARAMETER_UNIT_NA\020\000\022\014\n\010DIST",
+      "ANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003B\013B\tPSFP" +
+      "rotosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -4567,6 +5927,24 @@ public final class PSFProtos {
     internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor,
+        new java.lang.String[] { "Filename", "SplineScale", });
+    internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor,
+        new java.lang.String[] { "CubicSplineResources", });
+    internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor =
+      internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor.getNestedTypes().get(0);
+    internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
   }
 

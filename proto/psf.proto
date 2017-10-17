@@ -83,3 +83,18 @@ message ImagePSF
 	// should use rounding to the nearest integer and then add 1. 
 	double z_centre = 10;
 }
+
+// Define a cubic spline resource that can be loaded
+message CubicSplineResource
+{
+	// The filename where the spline data is stored
+	string filename = 1;
+	// The size of the spline scale in nanometers
+	double spline_scale = 2;
+}
+
+// Define the cubic spline settings
+message CubicSplineSettings
+{
+	map<string, CubicSplineResource> cubic_spline_resources = 1;
+}

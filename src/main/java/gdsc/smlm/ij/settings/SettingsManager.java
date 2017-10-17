@@ -44,6 +44,7 @@ import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import gdsc.smlm.data.config.GUIProtosHelper;
+import gdsc.smlm.data.config.PSFProtos.CubicSplineSettings;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
@@ -864,6 +865,18 @@ public class SettingsManager
 	public static CameraModelSettings readCameraModelSettings(int flags)
 	{
 		return new ConfigurationReader<CameraModelSettings>(CameraModelSettings.getDefaultInstance()).read(flags);
+	}
+
+	/**
+	 * Read the CubicSplineSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the CubicSplineSettings
+	 */
+	public static CubicSplineSettings readCubicSplineSettings(int flags)
+	{
+		return new ConfigurationReader<CubicSplineSettings>(CubicSplineSettings.getDefaultInstance()).read(flags);
 	}
 
 	/**
