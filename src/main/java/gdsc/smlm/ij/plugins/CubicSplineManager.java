@@ -29,6 +29,7 @@ import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.cspline.CubicSplineCalculator;
 import gdsc.smlm.function.cspline.CubicSplineData;
 import gdsc.smlm.function.cspline.CubicSplineFunction;
+import gdsc.smlm.function.cspline.SingleCubicSplineFunction;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.PeakResult;
@@ -82,10 +83,8 @@ public class CubicSplineManager implements PlugIn
 
 		public CubicSplineFunction createCubicSplineFunction(int maxy, int maxx, int scale)
 		{
-			CubicSplineFunction f = new CubicSplineFunction(splineData, maxx, maxy);
-			f.setCentreX(imagePSF.getXCentre());
-			f.setCentreY(imagePSF.getYCentre());
-			f.setScale(scale);
+			CubicSplineFunction f = new SingleCubicSplineFunction(splineData, maxx, maxy, imagePSF.getXCentre(),
+					imagePSF.getYCentre(), imagePSF.getZCentre(), scale);
 			return f;
 		}
 	}
@@ -534,13 +533,14 @@ public class CubicSplineManager implements PlugIn
 
 		// Put the spot in the centre of the image
 		double[] a = new double[5];
+		a[PeakResult.INTENSITY] = 1;
 		a[PeakResult.X] = padX;
 		a[PeakResult.Y] = padY;
 
 		// Adjust the centre
 		a[PeakResult.X] += xshift / nmPerPixel;
 		a[PeakResult.Y] += yshift / nmPerPixel;
-		a[PeakResult.Z] += zshift / nmPerPixel;
+		a[PeakResult.Z] += zshift / (psfModel.imagePSF.getPixelDepth() * scale);
 
 		double[] values = p.getValues(f, a);
 

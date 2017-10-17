@@ -1,14 +1,7 @@
 package gdsc.smlm.function.cspline;
 
-import java.util.Arrays;
-
 import gdsc.core.math.interpolation.CustomTricubicFunction;
-import gdsc.core.utils.SimpleArrayUtils;
-import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Function;
-import gdsc.smlm.function.Gradient2Procedure;
-import gdsc.smlm.function.ValueProcedure;
-import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -26,7 +19,7 @@ import gdsc.smlm.results.PeakResult;
 /**
  * Represent a cubic spline function.
  */
-public class CubicSplineFunction implements Gradient2Function
+public abstract class CubicSplineFunction implements Gradient2Function
 {
 	/**
 	 * Internal class to control visiting the correct cubic spline node for each [x][y] index in the
@@ -219,36 +212,24 @@ public class CubicSplineFunction implements Gradient2Function
 	}
 
 	/** The scale to map the target range (maxx * maxy) to the spline. */
-	private int scale = 1;
+	protected int scale = 1;
 
 	// The centre of the spline (unscaled)
-	private double cx, cy, cz;
+	protected double cx, cy, cz;
 
 	// The scaled bounds of the function with the centre at 0,0,0
-	private double lx, ly, ux, uy;
+	protected double lx, ly, ux, uy;
 
 	// Max size of spline data
-	private final int maxSx, maxSy, maxSz;
+	protected final int maxSx, maxSy, maxSz;
 
 	// The tricubic spline packed as Z * YX arrays 
-	private final CustomTricubicFunction[][] splines;
+	protected final CustomTricubicFunction[][] splines;
 
 	// The target range
-	private final int maxx, maxy;
+	protected final int maxx, maxy;
 
-	private int n = 1;
-
-	private int[] gradientIndices;
-
-	private double tB;
-
-	private TargetSpline[] t = new TargetSpline[0];
-
-	private TargetSpline[] working;
-	private int w;
-
-	private TargetSpline[] workingY;
-	private int wy;
+	protected double tB;
 
 	/**
 	 * Instantiates a new cubic spline function.
@@ -282,6 +263,18 @@ public class CubicSplineFunction implements Gradient2Function
 	 *
 	 * @param splineData
 	 *            the spline data
+	 * @param maxx
+	 *            The maximum x value of the 2-dimensional data
+	 * @param maxy
+	 *            The maximum y value of the 2-dimensional data
+	 * @param cx
+	 *            the x centre of the spline data
+	 * @param cy
+	 *            the y centre of the spline data
+	 * @param cz
+	 *            the z centre of the spline data
+	 * @param scale
+	 *            the scale of the spline data
 	 * @throws IllegalArgumentException
 	 *             If the function does not have an integer grid spacing from the origin
 	 */
@@ -345,27 +338,7 @@ public class CubicSplineFunction implements Gradient2Function
 	 *
 	 * @return the number of splines to draw
 	 */
-	public int getN()
-	{
-		return n;
-	}
-
-	/**
-	 * Sets the number of splines to draw.
-	 *
-	 * @param n
-	 *            the new number of splines to draw
-	 * @throws IllegalArgumentException
-	 *             If the number is not strictly positive
-	 */
-	public void setN(int n) throws IllegalArgumentException
-	{
-		if (n < 1)
-			throw new IllegalArgumentException();
-		if (n != this.n)
-			gradientIndices = null;
-		this.n = n;
-	}
+	abstract public int getN();
 
 	/**
 	 * Gets the centre X.
@@ -438,18 +411,6 @@ public class CubicSplineFunction implements Gradient2Function
 		return maxx * maxy;
 	}
 
-	public int[] gradientIndices()
-	{
-		if (gradientIndices == null)
-			gradientIndices = SimpleArrayUtils.newIntArray(getNumberOfGradients(), 0);
-		return gradientIndices;
-	}
-
-	public int getNumberOfGradients()
-	{
-		return 1 + 4 * n;
-	}
-
 	public void initialise(double[] a)
 	{
 		initialise(a, 0);
@@ -470,75 +431,5 @@ public class CubicSplineFunction implements Gradient2Function
 		initialise(a, 2);
 	}
 
-	public void initialise(double[] a, int order)
-	{
-		tB = a[PeakResult.BACKGROUND];
-		// Ensure we have enough room
-		if (t.length < n)
-		{
-			int m = t.length;
-			t = Arrays.copyOf(t, n); // Preserve memory space
-			boolean sp = splines[0][0].isSinglePrecision();
-			while (m < n)
-				t[m++] = (sp) ? new FloatTargetSpline() : new DoubleTargetSpline();
-			working = new TargetSpline[n];
-			workingY = new TargetSpline[n];
-		}
-		// Convert the target parameters to spline offset tables
-		w = 0;
-		for (int i = 0, j = PeakResult.INTENSITY; i < n; i++)
-		{
-			double tI = a[j++];
-			double tX = a[j++];
-			double tY = a[j++];
-			double tZ = a[j++];
-			if (t[i].initialise(tI, tX, tY, tZ, order))
-				working[w++] = t[i];
-		}
-	}
-
-	public void forEach(ValueProcedure procedure)
-	{
-		for (int n = 0; n < w; n++)
-			working[w].reset();
-
-		for (int y = 0; y < maxy; y++)
-		{
-			// Get the working targets for this Y 
-			wy = 0;
-			for (int n = 0; n < w; n++)
-			{
-				if (working[w].isNextYActive())
-					workingY[wy++] = working[w];
-			}
-
-			if (wy == 0)
-			{
-				for (int x = 0; x < maxx; x++)
-					procedure.execute(tB);
-			}
-			else
-			{
-				for (int x = 0; x < maxx; x++)
-				{
-					double I = tB;
-					for (int n = 0; n < wy; n++)
-					{
-						I += workingY[wy].value(x);
-					}
-					procedure.execute(I);
-				}
-			}
-		}
-	}
-
-	public void forEach(Gradient1Procedure procedure)
-	{
-
-	}
-
-	public void forEach(Gradient2Procedure procedure)
-	{
-
-	}
+	abstract protected void initialise(double[] a, int order);
 }
