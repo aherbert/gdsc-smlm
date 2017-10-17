@@ -431,4 +431,5 @@ message PSFCreatorSettings
 	int32 psf_z_magnification = 29;
 	double com_border = 30;
 	int32 output_type = 31;
+	string spline_filename = 32;
 }

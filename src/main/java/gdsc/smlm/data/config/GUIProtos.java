@@ -22243,6 +22243,16 @@ public final class GUIProtos {
      * <code>int32 output_type = 31;</code>
      */
     int getOutputType();
+
+    /**
+     * <code>string spline_filename = 32;</code>
+     */
+    java.lang.String getSplineFilename();
+    /**
+     * <code>string spline_filename = 32;</code>
+     */
+    com.google.protobuf.ByteString
+        getSplineFilenameBytes();
   }
   /**
    * <pre>
@@ -22288,6 +22298,7 @@ public final class GUIProtos {
       psfZMagnification_ = 0;
       comBorder_ = 0D;
       outputType_ = 0;
+      splineFilename_ = "";
     }
 
     @java.lang.Override
@@ -22492,6 +22503,12 @@ public final class GUIProtos {
             case 248: {
 
               outputType_ = input.readInt32();
+              break;
+            }
+            case 258: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              splineFilename_ = s;
               break;
             }
           }
@@ -22844,6 +22861,40 @@ public final class GUIProtos {
       return outputType_;
     }
 
+    public static final int SPLINE_FILENAME_FIELD_NUMBER = 32;
+    private volatile java.lang.Object splineFilename_;
+    /**
+     * <code>string spline_filename = 32;</code>
+     */
+    public java.lang.String getSplineFilename() {
+      java.lang.Object ref = splineFilename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        splineFilename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string spline_filename = 32;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSplineFilenameBytes() {
+      java.lang.Object ref = splineFilename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        splineFilename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -22948,6 +22999,9 @@ public final class GUIProtos {
       }
       if (outputType_ != 0) {
         output.writeInt32(31, outputType_);
+      }
+      if (!getSplineFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 32, splineFilename_);
       }
     }
 
@@ -23080,6 +23134,9 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(31, outputType_);
       }
+      if (!getSplineFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(32, splineFilename_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -23181,6 +23238,8 @@ public final class GUIProtos {
               other.getComBorder()));
       result = result && (getOutputType()
           == other.getOutputType());
+      result = result && getSplineFilename()
+          .equals(other.getSplineFilename());
       return result;
     }
 
@@ -23271,6 +23330,8 @@ public final class GUIProtos {
           java.lang.Double.doubleToLongBits(getComBorder()));
       hash = (37 * hash) + OUTPUT_TYPE_FIELD_NUMBER;
       hash = (53 * hash) + getOutputType();
+      hash = (37 * hash) + SPLINE_FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getSplineFilename().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -23478,6 +23539,8 @@ public final class GUIProtos {
 
         outputType_ = 0;
 
+        splineFilename_ = "";
+
         return this;
       }
 
@@ -23543,6 +23606,7 @@ public final class GUIProtos {
         result.psfZMagnification_ = psfZMagnification_;
         result.comBorder_ = comBorder_;
         result.outputType_ = outputType_;
+        result.splineFilename_ = splineFilename_;
         onBuilt();
         return result;
       }
@@ -23676,6 +23740,10 @@ public final class GUIProtos {
         }
         if (other.getOutputType() != 0) {
           setOutputType(other.getOutputType());
+        }
+        if (!other.getSplineFilename().isEmpty()) {
+          splineFilename_ = other.splineFilename_;
+          onChanged();
         }
         onChanged();
         return this;
@@ -24817,6 +24885,75 @@ public final class GUIProtos {
         onChanged();
         return this;
       }
+
+      private java.lang.Object splineFilename_ = "";
+      /**
+       * <code>string spline_filename = 32;</code>
+       */
+      public java.lang.String getSplineFilename() {
+        java.lang.Object ref = splineFilename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          splineFilename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string spline_filename = 32;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSplineFilenameBytes() {
+        java.lang.Object ref = splineFilename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          splineFilename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string spline_filename = 32;</code>
+       */
+      public Builder setSplineFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        splineFilename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string spline_filename = 32;</code>
+       */
+      public Builder clearSplineFilename() {
+        
+        splineFilename_ = getDefaultInstance().getSplineFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string spline_filename = 32;</code>
+       */
+      public Builder setSplineFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        splineFilename_ = value;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -25075,7 +25212,7 @@ public final class GUIProtos {
       "\022\023\n\013field_width\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022" +
       "\020\n\010z_dither\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022" +
       "\024\n\014nm_per_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001\"" +
-      "\323\006\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
+      "\354\006\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
       "radius\030\002 \001(\001\022\030\n\020interactive_mode\030\003 \001(\010\022\024" +
       "\n\014nm_per_slice\030\004 \001(\001\022E\n\023fit_engine_setti" +
       "ngs\030\005 \001(\0132(.gdsc.smlm.data.config.FitEng" +
@@ -25096,9 +25233,10 @@ public final class GUIProtos {
       " \001(\010\022\023\n\013crop_border\030\032 \001(\005\022\022\n\ncrop_start\030" +
       "\033 \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\033\n\023psf_z_magnifi" +
       "cation\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023\n\013outp" +
-      "ut_type\030\037 \001(\005*O\n\014TemplateType\022\023\n\017INLINE_" +
-      "TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUS" +
-      "TOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "ut_type\030\037 \001(\005\022\027\n\017spline_filename\030  \001(\t*O" +
+      "\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021R" +
+      "ESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B" +
+      "\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -25193,7 +25331,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor,
-        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", });
+        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", "SplineFilename", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();
