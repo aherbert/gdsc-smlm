@@ -24,7 +24,75 @@ import gdsc.smlm.function.Gradient2Function;
  */
 public abstract class CubicSplineFunction implements Gradient2Function
 {
+	/** Index of the background in the parameters array */
+	public static final int BACKGROUND = 0;
+	/** Index of the signal intensity in the parameters array */
+	public static final int SIGNAL = 1;
+	/** Index of the x-position in the parameters array */
+	public static final int X_POSITION = 2;
+	/** Index of the y-position in the parameters array */
+	public static final int Y_POSITION = 3;
+	/** Index of the z-position in the parameters array */
+	public static final int Z_POSITION = 4;
+	/** Index of the x-standard deviation in the parameters array */
 
+	/** The number of parameters per spline */
+	public static final int PARAMETERS_PER_PEAK = 4;
+
+	/**
+	 * Gets the name of the parameter assuming a 2D Gaussian function.
+	 *
+	 * @param index
+	 *            the index (zero or above)
+	 * @return the name
+	 */
+	public static String getName(int index)
+	{
+		final int i = 1 + (index - 1) % PARAMETERS_PER_PEAK;
+		switch (i)
+		{
+			//@formatter:off
+			case BACKGROUND: return "Background";
+			case SIGNAL: return "Signal";
+			case X_POSITION: return "X";
+			case Y_POSITION: return "Y";
+			case Z_POSITION: return "Z";
+			default: return "Unknown: "+index;
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * Gets the peak number (zero-based index) of the parameter assuming a cubic spline function.
+	 *
+	 * @param index
+	 *            the index (zero or above)
+	 * @return the peak number
+	 */
+	public static int getPeak(int index)
+	{
+		if (index < 1)
+			return 0;
+		return (index - 1) / PARAMETERS_PER_PEAK;
+	}
+
+	/**
+	 * Gets the index of the parameter in a multi-peak parameter array assuming a cubic spline function.
+	 *
+	 * @param peak
+	 *            the peak number (zero-based index)
+	 * @param parameterIndex
+	 *            the parameter index for a single peak (this can use the class constants, e.g.
+	 *            {@link CubicSplineFunction#SIGNAL})
+	 * @return the index
+	 */
+	public static int getIndex(int peak, int parameterIndex)
+	{
+		if (parameterIndex < 1)
+			return 0;
+		return peak * PARAMETERS_PER_PEAK + parameterIndex;
+	}
+	
 	/**
 	 * Internal class to control visiting the correct cubic spline node for each [x][y] index in the
 	 * target range [0 <= x < maxx], [0 <= y < maxy].
@@ -812,6 +880,56 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	{
 		this.cz = cz;
 		updateFunctionBounds();
+	}
+
+	// The following properties may be overridden by optimised versions (e.g. no background computation)
+	
+	/**
+	 * @return True if the function can evaluate the background gradient
+	 */
+	public boolean evaluatesBackground()
+	{
+		return true;
+	}
+
+	/**
+	 * @return True if the function can evaluate the signal gradient
+	 */
+	public boolean evaluatesSignal()
+	{
+		return true;
+	}
+
+	/**
+	 * @return True if the function can evaluate the XY-position gradient
+	 */
+	public boolean evaluatesPosition()
+	{
+		return evaluatesX() && evaluatesY();
+	}
+
+	/**
+	 * @return True if the function can evaluate the X-position gradient
+	 */
+	public boolean evaluatesX()
+	{
+		return true;
+	}
+
+	/**
+	 * @return True if the function can evaluate the Y-position gradient
+	 */
+	public boolean evaluatesY()
+	{
+		return true;
+	}
+
+	/**
+	 * @return True if the function can evaluate the Z-position gradient
+	 */
+	public boolean evaluatesZ()
+	{
+		return true;
 	}
 
 	/*
