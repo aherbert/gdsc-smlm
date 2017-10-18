@@ -619,8 +619,6 @@ public class CubicSplineManager implements PlugIn
 				a[PeakResult.Y] = padY;
 			}
 
-			a[PeakResult.INTENSITY] = 10;
-			
 			// Render
 			StandardValueProcedure p = new StandardValueProcedure();
 
@@ -637,9 +635,14 @@ public class CubicSplineManager implements PlugIn
 
 			double[] values = p.getValues(f, a);
 
-			ImagePlus imp = Utils.display(selected, values, f.getMaxX(), f.getMaxY());
+			ImagePlus imp = Utils.display(selected + " (slice)", values, f.getMaxX(), f.getMaxY(), Utils.NO_TO_FRONT);
+			if (Utils.isNewWindow())
+			{
+				updateCalibration = true;
+				imp.getWindow().toFront();
+			}
 
-			if (updateCalibration || Utils.isNewWindow())
+			if (updateCalibration)
 			{
 				Calibration c = imp.getLocalCalibration();
 				c.setUnit("nm");
@@ -794,7 +797,12 @@ public class CubicSplineManager implements PlugIn
 		for (float[] pixels : p.value)
 			stack.addSlice(null, pixels);
 
-		ImagePlus imp = Utils.display(name, stack);
+		ImagePlus imp = Utils.display(name + " (upsampled)", stack);
+		Calibration c = imp.getLocalCalibration();
+		c.setUnit("nm");
+		c.pixelWidth = c.pixelHeight = psfModel.imagePSF.getPixelSize() * magnification;
+		c.pixelDepth = psfModel.imagePSF.getPixelDepth() * magnification;
+
 		int centre = 1 + (int) Math.round(psfModel.imagePSF.getZCentre() * magnification);
 		imp.setSlice(centre);
 		imp.resetDisplayRange();
