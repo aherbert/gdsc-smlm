@@ -432,7 +432,7 @@ public class CubicSplineData
 			CustomTricubicFunction[] xySplines = splines[zp[z]];
 			for (int y = 0; y <= maxy; y++)
 			{
-				int index = yp[y] * maxx;
+				int index = yp[y] * getMaxX();
 				final int j = nx1 * (yt[y] + ny1 * zt[z]);
 				for (int x = 0; x <= maxx; x++)
 				{
