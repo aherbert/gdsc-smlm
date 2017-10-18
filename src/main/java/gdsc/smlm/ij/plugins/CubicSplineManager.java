@@ -1,5 +1,10 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.AWTEvent;
+import java.awt.Label;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -19,6 +24,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.logging.Ticker;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.PSFProtos.CubicSplineResource;
@@ -37,8 +43,11 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
+import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
+import ij.gui.NonBlockingExtendedGenericDialog;
+import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 
 /**
@@ -326,7 +335,13 @@ public class CubicSplineManager implements PlugIn
 		CubicSplineResource resource = settings.getCubicSplineResourcesMap().get(name);
 		if (resource == null)
 			return null;
-		return loadFromFile(name, resource.getFilename());
+		CubicSplinePSF f = loadFromFile(name, resource.getFilename());
+		if (f != null)
+		{
+			cache = f;
+			cacheName = name;
+		}
+		return f;
 	}
 
 	private static CubicSplinePSF loadFromFile(String name, String filename)
@@ -335,6 +350,7 @@ public class CubicSplineManager implements PlugIn
 		InputStream is = null;
 		try
 		{
+			IJ.showStatus("Loading cubic spline: " + name);
 			TrackProgress progress = new IJTrackProgress();
 			is = new BufferedInputStream(new FileInputStream(filename));
 
@@ -349,6 +365,7 @@ public class CubicSplineManager implements PlugIn
 		}
 		finally
 		{
+			IJ.showStatus("");
 			if (is != null)
 				try
 				{
@@ -432,7 +449,7 @@ public class CubicSplineManager implements PlugIn
 	private static int option = 0;
 	private static String selected = "";
 	private static int magnification = 3;
-	private static double nmPerPixel = 100;
+	private static int scale = 2;
 	private static double xshift = 0;
 	private static double yshift = 0;
 	private static double zshift = 0;
@@ -484,33 +501,14 @@ public class CubicSplineManager implements PlugIn
 
 	private void renderCubicSpline()
 	{
-		// Select an image
+		String[] MODELS = listCubicSplines(false);
 		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addNumericField("Pixel_pitch", nmPerPixel, 2, 6, "nm");
-		gd.addNumericField("x_shift", xshift, 2, 6, "nm");
-		gd.addNumericField("y_shift", yshift, 2, 6, "nm");
-		gd.addNumericField("z_shift", zshift, 2, 6, "nm");
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return;
-		nmPerPixel = gd.getNextNumber();
-		xshift = gd.getNextNumber();
-		yshift = gd.getNextNumber();
-		zshift = gd.getNextNumber();
-
-		String[] MODELS = listCubicSplines(false, nmPerPixel);
-		if (MODELS.length == 0)
-		{
-			IJ.error(TITLE, "No suitable spline data for pixel pitch: " + nmPerPixel);
-			return;
-		}
-		gd = new GenericDialog(TITLE);
 		gd.addChoice("Model", MODELS, selected);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-
 		String name = selected = gd.getNextChoice();
+
 		CubicSplinePSF psfModel = load(name);
 
 		if (psfModel == null)
@@ -519,37 +517,182 @@ public class CubicSplineManager implements PlugIn
 			return;
 		}
 
-		// Find the limits of the model. This works if the centre is within the image
-		ImagePSF imagePSF = psfModel.imagePSF;
-		int scale = psfModel.getScale(nmPerPixel);
-		CubicSplineData function = psfModel.splineData;
-		int padX = (int) Math.max(Math.ceil((imagePSF.getXCentre()) / scale),
-				Math.ceil((function.getMaxX() - imagePSF.getXCentre()) / scale));
-		int padY = (int) Math.max(Math.ceil((imagePSF.getYCentre()) / scale),
-				Math.ceil((function.getMaxY() - imagePSF.getYCentre()) / scale));
+		// Interactive render
+		new CSoplineRenderer(psfModel).run();
+	}
 
-		// Create a function
-		int rangeX = 1 + 2 * padX;
-		int rangeY = 1 + 2 * padY;
-		CubicSplineFunction f = psfModel.createCubicSplineFunction(rangeX, rangeY, scale);
+	private class CSoplineRenderer implements DialogListener
+	{
+		CubicSplinePSF psfModel;
+		ImagePSF imagePSF;
+		CubicSplineData function;
+		double padx, pady;
+		Label label;
 
-		// Render
-		StandardValueProcedure p = new StandardValueProcedure();
+		public CSoplineRenderer(CubicSplinePSF psfModel)
+		{
+			this.psfModel = psfModel;
+			imagePSF = psfModel.imagePSF;
+			function = psfModel.splineData;
 
-		// Put the spot in the centre of the image
-		double[] a = new double[5];
-		a[PeakResult.INTENSITY] = 1;
-		a[PeakResult.X] = padX;
-		a[PeakResult.Y] = padY;
+			// Find the limits of the model. This works if the centre is within the image
+			padx = Math.max(imagePSF.getXCentre(), function.getMaxX() - imagePSF.getXCentre());
+			pady = Math.max(imagePSF.getYCentre(), function.getMaxY() - imagePSF.getYCentre());
+		}
 
-		// Adjust the centre
-		a[PeakResult.X] += xshift / nmPerPixel;
-		a[PeakResult.Y] += yshift / nmPerPixel;
-		a[PeakResult.Z] += zshift / (psfModel.imagePSF.getPixelDepth() * scale);
+		public void run()
+		{
+			final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+			gd.addSlider("Scale", 1, 5, scale);
 
-		double[] values = p.getValues(f, a);
+			// Find the limits of the PSF
+			int width = (int) Math.ceil(function.getMaxX() * imagePSF.getPixelSize());
+			int height = (int) Math.ceil(function.getMaxY() * imagePSF.getPixelSize());
+			int minZ = (int) Math.floor(-imagePSF.getZCentre() * imagePSF.getPixelDepth());
+			int maxZ = (int) Math.ceil((function.getMaxZ() - imagePSF.getZCentre()) * imagePSF.getPixelDepth());
 
-		Utils.display(selected, values, rangeX, rangeY);
+			gd.addSlider("x_shift (nm)", -width, width, xshift);
+			final TextField tfxshift = gd.getLastTextField();
+			gd.addSlider("y_shift (nm)", -height, height, yshift);
+			final TextField tfyshift = gd.getLastTextField();
+			gd.addSlider("z_shift (nm)", minZ, maxZ, zshift);
+			final TextField tfzshift = gd.getLastTextField();
+			gd.addDialogListener(this);
+			if (Utils.isShowGenericDialog())
+			{
+				gd.addAndGetButton("Reset", new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						xshift = yshift = zshift = 0;
+						update();
+						// The events triggered by setting these should be ignored now
+						tfxshift.setText("0");
+						tfyshift.setText("0");
+						tfzshift.setText("0");
+					}
+				});
+				gd.addMessage("");
+				label = gd.getLastLabel();
+				draw();
+			}
+			gd.showDialog();
+		}
+
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			scale = (int) gd.getNextNumber();
+			xshift = gd.getNextNumber();
+			yshift = gd.getNextNumber();
+			zshift = gd.getNextNumber();
+
+			update();
+			return true;
+		}
+
+		private int _scale = -1;
+		private double _xshift = 0;
+		private double _yshift = 0;
+		private double _zshift = 0;
+		CubicSplineFunction f = null;
+		double[] a = new double[] { 0, 1, 0, 0, 0 }; // Intensity 1
+
+		private void draw()
+		{
+			_scale = scale;
+			_xshift = xshift;
+			_yshift = yshift;
+			_zshift = zshift;
+
+			boolean updateCalibration = false;
+			if (f == null || f.getScale() != _scale)
+			{
+				updateCalibration = true;
+				int padX = (int) Math.ceil(padx / _scale);
+				int padY = (int) Math.ceil(pady / _scale);
+
+				// Create a function
+				int rangeX = 1 + 2 * padX;
+				int rangeY = 1 + 2 * padY;
+				f = psfModel.createCubicSplineFunction(rangeX, rangeY, _scale);
+				a[PeakResult.X] = padX;
+				a[PeakResult.Y] = padY;
+			}
+
+			a[PeakResult.INTENSITY] = 10;
+			
+			// Render
+			StandardValueProcedure p = new StandardValueProcedure();
+
+			// Put the spot in the centre of the image
+			double[] a = this.a.clone();
+
+			// Adjust the centre
+			double nmPerPixel = imagePSF.getPixelSize() * _scale;
+			double nmPerSlice = imagePSF.getPixelDepth() * _scale;
+
+			a[PeakResult.X] += _xshift / nmPerPixel;
+			a[PeakResult.Y] += _yshift / nmPerPixel;
+			a[PeakResult.Z] += _zshift / nmPerSlice;
+
+			double[] values = p.getValues(f, a);
+
+			ImagePlus imp = Utils.display(selected, values, f.getMaxX(), f.getMaxY());
+
+			if (updateCalibration || Utils.isNewWindow())
+			{
+				Calibration c = imp.getLocalCalibration();
+				c.setUnit("nm");
+				c.pixelWidth = c.pixelHeight = nmPerPixel;
+				c.pixelDepth = nmPerSlice;
+			}
+
+			if (label != null)
+				label.setText("Intensity = " + Utils.rounded(Maths.sum(values)));
+		}
+
+		private void update()
+		{
+			if (aquireLock1())
+			{
+				// Run in a new thread to allow the GUI to continue updating
+				new Thread(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							// Continue while the parameter is changing
+							//@formatter:off
+							while (
+									_scale != scale ||
+									_xshift != xshift ||
+									_yshift != yshift ||
+									_zshift != zshift
+									)
+							//@formatter:on
+							{
+								draw();
+							}
+						}
+						finally
+						{
+							// Ensure the running flag is reset
+							lock1 = false;
+						}
+					}
+				}).start();
+			}
+		}
+
+		private boolean lock1;
+
+		private synchronized boolean aquireLock1()
+		{
+			if (lock1)
+				return false;
+			return lock1 = true;
+		}
 	}
 
 	private void deleteCubicSpline()
