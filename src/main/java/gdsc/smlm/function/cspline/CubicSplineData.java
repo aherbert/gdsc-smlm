@@ -16,6 +16,7 @@ import gdsc.core.logging.Ticker;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.math.interpolation.CubicSplinePosition;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
+import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import gdsc.core.math.interpolation.FloatCustomTricubicFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -80,6 +81,28 @@ public class CubicSplineData
 		this.maxx = maxx;
 		this.maxy = maxy;
 		this.splines = splines;
+	}
+
+	/**
+	 * Instantiates a new cubic spline data by copying the nodes from the function. 
+	 * <p>
+	 * Warning: Any information about the scale of each axis is ignored.
+	 *
+	 * @param function the function
+	 */
+	public CubicSplineData(CustomTricubicInterpolatingFunction function)
+	{
+		maxx = function.getMaxXSplinePosition() + 1;
+		maxy = function.getMaxYSplinePosition() + 1;
+		int maxz = function.getMaxZSplinePosition() + 1;
+
+		int size = maxx * maxy;
+		splines = new CustomTricubicFunction[maxz][size];
+
+		for (int z = 0; z < splines.length; z++)
+			for (int y = 0, i = 0; y < maxy; y++)
+				for (int x = 0; x < maxx; x++, i++)
+					splines[z][i] = function.getSplineNode(x, y, z);
 	}
 
 	/**
@@ -406,7 +429,7 @@ public class CubicSplineData
 		// Write interpolated values
 		for (int z = 0; z <= maxz; z++)
 		{
-			CustomTricubicFunction[] xySplines		= splines[zp[z]];	
+			CustomTricubicFunction[] xySplines = splines[zp[z]];
 			for (int y = 0; y <= maxy; y++)
 			{
 				int index = yp[y] * maxx;
