@@ -8,6 +8,7 @@ import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.results.PeakResult;
 
+// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -22,20 +23,40 @@ import gdsc.smlm.results.PeakResult;
  *---------------------------------------------------------------------------*/
 
 /**
- * Represent a cubic spline function for multiple points
+ * Represent a cubic spline function for multiple points.
  */
 public class MultiCubicSplineFunction extends CubicSplineFunction
 {
+	/** The number of splines to draw */
 	private int n = 1;
+
+	/** The gradient indices, This can be cached for the same n. */
 	private int[] gradientIndices;
 
+	/** The n target splines. This is cached to re-use memory */
 	private TargetSpline[] t = new TargetSpline[0];
 
+	/**
+	 * The working splines for the current evaluation.
+	 */
 	private TargetSpline[] working;
+
+	/**
+	 * The number of working splines. This is <=n depending on whether the spline is within the target region for each
+	 * point.
+	 */
 	private int w;
 
+	/**
+	 * The working splines for the current evaluation of the current y-index.
+	 */
 	private TargetSpline[] workingY;
-	private int wy;
+
+	/**
+	 * The number of working splines for the current y-index. This is <=w depending on whether the working spline is
+	 * within the target region for Y..
+	 */
+	private int wY;
 
 	/**
 	 * Instantiates a new cubic spline function.
@@ -108,6 +129,11 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 		this.n = n;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#gradientIndices()
+	 */
 	public int[] gradientIndices()
 	{
 		if (gradientIndices == null)
@@ -115,11 +141,21 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 		return gradientIndices;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
+	 */
 	public int getNumberOfGradients()
 	{
 		return 1 + 4 * n;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.cspline.CubicSplineFunction#initialise(double[], int)
+	 */
 	protected void initialise(double[] a, int order)
 	{
 		tB = a[PeakResult.BACKGROUND];
@@ -142,11 +178,16 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 			double tX = a[j++];
 			double tY = a[j++];
 			double tZ = a[j++];
-			if (t[i].initialise(tI, tX, tY, tZ, order))
+			if (t[i].initialise(i, tI, tX, tY, tZ, order))
 				working[w++] = t[i];
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ValueFunction#forEach(gdsc.smlm.function.ValueProcedure)
+	 */
 	public void forEach(ValueProcedure procedure)
 	{
 		for (int n = 0; n < w; n++)
@@ -155,14 +196,14 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 		for (int y = 0; y < maxy; y++)
 		{
 			// Get the working targets for this Y 
-			wy = 0;
+			wY = 0;
 			for (int n = 0; n < w; n++)
 			{
 				if (working[w].isNextYActive())
-					workingY[wy++] = working[w];
+					workingY[wY++] = working[w];
 			}
 
-			if (wy == 0)
+			if (wY == 0)
 			{
 				for (int x = 0; x < maxx; x++)
 					procedure.execute(tB);
@@ -172,9 +213,9 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 				for (int x = 0; x < maxx; x++)
 				{
 					double I = tB;
-					for (int n = 0; n < wy; n++)
+					for (int n = 0; n < wY; n++)
 					{
-						I += workingY[wy].value(x);
+						I += workingY[wY].value(x);
 					}
 					procedure.execute(I);
 				}
@@ -182,13 +223,90 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.Gradient1Function#forEach(gdsc.smlm.function.Gradient1Procedure)
+	 */
 	public void forEach(Gradient1Procedure procedure)
 	{
+		final double[] duda = new double[getNumberOfGradients()];
+		duda[0] = 1.0;
 
+		for (int n = 0; n < w; n++)
+			working[w].reset();
+
+		for (int y = 0; y < maxy; y++)
+		{
+			// Get the working targets for this Y 
+			wY = 0;
+			for (int n = 0; n < w; n++)
+			{
+				if (working[w].isNextYActive(duda))
+					workingY[wY++] = working[w];
+			}
+
+			if (wY == 0)
+			{
+				for (int x = 0; x < maxx; x++)
+					procedure.execute(tB, duda);
+			}
+			else
+			{
+				for (int x = 0; x < maxx; x++)
+				{
+					double I = tB;
+					for (int n = 0; n < wY; n++)
+					{
+						I += workingY[wY].value(x, duda);
+					}
+					procedure.execute(I, duda);
+				}
+			}
+		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
+	 */
 	public void forEach(Gradient2Procedure procedure)
 	{
+		final double[] duda = new double[getNumberOfGradients()];
+		final double[] d2uda2 = new double[getNumberOfGradients()];
+		duda[0] = 1.0;
 
+		for (int n = 0; n < w; n++)
+			working[w].reset();
+
+		for (int y = 0; y < maxy; y++)
+		{
+			// Get the working targets for this Y 
+			wY = 0;
+			for (int n = 0; n < w; n++)
+			{
+				if (working[w].isNextYActive(duda, d2uda2))
+					workingY[wY++] = working[w];
+			}
+
+			if (wY == 0)
+			{
+				for (int x = 0; x < maxx; x++)
+					procedure.execute(tB, duda, d2uda2);
+			}
+			else
+			{
+				for (int x = 0; x < maxx; x++)
+				{
+					double I = tB;
+					for (int n = 0; n < wY; n++)
+					{
+						I += workingY[wY].value(x, duda, d2uda2);
+					}
+					procedure.execute(I, duda, d2uda2);
+				}
+			}
+		}
 	}
 }

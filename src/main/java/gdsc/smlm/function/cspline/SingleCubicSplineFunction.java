@@ -19,14 +19,20 @@ import gdsc.smlm.results.PeakResult;
  *---------------------------------------------------------------------------*/
 
 /**
- * Represent a cubic spline function for a single points
+ * Represent a cubic spline function for a single points.
  */
 public class SingleCubicSplineFunction extends CubicSplineFunction
 {
+	/** The gradient indices for a single point [Background, Intensity, X, Y, Z] */
 	private static final int[] gradientIndices = new int[] { 0, 1, 2, 3, 4 };
 
-	private TargetSpline t;
+	/** The single target spline. */
+	private final TargetSpline t;
 
+	/**
+	 * The working spline for the current evaluation.
+	 * This is null if the point is outside the target range
+	 */
 	private TargetSpline working;
 
 	/**
@@ -85,29 +91,49 @@ public class SingleCubicSplineFunction extends CubicSplineFunction
 		return 1;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#gradientIndices()
+	 */
 	public int[] gradientIndices()
 	{
 		return gradientIndices;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
+	 */
 	public int getNumberOfGradients()
 	{
 		return 5;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.cspline.CubicSplineFunction#initialise(double[], int)
+	 */
 	protected void initialise(double[] a, int order)
 	{
 		tB = a[PeakResult.BACKGROUND];
-		working = (t.initialise(a[PeakResult.INTENSITY], a[PeakResult.X], a[PeakResult.Y], a[PeakResult.Z], order)) ? t
-				: null;
+		working = (t.initialise(0, a[PeakResult.INTENSITY], a[PeakResult.X], a[PeakResult.Y], a[PeakResult.Z], order))
+				? t : null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ValueFunction#forEach(gdsc.smlm.function.ValueProcedure)
+	 */
 	public void forEach(ValueProcedure procedure)
 	{
 		if (working == null)
 		{
-			// Special case
-			for (int i = 0, size = maxx * maxy; i < size; i++)
+			// Special case as the spline does not overlap the target region
+			for (int i = maxx * maxy; i-- > 0; )
 				procedure.execute(tB);
 		}
 		else
@@ -118,26 +144,93 @@ public class SingleCubicSplineFunction extends CubicSplineFunction
 				if (working.isNextYActive())
 				{
 					for (int x = 0; x < maxx; x++)
-						procedure.execute(tB);
+					{
+						procedure.execute(tB + working.value(x));
+					}
 				}
 				else
 				{
 					for (int x = 0; x < maxx; x++)
-					{
-						procedure.execute(tB + working.value(x));
-					}
+						procedure.execute(tB);
 				}
 			}
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.Gradient1Function#forEach(gdsc.smlm.function.Gradient1Procedure)
+	 */
 	public void forEach(Gradient1Procedure procedure)
 	{
+		final double[] duda = new double[getNumberOfGradients()];
+		duda[0] = 1.0;
 
+		if (working == null)
+		{
+			// Special case as the spline does not overlap the target region
+			for (int i = maxx * maxy; i-- > 0; )
+				procedure.execute(tB, duda);
+		}
+		else
+		{
+			working.reset();
+			for (int y = 0; y < maxy; y++)
+			{
+				if (working.isNextYActive(duda))
+				{
+					for (int x = 0; x < maxx; x++)
+					{
+						// Because the call to value(...) occurs before passing the arguments
+						procedure.execute(tB + working.value(x, duda), duda);
+					}
+				}
+				else
+				{
+					for (int x = 0; x < maxx; x++)
+						procedure.execute(tB, duda);
+				}
+			}
+		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
+	 */
 	public void forEach(Gradient2Procedure procedure)
 	{
+		final double[] duda = new double[getNumberOfGradients()];
+		final double[] d2uda2 = new double[getNumberOfGradients()];
+		duda[0] = 1.0;
 
+		if (working == null)
+		{
+			// Special case as the spline does not overlap the target region
+			for (int i = maxx * maxy; i-- > 0; )
+				procedure.execute(tB, duda, d2uda2);
+		}
+		else
+		{
+			working.reset();
+			for (int y = 0; y < maxy; y++)
+			{
+				if (working.isNextYActive(duda, d2uda2))
+				{
+					for (int x = 0; x < maxx; x++)
+					{
+						// Because the call to value(...) occurs before passing the arguments
+						procedure.execute(tB + working.value(x, duda, d2uda2), duda, d2uda2);
+					}
+				}
+				else
+				{
+					for (int x = 0; x < maxx; x++)
+						procedure.execute(tB, duda, d2uda2);
+				}
+			}
+		}
 	}
 }

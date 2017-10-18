@@ -17,24 +17,76 @@ import gdsc.smlm.function.Gradient2Function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Represent a cubic spline function.
+ * Represent a cubic spline function. N splines are drawn into a target region.
+ * <p>
+ * The parameters are [Background + n *{Intensity, X, Y, Z}]. The spline can be scaled-down before sampling (i.e.
+ * drawing on the target region). Only one sample is taken per index in the target region.
  */
 public abstract class CubicSplineFunction implements Gradient2Function
 {
+
 	/**
 	 * Internal class to control visiting the correct cubic spline node for each [x][y] index in the
-	 * target range [0 <= x < maxx], [0 <= y < maxy]
+	 * target range [0 <= x < maxx], [0 <= y < maxy].
 	 */
 	protected abstract class TargetSpline
 	{
-		int ix1, iy1;
-		int ix0, iy0;
-		int index;
+		/** The offset used for derivatives. */
+		int offset;
+
+		/** Working space for first order gradients. */
+		double[] dfda = new double[3];
+
+		/** Working space for second order gradients. */
+		double[] d2fda2 = new double[3];
+
+		/**
+		 * The x-index within the xy splines for x=0 in the target region.
+		 * It is offset by the scale for faster iteration with pre-increment loops.
+		 * This may be negative indicating that the spline does not overlap the target at x=0.
+		 */
+		int ix0;
+		/**
+		 * The y-index within the xy splines for y=0 in the target region.
+		 * It is offset by the scale for faster iteration with pre-increment loops.
+		 * This may be negative indicating that the spline does not overlap the target at y=0.
+		 */
+		int iy0;
+
+		/** The current y-index during iteration. */
 		int yindex;
+
+		/** The index of the current (X,Y) index within the xy splines. Used during forEach iteration. */
+		int yxindex;
+
+		/** The xy splines for the target z-position. */
 		CustomTricubicFunction[] xySplines;
+
+		/** Flag for each x-index to indicate if the spline overlaps the target region. */
 		boolean[] activeX = new boolean[maxx];
 
-		public boolean initialise(double tI, double tX, double tY, double tZ, int order)
+		/** The target intensity. */
+		double tI;
+
+		/**
+		 * Initialise the target. This checks if the spline, shifted to centre at the given XYZ coordinates, will
+		 * overlap the target region. If true then initialisation is performed for function evaluation.
+		 *
+		 * @param id
+		 *            the id (used to write the correct derivatives)
+		 * @param tI
+		 *            the target Intensity
+		 * @param tX
+		 *            the target X
+		 * @param tY
+		 *            the target Y
+		 * @param tZ
+		 *            the target Z
+		 * @param order
+		 *            the derivative order
+		 * @return true, if the spline partially overlaps with the target region
+		 */
+		public boolean initialise(int id, double tI, double tX, double tY, double tZ, int order)
 		{
 			// Map z to a position in the spline
 			// We want 0 to be in the centre. 
@@ -62,8 +114,8 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			// i.e. we sample the region at x=0,1,2,...
 			// We want the first integer that the function overlaps, 
 			// i.e. can interpolate a value for so it must be above the lower bounds
-			ix1 = (int) Math.ceil(x1);
-			iy1 = (int) Math.ceil(y1);
+			int ix1 = (int) Math.ceil(x1);
+			int iy1 = (int) Math.ceil(y1);
 
 			// How far into the unscaled function is the first point.
 			// i.e. x=1 may be 0.6 above the scaled lower bound (0.4) but that would require
@@ -91,14 +143,27 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 			computePowerTable(x - ix, y - iy, z - iz, order);
 
+			// The scale is the increment we sample the PSF.
+			// In order to have the same integral we adjust the intensity.
+			this.tI = tI * scale2;
+			this.offset = 1 + id * 4;
+
 			return true;
 		}
 
+		/**
+		 * Reset for iteration through YX-order.
+		 */
 		public void reset()
 		{
 			yindex = iy0;
 		}
 
+		/**
+		 * Checks if is the next Y-index is active. If true then it initialises the worker for iteration through x.
+		 *
+		 * @return true, if is next Y active
+		 */
 		public boolean isNextYActive()
 		{
 			// pre-increment yindex
@@ -106,33 +171,230 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			if (yindex >= 0 && yindex < maxSy)
 			{
 				// The y-index is inside the XY spline data
-				// Reset the index
-				index = yindex * maxSx + ix0;
+				// Reset the yx-index for iteration
+				yxindex = yindex * maxSx + ix0;
+				return true;
 			}
 			return false;
 		}
 
-		abstract public void computePowerTable(double x, double y, double z, int order);
-
-		public double value(int x)
+		/**
+		 * Checks if is the next Y-index is active. If true then it initialises the worker for iteration through x.
+		 * Otherwise it resets the gradients.
+		 *
+		 * @param df_da
+		 *            the df da
+		 * @return true, if is next Y active
+		 */
+		public boolean isNextYActive(double[] df_da)
 		{
-			index += scale; // pre-increment
-			return (activeX[x]) ? computeValue(xySplines[index]) : 0;
+			// pre-increment yindex
+			yindex += scale;
+			if (yindex >= 0 && yindex < maxSy)
+			{
+				// The y-index is inside the XY spline data
+				// Reset the yx-index for iteration
+				yxindex = yindex * maxSx + ix0;
+				return true;
+			}
+			// Zero gradients
+			df_da[offset] = 0;
+			df_da[offset + 1] = 0;
+			df_da[offset + 2] = 0;
+			df_da[offset + 3] = 0;
+			return false;
 		}
 
+		/**
+		 * Checks if is the next Y-index is active. If true then it initialises the worker for iteration through x.
+		 * Otherwise it resets the gradients.
+		 *
+		 * @param df_da
+		 *            the df da
+		 * @param d2f_da2
+		 *            the d 2 f da 2
+		 * @return true, if is next Y active
+		 */
+		public boolean isNextYActive(double[] df_da, double[] d2f_da2)
+		{
+			// pre-increment yindex
+			yindex += scale;
+			if (yindex >= 0 && yindex < maxSy)
+			{
+				// The y-index is inside the XY spline data
+				// Reset the yx-index for iteration
+				yxindex = yindex * maxSx + ix0;
+				return true;
+			}
+			// Zero gradients
+			df_da[offset] = 0;
+			df_da[offset + 1] = 0;
+			df_da[offset + 2] = 0;
+			df_da[offset + 3] = 0;
+			d2f_da2[offset + 1] = 0;
+			d2f_da2[offset + 2] = 0;
+			d2f_da2[offset + 3] = 0;
+			return false;
+		}
+
+		/**
+		 * Compute the power tables for the given spline position and derivative order.
+		 *
+		 * @param x
+		 *            the x (range 0-1)
+		 * @param y
+		 *            the y (range 0-1)
+		 * @param z
+		 *            the z (range 0-1)
+		 * @param order
+		 *            the order
+		 */
+		abstract public void computePowerTable(double x, double y, double z, int order);
+
+		/**
+		 * Compute the value at the given x-index.
+		 * Assumes that the current y-index has been set with a call to #{@link TargetSpline#isNextYActive()}.
+		 *
+		 * @param x
+		 *            the x
+		 * @return the value
+		 */
+		public double value(int x)
+		{
+			yxindex += scale; // pre-increment
+			return (activeX[x]) ? tI * computeValue(xySplines[yxindex]) : 0;
+		}
+
+		/**
+		 * Compute the value.
+		 *
+		 * @param customTricubicFunction
+		 *            the custom tricubic function
+		 * @return the value
+		 */
 		abstract public double computeValue(CustomTricubicFunction customTricubicFunction);
+
+		/**
+		 * Compute the value and derivatives at the given x-index.
+		 * Assumes that the current y-index has been set with a call to {@link TargetSpline#isNextYActive(double[])}.
+		 *
+		 * @param x
+		 *            the x
+		 * @param df_da
+		 *            the df da
+		 * @return the value
+		 */
+		public double value(int x, double[] df_da)
+		{
+			yxindex += scale; // pre-increment
+			if (activeX[x])
+			{
+				double v = computeValue1(xySplines[yxindex]);
+				// Copy the gradients into the correct position and account for the intensity
+				df_da[offset] = v;
+				df_da[offset + 1] = tI * dfda[0];
+				df_da[offset + 2] = tI * dfda[1];
+				df_da[offset + 3] = tI * dfda[2];
+				return tI * v;
+			}
+			else
+			{
+				// Zero gradients
+				df_da[offset] = 0;
+				df_da[offset + 1] = 0;
+				df_da[offset + 2] = 0;
+				df_da[offset + 3] = 0;
+				return 0;
+			}
+		}
+
+		/**
+		 * Compute the value and first-order derivatives. The derivatives are stored in {@link TargetSpline#dfda}.
+		 *
+		 * @param customTricubicFunction
+		 *            the custom tricubic function
+		 * @return the value
+		 */
+		abstract public double computeValue1(CustomTricubicFunction customTricubicFunction);
+
+		/**
+		 * Compute the value and derivatives at the given x-index.
+		 * Assumes that the current y-index has been set with a call to
+		 * #{@link TargetSpline#isNextYActive(double[],double[])}.
+		 *
+		 * @param x
+		 *            the x
+		 * @param df_da
+		 *            the df da
+		 * @param d2f_da2
+		 *            the d 2 f da 2
+		 * @return the value
+		 */
+		public double value(int x, double[] df_da, double[] d2f_da2)
+		{
+			yxindex += scale; // pre-increment
+			if (activeX[x])
+			{
+				double v = computeValue2(xySplines[yxindex]);
+				// Copy the gradients into the correct position and account for the intensity
+				df_da[offset] = v;
+				df_da[offset + 1] = tI * dfda[0];
+				df_da[offset + 2] = tI * dfda[1];
+				df_da[offset + 3] = tI * dfda[2];
+				d2f_da2[offset + 1] = tI * d2fda2[0];
+				d2f_da2[offset + 2] = tI * d2fda2[1];
+				d2f_da2[offset + 3] = tI * d2fda2[2];
+				return tI * v;
+			}
+			else
+			{
+				// Zero gradients
+				df_da[offset] = 0;
+				df_da[offset + 1] = 0;
+				df_da[offset + 2] = 0;
+				df_da[offset + 3] = 0;
+				d2f_da2[offset + 1] = 0;
+				d2f_da2[offset + 2] = 0;
+				d2f_da2[offset + 3] = 0;
+				return 0;
+			}
+		}
+
+		/**
+		 * Compute the value, first- and second-order derivatives. The derivatives are stored in
+		 * {@link TargetSpline#dfda} and {@link TargetSpline#d2fda2}.
+		 *
+		 * @param customTricubicFunction
+		 *            the custom tricubic function
+		 * @return the value
+		 */
+		abstract public double computeValue2(CustomTricubicFunction customTricubicFunction);
 	}
 
 	/**
-	 * Double precision computation of the target spline
+	 * Double precision computation of the target spline.
 	 */
 	protected class DoubleTargetSpline extends TargetSpline
 	{
+
+		/** The table 1. */
 		double[] table1 = new double[64];
+
+		/** The table 2. */
 		double[] table2;
+
+		/** The table 3. */
 		double[] table3;
+
+		/** The table 6. */
 		double[] table6;
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computePowerTable(double, double, double,
+		 * int)
+		 */
 		@Override
 		public void computePowerTable(double x, double y, double z, int order)
 		{
@@ -152,6 +414,15 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			}
 		}
 
+		/**
+		 * Multiply.
+		 *
+		 * @param n
+		 *            the n
+		 * @param table
+		 *            the table
+		 * @return the double[]
+		 */
 		private double[] multiply(int n, double[] table)
 		{
 			if (table == null)
@@ -161,22 +432,67 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			return table;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue(gdsc.core.math.interpolation.
+		 * CustomTricubicFunction)
+		 */
+		@Override
 		public double computeValue(CustomTricubicFunction customTricubicFunction)
 		{
 			return customTricubicFunction.value(table1);
 		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue1(gdsc.core.math.interpolation.
+		 * CustomTricubicFunction)
+		 */
+		@Override
+		public double computeValue1(CustomTricubicFunction customTricubicFunction)
+		{
+			return customTricubicFunction.value(table1, table2, table3, dfda);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue2(gdsc.core.math.interpolation.
+		 * CustomTricubicFunction)
+		 */
+		@Override
+		public double computeValue2(CustomTricubicFunction customTricubicFunction)
+		{
+			return customTricubicFunction.value(table1, table2, table3, table6, dfda, d2fda2);
+		}
 	}
 
 	/**
-	 * Double precision computation of the target spline
+	 * Single precision computation of the target spline.
 	 */
 	protected class FloatTargetSpline extends TargetSpline
 	{
+
+		/** The table 1. */
 		float[] table1 = new float[64];
+
+		/** The table 2. */
 		float[] table2;
+
+		/** The table 3. */
 		float[] table3;
+
+		/** The table 6. */
 		float[] table6;
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computePowerTable(double, double, double,
+		 * int)
+		 */
 		@Override
 		public void computePowerTable(double x, double y, double z, int order)
 		{
@@ -196,6 +512,15 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			}
 		}
 
+		/**
+		 * Multiply.
+		 *
+		 * @param n
+		 *            the n
+		 * @param table
+		 *            the table
+		 * @return the float[]
+		 */
 		private float[] multiply(int n, float[] table)
 		{
 			if (table == null)
@@ -205,30 +530,89 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			return table;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue(gdsc.core.math.interpolation.
+		 * CustomTricubicFunction)
+		 */
+		@Override
 		public double computeValue(CustomTricubicFunction customTricubicFunction)
 		{
 			return customTricubicFunction.value(table1);
 		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue1(gdsc.core.math.interpolation.
+		 * CustomTricubicFunction)
+		 */
+		@Override
+		public double computeValue1(CustomTricubicFunction customTricubicFunction)
+		{
+			return customTricubicFunction.value(table1, table2, table3, dfda);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue2(gdsc.core.math.interpolation.
+		 * CustomTricubicFunction)
+		 */
+		@Override
+		public double computeValue2(CustomTricubicFunction customTricubicFunction)
+		{
+			return customTricubicFunction.value(table1, table2, table3, table6, dfda, d2fda2);
+		}
 	}
 
-	/** The scale to map the target range (maxx * maxy) to the spline. */
+	/** The scale to reduce the size of the spline before mapping to the target range (maxx * maxy). */
 	protected int scale = 1;
 
-	// The centre of the spline (unscaled)
-	protected double cx, cy, cz;
+	/** The scale squared (stored for convenience). */
+	private int scale2;
 
-	// The scaled bounds of the function with the centre at 0,0,0
-	protected double lx, ly, ux, uy;
+	/** The x centre of the spline (unscaled). */
+	protected double cx;
 
-	// Max size of spline data
-	protected final int maxSx, maxSy, maxSz;
+	/** The y centre of the spline (unscaled). */
+	protected double cy;
 
-	// The tricubic spline packed as Z * YX arrays 
+	/** The z centre of the spline (unscaled). */
+	protected double cz;
+
+	/** The scaled lower x bound of the spline function with the centre at x=0,y=0 in the target region */
+	protected double lx;
+
+	/** The scaled lower y bound of the spline function with the centre at x=0,y=0 in the target region */
+	protected double ly;
+
+	/** The scaled upper x bound of the spline function with the centre at x=0,y=0 in the target region */
+	protected double ux;
+
+	/** The scaled upper y bound of the spline function with the centre at x=0,y=0 in the target region */
+	protected double uy;
+
+	/** Max size of spline data in the x-dimension. */
+	protected final int maxSx;
+
+	/** Max size of spline data in the y-dimension. */
+	protected final int maxSy;
+
+	/** Max size of spline data in the z-dimension. */
+	protected final int maxSz;
+
+	/** The tricubic spline packed as Z * YX arrays. */
 	protected final CustomTricubicFunction[][] splines;
 
-	// The target range
-	protected final int maxx, maxy;
+	/** The target range in the x-dimension. */
+	protected final int maxx;
 
+	/** The target range in the y-dimension. */
+	protected final int maxy;
+
+	/** The target background. */
 	protected double tB;
 
 	/**
@@ -293,6 +677,9 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		setScale(scale);
 	}
 
+	/**
+	 * Update function bounds.
+	 */
 	private void updateFunctionBounds()
 	{
 		// Store the bounds of the cubic spline if it were positioned at 0,0
@@ -303,6 +690,26 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		// Check if the centre was within the function
 		if (lx > 0 || ly > 0 || ux < 0 || uy < 0 || cz < 0 || cz > maxSz)
 			throw new IllegalArgumentException("Require the centre within the cubic spline");
+	}
+
+	/**
+	 * Gets the maximum x value of the 2-dimensional data.
+	 *
+	 * @return the maximum x value of the 2-dimensional data.
+	 */
+	public int getMaxX()
+	{
+		return maxx;
+	}
+
+	/**
+	 * Gets the maximum y value of the 2-dimensional data.
+	 *
+	 * @return the maximum y value of the 2-dimensional data.
+	 */
+	public int getMaxY()
+	{
+		return maxy;
 	}
 
 	/**
@@ -331,6 +738,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			throw new IllegalArgumentException();
 		this.scale = scale;
 		updateFunctionBounds();
+		scale2 = scale * scale;
 	}
 
 	/**
@@ -406,30 +814,63 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		updateFunctionBounds();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ValueFunction#size()
+	 */
 	public int size()
 	{
 		return maxx * maxy;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientFunction#initialise(double[])
+	 */
 	public void initialise(double[] a)
 	{
 		initialise(a, 0);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ValueFunction#initialise0(double[])
+	 */
 	public void initialise0(double[] a)
 	{
 		initialise(a, 0);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.Gradient1Function#initialise1(double[])
+	 */
 	public void initialise1(double[] a)
 	{
 		initialise(a, 1);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.Gradient2Function#initialise2(double[])
+	 */
 	public void initialise2(double[] a)
 	{
 		initialise(a, 2);
 	}
 
+	/**
+	 * Initialise.
+	 *
+	 * @param a
+	 *            the a
+	 * @param order
+	 *            the order
+	 */
 	abstract protected void initialise(double[] a, int order);
 }
