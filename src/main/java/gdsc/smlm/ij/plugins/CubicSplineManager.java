@@ -87,6 +87,11 @@ public class CubicSplineManager implements PlugIn
 					imagePSF.getYCentre(), imagePSF.getZCentre(), scale);
 			return f;
 		}
+
+		public int getScale(double nmPerPixel)
+		{
+			return CubicSplineManager.getScale(imagePSF.getPixelSize(), nmPerPixel);
+		}
 	}
 
 	private static final String TITLE = "Cubic Spline Manager";
@@ -516,7 +521,7 @@ public class CubicSplineManager implements PlugIn
 
 		// Find the limits of the model. This works if the centre is within the image
 		ImagePSF imagePSF = psfModel.imagePSF;
-		int scale = getScale(psfModel.imagePSF.getPixelSize(), nmPerPixel);
+		int scale = psfModel.getScale(nmPerPixel);
 		CubicSplineData function = psfModel.splineData;
 		int padX = (int) Math.max(Math.ceil((imagePSF.getXCentre()) / scale),
 				Math.ceil((function.getMaxX() - imagePSF.getXCentre()) / scale));
