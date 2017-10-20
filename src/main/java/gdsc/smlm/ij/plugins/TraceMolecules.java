@@ -800,7 +800,7 @@ public class TraceMolecules implements PlugIn
 			Parameters.isAboveZero("Time threshold", settings.getTimeThreshold());
 			Parameters.isPositive("Pulse interval", settings.getPulseInterval());
 			Parameters.isPositive("Pulse window", settings.getPulseWindow());
-			Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
+			//Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -910,7 +910,7 @@ public class TraceMolecules implements PlugIn
 				Parameters.isAboveZero("Time threshold", settings.getTimeThreshold());
 				Parameters.isPositive("Pulse interval", settings.getPulseInterval());
 			}
-			Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
+			//Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
 		}
 		catch (IllegalArgumentException e)
 		{
