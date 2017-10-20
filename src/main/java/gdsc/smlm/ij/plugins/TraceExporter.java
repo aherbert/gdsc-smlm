@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Comparator;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -19,6 +18,7 @@ import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.ij.plugins.MultiDialog.MemoryResultsItems;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.AttributePeakResult;
+import gdsc.smlm.results.IdPeakResultComparator;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
@@ -63,7 +63,6 @@ public class TraceExporter implements PlugIn
 	private static int maxJump = 1;
 	private static double wobble = 0;
 
-	private static Comparator<PeakResult> comp;
 	private static String[] FORMAT_NAMES;
 	private static int format = 0;
 
@@ -101,20 +100,6 @@ public class TraceExporter implements PlugIn
 		// Pick multiple input datasets together using a list box.
 		if (!showMultiDialog(allResults, items))
 			return;
-
-		if (comp == null)
-		{
-			comp = new Comparator<PeakResult>()
-			{
-				public int compare(PeakResult o1, PeakResult o2)
-				{
-					int result = o1.getId() - o2.getId();
-					if (result != 0)
-						return result;
-					return o1.getFrame() - o2.getFrame();
-				}
-			};
-		}
 
 		exportFormat = getExportFormat();
 
@@ -198,7 +183,7 @@ public class TraceExporter implements PlugIn
 		});
 
 		// Sort by ID then time
-		results.sort(comp);
+		results.sort(IdPeakResultComparator.INSTANCE);
 
 		// Split traces with big jumps
 		results = splitTraces(results);
@@ -231,7 +216,7 @@ public class TraceExporter implements PlugIn
 					return remove.contains(t.getId());
 				}
 			});
-			results.sort(comp);
+			results.sort(IdPeakResultComparator.INSTANCE);
 		}
 
 		if (wobble > 0)
