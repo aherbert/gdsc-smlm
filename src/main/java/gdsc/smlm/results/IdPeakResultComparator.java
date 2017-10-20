@@ -20,6 +20,9 @@ import java.util.Comparator;
  */
 public class IdPeakResultComparator implements Comparator<PeakResult>
 {
+	/** An instance of the comparator */
+	public static final IdPeakResultComparator INSTANCE = new IdPeakResultComparator();
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -27,6 +30,13 @@ public class IdPeakResultComparator implements Comparator<PeakResult>
 	 */
 	public int compare(PeakResult o1, PeakResult o2)
 	{
-		return Integer.compare(o1.getId(), o2.getId());
+		int id1 = o1.getId();
+		int id2 = o2.getId();
+		if (id1 < id2)
+			return -1;
+		if (id1 == id2)
+			// Sort by frame
+			return Integer.compare(o1.getFrame(), o2.getFrame());
+		return 1;
 	}
 }
