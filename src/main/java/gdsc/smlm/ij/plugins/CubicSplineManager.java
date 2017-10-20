@@ -25,6 +25,7 @@ import gdsc.core.logging.Ticker;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleLock;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.PSFProtos.CubicSplineResource;
@@ -654,9 +655,11 @@ public class CubicSplineManager implements PlugIn
 				label.setText("Intensity = " + Utils.rounded(Maths.sum(values)));
 		}
 
+		SimpleLock lock = new SimpleLock();
+
 		private void update()
 		{
-			if (aquireLock1())
+			if (lock.acquire())
 			{
 				// Run in a new thread to allow the GUI to continue updating
 				new Thread(new Runnable()
@@ -681,20 +684,11 @@ public class CubicSplineManager implements PlugIn
 						finally
 						{
 							// Ensure the running flag is reset
-							lock1 = false;
+							lock.release();
 						}
 					}
 				}).start();
 			}
-		}
-
-		private boolean lock1;
-
-		private synchronized boolean aquireLock1()
-		{
-			if (lock1)
-				return false;
-			return lock1 = true;
 		}
 	}
 
