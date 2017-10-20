@@ -12,6 +12,7 @@ import gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -99,6 +100,22 @@ public class CalibrationReader
 	}
 
 	/**
+	 * Gets an time converter to update values.
+	 * <p>
+	 * If the conversion is not possible then an exception is thrown.
+	 *
+	 * @param toTimeUnit
+	 *            the time unit
+	 * @return the time converter
+	 * @throws ConversionException
+	 *             the conversion exception
+	 */
+	public TypeConverter<TimeUnit> getTimeConverter(TimeUnit toTimeUnit) throws ConversionException
+	{
+		return CalibrationHelper.getTimeConverter(getCalibrationOrBuilder(), toTimeUnit);
+	}
+
+	/**
 	 * Gets an angle converter to update values.
 	 * <p>
 	 * If the conversion is not possible then an exception is thrown.
@@ -142,6 +159,21 @@ public class CalibrationReader
 	public TypeConverter<IntensityUnit> getIntensityConverterSafe(IntensityUnit toIntensityUnit)
 	{
 		return CalibrationHelper.getIntensityConverterSafe(getCalibrationOrBuilder(), toIntensityUnit);
+	}
+
+	/**
+	 * Gets an time converter to update values.
+	 * <p>
+	 * If the calibration is already in the given units or conversion is not possible
+	 * then an identity converter will be returned.
+	 *
+	 * @param toTimeUnit
+	 *            the time unit
+	 * @return CalibrationHelper.the time converter
+	 */
+	public TypeConverter<TimeUnit> getTimeConverterSafe(TimeUnit toTimeUnit)
+	{
+		return CalibrationHelper.getTimeConverterSafe(getCalibrationOrBuilder(), toTimeUnit);
 	}
 
 	/**

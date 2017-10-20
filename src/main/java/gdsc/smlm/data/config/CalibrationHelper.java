@@ -8,9 +8,11 @@ import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import gdsc.smlm.data.config.CalibrationProtos.DistanceCalibrationOrBuilder;
 import gdsc.smlm.data.config.CalibrationProtos.IntensityCalibrationOrBuilder;
+import gdsc.smlm.data.config.CalibrationProtos.TimeCalibrationOrBuilder;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -76,6 +78,32 @@ public class CalibrationHelper
 			IntensityCalibrationOrBuilder intensityCalibration = calibration.getIntensityCalibrationOrBuilder();
 			return UnitConverterFactory.createConverter(intensityCalibration.getIntensityUnit(), toIntensityUnit,
 					intensityCalibration.getCountPerPhoton());
+		}
+		throw new ConversionException();
+	}
+
+	/**
+	 * Gets a time converter to update values.
+	 * <p>
+	 * If the conversion is not possible then an exception is thrown.
+	 *
+	 * @param calibration
+	 *            the calibration
+	 * @param toTimeUnit
+	 *            the time unit
+	 * @return the time converter
+	 * @throws ConversionException
+	 *             if a converter cannot be created
+	 */
+	public static TypeConverter<TimeUnit> getTimeConverter(CalibrationOrBuilder calibration, TimeUnit toTimeUnit)
+			throws ConversionException
+	{
+		if (calibration != null && toTimeUnit != null && calibration.hasTimeCalibration())
+		{
+			TimeCalibrationOrBuilder timeCalibration = calibration.getTimeCalibrationOrBuilder();
+			// Assume time is in frames
+			TimeUnit timeUnit = TimeUnit.FRAME; // timeCalibration.getTimeUnit()
+			return UnitConverterFactory.createConverter(timeUnit, toTimeUnit, timeCalibration.getExposureTime());
 		}
 		throw new ConversionException();
 	}
@@ -157,6 +185,31 @@ public class CalibrationHelper
 				return new IdentityTypeConverter<IntensityUnit>(
 						calibration.getIntensityCalibrationOrBuilder().getIntensityUnit());
 			return new IdentityTypeConverter<IntensityUnit>(null);
+		}
+	}
+
+	/**
+	 * Gets an time converter to update values.
+	 * <p>
+	 * If the calibration is already in the given units or conversion is not possible
+	 * then an identity converter will be returned.
+	 *
+	 * @param calibration
+	 *            the calibration
+	 * @param toTimeUnit
+	 *            the time unit
+	 * @return the time converter
+	 */
+	public static TypeConverter<TimeUnit> getTimeConverterSafe(CalibrationOrBuilder calibration, TimeUnit toTimeUnit)
+	{
+		try
+		{
+			return getTimeConverter(calibration, toTimeUnit);
+		}
+		catch (ConversionException e)
+		{
+			// Calibration is assumed to be in frames
+			return new IdentityTypeConverter<TimeUnit>(TimeUnit.FRAME);
 		}
 	}
 

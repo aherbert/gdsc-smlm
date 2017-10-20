@@ -19,6 +19,7 @@ import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
@@ -2098,6 +2099,24 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		checkCalibration();
 		return getCalibrationReader().getIntensityConverter(intensityUnit);
+	}
+
+	/**
+	 * Gets the time converter.
+	 *
+	 * @param timeUnit
+	 *            the time unit
+	 * @return the time converter
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public TypeConverter<TimeUnit> getTimeConverter(TimeUnit timeUnit)
+			throws ConversionException, ConfigurationException
+	{
+		checkCalibration();
+		return getCalibrationReader().getTimeConverter(timeUnit);
 	}
 
 	/**
