@@ -4,6 +4,8 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.util.Arrays;
 
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
@@ -13,6 +15,7 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
+import gdsc.smlm.fitting.JumpDistanceAnalysis;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
@@ -32,6 +35,7 @@ import gdsc.smlm.results.IdPeakResultComparator;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
@@ -61,6 +65,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	private SimpleLock lock = new SimpleLock();
 	private double _msdThreshold = -1;
 	private boolean _normalise = false;
+	private double error = 0;
 	private double[] d;
 	private int[] length;
 	private double minX, maxX;
@@ -104,6 +109,25 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 			return;
 		}
 
+		// Get the localisation error (4s^2) in raw units^2
+		double precision = 0;
+		try
+		{
+			PrecisionResultProcedure p = new PrecisionResultProcedure(results);
+			p.getLSEPrecision();
+
+			// Precision in nm using the median
+			precision = new Percentile().evaluate(p.precision, 50);
+					 // Maths.sum(p.precision) / p.precision.length;
+			double rawPrecision = distanceConverter.convertBack(precision / 1e3); // Convert from nm to um to raw units
+			// Get the localisation error (4s^2) in units^2
+			error = 4 * rawPrecision * rawPrecision;
+		}
+		catch (Exception e)
+		{
+			Utils.log(TITLE + " - Unable to compute precision: " + e.getMessage());
+		}
+
 		// Analyse the track lengths
 		results = results.copy();
 		results.sort(IdPeakResultComparator.INSTANCE);
@@ -127,7 +151,8 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
 		// Interactive analysis
 		final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-		gd.addMessage("Split traces into fixed or moving using the track diffusion coefficient (D)");
+		gd.addMessage(String.format("Split traces into fixed or moving using the track diffusion coefficient (D).\n" +
+				"Localistion error has been subtracted from jumps (%s nm).", Utils.rounded(precision)));
 		Statistics s = new Statistics(d);
 		double av = s.getMean();
 		String msg = String.format("Average D per track = %s um^2/s", Utils.rounded(av));
@@ -212,10 +237,11 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		plot.addLabel(0, 0, String.format("Fixed (red) = %d (%s%%), Moving (blue) = %d (%s%%)", sum1, Utils.rounded(p),
 				sum2, Utils.rounded(100 - p)));
 		PlotWindow pw = Utils.display(title, plot, Utils.NO_TO_FRONT);
-		if (Utils.isNewWindow())
+		if (wo != null)
 		{
+			// First call with the window organiser put at the front
 			pw.toFront();
-			if (wo != null)
+			if (Utils.isNewWindow())
 				wo.add(pw);
 		}
 	}
@@ -337,9 +363,12 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		{
 			// Compute the jump
 			int jump = frame - lastFrame;
+			// Get the raw distance but subtract the expected localisation error
+			double d2 = Math.max(0, Maths.distance2(lastx, lasty, x, y) - error);
 			// We expect the Mean Squared Distance (MSD) to scale linearly 
-			// with time so just weight each jump by the time gap  
-			sumSquared += Maths.distance2(lastx, lasty, x, y);
+			// with time so just weight each jump by the time gap.
+			// However we apply a correction factor for diffusion with frames.
+			sumSquared += JumpDistanceAnalysis.convertObservedToActual(d2, jump);
 			n += jump;
 		}
 		lastFrame = frame;
