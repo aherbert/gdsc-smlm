@@ -1219,7 +1219,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Check arguments
 		try
 		{
-			Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
+			//Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
 			Parameters.isAbove("Fit length", settings.getFitLength(), 1);
 			Parameters.isAboveZero("Jump distance", settings.getJumpDistance());
 			Parameters.isEqualOrAbove("Maximum N", maxN, myMinN);
