@@ -2037,9 +2037,9 @@ public class JumpDistanceAnalysis
 	 * MSD.
 	 * <p>
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
-	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
+	 * frame. This leads to condensation of the observed distance traveled by the particle between two frames. The
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
-	 * the effect of reducing the effective time that diffusion occured in the start and end frame. The observed MSD can
+	 * the effect of reducing the effective time that diffusion occurred in the start and end frame. The observed MSD can
 	 * be converted to the corrected MSD by applying a factor:
 	 * 
 	 * <pre>
@@ -2062,9 +2062,9 @@ public class JumpDistanceAnalysis
 	 * MSD.
 	 * <p>
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
-	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
+	 * frame. This leads to condensation of the observed distance traveled by the particle between two frames. The
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
-	 * the effect of reducing the effective time that diffusion occured in the start and end frame and the total number
+	 * the effect of reducing the effective time that diffusion occurred in the start and end frame and the total number
 	 * of frames should be reduced by 1/3.
 	 * <p>
 	 * In the event that n is less than 1 the two frames overlap. Consequently there is interference where some of the
@@ -2104,9 +2104,9 @@ public class JumpDistanceAnalysis
 	 * Get the corrected time between n frames for an observed mean-squared distance (MSD).
 	 * <p>
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
-	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
+	 * frame. This leads to condensation of the observed distance traveled by the particle between two frames. The
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
-	 * the effect of reducing the effective time that diffusion occured in the start and end frame and the total number
+	 * the effect of reducing the effective time that diffusion occurred in the start and end frame and the total number
 	 * of frames should be reduced by 1/3.
 	 * 
 	 * <pre>
@@ -2127,9 +2127,9 @@ public class JumpDistanceAnalysis
 	 * Convert an observed mean-squared distance (MSD) between n frames into the actual MSD.
 	 * <p>
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
-	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
+	 * frame. This leads to condensation of the observed distance traveled by the particle between two frames. The
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
-	 * the effect of reducing the effective time that diffusion occured in the start and end frame and the total number
+	 * the effect of reducing the effective time that diffusion occurred in the start and end frame and the total number
 	 * of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
 	 * 
 	 * <pre>
@@ -2154,9 +2154,9 @@ public class JumpDistanceAnalysis
 	 * Convert an actual mean-squared distance (MSD) between n frames into the observed MSD.
 	 * <p>
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
-	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
+	 * frame. This leads to condensation of the observed distance traveled by the particle between two frames. The
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
-	 * the effect of reducing the effective time that diffusion occured in the start and end frame and the total number
+	 * the effect of reducing the effective time that diffusion occurred in the start and end frame and the total number
 	 * of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
 	 * 
 	 * <pre>
