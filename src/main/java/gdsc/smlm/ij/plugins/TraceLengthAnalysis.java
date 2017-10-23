@@ -10,6 +10,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleLock;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredData;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 
@@ -41,6 +42,7 @@ import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
 
 /**
  * Analyses the track lengths of traced data
@@ -128,21 +130,27 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		gd.addMessage("Split traces into fixed or moving using the track diffusion coefficient (D)");
 		Statistics s = new Statistics(d);
 		double av = s.getMean();
-		gd.addMessage(String.format("Average D per track = %s um^2/s", Utils.rounded(av)));
-		//// TODO - Histogram the diffusion coefficients to see if we can build a nice slider range
-		//double sd = s.getStandardDeviation();
-		//double min = Math.max(0, av - 3 * sd);
-		//double max = Math.max(0, av + 3 * sd);
-		//if (max - min < 5)
-		//	// Because sliders are used when the range is <5 and floating point
-		//	gd.addSlider("D_threshold", min, max, dThreshold);
-		//else
-		gd.addNumericField("D_threshold", dThreshold, 2, 6, "um^2/s");
+		String msg = String.format("Average D per track = %s um^2/s", Utils.rounded(av));
+		gd.addMessage(msg);
+		// Histogram the diffusion coefficients
+		WindowOrganiser wo = new WindowOrganiser();
+		int id = Utils.showHistogram("Trace diffusion coefficient", new StoredData(d), "D (um^2/s)", 0, 1, 0, msg);
+		if (Utils.isNewWindow())
+			wo.add(id);
+		double min = Utils.xValues[0];
+		double max = Utils.xValues[Utils.xValues.length - 1];
+		// see if we can build a nice slider range from the histogram limits
+		if (max - min < 5)
+			// Because sliders are used when the range is <5 and floating point
+			gd.addSlider("D_threshold", min, max, dThreshold);
+		else
+			gd.addNumericField("D_threshold", dThreshold, 2, 6, "um^2/s");
 		gd.addCheckbox("Normalise", normalise);
 		gd.addDialogListener(this);
 		if (Utils.isShowGenericDialog())
 		{
-			draw();
+			draw(wo);
+			wo.tile();
 		}
 		gd.hideCancelButton();
 		gd.showDialog();
@@ -173,7 +181,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		return true;
 	}
 
-	private void draw()
+	private void draw(WindowOrganiser wo)
 	{
 		_msdThreshold = dThreshold;
 		_normalise = normalise;
@@ -205,7 +213,11 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 				sum2, Utils.rounded(100 - p)));
 		PlotWindow pw = Utils.display(title, plot, Utils.NO_TO_FRONT);
 		if (Utils.isNewWindow())
+		{
 			pw.toFront();
+			if (wo != null)
+				wo.add(pw);
+		}
 	}
 
 	private static void computeHistogram(int i, int end, int[] length, int[] h)
@@ -287,7 +299,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 									)
 							//@formatter:on
 						{
-							draw();
+							draw(null);
 						}
 					}
 					finally
@@ -341,10 +353,11 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 			return;
 		int length = lastFrame - startFrame;
 		double msd = sumSquared / n;
+		// 4D = MSD => D = MSD / 4
 		// Mean squared distance is in raw units squared.
 		// Convert twice since this is a squared distance then from frames to seconds.
-		// Use the convert back since this is a divide in the final units: um^2/s
-		dList.add(timeConverter.convertBack(distanceConverter.convert(distanceConverter.convert(msd))));
+		// Use the convertBack() since this is a divide in the final units: um^2/s
+		dList.add(timeConverter.convertBack(distanceConverter.convert(distanceConverter.convert(msd))) / 4.0);
 		lengthList.add(length);
 	}
 }
