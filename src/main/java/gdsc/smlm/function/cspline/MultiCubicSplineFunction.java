@@ -137,7 +137,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 	public int[] gradientIndices()
 	{
 		if (gradientIndices == null)
-			gradientIndices = SimpleArrayUtils.newIntArray(getNumberOfGradients(), 0);
+			gradientIndices = SimpleArrayUtils.newArray(getNumberOfGradients(), 0, 1);
 		return gradientIndices;
 	}
 
@@ -191,7 +191,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 	public void forEach(ValueProcedure procedure)
 	{
 		for (int n = 0; n < w; n++)
-			working[w].reset();
+			working[n].reset();
 
 		for (int y = 0; y < maxy; y++)
 		{
@@ -199,8 +199,8 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 			wY = 0;
 			for (int n = 0; n < w; n++)
 			{
-				if (working[w].isNextYActive())
-					workingY[wY++] = working[w];
+				if (working[n].isNextYActive())
+					workingY[wY++] = working[n];
 			}
 
 			if (wY == 0)
@@ -215,7 +215,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 					double I = tB;
 					for (int n = 0; n < wY; n++)
 					{
-						I += workingY[wY].value(x);
+						I += workingY[n].value(x);
 					}
 					procedure.execute(I);
 				}
@@ -234,7 +234,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 		duda[0] = 1.0;
 
 		for (int n = 0; n < w; n++)
-			working[w].reset();
+			working[n].reset();
 
 		for (int y = 0; y < maxy; y++)
 		{
@@ -242,8 +242,8 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 			wY = 0;
 			for (int n = 0; n < w; n++)
 			{
-				if (working[w].isNextYActive(duda))
-					workingY[wY++] = working[w];
+				if (working[n].isNextYActive(duda))
+					workingY[wY++] = working[n];
 			}
 
 			if (wY == 0)
@@ -258,7 +258,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 					double I = tB;
 					for (int n = 0; n < wY; n++)
 					{
-						I += workingY[wY].value(x, duda);
+						I += workingY[n].value(x, duda);
 					}
 					procedure.execute(I, duda);
 				}
@@ -278,7 +278,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 		duda[0] = 1.0;
 
 		for (int n = 0; n < w; n++)
-			working[w].reset();
+			working[n].reset();
 
 		for (int y = 0; y < maxy; y++)
 		{
@@ -286,8 +286,8 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 			wY = 0;
 			for (int n = 0; n < w; n++)
 			{
-				if (working[w].isNextYActive(duda, d2uda2))
-					workingY[wY++] = working[w];
+				if (working[n].isNextYActive(duda, d2uda2))
+					workingY[wY++] = working[n];
 			}
 
 			if (wY == 0)
@@ -302,7 +302,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 					double I = tB;
 					for (int n = 0; n < wY; n++)
 					{
-						I += workingY[wY].value(x, duda, d2uda2);
+						I += workingY[n].value(x, duda, d2uda2);
 					}
 					procedure.execute(I, duda, d2uda2);
 				}

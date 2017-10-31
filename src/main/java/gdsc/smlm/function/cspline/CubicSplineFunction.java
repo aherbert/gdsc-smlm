@@ -195,6 +195,11 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			int ix = (int) x;
 			int iy = (int) y;
 			int iz = (int) z;
+			if (iz == maxSz)
+			{
+				// Special edge case. Interpolation uses the node below with a (z-iz) value of 1
+				iz--;
+			}
 
 			// Get the spline index position for 0,0 offset by the scale (for pre-increment loops)
 			ix0 = ix - scale * ix1 - scale;
@@ -206,6 +211,10 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			for (int i = 0, xindex = ix0; i < maxx; i++)
 			{
 				xindex += scale;
+				// Note that in theory we could interpolate if xindex==maxSx 
+				// but this requires a new power table with (x-ix)==1 and previous xindex.
+				// For speed this situation is ignored to avoid computing additional
+				// power tables.
 				activeX[i] = xindex >= 0 && xindex < maxSx;
 			}
 
@@ -236,6 +245,10 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		{
 			// pre-increment yindex
 			yindex += scale;
+			// Note that in theory we could interpolate if yindex==maxSy 
+			// but this requires a new power table with (y-iy)==1 and previous yindex.
+			// For speed this situation is ignored to avoid computing additional
+			// power tables.
 			if (yindex >= 0 && yindex < maxSy)
 			{
 				// The y-index is inside the XY spline data
