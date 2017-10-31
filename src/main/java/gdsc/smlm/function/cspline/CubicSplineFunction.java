@@ -254,9 +254,15 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			// The scale is the increment we sample the PSF.
 			// In order to have the same integral we adjust the intensity.
 			this.tI_by_s2 = tI * scale2;
-			this.neg_tI_by_s3 = -tI_by_s2 * scale;
-			this.tI_by_s4 = tI_by_s2 * scale2;
-			this.offset = 1 + id * 4;
+			if (order > 0)
+			{
+				this.offset = 1 + id * 4;
+				this.neg_tI_by_s3 = -tI_by_s2 * scale;
+				if (order == 2)
+				{
+					this.tI_by_s4 = tI_by_s2 * scale2;
+				}
+			}
 
 			return true;
 		}
