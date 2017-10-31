@@ -126,6 +126,9 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	 */
 	protected abstract class TargetSpline
 	{
+		/** The id. */
+		int id;
+
 		/** The offset used for derivatives. */
 		int offset;
 
@@ -254,6 +257,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			// The scale is the increment we sample the PSF.
 			// In order to have the same integral we adjust the intensity.
 			this.tI_by_s2 = tI * scale2;
+			this.id = id;
 			if (order > 0)
 			{
 				this.offset = 1 + id * 4;
@@ -493,6 +497,15 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		 * @return the value
 		 */
 		abstract public double computeValue2(CustomTricubicFunction customTricubicFunction);
+
+		/**
+		 * Checks if the power table is at the boundary of the cubic polynomial.
+		 * 
+		 * @param dimension
+		 *
+		 * @return true, if is node boundary
+		 */
+		abstract public boolean isNodeBoundary(int dimension);
 	}
 
 	/**
@@ -591,6 +604,17 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		{
 			return customTricubicFunction.value(table1, table2, table3, table6, dfda, d2fda2);
 		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#isNodeBoundary(int)
+		 */
+		@Override
+		public boolean isNodeBoundary(int dimension)
+		{
+			return CustomTricubicFunction.isBoundary(dimension, table1);
+		}
 	}
 
 	/**
@@ -688,6 +712,17 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		public double computeValue2(CustomTricubicFunction customTricubicFunction)
 		{
 			return customTricubicFunction.value(table1, table2, table3, table6, dfda, d2fda2);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#isNodeBoundary(int)
+		 */
+		@Override
+		public boolean isNodeBoundary(int dimension)
+		{
+			return CustomTricubicFunction.isBoundary(dimension, table1);
 		}
 	}
 
@@ -1047,4 +1082,16 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	 *            the order
 	 */
 	abstract protected void initialise(double[] a, int order);
+
+	/**
+	 * Checks if the gradient parameter is on a cubic spline node boundary. If true then the second order derivative
+	 * will not be smooth as they are not constant across spline points.
+	 * <p>
+	 * This only applies to XYZ gradients.
+	 *
+	 * @param gradientIndex
+	 *            the gradient index
+	 * @return true, if the peak is on a node boundary
+	 */
+	abstract public boolean isNodeBoundary(int gradientIndex);
 }

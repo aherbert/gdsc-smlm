@@ -309,4 +309,27 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 			}
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.cspline.CubicSplineFunction#isNodeBoundary(int)
+	 */
+	@Override
+	public boolean isNodeBoundary(int gradientIndex)
+	{
+		int parameterIndex = gradientIndices[gradientIndex];
+		if (parameterIndex == BACKGROUND)
+			return false;
+
+		int dimension = (parameterIndex - 1) % PARAMETERS_PER_PEAK;
+		if (dimension == 0)
+			return false; // Signal
+
+		int peak = getPeak(parameterIndex);
+		for (int n = 0; n < w; n++)
+			if (working[n].id == peak)
+				return working[n].isNodeBoundary(dimension - 1);
+		return false;
+	}
 }

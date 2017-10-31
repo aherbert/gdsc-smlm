@@ -133,7 +133,7 @@ public class SingleCubicSplineFunction extends CubicSplineFunction
 		if (working == null)
 		{
 			// Special case as the spline does not overlap the target region
-			for (int i = maxx * maxy; i-- > 0; )
+			for (int i = maxx * maxy; i-- > 0;)
 				procedure.execute(tB);
 		}
 		else
@@ -170,7 +170,7 @@ public class SingleCubicSplineFunction extends CubicSplineFunction
 		if (working == null)
 		{
 			// Special case as the spline does not overlap the target region
-			for (int i = maxx * maxy; i-- > 0; )
+			for (int i = maxx * maxy; i-- > 0;)
 				procedure.execute(tB, duda);
 		}
 		else
@@ -209,7 +209,7 @@ public class SingleCubicSplineFunction extends CubicSplineFunction
 		if (working == null)
 		{
 			// Special case as the spline does not overlap the target region
-			for (int i = maxx * maxy; i-- > 0; )
+			for (int i = maxx * maxy; i-- > 0;)
 				procedure.execute(tB, duda, d2uda2);
 		}
 		else
@@ -232,5 +232,27 @@ public class SingleCubicSplineFunction extends CubicSplineFunction
 				}
 			}
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.cspline.CubicSplineFunction#isNodeBoundary(int)
+	 */
+	@Override
+	public boolean isNodeBoundary(int gradientIndex)
+	{
+		int parameterIndex = gradientIndices[gradientIndex];
+		if (parameterIndex == BACKGROUND)
+			return false;
+
+		int dimension = (parameterIndex - 1) % PARAMETERS_PER_PEAK;
+		if (dimension == 0)
+			return false; // Signal
+
+		int peak = getPeak(parameterIndex);
+		if (peak == 0 && working != null)
+			return working.isNodeBoundary(dimension - 1);
+		return false;
 	}
 }

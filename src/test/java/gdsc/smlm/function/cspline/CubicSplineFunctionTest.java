@@ -37,12 +37,11 @@ public abstract class CubicSplineFunctionTest
 	protected int[] testy = new int[] { 4, 5, 6 };
 	protected double[] testbackground = new double[] { 0, 400 };
 	protected double[] testsignal1 = new double[] { 15, 55, 105 };
-	// Note that these should be chosen so that they do not fall exactly on a spline node as the
-	// numerical gradients evaluate poorly on the node boundaries. They are good when inside
-	// the same tricubic interpolating function.
-	protected double[] testcx1 = new double[] { 4.9, 5.3 };
-	protected double[] testcy1 = new double[] { 4.8, 5.2 };
-	protected double[] testcz1 = new double[] { -1.55, 1.1 };
+	// Pick some to fall on the node boundaries as the second order
+	// numerical gradients evaluate poorly on the node boundaries.
+	protected double[] testcx1 = new double[] { 5.0, 5.3 };
+	protected double[] testcy1 = new double[] { 4.5, 5.2 };
+	protected double[] testcz1 = new double[] { -1.5, 1.1 };
 	protected double[] testsignal2 = new double[] { 20, 50 };
 	protected double[] testcx2 = new double[] { 4.8, 5.3 };
 	protected double[] testcy2 = new double[] { 5.1, 4.9 };
@@ -369,6 +368,12 @@ public abstract class CubicSplineFunctionTest
 							double[] a = createParameters(background, signal1, cx1, cy1, cz1);
 
 							//System.out.println(java.util.Arrays.toString(a));
+							
+							f1.initialise2(a);
+							boolean test = !f1.isNodeBoundary(gradientIndex);
+							// Comment out when printing errors
+							if (!test)
+								continue;
 
 							// Evaluate all gradients 
 							p2.getValues(f1, a);
@@ -398,11 +403,14 @@ public abstract class CubicSplineFunctionTest
 									double gradient = (high - low) / (2 * h);
 									double d2yda2 = p2.d2yda2[i][gradientIndex];
 									double error = DoubleEquality.relativeError(gradient, d2yda2);
-									s.add(error);
-									Assert.assertTrue(gradient + " sign != " + d2yda2, (gradient * d2yda2) >= 0);
 									//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient, gradientIndex,	d2yda2, error);
-									Assert.assertTrue(gradient + " != " + d2yda2,
-											eq.almostEqualRelativeOrAbsolute(gradient, d2yda2));
+									if (test)
+									{
+										s.add(error);
+										Assert.assertTrue(gradient + " sign != " + d2yda2, (gradient * d2yda2) >= 0);
+										Assert.assertTrue(gradient + " != " + d2yda2,
+												eq.almostEqualRelativeOrAbsolute(gradient, d2yda2));
+									}
 								}
 						}
 		System.out.printf("functionComputesTargetGradient2 %s %s (error %s +/- %s)\n", f1.getClass().getSimpleName(),
@@ -634,6 +642,12 @@ public abstract class CubicSplineFunctionTest
 													cx2, cy2, cz2);
 
 											//System.out.println(java.util.Arrays.toString(a));
+											
+											f1.initialise2(a);
+											boolean test = !f1.isNodeBoundary(gradientIndex);
+											// Comment out when printing errors
+											if (!test)
+												continue;
 
 											// Evaluate all gradients 
 											p2.getValues(f2, a);
@@ -663,11 +677,15 @@ public abstract class CubicSplineFunctionTest
 													double gradient = (high - low) / (2 * h);
 													double d2yda2 = p2.d2yda2[i][gradientIndex];
 													double error = DoubleEquality.relativeError(gradient, d2yda2);
-													s.add(error);
-													Assert.assertTrue(gradient + " sign != " + d2yda2, (gradient * d2yda2) >= 0);
 													//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient, gradientIndex, d2yda2, error);
-													Assert.assertTrue(gradient + " != " + d2yda2,
-															eq.almostEqualRelativeOrAbsolute(gradient, d2yda2));
+													if (test)
+													{
+														s.add(error);
+														Assert.assertTrue(gradient + " sign != " + d2yda2,
+																(gradient * d2yda2) >= 0);
+														Assert.assertTrue(gradient + " != " + d2yda2,
+																eq.almostEqualRelativeOrAbsolute(gradient, d2yda2));
+													}
 												}
 										}
 		System.out.printf("functionComputesTargetGradient2With2Peaks %s %s (error %s +/- %s)\n",
