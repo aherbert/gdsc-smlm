@@ -2,12 +2,16 @@ package gdsc.smlm.function.cspline;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.util.Precision;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Test;
+
 import gdsc.core.data.DoubleStackTrivalueProvider;
 import gdsc.core.ij.Utils;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolator;
 import gdsc.core.utils.DoubleEquality;
-import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.smlm.function.StandardGradient1Procedure;
 import gdsc.smlm.function.StandardGradient2Procedure;
@@ -15,11 +19,6 @@ import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
-
-import org.apache.commons.math3.util.Precision;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
 
 public abstract class CubicSplineFunctionTest
 {
@@ -38,9 +37,12 @@ public abstract class CubicSplineFunctionTest
 	protected int[] testy = new int[] { 4, 5, 6 };
 	protected double[] testbackground = new double[] { 0, 400 };
 	protected double[] testsignal1 = new double[] { 15, 55, 105 };
+	// Note that these should be chosen so that they do not fall exactly on a spline node as the
+	// numerical gradients evaluate poorly on the node boundaries. They are good when inside
+	// the same tricubic interpolating function.
 	protected double[] testcx1 = new double[] { 4.9, 5.3 };
 	protected double[] testcy1 = new double[] { 4.8, 5.2 };
-	protected double[] testcz1 = new double[] { -1.5, 1.0 };
+	protected double[] testcz1 = new double[] { -1.55, 1.1 };
 	protected double[] testsignal2 = new double[] { 20, 50 };
 	protected double[] testcx2 = new double[] { 4.8, 5.3 };
 	protected double[] testcy2 = new double[] { 5.1, 4.9 };
@@ -82,7 +84,7 @@ public abstract class CubicSplineFunctionTest
 		StandardValueProcedure p = new StandardValueProcedure();
 		for (int z = minz, i = 0; z <= maxz; z++, i++)
 		{
-			a[Gaussian2DFunction.Z_POSITION] = z;
+			a[CubicSplineFunction.Z_POSITION] = z;
 			val[i] = p.getValues(f, a);
 		}
 		DoubleStackTrivalueProvider fval = new DoubleStackTrivalueProvider(val, size, size);
@@ -97,8 +99,8 @@ public abstract class CubicSplineFunctionTest
 				.interpolate();
 		//@formatter:on
 		splineData = new CubicSplineData(function);
-		cx = a[Gaussian2DFunction.X_POSITION];
-		cy = a[Gaussian2DFunction.Y_POSITION];
+		cx = a[CubicSplineFunction.X_POSITION];
+		cy = a[CubicSplineFunction.Y_POSITION];
 		cz = splineData.getMaxZ() / scale;
 	}
 
@@ -208,7 +210,204 @@ public abstract class CubicSplineFunctionTest
 
 							Assert.assertArrayEquals(e, o1, 0);
 							Assert.assertArrayEquals(e, o2, 0);
+							for (int i = e.length; i-- > 0;)
+								Assert.assertArrayEquals(p1.dyda[i], p2.dyda[i], 0);
 						}
+	}
+
+	@Test
+	public void functionComputesBackgroundGradient1()
+	{
+		Assume.assumeTrue(f1.evaluatesBackground());
+		functionComputesTargetGradient1(CubicSplineFunction.BACKGROUND);
+	}
+
+	@Test
+	public void functionComputesSignalGradient1()
+	{
+		Assume.assumeTrue(f1.evaluatesSignal());
+		functionComputesTargetGradient1(CubicSplineFunction.SIGNAL);
+	}
+
+	@Test
+	public void functionComputesXGradient1()
+	{
+		functionComputesTargetGradient1(CubicSplineFunction.X_POSITION);
+	}
+
+	@Test
+	public void functionComputesYGradient1()
+	{
+		functionComputesTargetGradient1(CubicSplineFunction.Y_POSITION);
+	}
+
+	@Test
+	public void functionComputesZGradient1()
+	{
+		Assume.assumeTrue(f1.evaluatesZ());
+		functionComputesTargetGradient1(CubicSplineFunction.Z_POSITION);
+	}
+
+	private void functionComputesTargetGradient1(int targetParameter)
+	{
+		int gradientIndex = findGradientIndex(f1, targetParameter);
+
+		Statistics s = new Statistics();
+
+		StandardValueProcedure p1a = new StandardValueProcedure();
+		StandardValueProcedure p1b = new StandardValueProcedure();
+		StandardGradient1Procedure p2 = new StandardGradient1Procedure();
+
+		for (double background : testbackground)
+			// Peak 1
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
+						{
+							double[] a = createParameters(background, signal1, cx1, cy1, cz1);
+
+							//System.out.println(java.util.Arrays.toString(a));
+
+							// Evaluate all gradients 
+							p2.getValues(f1, a);
+
+							// Numerically solve gradient. 
+							// Calculate the step size h to be an exact numerical representation
+							final double xx = a[targetParameter];
+
+							// Get h to minimise roundoff error
+							double h = Precision.representableDelta(xx, h_);
+
+							// Evaluate at (x+h) and (x-h)
+							a[targetParameter] = xx + h;
+							p1a.getValues(f1, a);
+
+							a[targetParameter] = xx - h;
+							p1b.getValues(f1, a);
+
+							// Only test close to the XY centre
+							for (int x : testx)
+								for (int y : testy)
+								{
+									int i = y * maxx + x;
+									double high = p1a.values[i];
+									double low = p1b.values[i];
+
+									double gradient = (high - low) / (2 * h);
+									double dyda = p2.dyda[i][gradientIndex];
+									double error = DoubleEquality.relativeError(gradient, dyda);
+									s.add(error);
+									Assert.assertTrue(gradient + " sign != " + dyda, (gradient * dyda) >= 0);
+									//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient, gradientIndex, dyda, error);
+									Assert.assertTrue(gradient + " != " + dyda,
+											eq.almostEqualRelativeOrAbsolute(gradient, dyda));
+								}
+						}
+		System.out.printf("functionComputesTargetGradient1 %s %s (error %s +/- %s)\n", f1.getClass().getSimpleName(),
+				CubicSplineFunction.getName(targetParameter), Utils.rounded(s.getMean()),
+				Utils.rounded(s.getStandardDeviation()));
+	}
+
+	protected int findGradientIndex(CubicSplineFunction f, int targetParameter)
+	{
+		int i = f.findGradientIndex(targetParameter);
+		Assert.assertTrue("Cannot find gradient index", i >= 0);
+		return i;
+	}
+
+	@Test
+	public void functionComputesBackgroundGradient2()
+	{
+		Assume.assumeTrue(f1.evaluatesBackground());
+		functionComputesTargetGradient2(CubicSplineFunction.BACKGROUND);
+	}
+
+	@Test
+	public void functionComputesSignalGradient2()
+	{
+		Assume.assumeTrue(f1.evaluatesSignal());
+		functionComputesTargetGradient2(CubicSplineFunction.SIGNAL);
+	}
+
+	@Test
+	public void functionComputesXGradient2()
+	{
+		functionComputesTargetGradient2(CubicSplineFunction.X_POSITION);
+	}
+
+	@Test
+	public void functionComputesYGradient2()
+	{
+		functionComputesTargetGradient2(CubicSplineFunction.Y_POSITION);
+	}
+
+	@Test
+	public void functionComputesZGradient2()
+	{
+		Assume.assumeTrue(f1.evaluatesZ());
+		functionComputesTargetGradient2(CubicSplineFunction.Z_POSITION);
+	}
+
+	private void functionComputesTargetGradient2(int targetParameter)
+	{
+		int gradientIndex = findGradientIndex(f1, targetParameter);
+
+		Statistics s = new Statistics();
+
+		StandardGradient1Procedure p1a = new StandardGradient1Procedure();
+		StandardGradient1Procedure p1b = new StandardGradient1Procedure();
+		StandardGradient2Procedure p2 = new StandardGradient2Procedure();
+
+		for (double background : testbackground)
+			// Peak 1
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
+						{
+							double[] a = createParameters(background, signal1, cx1, cy1, cz1);
+
+							//System.out.println(java.util.Arrays.toString(a));
+
+							// Evaluate all gradients 
+							p2.getValues(f1, a);
+
+							// Numerically solve gradient. 
+							// Calculate the step size h to be an exact numerical representation
+							final double xx = a[targetParameter];
+
+							// Get h to minimise roundoff error
+							double h = Precision.representableDelta(xx, h_);
+
+							// Evaluate at (x+h) and (x-h)
+							a[targetParameter] = xx + h;
+							p1a.getValues(f1, a);
+
+							a[targetParameter] = xx - h;
+							p1b.getValues(f1, a);
+
+							// Only test close to the XY centre
+							for (int x : testx)
+								for (int y : testy)
+								{
+									int i = y * maxx + x;
+									double high = p1a.dyda[i][gradientIndex];
+									double low = p1b.dyda[i][gradientIndex];
+
+									double gradient = (high - low) / (2 * h);
+									double d2yda2 = p2.d2yda2[i][gradientIndex];
+									double error = DoubleEquality.relativeError(gradient, d2yda2);
+									s.add(error);
+									Assert.assertTrue(gradient + " sign != " + d2yda2, (gradient * d2yda2) >= 0);
+									//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient, gradientIndex,	d2yda2, error);
+									Assert.assertTrue(gradient + " != " + d2yda2,
+											eq.almostEqualRelativeOrAbsolute(gradient, d2yda2));
+								}
+						}
+		System.out.printf("functionComputesTargetGradient2 %s %s (error %s +/- %s)\n", f1.getClass().getSimpleName(),
+				CubicSplineFunction.getName(targetParameter), Utils.rounded(s.getMean()),
+				Utils.rounded(s.getStandardDeviation()));
 	}
 
 	@Test
@@ -242,7 +441,238 @@ public abstract class CubicSplineFunctionTest
 
 											Assert.assertArrayEquals(e, o1, 0);
 											Assert.assertArrayEquals(e, o2, 0);
+											for (int i = e.length; i-- > 0;)
+												Assert.assertArrayEquals(p1.dyda[i], p2.dyda[i], 0);
 										}
+	}
+
+	@Test
+	public void functionComputesBackgroundGradient1With2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesBackground());
+		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.BACKGROUND);
+		functionComputesTargetGradient1With2Peaks(
+				CubicSplineFunction.BACKGROUND + CubicSplineFunction.PARAMETERS_PER_PEAK);
+	}
+
+	@Test
+	public void functionComputesSignalGradient1With2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesSignal());
+		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.SIGNAL);
+		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.SIGNAL + CubicSplineFunction.PARAMETERS_PER_PEAK);
+	}
+
+	@Test
+	public void functionComputesXGradient1With2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.X_POSITION);
+		functionComputesTargetGradient1With2Peaks(
+				CubicSplineFunction.X_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
+	}
+
+	@Test
+	public void functionComputesYGradient1With2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.Y_POSITION);
+		functionComputesTargetGradient1With2Peaks(
+				CubicSplineFunction.Y_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
+	}
+
+	@Test
+	public void functionComputesZGradient1With2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesZ());
+		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.Z_POSITION);
+		functionComputesTargetGradient1With2Peaks(
+				CubicSplineFunction.Z_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
+	}
+
+	private void functionComputesTargetGradient1With2Peaks(int targetParameter)
+	{
+		int gradientIndex = findGradientIndex(f2, targetParameter);
+
+		Statistics s = new Statistics();
+
+		StandardValueProcedure p1a = new StandardValueProcedure();
+		StandardValueProcedure p1b = new StandardValueProcedure();
+		StandardGradient1Procedure p2 = new StandardGradient1Procedure();
+
+		for (double background : testbackground)
+			// Peak 1
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
+							// Peak 2
+							for (double signal2 : testsignal2)
+								for (double cx2 : testcx2)
+									for (double cy2 : testcy2)
+										for (double cz2 : testcz2)
+										{
+											double[] a = createParameters(background, signal1, cx1, cy1, cz1, signal2,
+													cx2, cy2, cz2);
+
+											//System.out.println(java.util.Arrays.toString(a));
+
+											// Evaluate all gradients 
+											p2.getValues(f2, a);
+
+											// Numerically solve gradient. 
+											// Calculate the step size h to be an exact numerical representation
+											final double xx = a[targetParameter];
+
+											// Get h to minimise roundoff error
+											double h = Precision.representableDelta(xx, h_);
+
+											// Evaluate at (x+h) and (x-h)
+											a[targetParameter] = xx + h;
+											p1a.getValues(f2, a);
+
+											a[targetParameter] = xx - h;
+											p1b.getValues(f2, a);
+
+											// Only test close to the XY centre
+											for (int x : testx)
+												for (int y : testy)
+												{
+													int i = y * maxx + x;
+													double high = p1a.values[i];
+													double low = p1b.values[i];
+
+													double gradient = (high - low) / (2 * h);
+													double dyda = p2.dyda[i][gradientIndex];
+													double error = DoubleEquality.relativeError(gradient, dyda);
+													s.add(error);
+													Assert.assertTrue(gradient + " sign != " + dyda,
+															(gradient * dyda) >= 0);
+													//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient, gradientIndex, dyda, error);
+													Assert.assertTrue(gradient + " != " + dyda,
+															eq.almostEqualRelativeOrAbsolute(gradient, dyda));
+												}
+										}
+		System.out.printf("functionComputesTargetGradient1With2Peaks %s %s (error %s +/- %s)\n",
+				f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter), Utils.rounded(s.getMean()),
+				Utils.rounded(s.getStandardDeviation()));
+	}
+
+	@Test
+	public void functionComputesBackgroundGradient2With2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesBackground());
+		functionComputesTargetGradient2With2Peaks(CubicSplineFunction.BACKGROUND);
+		functionComputesTargetGradient2With2Peaks(
+				CubicSplineFunction.BACKGROUND + CubicSplineFunction.PARAMETERS_PER_PEAK);
+	}
+
+	@Test
+	public void functionComputesSignalGradient2With2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesSignal());
+		functionComputesTargetGradient2With2Peaks(CubicSplineFunction.SIGNAL);
+		functionComputesTargetGradient2With2Peaks(CubicSplineFunction.SIGNAL + CubicSplineFunction.PARAMETERS_PER_PEAK);
+	}
+
+	@Test
+	public void functionComputesXGradient2With2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+		functionComputesTargetGradient2With2Peaks(CubicSplineFunction.X_POSITION);
+		functionComputesTargetGradient2With2Peaks(
+				CubicSplineFunction.X_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
+	}
+
+	@Test
+	public void functionComputesYGradient2With2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+		functionComputesTargetGradient2With2Peaks(CubicSplineFunction.Y_POSITION);
+		functionComputesTargetGradient2With2Peaks(
+				CubicSplineFunction.Y_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
+	}
+
+	@Test
+	public void functionComputesZGradient2With2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+		Assume.assumeTrue(f2.evaluatesZ());
+		functionComputesTargetGradient1With2Peaks(CubicSplineFunction.Z_POSITION);
+		functionComputesTargetGradient1With2Peaks(
+				CubicSplineFunction.Z_POSITION + CubicSplineFunction.PARAMETERS_PER_PEAK);
+	}
+
+	private void functionComputesTargetGradient2With2Peaks(int targetParameter)
+	{
+		int gradientIndex = findGradientIndex(f2, targetParameter);
+
+		Statistics s = new Statistics();
+
+		StandardGradient1Procedure p1a = new StandardGradient1Procedure();
+		StandardGradient1Procedure p1b = new StandardGradient1Procedure();
+		StandardGradient2Procedure p2 = new StandardGradient2Procedure();
+
+		for (double background : testbackground)
+			// Peak 1
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
+							// Peak 2
+							for (double signal2 : testsignal2)
+								for (double cx2 : testcx2)
+									for (double cy2 : testcy2)
+										for (double cz2 : testcz2)
+										{
+											double[] a = createParameters(background, signal1, cx1, cy1, cz1, signal2,
+													cx2, cy2, cz2);
+
+											//System.out.println(java.util.Arrays.toString(a));
+
+											// Evaluate all gradients 
+											p2.getValues(f2, a);
+
+											// Numerically solve gradient. 
+											// Calculate the step size h to be an exact numerical representation
+											final double xx = a[targetParameter];
+
+											// Get h to minimise roundoff error
+											double h = Precision.representableDelta(xx, h_);
+
+											// Evaluate at (x+h) and (x-h)
+											a[targetParameter] = xx + h;
+											p1a.getValues(f2, a);
+
+											a[targetParameter] = xx - h;
+											p1b.getValues(f2, a);
+
+											// Only test close to the XY centre
+											for (int x : testx)
+												for (int y : testy)
+												{
+													int i = y * maxx + x;
+													double high = p1a.dyda[i][gradientIndex];
+													double low = p1b.dyda[i][gradientIndex];
+
+													double gradient = (high - low) / (2 * h);
+													double d2yda2 = p2.d2yda2[i][gradientIndex];
+													double error = DoubleEquality.relativeError(gradient, d2yda2);
+													s.add(error);
+													Assert.assertTrue(gradient + " sign != " + d2yda2, (gradient * d2yda2) >= 0);
+													//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient, gradientIndex, d2yda2, error);
+													Assert.assertTrue(gradient + " != " + d2yda2,
+															eq.almostEqualRelativeOrAbsolute(gradient, d2yda2));
+												}
+										}
+		System.out.printf("functionComputesTargetGradient2With2Peaks %s %s (error %s +/- %s)\n",
+				f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter), Utils.rounded(s.getMean()),
+				Utils.rounded(s.getStandardDeviation()));
 	}
 
 	protected double[] createParameters(double... args)

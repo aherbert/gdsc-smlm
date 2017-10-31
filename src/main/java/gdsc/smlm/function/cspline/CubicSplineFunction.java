@@ -92,7 +92,34 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			return 0;
 		return peak * PARAMETERS_PER_PEAK + parameterIndex;
 	}
-	
+
+	/**
+	 * Gets the name of the gradient parameter.
+	 *
+	 * @param index
+	 *            the index (must be within the array returned from {@link #gradientIndices()})
+	 * @return the name
+	 */
+	public String getGradientParameterName(int index)
+	{
+		return getName(gradientIndices()[index]);
+	}
+
+	/**
+	 * Locate the index within the gradient indices for the specified parameter
+	 * 
+	 * @param parameterIndex
+	 * @return the gradient index (or -1 if not present)
+	 */
+	public int findGradientIndex(int parameterIndex)
+	{
+		int[] gradientIndices = gradientIndices();
+		for (int i = 0; i < gradientIndices.length; i++)
+			if (gradientIndices[i] == parameterIndex)
+				return i;
+		return -1;
+	}
+
 	/**
 	 * Internal class to control visiting the correct cubic spline node for each [x][y] index in the
 	 * target range [0 <= x < maxx], [0 <= y < maxy].
@@ -133,8 +160,12 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		/** Flag for each x-index to indicate if the spline overlaps the target region. */
 		boolean[] activeX = new boolean[maxx];
 
-		/** The target intensity. */
-		double tI;
+		/** The target intensity multiplied by the scale^2 to normalise the integral. */
+		double tI_by_s2;
+		/** The target intensity multiplied by the scale^3 and negated. Used to scale the first order gradients. */
+		double neg_tI_by_s3;
+		/** The target intensity multiplied by the scale^4. Used to scale the second order gradients. */
+		double tI_by_s4;
 
 		/**
 		 * Initialise the target. This checks if the spline, shifted to centre at the given XYZ coordinates, will
@@ -222,7 +253,9 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 			// The scale is the increment we sample the PSF.
 			// In order to have the same integral we adjust the intensity.
-			this.tI = tI * scale2;
+			this.tI_by_s2 = tI * scale2;
+			this.neg_tI_by_s3 = -tI_by_s2 * scale;
+			this.tI_by_s4 = tI_by_s2 * scale2;
 			this.offset = 1 + id * 4;
 
 			return true;
@@ -343,7 +376,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		public double value(int x)
 		{
 			yxindex += scale; // pre-increment
-			return (activeX[x]) ? tI * computeValue(xySplines[yxindex]) : 0;
+			return (activeX[x]) ? tI_by_s2 * computeValue(xySplines[yxindex]) : 0;
 		}
 
 		/**
@@ -370,13 +403,15 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			yxindex += scale; // pre-increment
 			if (activeX[x])
 			{
-				double v = computeValue1(xySplines[yxindex]);
-				// Copy the gradients into the correct position and account for the intensity
-				df_da[offset] = v;
-				df_da[offset + 1] = tI * dfda[0];
-				df_da[offset + 2] = tI * dfda[1];
-				df_da[offset + 3] = tI * dfda[2];
-				return tI * v;
+				final double v = computeValue1(xySplines[yxindex]);
+				// Copy the gradients into the correct position and account for the intensity.
+				// Negate the gradients as a shift of the position moves the spline the 
+				// other direction. Also scale the gradients appropriately.
+				df_da[offset] = scale2 * v;
+				df_da[offset + 1] = neg_tI_by_s3 * dfda[0];
+				df_da[offset + 2] = neg_tI_by_s3 * dfda[1];
+				df_da[offset + 3] = neg_tI_by_s3 * -dfda[2];
+				return tI_by_s2 * v;
 			}
 			else
 			{
@@ -416,16 +451,18 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			yxindex += scale; // pre-increment
 			if (activeX[x])
 			{
-				double v = computeValue2(xySplines[yxindex]);
-				// Copy the gradients into the correct position and account for the intensity
-				df_da[offset] = v;
-				df_da[offset + 1] = tI * dfda[0];
-				df_da[offset + 2] = tI * dfda[1];
-				df_da[offset + 3] = tI * dfda[2];
-				d2f_da2[offset + 1] = tI * d2fda2[0];
-				d2f_da2[offset + 2] = tI * d2fda2[1];
-				d2f_da2[offset + 3] = tI * d2fda2[2];
-				return tI * v;
+				final double v = computeValue2(xySplines[yxindex]);
+				// Copy the gradients into the correct position and account for the intensity.
+				// Negate the gradients as a shift of the position moves the spline the 
+				// other direction. Also scale the gradients appropriately.
+				df_da[offset] = scale2 * v;
+				df_da[offset + 1] = neg_tI_by_s3 * dfda[0];
+				df_da[offset + 2] = neg_tI_by_s3 * dfda[1];
+				df_da[offset + 3] = neg_tI_by_s3 * -dfda[2];
+				d2f_da2[offset + 1] = tI_by_s4 * d2fda2[0];
+				d2f_da2[offset + 2] = tI_by_s4 * d2fda2[1];
+				d2f_da2[offset + 3] = tI_by_s4 * d2fda2[2];
+				return tI_by_s2 * v;
 			}
 			else
 			{
@@ -896,7 +933,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	}
 
 	// The following properties may be overridden by optimised versions (e.g. no background computation)
-	
+
 	/**
 	 * @return True if the function can evaluate the background gradient
 	 */
