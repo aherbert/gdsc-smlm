@@ -3276,8 +3276,8 @@ public class OPTICS implements PlugIn
 			for (int i : parents)
 			{
 				PeakResult p = results.get(i);
-				IdPeakResult r = new IdPeakResult(p.getFrame(), p.getOrigX(), p.getOrigY(), p.getOrigValue(), p.getError(), p.getNoise(),
-						p.getParameters(), p.getParameterDeviations(), clusters[i]);
+				IdPeakResult r = new IdPeakResult(p.getFrame(), p.getOrigX(), p.getOrigY(), p.getOrigValue(),
+						p.getError(), p.getNoise(), p.getParameters(), p.getParameterDeviations(), clusters[i]);
 				table.add(r);
 			}
 
@@ -3689,10 +3689,16 @@ public class OPTICS implements PlugIn
 				public boolean collectOptions(Integer value)
 				{
 					inputSettings.setOpticsMode(value);
-					return collectOptions();
+					boolean result = collectOptions(false);
+					return result;
 				}
 
 				public boolean collectOptions()
+				{
+					return collectOptions(true);
+				}
+
+				private boolean collectOptions(boolean silent)
 				{
 					OpticsMode mode = OpticsMode.get(inputSettings.getOpticsMode());
 					ExtendedGenericDialog egd = new ExtendedGenericDialog(mode.toString() + " options");
@@ -3710,6 +3716,7 @@ public class OPTICS implements PlugIn
 							String[] sampleModes = SettingsManager.getNames((Object[]) SampleMode.values());
 							egd.addChoice("Sample_mode", sampleModes, inputSettings.getSampleMode());
 						}
+						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
@@ -3750,10 +3757,16 @@ public class OPTICS implements PlugIn
 						public boolean collectOptions(Integer value)
 						{
 							inputSettings.setClusteringMode(value);
-							return collectOptions();
+							boolean result = collectOptions(false);
+							return result;
 						}
 
 						public boolean collectOptions()
+						{
+							return collectOptions(true);
+						}
+
+						private boolean collectOptions(boolean silent)
 						{
 							ClusteringMode mode = ClusteringMode.get(inputSettings.getClusteringMode());
 							ExtendedGenericDialog egd = new ExtendedGenericDialog(mode.toString() + " options");
@@ -3766,6 +3779,7 @@ public class OPTICS implements PlugIn
 								egd.addCheckbox("Top_clusters", inputSettings.getTopLevel());
 								egd.addNumericField("Upper_limit", inputSettings.getUpperLimit(), 4, 10, "nm");
 								egd.addNumericField("Lower_limit", inputSettings.getLowerLimit(), 4, 10, "nm");
+								egd.setSilent(silent);
 								egd.showDialog(true, gd);
 								if (egd.wasCanceled())
 									return false;
@@ -3780,6 +3794,7 @@ public class OPTICS implements PlugIn
 								egd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 4, 10,
 										"nm");
 								egd.addCheckbox("Core_points", inputSettings.getCore());
+								egd.setSilent(silent);
 								egd.showDialog(true, gd);
 								if (egd.wasCanceled())
 									return false;
@@ -3797,10 +3812,16 @@ public class OPTICS implements PlugIn
 			public boolean collectOptions(Boolean value)
 			{
 				inputSettings.setShowTable(value);
-				return collectOptions();
+				boolean result = collectOptions(false);
+				return result;
 			}
 
 			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
 			{
 				if (!inputSettings.getShowTable())
 					return false;
@@ -3809,6 +3830,7 @@ public class OPTICS implements PlugIn
 				String[] modes = SettingsManager.getNames((Object[]) TableSortMode.values());
 				egd.addChoice("Table_sort_mode", modes, inputSettings.getTableSortMode());
 				egd.addCheckbox("Table_reverse_sort", inputSettings.getTableReverseSort());
+				egd.setSilent(silent);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;
@@ -3836,10 +3858,16 @@ public class OPTICS implements PlugIn
 					public boolean collectOptions(Integer value)
 					{
 						inputSettings.setImageMode(((ImageMode) imageModeArray[value]).ordinal());
-						return collectOptions();
+						boolean result = collectOptions(false);
+						return result;
 					}
 
 					public boolean collectOptions()
+					{
+						return collectOptions(true);
+					}
+
+					private boolean collectOptions(boolean silent)
 					{
 						ImageMode mode = ImageMode.get(inputSettings.getImageMode());
 						ExtendedGenericDialog egd = new ExtendedGenericDialog(mode.toString() + " options");
@@ -3854,6 +3882,7 @@ public class OPTICS implements PlugIn
 						}
 						if (!egd.hasFields())
 							return false;
+						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;

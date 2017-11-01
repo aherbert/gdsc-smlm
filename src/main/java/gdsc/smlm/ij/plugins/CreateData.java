@@ -4252,11 +4252,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					public boolean collectOptions(Integer field)
 					{
 						settings.setCameraType(SettingsManager.getCameraTypeValues()[field]);
-						boolean result = collectOptions();
+						boolean result = collectOptions(false);
 						return result;
 					}
 
 					public boolean collectOptions()
+					{
+						return collectOptions(true);
+					}
+
+					private boolean collectOptions(boolean silent)
 					{
 						CameraType cameraType = settings.getCameraType();
 						boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
@@ -4283,6 +4288,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							IJ.error("Unsupported camera type " + CalibrationProtosHelper.getName(cameraType));
 							return false;
 						}
+						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
@@ -5500,11 +5506,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					public boolean collectOptions(Integer field)
 					{
 						settings.setCameraType(SettingsManager.getCameraTypeValues()[field]);
-						boolean result = collectOptions();
+						boolean result = collectOptions(false);
 						return result;
 					}
 
 					public boolean collectOptions()
+					{
+						return collectOptions(true);
+					}
+
+					private boolean collectOptions(boolean silent)
 					{
 						CameraType cameraType = settings.getCameraType();
 						boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
@@ -5528,6 +5539,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							IJ.error("Unsupported camera type " + CalibrationProtosHelper.getName(cameraType));
 							return false;
 						}
+						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;

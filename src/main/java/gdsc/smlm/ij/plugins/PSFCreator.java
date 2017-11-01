@@ -3958,10 +3958,16 @@ public class PSFCreator implements PlugInFilter
 				public boolean collectOptions(Integer value)
 				{
 					settings.setOutputType(value);
-					return collectOptions();
+					boolean result = collectOptions(false);
+					return result;
 				}
 
 				public boolean collectOptions()
+				{
+					return collectOptions(true);
+				}
+
+				private boolean collectOptions(boolean silent)
 				{
 					int outputType = settings.getOutputType();
 					ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
@@ -3976,6 +3982,7 @@ public class PSFCreator implements PlugInFilter
 						egd.addCheckbox("Single_precision", settings.getSinglePrecision());
 						egd.addFilenameField("Spline_filename", settings.getSplineFilename());
 					}
+					egd.setSilent(silent);
 					egd.showDialog(true, gd);
 					if (egd.wasCanceled())
 						return false;

@@ -532,11 +532,16 @@ public class ResultsManager implements PlugIn
 			public boolean collectOptions(Boolean field)
 			{
 				tableSettings.setShowTable(field);
-				boolean result = collectOptions();
+				boolean result = collectOptions(false);
 				return result;
 			}
 
 			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
 			{
 				if (!tableSettings.getShowTable())
 				{
@@ -553,6 +558,7 @@ public class ResultsManager implements PlugIn
 				egd.addCheckbox("Table_show_noise_data", tableSettings.getShowNoiseData());
 				egd.addCheckbox("Table_show_precision", tableSettings.getComputePrecision());
 				egd.addSlider("Table_precision", 0, 10, tableSettings.getRoundingPrecision());
+				egd.setSilent(silent);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;
@@ -596,11 +602,16 @@ public class ResultsManager implements PlugIn
 					public boolean collectOptions(Integer field)
 					{
 						imageSettings.setImageTypeValue(field);
-						boolean result = collectOptions();
+						boolean result = collectOptions(false);
 						return result;
 					}
 
 					public boolean collectOptions()
+					{
+						return collectOptions(true);
+					}
+
+					private boolean collectOptions(boolean silent)
 					{
 						ResultsImageType resultsImage = imageSettings.getImageType();
 						if (resultsImage.getNumber() <= 0)
@@ -617,6 +628,7 @@ public class ResultsManager implements PlugIn
 						egd.addSlider("Image_Scale", 1, 15, imageSettings.getScale());
 						if (extraOptions)
 							egd.addNumericField("Image_Window", imageSettings.getRollingWindowSize(), 0);
+						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
@@ -644,11 +656,16 @@ public class ResultsManager implements PlugIn
 					public boolean collectOptions(Integer field)
 					{
 						fileSettings.setFileFormatValue(field);
-						boolean result = collectOptions();
+						boolean result = collectOptions(false);
 						return result;
 					}
 
 					public boolean collectOptions()
+					{
+						return collectOptions(true);
+					}
+
+					private boolean collectOptions(boolean silent)
 					{
 						ResultsFileFormat resultsFileFormat = fileSettings.getFileFormat();
 						if (!ResultsProtosHelper.isGDSC(resultsFileFormat))
@@ -667,6 +684,7 @@ public class ResultsManager implements PlugIn
 							egd.addCheckbox("File_show_precision", fileSettings.getComputePrecision());
 						}
 						egd.addCheckbox("Show_deviations", resultsSettings.getShowDeviations());
+						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;

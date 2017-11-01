@@ -1133,11 +1133,16 @@ public class PeakFit implements PlugInFilter, ItemListener
 					{
 						CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
 						calibration.setCameraType(SettingsManager.getCameraTypeValues()[field]);
-						boolean result = collectOptions();
+						boolean result = collectOptions(false);
 						return result;
 					}
 
 					public boolean collectOptions()
+					{
+						return collectOptions(true);
+					}
+
+					private boolean collectOptions(boolean silent)
 					{
 						CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
 						ExtendedGenericDialog egd = new ExtendedGenericDialog("Camera type options", null);
@@ -1166,6 +1171,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 									CalibrationProtosHelper.getName(calibration.getCameraType()));
 							return false;
 						}
+						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
@@ -1283,20 +1289,30 @@ public class PeakFit implements PlugInFilter, ItemListener
 					{
 						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						fitConfig.setPSFType(PeakFit.getPSFTypeValues()[field]);
-						boolean result = collectOptions();
+						boolean result = collectOptions(false);
 						return result;
 					}
 
 					public boolean collectOptions()
 					{
+						return collectOptions(true);
+					}
+
+					private boolean collectOptions(boolean silent)
+					{
 						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						PSFType psfType = fitConfig.getPSFType();
 						ExtendedGenericDialog egd = new ExtendedGenericDialog("PSF Options", null);
 						PSF oldPsf = fitConfig.getPSF();
-						for (PSFParameter p : oldPsf.getParametersList())
-							egd.addNumericField(p.getName(), p.getValue(), 3);
+						for (int i = 0; i < oldPsf.getParametersCount(); i++)
+						{
+							PSFParameter p = oldPsf.getParameters(i);
+							egd.addNumericField(String.format("PSF_parameter_%d (%s)", i + 1, p.getName()),
+									p.getValue(), 3);
+						}
 						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
 							egd.addCheckbox("Fixed", fitConfig.isFixedPSF());
+						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
@@ -1356,14 +1372,20 @@ public class PeakFit implements PlugInFilter, ItemListener
 			public boolean collectOptions(Double value)
 			{
 				// Nothing depends on the input double value so just collect the options
-				return collectOptions();
+				return collectOptions(false);
 			}
 
 			public boolean collectOptions()
 			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
 				ExtendedGenericDialog egd = new ExtendedGenericDialog(rp.name + " Options", null);
 				boolean oldValue = rp.isAbsolute();
 				egd.addCheckbox(rp.getDialogName() + "_absolute", oldValue);
+				egd.setSilent(silent);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;
