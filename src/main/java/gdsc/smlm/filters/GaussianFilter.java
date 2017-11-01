@@ -18,7 +18,7 @@ import java.awt.Rectangle;
 /**
  * Computes a Gaussian convolution in the spatial domain for each point within the array.
  * <p>
- * Adapted from ij.plugin.filter.GaussianBlur
+ * Adapted from {@link ij.plugin.filter.GaussianBlur}
  */
 public class GaussianFilter extends BaseWeightedFilter
 {
@@ -169,7 +169,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	{
 		// If not all data points will be over-written clone the input before blurring 
 		float[] wdata = (extraLines != 0) ? data.clone() : data;
-		
+
 		if (hasWeights())
 		{
 			int size = data.length;
@@ -196,7 +196,7 @@ public class GaussianFilter extends BaseWeightedFilter
 		{
 			blur1Direction(wdata, roi, maxx, maxy, sigmaX, true, extraLines);
 			blur1Direction(wdata, roi, maxx, maxy, sigmaY, false, 0);
-			
+
 			if (extraLines != 0)
 			{
 				// Copy back to the input array so that the extra blurred lines 
