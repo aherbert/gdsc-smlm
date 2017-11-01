@@ -318,7 +318,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 	@Override
 	public boolean isNodeBoundary(int gradientIndex)
 	{
-		int parameterIndex = gradientIndices[gradientIndex];
+		int parameterIndex = gradientIndices()[gradientIndex];
 		if (parameterIndex == BACKGROUND)
 			return false;
 
