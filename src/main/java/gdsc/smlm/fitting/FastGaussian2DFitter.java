@@ -63,7 +63,7 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 		isAngleFitting = fitConfiguration.isAngleFitting();
 		if (isAngleFitting)
 		{
-			if (fitConfiguration.getInitialAngle() >= -Math.PI && fitConfiguration.getInitialAngle() <= -Math.PI)
+			if (fitConfiguration.getInitialAngle() >= -Math.PI && fitConfiguration.getInitialAngle() <= Math.PI)
 				angle = fitConfiguration.getInitialAngle();
 			else
 				throw new IllegalArgumentException("No initial angle estimate");
