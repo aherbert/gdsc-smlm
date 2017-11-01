@@ -18,6 +18,9 @@ package gdsc.smlm.filters;
  */
 public class NonNormaliser implements Normaliser
 {
+	/** An instance for applying no normalisation */
+	public static final NonNormaliser INSTANCE = new NonNormaliser();
+	
 	/**
 	 * Normalise the sum.
 	 *

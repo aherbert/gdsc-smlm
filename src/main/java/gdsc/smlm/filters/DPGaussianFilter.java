@@ -202,7 +202,7 @@ public class DPGaussianFilter extends BaseWeightedFilter
 			{
 				// Copy back to the input array so that the extra blurred lines 
 				// are not present.
-				new NonNormaliser().normalise(wdata, data, maxx, maxy, extraLines);
+				NonNormaliser.INSTANCE.normalise(wdata, data, maxx, maxy, extraLines);
 			}
 		}
 	}

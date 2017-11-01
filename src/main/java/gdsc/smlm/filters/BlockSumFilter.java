@@ -20,8 +20,6 @@ package gdsc.smlm.filters;
  */
 public class BlockSumFilter extends BlockFilter
 {
-	private static NonNormaliser normaliser = new NonNormaliser();
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -30,7 +28,7 @@ public class BlockSumFilter extends BlockFilter
 	@Override
 	protected Normaliser computeWeightedNormaliser(float n)
 	{
-		return normaliser;
+		return NonNormaliser.INSTANCE;
 	}
 
 	/*
@@ -41,7 +39,7 @@ public class BlockSumFilter extends BlockFilter
 	@Override
 	protected Normaliser computeNormaliser(float n)
 	{
-		return normaliser;
+		return NonNormaliser.INSTANCE;
 	}
 
 	/*

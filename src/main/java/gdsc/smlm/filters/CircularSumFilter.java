@@ -20,8 +20,6 @@ package gdsc.smlm.filters;
  */
 public class CircularSumFilter extends CircularFilter
 {
-	private static NonNormaliser normaliser = new NonNormaliser();
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -30,7 +28,7 @@ public class CircularSumFilter extends CircularFilter
 	@Override
 	protected Normaliser computeWeightedNormaliser(double radius)
 	{
-		return normaliser;
+		return NonNormaliser.INSTANCE;
 	}
 
 	/*
@@ -41,7 +39,7 @@ public class CircularSumFilter extends CircularFilter
 	@Override
 	protected Normaliser computeNormaliser(int nPoints)
 	{
-		return normaliser;
+		return NonNormaliser.INSTANCE;
 	}
 
 	/*
