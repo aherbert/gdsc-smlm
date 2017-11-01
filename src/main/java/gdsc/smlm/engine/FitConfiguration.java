@@ -415,31 +415,47 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 		isTwoAxisGaussian2D = PSFHelper.isTwoAxisGaussian2D(psfType);
 
-		while (psf.getParametersCount() > nParams)
-			psf.removeParameters(psf.getParametersCount() - 1);
+		boolean changed = psf.getParametersCount() > nParams;
+		if (changed)
+		{
+			while (psf.getParametersCount() > nParams)
+				psf.removeParameters(psf.getParametersCount() - 1);
+
+			// Updated names when changing from two-axis to one axis
+			if (psf.getParametersCount() == 1)
+			{
+				psf.getParametersBuilder(PSFHelper.INDEX_SX).setName(
+						PSFProtosHelper.defaultOneAxisGaussian2DPSF.getParameters(PSFHelper.INDEX_SX).getName());
+			}
+		}
 
 		// Ensure we have enough parameters
 		if (psf.getParametersCount() == 0)
 		{
 			// Create a dummy Sx
-			PSFParameter.Builder p = psf.addParametersBuilder(PSFHelper.INDEX_SX);
-			p.setName("Sx");
+			PSFParameter.Builder p = psf.addParametersBuilder();
+			p.setName(PSFProtosHelper.defaultOneAxisGaussian2DPSF.getParameters(PSFHelper.INDEX_SX).getName());
 			p.setValue(1);
 			p.setUnit(PSFParameterUnit.DISTANCE);
 		}
 		if (psf.getParametersCount() == 1 && nParams > 1)
 		{
+			// Rename S to Sx
+			psf.getParametersBuilder(PSFHelper.INDEX_SX)
+					.setName(PSFProtosHelper.defaultTwoAxisGaussian2DPSF.getParameters(PSFHelper.INDEX_SX).getName());
+
 			// Duplicate the Sx to Sy
-			PSFParameter.Builder p = psf.addParametersBuilder(PSFHelper.INDEX_SY);
-			p.setName("Sy");
+			PSFParameter.Builder p = psf.addParametersBuilder();
+			p.setName(PSFProtosHelper.defaultTwoAxisGaussian2DPSF.getParameters(PSFHelper.INDEX_SY).getName());
 			p.setValue(psf.getParameters(PSFHelper.INDEX_SX).getValue());
 			p.setUnit(PSFParameterUnit.DISTANCE);
 		}
 		if (psf.getParametersCount() == 2 && nParams > 2)
 		{
 			// Create a dummy angle
-			PSFParameter.Builder p = psf.addParametersBuilder(PSFHelper.INDEX_THETA);
-			p.setName("Angle");
+			PSFParameter.Builder p = psf.addParametersBuilder();
+			p.setName(
+					PSFProtosHelper.defaultTwoAxisAndThetaGaussian2DPSF.getParameters(PSFHelper.INDEX_THETA).getName());
 			p.setUnit(PSFParameterUnit.ANGLE);
 		}
 
@@ -2412,8 +2428,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		// This uses the local fitted background to estimate the noise
 		final double noise = (b > 0) ? PeakResultHelper.localBackgroundToNoise(b, 1.0, this.emCCD) : this.noise;
-		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, noise, b, angle, x, y, z, x0, y0,
-				xsd, ysd, xsd0, ysd0, variance, variance2, resultType);
+		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, noise, b, angle, x, y, z, x0, y0, xsd, ysd,
+				xsd0, ysd0, variance, variance2, resultType);
 	}
 
 	/**
