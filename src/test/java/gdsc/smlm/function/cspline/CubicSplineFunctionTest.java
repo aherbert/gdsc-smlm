@@ -11,14 +11,23 @@ import gdsc.core.data.DoubleStackTrivalueProvider;
 import gdsc.core.ij.Utils;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolator;
+import gdsc.core.test.BaseTimingTask;
+import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
+import gdsc.core.utils.TurboList;
+import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.Gradient1Procedure;
+import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.StandardGradient1Procedure;
 import gdsc.smlm.function.StandardGradient2Procedure;
 import gdsc.smlm.function.StandardValueProcedure;
+import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
+import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 
 public abstract class CubicSplineFunctionTest
 {
@@ -39,7 +48,7 @@ public abstract class CubicSplineFunctionTest
 	protected double[] testsignal1 = new double[] { 15, 55, 105 };
 	// Pick some to fall on the node boundaries as the second order
 	// numerical gradients evaluate poorly on the node boundaries.
-	protected double[] testcx1 = new double[] { 5.0, 5.3 };
+	protected double[] testcx1 = new double[] { 5.3, 5.0 };
 	protected double[] testcy1 = new double[] { 4.5, 5.2 };
 	protected double[] testcz1 = new double[] { -1.5, 1.1 };
 	protected double[] testsignal2 = new double[] { 20, 50 };
@@ -51,14 +60,16 @@ public abstract class CubicSplineFunctionTest
 	protected int maxx = 10, maxy = 9;
 	protected double background = 50;
 	protected CubicSplineFunction f1;
+	protected CubicSplineFunction f1f;
 	protected CubicSplineFunction f2 = null;
+	protected CubicSplineFunction f2f = null;
 
 	// Test Astigmatic Gaussian
 	final static double gamma = 2;
 	final static int zDepth = 5;
 	protected QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
-	final static CubicSplineData splineData;
+	final static CubicSplineData splineData, splineDataFloat;
 	final static double cx, cy, cz;
 	final static int scale;
 	static
@@ -101,6 +112,9 @@ public abstract class CubicSplineFunctionTest
 		cx = a[CubicSplineFunction.X_POSITION];
 		cy = a[CubicSplineFunction.Y_POSITION];
 		cz = splineData.getMaxZ() / scale;
+
+		function.toSinglePrecision();
+		splineDataFloat = new CubicSplineData(function);
 	}
 
 	public CubicSplineFunctionTest()
@@ -368,7 +382,7 @@ public abstract class CubicSplineFunctionTest
 							double[] a = createParameters(background, signal1, cx1, cy1, cz1);
 
 							//System.out.println(java.util.Arrays.toString(a));
-							
+
 							f1.initialise2(a);
 							boolean test = !f1.isNodeBoundary(gradientIndex);
 							// Comment out when printing errors
@@ -642,9 +656,9 @@ public abstract class CubicSplineFunctionTest
 													cx2, cy2, cz2);
 
 											//System.out.println(java.util.Arrays.toString(a));
-											
-											f1.initialise2(a);
-											boolean test = !f1.isNodeBoundary(gradientIndex);
+
+											f2.initialise2(a);
+											boolean test = !f2.isNodeBoundary(gradientIndex);
 											// Comment out when printing errors
 											if (!test)
 												continue;
@@ -691,6 +705,197 @@ public abstract class CubicSplineFunctionTest
 		System.out.printf("functionComputesTargetGradient2With2Peaks %s %s (error %s +/- %s)\n",
 				f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter), Utils.rounded(s.getMean()),
 				Utils.rounded(s.getStandardDeviation()));
+	}
+
+	@Test
+	public void runSpeedTestWith1Peak()
+	{
+		speedTest(1, 0);
+		speedTest(1, 1);
+		speedTest(1, 2);
+	}
+
+	@Test
+	public void runSpeedTestWith2Peaks()
+	{
+		speedTest(2, 0);
+		speedTest(2, 1);
+		speedTest(2, 2);
+	}
+
+	private class FunctionTimingTask extends BaseTimingTask
+			implements ValueProcedure, Gradient1Procedure, Gradient2Procedure
+	{
+		Gradient1Function f1;
+		Gradient2Function f2;
+		double[][] x;
+		int order;
+		double s;
+
+		public FunctionTimingTask(Gradient1Function f, double[][] x, int order)
+		{
+			super(f.getClass().getSimpleName() + " " + order);
+			this.f1 = f;
+			if (order > 1)
+				throw new IllegalArgumentException("Gradient1Function for order>1");
+			this.x = x;
+			this.order = order;
+		}
+
+		public FunctionTimingTask(Gradient2Function f, double[][] x, int order)
+		{
+			super(f.getClass().getSimpleName() + " " + order);
+			this.f1 = f;
+			this.f2 = f;
+			this.x = x;
+			this.order = order;
+		}
+
+		public FunctionTimingTask(Gradient2Function f, double[][] x, int order, String suffix)
+		{
+			super(f.getClass().getSimpleName() + " " + order + suffix);
+			this.f1 = f;
+			this.f2 = f;
+			this.x = x;
+			this.order = order;
+		}
+
+		public int getSize()
+		{
+			return 1;
+		}
+
+		public Object getData(int i)
+		{
+			return null;
+		}
+
+		public Object run(Object data)
+		{
+			s = 0;
+			//f = f.copy();
+			if (order == 0)
+			{
+				for (int i = 0; i < x.length; i++)
+				{
+					f1.initialise0(x[i]);
+					f1.forEach((ValueProcedure) this);
+				}
+			}
+			else if (order == 1)
+			{
+				for (int i = 0; i < x.length; i++)
+				{
+					f1.initialise1(x[i]);
+					f1.forEach((Gradient1Procedure) this);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < x.length; i++)
+				{
+					f2.initialise2(x[i]);
+					f2.forEach((Gradient2Procedure) this);
+				}
+			}
+			return s;
+		}
+
+		public void execute(double value)
+		{
+			s += value;
+		}
+
+		public void execute(double value, double[] dy_da)
+		{
+			s += value;
+		}
+
+		public void execute(double value, double[] dy_da, double[] d2y_da2)
+		{
+			s += value;
+		}
+	}
+
+	private void speedTest(int n, int order)
+	{
+		CubicSplineFunction cf = (n == 2) ? f2 : f1;
+		Assume.assumeNotNull(cf);
+		CubicSplineFunction cff = (n == 2) ? f2f : f1f;
+		ErfGaussian2DFunction gf = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(n, maxx, maxy,
+				GaussianFunctionFactory.FIT_ASTIGMATISM, zModel);
+		Gaussian2DFunction gf2 = (order < 2) ? GaussianFunctionFactory.create2D(n, maxx, maxy,
+				GaussianFunctionFactory.FIT_SIMPLE_FREE_CIRCLE, zModel) : null;
+		TurboList<double[]> l1 = new TurboList<double[]>();
+		TurboList<double[]> l2 = new TurboList<double[]>();
+		TurboList<double[]> l3 = new TurboList<double[]>();
+		double[] a = new double[1 + n * CubicSplineFunction.PARAMETERS_PER_PEAK];
+		double[] b = new double[1 + n * Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		double[] bb = null;
+		a[CubicSplineFunction.BACKGROUND] = 0.1;
+		b[Gaussian2DFunction.BACKGROUND] = 0.1;
+		for (int i = 0; i < n; i++)
+		{
+			a[i * CubicSplineFunction.PARAMETERS_PER_PEAK + CubicSplineFunction.SIGNAL] = 10;
+			b[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL] = 10;
+		}
+		if (n == 2)
+		{
+			// Fix second peak parameters
+			a[CubicSplineFunction.PARAMETERS_PER_PEAK + CubicSplineFunction.X_POSITION] = testcx1[0];
+			a[CubicSplineFunction.PARAMETERS_PER_PEAK + CubicSplineFunction.Y_POSITION] = testcy1[0];
+			a[CubicSplineFunction.PARAMETERS_PER_PEAK + CubicSplineFunction.Z_POSITION] = testcz1[0];
+			b[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] = testcx1[0];
+			b[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] = testcy1[0];
+			b[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Z_POSITION] = testcz1[0];
+		}
+		if (gf2 != null)
+		{
+			bb = b.clone();
+			if (n == 2)
+			{
+				// Fix second peak parameters
+				bb[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD] = zModel.getSx(testcz1[0]);
+				bb[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD] = zModel.getSy(testcz1[0]);
+			}
+		}
+		for (int x = 0; x <= maxx; x++)
+		{
+			a[CubicSplineFunction.X_POSITION] = x;
+			b[Gaussian2DFunction.X_POSITION] = x;
+			for (int y = 0; y <= maxy; y++)
+			{
+				a[CubicSplineFunction.Y_POSITION] = y;
+				b[Gaussian2DFunction.Y_POSITION] = y;
+				for (int z = -zDepth; z <= zDepth; z++)
+				{
+					a[CubicSplineFunction.Z_POSITION] = z;
+					b[Gaussian2DFunction.Z_POSITION] = z;
+					l1.add(a.clone());
+					l2.add(b.clone());
+					if (gf2 != null)
+					{
+						bb[Gaussian2DFunction.X_SD] = zModel.getSx(z);
+						bb[Gaussian2DFunction.Y_SD] = zModel.getSy(z);
+						l3.add(bb.clone());
+					}
+				}
+			}
+		}
+		double[][] x1 = l1.toArray(new double[l1.size()][]);
+		double[][] x2 = l2.toArray(new double[l2.size()][]);
+		double[][] x3 = l3.toArray(new double[l3.size()][]);
+
+		TimingService ts = new TimingService(5);
+		ts.execute(new FunctionTimingTask(gf, x2, order));
+		if (gf2 != null)
+			ts.execute(new FunctionTimingTask(gf2, x3, order));
+		ts.execute(new FunctionTimingTask(cf, x1, order));
+		ts.execute(new FunctionTimingTask(cff, x1, order, " single-precision"));
+
+		int size = ts.getSize();
+		ts.repeat(size);
+		ts.report(size);
 	}
 
 	protected double[] createParameters(double... args)
