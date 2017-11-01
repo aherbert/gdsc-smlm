@@ -336,7 +336,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		ysd = fitConfig.getInitialYSD();
 
 		// Used for duplicate checking
-		coordinateStore = CoordinateStoreFactory.create(0, 0, 0, 0, 
+		coordinateStore = CoordinateStoreFactory.create(0, 0, 0, 0,
 				config.convertUsingHWHMax(config.getDuplicateDistanceParameter()));
 		calculateNoise = fitConfig.getNoise() <= 0;
 		if (!calculateNoise)
@@ -3767,7 +3767,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// candidate Id
 		// Initial and final params for each fit result.
 		// Details of the selected result.
-		// Then try to figure out why the benchmark fit deviates from PeakFit.
 
 		// Add to the slice results.
 		final PreprocessedPeakResult[] results = selectedResult.results;
@@ -3776,8 +3775,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (logger != null)
 			{
 				final int candidateId = dynamicMultiPathFitResult.candidateId;
-				logger.info("Not fit %d (%d,%d)", candidateId, cc.fromDataToGlobalX(candidates.get(candidateId).x),
-						cc.fromDataToGlobalY(candidates.get(candidateId).y));
+				//@formatter:off
+				logger.info("Not fit %d (%d,%d) %s", candidateId, 
+						cc.fromDataToGlobalX(candidates.get(candidateId).x),
+						cc.fromDataToGlobalY(candidates.get(candidateId).y),
+						(selectedResult.fitResult!=null && selectedResult.fitResult.data!=null) ?
+						((FitResult) selectedResult.fitResult.data).getStatus().toString() : "");								
+				//@formatter:on
 			}
 			return;
 		}
