@@ -14,16 +14,17 @@ package gdsc.smlm.filters;
  *---------------------------------------------------------------------------*/
 
 /**
- * Computes a convolution in the spatial domain for each point within the array.
+ * Computes a convolution in the spatial domain for each point within the array. Pixels outside the array are set to the
+ * value of the appropriate edge pixel.
  * <p>
  * Adapted from {@link ij.plugin.filter.Convolver}
  */
 public class KernelFilter extends BaseWeightedFilter
 {
-	private final float[] kernel;
-	private final int kw;
-	private final int kh;
-	private final double scale;
+	protected final float[] kernel;
+	protected final int kw;
+	protected final int kh;
+	protected final double scale;
 
 	private Normaliser normaliser = null;
 
@@ -65,6 +66,8 @@ public class KernelFilter extends BaseWeightedFilter
 	 */
 	public KernelFilter(float[] kernel, int kw, int kh)
 	{
+		if (kw < 1 || kh < 1)
+			throw new IllegalArgumentException("Kernel width & height must be positive");
 		if (kw * kh != kernel.length)
 			throw new IllegalArgumentException("Kernel width x height != kernel length");
 		if ((kw & 1) != 1 || (kh & 1) != 1)
@@ -197,7 +200,7 @@ public class KernelFilter extends BaseWeightedFilter
 	 * @param border
 	 *            the border
 	 */
-	private void convolveData(float[] in, float[] out, final int width, final int height, int border)
+	protected void convolveData(float[] in, float[] out, final int width, final int height, int border)
 	{
 		final int x1 = border;
 		final int y1 = border;
@@ -221,7 +224,7 @@ public class KernelFilter extends BaseWeightedFilter
 					{
 						// Create a safe y-index
 						int yIndex = y + v;
-						if (yIndex <= 0)
+						if (yIndex < 0)
 							yIndex = 0;
 						else if (yIndex >= height)
 							yIndex = height - 1;
@@ -266,7 +269,7 @@ public class KernelFilter extends BaseWeightedFilter
 	 */
 	private static float getPixel(int x, int yIndex, float[] pixels, int width)
 	{
-		if (x <= 0)
+		if (x < 0)
 			x = 0;
 		else if (x >= width)
 			x = width - 1;

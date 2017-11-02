@@ -9,6 +9,7 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 
 public abstract class WeightedFilterTest
 {
@@ -39,7 +40,8 @@ public abstract class WeightedFilterTest
 
 		DataFilter filter1 = createDataFilter();
 		DataFilter filter2 = createDataFilter();
-		float[] offsets = (filter1.isInterpolated) ? this.offsets : new float[1];
+		float[] offsets = getOffsets(filter1);
+		int[] boxSizes = getBoxSizes(filter1);
 
 		int[] primes = Arrays.copyOf(this.primes, this.primes.length - 1);
 
@@ -53,7 +55,7 @@ public abstract class WeightedFilterTest
 				Arrays.fill(w, 0.5f);
 				filter2.setWeights(w, width, height);
 
-				for (float boxSize : boxSizes)
+				for (int boxSize : boxSizes)
 					for (float offset : offsets)
 						for (boolean internal : checkInternal)
 						{
@@ -73,6 +75,23 @@ public abstract class WeightedFilterTest
 			}
 	}
 
+	private float[] getOffsets(DataFilter filter1)
+	{
+		float[] offsets = (filter1.isInterpolated) ? this.offsets : new float[1];
+		return offsets;
+	}
+
+	private int[] getBoxSizes(DataFilter filter1)
+	{
+		if (filter1.minBoxSize == 0)
+			return boxSizes;
+		TIntArrayList list = new TIntArrayList();
+		for (int b : boxSizes)
+			if (b >= filter1.minBoxSize)
+				list.add(b);
+		return list.toArray();
+	}
+
 	@Test
 	public void filterDoesNotAlterImageMean()
 	{
@@ -81,7 +100,8 @@ public abstract class WeightedFilterTest
 		//		ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 		DataFilter filter = createDataFilter();
-		float[] offsets = (filter.isInterpolated) ? this.offsets : new float[1];
+		float[] offsets = getOffsets(filter);
+		int[] boxSizes = getBoxSizes(filter);
 
 		TDoubleArrayList l1 = new TDoubleArrayList();
 
@@ -92,7 +112,7 @@ public abstract class WeightedFilterTest
 				l1.reset();
 
 				filter.setWeights(null, width, height);
-				for (float boxSize : boxSizes)
+				for (int boxSize : boxSizes)
 					for (float offset : offsets)
 						for (boolean internal : checkInternal)
 						{
@@ -107,7 +127,7 @@ public abstract class WeightedFilterTest
 
 				Arrays.fill(w, 0.5f);
 				filter.setWeights(w, width, height);
-				for (float boxSize : boxSizes)
+				for (int boxSize : boxSizes)
 					for (float offset : offsets)
 						for (boolean internal : checkInternal)
 						{
@@ -124,7 +144,7 @@ public abstract class WeightedFilterTest
 
 				ei = 0;
 				filter.setWeights(w, width, height);
-				for (float boxSize : boxSizes)
+				for (int boxSize : boxSizes)
 					for (float offset : offsets)
 						for (boolean internal : checkInternal)
 						{
