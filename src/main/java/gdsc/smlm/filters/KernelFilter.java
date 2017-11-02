@@ -326,4 +326,20 @@ public class KernelFilter extends BaseWeightedFilter
 	{
 		return scale;
 	}
+
+	/**
+	 * Rotate 180 degrees.
+	 *
+	 * @param kernel
+	 *            the kernel
+	 */
+	public static void rotate180(float[] kernel)
+	{
+		for (int i = kernel.length / 2, j = kernel.length - i; i-- > 0; j++)
+		{
+			float tmp = kernel[i];
+			kernel[i] = kernel[j];
+			kernel[j] = tmp;
+		}
+	}
 }

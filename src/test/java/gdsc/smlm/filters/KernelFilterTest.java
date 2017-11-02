@@ -140,6 +140,21 @@ public class KernelFilterTest
 	}
 
 	@Test
+	public void canRotate180()
+	{
+		for (int kw = 1; kw < 3; kw++)
+			for (int kh = 1; kh < 3; kh++)
+			{
+				float[] kernel = createKernel(kw, kh);
+				FloatProcessor fp = new FloatProcessor(kw, kh, kernel.clone());
+				fp.flipHorizontal();
+				fp.flipVertical();
+				KernelFilter.rotate180(kernel);
+				Assert.assertArrayEquals((float[]) fp.getPixels(), kernel, 0);
+			}
+	}
+
+	@Test
 	public void kernelFilterIsSameAsIJFilter()
 	{
 		int kw = 5, kh = 5;

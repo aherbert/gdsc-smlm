@@ -31,11 +31,11 @@ import ij.process.ImageProcessor;
  *---------------------------------------------------------------------------*/
 
 /**
- * Convolve an image with another image.
+ * Convolve an image with a kernel from another image.
  */
-public class ConvolveFilter implements ExtendedPlugInFilter, DialogListener
+public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 {
-	private static final String TITLE = "Convolve Filter";
+	private static final String TITLE = "Image Kernel Filter";
 	private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | KEEP_PREVIEW | PARALLELIZE_STACKS | CONVERT_TO_FLOAT;
 
 	private static String title = "";
@@ -143,6 +143,7 @@ public class ConvolveFilter implements ExtendedPlugInFilter, DialogListener
 				fp = fp2;
 			}
 			float[] kernel = (float[]) fp.getPixels();
+			
 			kf = (zero) ? new ZeroKernelFilter(kernel, kw, kh) : new KernelFilter(kernel, kw, kh);
 		}
 
