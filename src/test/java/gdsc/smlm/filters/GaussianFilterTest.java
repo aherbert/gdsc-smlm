@@ -1,5 +1,7 @@
 package gdsc.smlm.filters;
 
+import java.awt.Rectangle;
+
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,6 +10,8 @@ import gdsc.core.test.BaseTimingTask;
 import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Random;
+import ij.plugin.filter.GaussianBlur;
+import ij.process.FloatProcessor;
 
 public class GaussianFilterTest
 {
@@ -46,6 +50,41 @@ public class GaussianFilterTest
 		abstract void setWeights(float[] w);
 	}
 
+	private class IJFilter extends GFilter
+	{
+		GaussianBlur gf = new GaussianBlur();
+		
+		IJFilter(boolean internal)
+		{
+			super(GaussianBlur.class.getSimpleName(), internal);
+		}
+
+		@Override
+		float[] filter(float[] d, double sigma)
+		{
+			FloatProcessor fp = new FloatProcessor(size, size, d);
+			gf.blurGaussian(fp, sigma, sigma, GaussianFilter.DEFAULT_ACCURACY);
+			return d;
+		}
+
+		@Override
+		float[] filterInternal(float[] d, double sigma)
+		{
+			FloatProcessor fp = new FloatProcessor(size, size, d);
+			final int border = GaussianFilter.getBorder(sigma);
+			Rectangle roi = new Rectangle(border, border, size - 2 * border, size - 2 * border);
+			fp.setRoi(roi);
+			gf.blurGaussian(fp, sigma, sigma, GaussianFilter.DEFAULT_ACCURACY);
+			return d;
+		}
+
+		@Override
+		void setWeights(float[] w)
+		{
+			// Ignored
+		}
+	}	
+	
 	private class FloatFilter extends GFilter
 	{
 		GaussianFilter gf = new GaussianFilter();
@@ -136,6 +175,18 @@ public class GaussianFilterTest
 		}
 	}
 
+	@Test
+	public void floatFilterIsSameAsIJFilter()
+	{
+		filter1IsSameAsFilter2(new FloatFilter(false), new IJFilter(false), false, 1e-2);
+	}
+
+	@Test
+	public void floatFilterInternalIsSameAsIJFilter()
+	{
+		filter1IsSameAsFilter2(new FloatFilter(true), new IJFilter(true), false, 1e-2);
+	}
+	
 	@Test
 	public void floatFilterIsSameAsDoubleFilter()
 	{

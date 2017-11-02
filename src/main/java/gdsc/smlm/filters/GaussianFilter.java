@@ -22,6 +22,12 @@ import java.awt.Rectangle;
  */
 public class GaussianFilter extends BaseWeightedFilter
 {
+	/**
+	 * The default accuracy. This is the highest acceptable value of the accuracy for maximum speed. Lower values will
+	 * increase the kernel size.
+	 */
+	public static final double DEFAULT_ACCURACY = 0.02;
+
 	private final double accuracy;
 
 	private double lastSigma;
@@ -72,13 +78,13 @@ public class GaussianFilter extends BaseWeightedFilter
 	 */
 	public GaussianFilter()
 	{
-		this(0.02);
+		this(DEFAULT_ACCURACY);
 	}
 
 	/**
 	 * @param accuracy
 	 *            Accuracy of kernel, should not be above 0.02. Better (lower)
-	 *            accuracy needs slightly more computing time.
+	 *            accuracy needs slightly more computing time as the kernel size is increased.
 	 */
 	public GaussianFilter(double accuracy)
 	{
