@@ -354,11 +354,21 @@ public class FHTFilter extends BaseFilter
 		return kh;
 	}
 
+	/**
+	 * Checks if is a convolution filter. The default is correlation.
+	 *
+	 * @return true, if is a convolution filter
+	 */
 	public boolean isConvolution()
 	{
 		return convolution;
 	}
 
+	/**
+	 * Sets the convolution flag. The default is correlation.
+	 *
+	 * @param convolution the new convolution flag
+	 */
 	public void setConvolution(boolean convolution)
 	{
 		this.convolution = convolution;

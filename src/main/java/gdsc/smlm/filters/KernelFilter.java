@@ -1,5 +1,7 @@
 package gdsc.smlm.filters;
 
+import ij.process.FloatProcessor;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -21,12 +23,13 @@ package gdsc.smlm.filters;
  */
 public class KernelFilter extends BaseWeightedFilter
 {
-	protected final float[] kernel;
+	protected float[] kernel;
 	protected final int kw;
 	protected final int kh;
 	protected final double scale;
 
 	private Normaliser normaliser = null;
+	private boolean convolution;
 
 	/*
 	 * (non-Javadoc)
@@ -72,7 +75,7 @@ public class KernelFilter extends BaseWeightedFilter
 			throw new IllegalArgumentException("Kernel width x height != kernel length");
 		if ((kw & 1) != 1 || (kh & 1) != 1)
 			throw new IllegalArgumentException("Kernel width or height not odd (" + kw + "x" + kh + ")");
-		this.kernel = kernel;
+		this.kernel = kernel.clone();
 		this.kw = kw;
 		this.kh = kh;
 		this.scale = getScale(kernel);
@@ -284,6 +287,7 @@ public class KernelFilter extends BaseWeightedFilter
 	public KernelFilter clone()
 	{
 		KernelFilter o = (KernelFilter) super.clone();
+		o.kernel = getKernal();
 		return o;
 	}
 
@@ -341,5 +345,53 @@ public class KernelFilter extends BaseWeightedFilter
 			kernel[i] = kernel[j];
 			kernel[j] = tmp;
 		}
+	}
+
+	/**
+	 * Pad an image processor to make the width and height an odd number
+	 *
+	 * @param fp
+	 *            the fp
+	 * @return the float processor
+	 */
+	public static FloatProcessor pad(FloatProcessor fp)
+	{
+		int kw = fp.getWidth();
+		int kh = fp.getHeight();
+		// Ensure odd size(to avoid exceptions)
+		if ((kw & 1) != 1)
+			kw++;
+		if ((kh & 1) != 1)
+			kh++;
+		if (kw != fp.getWidth() || kh != fp.getHeight())
+		{
+			FloatProcessor fp2 = new FloatProcessor(kw, kh);
+			fp2.insert(fp, 0, 0);
+			fp = fp2;
+		}
+		return fp;
+	}
+
+	/**
+	 * Checks if is a convolution filter. The default is correlation.
+	 *
+	 * @return true, if is a convolution filter
+	 */
+	public boolean isConvolution()
+	{
+		return convolution;
+	}
+
+	/**
+	 * Sets the convolution flag. The default is correlation. Changing the type just rotates the kernel 180.
+	 *
+	 * @param convolution
+	 *            the new convolution flag
+	 */
+	public void setConvolution(boolean convolution)
+	{
+		if (this.convolution != convolution)
+			rotate180(kernel);
+		this.convolution = convolution;
 	}
 }
