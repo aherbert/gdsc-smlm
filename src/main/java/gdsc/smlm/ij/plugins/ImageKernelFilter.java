@@ -5,12 +5,14 @@ import java.awt.AWTEvent;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Ticker;
+import gdsc.smlm.filters.FHTFilter;
 import gdsc.smlm.filters.KernelFilter;
 import gdsc.smlm.filters.ZeroKernelFilter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
@@ -38,7 +40,17 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	private static final String TITLE = "Image Kernel Filter";
 	private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | KEEP_PREVIEW | PARALLELIZE_STACKS | CONVERT_TO_FLOAT;
 
+	private static final String[] METHODS = { "Spatial domain", "FHT" };
+	private static final int METHOD_SPATIAL = 0;
+	private static final int METHOD_FHT = 1;
+	private static final String[] FILTERS = { "Correlation", "Convolution" };
+	@SuppressWarnings("unused")
+	private static final int FILTER_CORRELATION = 0;
+	private static final int FILTER_CONVOLUTION = 1;
+
 	private static String title = "";
+	private static int method = 0;
+	private static int filter = 0;
 	private static int border = 0;
 	private static boolean zero = false;
 
@@ -46,8 +58,11 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	private Ticker ticker = Ticker.INSTANCE;
 
 	private int lastId = 0;
+	private int lastMethod = -1;
+	private int lastFilter = -1;
 	private boolean lastZero;
 	private KernelFilter kf = null;
+	private FHTFilter ff = null;
 	private ImagePlus imp;
 
 	/*
@@ -69,8 +84,20 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 
 	public void run(ImageProcessor ip)
 	{
+		float[] data = (float[]) ip.getPixels();
+		int w = ip.getWidth();
+		int h = ip.getHeight();
+		if (method == METHOD_SPATIAL)
+		{
+			kf.convolve(data, w, h, border);
+		}
+		else
+		{
+			// Use a clone for thread safety
+			FHTFilter f = (ticker.getTotal() > 1) ? ff.clone() : ff;
+			f.filter(data, w, h);
+		}
 		ticker.tick();
-		kf.convolve((float[]) ip.getPixels(), ip.getWidth(), ip.getHeight(), border);
 	}
 
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
@@ -83,12 +110,14 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 			return DONE;
 		}
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Convolve an image using another image as the convolution kernel");
 
 		gd.addChoice("Kernel_image", names, title);
+		gd.addChoice("Method", METHODS, method);
+		gd.addChoice("Filter", FILTERS, filter);
 		gd.addSlider("Border", 0, 10, border);
 		gd.addCheckbox("Zero_outside_image", zero);
 
@@ -111,6 +140,8 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		title = gd.getNextChoice();
+		method = gd.getNextChoiceIndex();
+		filter = gd.getNextChoiceIndex();
 		border = (int) gd.getNextNumber();
 		zero = gd.getNextBoolean();
 
@@ -124,27 +155,39 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	public void setNPasses(int nPasses)
 	{
 		// Create the kernel from the image
-		if (kf == null || imp.getID() != lastId || zero != lastZero)
+		boolean build = imp.getID() != lastId || method != lastMethod || filter != lastFilter;
+		build = build || (method == METHOD_SPATIAL && kf == null);
+		build = build || (method == METHOD_FHT && ff == null);
+		if (build)
 		{
 			FloatProcessor fp = imp.getProcessor().toFloat(0, null);
-			lastId = imp.getID();
-			lastZero = zero;
-			int kw = fp.getWidth();
-			int kh = fp.getHeight();
-			// Ensure odd size(to avoid exceptions)
-			if ((kw & 1) != 1)
-				kw++;
-			if ((kh & 1) != 1)
-				kh++;
-			if (kw != fp.getWidth() || kh != fp.getHeight())
+			if (method == METHOD_SPATIAL)
 			{
-				FloatProcessor fp2 = new FloatProcessor(kw, kh);
-				fp2.insert(fp, 0, 0);
-				fp = fp2;
+				if (kf == null || imp.getID() != lastId || zero != lastZero)
+				{
+					fp = KernelFilter.pad(fp);
+					int kw = fp.getWidth();
+					int kh = fp.getHeight();
+					float[] kernel = (float[]) fp.getPixels();
+					kf = (zero) ? new ZeroKernelFilter(kernel, kw, kh) : new KernelFilter(kernel, kw, kh);
+				}
+				kf.setConvolution(filter == FILTER_CONVOLUTION);
 			}
-			float[] kernel = (float[]) fp.getPixels();
-			
-			kf = (zero) ? new ZeroKernelFilter(kernel, kw, kh) : new KernelFilter(kernel, kw, kh);
+			else
+			{
+				if (ff == null || imp.getID() != lastId)
+				{
+					int kw = fp.getWidth();
+					int kh = fp.getHeight();
+					float[] kernel = (float[]) fp.getPixels();
+					ff = new FHTFilter(kernel, kw, kh);
+				}
+				ff.setConvolution(filter == FILTER_CONVOLUTION);
+			}
+			lastId = imp.getID();
+			lastMethod = method;
+			lastFilter = filter;
+			lastZero = zero;
 		}
 
 		ticker = Ticker.create(new IJTrackProgress(), nPasses, true);
