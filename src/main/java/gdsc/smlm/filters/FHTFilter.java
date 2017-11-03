@@ -296,15 +296,15 @@ public class FHTFilter extends BaseFilter
 		{
 			// index = y * kw + x
 
-			// Rows: y = b or kh-b; x = 0
+			// Rows: y = b or kh-b-1; x = 0
 			double weight = w[b];
-			for (int i = 0, lx = b * kw, ux = (kh - b) * kw; i < kw; i++, lx++, ux++)
+			for (int i = 0, lx = b * kw, ux = (kh - b - 1) * kw; i < kw; i++, lx++, ux++)
 			{
 				kernel[lx] *= weight;
 				kernel[ux] *= weight;
 			}
-			// Columns: y = 0; x = b or kw-b
-			for (int i = 0, ly = b, uy = kw - b; i < kh; i++, ly += kw, uy += kw)
+			// Columns: y = 0; x = b or kw-b-1
+			for (int i = 0, ly = b, uy = kw - b - 1; i < kh; i++, ly += kw, uy += kw)
 			{
 				kernel[ly] *= weight;
 				kernel[uy] *= weight;
@@ -367,7 +367,8 @@ public class FHTFilter extends BaseFilter
 	/**
 	 * Sets the convolution flag. The default is correlation.
 	 *
-	 * @param convolution the new convolution flag
+	 * @param convolution
+	 *            the new convolution flag
 	 */
 	public void setConvolution(boolean convolution)
 	{

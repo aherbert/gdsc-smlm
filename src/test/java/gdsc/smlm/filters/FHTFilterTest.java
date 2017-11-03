@@ -5,6 +5,7 @@ import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.SimpleArrayUtils;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
@@ -95,5 +96,21 @@ public class FHTFilterTest
 				d[i] += r.nextFloat() * 0.01;
 		}
 		return fp;
+	}
+
+	@Test
+	public void canWindow()
+	{
+		int size = 16;
+		float[] in = SimpleArrayUtils.newFloatArray(size * size, 1);
+		FHTFilter f = new FHTFilter(new float[1], 1, 1);
+		for (int i = 1; i < 5; i++)
+		{
+			double[] wx = ImageWindow.tukeyEdge(size, i);
+			float[] e = ImageWindow.applyWindowSeparable(in, size, size, wx, wx);
+			float[] o = in.clone();
+			f.applyBorder(o, size, size, i);
+			Assert.assertArrayEquals(e, o, 0);
+		}
 	}
 }
