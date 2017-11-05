@@ -282,32 +282,31 @@ public class FHTFilter extends BaseFilter
 	 */
 	private void applyBorderInternal(float[] kernel, int kw, int kh, int border)
 	{
+		// Border will be positive, ensure no overflow of kernel size
+		border = Maths.min(border, kw / 2, kh / 2);
+
 		if (edge != border)
 		{
 			edge = border;
-			// Get the whole window but we only use part of it.
+			// Cache the whole window but we only use part of it.
 			w = ImageWindow.tukeyEdge(Math.min(kw, kh), border);
 		}
 
 		// Assume that the border will only be a fraction of the image and perform 
 		// selective weighting
 
-		for (int b = 0; b < border; b++)
+		for (int b = 0, ri = -1, rj = kernel.length; b < border; b++)
 		{
-			// index = y * kw + x
-
-			// Rows: y = b or kh-b-1; x = 0
 			double weight = w[b];
-			for (int i = 0, lx = b * kw, ux = (kh - b - 1) * kw; i < kw; i++, lx++, ux++)
+			// index = y * kw + x
+			// Rows (ri|rj): y = b or kh-b-1; x = 0
+			// Columns (ri|rj): y = 0; x = b or kw-b-1
+			for (int i = 0, ci = b, cj = kw - b - 1; i < kh; i++, ci += kw, cj += kw)
 			{
-				kernel[lx] *= weight;
-				kernel[ux] *= weight;
-			}
-			// Columns: y = 0; x = b or kw-b-1
-			for (int i = 0, ly = b, uy = kw - b - 1; i < kh; i++, ly += kw, uy += kw)
-			{
-				kernel[ly] *= weight;
-				kernel[uy] *= weight;
+				kernel[++ri] *= weight;
+				kernel[--rj] *= weight;
+				kernel[ci] *= weight;
+				kernel[cj] *= weight;
 			}
 		}
 	}
