@@ -162,8 +162,8 @@ public class FHTFilter extends BaseFilter
 		result.swapQuadrants();
 		if (maxx < maxN || maxy < maxN)
 		{
-			int x = (maxN - maxx) / 2;
-			int y = (maxN - maxy) / 2;
+			int x = getInsert(maxN, maxx);
+			int y = getInsert(maxN, maxy);
 			for (int to = 0, from = y * maxN + x; to < data.length; to += maxx, from += maxN)
 			{
 				System.arraycopy(tmp, from, data, to, maxx);
@@ -197,8 +197,8 @@ public class FHTFilter extends BaseFilter
 		{
 			// Too small so insert in the middle
 			float[] data = new float[size];
-			int x = (maxN - kw) / 2;
-			int y = (maxN - kh) / 2;
+			int x = getInsert(maxN, kw);
+			int y = getInsert(maxN, kh);
 			insert(kernel, kw, kh, data, maxN, x, y);
 			fht = new FHT2(data, maxN, false);
 		}
@@ -211,7 +211,17 @@ public class FHTFilter extends BaseFilter
 		// This is used for the output complex multiple of the two FHTs
 		tmp = new float[size];
 	}
-	
+
+	private static int getInsert(int maxN, int width)
+	{
+		// Note the FHT power spectrum centre is at n/2 of an even sized image.
+		// So we must insert the centre at that point. To do this we check for odd/even
+		// and offset if necessary. This allows the FHTFilter to match the correlation
+		// result from a filter in the spatial domain performed using the KernelFilter class. 
+		int diff = maxN - width;
+		return ((diff & 1) == 1) ? (diff + 1) / 2 : diff / 2;
+	}
+
 	private static void insert(float[] source, int maxx, int maxy, float[] dest, int maxN, int x, int y)
 	{
 		for (int from = 0, to = y * maxN + x; from < source.length; from += maxx, to += maxN)
@@ -242,9 +252,9 @@ public class FHTFilter extends BaseFilter
 		if (maxx < maxN || maxy < maxN)
 		{
 			// Too small so insert in the middle of a new processor
-			float[] data2 = new float[maxN*maxN];
-			int x = (maxN - maxx) / 2;
-			int y = (maxN - maxy) / 2;
+			float[] data2 = new float[maxN * maxN];
+			int x = getInsert(maxN, maxx);
+			int y = getInsert(maxN, maxy);
 			insert(data, maxx, maxy, data2, maxN, x, y);
 			data = data2;
 		}
@@ -326,7 +336,7 @@ public class FHTFilter extends BaseFilter
 	 */
 	public FHTFilter clone()
 	{
-		FHTFilter fht = (FHTFilter) clone();
+		FHTFilter fht = (FHTFilter) super.clone();
 		fht.tmp = null; // This cannot be shared across instances
 		return fht;
 	}
