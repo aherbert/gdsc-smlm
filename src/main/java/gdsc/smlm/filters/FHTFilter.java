@@ -28,7 +28,7 @@ public class FHTFilter extends BaseFilter
 	private final int kh;
 	private final int kN; // Next power of 2 for the kernel
 
-	private FHT2 fht = null;
+	private FHT2 kernelFht = null;
 	private float[] tmp;
 	private boolean convolution = false;
 
@@ -152,12 +152,10 @@ public class FHTFilter extends BaseFilter
 	{
 		initialiseKernel(maxx, maxy);
 
-		FHT2 fht2 = createFHT(data, maxx, maxy, border);
-		int maxN = fht.getWidth();
+		FHT2 dataFht = createFHT(data, maxx, maxy, border);
+		int maxN = kernelFht.getWidth();
 
-		FHT2 result = (convolution) ? fht2.multiply(fht.getData(), tmp) : fht2.conjugateMultiply(fht.getData(), tmp);
-		// Transform using the kernel FHT with precomputed tables
-		//this.fht.rc2DFHT(tmp, true, maxN);
+		FHT2 result = (convolution) ? dataFht.multiply(kernelFht.getData(), tmp) : dataFht.conjugateMultiply(kernelFht.getData(), tmp);
 		result.inverseTransform();
 		result.swapQuadrants();
 		if (maxx < maxN || maxy < maxN)
@@ -176,19 +174,19 @@ public class FHTFilter extends BaseFilter
 	}
 
 	/**
-	 * Initialise kernel. It is recreated only if the FHT size has changed.
+	 * Initialise the kernel FHT. It is recreated only if the target size has changed.
 	 *
 	 * @param maxx
 	 *            the width of the target image
 	 * @param maxy
 	 *            the height of the target image
 	 */
-	private void initialiseKernel(int maxx, int maxy)
+	public void initialiseKernel(int maxx, int maxy)
 	{
 		int maxN = Maths.nextPow2(Maths.max(maxx, maxy, kN));
 		if (tmp == null || tmp.length != maxN * maxN)
 			tmp = new float[maxN * maxN];
-		if (fht != null && maxN == fht.getWidth())
+		if (kernelFht != null && maxN == kernelFht.getWidth())
 			// Already initialised
 			return;
 		int size = maxN * maxN;
@@ -200,14 +198,14 @@ public class FHTFilter extends BaseFilter
 			int x = getInsert(maxN, kw);
 			int y = getInsert(maxN, kh);
 			insert(kernel, kw, kh, data, maxN, x, y);
-			fht = new FHT2(data, maxN, false);
+			kernelFht = new FHT2(data, maxN, false);
 		}
 		else
 		{
 			// Clone to avoid destroying data
-			fht = new FHT2(kernel.clone(), maxN, false);
+			kernelFht = new FHT2(kernel.clone(), maxN, false);
 		}
-		fht.transform();
+		kernelFht.transform();
 		// This is used for the output complex multiple of the two FHTs
 		tmp = new float[size];
 	}
@@ -248,7 +246,7 @@ public class FHTFilter extends BaseFilter
 		if (border != 0)
 			applyBorderInternal(data, maxx, maxy, border);
 
-		int maxN = fht.getWidth();
+		int maxN = kernelFht.getWidth();
 		if (maxx < maxN || maxy < maxN)
 		{
 			// Too small so insert in the middle of a new processor
@@ -259,10 +257,9 @@ public class FHTFilter extends BaseFilter
 			data = data2;
 		}
 
-		// Tranform using the kernel FHT using the precomputed tables
-		FHT2 result;
-		result = new FHT2(data, maxN, false);
-		result.copyTables(fht);
+		FHT2 result = new FHT2(data, maxN, false);
+		// Copy the initialised tables
+		result.copyTables(kernelFht);
 		result.transform();
 		return result;
 	}

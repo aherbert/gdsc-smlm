@@ -63,7 +63,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	private boolean lastZero;
 	private KernelFilter kf = null;
 	private FHTFilter ff = null;
-	private ImagePlus imp;
+	private ImagePlus dataImp, kernelImp;
 
 	/*
 	 * (non-Javadoc)
@@ -109,6 +109,8 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 			IJ.error(TITLE, "No suitable kernel images");
 			return DONE;
 		}
+		
+		this.dataImp=imp;
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -145,8 +147,8 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 		border = (int) gd.getNextNumber();
 		zero = gd.getNextBoolean();
 
-		imp = WindowManager.getImage(title);
-		if (imp == null)
+		kernelImp = WindowManager.getImage(title);
+		if (kernelImp == null)
 			return false;
 
 		return true;
@@ -155,15 +157,15 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	public void setNPasses(int nPasses)
 	{
 		// Create the kernel from the image
-		boolean build = imp.getID() != lastId || method != lastMethod || filter != lastFilter;
+		boolean build = kernelImp.getID() != lastId || method != lastMethod || filter != lastFilter;
 		build = build || (method == METHOD_SPATIAL && kf == null);
 		build = build || (method == METHOD_FHT && ff == null);
 		if (build)
 		{
-			FloatProcessor fp = imp.getProcessor().toFloat(0, null);
+			FloatProcessor fp = kernelImp.getProcessor().toFloat(0, null);
 			if (method == METHOD_SPATIAL)
 			{
-				if (kf == null || imp.getID() != lastId || zero != lastZero)
+				if (kf == null || kernelImp.getID() != lastId || zero != lastZero)
 				{
 					fp = KernelFilter.pad(fp);
 					int kw = fp.getWidth();
@@ -175,16 +177,17 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 			}
 			else
 			{
-				if (ff == null || imp.getID() != lastId)
+				if (ff == null || kernelImp.getID() != lastId)
 				{
 					int kw = fp.getWidth();
 					int kh = fp.getHeight();
 					float[] kernel = (float[]) fp.getPixels();
 					ff = new FHTFilter(kernel, kw, kh);
+					ff.initialiseKernel(dataImp.getWidth(), dataImp.getHeight());
 				}
 				ff.setConvolution(filter == FILTER_CONVOLUTION);
 			}
-			lastId = imp.getID();
+			lastId = kernelImp.getID();
 			lastMethod = method;
 			lastFilter = filter;
 			lastZero = zero;
