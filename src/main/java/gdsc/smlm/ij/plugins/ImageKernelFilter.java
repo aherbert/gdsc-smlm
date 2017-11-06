@@ -95,7 +95,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 		{
 			// Use a clone for thread safety
 			FHTFilter f = (ticker.getTotal() > 1) ? ff.clone() : ff;
-			f.filter(data, w, h);
+			f.filter(data, w, h, border);
 		}
 		ticker.tick();
 	}
