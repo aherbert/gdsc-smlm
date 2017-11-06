@@ -155,10 +155,10 @@ public class FHTFilter extends BaseFilter
 		FHT2 fht2 = createFHT(data, maxx, maxy, border);
 		int maxN = fht.getWidth();
 
-		FHT2 result = (convolution) ? fht2.multiply(fht, tmp) : fht2.conjugateMultiply(fht, tmp);
+		FHT2 result = (convolution) ? fht2.multiply(fht.getData(), tmp) : fht2.conjugateMultiply(fht.getData(), tmp);
 		// Transform using the kernel FHT with precomputed tables
-		this.fht.rc2DFHT(tmp, true, maxN);
-		// result.inverseTransform();
+		//this.fht.rc2DFHT(tmp, true, maxN);
+		result.inverseTransform();
 		result.swapQuadrants();
 		if (maxx < maxN || maxy < maxN)
 		{
@@ -260,8 +260,11 @@ public class FHTFilter extends BaseFilter
 		}
 
 		// Tranform using the kernel FHT using the precomputed tables
-		this.fht.rc2DFHT(data, false, maxN);
-		return new FHT2(data, maxN, true);
+		FHT2 result;
+		result = new FHT2(data, maxN, false);
+		result.copyTables(fht);
+		result.transform();
+		return result;
 	}
 
 	/**

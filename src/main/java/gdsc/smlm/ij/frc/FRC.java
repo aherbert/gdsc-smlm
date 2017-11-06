@@ -12,26 +12,10 @@ import gdsc.core.logging.TrackProgress;
 import gdsc.core.math.RadialStatistics;
 import gdsc.core.utils.FloatEquality;
 import gdsc.core.utils.Maths;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import ij.ImageStack;
 import ij.process.FHT2;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
-// TODO: Auto-generated Javadoc
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
  * <p>
@@ -640,7 +624,6 @@ public class FRC
 			// Speed up by reusing the FFT object which performs pre-computation
 			float[] data = new float[size * size * 2];
 			FloatFFT_2D fft = new FloatFFT_2D(size, size);
-			FHT2 fht = new FHT2(); // For quadrant swap
 
 			float[] pixels = (float[]) ip1.getPixels();
 			System.arraycopy(pixels, 0, data, 0, pixels.length);
@@ -654,8 +637,8 @@ public class FRC
 				re1[j] = data[i++];
 				im1[j] = data[i++];
 			}
-			fht.swapQuadrants(new FloatProcessor(size, size, re1));
-			fht.swapQuadrants(new FloatProcessor(size, size, im1));
+			FHT2.swapQuadrants(new FloatProcessor(size, size, re1));
+			FHT2.swapQuadrants(new FloatProcessor(size, size, im1));
 			progess.incrementProgress(THIRD);
 
 			ip2 = getSquareTaperedImage(ip2);
@@ -675,8 +658,8 @@ public class FRC
 				re2[j] = data[i++];
 				im2[j] = data[i++];
 			}
-			fht.swapQuadrants(new FloatProcessor(size, size, re2));
-			fht.swapQuadrants(new FloatProcessor(size, size, im2));
+			FHT2.swapQuadrants(new FloatProcessor(size, size, re2));
+			FHT2.swapQuadrants(new FloatProcessor(size, size, im2));
 			progess.incrementProgress(THIRD);
 		}
 		else
@@ -695,13 +678,11 @@ public class FRC
 			//progess.incrementProgress(THIRD);
 
 			// Speed up by reusing the FHT object which performs pre-computation
-			FHT2 fht = new FHT2();
-			fht.setShowProgress(false);
 
 			float[] f1 = (float[]) ip1.getPixels();
-			fht.rc2DFHT(f1, false, size);
-			FHT2 fht1 = new FHT2(ip1, true);
-			FloatProcessor[] fft = getProcessors(fht1.getComplexTransform2());
+			FHT2 fht1 = new FHT2(f1, ip1.getWidth(), false);
+			fht1.transform();
+			FloatProcessor[] fft = fht1.getComplexTransformProcessors();
 			re1 = (float[]) fft[0].getPixels();
 			im1 = (float[]) fft[1].getPixels();
 			progess.incrementProgress(THIRD);
@@ -710,9 +691,9 @@ public class FRC
 			mean2 = taperedImageMean;
 
 			float[] f2 = (float[]) ip2.getPixels();
-			fht.rc2DFHT(f2, false, size);
-			FHT2 fht2 = new FHT2(ip2, true);
-			fft = getProcessors(fht2.getComplexTransform2());
+			FHT2 fht2 = new FHT2(f2, ip2.getWidth(), false);
+			fht2.copyTables(fht1);
+			fft = fht2.getComplexTransformProcessors();
 			re2 = (float[]) fft[0].getPixels();
 			im2 = (float[]) fft[1].getPixels();
 			progess.incrementProgress(THIRD);
@@ -1054,25 +1035,9 @@ public class FRC
 		FloatProcessor taperedDataImage = getSquareTaperedImage(ip);
 
 		FHT2 fht = new FHT2(taperedDataImage);
-		fht.setShowProgress(false);
 		fht.transform();
 
-		ImageStack stack1 = fht.getComplexTransform();
-		return getProcessors(stack1);
-	}
-
-	/**
-	 * Gets the processors.
-	 *
-	 * @param stack1 the stack 1
-	 * @return the processors
-	 */
-	private FloatProcessor[] getProcessors(ImageStack stack1)
-	{
-		FloatProcessor[] ret = new FloatProcessor[2];
-		ret[0] = ((FloatProcessor) stack1.getProcessor(1));
-		ret[1] = ((FloatProcessor) stack1.getProcessor(2));
-		return ret;
+		return fht.getComplexTransformProcessors();
 	}
 
 	/** Max size for Fourier images. Must be a power of 2 that is smalled that Math.sqrt(Integer.MAX_VALUE) */
