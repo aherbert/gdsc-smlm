@@ -1075,7 +1075,6 @@ public class PCPALMAnalysis implements PlugInFilter
 		if (im2 == null)
 			return null;
 		FHT2 FHT2 = new FHT2(im2);
-		FHT2.setShowProgress(false);
 		FHT2.transform();
 		return FHT2;
 	}
@@ -1198,7 +1197,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 		// Swap quadrants
 		FloatProcessor fp = new FloatProcessor(size, size, correlation, null);
-		new FHT2().swapQuadrants(fp);
+		FHT2.swapQuadrants(fp);
 		return fp;
 	}
 
