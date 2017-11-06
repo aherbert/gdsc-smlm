@@ -28,6 +28,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleLock;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import gdsc.smlm.data.config.PSFProtos.CubicSplineResource;
 import gdsc.smlm.data.config.PSFProtos.CubicSplineSettings;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
@@ -447,13 +448,7 @@ public class CubicSplineManager implements PlugIn
 			"Delete a spline model",
 			"Render the spline function" };
 	//@formatter:on
-	private static int option = 0;
-	private static String selected = "";
-	private static int magnification = 3;
-	private static int scale = 2;
-	private static double xshift = 0;
-	private static double yshift = 0;
-	private static double zshift = 0;
+	private CubicSplineManagerSettings.Builder pluginSettings;
 
 	/*
 	 * (non-Javadoc)
@@ -471,14 +466,16 @@ public class CubicSplineManager implements PlugIn
 			return;
 		}
 
-		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addChoice("Option", OPTIONS, OPTIONS[option]);
+		pluginSettings = SettingsManager.readCubicSplineManagerSettings(0).toBuilder();
+
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addChoice("Option", OPTIONS, pluginSettings.getOption());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		option = gd.getNextChoiceIndex();
+		pluginSettings.setOption(gd.getNextChoiceIndex());
 
-		switch (option)
+		switch (pluginSettings.getOption())
 		{
 			case 5:
 				renderCubicSpline();
@@ -498,17 +495,20 @@ public class CubicSplineManager implements PlugIn
 			default:
 				printCubicSplines();
 		}
+
+		SettingsManager.writeSettings(pluginSettings);
 	}
 
 	private void renderCubicSpline()
 	{
 		String[] MODELS = listCubicSplines(false);
 		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addChoice("Model", MODELS, selected);
+		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = selected = gd.getNextChoice();
+		String name = gd.getNextChoice();
+		pluginSettings.setSelected(name);
 
 		CubicSplinePSF psfModel = load(name);
 
@@ -544,7 +544,7 @@ public class CubicSplineManager implements PlugIn
 		public void run()
 		{
 			final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-			gd.addSlider("Scale", 1, 5, scale);
+			gd.addSlider("Scale", 1, 5, pluginSettings.getScale());
 
 			// Find the limits of the PSF
 			int width = (int) Math.ceil(function.getMaxX() * imagePSF.getPixelSize());
@@ -552,11 +552,11 @@ public class CubicSplineManager implements PlugIn
 			int minZ = (int) Math.floor(-imagePSF.getZCentre() * imagePSF.getPixelDepth());
 			int maxZ = (int) Math.ceil((function.getMaxZ() - imagePSF.getZCentre()) * imagePSF.getPixelDepth());
 
-			gd.addSlider("x_shift (nm)", -width, width, xshift);
+			gd.addSlider("x_shift (nm)", -width, width, pluginSettings.getXShift());
 			final TextField tfxshift = gd.getLastTextField();
-			gd.addSlider("y_shift (nm)", -height, height, yshift);
+			gd.addSlider("y_shift (nm)", -height, height, pluginSettings.getYShift());
 			final TextField tfyshift = gd.getLastTextField();
-			gd.addSlider("z_shift (nm)", minZ, maxZ, zshift);
+			gd.addSlider("z_shift (nm)", minZ, maxZ, pluginSettings.getZShift());
 			final TextField tfzshift = gd.getLastTextField();
 			gd.addDialogListener(this);
 			if (Utils.isShowGenericDialog())
@@ -565,7 +565,9 @@ public class CubicSplineManager implements PlugIn
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						xshift = yshift = zshift = 0;
+						pluginSettings.setXShift(0);
+						pluginSettings.setYShift(0);
+						pluginSettings.setZShift(0);
 						update();
 						// The events triggered by setting these should be ignored now
 						tfxshift.setText("0");
@@ -582,10 +584,10 @@ public class CubicSplineManager implements PlugIn
 
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
-			scale = (int) gd.getNextNumber();
-			xshift = gd.getNextNumber();
-			yshift = gd.getNextNumber();
-			zshift = gd.getNextNumber();
+			pluginSettings.setScale((int) gd.getNextNumber());
+			pluginSettings.setXShift(gd.getNextNumber());
+			pluginSettings.setYShift(gd.getNextNumber());
+			pluginSettings.setZShift(gd.getNextNumber());
 
 			update();
 			return true;
@@ -600,10 +602,10 @@ public class CubicSplineManager implements PlugIn
 
 		private void draw()
 		{
-			_scale = scale;
-			_xshift = xshift;
-			_yshift = yshift;
-			_zshift = zshift;
+			_scale = pluginSettings.getScale();
+			_xshift = pluginSettings.getXShift();
+			_yshift = pluginSettings.getYShift();
+			_zshift = pluginSettings.getZShift();
 
 			boolean updateCalibration = false;
 			if (f == null || f.getScale() != _scale)
@@ -636,7 +638,8 @@ public class CubicSplineManager implements PlugIn
 
 			double[] values = p.getValues(f, a);
 
-			ImagePlus imp = Utils.display(selected + " (slice)", values, f.getMaxX(), f.getMaxY(), Utils.NO_TO_FRONT);
+			ImagePlus imp = Utils.display(pluginSettings.getSelected() + " (slice)", values, f.getMaxX(), f.getMaxY(),
+					Utils.NO_TO_FRONT);
 			if (Utils.isNewWindow())
 			{
 				updateCalibration = true;
@@ -671,10 +674,10 @@ public class CubicSplineManager implements PlugIn
 							// Continue while the parameter is changing
 							//@formatter:off
 							while (
-									_scale != scale ||
-									_xshift != xshift ||
-									_yshift != yshift ||
-									_zshift != zshift
+									_scale != pluginSettings.getScale() ||
+									_xshift != pluginSettings.getXShift() ||
+									_yshift != pluginSettings.getYShift() ||
+									_zshift != pluginSettings.getZShift()
 									)
 							//@formatter:on
 							{
@@ -696,11 +699,12 @@ public class CubicSplineManager implements PlugIn
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		String[] MODELS = listCubicSplines(false);
-		gd.addChoice("Model", MODELS, selected);
+		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = selected = gd.getNextChoice();
+		String name = gd.getNextChoice();
+		pluginSettings.setSelected(name);
 
 		CubicSplineResource resource = settings.getCubicSplineResourcesMap().get(name);
 		if (resource == null)
@@ -767,13 +771,15 @@ public class CubicSplineManager implements PlugIn
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		String[] MODELS = listCubicSplines(false);
-		gd.addChoice("Model", MODELS, selected);
-		gd.addSlider("Magnification", 1, 5, magnification);
+		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+		gd.addSlider("Magnification", 1, 5, pluginSettings.getMagnification());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = selected = gd.getNextChoice();
-		magnification = (int) gd.getNextNumber();
+		String name = gd.getNextChoice();
+		pluginSettings.setSelected(name);
+		int magnification = (int) gd.getNextNumber();
+		pluginSettings.setMagnification(magnification);
 
 		CubicSplinePSF psfModel = load(name);
 

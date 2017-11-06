@@ -32,9 +32,11 @@ import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
+import gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
@@ -901,6 +903,30 @@ public class SettingsManager
 	public static PSFCreatorSettings readPSFCreatorSettings(int flags)
 	{
 		return new ConfigurationReader<PSFCreatorSettings>(GUIProtosHelper.defaultPSFCreatorSettings).read(flags);
+	}
+
+	/**
+	 * Read the CameraModelManagerSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the CameraModelManagerSettings
+	 */
+	public static CameraModelManagerSettings readCameraModelManagerSettings(int flags)
+	{
+		return new ConfigurationReader<CameraModelManagerSettings>(GUIProtosHelper.defaultCameraModelManagerSettings).read(flags);
+	}
+
+	/**
+	 * Read the CubicSplineManagerSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the CubicSplineManagerSettings
+	 */
+	public static CubicSplineManagerSettings readCubicSplineManagerSettings(int flags)
+	{
+		return new ConfigurationReader<CubicSplineManagerSettings>(GUIProtosHelper.defaultCubicSplineManagerSettings).read(flags);
 	}
 
 	/**

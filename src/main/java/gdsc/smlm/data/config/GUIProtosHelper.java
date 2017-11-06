@@ -230,4 +230,21 @@ public class GUIProtosHelper
 		builder.setComBorder(0.40); // Right in the middle of a spot
 		defaultPSFCreatorSettings = builder.build();
 	}
+	
+	/** The default CameraModelManagerSettings */
+	public static final CameraModelManagerSettings defaultCameraModelManagerSettings;
+	static
+	{
+		defaultCameraModelManagerSettings = CameraModelManagerSettings.getDefaultInstance();
+	}
+	
+	/** The default CubicSplineManagerSettings */
+	public static final CubicSplineManagerSettings defaultCubicSplineManagerSettings;
+	static
+	{
+		CubicSplineManagerSettings.Builder builder = CubicSplineManagerSettings.newBuilder();
+		builder.setMagnification(3);
+		builder.setScale(2);
+		defaultCubicSplineManagerSettings = builder.build();
+	}
 }

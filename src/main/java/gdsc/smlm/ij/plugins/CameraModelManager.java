@@ -13,6 +13,7 @@ import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationProtos.CameraModelResource;
 import gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings;
+import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.camera.CameraModel;
@@ -236,11 +237,7 @@ public class CameraModelManager implements PlugIn
 			"Delete a camera model",
 			"Filter an image" };
 	//@formatter:on
-	private static int option = 0;
-	private static int ox = 0;
-	private static int oy = 0;
-	private static String image = "";
-	private static String selected = "";
+	private CameraModelManagerSettings.Builder pluginSettings;
 
 	/*
 	 * (non-Javadoc)
@@ -258,14 +255,16 @@ public class CameraModelManager implements PlugIn
 			return;
 		}
 
-		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addChoice("Option", OPTIONS, OPTIONS[option]);
+		pluginSettings = SettingsManager.readCameraModelManagerSettings(0).toBuilder();
+
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addChoice("Option", OPTIONS, pluginSettings.getOption());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		option = gd.getNextChoiceIndex();
+		pluginSettings.setOption(gd.getNextChoiceIndex());
 
-		switch (option)
+		switch (pluginSettings.getOption())
 		{
 			case 5:
 				filterImage();
@@ -285,6 +284,8 @@ public class CameraModelManager implements PlugIn
 			default:
 				printCameraModels();
 		}
+
+		SettingsManager.writeSettings(pluginSettings);
 	}
 
 	private void filterImage()
@@ -292,11 +293,12 @@ public class CameraModelManager implements PlugIn
 		// Select an image
 		GenericDialog gd = new GenericDialog(TITLE);
 		String[] list = Utils.getImageList(Utils.GREY_SCALE);
-		gd.addChoice("Image", list, image);
+		gd.addChoice("Image", list, pluginSettings.getImage());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		image = gd.getNextChoice();
+		String image = gd.getNextChoice();
+		pluginSettings.setImage(image);
 		ImagePlus imp = WindowManager.getImage(image);
 		if (imp == null)
 		{
@@ -307,11 +309,12 @@ public class CameraModelManager implements PlugIn
 		// Select the model
 		gd = new GenericDialog(TITLE);
 		String[] MODELS = listCameraModels(false);
-		gd.addChoice("Model", MODELS, selected);
+		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = selected = gd.getNextChoice();
+		String name = gd.getNextChoice();
+		pluginSettings.setSelected(name);
 
 		CameraModel cameraModel = load(name);
 
@@ -322,7 +325,15 @@ public class CameraModelManager implements PlugIn
 		}
 
 		// Crop the model if appropriate
-		cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(), ox, oy, true);
+		cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(), pluginSettings.getOriginX(),
+				pluginSettings.getOriginY(), false);
+		Rectangle bounds = cameraModel.getBounds();
+		pluginSettings.setOriginX(bounds.x);
+		pluginSettings.setOriginY(bounds.y);
+
+		// Reset origin for fast filtering
+		cameraModel = cameraModel.copy();
+		cameraModel.setOrigin(0, 0);
 
 		// Filter all the frames
 		ImageSource source = new IJImageSource(imp);
@@ -342,11 +353,12 @@ public class CameraModelManager implements PlugIn
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		String[] MODELS = listCameraModels(false);
-		gd.addChoice("Model", MODELS, selected);
+		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = selected = gd.getNextChoice();
+		String name = gd.getNextChoice();
+		pluginSettings.setSelected(name);
 
 		CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
 		if (resource == null)
@@ -413,11 +425,12 @@ public class CameraModelManager implements PlugIn
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		String[] MODELS = listCameraModels(false);
-		gd.addChoice("Model", MODELS, selected);
+		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		String name = selected = gd.getNextChoice();
+		String name = gd.getNextChoice();
+		pluginSettings.setSelected(name);
 
 		// Try and get the named resource
 		CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);

@@ -433,3 +433,25 @@ message PSFCreatorSettings
 	int32 output_type = 31;
 	string spline_filename = 32;
 }
+
+// Contains settings for the Camera Model Manager plugin
+message CameraModelManagerSettings
+{
+	int32 option = 1;
+	int32 origin_x = 2;
+	int32 origin_y = 3;
+	string image = 4;
+	string selected = 5;
+}
+
+// Contains settings for the Cubic Spline Manager plugin
+message CubicSplineManagerSettings
+{
+	int32 option = 1;
+	string selected = 2;
+	int32 magnification = 3;
+	int32 scale = 4;
+	double x_shift = 5;
+	double y_shift = 6;
+	double z_shift = 7;
+}

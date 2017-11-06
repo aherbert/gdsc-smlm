@@ -44,13 +44,12 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	private static final int METHOD_SPATIAL = 0;
 	private static final int METHOD_FHT = 1;
 	private static final String[] FILTERS = { "Correlation", "Convolution" };
-	@SuppressWarnings("unused")
 	private static final int FILTER_CORRELATION = 0;
 	private static final int FILTER_CONVOLUTION = 1;
 
 	private static String title = "";
-	private static int method = 0;
-	private static int filter = 0;
+	private static int method = METHOD_FHT;
+	private static int filter = FILTER_CORRELATION;
 	private static int border = 0;
 	private static boolean zero = false;
 

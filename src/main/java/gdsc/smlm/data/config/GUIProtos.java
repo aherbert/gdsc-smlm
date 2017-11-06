@@ -25003,6 +25003,1763 @@ public final class GUIProtos {
 
   }
 
+  public interface CameraModelManagerSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CameraModelManagerSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int32 option = 1;</code>
+     */
+    int getOption();
+
+    /**
+     * <code>int32 origin_x = 2;</code>
+     */
+    int getOriginX();
+
+    /**
+     * <code>int32 origin_y = 3;</code>
+     */
+    int getOriginY();
+
+    /**
+     * <code>string image = 4;</code>
+     */
+    java.lang.String getImage();
+    /**
+     * <code>string image = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getImageBytes();
+
+    /**
+     * <code>string selected = 5;</code>
+     */
+    java.lang.String getSelected();
+    /**
+     * <code>string selected = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getSelectedBytes();
+  }
+  /**
+   * <pre>
+   * Contains settings for the Camera Model Manager plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.CameraModelManagerSettings}
+   */
+  public  static final class CameraModelManagerSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CameraModelManagerSettings)
+      CameraModelManagerSettingsOrBuilder {
+    // Use CameraModelManagerSettings.newBuilder() to construct.
+    private CameraModelManagerSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CameraModelManagerSettings() {
+      option_ = 0;
+      originX_ = 0;
+      originY_ = 0;
+      image_ = "";
+      selected_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private CameraModelManagerSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+
+              option_ = input.readInt32();
+              break;
+            }
+            case 16: {
+
+              originX_ = input.readInt32();
+              break;
+            }
+            case 24: {
+
+              originY_ = input.readInt32();
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              image_ = s;
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              selected_ = s;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings.class, gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings.Builder.class);
+    }
+
+    public static final int OPTION_FIELD_NUMBER = 1;
+    private int option_;
+    /**
+     * <code>int32 option = 1;</code>
+     */
+    public int getOption() {
+      return option_;
+    }
+
+    public static final int ORIGIN_X_FIELD_NUMBER = 2;
+    private int originX_;
+    /**
+     * <code>int32 origin_x = 2;</code>
+     */
+    public int getOriginX() {
+      return originX_;
+    }
+
+    public static final int ORIGIN_Y_FIELD_NUMBER = 3;
+    private int originY_;
+    /**
+     * <code>int32 origin_y = 3;</code>
+     */
+    public int getOriginY() {
+      return originY_;
+    }
+
+    public static final int IMAGE_FIELD_NUMBER = 4;
+    private volatile java.lang.Object image_;
+    /**
+     * <code>string image = 4;</code>
+     */
+    public java.lang.String getImage() {
+      java.lang.Object ref = image_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        image_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string image = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getImageBytes() {
+      java.lang.Object ref = image_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        image_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SELECTED_FIELD_NUMBER = 5;
+    private volatile java.lang.Object selected_;
+    /**
+     * <code>string selected = 5;</code>
+     */
+    public java.lang.String getSelected() {
+      java.lang.Object ref = selected_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        selected_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string selected = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSelectedBytes() {
+      java.lang.Object ref = selected_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        selected_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (option_ != 0) {
+        output.writeInt32(1, option_);
+      }
+      if (originX_ != 0) {
+        output.writeInt32(2, originX_);
+      }
+      if (originY_ != 0) {
+        output.writeInt32(3, originY_);
+      }
+      if (!getImageBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, image_);
+      }
+      if (!getSelectedBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, selected_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (option_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, option_);
+      }
+      if (originX_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, originX_);
+      }
+      if (originY_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, originY_);
+      }
+      if (!getImageBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, image_);
+      }
+      if (!getSelectedBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, selected_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings other = (gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings) obj;
+
+      boolean result = true;
+      result = result && (getOption()
+          == other.getOption());
+      result = result && (getOriginX()
+          == other.getOriginX());
+      result = result && (getOriginY()
+          == other.getOriginY());
+      result = result && getImage()
+          .equals(other.getImage());
+      result = result && getSelected()
+          .equals(other.getSelected());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getOption();
+      hash = (37 * hash) + ORIGIN_X_FIELD_NUMBER;
+      hash = (53 * hash) + getOriginX();
+      hash = (37 * hash) + ORIGIN_Y_FIELD_NUMBER;
+      hash = (53 * hash) + getOriginY();
+      hash = (37 * hash) + IMAGE_FIELD_NUMBER;
+      hash = (53 * hash) + getImage().hashCode();
+      hash = (37 * hash) + SELECTED_FIELD_NUMBER;
+      hash = (53 * hash) + getSelected().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains settings for the Camera Model Manager plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.CameraModelManagerSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CameraModelManagerSettings)
+        gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings.class, gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        option_ = 0;
+
+        originX_ = 0;
+
+        originY_ = 0;
+
+        image_ = "";
+
+        selected_ = "";
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings build() {
+        gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings(this);
+        result.option_ = option_;
+        result.originX_ = originX_;
+        result.originY_ = originY_;
+        result.image_ = image_;
+        result.selected_ = selected_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings.getDefaultInstance()) return this;
+        if (other.getOption() != 0) {
+          setOption(other.getOption());
+        }
+        if (other.getOriginX() != 0) {
+          setOriginX(other.getOriginX());
+        }
+        if (other.getOriginY() != 0) {
+          setOriginY(other.getOriginY());
+        }
+        if (!other.getImage().isEmpty()) {
+          image_ = other.image_;
+          onChanged();
+        }
+        if (!other.getSelected().isEmpty()) {
+          selected_ = other.selected_;
+          onChanged();
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int option_ ;
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public int getOption() {
+        return option_;
+      }
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public Builder setOption(int value) {
+        
+        option_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public Builder clearOption() {
+        
+        option_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int originX_ ;
+      /**
+       * <code>int32 origin_x = 2;</code>
+       */
+      public int getOriginX() {
+        return originX_;
+      }
+      /**
+       * <code>int32 origin_x = 2;</code>
+       */
+      public Builder setOriginX(int value) {
+        
+        originX_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 origin_x = 2;</code>
+       */
+      public Builder clearOriginX() {
+        
+        originX_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int originY_ ;
+      /**
+       * <code>int32 origin_y = 3;</code>
+       */
+      public int getOriginY() {
+        return originY_;
+      }
+      /**
+       * <code>int32 origin_y = 3;</code>
+       */
+      public Builder setOriginY(int value) {
+        
+        originY_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 origin_y = 3;</code>
+       */
+      public Builder clearOriginY() {
+        
+        originY_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object image_ = "";
+      /**
+       * <code>string image = 4;</code>
+       */
+      public java.lang.String getImage() {
+        java.lang.Object ref = image_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          image_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string image = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getImageBytes() {
+        java.lang.Object ref = image_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          image_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string image = 4;</code>
+       */
+      public Builder setImage(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        image_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string image = 4;</code>
+       */
+      public Builder clearImage() {
+        
+        image_ = getDefaultInstance().getImage();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string image = 4;</code>
+       */
+      public Builder setImageBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        image_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object selected_ = "";
+      /**
+       * <code>string selected = 5;</code>
+       */
+      public java.lang.String getSelected() {
+        java.lang.Object ref = selected_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          selected_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string selected = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSelectedBytes() {
+        java.lang.Object ref = selected_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          selected_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string selected = 5;</code>
+       */
+      public Builder setSelected(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        selected_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string selected = 5;</code>
+       */
+      public Builder clearSelected() {
+        
+        selected_ = getDefaultInstance().getSelected();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string selected = 5;</code>
+       */
+      public Builder setSelectedBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        selected_ = value;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CameraModelManagerSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CameraModelManagerSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CameraModelManagerSettings>
+        PARSER = new com.google.protobuf.AbstractParser<CameraModelManagerSettings>() {
+      public CameraModelManagerSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new CameraModelManagerSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CameraModelManagerSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CameraModelManagerSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CubicSplineManagerSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CubicSplineManagerSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int32 option = 1;</code>
+     */
+    int getOption();
+
+    /**
+     * <code>string selected = 2;</code>
+     */
+    java.lang.String getSelected();
+    /**
+     * <code>string selected = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getSelectedBytes();
+
+    /**
+     * <code>int32 magnification = 3;</code>
+     */
+    int getMagnification();
+
+    /**
+     * <code>int32 scale = 4;</code>
+     */
+    int getScale();
+
+    /**
+     * <code>double x_shift = 5;</code>
+     */
+    double getXShift();
+
+    /**
+     * <code>double y_shift = 6;</code>
+     */
+    double getYShift();
+
+    /**
+     * <code>double z_shift = 7;</code>
+     */
+    double getZShift();
+  }
+  /**
+   * <pre>
+   * Contains settings for the Cubic Spline Manager plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.CubicSplineManagerSettings}
+   */
+  public  static final class CubicSplineManagerSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CubicSplineManagerSettings)
+      CubicSplineManagerSettingsOrBuilder {
+    // Use CubicSplineManagerSettings.newBuilder() to construct.
+    private CubicSplineManagerSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CubicSplineManagerSettings() {
+      option_ = 0;
+      selected_ = "";
+      magnification_ = 0;
+      scale_ = 0;
+      xShift_ = 0D;
+      yShift_ = 0D;
+      zShift_ = 0D;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private CubicSplineManagerSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+
+              option_ = input.readInt32();
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              selected_ = s;
+              break;
+            }
+            case 24: {
+
+              magnification_ = input.readInt32();
+              break;
+            }
+            case 32: {
+
+              scale_ = input.readInt32();
+              break;
+            }
+            case 41: {
+
+              xShift_ = input.readDouble();
+              break;
+            }
+            case 49: {
+
+              yShift_ = input.readDouble();
+              break;
+            }
+            case 57: {
+
+              zShift_ = input.readDouble();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings.class, gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings.Builder.class);
+    }
+
+    public static final int OPTION_FIELD_NUMBER = 1;
+    private int option_;
+    /**
+     * <code>int32 option = 1;</code>
+     */
+    public int getOption() {
+      return option_;
+    }
+
+    public static final int SELECTED_FIELD_NUMBER = 2;
+    private volatile java.lang.Object selected_;
+    /**
+     * <code>string selected = 2;</code>
+     */
+    public java.lang.String getSelected() {
+      java.lang.Object ref = selected_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        selected_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string selected = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSelectedBytes() {
+      java.lang.Object ref = selected_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        selected_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MAGNIFICATION_FIELD_NUMBER = 3;
+    private int magnification_;
+    /**
+     * <code>int32 magnification = 3;</code>
+     */
+    public int getMagnification() {
+      return magnification_;
+    }
+
+    public static final int SCALE_FIELD_NUMBER = 4;
+    private int scale_;
+    /**
+     * <code>int32 scale = 4;</code>
+     */
+    public int getScale() {
+      return scale_;
+    }
+
+    public static final int X_SHIFT_FIELD_NUMBER = 5;
+    private double xShift_;
+    /**
+     * <code>double x_shift = 5;</code>
+     */
+    public double getXShift() {
+      return xShift_;
+    }
+
+    public static final int Y_SHIFT_FIELD_NUMBER = 6;
+    private double yShift_;
+    /**
+     * <code>double y_shift = 6;</code>
+     */
+    public double getYShift() {
+      return yShift_;
+    }
+
+    public static final int Z_SHIFT_FIELD_NUMBER = 7;
+    private double zShift_;
+    /**
+     * <code>double z_shift = 7;</code>
+     */
+    public double getZShift() {
+      return zShift_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (option_ != 0) {
+        output.writeInt32(1, option_);
+      }
+      if (!getSelectedBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, selected_);
+      }
+      if (magnification_ != 0) {
+        output.writeInt32(3, magnification_);
+      }
+      if (scale_ != 0) {
+        output.writeInt32(4, scale_);
+      }
+      if (xShift_ != 0D) {
+        output.writeDouble(5, xShift_);
+      }
+      if (yShift_ != 0D) {
+        output.writeDouble(6, yShift_);
+      }
+      if (zShift_ != 0D) {
+        output.writeDouble(7, zShift_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (option_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, option_);
+      }
+      if (!getSelectedBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, selected_);
+      }
+      if (magnification_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, magnification_);
+      }
+      if (scale_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, scale_);
+      }
+      if (xShift_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(5, xShift_);
+      }
+      if (yShift_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(6, yShift_);
+      }
+      if (zShift_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(7, zShift_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings other = (gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings) obj;
+
+      boolean result = true;
+      result = result && (getOption()
+          == other.getOption());
+      result = result && getSelected()
+          .equals(other.getSelected());
+      result = result && (getMagnification()
+          == other.getMagnification());
+      result = result && (getScale()
+          == other.getScale());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getXShift())
+          == java.lang.Double.doubleToLongBits(
+              other.getXShift()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getYShift())
+          == java.lang.Double.doubleToLongBits(
+              other.getYShift()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getZShift())
+          == java.lang.Double.doubleToLongBits(
+              other.getZShift()));
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getOption();
+      hash = (37 * hash) + SELECTED_FIELD_NUMBER;
+      hash = (53 * hash) + getSelected().hashCode();
+      hash = (37 * hash) + MAGNIFICATION_FIELD_NUMBER;
+      hash = (53 * hash) + getMagnification();
+      hash = (37 * hash) + SCALE_FIELD_NUMBER;
+      hash = (53 * hash) + getScale();
+      hash = (37 * hash) + X_SHIFT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getXShift()));
+      hash = (37 * hash) + Y_SHIFT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getYShift()));
+      hash = (37 * hash) + Z_SHIFT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getZShift()));
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains settings for the Cubic Spline Manager plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.CubicSplineManagerSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CubicSplineManagerSettings)
+        gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings.class, gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        option_ = 0;
+
+        selected_ = "";
+
+        magnification_ = 0;
+
+        scale_ = 0;
+
+        xShift_ = 0D;
+
+        yShift_ = 0D;
+
+        zShift_ = 0D;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings build() {
+        gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings result = new gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings(this);
+        result.option_ = option_;
+        result.selected_ = selected_;
+        result.magnification_ = magnification_;
+        result.scale_ = scale_;
+        result.xShift_ = xShift_;
+        result.yShift_ = yShift_;
+        result.zShift_ = zShift_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings.getDefaultInstance()) return this;
+        if (other.getOption() != 0) {
+          setOption(other.getOption());
+        }
+        if (!other.getSelected().isEmpty()) {
+          selected_ = other.selected_;
+          onChanged();
+        }
+        if (other.getMagnification() != 0) {
+          setMagnification(other.getMagnification());
+        }
+        if (other.getScale() != 0) {
+          setScale(other.getScale());
+        }
+        if (other.getXShift() != 0D) {
+          setXShift(other.getXShift());
+        }
+        if (other.getYShift() != 0D) {
+          setYShift(other.getYShift());
+        }
+        if (other.getZShift() != 0D) {
+          setZShift(other.getZShift());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int option_ ;
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public int getOption() {
+        return option_;
+      }
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public Builder setOption(int value) {
+        
+        option_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public Builder clearOption() {
+        
+        option_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object selected_ = "";
+      /**
+       * <code>string selected = 2;</code>
+       */
+      public java.lang.String getSelected() {
+        java.lang.Object ref = selected_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          selected_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string selected = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSelectedBytes() {
+        java.lang.Object ref = selected_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          selected_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string selected = 2;</code>
+       */
+      public Builder setSelected(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        selected_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string selected = 2;</code>
+       */
+      public Builder clearSelected() {
+        
+        selected_ = getDefaultInstance().getSelected();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string selected = 2;</code>
+       */
+      public Builder setSelectedBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        selected_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int magnification_ ;
+      /**
+       * <code>int32 magnification = 3;</code>
+       */
+      public int getMagnification() {
+        return magnification_;
+      }
+      /**
+       * <code>int32 magnification = 3;</code>
+       */
+      public Builder setMagnification(int value) {
+        
+        magnification_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 magnification = 3;</code>
+       */
+      public Builder clearMagnification() {
+        
+        magnification_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int scale_ ;
+      /**
+       * <code>int32 scale = 4;</code>
+       */
+      public int getScale() {
+        return scale_;
+      }
+      /**
+       * <code>int32 scale = 4;</code>
+       */
+      public Builder setScale(int value) {
+        
+        scale_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 scale = 4;</code>
+       */
+      public Builder clearScale() {
+        
+        scale_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double xShift_ ;
+      /**
+       * <code>double x_shift = 5;</code>
+       */
+      public double getXShift() {
+        return xShift_;
+      }
+      /**
+       * <code>double x_shift = 5;</code>
+       */
+      public Builder setXShift(double value) {
+        
+        xShift_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double x_shift = 5;</code>
+       */
+      public Builder clearXShift() {
+        
+        xShift_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double yShift_ ;
+      /**
+       * <code>double y_shift = 6;</code>
+       */
+      public double getYShift() {
+        return yShift_;
+      }
+      /**
+       * <code>double y_shift = 6;</code>
+       */
+      public Builder setYShift(double value) {
+        
+        yShift_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double y_shift = 6;</code>
+       */
+      public Builder clearYShift() {
+        
+        yShift_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double zShift_ ;
+      /**
+       * <code>double z_shift = 7;</code>
+       */
+      public double getZShift() {
+        return zShift_;
+      }
+      /**
+       * <code>double z_shift = 7;</code>
+       */
+      public Builder setZShift(double value) {
+        
+        zShift_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double z_shift = 7;</code>
+       */
+      public Builder clearZShift() {
+        
+        zShift_ = 0D;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CubicSplineManagerSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CubicSplineManagerSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CubicSplineManagerSettings>
+        PARSER = new com.google.protobuf.AbstractParser<CubicSplineManagerSettings>() {
+      public CubicSplineManagerSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new CubicSplineManagerSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CubicSplineManagerSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CubicSplineManagerSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
   private static final 
@@ -25068,6 +26825,16 @@ public final class GUIProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -25233,10 +27000,17 @@ public final class GUIProtos {
       " \001(\010\022\023\n\013crop_border\030\032 \001(\005\022\022\n\ncrop_start\030" +
       "\033 \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\033\n\023psf_z_magnifi" +
       "cation\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023\n\013outp" +
-      "ut_type\030\037 \001(\005\022\027\n\017spline_filename\030  \001(\t*O" +
-      "\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021R" +
-      "ESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B" +
-      "\013B\tGUIProtosb\006proto3"
+      "ut_type\030\037 \001(\005\022\027\n\017spline_filename\030  \001(\t\"q" +
+      "\n\032CameraModelManagerSettings\022\016\n\006option\030\001" +
+      " \001(\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n\010origin_y\030\003 \001(\005" +
+      "\022\r\n\005image\030\004 \001(\t\022\020\n\010selected\030\005 \001(\t\"\227\001\n\032Cu",
+      "bicSplineManagerSettings\022\016\n\006option\030\001 \001(\005" +
+      "\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnification\030\003 \001(" +
+      "\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_s" +
+      "hift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001*O\n\014TemplateT" +
+      "ype\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEM" +
+      "PLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProto" +
+      "sb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -25332,6 +27106,18 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor,
         new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", "SplineFilename", });
+    internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor =
+      getDescriptor().getMessageTypes().get(13);
+    internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor,
+        new java.lang.String[] { "Option", "OriginX", "OriginY", "Image", "Selected", });
+    internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor =
+      getDescriptor().getMessageTypes().get(14);
+    internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor,
+        new java.lang.String[] { "Option", "Selected", "Magnification", "Scale", "XShift", "YShift", "ZShift", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();
