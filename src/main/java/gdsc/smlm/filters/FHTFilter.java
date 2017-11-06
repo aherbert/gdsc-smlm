@@ -3,7 +3,6 @@ package gdsc.smlm.filters;
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.Maths;
 import ij.process.FHT2;
-import ij.process.FloatProcessor;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -197,10 +196,11 @@ public class FHTFilter extends BaseFilter
 		if (kw < maxN || kh < maxN)
 		{
 			// Too small so insert in the middle
-			fht = new FHT2(new float[size], maxN, false);
-			int x = (maxN - maxx) / 2;
-			int y = (maxN - maxy) / 2;
-			fht.insert(new FloatProcessor(kw, kh, kernel), x, y);
+			float[] data = new float[size];
+			int x = (maxN - kw) / 2;
+			int y = (maxN - kh) / 2;
+			insert(kernel, kw, kh, data, maxN, x, y);
+			fht = new FHT2(data, maxN, false);
 		}
 		else
 		{
@@ -210,6 +210,14 @@ public class FHTFilter extends BaseFilter
 		fht.transform();
 		// This is used for the output complex multiple of the two FHTs
 		tmp = new float[size];
+	}
+	
+	private static void insert(float[] source, int maxx, int maxy, float[] dest, int maxN, int x, int y)
+	{
+		for (int from = 0, to = y * maxN + x; from < source.length; from += maxx, to += maxN)
+		{
+			System.arraycopy(source, from, dest, to, maxx);
+		}
 	}
 
 	/**
@@ -234,11 +242,11 @@ public class FHTFilter extends BaseFilter
 		if (maxx < maxN || maxy < maxN)
 		{
 			// Too small so insert in the middle of a new processor
+			float[] data2 = new float[maxN*maxN];
 			int x = (maxN - maxx) / 2;
 			int y = (maxN - maxy) / 2;
-			FloatProcessor fp = new FloatProcessor(maxN, maxN);
-			fp.insert(new FloatProcessor(maxx, maxy, data), x, y);
-			data = (float[]) fp.getPixels();
+			insert(data, maxx, maxy, data2, maxN, x, y);
+			data = data2;
 		}
 
 		// Tranform using the kernel FHT using the precomputed tables
