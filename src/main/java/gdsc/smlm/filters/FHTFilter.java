@@ -1,5 +1,8 @@
 package gdsc.smlm.filters;
 
+import org.jtransforms.dht.FloatDHT_2D;
+import org.jtransforms.utils.CommonUtils;
+
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.Maths;
 import ij.process.FHT2;
@@ -28,6 +31,7 @@ public class FHTFilter extends BaseFilter
 	private final int kh;
 	private final int kN; // Next power of 2 for the kernel
 
+	private FloatDHT_2D dht = null;
 	private FHT2 kernelFht = null;
 	private float[] tmp;
 	private boolean convolution = false;
@@ -156,7 +160,12 @@ public class FHTFilter extends BaseFilter
 		int maxN = kernelFht.getWidth();
 
 		FHT2 result = (convolution) ? dataFht.multiply(kernelFht, tmp) : dataFht.conjugateMultiply(kernelFht, tmp);
-		result.inverseTransform();
+
+		// Do the transform using JTransforms as it is faster
+		dht.inverse(result.getData(), true);
+
+		//result.inverseTransform();
+
 		result.swapQuadrants();
 		if (maxx < maxN || maxy < maxN)
 		{
@@ -191,22 +200,33 @@ public class FHTFilter extends BaseFilter
 			return;
 		int size = maxN * maxN;
 		// No window function for the kernel so just create a new FHT
+		float[] data;
 		if (kw < maxN || kh < maxN)
 		{
 			// Too small so insert in the middle
-			float[] data = new float[size];
+			data = new float[size];
 			int x = getInsert(maxN, kw);
 			int y = getInsert(maxN, kh);
 			insert(kernel, kw, kh, data, maxN, x, y);
-			kernelFht = new FHT2(data, maxN, false);
 		}
 		else
 		{
 			// Clone to avoid destroying data
-			kernelFht = new FHT2(kernel.clone(), maxN, false);
+			data = kernel.clone();
 		}
-		kernelFht.transform();
+
+		// Do the transform using JTransforms as it is faster. Do not allow multi-threading.
+		CommonUtils.setThreadsBeginN_2D(Long.MAX_VALUE);
+		dht = new FloatDHT_2D(maxN, maxN);
+		CommonUtils.resetThreadsBeginN();
+		dht.forward(data);
+		kernelFht = new FHT2(data, maxN, true);
+
+		//kernelFht = new FHT2(data, maxN, false);
+		//kernelFht.transform();		
+
 		kernelFht.initialiseFastMultiply();
+
 		// This is used for the output complex multiple of the two FHTs
 		tmp = new float[size];
 	}
@@ -258,10 +278,15 @@ public class FHTFilter extends BaseFilter
 			data = data2;
 		}
 
-		FHT2 result = new FHT2(data, maxN, false);
+		// Do the transform using JTransforms as it is faster
+		dht.forward(data);
+		FHT2 result = new FHT2(data, maxN, true);
+
+		//FHT2 result = new FHT2(data, maxN, false);
 		// Copy the initialised tables
-		result.copyTables(kernelFht);
-		result.transform();
+		//result.copyTables(kernelFht);
+		//result.transform();
+
 		return result;
 	}
 

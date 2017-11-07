@@ -74,12 +74,14 @@ public class FHTFilterTest
 		//System.out.printf("Sum = %f vs [%d] %f\n", sum, size / 2 * size + size / 2, exp);
 		Assert.assertEquals(sum, sum, 1e-3);
 
-		// Test the FHT
+		// Test the FHT filter
 		FHTFilter ff = new FHTFilter(input2, size, size);
 		ff.setConvolution(convolution);
 		ff.filter(input1, size, size);
 
-		Assert.assertArrayEquals(e, input1, 0);
+		// There may be differences due to the use of the JTransforms library
+		for (int i = 0; i < e.length; i++)
+			Assert.assertEquals(e[i], input1[i], Math.abs(e[i] * 1e-4f));
 	}
 
 	private FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
