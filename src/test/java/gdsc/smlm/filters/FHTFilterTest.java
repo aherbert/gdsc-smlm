@@ -9,7 +9,7 @@ import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.SimpleArrayUtils;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
-import ij.process.FHT2;
+import ij.process.FHT;
 import ij.process.FloatProcessor;
 
 public class FHTFilterTest
@@ -39,12 +39,12 @@ public class FHTFilterTest
 		float[] input1 = ((float[]) fp1.getPixels()).clone();
 		float[] input2 = ((float[]) fp2.getPixels()).clone();
 
-		FHT2 fht1 = new FHT2(fp1);
+		FHT fht1 = new FHT(fp1);
 		fht1.transform();
-		FHT2 fht2 = new FHT2(fp2);
+		FHT fht2 = new FHT(fp2);
 		fht2.transform();
 
-		FHT2 fhtE = (convolution) ? fht1.multiply(fht2) : fht1.conjugateMultiply(fht2);
+		FHT fhtE = (convolution) ? fht1.multiply(fht2) : fht1.conjugateMultiply(fht2);
 		fhtE.inverseTransform();
 		fhtE.swapQuadrants();
 

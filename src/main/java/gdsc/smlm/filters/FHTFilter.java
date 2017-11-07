@@ -155,7 +155,7 @@ public class FHTFilter extends BaseFilter
 		FHT2 dataFht = createFHT(data, maxx, maxy, border);
 		int maxN = kernelFht.getWidth();
 
-		FHT2 result = (convolution) ? dataFht.multiply(kernelFht.getData(), tmp) : dataFht.conjugateMultiply(kernelFht.getData(), tmp);
+		FHT2 result = (convolution) ? dataFht.multiply(kernelFht, tmp) : dataFht.conjugateMultiply(kernelFht, tmp);
 		result.inverseTransform();
 		result.swapQuadrants();
 		if (maxx < maxN || maxy < maxN)
@@ -206,6 +206,7 @@ public class FHTFilter extends BaseFilter
 			kernelFht = new FHT2(kernel.clone(), maxN, false);
 		}
 		kernelFht.transform();
+		kernelFht.initialiseFastMultiply();
 		// This is used for the output complex multiple of the two FHTs
 		tmp = new float[size];
 	}
