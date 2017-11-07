@@ -216,9 +216,10 @@ public class FHTFilter extends BaseFilter
 		}
 
 		// Do the transform using JTransforms as it is faster. Do not allow multi-threading.
+		long begin = CommonUtils.getThreadsBeginN_2D();
 		CommonUtils.setThreadsBeginN_2D(Long.MAX_VALUE);
 		dht = new FloatDHT_2D(maxN, maxN);
-		CommonUtils.resetThreadsBeginN();
+		CommonUtils.setThreadsBeginN_2D(begin);
 		dht.forward(data);
 		kernelFht = new FHT2(data, maxN, true);
 
