@@ -5,6 +5,7 @@ import org.jtransforms.utils.CommonUtils;
 
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.Maths;
+import gdsc.smlm.data.NamedObject;
 import ij.process.FHT2;
 
 /*----------------------------------------------------------------------------- 
@@ -26,6 +27,38 @@ import ij.process.FHT2;
  */
 public class FHTFilter extends BaseFilter
 {
+	/**
+	 * The filter operation.
+	 */
+	public enum Operation implements NamedObject
+	{
+		//@formatter:off
+		CORRELATION { public String getName() { return "Correlation"; } },
+		CONVOLUTION { public String getName() { return "Convolution"; } },
+		DECONVOLUTION { public String getName() { return "Deconvolution"; } };
+		//@formatter:on
+
+		public String getShortName()
+		{
+			return getName();
+		}
+
+		/**
+		 * Get the operation for the given ordinal. If invalid then the ordinal is set to zero.
+		 *
+		 * @param ordinal
+		 *            the ordinal
+		 * @return the operation
+		 */
+		public static Operation forOrdinal(int ordinal)
+		{
+			Operation[] values = Operation.values();
+			if (ordinal < 0 || ordinal >= values.length)
+				return Operation.CORRELATION;
+			return values[ordinal];
+		}
+	}
+
 	private final float[] kernel;
 	private final int kw;
 	private final int kh;
@@ -34,7 +67,7 @@ public class FHTFilter extends BaseFilter
 	private FloatDHT_2D dht = null;
 	private FHT2 kernelFht = null;
 	private float[] tmp;
-	private boolean convolution = false;
+	private Operation operation = Operation.CORRELATION;
 
 	// Cache the window function
 	private double[] w = null;
@@ -159,7 +192,7 @@ public class FHTFilter extends BaseFilter
 		FHT2 dataFht = createFHT(data, maxx, maxy, border);
 		int maxN = kernelFht.getWidth();
 
-		FHT2 result = (convolution) ? dataFht.multiply(kernelFht, tmp) : dataFht.conjugateMultiply(kernelFht, tmp);
+		FHT2 result = compute(dataFht);
 
 		// Do the transform using JTransforms as it is faster
 		dht.inverse(result.getData(), true);
@@ -179,6 +212,21 @@ public class FHTFilter extends BaseFilter
 		else
 		{
 			System.arraycopy(tmp, 0, data, 0, tmp.length);
+		}
+	}
+
+	private FHT2 compute(FHT2 dataFht)
+	{
+		switch (operation)
+		{
+			case CORRELATION:
+				return dataFht.conjugateMultiply(kernelFht, tmp);
+			case CONVOLUTION:
+				return dataFht.multiply(kernelFht, tmp);
+			case DECONVOLUTION:
+				return dataFht.divide(kernelFht, tmp);
+			default:
+				throw new IllegalStateException("Unknown operation: " + operation);
 		}
 	}
 
@@ -226,7 +274,10 @@ public class FHTFilter extends BaseFilter
 		//kernelFht = new FHT2(data, maxN, false);
 		//kernelFht.transform();		
 
-		kernelFht.initialiseFastMultiply();
+		if (operation == Operation.DECONVOLUTION)
+			kernelFht.initialiseFastOperations();
+		else
+			kernelFht.initialiseFastMultiply();
 
 		// This is used for the output complex multiple of the two FHTs
 		tmp = new float[size];
@@ -399,23 +450,23 @@ public class FHTFilter extends BaseFilter
 	}
 
 	/**
-	 * Checks if is a convolution filter. The default is correlation.
+	 * Gets the operation.
 	 *
-	 * @return true, if is a convolution filter
+	 * @return the operation
 	 */
-	public boolean isConvolution()
+	public Operation getOperation()
 	{
-		return convolution;
+		return operation;
 	}
 
 	/**
-	 * Sets the convolution flag. The default is correlation.
+	 * Sets the operation.
 	 *
-	 * @param convolution
-	 *            the new convolution flag
+	 * @param operation
+	 *            the new operation
 	 */
-	public void setConvolution(boolean convolution)
+	public void setOperation(Operation operation)
 	{
-		this.convolution = convolution;
+		this.operation = operation;
 	}
 }

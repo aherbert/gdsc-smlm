@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import gdsc.core.test.BaseTimingTask;
 import gdsc.core.test.TimingService;
+import gdsc.smlm.filters.FHTFilter.Operation;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
 import ij.process.FHT2;
@@ -58,7 +59,7 @@ public class JTransformsTest
 		float[] input2 = (float[]) fp2.getPixels();
 
 		FHTFilter ff = new FHTFilter(input2.clone(), size, size);
-		ff.setConvolution(convolution);
+		ff.setOperation((convolution) ? Operation.CONVOLUTION : Operation.CORRELATION);
 		float[] e = input1.clone();
 		ff.filter(e, size, size);
 
@@ -99,7 +100,7 @@ public class JTransformsTest
 	{
 		// Note: no need to test the correlation as the transformed data 
 		// is the same format as FHT so we just test that.
-		
+
 		int size = 16;
 		int ex = 5, ey = 7;
 		int ox = 1, oy = 2;
@@ -252,17 +253,17 @@ public class JTransformsTest
 			fht2.conjugateMultiply(fht2, pixels2);
 			data[j++] = pixels2;
 		}
-		
+
 		//CommonUtils.setThreadsBeginN_1D_FFT_2Threads(Long.MAX_VALUE);
 		//CommonUtils.setThreadsBeginN_1D_FFT_4Threads(Long.MAX_VALUE);
 		CommonUtils.setThreadsBeginN_2D(Long.MAX_VALUE);
-		
+
 		TimingService ts = new TimingService();
 		ts.execute(new IJDHTSpeedTask(size, data));
 		ts.execute(new JTransformsDHTSpeedTask(size, data));
 		ts.repeat();
 		ts.report();
-		
+
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}
 }

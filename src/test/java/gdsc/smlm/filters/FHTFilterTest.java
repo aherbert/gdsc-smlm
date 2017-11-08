@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.smlm.filters.FHTFilter.Operation;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
 import ij.process.FHT;
@@ -17,16 +18,22 @@ public class FHTFilterTest
 	@Test
 	public void canCorrelate()
 	{
-		canFilter(false);
+		canFilter(Operation.CORRELATION);
 	}
 
 	@Test
 	public void canConvolve()
 	{
-		canFilter(true);
+		canFilter(Operation.CONVOLUTION);
 	}
 
-	private void canFilter(boolean convolution)
+	@Test
+	public void canDeconvolve()
+	{
+		canFilter(Operation.DECONVOLUTION);
+	}
+
+	private void canFilter(Operation operation)
 	{
 		int size = 16;
 		int ex = 5, ey = 7;
@@ -44,12 +51,26 @@ public class FHTFilterTest
 		FHT fht2 = new FHT(fp2);
 		fht2.transform();
 
-		FHT fhtE = (convolution) ? fht1.multiply(fht2) : fht1.conjugateMultiply(fht2);
+		FHT fhtE;
+		switch (operation)
+		{
+			case CONVOLUTION:
+				fhtE = fht1.multiply(fht2);
+				break;
+			case CORRELATION:
+				fhtE = fht1.conjugateMultiply(fht2);
+				break;
+			case DECONVOLUTION:
+				fhtE = fht1.divide(fht2);
+				break;
+			default:
+				throw new RuntimeException();
+		}
 		fhtE.inverseTransform();
 		fhtE.swapQuadrants();
 
 		float[] e = (float[]) fhtE.getPixels();
-		if (!convolution)
+		if (operation == Operation.CORRELATION)
 		{
 			// Test the max correlation position
 			int max = SimpleArrayUtils.findMaxIndex(e);
@@ -61,27 +82,31 @@ public class FHTFilterTest
 		}
 
 		// Test verses a spatial domain filter in the middle of the image
-		double sum = 0;
-		float[] i2 = input2;
-		if (convolution)
+		if (operation != Operation.DECONVOLUTION)
 		{
-			i2 = i2.clone();
-			KernelFilter.rotate180(i2);
+			double sum = 0;
+			float[] i2 = input2;
+			if (operation == Operation.CONVOLUTION)
+			{
+				i2 = i2.clone();
+				KernelFilter.rotate180(i2);
+			}
+			for (int i = 0; i < input1.length; i++)
+				sum += input1[i] * i2[i];
+			//double exp = e[size / 2 * size + size / 2];
+			//System.out.printf("Sum = %f vs [%d] %f\n", sum, size / 2 * size + size / 2, exp);
+			Assert.assertEquals(sum, sum, 1e-3);
 		}
-		for (int i = 0; i < input1.length; i++)
-			sum += input1[i] * i2[i];
-		//double exp = e[size / 2 * size + size / 2];
-		//System.out.printf("Sum = %f vs [%d] %f\n", sum, size / 2 * size + size / 2, exp);
-		Assert.assertEquals(sum, sum, 1e-3);
 
 		// Test the FHT filter
 		FHTFilter ff = new FHTFilter(input2, size, size);
-		ff.setConvolution(convolution);
+		ff.setOperation(operation);
 		ff.filter(input1, size, size);
 
 		// There may be differences due to the use of the JTransforms library
+		float error = (operation == Operation.DECONVOLUTION) ? 1e-2f : 1e-4f;
 		for (int i = 0; i < e.length; i++)
-			Assert.assertEquals(e[i], input1[i], Math.abs(e[i] * 1e-4f));
+			Assert.assertEquals(e[i], input1[i], Math.abs(e[i] * error));
 	}
 
 	private FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)

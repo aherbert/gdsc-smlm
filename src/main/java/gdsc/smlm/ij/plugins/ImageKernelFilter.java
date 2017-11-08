@@ -6,8 +6,10 @@ import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Ticker;
 import gdsc.smlm.filters.FHTFilter;
+import gdsc.smlm.filters.FHTFilter.Operation;
 import gdsc.smlm.filters.KernelFilter;
 import gdsc.smlm.filters.ZeroKernelFilter;
+import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -43,13 +45,15 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	private static final String[] METHODS = { "Spatial domain", "FHT" };
 	private static final int METHOD_SPATIAL = 0;
 	private static final int METHOD_FHT = 1;
-	private static final String[] FILTERS = { "Correlation", "Convolution" };
-	private static final int FILTER_CORRELATION = 0;
-	private static final int FILTER_CONVOLUTION = 1;
+	private static final String[] FILTERS;
+	static
+	{
+		FILTERS = SettingsManager.getNames((Object[]) Operation.values());
+	}
 
 	private static String title = "";
 	private static int method = METHOD_FHT;
-	private static int filter = FILTER_CORRELATION;
+	private static int filter = Operation.CORRELATION.ordinal();
 	private static int border = 0;
 	private static boolean zero = false;
 
@@ -161,6 +165,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 		build = build || (method == METHOD_FHT && ff == null);
 		if (build)
 		{
+			Operation operation = Operation.forOrdinal(filter);
 			FloatProcessor fp = kernelImp.getProcessor().toFloat(0, null);
 			if (method == METHOD_SPATIAL)
 			{
@@ -172,7 +177,20 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 					float[] kernel = (float[]) fp.getPixels();
 					kf = (zero) ? new ZeroKernelFilter(kernel, kw, kh) : new KernelFilter(kernel, kw, kh);
 				}
-				kf.setConvolution(filter == FILTER_CONVOLUTION);
+				switch (operation)
+				{
+					case CONVOLUTION:
+						kf.setConvolution(true);
+						break;
+					case CORRELATION:
+						kf.setConvolution(false);
+						break;
+					case DECONVOLUTION:
+					default:
+						Utils.log("Unsupported operation (%s), default to correlation", operation.getName());
+						kf.setConvolution(false);
+						break;
+				}
 			}
 			else
 			{
@@ -184,7 +202,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 					ff = new FHTFilter(kernel, kw, kh);
 					ff.initialiseKernel(dataImp.getWidth(), dataImp.getHeight());
 				}
-				ff.setConvolution(filter == FILTER_CONVOLUTION);
+				ff.setOperation(operation);
 			}
 			lastId = kernelImp.getID();
 			lastMethod = method;
