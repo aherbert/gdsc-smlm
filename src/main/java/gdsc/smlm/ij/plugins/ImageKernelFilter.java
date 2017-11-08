@@ -40,7 +40,7 @@ import ij.process.ImageProcessor;
 public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 {
 	private static final String TITLE = "Image Kernel Filter";
-	private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | KEEP_PREVIEW | PARALLELIZE_STACKS | CONVERT_TO_FLOAT;
+	private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | KEEP_PREVIEW | PARALLELIZE_STACKS | CONVERT_TO_FLOAT | FINAL_PROCESSING;
 
 	private static final String[] METHODS = { "Spatial domain", "FHT" };
 	private static final int METHOD_SPATIAL = 0;
@@ -75,6 +75,13 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
+		if ("final".equals(arg))
+		{
+			imp.getProcessor().resetMinAndMax();
+			imp.updateAndDraw();
+			return DONE;
+		}
+		
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		if (imp == null)
@@ -97,9 +104,11 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 		else
 		{
 			// Use a clone for thread safety
-			FHTFilter f = (ticker.getTotal() > 1) ? ff.clone() : ff;
+			FHTFilter f = (ticker.getTotal() > 1l) ? ff.clone() : ff;
 			f.filter(data, w, h, border);
 		}
+		if (ticker.getTotal() == 1l)
+			ip.resetMinAndMax();
 		ticker.tick();
 	}
 
@@ -210,7 +219,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 			lastZero = zero;
 		}
 
-		ticker = Ticker.create(new IJTrackProgress(), nPasses, true);
+		ticker = Ticker.create(new IJTrackProgress(), nPasses, nPasses != 1);
 		ticker.start();
 	}
 }
