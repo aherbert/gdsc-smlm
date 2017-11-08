@@ -3,6 +3,7 @@ package gdsc.smlm.ij.utils;
 import org.jtransforms.dht.FloatDHT_3D;
 
 import ij.ImageStack;
+import ij.process.FHT2;
 import ij.process.ImageProcessor;
 import pl.edu.icm.jlargearrays.LargeArray;
 
@@ -45,6 +46,7 @@ public class DHT3D
 		nc = stack.getWidth();
 
 		long size = (long) ns * nr * nc;
+		// Don't support using large arrays for simplicity
 		if (size > LargeArray.getMaxSizeOf32bitArray())
 			throw new IllegalArgumentException("3D data too large");
 
@@ -52,12 +54,12 @@ public class DHT3D
 
 		data = new float[(int) size];
 
-		int nr_nc = nr * nc;
+		int nr_by_nc = nr * nc;
 		if (stack.getBitDepth() == 32)
 		{
 			for (int s = 0; s < ns; s++)
 			{
-				System.arraycopy(stack.getPixels(s + 1), 0, data, s * nr_nc, nr_nc);
+				System.arraycopy(stack.getPixels(s + 1), 0, data, s * nr_by_nc, nr_by_nc);
 			}
 		}
 		else
@@ -65,7 +67,7 @@ public class DHT3D
 			for (int s = 1, i = 0; s <= ns; s++)
 			{
 				ImageProcessor ip = stack.getProcessor(s);
-				for (int j = 0; i < nr_nc; j++)
+				for (int j = 0; i < nr_by_nc; j++)
 					data[i++] = ip.getf(j);
 			}
 		}
@@ -89,11 +91,11 @@ public class DHT3D
 	public ImageStack getImageStack()
 	{
 		ImageStack stack = new ImageStack(nc, nr);
-		int nr_nc = nr * nc;
+		int nr_by_nc = nr * nc;
 		for (int s = 0; s < ns; s++)
 		{
-			float[] pixels = new float[nr_nc];
-			System.arraycopy(data, s * nr_nc, pixels, 0, nr_nc);
+			float[] pixels = new float[nr_by_nc];
+			System.arraycopy(data, s * nr_by_nc, pixels, 0, nr_by_nc);
 			stack.addSlice(null, pixels);
 		}
 		return stack;
@@ -151,25 +153,45 @@ public class DHT3D
 	 */
 	public DHT3D multiply(DHT3D dht) throws IllegalArgumentException
 	{
+		return multiply(dht, null);
+	}
+
+	/**
+	 * Returns the image resulting from the point by point Hartley multiplication
+	 * of this image and the specified image. Both images are assumed to be in
+	 * the frequency domain. Multiplication in the frequency domain is equivalent
+	 * to convolution in the space domain.
+	 *
+	 * @param dht
+	 *            the dht
+	 * @param tmp
+	 *            the tmp buffer to use for the result
+	 * @return the result
+	 * @throws IllegalArgumentException
+	 *             if the dht is not the same dimensions
+	 */
+	public DHT3D multiply(DHT3D dht, float[] tmp) throws IllegalArgumentException
+	{
 		checkDHT(dht);
 
-		float[] tmp = new float[data.length];
 		float[] h1 = this.data;
 		float[] h2 = dht.data;
-		int nr_nc = nr * nc;
+		if (tmp == null || tmp.length != h1.length)
+			tmp = new float[h1.length];
+		int nr_by_nc = nr * nc;
 
-		for (int s = 0, ns_s = 0, i = 0; s < ns; s++, ns_s = ns - s)
+		for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s)
 		{
-			for (int r = 0, nr_r = 0; r < nr; r++, nr_r = nr - r)
+			for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r)
 			{
-				for (int c = 0, nc_c = 0; c < nc; c++, nc_c = nc - c, i++)
+				for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 				{
 					// This is actually doing for 3D data stored as x[slices][rows][columns]
 					// https://en.wikipedia.org/wiki/Discrete_Hartley_transform
 					//h2e = (h2[s][r][c] + h2[Ns-s][Nr-r][Nr-c]) / 2;
 					//h2o = (h2[s][r][c] - h2[Ns-s][Nr-r][Nr-c]) / 2;
 					//tmp[s][r][c] = (float) (h1[s][r][c] * h2e + h1[Ns-s][Nr-r][Nc-c] * h2o);
-					int j = ns_s * nr_nc + nr_r * nc + nc_c;
+					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
 					double h2e = (h2[i] + h2[j]) / 2;
 					double h2o = (h2[i] - h2[j]) / 2;
 					tmp[i] = (float) (h1[i] * h2e + h1[j] * h2o);
@@ -194,20 +216,40 @@ public class DHT3D
 	 */
 	public DHT3D conjugateMultiply(DHT3D dht) throws IllegalArgumentException
 	{
+		return conjugateMultiply(dht, null);
+	}
+
+	/**
+	 * Returns the image resulting from the point by point Hartley conjugate
+	 * multiplication of this image and the specified image. Both images are
+	 * assumed to be in the frequency domain. Conjugate multiplication in
+	 * the frequency domain is equivalent to correlation in the space domain.
+	 *
+	 * @param dht
+	 *            the dht
+	 * @param tmp
+	 *            the tmp buffer to use for the result
+	 * @return the result
+	 * @throws IllegalArgumentException
+	 *             if the dht is not the same dimensions
+	 */
+	public DHT3D conjugateMultiply(DHT3D dht, float[] tmp) throws IllegalArgumentException
+	{
 		checkDHT(dht);
 
-		float[] tmp = new float[data.length];
 		float[] h1 = this.data;
 		float[] h2 = dht.data;
-		int nr_nc = nr * nc;
+		if (tmp == null || tmp.length != h1.length)
+			tmp = new float[h1.length];
+		int nr_by_nc = nr * nc;
 
-		for (int s = 0, ns_s = 0, i = 0; s < ns; s++, ns_s = ns - s)
+		for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s)
 		{
-			for (int r = 0, nr_r = 0; r < nr; r++, nr_r = nr - r)
+			for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r)
 			{
-				for (int c = 0, nc_c = 0; c < nc; c++, nc_c = nc - c, i++)
+				for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 				{
-					int j = ns_s * nr_nc + nr_r * nc + nc_c;
+					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
 					double h2e = (h2[i] + h2[j]) / 2;
 					double h2o = (h2[i] - h2[j]) / 2;
 					// As per multiply but reverse the addition sign for the conjugate  
@@ -233,21 +275,41 @@ public class DHT3D
 	 */
 	public DHT3D divide(DHT3D dht) throws IllegalArgumentException
 	{
+		return divide(dht, null);
+	}
+
+	/**
+	 * Returns the image resulting from the point by point Hartley division
+	 * of this image by the specified image. Both images are assumed to be in
+	 * the frequency domain. Division in the frequency domain is equivalent
+	 * to deconvolution in the space domain.
+	 *
+	 * @param dht
+	 *            the dht
+	 * @param tmp
+	 *            the tmp buffer to use for the result
+	 * @return the result
+	 * @throws IllegalArgumentException
+	 *             if the dht is not the same dimensions or in the frequency domain
+	 */
+	public DHT3D divide(DHT3D dht, float[] tmp) throws IllegalArgumentException
+	{
 		checkDHT(dht);
 
-		float[] tmp = new float[data.length];
 		float[] h1 = this.data;
 		float[] h2 = dht.data;
-		int nr_nc = nr * nc;
+		if (tmp == null || tmp.length != h1.length)
+			tmp = new float[h1.length];
+		int nr_by_nc = nr * nc;
 
-		for (int s = 0, ns_s = 0, i = 0; s < ns; s++, ns_s = ns - s)
+		for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s)
 		{
-			for (int r = 0, nr_r = 0; r < nr; r++, nr_r = nr - r)
+			for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r)
 			{
-				for (int c = 0, nc_c = 0; c < nc; c++, nc_c = nc - c, i++)
+				for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 				{
 					// This is a copy of the divide operation in ij.process.FHT
-					int j = ns_s * nr_nc + nr_r * nc + nc_c;
+					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
 					double mag = h2[i] * h2[i] + h2[j] * h2[j];
 					if (mag < 1e-20)
 						mag = 1e-20;
@@ -261,7 +323,15 @@ public class DHT3D
 		return new DHT3D(tmp, ns, nr, nc, true, this.dht);
 	}
 
-	private void checkDHT(DHT3D dht)
+	/**
+	 * Check the DHT matches the dimensions of this DHT. Check both are in the frequency domain.
+	 *
+	 * @param dht
+	 *            the dht
+	 * @throws IllegalArgumentException
+	 *             If multiplication is not possible
+	 */
+	private void checkDHT(DHT3D dht) throws IllegalArgumentException
 	{
 		if (dht.ns != ns || dht.nr != nr || dht.nc != nc)
 			throw new IllegalArgumentException("Dimension mismatch");
@@ -270,105 +340,56 @@ public class DHT3D
 	}
 
 	/**
-	 * Swap quadrants 1+7, 2+8, 4+6, 3+5 of the specified image stack
-	 * so the power spectrum origin is at the center of the image.
+	 * Swap octants 1+7, 2+8, 4+6, 3+5 of the specified image stack
+	 * so the power spectrum origin is at the centre of the image.
 	 * 
 	 * <pre>
-	 *        2----1
-	 *       /    /
-	 *      3----4
-	 * 
-	 *        6----5
-	 *       /    / 
-	 *      7----8
+	 * 1 +++ <=> 7 ---
+	 * 2 -++ <=> 8 +--
+	 * 3 --+ <=> 5 ++-
+	 * 4 +-+ <=> 6 -+-
 	 * </pre>
 	 * 
-	 * Requires even dimensions.
+	 * Requires even dimensions in a 32-bit float stack.
 	 *
 	 * @param stack
 	 *            the stack
+	 * @throws IllegalArgumentException
+	 *             If not a float stack with even dimensions
+	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
 	 */
-	public static void swapQuadrants(ImageStack stack)
+	public static void swapOctants(ImageStack stack) throws IllegalArgumentException
 	{
 		if (stack.getBitDepth() != 32)
 			throw new IllegalArgumentException("Require float stack");
-		int ns = stack.getSize();
-		int nr = stack.getHeight();
-		int nc = stack.getWidth();
-		if ((ns & 1) == 1 || (nr & 1) == 1 || (nc & 1) == 1)
+		int nz = stack.getSize();
+		int ny = stack.getHeight();
+		int nx = stack.getWidth();
+		if ((nz & 1) == 1 || (ny & 1) == 1 || (nx & 1) == 1)
 			throw new IllegalArgumentException("Require even dimensions");
 
-		// TODO - Finish this
+		int nz_2 = nz / 2;
+		int ny_2 = ny / 2;
+		int nx_2 = nx / 2;
 
-		//		int width = ip.getWidth();
-		//		float[] pixels = (float[]) ip.getPixels();
-		//		int size = width / 2;
-		//		float[] a = new float[size * size];
-		//		float[] b = new float[size * size];
+		float[] tmp = new float[nx];
 
-		//		crop(pixels, width, a, size, 0, size);
-		//		crop(pixels, width, b, 0, size, size);
-		//		insert(pixels, width, b, size, 0, size);
-		//		insert(pixels, width, a, 0, size, size);
-		//		crop(pixels, width, a, 0, 0, size);
-		//		crop(pixels, width, b, size, size, size);
-		//		insert(pixels, width, b, 0, 0, size);
-		//		insert(pixels, width, a, size, size, size);
-	}
-
-	/**
-	 * Crop from the source.
-	 *
-	 * @param source
-	 *            the source pixels
-	 * @param width
-	 *            the width of the source pixels
-	 * @param x
-	 *            the source x location
-	 * @param y
-	 *            the source y location
-	 * @param w
-	 *            the source width
-	 * @param h
-	 *            the source height
-	 * @param buffer
-	 *            the buffer pixels
-	 */
-	private static void crop(float[] source, int width, int x, int y, int w, int h, float[] buffer)
-	{
-		for (int ys = y + h; ys-- > y;)
+		for (int z = 0; z < nz_2; z++)
 		{
-			int si = ys * width + x;
-			int bi = (ys - y) * w;
-			System.arraycopy(source, si, buffer, bi, w);
-		}
-	}
-
-	/**
-	 * Insert into the source.
-	 *
-	 * @param source
-	 *            the source pixels
-	 * @param width
-	 *            the width of the source pixels
-	 * @param x
-	 *            the source x location
-	 * @param y
-	 *            the source y location
-	 * @param w
-	 *            the source width
-	 * @param h
-	 *            the source height
-	 * @param buffer
-	 *            the buffer pixels
-	 */
-	private static void insert(float[] source, int width, int x, int y, int w, int h, float[] buffer)
-	{
-		for (int ys = y + h; ys-- > y;)
-		{
-			int si = ys * width + x;
-			int bi = (ys - y) * w;
-			System.arraycopy(buffer, bi, source, si, w);
+			// slice index is 1-based
+			float[] a = (float[]) stack.getPixels(1 + z);
+			float[] b = (float[]) stack.getPixels(1 + z + nz_2);
+			//@formatter:off
+			// We swap: 0 <=> nx_2, 0 <=> ny_2
+			// 1 <=> 7 
+			FHT2.swap(a, b, nx, nx_2,    0,    0, ny_2, nx_2, ny_2, tmp);
+			// 2 <=> 8
+			FHT2.swap(a, b, nx,    0,    0, nx_2, ny_2, nx_2, ny_2, tmp);
+			// 3 <=> 5
+			FHT2.swap(a, b, nx,    0, ny_2, nx_2,    0, nx_2, ny_2, tmp);
+			// 4 <=> 6
+			FHT2.swap(a, b, nx, nx_2, ny_2,    0,    0, nx_2, ny_2, tmp);
+			//@formatter:on
 		}
 	}
 }
