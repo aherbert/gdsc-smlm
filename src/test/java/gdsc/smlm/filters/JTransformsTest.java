@@ -14,8 +14,10 @@ import gdsc.core.test.TimingService;
 import gdsc.smlm.filters.FHTFilter.Operation;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
+import ij.process.FHT;
 import ij.process.FHT2;
 import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
 
 public class JTransformsTest
 {
@@ -164,11 +166,54 @@ public class JTransformsTest
 		abstract Object run(float[][] data);
 	}
 
-	private class IJDHTSpeedTask extends DHTSpeedTask
+	private class NonDuplicatingFloatProcessor extends FloatProcessor
+	{
+		public NonDuplicatingFloatProcessor(int width, int height, float[] pixels)
+		{
+			super(width, height, pixels);
+		}
+
+		@Override
+		public ImageProcessor duplicate()
+		{
+			return this;
+		}
+		
+		@Override
+		public ImageProcessor convertToFloat()
+		{
+			return this;
+		}
+	}
+
+	private class IJFHTSpeedTask extends DHTSpeedTask
+	{
+		public IJFHTSpeedTask(int maxN, float[][] data)
+		{
+			super(FHT.class.getSimpleName(), maxN, data);
+		}
+
+		@Override
+		Object run(float[][] data)
+		{
+			for (int i = 0; i < data.length; i += 2)
+			{
+				// Forward
+				FHT fht = new FHT(new NonDuplicatingFloatProcessor(maxN, maxN, data[i]), false);
+				fht.transform();
+				// Reverse
+				fht = new FHT(new NonDuplicatingFloatProcessor(maxN, maxN, data[i + 1]), true);
+				fht.transform();
+			}
+			return null;
+		}
+	}
+
+	private class IJFHT2SpeedTask extends DHTSpeedTask
 	{
 		FHT2 fht2;
 
-		public IJDHTSpeedTask(int maxN, float[][] data)
+		public IJFHT2SpeedTask(int maxN, float[][] data)
 		{
 			super(FHT2.class.getSimpleName(), maxN, data);
 			// Create one so we have the pre-computed tables
@@ -259,7 +304,8 @@ public class JTransformsTest
 		CommonUtils.setThreadsBeginN_2D(Long.MAX_VALUE);
 
 		TimingService ts = new TimingService();
-		ts.execute(new IJDHTSpeedTask(size, data));
+		ts.execute(new IJFHTSpeedTask(size, data));
+		ts.execute(new IJFHT2SpeedTask(size, data));
 		ts.execute(new JTransformsDHTSpeedTask(size, data));
 		ts.repeat();
 		ts.report();
