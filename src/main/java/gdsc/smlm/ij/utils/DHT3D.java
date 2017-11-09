@@ -25,7 +25,15 @@ import pl.edu.icm.jlargearrays.LargeArray;
  */
 public class DHT3D
 {
-	public final int ns, nr, nc;
+	/** The number of slices (max z). */
+	public final int ns;
+	/** The number of rows (max y). */
+	public final int nr;
+	/** The number of columns (max x). */
+	public final int nc;
+
+	/** The number of rows multiplied by the number of columns */
+	private final int nr_by_nc;
 
 	private boolean isFrequencyDomain;
 	private final FloatDHT_3D dht;
@@ -54,7 +62,7 @@ public class DHT3D
 
 		data = new float[(int) size];
 
-		int nr_by_nc = nr * nc;
+		nr_by_nc = nr * nc;
 		if (stack.getBitDepth() == 32)
 		{
 			for (int s = 0; s < ns; s++)
@@ -73,14 +81,84 @@ public class DHT3D
 		}
 	}
 
-	private DHT3D(float[] data, int ns, int nr, int nc, boolean isFrequencyDomain, FloatDHT_3D dht)
+	/**
+	 * Instantiates a new 3D discrete Hartley transform.
+	 *
+	 * @param nc
+	 *            the number of columns
+	 * @param nr
+	 *            the number of rows
+	 * @param ns
+	 *            the number of slices
+	 * @param data
+	 *            the data
+	 * @param isFrequencyDomain
+	 *            Set to true if in the frequency domain
+	 * @throws IllegalArgumentException
+	 *             If any dimension is less than 2, or if the data is not the correct length
+	 */
+	public DHT3D(int nc, int nr, int ns, float[] data, boolean isFrequencyDomain) throws IllegalArgumentException
 	{
+		long size = (long) ns * nr * nc;
+		if (data == null || data.length != size)
+			throw new IllegalArgumentException("Data is not correct length");
+		dht = new FloatDHT_3D(ns, nr, nc);
 		this.ns = ns;
 		this.nr = nr;
 		this.nc = nc;
-		this.dht = dht; // This can be reused across objects
+		nr_by_nc = nr * nc;
 		this.data = data;
 		this.isFrequencyDomain = isFrequencyDomain;
+	}
+
+	/**
+	 * Instantiates a new 3D discrete Hartley transform.
+	 *
+	 * @param ns
+	 *            the number of slices
+	 * @param nr
+	 *            the number of rows
+	 * @param nc
+	 *            the number of columns
+	 * @param nr_by_nc
+	 *            the number of rows multiplied by the number of columns
+	 * @param data
+	 *            the data
+	 * @param isFrequencyDomain
+	 *            the is frequency domain
+	 * @param dht
+	 *            the dht
+	 */
+	private DHT3D(int ns, int nr, int nc, int nr_by_nc, float[] data, boolean isFrequencyDomain, FloatDHT_3D dht)
+	{
+		// No checks as this is used internally		
+		this.ns = ns;
+		this.nr = nr;
+		this.nc = nc;
+		this.nr_by_nc = nr_by_nc;
+		this.data = data;
+		this.isFrequencyDomain = isFrequencyDomain;
+		this.dht = dht; // This can be reused across objects
+	}
+
+	/**
+	 * Return a copy of the 3D discrete Hartley transform.
+	 *
+	 * @return the copy
+	 */
+	public DHT3D copy()
+	{
+		return new DHT3D(ns, nr, nc, nr_by_nc, data.clone(), isFrequencyDomain, dht);
+	}
+
+	/**
+	 * Gets the data.
+	 *
+	 * @return the data
+	 */
+	public float[] getData()
+	{
+		return data;
 	}
 
 	/**
@@ -91,7 +169,6 @@ public class DHT3D
 	public ImageStack getImageStack()
 	{
 		ImageStack stack = new ImageStack(nc, nr);
-		int nr_by_nc = nr * nc;
 		for (int s = 0; s < ns; s++)
 		{
 			float[] pixels = new float[nr_by_nc];
@@ -178,7 +255,6 @@ public class DHT3D
 		float[] h2 = dht.data;
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new float[h1.length];
-		int nr_by_nc = nr * nc;
 
 		for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s)
 		{
@@ -199,7 +275,7 @@ public class DHT3D
 			}
 		}
 
-		return new DHT3D(tmp, ns, nr, nc, true, this.dht);
+		return new DHT3D(ns, nr, nc, nr_by_nc, tmp, true, this.dht);
 	}
 
 	/**
@@ -241,7 +317,6 @@ public class DHT3D
 		float[] h2 = dht.data;
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new float[h1.length];
-		int nr_by_nc = nr * nc;
 
 		for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s)
 		{
@@ -258,7 +333,7 @@ public class DHT3D
 			}
 		}
 
-		return new DHT3D(tmp, ns, nr, nc, true, this.dht);
+		return new DHT3D(ns, nr, nc, nr_by_nc, tmp, true, this.dht);
 	}
 
 	/**
@@ -300,7 +375,6 @@ public class DHT3D
 		float[] h2 = dht.data;
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new float[h1.length];
-		int nr_by_nc = nr * nc;
 
 		for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s)
 		{
@@ -320,7 +394,7 @@ public class DHT3D
 			}
 		}
 
-		return new DHT3D(tmp, ns, nr, nc, true, this.dht);
+		return new DHT3D(ns, nr, nc, nr_by_nc, tmp, true, this.dht);
 	}
 
 	/**
@@ -358,38 +432,133 @@ public class DHT3D
 	 *             If not a float stack with even dimensions
 	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
 	 */
+	public void swapOctants() throws IllegalArgumentException
+	{
+		if ((ns & 1) == 1 || (nr & 1) == 1 || (nc & 1) == 1)
+			throw new IllegalArgumentException("Require even dimensions");
+
+		int ns_2 = ns / 2;
+		int nr_2 = nr / 2;
+		int nc_2 = nc / 2;
+
+		float[] tmp = new float[nc];
+
+		// For convenience we extract slices for swapping
+		float[] a = new float[nr_by_nc];
+		float[] b = new float[nr_by_nc];
+
+		for (int s = 0; s < ns_2; s++)
+		{
+			// Extract
+			System.arraycopy(data, s * nr_by_nc, a, 0, nr_by_nc);
+			System.arraycopy(data, (s + ns_2) * nr_by_nc, b, 0, nr_by_nc);
+
+			//@formatter:off
+			// We swap: 0 <=> nx_2, 0 <=> ny_2
+			// 1 <=> 7 
+			FHT2.swap(a, b, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
+			// 2 <=> 8
+			FHT2.swap(a, b, nc,    0,    0, nc_2, nr_2, nc_2, nr_2, tmp);
+			// 3 <=> 5
+			FHT2.swap(a, b, nc,    0, nr_2, nc_2,    0, nc_2, nr_2, tmp);
+			// 4 <=> 6
+			FHT2.swap(a, b, nc, nc_2, nr_2,    0,    0, nc_2, nr_2, tmp);
+			//@formatter:on
+
+			// Replace
+			System.arraycopy(a, 0, data, s * nr_by_nc, nr_by_nc);
+			System.arraycopy(b, 0, data, (s + ns_2) * nr_by_nc, nr_by_nc);
+		}
+	}
+
+	/**
+	 * Swap octants 1+7, 2+8, 4+6, 3+5 of the specified image stack
+	 * so the power spectrum origin is at the centre of the image.
+	 * 
+	 * <pre>
+	 * 1 +++ <=> 7 ---
+	 * 2 -++ <=> 8 +--
+	 * 3 --+ <=> 5 ++-
+	 * 4 +-+ <=> 6 -+-
+	 * </pre>
+	 * 
+	 * Requires even dimensions in a 32-bit float stack.
+	 *
+	 * @param stack
+	 *            the stack
+	 * @throws IllegalArgumentException
+	 *             If not a float stack with even dimensions
+	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
+	 */
 	public static void swapOctants(ImageStack stack) throws IllegalArgumentException
 	{
 		if (stack.getBitDepth() != 32)
 			throw new IllegalArgumentException("Require float stack");
-		int nz = stack.getSize();
-		int ny = stack.getHeight();
-		int nx = stack.getWidth();
-		if ((nz & 1) == 1 || (ny & 1) == 1 || (nx & 1) == 1)
+		int ns = stack.getSize();
+		int nr = stack.getHeight();
+		int nc = stack.getWidth();
+		if ((ns & 1) == 1 || (nr & 1) == 1 || (nc & 1) == 1)
 			throw new IllegalArgumentException("Require even dimensions");
 
-		int nz_2 = nz / 2;
-		int ny_2 = ny / 2;
-		int nx_2 = nx / 2;
+		int ns_2 = ns / 2;
+		int nr_2 = nr / 2;
+		int nc_2 = nc / 2;
 
-		float[] tmp = new float[nx];
+		float[] tmp = new float[nc];
 
-		for (int z = 0; z < nz_2; z++)
+		for (int s = 0; s < ns_2; s++)
 		{
 			// slice index is 1-based
-			float[] a = (float[]) stack.getPixels(1 + z);
-			float[] b = (float[]) stack.getPixels(1 + z + nz_2);
+			float[] a = (float[]) stack.getPixels(1 + s);
+			float[] b = (float[]) stack.getPixels(1 + s + ns_2);
 			//@formatter:off
 			// We swap: 0 <=> nx_2, 0 <=> ny_2
 			// 1 <=> 7 
-			FHT2.swap(a, b, nx, nx_2,    0,    0, ny_2, nx_2, ny_2, tmp);
+			FHT2.swap(a, b, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
 			// 2 <=> 8
-			FHT2.swap(a, b, nx,    0,    0, nx_2, ny_2, nx_2, ny_2, tmp);
+			FHT2.swap(a, b, nc,    0,    0, nc_2, nr_2, nc_2, nr_2, tmp);
 			// 3 <=> 5
-			FHT2.swap(a, b, nx,    0, ny_2, nx_2,    0, nx_2, ny_2, tmp);
+			FHT2.swap(a, b, nc,    0, nr_2, nc_2,    0, nc_2, nr_2, tmp);
 			// 4 <=> 6
-			FHT2.swap(a, b, nx, nx_2, ny_2,    0,    0, nx_2, ny_2, tmp);
+			FHT2.swap(a, b, nc, nc_2, nr_2,    0,    0, nc_2, nr_2, tmp);
 			//@formatter:on
 		}
+	}
+
+	/**
+	 * Gets the xyz components of the index
+	 *
+	 * @param i
+	 *            the index
+	 * @return the xyz components
+	 */
+	public int[] getXYZ(int i)
+	{
+		if (i < 0 || i >= data.length)
+			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + data.length);
+		int[] xyz = new int[3];
+		xyz[2] = i / nr_by_nc;
+		int j = i % nr_by_nc;
+		xyz[1] = j / nc;
+		xyz[0] = j % nc;
+		return xyz;
+	}
+
+	/**
+	 * Gets the xyz components of the index.
+	 *
+	 * @param i
+	 *            the index
+	 * @param xyz
+	 *            the xyz components (must be an array of at least length 3)
+	 */
+	public void getXYZ(int i, int[] xyz)
+	{
+		if (i < 0 || i >= data.length)
+			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + data.length);
+		xyz[2] = i / nr_by_nc;
+		int j = i % nr_by_nc;
+		xyz[1] = j / nc;
+		xyz[0] = j % nc;
 	}
 }
