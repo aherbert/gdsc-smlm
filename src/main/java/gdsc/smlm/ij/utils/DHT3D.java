@@ -337,8 +337,7 @@ public class DHT3D extends Image3D
 	}
 
 	/**
-	 * Swap octants 1+7, 2+8, 4+6, 3+5 of the specified image stack
-	 * so the power spectrum origin is at the centre of the image.
+	 * Swap octants 1+7, 2+8, 4+6, 3+5 so the power spectrum origin is at the centre of the image.
 	 * 
 	 * <pre>
 	 * 1 +++ <=> 7 ---
@@ -347,10 +346,8 @@ public class DHT3D extends Image3D
 	 * 4 +-+ <=> 6 -+-
 	 * </pre>
 	 * 
-	 * Requires even dimensions in a 32-bit float stack.
+	 * Requires even dimensions.
 	 *
-	 * @param stack
-	 *            the stack
 	 * @throws IllegalArgumentException
 	 *             If not a float stack with even dimensions
 	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
@@ -371,7 +368,7 @@ public class DHT3D extends Image3D
 	 * 4 +-+ <=> 6 -+-
 	 * </pre>
 	 * 
-	 * Requires even dimensions in a 32-bit float stack.
+	 * Requires even dimensions.
 	 *
 	 * @param image
 	 *            the image
@@ -384,7 +381,7 @@ public class DHT3D extends Image3D
 		int ns = image.ns;
 		int nr = image.nr;
 		int nc = image.nc;
-		
+
 		if ((ns & 1) == 1 || (nr & 1) == 1 || (nc & 1) == 1)
 			throw new IllegalArgumentException("Require even dimensions");
 
