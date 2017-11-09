@@ -4,7 +4,6 @@ import org.jtransforms.dht.FloatDHT_3D;
 
 import ij.ImageStack;
 import ij.process.FHT2;
-import ij.process.ImageProcessor;
 import pl.edu.icm.jlargearrays.LargeArray;
 
 /*----------------------------------------------------------------------------- 
@@ -23,21 +22,10 @@ import pl.edu.icm.jlargearrays.LargeArray;
 /**
  * Wrapper to compute the discrete Hartley transform on 3D data. This uses the JTransforms library.
  */
-public class DHT3D
+public class DHT3D extends Image3D
 {
-	/** The number of slices (max z). */
-	public final int ns;
-	/** The number of rows (max y). */
-	public final int nr;
-	/** The number of columns (max x). */
-	public final int nc;
-
-	/** The number of rows multiplied by the number of columns */
-	private final int nr_by_nc;
-
 	private boolean isFrequencyDomain;
 	private final FloatDHT_3D dht;
-	private final float[] data;
 
 	/**
 	 * Instantiates a new 3D discrete Hartley transform
@@ -49,36 +37,9 @@ public class DHT3D
 	 */
 	public DHT3D(ImageStack stack) throws IllegalArgumentException
 	{
-		ns = stack.getSize();
-		nr = stack.getHeight();
-		nc = stack.getWidth();
-
-		long size = (long) ns * nr * nc;
-		// Don't support using large arrays for simplicity
-		if (size > LargeArray.getMaxSizeOf32bitArray())
-			throw new IllegalArgumentException("3D data too large");
-
+		super(stack);
+		LargeArray.setMaxSizeOf32bitArray(maxSizeOf32bitArray);
 		dht = new FloatDHT_3D(ns, nr, nc);
-
-		data = new float[(int) size];
-
-		nr_by_nc = nr * nc;
-		if (stack.getBitDepth() == 32)
-		{
-			for (int s = 0; s < ns; s++)
-			{
-				System.arraycopy(stack.getPixels(s + 1), 0, data, s * nr_by_nc, nr_by_nc);
-			}
-		}
-		else
-		{
-			for (int s = 1, i = 0; s <= ns; s++)
-			{
-				ImageProcessor ip = stack.getProcessor(s);
-				for (int j = 0; i < nr_by_nc; j++)
-					data[i++] = ip.getf(j);
-			}
-		}
 	}
 
 	/**
@@ -99,15 +60,9 @@ public class DHT3D
 	 */
 	public DHT3D(int nc, int nr, int ns, float[] data, boolean isFrequencyDomain) throws IllegalArgumentException
 	{
-		long size = (long) ns * nr * nc;
-		if (data == null || data.length != size)
-			throw new IllegalArgumentException("Data is not correct length");
+		super(nc, nr, ns, data);
+		LargeArray.setMaxSizeOf32bitArray(maxSizeOf32bitArray);
 		dht = new FloatDHT_3D(ns, nr, nc);
-		this.ns = ns;
-		this.nr = nr;
-		this.nc = nc;
-		nr_by_nc = nr * nc;
-		this.data = data;
 		this.isFrequencyDomain = isFrequencyDomain;
 	}
 
@@ -131,12 +86,7 @@ public class DHT3D
 	 */
 	private DHT3D(int ns, int nr, int nc, int nr_by_nc, float[] data, boolean isFrequencyDomain, FloatDHT_3D dht)
 	{
-		// No checks as this is used internally		
-		this.ns = ns;
-		this.nr = nr;
-		this.nc = nc;
-		this.nr_by_nc = nr_by_nc;
-		this.data = data;
+		super(ns, nr, nc, nr_by_nc, data);
 		this.isFrequencyDomain = isFrequencyDomain;
 		this.dht = dht; // This can be reused across objects
 	}
@@ -149,33 +99,6 @@ public class DHT3D
 	public DHT3D copy()
 	{
 		return new DHT3D(ns, nr, nc, nr_by_nc, data.clone(), isFrequencyDomain, dht);
-	}
-
-	/**
-	 * Gets the data.
-	 *
-	 * @return the data
-	 */
-	public float[] getData()
-	{
-		return data;
-	}
-
-	/**
-	 * Convert to an image stack.
-	 *
-	 * @return the image stack
-	 */
-	public ImageStack getImageStack()
-	{
-		ImageStack stack = new ImageStack(nc, nr);
-		for (int s = 0; s < ns; s++)
-		{
-			float[] pixels = new float[nr_by_nc];
-			System.arraycopy(data, s * nr_by_nc, pixels, 0, nr_by_nc);
-			stack.addSlice(null, pixels);
-		}
-		return stack;
 	}
 
 	/**
@@ -434,6 +357,34 @@ public class DHT3D
 	 */
 	public void swapOctants() throws IllegalArgumentException
 	{
+		swapOctants(this);
+	}
+
+	/**
+	 * Swap octants 1+7, 2+8, 4+6, 3+5 of the specified image stack
+	 * so the power spectrum origin is at the centre of the image.
+	 * 
+	 * <pre>
+	 * 1 +++ <=> 7 ---
+	 * 2 -++ <=> 8 +--
+	 * 3 --+ <=> 5 ++-
+	 * 4 +-+ <=> 6 -+-
+	 * </pre>
+	 * 
+	 * Requires even dimensions in a 32-bit float stack.
+	 *
+	 * @param image
+	 *            the image
+	 * @throws IllegalArgumentException
+	 *             If not even dimensions
+	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
+	 */
+	public static void swapOctants(Image3D image) throws IllegalArgumentException
+	{
+		int ns = image.ns;
+		int nr = image.nr;
+		int nc = image.nc;
+		
 		if ((ns & 1) == 1 || (nr & 1) == 1 || (nc & 1) == 1)
 			throw new IllegalArgumentException("Require even dimensions");
 
@@ -444,6 +395,8 @@ public class DHT3D
 		float[] tmp = new float[nc];
 
 		// For convenience we extract slices for swapping
+		int nr_by_nc = image.nr_by_nc;
+		float[] data = image.getData();
 		float[] a = new float[nr_by_nc];
 		float[] b = new float[nr_by_nc];
 
@@ -523,129 +476,5 @@ public class DHT3D
 			FHT2.swap(a, b, nc, nc_2, nr_2,    0,    0, nc_2, nr_2, tmp);
 			//@formatter:on
 		}
-	}
-
-	/**
-	 * Gets the xyz components of the index.
-	 *
-	 * @param i
-	 *            the index
-	 * @return the xyz components
-	 * @throws IllegalArgumentException
-	 *             if the index is not within the data
-	 */
-	public int[] getXYZ(int i) throws IllegalArgumentException
-	{
-		if (i < 0 || i >= data.length)
-			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + data.length);
-		int[] xyz = new int[3];
-		xyz[2] = i / nr_by_nc;
-		int j = i % nr_by_nc;
-		xyz[1] = j / nc;
-		xyz[0] = j % nc;
-		return xyz;
-	}
-
-	/**
-	 * Gets the xyz components of the index.
-	 *
-	 * @param i
-	 *            the index
-	 * @param xyz
-	 *            the xyz components (must be an array of at least length 3)
-	 * @throws IllegalArgumentException
-	 *             if the index is not within the data
-	 */
-	public void getXYZ(int i, int[] xyz) throws IllegalArgumentException
-	{
-		if (i < 0 || i >= data.length)
-			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + data.length);
-		xyz[2] = i / nr_by_nc;
-		int j = i % nr_by_nc;
-		xyz[1] = j / nc;
-		xyz[0] = j % nc;
-	}
-
-	/**
-	 * Crop a sub-region of the data.
-	 *
-	 * @param x
-	 *            the x index
-	 * @param y
-	 *            the y index
-	 * @param z
-	 *            the z index
-	 * @param w
-	 *            the width
-	 * @param h
-	 *            the height
-	 * @param d
-	 *            the depth
-	 * @param region
-	 *            the cropped data (will be reused if the correct size)
-	 * @return the cropped data
-	 * @throws IllegalArgumentException
-	 *             if the region is not within the data
-	 */
-	public float[] crop(int x, int y, int z, int w, int h, int d, float[] region)
-	{
-		// Check the region range
-		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
-			throw new IllegalArgumentException("Region not within the data");
-		int size = d * h * w;
-		if (region == null || region.length != size)
-			region = new float[size];
-		for (int s = 0, i = 0; s < d; s++, z++)
-		{
-			int base = z * nr_by_nc + y * nc + x;
-			for (int r = 0; r < h; r++)
-			{
-				System.arraycopy(data, base, region, i, w);
-				base += nc;
-				i += w;
-			}
-		}
-		return region;
-	}
-
-	/**
-	 * Crop a sub-region of the data.
-	 *
-	 * @param x
-	 *            the x index
-	 * @param y
-	 *            the y index
-	 * @param z
-	 *            the z index
-	 * @param w
-	 *            the width
-	 * @param h
-	 *            the height
-	 * @param d
-	 *            the depth
-	 * @return the cropped data
-	 * @throws IllegalArgumentException
-	 *             if the region is not within the data
-	 */
-	public ImageStack crop(int x, int y, int z, int w, int h, int d)
-	{
-		// Check the region range
-		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
-			throw new IllegalArgumentException("Region not within the data");
-		int size = w * h;
-		ImageStack stack = new ImageStack(w, h);
-		for (int s = 0; s < d; s++, z++)
-		{
-			int base = z * nr_by_nc + y * nc + x;
-			float[] region = new float[size];
-			for (int r = 0, i = 0; r < h; r++)
-			{
-				System.arraycopy(data, base, region, i, w);
-				base += nc;
-				i += w;
-			}
-			stack.addSlice(null, region);
-		}
-		return stack;
 	}
 }
