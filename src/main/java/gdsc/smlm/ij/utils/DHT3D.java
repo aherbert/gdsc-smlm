@@ -526,13 +526,15 @@ public class DHT3D
 	}
 
 	/**
-	 * Gets the xyz components of the index
+	 * Gets the xyz components of the index.
 	 *
 	 * @param i
 	 *            the index
 	 * @return the xyz components
+	 * @throws IllegalArgumentException
+	 *             if the index is not within the data
 	 */
-	public int[] getXYZ(int i)
+	public int[] getXYZ(int i) throws IllegalArgumentException
 	{
 		if (i < 0 || i >= data.length)
 			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + data.length);
@@ -551,8 +553,10 @@ public class DHT3D
 	 *            the index
 	 * @param xyz
 	 *            the xyz components (must be an array of at least length 3)
+	 * @throws IllegalArgumentException
+	 *             if the index is not within the data
 	 */
-	public void getXYZ(int i, int[] xyz)
+	public void getXYZ(int i, int[] xyz) throws IllegalArgumentException
 	{
 		if (i < 0 || i >= data.length)
 			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + data.length);
@@ -560,5 +564,88 @@ public class DHT3D
 		int j = i % nr_by_nc;
 		xyz[1] = j / nc;
 		xyz[0] = j % nc;
+	}
+
+	/**
+	 * Crop a sub-region of the data.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @param region
+	 *            the cropped data (will be reused if the correct size)
+	 * @return the cropped data
+	 * @throws IllegalArgumentException
+	 *             if the region is not within the data
+	 */
+	public float[] crop(int x, int y, int z, int w, int h, int d, float[] region)
+	{
+		// Check the region range
+		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+			throw new IllegalArgumentException("Region not within the data");
+		int size = d * h * w;
+		if (region == null || region.length != size)
+			region = new float[size];
+		for (int s = 0, i = 0; s < d; s++, z++)
+		{
+			int base = z * nr_by_nc + y * nc + x;
+			for (int r = 0; r < h; r++)
+			{
+				System.arraycopy(data, base, region, i, w);
+				base += nc;
+				i += w;
+			}
+		}
+		return region;
+	}
+
+	/**
+	 * Crop a sub-region of the data.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @return the cropped data
+	 * @throws IllegalArgumentException
+	 *             if the region is not within the data
+	 */
+	public ImageStack crop(int x, int y, int z, int w, int h, int d)
+	{
+		// Check the region range
+		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+			throw new IllegalArgumentException("Region not within the data");
+		int size = w * h;
+		ImageStack stack = new ImageStack(w, h);
+		for (int s = 0; s < d; s++, z++)
+		{
+			int base = z * nr_by_nc + y * nc + x;
+			float[] region = new float[size];
+			for (int r = 0, i = 0; r < h; r++)
+			{
+				System.arraycopy(data, base, region, i, w);
+				base += nc;
+				i += w;
+			}
+			stack.addSlice(null, region);
+		}
+		return stack;
 	}
 }

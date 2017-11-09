@@ -12,6 +12,7 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import gdsc.smlm.ij.utils.DHT3D;
 import ij.ImageStack;
+import ij.process.ImageProcessor;
 
 public class DHT3DTest
 {
@@ -122,5 +123,37 @@ public class DHT3DTest
 					Assert.assertEquals(y, oy);
 					Assert.assertEquals(z, oz);
 				}
+	}
+
+	@Test
+	public void canCrop()
+	{
+		DHT3D dht = createData();
+		int x = 3, y = 4, z = 5;
+		int w = 6, h = 7, d = 8;
+		float[] croppedData = dht.crop(x, y, z, w, h, d, null);
+		ImageStack croppedStack = dht.crop(x, y, z, w, h, d);
+		float[] croppedStackData = new DHT3D(croppedStack).getData();
+
+		Assert.assertArrayEquals(croppedData, croppedStackData, 0);
+
+		// Test it is the correct region
+		ImageStack originalStack = dht.getImageStack();
+		for (int zz = 0; zz < d; zz++)
+		{
+			// Crop from the original data
+			ImageProcessor fp = originalStack.getProcessor(1 + zz + z);
+			fp.setRoi(x, y, w, h);
+			fp = fp.crop();			
+			float[] e = (float[]) fp.getPixels();
+			
+			// Compare to the cropped stack 
+			float[] o = (float[]) croppedStack.getPixels(1 + zz);
+			Assert.assertArrayEquals(e, o, 0);
+			
+			// Compare to the cropped data
+			System.arraycopy(croppedData, zz * o.length, o, 0, o.length);
+			Assert.assertArrayEquals(e, o, 0);
+		}
 	}
 }
