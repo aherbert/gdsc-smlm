@@ -1,4 +1,4 @@
-package gdsc.smlm.utils;
+package gdsc.smlm.ij.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -134,7 +134,13 @@ public class DHT3DTest
 		int x = 3, y = 4, z = 5;
 		int w = 6, h = 7, d = 8;
 		Image3D croppedData = dht.crop(x, y, z, w, h, d, null);
+		Assert.assertEquals(croppedData.getWidth(), w);
+		Assert.assertEquals(croppedData.getHeight(), h);
+		Assert.assertEquals(croppedData.getSize(), d);
 		ImageStack croppedStack = dht.cropToStack(x, y, z, w, h, d);
+		Assert.assertEquals(croppedStack.getWidth(), w);
+		Assert.assertEquals(croppedStack.getHeight(), h);
+		Assert.assertEquals(croppedStack.getSize(), d);
 		float[] croppedStackData = new Image3D(croppedStack).getData();
 
 		Assert.assertArrayEquals(croppedData.getData(), croppedStackData, 0);
@@ -154,6 +160,7 @@ public class DHT3DTest
 			Assert.assertArrayEquals(e, o, 0);
 			
 			// Compare to the cropped data
+			croppedData.copySlice(zz, o, 0);
 			System.arraycopy(croppedData.getData(), zz * o.length, o, 0, o.length);
 			Assert.assertArrayEquals(e, o, 0);
 		}

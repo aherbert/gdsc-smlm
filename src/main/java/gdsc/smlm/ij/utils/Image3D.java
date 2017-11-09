@@ -97,33 +97,33 @@ public class Image3D
 		long size = (long) ns * nr * nc;
 		if (data == null || data.length != size)
 			throw new IllegalArgumentException("Data is not correct length");
-		this.ns = ns;
-		this.nr = nr;
 		this.nc = nc;
+		this.nr = nr;
+		this.ns = ns;
 		nr_by_nc = nr * nc;
 		this.data = data;
 	}
 
 	/**
-	 * Instantiates a new 3D image
+	 * Instantiates a new 3D image.
 	 *
-	 * @param ns
-	 *            the number of slices
-	 * @param nr
-	 *            the number of rows
 	 * @param nc
 	 *            the number of columns
+	 * @param nr
+	 *            the number of rows
+	 * @param ns
+	 *            the number of slices
 	 * @param nr_by_nc
 	 *            the number of rows multiplied by the number of columns
 	 * @param data
 	 *            the data
 	 */
-	protected Image3D(int ns, int nr, int nc, int nr_by_nc, float[] data)
+	protected Image3D(int nc, int nr, int ns, int nr_by_nc, float[] data)
 	{
 		// No checks as this is used internally		
-		this.ns = ns;
-		this.nr = nr;
 		this.nc = nc;
+		this.nr = nr;
+		this.ns = ns;
 		this.nr_by_nc = nr_by_nc;
 		this.data = data;
 	}
@@ -135,7 +135,37 @@ public class Image3D
 	 */
 	public Image3D copy()
 	{
-		return new Image3D(ns, nr, nc, nr_by_nc, data.clone());
+		return new Image3D(nc, nr, ns, nr_by_nc, data.clone());
+	}
+
+	/**
+	 * Gets the width (the number of columns).
+	 *
+	 * @return the width
+	 */
+	public int getWidth()
+	{
+		return nc;
+	}
+
+	/**
+	 * Gets the height (the number of rows).
+	 *
+	 * @return the height
+	 */
+	public int getHeight()
+	{
+		return nr;
+	}
+
+	/**
+	 * Gets the size (the number of slices)
+	 *
+	 * @return the size
+	 */
+	public int getSize()
+	{
+		return ns;
 	}
 
 	/**
@@ -245,7 +275,7 @@ public class Image3D
 				i += w;
 			}
 		}
-		return new Image3D(w, h, d, w * d, region);
+		return new Image3D(w, h, d, w * h, region);
 	}
 
 	/**
@@ -287,5 +317,20 @@ public class Image3D
 			stack.addSlice(null, region);
 		}
 		return stack;
+	}
+
+	/**
+	 * Copy a slice of XY data into the given buffer at the target position.
+	 *
+	 * @param z
+	 *            the z slice
+	 * @param dest
+	 *            the destination buffer
+	 * @param to
+	 *            the target position
+	 */
+	public void copySlice(int z, float[] dest, int to)
+	{
+		System.arraycopy(data, z * nr_by_nc, dest, to, nr_by_nc);
 	}
 }
