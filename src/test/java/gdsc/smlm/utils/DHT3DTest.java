@@ -115,6 +115,8 @@ public class DHT3DTest
 					int i = SimpleArrayUtils.findMaxIndex(pixels);
 					int[] xyz = correlation.getXYZ(i);
 
+					// This is how far dht has to move to align with dht2.
+					// To align dht2 with dht would be the opposite sign.
 					int ox = xyz[0] - icentre;
 					int oy = xyz[1] - icentre;
 					int oz = xyz[2] - icentre;
