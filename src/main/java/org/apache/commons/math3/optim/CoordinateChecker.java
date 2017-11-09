@@ -26,6 +26,7 @@ import org.apache.commons.math3.util.FastMath;
 public abstract class CoordinateChecker implements OptimizationData, ConvergenceChecker<PointValuePair>
 {
 	final double relative, absolute;
+	final int fixedIterations;
 
 	/**
 	 * Build an instance with specified thresholds.
@@ -41,8 +42,28 @@ public abstract class CoordinateChecker implements OptimizationData, Convergence
 	 */
 	public CoordinateChecker(double relative, double absolute)
 	{
+		this(relative, absolute, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Build an instance with specified thresholds.
+	 * 
+	 * In order to perform only relative checks, the absolute tolerance
+	 * must be set to a negative value. In order to perform only absolute
+	 * checks, the relative tolerance must be set to a negative value.
+	 *
+	 * @param relative
+	 *            the relative
+	 * @param absolute
+	 *            the absolute
+	 * @param fixedIterations
+	 *            the fixed number of iterations to signal convergence
+	 */
+	public CoordinateChecker(double relative, double absolute, int fixedIterations)
+	{
 		this.relative = relative;
 		this.absolute = absolute;
+		this.fixedIterations = fixedIterations;
 	}
 
 	/**
@@ -77,6 +98,8 @@ public abstract class CoordinateChecker implements OptimizationData, Convergence
 	 */
 	public boolean converged(int iteration, PointValuePair previous, PointValuePair current)
 	{
+		if (iteration >= fixedIterations)
+			return true;
 		return converged(previous.getPointRef(), current.getPointRef());
 	}
 }

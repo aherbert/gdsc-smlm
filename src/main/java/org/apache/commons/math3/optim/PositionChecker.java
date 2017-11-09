@@ -39,4 +39,23 @@ public class PositionChecker extends CoordinateChecker
 	{
 		super(relative, absolute);
 	}
+
+	/**
+	 * Build an instance with specified thresholds.
+	 *
+	 * In order to perform only relative checks, the absolute tolerance
+	 * must be set to a negative value. In order to perform only absolute
+	 * checks, the relative tolerance must be set to a negative value.
+	 *
+	 * @param relativeThreshold
+	 *            relative tolerance threshold
+	 * @param absoluteThreshold
+	 *            absolute tolerance threshold
+	 * @param fixedIterations
+	 *            the fixed number of iterations to signal convergence
+	 */
+	public PositionChecker(double relative, double absolute, int fixedIterations)
+	{
+		super(relative, absolute, fixedIterations);
+	}
 }
