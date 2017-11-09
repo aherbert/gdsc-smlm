@@ -3,7 +3,6 @@ package gdsc.smlm.utils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.utils.FloatEquality;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.StandardFloatValueProcedure;
@@ -11,6 +10,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import gdsc.smlm.ij.utils.DHT3D;
+import gdsc.smlm.ij.utils.Image3D;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 
@@ -55,7 +55,7 @@ public class DHT3DTest
 		// This just tests that the swap of the DHT and the stack matches
 		DHT3D dht = createData();
 		ImageStack stack = dht.getImageStack();
-		Utils.display("Test", stack);
+		//gdsc.core.ij.Utils.display("Test", stack);
 		dht.swapOctants();
 		DHT3D.swapOctants(stack);
 
@@ -133,11 +133,11 @@ public class DHT3DTest
 		DHT3D dht = createData();
 		int x = 3, y = 4, z = 5;
 		int w = 6, h = 7, d = 8;
-		float[] croppedData = dht.crop(x, y, z, w, h, d, null);
-		ImageStack croppedStack = dht.crop(x, y, z, w, h, d);
-		float[] croppedStackData = new DHT3D(croppedStack).getData();
+		Image3D croppedData = dht.crop(x, y, z, w, h, d, null);
+		ImageStack croppedStack = dht.cropToStack(x, y, z, w, h, d);
+		float[] croppedStackData = new Image3D(croppedStack).getData();
 
-		Assert.assertArrayEquals(croppedData, croppedStackData, 0);
+		Assert.assertArrayEquals(croppedData.getData(), croppedStackData, 0);
 
 		// Test it is the correct region
 		ImageStack originalStack = dht.getImageStack();
@@ -154,7 +154,7 @@ public class DHT3DTest
 			Assert.assertArrayEquals(e, o, 0);
 			
 			// Compare to the cropped data
-			System.arraycopy(croppedData, zz * o.length, o, 0, o.length);
+			System.arraycopy(croppedData.getData(), zz * o.length, o, 0, o.length);
 			Assert.assertArrayEquals(e, o, 0);
 		}
 	}
