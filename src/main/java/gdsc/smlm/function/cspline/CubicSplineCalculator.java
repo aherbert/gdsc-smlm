@@ -118,4 +118,21 @@ public class CubicSplineCalculator
 		solver.solve(B, B);
 		return B.data;
 	}
+
+	/**
+	 * Compute the coefficients given the spline node value at interpolated points. The value should be interpolated at
+	 * [0,1/3,2/3,1] in each dimension.
+	 *
+	 * @param value
+	 *            the value (packed in order : i = z*16+4*y+x) for x,y,z in [0,1,2,3])
+	 * @return the coefficients (or null if computation failed)
+	 */
+	public double[] compute(float[] value)
+	{
+		DenseMatrix64F B = new DenseMatrix64F(64, 1);
+		for (int i = 0; i < 64; i++)
+			B.data[i] = value[i];
+		solver.solve(B, B);
+		return B.data;
+	}
 }
