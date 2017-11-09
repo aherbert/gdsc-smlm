@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.utils;
 
 import ij.ImageStack;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 /*----------------------------------------------------------------------------- 
@@ -58,6 +59,41 @@ public class Image3D
 			throw new IllegalArgumentException("3D data too large");
 
 		data = new float[(int) size];
+
+		nr_by_nc = nr * nc;
+		if (stack.getBitDepth() == 32)
+		{
+			for (int s = 0; s < ns; s++)
+			{
+				System.arraycopy(stack.getPixels(s + 1), 0, data, s * nr_by_nc, nr_by_nc);
+			}
+		}
+		else
+		{
+			for (int s = 1, i = 0; s <= ns; s++)
+			{
+				ImageProcessor ip = stack.getProcessor(s);
+				for (int j = 0; i < nr_by_nc; j++)
+					data[i++] = ip.getf(j);
+			}
+		}
+	}
+
+	/**
+	 * Instantiates a new 3D image.
+	 *
+	 * @param stack
+	 *            the stack
+	 * @param data
+	 *            the data
+	 */
+	private Image3D(ImageStack stack, float[] data)
+	{
+		nc = stack.getWidth();
+		nr = stack.getHeight();
+		ns = stack.getSize();
+
+		this.data = data;
 
 		nr_by_nc = nr * nc;
 		if (stack.getBitDepth() == 32)
@@ -237,6 +273,42 @@ public class Image3D
 	}
 
 	/**
+	 * Gets the index using the xyz components
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @return the index
+	 * @throws IllegalArgumentException
+	 *             if the index is not within the data
+	 */
+	public int getIndex(int x, int y, int z) throws IllegalArgumentException
+	{
+		if (x < 0 || x >= nc || y < 0 || y >= nr || z < 0 || z >= ns)
+			throw new IllegalArgumentException("Index in not inside the image");
+		return index(x, y, z);
+	}
+
+	/**
+	 * Gets the index using the xyz components
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @return the index
+	 */
+	private int index(int x, int y, int z)
+	{
+		return z * nr_by_nc + y * nc + x;
+	}
+
+	/**
 	 * Crop a sub-region of the data.
 	 *
 	 * @param x
@@ -276,6 +348,26 @@ public class Image3D
 			}
 		}
 		return new Image3D(w, h, d, w * h, region);
+	}
+
+	/**
+	 * Crop a sub-region of the data into the given image.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param image
+	 *            the image
+	 * @return the cropped data
+	 * @throws IllegalArgumentException
+	 *             if the region is not within the data
+	 */
+	public Image3D crop(int x, int y, int z, Image3D image)
+	{
+		return crop(x, y, z, image.getWidth(), image.getHeight(), image.getSize(), image.data);
 	}
 
 	/**
@@ -340,12 +432,20 @@ public class Image3D
 	 *            the cropped data (will be reused if the correct size)
 	 * @return the cropped data
 	 * @throws IllegalArgumentException
-	 *             if the region is not within the data, or the stack is not 32-bit float data
+	 *             if the region is not within the data
 	 */
 	public static Image3D crop(ImageStack stack, int x, int y, int z, int w, int h, int d, float[] region)
 	{
 		if (stack.getBitDepth() != 32)
-			throw new IllegalArgumentException("Require float stack");
+		{
+			// Handle non-float data
+			stack = cropToStack(stack, x, y, z, w, h, d);
+			int size = d * h * w;
+			if (region == null || region.length != size)
+				region = new float[size];
+			return new Image3D(stack, region);
+		}
+
 		int nc = stack.getWidth();
 		int nr = stack.getHeight();
 		int ns = stack.getSize();
@@ -387,12 +487,10 @@ public class Image3D
 	 *            the depth
 	 * @return the cropped data
 	 * @throws IllegalArgumentException
-	 *             if the region is not within the data, or the stack is not 32-bit float data
+	 *             if the region is not within the data
 	 */
 	public static ImageStack cropToStack(ImageStack stack, int x, int y, int z, int w, int h, int d)
 	{
-		if (stack.getBitDepth() != 32)
-			throw new IllegalArgumentException("Require float stack");
 		int nc = stack.getWidth();
 		int nr = stack.getHeight();
 		int ns = stack.getSize();
@@ -400,51 +498,86 @@ public class Image3D
 		// Check the region range
 		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = w * h;
 		ImageStack stack2 = new ImageStack(w, h, d);
 		for (int s = 0; s < d; s++, z++)
 		{
-			float[] data = (float[]) stack.getPixels(1 + z);
-			int base = y * nc + x;
-			float[] region = new float[size];
-			for (int r = 0, i = 0; r < h; r++)
-			{
-				System.arraycopy(data, base, region, i, w);
-				base += nc;
-				i += w;
-			}
-			stack2.setPixels(region, 1 + s);
+			ImageProcessor ip = stack.getProcessor(1 + z);
+			ip.setRoi(x, y, w, h);
+			stack2.setPixels(ip.crop().getPixels(), 1 + s);
 		}
 		return stack2;
 	}
 
 	/**
-	 * Copy a slice of XY data to the given buffer at the target position.
+	 * Insert a sub-region.
 	 *
+	 * @param x
+	 *            the x position
+	 * @param y
+	 *            the y position
 	 * @param z
-	 *            the z slice
-	 * @param dest
-	 *            the destination buffer
-	 * @param pos
-	 *            the position
+	 *            the z position
+	 * @param image
+	 *            the image
+	 * @throws IllegalArgumentException
+	 *             if the region is not within the data
 	 */
-	public void copyTo(int z, float[] dest, int pos)
+	public void insert(int x, int y, int z, Image3D image)
 	{
-		System.arraycopy(data, z * nr_by_nc, dest, pos, nr_by_nc);
+		// Check the region range
+		int w = image.getWidth();
+		int h = image.getHeight();
+		int d = image.getSize();
+		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+			throw new IllegalArgumentException("Region not within the data");
+		float[] region = image.data;
+		for (int s = 0, i = 0; s < d; s++, z++)
+		{
+			int base = z * nr_by_nc + y * nc + x;
+			for (int r = 0; r < h; r++)
+			{
+				System.arraycopy(region, i, data, base, w);
+				base += nc;
+				i += w;
+			}
+		}
 	}
 
 	/**
-	 * Copy a slice of XY data from the given buffer at the target position.
+	 * Insert a sub-region.
 	 *
+	 * @param x
+	 *            the x position
+	 * @param y
+	 *            the y position
 	 * @param z
-	 *            the z slice
-	 * @param source
-	 *            the source buffer
-	 * @param pos
-	 *            the position
+	 *            the z position
+	 * @param stack
+	 *            the image stack
+	 * @throws IllegalArgumentException
+	 *             if the region is not within the data
 	 */
-	public void copyFrom(int z, float[] source, int pos)
+	public void insert(int x, int y, int z, ImageStack stack)
 	{
-		System.arraycopy(source, pos, data, z * nr_by_nc, nr_by_nc);
+		// Check the region range
+		int w = stack.getWidth();
+		int h = stack.getHeight();
+		int d = stack.getSize();
+		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+			throw new IllegalArgumentException("Region not within the data");
+		boolean isFloat = stack.getBitDepth() == 32;
+		FloatProcessor fp = (isFloat) ? new FloatProcessor(w, h) : null;
+		for (int s = 0; s < d; s++, z++)
+		{
+			int base = z * nr_by_nc + y * nc + x;
+			float[] region = (float[]) ((isFloat) ? stack.getPixels(1 + s)
+					: stack.getProcessor(1 + s).toFloat(0, fp).getPixels());
+			for (int r = 0, i = 0; r < h; r++)
+			{
+				System.arraycopy(region, i, data, base, w);
+				base += nc;
+				i += w;
+			}
+		}
 	}
 }

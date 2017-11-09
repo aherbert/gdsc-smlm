@@ -391,14 +391,16 @@ public class DHT3D extends Image3D
 		float[] tmp = new float[nc];
 
 		// For convenience we extract slices for swapping with the FHT2 routine
-		float[] a = new float[image.nr_by_nc];
-		float[] b = new float[image.nr_by_nc];
+		int nr_by_nc = image.nr_by_nc;
+		float[] data = image.data;
+		float[] a = new float[nr_by_nc];
+		float[] b = new float[nr_by_nc];
 
 		for (int s = 0; s < ns_2; s++)
 		{
 			// Extract
-			image.copyTo(s, a, 0);
-			image.copyTo(s + ns_2, b, 0);
+			System.arraycopy(data, s * nr_by_nc, a, 0, nr_by_nc);
+			System.arraycopy(data, (s + ns_2) * nr_by_nc, b, 0, nr_by_nc);
 
 			//@formatter:off
 			// We swap: 0 <=> nx_2, 0 <=> ny_2
@@ -413,8 +415,8 @@ public class DHT3D extends Image3D
 			//@formatter:on
 
 			// Replace
-			image.copyFrom(s, a, 0);
-			image.copyFrom(s + ns_2, b, 0);
+			System.arraycopy(a, 0, data, s * nr_by_nc, nr_by_nc);
+			System.arraycopy(b, 0, data, (s + ns_2) * nr_by_nc, nr_by_nc);
 		}
 	}
 

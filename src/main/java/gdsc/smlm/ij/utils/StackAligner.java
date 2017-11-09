@@ -102,7 +102,7 @@ public class StackAligner implements Cloneable
 	 * of a single array.
 	 *
 	 * @param stack
-	 *            the stack (destructively modified)
+	 *            the stack (may be destructively modified)
 	 * @param w
 	 *            the width of the target stack
 	 * @param h
@@ -136,6 +136,9 @@ public class StackAligner implements Cloneable
 
 	private DHT3D createDHT(ImageStack stack)
 	{
+		if (stack.getBitDepth() != 32)
+			return createDHT(new Image3D(stack));
+		
 		// Apply window
 		int w = stack.getWidth(), h = stack.getHeight(), d = stack.getSize();
 		if (edgeWindow > 0)
@@ -162,23 +165,12 @@ public class StackAligner implements Cloneable
 		if (w < nc || h < nr || d < ns)
 		{
 			// Pad into the desired data size
-			int size = nc * nr;
-			float[] dest = new float[ns * size];
-
+			float[] dest = new float[ns * nc * nr];
+			dht = new DHT3D(nc, nr, ns, dest, false);
 			int ix = getInsert(nc, w);
 			int iy = getInsert(nr, h);
 			int iz = getInsert(ns, d);
-			int insertPos = iy * nc + ix;
-			for (int z = 0, slice = 0; z < ns; z++)
-			{
-				if (z >= iz && slice < d)
-				{
-					// Stack uses 1-based index
-					float[] source = (float[]) stack.getPixels(++slice);
-					insert(source, w, dest, nc, z * size + insertPos);
-				}
-			}
-			dht = new DHT3D(nc, nr, ns, dest, false);
+			dht.insert(ix, iy, iz, stack);
 		}
 		else
 		{
@@ -238,14 +230,6 @@ public class StackAligner implements Cloneable
 		return ((diff & 1) == 1) ? (diff + 1) / 2 : diff / 2;
 	}
 
-	private static void insert(float[] source, int sw, float[] dest, int dw, int to)
-	{
-		for (int from = 0; from < source.length; from += sw, to += dw)
-		{
-			System.arraycopy(source, from, dest, to, sw);
-		}
-	}
-
 	/**
 	 * Sets the reference stack and assumes the target stack will be the same size.
 	 * <p>
@@ -269,7 +253,7 @@ public class StackAligner implements Cloneable
 	 * of a single array.
 	 *
 	 * @param stack
-	 *            the stack (destructively modified)
+	 *            the stack (may be destructively modified)
 	 * @param w
 	 *            the width of the target stack
 	 * @param h
@@ -332,24 +316,12 @@ public class StackAligner implements Cloneable
 		if (w < nc || h < nr || d < ns)
 		{
 			// Pad into the desired data size
-			int size = nc * nr;
-			float[] dest = new float[ns * size];
+			float[] dest = new float[ns * nr * nc];
 			dht = new DHT3D(nc, nr, ns, dest, false);
-
 			int ix = getInsert(nc, w);
 			int iy = getInsert(nr, h);
 			int iz = getInsert(ns, d);
-			int insertPos = iy * nc + ix;
-			float[] pixels = stack.getData();
-			int inc = stack.nr_by_nc;
-			for (int z = 0, slice = 0; z < ns; z++)
-			{
-				if (z >= iz && slice < d)
-				{
-					insert(pixels, slice * inc, w, h, dest, nc, z * size + insertPos);
-					slice++;
-				}
-			}
+			dht.insert(ix, iy, iz, stack);
 		}
 		else
 		{
@@ -359,16 +331,6 @@ public class StackAligner implements Cloneable
 
 		dht.transform();
 		return dht;
-	}
-
-	private static void insert(float[] source, int from, int sw, int sh, float[] dest, int dw, int to)
-	{
-		while (sh-- > 0)
-		{
-			System.arraycopy(source, from, dest, to, sw);
-			from += sw;
-			to += dw;
-		}
 	}
 
 	/**
