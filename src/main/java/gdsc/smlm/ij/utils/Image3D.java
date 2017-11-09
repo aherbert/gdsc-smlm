@@ -303,7 +303,7 @@ public class Image3D
 		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
 			throw new IllegalArgumentException("Region not within the data");
 		int size = w * h;
-		ImageStack stack = new ImageStack(w, h);
+		ImageStack stack = new ImageStack(w, h, d);
 		for (int s = 0; s < d; s++, z++)
 		{
 			int base = z * nr_by_nc + y * nc + x;
@@ -314,7 +314,7 @@ public class Image3D
 				base += nc;
 				i += w;
 			}
-			stack.addSlice(null, region);
+			stack.setPixels(region, 1 + s);
 		}
 		return stack;
 	}
@@ -401,7 +401,7 @@ public class Image3D
 		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
 			throw new IllegalArgumentException("Region not within the data");
 		int size = w * h;
-		ImageStack stack2 = new ImageStack(w, h);
+		ImageStack stack2 = new ImageStack(w, h, d);
 		for (int s = 0; s < d; s++, z++)
 		{
 			float[] data = (float[]) stack.getPixels(1 + z);
@@ -413,23 +413,38 @@ public class Image3D
 				base += nc;
 				i += w;
 			}
-			stack2.addSlice(null, region);
+			stack2.setPixels(region, 1 + s);
 		}
 		return stack2;
 	}
 
 	/**
-	 * Copy a slice of XY data into the given buffer at the target position.
+	 * Copy a slice of XY data to the given buffer at the target position.
 	 *
 	 * @param z
 	 *            the z slice
 	 * @param dest
 	 *            the destination buffer
-	 * @param to
-	 *            the target position
+	 * @param pos
+	 *            the position
 	 */
-	public void copySlice(int z, float[] dest, int to)
+	public void copyTo(int z, float[] dest, int pos)
 	{
-		System.arraycopy(data, z * nr_by_nc, dest, to, nr_by_nc);
+		System.arraycopy(data, z * nr_by_nc, dest, pos, nr_by_nc);
+	}
+
+	/**
+	 * Copy a slice of XY data from the given buffer at the target position.
+	 *
+	 * @param z
+	 *            the z slice
+	 * @param source
+	 *            the source buffer
+	 * @param pos
+	 *            the position
+	 */
+	public void copyFrom(int z, float[] source, int pos)
+	{
+		System.arraycopy(source, pos, data, z * nr_by_nc, nr_by_nc);
 	}
 }

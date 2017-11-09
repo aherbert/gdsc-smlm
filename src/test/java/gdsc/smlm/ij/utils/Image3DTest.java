@@ -62,7 +62,7 @@ public class Image3DTest
 			Assert.assertArrayEquals(e, o, 0);
 
 			// Compare to the cropped data
-			croppedData.copySlice(zz, o, 0);
+			croppedData.copyTo(zz, o, 0);
 			System.arraycopy(croppedData.getData(), zz * o.length, o, 0, o.length);
 			Assert.assertArrayEquals(e, o, 0);
 		}

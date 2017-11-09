@@ -10,6 +10,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import ij.ImageStack;
+import ij.process.FloatProcessor;
 
 public class DHT3DTest
 {
@@ -46,20 +47,80 @@ public class DHT3DTest
 		return createData(centre, centre, centre);
 	}
 
+	private DHT3D createOctants(int w, int h, int d)
+	{
+		int w_2 = w / 2;
+		int h_2 = h / 2;
+		int d_2 = d / 2;
+		ImageStack stack = new ImageStack(w, h, d);
+		FloatProcessor fp = new FloatProcessor(w, h);
+		float[] pixels = (float[]) fp.getPixels();
+		fill(fp, w_2, 0, w_2, h_2, 1);
+		fill(fp, 0, 0, w_2, h_2, 2);
+		fill(fp, 0, h_2, w_2, h_2, 3);
+		fill(fp, w_2, h_2, w_2, h_2, 4);
+		for (int z = 0; z < d_2; z++)
+			stack.setPixels(pixels.clone(), 1 + z);
+		fill(fp, w_2, 0, w_2, h_2, 5);
+		fill(fp, 0, 0, w_2, h_2, 6);
+		fill(fp, 0, h_2, w_2, h_2, 7);
+		fill(fp, w_2, h_2, w_2, h_2, 8);
+		for (int z = d_2; z < d; z++)
+			stack.setPixels(pixels.clone(), 1 + z);
+		return new DHT3D(stack);
+	}
+
+	private void fill(FloatProcessor fp, int x, int y, int w, int h, double value)
+	{
+		fp.setRoi(x, y, w, h);
+		fp.setValue(value);
+		fp.fill();
+	}
+
 	@Test
 	public void canSwapOctants()
 	{
-		// This just tests that the swap of the DHT and the stack matches
-		DHT3D dht = createData();
-		ImageStack stack = dht.getImageStack();
-		//gdsc.core.ij.Utils.display("Test", stack);
+		DHT3D dht;
+
+		// Simple test
+		float[] data = new float[] { 2, 1, 3, 4, 6, 5, 7, 8 };
+		dht = new DHT3D(2, 2, 2, data.clone(), false);
 		dht.swapOctants();
-		DHT3D.swapOctants(stack);
+		checkOctants(data, dht.getData());
 
-		float[] e = new DHT3D(stack).getData();
-		float[] o = dht.getData();
+		int[] test = new int[] { 2, 4, 6 };
+		for (int w : test)
+			for (int h : test)
+				for (int d : test)
+				{
+					dht = createOctants(w, h, d);
 
-		Assert.assertArrayEquals(e, o, 0);
+					// This just tests that the swap of the DHT and the stack matches
+					ImageStack stack = dht.getImageStack();
+					//gdsc.core.ij.Utils.display("Test", stack);
+					dht.swapOctants();
+					DHT3D.swapOctants(stack);
+
+					float[] e = new DHT3D(stack).getData();
+					float[] o = dht.getData();
+
+					Assert.assertArrayEquals(e, o, 0);
+				}
+	}
+
+	private void checkOctants(float[] in, float[] out)
+	{
+		int[] swap = new int[9];
+		swap[1] = 7;
+		swap[2] = 8;
+		swap[3] = 5;
+		swap[4] = 6;
+		swap[5] = 3;
+		swap[6] = 4;
+		swap[7] = 1;
+		swap[8] = 2;
+		for (int i = 0; i < in.length; i++)
+			Assert.assertEquals(in[i], swap[(int) out[i]], 0);
 	}
 
 	@Test

@@ -337,7 +337,7 @@ public class DHT3D extends Image3D
 	}
 
 	/**
-	 * Swap octants 1+7, 2+8, 4+6, 3+5 so the power spectrum origin is at the centre of the image.
+	 * Swap octants so the power spectrum origin is at the centre of the image.
 	 * 
 	 * <pre>
 	 * 1 +++ <=> 7 ---
@@ -349,7 +349,7 @@ public class DHT3D extends Image3D
 	 * Requires even dimensions.
 	 *
 	 * @throws IllegalArgumentException
-	 *             If not a float stack with even dimensions
+	 *             If not even dimensions
 	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
 	 */
 	public void swapOctants() throws IllegalArgumentException
@@ -358,8 +358,7 @@ public class DHT3D extends Image3D
 	}
 
 	/**
-	 * Swap octants 1+7, 2+8, 4+6, 3+5 of the specified image stack
-	 * so the power spectrum origin is at the centre of the image.
+	 * Swap octants of the specified image stack so the power spectrum origin is at the centre of the image.
 	 * 
 	 * <pre>
 	 * 1 +++ <=> 7 ---
@@ -391,17 +390,15 @@ public class DHT3D extends Image3D
 
 		float[] tmp = new float[nc];
 
-		// For convenience we extract slices for swapping
-		int nr_by_nc = image.nr_by_nc;
-		float[] data = image.getData();
-		float[] a = new float[nr_by_nc];
-		float[] b = new float[nr_by_nc];
+		// For convenience we extract slices for swapping with the FHT2 routine
+		float[] a = new float[image.nr_by_nc];
+		float[] b = new float[image.nr_by_nc];
 
 		for (int s = 0; s < ns_2; s++)
 		{
 			// Extract
-			System.arraycopy(data, s * nr_by_nc, a, 0, nr_by_nc);
-			System.arraycopy(data, (s + ns_2) * nr_by_nc, b, 0, nr_by_nc);
+			image.copyTo(s, a, 0);
+			image.copyTo(s + ns_2, b, 0);
 
 			//@formatter:off
 			// We swap: 0 <=> nx_2, 0 <=> ny_2
@@ -416,14 +413,13 @@ public class DHT3D extends Image3D
 			//@formatter:on
 
 			// Replace
-			System.arraycopy(a, 0, data, s * nr_by_nc, nr_by_nc);
-			System.arraycopy(b, 0, data, (s + ns_2) * nr_by_nc, nr_by_nc);
+			image.copyFrom(s, a, 0);
+			image.copyFrom(s + ns_2, b, 0);
 		}
 	}
 
 	/**
-	 * Swap octants 1+7, 2+8, 4+6, 3+5 of the specified image stack
-	 * so the power spectrum origin is at the centre of the image.
+	 * Swap octants of the specified image stack so the power spectrum origin is at the centre of the image.
 	 * 
 	 * <pre>
 	 * 1 +++ <=> 7 ---
