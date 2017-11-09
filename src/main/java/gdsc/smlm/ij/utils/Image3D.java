@@ -18,7 +18,7 @@ import ij.process.ImageProcessor;
  *---------------------------------------------------------------------------*/
 
 /**
- * Store a 3D image in a single array
+ * Store a 3D image in a single float array
  */
 public class Image3D
 {
@@ -26,7 +26,34 @@ public class Image3D
 	 * The largest array size for which a regular 1D Java array is used to store the
 	 * data (2^30)
 	 */
-	public static final int maxSizeOf32bitArray = 1073741824;
+	public static final int MAX_SIZE_OF_32_BIT_ARRAY = 1073741824;
+
+	/**
+	 * Check the size can fit in a 1D array
+	 *
+	 * @param nc
+	 *            the number of columns
+	 * @param nr
+	 *            the number of rows
+	 * @param ns
+	 *            the number of slices
+	 * @param raiseException
+	 *            Set to true to raise an exception if too large
+	 * @return the size, or -1 if too large
+	 * @throws IllegalArgumentException
+	 *             if too large (optional)
+	 */
+	public static int checkSize(int nc, int nr, int ns, boolean raiseException) throws IllegalArgumentException
+	{
+		long size = (long) ns * nr * nc;
+		if (size > MAX_SIZE_OF_32_BIT_ARRAY)
+		{
+			if (raiseException)
+				throw new IllegalArgumentException("3D data too large");
+			return -1;
+		}
+		return (int) size;
+	}
 
 	/** The number of slices (max z). */
 	public final int ns;
@@ -53,12 +80,8 @@ public class Image3D
 		nc = stack.getWidth();
 		nr = stack.getHeight();
 		ns = stack.getSize();
-
-		long size = (long) ns * nr * nc;
-		if (size > maxSizeOf32bitArray)
-			throw new IllegalArgumentException("3D data too large");
-
-		data = new float[(int) size];
+		
+		data = new float[checkSize(nc, nr, ns, true)];
 
 		nr_by_nc = nr * nc;
 		if (stack.getBitDepth() == 32)
@@ -92,7 +115,7 @@ public class Image3D
 		nc = stack.getWidth();
 		nr = stack.getHeight();
 		ns = stack.getSize();
-
+		
 		this.data = data;
 
 		nr_by_nc = nr * nc;

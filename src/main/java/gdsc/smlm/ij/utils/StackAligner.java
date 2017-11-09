@@ -21,7 +21,6 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.cspline.CubicSplineCalculator;
 import ij.ImageStack;
-import pl.edu.icm.jlargearrays.LargeArray;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -120,10 +119,8 @@ public class StackAligner implements Cloneable
 		nc = Maths.nextPow2(Math.max(w, stack.getWidth()));
 		nr = Maths.nextPow2(Math.max(h, stack.getHeight()));
 		ns = Maths.nextPow2(Math.max(d, stack.getSize()));
-		long size = (long) ns * nr * nc;
-		// Don't support using large arrays for simplicity
-		if (size > LargeArray.getMaxSizeOf32bitArray())
-			throw new IllegalArgumentException("3D data too large");
+		// Check the stack will fit in an Image3D
+		Image3D.checkSize(nc, nr, ns, true);
 		// Window and pad the reference
 		reference = createDHT(stack);
 	}
@@ -138,7 +135,7 @@ public class StackAligner implements Cloneable
 	{
 		if (stack.getBitDepth() != 32)
 			return createDHT(new Image3D(stack));
-		
+
 		// Apply window
 		int w = stack.getWidth(), h = stack.getHeight(), d = stack.getSize();
 		if (edgeWindow > 0)
@@ -271,10 +268,6 @@ public class StackAligner implements Cloneable
 		nc = Maths.nextPow2(Math.max(w, stack.getWidth()));
 		nr = Maths.nextPow2(Math.max(h, stack.getHeight()));
 		ns = Maths.nextPow2(Math.max(d, stack.getSize()));
-		long size = (long) ns * nr * nc;
-		// Don't support using large arrays for simplicity
-		if (size > LargeArray.getMaxSizeOf32bitArray())
-			throw new IllegalArgumentException("3D data too large");
 		// Window and pad the reference
 		reference = createDHT(stack);
 	}

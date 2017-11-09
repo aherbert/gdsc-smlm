@@ -38,7 +38,7 @@ public class DHT3D extends Image3D
 	public DHT3D(ImageStack stack) throws IllegalArgumentException
 	{
 		super(stack);
-		LargeArray.setMaxSizeOf32bitArray(maxSizeOf32bitArray);
+		LargeArray.setMaxSizeOf32bitArray(MAX_SIZE_OF_32_BIT_ARRAY);
 		dht = new FloatDHT_3D(ns, nr, nc);
 	}
 
@@ -61,7 +61,7 @@ public class DHT3D extends Image3D
 	public DHT3D(int nc, int nr, int ns, float[] data, boolean isFrequencyDomain) throws IllegalArgumentException
 	{
 		super(nc, nr, ns, data);
-		LargeArray.setMaxSizeOf32bitArray(maxSizeOf32bitArray);
+		LargeArray.setMaxSizeOf32bitArray(MAX_SIZE_OF_32_BIT_ARRAY);
 		dht = new FloatDHT_3D(ns, nr, nc);
 		this.isFrequencyDomain = isFrequencyDomain;
 	}
