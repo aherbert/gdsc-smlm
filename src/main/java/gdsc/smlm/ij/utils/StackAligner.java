@@ -214,7 +214,12 @@ public class StackAligner implements Cloneable
 
 	private static void applyWindow(float[] image, int maxx, int maxy, double[] wx, double[] wy, double wz)
 	{
-		for (int y = 0, i = 0; y < maxy; y++)
+		applyWindow(image, 0, maxx, maxy, wx, wy, wz);
+	}
+
+	private static void applyWindow(float[] image, int i, int maxx, int maxy, double[] wx, double[] wy, double wz)
+	{
+		for (int y = 0; y < maxy; y++)
 		{
 			double w = wy[y] * wz;
 			for (int x = 0; x < maxx; x++, i++)
@@ -238,6 +243,131 @@ public class StackAligner implements Cloneable
 		for (int from = 0; from < source.length; from += sw, to += dw)
 		{
 			System.arraycopy(source, from, dest, to, sw);
+		}
+	}
+
+	/**
+	 * Sets the reference stack and assumes the target stack will be the same size.
+	 * <p>
+	 * The dimension are converted to the next power of 2 for speed. The combined size must fit within the maximum size
+	 * of a single array.
+	 *
+	 * @param stack
+	 *            the stack (destructively modified)
+	 * @throws IllegalArgumentException
+	 *             If any dimension is less than 2, or if the combined target dimensions is too large for an array
+	 */
+	public void setReference(Image3D stack)
+	{
+		setReference(stack, stack.getWidth(), stack.getHeight(), stack.getSize());
+	}
+
+	/**
+	 * Sets the reference stack and the size of the target stack.
+	 * <p>
+	 * The dimension are converted to the next power of 2 for speed. The combined size must fit within the maximum size
+	 * of a single array.
+	 *
+	 * @param stack
+	 *            the stack (destructively modified)
+	 * @param w
+	 *            the width of the target stack
+	 * @param h
+	 *            the height of the target stack
+	 * @param d
+	 *            the depth of the target stack
+	 * @throws IllegalArgumentException
+	 *             If any dimension is less than 2, or if the combined target dimensions is too large for an array
+	 */
+	public void setReference(Image3D stack, int w, int h, int d)
+	{
+		check3D(stack);
+		if (w < 2 || h < 2 || d < 2)
+			throw new IllegalArgumentException("Require a 3D target stack");
+		nc = Maths.nextPow2(Math.max(w, stack.getWidth()));
+		nr = Maths.nextPow2(Math.max(h, stack.getHeight()));
+		ns = Maths.nextPow2(Math.max(d, stack.getSize()));
+		long size = (long) ns * nr * nc;
+		// Don't support using large arrays for simplicity
+		if (size > LargeArray.getMaxSizeOf32bitArray())
+			throw new IllegalArgumentException("3D data too large");
+		// Window and pad the reference
+		reference = createDHT(stack);
+	}
+
+	private void check3D(Image3D stack)
+	{
+		if (stack.getWidth() < 2 || stack.getHeight() < 2 || stack.getSize() < 2)
+			throw new IllegalArgumentException("Require a 3D stack");
+	}
+
+	private DHT3D createDHT(Image3D stack)
+	{
+		// Apply window
+		int w = stack.getWidth(), h = stack.getHeight(), d = stack.getSize();
+		if (edgeWindow > 0)
+		{
+			double[] wx = createXWindow(w);
+			double[] wy = createYWindow(h);
+			double[] wz = createZWindow(d);
+			float[] pixels = stack.getData();
+			int inc = stack.nr_by_nc;
+			for (int z = 0, i = 0; z < d; z++)
+			{
+				if (wz[z] == 0)
+				{
+					// Special case happens with Tukey window at the ends
+					for (int j = 0; j < inc; j++)
+						pixels[i++] = 0;
+				}
+				else
+				{
+					applyWindow(pixels, i, w, h, wx, wy, wz[z]);
+					i += inc;
+				}
+			}
+		}
+
+		DHT3D dht;
+		if (w < nc || h < nr || d < ns)
+		{
+			// Pad into the desired data size
+			int size = nc * nr;
+			float[] dest = new float[ns * size];
+			dht = new DHT3D(nc, nr, ns, dest, false);
+
+			int ix = getInsert(nc, w);
+			int iy = getInsert(nr, h);
+			int iz = getInsert(ns, d);
+			int insertPos = iy * nc + ix;
+			float[] pixels = stack.getData();
+			int inc = stack.nr_by_nc;
+			for (int z = 0, slice = 0; z < ns; z++)
+			{
+				if (z >= iz && slice < d)
+				{
+					insert(pixels, slice * inc, w, h, dest, nc, z * size + insertPos);
+					slice++;
+				}
+			}
+		}
+		else
+		{
+			// This will just uses the data
+			dht = new DHT3D(w, h, d, stack.getData(), false);
+		}
+
+		dht.transform();
+		return dht;
+	}
+
+	private static void insert(float[] source, int from, int sw, int sh, float[] dest, int dw, int to)
+	{
+		while (sh-- > 0)
+		{
+			System.arraycopy(source, from, dest, to, sw);
+			from += sw;
+			to += dw;
 		}
 	}
 
@@ -278,6 +408,65 @@ public class StackAligner implements Cloneable
 			throw new IllegalArgumentException("Stack is larger than the initialised reference");
 
 		DHT3D target = createDHT(stack);
+		return align(target, refinements, error);
+	}
+
+	/**
+	 * Align the stack with the reference. Compute the translation required to move the target stack onto the reference
+	 * stack for maximum correlation.
+	 *
+	 * @param stack
+	 *            the stack
+	 * @return [x,y,z,value]
+	 * @throws IllegalArgumentException
+	 *             If any dimension is less than 2, or if larger than the initialised reference
+	 */
+	public double[] align(Image3D stack)
+	{
+		return align(stack, 0, 0);
+	}
+
+	/**
+	 * Align the stack with the reference with sub-pixel accuracy. Compute the translation required to move the target
+	 * stack onto the reference stack for maximum correlation.
+	 *
+	 * @param stack
+	 *            the stack
+	 * @param refinements
+	 *            the refinements for sub-pixel accuracy
+	 * @param error
+	 *            the error for sub-pixel accuracy (i.e. stop when improvements are less than this error)
+	 * @return [x,y,z,value]
+	 * @throws IllegalArgumentException
+	 *             If any dimension is less than 2, or if larger than the initialised reference
+	 */
+	public double[] align(Image3D stack, int refinements, double error)
+	{
+		check3D(stack);
+		int w = stack.getWidth(), h = stack.getHeight(), d = stack.getSize();
+		if (w > nc || h > nr || d > ns)
+			throw new IllegalArgumentException("Stack is larger than the initialised reference");
+
+		DHT3D target = createDHT(stack);
+		return align(target, refinements, error);
+	}
+
+	/**
+	 * Align the stack with the reference with sub-pixel accuracy. Compute the translation required to move the target
+	 * stack onto the reference stack for maximum correlation.
+	 *
+	 * @param target
+	 *            the target
+	 * @param refinements
+	 *            the refinements for sub-pixel accuracy
+	 * @param error
+	 *            the error for sub-pixel accuracy (i.e. stop when improvements are less than this error)
+	 * @return [x,y,z,value]
+	 * @throws IllegalArgumentException
+	 *             If any dimension is less than 2, or if larger than the initialised reference
+	 */
+	private double[] align(DHT3D target, int refinements, double error)
+	{
 		DHT3D correlation = target.conjugateMultiply(reference, buffer);
 		buffer = correlation.getData();
 		correlation.inverseTransform();
