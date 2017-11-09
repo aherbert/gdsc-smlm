@@ -16,11 +16,11 @@ package gdsc.smlm.function;
 /**
  * Class for evaluating a function
  */
-public class StandardValueProcedure implements ValueProcedure
+public class StandardFloatValueProcedure implements ValueProcedure
 {
 	private int i;
-	/** The values from the last call to {@link #getValues(ValueFunction, double[])}. */
-	public double[] values;
+	/** The values from the last call to {@link #getValues(ValueFunction, float[])}. */
+	public float[] values;
 
 	/**
 	 * Gets the values.
@@ -31,9 +31,9 @@ public class StandardValueProcedure implements ValueProcedure
 	 *            the function coefficients
 	 * @return the values
 	 */
-	public double[] getValues(ValueFunction f, double[] a)
+	public float[] getValues(ValueFunction f, double[] a)
 	{
-		values = new double[f.size()];
+		values = new float[f.size()];
 		i = 0;
 		f.initialise0(a);
 		f.forEach(this);
@@ -52,7 +52,7 @@ public class StandardValueProcedure implements ValueProcedure
 	 * @param offset
 	 *            the offset
 	 */
-	public void getValues(ValueFunction f, double[] a, double[] buffer, int offset)
+	public void getValues(ValueFunction f, double[] a, float[] buffer, int offset)
 	{
 		if (buffer == null || buffer.length < offset + f.size())
 			throw new IllegalArgumentException("Buffer is not large enough for the function values");
@@ -65,10 +65,10 @@ public class StandardValueProcedure implements ValueProcedure
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
+	 * @see gdsc.smlm.function.ValueProcedure#execute(float)
 	 */
 	public void execute(double value)
 	{
-		values[i++] = value;
+		values[i++] = (float) value;
 	}
 }
