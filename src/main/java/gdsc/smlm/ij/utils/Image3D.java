@@ -45,6 +45,12 @@ public class Image3D
 	 */
 	public static int checkSize(int nc, int nr, int ns, boolean raiseException) throws IllegalArgumentException
 	{
+		if (nc < 0 || nr < 0 || ns < 0)
+		{
+			if (raiseException)
+				throw new IllegalArgumentException("Negative dimensions");
+			return -1;
+		}
 		long size = (long) ns * nr * nc;
 		if (size > MAX_SIZE_OF_32_BIT_ARRAY)
 		{
@@ -174,8 +180,7 @@ public class Image3D
 	 */
 	public Image3D(int nc, int nr, int ns, float[] data) throws IllegalArgumentException
 	{
-		long size = (long) ns * nr * nc;
-		if (data == null || data.length != size)
+		if (data == null || data.length != checkSize(nc, nr, ns, true))
 			throw new IllegalArgumentException("Data is not correct length");
 		this.nc = nc;
 		this.nr = nr;
@@ -376,7 +381,8 @@ public class Image3D
 	public Image3D crop(int x, int y, int z, int w, int h, int d, float[] region)
 	{
 		// Check the region range
-		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
+				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
 		int size = d * h * w;
 		if (region == null || region.length != size)
@@ -436,7 +442,8 @@ public class Image3D
 	public ImageStack cropToStack(int x, int y, int z, int w, int h, int d)
 	{
 		// Check the region range
-		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
+				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
 		int size = w * h;
 		ImageStack stack = new ImageStack(w, h, d);
@@ -483,6 +490,7 @@ public class Image3D
 		if (stack.getBitDepth() != 32)
 		{
 			// Handle non-float data
+			checkSize(w, h, d, true);
 			stack = cropToStack(stack, x, y, z, w, h, d);
 			int size = d * h * w;
 			if (region == null || region.length != size)
@@ -495,9 +503,10 @@ public class Image3D
 		int ns = stack.getSize();
 
 		// Check the region range
-		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
+				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = d * h * w;
+		int size = checkSize(w, h, d, true);
 		if (region == null || region.length != size)
 			region = new float[size];
 		for (int s = 0, i = 0; s < d; s++, z++)
@@ -540,7 +549,8 @@ public class Image3D
 		int ns = stack.getSize();
 
 		// Check the region range
-		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
+				(long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
 		ImageStack stack2 = new ImageStack(w, h, d);
 		for (int s = 0; s < d; s++, z++)
@@ -572,7 +582,7 @@ public class Image3D
 		int w = image.getWidth();
 		int h = image.getHeight();
 		int d = image.getSize();
-		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
 		float[] region = image.data;
 		for (int s = 0, i = 0; s < d; s++, z++)
@@ -607,7 +617,7 @@ public class Image3D
 		int w = stack.getWidth();
 		int h = stack.getHeight();
 		int d = stack.getSize();
-		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
 		boolean isFloat = stack.getBitDepth() == 32;
 		FloatProcessor fp = (isFloat) ? new FloatProcessor(w, h) : null;
@@ -622,6 +632,38 @@ public class Image3D
 				base += nc;
 				i += w;
 			}
+		}
+	}
+
+	/**
+	 * Insert a sub-region.
+	 *
+	 * @param x
+	 *            the x position
+	 * @param y
+	 *            the y position
+	 * @param z
+	 *            the z position
+	 * @param image
+	 *            the image
+	 * @throws IllegalArgumentException
+	 *             if the region is not within the data
+	 */
+	public void insert(int x, int y, int z, ImageProcessor image)
+	{
+		// Check the region range
+		int w = image.getWidth();
+		int h = image.getHeight();
+		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || z >= ns)
+			throw new IllegalArgumentException("Region not within the data");
+		boolean isFloat = image.getBitDepth() == 32;
+		int base = z * nr_by_nc + y * nc + x;
+		float[] region = (float[]) ((isFloat) ? image.getPixels() : image.toFloat(0, null).getPixels());
+		for (int r = 0, i = 0; r < h; r++)
+		{
+			System.arraycopy(region, i, data, base, w);
+			base += nc;
+			i += w;
 		}
 	}
 }
