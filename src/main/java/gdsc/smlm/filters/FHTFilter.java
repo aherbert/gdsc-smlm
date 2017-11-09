@@ -255,7 +255,7 @@ public class FHTFilter extends BaseFilter
 			data = new float[size];
 			int x = getInsert(maxN, kw);
 			int y = getInsert(maxN, kh);
-			insert(kernel, kw, kh, data, maxN, x, y);
+			insert(kernel, kw, data, maxN, x, y);
 		}
 		else
 		{
@@ -293,7 +293,7 @@ public class FHTFilter extends BaseFilter
 		return ((diff & 1) == 1) ? (diff + 1) / 2 : diff / 2;
 	}
 
-	private static void insert(float[] source, int maxx, int maxy, float[] dest, int maxN, int x, int y)
+	private static void insert(float[] source, int maxx, float[] dest, int maxN, int x, int y)
 	{
 		for (int from = 0, to = y * maxN + x; from < source.length; from += maxx, to += maxN)
 		{
@@ -326,7 +326,7 @@ public class FHTFilter extends BaseFilter
 			float[] data2 = new float[maxN * maxN];
 			int x = getInsert(maxN, maxx);
 			int y = getInsert(maxN, maxy);
-			insert(data, maxx, maxy, data2, maxN, x, y);
+			insert(data, maxx, data2, maxN, x, y);
 			data = data2;
 		}
 
