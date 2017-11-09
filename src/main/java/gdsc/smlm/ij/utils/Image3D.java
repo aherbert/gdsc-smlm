@@ -49,9 +49,9 @@ public class Image3D
 	 */
 	public Image3D(ImageStack stack) throws IllegalArgumentException
 	{
-		ns = stack.getSize();
-		nr = stack.getHeight();
 		nc = stack.getWidth();
+		nr = stack.getHeight();
+		ns = stack.getSize();
 
 		long size = (long) ns * nr * nc;
 		if (size > maxSizeOf32bitArray)
@@ -317,6 +317,105 @@ public class Image3D
 			stack.addSlice(null, region);
 		}
 		return stack;
+	}
+
+	/**
+	 * Crop a sub-region of the data.
+	 *
+	 * @param stack
+	 *            the stack
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @param region
+	 *            the cropped data (will be reused if the correct size)
+	 * @return the cropped data
+	 * @throws IllegalArgumentException
+	 *             if the region is not within the data, or the stack is not 32-bit float data
+	 */
+	public static Image3D crop(ImageStack stack, int x, int y, int z, int w, int h, int d, float[] region)
+	{
+		if (stack.getBitDepth() != 32)
+			throw new IllegalArgumentException("Require float stack");
+		int nc = stack.getWidth();
+		int nr = stack.getHeight();
+		int ns = stack.getSize();
+
+		// Check the region range
+		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+			throw new IllegalArgumentException("Region not within the data");
+		int size = d * h * w;
+		if (region == null || region.length != size)
+			region = new float[size];
+		for (int s = 0, i = 0; s < d; s++, z++)
+		{
+			float[] data = (float[]) stack.getPixels(1 + z);
+			int base = y * nc + x;
+			for (int r = 0; r < h; r++)
+			{
+				System.arraycopy(data, base, region, i, w);
+				base += nc;
+				i += w;
+			}
+		}
+		return new Image3D(w, h, d, w * h, region);
+	}
+
+	/**
+	 * Crop a sub-region of the data.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @return the cropped data
+	 * @throws IllegalArgumentException
+	 *             if the region is not within the data, or the stack is not 32-bit float data
+	 */
+	public static ImageStack cropToStack(ImageStack stack, int x, int y, int z, int w, int h, int d)
+	{
+		if (stack.getBitDepth() != 32)
+			throw new IllegalArgumentException("Require float stack");
+		int nc = stack.getWidth();
+		int nr = stack.getHeight();
+		int ns = stack.getSize();
+
+		// Check the region range
+		if (x < 0 || x + w >= nc || y < 0 || y + h >= nr || z < 0 || z + d >= ns)
+			throw new IllegalArgumentException("Region not within the data");
+		int size = w * h;
+		ImageStack stack2 = new ImageStack(w, h);
+		for (int s = 0; s < d; s++, z++)
+		{
+			float[] data = (float[]) stack.getPixels(1 + z);
+			int base = y * nc + x;
+			float[] region = new float[size];
+			for (int r = 0, i = 0; r < h; r++)
+			{
+				System.arraycopy(data, base, region, i, w);
+				base += nc;
+				i += w;
+			}
+			stack2.addSlice(null, region);
+		}
+		return stack2;
 	}
 
 	/**
