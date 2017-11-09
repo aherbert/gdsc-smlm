@@ -80,7 +80,7 @@ public class Image3D
 		nc = stack.getWidth();
 		nr = stack.getHeight();
 		ns = stack.getSize();
-		
+
 		data = new float[checkSize(nc, nr, ns, true)];
 
 		nr_by_nc = nr * nc;
@@ -115,7 +115,7 @@ public class Image3D
 		nc = stack.getWidth();
 		nr = stack.getHeight();
 		ns = stack.getSize();
-		
+
 		this.data = data;
 
 		nr_by_nc = nr * nc;
@@ -146,10 +146,31 @@ public class Image3D
 	 *            the number of rows
 	 * @param ns
 	 *            the number of slices
+	 * @throws IllegalArgumentException
+	 *             If the combined dimensions is too large for an array
+	 */
+	public Image3D(int nc, int nr, int ns) throws IllegalArgumentException
+	{
+		data = new float[checkSize(nc, nr, ns, true)];
+		this.nc = nc;
+		this.nr = nr;
+		this.ns = ns;
+		nr_by_nc = nr * nc;
+	}
+
+	/**
+	 * Instantiates a new 3D image.
+	 *
+	 * @param nc
+	 *            the number of columns
+	 * @param nr
+	 *            the number of rows
+	 * @param ns
+	 *            the number of slices
 	 * @param data
 	 *            the data
 	 * @throws IllegalArgumentException
-	 *             If any dimension is less than 2, or if the data is not the correct length
+	 *             If the data is not the correct length
 	 */
 	public Image3D(int nc, int nr, int ns, float[] data) throws IllegalArgumentException
 	{

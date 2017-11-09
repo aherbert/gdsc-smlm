@@ -66,6 +66,34 @@ public class Image3DTest
 			Assert.assertArrayEquals(e, o, 0);
 		}
 	}
-	
-	// TODO - Test can insert ...
+
+	@Test
+	public void canInsert()
+	{
+		canInsert(3, 4, 5, 6, 7, 8);
+		canInsert(3, 4, 5, 1, 1, 1);
+		canInsert(0, 0, 0, 1, 2, 3);
+	}
+
+	private void canInsert(int x, int y, int z, int w, int h, int d)
+	{
+		// This test assumes that crop works!
+		
+		Image3D image = createData(x + w + 1, y + h + 1, z + d + 1);
+		Image3D image2 = image.copy();
+
+		Image3D blank = new Image3D(w, h, d);
+		
+		image.insert(x, y, z, blank);
+
+		Image3D croppedData = image.crop(x, y, z, w, h, d, null);
+		
+		Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
+
+		image2.insert(x, y, z, blank.getImageStack());
+		
+		croppedData = image.crop(x, y, z, w, h, d, null);
+		
+		Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
+	}
 }
