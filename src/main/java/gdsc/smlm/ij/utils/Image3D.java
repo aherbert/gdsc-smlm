@@ -358,7 +358,7 @@ public class Image3D
 	}
 
 	/**
-	 * Crop a sub-region of the data.
+	 * Crop a sub-region of the data. The target dimensions must be positive.
 	 *
 	 * @param x
 	 *            the x index
@@ -401,7 +401,7 @@ public class Image3D
 	}
 
 	/**
-	 * Crop a sub-region of the data into the given image.
+	 * Crop a sub-region of the data into the given image. The target dimensions must be positive.
 	 *
 	 * @param x
 	 *            the x index
@@ -421,7 +421,7 @@ public class Image3D
 	}
 
 	/**
-	 * Crop a sub-region of the data.
+	 * Crop a sub-region of the data. The target dimensions must be positive.
 	 *
 	 * @param x
 	 *            the x index
@@ -463,7 +463,7 @@ public class Image3D
 	}
 
 	/**
-	 * Crop a sub-region of the data.
+	 * Crop a sub-region of the data. The target dimensions must be positive.
 	 *
 	 * @param stack
 	 *            the stack
@@ -524,7 +524,7 @@ public class Image3D
 	}
 
 	/**
-	 * Crop a sub-region of the data.
+	 * Crop a sub-region of the data. The target dimensions must be positive.
 	 *
 	 * @param x
 	 *            the x index
@@ -582,6 +582,8 @@ public class Image3D
 		int w = image.getWidth();
 		int h = image.getHeight();
 		int d = image.getSize();
+		if (w < 1 || h < 1 || d < 1)
+			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
 		float[] region = image.data;
@@ -617,6 +619,8 @@ public class Image3D
 		int w = stack.getWidth();
 		int h = stack.getHeight();
 		int d = stack.getSize();
+		if (w < 1 || h < 1 || d < 1)
+			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
 		boolean isFloat = stack.getBitDepth() == 32;
@@ -654,6 +658,8 @@ public class Image3D
 		// Check the region range
 		int w = image.getWidth();
 		int h = image.getHeight();
+		if (w < 1 || h < 1)
+			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || z >= ns)
 			throw new IllegalArgumentException("Region not within the data");
 		boolean isFloat = image.getBitDepth() == 32;
