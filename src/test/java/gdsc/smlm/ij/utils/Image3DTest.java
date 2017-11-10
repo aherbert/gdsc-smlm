@@ -110,43 +110,6 @@ public class Image3DTest
 	}
 
 	@Test
-	public void canComputeSum()
-	{
-		// Bounds checks
-		Image3D image = createData(2, 2, 2);
-		Assert.assertEquals(36, image.computeSum(0, 0, 0, 2, 2, 2), 0);
-		Assert.assertEquals(0, image.computeSum(0, 0, 0, 0, 0, 0), 0);
-		Assert.assertEquals(1, image.computeSum(0, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(2, image.computeSum(1, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(-10, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(10, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(0, 10, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(0, -10, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(0, 0, 10, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(0, 0, -10, 1, 1, 1), 0);
-
-		// Larger slices
-		canComputeSum(3, 4, 5, 6, 7, 8);
-		canComputeSum(3, 4, 5, 1, 1, 1);
-		canComputeSum(0, 0, 0, 1, 2, 3);
-	}
-
-	private void canComputeSum(int x, int y, int z, int w, int h, int d)
-	{
-		// This test assumes that crop works!
-		for (int pad : new int[] { 0, 1 })
-		{
-			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
-
-			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
-			double e = Maths.sum(croppedData.getData());
-			double o = image.computeSum(x, y, z, w, h, d);
-
-			Assert.assertEquals(o, e, 0);
-		}
-	}
-
-	@Test
 	public void canFindMin()
 	{
 		Image3D image = createData(2, 2, 2);
@@ -221,6 +184,101 @@ public class Image3DTest
 			Assert.assertEquals(xyz[0] + x, xyz2[0]);
 			Assert.assertEquals(xyz[1] + y, xyz2[1]);
 			Assert.assertEquals(xyz[2] + z, xyz2[2]);
+		}
+	}
+
+	@Test
+	public void canComputeSum()
+	{
+		// Bounds checks
+		Image3D image = createData(2, 2, 2);
+		Assert.assertEquals(36, image.computeSum(0, 0, 0, 2, 2, 2), 0);
+		Assert.assertEquals(0, image.computeSum(0, 0, 0, 0, 0, 0), 0);
+		Assert.assertEquals(1, image.computeSum(0, 0, 0, 1, 1, 1), 0);
+		Assert.assertEquals(2, image.computeSum(1, 0, 0, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(-10, 0, 0, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(10, 0, 0, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(0, 10, 0, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(0, -10, 0, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(0, 0, 10, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(0, 0, -10, 1, 1, 1), 0);
+
+		// Larger slices
+		canComputeSum(3, 4, 5, 6, 7, 8);
+		canComputeSum(3, 4, 5, 1, 1, 1);
+		canComputeSum(0, 0, 0, 1, 2, 3);
+	}
+
+	private void canComputeSum(int x, int y, int z, int w, int h, int d)
+	{
+		// This test assumes that crop works!
+		for (int pad : new int[] { 0, 1 })
+		{
+			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
+
+			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
+			double e = Maths.sum(croppedData.getData());
+			double o = image.computeSum(x, y, z, w, h, d);
+
+			Assert.assertEquals(o, e, 0);
+		}
+	}
+
+	@Test
+	public void canComputeRollingSumTable()
+	{
+		int w = 2, h = 3, d = 4;
+		Image3D image = createData(w, h, d);
+		double[] table = image.computeRollingSumTable(null);
+		for (int dd = 1, i = 0; dd <= d; dd++)
+			for (int hh = 1; hh <= h; hh++)
+				for (int ww = 1; ww <= w; ww++)
+				{
+					double e = image.computeSum(0, 0, 0, ww, hh, dd);
+					double o = table[i++];
+					Assert.assertEquals(e, o, 1e-3);
+				}
+	}
+
+	@Test
+	public void canComputeSumUsingTable()
+	{
+		// Bounds checks
+		Image3D image = createData(2, 2, 2);
+		double[] table = image.computeRollingSumTable(null);
+		Assert.assertEquals(36, image.computeSum(table, 0, 0, 0, 2, 2, 2), 0);
+		Assert.assertEquals(36, image.computeSum(table, 0, 0, 0, 5, 7, 9), 0);
+		Assert.assertEquals(0, image.computeSum(table, 0, 0, 0, 0, 0, 0), 0);
+		Assert.assertEquals(1, image.computeSum(table, 0, 0, 0, 1, 1, 1), 0);
+		Assert.assertEquals(2, image.computeSum(table, 1, 0, 0, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(table, -10, 0, 0, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(table, 10, 0, 0, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(table, 0, 10, 0, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(table, 0, -10, 0, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(table, 0, 0, 10, 1, 1, 1), 0);
+		Assert.assertEquals(0, image.computeSum(table, 0, 0, -10, 1, 1, 1), 0);
+
+		// Larger slices
+		canComputeSumUsingTable(3, 4, 5, 6, 7, 8);
+		canComputeSumUsingTable(3, 4, 5, 1, 1, 1);
+		canComputeSumUsingTable(0, 0, 0, 1, 2, 3);
+	}
+
+	private void canComputeSumUsingTable(int x, int y, int z, int w, int h, int d)
+	{
+		// This test assumes that crop works!
+		for (int pad : new int[] { 0, 1 })
+		{
+			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
+			double[] table = image.computeRollingSumTable(null);
+
+			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
+			double e = Maths.sum(croppedData.getData());
+			double o = image.computeSum(table, x, y, z, w, h, d);
+
+			// This may be different due to floating point error
+			// but we are adding integers so it should be OK
+			Assert.assertEquals(o, e, 0);
 		}
 	}
 }

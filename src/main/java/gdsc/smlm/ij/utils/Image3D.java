@@ -1019,13 +1019,57 @@ public class Image3D
 	}
 
 	/**
-	 * Compute the rolling sum table for use in computeSum.
+	 * Compute the rolling sum table for use in {@link #computeSum(double[], int, int, int, int, int, int)}.
+	 * <p>
+	 * This is a table of the sum of the volume from 0,0,0 to x,y,z inclusive.
 	 *
+	 * @param table
+	 *            the table (will be reused if the correct size)
 	 * @return the rolling sum table
 	 */
-	public double[] computeRollingSumTable()
+	public double[] computeRollingSumTable(double[] table)
 	{
-		return null;
+		if (table == null || table.length != data.length)
+			table = new double[data.length];
+
+		// First build a table for each XY slice
+		for (int s = 0; s < ns; s++)
+		{
+			double sum = 0;
+			int i = s * nr_by_nc;
+			// Initialise first row sum
+			// sum = rolling sum of (0 - colomn)
+			for (int c = 0; c < nc; c++, i++)
+			{
+				sum += data[i];
+				table[i] = sum;
+			}
+			// Remaining rows
+			// sum = rolling sum of (0 - colomn) + sum of same position above
+			for (int r = 1, ii = i - nc; r < nr; r++)
+			{
+				sum = 0;
+				for (int c = 0; c < nc; c++, i++)
+				{
+					sum += data[i];
+					// Add the sum from the previous row
+					table[i] = sum + table[ii++];
+				}
+			}
+		}
+
+		// Now sum across slices
+		// sum = rolling sum of (0,0 to column,row) + sum of same position above
+		// => rolling sum of (0,0,0 to column,row,slice)
+		for (int s = 1; s < ns; s++)
+		{
+			int i = s * nr_by_nc;
+			int ii = i - nr_by_nc;
+			for (int j = 0; j < nr_by_nc; j++)
+				table[i++] += table[ii++];
+		}
+
+		return table;
 	}
 
 	/**
@@ -1049,6 +1093,67 @@ public class Image3D
 	 */
 	public double computeSum(double[] table, int x, int y, int z, int w, int h, int d)
 	{
-		return 0;
+		int[] intersect = computeIntersect(x, y, z, w, h, d);
+		w = intersect[3];
+		h = intersect[4];
+		d = intersect[5];
+		// Recheck bounds
+		if (w == 0 || h == 0 || d == 0)
+			return 0;
+		//x = intersect[0];
+		//y = intersect[1];
+		//z = intersect[2];
+
+		// Compute sum from rolling sum using:
+		// sum(x,y,z,w,h,d) = 
+		// + s(x+w-1,y+h-1,z+d-1) 
+		// - s(x-1,y+h-1,z+d-1)
+		// - s(x+w-1,y-1,z+d-1)
+		// + s(x-1,y-1,z+d-1)
+		// /* Stack above must be subtracted so reverse sign*/
+		// - s(x+w-1,y+h-1,z-1) 
+		// + s(x-1,y+h-1,z-1)
+		// + s(x+w-1,y-1,z-1)
+		// - s(x-1,y-1,z-1)
+		// Note: 
+		// s(i,j,k) = 0 when either i,j,k < 0
+		// i = imax when i>imax 
+		// j = jmax when j>jmax 
+		// k = kmax when k>kmax 
+
+		int x_1 = intersect[0] - 1;
+		int y_1 = intersect[1] - 1;
+		int z_1 = intersect[2] - 1;
+		// The intersect has already checked the bounds 
+		//int x_w_1 = Math.min(x_1 + w, nc);
+		//int y_h_1 = Math.min(y_1 + h, nr);
+		//int z_d_1 = Math.min(z_1 + d, ns);
+		int x_w_1 = x_1 + w;
+		int y_h_1 = y_1 + h;
+		int z_d_1 = z_1 + d;
+
+		double sum = table[index(x_w_1, y_h_1, z_d_1)];
+		if (x_1 >= 0)
+			sum -= table[index(x_1, y_h_1, z_d_1)];
+		if (y_1 >= 0)
+		{
+			sum -= table[index(x_w_1, y_1, z_d_1)];
+			if (x_1 >= 0)
+				sum += table[index(x_1, y_1, z_d_1)];
+		}
+		if (z_1 >= 0)
+		{
+			sum -= table[index(x_w_1, y_h_1, z_1)];
+			if (x_1 >= 0)
+				sum += table[index(x_1, y_h_1, z_1)];
+			if (y_1 >= 0)
+			{
+				sum += table[index(x_w_1, y_1, z_1)];
+				if (x_1 >= 0)
+					sum -= table[index(x_1, y_1, z_1)];
+			}
+		}
+		return sum;
 	}
+
 }
