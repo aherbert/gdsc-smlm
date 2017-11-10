@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.utils;
 
+import gdsc.core.utils.Maths;
 import ij.ImageStack;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -671,5 +672,87 @@ public class Image3D
 			base += nc;
 			i += w;
 		}
+	}
+
+	/**
+	 * Compute the sum of the region.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @return the sum
+	 */
+	public double computeSum(int x, int y, int z, int w, int h, int d)
+	{
+		if (w < 1 || h < 1 || d < 1)
+			return 0;
+		// Compute 3D intersect with this object
+		int x2 = Maths.clip(0, nc, x + w);
+		int y2 = Maths.clip(0, nr, y + h);
+		int z2 = Maths.clip(0, ns, z + d);
+		x = Maths.clip(0, nc, x);
+		y = Maths.clip(0, nr, y);
+		z = Maths.clip(0, ns, z);
+		w = x2 - x;
+		h = y2 - y;
+		d = z2 - z;
+		// Recheck bounds
+		if (w < 1 || h < 1 || d < 1)
+			return 0;
+		double sum = 0;
+		for (int s = 0; s < d; s++, z++)
+		{
+			int base = z * nr_by_nc + y * nc + x;
+			for (int r = 0; r < h; r++)
+			{
+				for (int j = 0; j < w; j++)
+					sum += data[base + j];
+				base += nc;
+			}
+		}
+		return sum;
+	}
+
+	/**
+	 * Compute the rolling sum table for use in computeSum.
+	 *
+	 * @return the rolling sum table
+	 */
+	public double[] computeRollingSumTable()
+	{
+		return null;
+	}
+
+	/**
+	 * Compute the sum of the region using the precomputed rolling sum table.
+	 *
+	 * @param table
+	 *            the rolling sum table
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @return the sum
+	 */
+	public double computeSum(double[] table, int x, int y, int z, int w, int h, int d)
+	{
+		return 0;
 	}
 }
