@@ -1,6 +1,5 @@
 package gdsc.smlm.ij.utils;
 
-import gdsc.core.utils.Maths;
 import ij.ImageStack;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -379,7 +378,7 @@ public class Image3D
 	 * @throws IllegalArgumentException
 	 *             if the region is not within the data
 	 */
-	public Image3D crop(int x, int y, int z, int w, int h, int d, float[] region)
+	public Image3D crop(int x, int y, int z, int w, int h, int d, float[] region) throws IllegalArgumentException
 	{
 		// Check the region range
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
@@ -416,7 +415,7 @@ public class Image3D
 	 * @throws IllegalArgumentException
 	 *             if the region is not within the data
 	 */
-	public Image3D crop(int x, int y, int z, Image3D image)
+	public Image3D crop(int x, int y, int z, Image3D image) throws IllegalArgumentException
 	{
 		return crop(x, y, z, image.getWidth(), image.getHeight(), image.getSize(), image.data);
 	}
@@ -440,7 +439,7 @@ public class Image3D
 	 * @throws IllegalArgumentException
 	 *             if the region is not within the data
 	 */
-	public ImageStack cropToStack(int x, int y, int z, int w, int h, int d)
+	public ImageStack cropToStack(int x, int y, int z, int w, int h, int d) throws IllegalArgumentException
 	{
 		// Check the region range
 		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
@@ -487,6 +486,7 @@ public class Image3D
 	 *             if the region is not within the data
 	 */
 	public static Image3D crop(ImageStack stack, int x, int y, int z, int w, int h, int d, float[] region)
+			throws IllegalArgumentException
 	{
 		if (stack.getBitDepth() != 32)
 		{
@@ -544,6 +544,7 @@ public class Image3D
 	 *             if the region is not within the data
 	 */
 	public static ImageStack cropToStack(ImageStack stack, int x, int y, int z, int w, int h, int d)
+			throws IllegalArgumentException
 	{
 		int nc = stack.getWidth();
 		int nr = stack.getHeight();
@@ -577,7 +578,7 @@ public class Image3D
 	 * @throws IllegalArgumentException
 	 *             if the region is not within the data
 	 */
-	public void insert(int x, int y, int z, Image3D image)
+	public void insert(int x, int y, int z, Image3D image) throws IllegalArgumentException
 	{
 		// Check the region range
 		int w = image.getWidth();
@@ -614,7 +615,7 @@ public class Image3D
 	 * @throws IllegalArgumentException
 	 *             if the region is not within the data
 	 */
-	public void insert(int x, int y, int z, ImageStack stack)
+	public void insert(int x, int y, int z, ImageStack stack) throws IllegalArgumentException
 	{
 		// Check the region range
 		int w = stack.getWidth();
@@ -654,7 +655,7 @@ public class Image3D
 	 * @throws IllegalArgumentException
 	 *             if the region is not within the data
 	 */
-	public void insert(int x, int y, int z, ImageProcessor image)
+	public void insert(int x, int y, int z, ImageProcessor image) throws IllegalArgumentException
 	{
 		// Check the region range
 		int w = image.getWidth();
@@ -672,6 +673,306 @@ public class Image3D
 			base += nc;
 			i += w;
 		}
+	}
+
+	/**
+	 * Compute 3D intersect with this object.
+	 * <p>
+	 * If any of w,h,d are negative then the corresponding x,y,z is updated and the w,h,d is inverted.
+	 * The maximum bounds of the given dimensions are then computed by adding the
+	 * w,h,d to the x,y,z. The bounds are then clipped to the image dimensions and the intersect returned.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @return [x,y,z,w,h,d]
+	 */
+	public int[] computeIntersect(int x, int y, int z, int w, int h, int d)
+	{
+		if (w < 0)
+		{
+			w = -w;
+			x = subtract(x, w);
+		}
+		if (h < 0)
+		{
+			h = -h;
+			y = subtract(y, h);
+		}
+		if (d < 0)
+		{
+			d = -d;
+			z = subtract(z, d);
+		}
+		// Compute 3D intersect with this object
+		int x2 = clip(nc, x, w);
+		int y2 = clip(nr, y, h);
+		int z2 = clip(ns, z, d);
+		x = clip(nc, x);
+		y = clip(nr, y);
+		z = clip(ns, z);
+		return new int[] { x, y, z, x2 - x, y2 - y, z2 - z };
+	}
+
+	/**
+	 * Compute 3D intersect with this object or throw an exception if the intersect has no volume.
+	 * <p>
+	 * If any of w,h,d are negative then the corresponding x,y,z is updated and the w,h,d is inverted.
+	 * The maximum bounds of the given dimensions are then computed by adding the
+	 * w,h,d to the x,y,z. The bounds are then clipped to the image dimensions and the intersect returned.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @return [x,y,z,w,h,d]
+	 * @throws IllegalArgumentException
+	 *             if the intersect has no volume
+	 */
+	public int[] computeIntersectOrThrow(int x, int y, int z, int w, int h, int d) throws IllegalArgumentException
+	{
+		if (w < 0)
+		{
+			w = -w;
+			x = subtract(x, w);
+		}
+		if (h < 0)
+		{
+			h = -h;
+			y = subtract(y, h);
+		}
+		if (d < 0)
+		{
+			d = -d;
+			z = subtract(z, d);
+		}
+		// Compute 3D intersect with this object
+		int x2 = clip(nc, x, w);
+		int y2 = clip(nr, y, h);
+		int z2 = clip(ns, z, d);
+		x = clip(nc, x);
+		y = clip(nr, y);
+		z = clip(ns, z);
+		w = checkSize(x2 - x);
+		h = checkSize(y2 - y);
+		d = checkSize(z2 - z);
+		return new int[] { x, y, z, w, h, d };
+	}
+
+	/**
+	 * Check size is above zero or throw an exception.
+	 *
+	 * @param size
+	 *            the size
+	 * @return the size
+	 * @throws IllegalArgumentException
+	 *             If the size if zero
+	 */
+	private static int checkSize(int size) throws IllegalArgumentException
+	{
+		if (size == 0)
+			throw new IllegalArgumentException("No intersect");
+		return size;
+	}
+
+	/**
+	 * Subtract the value avoiding underflow.
+	 *
+	 * @param value
+	 *            the value
+	 * @param subtraction
+	 *            the subtraction
+	 * @return the value
+	 */
+	private static int subtract(int value, int subtraction)
+	{
+		// Avoid underflow
+		long v = (long) value - subtraction;
+		return (v < Integer.MIN_VALUE) ? Integer.MIN_VALUE : (int) v;
+	}
+
+	/**
+	 * Return value clipped to within the given bounds (0 - upper).
+	 *
+	 * @param upper
+	 *            the upper limit
+	 * @param value
+	 *            the value
+	 * @param addition
+	 *            the addition
+	 * @return the clipped value
+	 */
+	private static int clip(int upper, int value, int addition)
+	{
+		// Avoid overflow
+		long v = (long) value + addition;
+		if (v < 0)
+			return 0;
+		if (v > upper)
+			return upper;
+		return (int) v;
+	}
+
+	/**
+	 * Return value clipped to within the given bounds (0 - upper).
+	 *
+	 * @param upper
+	 *            the upper limit
+	 * @param value
+	 *            the value
+	 * @return the clipped value
+	 */
+	private static int clip(int upper, int value)
+	{
+		return (value < 0) ? 0 : (value > upper) ? upper : value;
+	}
+
+	/**
+	 * Find the index of the minimum value in the region.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @return the min index
+	 * @throws IllegalArgumentException
+	 *             if there is no intersect
+	 * @throws IllegalStateException
+	 *             if the region is just NaN values
+	 */
+	public int findMinIndex(int x, int y, int z, int w, int h, int d)
+			throws IllegalArgumentException, IllegalStateException
+	{
+		int[] intersect = computeIntersectOrThrow(x, y, z, w, h, d);
+		x = intersect[0];
+		y = intersect[1];
+		z = intersect[2];
+		w = intersect[3];
+		h = intersect[4];
+		d = intersect[5];
+		int index = findValueIndex(x, y, z, w, h, d);
+		for (int s = 0; s < d; s++, z++)
+		{
+			int base = z * nr_by_nc + y * nc + x;
+			for (int r = 0; r < h; r++)
+			{
+				for (int j = 0; j < w; j++)
+					if (data[base + j] < data[index])
+						index = base + j;
+				base += nc;
+			}
+		}
+		return index;
+	}
+
+	/**
+	 * Find the index of the minimum value in the region.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @return the min index
+	 * @throws IllegalArgumentException
+	 *             if there is no intersect
+	 * @throws IllegalStateException
+	 *             if the region is just NaN values
+	 */
+	public int findMaxIndex(int x, int y, int z, int w, int h, int d)
+			throws IllegalArgumentException, IllegalStateException
+	{
+		int[] intersect = computeIntersectOrThrow(x, y, z, w, h, d);
+		x = intersect[0];
+		y = intersect[1];
+		z = intersect[2];
+		w = intersect[3];
+		h = intersect[4];
+		d = intersect[5];
+		int index = findValueIndex(x, y, z, w, h, d);
+		for (int s = 0; s < d; s++, z++)
+		{
+			int base = z * nr_by_nc + y * nc + x;
+			for (int r = 0; r < h; r++)
+			{
+				for (int j = 0; j < w; j++)
+					if (data[base + j] > data[index])
+						index = base + j;
+				base += nc;
+			}
+		}
+		return index;
+	}
+
+	/**
+	 * Find the index of the first non-NaN value in the region.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @return the index
+	 * @throws IllegalStateException
+	 *             if the region is just NaN values
+	 */
+	private int findValueIndex(int x, int y, int z, int w, int h, int d) throws IllegalStateException
+	{
+		// Quick check without loops
+		if (!Float.isNaN(data[z * nr_by_nc + y * nc + x]))
+			return z * nr_by_nc + y * nc + x;
+
+		for (int s = 0; s < d; s++, z++)
+		{
+			int base = z * nr_by_nc + y * nc + x;
+			for (int r = 0; r < h; r++)
+			{
+				for (int j = 0; j < w; j++)
+					if (!Float.isNaN(data[base + j]))
+						return base + j;
+				base += nc;
+			}
+		}
+		throw new IllegalStateException("Region is NaN");
 	}
 
 	/**
@@ -693,21 +994,16 @@ public class Image3D
 	 */
 	public double computeSum(int x, int y, int z, int w, int h, int d)
 	{
-		if (w < 1 || h < 1 || d < 1)
-			return 0;
-		// Compute 3D intersect with this object
-		int x2 = Maths.clip(0, nc, x + w);
-		int y2 = Maths.clip(0, nr, y + h);
-		int z2 = Maths.clip(0, ns, z + d);
-		x = Maths.clip(0, nc, x);
-		y = Maths.clip(0, nr, y);
-		z = Maths.clip(0, ns, z);
-		w = x2 - x;
-		h = y2 - y;
-		d = z2 - z;
+		int[] intersect = computeIntersect(x, y, z, w, h, d);
+		w = intersect[3];
+		h = intersect[4];
+		d = intersect[5];
 		// Recheck bounds
-		if (w < 1 || h < 1 || d < 1)
+		if (w == 0 || h == 0 || d == 0)
 			return 0;
+		x = intersect[0];
+		y = intersect[1];
+		z = intersect[2];
 		double sum = 0;
 		for (int s = 0; s < d; s++, z++)
 		{

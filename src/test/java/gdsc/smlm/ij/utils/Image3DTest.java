@@ -12,7 +12,7 @@ public class Image3DTest
 {
 	private Image3D createData(int w, int h, int d)
 	{
-		float[] data = SimpleArrayUtils.newArray(w * h * d, 0, 1f);
+		float[] data = SimpleArrayUtils.newArray(w * h * d, 1f, 1f);
 		return new Image3D(w, h, d, data);
 	}
 
@@ -108,22 +108,23 @@ public class Image3DTest
 			Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
 		}
 	}
-	
+
 	@Test
 	public void canComputeSum()
 	{
 		// Bounds checks
 		Image3D image = createData(2, 2, 2);
-		Assert.assertEquals(28, image.computeSum(0, 0, 0, 2, 2, 2), 0);
+		Assert.assertEquals(36, image.computeSum(0, 0, 0, 2, 2, 2), 0);
 		Assert.assertEquals(0, image.computeSum(0, 0, 0, 0, 0, 0), 0);
-		Assert.assertEquals(1, image.computeSum(1, 0, 0, 1, 1, 1), 0);
+		Assert.assertEquals(1, image.computeSum(0, 0, 0, 1, 1, 1), 0);
+		Assert.assertEquals(2, image.computeSum(1, 0, 0, 1, 1, 1), 0);
 		Assert.assertEquals(0, image.computeSum(-10, 0, 0, 1, 1, 1), 0);
 		Assert.assertEquals(0, image.computeSum(10, 0, 0, 1, 1, 1), 0);
 		Assert.assertEquals(0, image.computeSum(0, 10, 0, 1, 1, 1), 0);
 		Assert.assertEquals(0, image.computeSum(0, -10, 0, 1, 1, 1), 0);
 		Assert.assertEquals(0, image.computeSum(0, 0, 10, 1, 1, 1), 0);
 		Assert.assertEquals(0, image.computeSum(0, 0, -10, 1, 1, 1), 0);
-		
+
 		// Larger slices
 		canComputeSum(3, 4, 5, 6, 7, 8);
 		canComputeSum(3, 4, 5, 1, 1, 1);
@@ -132,7 +133,7 @@ public class Image3DTest
 
 	private void canComputeSum(int x, int y, int z, int w, int h, int d)
 	{
-		// This test assumes that crop work!
+		// This test assumes that crop works!
 		for (int pad : new int[] { 0, 1 })
 		{
 			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
@@ -140,8 +141,86 @@ public class Image3DTest
 			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
 			double e = Maths.sum(croppedData.getData());
 			double o = image.computeSum(x, y, z, w, h, d);
-			
+
 			Assert.assertEquals(o, e, 0);
 		}
-	}	
+	}
+
+	@Test
+	public void canFindMin()
+	{
+		Image3D image = createData(2, 2, 2);
+		Assert.assertEquals(0, image.findMinIndex(0, 0, 0, 2, 2, 2));
+		Assert.assertEquals(1, image.findMinIndex(1, 0, 0, 2, 2, 2));
+		Assert.assertEquals(2, image.findMinIndex(0, 1, 0, 2, 2, 2));
+		Assert.assertEquals(3, image.findMinIndex(1, 1, 0, 2, 2, 2));
+		Assert.assertEquals(4, image.findMinIndex(0, 0, 1, 2, 2, 2));
+		Assert.assertEquals(5, image.findMinIndex(1, 0, 1, 2, 2, 2));
+		Assert.assertEquals(6, image.findMinIndex(0, 1, 1, 2, 2, 2));
+		Assert.assertEquals(7, image.findMinIndex(1, 1, 1, 2, 2, 2));
+
+		// Larger slices
+		canFindMin(3, 4, 5, 6, 7, 8);
+		canFindMin(3, 4, 5, 1, 1, 1);
+		canFindMin(0, 0, 0, 1, 2, 3);
+	}
+
+	private void canFindMin(int x, int y, int z, int w, int h, int d)
+	{
+		// This test assumes that crop works!
+		for (int pad : new int[] { 0, 1 })
+		{
+			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
+
+			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
+			int i = SimpleArrayUtils.findMinIndex(croppedData.getData());
+			int[] xyz = croppedData.getXYZ(i);
+
+			int j = image.findMinIndex(x, y, z, w, h, d);
+			int[] xyz2 = image.getXYZ(j);
+
+			Assert.assertEquals(xyz[0] + x, xyz2[0]);
+			Assert.assertEquals(xyz[1] + y, xyz2[1]);
+			Assert.assertEquals(xyz[2] + z, xyz2[2]);
+		}
+	}
+
+	@Test
+	public void canFindMax()
+	{
+		Image3D image = createData(2, 2, 2);
+		Assert.assertEquals(7, image.findMaxIndex(0, 0, 0, 2, 2, 2));
+		Assert.assertEquals(6, image.findMaxIndex(0, 0, 0, 1, 2, 2));
+		Assert.assertEquals(5, image.findMaxIndex(0, 0, 0, 2, 1, 2));
+		Assert.assertEquals(4, image.findMaxIndex(0, 0, 0, 1, 1, 2));
+		Assert.assertEquals(3, image.findMaxIndex(0, 0, 0, 2, 2, 1));
+		Assert.assertEquals(2, image.findMaxIndex(0, 0, 0, 1, 2, 1));
+		Assert.assertEquals(1, image.findMaxIndex(0, 0, 0, 2, 1, 1));
+		Assert.assertEquals(0, image.findMaxIndex(0, 0, 0, 1, 1, 1));
+
+		// Larger slices
+		canFindMax(3, 4, 5, 6, 7, 8);
+		canFindMax(3, 4, 5, 1, 1, 1);
+		canFindMax(0, 0, 0, 1, 2, 3);
+	}
+
+	private void canFindMax(int x, int y, int z, int w, int h, int d)
+	{
+		// This test assumes that crop works!
+		for (int pad : new int[] { 0, 1 })
+		{
+			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
+
+			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
+			int i = SimpleArrayUtils.findMaxIndex(croppedData.getData());
+			int[] xyz = croppedData.getXYZ(i);
+
+			int j = image.findMaxIndex(x, y, z, w, h, d);
+			int[] xyz2 = image.getXYZ(j);
+
+			Assert.assertEquals(xyz[0] + x, xyz2[0]);
+			Assert.assertEquals(xyz[1] + y, xyz2[1]);
+			Assert.assertEquals(xyz[2] + z, xyz2[2]);
+		}
+	}
 }
