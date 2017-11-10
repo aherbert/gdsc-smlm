@@ -268,11 +268,13 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 				}
 			}
 
+			final PointValuePair previous = new PointValuePair(x1, fX, false);
+			final PointValuePair current = new PointValuePair(x, fVal, false);
 			boolean stop = false;
 			if (positionChecker != null)
 			{
 				// Check for convergence on the position
-				stop = positionChecker.converged(x1, x);
+				stop = positionChecker.converged(getIterations(), previous, current);
 			}
 			if (!stop)
 			{
@@ -295,8 +297,6 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 				}
 			}
 
-			final PointValuePair previous = new PointValuePair(x1, fX);
-			final PointValuePair current = new PointValuePair(x, fVal);
 			if (!stop && checker != null)
 			{ // User-defined stopping criteria.
 				stop = checker.converged(getIterations(), previous, current);

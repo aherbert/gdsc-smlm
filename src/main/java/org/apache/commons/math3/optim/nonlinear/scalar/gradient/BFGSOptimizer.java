@@ -263,7 +263,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				{
 					break;
 				}
-				if (positionChecker.converged(lastResult.getPointRef(), result.getPointRef()))
+				if (positionChecker.converged(getIterations(), lastResult, result))
 				{
 					break;
 				}
@@ -342,15 +342,13 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 		while (true)
 		{
-			incrementIterationCount();
-
 			// Get the value of the point
 			double fp = computeObjectiveValue(p);
 
+			PointValuePair previous = current;
+			current = new PointValuePair(p, fp, false);
 			if (checker != null)
 			{
-				PointValuePair previous = current;
-				current = new PointValuePair(p, fp);
 				if (previous != null && checker.converged(getIterations(), previous, current))
 				{
 					// We have found an optimum.
@@ -359,6 +357,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				}
 			}
 
+			incrementIterationCount();
+			
 			// Move along the search direction.
 			final double[] pnew;
 			try
@@ -371,17 +371,18 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				// In this case the algorithm should be restarted.
 				converged = ROUNDOFF_ERROR;
 				//System.out.printf("Roundoff error, iter=%d\n", getIterations());
-				return new PointValuePair(p, fp);
+				return current;
 			}
 
 			// We assume the new point is on/within the bounds since the line search is constrained
 			double fret = lineSearch.f;
 
 			// Test for convergence on change in position
-			if (positionChecker.converged(p, pnew))
+			PointValuePair updated = new PointValuePair(pnew, fret, false);
+			if (positionChecker.converged(getIterations(), current, updated))
 			{
 				converged = POSITION;
-				return new PointValuePair(pnew, fret);
+				return updated;
 			}
 
 			// Update the line direction
@@ -417,7 +418,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			if (test < gradientTolerance)
 			{
 				converged = GRADIENT;
-				return new PointValuePair(p, fp);
+				return updated;
 			}
 
 			for (int i = 0; i < n; i++)
