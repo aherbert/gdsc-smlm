@@ -69,12 +69,12 @@ public class DHT3D extends Image3D
 	/**
 	 * Instantiates a new 3D discrete Hartley transform.
 	 *
-	 * @param ns
-	 *            the number of slices
-	 * @param nr
-	 *            the number of rows
 	 * @param nc
 	 *            the number of columns
+	 * @param nr
+	 *            the number of rows
+	 * @param ns
+	 *            the number of slices
 	 * @param nr_by_nc
 	 *            the number of rows multiplied by the number of columns
 	 * @param data
@@ -84,9 +84,9 @@ public class DHT3D extends Image3D
 	 * @param dht
 	 *            the dht
 	 */
-	private DHT3D(int ns, int nr, int nc, int nr_by_nc, float[] data, boolean isFrequencyDomain, FloatDHT_3D dht)
+	private DHT3D(int nc, int nr, int ns, int nr_by_nc, float[] data, boolean isFrequencyDomain, FloatDHT_3D dht)
 	{
-		super(ns, nr, nc, nr_by_nc, data);
+		super(nc, nr, ns, nr_by_nc, data);
 		this.isFrequencyDomain = isFrequencyDomain;
 		this.dht = dht; // This can be reused across objects
 	}
@@ -98,7 +98,7 @@ public class DHT3D extends Image3D
 	 */
 	public DHT3D copy()
 	{
-		return new DHT3D(ns, nr, nc, nr_by_nc, data.clone(), isFrequencyDomain, dht);
+		return new DHT3D(nc, nr, ns, nr_by_nc, data.clone(), isFrequencyDomain, dht);
 	}
 
 	/**
@@ -198,7 +198,7 @@ public class DHT3D extends Image3D
 			}
 		}
 
-		return new DHT3D(ns, nr, nc, nr_by_nc, tmp, true, this.dht);
+		return new DHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
 	}
 
 	/**
@@ -256,7 +256,7 @@ public class DHT3D extends Image3D
 			}
 		}
 
-		return new DHT3D(ns, nr, nc, nr_by_nc, tmp, true, this.dht);
+		return new DHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
 	}
 
 	/**
@@ -317,7 +317,7 @@ public class DHT3D extends Image3D
 			}
 		}
 
-		return new DHT3D(ns, nr, nc, nr_by_nc, tmp, true, this.dht);
+		return new DHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
 	}
 
 	/**
