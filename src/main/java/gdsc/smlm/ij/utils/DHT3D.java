@@ -96,6 +96,7 @@ public class DHT3D extends Image3D
 	 *
 	 * @return the copy
 	 */
+	@Override
 	public DHT3D copy()
 	{
 		return new DHT3D(nc, nr, ns, nr_by_nc, data.clone(), isFrequencyDomain, dht);
@@ -334,6 +335,132 @@ public class DHT3D extends Image3D
 			throw new IllegalArgumentException("Dimension mismatch");
 		if (!dht.isFrequencyDomain || !isFrequencyDomain)
 			throw new IllegalArgumentException("Require frequency domain DHT");
+	}
+
+	/**
+	 * Converts this DHT to a discrete Fourier transform (DFT) and returns it as a two image pair. The image is assumed
+	 * to be in the frequency domain.
+	 *
+	 * @param real
+	 *            the buffer to use for the real component (can be null)
+	 * @param imaginary
+	 *            the buffer to use for the imaginary component (can be null)
+	 * @return [real, imaginary]
+	 * @throws IllegalArgumentException
+	 *             if not in the frequency domain
+	 * @see <A href=
+	 *      "https://en.wikipedia.org/wiki/Hartley_transform#Relation_to_Fourier_transform">https://en.wikipedia.org/wiki/Hartley_transform#Relation_to_Fourier_transform</a>
+	 */
+	public Image3D[] toDFT(float[] real, float[] imaginary) throws IllegalArgumentException
+	{
+		if (!isFrequencyDomain)
+			throw new IllegalArgumentException("Require frequency domain DHT");
+
+		float[] h1 = this.data;
+		if (real == null || real.length != h1.length)
+			real = new float[h1.length];
+		if (imaginary == null || imaginary.length != h1.length)
+			imaginary = new float[h1.length];
+
+		for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s)
+		{
+			for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r)
+			{
+				for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
+				{
+					// This is a copy of the getComplexTransform operation in ij.process.FHT
+					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
+					real[i] = (h1[i] + h1[j]) * 0.5f;
+					imaginary[i] = (-h1[i] + h1[j]) * 0.5f;
+				}
+			}
+		}
+
+		return new Image3D[] { new Image3D(nc, nr, ns, nr_by_nc, real), new Image3D(nc, nr, ns, nr_by_nc, imaginary) };
+	}
+
+	/**
+	 * Convert a discrete Fourier transform (DFT) to a DHT
+	 *
+	 * @param real
+	 *            the real component
+	 * @param imaginary
+	 *            the imaginary component
+	 * @param tmp
+	 *            the tmp buffer to use for the result
+	 * @return the DHT
+	 * @throws IllegalArgumentException
+	 *             If there is a dimension mismatch
+	 */
+	public static DHT3D fromDFT(Image3D real, Image3D imaginary, float[] tmp) throws IllegalArgumentException
+	{
+		if (real.ns != imaginary.ns || real.nr != imaginary.nr || real.nc != imaginary.nc)
+			throw new IllegalArgumentException("Dimension mismatch");
+
+		float[] re = real.getData();
+		float[] im = imaginary.getData();
+		if (tmp == null || tmp.length != re.length)
+			tmp = new float[re.length];
+
+		int nc = real.nc;
+		int nr = real.nr;
+		int ns = real.ns;
+		int nr_by_nc = real.nr_by_nc;
+
+		for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s)
+		{
+			for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r)
+			{
+				for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
+				{
+					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
+					// Reverse the toDFT() method
+					// re = (a+b)/2
+					// im = (-a+b)/2
+					// b = re + im
+					// a = 2*re - b
+					tmp[j] = re[i] + im[i];
+					tmp[i] = 2 * re[i] - tmp[j];
+				}
+			}
+		}
+
+		return new DHT3D(nc, nr, ns, nr_by_nc, tmp, true, new FloatDHT_3D(ns, nr, nc));
+	}
+
+	/**
+	 * Returns the absolute value (amplitude) of the Hartley transform. The image is assumed to be in
+	 * the frequency domain.
+	 *
+	 * @param tmp
+	 *            the tmp buffer to use for the result
+	 * @return the result
+	 * @throws IllegalArgumentException
+	 *             if not in the frequency domain
+	 */
+	public Image3D getAbsoluteValue(float[] tmp) throws IllegalArgumentException
+	{
+		if (!isFrequencyDomain)
+			throw new IllegalArgumentException("Require frequency domain DHT");
+
+		float[] h1 = this.data;
+		if (tmp == null || tmp.length != h1.length)
+			tmp = new float[h1.length];
+
+		for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s)
+		{
+			for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r)
+			{
+				for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
+				{
+					// This is a copy of the amplitude operation in ij.process.FHT
+					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
+					tmp[i] = (float) Math.sqrt(h1[i] * h1[i] + h1[j] * h1[j]);
+				}
+			}
+		}
+
+		return new Image3D(nc, nr, ns, nr_by_nc, tmp);
 	}
 
 	/**

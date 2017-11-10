@@ -1,5 +1,8 @@
 package gdsc.smlm.ij.utils;
 
+import java.util.Arrays;
+
+import org.jtransforms.fft.FloatFFT_3D;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -183,5 +186,36 @@ public class DHT3DTest
 					Assert.assertEquals(y, oy);
 					Assert.assertEquals(z, oz);
 				}
+	}
+
+	@Test
+	public void canConvertToDFT()
+	{
+		DHT3D dht = createData();
+		float[] input = dht.getData().clone();
+		dht.transform();
+
+		Image3D[] result = dht.toDFT(null, null);
+
+		// Test reverse transform
+		DHT3D dht2 = DHT3D.fromDFT(result[0], result[1], null);
+
+		float[] e = dht.getData();
+		float[] o = dht2.getData();
+		for (int i = 0; i < e.length; i++)
+			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6f, 1e-6f));
+
+		// Test verses full forward transform
+		FloatFFT_3D fft = new FloatFFT_3D(dht.ns, dht.nr, dht.nc);
+		float[] dft = Arrays.copyOf(input, 2 * e.length);
+		fft.realForwardFull(dft);
+
+		float[] or = result[0].getData();
+		float[] oi = result[1].getData();
+		for (int i = 0, j = 0; i < dft.length; i += 2, j++)
+		{
+			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], 1e-6f, 1e-6f));
+			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], 1e-6f, 1e-6f));
+		}
 	}
 }
