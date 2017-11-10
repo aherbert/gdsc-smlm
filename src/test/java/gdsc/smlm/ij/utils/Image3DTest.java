@@ -77,23 +77,34 @@ public class Image3DTest
 
 	private void canInsert(int x, int y, int z, int w, int h, int d)
 	{
-		// This test assumes that crop works!
-		
-		Image3D image = createData(x + w + 1, y + h + 1, z + d + 1);
-		Image3D image2 = image.copy();
+		// This test assumes that copy and crop work!
+		for (int pad : new int[] { 0, 1 })
+		{
+			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
+			Image3D image2 = image.copy();
+			Image3D image3 = image.copy();
 
-		Image3D blank = new Image3D(w, h, d);
-		
-		image.insert(x, y, z, blank);
+			Image3D blank = new Image3D(w, h, d);
 
-		Image3D croppedData = image.crop(x, y, z, w, h, d, null);
-		
-		Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
+			image.insert(x, y, z, blank);
 
-		image2.insert(x, y, z, blank.getImageStack());
-		
-		croppedData = image.crop(x, y, z, w, h, d, null);
-		
-		Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
+			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
+
+			Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
+
+			ImageStack blankStack = blank.getImageStack();
+			image2.insert(x, y, z, blankStack);
+
+			croppedData = image2.crop(x, y, z, w, h, d, null);
+
+			Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
+
+			for (int s = 0; s < blankStack.getSize(); s++)
+				image3.insert(x, y, z + s, blankStack.getProcessor(1 + s));
+
+			croppedData = image3.crop(x, y, z, w, h, d, null);
+
+			Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
+		}
 	}
 }
