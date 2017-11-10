@@ -9,11 +9,12 @@ import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.PositionChecker;
 import org.apache.commons.math3.optim.SimpleBounds;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.math.interpolation.CubicSplinePosition;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.utils.ImageWindow;
@@ -41,6 +42,7 @@ import ij.ImageStack;
 public class StackAligner implements Cloneable
 {
 	private double edgeWindow;
+	private double relativeThreshold = 1e-3;
 
 	/** The number of slices (max z) of the discrete Hartley transform. */
 	private int ns;
@@ -50,7 +52,7 @@ public class StackAligner implements Cloneable
 	private int nc;
 
 	private DHT3D reference;
-	private float[] buffer, region;
+	private float[] buffer, region, amp1, amp2;
 
 	// Allow cached window weights
 	private double[] wx = null;
@@ -122,7 +124,13 @@ public class StackAligner implements Cloneable
 		// Check the stack will fit in an Image3D
 		Image3D.checkSize(nc, nr, ns, true);
 		// Window and pad the reference
-		reference = createDHT(stack);
+		setReference(createDHT(stack));
+	}
+
+	private void setReference(DHT3D dht)
+	{
+		reference = dht;
+		amp1 = dht.getAbsoluteValue(amp1).getData();
 	}
 
 	private void check3D(ImageStack stack)
@@ -269,7 +277,7 @@ public class StackAligner implements Cloneable
 		nr = Maths.nextPow2(Math.max(h, stack.getHeight()));
 		ns = Maths.nextPow2(Math.max(d, stack.getSize()));
 		// Window and pad the reference
-		reference = createDHT(stack);
+		setReference(createDHT(stack));
 	}
 
 	private void check3D(Image3D stack)
@@ -318,7 +326,7 @@ public class StackAligner implements Cloneable
 		}
 		else
 		{
-			// This will just uses the data
+			// This will just use the data
 			dht = new DHT3D(w, h, d, stack.getData(), false);
 		}
 
@@ -384,11 +392,36 @@ public class StackAligner implements Cloneable
 	/**
 	 * Align the stack with the reference with sub-pixel accuracy. Compute the translation required to move the target
 	 * stack onto the reference stack for maximum correlation.
+	 * <p>
+	 * Refinement uses a default sub-pixel accuracy of 1e-2;
 	 *
 	 * @param stack
 	 *            the stack
 	 * @param refinements
 	 *            the refinements for sub-pixel accuracy
+	 * @return [x,y,z,value]
+	 * @throws IllegalArgumentException
+	 *             If any dimension is less than 2, or if larger than the initialised reference
+	 */
+	public double[] align(Image3D stack, int refinements)
+	{
+		check3D(stack);
+		int w = stack.getWidth(), h = stack.getHeight(), d = stack.getSize();
+		if (w > nc || h > nr || d > ns)
+			throw new IllegalArgumentException("Stack is larger than the initialised reference");
+
+		DHT3D target = createDHT(stack);
+		return align(target, refinements, 1e-2);
+	}
+
+	/**
+	 * Align the stack with the reference with sub-pixel accuracy. Compute the translation required to move the target
+	 * stack onto the reference stack for maximum correlation.
+	 *
+	 * @param stack
+	 *            the stack
+	 * @param refinements
+	 *            the maximum number of refinements for sub-pixel accuracy
 	 * @param error
 	 *            the error for sub-pixel accuracy (i.e. stop when improvements are less than this error)
 	 * @return [x,y,z,value]
@@ -413,7 +446,7 @@ public class StackAligner implements Cloneable
 	 * @param target
 	 *            the target
 	 * @param refinements
-	 *            the refinements for sub-pixel accuracy
+	 *            the maximum number of refinements for sub-pixel accuracy
 	 * @param error
 	 *            the error for sub-pixel accuracy (i.e. stop when improvements are less than this error)
 	 * @return [x,y,z,value]
@@ -422,10 +455,61 @@ public class StackAligner implements Cloneable
 	 */
 	private double[] align(DHT3D target, int refinements, double error)
 	{
+		// Test - Do a correlation in the FFT
+		//		Image3D[] fft1 = target.toDFT(null, null);
+		//		Image3D[] fft2 = reference.toDFT(null, null);
+		//		float[] r1 = fft1[0].getData();
+		//		float[] i1 = fft1[1].getData();
+		//		float[] r2 = fft2[0].getData();
+		//		float[] i2 = fft2[1].getData();
+		//		for (int i = 0; i < r1.length; i++)
+		//		{
+		//			float a = r1[i];
+		//			float b = i1[i];
+		//			float c = r2[i];
+		//			float d = -i2[i]; // Get the conjugate for correlation
+		//			// Re-use the space
+		//			r1[i] = a * c - b * d;
+		//			i1[i] = b * c + a * d;
+		//			// Normalise for phase correlation
+		//			if (r1[i] != 0 || i1[i] != 0)
+		//			{
+		//				//double mag = Math.sqrt((a * a + b * b) * (c * c + d * d));
+		//				double mag = Math.sqrt(r1[i] * r1[i] + i1[i] * i1[i]);
+		//				r1[i] /= mag;
+		//				//r1[i] = 1;
+		//				i1[i] /= mag;
+		//				//i1[i] = 0;
+		//			}
+		//		}
+		//		DHT3D correlation = DHT3D.fromDFT(fft1[0], fft1[1], null);
+
 		DHT3D correlation = target.conjugateMultiply(reference, buffer);
 		buffer = correlation.getData();
+
+		//		// Do phase correlation by normalising by the amplitude
+		//		amp2 = target.getAbsoluteValue(amp2).getData();
+		//		for (int i = 0; i < buffer.length; i++)
+		//		{
+		//			if (buffer[i] != 0)
+		//			{
+		//				double m = amp1[i] * amp2[i];
+		//				buffer[i] /= m;
+		//			}
+		//		}
+		//		amp2 = correlation.getAbsoluteValue(amp2).getData();
+		//		for (int i = 0; i < buffer.length; i++)
+		//		{
+		//			if (buffer[i] != 0)
+		//			{
+		//				double m = amp2[i];
+		//				buffer[i] /= m;
+		//			}
+		//		}
+
 		correlation.inverseTransform();
 		correlation.swapOctants();
+		//Utils.display("corr", correlation.getImageStack());
 		float[] data = correlation.getData();
 		int maxi = SimpleArrayUtils.findMaxIndex(data);
 		int[] xyz = correlation.getXYZ(maxi);
@@ -447,9 +531,9 @@ public class StackAligner implements Cloneable
 			if (calc == null)
 				calc = new CubicSplineCalculator();
 			// Avoid out-of-bounds errors
-			int x = Math.max(0, xyz[0] - 1);
-			int y = Math.max(0, xyz[1] - 1);
-			int z = Math.max(0, xyz[2] - 1);
+			int x = Maths.clip(0, correlation.getWidth() - 4, xyz[0] - 1);
+			int y = Maths.clip(0, correlation.getHeight() - 4, xyz[1] - 1);
+			int z = Maths.clip(0, correlation.getSize() - 4, xyz[2] - 1);
 			Image3D crop = correlation.crop(x, y, z, 4, 4, 4, region);
 			region = crop.getData();
 			CustomTricubicFunction f = CustomTricubicFunction.create(calc.compute(region));
@@ -467,17 +551,19 @@ public class StackAligner implements Cloneable
 				final SplineFunction sf = new SplineFunction(f, origin);
 
 				// @formatter:off				
-				// Scale the error for the position check
 				BFGSOptimizer optimiser = new BFGSOptimizer(
-						new PositionChecker(-1, error / 3.0, refinements));
+						// Use a simple check on the relative value change and 
+						// set the number of refinements
+						new SimpleValueChecker(relativeThreshold, -1, refinements));
 
 				PointValuePair opt = optimiser.optimize(
-						GoalType.MAXIMIZE,
 						maxEvaluations,
 						bounds, 
 						gradientTolerance,
 						stepLength,
 						new InitialGuess(origin),
+						// Scale the error for the position check
+						new PositionChecker(-1, error / 3.0),
 						new ObjectiveFunction(new MultivariateFunction(){
 							public double value(double[] point)
 							{
@@ -493,10 +579,11 @@ public class StackAligner implements Cloneable
 							}}));
 				// @formatter:on
 
-				// Check it is higher
-				if (opt.getValue() > result[3])
+				// Check it is higher. Invert since we did a minimisation.
+				double value = -opt.getValue();
+				if (value > result[3])
 				{
-					result[3] = opt.getValue();
+					result[3] = value;
 					// Convert the maximum back with scaling
 					double[] optimum = opt.getPointRef();
 					for (int i = 0; i < 3; i++)
@@ -546,13 +633,17 @@ public class StackAligner implements Cloneable
 		double value(double[] point)
 		{
 			initialise(point);
-			return f.value(table);
+			// BFGS algorithm minimimises so invert
+			return -f.value(table);
 		}
 
 		void value(double[] point, double[] df_da)
 		{
 			initialise(point);
 			f.gradient(table, df_da);
+			// BFGS algorithm minimimises so invert
+			for (int i = 0; i < 3; i++)
+				df_da[i] = -df_da[i];
 		}
 
 		void initialise(double[] point)
@@ -586,6 +677,8 @@ public class StackAligner implements Cloneable
 			copy.calc = null;
 			copy.buffer = null;
 			copy.region = null;
+			copy.amp1 = null;
+			copy.amp2 = null;
 			return copy;
 		}
 		catch (CloneNotSupportedException e)
@@ -613,5 +706,28 @@ public class StackAligner implements Cloneable
 	public void setEdgeWindow(double edgeWindow)
 	{
 		this.edgeWindow = edgeWindow;
+	}
+
+	/**
+	 * Gets the relative threshold for change in the correlation value for halting refinement. If this is negative it is
+	 * disabled.
+	 *
+	 * @return the relative threshold
+	 */
+	public double getRelativeThreshold()
+	{
+		return relativeThreshold;
+	}
+
+	/**
+	 * Sets the relative threshold for change in the correlation value for halting refinement. Set to negative to
+	 * disable. Refinement will then only be halted by the number of refinement steps or the position error.
+	 *
+	 * @param relativeThreshold
+	 *            the new relative threshold
+	 */
+	public void setRelativeThreshold(double relativeThreshold)
+	{
+		this.relativeThreshold = relativeThreshold;
 	}
 }
