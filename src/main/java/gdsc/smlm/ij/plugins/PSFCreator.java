@@ -486,7 +486,17 @@ public class PSFCreator implements PlugInFilter
 		if (settings.getMode() == 1)
 			runUsingFitting();
 		else
-			runUsingProjections();
+		{
+			try
+			{
+				runUsingProjections();
+			}
+			catch (OutOfMemoryError e)
+			{
+				IJ.showMessage(TITLE, TextUtils.wrap("Out-of-memory. You may be using too many spots or " +
+						"too large a PSF projection. The default projection size is 2.", 80));
+			}
+		}
 
 		SettingsManager.writeSettings(settings);
 
