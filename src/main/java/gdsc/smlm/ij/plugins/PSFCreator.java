@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
+import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Label;
@@ -56,6 +57,7 @@ import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
+import gdsc.smlm.data.config.GUIProtosHelper;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFParameter;
@@ -3953,6 +3955,7 @@ public class PSFCreator implements PlugInFilter
 			gd.addSlider("Crop_border", 0, Math.min(psf.maxx, psf.maxy) / 2 - 1, settings.getCropBorder());
 			gd.addSlider("Crop_start", 0, maxz / 2 - 1, settings.getCropStart());
 			gd.addSlider("Crop_end", 0, maxz / 2 - 1, settings.getCropEnd());
+			gd.addMessage("Click ... to configure the output options");
 			gd.addChoice("Output_type", OUTPUT_TYPE, settings.getOutputType(), new OptionListener<Integer>()
 			{
 				public boolean collectOptions(Integer value)
@@ -4281,20 +4284,54 @@ public class PSFCreator implements PlugInFilter
 
 		CalibrationWriter cw = CalibrationWriter.create(settings.getCalibration());
 
+		// These are ignored for reset
 		gd.addChoice("PSF_type", PSF_TYPE, settings.getPsfType());
 		gd.addNumericField("nm_per_pixel", cw.getNmPerPixel(), 2);
 		gd.addNumericField("nm_per_slice", settings.getNmPerSlice(), 0);
 		PeakFit.addCameraOptions(gd, PeakFit.FLAG_NO_GAIN, cw);
-		gd.addSlider("Analysis_window", 0, 8, settings.getAnalysisWindow());
-		gd.addSlider("Smoothing", 0.1, 0.5, settings.getSmoothing());
-		gd.addSlider("CoM_z_window", 0, 8, settings.getComWindow());
-		gd.addSlider("CoM_border", 0, 0.5, settings.getComBorder());
-		gd.addSlider("Projection_magnification", 1, 8, settings.getProjectionMagnification());
-		gd.addCheckbox("Smooth_stack_signal", settings.getSmoothStackSignal());
-		gd.addSlider("Max_iterations", 1, 20, settings.getMaxIterations());
+
+		// For reset
+		final TurboList<TextField> tf = new TurboList<TextField>();
+		final TurboList<Checkbox> cb = new TurboList<Checkbox>();
+		tf.add(gd.addAndGetSlider("Analysis_window", 0, 8, settings.getAnalysisWindow()));
+		tf.add(gd.addAndGetSlider("Smoothing", 0.1, 0.5, settings.getSmoothing()));
+		tf.add(gd.addAndGetSlider("CoM_z_window", 0, 8, settings.getComWindow()));
+		tf.add(gd.addAndGetSlider("CoM_border", 0, 0.5, settings.getComBorder()));
+		tf.add(gd.addAndGetSlider("Projection_magnification", 1, 8, settings.getProjectionMagnification()));
+		cb.add(gd.addAndGetCheckbox("Smooth_stack_signal", settings.getSmoothStackSignal()));
+		tf.add(gd.addAndGetSlider("Max_iterations", 1, 20, settings.getMaxIterations()));
 		if (settings.getInteractiveMode())
-			gd.addCheckbox("Check_alignments", settings.getCheckAlignments());
-		//gd.addSlider("PSF_magnification", 1, 8, settings.getPsfMagnification());
+			cb.add(gd.addAndGetCheckbox("Check_alignments", settings.getCheckAlignments()));
+
+		if (Utils.isShowGenericDialog())
+		{
+			gd.addAndGetButton("Reset", new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					PSFCreatorSettings defaults = GUIProtosHelper.defaultPSFCreatorSettings;
+					int t = 0, c = 0;
+					tf.get(t++).setText(Double.toString(defaults.getAnalysisWindow()));
+					tf.get(t++).setText(Double.toString(defaults.getSmoothing()));
+					tf.get(t++).setText(Integer.toString(defaults.getComWindow()));
+					tf.get(t++).setText(Double.toString(defaults.getComBorder()));
+					tf.get(t++).setText(Integer.toString(defaults.getProjectionMagnification()));
+					cb.get(c++).setState(defaults.getSmoothStackSignal());
+					tf.get(t++).setText(Integer.toString(defaults.getMaxIterations()));
+					if (PSFCreator.this.settings.getInteractiveMode())
+						cb.get(c++).setState(defaults.getCheckAlignments());
+
+					// Reset later options too
+					PSFCreator.this.settings.setPsfMagnification(defaults.getPsfMagnification());
+					PSFCreator.this.settings.setWindow(defaults.getWindow());
+					PSFCreator.this.settings.setSmoothStackSignal(defaults.getSmoothStackSignal());
+					PSFCreator.this.settings.setComBorder(defaults.getComBorder());
+					PSFCreator.this.settings.setCropBorder(0);
+					PSFCreator.this.settings.setCropStart(0);
+					PSFCreator.this.settings.setCropEnd(0);
+				}
+			});
+		}
 
 		gd.showDialog();
 
