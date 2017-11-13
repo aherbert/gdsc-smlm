@@ -349,7 +349,8 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             if not in the frequency domain
 	 * @see <A href=
-	 *      "https://en.wikipedia.org/wiki/Hartley_transform#Relation_to_Fourier_transform">https://en.wikipedia.org/wiki/Hartley_transform#Relation_to_Fourier_transform</a>
+	 *      "https://en.wikipedia.org/wiki/Hartley_transform#Relation_to_Fourier_transform">https://en.wikipedia.org/
+	 *      wiki/Hartley_transform#Relation_to_Fourier_transform</a>
 	 */
 	public Image3D[] toDFT(float[] real, float[] imaginary) throws IllegalArgumentException
 	{
@@ -517,33 +518,69 @@ public class DHT3D extends Image3D
 
 		float[] tmp = new float[nc];
 
-		// For convenience we extract slices for swapping with the FHT2 routine
 		int nr_by_nc = image.nr_by_nc;
-		float[] data = image.data;
-		float[] a = new float[nr_by_nc];
-		float[] b = new float[nr_by_nc];
+		float[] a = image.data;
 
 		for (int s = 0; s < ns_2; s++)
 		{
-			// Extract
-			System.arraycopy(data, s * nr_by_nc, a, 0, nr_by_nc);
-			System.arraycopy(data, (s + ns_2) * nr_by_nc, b, 0, nr_by_nc);
+			// Insert points
+			int ia = s * nr_by_nc;
+			int ib = (s + ns_2) * nr_by_nc;
 
 			//@formatter:off
 			// We swap: 0 <=> nx_2, 0 <=> ny_2
 			// 1 <=> 7 
-			FHT2.swap(a, b, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
+			swap(a, ia, a, ib, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
 			// 2 <=> 8
-			FHT2.swap(a, b, nc,    0,    0, nc_2, nr_2, nc_2, nr_2, tmp);
+			swap(a, ia, a, ib, nc,    0,    0, nc_2, nr_2, nc_2, nr_2, tmp);
 			// 3 <=> 5
-			FHT2.swap(a, b, nc,    0, nr_2, nc_2,    0, nc_2, nr_2, tmp);
+			swap(a, ia, a, ib, nc,    0, nr_2, nc_2,    0, nc_2, nr_2, tmp);
 			// 4 <=> 6
-			FHT2.swap(a, b, nc, nc_2, nr_2,    0,    0, nc_2, nr_2, tmp);
+			swap(a, ia, a, ib, nc, nc_2, nr_2,    0,    0, nc_2, nr_2, tmp);
 			//@formatter:on
+		}
+	}
 
-			// Replace
-			System.arraycopy(a, 0, data, s * nr_by_nc, nr_by_nc);
-			System.arraycopy(b, 0, data, (s + ns_2) * nr_by_nc, nr_by_nc);
+	/**
+	 * Swap the rectangle pixel values from a with b.
+	 * <p>
+	 * No bounds checks are performed so use with care!
+	 *
+	 * @param a
+	 *            the a pixels
+	 * @param ia
+	 *            the insert position for a
+	 * @param b
+	 *            the b pixels (must match a.length)
+	 * @param ib
+	 *            the insert position for b
+	 * @param width
+	 *            the width of each set of XY pixels
+	 * @param ax
+	 *            the x origin from a
+	 * @param ay
+	 *            the y origin from a
+	 * @param bx
+	 *            the x origin from b
+	 * @param by
+	 *            the b origin from b
+	 * @param w
+	 *            the width of the rectangle to swap
+	 * @param h
+	 *            the height of the rectangle to swap
+	 * @param tmp
+	 *            the tmp buffer (must be at least width in length)
+	 */
+	private static void swap(float[] a, int ia, float[] b, int ib, int width, int ax, int ay, int bx, int by, int w,
+			int h, float[] tmp)
+	{
+		for (int ayy = ay + h, byy = by + h - 1; ayy-- > ay; byy--)
+		{
+			int ai = ia + ayy * width + ax;
+			int bi = ib + byy * width + bx;
+			System.arraycopy(a, ai, tmp, 0, w);
+			System.arraycopy(b, bi, a, ai, w);
+			System.arraycopy(tmp, 0, b, bi, w);
 		}
 	}
 
