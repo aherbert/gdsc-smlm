@@ -94,6 +94,12 @@ public class SettingsManager
 	public static final int FLAG_JSON_WHITESPACE = 0x00000004;
 	/** Use this flag to include default values in JSON output. */
 	public static final int FLAG_JSON_DEFAULT_VALUES = 0x00000008;
+	/**
+	 * Use this to show file-not-found warning when reading settings.
+	 * The default is to suppress the warning as it is usually usually
+	 * from a settings file that has not been created.
+	 */
+	public static final int FLAG_SHOW_FILE_NOT_FOUND_ON_READ = 0x00000010;
 
 	/** The settings directory. */
 	private static File settingsDirectory;
@@ -609,7 +615,7 @@ public class SettingsManager
 	{
 		return writeSettings(message.build(), flags);
 	}
-	
+
 	/**
 	 * Clear the settings file for the given class.
 	 *
@@ -826,7 +832,8 @@ public class SettingsManager
 	 */
 	public static ConfigurationTemplateSettings readConfigurationTemplateSettings(int flags)
 	{
-		return new ConfigurationReader<ConfigurationTemplateSettings>(GUIProtosHelper.defaultConfigurationTemplateSettings).read(flags);
+		return new ConfigurationReader<ConfigurationTemplateSettings>(
+				GUIProtosHelper.defaultConfigurationTemplateSettings).read(flags);
 	}
 
 	/**
@@ -838,9 +845,10 @@ public class SettingsManager
 	 */
 	public static DefaultTemplateSettings readDefaultTemplateSettings(int flags)
 	{
-		return new ConfigurationReader<DefaultTemplateSettings>(DefaultTemplateSettings.getDefaultInstance()).read(flags);
+		return new ConfigurationReader<DefaultTemplateSettings>(DefaultTemplateSettings.getDefaultInstance())
+				.read(flags);
 	}
-	
+
 	/**
 	 * Read the FitEngineConfiguration from the settings file in the settings directory. This loads the current
 	 * Calibration, PSF and FitEngineSettings.
@@ -914,7 +922,8 @@ public class SettingsManager
 	 */
 	public static CameraModelManagerSettings readCameraModelManagerSettings(int flags)
 	{
-		return new ConfigurationReader<CameraModelManagerSettings>(GUIProtosHelper.defaultCameraModelManagerSettings).read(flags);
+		return new ConfigurationReader<CameraModelManagerSettings>(GUIProtosHelper.defaultCameraModelManagerSettings)
+				.read(flags);
 	}
 
 	/**
@@ -926,7 +935,8 @@ public class SettingsManager
 	 */
 	public static CubicSplineManagerSettings readCubicSplineManagerSettings(int flags)
 	{
-		return new ConfigurationReader<CubicSplineManagerSettings>(GUIProtosHelper.defaultCubicSplineManagerSettings).read(flags);
+		return new ConfigurationReader<CubicSplineManagerSettings>(GUIProtosHelper.defaultCubicSplineManagerSettings)
+				.read(flags);
 	}
 
 	/**
@@ -1080,7 +1090,10 @@ public class SettingsManager
 		catch (FileNotFoundException e)
 		{
 			//e.printStackTrace();
-			if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+			// Only print this if the file-not-found flag is present 
+			// and not silent. This prevents warnings when settings files
+			// have yet to be created, i.e. for new users of a settings file. 
+			if (BitFlags.areSet(flags, FLAG_SHOW_FILE_NOT_FOUND_ON_READ) && !BitFlags.anySet(flags, FLAG_SILENT))
 				IJ.log("Unable to read message: " + e.getMessage());
 		}
 		finally
