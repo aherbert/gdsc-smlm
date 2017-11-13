@@ -269,7 +269,7 @@ public class PSFCreator implements PlugInFilter
 		gd.addMessage("Produces an average PSF using selected diffraction limited spots.");
 
 		gd.addChoice("Mode", MODE, settings.getMode());
-		gd.addSlider("Radius", 3, Maths.max(10, imp.getWidth(), imp.getHeight()) / 2, settings.getRadius());
+		gd.addSlider("Radius (px)", 3, Maths.max(10, imp.getWidth(), imp.getHeight()) / 2, settings.getRadius());
 		gd.addCheckbox("Interactive_mode", settings.getInteractiveMode());
 
 		InteractiveInputListener l = new InteractiveInputListener();
@@ -1711,7 +1711,11 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	/**
-	 * @return Extract all the ROI points that are not within twice the box radius of any other spot
+	 * Extract all the ROI points that have a box region not overlapping with any other spot.
+	 *
+	 * @param offset
+	 *            the offset
+	 * @return the spots
 	 */
 	private BasePoint[] getSpots(float offset)
 	{
@@ -1721,6 +1725,8 @@ public class PSFCreator implements PlugInFilter
 		{
 			FloatPolygon p = roi.getFloatPolygon();
 			int n = p.npoints;
+			if (n == 0)
+				return new BasePoint[0];
 
 			if (offset != 0)
 			{
@@ -1735,71 +1741,67 @@ public class PSFCreator implements PlugInFilter
 				roiPoints[i] = new BasePoint(p.xpoints[i] + offset, p.ypoints[i] + offset, z);
 			}
 
-			// All vs all distance matrix
-			double[][] d = new double[n][n];
-			for (int i = 0; i < n; i++)
-				for (int j = i + 1; j < n; j++)
-					d[i][j] = d[j][i] = roiPoints[i].distanceXY2(roiPoints[j]);
-
-			// Spots must be twice as far apart to have no overlap of the extracted box region
-			double d2 = boxRadius * boxRadius * 4;
-			int ok = 0;
-			for (int i = 0; i < n; i++)
-			{
-				if (noNeighbours(d, n, i, d2))
-					roiPoints[ok++] = roiPoints[i];
-			}
-
-			return Arrays.copyOf(roiPoints, ok);
+			return checkSpotOverlap(roiPoints);
 		}
 		return new BasePoint[0];
 	}
 
 	/**
-	 * Check spots box region do not overlap.
+	 * Get all the ROI points that have a box region not overlapping with any other spot.
 	 *
-	 * @param centres
-	 *            the centres
-	 * @return true, if successful
+	 * @param offset
+	 *            the offset
+	 * @return the spots
 	 */
-	private boolean checkSpots(BasePoint[] centres)
+	private BasePoint[] checkSpotOverlap(BasePoint[] roiPoints)
 	{
-		int n = centres.length;
+		int n = roiPoints.length;
+		if (n == 1)
+			return roiPoints;
 
-		// Spots must be twice as far apart to have no overlap of the extracted box region
-		double d2 = boxRadius * boxRadius * 4;
-
+		// Check overlap of box regions
+		int w = imp.getWidth();
+		int h = imp.getHeight();
+		ImageExtractor ie = new ImageExtractor(null, w, h);
+		Rectangle[] regions = new Rectangle[n];
+		// Check size if not fitting
+		int size = (settings.getMode() != 1) ? 2 * boxRadius + 1 : Integer.MAX_VALUE;
 		for (int i = 0; i < n; i++)
-			for (int j = i + 1; j < n; j++)
-				if (centres[i].distanceXY2(centres[j]) < d2)
-					return false;
-
-		return true;
-	}
-
-	/**
-	 * Check the spot is not within the given squared distance from any other spot
-	 * 
-	 * @param d
-	 *            The distance matrix
-	 * @param n
-	 *            The number of spots
-	 * @param i
-	 *            The spot
-	 * @param d2
-	 *            The squared distance
-	 * @return True if there are no neighbours
-	 */
-	private boolean noNeighbours(final double[][] d, final int n, final int i, final double d2)
-	{
-		for (int j = 0; j < n; j++)
 		{
-			if (i != j && d[i][j] < d2)
+			Rectangle r = ie.getBoxRegionBounds(roiPoints[i].getXint(), roiPoints[i].getYint(), boxRadius);
+			regions[i] = r;
+			if (r.width < size || r.height < size)
 			{
-				return false;
+				Utils.log("Warning: Spot %d region extends beyond the image, border pixels will be duplicated", i + 1);
 			}
 		}
-		return true;
+		boolean[] bad = new boolean[n];
+		for (int i = 0; i < n; i++)
+		{
+			if (bad[i]) // Already found to overlap
+				continue;
+			// Check intersect with others
+			for (int j = i; ++j < n;)
+			{
+				if (regions[i].intersects(regions[j]))
+				{
+					Utils.log("Warning: Spot %d region overlaps with spot %d, ignoring both", i + 1, j + 1);
+					bad[i] = bad[j] = true;
+					break;
+				}
+			}
+		}
+
+		int ok = 0;
+		for (int i = 0; i < n; i++)
+		{
+			if (bad[i])
+				continue;
+			roiPoints[ok++] = roiPoints[i];
+		}
+
+		return Arrays.copyOf(roiPoints, ok);
+
 	}
 
 	/**
@@ -2649,7 +2651,7 @@ public class PSFCreator implements PlugInFilter
 		BasePoint[] centres = getSpots(0.5f);
 		if (centres.length == 0)
 		{
-			IJ.error(TITLE, "No spots without neighbours within " + (boxRadius * 2) + "px");
+			IJ.error(TITLE, "No spots without neighbours within the box region");
 			return;
 		}
 
@@ -2682,7 +2684,7 @@ public class PSFCreator implements PlugInFilter
 		zSelector = new PSFCentreSelector();
 
 		// Relocate the initial centres
-		Utils.showStatus("Relocating intital centres");
+		Utils.showStatus("Relocating initial centres");
 		centres = relocateCentres(image, centres);
 		if (centres == null)
 			return;
@@ -2787,9 +2789,10 @@ public class PSFCreator implements PlugInFilter
 			}
 			else
 			{
-				if (!checkSpots(centres))
+				BasePoint[] newCentres = checkSpotOverlap(centres);
+				if (newCentres.length < centres.length)
 				{
-					IJ.error(TITLE, "New spots centers create overlap within " + (boxRadius * 2) + "px");
+					IJ.error(TITLE, "New spots centers create overlap within box region");
 					return;
 				}
 			}
@@ -3285,8 +3288,8 @@ public class PSFCreator implements PlugInFilter
 					// Spot - get FWHM of the X and Y sum projections
 					w0 = new double[maxz];
 					w1 = new double[maxz];
-					double[] xp = new double[maxy];
-					double[] yp = new double[maxx];
+					double[] xp = new double[maxx];
+					double[] yp = new double[maxy];
 					for (int z = 0; z < maxz; z++)
 					{
 						float[] data = psf.psf[z];
@@ -4286,8 +4289,8 @@ public class PSFCreator implements PlugInFilter
 
 		// These are ignored for reset
 		gd.addChoice("PSF_type", PSF_TYPE, settings.getPsfType());
-		gd.addNumericField("nm_per_pixel", cw.getNmPerPixel(), 2);
-		gd.addNumericField("nm_per_slice", settings.getNmPerSlice(), 0);
+		gd.addNumericField("nm_per_pixel", cw.getNmPerPixel(), 2, 6, "nm");
+		gd.addNumericField("nm_per_slice", settings.getNmPerSlice(), 0, 6, "nm");
 		PeakFit.addCameraOptions(gd, PeakFit.FLAG_NO_GAIN, cw);
 
 		// For reset
