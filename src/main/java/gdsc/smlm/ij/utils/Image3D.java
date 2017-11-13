@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.utils;
 
+import gdsc.core.utils.Maths;
 import ij.ImageStack;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -1132,28 +1133,187 @@ public class Image3D
 		int y_h_1 = y_1 + h;
 		int z_d_1 = z_1 + d;
 
-		double sum = table[index(x_w_1, y_h_1, z_d_1)];
-		if (x_1 >= 0)
-			sum -= table[index(x_1, y_h_1, z_d_1)];
-		if (y_1 >= 0)
-		{
-			sum -= table[index(x_w_1, y_1, z_d_1)];
-			if (x_1 >= 0)
-				sum += table[index(x_1, y_1, z_d_1)];
-		}
+		//double sum = table[index(x_w_1, y_h_1, z_d_1)];
+		//if (y_1 >= 0)
+		//{
+		//	sum -= table[index(x_w_1, y_1, z_d_1)];
+		//	if (x_1 >= 0)
+		//		sum = sum + table[index(x_1, y_1, z_d_1)] - table[index(x_1, y_h_1, z_d_1)];
+		//}
+		//else if (x_1 >= 0)
+		//{
+		//	sum -= table[index(x_1, y_h_1, z_d_1)];
+		//}
+		//if (z_1 >= 0)
+		//{
+		//	sum -= table[index(x_w_1, y_h_1, z_1)];
+		//	if (y_1 >= 0)
+		//	{
+		//		sum += table[index(x_w_1, y_1, z_1)];
+		//		if (x_1 >= 0)
+		//			sum = sum - table[index(x_1, y_1, z_1)] + table[index(x_1, y_h_1, z_1)];
+		//	}
+		//	else if (x_1 >= 0)
+		//	{
+		//		sum += table[index(x_1, y_h_1, z_1)];
+		//	}
+		//}
+		//return sum;
+
+		// This has been ordered to use the smallest sums first (i.e. closer to x,y,z than x+w,y+h,z+d)
+		int xw_yh_zd = index(x_w_1, y_h_1, z_d_1);
 		if (z_1 >= 0)
 		{
-			sum -= table[index(x_w_1, y_h_1, z_1)];
-			if (x_1 >= 0)
-				sum += table[index(x_1, y_h_1, z_1)];
+			int xw_yh_z = xw_yh_zd - d * nr_by_nc;
+			double sum = 0;
 			if (y_1 >= 0)
 			{
-				sum += table[index(x_w_1, y_1, z_1)];
+				int h_ = h * nc;
 				if (x_1 >= 0)
-					sum -= table[index(x_1, y_1, z_1)];
+					sum = table[xw_yh_zd - w - h_] - table[xw_yh_z - w - h_] - table[xw_yh_zd - w] + table[xw_yh_z - w];
+				sum = sum + table[xw_yh_z - h_] - table[xw_yh_zd - h_];
 			}
+			else if (x_1 >= 0)
+				sum = table[xw_yh_z - w] - table[xw_yh_zd - w];
+			return sum + table[xw_yh_zd] - table[xw_yh_z];
 		}
-		return sum;
+		else
+		{
+			double sum = 0;
+			if (y_1 >= 0)
+			{
+				int h_ = h * nc;
+				if (x_1 >= 0)
+					sum = table[xw_yh_zd - w - h_] - table[xw_yh_zd - w];
+				sum -= table[xw_yh_zd - h_];
+			}
+			else if (x_1 >= 0)
+				sum = -table[xw_yh_zd - w];
+			return sum + table[xw_yh_zd];
+		}
 	}
 
+	/**
+	 * Compute the sum of the region using the precomputed rolling sum table. Assumes x+w,y+h,z+d will not overflow!
+	 *
+	 * @param table
+	 *            the rolling sum table
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param z
+	 *            the z index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @return the sum
+	 */
+	public double computeSumFast(double[] table, int x, int y, int z, int w, int h, int d)
+	{
+		if (w <= 0 || h <= 0 || d <= 0 || x >= nc || y >= nr || z >= ns)
+			return 0;
+
+		// Compute sum from rolling sum using:
+		// sum(x,y,z,w,h,d) = 
+		// + s(x+w-1,y+h-1,z+d-1) 
+		// - s(x-1,y+h-1,z+d-1)
+		// - s(x+w-1,y-1,z+d-1)
+		// + s(x-1,y-1,z+d-1)
+		// /* Stack above must be subtracted so reverse sign*/
+		// - s(x+w-1,y+h-1,z-1) 
+		// + s(x-1,y+h-1,z-1)
+		// + s(x+w-1,y-1,z-1)
+		// - s(x-1,y-1,z-1)
+		// Note: 
+		// s(i,j,k) = 0 when either i,j,k < 0
+		// i = imax when i>imax 
+		// j = jmax when j>jmax 
+		// k = kmax when k>kmax
+
+		// Compute bounds assuming w,h,d is small and positive.
+		int x_1, y_1, z_1, x_w_1, y_h_1, z_d_1;
+		if (x < 0)
+		{
+			x_1 = 0;
+			x_w_1 = Maths.clip(0, nc, x + w);
+		}
+		else
+		{
+			x_1 = x;
+			x_w_1 = Math.min(nc, x + w);
+		}
+		w = x_w_1 - x_1;
+		if (w == 0)
+			return 0;
+		if (y < 0)
+		{
+			y_1 = 0;
+			y_h_1 = Maths.clip(0, nr, y + h);
+		}
+		else
+		{
+			y_1 = y;
+			y_h_1 = Math.min(nr, y + h);
+		}
+		h = y_h_1 - y_1;
+		if (h == 0)
+			return 0;
+		if (z < 0)
+		{
+			z_1 = 0;
+			z_d_1 = Maths.clip(0, ns, z + d);
+		}
+		else
+		{
+			z_1 = z;
+			z_d_1 = Math.min(ns, z + d);
+		}
+		d = z_d_1 - z_1;
+		if (d == 0)
+			return 0;
+
+		// Adjust for the -1
+		x_1--;
+		y_1--;
+		z_1--;
+		x_w_1--;
+		y_h_1--;
+		z_d_1--;
+
+		// This has been ordered to use the smallest sums first (i.e. closer to x,y,z than x+w,y+h,z+d)
+		int xw_yh_zd = index(x_w_1, y_h_1, z_d_1);
+		if (z_1 >= 0)
+		{
+			int xw_yh_z = xw_yh_zd - d * nr_by_nc;
+			double sum = 0;
+			if (y_1 >= 0)
+			{
+				int h_ = h * nc;
+				if (x_1 >= 0)
+					sum = table[xw_yh_zd - w - h_] - table[xw_yh_z - w - h_] - table[xw_yh_zd - w] + table[xw_yh_z - w];
+				sum = sum + table[xw_yh_z - h_] - table[xw_yh_zd - h_];
+			}
+			else if (x_1 >= 0)
+				sum = table[xw_yh_z - w] - table[xw_yh_zd - w];
+			return sum + table[xw_yh_zd] - table[xw_yh_z];
+		}
+		else
+		{
+			double sum = 0;
+			if (y_1 >= 0)
+			{
+				int h_ = h * nc;
+				if (x_1 >= 0)
+					sum = table[xw_yh_zd - w - h_] - table[xw_yh_zd - w];
+				sum -= table[xw_yh_zd - h_];
+			}
+			else if (x_1 >= 0)
+				sum = -table[xw_yh_zd - w];
+			return sum + table[xw_yh_zd];
+		}
+	}
 }

@@ -246,17 +246,17 @@ public class Image3DTest
 		// Bounds checks
 		Image3D image = createData(2, 2, 2);
 		double[] table = image.computeRollingSumTable(null);
-		Assert.assertEquals(36, image.computeSum(table, 0, 0, 0, 2, 2, 2), 0);
-		Assert.assertEquals(36, image.computeSum(table, 0, 0, 0, 5, 7, 9), 0);
-		Assert.assertEquals(0, image.computeSum(table, 0, 0, 0, 0, 0, 0), 0);
-		Assert.assertEquals(1, image.computeSum(table, 0, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(2, image.computeSum(table, 1, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(table, -10, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(table, 10, 0, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(table, 0, 10, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(table, 0, -10, 0, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(table, 0, 0, 10, 1, 1, 1), 0);
-		Assert.assertEquals(0, image.computeSum(table, 0, 0, -10, 1, 1, 1), 0);
+		//testComputeSum(36, image,table, 0, 0, 0, 2, 2, 2);
+		testComputeSum(36, image,table, 0, 0, 0, 5, 7, 9);
+		testComputeSum(0, image,table, 0, 0, 0, 0, 0, 0);
+		testComputeSum(1, image,table, 0, 0, 0, 1, 1, 1);
+		testComputeSum(2, image,table, 1, 0, 0, 1, 1, 1);
+		testComputeSum(0, image,table, -10, 0, 0, 1, 1, 1);
+		testComputeSum(0, image,table, 10, 0, 0, 1, 1, 1);
+		testComputeSum(0, image,table, 0, 10, 0, 1, 1, 1);
+		testComputeSum(0, image,table, 0, -10, 0, 1, 1, 1);
+		testComputeSum(0, image,table, 0, 0, 10, 1, 1, 1);
+		testComputeSum(0, image,table, 0, 0, -10, 1, 1, 1);
 
 		// Larger slices
 		canComputeSumUsingTable(3, 4, 5, 6, 7, 8);
@@ -274,11 +274,19 @@ public class Image3DTest
 
 			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
 			double e = Maths.sum(croppedData.getData());
-			double o = image.computeSum(table, x, y, z, w, h, d);
-
-			// This may be different due to floating point error
-			// but we are adding integers so it should be OK
-			Assert.assertEquals(o, e, 0);
+			
+			testComputeSum(e, image, table, x, y, z, w, h, d);
 		}
+	}
+
+	private void testComputeSum(double e, Image3D image,  double[] table, int x, int y, int z, int w, int h, int d)
+	{
+		double o = image.computeSum(table, x, y, z, w, h, d);
+		double o2 = image.computeSumFast(table, x, y, z, w, h, d);
+
+		// This may be different due to floating point error
+		// but we are adding integers so it should be OK
+		Assert.assertEquals(e, o, 0);
+		Assert.assertEquals(e, o2, 0);
 	}
 }
