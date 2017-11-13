@@ -528,7 +528,7 @@ public class DHT3D extends Image3D
 			int ib = (s + ns_2) * nr_by_nc;
 
 			//@formatter:off
-			// We swap: 0 <=> nx_2, 0 <=> ny_2
+			// We swap: 0 <=> nc_2, 0 <=> nc_2
 			// 1 <=> 7 
 			swap(a, ia, a, ib, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
 			// 2 <=> 8
