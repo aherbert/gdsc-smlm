@@ -624,7 +624,7 @@ public class DHT3D extends Image3D
 			float[] a = (float[]) stack.getPixels(1 + s);
 			float[] b = (float[]) stack.getPixels(1 + s + ns_2);
 			//@formatter:off
-			// We swap: 0 <=> nx_2, 0 <=> ny_2
+			// We swap: 0 <=> nc_2, 0 <=> nc_2
 			// 1 <=> 7 
 			FHT2.swap(a, b, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
 			// 2 <=> 8
