@@ -4381,8 +4381,10 @@ public class PSFCreator implements PlugInFilter
 		{
 			Parameters.isPositive("nm/pixel", nmPerPixel);
 			Parameters.isPositive("nm/slice", settings.getNmPerSlice());
-			if (!cw.isSCMOS())
-				Parameters.isAboveZero("Bias", cw.getBias());
+			// Since we do a local background estimation for each extracted PSF then we
+			// do not need the bias for non sCMOS cameras.
+			//if (!cw.isSCMOS())
+			//	Parameters.isAboveZero("Bias", cw.getBias());
 			Parameters.isEqualOrAbove("Projection magnification", settings.getProjectionMagnification(), 1);
 			Parameters.isEqualOrAbove("Max iterations", settings.getMaxIterations(), 1);
 			Parameters.isEqualOrAbove("PSF magnification", settings.getPsfMagnification(), 1);
