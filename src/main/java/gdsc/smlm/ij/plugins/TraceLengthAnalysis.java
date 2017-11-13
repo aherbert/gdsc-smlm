@@ -9,6 +9,7 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.SimpleLock;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.Statistics;
@@ -65,9 +66,11 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	private SimpleLock lock = new SimpleLock();
 	private double _msdThreshold = -1;
 	private boolean _normalise = false;
+	private int _index;
 	private double error = 0;
-	private double[] d;
-	private int[] length;
+	private double[] d; // MSD of trace
+	private int[] length; // Length of trace
+	private int[] id; // trace id
 	private double minX, maxX;
 	private int[] h1, h2;
 	private float[] x1, x2, y1, y2;
@@ -118,7 +121,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
 			// Precision in nm using the median
 			precision = new Percentile().evaluate(p.precision, 50);
-					 // Maths.sum(p.precision) / p.precision.length;
+			// Maths.sum(p.precision) / p.precision.length;
 			double rawPrecision = distanceConverter.convertBack(precision / 1e3); // Convert from nm to um to raw units
 			// Get the localisation error (4s^2) in units^2
 			error = 4 * rawPrecision * rawPrecision;
@@ -137,6 +140,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		store(); // For the final track
 		d = dList.toArray();
 		length = lengthList.toArray();
+		id = idList.toArray();
 		int[] limits = Maths.limits(length);
 		minX = limits[0] - 1;
 		maxX = limits[1] + 1;
@@ -147,7 +151,18 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		y1 = new float[x1.length];
 		y2 = new float[x1.length];
 
-		Sort.sortArrays(length, d, true);
+		// Sort by MSD
+		int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
+		Sort.sortAscending(indices, d, false);
+		double[] d2 = d.clone();
+		int[] length2 = length.clone();
+		int[] id2 = id.clone();
+		for (int i = 0; i < indices.length; i++)
+		{
+			d[i] = d2[indices[i]];
+			length[i] = length2[indices[i]];
+			id[i] = id2[indices[i]];
+		}
 
 		// Interactive analysis
 		final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
@@ -177,8 +192,43 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 			draw(wo);
 			wo.tile();
 		}
-		gd.hideCancelButton();
+		gd.setOKLabel("Save datasets");
+		gd.setCancelLabel("Close");
 		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return;
+
+		// Sort by ID
+		PeakResult[] list = results.toArray();
+		Arrays.sort(list, new IdPeakResultComparator());
+
+		createResults(results, "Fixed", 0, _index, list);
+		createResults(results, "Moving", _index, d.length, list);
+	}
+
+	private void createResults(MemoryPeakResults results, String suffix, int from, int to, PeakResult[] list)
+	{
+		MemoryPeakResults out = new MemoryPeakResults();
+		out.copySettings(results);
+		out.setName(results.getName() + " " + suffix);
+
+		// Sort target ids
+		int[] target = Arrays.copyOfRange(id, from, to);
+		Arrays.sort(target);
+
+		for (int i = 0, j = 0; i < list.length && j < target.length;)
+		{
+			int nextId = target[j++];
+			// Move forward
+			while (i < list.length && list[i].getId() < nextId)
+				i++;
+			// Write out
+			while (i < list.length && list[i].getId() == nextId)
+				out.add(list[i++]);
+		}
+
+		MemoryPeakResults.addResults(out);
 	}
 
 	private boolean showDialog()
@@ -215,6 +265,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		int index = Arrays.binarySearch(d, _msdThreshold);
 		if (index < 0)
 			index = -index - 1;
+		_index = index;
 
 		// Histogram the distributions
 		computeHistogram(0, index, length, h1);
@@ -344,6 +395,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	private double sumSquared;
 	private TDoubleArrayList dList = new TDoubleArrayList();
 	private TIntArrayList lengthList = new TIntArrayList();
+	private TIntArrayList idList = new TIntArrayList();
 
 	public void execute(PeakResult peakResult)
 	{
@@ -388,5 +440,6 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		// Use the convertBack() since this is a divide in the final units: um^2/s
 		dList.add(timeConverter.convertBack(distanceConverter.convert(distanceConverter.convert(msd))) / 4.0);
 		lengthList.add(length);
+		idList.add(lastid);
 	}
 }
