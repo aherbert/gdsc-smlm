@@ -214,12 +214,11 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		out.setName(results.getName() + " " + suffix);
 
 		// Sort target ids
-		int[] target = Arrays.copyOfRange(id, from, to);
-		Arrays.sort(target);
+		Arrays.sort(id, from, to);
 
-		for (int i = 0, j = 0; i < list.length && j < target.length;)
+		for (int i = 0; i < list.length && from < to;)
 		{
-			int nextId = target[j++];
+			int nextId = id[from++];
 			// Move forward
 			while (i < list.length && list[i].getId() < nextId)
 				i++;
