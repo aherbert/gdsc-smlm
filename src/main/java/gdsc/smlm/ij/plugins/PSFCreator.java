@@ -2654,7 +2654,7 @@ public class PSFCreator implements PlugInFilter
 		CameraModel cameraModel = null;
 		if (calibration.isSCMOS())
 		{
-			cameraModel = CameraModelManager.load(fitConfig.getCameraModelName());
+			cameraModel = CameraModelManager.load(calibration.getCameraModelName());
 			if (cameraModel == null)
 			{
 				IJ.error(TITLE, "No camera model");
