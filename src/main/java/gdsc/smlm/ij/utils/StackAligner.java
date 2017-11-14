@@ -14,6 +14,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.math.interpolation.CubicSplinePosition;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.utils.ImageWindow;
@@ -110,7 +111,7 @@ public class StackAligner implements Cloneable
 
 	private double edgeWindow;
 	private double relativeThreshold = 1e-3;
-	public SearchMode searchMode = SearchMode.BINARY;
+	public SearchMode searchMode = SearchMode.GRADIENT;
 
 	/** The number of slices (max z) of the discrete Hartley transform. */
 	private int ns;
@@ -133,6 +134,7 @@ public class StackAligner implements Cloneable
 	private double[] wz = null;
 
 	private CubicSplineCalculator calc;
+	private Image3D ref, tar;
 
 	/**
 	 * Instantiates a new stack aligner with a default edge window of 0.25
@@ -272,9 +274,9 @@ public class StackAligner implements Cloneable
 		//}
 
 		if (dhtData == null)
-			dhtData = new DHTData(dht, w, d, h);
+			dhtData = new DHTData(dht, w, h, d);
 		else
-			dhtData.setDHT(dht, w, d, h);
+			dhtData.setDHT(dht, w, h, d);
 
 		return prepareDHT(dhtData);
 	}
@@ -328,21 +330,25 @@ public class StackAligner implements Cloneable
 	}
 
 	/**
-	 * Prepare the DHT. Converts the data to the full range of a 16-bit unsigned integer. This may reduce the precision
-	 * slightly but allows the computation of a rolling sum table with no errors. The rolling sum and sum-of-squares
-	 * table is computed and the DHT is transformed to the frequency domain.
+	 * Prepare the DHT.
+	 * <p>
+	 * Converts the data to the full range of a 16-bit signed integer with a mean of zero.
+	 * This may reduce the precision slightly but allows the computation of a rolling sum table with no errors. The
+	 * rolling sum and sum-of-squares table is computed and the DHT is transformed to the frequency domain.
 	 *
 	 * @param dhtData
 	 *            the dht data
 	 * @return the DHT data
 	 */
-	private static DHTData prepareDHT(DHTData dhtData)
+	private DHTData prepareDHT(DHTData dhtData)
 	{
 		DHT3D dht = dhtData.dht;
 		long[] s_ = dhtData.s_;
 		long[] ss = dhtData.ss;
 
-		// Convert to a 16-bit unsigned integer
+		// XXX Update this
+		
+		// Convert to a 16-bit signed integer
 		// This makes it possible to compute the rolling tables without error
 		float[] data = dht.getData();
 		float[] limits = Maths.limits(data);
@@ -356,7 +362,7 @@ public class StackAligner implements Cloneable
 		}
 		else
 		{
-			double scale = 65535.0 / (max - min);
+			double scale = LIMIT / (max - min);
 
 			// Compute the rolling sum tables
 			int nr_by_nc = dht.nr_by_nc;
@@ -376,6 +382,7 @@ public class StackAligner implements Cloneable
 				for (int c = 0; c < nc; c++, i++)
 				{
 					int v = transform(data[i], min, scale);
+					data[i] = v;
 					sum += v;
 					sum2 += v * v;
 					s_[i] = sum;
@@ -390,11 +397,12 @@ public class StackAligner implements Cloneable
 					for (int c = 0; c < nc; c++, i++, ii++)
 					{
 						int v = transform(data[i], min, scale);
+						data[i] = v;
 						sum += v;
 						sum2 += v * v;
 						// Add the sum from the previous row
 						s_[i] = sum + s_[ii];
-						ss[i] = sum + ss[ii];
+						ss[i] = sum2 + ss[ii];
 					}
 				}
 			}
@@ -413,19 +421,24 @@ public class StackAligner implements Cloneable
 				}
 			}
 		}
-
+		if (ref == null)
+			ref = new Image3D(nc, nr, ns, data.clone());
+		else
+			tar = new Image3D(nc, nr, ns, data.clone());
 		// Transform the data
 		dht.transform();
 		return dhtData;
 	}
+
+	private static double LIMIT = 1023; //65535.0;
 
 	private static int transform(float f, double min, double scale)
 	{
 		double value = (f - min) * scale;
 		if (value < 0.0)
 			return 0;
-		if (value > 65535.0)
-			return 65535;
+		if (value > LIMIT)
+			return (int) LIMIT;
 		return (int) (value + 0.5);
 	}
 
@@ -537,9 +550,9 @@ public class StackAligner implements Cloneable
 		}
 
 		if (dhtData == null)
-			dhtData = new DHTData(dht, w, d, h);
+			dhtData = new DHTData(dht, w, h, d);
 		else
-			dhtData.setDHT(dht, w, d, h);
+			dhtData.setDHT(dht, w, h, d);
 
 		return prepareDHT(dhtData);
 	}
@@ -685,7 +698,6 @@ public class StackAligner implements Cloneable
 		int id = Math.max(reference.iz + reference.d, target.iz + target.d);
 
 		float[] data = correlation.getData();
-		int nr_by_nc = correlation.nr_by_nc;
 
 		// Compute sum from rolling sum using:
 		// sum(x,y,z,w,h,d) = 
@@ -787,13 +799,37 @@ public class StackAligner implements Cloneable
 					compute(rx_1[i], ry_1[j], rz_1, rx_w_1[i], ry_h_1[j], rz_d_1, w[i], h[j], d, rs_, rss, rsum);
 					compute(tx_1[i], ty_1[j], tz_1, tx_w_1[i], ty_h_1[j], tz_d_1, w[i], h[j], d, ts_, tss, tsum);
 
+					// XXX debug this ...
+					if (w[i] == nc && h[j] == nr && d == ns)
+					{
+						double rs = ref.computeSum(rx_1[i] + 1, ry_1[j] + 1, rz_1 + 1, w[i], h[j], d);
+						double ts = tar.computeSum(tx_1[i] + 1, ty_1[j] + 1, tz_1 + 1, w[i], h[j], d);
+						sumXY = 0;
+						long sumXX = 0;
+						long sumYY = 0;
+						for (int k = ref.getDataLength(); k-- > 0;)
+						{
+							int a = (int) ref.getData()[k];
+							int b = (int) tar.getData()[k];
+							sumXY += a * b;
+							sumXX += a * a;
+							sumYY += b * b;
+						}
+
+						// The actual sumXY from the correlation is incorrect!
+						// Is it because the data have been converted to int?
+
+						System.out.printf("%g vs %g, %d vs %g, %d vs %g, %d vs %d, %d vs %d\n", data[base + c], sumXY,
+								rsum[X], rs, tsum[Y], ts, sumXX, rsum[XX], sumYY, tsum[YY]);
+					}
+
 					// Compute the correlation
 					double one_over_n = 1.0 / (w[i] * hd);
 					// (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
 
 					double pearsons1 = sumXY - (one_over_n * rsum[X] * tsum[Y]);
-					double pearsons2 = Math.max(0, rsum[XX] - (one_over_n * rsum[X] * rsum[X]));
-					double pearsons3 = Math.max(0, tsum[YY] - (one_over_n * tsum[Y] * tsum[Y]));
+					double pearsons2 = rsum[XX] - (one_over_n * rsum[X] * rsum[X]);
+					double pearsons3 = tsum[YY] - (one_over_n * tsum[Y] * tsum[Y]);
 
 					double R;
 					if (pearsons2 == 0 || pearsons3 == 0)
@@ -811,7 +847,7 @@ public class StackAligner implements Cloneable
 					else
 					{
 						R = pearsons1 / (Math.sqrt(pearsons2 * pearsons3));
-						// Leve as raw for debugging
+						// Leave as raw for debugging
 						//R = Maths.clip(-1, 1, R);
 					}
 					data[base + c] = (float) R;
@@ -820,7 +856,7 @@ public class StackAligner implements Cloneable
 		}
 
 		//Utils.display("corr", correlation.getImageStack());
-		int maxi = correlation.findMaxIndex(ix, iy, iz, iw, ih, id);
+		int maxi = correlation.findMaxIndex(ix, iy, iz, iw - ix, ih - iy, id - iz);
 		int[] xyz = correlation.getXYZ(maxi);
 
 		// Q. What if the correlation surface is flat? This will pick the start and not
@@ -981,9 +1017,11 @@ public class StackAligner implements Cloneable
 		// i = imax when i>imax 
 		// j = jmax when j>jmax 
 		// k = kmax when k>kmax
+
 		// This has been adapted from Image3D to compute the twos sums together
 
-		int xw_yh_zd = z_d_1 * nr_by_nc + y_h_1 * nc + x_w_1;
+		int xw_yh_zd = reference.dht.getIndex(x_w_1, y_h_1, z_d_1);
+		//int xw_yh_zd = z_d_1 * nr_by_nc + y_h_1 * nc + x_w_1;
 		sum[0] = 0;
 		sum[1] = 0;
 		if (z_1 >= 0)

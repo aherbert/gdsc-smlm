@@ -1,9 +1,7 @@
 package gdsc.smlm.ij.utils;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
 import gdsc.smlm.function.StandardFloatValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -47,7 +45,7 @@ public class StackAlignerTest
 	public void canCorrelate()
 	{
 		int maxz = 64;
-		canCorrelate(16, 16, maxz, 7.5, 7.5, (maxz-1)/2, 8, 8, (maxz+10)/2, 0.1, 3, 1e-2);
+		canCorrelate(16, 16, maxz, 7.5, 7.5, (maxz-1)/2.0, 8, 8, (maxz+10)/2.0, 0.1, 3, 1e-2);
 	}
 
 	private void canCorrelate(int maxx, int maxy, int maxz, double cx1, double cy1, double cz1, double cx2, double cy2,
