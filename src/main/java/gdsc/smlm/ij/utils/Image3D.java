@@ -265,6 +265,16 @@ public class Image3D
 	}
 
 	/**
+	 * Gets the data length.
+	 *
+	 * @return the data length
+	 */
+	public int getDataLength()
+	{
+		return data.length;
+	}
+
+	/**
 	 * Convert to an image stack.
 	 *
 	 * @return the image stack
