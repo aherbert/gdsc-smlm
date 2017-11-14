@@ -14,7 +14,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.math.interpolation.CubicSplinePosition;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.utils.ImageWindow;
@@ -37,12 +36,81 @@ import ij.ImageStack;
  *---------------------------------------------------------------------------*/
 
 /**
- * Perform 3D image alignment using cross-correlation
+ * Perform 3D image alignment using normalised cross-correlation.
+ * <p>
+ * Uses the following formula:
+ * 
+ * <pre>
+ *  ( Σ xiyi - nx̄ӯ ) / ( (Σ xi^2 - nx̄^2) (Σ yi^2 - nӯ^2) )^0.5
+ * </pre>
+ * 
+ * The summation in the numerator is computed using a conjugate multiplication in the frequency domain. The summation
+ * terms are computed using rolling sum tables. Images are converted to the full range of an unsigned 16-bit integer
+ * before computation to avoid errors in the rolling sum tables. This should have minimal impact on the
+ * correlation value since it is normalised.
+ * 
+ * @see <a href=
+ *      "https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">https://en.wikipedia.org/wiki/Pearson_correlation_coefficient</a>
+ * @see <a href="http://scribblethink.org/Work/nvisionInterface/nip.html">Fast Normalized Cross-Correlation by J.P.
+ *      Lewis</a>
  */
 public class StackAligner implements Cloneable
 {
+	private static final int X = 0;
+	private static final int XX = 1;
+	private static final int Y = 0;
+	private static final int YY = 1;
+
+	private static class DHTData
+	{
+		DHT3D dht;
+		long[] s_;
+		long[] ss;
+		// Original dimensions
+		int w, h, d;
+		// Insert position
+		int ix, iy, iz;
+
+		DHTData(DHT3D dht, int w, int h, int d)
+		{
+			setDHT(dht, w, h, d);
+		}
+
+		void setDHT(DHT3D dht, int w, int h, int d)
+		{
+			this.dht = dht;
+			s_ = resize(s_);
+			ss = resize(ss);
+			this.w = w;
+			this.h = h;
+			this.d = d;
+			ix = getInsert(dht.nc, w);
+			iy = getInsert(dht.nr, h);
+			iz = getInsert(dht.ns, d);
+		}
+
+		private long[] resize(long[] data)
+		{
+			return (data == null || data.length != dht.getDataLength()) ? new long[dht.getDataLength()] : data;
+		}
+	}
+
+	/**
+	 * The search mode for sub-pixel refinement.
+	 */
+	public enum SearchMode
+	{
+		/**
+		 * Perform a binary search by condensing the cube vertices around the highest value of a tricubic interpolation
+		 */
+		BINARY,
+		/** Use the local gradient of a tricubic interpolation to find the maximum. */
+		GRADIENT
+	}
+
 	private double edgeWindow;
 	private double relativeThreshold = 1e-3;
+	public SearchMode searchMode = SearchMode.BINARY;
 
 	/** The number of slices (max z) of the discrete Hartley transform. */
 	private int ns;
@@ -50,9 +118,14 @@ public class StackAligner implements Cloneable
 	private int nr;
 	/** The number of columns (max x) of the discrete Hartley transform. */
 	private int nc;
+	/** The number of rows by columns of the discrete Hartley transform. */
+	private int nr_by_nc;
 
-	private DHT3D reference;
-	private float[] buffer, region, amp1, amp2;
+	private DHTData reference;
+
+	// Not thread safe as they are used for the target image
+	private DHTData target;
+	private float[] buffer, region;
 
 	// Allow cached window weights
 	private double[] wx = null;
@@ -124,13 +197,14 @@ public class StackAligner implements Cloneable
 		// Check the stack will fit in an Image3D
 		Image3D.checkSize(nc, nr, ns, true);
 		// Window and pad the reference
-		setReference(createDHT(stack));
+		setReference(createDHT(stack, reference));
 	}
 
-	private void setReference(DHT3D dht)
+	private void setReference(DHTData dhtData)
 	{
-		reference = dht;
-		amp1 = dht.getAbsoluteValue(amp1).getData();
+		reference = dhtData;
+		// We could pre-compute the mean and sum-of-squares for each overlap position here
+		// But that would require more storage again
 	}
 
 	private void check3D(ImageStack stack)
@@ -139,10 +213,10 @@ public class StackAligner implements Cloneable
 			throw new IllegalArgumentException("Require a 3D stack");
 	}
 
-	private DHT3D createDHT(ImageStack stack)
+	private DHTData createDHT(ImageStack stack, DHTData dhtData)
 	{
 		if (stack.getBitDepth() != 32)
-			return createDHT(new Image3D(stack));
+			return createDHT(new Image3D(stack), dhtData);
 
 		// Apply window
 		int w = stack.getWidth(), h = stack.getHeight(), d = stack.getSize();
@@ -167,24 +241,42 @@ public class StackAligner implements Cloneable
 		}
 
 		DHT3D dht;
-		if (w < nc || h < nr || d < ns)
+		//if (w < nc || h < nr || d < ns)
+		//{
+
+		// Pad into the desired data size.
+		// We always do this so the data is reused
+		int size = ns * nr * nc;
+		float[] dest;
+		if (dhtData == null || dhtData.dht.getDataLength() != size)
 		{
-			// Pad into the desired data size
-			float[] dest = new float[ns * nc * nr];
-			dht = new DHT3D(nc, nr, ns, dest, false);
-			int ix = getInsert(nc, w);
-			int iy = getInsert(nr, h);
-			int iz = getInsert(ns, d);
-			dht.insert(ix, iy, iz, stack);
+			dest = new float[size];
 		}
 		else
 		{
-			// This will just copy the data
-			dht = new DHT3D(stack);
+			// Re-use space
+			dest = dhtData.dht.getData();
+			Arrays.fill(dest, 0f);
 		}
+		dht = new DHT3D(nc, nr, ns, dest, false);
+		int ix = getInsert(nc, w);
+		int iy = getInsert(nr, h);
+		int iz = getInsert(ns, d);
+		dht.insert(ix, iy, iz, stack);
 
-		dht.transform();
-		return dht;
+		//}
+		//else
+		//{
+		//	// This will just copy the data
+		//	dht = new DHT3D(stack);
+		//}
+
+		if (dhtData == null)
+			dhtData = new DHTData(dht, w, d, h);
+		else
+			dhtData.setDHT(dht, w, d, h);
+
+		return prepareDHT(dhtData);
 	}
 
 	private double[] createXWindow(int n)
@@ -236,6 +328,108 @@ public class StackAligner implements Cloneable
 	}
 
 	/**
+	 * Prepare the DHT. Converts the data to the full range of a 16-bit unsigned integer. This may reduce the precision
+	 * slightly but allows the computation of a rolling sum table with no errors. The rolling sum and sum-of-squares
+	 * table is computed and the DHT is transformed to the frequency domain.
+	 *
+	 * @param dhtData
+	 *            the dht data
+	 * @return the DHT data
+	 */
+	private static DHTData prepareDHT(DHTData dhtData)
+	{
+		DHT3D dht = dhtData.dht;
+		long[] s_ = dhtData.s_;
+		long[] ss = dhtData.ss;
+
+		// Convert to a 16-bit unsigned integer
+		// This makes it possible to compute the rolling tables without error
+		float[] data = dht.getData();
+		float[] limits = Maths.limits(data);
+		double min = limits[0];
+		double max = limits[1];
+		if ((max - min) == 0.0)
+		{
+			// No data variation so just zero fill!
+			Arrays.fill(s_, 0);
+			Arrays.fill(ss, 0);
+		}
+		else
+		{
+			double scale = 65535.0 / (max - min);
+
+			// Compute the rolling sum tables
+			int nr_by_nc = dht.nr_by_nc;
+			int nc = dht.nc;
+			int nr = dht.nr;
+			int ns = dht.ns;
+
+			// This has been adapted from Image3D to compute two rolling sum table at once
+
+			// First build a table for each XY slice
+			for (int s = 0; s < ns; s++)
+			{
+				long sum = 0, sum2 = 0;
+				int i = s * nr_by_nc;
+				// Initialise first row sum
+				// sum = rolling sum of (0 - colomn)
+				for (int c = 0; c < nc; c++, i++)
+				{
+					int v = transform(data[i], min, scale);
+					sum += v;
+					sum2 += v * v;
+					s_[i] = sum;
+					ss[i] = sum2;
+				}
+				// Remaining rows
+				// sum = rolling sum of (0 - colomn) + sum of same position above
+				for (int r = 1, ii = i - nc; r < nr; r++)
+				{
+					sum = 0;
+					sum2 = 0;
+					for (int c = 0; c < nc; c++, i++, ii++)
+					{
+						int v = transform(data[i], min, scale);
+						sum += v;
+						sum2 += v * v;
+						// Add the sum from the previous row
+						s_[i] = sum + s_[ii];
+						ss[i] = sum + ss[ii];
+					}
+				}
+			}
+
+			// Now sum across slices
+			// sum = rolling sum of (0,0 to column,row) + sum of same position above
+			// => rolling sum of (0,0,0 to column,row,slice)
+			for (int s = 1; s < ns; s++)
+			{
+				int i = s * nr_by_nc;
+				int ii = i - nr_by_nc;
+				for (int j = 0; j < nr_by_nc; j++, i++, ii++)
+				{
+					s_[i] += s_[ii];
+					ss[i] += ss[ii];
+				}
+			}
+		}
+
+		// Transform the data
+		dht.transform();
+		return dhtData;
+	}
+
+	private static int transform(float f, double min, double scale)
+	{
+		double value = (f - min) * scale;
+		if (value < 0.0)
+			return 0;
+		if (value > 65535.0)
+			return 65535;
+		return (int) (value + 0.5);
+	}
+
+	/**
 	 * Sets the reference stack and assumes the target stack will be the same size.
 	 * <p>
 	 * The dimension are converted to the next power of 2 for speed. The combined size must fit within the maximum size
@@ -276,8 +470,9 @@ public class StackAligner implements Cloneable
 		nc = Maths.nextPow2(Math.max(w, stack.getWidth()));
 		nr = Maths.nextPow2(Math.max(h, stack.getHeight()));
 		ns = Maths.nextPow2(Math.max(d, stack.getSize()));
+		nr_by_nc = nr * nc;
 		// Window and pad the reference
-		setReference(createDHT(stack));
+		setReference(createDHT(stack, reference));
 	}
 
 	private void check3D(Image3D stack)
@@ -286,7 +481,7 @@ public class StackAligner implements Cloneable
 			throw new IllegalArgumentException("Require a 3D stack");
 	}
 
-	private DHT3D createDHT(Image3D stack)
+	private DHTData createDHT(Image3D stack, DHTData dhtData)
 	{
 		// Apply window
 		int w = stack.getWidth(), h = stack.getHeight(), d = stack.getSize();
@@ -317,7 +512,18 @@ public class StackAligner implements Cloneable
 		if (w < nc || h < nr || d < ns)
 		{
 			// Pad into the desired data size
-			float[] dest = new float[ns * nr * nc];
+			int size = ns * nr * nc;
+			float[] dest;
+			if (dhtData == null || dhtData.dht.getDataLength() != size)
+			{
+				dest = new float[size];
+			}
+			else
+			{
+				// Re-use space
+				dest = dhtData.dht.getData();
+				Arrays.fill(dest, 0f);
+			}
 			dht = new DHT3D(nc, nr, ns, dest, false);
 			int ix = getInsert(nc, w);
 			int iy = getInsert(nr, h);
@@ -330,8 +536,12 @@ public class StackAligner implements Cloneable
 			dht = new DHT3D(w, h, d, stack.getData(), false);
 		}
 
-		dht.transform();
-		return dht;
+		if (dhtData == null)
+			dhtData = new DHTData(dht, w, d, h);
+		else
+			dhtData.setDHT(dht, w, d, h);
+
+		return prepareDHT(dhtData);
 	}
 
 	/**
@@ -370,7 +580,7 @@ public class StackAligner implements Cloneable
 		if (w > nc || h > nr || d > ns)
 			throw new IllegalArgumentException("Stack is larger than the initialised reference");
 
-		DHT3D target = createDHT(stack);
+		target = createDHT(stack, target);
 		return align(target, refinements, error);
 	}
 
@@ -410,7 +620,7 @@ public class StackAligner implements Cloneable
 		if (w > nc || h > nr || d > ns)
 			throw new IllegalArgumentException("Stack is larger than the initialised reference");
 
-		DHT3D target = createDHT(stack);
+		target = createDHT(stack, target);
 		return align(target, refinements, 1e-2);
 	}
 
@@ -435,7 +645,7 @@ public class StackAligner implements Cloneable
 		if (w > nc || h > nr || d > ns)
 			throw new IllegalArgumentException("Stack is larger than the initialised reference");
 
-		DHT3D target = createDHT(stack);
+		target = createDHT(stack, target);
 		return align(target, refinements, error);
 	}
 
@@ -453,66 +663,168 @@ public class StackAligner implements Cloneable
 	 * @throws IllegalArgumentException
 	 *             If any dimension is less than 2, or if larger than the initialised reference
 	 */
-	private double[] align(DHT3D target, int refinements, double error)
+	private double[] align(DHTData target, int refinements, double error)
 	{
-		// Test - Do a correlation in the FFT
-		//		Image3D[] fft1 = target.toDFT(null, null);
-		//		Image3D[] fft2 = reference.toDFT(null, null);
-		//		float[] r1 = fft1[0].getData();
-		//		float[] i1 = fft1[1].getData();
-		//		float[] r2 = fft2[0].getData();
-		//		float[] i2 = fft2[1].getData();
-		//		for (int i = 0; i < r1.length; i++)
-		//		{
-		//			float a = r1[i];
-		//			float b = i1[i];
-		//			float c = r2[i];
-		//			float d = -i2[i]; // Get the conjugate for correlation
-		//			// Re-use the space
-		//			r1[i] = a * c - b * d;
-		//			i1[i] = b * c + a * d;
-		//			// Normalise for phase correlation
-		//			if (r1[i] != 0 || i1[i] != 0)
-		//			{
-		//				//double mag = Math.sqrt((a * a + b * b) * (c * c + d * d));
-		//				double mag = Math.sqrt(r1[i] * r1[i] + i1[i] * i1[i]);
-		//				r1[i] /= mag;
-		//				//r1[i] = 1;
-		//				i1[i] /= mag;
-		//				//i1[i] = 0;
-		//			}
-		//		}
-		//		DHT3D correlation = DHT3D.fromDFT(fft1[0], fft1[1], null);
-
-		DHT3D correlation = target.conjugateMultiply(reference, buffer);
-		buffer = correlation.getData();
-
-		//		// Do phase correlation by normalising by the amplitude
-		//		amp2 = target.getAbsoluteValue(amp2).getData();
-		//		for (int i = 0; i < buffer.length; i++)
-		//		{
-		//			if (buffer[i] != 0)
-		//			{
-		//				double m = amp1[i] * amp2[i];
-		//				buffer[i] /= m;
-		//			}
-		//		}
-		//		amp2 = correlation.getAbsoluteValue(amp2).getData();
-		//		for (int i = 0; i < buffer.length; i++)
-		//		{
-		//			if (buffer[i] != 0)
-		//			{
-		//				double m = amp2[i];
-		//				buffer[i] /= m;
-		//			}
-		//		}
-
+		// Multiply by the reference. This allows the reference to be shared across threads.
+		DHT3D correlation = target.dht.conjugateMultiply(reference.dht, buffer);
+		buffer = correlation.getData(); // Store for reuse
 		correlation.inverseTransform();
 		correlation.swapOctants();
-		//Utils.display("corr", correlation.getImageStack());
+
+		// Normalise:
+		//  ( Σ xiyi - nx̄ӯ ) / ( (Σ xi^2 - nx̄^2) (Σ yi^2 - nӯ^2) )^0.5
+		// 
+		// (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
+
+		// Only do this over the range where at least half the original images overlap.
+		int ix = Math.max(reference.ix, target.ix);
+		int iy = Math.max(reference.iy, target.iy);
+		int iz = Math.max(reference.iz, target.iz);
+		int iw = Math.max(reference.ix + reference.w, target.ix + target.w);
+		int ih = Math.max(reference.iy + reference.h, target.iy + target.h);
+		int id = Math.max(reference.iz + reference.d, target.iz + target.d);
+
 		float[] data = correlation.getData();
-		int maxi = SimpleArrayUtils.findMaxIndex(data);
+		int nr_by_nc = correlation.nr_by_nc;
+
+		// Compute sum from rolling sum using:
+		// sum(x,y,z,w,h,d) = 
+		// + s(x+w-1,y+h-1,z+d-1) 
+		// - s(x-1,y+h-1,z+d-1)
+		// - s(x+w-1,y-1,z+d-1)
+		// + s(x-1,y-1,z+d-1)
+		// /* Stack above must be subtracted so reverse sign*/
+		// - s(x+w-1,y+h-1,z-1) 
+		// + s(x-1,y+h-1,z-1)
+		// + s(x+w-1,y-1,z-1)
+		// - s(x-1,y-1,z-1)
+		// Note: 
+		// s(i,j,k) = 0 when either i,j,k < 0
+		// i = imax when i>imax 
+		// j = jmax when j>jmax 
+		// k = kmax when k>kmax
+
+		// Note: The correlation is for the movement of the reference over the target
+		int nc_2 = nc / 2;
+		int nr_2 = nr / 2;
+		int ns_2 = ns / 2;
+
+		// Compute the shift from the centre
+		int dx = nc_2 - ix;
+		int dy = nr_2 - iy;
+		int dz = ns_2 - iz;
+
+		// For the reference (moved -dx,-dy,-dz over the target)
+		int rx = -dx;
+		int ry = -dy;
+		int rz = -dz;
+
+		// For the target (moved dx,dy,dz over the reference)
+		int tx = dx;
+		int ty = dy;
+		int tz = dz;
+
+		// Precompute the x-1,x+w-1,y-1,y+h-1
+		int nx = iw - ix;
+		int[] rx_1 = new int[nx];
+		int[] rx_w_1 = new int[nx];
+		int[] tx_1 = new int[nx];
+		int[] tx_w_1 = new int[nx];
+		int[] w = new int[nx];
+		for (int c = ix, i = 0; c < iw; c++, i++)
+		{
+			rx_1[i] = Math.max(-1, rx - 1);
+			rx_w_1[i] = Math.min(nc, rx + nc) - 1;
+			rx++;
+			tx_1[i] = Math.max(-1, tx - 1);
+			tx_w_1[i] = Math.min(nc, tx + nc) - 1;
+			tx--;
+			w[i] = rx_w_1[i] - rx_1[i];
+		}
+		int ny = ih - iy;
+		int[] ry_1 = new int[ny];
+		int[] ry_h_1 = new int[ny];
+		int[] ty_1 = new int[ny];
+		int[] ty_h_1 = new int[ny];
+		int[] h = new int[ny];
+		for (int r = iy, j = 0; r < ih; r++, j++)
+		{
+			ry_1[j] = Math.max(-1, ry - 1);
+			ry_h_1[j] = Math.min(nr, ry + nr) - 1;
+			ry++;
+			ty_1[j] = Math.max(-1, ty - 1);
+			ty_h_1[j] = Math.min(nr, ty + nr) - 1;
+			ty--;
+			h[j] = ry_h_1[j] - ry_1[j];
+		}
+
+		long[] rs_ = reference.s_;
+		long[] rss = reference.ss;
+		long[] ts_ = target.s_;
+		long[] tss = target.ss;
+		long[] rsum = new long[2];
+		long[] tsum = new long[2];
+
+		for (int s = iz; s < id; s++)
+		{
+			// Compute the z-1,z+d-1
+			int rz_1 = Math.max(-1, rz - 1);
+			int rz_d_1 = Math.min(ns, rz + ns) - 1;
+			rz++;
+			int tz_1 = Math.max(-1, tz - 1);
+			int tz_d_1 = Math.min(ns, tz + ns) - 1;
+			tz--;
+			int d = rz_d_1 - rz_1;
+
+			for (int r = iy, j = 0; r < ih; r++, j++)
+			{
+				int base = s * nr_by_nc + r * nc;
+				int hd = h[j] * d;
+				for (int c = ix, i = 0; c < iw; c++, i++)
+				{
+					double sumXY = data[base + c];
+
+					compute(rx_1[i], ry_1[j], rz_1, rx_w_1[i], ry_h_1[j], rz_d_1, w[i], h[j], d, rs_, rss, rsum);
+					compute(tx_1[i], ty_1[j], tz_1, tx_w_1[i], ty_h_1[j], tz_d_1, w[i], h[j], d, ts_, tss, tsum);
+
+					// Compute the correlation
+					double one_over_n = 1.0 / (w[i] * hd);
+					// (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
+
+					double pearsons1 = sumXY - (one_over_n * rsum[X] * tsum[Y]);
+					double pearsons2 = Math.max(0, rsum[XX] - (one_over_n * rsum[X] * rsum[X]));
+					double pearsons3 = Math.max(0, tsum[YY] - (one_over_n * tsum[Y] * tsum[Y]));
+
+					double R;
+					if (pearsons2 == 0 || pearsons3 == 0)
+					{
+						// If there is data and all the variances are the same then correlation is perfect
+						if (rsum[XX] == tsum[YY] && rsum[XX] == sumXY && rsum[XX] > 0)
+						{
+							R = 1;
+						}
+						else
+						{
+							R = 0;
+						}
+					}
+					else
+					{
+						R = pearsons1 / (Math.sqrt(pearsons2 * pearsons3));
+						// Leve as raw for debugging
+						//R = Maths.clip(-1, 1, R);
+					}
+					data[base + c] = (float) R;
+				}
+			}
+		}
+
+		//Utils.display("corr", correlation.getImageStack());
+		int maxi = correlation.findMaxIndex(ix, iy, iz, iw, ih, id);
 		int[] xyz = correlation.getXYZ(maxi);
+
+		// Q. What if the correlation surface is flat? This will pick the start and not
+		// the centre of the plateau.
 
 		// Report the shift required to move from the centre of the target image to the reference
 		// @formatter:off
@@ -546,9 +858,30 @@ public class StackAligner implements Cloneable
 			// Scale to the cubic spline dimensions of 0-1
 			double[] origin = new double[] { ox / 3.0, oy / 3.0, oz / 3.0 };
 
-			try
+			// Simple condensing search
+			if (searchMode == SearchMode.BINARY)
 			{
-				final SplineFunction sf = new SplineFunction(f, origin);
+				// Can this use the current origin as a start point?
+				// Currently we evaluate 8-cube vertices. A better search
+				// would evaluate 27 points around the optimum, pick the best then condense 
+				// the range.
+				double[] optimum = f.search(true, refinements, relativeThreshold, -1);
+				double value = optimum[3];
+				if (value > result[3])
+				{
+					result[3] = value;
+					// Convert the maximum back with scaling
+					for (int i = 0; i < 3; i++)
+						result[i] -= (optimum[i] - origin[i]) * 3.0;
+					return result;
+				}
+			}
+			else
+			{
+				// Gradient search
+				try
+				{
+					final SplineFunction sf = new SplineFunction(f, origin);
 
 				// @formatter:off				
 				BFGSOptimizer optimiser = new BFGSOptimizer(
@@ -579,25 +912,123 @@ public class StackAligner implements Cloneable
 							}}));
 				// @formatter:on
 
-				// Check it is higher. Invert since we did a minimisation.
-				double value = -opt.getValue();
-				if (value > result[3])
-				{
-					result[3] = value;
-					// Convert the maximum back with scaling
-					double[] optimum = opt.getPointRef();
-					for (int i = 0; i < 3; i++)
-						result[i] -= (optimum[i] - origin[i]) * 3.0;
-					return result;
+					// Check it is higher. Invert since we did a minimisation.
+					double value = -opt.getValue();
+					if (value > result[3])
+					{
+						result[3] = value;
+						// Convert the maximum back with scaling
+						double[] optimum = opt.getPointRef();
+						for (int i = 0; i < 3; i++)
+							result[i] -= (optimum[i] - origin[i]) * 3.0;
+						return result;
+					}
 				}
-			}
-			catch (Exception e)
-			{
-				// Ignore this
+				catch (Exception e)
+				{
+					// Ignore this
+				}
 			}
 		}
 
 		return result;
+	}
+
+	/**
+	 * Compute the sum from the rolling sum tables
+	 *
+	 * @param x_1
+	 *            the x value -1
+	 * @param y_1
+	 *            the y value -1
+	 * @param z_1
+	 *            the z value -1
+	 * @param x_w_1
+	 *            the x value +w -1
+	 * @param y_h_1
+	 *            the y value +h -1
+	 * @param z_d_1
+	 *            the z value +d -1
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param d
+	 *            the depth
+	 * @param s_
+	 *            the sum table
+	 * @param ss
+	 *            the sum-of-squares table
+	 * @param sum
+	 *            the sum (output = [sum, sum-of-squares])
+	 */
+	private void compute(int x_1, int y_1, int z_1, int x_w_1, int y_h_1, int z_d_1, int w, int h, int d, long[] s_,
+			long[] ss, long[] sum)
+	{
+		// Compute sum from rolling sum using:
+		// sum(x,y,z,w,h,d) = 
+		// + s(x+w-1,y+h-1,z+d-1) 
+		// - s(x-1,y+h-1,z+d-1)
+		// - s(x+w-1,y-1,z+d-1)
+		// + s(x-1,y-1,z+d-1)
+		// /* Stack above must be subtracted so reverse sign*/
+		// - s(x+w-1,y+h-1,z-1) 
+		// + s(x-1,y+h-1,z-1)
+		// + s(x+w-1,y-1,z-1)
+		// - s(x-1,y-1,z-1)
+		// Note: 
+		// s(i,j,k) = 0 when either i,j,k < 0
+		// i = imax when i>imax 
+		// j = jmax when j>jmax 
+		// k = kmax when k>kmax
+		// This has been adapted from Image3D to compute the twos sums together
+
+		int xw_yh_zd = z_d_1 * nr_by_nc + y_h_1 * nc + x_w_1;
+		sum[0] = 0;
+		sum[1] = 0;
+		if (z_1 >= 0)
+		{
+			int xw_yh_z = xw_yh_zd - d * nr_by_nc;
+			if (y_1 >= 0)
+			{
+				int h_ = h * nc;
+				if (x_1 >= 0)
+				{
+					sum[0] = s_[xw_yh_zd - w - h_] - s_[xw_yh_z - w - h_] - s_[xw_yh_zd - w] + s_[xw_yh_z - w];
+					sum[1] = ss[xw_yh_zd - w - h_] - ss[xw_yh_z - w - h_] - ss[xw_yh_zd - w] + ss[xw_yh_z - w];
+				}
+				sum[0] = sum[0] + s_[xw_yh_z - h_] - s_[xw_yh_zd - h_];
+				sum[1] = sum[1] + ss[xw_yh_z - h_] - ss[xw_yh_zd - h_];
+			}
+			else if (x_1 >= 0)
+			{
+				sum[0] = s_[xw_yh_z - w] - s_[xw_yh_zd - w];
+				sum[1] = ss[xw_yh_z - w] - ss[xw_yh_zd - w];
+			}
+			sum[0] = sum[0] + s_[xw_yh_zd] - s_[xw_yh_z];
+			sum[1] = sum[1] + ss[xw_yh_zd] - ss[xw_yh_z];
+		}
+		else
+		{
+			if (y_1 >= 0)
+			{
+				int h_ = h * nc;
+				if (x_1 >= 0)
+				{
+					sum[0] = s_[xw_yh_zd - w - h_] - s_[xw_yh_zd - w];
+					sum[1] = ss[xw_yh_zd - w - h_] - ss[xw_yh_zd - w];
+				}
+				sum[0] -= s_[xw_yh_zd - h_];
+				sum[1] -= ss[xw_yh_zd - h_];
+			}
+			else if (x_1 >= 0)
+			{
+				sum[0] = -s_[xw_yh_zd - w];
+				sum[1] = -ss[xw_yh_zd - w];
+			}
+			sum[0] = sum[0] + s_[xw_yh_zd];
+			sum[1] = sum[1] + ss[xw_yh_zd];
+		}
 	}
 
 	// For optimisation
@@ -677,8 +1108,7 @@ public class StackAligner implements Cloneable
 			copy.calc = null;
 			copy.buffer = null;
 			copy.region = null;
-			copy.amp1 = null;
-			copy.amp2 = null;
+			copy.target = null;
 			return copy;
 		}
 		catch (CloneNotSupportedException e)
