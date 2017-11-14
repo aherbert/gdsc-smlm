@@ -3056,15 +3056,16 @@ public class PSFCreator implements PlugInFilter
 
 		if (settings.getOutputType() == OUTPUT_TYPE_CSPLINE)
 		{
-			if (TextUtils.isNullOrEmpty(settings.getSplineFilename()))
-			{
-				final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-				gd.addFilenameField("Spline_filename", settings.getSplineFilename());
-				gd.showDialog(true);
-				if (gd.wasCanceled())
-					return;
-				settings.setSplineFilename(gd.getNextString());
-			}
+			// Ask this again as it is important
+			//if (TextUtils.isNullOrEmpty(settings.getSplineFilename()))
+			//{
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			gd.addFilenameField("Spline_filename", settings.getSplineFilename());
+			gd.showDialog(true);
+			if (gd.wasCanceled())
+				return;
+			settings.setSplineFilename(gd.getNextString());
+			//}
 			if (!TextUtils.isNullOrEmpty(settings.getSplineFilename()))
 			{
 				// Save the result ...
