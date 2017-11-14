@@ -22253,6 +22253,11 @@ public final class GUIProtos {
      */
     com.google.protobuf.ByteString
         getSplineFilenameBytes();
+
+    /**
+     * <code>bool crop_to_z_centre = 33;</code>
+     */
+    boolean getCropToZCentre();
   }
   /**
    * <pre>
@@ -22299,6 +22304,7 @@ public final class GUIProtos {
       comBorder_ = 0D;
       outputType_ = 0;
       splineFilename_ = "";
+      cropToZCentre_ = false;
     }
 
     @java.lang.Override
@@ -22312,6 +22318,7 @@ public final class GUIProtos {
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
       int mutable_bitField0_ = 0;
+      int mutable_bitField1_ = 0;
       try {
         boolean done = false;
         while (!done) {
@@ -22509,6 +22516,11 @@ public final class GUIProtos {
               java.lang.String s = input.readStringRequireUtf8();
 
               splineFilename_ = s;
+              break;
+            }
+            case 264: {
+
+              cropToZCentre_ = input.readBool();
               break;
             }
           }
@@ -22895,6 +22907,15 @@ public final class GUIProtos {
       }
     }
 
+    public static final int CROP_TO_Z_CENTRE_FIELD_NUMBER = 33;
+    private boolean cropToZCentre_;
+    /**
+     * <code>bool crop_to_z_centre = 33;</code>
+     */
+    public boolean getCropToZCentre() {
+      return cropToZCentre_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -23002,6 +23023,9 @@ public final class GUIProtos {
       }
       if (!getSplineFilenameBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 32, splineFilename_);
+      }
+      if (cropToZCentre_ != false) {
+        output.writeBool(33, cropToZCentre_);
       }
     }
 
@@ -23137,6 +23161,10 @@ public final class GUIProtos {
       if (!getSplineFilenameBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(32, splineFilename_);
       }
+      if (cropToZCentre_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(33, cropToZCentre_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -23240,6 +23268,8 @@ public final class GUIProtos {
           == other.getOutputType());
       result = result && getSplineFilename()
           .equals(other.getSplineFilename());
+      result = result && (getCropToZCentre()
+          == other.getCropToZCentre());
       return result;
     }
 
@@ -23332,6 +23362,9 @@ public final class GUIProtos {
       hash = (53 * hash) + getOutputType();
       hash = (37 * hash) + SPLINE_FILENAME_FIELD_NUMBER;
       hash = (53 * hash) + getSplineFilename().hashCode();
+      hash = (37 * hash) + CROP_TO_Z_CENTRE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCropToZCentre());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -23541,6 +23574,8 @@ public final class GUIProtos {
 
         splineFilename_ = "";
 
+        cropToZCentre_ = false;
+
         return this;
       }
 
@@ -23607,6 +23642,7 @@ public final class GUIProtos {
         result.comBorder_ = comBorder_;
         result.outputType_ = outputType_;
         result.splineFilename_ = splineFilename_;
+        result.cropToZCentre_ = cropToZCentre_;
         onBuilt();
         return result;
       }
@@ -23744,6 +23780,9 @@ public final class GUIProtos {
         if (!other.getSplineFilename().isEmpty()) {
           splineFilename_ = other.splineFilename_;
           onChanged();
+        }
+        if (other.getCropToZCentre() != false) {
+          setCropToZCentre(other.getCropToZCentre());
         }
         onChanged();
         return this;
@@ -24951,6 +24990,32 @@ public final class GUIProtos {
   checkByteStringIsUtf8(value);
         
         splineFilename_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean cropToZCentre_ ;
+      /**
+       * <code>bool crop_to_z_centre = 33;</code>
+       */
+      public boolean getCropToZCentre() {
+        return cropToZCentre_;
+      }
+      /**
+       * <code>bool crop_to_z_centre = 33;</code>
+       */
+      public Builder setCropToZCentre(boolean value) {
+        
+        cropToZCentre_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool crop_to_z_centre = 33;</code>
+       */
+      public Builder clearCropToZCentre() {
+        
+        cropToZCentre_ = false;
         onChanged();
         return this;
       }
@@ -26979,7 +27044,7 @@ public final class GUIProtos {
       "\022\023\n\013field_width\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022" +
       "\020\n\010z_dither\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022" +
       "\024\n\014nm_per_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001\"" +
-      "\354\006\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
+      "\206\007\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
       "radius\030\002 \001(\001\022\030\n\020interactive_mode\030\003 \001(\010\022\024" +
       "\n\014nm_per_slice\030\004 \001(\001\022E\n\023fit_engine_setti" +
       "ngs\030\005 \001(\0132(.gdsc.smlm.data.config.FitEng" +
@@ -27000,17 +27065,17 @@ public final class GUIProtos {
       " \001(\010\022\023\n\013crop_border\030\032 \001(\005\022\022\n\ncrop_start\030" +
       "\033 \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\033\n\023psf_z_magnifi" +
       "cation\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023\n\013outp" +
-      "ut_type\030\037 \001(\005\022\027\n\017spline_filename\030  \001(\t\"q" +
-      "\n\032CameraModelManagerSettings\022\016\n\006option\030\001" +
-      " \001(\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n\010origin_y\030\003 \001(\005" +
-      "\022\r\n\005image\030\004 \001(\t\022\020\n\010selected\030\005 \001(\t\"\227\001\n\032Cu",
-      "bicSplineManagerSettings\022\016\n\006option\030\001 \001(\005" +
-      "\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnification\030\003 \001(" +
-      "\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_s" +
-      "hift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001*O\n\014TemplateT" +
-      "ype\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEM" +
-      "PLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProto" +
-      "sb\006proto3"
+      "ut_type\030\037 \001(\005\022\027\n\017spline_filename\030  \001(\t\022\030" +
+      "\n\020crop_to_z_centre\030! \001(\010\"q\n\032CameraModelM" +
+      "anagerSettings\022\016\n\006option\030\001 \001(\005\022\020\n\010origin" +
+      "_x\030\002 \001(\005\022\020\n\010origin_y\030\003 \001(\005\022\r\n\005image\030\004 \001(",
+      "\t\022\020\n\010selected\030\005 \001(\t\"\227\001\n\032CubicSplineManag" +
+      "erSettings\022\016\n\006option\030\001 \001(\005\022\020\n\010selected\030\002" +
+      " \001(\t\022\025\n\rmagnification\030\003 \001(\005\022\r\n\005scale\030\004 \001" +
+      "(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007" +
+      "z_shift\030\007 \001(\001*O\n\014TemplateType\022\023\n\017INLINE_" +
+      "TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUS" +
+      "TOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -27105,7 +27170,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor,
-        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", "SplineFilename", });
+        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", "SplineFilename", "CropToZCentre", });
     internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor =
       getDescriptor().getMessageTypes().get(13);
     internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable = new

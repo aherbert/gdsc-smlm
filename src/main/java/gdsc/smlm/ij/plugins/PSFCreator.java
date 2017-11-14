@@ -1765,9 +1765,21 @@ public class PSFCreator implements PlugInFilter
 	 */
 	private BasePoint[] checkSpotOverlap(BasePoint[] roiPoints)
 	{
+		return getNonOverlappingSpots(roiPoints, findSpotOverlap(roiPoints));
+	}
+
+	/**
+	 * Find all the ROI points that have a box region overlapping with any other spot.
+	 *
+	 * @param offset
+	 *            the offset
+	 * @return the overlap array
+	 */
+	private boolean[] findSpotOverlap(BasePoint[] roiPoints)
+	{
 		int n = roiPoints.length;
 		if (n == 1)
-			return roiPoints;
+			return new boolean[1];
 
 		// Check overlap of box regions
 		int w = imp.getWidth();
@@ -1802,16 +1814,19 @@ public class PSFCreator implements PlugInFilter
 			}
 		}
 
+		return bad;
+	}
+
+	private BasePoint[] getNonOverlappingSpots(BasePoint[] roiPoints, boolean[] bad)
+	{
 		int ok = 0;
-		for (int i = 0; i < n; i++)
+		for (int i = 0, n = bad.length; i < n; i++)
 		{
 			if (bad[i])
 				continue;
 			roiPoints[ok++] = roiPoints[i];
 		}
-
 		return Arrays.copyOf(roiPoints, ok);
-
 	}
 
 	/**
@@ -2703,6 +2718,8 @@ public class PSFCreator implements PlugInFilter
 		Utils.showStatus(String.format("[%d] Extracting PSFs", 0));
 		ExtractedPSF[] psfs = extractPSFs(image, centres);
 
+		Point location = null;
+
 		// Iterate until centres have converged
 		boolean converged = false;
 		for (int iter = 0; !converged && iter < settings.getMaxIterations(); iter++)
@@ -2740,7 +2757,6 @@ public class PSFCreator implements PlugInFilter
 				ImageCanvas ic = imp.getCanvas();
 				//ic.setMagnification(16);
 				int reject = 0;
-				Point location = null;
 				float box = boxRadius + 0.5f;
 				int n = imp.getStackSize();
 				for (int j = 0; j < centres.length; j++)
@@ -2797,25 +2813,60 @@ public class PSFCreator implements PlugInFilter
 					return;
 				}
 			}
-			else
+
+			boolean[] bad = findSpotOverlap(centres);
+			int ok = 0;
+			for (int j = 0; j < bad.length; j++)
 			{
-				BasePoint[] newCentres = checkSpotOverlap(centres);
-				if (newCentres.length < centres.length)
+				if (bad[j])
+					continue;
+				ok++;
+			}
+			if (ok < bad.length)
+			{
+				if (settings.getInteractiveMode())
 				{
-					IJ.error(TITLE, "New spots centers create overlap within box region");
+					ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+					gd.addMessage("Regions now overlap leaving " + TextUtils.pleural(ok, "PSF"));
+					gd.enableYesNoCancel("Exclude", "Include");
+					if (location != null)
+						gd.setLocation(location.x, location.y);
+					gd.showDialog();
+					if (gd.wasCanceled())
+					{
+						imp.restoreRoi();
+						imp.setOverlay(null);
+						return;
+					}
+					if (!gd.wasOKed())
+					{
+						Arrays.fill(bad, false); // allow bad spots
+						ok = bad.length;
+					}
+					location = gd.getLocation();
+				}
+
+				if (ok == 0)
+				{
+					IJ.error(TITLE, "No PSFs that do not overlap within box region");
+					imp.restoreRoi();
+					imp.setOverlay(null);
 					return;
 				}
 			}
+			BasePoint[] newCentres = getNonOverlappingSpots(centres, bad);
 
 			// Find the change in centres
 			double[] rmsd = new double[2];
 			for (int j = 0; j < psfs.length; j++)
 			{
+				if (bad[j])
+					continue;
 				rmsd[0] += Maths.pow2(translation[j][0]) + Maths.pow2(translation[j][1]);
 				rmsd[1] += Maths.pow2(translation[j][2]);
 			}
 			for (int j = 0; j < 2; j++)
-				rmsd[j] = Math.sqrt(rmsd[j] / psfs.length);
+				rmsd[j] = Math.sqrt(rmsd[j] / ok);
 
 			Utils.showStatus(String.format("[%d] Checking combined PSF", iter + 1));
 
@@ -2826,7 +2877,7 @@ public class PSFCreator implements PlugInFilter
 			zSelector.guessZCentre();
 			if (settings.getInteractiveMode())
 			{
-				double dz = zSelector.run(true, false, null);
+				double dz = zSelector.run(true, false, false, null);
 				if (dz < 0)
 					return;
 			}
@@ -2861,6 +2912,9 @@ public class PSFCreator implements PlugInFilter
 				// Sensible convergence on minimal shift
 				converged = rmsd[0] < 0.01 && rmsd[1] < 0.05 && shiftd < 0.001;
 			}
+
+			// For the next round we move to the non-overlapping spots
+			centres = newCentres;
 
 			// Update the centres using the centre-of-mass of the combined PSF
 			centres = updateUsingCentreOfMassXYShift(shift, shiftd, combined, centres);
@@ -2916,11 +2970,17 @@ public class PSFCreator implements PlugInFilter
 		zSelector.analyse();
 		//zSelector.zCentre = finalPSF.psf.length / 2.0;
 		zSelector.guessZCentre();
-		double dz = zSelector.run(true, true, null);
+		double dz = zSelector.run(true, true, true, null);
 		if (dz < 0)
 			return;
 
 		zCentre = zSelector.getCentreSlice();
+
+		if (settings.getCropToZCentre())
+		{
+			finalPSF = finalPSF.cropToZCentre(zCentre);
+			zCentre = finalPSF.relativeCentre;
+		}
 
 		// When click ok the background is subtracted from the PSF
 		// All pixels below the background are set to zero
@@ -3074,7 +3134,7 @@ public class PSFCreator implements PlugInFilter
 				imp.updateAndDraw();
 
 				// Ask user for z-centre confirmation
-				double dz = zSelector.run(true, false, Integer.toString(i + 1));
+				double dz = zSelector.run(true, false, false, Integer.toString(i + 1));
 				if (dz < 0)
 				{
 					imp.setOverlay(null);
@@ -3150,7 +3210,7 @@ public class PSFCreator implements PlugInFilter
 		float background;
 		private Label backgroundLabel = null;
 
-		boolean plotBackground, plotEdgeWindow;
+		boolean plotBackground, plotEdgeWindow, cropOption;
 
 		// We choose the angle with the first spot
 		double targetAngle = NO_ANGLE;
@@ -3515,10 +3575,11 @@ public class PSFCreator implements PlugInFilter
 			}
 		}
 
-		public double run(boolean plotBackground, boolean plotEdgeWindow, String id)
+		public double run(boolean plotBackground, boolean plotEdgeWindow, boolean cropOption, String id)
 		{
 			this.plotBackground = plotBackground;
 			this.plotEdgeWindow = plotEdgeWindow;
+			this.cropOption = cropOption;
 
 			int slice = getCentreSlice();
 
@@ -3555,6 +3616,10 @@ public class PSFCreator implements PlugInFilter
 			if (plotEdgeWindow)
 			{
 				gd.addSlider("Edge_window", 0, psf.maxx / 2, settings.getWindow());
+			}
+			if (cropOption)
+			{
+				gd.addCheckbox("Crop_to_z-centre", settings.getCropToZCentre());
 			}
 			gd.addDialogListener(this);
 			if (Utils.isShowGenericDialog())
@@ -3605,6 +3670,8 @@ public class PSFCreator implements PlugInFilter
 				settings.setAnalysisWindow(gd.getNextNumber() / psf.magnification);
 			if (plotEdgeWindow)
 				settings.setWindow((int) gd.getNextNumber());
+			if (cropOption)
+				settings.setCropToZCentre(gd.getNextBoolean());
 
 			updatePSFPlots();
 			return true;
@@ -4813,6 +4880,28 @@ public class PSFCreator implements PlugInFilter
 			this.psf = psf;
 			maxx = size;
 			maxy = size;
+		}
+
+		/**
+		 * Crop to Z centre.
+		 *
+		 * @param zCentre
+		 *            the z centre (1-based index
+		 */
+		public ExtractedPSF cropToZCentre(int zCentre)
+		{
+			if (zCentre < 1 || zCentre > psf.length)
+				throw new IllegalStateException("Cannot crop outside the PSF: " + zCentre);
+			zCentre--; // Make 0-based index
+			// Number of slices before and after the centre to make it even
+			int d = Math.min(zCentre, psf.length - zCentre - 1);
+			int from = zCentre - d;
+			int to = zCentre + d + 1;
+			float[][] psf = Arrays.copyOfRange(this.psf, from, to);
+			int zShift = -from;
+			ExtractedPSF p = new ExtractedPSF(psf, maxx, centre.shift(0, 0, -zShift), magnification);
+			p.relativeCentre = zCentre + zShift + 1; // Back to 1-based index
+			return p;
 		}
 
 		ExtractedPSF(float[][] psf, int maxx, int maxy)

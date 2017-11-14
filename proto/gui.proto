@@ -432,6 +432,7 @@ message PSFCreatorSettings
 	double com_border = 30;
 	int32 output_type = 31;
 	string spline_filename = 32;
+	bool crop_to_z_centre = 33;
 }
 
 // Contains settings for the Camera Model Manager plugin
