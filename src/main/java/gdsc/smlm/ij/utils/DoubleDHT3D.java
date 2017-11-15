@@ -371,8 +371,8 @@ public class DoubleDHT3D extends DoubleImage3D
 				{
 					// This is a copy of the getComplexTransform operation in ij.process.FHT
 					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
-					real[i] = (h1[i] + h1[j]) * 0.5f;
-					imaginary[i] = (-h1[i] + h1[j]) * 0.5f;
+					real[i] = (h1[i] + h1[j]) * 0.5;
+					imaginary[i] = (-h1[i] + h1[j]) * 0.5;
 				}
 			}
 		}
