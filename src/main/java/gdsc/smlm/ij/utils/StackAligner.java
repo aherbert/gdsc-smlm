@@ -14,7 +14,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 
-import gdsc.core.ij.Utils;
 import gdsc.core.math.interpolation.CubicSplinePosition;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.utils.ImageWindow;
@@ -64,7 +63,7 @@ public class StackAligner implements Cloneable
 
 	private static class DHTData
 	{
-		DHT3D dht;
+		FloatDHT3D dht;
 		long[] s_;
 		long[] ss;
 		// Original dimensions
@@ -72,12 +71,12 @@ public class StackAligner implements Cloneable
 		// Insert position
 		int ix, iy, iz;
 
-		DHTData(DHT3D dht, int w, int h, int d)
+		DHTData(FloatDHT3D dht, int w, int h, int d)
 		{
 			setDHT(dht, w, h, d);
 		}
 
-		void setDHT(DHT3D dht, int w, int h, int d)
+		void setDHT(FloatDHT3D dht, int w, int h, int d)
 		{
 			this.dht = dht;
 			s_ = resize(s_);
@@ -110,8 +109,8 @@ public class StackAligner implements Cloneable
 	}
 
 	private double edgeWindow;
-	private double relativeThreshold = 1e-3;
-	public SearchMode searchMode = SearchMode.GRADIENT;
+	private double relativeThreshold = 1e-6;
+	private SearchMode searchMode = SearchMode.GRADIENT;
 
 	/** The number of slices (max z) of the discrete Hartley transform. */
 	private int ns;
@@ -152,7 +151,7 @@ public class StackAligner implements Cloneable
 	 */
 	public StackAligner(double edgeWindow)
 	{
-		this.edgeWindow = edgeWindow;
+		setEdgeWindow(edgeWindow);
 	}
 
 	/**
@@ -218,33 +217,47 @@ public class StackAligner implements Cloneable
 	private DHTData createDHT(ImageStack stack, DHTData dhtData)
 	{
 		if (stack.getBitDepth() != 32)
-			return createDHT(new Image3D(stack), dhtData);
+			return createDHT(new FloatImage3D(stack), dhtData);
 
-		// Apply window
+		// Shift mean to 0 with optional window		
 		int w = stack.getWidth(), h = stack.getHeight(), d = stack.getSize();
-		if (edgeWindow > 0)
+		double[] wx = createXWindow(w);
+		double[] wy = createYWindow(h);
+		double[] wz = createZWindow(d);
+
+		// We need to compute the weighted centre
+		double[] sum = new double[2];
+
+		for (int z = 0; z < d; z++)
 		{
-			double[] wx = createXWindow(w);
-			double[] wy = createYWindow(h);
-			double[] wz = createZWindow(d);
-			for (int z = 0; z < d; z++)
+			float[] pixels = (float[]) stack.getPixels(1 + z);
+			if (wz[z] == 0)
 			{
-				float[] pixels = (float[]) stack.getPixels(1 + z);
-				if (wz[z] == 0)
-				{
-					// Special case happens with Tukey window at the ends
-					Arrays.fill(pixels, 0);
-				}
-				else
-				{
-					applyWindow(pixels, w, h, wx, wy, wz[z]);
-				}
+				// Special case happens with Tukey window at the ends
+			}
+			else
+			{
+				calculateWeightedCentre(pixels, w, h, wx, wy, wz[z], sum);
 			}
 		}
 
-		DHT3D dht;
-		//if (w < nc || h < nr || d < ns)
-		//{
+		double shift = sum[0] / sum[1];
+
+		for (int z = 0; z < d; z++)
+		{
+			float[] pixels = (float[]) stack.getPixels(1 + z);
+			if (wz[z] == 0)
+			{
+				// Special case happens with Tukey window at the ends
+				Arrays.fill(pixels, 0f);
+			}
+			else
+			{
+				applyWindow(pixels, w, h, wx, wy, wz[z], shift);
+			}
+		}
+
+		FloatDHT3D dht;
 
 		// Pad into the desired data size.
 		// We always do this so the data is reused
@@ -260,18 +273,11 @@ public class StackAligner implements Cloneable
 			dest = dhtData.dht.getData();
 			Arrays.fill(dest, 0f);
 		}
-		dht = new DHT3D(nc, nr, ns, dest, false);
+		dht = new FloatDHT3D(nc, nr, ns, dest, false);
 		int ix = getInsert(nc, w);
 		int iy = getInsert(nr, h);
 		int iz = getInsert(ns, d);
 		dht.insert(ix, iy, iz, stack);
-
-		//}
-		//else
-		//{
-		//	// This will just copy the data
-		//	dht = new DHT3D(stack);
-		//}
 
 		if (dhtData == null)
 			dhtData = new DHTData(dht, w, h, d);
@@ -303,19 +309,70 @@ public class StackAligner implements Cloneable
 		return w;
 	}
 
-	private static void applyWindow(float[] image, int maxx, int maxy, double[] wx, double[] wy, double wz)
+	private static void calculateWeightedCentre(float[] image, int maxx, int maxy, double[] wx, double[] wy, double wz,
+			double[] sum)
 	{
-		applyWindow(image, 0, maxx, maxy, wx, wy, wz);
+		calculateWeightedCentre(image, 0, maxx, maxy, wx, wy, wz, sum);
 	}
 
-	private static void applyWindow(float[] image, int i, int maxx, int maxy, double[] wx, double[] wy, double wz)
+	private static void calculateWeightedCentre(float[] image, int i, int maxx, int maxy, double[] wx, double[] wy,
+			double wz, double[] sum)
 	{
 		for (int y = 0; y < maxy; y++)
 		{
-			double w = wy[y] * wz;
+			double wyz = wy[y] * wz;
 			for (int x = 0; x < maxx; x++, i++)
 			{
-				image[i] *= wx[x] * w;
+				double w = wx[x] * wyz;
+				sum[0] += image[i] * w;
+				sum[1] += w;
+			}
+		}
+	}
+
+	private static void calculateWeightedCentre(Image3D image, int i, int maxx, int maxy, double[] wx, double[] wy,
+			double wz, double[] sum)
+	{
+		for (int y = 0; y < maxy; y++)
+		{
+			double wyz = wy[y] * wz;
+			for (int x = 0; x < maxx; x++, i++)
+			{
+				double w = wx[x] * wyz;
+				sum[0] += image.get(i) * w;
+				sum[1] += w;
+			}
+		}
+	}
+
+	private static void applyWindow(float[] image, int maxx, int maxy, double[] wx, double[] wy, double wz,
+			double shift)
+	{
+		applyWindow(image, 0, maxx, maxy, wx, wy, wz, shift);
+	}
+
+	private static void applyWindow(float[] image, int i, int maxx, int maxy, double[] wx, double[] wy, double wz,
+			double shift)
+	{
+		for (int y = 0; y < maxy; y++)
+		{
+			double wyz = wy[y] * wz;
+			for (int x = 0; x < maxx; x++, i++)
+			{
+				image[i] = (float) ((image[i] - shift) * wx[x] * wyz);
+			}
+		}
+	}
+
+	private static void applyWindow(Image3D image, int i, int maxx, int maxy, double[] wx, double[] wy, double wz,
+			double shift)
+	{
+		for (int y = 0; y < maxy; y++)
+		{
+			double wyz = wy[y] * wz;
+			for (int x = 0; x < maxx; x++, i++)
+			{
+				image.set(i, (image.get(i) - shift) * wx[x] * wyz);
 			}
 		}
 	}
@@ -332,7 +389,7 @@ public class StackAligner implements Cloneable
 	/**
 	 * Prepare the DHT.
 	 * <p>
-	 * Converts the data to the full range of a 16-bit signed integer with a mean of zero.
+	 * Converts the data to a signed integer. Any zero value (from padding or weighting) remains zero.
 	 * This may reduce the precision slightly but allows the computation of a rolling sum table with no errors. The
 	 * rolling sum and sum-of-squares table is computed and the DHT is transformed to the frequency domain.
 	 *
@@ -342,12 +399,12 @@ public class StackAligner implements Cloneable
 	 */
 	private DHTData prepareDHT(DHTData dhtData)
 	{
-		DHT3D dht = dhtData.dht;
+		FloatDHT3D dht = dhtData.dht;
 		long[] s_ = dhtData.s_;
 		long[] ss = dhtData.ss;
 
 		// XXX Update this
-		
+
 		// Convert to a 16-bit signed integer
 		// This makes it possible to compute the rolling tables without error
 		float[] data = dht.getData();
@@ -362,6 +419,11 @@ public class StackAligner implements Cloneable
 		}
 		else
 		{
+			// Note: The image has been shifted to a mean of 0 so that zero padding
+			// for frequency domain transform does not add any information.
+			// We need to maintain the sign information and ensure that zero is still
+			// zero.
+
 			double scale = LIMIT / (max - min);
 
 			// Compute the rolling sum tables
@@ -381,7 +443,7 @@ public class StackAligner implements Cloneable
 				// sum = rolling sum of (0 - colomn)
 				for (int c = 0; c < nc; c++, i++)
 				{
-					int v = transform(data[i], min, scale);
+					int v = transform(data[i], scale);
 					data[i] = v;
 					sum += v;
 					sum2 += v * v;
@@ -396,7 +458,7 @@ public class StackAligner implements Cloneable
 					sum2 = 0;
 					for (int c = 0; c < nc; c++, i++, ii++)
 					{
-						int v = transform(data[i], min, scale);
+						int v = transform(data[i], scale);
 						data[i] = v;
 						sum += v;
 						sum2 += v * v;
@@ -422,24 +484,27 @@ public class StackAligner implements Cloneable
 			}
 		}
 		if (ref == null)
-			ref = new Image3D(nc, nr, ns, data.clone());
+			ref = dht.copy();
 		else
-			tar = new Image3D(nc, nr, ns, data.clone());
+			tar = dht.copy();
 		// Transform the data
 		dht.transform();
 		return dhtData;
 	}
 
-	private static double LIMIT = 1023; //65535.0;
+	// When this it too high the sumXY from the DHT conjugate multiplication 
+	// does not match the sum from correlation in the spatial domain.
+	private static double LIMIT = 4096.0; // 12-bit integer
 
-	private static int transform(float f, double min, double scale)
+	private static int transform(float f, double scale)
 	{
-		double value = (f - min) * scale;
-		if (value < 0.0)
+		// Ensure zero is zero
+		if (f == 0)
 			return 0;
-		if (value > LIMIT)
-			return (int) LIMIT;
-		return (int) (value + 0.5);
+
+		// Maintain the sign information
+		double value = f * scale;
+		return (int) Math.round(value);
 	}
 
 	/**
@@ -496,58 +561,69 @@ public class StackAligner implements Cloneable
 
 	private DHTData createDHT(Image3D stack, DHTData dhtData)
 	{
-		// Apply window
+		// Shift mean to 0 with optional window		
 		int w = stack.getWidth(), h = stack.getHeight(), d = stack.getSize();
-		if (edgeWindow > 0)
-		{
-			double[] wx = createXWindow(w);
-			double[] wy = createYWindow(h);
-			double[] wz = createZWindow(d);
-			float[] pixels = stack.getData();
-			int inc = stack.nr_by_nc;
-			for (int z = 0, i = 0; z < d; z++)
-			{
-				if (wz[z] == 0)
-				{
-					// Special case happens with Tukey window at the ends
-					for (int j = 0; j < inc; j++)
-						pixels[i++] = 0;
-				}
-				else
-				{
-					applyWindow(pixels, i, w, h, wx, wy, wz[z]);
-					i += inc;
-				}
-			}
-		}
+		double[] wx = createXWindow(w);
+		double[] wy = createYWindow(h);
+		double[] wz = createZWindow(d);
+		int inc = stack.nr_by_nc;
 
-		DHT3D dht;
-		if (w < nc || h < nr || d < ns)
+		// We need to compute the weighted centre
+		double[] sum = new double[2];
+
+		for (int z = 0, i = 0; z < d; z++)
 		{
-			// Pad into the desired data size
-			int size = ns * nr * nc;
-			float[] dest;
-			if (dhtData == null || dhtData.dht.getDataLength() != size)
+			if (wz[z] == 0)
 			{
-				dest = new float[size];
+				// Special case happens with Tukey window at the ends
 			}
 			else
 			{
-				// Re-use space
-				dest = dhtData.dht.getData();
-				Arrays.fill(dest, 0f);
+				calculateWeightedCentre(stack, i, w, h, wx, wy, wz[z], sum);
 			}
-			dht = new DHT3D(nc, nr, ns, dest, false);
-			int ix = getInsert(nc, w);
-			int iy = getInsert(nr, h);
-			int iz = getInsert(ns, d);
-			dht.insert(ix, iy, iz, stack);
+			i += inc;
+		}
+
+		double shift = sum[0] / sum[1];
+
+		for (int z = 0, i = 0; z < d; z++)
+		{
+			if (wz[z] == 0)
+			{
+				// Special case happens with Tukey window at the ends
+				for (int j = 0; j < inc; j++)
+					stack.set(i++, 0);
+			}
+			else
+			{
+				applyWindow(stack, i, w, h, wx, wy, wz[z], shift);
+				i += inc;
+			}
+		}
+
+		//System.out.printf("Sum = %g => %g\n", sum[0], Maths.sum(pixels));
+
+		FloatDHT3D dht;
+
+		// Pad into the desired data size.
+		// We always do this to handle input of float/double Image3D data.
+		int size = ns * nr * nc;
+		float[] dest;
+		if (dhtData == null || dhtData.dht.getDataLength() != size)
+		{
+			dest = new float[size];
 		}
 		else
 		{
-			// This will just use the data
-			dht = new DHT3D(w, h, d, stack.getData(), false);
+			// Re-use space
+			dest = dhtData.dht.getData();
+			Arrays.fill(dest, 0f);
 		}
+		dht = new FloatDHT3D(nc, nr, ns, dest, false);
+		int ix = getInsert(nc, w);
+		int iy = getInsert(nr, h);
+		int iz = getInsert(ns, d);
+		dht.insert(ix, iy, iz, stack);
 
 		if (dhtData == null)
 			dhtData = new DHTData(dht, w, h, d);
@@ -679,7 +755,7 @@ public class StackAligner implements Cloneable
 	private double[] align(DHTData target, int refinements, double error)
 	{
 		// Multiply by the reference. This allows the reference to be shared across threads.
-		DHT3D correlation = target.dht.conjugateMultiply(reference.dht, buffer);
+		FloatDHT3D correlation = target.dht.conjugateMultiply(reference.dht, buffer);
 		buffer = correlation.getData(); // Store for reuse
 		correlation.inverseTransform();
 		correlation.swapOctants();
@@ -809,8 +885,8 @@ public class StackAligner implements Cloneable
 						long sumYY = 0;
 						for (int k = ref.getDataLength(); k-- > 0;)
 						{
-							int a = (int) ref.getData()[k];
-							int b = (int) tar.getData()[k];
+							int a = (int) ref.get(k);
+							int b = (int) tar.get(k);
 							sumXY += a * b;
 							sumXX += a * a;
 							sumYY += b * b;
@@ -855,19 +931,42 @@ public class StackAligner implements Cloneable
 			}
 		}
 
-		//Utils.display("corr", correlation.getImageStack());
 		int maxi = correlation.findMaxIndex(ix, iy, iz, iw - ix, ih - iy, id - iz);
 		int[] xyz = correlation.getXYZ(maxi);
 
-		// Q. What if the correlation surface is flat? This will pick the start and not
-		// the centre of the plateau.
+		// The above method finds the first index so we check for a plateau within the 
+		// cube of adjacent points. If the plateau is larger then finding the centre is
+		// non-trivial as in the worst case it may be an irregular 26-connected shape.
+		// Checking the adjacent points provides a quick check to avoid 0.5 pixel 
+		// alignment errors for a symmetric correlation surface.
+		double[] com = new double[3];
+		int n = 0;
+		for (int zz = Math.min(ns - 1, xyz[2] + 1) - xyz[2]; zz-- > 0;)
+		{
+			for (int yy = Math.min(nr - 1, xyz[1] + 1) - xyz[1]; yy-- > 0;)
+			{
+				for (int xx = Math.min(nc - 1, xyz[0] + 1) - xyz[0]; xx-- > 0;)
+				{
+					if (data[maxi + zz * nr_by_nc + yy * nc + xx] == data[maxi])
+					{
+						com[0] += xx;
+						com[1] += xx;
+						com[2] += xx;
+						n++;
+					}
+				}
+			}
+		}
+		// n will always include data[maxi] 
+		for (int i = 0; i < 3; i++)
+			com[i] /= n;
 
 		// Report the shift required to move from the centre of the target image to the reference
 		// @formatter:off
 		double[] result = new double[] {
-			nc/2 - xyz[0],
-			nr/2 - xyz[1],
-			ns/2 - xyz[2],
+			nc/2 - xyz[0] - com[0],
+			nr/2 - xyz[1] - com[1],
+			ns/2 - xyz[2] - com[2],
 			data[maxi]
 		};
 		// @formatter:on
@@ -882,7 +981,7 @@ public class StackAligner implements Cloneable
 			int x = Maths.clip(0, correlation.getWidth() - 4, xyz[0] - 1);
 			int y = Maths.clip(0, correlation.getHeight() - 4, xyz[1] - 1);
 			int z = Maths.clip(0, correlation.getSize() - 4, xyz[2] - 1);
-			Image3D crop = correlation.crop(x, y, z, 4, 4, 4, region);
+			FloatImage3D crop = correlation.crop(x, y, z, 4, 4, 4, region);
 			region = crop.getData();
 			CustomTricubicFunction f = CustomTricubicFunction.create(calc.compute(region));
 
@@ -1156,6 +1255,24 @@ public class StackAligner implements Cloneable
 	}
 
 	/**
+	 * Gets the correlation image from the last alignment.
+	 *
+	 * @return the correlation (or null)
+	 */
+	public Image3D getCorrelation()
+	{
+		try
+		{
+			return new FloatImage3D(nc, nr, ns, buffer);
+		}
+		catch (IllegalArgumentException e)
+		{
+			// Thrown when buffer is null or does not match the dimensions.
+			return null;
+		}
+	}
+
+	/**
 	 * Gets the edge window.
 	 *
 	 * @return the edge window
@@ -1173,7 +1290,7 @@ public class StackAligner implements Cloneable
 	 */
 	public void setEdgeWindow(double edgeWindow)
 	{
-		this.edgeWindow = edgeWindow;
+		this.edgeWindow = Maths.clip(0, 1, edgeWindow);
 	}
 
 	/**
@@ -1197,5 +1314,26 @@ public class StackAligner implements Cloneable
 	public void setRelativeThreshold(double relativeThreshold)
 	{
 		this.relativeThreshold = relativeThreshold;
+	}
+
+	/**
+	 * Gets the search mode.
+	 *
+	 * @return the search mode
+	 */
+	public SearchMode getSearchMode()
+	{
+		return searchMode;
+	}
+
+	/**
+	 * Sets the search mode.
+	 *
+	 * @param searchMode
+	 *            the new search mode
+	 */
+	public void setSearchMode(SearchMode searchMode)
+	{
+		this.searchMode = searchMode;
 	}
 }

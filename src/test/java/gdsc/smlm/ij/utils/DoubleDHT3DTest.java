@@ -2,20 +2,19 @@ package gdsc.smlm.ij.utils;
 
 import java.util.Arrays;
 
-import org.jtransforms.fft.FloatFFT_3D;
+import org.jtransforms.fft.DoubleFFT_3D;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.utils.FloatEquality;
+import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.SimpleArrayUtils;
-import gdsc.smlm.function.StandardFloatValueProcedure;
+import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import ij.ImageStack;
-import ij.process.FloatProcessor;
 
-public class DHT3DTest
+public class DoubleDHT3DTest
 {
 	int size = 16;
 	double centre = (size - 1) / 2.0;
@@ -24,70 +23,45 @@ public class DHT3DTest
 	final static int zDepth = 5;
 	protected QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
-	private DHT3D createData(double cx, double cy, double cz)
+	private DoubleDHT3D createData(double cx, double cy, double cz)
 	{
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_ASTIGMATISM,
 				zModel);
 		int length = size * size;
-		float[] data = new float[size * length];
+		double[] data = new double[size * length];
 		double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		a[Gaussian2DFunction.SIGNAL] = 1;
 		a[Gaussian2DFunction.X_POSITION] = cx;
 		a[Gaussian2DFunction.Y_POSITION] = cy;
 		a[Gaussian2DFunction.X_SD] = 1;
 		a[Gaussian2DFunction.Y_SD] = 1;
-		StandardFloatValueProcedure p = new StandardFloatValueProcedure();
+		StandardValueProcedure p = new StandardValueProcedure();
 		for (int z = 0; z < size; z++)
 		{
 			a[Gaussian2DFunction.Z_POSITION] = z - cz;
 			p.getValues(f, a, data, z * length);
 		}
-		return new DHT3D(size, size, size, data, false);
+		return new DoubleDHT3D(size, size, size, data, false);
 	}
 
-	private DHT3D createData()
+	private DoubleDHT3D createData()
 	{
 		return createData(centre, centre, centre);
 	}
 
-	private DHT3D createOctants(int w, int h, int d)
+	private DoubleDHT3D createOctants(int w, int h, int d)
 	{
-		int w_2 = w / 2;
-		int h_2 = h / 2;
-		int d_2 = d / 2;
-		ImageStack stack = new ImageStack(w, h, d);
-		FloatProcessor fp = new FloatProcessor(w, h);
-		float[] pixels = (float[]) fp.getPixels();
-		fill(fp, w_2, 0, w_2, h_2, 1);
-		fill(fp, 0, 0, w_2, h_2, 2);
-		fill(fp, 0, h_2, w_2, h_2, 3);
-		fill(fp, w_2, h_2, w_2, h_2, 4);
-		for (int z = 0; z < d_2; z++)
-			stack.setPixels(pixels.clone(), 1 + z);
-		fill(fp, w_2, 0, w_2, h_2, 5);
-		fill(fp, 0, 0, w_2, h_2, 6);
-		fill(fp, 0, h_2, w_2, h_2, 7);
-		fill(fp, w_2, h_2, w_2, h_2, 8);
-		for (int z = d_2; z < d; z++)
-			stack.setPixels(pixels.clone(), 1 + z);
-		return new DHT3D(stack);
-	}
-
-	private void fill(FloatProcessor fp, int x, int y, int w, int h, double value)
-	{
-		fp.setRoi(x, y, w, h);
-		fp.setValue(value);
-		fp.fill();
+		return new DoubleDHT3D(FloatDHT3DTest.createOctantsStack(w, h, d));
 	}
 
 	@Test
 	public void canSwapOctants()
 	{
-		DHT3D dht;
+		DoubleDHT3D dht;
 
 		// Simple test
-		float[] data = new float[] { 2, 1, 3, 4, 6, 5, 7, 8 };
-		dht = new DHT3D(2, 2, 2, data.clone(), false);
+		double[] data = new double[] { 2, 1, 3, 4, 6, 5, 7, 8 };
+		dht = new DoubleDHT3D(2, 2, 2, data.clone(), false);
 		dht.swapOctants();
 		checkOctants(data, dht.getData());
 
@@ -102,16 +76,16 @@ public class DHT3DTest
 					ImageStack stack = dht.getImageStack();
 					//gdsc.core.ij.Utils.display("Test", stack);
 					dht.swapOctants();
-					DHT3D.swapOctants(stack);
+					FloatDHT3D.swapOctants(stack);
 
-					float[] e = new DHT3D(stack).getData();
-					float[] o = dht.getData();
+					double[] e = new DoubleDHT3D(stack).getData();
+					double[] o = dht.getData();
 
 					Assert.assertArrayEquals(e, o, 0);
 				}
 	}
 
-	private void checkOctants(float[] in, float[] out)
+	private void checkOctants(double[] in, double[] out)
 	{
 		int[] swap = new int[9];
 		swap[1] = 7;
@@ -129,17 +103,17 @@ public class DHT3DTest
 	@Test
 	public void canConvolveAndDeconvolve()
 	{
-		DHT3D dht = createData();
-		float[] pixels = dht.getData().clone();
+		DoubleDHT3D dht = createData();
+		double[] pixels = dht.getData().clone();
 		dht.transform();
 
-		DHT3D convolved = dht.multiply(dht);
-		DHT3D deconvolved = convolved.divide(dht);
+		DoubleDHT3D convolved = dht.multiply(dht);
+		DoubleDHT3D deconvolved = convolved.divide(dht);
 
-		float[] e = dht.getData();
-		float[] o = deconvolved.getData();
+		double[] e = dht.getData();
+		double[] o = deconvolved.getData();
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6f, 1e-6f));
+			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6, 1e-6));
 
 		deconvolved.inverseTransform();
 
@@ -148,13 +122,13 @@ public class DHT3DTest
 		o = deconvolved.getData();
 
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6f, 1e-6f));
+			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-8, 1e-8));
 	}
 
 	@Test
 	public void canCorrelate()
 	{
-		DHT3D dht = createData();
+		DoubleDHT3D dht = createData();
 		dht.transform();
 
 		// Centre of power spectrum
@@ -164,14 +138,14 @@ public class DHT3DTest
 			for (int y = -1; y <= 1; y++)
 				for (int x = -1; x <= 1; x++)
 				{
-					DHT3D dht2 = createData(centre + x, centre + y, centre + z);
+					DoubleDHT3D dht2 = createData(centre + x, centre + y, centre + z);
 					dht2.transform();
 
-					DHT3D correlation = dht2.conjugateMultiply(dht);
+					DoubleDHT3D correlation = dht2.conjugateMultiply(dht);
 					correlation.inverseTransform();
 					correlation.swapOctants();
 
-					float[] pixels = correlation.getData();
+					double[] pixels = correlation.getData();
 
 					int i = SimpleArrayUtils.findMaxIndex(pixels);
 					int[] xyz = correlation.getXYZ(i);
@@ -191,31 +165,34 @@ public class DHT3DTest
 	@Test
 	public void canConvertToDFT()
 	{
-		DHT3D dht = createData();
-		float[] input = dht.getData().clone();
+		DoubleDHT3D dht = createData();
+		double[] input = dht.getData().clone();
 		dht.transform();
 
-		Image3D[] result = dht.toDFT(null, null);
+		DoubleImage3D[] result = dht.toDFT(null, null);
+
+		double rel = 1e-14;
+		double abs = 1e-14;
 
 		// Test reverse transform
-		DHT3D dht2 = DHT3D.fromDFT(result[0], result[1], null);
+		DoubleDHT3D dht2 = DoubleDHT3D.fromDFT(result[0], result[1], null);
 
-		float[] e = dht.getData();
-		float[] o = dht2.getData();
+		double[] e = dht.getData();
+		double[] o = dht2.getData();
 		for (int i = 0; i < e.length; i++)
-			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6f, 1e-6f));
+			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs));
 
 		// Test verses full forward transform
-		FloatFFT_3D fft = new FloatFFT_3D(dht.ns, dht.nr, dht.nc);
-		float[] dft = Arrays.copyOf(input, 2 * e.length);
+		DoubleFFT_3D fft = new DoubleFFT_3D(dht.ns, dht.nr, dht.nc);
+		double[] dft = Arrays.copyOf(input, 2 * e.length);
 		fft.realForwardFull(dft);
 
-		float[] or = result[0].getData();
-		float[] oi = result[1].getData();
+		double[] or = result[0].getData();
+		double[] oi = result[1].getData();
 		for (int i = 0, j = 0; i < dft.length; i += 2, j++)
 		{
-			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], 1e-6f, 1e-6f));
-			Assert.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], 1e-6f, 1e-6f));
+			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], rel, abs));
+			Assert.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], rel, abs));
 		}
 	}
 }

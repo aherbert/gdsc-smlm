@@ -17,7 +17,7 @@ public class StackAlignerTest
 	final static int zDepth = 10;
 	protected QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
-	private Image3D createData(int x, int y, int z, double cx, double cy, double cz)
+	private FloatImage3D createData(int x, int y, int z, double cx, double cy, double cz)
 	{
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, x, y, GaussianFunctionFactory.FIT_ASTIGMATISM,
 				zModel);
@@ -32,20 +32,20 @@ public class StackAlignerTest
 		StandardFloatValueProcedure p = new StandardFloatValueProcedure();
 		for (int zz = 0; zz < z; zz++)
 		{
-			double dz = zz-cz;
-			if (zz==0||zz==z-1)
+			double dz = zz - cz;
+			if (zz == 0 || zz == z - 1)
 				System.out.printf("%f  %f %f\n", dz, zModel.getSx(dz), zModel.getSy(dz));
 			a[Gaussian2DFunction.Z_POSITION] = dz;
 			p.getValues(f, a, data, zz * length);
 		}
-		return new Image3D(x, y, z, data);
+		return new FloatImage3D(x, y, z, data);
 	}
 
 	@Test
 	public void canCorrelate()
 	{
-		int maxz = 64;
-		canCorrelate(16, 16, maxz, 7.5, 7.5, (maxz-1)/2.0, 8, 8, (maxz+10)/2.0, 0.1, 3, 1e-2);
+		int maxz = 63;
+		canCorrelate(16, 16, maxz, 7.5, 7.5, (maxz - 1) / 2.0, 8, 8, (maxz +2) / 2.0, 0.1, 10, 1e-2);
 	}
 
 	private void canCorrelate(int maxx, int maxy, int maxz, double cx1, double cy1, double cz1, double cx2, double cy2,
@@ -59,14 +59,22 @@ public class StackAlignerTest
 
 		StackAligner a = new StackAligner(window);
 		a.setReference(reference);
+		//a.setSearchMode(SearchMode.BINARY);
+		//a.setRelativeThreshold(1e-6);
+
+		double[] e = new double[] { cx1 - cx2, cy1 - cy2, cz1 - cz2 };
+		int cx = maxx / 2 - (int) Math.round(e[0]);
+		int cy = maxy / 2 - (int) Math.round(e[1]);
+		int cz = maxz / 2 - (int) Math.round(e[2]);
+		int index = target.getIndex(cx, cy, cz);
 
 		for (int i = 0; i <= refinements; i++)
 		{
 			double[] result = a.align(target.copy(), i, error);
+			Image3D c = a.getCorrelation();
 
-			double[] e = new double[] { cx1 - cx2, cy1 - cy2, cz1 - cz2 };
-
-			System.out.printf("e %s, o %s\n", java.util.Arrays.toString(e), java.util.Arrays.toString(result));
+			System.out.printf("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
+					java.util.Arrays.toString(result));
 			//for (int i = 0; i < 3; i++)
 			//	Assert.assertEquals(e[i], result[i], 0.25);
 		}

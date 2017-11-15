@@ -3,18 +3,12 @@ package gdsc.smlm.ij.utils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.SimpleArrayUtils;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 
-public class Image3DTest
+public abstract class Image3DTest
 {
-	private Image3D createData(int w, int h, int d)
-	{
-		float[] data = SimpleArrayUtils.newArray(w * h * d, 1f, 1f);
-		return new Image3D(w, h, d, data);
-	}
+	protected abstract Image3D createData(int w, int h, int d);
 
 	@Test
 	public void canCrop()
@@ -29,24 +23,23 @@ public class Image3DTest
 		Image3D image = createData(x + w + 1, y + h + 1, z + d + 1);
 		ImageStack stack = image.getImageStack();
 
-		Image3D croppedData = image.crop(x, y, z, w, h, d, null);
+		Image3D croppedData = image.crop(x, y, z, w, h, d);
 		Assert.assertEquals(croppedData.getWidth(), w);
 		Assert.assertEquals(croppedData.getHeight(), h);
 		Assert.assertEquals(croppedData.getSize(), d);
 
-		Image3D croppedData2 = Image3D.crop(stack, x, y, z, w, h, d, null);
-		Assert.assertArrayEquals(croppedData.getData(), croppedData2.getData(), 0);
+		Image3D croppedData2 = FloatImage3D.crop(stack, x, y, z, w, h, d, null);
+		assertEquals(croppedData, croppedData2);
 
 		ImageStack croppedStack = image.cropToStack(x, y, z, w, h, d);
 		Assert.assertEquals(croppedStack.getWidth(), w);
 		Assert.assertEquals(croppedStack.getHeight(), h);
 		Assert.assertEquals(croppedStack.getSize(), d);
 
-		float[] croppedStackData = new Image3D(croppedStack).getData();
-		Assert.assertArrayEquals(croppedData.getData(), croppedStackData, 0);
+		assertEquals(croppedData, new FloatImage3D(croppedStack));
 
 		ImageStack croppedStack2 = Image3D.cropToStack(stack, x, y, z, w, h, d);
-		Assert.assertArrayEquals(croppedData.getData(), new Image3D(croppedStack2).getData(), 0);
+		assertEquals(croppedData, new FloatImage3D(croppedStack2));
 
 		// Test it is the correct region
 		ImageStack originalStack = image.getImageStack();
@@ -63,8 +56,8 @@ public class Image3DTest
 			Assert.assertArrayEquals(e, o, 0);
 
 			// Compare to the cropped data
-			System.arraycopy(croppedData.getData(), zz * o.length, o, 0, o.length);
-			Assert.assertArrayEquals(e, o, 0);
+			for (int i = 0, j = zz * e.length; i < e.length; i++, j++)
+				Assert.assertEquals(e[i], croppedData.get(j), 0);
 		}
 	}
 
@@ -85,27 +78,27 @@ public class Image3DTest
 			Image3D image2 = image.copy();
 			Image3D image3 = image.copy();
 
-			Image3D blank = new Image3D(w, h, d);
+			Image3D blank = new FloatImage3D(w, h, d);
 
 			image.insert(x, y, z, blank);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
+			Image3D croppedData = image.crop(x, y, z, w, h, d);
 
-			Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
+			assertEquals(croppedData, blank);
 
 			ImageStack blankStack = blank.getImageStack();
 			image2.insert(x, y, z, blankStack);
 
-			croppedData = image2.crop(x, y, z, w, h, d, null);
+			croppedData = image2.crop(x, y, z, w, h, d);
 
-			Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
+			assertEquals(croppedData, blank);
 
 			for (int s = 0; s < blankStack.getSize(); s++)
 				image3.insert(x, y, z + s, blankStack.getProcessor(1 + s));
 
-			croppedData = image3.crop(x, y, z, w, h, d, null);
+			croppedData = image3.crop(x, y, z, w, h, d);
 
-			Assert.assertArrayEquals(croppedData.getData(), blank.getData(), 0);
+			assertEquals(croppedData, blank);
 		}
 	}
 
@@ -135,8 +128,8 @@ public class Image3DTest
 		{
 			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
-			int i = SimpleArrayUtils.findMinIndex(croppedData.getData());
+			Image3D croppedData = image.crop(x, y, z, w, h, d);
+			int i = findMinIndex(croppedData);
 			int[] xyz = croppedData.getXYZ(i);
 
 			int j = image.findMinIndex(x, y, z, w, h, d);
@@ -174,8 +167,8 @@ public class Image3DTest
 		{
 			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
-			int i = SimpleArrayUtils.findMaxIndex(croppedData.getData());
+			Image3D croppedData = image.crop(x, y, z, w, h, d);
+			int i = findMaxIndex(croppedData);
 			int[] xyz = croppedData.getXYZ(i);
 
 			int j = image.findMaxIndex(x, y, z, w, h, d);
@@ -216,8 +209,8 @@ public class Image3DTest
 		{
 			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
-			double e = Maths.sum(croppedData.getData());
+			Image3D croppedData = image.crop(x, y, z, w, h, d);
+			double e = sum(croppedData);
 			double o = image.computeSum(x, y, z, w, h, d);
 
 			Assert.assertEquals(o, e, 0);
@@ -247,16 +240,16 @@ public class Image3DTest
 		Image3D image = createData(2, 2, 2);
 		double[] table = image.computeRollingSumTable(null);
 		//testComputeSum(36, image,table, 0, 0, 0, 2, 2, 2);
-		testComputeSum(36, image,table, 0, 0, 0, 5, 7, 9);
-		testComputeSum(0, image,table, 0, 0, 0, 0, 0, 0);
-		testComputeSum(1, image,table, 0, 0, 0, 1, 1, 1);
-		testComputeSum(2, image,table, 1, 0, 0, 1, 1, 1);
-		testComputeSum(0, image,table, -10, 0, 0, 1, 1, 1);
-		testComputeSum(0, image,table, 10, 0, 0, 1, 1, 1);
-		testComputeSum(0, image,table, 0, 10, 0, 1, 1, 1);
-		testComputeSum(0, image,table, 0, -10, 0, 1, 1, 1);
-		testComputeSum(0, image,table, 0, 0, 10, 1, 1, 1);
-		testComputeSum(0, image,table, 0, 0, -10, 1, 1, 1);
+		testComputeSum(36, image, table, 0, 0, 0, 5, 7, 9);
+		testComputeSum(0, image, table, 0, 0, 0, 0, 0, 0);
+		testComputeSum(1, image, table, 0, 0, 0, 1, 1, 1);
+		testComputeSum(2, image, table, 1, 0, 0, 1, 1, 1);
+		testComputeSum(0, image, table, -10, 0, 0, 1, 1, 1);
+		testComputeSum(0, image, table, 10, 0, 0, 1, 1, 1);
+		testComputeSum(0, image, table, 0, 10, 0, 1, 1, 1);
+		testComputeSum(0, image, table, 0, -10, 0, 1, 1, 1);
+		testComputeSum(0, image, table, 0, 0, 10, 1, 1, 1);
+		testComputeSum(0, image, table, 0, 0, -10, 1, 1, 1);
 
 		// Larger slices
 		canComputeSumUsingTable(3, 4, 5, 6, 7, 8);
@@ -272,14 +265,14 @@ public class Image3DTest
 			Image3D image = createData(x + w + pad, y + h + pad, z + d + pad);
 			double[] table = image.computeRollingSumTable(null);
 
-			Image3D croppedData = image.crop(x, y, z, w, h, d, null);
-			double e = Maths.sum(croppedData.getData());
-			
+			Image3D croppedData = image.crop(x, y, z, w, h, d);
+			double e = sum(croppedData);
+
 			testComputeSum(e, image, table, x, y, z, w, h, d);
 		}
 	}
 
-	private void testComputeSum(double e, Image3D image,  double[] table, int x, int y, int z, int w, int h, int d)
+	private void testComputeSum(double e, Image3D image, double[] table, int x, int y, int z, int w, int h, int d)
 	{
 		double o = image.computeSum(table, x, y, z, w, h, d);
 		double o2 = image.computeSumFast(table, x, y, z, w, h, d);
@@ -289,4 +282,36 @@ public class Image3DTest
 		Assert.assertEquals(e, o, 0);
 		Assert.assertEquals(e, o2, 0);
 	}
+	
+	private static void assertEquals(Image3D a, Image3D b)
+	{
+		for (int i = a.getDataLength(); i-- > 0;)
+			Assert.assertEquals(a.get(i), b.get(i), 0);
+	}
+	
+	private  static int findMinIndex(Image3D image)
+	{
+		int min = 0;
+		for (int i = image.getDataLength(); i-- > 0;)
+			if (image.get(i) < image.get(min))
+				min = i;
+		return min;
+	}
+
+	private   static int findMaxIndex(Image3D image)
+	{
+		int max = 0;
+		for (int i = image.getDataLength(); i-- > 0;)
+			if (image.get(i) > image.get(max))
+				max = i;
+		return max;
+	}
+	private static double sum(Image3D image)
+	{
+		double sum = 0;
+		for (int i = image.getDataLength(); i-- > 0;)
+			sum += image.get(i);
+		return sum;
+	}
+
 }

@@ -21,7 +21,7 @@ import ij.process.ImageProcessor;
 /**
  * Store a 3D image in a single float array
  */
-public class Image3D
+public abstract class Image3D
 {
 	/**
 	 * The largest array size for which a regular 1D Java array is used to store the
@@ -72,78 +72,6 @@ public class Image3D
 	/** The number of rows multiplied by the number of columns */
 	public final int nr_by_nc;
 
-	protected final float[] data;
-
-	/**
-	 * Instantiates a new 3D image
-	 *
-	 * @param stack
-	 *            the stack
-	 * @throws IllegalArgumentException
-	 *             If the combined dimensions is too large for an array
-	 */
-	public Image3D(ImageStack stack) throws IllegalArgumentException
-	{
-		nc = stack.getWidth();
-		nr = stack.getHeight();
-		ns = stack.getSize();
-
-		data = new float[checkSize(nc, nr, ns, true)];
-
-		nr_by_nc = nr * nc;
-		if (stack.getBitDepth() == 32)
-		{
-			for (int s = 0; s < ns; s++)
-			{
-				System.arraycopy(stack.getPixels(s + 1), 0, data, s * nr_by_nc, nr_by_nc);
-			}
-		}
-		else
-		{
-			for (int s = 1, i = 0; s <= ns; s++)
-			{
-				ImageProcessor ip = stack.getProcessor(s);
-				for (int j = 0; i < nr_by_nc; j++)
-					data[i++] = ip.getf(j);
-			}
-		}
-	}
-
-	/**
-	 * Instantiates a new 3D image.
-	 *
-	 * @param stack
-	 *            the stack
-	 * @param data
-	 *            the data
-	 */
-	private Image3D(ImageStack stack, float[] data)
-	{
-		nc = stack.getWidth();
-		nr = stack.getHeight();
-		ns = stack.getSize();
-
-		this.data = data;
-
-		nr_by_nc = nr * nc;
-		if (stack.getBitDepth() == 32)
-		{
-			for (int s = 0; s < ns; s++)
-			{
-				System.arraycopy(stack.getPixels(s + 1), 0, data, s * nr_by_nc, nr_by_nc);
-			}
-		}
-		else
-		{
-			for (int s = 1, i = 0; s <= ns; s++)
-			{
-				ImageProcessor ip = stack.getProcessor(s);
-				for (int j = 0; i < nr_by_nc; j++)
-					data[i++] = ip.getf(j);
-			}
-		}
-	}
-
 	/**
 	 * Instantiates a new 3D image.
 	 *
@@ -158,7 +86,7 @@ public class Image3D
 	 */
 	public Image3D(int nc, int nr, int ns) throws IllegalArgumentException
 	{
-		data = new float[checkSize(nc, nr, ns, true)];
+		createData(checkSize(nc, nr, ns, true));
 		this.nc = nc;
 		this.nr = nr;
 		this.ns = ns;
@@ -174,24 +102,36 @@ public class Image3D
 	 *            the number of rows
 	 * @param ns
 	 *            the number of slices
-	 * @param data
-	 *            the data
 	 * @throws IllegalArgumentException
-	 *             If the data is not the correct length
+	 *             If the combined dimensions is too large for an array
 	 */
-	public Image3D(int nc, int nr, int ns, float[] data) throws IllegalArgumentException
+	public Image3D(ImageStack stack) throws IllegalArgumentException
 	{
-		if (data == null || data.length != checkSize(nc, nr, ns, true))
-			throw new IllegalArgumentException("Data is not correct length");
-		this.nc = nc;
-		this.nr = nr;
-		this.ns = ns;
+		nc = stack.getWidth();
+		nr = stack.getHeight();
+		ns = stack.getSize();
+		createData(checkSize(nc, nr, ns, true));
 		nr_by_nc = nr * nc;
-		this.data = data;
+		if (stack.getBitDepth() == 32)
+		{
+			for (int s = 0; s < ns; s++)
+			{
+				copyFrom((float[]) stack.getPixels(s + 1), 0, nr_by_nc, s * nr_by_nc);
+			}
+		}
+		else
+		{
+			for (int s = 1, i = 0; s <= ns; s++)
+			{
+				ImageProcessor ip = stack.getProcessor(s);
+				for (int j = 0; i < nr_by_nc; j++)
+					setf(i++, ip.getf(j));
+			}
+		}
 	}
 
 	/**
-	 * Instantiates a new 3D image.
+	 * Instantiates a new 3D image. It is assumed that the sub-class will correctly create the data storage.
 	 *
 	 * @param nc
 	 *            the number of columns
@@ -201,28 +141,100 @@ public class Image3D
 	 *            the number of slices
 	 * @param nr_by_nc
 	 *            the number of rows multiplied by the number of columns
-	 * @param data
-	 *            the data
 	 */
-	protected Image3D(int nc, int nr, int ns, int nr_by_nc, float[] data)
+	protected Image3D(int nc, int nr, int ns, int nr_by_nc)
 	{
 		// No checks as this is used internally		
 		this.nc = nc;
 		this.nr = nr;
 		this.ns = ns;
 		this.nr_by_nc = nr_by_nc;
-		this.data = data;
 	}
+
+	/**
+	 * Creates the array to store the data.
+	 *
+	 * @param size
+	 *            the size of the array
+	 */
+	protected abstract void createData(int size);
+
+	/**
+	 * Copy the data from the given index to the buffer.
+	 * <p>
+	 * Utility method to handle conversion with ImageJ ImageProcessor objects.
+	 *
+	 * @param i
+	 *            the index
+	 * @param buffer
+	 *            the buffer
+	 * @param j
+	 *            the buffer index
+	 * @param size
+	 *            the size
+	 */
+	protected abstract void copyTo(int i, float[] buffer, int j, int size);
+
+	/**
+	 * Copy the data from the given buffer to the given index.
+	 * <p>
+	 * Utility method to handle conversion with ImageJ ImageProcessor objects.
+	 *
+	 * @param i
+	 *            the index
+	 * @param buffer
+	 *            the buffer
+	 * @param j
+	 *            the buffer index
+	 * @param size
+	 *            the size
+	 */
+	protected abstract void copyFrom(float[] buffer, int j, int size, int i);
+
+	/**
+	 * Gets the value at the given index.
+	 *
+	 * @param i
+	 *            the index
+	 * @return the value
+	 */
+	public abstract double get(int i);
+
+	/**
+	 * Sets the value at the given index.
+	 *
+	 * @param i
+	 *            the index
+	 * @param value
+	 *            the value
+	 */
+	public abstract void set(int i, double value);
+
+	/**
+	 * Gets the value at the given index.
+	 *
+	 * @param i
+	 *            the index
+	 * @return the value
+	 */
+	public abstract float getf(int i);
+
+	/**
+	 * Sets the value at the given index.
+	 *
+	 * @param i
+	 *            the index
+	 * @param value
+	 *            the value
+	 */
+	public abstract void setf(int i, float value);
 
 	/**
 	 * Return a copy of the 3D image.
 	 *
 	 * @return the copy
 	 */
-	public Image3D copy()
-	{
-		return new Image3D(nc, nr, ns, nr_by_nc, data.clone());
-	}
+	public abstract Image3D copy();
 
 	/**
 	 * Gets the width (the number of columns).
@@ -255,23 +267,13 @@ public class Image3D
 	}
 
 	/**
-	 * Gets the data.
-	 *
-	 * @return the data
-	 */
-	public float[] getData()
-	{
-		return data;
-	}
-
-	/**
 	 * Gets the data length.
 	 *
 	 * @return the data length
 	 */
 	public int getDataLength()
 	{
-		return data.length;
+		return ns * nr_by_nc;
 	}
 
 	/**
@@ -285,7 +287,7 @@ public class Image3D
 		for (int s = 0; s < ns; s++)
 		{
 			float[] pixels = new float[nr_by_nc];
-			System.arraycopy(data, s * nr_by_nc, pixels, 0, nr_by_nc);
+			copyTo(s * nr_by_nc, pixels, 0, nr_by_nc);
 			stack.addSlice(null, pixels);
 		}
 		return stack;
@@ -302,8 +304,8 @@ public class Image3D
 	 */
 	public int[] getXYZ(int i) throws IllegalArgumentException
 	{
-		if (i < 0 || i >= data.length)
-			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + data.length);
+		if (i < 0 || i >= getDataLength())
+			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + getDataLength());
 		int[] xyz = new int[3];
 		xyz[2] = i / nr_by_nc;
 		int j = i % nr_by_nc;
@@ -324,8 +326,8 @@ public class Image3D
 	 */
 	public void getXYZ(int i, int[] xyz) throws IllegalArgumentException
 	{
-		if (i < 0 || i >= data.length)
-			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + data.length);
+		if (i < 0 || i >= getDataLength())
+			throw new IllegalArgumentException("Index in not in the correct range: 0 <= i < " + getDataLength());
 		xyz[2] = i / nr_by_nc;
 		int j = i % nr_by_nc;
 		xyz[1] = j / nc;
@@ -363,7 +365,7 @@ public class Image3D
 	 *            the z
 	 * @return the index
 	 */
-	private int index(int x, int y, int z)
+	protected int index(int x, int y, int z)
 	{
 		return z * nr_by_nc + y * nc + x;
 	}
@@ -383,33 +385,11 @@ public class Image3D
 	 *            the height
 	 * @param d
 	 *            the depth
-	 * @param region
-	 *            the cropped data (will be reused if the correct size)
 	 * @return the cropped data
 	 * @throws IllegalArgumentException
 	 *             if the region is not within the data
 	 */
-	public Image3D crop(int x, int y, int z, int w, int h, int d, float[] region) throws IllegalArgumentException
-	{
-		// Check the region range
-		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
-				(long) z + d > ns)
-			throw new IllegalArgumentException("Region not within the data");
-		int size = d * h * w;
-		if (region == null || region.length != size)
-			region = new float[size];
-		for (int s = 0, i = 0; s < d; s++, z++)
-		{
-			int base = z * nr_by_nc + y * nc + x;
-			for (int r = 0; r < h; r++)
-			{
-				System.arraycopy(data, base, region, i, w);
-				base += nc;
-				i += w;
-			}
-		}
-		return new Image3D(w, h, d, w * h, region);
-	}
+	public abstract Image3D crop(int x, int y, int z, int w, int h, int d) throws IllegalArgumentException;
 
 	/**
 	 * Crop a sub-region of the data into the given image. The target dimensions must be positive.
@@ -428,7 +408,24 @@ public class Image3D
 	 */
 	public Image3D crop(int x, int y, int z, Image3D image) throws IllegalArgumentException
 	{
-		return crop(x, y, z, image.getWidth(), image.getHeight(), image.getSize(), image.data);
+		// Check the region range
+		int w = image.getWidth();
+		int h = image.getHeight();
+		int d = image.getSize();
+		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
+				(long) z + d > ns)
+			throw new IllegalArgumentException("Region not within the data");
+		for (int s = 0, i = 0; s < d; s++, z++)
+		{
+			int base = z * nr_by_nc + y * nc + x;
+			for (int r = 0; r < h; r++)
+			{
+				for (int c = 0; c < w; c++)
+					image.set(i++, get(base + c));
+				base += nc;
+			}
+		}
+		return image;
 	}
 
 	/**
@@ -464,7 +461,7 @@ public class Image3D
 			float[] region = new float[size];
 			for (int r = 0, i = 0; r < h; r++)
 			{
-				System.arraycopy(data, base, region, i, w);
+				copyTo(base, region, i, w);
 				base += nc;
 				i += w;
 			}
@@ -472,69 +469,7 @@ public class Image3D
 		}
 		return stack;
 	}
-
-	/**
-	 * Crop a sub-region of the data. The target dimensions must be positive.
-	 *
-	 * @param stack
-	 *            the stack
-	 * @param x
-	 *            the x index
-	 * @param y
-	 *            the y index
-	 * @param z
-	 *            the z index
-	 * @param w
-	 *            the width
-	 * @param h
-	 *            the height
-	 * @param d
-	 *            the depth
-	 * @param region
-	 *            the cropped data (will be reused if the correct size)
-	 * @return the cropped data
-	 * @throws IllegalArgumentException
-	 *             if the region is not within the data
-	 */
-	public static Image3D crop(ImageStack stack, int x, int y, int z, int w, int h, int d, float[] region)
-			throws IllegalArgumentException
-	{
-		if (stack.getBitDepth() != 32)
-		{
-			// Handle non-float data
-			checkSize(w, h, d, true);
-			stack = cropToStack(stack, x, y, z, w, h, d);
-			int size = d * h * w;
-			if (region == null || region.length != size)
-				region = new float[size];
-			return new Image3D(stack, region);
-		}
-
-		int nc = stack.getWidth();
-		int nr = stack.getHeight();
-		int ns = stack.getSize();
-
-		// Check the region range
-		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
-				(long) z + d > ns)
-			throw new IllegalArgumentException("Region not within the data");
-		int size = checkSize(w, h, d, true);
-		if (region == null || region.length != size)
-			region = new float[size];
-		for (int s = 0, i = 0; s < d; s++, z++)
-		{
-			float[] data = (float[]) stack.getPixels(1 + z);
-			int base = y * nc + x;
-			for (int r = 0; r < h; r++)
-			{
-				System.arraycopy(data, base, region, i, w);
-				base += nc;
-				i += w;
-			}
-		}
-		return new Image3D(w, h, d, w * h, region);
-	}
-
+	
 	/**
 	 * Crop a sub-region of the data. The target dimensions must be positive.
 	 *
@@ -599,15 +534,14 @@ public class Image3D
 			return;
 		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns)
 			throw new IllegalArgumentException("Region not within the data");
-		float[] region = image.data;
 		for (int s = 0, i = 0; s < d; s++, z++)
 		{
 			int base = z * nr_by_nc + y * nc + x;
 			for (int r = 0; r < h; r++)
 			{
-				System.arraycopy(region, i, data, base, w);
+				for (int c = 0; c < w; c++)
+					set(base + c, image.get(i++));
 				base += nc;
-				i += w;
 			}
 		}
 	}
@@ -645,7 +579,7 @@ public class Image3D
 					: stack.getProcessor(1 + s).toFloat(0, fp).getPixels());
 			for (int r = 0, i = 0; r < h; r++)
 			{
-				System.arraycopy(region, i, data, base, w);
+				copyFrom(region, i, w, base);
 				base += nc;
 				i += w;
 			}
@@ -680,7 +614,7 @@ public class Image3D
 		float[] region = (float[]) ((isFloat) ? image.getPixels() : image.toFloat(0, null).getPixels());
 		for (int r = 0, i = 0; r < h; r++)
 		{
-			System.arraycopy(region, i, data, base, w);
+			copyFrom(region, i, w, base);
 			base += nc;
 			i += w;
 		}
@@ -887,14 +821,18 @@ public class Image3D
 		h = intersect[4];
 		d = intersect[5];
 		int index = findValueIndex(x, y, z, w, h, d);
+		double min = get(index);
 		for (int s = 0; s < d; s++, z++)
 		{
 			int base = z * nr_by_nc + y * nc + x;
 			for (int r = 0; r < h; r++)
 			{
 				for (int j = 0; j < w; j++)
-					if (data[base + j] < data[index])
+					if (get(base + j) < min)
+					{
 						index = base + j;
+						min = get(index);
+					}
 				base += nc;
 			}
 		}
@@ -933,14 +871,20 @@ public class Image3D
 		h = intersect[4];
 		d = intersect[5];
 		int index = findValueIndex(x, y, z, w, h, d);
+		double max = get(index);
 		for (int s = 0; s < d; s++, z++)
 		{
 			int base = z * nr_by_nc + y * nc + x;
 			for (int r = 0; r < h; r++)
 			{
 				for (int j = 0; j < w; j++)
-					if (data[base + j] > data[index])
+				{
+					if (get(base + j) > max)
+					{
 						index = base + j;
+						max = get(index);
+					}
+				}
 				base += nc;
 			}
 		}
@@ -969,7 +913,7 @@ public class Image3D
 	private int findValueIndex(int x, int y, int z, int w, int h, int d) throws IllegalStateException
 	{
 		// Quick check without loops
-		if (!Float.isNaN(data[z * nr_by_nc + y * nc + x]))
+		if (!Double.isNaN(get(z * nr_by_nc + y * nc + x)))
 			return z * nr_by_nc + y * nc + x;
 
 		for (int s = 0; s < d; s++, z++)
@@ -978,7 +922,7 @@ public class Image3D
 			for (int r = 0; r < h; r++)
 			{
 				for (int j = 0; j < w; j++)
-					if (!Float.isNaN(data[base + j]))
+					if (!Double.isNaN(get(base + j)))
 						return base + j;
 				base += nc;
 			}
@@ -1022,7 +966,7 @@ public class Image3D
 			for (int r = 0; r < h; r++)
 			{
 				for (int j = 0; j < w; j++)
-					sum += data[base + j];
+					sum += get(base + j);
 				base += nc;
 			}
 		}
@@ -1040,8 +984,8 @@ public class Image3D
 	 */
 	public double[] computeRollingSumTable(double[] table)
 	{
-		if (table == null || table.length != data.length)
-			table = new double[data.length];
+		if (table == null || table.length != getDataLength())
+			table = new double[getDataLength()];
 
 		// First build a table for each XY slice
 		for (int s = 0; s < ns; s++)
@@ -1052,7 +996,7 @@ public class Image3D
 			// sum = rolling sum of (0 - colomn)
 			for (int c = 0; c < nc; c++, i++)
 			{
-				sum += data[i];
+				sum += get(i);
 				table[i] = sum;
 			}
 			// Remaining rows
@@ -1062,7 +1006,7 @@ public class Image3D
 				sum = 0;
 				for (int c = 0; c < nc; c++, i++)
 				{
-					sum += data[i];
+					sum += get(i);
 					// Add the sum from the previous row
 					table[i] = sum + table[ii++];
 				}

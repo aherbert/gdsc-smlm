@@ -22,7 +22,7 @@ import pl.edu.icm.jlargearrays.LargeArray;
 /**
  * Wrapper to compute the discrete Hartley transform on 3D data. This uses the JTransforms library.
  */
-public class DHT3D extends Image3D
+public class FloatDHT3D extends FloatImage3D
 {
 	private boolean isFrequencyDomain;
 	private final FloatDHT_3D dht;
@@ -35,7 +35,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             If any dimension is less than 2, or if the combined dimensions is too large for an array
 	 */
-	public DHT3D(ImageStack stack) throws IllegalArgumentException
+	public FloatDHT3D(ImageStack stack) throws IllegalArgumentException
 	{
 		super(stack);
 		LargeArray.setMaxSizeOf32bitArray(MAX_SIZE_OF_32_BIT_ARRAY);
@@ -58,7 +58,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             If any dimension is less than 2, or if the data is not the correct length
 	 */
-	public DHT3D(int nc, int nr, int ns, float[] data, boolean isFrequencyDomain) throws IllegalArgumentException
+	public FloatDHT3D(int nc, int nr, int ns, float[] data, boolean isFrequencyDomain) throws IllegalArgumentException
 	{
 		super(nc, nr, ns, data);
 		LargeArray.setMaxSizeOf32bitArray(MAX_SIZE_OF_32_BIT_ARRAY);
@@ -84,7 +84,7 @@ public class DHT3D extends Image3D
 	 * @param dht
 	 *            the dht
 	 */
-	private DHT3D(int nc, int nr, int ns, int nr_by_nc, float[] data, boolean isFrequencyDomain, FloatDHT_3D dht)
+	private FloatDHT3D(int nc, int nr, int ns, int nr_by_nc, float[] data, boolean isFrequencyDomain, FloatDHT_3D dht)
 	{
 		super(nc, nr, ns, nr_by_nc, data);
 		this.isFrequencyDomain = isFrequencyDomain;
@@ -97,9 +97,9 @@ public class DHT3D extends Image3D
 	 * @return the copy
 	 */
 	@Override
-	public DHT3D copy()
+	public FloatDHT3D copy()
 	{
-		return new DHT3D(nc, nr, ns, nr_by_nc, data.clone(), isFrequencyDomain, dht);
+		return new FloatDHT3D(nc, nr, ns, nr_by_nc, data.clone(), isFrequencyDomain, dht);
 	}
 
 	/**
@@ -152,7 +152,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             if the dht is not the same dimensions
 	 */
-	public DHT3D multiply(DHT3D dht) throws IllegalArgumentException
+	public FloatDHT3D multiply(FloatDHT3D dht) throws IllegalArgumentException
 	{
 		return multiply(dht, null);
 	}
@@ -171,7 +171,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             if the dht is not the same dimensions
 	 */
-	public DHT3D multiply(DHT3D dht, float[] tmp) throws IllegalArgumentException
+	public FloatDHT3D multiply(FloatDHT3D dht, float[] tmp) throws IllegalArgumentException
 	{
 		checkDHT(dht);
 
@@ -192,14 +192,14 @@ public class DHT3D extends Image3D
 					//h2o = (h2[s][r][c] - h2[Ns-s][Nr-r][Nr-c]) / 2;
 					//tmp[s][r][c] = (float) (h1[s][r][c] * h2e + h1[Ns-s][Nr-r][Nc-c] * h2o);
 					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
-					double h2e = (h2[i] + h2[j]) / 2;
-					double h2o = (h2[i] - h2[j]) / 2;
+					double h2e = ((double) h2[i] + (double) h2[j]) / 2.0;
+					double h2o = ((double) h2[i] - (double) h2[j]) / 2.0;
 					tmp[i] = (float) (h1[i] * h2e + h1[j] * h2o);
 				}
 			}
 		}
 
-		return new DHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+		return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
 	}
 
 	/**
@@ -214,7 +214,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             if the dht is not the same dimensions
 	 */
-	public DHT3D conjugateMultiply(DHT3D dht) throws IllegalArgumentException
+	public FloatDHT3D conjugateMultiply(FloatDHT3D dht) throws IllegalArgumentException
 	{
 		return conjugateMultiply(dht, null);
 	}
@@ -233,7 +233,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             if the dht is not the same dimensions
 	 */
-	public DHT3D conjugateMultiply(DHT3D dht, float[] tmp) throws IllegalArgumentException
+	public FloatDHT3D conjugateMultiply(FloatDHT3D dht, float[] tmp) throws IllegalArgumentException
 	{
 		checkDHT(dht);
 
@@ -249,15 +249,15 @@ public class DHT3D extends Image3D
 				for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
 				{
 					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
-					double h2e = (h2[i] + h2[j]) / 2;
-					double h2o = (h2[i] - h2[j]) / 2;
+					double h2e = ((double) h2[i] + (double) h2[j]) / 2.0;
+					double h2o = ((double) h2[i] - (double) h2[j]) / 2.0;
 					// As per multiply but reverse the addition sign for the conjugate  
 					tmp[i] = (float) (h1[i] * h2e - h1[j] * h2o);
 				}
 			}
 		}
 
-		return new DHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+		return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
 	}
 
 	/**
@@ -272,7 +272,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             if the dht is not the same dimensions or in the frequency domain
 	 */
-	public DHT3D divide(DHT3D dht) throws IllegalArgumentException
+	public FloatDHT3D divide(FloatDHT3D dht) throws IllegalArgumentException
 	{
 		return divide(dht, null);
 	}
@@ -291,7 +291,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             if the dht is not the same dimensions or in the frequency domain
 	 */
-	public DHT3D divide(DHT3D dht, float[] tmp) throws IllegalArgumentException
+	public FloatDHT3D divide(FloatDHT3D dht, float[] tmp) throws IllegalArgumentException
 	{
 		checkDHT(dht);
 
@@ -308,17 +308,19 @@ public class DHT3D extends Image3D
 				{
 					// This is a copy of the divide operation in ij.process.FHT
 					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
-					double mag = h2[i] * h2[i] + h2[j] * h2[j];
+					double h2i = (double) h2[i];
+					double h2j = (double) h2[j];
+					double mag = h2i * h2i + h2j * h2j;
 					if (mag < 1e-20)
 						mag = 1e-20;
-					double h2e = (h2[i] + h2[j]);
-					double h2o = (h2[i] - h2[j]);
+					double h2e = (h2i + h2j);
+					double h2o = (h2i - h2j);
 					tmp[i] = (float) ((h1[i] * h2e - h1[j] * h2o) / mag);
 				}
 			}
 		}
 
-		return new DHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+		return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
 	}
 
 	/**
@@ -329,7 +331,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             If multiplication is not possible
 	 */
-	private void checkDHT(DHT3D dht) throws IllegalArgumentException
+	private void checkDHT(FloatDHT3D dht) throws IllegalArgumentException
 	{
 		if (dht.ns != ns || dht.nr != nr || dht.nc != nc)
 			throw new IllegalArgumentException("Dimension mismatch");
@@ -352,7 +354,7 @@ public class DHT3D extends Image3D
 	 *      "https://en.wikipedia.org/wiki/Hartley_transform#Relation_to_Fourier_transform">https://en.wikipedia.org/
 	 *      wiki/Hartley_transform#Relation_to_Fourier_transform</a>
 	 */
-	public Image3D[] toDFT(float[] real, float[] imaginary) throws IllegalArgumentException
+	public FloatImage3D[] toDFT(float[] real, float[] imaginary) throws IllegalArgumentException
 	{
 		if (!isFrequencyDomain)
 			throw new IllegalArgumentException("Require frequency domain DHT");
@@ -377,7 +379,7 @@ public class DHT3D extends Image3D
 			}
 		}
 
-		return new Image3D[] { new Image3D(nc, nr, ns, nr_by_nc, real), new Image3D(nc, nr, ns, nr_by_nc, imaginary) };
+		return new FloatImage3D[] { new FloatImage3D(nc, nr, ns, nr_by_nc, real), new FloatImage3D(nc, nr, ns, nr_by_nc, imaginary) };
 	}
 
 	/**
@@ -393,7 +395,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             If there is a dimension mismatch
 	 */
-	public static DHT3D fromDFT(Image3D real, Image3D imaginary, float[] tmp) throws IllegalArgumentException
+	public static FloatDHT3D fromDFT(FloatImage3D real, FloatImage3D imaginary, float[] tmp) throws IllegalArgumentException
 	{
 		if (real.ns != imaginary.ns || real.nr != imaginary.nr || real.nc != imaginary.nc)
 			throw new IllegalArgumentException("Dimension mismatch");
@@ -426,7 +428,7 @@ public class DHT3D extends Image3D
 			}
 		}
 
-		return new DHT3D(nc, nr, ns, nr_by_nc, tmp, true, new FloatDHT_3D(ns, nr, nc));
+		return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, new FloatDHT_3D(ns, nr, nc));
 	}
 
 	/**
@@ -439,7 +441,7 @@ public class DHT3D extends Image3D
 	 * @throws IllegalArgumentException
 	 *             if not in the frequency domain
 	 */
-	public Image3D getAbsoluteValue(float[] tmp) throws IllegalArgumentException
+	public FloatImage3D getAbsoluteValue(float[] tmp) throws IllegalArgumentException
 	{
 		if (!isFrequencyDomain)
 			throw new IllegalArgumentException("Require frequency domain DHT");
@@ -461,7 +463,7 @@ public class DHT3D extends Image3D
 			}
 		}
 
-		return new Image3D(nc, nr, ns, nr_by_nc, tmp);
+		return new FloatImage3D(nc, nr, ns, nr_by_nc, tmp);
 	}
 
 	/**
@@ -503,7 +505,7 @@ public class DHT3D extends Image3D
 	 *             If not even dimensions
 	 * @see https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)
 	 */
-	public static void swapOctants(Image3D image) throws IllegalArgumentException
+	public static void swapOctants(FloatImage3D image) throws IllegalArgumentException
 	{
 		int ns = image.ns;
 		int nr = image.nr;
