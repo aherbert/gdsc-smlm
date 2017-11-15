@@ -190,11 +190,11 @@ public class DoubleDHT3D extends DoubleImage3D
 					// https://en.wikipedia.org/wiki/Discrete_Hartley_transform
 					//h2e = (h2[s][r][c] + h2[Ns-s][Nr-r][Nr-c]) / 2;
 					//h2o = (h2[s][r][c] - h2[Ns-s][Nr-r][Nr-c]) / 2;
-					//tmp[s][r][c] = (float) (h1[s][r][c] * h2e + h1[Ns-s][Nr-r][Nc-c] * h2o);
+					//tmp[s][r][c] =  (h1[s][r][c] * h2e + h1[Ns-s][Nr-r][Nc-c] * h2o);
 					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
 					double h2e = (h2[i] + h2[j]) / 2.0;
 					double h2o = (h2[i] - h2[j]) / 2.0;
-					tmp[i] = (float) (h1[i] * h2e + h1[j] * h2o);
+					tmp[i] = (h1[i] * h2e + h1[j] * h2o);
 				}
 			}
 		}
@@ -252,7 +252,7 @@ public class DoubleDHT3D extends DoubleImage3D
 					double h2e = (h2[i] + h2[j]) / 2.0;
 					double h2o = (h2[i] - h2[j]) / 2.0;
 					// As per multiply but reverse the addition sign for the conjugate  
-					tmp[i] = (float) (h1[i] * h2e - h1[j] * h2o);
+					tmp[i] = (h1[i] * h2e - h1[j] * h2o);
 				}
 			}
 		}
@@ -313,7 +313,7 @@ public class DoubleDHT3D extends DoubleImage3D
 						mag = 1e-20;
 					double h2e = (h2[i] + h2[j]);
 					double h2o = (h2[i] - h2[j]);
-					tmp[i] = (float) ((h1[i] * h2e - h1[j] * h2o) / mag);
+					tmp[i] = ((h1[i] * h2e - h1[j] * h2o) / mag);
 				}
 			}
 		}
@@ -458,7 +458,7 @@ public class DoubleDHT3D extends DoubleImage3D
 				{
 					// This is a copy of the amplitude operation in ij.process.FHT
 					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
-					tmp[i] = (float) Math.sqrt(h1[i] * h1[i] + h1[j] * h1[j]);
+					tmp[i] = Math.sqrt(h1[i] * h1[i] + h1[j] * h1[j]);
 				}
 			}
 		}
