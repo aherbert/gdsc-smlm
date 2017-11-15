@@ -52,7 +52,9 @@ public class StackAlignerTest
 			double cz2, double window, int refinements, double error)
 	{
 		Image3D reference = createData(maxx, maxy, maxz, cx1, cy1, cz1);
-		Image3D target = createData(maxx, maxy, maxz, cx2, cy2, cz2);
+		//Image3D target = createData(maxx, maxy, maxz, cx2, cy2, cz2);
+		// Test perfect correlation. This sets the limit on the frequency domain multiplication
+		Image3D target = createData(maxx, maxy, maxz, cx1, cy1, cz1);
 
 		//Utils.display("Ref", reference.getImageStack());
 		//Utils.display("Tar", target.getImageStack());

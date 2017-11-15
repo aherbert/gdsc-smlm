@@ -63,7 +63,7 @@ public class StackAligner implements Cloneable
 
 	private static class DHTData
 	{
-		FloatDHT3D dht;
+		DoubleDHT3D dht;
 		long[] s_;
 		long[] ss;
 		// Original dimensions
@@ -71,12 +71,12 @@ public class StackAligner implements Cloneable
 		// Insert position
 		int ix, iy, iz;
 
-		DHTData(FloatDHT3D dht, int w, int h, int d)
+		DHTData(DoubleDHT3D dht, int w, int h, int d)
 		{
 			setDHT(dht, w, h, d);
 		}
 
-		void setDHT(FloatDHT3D dht, int w, int h, int d)
+		void setDHT(DoubleDHT3D dht, int w, int h, int d)
 		{
 			this.dht = dht;
 			s_ = resize(s_);
@@ -125,7 +125,7 @@ public class StackAligner implements Cloneable
 
 	// Not thread safe as they are used for the target image
 	private DHTData target;
-	private float[] buffer, region;
+	private double[] buffer, region;
 
 	// Allow cached window weights
 	private double[] wx = null;
@@ -257,23 +257,23 @@ public class StackAligner implements Cloneable
 			}
 		}
 
-		FloatDHT3D dht;
+		DoubleDHT3D dht;
 
 		// Pad into the desired data size.
 		// We always do this so the data is reused
 		int size = ns * nr * nc;
-		float[] dest;
+		double[] dest;
 		if (dhtData == null || dhtData.dht.getDataLength() != size)
 		{
-			dest = new float[size];
+			dest = new double[size];
 		}
 		else
 		{
 			// Re-use space
 			dest = dhtData.dht.getData();
-			Arrays.fill(dest, 0f);
+			Arrays.fill(dest, 0);
 		}
-		dht = new FloatDHT3D(nc, nr, ns, dest, false);
+		dht = new DoubleDHT3D(nc, nr, ns, dest, false);
 		int ix = getInsert(nc, w);
 		int iy = getInsert(nr, h);
 		int iz = getInsert(ns, d);
@@ -399,16 +399,14 @@ public class StackAligner implements Cloneable
 	 */
 	private DHTData prepareDHT(DHTData dhtData)
 	{
-		FloatDHT3D dht = dhtData.dht;
+		DoubleDHT3D dht = dhtData.dht;
 		long[] s_ = dhtData.s_;
 		long[] ss = dhtData.ss;
 
-		// XXX Update this
-
-		// Convert to a 16-bit signed integer
+		// Convert to a signed integer
 		// This makes it possible to compute the rolling tables without error
-		float[] data = dht.getData();
-		float[] limits = Maths.limits(data);
+		double[] data = dht.getData();
+		double[] limits = Maths.limits(data);
 		double min = limits[0];
 		double max = limits[1];
 		if ((max - min) == 0.0)
@@ -426,6 +424,8 @@ public class StackAligner implements Cloneable
 
 			double scale = LIMIT / (max - min);
 
+			System.out.printf("n=%d, min = %g (%d), max = %g (%d)\n", ss.length, min, transform(min, scale), max, transform(max, scale));
+
 			// Compute the rolling sum tables
 			int nr_by_nc = dht.nr_by_nc;
 			int nc = dht.nc;
@@ -437,7 +437,7 @@ public class StackAligner implements Cloneable
 			// First build a table for each XY slice
 			for (int s = 0; s < ns; s++)
 			{
-				long sum = 0, sum2 = 0;
+				long sum_ = 0, sum2 = 0;
 				int i = s * nr_by_nc;
 				// Initialise first row sum
 				// sum = rolling sum of (0 - colomn)
@@ -445,25 +445,25 @@ public class StackAligner implements Cloneable
 				{
 					int v = transform(data[i], scale);
 					data[i] = v;
-					sum += v;
+					sum_ += v;
 					sum2 += v * v;
-					s_[i] = sum;
+					s_[i] = sum_;
 					ss[i] = sum2;
 				}
 				// Remaining rows
 				// sum = rolling sum of (0 - colomn) + sum of same position above
 				for (int r = 1, ii = i - nc; r < nr; r++)
 				{
-					sum = 0;
+					sum_ = 0;
 					sum2 = 0;
 					for (int c = 0; c < nc; c++, i++, ii++)
 					{
 						int v = transform(data[i], scale);
 						data[i] = v;
-						sum += v;
+						sum_ += v;
 						sum2 += v * v;
 						// Add the sum from the previous row
-						s_[i] = sum + s_[ii];
+						s_[i] = sum_ + s_[ii];
 						ss[i] = sum2 + ss[ii];
 					}
 				}
@@ -482,6 +482,9 @@ public class StackAligner implements Cloneable
 					ss[i] += ss[ii];
 				}
 			}
+			
+			limits = Maths.limits(data);
+			System.out.printf("n=%d, min = %g, max = %g\n", ss.length, limits[0], limits[1]);
 		}
 		if (ref == null)
 			ref = dht.copy();
@@ -492,11 +495,21 @@ public class StackAligner implements Cloneable
 		return dhtData;
 	}
 
-	// When this it too high the sumXY from the DHT conjugate multiplication 
-	// does not match the sum from correlation in the spatial domain.
-	private static double LIMIT = 4096.0; // 12-bit integer
+	// 
 
-	private static int transform(float f, double scale)
+	/**
+	 * The limit for the range of the data as an integer.
+	 * <p>
+	 * When this it too high the sumXY from the DHT conjugate multiplication
+	 * does not match the sum from correlation in the spatial domain.
+	 * <p>
+	 * In theory the largest sumXY should be 2^bits * 2^bits * max integer (the size of the largest array).
+	 * 10-bit integer: 2^10 * 2^10 * 2^31 = 2^51. This is smaller than the mantissa of a double (2^52)
+	 * so should be represented correctly. However experimentation shows that when the number of bits.  
+	 */
+	private static double LIMIT = 1024;
+
+	private static int transform(double f, double scale)
 	{
 		// Ensure zero is zero
 		if (f == 0)
@@ -603,15 +616,15 @@ public class StackAligner implements Cloneable
 
 		//System.out.printf("Sum = %g => %g\n", sum[0], Maths.sum(pixels));
 
-		FloatDHT3D dht;
+		DoubleDHT3D dht;
 
 		// Pad into the desired data size.
 		// We always do this to handle input of float/double Image3D data.
 		int size = ns * nr * nc;
-		float[] dest;
+		double[] dest;
 		if (dhtData == null || dhtData.dht.getDataLength() != size)
 		{
-			dest = new float[size];
+			dest = new double[size];
 		}
 		else
 		{
@@ -619,7 +632,7 @@ public class StackAligner implements Cloneable
 			dest = dhtData.dht.getData();
 			Arrays.fill(dest, 0f);
 		}
-		dht = new FloatDHT3D(nc, nr, ns, dest, false);
+		dht = new DoubleDHT3D(nc, nr, ns, dest, false);
 		int ix = getInsert(nc, w);
 		int iy = getInsert(nr, h);
 		int iz = getInsert(ns, d);
@@ -755,7 +768,7 @@ public class StackAligner implements Cloneable
 	private double[] align(DHTData target, int refinements, double error)
 	{
 		// Multiply by the reference. This allows the reference to be shared across threads.
-		FloatDHT3D correlation = target.dht.conjugateMultiply(reference.dht, buffer);
+		DoubleDHT3D correlation = target.dht.conjugateMultiply(reference.dht, buffer);
 		buffer = correlation.getData(); // Store for reuse
 		correlation.inverseTransform();
 		correlation.swapOctants();
@@ -772,8 +785,6 @@ public class StackAligner implements Cloneable
 		int iw = Math.max(reference.ix + reference.w, target.ix + target.w);
 		int ih = Math.max(reference.iy + reference.h, target.iy + target.h);
 		int id = Math.max(reference.iz + reference.d, target.iz + target.d);
-
-		float[] data = correlation.getData();
 
 		// Compute sum from rolling sum using:
 		// sum(x,y,z,w,h,d) = 
@@ -870,7 +881,7 @@ public class StackAligner implements Cloneable
 				int hd = h[j] * d;
 				for (int c = ix, i = 0; c < iw; c++, i++)
 				{
-					double sumXY = data[base + c];
+					double sumXY = buffer[base + c];
 
 					compute(rx_1[i], ry_1[j], rz_1, rx_w_1[i], ry_h_1[j], rz_d_1, w[i], h[j], d, rs_, rss, rsum);
 					compute(tx_1[i], ty_1[j], tz_1, tx_w_1[i], ty_h_1[j], tz_d_1, w[i], h[j], d, ts_, tss, tsum);
@@ -895,7 +906,7 @@ public class StackAligner implements Cloneable
 						// The actual sumXY from the correlation is incorrect!
 						// Is it because the data have been converted to int?
 
-						System.out.printf("%g vs %g, %d vs %g, %d vs %g, %d vs %d, %d vs %d\n", data[base + c], sumXY,
+						System.out.printf("%g vs %g, %d vs %g, %d vs %g, %d vs %d, %d vs %d\n", buffer[base + c], sumXY,
 								rsum[X], rs, tsum[Y], ts, sumXX, rsum[XX], sumYY, tsum[YY]);
 					}
 
@@ -926,7 +937,7 @@ public class StackAligner implements Cloneable
 						// Leave as raw for debugging
 						//R = Maths.clip(-1, 1, R);
 					}
-					data[base + c] = (float) R;
+					buffer[base + c] = R;
 				}
 			}
 		}
@@ -947,7 +958,7 @@ public class StackAligner implements Cloneable
 			{
 				for (int xx = Math.min(nc - 1, xyz[0] + 1) - xyz[0]; xx-- > 0;)
 				{
-					if (data[maxi + zz * nr_by_nc + yy * nc + xx] == data[maxi])
+					if (buffer[maxi + zz * nr_by_nc + yy * nc + xx] == buffer[maxi])
 					{
 						com[0] += xx;
 						com[1] += xx;
@@ -967,7 +978,7 @@ public class StackAligner implements Cloneable
 			nc/2 - xyz[0] - com[0],
 			nr/2 - xyz[1] - com[1],
 			ns/2 - xyz[2] - com[2],
-			data[maxi]
+			buffer[maxi]
 		};
 		// @formatter:on
 
@@ -981,7 +992,7 @@ public class StackAligner implements Cloneable
 			int x = Maths.clip(0, correlation.getWidth() - 4, xyz[0] - 1);
 			int y = Maths.clip(0, correlation.getHeight() - 4, xyz[1] - 1);
 			int z = Maths.clip(0, correlation.getSize() - 4, xyz[2] - 1);
-			FloatImage3D crop = correlation.crop(x, y, z, 4, 4, 4, region);
+			DoubleImage3D crop = correlation.crop(x, y, z, 4, 4, 4, region);
 			region = crop.getData();
 			CustomTricubicFunction f = CustomTricubicFunction.create(calc.compute(region));
 
@@ -1263,7 +1274,7 @@ public class StackAligner implements Cloneable
 	{
 		try
 		{
-			return new FloatImage3D(nc, nr, ns, buffer);
+			return new DoubleImage3D(nc, nr, ns, buffer);
 		}
 		catch (IllegalArgumentException e)
 		{
