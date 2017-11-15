@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
@@ -493,6 +494,7 @@ public class PSFCreator implements PlugInFilter
 			}
 			catch (OutOfMemoryError e)
 			{
+				IJ.log(ExceptionUtils.getStackTrace(e));
 				IJ.showMessage(TITLE, TextUtils.wrap("Out-of-memory. You may be using too many spots or " +
 						"too large a PSF projection. The default projection size is 2.", 80));
 			}
@@ -5039,6 +5041,7 @@ public class PSFCreator implements PlugInFilter
 					.setYValue(yval) 
 					.setZValue(zval)
 					.setFValue(new FloatStackTrivalueProvider(fval, rangex, rangey))
+					.setSinglePrecision(true) // to save memory
 					.interpolate();
 			//@formatter:on
 
