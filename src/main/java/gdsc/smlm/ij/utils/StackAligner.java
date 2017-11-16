@@ -70,8 +70,8 @@ public class StackAligner implements Cloneable
 		double[] input;
 		double[] s_;
 		double[] ss;
-		// Original dimensions
-		int w, h, d;
+		// Original dimensions and 3D size
+		int w, h, d, size;
 		// Insert position
 		int ix, iy, iz;
 
@@ -88,6 +88,7 @@ public class StackAligner implements Cloneable
 			this.w = w;
 			this.h = h;
 			this.d = d;
+			size = w * h * d;
 			ix = getInsert(dht.nc, w);
 			iy = getInsert(dht.nr, h);
 			iz = getInsert(dht.ns, d);
@@ -96,7 +97,6 @@ public class StackAligner implements Cloneable
 			if (isCheckCorrelation())
 			{
 				input = resize(input);
-				System.arraycopy(dht.getData(), 0, input, 0, input.length);
 			}
 		}
 
@@ -123,6 +123,8 @@ public class StackAligner implements Cloneable
 	private double relativeThreshold = 1e-6;
 	private SearchMode searchMode = SearchMode.GRADIENT;
 	private boolean checkCorrelation = true;
+	private double minimumOverlap = 0.5;
+	private double minimumDimensionOverlap = 0.75;
 
 	/** The number of slices (max z) of the discrete Hartley transform. */
 	private int ns;
@@ -502,6 +504,10 @@ public class StackAligner implements Cloneable
 			}
 		}
 
+		// Store after numerical transform
+		if (dhtData.input != null && dhtData.input.length == ss.length)
+			System.arraycopy(dht.getData(), 0, dhtData.input, 0, ss.length);
+
 		// Transform the data
 		dht.transform();
 		return dhtData;
@@ -529,7 +535,7 @@ public class StackAligner implements Cloneable
 
 		// Maintain the sign information
 		double value = f * scale;
-		return Math.round(value) / scale;
+		return Math.round(value); // / scale;
 	}
 
 	/**
@@ -804,8 +810,29 @@ public class StackAligner implements Cloneable
 		int ih = Math.max(reference.iy + reference.h, target.iy + target.h);
 		int id = Math.max(reference.iz + reference.d, target.iz + target.d);
 
+		if (minimumDimensionOverlap > 0)
+		{
+			double f = (1 - minimumDimensionOverlap) / 2;
+			int ux = (int) (Math.round(Math.min(reference.w, target.w) * f));
+			int uy = (int) (Math.round(Math.min(reference.h, target.h) * f));
+			int uz = (int) (Math.round(Math.min(reference.d, target.d) * f));
+			ix += ux;
+			iw -= ux;
+			iy += uy;
+			ih -= uy;
+			iz += uz;
+			id -= uz;
+		}
+
+		// The maximum correlation unnormalised. Since this is unnormalised
+		// it will be biased towards the centre of the image. This is used
+		// to restrict the bounds for finding the maximum of the normalised correlation
+		// which should be close to this.
+		int maxi = correlation.findMaxIndex(ix, iy, iz, iw - ix, ih - iy, id - iz);
+		int[] xyz = correlation.getXYZ(maxi);
+
 		// Check in the spatial domain
-		checkCorrelation(target, correlation, ix, iy, iz, iw - ix, ih - iy, id - iz);
+		checkCorrelation(target, correlation, maxi);
 
 		// Compute sum from rolling sum using:
 		// sum(x,y,z,w,h,d) = 
@@ -828,6 +855,7 @@ public class StackAligner implements Cloneable
 		int nc_2 = nc / 2;
 		int nr_2 = nr / 2;
 		int ns_2 = ns / 2;
+		int[] centre = new int[] { nc_2, nr_2, ns_2 };
 
 		// Compute the shift from the centre
 		int dx = nc_2 - ix;
@@ -885,6 +913,11 @@ public class StackAligner implements Cloneable
 		double[] rsum = new double[2];
 		double[] tsum = new double[2];
 
+		int size = Math.min(reference.size, target.size);
+		int minimumN = (int) (Math.round(size * minimumOverlap));
+		int maxj = -1;
+		double max = 0;
+
 		for (int s = iz; s < id; s++)
 		{
 			// Compute the z-1,z+d-1
@@ -910,10 +943,10 @@ public class StackAligner implements Cloneable
 					// Compute the correlation
 					// (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
 
-					double one_over_n = 1.0 / (w[i] * hd);
-					double numerator = sumXY - (one_over_n * rsum[X] * tsum[Y]);
-					double denominator1 = rsum[XX] - (one_over_n * rsum[X] * rsum[X]);
-					double denominator2 = tsum[YY] - (one_over_n * tsum[Y] * tsum[Y]);
+					int n = w[i] * hd;
+					double numerator = sumXY - (rsum[X] * tsum[Y] / n);
+					double denominator1 = rsum[XX] - (rsum[X] * rsum[X] / n);
+					double denominator2 = tsum[YY] - (tsum[Y] * tsum[Y] / n);
 
 					double R;
 					if (denominator1 == 0 || denominator2 == 0)
@@ -934,48 +967,60 @@ public class StackAligner implements Cloneable
 						// Leave as raw for debugging
 						//R = Maths.clip(-1, 1, R);
 					}
+
 					buffer[base + c] = R;
+
+					if (n < minimumN)
+						continue;
+
+					if (R > 1.0001) // some margin for error
+					{
+						// Normalisation has failed.
+						// This occurs when the correlation sum XY is incorrect.
+						// The other terms are exact due to the quantisation to integer data.
+						// It is likely to occur at the bounds.
+
+						System.out.printf("Bad normalisation [%d,%d,%d] = %g  (overlap=%g)\n", c, r, s, R,
+								(double) n / size);
+						continue;
+					}
+
+					if (R > max)
+					{
+						max = R;
+						maxj = base + c;
+					}
+					else if (R == max)
+					{
+						// Get shift from centre
+						int[] xyz1 = correlation.getXYZ(maxj);
+						int[] xyz2 = correlation.getXYZ(base + c);
+						int d1 = 0, d2 = 0;
+						for (int k = 0; k < 3; k++)
+						{
+							d1 += Maths.pow2(xyz1[k] - centre[k]);
+							d2 += Maths.pow2(xyz2[k] - centre[k]);
+						}
+						if (d2 < d1)
+						{
+							max = R;
+							maxj = base + c;
+						}
+					}
 				}
 			}
 		}
 
 		// The maximum correlation with normalisation
-		int maxi = correlation.findMaxIndex(ix, iy, iz, iw - ix, ih - iy, id - iz);
-		int[] xyz = correlation.getXYZ(maxi);
-
-		// The above method finds the first index so we check for a plateau within the 
-		// cube of adjacent points. If the plateau is larger then finding the centre is
-		// non-trivial as in the worst case it may be an irregular 26-connected shape.
-		// Checking the adjacent points provides a quick check to avoid 0.5 pixel 
-		// alignment errors for a symmetric correlation surface.
-		double[] com = new double[3];
-		int n = 0;
-		for (int zz = Math.min(ns - 1, xyz[2] + 1) - xyz[2]; zz-- > 0;)
-		{
-			for (int yy = Math.min(nr - 1, xyz[1] + 1) - xyz[1]; yy-- > 0;)
-			{
-				for (int xx = Math.min(nc - 1, xyz[0] + 1) - xyz[0]; xx-- > 0;)
-				{
-					if (buffer[maxi + zz * nr_by_nc + yy * nc + xx] == buffer[maxi])
-					{
-						com[0] += xx;
-						com[1] += xx;
-						com[2] += xx;
-						n++;
-					}
-				}
-			}
-		}
-		// n will always include data[maxi] 
-		for (int i = 0; i < 3; i++)
-			com[i] /= n;
+		maxi = maxj; //correlation.findMaxIndex(ix, iy, iz, iw - ix, ih - iy, id - iz);
+		xyz = correlation.getXYZ(maxi);
 
 		// Report the shift required to move from the centre of the target image to the reference
 		// @formatter:off
 		double[] result = new double[] {
-			nc_2 - xyz[0] - com[0],
-			nr_2 - xyz[1] - com[1],
-			ns_2 - xyz[2] - com[2],
+			nc_2 - xyz[0],
+			nr_2 - xyz[1],
+			ns_2 - xyz[2],
 			buffer[maxi]
 		};
 		// @formatter:on
@@ -986,10 +1031,10 @@ public class StackAligner implements Cloneable
 			// Create a cubic spline using a small region of pixels around the maximum
 			if (calc == null)
 				calc = new CubicSplineCalculator();
-			// Avoid out-of-bounds errors
-			int x = Maths.clip(0, correlation.getWidth() - 4, xyz[0] - 1);
-			int y = Maths.clip(0, correlation.getHeight() - 4, xyz[1] - 1);
-			int z = Maths.clip(0, correlation.getSize() - 4, xyz[2] - 1);
+			// Avoid out-of-bounds errors. Only use the range that was normalised
+			int x = Maths.clip(ix, iw - 4, xyz[0] - 1);
+			int y = Maths.clip(iy, ih - 4, xyz[1] - 1);
+			int z = Maths.clip(iz, id - 4, xyz[2] - 1);
 			DoubleImage3D crop = correlation.crop(x, y, z, 4, 4, 4, region);
 			region = crop.getData();
 			CustomTricubicFunction f = CustomTricubicFunction.create(calc.compute(region));
@@ -1085,27 +1130,16 @@ public class StackAligner implements Cloneable
 	 *            the target
 	 * @param correlation
 	 *            the correlation
-	 * @param ix
-	 *            the lower x bounds to search for the max correlation
-	 * @param iy
-	 *            the lower y bounds to search for the max correlation
-	 * @param iz
-	 *            the lower z bounds to search for the max correlation
-	 * @param w
-	 *            the width to search for the max correlation
-	 * @param h
-	 *            the height to search for the max correlation
-	 * @param d
-	 *            the depth to search for the max correlation
+	 * @param maxi
+	 *            the index of the maximum correlation
 	 */
-	private void checkCorrelation(DHTData target, DoubleDHT3D correlation, int ix, int iy, int iz, int w, int h, int d)
+	private void checkCorrelation(DHTData target, DoubleDHT3D correlation, int maxi)
 	{
 		if (target.input == null || reference.input == null)
 			// No check possible
 			return;
 
 		// The maximum correlation without normalisation 
-		int maxi = correlation.findMaxIndex(ix, iy, iz, w, h, d);
 		int[] xyz = correlation.getXYZ(maxi);
 
 		// Find the range for the target and reference
@@ -1115,9 +1149,9 @@ public class StackAligner implements Cloneable
 		int tx = Math.max(0, xyz[0] - nc_2);
 		int ty = Math.max(0, xyz[1] - nr_2);
 		int tz = Math.max(0, xyz[2] - ns_2);
-		w = Math.min(nc, xyz[0] + nc_2) - tx;
-		h = Math.min(nr, xyz[1] + nr_2) - ty;
-		d = Math.min(ns, xyz[2] + ns_2) - tz;
+		int w = Math.min(nc, xyz[0] + nc_2) - tx;
+		int h = Math.min(nr, xyz[1] + nr_2) - ty;
+		int d = Math.min(ns, xyz[2] + ns_2) - tz;
 
 		// For the reference we express as a shift relative to the centre
 		// and subtract the half-width.
@@ -1144,6 +1178,8 @@ public class StackAligner implements Cloneable
 				}
 			}
 		}
+
+		//System.out.printf("Raw %d,%d,%d = %g\n", xyz[0], xyz[1], xyz[1], o);
 
 		frequencyDomainCorrelationError = DoubleEquality.relativeError(o, e);
 		if (frequencyDomainCorrelationError > 0.05)
@@ -1453,5 +1489,47 @@ public class StackAligner implements Cloneable
 	public void setCheckCorrelation(boolean checkCorrelation)
 	{
 		this.checkCorrelation = checkCorrelation;
+	}
+
+	/**
+	 * Gets the minimum overlap between the smaller image and the other image.
+	 *
+	 * @return the minimum overlap
+	 */
+	public double getMinimumOverlap()
+	{
+		return minimumOverlap;
+	}
+
+	/**
+	 * Sets the minimum overlap between the smaller image and the other image.
+	 *
+	 * @param minimumOverlap
+	 *            the new minimum overlap
+	 */
+	public void setMinimumOverlap(double minimumOverlap)
+	{
+		this.minimumOverlap = Maths.clip(0, 1, minimumOverlap);
+	}
+
+	/**
+	 * Gets the minimum overlap between the smaller image and the other image in each dimension.
+	 *
+	 * @return the minimum dimension overlap
+	 */
+	public double getMinimumDimensionOverlap()
+	{
+		return minimumDimensionOverlap;
+	}
+
+	/**
+	 * Sets the minimum overlap between the smaller image and the other image in each dimension.
+	 *
+	 * @param minimumDimensionOverlap
+	 *            the new minimum dimension overlap
+	 */
+	public void setMinimumDimensionOverlap(double minimumDimensionOverlap)
+	{
+		this.minimumDimensionOverlap = Maths.clip(0, 1, minimumDimensionOverlap);
 	}
 }

@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.utils;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.smlm.function.StandardFloatValueProcedure;
@@ -13,8 +14,8 @@ public class StackAlignerTest
 
 	// Check the alignment of the ImageStack and Image3D is the same with padding and windowing
 
-	final static double gamma = 5;
-	final static int zDepth = 10;
+	final static double gamma = 2.5;
+	final static int zDepth = 5;
 	protected QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
 	private FloatImage3D createData(int x, int y, int z, double cx, double cy, double cz)
@@ -33,8 +34,8 @@ public class StackAlignerTest
 		for (int zz = 0; zz < z; zz++)
 		{
 			double dz = zz - cz;
-			if (zz == 0 || zz == z - 1)
-				System.out.printf("%f  %f %f\n", dz, zModel.getSx(dz), zModel.getSy(dz));
+			//if (zz == 0 || zz == z - 1)
+			//	System.out.printf("%f  %f %f\n", dz, zModel.getSx(dz), zModel.getSy(dz));
 			a[Gaussian2DFunction.Z_POSITION] = dz;
 			p.getValues(f, a, data, zz * length);
 		}
@@ -44,24 +45,43 @@ public class StackAlignerTest
 	@Test
 	public void canCorrelate()
 	{
-		int maxz = 63;
-		canCorrelate(16, 16, maxz, 7.5, 7.5, (maxz - 1) / 2.0, 8, 8, (maxz +2) / 2.0, 0.1, 10, 1e-2);
+		int maxx = 16;
+		int maxy = 16;
+		// Not as much information in the z dimension.
+		// Q. How to address in real PSF alignment? Perhaps the z-dimension should be
+		// sampled N-times more than the XY dimension. 
+		int maxz = 32;
+		double cx = (maxx - 1) / 2.0;
+		double cy = (maxy - 1) / 2.0;
+		double cz = (maxz - 1) / 2.0;
+
+		double[] shift = new double[] { 0, 1, 1.5, 2 };
+
+		Image3D reference = createData(maxx, maxy, maxz, cx, cy, cz);
+		StackAligner a = new StackAligner();
+		a.setReference(reference);
+
+		for (double sz : shift)
+			for (double sy : shift)
+				for (double sx : shift)
+				{
+					canCorrelate(a, maxx, maxy, maxz, cx, cy, cz, cx + sx, cy + sy, cz + sz, 0.25, 0, 1e-2, 1);
+					canCorrelate(a, maxx, maxy, maxz, cx, cy, cz, cx + sx, cy + sy, cz + sz, 0.25, 5, 1e-2, 0.25);
+				}
 	}
 
-	private void canCorrelate(int maxx, int maxy, int maxz, double cx1, double cy1, double cz1, double cx2, double cy2,
-			double cz2, double window, int refinements, double error)
+	private void canCorrelate(StackAligner a, int maxx, int maxy, int maxz, double cx1, double cy1, double cz1,
+			double cx2, double cy2, double cz2, double window, int refinements, double error, double tolerance)
 	{
-		Image3D reference = createData(maxx, maxy, maxz, cx1, cy1, cz1);
-		//Image3D target = createData(maxx, maxy, maxz, cx2, cy2, cz2);
-		// Test perfect correlation. This sets the limit on the frequency domain multiplication
-		Image3D target = createData(maxx, maxy, maxz, cx1, cy1, cz1);
+		double[] result;
+		Image3D c;
+		Image3D target = createData(maxx, maxy, maxz, cx2, cy2, cz2);
 
 		//Utils.display("Ref", reference.getImageStack());
 		//Utils.display("Tar", target.getImageStack());
 
-		StackAligner a = new StackAligner(window);
-		a.setReference(reference);
-		//a.setSearchMode(SearchMode.BINARY);
+		a.setEdgeWindow(window);
+		//a.setSearchMode(gdsc.smlm.ij.utils.StackAligner.SearchMode.BINARY);
 		//a.setRelativeThreshold(1e-6);
 
 		double[] e = new double[] { cx1 - cx2, cy1 - cy2, cz1 - cz2 };
@@ -70,15 +90,23 @@ public class StackAlignerTest
 		int cz = maxz / 2 - (int) Math.round(e[2]);
 		int index = target.getIndex(cx, cy, cz);
 
-		for (int i = 0; i <= refinements; i++)
-		{
-			double[] result = a.align(target.copy(), i, error);
-			Image3D c = a.getCorrelation();
+		// Debug the convergence
+		//for (int i = 0; i <= refinements; i++)
+		//{
+		//	result = a.align(target.copy(), i, error);
+		//	c = a.getCorrelation();
+		//
+		//	System.out.printf("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
+		//			java.util.Arrays.toString(result));
+		//}
+		
+		// Test
+		result = a.align(target, refinements, error);
+		c = a.getCorrelation();
+		System.out.printf("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
+				java.util.Arrays.toString(result));
 
-			System.out.printf("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
-					java.util.Arrays.toString(result));
-			//for (int i = 0; i < 3; i++)
-			//	Assert.assertEquals(e[i], result[i], 0.25);
-		}
+		for (int i = 0; i < 3; i++)
+			Assert.assertEquals(e[i], result[i], tolerance);
 	}
 }
