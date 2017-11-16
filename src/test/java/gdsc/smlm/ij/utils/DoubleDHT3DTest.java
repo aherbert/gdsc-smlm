@@ -71,6 +71,8 @@ public class DoubleDHT3DTest
 				for (int d : test)
 				{
 					dht = createOctants(w, h, d);
+					
+					double[] in = dht.getData().clone();
 
 					// This just tests that the swap of the DHT and the stack matches
 					ImageStack stack = dht.getImageStack();
@@ -80,6 +82,8 @@ public class DoubleDHT3DTest
 
 					double[] e = new DoubleDHT3D(stack).getData();
 					double[] o = dht.getData();
+
+					checkOctants(in, o);
 
 					Assert.assertArrayEquals(e, o, 0);
 				}
