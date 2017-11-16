@@ -2817,6 +2817,7 @@ public class PSFCreator implements PlugInFilter
 			}
 
 			boolean[] bad = findSpotOverlap(centres);
+			bad[1] = bad[2] = true;
 			int ok = 0;
 			for (int j = 0; j < bad.length; j++)
 			{
@@ -2829,7 +2830,9 @@ public class PSFCreator implements PlugInFilter
 				if (settings.getInteractiveMode())
 				{
 					ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-					gd.addMessage("Regions now overlap leaving " + TextUtils.pleural(ok, "PSF"));
+					gd.addMessage("Warning: Regions now overlap!");
+					gd.addMessage("OK = " + TextUtils.pleural(ok, "PSF"));
+					gd.addMessage("Overlapping = " + TextUtils.pleural(bad.length - ok, "PSF"));
 					gd.enableYesNoCancel("Exclude", "Include");
 					if (location != null)
 						gd.setLocation(location.x, location.y);
