@@ -17,7 +17,7 @@ import ij.process.ImageProcessor;
  *---------------------------------------------------------------------------*/
 
 /**
- * Store a 3D image in a single float array
+ * Store a 3D image in a single float array. Forms a base for 3D DHT transform using the JTransforms library.
  */
 public class FloatImage3D extends Image3D
 {

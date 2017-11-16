@@ -19,7 +19,7 @@ import ij.process.ImageProcessor;
  *---------------------------------------------------------------------------*/
 
 /**
- * Store a 3D image in a single float array
+ * Store a 3D image in a single array
  */
 public abstract class Image3D
 {
@@ -96,14 +96,8 @@ public abstract class Image3D
 	/**
 	 * Instantiates a new 3D image.
 	 *
-	 * @param nc
-	 *            the number of columns
-	 * @param nr
-	 *            the number of rows
-	 * @param ns
-	 *            the number of slices
-	 * @throws IllegalArgumentException
-	 *             If the combined dimensions is too large for an array
+	 * @param stack the stack
+	 * @throws IllegalArgumentException             If the combined dimensions is too large for an array
 	 */
 	public Image3D(ImageStack stack) throws IllegalArgumentException
 	{

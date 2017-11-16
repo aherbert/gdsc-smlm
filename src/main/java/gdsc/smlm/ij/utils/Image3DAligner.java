@@ -57,7 +57,7 @@ import ij.process.ImageProcessor;
  * @see <a href="http://scribblethink.org/Work/nvisionInterface/nip.html">Fast Normalized Cross-Correlation by J.P.
  *      Lewis</a>
  */
-public class StackAligner implements Cloneable
+public class Image3DAligner implements Cloneable
 {
 	private static final int X = 0;
 	private static final int XX = 1;
@@ -152,7 +152,7 @@ public class StackAligner implements Cloneable
 	/**
 	 * Instantiates a new stack aligner with a default edge window of 0.25
 	 */
-	public StackAligner()
+	public Image3DAligner()
 	{
 		this(0.25);
 	}
@@ -163,7 +163,7 @@ public class StackAligner implements Cloneable
 	 * @param edgeWindow
 	 *            the alpha value for the Tukey edge window
 	 */
-	public StackAligner(double edgeWindow)
+	public Image3DAligner(double edgeWindow)
 	{
 		setEdgeWindow(edgeWindow);
 	}
@@ -1355,12 +1355,12 @@ public class StackAligner implements Cloneable
 	 *
 	 * @return the stack aligner
 	 */
-	public StackAligner copy()
+	public Image3DAligner copy()
 	{
-		StackAligner copy;
+		Image3DAligner copy;
 		try
 		{
-			copy = (StackAligner) clone();
+			copy = (Image3DAligner) clone();
 			// Reset objects that are not thread safe
 			copy.calc = null;
 			copy.buffer = null;

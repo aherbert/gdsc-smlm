@@ -8,7 +8,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 
-public class StackAlignerTest
+public class Image3DAlignerTest
 {
 	// TODO - Make this test the StackAligner with sub-pixel accuracy and non power of 2 images
 
@@ -58,7 +58,7 @@ public class StackAlignerTest
 		double[] shift = new double[] { 0, 1, 1.5, 2 };
 
 		Image3D reference = createData(maxx, maxy, maxz, cx, cy, cz);
-		StackAligner a = new StackAligner();
+		Image3DAligner a = new Image3DAligner();
 		a.setReference(reference);
 
 		for (double sz : shift)
@@ -70,7 +70,7 @@ public class StackAlignerTest
 				}
 	}
 
-	private void canCorrelate(StackAligner a, int maxx, int maxy, int maxz, double cx1, double cy1, double cz1,
+	private void canCorrelate(Image3DAligner a, int maxx, int maxy, int maxz, double cx1, double cy1, double cz1,
 			double cx2, double cy2, double cz2, double window, int refinements, double error, double tolerance)
 	{
 		double[] result;

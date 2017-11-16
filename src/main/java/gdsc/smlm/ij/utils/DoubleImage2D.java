@@ -1,6 +1,5 @@
 package gdsc.smlm.ij.utils;
 
-import ij.ImageStack;
 import ij.process.ImageProcessor;
 
 /*----------------------------------------------------------------------------- 
@@ -17,46 +16,44 @@ import ij.process.ImageProcessor;
  *---------------------------------------------------------------------------*/
 
 /**
- * Store a 3D image in a single double array. Forms a base for 3D DHT transform using the JTransforms library.
+ * Store a 2D image in a single double array. Forms a base for 2D DHT transform using the JTransforms library.
  */
-public class DoubleImage3D extends Image3D
+public class DoubleImage2D extends Image2D
 {
 	protected double[] data;
 
 	/**
-	 * Instantiates a new 3D image.
+	 * Instantiates a new 2D image.
 	 *
 	 * @param nc
 	 *            the number of columns
 	 * @param nr
 	 *            the number of rows
-	 * @param ns
-	 *            the number of slices
 	 * @throws IllegalArgumentException
 	 *             If the combined dimensions is too large for an array
 	 */
-	public DoubleImage3D(int nc, int nr, int ns) throws IllegalArgumentException
+	public DoubleImage2D(int nc, int nr) throws IllegalArgumentException
 	{
-		super(nc, nr, ns);
+		super(nc, nr);
 	}
 
 	/**
-	 * Instantiates a new 3D image
+	 * Instantiates a new 2D image.
 	 *
-	 * @param stack
-	 *            the stack
+	 * @param image
+	 *            the image
 	 * @throws IllegalArgumentException
 	 *             If the combined dimensions is too large for an array
 	 */
-	public DoubleImage3D(ImageStack stack) throws IllegalArgumentException
+	public DoubleImage2D(ImageProcessor image) throws IllegalArgumentException
 	{
-		super(stack);
+		super(image);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ij.utils.Image3D#createData(int)
+	 * @see gdsc.smlm.ij.utils.Image2D#createData(int)
 	 */
 	@Override
 	protected void createData(int size)
@@ -65,80 +62,53 @@ public class DoubleImage3D extends Image3D
 	}
 
 	/**
-	 * Instantiates a new 3D image.
-	 *
-	 * @param stack
-	 *            the stack
-	 * @param data
-	 *            the data
-	 */
-	private DoubleImage3D(ImageStack stack, double[] data)
-	{
-		super(stack.getWidth(), stack.getHeight(), stack.getSize(), stack.getWidth() * stack.getHeight());
-
-		// This is used internally so the data is the correct length
-		this.data = data;
-
-		for (int s = 1, i = 0; s <= ns; s++)
-		{
-			ImageProcessor ip = stack.getProcessor(s);
-			for (int j = 0; i < nr_by_nc; j++)
-				data[i++] = ip.getf(j);
-		}
-	}
-
-	/**
-	 * Instantiates a new 3D image.
+	 * Instantiates a new 2D image.
 	 *
 	 * @param nc
 	 *            the number of columns
 	 * @param nr
 	 *            the number of rows
-	 * @param ns
-	 *            the number of slices
 	 * @param data
 	 *            the data
 	 * @throws IllegalArgumentException
 	 *             If the data is not the correct length
 	 */
-	public DoubleImage3D(int nc, int nr, int ns, double[] data) throws IllegalArgumentException
+	public DoubleImage2D(int nc, int nr, double[] data) throws IllegalArgumentException
 	{
 		// Avoid constructor that calls createData(int)
-		super(nc, nr, ns, nr * nc);
-		if (data == null || data.length != checkSize(nc, nr, ns, true))
+		super(nc, nr, false);
+		if (data == null || data.length != checkSize(nc, nr, true))
 			throw new IllegalArgumentException("Data is not correct length");
 		this.data = data;
 	}
 
 	/**
-	 * Instantiates a new 3D image.
+	 * Instantiates a new 2D image.
 	 *
 	 * @param nc
 	 *            the number of columns
 	 * @param nr
 	 *            the number of rows
-	 * @param ns
-	 *            the number of slices
-	 * @param nr_by_nc
-	 *            the number of rows multiplied by the number of columns
 	 * @param data
 	 *            the data
+	 * @param dummy
+	 *            the dummy flag
 	 */
-	protected DoubleImage3D(int nc, int nr, int ns, int nr_by_nc, double[] data)
+	protected DoubleImage2D(int nc, int nr, double[] data, boolean dummy)
 	{
 		// No checks as this is used internally		
-		super(nc, nr, ns, nr_by_nc);
+		super(nc, nr, false);
 		this.data = data;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ij.utils.Image3D#copy()
+	 * @see gdsc.smlm.ij.utils.Image2D#copy()
 	 */
-	public DoubleImage3D copy()
+	public DoubleImage2D copy()
 	{
-		return new DoubleImage3D(nc, nr, ns, nr_by_nc, data.clone());
+		return new DoubleImage2D(nc, nr, data.clone(), false);
 	}
 
 	/**
@@ -154,7 +124,7 @@ public class DoubleImage3D extends Image3D
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ij.utils.Image3D#getDataLength()
+	 * @see gdsc.smlm.ij.utils.Image2D#getDataLength()
 	 */
 	@Override
 	public int getDataLength()
@@ -165,12 +135,12 @@ public class DoubleImage3D extends Image3D
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ij.utils.Image3D#crop(int, int, int, int, int, int)
+	 * @see gdsc.smlm.ij.utils.Image2D#crop(int, int, int, int)
 	 */
 	@Override
-	public DoubleImage3D crop(int x, int y, int z, int w, int h, int d) throws IllegalArgumentException
+	public DoubleImage2D crop(int x, int y, int w, int h) throws IllegalArgumentException
 	{
-		return crop(x, y, z, w, h, d, null);
+		return crop(x, y, w, h, null);
 	}
 
 	/**
@@ -180,105 +150,87 @@ public class DoubleImage3D extends Image3D
 	 *            the x index
 	 * @param y
 	 *            the y index
-	 * @param z
-	 *            the z index
 	 * @param w
 	 *            the width
 	 * @param h
 	 *            the height
-	 * @param d
-	 *            the depth
 	 * @param region
 	 *            the cropped data (will be reused if the correct size)
 	 * @return the cropped data
 	 * @throws IllegalArgumentException
 	 *             if the region is not within the data
 	 */
-	public DoubleImage3D crop(int x, int y, int z, int w, int h, int d, double[] region) throws IllegalArgumentException
+	public DoubleImage2D crop(int x, int y, int w, int h, double[] region) throws IllegalArgumentException
 	{
 		// Check the region range
-		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
-				(long) z + d > ns)
+		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = d * h * w;
+		int size = h * w;
 		if (region == null || region.length != size)
 			region = new double[size];
-		for (int s = 0, i = 0; s < d; s++, z++)
+		int base = y * nc + x;
+		for (int r = 0, i = 0; r < h; r++)
 		{
-			int base = z * nr_by_nc + y * nc + x;
-			for (int r = 0; r < h; r++)
-			{
-				System.arraycopy(data, base, region, i, w);
-				base += nc;
-				i += w;
-			}
+			System.arraycopy(data, base, region, i, w);
+			base += nc;
+			i += w;
 		}
-		return new DoubleImage3D(w, h, d, w * h, region);
+		return new DoubleImage2D(w, h, region, false);
 	}
 
 	/**
 	 * Crop a sub-region of the data. The target dimensions must be positive.
 	 *
-	 * @param stack
-	 *            the stack
+	 * @param image
+	 *            the image
 	 * @param x
 	 *            the x index
 	 * @param y
 	 *            the y index
-	 * @param z
-	 *            the z index
 	 * @param w
 	 *            the width
 	 * @param h
 	 *            the height
-	 * @param d
-	 *            the depth
 	 * @param region
 	 *            the cropped data (will be reused if the correct size)
 	 * @return the cropped data
 	 * @throws IllegalArgumentException
 	 *             if the region is not within the data
 	 */
-	public static DoubleImage3D crop(ImageStack stack, int x, int y, int z, int w, int h, int d, double[] region)
+	public static DoubleImage2D crop(ImageProcessor image, int x, int y, int w, int h, double[] region)
 			throws IllegalArgumentException
 	{
-		int nc = stack.getWidth();
-		int nr = stack.getHeight();
-		int ns = stack.getSize();
+		int nc = image.getWidth();
+		int nr = image.getHeight();
 
 		// Check the region range
-		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1 ||
-				(long) z + d > ns)
+		if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr)
 			throw new IllegalArgumentException("Region not within the data");
-		int size = checkSize(w, h, d, true);
+		int size = checkSize(w, h, true);
 		if (region == null || region.length != size)
 			region = new double[size];
-		for (int s = 0, i = 0; s < d; s++, z++)
+		int base = y * nc + x;
+		for (int r = 0, i = 0; r < h; r++)
 		{
-			ImageProcessor ip = stack.getProcessor(1 + z);
-			int base = y * nc + x;
-			for (int r = 0; r < h; r++)
+			for (int c = 0; c < w; c++)
 			{
-				for (int c = 0; c < w; c++)
-				{
-					region[i++] = ip.getf(base + c);
-				}
-				base += nc;
+				region[i++] = image.getf(base + c);
 			}
+			base += nc;
 		}
-		return new DoubleImage3D(w, h, d, w * h, region);
+		return new DoubleImage2D(w, h, region, false);
 	}
 
 	@Override
-	public void insert(int x, int y, int z, Image3D image) throws IllegalArgumentException
+	public void insert(int x, int y, Image2D image) throws IllegalArgumentException
 	{
-		if (image instanceof DoubleImage3D)
+		if (image instanceof DoubleImage2D)
 		{
-			insert(x, y, z, (DoubleImage3D) image);
+			insert(x, y, (DoubleImage2D) image);
 		}
 		else
 		{
-			super.insert(x, y, z, image);
+			super.insert(x, y, image);
 		}
 	}
 
@@ -289,33 +241,27 @@ public class DoubleImage3D extends Image3D
 	 *            the x position
 	 * @param y
 	 *            the y position
-	 * @param z
-	 *            the z position
 	 * @param image
 	 *            the image
 	 * @throws IllegalArgumentException
 	 *             if the region is not within the data
 	 */
-	public void insert(int x, int y, int z, DoubleImage3D image) throws IllegalArgumentException
+	public void insert(int x, int y, DoubleImage2D image) throws IllegalArgumentException
 	{
 		// Check the region range
 		int w = image.getWidth();
 		int h = image.getHeight();
-		int d = image.getSize();
-		if (w < 1 || h < 1 || d < 1)
+		if (w < 1 || h < 1)
 			return;
-		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns)
+		if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr)
 			throw new IllegalArgumentException("Region not within the data");
 		double[] region = image.data;
-		for (int s = 0, i = 0; s < d; s++, z++)
+		int base = y * nc + x;
+		for (int r = 0, i = 0; r < h; r++)
 		{
-			int base = z * nr_by_nc + y * nc + x;
-			for (int r = 0; r < h; r++)
-			{
-				System.arraycopy(region, i, data, base, w);
-				base += nc;
-				i += w;
-			}
+			System.arraycopy(region, i, data, base, w);
+			base += nc;
+			i += w;
 		}
 	}
 
