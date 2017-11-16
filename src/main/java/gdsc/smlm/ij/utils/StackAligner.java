@@ -21,6 +21,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.cspline.CubicSplineCalculator;
 import ij.ImageStack;
+import ij.process.ImageProcessor;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -212,6 +213,16 @@ public class StackAligner implements Cloneable
 	{
 		if (stack.getWidth() < 2 || stack.getHeight() < 2 || stack.getSize() < 2)
 			throw new IllegalArgumentException("Require a 3D stack");
+		// Check for data
+		int size = stack.getWidth() * stack.getHeight();
+		for (int s = 1; s <= stack.getSize(); s++)
+		{
+			ImageProcessor ip = stack.getProcessor(s);
+			for (int i = 0; i < size; i++)
+				if (ip.getf(i) != 0)
+					return;
+		}
+		throw new IllegalArgumentException("No data in 3D stack");
 	}
 
 	private DHTData createDHT(ImageStack stack, DHTData dhtData)
@@ -424,7 +435,8 @@ public class StackAligner implements Cloneable
 
 			double scale = LIMIT / (max - min);
 
-			System.out.printf("n=%d, min = %g (%d), max = %g (%d)\n", ss.length, min, transform(min, scale), max, transform(max, scale));
+			System.out.printf("n=%d, min = %g (%d), max = %g (%d)\n", ss.length, min, transform(min, scale), max,
+					transform(max, scale));
 
 			// Compute the rolling sum tables
 			int nr_by_nc = dht.nr_by_nc;
@@ -482,7 +494,7 @@ public class StackAligner implements Cloneable
 					ss[i] += ss[ii];
 				}
 			}
-			
+
 			limits = Maths.limits(data);
 			System.out.printf("n=%d, min = %g, max = %g\n", ss.length, limits[0], limits[1]);
 		}
@@ -492,6 +504,8 @@ public class StackAligner implements Cloneable
 			tar = dht.copy();
 		// Transform the data
 		dht.transform();
+		limits = Maths.limits(data);
+		System.out.printf("limit =%g, n=%d, min = %g, max = %g\n", LIMIT, ss.length, limits[0], limits[1]);
 		return dhtData;
 	}
 
@@ -505,7 +519,7 @@ public class StackAligner implements Cloneable
 	 * <p>
 	 * In theory the largest sumXY should be 2^bits * 2^bits * max integer (the size of the largest array).
 	 * 10-bit integer: 2^10 * 2^10 * 2^31 = 2^51. This is smaller than the mantissa of a double (2^52)
-	 * so should be represented correctly. However experimentation shows that when the number of bits.  
+	 * so should be represented correctly. However experimentation shows that when the number of bits.
 	 */
 	private static double LIMIT = 1024;
 
@@ -570,6 +584,11 @@ public class StackAligner implements Cloneable
 	{
 		if (stack.getWidth() < 2 || stack.getHeight() < 2 || stack.getSize() < 2)
 			throw new IllegalArgumentException("Require a 3D stack");
+		// Check for data
+		for (int i = 0, size = stack.getDataLength(); i < size; i++)
+			if (stack.get(i) != 0)
+				return;
+		throw new IllegalArgumentException("No data in 3D stack");
 	}
 
 	private DHTData createDHT(Image3D stack, DHTData dhtData)
@@ -778,10 +797,11 @@ public class StackAligner implements Cloneable
 		// 
 		// (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
 
-		// Only do this over the range where at least half the original images overlap.
-		int ix = Math.max(reference.ix, target.ix);
-		int iy = Math.max(reference.iy, target.iy);
-		int iz = Math.max(reference.iz, target.iz);
+		// Only do this over the range where at least half the original images overlap,
+		// i.e. the insert point of one will be the middle of the other when shifted.
+		int ix = Math.min(reference.ix, target.ix);
+		int iy = Math.min(reference.iy, target.iy);
+		int iz = Math.min(reference.iz, target.iz);
 		int iw = Math.max(reference.ix + reference.w, target.ix + target.w);
 		int ih = Math.max(reference.iy + reference.h, target.iy + target.h);
 		int id = Math.max(reference.iz + reference.d, target.iz + target.d);
