@@ -14,8 +14,10 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.math.interpolation.CubicSplinePosition;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
+import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
@@ -62,11 +64,12 @@ public class StackAligner implements Cloneable
 	private static final int Y = 0;
 	private static final int YY = 1;
 
-	private static class DHTData
+	private class DHTData
 	{
 		DoubleDHT3D dht;
-		long[] s_;
-		long[] ss;
+		double[] input;
+		double[] s_;
+		double[] ss;
 		// Original dimensions
 		int w, h, d;
 		// Insert position
@@ -88,11 +91,18 @@ public class StackAligner implements Cloneable
 			ix = getInsert(dht.nc, w);
 			iy = getInsert(dht.nr, h);
 			iz = getInsert(dht.ns, d);
+			// Make storage of the original data optional. It is just used for 
+			// the spatial domain correlation check
+			if (isCheckCorrelation())
+			{
+				input = resize(input);
+				System.arraycopy(dht.getData(), 0, input, 0, input.length);
+			}
 		}
 
-		private long[] resize(long[] data)
+		private double[] resize(double[] data)
 		{
-			return (data == null || data.length != dht.getDataLength()) ? new long[dht.getDataLength()] : data;
+			return (data == null || data.length != dht.getDataLength()) ? new double[dht.getDataLength()] : data;
 		}
 	}
 
@@ -112,6 +122,7 @@ public class StackAligner implements Cloneable
 	private double edgeWindow;
 	private double relativeThreshold = 1e-6;
 	private SearchMode searchMode = SearchMode.GRADIENT;
+	private boolean checkCorrelation = true;
 
 	/** The number of slices (max z) of the discrete Hartley transform. */
 	private int ns;
@@ -127,6 +138,7 @@ public class StackAligner implements Cloneable
 	// Not thread safe as they are used for the target image
 	private DHTData target;
 	private double[] buffer, region;
+	private double frequencyDomainCorrelationError;
 
 	// Allow cached window weights
 	private double[] wx = null;
@@ -134,7 +146,6 @@ public class StackAligner implements Cloneable
 	private double[] wz = null;
 
 	private CubicSplineCalculator calc;
-	private Image3D ref, tar;
 
 	/**
 	 * Instantiates a new stack aligner with a default edge window of 0.25
@@ -400,8 +411,10 @@ public class StackAligner implements Cloneable
 	/**
 	 * Prepare the DHT.
 	 * <p>
-	 * Converts the data to a signed integer. Any zero value (from padding or weighting) remains zero.
-	 * This may reduce the precision slightly but allows the computation of a rolling sum table with no errors. The
+	 * Converts the data to quantised data. Any zero value (from padding
+	 * or weighting) remains zero.
+	 * <p>
+	 * This may reduce the precision slightly but allows the computation of a rolling sum table have minimal errors. The
 	 * rolling sum and sum-of-squares table is computed and the DHT is transformed to the frequency domain.
 	 *
 	 * @param dhtData
@@ -411,101 +424,86 @@ public class StackAligner implements Cloneable
 	private DHTData prepareDHT(DHTData dhtData)
 	{
 		DoubleDHT3D dht = dhtData.dht;
-		long[] s_ = dhtData.s_;
-		long[] ss = dhtData.ss;
+		double[] s_ = dhtData.s_;
+		double[] ss = dhtData.ss;
 
-		// Convert to a signed integer
-		// This makes it possible to compute the rolling tables without error
+		// Note previous versions converted to 10-bit integer data. However the 3D DHT creates very large
+		// output values and errors occurred when computing the conjugate multiple in the frequency
+		// domain verses the spatial domain. A check has been added to compute the spatial domain
+		// correlation for the corresponding max correlation in the frequency domain. This allow
+		// the code to report when the correlation value is incorrect.
+
 		double[] data = dht.getData();
 		double[] limits = Maths.limits(data);
 		double min = limits[0];
 		double max = limits[1];
-		if ((max - min) == 0.0)
+
+		// Note: The image has been shifted to a mean of 0 so that zero padding
+		// for frequency domain transform does not add any information.
+		// We need to maintain the sign information and ensure that zero is still
+		// zero.
+
+		double scale = LIMIT / (max - min);
+
+		// Compute the rolling sum tables
+		int nr_by_nc = dht.nr_by_nc;
+		int nc = dht.nc;
+		int nr = dht.nr;
+		int ns = dht.ns;
+
+		// This has been adapted from Image3D to compute two rolling sum table at once
+
+		// First build a table for each XY slice
+		for (int s = 0; s < ns; s++)
 		{
-			// No data variation so just zero fill!
-			Arrays.fill(s_, 0);
-			Arrays.fill(ss, 0);
-		}
-		else
-		{
-			// Note: The image has been shifted to a mean of 0 so that zero padding
-			// for frequency domain transform does not add any information.
-			// We need to maintain the sign information and ensure that zero is still
-			// zero.
-
-			double scale = LIMIT / (max - min);
-
-			System.out.printf("n=%d, min = %g (%d), max = %g (%d)\n", ss.length, min, transform(min, scale), max,
-					transform(max, scale));
-
-			// Compute the rolling sum tables
-			int nr_by_nc = dht.nr_by_nc;
-			int nc = dht.nc;
-			int nr = dht.nr;
-			int ns = dht.ns;
-
-			// This has been adapted from Image3D to compute two rolling sum table at once
-
-			// First build a table for each XY slice
-			for (int s = 0; s < ns; s++)
+			double sum_ = 0, sum2 = 0;
+			int i = s * nr_by_nc;
+			// Initialise first row sum
+			// sum = rolling sum of (0 - colomn)
+			for (int c = 0; c < nc; c++, i++)
 			{
-				long sum_ = 0, sum2 = 0;
-				int i = s * nr_by_nc;
-				// Initialise first row sum
-				// sum = rolling sum of (0 - colomn)
-				for (int c = 0; c < nc; c++, i++)
+				double v = transform(data[i], scale);
+				data[i] = v;
+				sum_ += v;
+				sum2 += v * v;
+				s_[i] = sum_;
+				ss[i] = sum2;
+			}
+			// Remaining rows
+			// sum = rolling sum of (0 - colomn) + sum of same position above
+			for (int r = 1, ii = i - nc; r < nr; r++)
+			{
+				sum_ = 0;
+				sum2 = 0;
+				for (int c = 0; c < nc; c++, i++, ii++)
 				{
-					int v = transform(data[i], scale);
+					double v = transform(data[i], scale);
 					data[i] = v;
 					sum_ += v;
 					sum2 += v * v;
-					s_[i] = sum_;
-					ss[i] = sum2;
-				}
-				// Remaining rows
-				// sum = rolling sum of (0 - colomn) + sum of same position above
-				for (int r = 1, ii = i - nc; r < nr; r++)
-				{
-					sum_ = 0;
-					sum2 = 0;
-					for (int c = 0; c < nc; c++, i++, ii++)
-					{
-						int v = transform(data[i], scale);
-						data[i] = v;
-						sum_ += v;
-						sum2 += v * v;
-						// Add the sum from the previous row
-						s_[i] = sum_ + s_[ii];
-						ss[i] = sum2 + ss[ii];
-					}
+					// Add the sum from the previous row
+					s_[i] = sum_ + s_[ii];
+					ss[i] = sum2 + ss[ii];
 				}
 			}
-
-			// Now sum across slices
-			// sum = rolling sum of (0,0 to column,row) + sum of same position above
-			// => rolling sum of (0,0,0 to column,row,slice)
-			for (int s = 1; s < ns; s++)
-			{
-				int i = s * nr_by_nc;
-				int ii = i - nr_by_nc;
-				for (int j = 0; j < nr_by_nc; j++, i++, ii++)
-				{
-					s_[i] += s_[ii];
-					ss[i] += ss[ii];
-				}
-			}
-
-			limits = Maths.limits(data);
-			System.out.printf("n=%d, min = %g, max = %g\n", ss.length, limits[0], limits[1]);
 		}
-		if (ref == null)
-			ref = dht.copy();
-		else
-			tar = dht.copy();
+
+		// Now sum across slices
+		// sum = rolling sum of (0,0 to column,row) + sum of same position above
+		// => rolling sum of (0,0,0 to column,row,slice)
+		for (int s = 1; s < ns; s++)
+		{
+			int i = s * nr_by_nc;
+			int ii = i - nr_by_nc;
+			for (int j = 0; j < nr_by_nc; j++, i++, ii++)
+			{
+				s_[i] += s_[ii];
+				ss[i] += ss[ii];
+			}
+		}
+
 		// Transform the data
 		dht.transform();
-		limits = Maths.limits(data);
-		System.out.printf("limit =%g, n=%d, min = %g, max = %g\n", LIMIT, ss.length, limits[0], limits[1]);
 		return dhtData;
 	}
 
@@ -519,19 +517,19 @@ public class StackAligner implements Cloneable
 	 * <p>
 	 * In theory the largest sumXY should be 2^bits * 2^bits * max integer (the size of the largest array).
 	 * 10-bit integer: 2^10 * 2^10 * 2^31 = 2^51. This is smaller than the mantissa of a double (2^52)
-	 * so should be represented correctly. However experimentation shows that when the number of bits.
+	 * so should be represented correctly.
 	 */
 	private static double LIMIT = 1024;
 
-	private static int transform(double f, double scale)
+	private static double transform(double f, double scale)
 	{
 		// Ensure zero is zero
-		if (f == 0)
-			return 0;
+		if (f == 0.0)
+			return 0.0;
 
 		// Maintain the sign information
 		double value = f * scale;
-		return (int) Math.round(value);
+		return Math.round(value) / scale;
 	}
 
 	/**
@@ -806,6 +804,9 @@ public class StackAligner implements Cloneable
 		int ih = Math.max(reference.iy + reference.h, target.iy + target.h);
 		int id = Math.max(reference.iz + reference.d, target.iz + target.d);
 
+		// Check in the spatial domain
+		checkCorrelation(target, correlation, ix, iy, iz, iw - ix, ih - iy, id - iz);
+
 		// Compute sum from rolling sum using:
 		// sum(x,y,z,w,h,d) = 
 		// + s(x+w-1,y+h-1,z+d-1) 
@@ -877,12 +878,12 @@ public class StackAligner implements Cloneable
 			h[j] = ry_h_1[j] - ry_1[j];
 		}
 
-		long[] rs_ = reference.s_;
-		long[] rss = reference.ss;
-		long[] ts_ = target.s_;
-		long[] tss = target.ss;
-		long[] rsum = new long[2];
-		long[] tsum = new long[2];
+		double[] rs_ = reference.s_;
+		double[] rss = reference.ss;
+		double[] ts_ = target.s_;
+		double[] tss = target.ss;
+		double[] rsum = new double[2];
+		double[] tsum = new double[2];
 
 		for (int s = iz; s < id; s++)
 		{
@@ -906,40 +907,16 @@ public class StackAligner implements Cloneable
 					compute(rx_1[i], ry_1[j], rz_1, rx_w_1[i], ry_h_1[j], rz_d_1, w[i], h[j], d, rs_, rss, rsum);
 					compute(tx_1[i], ty_1[j], tz_1, tx_w_1[i], ty_h_1[j], tz_d_1, w[i], h[j], d, ts_, tss, tsum);
 
-					// XXX debug this ...
-					if (w[i] == nc && h[j] == nr && d == ns)
-					{
-						double rs = ref.computeSum(rx_1[i] + 1, ry_1[j] + 1, rz_1 + 1, w[i], h[j], d);
-						double ts = tar.computeSum(tx_1[i] + 1, ty_1[j] + 1, tz_1 + 1, w[i], h[j], d);
-						sumXY = 0;
-						long sumXX = 0;
-						long sumYY = 0;
-						for (int k = ref.getDataLength(); k-- > 0;)
-						{
-							int a = (int) ref.get(k);
-							int b = (int) tar.get(k);
-							sumXY += a * b;
-							sumXX += a * a;
-							sumYY += b * b;
-						}
-
-						// The actual sumXY from the correlation is incorrect!
-						// Is it because the data have been converted to int?
-
-						System.out.printf("%g vs %g, %d vs %g, %d vs %g, %d vs %d, %d vs %d\n", buffer[base + c], sumXY,
-								rsum[X], rs, tsum[Y], ts, sumXX, rsum[XX], sumYY, tsum[YY]);
-					}
-
 					// Compute the correlation
-					double one_over_n = 1.0 / (w[i] * hd);
 					// (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
 
-					double pearsons1 = sumXY - (one_over_n * rsum[X] * tsum[Y]);
-					double pearsons2 = rsum[XX] - (one_over_n * rsum[X] * rsum[X]);
-					double pearsons3 = tsum[YY] - (one_over_n * tsum[Y] * tsum[Y]);
+					double one_over_n = 1.0 / (w[i] * hd);
+					double numerator = sumXY - (one_over_n * rsum[X] * tsum[Y]);
+					double denominator1 = rsum[XX] - (one_over_n * rsum[X] * rsum[X]);
+					double denominator2 = tsum[YY] - (one_over_n * tsum[Y] * tsum[Y]);
 
 					double R;
-					if (pearsons2 == 0 || pearsons3 == 0)
+					if (denominator1 == 0 || denominator2 == 0)
 					{
 						// If there is data and all the variances are the same then correlation is perfect
 						if (rsum[XX] == tsum[YY] && rsum[XX] == sumXY && rsum[XX] > 0)
@@ -953,7 +930,7 @@ public class StackAligner implements Cloneable
 					}
 					else
 					{
-						R = pearsons1 / (Math.sqrt(pearsons2 * pearsons3));
+						R = numerator / Math.sqrt(denominator1 * denominator2);
 						// Leave as raw for debugging
 						//R = Maths.clip(-1, 1, R);
 					}
@@ -962,6 +939,7 @@ public class StackAligner implements Cloneable
 			}
 		}
 
+		// The maximum correlation with normalisation
 		int maxi = correlation.findMaxIndex(ix, iy, iz, iw - ix, ih - iy, id - iz);
 		int[] xyz = correlation.getXYZ(maxi);
 
@@ -995,9 +973,9 @@ public class StackAligner implements Cloneable
 		// Report the shift required to move from the centre of the target image to the reference
 		// @formatter:off
 		double[] result = new double[] {
-			nc/2 - xyz[0] - com[0],
-			nr/2 - xyz[1] - com[1],
-			ns/2 - xyz[2] - com[2],
+			nc_2 - xyz[0] - com[0],
+			nr_2 - xyz[1] - com[1],
+			ns_2 - xyz[2] - com[2],
 			buffer[maxi]
 		};
 		// @formatter:on
@@ -1101,6 +1079,81 @@ public class StackAligner implements Cloneable
 	}
 
 	/**
+	 * Check the correlation in the spatial domain verses the maximum correlation in the frequency domain.
+	 *
+	 * @param target
+	 *            the target
+	 * @param correlation
+	 *            the correlation
+	 * @param ix
+	 *            the lower x bounds to search for the max correlation
+	 * @param iy
+	 *            the lower y bounds to search for the max correlation
+	 * @param iz
+	 *            the lower z bounds to search for the max correlation
+	 * @param w
+	 *            the width to search for the max correlation
+	 * @param h
+	 *            the height to search for the max correlation
+	 * @param d
+	 *            the depth to search for the max correlation
+	 */
+	private void checkCorrelation(DHTData target, DoubleDHT3D correlation, int ix, int iy, int iz, int w, int h, int d)
+	{
+		if (target.input == null || reference.input == null)
+			// No check possible
+			return;
+
+		// The maximum correlation without normalisation 
+		int maxi = correlation.findMaxIndex(ix, iy, iz, w, h, d);
+		int[] xyz = correlation.getXYZ(maxi);
+
+		// Find the range for the target and reference
+		int nc_2 = nc / 2;
+		int nr_2 = nr / 2;
+		int ns_2 = ns / 2;
+		int tx = Math.max(0, xyz[0] - nc_2);
+		int ty = Math.max(0, xyz[1] - nr_2);
+		int tz = Math.max(0, xyz[2] - ns_2);
+		w = Math.min(nc, xyz[0] + nc_2) - tx;
+		h = Math.min(nr, xyz[1] + nr_2) - ty;
+		d = Math.min(ns, xyz[2] + ns_2) - tz;
+
+		// For the reference we express as a shift relative to the centre
+		// and subtract the half-width.
+		// Formally: (nc_2 - xyz[0]) // shift 
+		//           + nc_2          // centre
+		//           - nc_2          // Half width
+		int rx = Math.max(0, -xyz[0] + nc_2);
+		int ry = Math.max(0, -xyz[1] + nr_2);
+		int rz = Math.max(0, -xyz[2] + ns_2);
+
+		double[] tar = target.input;
+		double[] ref = reference.input;
+		double o = correlation.get(maxi);
+		double e = 0;
+		for (int z = 0; z < d; z++)
+		{
+			for (int y = 0; y < h; y++)
+			{
+				int i = (tz + z) * nr_by_nc + (ty + y) * nc + tx;
+				int j = (rz + z) * nr_by_nc + (ry + y) * nc + rx;
+				for (int x = 0; x < w; x++)
+				{
+					e += tar[i++] * ref[j++];
+				}
+			}
+		}
+
+		frequencyDomainCorrelationError = DoubleEquality.relativeError(o, e);
+		if (frequencyDomainCorrelationError > 0.05)
+		{
+			System.err.printf("3D Correlation Error = %s : Spatial = %s, Freq = %s\n",
+					Utils.rounded(frequencyDomainCorrelationError), Double.toString(e), Double.toString(o));
+		}
+	}
+
+	/**
 	 * Compute the sum from the rolling sum tables
 	 *
 	 * @param x_1
@@ -1128,8 +1181,8 @@ public class StackAligner implements Cloneable
 	 * @param sum
 	 *            the sum (output = [sum, sum-of-squares])
 	 */
-	private void compute(int x_1, int y_1, int z_1, int x_w_1, int y_h_1, int z_d_1, int w, int h, int d, long[] s_,
-			long[] ss, long[] sum)
+	private void compute(int x_1, int y_1, int z_1, int x_w_1, int y_h_1, int z_d_1, int w, int h, int d, double[] s_,
+			double[] ss, double[] sum)
 	{
 		// Compute sum from rolling sum using:
 		// sum(x,y,z,w,h,d) = 
@@ -1277,6 +1330,7 @@ public class StackAligner implements Cloneable
 			copy.buffer = null;
 			copy.region = null;
 			copy.target = null;
+			copy.frequencyDomainCorrelationError = 0;
 			return copy;
 		}
 		catch (CloneNotSupportedException e)
@@ -1301,6 +1355,16 @@ public class StackAligner implements Cloneable
 			// Thrown when buffer is null or does not match the dimensions.
 			return null;
 		}
+	}
+
+	/**
+	 * Gets the frequency domain correlation error from the last correlation.
+	 *
+	 * @return the frequency domain correlation error
+	 */
+	public double getFrequencyDomainCorrelationError()
+	{
+		return frequencyDomainCorrelationError;
 	}
 
 	/**
@@ -1366,5 +1430,28 @@ public class StackAligner implements Cloneable
 	public void setSearchMode(SearchMode searchMode)
 	{
 		this.searchMode = searchMode;
+	}
+
+	/**
+	 * Checks if the spatial domain correlation check is enabled.
+	 *
+	 * @return true, if the spatial domain correlation check is enabled
+	 */
+	public boolean isCheckCorrelation()
+	{
+		return checkCorrelation;
+	}
+
+	/**
+	 * Sets the spatial domain correlation check flag. If true then the original untransformed data will be stored in
+	 * memory. The point of the highest correlation in the frequency domain will be recomputed in the spatial domain.
+	 * The error between the two can be returned using {@link #getFrequencyDomainCorrelationError()}.
+	 *
+	 * @param checkCorrelation
+	 *            the new check correlation flag
+	 */
+	public void setCheckCorrelation(boolean checkCorrelation)
+	{
+		this.checkCorrelation = checkCorrelation;
 	}
 }
