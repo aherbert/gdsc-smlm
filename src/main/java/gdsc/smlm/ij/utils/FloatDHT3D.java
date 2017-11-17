@@ -26,6 +26,9 @@ public class FloatDHT3D extends FloatImage3D
 {
 	private boolean isFrequencyDomain;
 	private final FloatDHT_3D dht;
+	// Used for fast multiply operations
+	private double[] h2e, h2o, mag;
+	private int[] jj;
 
 	/**
 	 * Instantiates a new 3D discrete Hartley transform
@@ -99,7 +102,12 @@ public class FloatDHT3D extends FloatImage3D
 	@Override
 	public FloatDHT3D copy()
 	{
-		return new FloatDHT3D(nc, nr, ns, nr_by_nc, data.clone(), isFrequencyDomain, dht);
+		FloatDHT3D copy = new FloatDHT3D(nc, nr, ns, nr_by_nc, data.clone(), isFrequencyDomain, dht);
+		copy.h2e = h2e;
+		copy.h2o = h2o;
+		copy.jj = jj;
+		copy.mag = mag;
+		return copy;
 	}
 
 	/**
@@ -114,6 +122,7 @@ public class FloatDHT3D extends FloatImage3D
 			throw new IllegalArgumentException("Already frequency domain DHT");
 		dht.forward(data);
 		isFrequencyDomain = true;
+		resetFastOperations();
 	}
 
 	/**
@@ -128,6 +137,7 @@ public class FloatDHT3D extends FloatImage3D
 			throw new IllegalArgumentException("Already space domain DHT");
 		dht.inverse(data, true);
 		isFrequencyDomain = false;
+		resetFastOperations();
 	}
 
 	/**
@@ -138,6 +148,95 @@ public class FloatDHT3D extends FloatImage3D
 	public boolean isFrequencyDomain()
 	{
 		return isFrequencyDomain;
+	}
+
+	/**
+	 * Initialise fast operations for {@link #multiply(FloatDHT3D)} and {@link #conjugateMultiply(FloatDHT3D)}. This
+	 * pre-computes
+	 * the values needed for the operations.
+	 * <p>
+	 * Note: This initialises the FHT object for use as the argument to the operation, for example if a convolution
+	 * kernel is to be applied to many FHT objects.
+	 */
+	public void initialiseFastMultiply()
+	{
+		if (h2e == null)
+		{
+			// Do this on new arrays for thread safety (i.e. concurrent initialisation)
+			float[] h2 = getData();
+			double[] h2e = new double[h2.length];
+			double[] h2o = new double[h2e.length];
+			int[] jj = new int[h2e.length];
+			for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s)
+			{
+				for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r)
+				{
+					for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++)
+					{
+						int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
+						h2e[i] = ((double) h2[i] + (double) h2[j]) / 2.0;
+						h2o[i] = ((double) h2[i] - (double) h2[j]) / 2.0;
+						jj[i] = j;
+					}
+				}
+			}
+			this.h2o = h2o;
+			this.jj = jj;
+			// Assign at the end for thread safety (i.e. concurrent initialisation)
+			this.h2e = h2e;
+		}
+	}
+
+	/**
+	 * Initialise fast operations for {@link #multiply(FloatDHT3D)}, {@link #conjugateMultiply(FloatDHT3D)} and
+	 * {@link #divide(FloatDHT3D)}. This pre-computes the values needed for the operations.
+	 * <p>
+	 * Note: This initialises the FHT object for use as the argument to the operation, for example if a deconvolution
+	 * kernel is to be applied to many FHT objects.
+	 */
+	public void initialiseFastOperations()
+	{
+		initialiseFastMultiply();
+		if (mag == null)
+		{
+			// Do this on new arrays for thread safety (i.e. concurrent initialisation)
+			double[] mag = new double[h2e.length];
+			float[] h2 = getData();
+			for (int i = 0; i < h2.length; i++)
+				// Note that pre-computed h2e and h2o are divided by 2 so we also
+				// divide the magnitude by 2 to allow reuse of the pre-computed values
+				// in the divide operation (which does not require h2e/2 and h2o/2)
+				mag[i] = Math.max(1e-20, h2[i] * h2[i] + h2[jj[i]] * h2[jj[i]]) / 2;
+			this.mag = mag;
+		}
+	}
+
+	/**
+	 * Checks if is initialised for fast multiply.
+	 *
+	 * @return true, if is fast multiply
+	 */
+	public boolean isFastMultiply()
+	{
+		return h2e != null;
+	}
+
+	/**
+	 * Checks if is initialised for fast operations.
+	 *
+	 * @return true, if is fast operations
+	 */
+	public boolean isFastOperations()
+	{
+		return mag != null;
+	}
+
+	private void resetFastOperations()
+	{
+		h2e = null;
+		h2o = null;
+		jj = null;
+		mag = null;
 	}
 
 	/**
@@ -174,9 +273,26 @@ public class FloatDHT3D extends FloatImage3D
 	public FloatDHT3D multiply(FloatDHT3D dht, float[] tmp) throws IllegalArgumentException
 	{
 		checkDHT(dht);
+		return (dht.isFastMultiply()) ? multiply(dht.h2e, dht.h2o, dht.jj, tmp) : multiply(dht.getData(), tmp);
+	}
 
+	/**
+	 * Returns the image resulting from the point by point Hartley multiplication
+	 * of this image and the specified image. Both images are assumed to be in
+	 * the frequency domain. Multiplication in the frequency domain is equivalent
+	 * to convolution in the space domain.
+	 *
+	 * @param h2
+	 *            the h 2
+	 * @param tmp
+	 *            the tmp buffer to use for the result
+	 * @return the result
+	 * @throws IllegalArgumentException
+	 *             if the dht is not the same dimensions
+	 */
+	private FloatDHT3D multiply(float[] h2, float[] tmp) throws IllegalArgumentException
+	{
 		float[] h1 = this.data;
-		float[] h2 = dht.data;
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new float[h1.length];
 
@@ -199,6 +315,32 @@ public class FloatDHT3D extends FloatImage3D
 			}
 		}
 
+		return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+	}
+
+	/**
+	 * Returns the image resulting from the point by point Hartley multiplication
+	 * of this image and the specified image. Both images are assumed to be in
+	 * the frequency domain. Multiplication in the frequency domain is equivalent
+	 * to convolution in the space domain.
+	 *
+	 * @param h2e
+	 *            the pre-initialised h2e value
+	 * @param h2o
+	 *            the pre-initialised h2o value
+	 * @param jj
+	 *            the pre-initialised j index
+	 * @param tmp
+	 *            the buffer for the result (can be null)
+	 * @return the result
+	 */
+	private FloatDHT3D multiply(double[] h2e, double[] h2o, int[] jj, float[] tmp)
+	{
+		float[] h1 = getData();
+		if (tmp == null || tmp.length != h1.length)
+			tmp = new float[h1.length];
+		for (int i = 0; i < h1.length; i++)
+			tmp[i] = (float) (h1[i] * h2e[i] + h1[jj[i]] * h2o[i]);
 		return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
 	}
 
@@ -236,9 +378,27 @@ public class FloatDHT3D extends FloatImage3D
 	public FloatDHT3D conjugateMultiply(FloatDHT3D dht, float[] tmp) throws IllegalArgumentException
 	{
 		checkDHT(dht);
+		return (dht.isFastMultiply()) ? conjugateMultiply(dht.h2e, dht.h2o, dht.jj, tmp)
+				: conjugateMultiply(dht.getData(), tmp);
+	}
 
+	/**
+	 * Returns the image resulting from the point by point Hartley conjugate
+	 * multiplication of this image and the specified image. Both images are
+	 * assumed to be in the frequency domain. Conjugate multiplication in
+	 * the frequency domain is equivalent to correlation in the space domain.
+	 *
+	 * @param h2
+	 *            the h 2
+	 * @param tmp
+	 *            the tmp buffer to use for the result
+	 * @return the result
+	 * @throws IllegalArgumentException
+	 *             if the dht is not the same dimensions
+	 */
+	private FloatDHT3D conjugateMultiply(float[] h2, float[] tmp) throws IllegalArgumentException
+	{
 		float[] h1 = this.data;
-		float[] h2 = dht.data;
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new float[h1.length];
 
@@ -257,6 +417,32 @@ public class FloatDHT3D extends FloatImage3D
 			}
 		}
 
+		return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+	}
+
+	/**
+	 * Returns the image resulting from the point by point Hartley conjugate
+	 * multiplication of this image and the specified image. Both images are
+	 * assumed to be in the frequency domain. Conjugate multiplication in
+	 * the frequency domain is equivalent to correlation in the space domain.
+	 *
+	 * @param h2e
+	 *            the pre-initialised h2e value
+	 * @param h2o
+	 *            the pre-initialised h2o value
+	 * @param jj
+	 *            the pre-initialised j index
+	 * @param tmp
+	 *            the buffer for the result (can be null)
+	 * @return the fht2
+	 */
+	private FloatDHT3D conjugateMultiply(double[] h2e, double[] h2o, int[] jj, float[] tmp)
+	{
+		float[] h1 = getData();
+		if (tmp == null || tmp.length != h1.length)
+			tmp = new float[h1.length];
+		for (int i = 0; i < h1.length; i++)
+			tmp[i] = (float) (h1[i] * h2e[i] - h1[jj[i]] * h2o[i]);
 		return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
 	}
 
@@ -294,9 +480,26 @@ public class FloatDHT3D extends FloatImage3D
 	public FloatDHT3D divide(FloatDHT3D dht, float[] tmp) throws IllegalArgumentException
 	{
 		checkDHT(dht);
+		return (dht.isFastOperations()) ? divide(dht.h2e, dht.h2o, dht.jj, dht.mag, tmp) : divide(dht.getData(), tmp);
+	}
 
+	/**
+	 * Returns the image resulting from the point by point Hartley division
+	 * of this image by the specified image. Both images are assumed to be in
+	 * the frequency domain. Division in the frequency domain is equivalent
+	 * to deconvolution in the space domain.
+	 *
+	 * @param h2
+	 *            the h 2
+	 * @param tmp
+	 *            the tmp buffer to use for the result
+	 * @return the result
+	 * @throws IllegalArgumentException
+	 *             if the dht is not the same dimensions or in the frequency domain
+	 */
+	private FloatDHT3D divide(float[] h2, float[] tmp) throws IllegalArgumentException
+	{
 		float[] h1 = this.data;
-		float[] h2 = dht.data;
 		if (tmp == null || tmp.length != h1.length)
 			tmp = new float[h1.length];
 
@@ -320,6 +523,33 @@ public class FloatDHT3D extends FloatImage3D
 			}
 		}
 
+		return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+	}
+
+	/**
+	 * Returns the image resulting from the point by point Hartley division
+	 * of this image by the specified image. Both images are assumed to be in
+	 * the frequency domain. Division in the frequency domain is equivalent
+	 * to deconvolution in the space domain.
+	 * 
+	 * @param h2e
+	 *            the pre-initialised h2e value
+	 * @param h2o
+	 *            the pre-initialised h2o value
+	 * @param jj
+	 *            the pre-initialised j index
+	 * @param h2o
+	 *            the pre-initialised magnitude value
+	 * @param tmp
+	 *            the buffer for the result (can be null)
+	 */
+	private FloatDHT3D divide(double[] h2e, double[] h2o, int[] jj, double[] mag, float[] tmp)
+	{
+		float[] h1 = getData();
+		if (tmp == null || tmp.length != h1.length)
+			tmp = new float[h1.length];
+		for (int i = 0; i < h1.length; i++)
+			tmp[i] = (float) ((h1[i] * h2e[i] - h1[jj[i]] * h2o[i]) / mag[i]);
 		return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
 	}
 
@@ -379,7 +609,8 @@ public class FloatDHT3D extends FloatImage3D
 			}
 		}
 
-		return new FloatImage3D[] { new FloatImage3D(nc, nr, ns, nr_by_nc, real), new FloatImage3D(nc, nr, ns, nr_by_nc, imaginary) };
+		return new FloatImage3D[] { new FloatImage3D(nc, nr, ns, nr_by_nc, real),
+				new FloatImage3D(nc, nr, ns, nr_by_nc, imaginary) };
 	}
 
 	/**
@@ -395,7 +626,8 @@ public class FloatDHT3D extends FloatImage3D
 	 * @throws IllegalArgumentException
 	 *             If there is a dimension mismatch
 	 */
-	public static FloatDHT3D fromDFT(FloatImage3D real, FloatImage3D imaginary, float[] tmp) throws IllegalArgumentException
+	public static FloatDHT3D fromDFT(FloatImage3D real, FloatImage3D imaginary, float[] tmp)
+			throws IllegalArgumentException
 	{
 		if (real.ns != imaginary.ns || real.nr != imaginary.nr || real.nc != imaginary.nc)
 			throw new IllegalArgumentException("Dimension mismatch");

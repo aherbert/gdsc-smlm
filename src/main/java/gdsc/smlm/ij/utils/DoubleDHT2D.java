@@ -277,10 +277,8 @@ public class DoubleDHT2D extends DoubleImage2D
 	 * @param tmp
 	 *            the tmp buffer to use for the result
 	 * @return the result
-	 * @throws IllegalArgumentException
-	 *             if the dht is not the same dimensions
 	 */
-	private DoubleDHT2D multiply(double[] h2, double[] tmp) throws IllegalArgumentException
+	private DoubleDHT2D multiply(double[] h2, double[] tmp)
 	{
 		double[] h1 = this.data;
 		if (tmp == null || tmp.length != h1.length)
