@@ -120,7 +120,6 @@ import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.gui.Line;
 import ij.gui.NonBlockingExtendedGenericDialog;
-import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.Plot2;
@@ -1767,7 +1766,7 @@ public class PSFCreator implements PlugInFilter
 	 */
 	private BasePoint[] checkSpotOverlap(BasePoint[] roiPoints)
 	{
-		return getNonOverlappingSpots(roiPoints, findSpotOverlap(roiPoints));
+		return getNonOverlappingSpots(roiPoints, findSpotOverlap(roiPoints, null));
 	}
 
 	/**
@@ -1777,11 +1776,12 @@ public class PSFCreator implements PlugInFilter
 	 *            the offset
 	 * @return the overlap array
 	 */
-	private boolean[] findSpotOverlap(BasePoint[] roiPoints)
+	private boolean[] findSpotOverlap(BasePoint[] roiPoints, boolean[] excluded)
 	{
 		int n = roiPoints.length;
+		boolean[] bad = new boolean[n];
 		if (n == 1)
-			return new boolean[1];
+			return bad;
 
 		// Check overlap of box regions
 		int w = imp.getWidth();
@@ -1792,6 +1792,8 @@ public class PSFCreator implements PlugInFilter
 		int size = (settings.getMode() != 1) ? 2 * boxRadius + 1 : Integer.MAX_VALUE;
 		for (int i = 0; i < n; i++)
 		{
+			if (excluded != null && excluded[i])
+				continue;
 			Rectangle r = ie.getBoxRegionBounds(roiPoints[i].getXint(), roiPoints[i].getYint(), boxRadius);
 			regions[i] = r;
 			if (r.width < size || r.height < size)
@@ -1799,14 +1801,17 @@ public class PSFCreator implements PlugInFilter
 				Utils.log("Warning: Spot %d region extends beyond the image, border pixels will be duplicated", i + 1);
 			}
 		}
-		boolean[] bad = new boolean[n];
 		for (int i = 0; i < n; i++)
 		{
+			if (excluded != null && excluded[i])
+				continue;
 			if (bad[i]) // Already found to overlap
 				continue;
 			// Check intersect with others
 			for (int j = i; ++j < n;)
 			{
+				if (excluded != null && excluded[j])
+					continue;
 				if (regions[i].intersects(regions[j]))
 				{
 					Utils.log("Warning: Spot %d region overlaps with spot %d, ignoring both", i + 1, j + 1);
@@ -2747,6 +2752,7 @@ public class PSFCreator implements PlugInFilter
 						rounder.toString(translation[j][2]));
 			}
 
+			final boolean[] excluded = new boolean[psfs.length];
 			if (checkAlignments)
 			{
 				combined.show(TITLE_PSF);
@@ -2785,10 +2791,27 @@ public class PSFCreator implements PlugInFilter
 					}
 					imp.setOverlay(o);
 					imp.updateAndDraw();
-					NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+					NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 					gd.addMessage(String.format("Shift X = %s\nShift Y = %s\nShift Z = %s",
 							rounder.toString(translation[j][0]), rounder.toString(translation[j][1]),
 							rounder.toString(translation[j][2])));
+					final int spotIndex = j;
+					gd.addAndGetButton("Exclude spot", new ActionListener()
+					{
+						public void actionPerformed(ActionEvent e)
+						{
+							if (excluded[spotIndex])
+							{
+								Utils.log("Included spot %d", spotIndex + 1);
+								excluded[spotIndex] = false;
+							}
+							else
+							{
+								Utils.log("Excluded spot %d", spotIndex + 1);
+								excluded[spotIndex] = true;
+							}
+						}
+					});
 					gd.enableYesNoCancel("Accept", "Reject");
 					if (location != null)
 						gd.setLocation(location.x, location.y);
@@ -2799,7 +2822,8 @@ public class PSFCreator implements PlugInFilter
 						imp.setOverlay(null);
 						return;
 					}
-					if (!gd.wasOKed())
+					boolean failed = excluded[spotIndex] || !gd.wasOKed();
+					if (failed)
 					{
 						reject++;
 						centres[j] = psfs[j].centre;
@@ -2811,28 +2835,24 @@ public class PSFCreator implements PlugInFilter
 				imp.setOverlay(null);
 				if (reject == psfs.length)
 				{
-					IJ.error(TITLE, "No centre translations were accepted");
+					IJ.error(TITLE, "No PSF translations were accepted");
 					return;
 				}
 			}
 
-			boolean[] bad = findSpotOverlap(centres);
-			bad[1] = bad[2] = true;
-			int ok = 0;
-			for (int j = 0; j < bad.length; j++)
-			{
-				if (bad[j])
-					continue;
-				ok++;
-			}
+			boolean[] bad = findSpotOverlap(centres, excluded);
+			int badCount = count(bad);
+			int excludedCount = count(excluded);
+			int ok = bad.length - badCount - excludedCount;
 			if (ok < bad.length)
 			{
-				if (settings.getInteractiveMode())
+				if (badCount != 0 && settings.getInteractiveMode())
 				{
 					ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 					gd.addMessage("Warning: Regions now overlap!");
 					gd.addMessage("OK = " + TextUtils.pleural(ok, "PSF"));
-					gd.addMessage("Overlapping = " + TextUtils.pleural(bad.length - ok, "PSF"));
+					gd.addMessage("Overlapping = " + TextUtils.pleural(badCount, "PSF"));
+					//gd.addMessage("Excluded = " + TextUtils.pleural(excludedCount, "PSF"));
 					gd.enableYesNoCancel("Exclude", "Include");
 					if (location != null)
 						gd.setLocation(location.x, location.y);
@@ -2853,12 +2873,19 @@ public class PSFCreator implements PlugInFilter
 
 				if (ok == 0)
 				{
-					IJ.error(TITLE, "No PSFs that do not overlap within box region");
+					IJ.error(TITLE, "No PSFs remaining");
 					imp.restoreRoi();
 					imp.setOverlay(null);
 					return;
 				}
 			}
+
+			// Merge bad and excluded to get new centres
+			for (int i = 0; i < bad.length; i++)
+				if (excluded[i])
+					bad[i] = true;
+			ok = count(bad);
+
 			BasePoint[] newCentres = getNonOverlappingSpots(centres, bad);
 
 			// Find the change in centres
@@ -3086,6 +3113,15 @@ public class PSFCreator implements PlugInFilter
 			}
 		}
 		IJ.showStatus("");
+	}
+
+	private int count(boolean[] flags)
+	{
+		int c = 0;
+		for (int i = 0; i < flags.length; i++)
+			if (flags[i])
+				c++;
+		return c;
 	}
 
 	private int getCoMXYBorder(int maxx, int maxy)
