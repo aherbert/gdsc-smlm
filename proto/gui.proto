@@ -433,6 +433,8 @@ message PSFCreatorSettings
 	int32 output_type = 31;
 	string spline_filename = 32;
 	bool crop_to_z_centre = 33;
+	int32 alignment_mode = 34;
+	double alignment_z_radius = 35;
 }
 
 // Contains settings for the Camera Model Manager plugin

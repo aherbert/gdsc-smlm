@@ -228,6 +228,8 @@ public class GUIProtosHelper
 		builder.setWindow(3);
 		builder.setSmoothStackSignal(true);
 		builder.setComBorder(0.40); // Right in the middle of a spot
+		builder.setAlignmentMode(0); // Projections
+		builder.setAlignmentZRadius(0); // All of the z-stack
 		defaultPSFCreatorSettings = builder.build();
 	}
 	

@@ -159,7 +159,8 @@ public class PSFCreator implements PlugInFilter
 	private final static String TITLE_PSF = "PSF";
 	private final static String TITLE_SPOT_PSF = "Spot PSF";
 
-	private final static String[] MODE = { "Projection", "Gaussian Fitting" };
+	private final static String[] MODE = { "Stack Alignment", "Gaussian Fitting" };
+	private final static String[] ALIGNMENT_MODE = { "2D Projections", "3D" };
 	private static String[] PSF_TYPE = { "Spot", "Astigmatism", "Double Helix" };
 	@SuppressWarnings("unused")
 	private static final int PSF_TYPE_SPOT = 0;
@@ -485,12 +486,14 @@ public class PSFCreator implements PlugInFilter
 	public void run(ImageProcessor ip)
 	{
 		if (settings.getMode() == 1)
+		{
 			runUsingFitting();
+		}
 		else
 		{
 			try
 			{
-				runUsingProjections();
+				runUsingAlignment();
 			}
 			catch (OutOfMemoryError e)
 			{
@@ -2667,9 +2670,9 @@ public class PSFCreator implements PlugInFilter
 		}
 	}
 
-	private void runUsingProjections()
+	private void runUsingAlignment()
 	{
-		if (!showProjectionDialog())
+		if (!showAlignmentDialog())
 			return;
 
 		boxRadius = (int) Math.ceil(settings.getRadius());
@@ -4437,16 +4440,18 @@ public class PSFCreator implements PlugInFilter
 		return new ExtractedPSF(combined, size, centre, psfs[0].magnification);
 	}
 
-	private boolean showProjectionDialog()
+	private boolean showAlignmentDialog()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Use X,Y,Z-projection alignment to create a combined PSF");
+		gd.addMessage("Use XYZ stack alignment to create a combined PSF");
 
 		CalibrationWriter cw = CalibrationWriter.create(settings.getCalibration());
 
 		// These are ignored for reset
+		gd.addChoice("Alignment_mode", ALIGNMENT_MODE, settings.getAlignmentMode());
+		gd.addSlider("Alignment_z_radius", 0, imp.getStackSize() / 2, settings.getAlignmentZRadius());
 		gd.addChoice("PSF_type", PSF_TYPE, settings.getPsfType());
 		gd.addNumericField("nm_per_pixel", cw.getNmPerPixel(), 2, 6, "nm");
 		gd.addNumericField("nm_per_slice", settings.getNmPerSlice(), 0, 6, "nm");
@@ -4500,6 +4505,8 @@ public class PSFCreator implements PlugInFilter
 		if (gd.wasCanceled())
 			return false;
 
+		settings.setAlignmentMode(gd.getNextChoiceIndex());
+		settings.setAlignmentZRadius((int) gd.getNextNumber());
 		settings.setPsfType(gd.getNextChoiceIndex());
 		cw.setNmPerPixel(gd.getNextNumber());
 		settings.setNmPerSlice(gd.getNextNumber());
@@ -5382,6 +5389,10 @@ public class PSFCreator implements PlugInFilter
 	 */
 	private float[][] align(ExtractedPSF combined, final ExtractedPSF[] psfs)
 	{
+		// TODO: Use the alignment settings.
+		// Extract each PSF around the current z-centre.
+		// The z-radius should never be smaller than the XY radius
+		
 		int n = psfs.length * 3;
 		List<Future<?>> futures = new TurboList<Future<?>>(n);
 

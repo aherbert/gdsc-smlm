@@ -22258,6 +22258,16 @@ public final class GUIProtos {
      * <code>bool crop_to_z_centre = 33;</code>
      */
     boolean getCropToZCentre();
+
+    /**
+     * <code>int32 alignment_mode = 34;</code>
+     */
+    int getAlignmentMode();
+
+    /**
+     * <code>double alignment_z_radius = 35;</code>
+     */
+    double getAlignmentZRadius();
   }
   /**
    * <pre>
@@ -22305,6 +22315,8 @@ public final class GUIProtos {
       outputType_ = 0;
       splineFilename_ = "";
       cropToZCentre_ = false;
+      alignmentMode_ = 0;
+      alignmentZRadius_ = 0D;
     }
 
     @java.lang.Override
@@ -22521,6 +22533,16 @@ public final class GUIProtos {
             case 264: {
 
               cropToZCentre_ = input.readBool();
+              break;
+            }
+            case 272: {
+
+              alignmentMode_ = input.readInt32();
+              break;
+            }
+            case 281: {
+
+              alignmentZRadius_ = input.readDouble();
               break;
             }
           }
@@ -22916,6 +22938,24 @@ public final class GUIProtos {
       return cropToZCentre_;
     }
 
+    public static final int ALIGNMENT_MODE_FIELD_NUMBER = 34;
+    private int alignmentMode_;
+    /**
+     * <code>int32 alignment_mode = 34;</code>
+     */
+    public int getAlignmentMode() {
+      return alignmentMode_;
+    }
+
+    public static final int ALIGNMENT_Z_RADIUS_FIELD_NUMBER = 35;
+    private double alignmentZRadius_;
+    /**
+     * <code>double alignment_z_radius = 35;</code>
+     */
+    public double getAlignmentZRadius() {
+      return alignmentZRadius_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -23026,6 +23066,12 @@ public final class GUIProtos {
       }
       if (cropToZCentre_ != false) {
         output.writeBool(33, cropToZCentre_);
+      }
+      if (alignmentMode_ != 0) {
+        output.writeInt32(34, alignmentMode_);
+      }
+      if (alignmentZRadius_ != 0D) {
+        output.writeDouble(35, alignmentZRadius_);
       }
     }
 
@@ -23165,6 +23211,14 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(33, cropToZCentre_);
       }
+      if (alignmentMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(34, alignmentMode_);
+      }
+      if (alignmentZRadius_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(35, alignmentZRadius_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -23270,6 +23324,12 @@ public final class GUIProtos {
           .equals(other.getSplineFilename());
       result = result && (getCropToZCentre()
           == other.getCropToZCentre());
+      result = result && (getAlignmentMode()
+          == other.getAlignmentMode());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getAlignmentZRadius())
+          == java.lang.Double.doubleToLongBits(
+              other.getAlignmentZRadius()));
       return result;
     }
 
@@ -23365,6 +23425,11 @@ public final class GUIProtos {
       hash = (37 * hash) + CROP_TO_Z_CENTRE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getCropToZCentre());
+      hash = (37 * hash) + ALIGNMENT_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getAlignmentMode();
+      hash = (37 * hash) + ALIGNMENT_Z_RADIUS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getAlignmentZRadius()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -23576,6 +23641,10 @@ public final class GUIProtos {
 
         cropToZCentre_ = false;
 
+        alignmentMode_ = 0;
+
+        alignmentZRadius_ = 0D;
+
         return this;
       }
 
@@ -23643,6 +23712,8 @@ public final class GUIProtos {
         result.outputType_ = outputType_;
         result.splineFilename_ = splineFilename_;
         result.cropToZCentre_ = cropToZCentre_;
+        result.alignmentMode_ = alignmentMode_;
+        result.alignmentZRadius_ = alignmentZRadius_;
         onBuilt();
         return result;
       }
@@ -23783,6 +23854,12 @@ public final class GUIProtos {
         }
         if (other.getCropToZCentre() != false) {
           setCropToZCentre(other.getCropToZCentre());
+        }
+        if (other.getAlignmentMode() != 0) {
+          setAlignmentMode(other.getAlignmentMode());
+        }
+        if (other.getAlignmentZRadius() != 0D) {
+          setAlignmentZRadius(other.getAlignmentZRadius());
         }
         onChanged();
         return this;
@@ -25016,6 +25093,58 @@ public final class GUIProtos {
       public Builder clearCropToZCentre() {
         
         cropToZCentre_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int alignmentMode_ ;
+      /**
+       * <code>int32 alignment_mode = 34;</code>
+       */
+      public int getAlignmentMode() {
+        return alignmentMode_;
+      }
+      /**
+       * <code>int32 alignment_mode = 34;</code>
+       */
+      public Builder setAlignmentMode(int value) {
+        
+        alignmentMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 alignment_mode = 34;</code>
+       */
+      public Builder clearAlignmentMode() {
+        
+        alignmentMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double alignmentZRadius_ ;
+      /**
+       * <code>double alignment_z_radius = 35;</code>
+       */
+      public double getAlignmentZRadius() {
+        return alignmentZRadius_;
+      }
+      /**
+       * <code>double alignment_z_radius = 35;</code>
+       */
+      public Builder setAlignmentZRadius(double value) {
+        
+        alignmentZRadius_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double alignment_z_radius = 35;</code>
+       */
+      public Builder clearAlignmentZRadius() {
+        
+        alignmentZRadius_ = 0D;
         onChanged();
         return this;
       }
@@ -27044,7 +27173,7 @@ public final class GUIProtos {
       "\022\023\n\013field_width\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022" +
       "\020\n\010z_dither\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022" +
       "\024\n\014nm_per_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001\"" +
-      "\206\007\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
+      "\272\007\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
       "radius\030\002 \001(\001\022\030\n\020interactive_mode\030\003 \001(\010\022\024" +
       "\n\014nm_per_slice\030\004 \001(\001\022E\n\023fit_engine_setti" +
       "ngs\030\005 \001(\0132(.gdsc.smlm.data.config.FitEng" +
@@ -27066,16 +27195,18 @@ public final class GUIProtos {
       "\033 \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\033\n\023psf_z_magnifi" +
       "cation\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023\n\013outp" +
       "ut_type\030\037 \001(\005\022\027\n\017spline_filename\030  \001(\t\022\030" +
-      "\n\020crop_to_z_centre\030! \001(\010\"q\n\032CameraModelM" +
-      "anagerSettings\022\016\n\006option\030\001 \001(\005\022\020\n\010origin" +
-      "_x\030\002 \001(\005\022\020\n\010origin_y\030\003 \001(\005\022\r\n\005image\030\004 \001(",
-      "\t\022\020\n\010selected\030\005 \001(\t\"\227\001\n\032CubicSplineManag" +
-      "erSettings\022\016\n\006option\030\001 \001(\005\022\020\n\010selected\030\002" +
-      " \001(\t\022\025\n\rmagnification\030\003 \001(\005\022\r\n\005scale\030\004 \001" +
-      "(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007" +
-      "z_shift\030\007 \001(\001*O\n\014TemplateType\022\023\n\017INLINE_" +
-      "TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUS" +
-      "TOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "\n\020crop_to_z_centre\030! \001(\010\022\026\n\016alignment_mo" +
+      "de\030\" \001(\005\022\032\n\022alignment_z_radius\030# \001(\001\"q\n\032" +
+      "CameraModelManagerSettings\022\016\n\006option\030\001 \001",
+      "(\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n\010origin_y\030\003 \001(\005\022\r" +
+      "\n\005image\030\004 \001(\t\022\020\n\010selected\030\005 \001(\t\"\227\001\n\032Cubi" +
+      "cSplineManagerSettings\022\016\n\006option\030\001 \001(\005\022\020" +
+      "\n\010selected\030\002 \001(\t\022\025\n\rmagnification\030\003 \001(\005\022" +
+      "\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_shi" +
+      "ft\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001*O\n\014TemplateTyp" +
+      "e\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPL" +
+      "ATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb" +
+      "\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -27170,7 +27301,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor,
-        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", "SplineFilename", "CropToZCentre", });
+        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", "SplineFilename", "CropToZCentre", "AlignmentMode", "AlignmentZRadius", });
     internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor =
       getDescriptor().getMessageTypes().get(13);
     internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable = new
