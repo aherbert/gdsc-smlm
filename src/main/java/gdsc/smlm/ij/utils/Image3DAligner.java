@@ -125,6 +125,7 @@ public class Image3DAligner implements Cloneable
 	private boolean checkCorrelation = true;
 	private double minimumOverlap = 0.5;
 	private double minimumDimensionOverlap = 0.75;
+	private boolean fastMultiply = true;
 
 	/** The number of slices (max z) of the discrete Hartley transform. */
 	private int ns;
@@ -220,6 +221,8 @@ public class Image3DAligner implements Cloneable
 	private void setReference(DHTData dhtData)
 	{
 		reference = dhtData;
+		if (fastMultiply)
+			reference.dht.initialiseFastMultiply();
 	}
 
 	private void check3D(ImageStack image)
@@ -1534,5 +1537,27 @@ public class Image3DAligner implements Cloneable
 	public void setMinimumDimensionOverlap(double minimumDimensionOverlap)
 	{
 		this.minimumDimensionOverlap = Maths.clip(0, 1, minimumDimensionOverlap);
+	}
+
+	/**
+	 * Checks if is fast multiply.
+	 *
+	 * @return true, if is fast multiply
+	 */
+	public boolean isFastMultiply()
+	{
+		return fastMultiply;
+	}
+
+	/**
+	 * Sets the fast multiply flag. This initialises the DHT for multiplication at the cost of extra memory storage. The
+	 * storage requirements are 2 double arrays and 1 integer array of the same length at the FHT data.
+	 *
+	 * @param fastMultiply
+	 *            the new fast multiply flag
+	 */
+	public void setFastMultiply(boolean fastMultiply)
+	{
+		this.fastMultiply = fastMultiply;
 	}
 }

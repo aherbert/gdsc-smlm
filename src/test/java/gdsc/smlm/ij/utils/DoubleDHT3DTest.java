@@ -71,7 +71,7 @@ public class DoubleDHT3DTest
 				for (int d : test)
 				{
 					dht = createOctants(w, h, d);
-					
+
 					double[] in = dht.getData().clone();
 
 					// This just tests that the swap of the DHT and the stack matches
@@ -110,9 +110,18 @@ public class DoubleDHT3DTest
 		DoubleDHT3D dht = createData();
 		double[] pixels = dht.getData().clone();
 		dht.transform();
+		
+		DoubleDHT3D copy = dht.copy();
+		copy.initialiseFastMultiply();
 
 		DoubleDHT3D convolved = dht.multiply(dht);
 		DoubleDHT3D deconvolved = convolved.divide(dht);
+
+		DoubleDHT3D convolved2 = dht.multiply(copy);
+		DoubleDHT3D deconvolved2 = convolved.divide(copy);
+
+		Assert.assertArrayEquals(convolved.getData(), convolved2.getData(), 0);
+		Assert.assertArrayEquals(deconvolved.getData(), deconvolved2.getData(), 0);
 
 		double[] e = dht.getData();
 		double[] o = deconvolved.getData();
@@ -135,6 +144,9 @@ public class DoubleDHT3DTest
 		DoubleDHT3D dht = createData();
 		dht.transform();
 
+		DoubleDHT3D copy = dht.copy();
+		copy.initialiseFastMultiply();
+
 		// Centre of power spectrum
 		int icentre = size / 2;
 
@@ -146,6 +158,9 @@ public class DoubleDHT3DTest
 					dht2.transform();
 
 					DoubleDHT3D correlation = dht2.conjugateMultiply(dht);
+					DoubleDHT3D correlation2 = dht2.conjugateMultiply(copy);
+					Assert.assertArrayEquals(correlation.getData(), correlation2.getData(), 0);
+
 					correlation.inverseTransform();
 					correlation.swapOctants();
 

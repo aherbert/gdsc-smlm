@@ -94,6 +94,7 @@ public class Image2DAligner implements Cloneable
 	private boolean checkCorrelation = true;
 	private double minimumOverlap = 0.5;
 	private double minimumDimensionOverlap = 0.75;
+	private boolean fastMultiply = true;
 
 	/** The number of rows (max y) of the discrete Hartley transform. */
 	private int nr;
@@ -186,7 +187,8 @@ public class Image2DAligner implements Cloneable
 	private void setReference(DHTData dhtData)
 	{
 		reference = dhtData;
-		dhtData.dht.initialiseFastMultiply();
+		if (fastMultiply)
+			dhtData.dht.initialiseFastMultiply();
 	}
 
 	/**
@@ -1157,7 +1159,7 @@ public class Image2DAligner implements Cloneable
 	private static boolean performCubicSearch(Image2D surface, CachedBicubicInterpolator[][] nodes, double range,
 			double[] centre, double[] y, int[] iy)
 	{
-		// XXX for debugging
+		// for debugging
 		//FloatProcessor fp = (FloatProcessor) surface.getImageProcessor();
 
 		// Pre-compute the node position and the fraction between 0-1 for y values
@@ -1364,5 +1366,27 @@ public class Image2DAligner implements Cloneable
 	public void setMinimumDimensionOverlap(double minimumDimensionOverlap)
 	{
 		this.minimumDimensionOverlap = Maths.clip(0, 1, minimumDimensionOverlap);
+	}
+
+	/**
+	 * Checks if is fast multiply.
+	 *
+	 * @return true, if is fast multiply
+	 */
+	public boolean isFastMultiply()
+	{
+		return fastMultiply;
+	}
+
+	/**
+	 * Sets the fast multiply flag. This initialises the DHT for multiplication at the cost of extra memory storage. The
+	 * storage requirements are 2 double arrays and 1 integer array of the same length at the FHT data.
+	 *
+	 * @param fastMultiply
+	 *            the new fast multiply flag
+	 */
+	public void setFastMultiply(boolean fastMultiply)
+	{
+		this.fastMultiply = fastMultiply;
 	}
 }

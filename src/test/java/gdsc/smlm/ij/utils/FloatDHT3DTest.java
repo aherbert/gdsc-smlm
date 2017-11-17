@@ -102,7 +102,7 @@ public class FloatDHT3DTest
 				for (int d : test)
 				{
 					dht = createOctants(w, h, d);
-					
+
 					float[] in = dht.getData().clone();
 
 					// This just tests that the swap of the DHT and the stack matches
@@ -113,7 +113,7 @@ public class FloatDHT3DTest
 
 					float[] e = new FloatDHT3D(stack).getData();
 					float[] o = dht.getData();
-					
+
 					checkOctants(in, o);
 
 					Assert.assertArrayEquals(e, o, 0);
@@ -142,8 +142,17 @@ public class FloatDHT3DTest
 		float[] pixels = dht.getData().clone();
 		dht.transform();
 
+		FloatDHT3D copy = dht.copy();
+		copy.initialiseFastMultiply();
+
 		FloatDHT3D convolved = dht.multiply(dht);
 		FloatDHT3D deconvolved = convolved.divide(dht);
+
+		FloatDHT3D convolved2 = dht.multiply(copy);
+		FloatDHT3D deconvolved2 = convolved.divide(copy);
+
+		Assert.assertArrayEquals(convolved.getData(), convolved2.getData(), 0);
+		Assert.assertArrayEquals(deconvolved.getData(), deconvolved2.getData(), 0);
 
 		float[] e = dht.getData();
 		float[] o = deconvolved.getData();
@@ -166,6 +175,9 @@ public class FloatDHT3DTest
 		FloatDHT3D dht = createData();
 		dht.transform();
 
+		FloatDHT3D copy = dht.copy();
+		copy.initialiseFastMultiply();
+
 		// Centre of power spectrum
 		int icentre = size / 2;
 
@@ -177,6 +189,9 @@ public class FloatDHT3DTest
 					dht2.transform();
 
 					FloatDHT3D correlation = dht2.conjugateMultiply(dht);
+					FloatDHT3D correlation2 = dht2.conjugateMultiply(copy);
+					Assert.assertArrayEquals(correlation.getData(), correlation2.getData(), 0);
+
 					correlation.inverseTransform();
 					correlation.swapOctants();
 
