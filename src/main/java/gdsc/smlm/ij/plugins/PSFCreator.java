@@ -93,6 +93,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.CubicSplineManager.CubicSplinePSF;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.ij.utils.Image2DAligner;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.FixedPixelCameraModel;
@@ -2880,7 +2881,7 @@ public class PSFCreator implements PlugInFilter
 			for (int i = 0; i < bad.length; i++)
 				if (excluded[i])
 					bad[i] = true;
-			ok = count(bad);
+			ok = bad.length - count(bad);
 
 			BasePoint[] newCentres = getNonOverlappingSpots(centres, bad);
 
@@ -5370,7 +5371,68 @@ public class PSFCreator implements PlugInFilter
 		}
 	}
 
+	/**
+	 * Align the PSFs with the combined PSF using the Image2DAligner class.
+	 *
+	 * @param combined
+	 *            the combined
+	 * @param psfs
+	 *            the psfs
+	 * @return The XYZ translations for each PSF
+	 */
 	private float[][] align(ExtractedPSF combined, final ExtractedPSF[] psfs)
+	{
+		int n = psfs.length * 3;
+		List<Future<?>> futures = new TurboList<Future<?>>(n);
+
+		final Image2DAligner[] align = new Image2DAligner[3];
+		for (int i = 0; i < 3; i++)
+		{
+			align[i] = new Image2DAligner();
+			FloatProcessor fp1 = combined.getProjection(i);
+			align[i].setReference(fp1); // No need to set the bounds as the PSF will be smaller
+		}
+
+		final float[][] results = new float[psfs.length][3];
+
+		for (int j = 0; j < psfs.length; j++)
+		{
+			final int jj = j;
+			for (int i = 0; i < 3; i++)
+			{
+				final int ii = i;
+				futures.add(threadPool.submit(new Runnable()
+				{
+					public void run()
+					{
+						ExtractedPSF psf = psfs[jj];
+						double[] result = align[ii].copy().align(psf.getProjection(ii), 10);
+						// We just average the shift from each projection. There should be
+						// two shifts for each dimension
+						results[jj][Projection.getXDimension(ii)] -= result[0] / 2;
+						results[jj][Projection.getYDimension(ii)] -= result[1] / 2;
+						//psfs[index].show(TITLE + index);
+					}
+				}));
+			}
+		}
+
+		Utils.waitForCompletion(futures);
+
+		return results;
+	}
+
+	/**
+	 * Align the PSFs with the combined PSF using the gdsc.core.ij.AlignImagesFFT class
+	 *
+	 * @param combined
+	 *            the combined
+	 * @param psfs
+	 *            the psfs
+	 * @return The XYZ translations for each PSF
+	 */
+	@SuppressWarnings("unused")
+	private float[][] align2(ExtractedPSF combined, final ExtractedPSF[] psfs)
 	{
 		int n = psfs.length * 3;
 		List<Future<?>> futures = new TurboList<Future<?>>(n);
