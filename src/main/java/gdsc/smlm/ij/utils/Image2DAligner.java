@@ -3,6 +3,7 @@ package gdsc.smlm.ij.utils;
 import java.util.Arrays;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.math.interpolation.CachedBicubicInterpolator;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.Maths;
@@ -1077,6 +1078,56 @@ public class Image2DAligner implements Cloneable
 		return moved;
 	}
 
+	/**
+	 * Iteratively search the cubic spline surface around the given pixel
+	 * to maximise the value.
+	 * <p>
+	 * At each round each of 8 points around the current maximum (+/- range) are evaluated. The optimum is picked and
+	 * the range is halved. The initial range is 0.5 so the maximum distance that can be walked in any direction is 1
+	 * pixel when the number of refinements is unlimited. With refinements = 3 the distance is 0.5 + 0.25 + 0.125 =
+	 * 0.875.
+	 *
+	 * @param fp
+	 *            Float processor containing a peak surface
+	 * @param i
+	 *            The peak x position
+	 * @param j
+	 *            The peak y position
+	 * @param refinements
+	 *            the maximum number of refinements
+	 * @param relativeThreshold
+	 *            Sets the relative threshold for change in the value for halting refinement. This applies
+	 *            only if the position moved during the refinement step.
+	 * @return The peak location with sub-pixel accuracy [x,y,value]
+	 */
+	public static double[] performCubicSearch(FloatProcessor fp, int i, int j, int refinements, double relativeThreshold)
+	{
+		// TODO - implement this
+		// We compute these dynamically as required
+		CachedBicubicInterpolator[][] nodes = new CachedBicubicInterpolator[fp.getWidth()][fp.getHeight()];
+		
+		double[] centre = new double[] { i, j, fp.getf(i, j) };
+		// Working space
+		double[] xrange = new double[3];
+		double[] yrange = new double[3];
+		// This value will be progressively halved. 
+		// Start with a value that allows the number of iterations to fully cover the region +/- 1 pixel
+		// 0.5 will result in an minimum range of 0.5 / 2^9 = 0.000976
+		double range = 0.5;
+		while (refinements-- > 0)
+		{
+			double previous = centre[2];
+			if (performCubicFit(fp, range, centre, xrange, yrange))
+			{
+				// The centre moved. Check convergence.
+				if ((centre[2] - previous) / centre[2] < relativeThreshold)
+					break;
+			}
+			range /= 2;
+		}
+		return centre;
+	}	
+	
 	/**
 	 * Copy the aligner. This copies the initialised state for use in alignment on multiple threads concurrently.
 	 *
