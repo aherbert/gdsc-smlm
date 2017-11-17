@@ -3143,8 +3143,6 @@ public class PSFCreator implements PlugInFilter
 
 		double mean = 0;
 
-		//PSFCentreSelector zSelector = new PSFCentreSelector();
-
 		for (int i = 0; i < centres.length; i++)
 		{
 			// Extract stack
@@ -3177,10 +3175,16 @@ public class PSFCreator implements PlugInFilter
 
 				// Ask user for z-centre confirmation
 				double dz = zSelector.run(true, false, false, Integer.toString(i + 1));
-				if (dz < 0)
+				if (dz == -1)
 				{
 					imp.setOverlay(null);
 					return null;
+				}
+				if (dz == -2)
+				{
+					// Exclude this PSF
+					centres[i] = null;
+					continue;
 				}
 			}
 
@@ -3209,6 +3213,22 @@ public class PSFCreator implements PlugInFilter
 		if (settings.getInteractiveMode())
 		{
 			imp.setOverlay(null);
+
+			// Check if any centres were excluded
+			int size = 0;
+			for (int i = 0; i < centres.length; i++)
+			{
+				if (centres[i] == null)
+					continue;
+				centres[size++] = centres[i];
+			}
+			if (size == 0)
+			{
+				IJ.error(TITLE, "No remaining PSF centres");
+				return null;
+			}
+			if (size < centres.length)
+				centres = Arrays.copyOf(centres, size);
 		}
 
 		// z-centres should be relative to the combined stack, not absolute
@@ -3671,6 +3691,11 @@ public class PSFCreator implements PlugInFilter
 				drawPSFPlots();
 			}
 			gd.setLocation(location);
+			if (id != null)
+			{
+				// This is when first selecting spots
+				gd.enableYesNoCancel("Include", "Exclude");
+			}
 			gd.showDialog(true);
 
 			// Remove interactive guides
@@ -3687,6 +3712,8 @@ public class PSFCreator implements PlugInFilter
 
 			if (gd.wasCanceled())
 				return -1;
+			if (!gd.wasOKed())
+				return -2;
 
 			return zCentre;
 		}
