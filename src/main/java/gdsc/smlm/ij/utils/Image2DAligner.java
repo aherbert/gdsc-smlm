@@ -1103,7 +1103,9 @@ public class Image2DAligner implements Cloneable
 	public static double[] performCubicSearch(FloatProcessor fp, int i, int j, int refinements, double relativeThreshold)
 	{
 		// TODO - implement this
-		// We compute these dynamically as required
+		// We compute these dynamically as required.
+		// Move this functionality to gdsc.core.math.interpolation.BicubicInterpolatingFunction
+		
 		CachedBicubicInterpolator[][] nodes = new CachedBicubicInterpolator[fp.getWidth()][fp.getHeight()];
 		
 		double[] centre = new double[] { i, j, fp.getf(i, j) };
