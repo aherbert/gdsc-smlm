@@ -3271,8 +3271,7 @@ public class PSFCreator implements PlugInFilter
 		int bIndex, fIndex, sIndex, wIndex, aIndex;
 		float background;
 		private Label backgroundLabel = null;
-
-		boolean plotBackground, plotEdgeWindow, cropOption;
+		boolean hasId, plotBackground, plotEdgeWindow, cropOption;
 
 		// We choose the angle with the first spot
 		double targetAngle = NO_ANGLE;
@@ -3639,6 +3638,7 @@ public class PSFCreator implements PlugInFilter
 
 		public double run(boolean plotBackground, boolean plotEdgeWindow, boolean cropOption, String id)
 		{
+			hasId = !TextUtils.isNullOrEmpty(id);
 			this.plotBackground = plotBackground;
 			this.plotEdgeWindow = plotEdgeWindow;
 			this.cropOption = cropOption;
@@ -3653,7 +3653,7 @@ public class PSFCreator implements PlugInFilter
 			NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 			gd.addMessage("Configure the PSF.\nCurrent Z-centre = " + Utils.rounded(1 + zCentre));
 			String label = "z-centre";
-			if (!TextUtils.isNullOrEmpty(id))
+			if (hasId)
 				label += "_" + id;
 			gd.addSlider(label, 1, psf.psf.length, 1 + zCentre);
 			final TextField tf = gd.getLastTextField();
@@ -3691,7 +3691,7 @@ public class PSFCreator implements PlugInFilter
 				drawPSFPlots();
 			}
 			gd.setLocation(location);
-			if (id != null)
+			if (hasId)
 			{
 				// This is when first selecting spots
 				gd.enableYesNoCancel("Include", "Exclude");
@@ -4003,6 +4003,14 @@ public class PSFCreator implements PlugInFilter
 			psfOut[0].setSlice(psfZCentre);
 			psfOut[0].resetDisplayRange();
 			psfOut[0].updateAndDraw();
+
+			// If selecting the original PSFs we can scroll the original image
+			if (hasId)
+			{
+				imp.setSlice(psfZCentre);
+				imp.setDisplayRange(psfOut[0].getDisplayRangeMin(), psfOut[0].getDisplayRangeMax());
+				imp.updateAndDraw();
+			}
 
 			// Show border
 			int border = getCoMXYBorder(psf.maxx, psf.maxy);
