@@ -64,7 +64,7 @@ public class Image2DAlignerTest
 		double cx = (maxx - 1) / 2.0;
 		double cy = (maxy - 1) / 2.0;
 
-		double[] shift = new double[] { 0, 1, 1.5, 2 };
+		double[] shift = new double[] { -1, -0.5, 0, 1.5, 2 };
 
 		Image2D reference = createData(maxx, maxy, cx, cy);
 		Image2DAligner a = new Image2DAligner();

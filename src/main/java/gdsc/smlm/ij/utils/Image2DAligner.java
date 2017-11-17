@@ -850,13 +850,21 @@ public class Image2DAligner implements Cloneable
 			int x = Maths.clip(ix, ixw - 5, xy[0] - 2);
 			int y = Maths.clip(iy, iyh - 5, xy[1] - 2);
 			DoubleImage2D crop = correlation.crop(x, y, 5, 5, region);
-			FloatProcessor fp = new FloatProcessor(5, 5, crop.getData());
 
 			// Find the maximum starting at the current origin
 			int ox = xy[0] - x;
 			int oy = xy[1] - y;
 
-			double[] optimum = performCubicFit(fp, ox, oy, refinements, getRelativeThreshold());
+			double[] optimum;
+			if (ox == 2 && oy == 2 && crop.getWidth() == 5 && crop.getHeight() == 5)
+			{
+				optimum = performCubicSearch(crop, refinements, getRelativeThreshold());
+			}
+			else
+			{
+				FloatProcessor fp = new FloatProcessor(5, 5, crop.getData());
+				optimum = performCubicFit(fp, ox, oy, refinements, getRelativeThreshold());
+			}
 
 			// Shift the result
 			result[0] -= (optimum[0] - ox);
@@ -1012,9 +1020,6 @@ public class Image2DAligner implements Cloneable
 	public static double[] performCubicFit(FloatProcessor fp, int i, int j, int refinements, double relativeThreshold)
 	{
 		double[] centre = new double[] { i, j, fp.getf(i, j) };
-		// Working space
-		double[] xrange = new double[3];
-		double[] yrange = new double[3];
 		// This value will be progressively halved. 
 		// Start with a value that allows the number of iterations to fully cover the region +/- 1 pixel
 		// 0.5 will result in an minimum range of 0.5 / 2^9 = 0.000976
@@ -1022,7 +1027,7 @@ public class Image2DAligner implements Cloneable
 		while (refinements-- > 0)
 		{
 			double previous = centre[2];
-			if (performCubicFit(fp, range, centre, xrange, yrange))
+			if (performCubicFit(fp, range, centre))
 			{
 				// The centre moved. Check convergence.
 				if ((centre[2] - previous) / centre[2] < relativeThreshold)
@@ -1042,34 +1047,25 @@ public class Image2DAligner implements Cloneable
 	 *            the range
 	 * @param centre
 	 *            the centre
-	 * @param xrange
-	 *            the xrange working space
-	 * @param yrange
-	 *            the yrange working space
 	 * @return true, if the centre moved
 	 */
-	private static boolean performCubicFit(FloatProcessor fp, double range, double[] centre, double[] xrange,
-			double[] yrange)
+	private static boolean performCubicFit(FloatProcessor fp, double range, double[] centre)
 	{
 		boolean moved = false;
-		xrange[0] = centre[0] - range;
-		xrange[1] = centre[0];
-		xrange[2] = centre[0] + range;
-		yrange[0] = centre[1] - range;
-		yrange[1] = centre[1];
-		yrange[2] = centre[1] + range;
-		for (int i = 0; i < 3; i++)
+		for (int i = -1; i <= 1; i++)
 		{
-			for (int j = 0; j < 3; j++)
+			double x = centre[0] + i * range;
+			for (int j = -1; j <= 1; j++)
 			{
-				if (i == 1 && j == 1)
+				if (i == 0 && j == 0)
 					// Current maximum
 					continue;
-				double v = fp.getBicubicInterpolatedPixel(xrange[i], yrange[j], fp);
+				double y = centre[1] + j * range;
+				double v = fp.getBicubicInterpolatedPixel(x, y, fp);
 				if (centre[2] < v)
 				{
-					centre[0] = xrange[i];
-					centre[1] = yrange[j];
+					centre[0] = x;
+					centre[1] = y;
 					centre[2] = v;
 					moved = true;
 				}
@@ -1079,20 +1075,15 @@ public class Image2DAligner implements Cloneable
 	}
 
 	/**
-	 * Iteratively search the cubic spline surface around the given pixel
-	 * to maximise the value.
+	 * Iteratively search the cubic spline surface around the centre to maximise the value.
 	 * <p>
 	 * At each round each of 8 points around the current maximum (+/- range) are evaluated. The optimum is picked and
 	 * the range is halved. The initial range is 0.5 so the maximum distance that can be walked in any direction is 1
 	 * pixel when the number of refinements is unlimited. With refinements = 3 the distance is 0.5 + 0.25 + 0.125 =
 	 * 0.875.
 	 *
-	 * @param fp
-	 *            Float processor containing a peak surface
-	 * @param i
-	 *            The peak x position
-	 * @param j
-	 *            The peak y position
+	 * @param surface
+	 *            A peak surface (must be 5x5)
 	 * @param refinements
 	 *            the maximum number of refinements
 	 * @param relativeThreshold
@@ -1100,18 +1091,31 @@ public class Image2DAligner implements Cloneable
 	 *            only if the position moved during the refinement step.
 	 * @return The peak location with sub-pixel accuracy [x,y,value]
 	 */
-	public static double[] performCubicSearch(FloatProcessor fp, int i, int j, int refinements, double relativeThreshold)
+	public static double[] performCubicSearch(Image2D surface, int refinements, double relativeThreshold)
 	{
-		// TODO - implement this
-		// We compute these dynamically as required.
-		// Move this functionality to gdsc.core.math.interpolation.BicubicInterpolatingFunction
-		
-		CachedBicubicInterpolator[][] nodes = new CachedBicubicInterpolator[fp.getWidth()][fp.getHeight()];
-		
-		double[] centre = new double[] { i, j, fp.getf(i, j) };
-		// Working space
-		double[] xrange = new double[3];
-		double[] yrange = new double[3];
+		if (surface.getWidth() != 5 || surface.getHeight() != 5)
+			throw new IllegalArgumentException("Require a 5x5 input surface");
+
+		CachedBicubicInterpolator[][] nodes = new CachedBicubicInterpolator[2][2];
+		double[] data = new double[16];
+		for (int x = 0; x < 2; x++)
+			for (int y = 0; y < 2; y++)
+			{
+				int offset = y * 5 + x;
+				for (int k = 0, index = 0; k < 4; k++)
+				{
+					for (int l = 0; l < 4; l++)
+						data[index++] = surface.get(offset + l);
+					offset += 5;
+				}
+				nodes[x][y] = new CachedBicubicInterpolator();
+				nodes[x][y].updateCoefficients(data);
+			}
+
+		// Offset centre by 1 so it is exactly in the middle of the 2x2 grid of bicubic interpolators
+		double[] centre = new double[] { 1, 1, surface.get(12) };
+		double[] y = new double[9];
+		int[] iy = new int[3];
 		// This value will be progressively halved. 
 		// Start with a value that allows the number of iterations to fully cover the region +/- 1 pixel
 		// 0.5 will result in an minimum range of 0.5 / 2^9 = 0.000976
@@ -1119,7 +1123,7 @@ public class Image2DAligner implements Cloneable
 		while (refinements-- > 0)
 		{
 			double previous = centre[2];
-			if (performCubicFit(fp, range, centre, xrange, yrange))
+			if (performCubicSearch(surface, nodes, range, centre, y, iy))
 			{
 				// The centre moved. Check convergence.
 				if ((centre[2] - previous) / centre[2] < relativeThreshold)
@@ -1127,9 +1131,77 @@ public class Image2DAligner implements Cloneable
 			}
 			range /= 2;
 		}
+		// Add back the pixel offset
+		centre[0] += 1;
+		centre[1] += 1;
 		return centre;
-	}	
-	
+	}
+
+	/**
+	 * Perform a cubic search refinement.
+	 *
+	 * @param surface
+	 *            the surface (to allow debugging)
+	 * @param nodes
+	 *            the nodes for interpolation
+	 * @param range
+	 *            the range
+	 * @param centre
+	 *            the centre
+	 * @param y
+	 *            working space for y
+	 * @param iy
+	 *            working space for iy
+	 * @return true, if the centre moved
+	 */
+	private static boolean performCubicSearch(Image2D surface, CachedBicubicInterpolator[][] nodes, double range,
+			double[] centre, double[] y, int[] iy)
+	{
+		// XXX for debugging
+		//FloatProcessor fp = (FloatProcessor) surface.getImageProcessor();
+
+		// Pre-compute the node position and the fraction between 0-1 for y values
+		for (int j = -1, k = 0, l = 0; j <= 1; j++, k++)
+		{
+			double yy = centre[1] + j * range;
+			iy[k] = (int) yy;
+			yy = yy - iy[k];
+			y[l++] = yy;
+			y[l++] = yy * yy;
+			y[l++] = yy * yy * yy;
+		}
+
+		boolean moved = false;
+		for (int i = -1; i <= 1; i++)
+		{
+			// Compute the node position and the fraction between 0-1 for y values
+			double x = centre[0] + i * range;
+			int ix = (int) x;
+			x = x - ix;
+			double x2 = x * x;
+			double x3 = x * x2;
+			for (int k = 0; k < 3; k++)
+			{
+				if (i == 0 && k == 1)
+					// Current maximum
+					continue;
+				double v = nodes[ix][iy[k]].getValue(x, x2, x3, y[k * 3], y[k * 3 + 1], y[k * 3 + 2]);
+				//double v2 = fp.getBicubicInterpolatedPixel(ix + 1 + x, iy[k] + 1 + y[k * 3], fp);
+				//System.out.printf("%g vs %g @ %g,%g\n", v, v2, x + ix, iy[k] + y[k * 3]);
+				if (centre[2] < v)
+				{
+					// Add back the node index to get the correct x/y-values
+					centre[0] = x + ix;
+					centre[1] = y[k * 3] + iy[k];
+					centre[2] = v;
+					moved = true;
+				}
+			}
+		}
+		//System.out.printf("Centre %g,%g = %g\n", centre[0], centre[1], centre[2]);
+		return moved;
+	}
+
 	/**
 	 * Copy the aligner. This copies the initialised state for use in alignment on multiple threads concurrently.
 	 *
