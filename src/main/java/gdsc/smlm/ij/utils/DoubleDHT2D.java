@@ -141,8 +141,8 @@ public class DoubleDHT2D extends DoubleImage2D
 	 * pre-computes
 	 * the values needed for the operations.
 	 * <p>
-	 * Note: This initialises the FHT object for use as the argument to the operation, for example if a convolution
-	 * kernel is to be applied to many FHT objects.
+	 * Note: This initialises the DHT object for use as the argument to the operation, for example if a convolution
+	 * kernel is to be applied to many DHT objects.
 	 */
 	public void initialiseFastMultiply()
 	{
@@ -174,8 +174,8 @@ public class DoubleDHT2D extends DoubleImage2D
 	 * Initialise fast operations for {@link #multiply(DoubleDHT2D)}, {@link #conjugateMultiply(DoubleDHT2D)} and
 	 * {@link #divide(DoubleDHT2D)}. This pre-computes the values needed for the operations.
 	 * <p>
-	 * Note: This initialises the FHT object for use as the argument to the operation, for example if a deconvolution
-	 * kernel is to be applied to many FHT objects.
+	 * Note: This initialises the DHT object for use as the argument to the operation, for example if a deconvolution
+	 * kernel is to be applied to many DHT objects.
 	 */
 	public void initialiseFastOperations()
 	{
@@ -266,7 +266,7 @@ public class DoubleDHT2D extends DoubleImage2D
 	 * to convolution in the space domain.
 	 *
 	 * @param h2
-	 *            the second FHT
+	 *            the second DHT
 	 * @param tmp
 	 *            the tmp buffer to use for the result
 	 * @return the result
