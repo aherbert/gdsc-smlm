@@ -221,7 +221,7 @@ public class GUIProtosHelper
 		builder.setPsfType(0);
 		builder.setAnalysisWindow(1);
 		builder.setComWindow(2);
-		builder.setProjectionMagnification(2);
+		builder.setAlignmentMagnification(2);
 		builder.setMaxIterations(20);
 		builder.setCheckAlignments(false);
 		builder.setPsfMagnification(4);

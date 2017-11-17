@@ -418,7 +418,7 @@ message PSFCreatorSettings
 	Calibration calibration = 16;
 	double analysis_window = 17;
 	int32 com_window = 18;
-	int32 projection_magnification = 19;
+	int32 alignment_magnification = 19;
 	int32 maxIterations = 20;
 	bool check_alignments = 21;
 	int32 psf_magnification = 22;

@@ -22180,9 +22180,9 @@ public final class GUIProtos {
     int getComWindow();
 
     /**
-     * <code>int32 projection_magnification = 19;</code>
+     * <code>int32 alignment_magnification = 19;</code>
      */
-    int getProjectionMagnification();
+    int getAlignmentMagnification();
 
     /**
      * <code>int32 maxIterations = 20;</code>
@@ -22300,7 +22300,7 @@ public final class GUIProtos {
       psfType_ = 0;
       analysisWindow_ = 0D;
       comWindow_ = 0;
-      projectionMagnification_ = 0;
+      alignmentMagnification_ = 0;
       maxIterations_ = 0;
       checkAlignments_ = false;
       psfMagnification_ = 0;
@@ -22461,7 +22461,7 @@ public final class GUIProtos {
             }
             case 152: {
 
-              projectionMagnification_ = input.readInt32();
+              alignmentMagnification_ = input.readInt32();
               break;
             }
             case 160: {
@@ -22778,13 +22778,13 @@ public final class GUIProtos {
       return comWindow_;
     }
 
-    public static final int PROJECTION_MAGNIFICATION_FIELD_NUMBER = 19;
-    private int projectionMagnification_;
+    public static final int ALIGNMENT_MAGNIFICATION_FIELD_NUMBER = 19;
+    private int alignmentMagnification_;
     /**
-     * <code>int32 projection_magnification = 19;</code>
+     * <code>int32 alignment_magnification = 19;</code>
      */
-    public int getProjectionMagnification() {
-      return projectionMagnification_;
+    public int getAlignmentMagnification() {
+      return alignmentMagnification_;
     }
 
     public static final int MAXITERATIONS_FIELD_NUMBER = 20;
@@ -23022,8 +23022,8 @@ public final class GUIProtos {
       if (comWindow_ != 0) {
         output.writeInt32(18, comWindow_);
       }
-      if (projectionMagnification_ != 0) {
-        output.writeInt32(19, projectionMagnification_);
+      if (alignmentMagnification_ != 0) {
+        output.writeInt32(19, alignmentMagnification_);
       }
       if (maxIterations_ != 0) {
         output.writeInt32(20, maxIterations_);
@@ -23152,9 +23152,9 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(18, comWindow_);
       }
-      if (projectionMagnification_ != 0) {
+      if (alignmentMagnification_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(19, projectionMagnification_);
+          .computeInt32Size(19, alignmentMagnification_);
       }
       if (maxIterations_ != 0) {
         size += com.google.protobuf.CodedOutputStream
@@ -23292,8 +23292,8 @@ public final class GUIProtos {
               other.getAnalysisWindow()));
       result = result && (getComWindow()
           == other.getComWindow());
-      result = result && (getProjectionMagnification()
-          == other.getProjectionMagnification());
+      result = result && (getAlignmentMagnification()
+          == other.getAlignmentMagnification());
       result = result && (getMaxIterations()
           == other.getMaxIterations());
       result = result && (getCheckAlignments()
@@ -23390,8 +23390,8 @@ public final class GUIProtos {
           java.lang.Double.doubleToLongBits(getAnalysisWindow()));
       hash = (37 * hash) + COM_WINDOW_FIELD_NUMBER;
       hash = (53 * hash) + getComWindow();
-      hash = (37 * hash) + PROJECTION_MAGNIFICATION_FIELD_NUMBER;
-      hash = (53 * hash) + getProjectionMagnification();
+      hash = (37 * hash) + ALIGNMENT_MAGNIFICATION_FIELD_NUMBER;
+      hash = (53 * hash) + getAlignmentMagnification();
       hash = (37 * hash) + MAXITERATIONS_FIELD_NUMBER;
       hash = (53 * hash) + getMaxIterations();
       hash = (37 * hash) + CHECK_ALIGNMENTS_FIELD_NUMBER;
@@ -23611,7 +23611,7 @@ public final class GUIProtos {
 
         comWindow_ = 0;
 
-        projectionMagnification_ = 0;
+        alignmentMagnification_ = 0;
 
         maxIterations_ = 0;
 
@@ -23697,7 +23697,7 @@ public final class GUIProtos {
         }
         result.analysisWindow_ = analysisWindow_;
         result.comWindow_ = comWindow_;
-        result.projectionMagnification_ = projectionMagnification_;
+        result.alignmentMagnification_ = alignmentMagnification_;
         result.maxIterations_ = maxIterations_;
         result.checkAlignments_ = checkAlignments_;
         result.psfMagnification_ = psfMagnification_;
@@ -23809,8 +23809,8 @@ public final class GUIProtos {
         if (other.getComWindow() != 0) {
           setComWindow(other.getComWindow());
         }
-        if (other.getProjectionMagnification() != 0) {
-          setProjectionMagnification(other.getProjectionMagnification());
+        if (other.getAlignmentMagnification() != 0) {
+          setAlignmentMagnification(other.getAlignmentMagnification());
         }
         if (other.getMaxIterations() != 0) {
           setMaxIterations(other.getMaxIterations());
@@ -24664,28 +24664,28 @@ public final class GUIProtos {
         return this;
       }
 
-      private int projectionMagnification_ ;
+      private int alignmentMagnification_ ;
       /**
-       * <code>int32 projection_magnification = 19;</code>
+       * <code>int32 alignment_magnification = 19;</code>
        */
-      public int getProjectionMagnification() {
-        return projectionMagnification_;
+      public int getAlignmentMagnification() {
+        return alignmentMagnification_;
       }
       /**
-       * <code>int32 projection_magnification = 19;</code>
+       * <code>int32 alignment_magnification = 19;</code>
        */
-      public Builder setProjectionMagnification(int value) {
+      public Builder setAlignmentMagnification(int value) {
         
-        projectionMagnification_ = value;
+        alignmentMagnification_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 projection_magnification = 19;</code>
+       * <code>int32 alignment_magnification = 19;</code>
        */
-      public Builder clearProjectionMagnification() {
+      public Builder clearAlignmentMagnification() {
         
-        projectionMagnification_ = 0;
+        alignmentMagnification_ = 0;
         onChanged();
         return this;
       }
@@ -27173,7 +27173,7 @@ public final class GUIProtos {
       "\022\023\n\013field_width\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022" +
       "\020\n\010z_dither\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022" +
       "\024\n\014nm_per_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001\"" +
-      "\272\007\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
+      "\271\007\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
       "radius\030\002 \001(\001\022\030\n\020interactive_mode\030\003 \001(\010\022\024" +
       "\n\014nm_per_slice\030\004 \001(\001\022E\n\023fit_engine_setti" +
       "ngs\030\005 \001(\0132(.gdsc.smlm.data.config.FitEng" +
@@ -27186,27 +27186,27 @@ public final class GUIProtos {
       "terpolation_method\030\016 \001(\005\022\017\n\007psfType\030\017 \001(" +
       "\005\0227\n\013calibration\030\020 \001(\0132\".gdsc.smlm.data." +
       "config.Calibration\022\027\n\017analysis_window\030\021 " +
-      "\001(\001\022\022\n\ncom_window\030\022 \001(\005\022 \n\030projection_ma" +
-      "gnification\030\023 \001(\005\022\025\n\rmaxIterations\030\024 \001(\005",
-      "\022\030\n\020check_alignments\030\025 \001(\010\022\031\n\021psf_magnif" +
-      "ication\030\026 \001(\005\022\016\n\006window\030\027 \001(\005\022\033\n\023smooth_" +
-      "stack_signal\030\030 \001(\010\022\030\n\020single_precision\030\031" +
-      " \001(\010\022\023\n\013crop_border\030\032 \001(\005\022\022\n\ncrop_start\030" +
-      "\033 \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\033\n\023psf_z_magnifi" +
-      "cation\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023\n\013outp" +
-      "ut_type\030\037 \001(\005\022\027\n\017spline_filename\030  \001(\t\022\030" +
-      "\n\020crop_to_z_centre\030! \001(\010\022\026\n\016alignment_mo" +
-      "de\030\" \001(\005\022\032\n\022alignment_z_radius\030# \001(\001\"q\n\032" +
-      "CameraModelManagerSettings\022\016\n\006option\030\001 \001",
-      "(\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n\010origin_y\030\003 \001(\005\022\r" +
-      "\n\005image\030\004 \001(\t\022\020\n\010selected\030\005 \001(\t\"\227\001\n\032Cubi" +
-      "cSplineManagerSettings\022\016\n\006option\030\001 \001(\005\022\020" +
-      "\n\010selected\030\002 \001(\t\022\025\n\rmagnification\030\003 \001(\005\022" +
-      "\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_shi" +
-      "ft\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001*O\n\014TemplateTyp" +
-      "e\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPL" +
-      "ATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb" +
-      "\006proto3"
+      "\001(\001\022\022\n\ncom_window\030\022 \001(\005\022\037\n\027alignment_mag" +
+      "nification\030\023 \001(\005\022\025\n\rmaxIterations\030\024 \001(\005\022",
+      "\030\n\020check_alignments\030\025 \001(\010\022\031\n\021psf_magnifi" +
+      "cation\030\026 \001(\005\022\016\n\006window\030\027 \001(\005\022\033\n\023smooth_s" +
+      "tack_signal\030\030 \001(\010\022\030\n\020single_precision\030\031 " +
+      "\001(\010\022\023\n\013crop_border\030\032 \001(\005\022\022\n\ncrop_start\030\033" +
+      " \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\033\n\023psf_z_magnific" +
+      "ation\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023\n\013outpu" +
+      "t_type\030\037 \001(\005\022\027\n\017spline_filename\030  \001(\t\022\030\n" +
+      "\020crop_to_z_centre\030! \001(\010\022\026\n\016alignment_mod" +
+      "e\030\" \001(\005\022\032\n\022alignment_z_radius\030# \001(\001\"q\n\032C" +
+      "ameraModelManagerSettings\022\016\n\006option\030\001 \001(",
+      "\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n\010origin_y\030\003 \001(\005\022\r\n" +
+      "\005image\030\004 \001(\t\022\020\n\010selected\030\005 \001(\t\"\227\001\n\032Cubic" +
+      "SplineManagerSettings\022\016\n\006option\030\001 \001(\005\022\020\n" +
+      "\010selected\030\002 \001(\t\022\025\n\rmagnification\030\003 \001(\005\022\r" +
+      "\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_shif" +
+      "t\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001*O\n\014TemplateType" +
+      "\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLA" +
+      "TE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006" +
+      "proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -27301,7 +27301,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor,
-        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "ProjectionMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", "SplineFilename", "CropToZCentre", "AlignmentMode", "AlignmentZRadius", });
+        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "AlignmentMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", "SplineFilename", "CropToZCentre", "AlignmentMode", "AlignmentZRadius", });
     internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor =
       getDescriptor().getMessageTypes().get(13);
     internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable = new

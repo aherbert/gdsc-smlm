@@ -4464,7 +4464,7 @@ public class PSFCreator implements PlugInFilter
 		tf.add(gd.addAndGetSlider("Smoothing", 0.1, 0.5, settings.getSmoothing()));
 		tf.add(gd.addAndGetSlider("CoM_z_window", 0, 8, settings.getComWindow()));
 		tf.add(gd.addAndGetSlider("CoM_border", 0, 0.5, settings.getComBorder()));
-		tf.add(gd.addAndGetSlider("Projection_magnification", 1, 8, settings.getProjectionMagnification()));
+		tf.add(gd.addAndGetSlider("PSF_magnification", 1, 8, settings.getAlignmentMagnification()));
 		cb.add(gd.addAndGetCheckbox("Smooth_stack_signal", settings.getSmoothStackSignal()));
 		tf.add(gd.addAndGetSlider("Max_iterations", 1, 20, settings.getMaxIterations()));
 		if (settings.getInteractiveMode())
@@ -4482,7 +4482,7 @@ public class PSFCreator implements PlugInFilter
 					tf.get(t++).setText(Double.toString(defaults.getSmoothing()));
 					tf.get(t++).setText(Integer.toString(defaults.getComWindow()));
 					tf.get(t++).setText(Double.toString(defaults.getComBorder()));
-					tf.get(t++).setText(Integer.toString(defaults.getProjectionMagnification()));
+					tf.get(t++).setText(Integer.toString(defaults.getAlignmentMagnification()));
 					cb.get(c++).setState(defaults.getSmoothStackSignal());
 					tf.get(t++).setText(Integer.toString(defaults.getMaxIterations()));
 					if (PSFCreator.this.settings.getInteractiveMode())
@@ -4515,7 +4515,7 @@ public class PSFCreator implements PlugInFilter
 		settings.setSmoothing(gd.getNextNumber());
 		settings.setComWindow((int) gd.getNextNumber());
 		settings.setComBorder(gd.getNextNumber());
-		settings.setProjectionMagnification((int) gd.getNextNumber());
+		settings.setAlignmentMagnification((int) gd.getNextNumber());
 		settings.setSmoothStackSignal(gd.getNextBoolean());
 		settings.setMaxIterations((int) gd.getNextNumber());
 		if (settings.getInteractiveMode())
@@ -4541,7 +4541,7 @@ public class PSFCreator implements PlugInFilter
 			// do not need the bias for non sCMOS cameras.
 			//if (!cw.isSCMOS())
 			//	Parameters.isAboveZero("Bias", cw.getBias());
-			Parameters.isEqualOrAbove("Projection magnification", settings.getProjectionMagnification(), 1);
+			Parameters.isEqualOrAbove("Projection magnification", settings.getAlignmentMagnification(), 1);
 			Parameters.isEqualOrAbove("Max iterations", settings.getMaxIterations(), 1);
 			Parameters.isEqualOrAbove("PSF magnification", settings.getPsfMagnification(), 1);
 			Parameters.isAbove("Smoothing", settings.getSmoothing(), 0);
@@ -4572,7 +4572,7 @@ public class PSFCreator implements PlugInFilter
 				public void run()
 				{
 					psfs[index] = new ExtractedPSF(image, w, h, centres[index], boxRadius,
-							settings.getProjectionMagnification());
+							settings.getAlignmentMagnification());
 					// Do this here within the thread
 					psfs[index].createProjections();
 
