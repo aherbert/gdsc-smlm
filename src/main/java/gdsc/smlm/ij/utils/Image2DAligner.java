@@ -171,6 +171,7 @@ public class Image2DAligner implements Cloneable
 			throw new IllegalArgumentException("Require a 2D target image");
 		nc = Maths.nextPow2(Math.max(w, image.getWidth()));
 		nr = Maths.nextPow2(Math.max(h, image.getHeight()));
+		nr_by_nc = nr * nc;
 		// Window and pad the reference
 		setReference(createDHT(image, reference));
 	}

@@ -212,6 +212,7 @@ public class Image3DAligner implements Cloneable
 		ns = Maths.nextPow2(Math.max(d, image.getSize()));
 		// Check the image will fit in an Image3D
 		Image3D.checkSize(nc, nr, ns, true);
+		nr_by_nc = nr * nc;
 		// Window and pad the reference
 		setReference(createDHT(image, reference));
 	}
