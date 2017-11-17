@@ -1092,6 +1092,7 @@ public class Image2DAligner implements Cloneable
 			copy.buffer = null;
 			copy.region = null;
 			copy.target = null;
+			copy.crop = null;
 			copy.frequencyDomainCorrelationError = 0;
 			return copy;
 		}

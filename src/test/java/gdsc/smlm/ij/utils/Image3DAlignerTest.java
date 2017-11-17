@@ -43,21 +43,33 @@ public class Image3DAlignerTest
 	@Test
 	public void canCorrelatePow2Image()
 	{
-		canCorrelate(16, 16, 32);
-	}	
+		canCorrelate(16, 16, 32, false);
+	}
 
 	@Test
 	public void canCorrelateNonPow2Image()
 	{
-		canCorrelate(15, 17, 29);
-	}	
-	
-	private void canCorrelate(int maxx, int maxy, int maxz)
+		canCorrelate(15, 17, 29, false);
+	}
+
+	@Test
+	public void canCorrelatePow2ImageUsingIJImage()
+	{
+		canCorrelate(16, 16, 32, true);
+	}
+
+	@Test
+	public void canCorrelateNonPow2ImageUsingIJImage()
+	{
+		canCorrelate(15, 17, 29, true);
+	}
+
+	private void canCorrelate(int maxx, int maxy, int maxz, boolean ijMode)
 	{
 		// Not as much information in the z dimension due to axila imaging.
 		// Q. How to address in real PSF alignment? Perhaps the z-dimension should be
 		// sampled N-times more than the XY dimension.
-		
+
 		double cx = (maxx - 1) / 2.0;
 		double cy = (maxy - 1) / 2.0;
 		double cz = (maxz - 1) / 2.0;
@@ -66,19 +78,24 @@ public class Image3DAlignerTest
 
 		Image3D reference = createData(maxx, maxy, maxz, cx, cy, cz);
 		Image3DAligner a = new Image3DAligner();
-		a.setReference(reference);
+		if (ijMode)
+			a.setReference(reference.getImageStack());
+		else
+			a.setReference(reference);
 
 		for (double sz : shift)
 			for (double sy : shift)
 				for (double sx : shift)
 				{
-					canCorrelate(a, maxx, maxy, maxz, cx, cy, cz, cx + sx, cy + sy, cz + sz, 0.25, 0, 1e-2, 1);
-					canCorrelate(a, maxx, maxy, maxz, cx, cy, cz, cx + sx, cy + sy, cz + sz, 0.25, 5, 1e-2, 0.25);
+					canCorrelate(a, maxx, maxy, maxz, cx, cy, cz, cx + sx, cy + sy, cz + sz, 0.25, 0, 1e-2, 1, ijMode);
+					canCorrelate(a, maxx, maxy, maxz, cx, cy, cz, cx + sx, cy + sy, cz + sz, 0.25, 5, 1e-2, 0.25,
+							ijMode);
 				}
 	}
 
 	private void canCorrelate(Image3DAligner a, int maxx, int maxy, int maxz, double cx1, double cy1, double cz1,
-			double cx2, double cy2, double cz2, double window, int refinements, double error, double tolerance)
+			double cx2, double cy2, double cz2, double window, int refinements, double error, double tolerance,
+			boolean ijMode)
 	{
 		double[] result;
 		Image3D c;
@@ -106,9 +123,12 @@ public class Image3DAlignerTest
 		//	System.out.printf("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
 		//			java.util.Arrays.toString(result));
 		//}
-		
+
 		// Test
-		result = a.align(target, refinements, error);
+		if (ijMode)
+			result = a.align(target.getImageStack(), refinements, error);
+		else
+			result = a.align(target, refinements, error);
 		c = a.getCorrelation();
 		System.out.printf("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
 				java.util.Arrays.toString(result));

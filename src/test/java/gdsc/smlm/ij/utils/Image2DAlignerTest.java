@@ -26,22 +26,40 @@ public class Image2DAlignerTest
 	@Test
 	public void canCorrelateSquareImage()
 	{
-		canCorrelate(16, 16);
+		canCorrelate(16, 16, false);
 	}
 
 	@Test
 	public void canCorrelateNonSquareImage()
 	{
-		canCorrelate(16, 32);
+		canCorrelate(16, 32, false);
 	}
-	
+
 	@Test
 	public void canCorrelateNonPow2Image()
 	{
-		canCorrelate(17, 29);
+		canCorrelate(17, 29, false);
 	}
-	
-	private void canCorrelate(int maxx, int maxy)
+
+	@Test
+	public void canCorrelateSquareImageUsingIJImage()
+	{
+		canCorrelate(16, 16, true);
+	}
+
+	@Test
+	public void canCorrelateNonSquareImageUsingIJImage()
+	{
+		canCorrelate(16, 32, true);
+	}
+
+	@Test
+	public void canCorrelateNonPow2ImageUsingIJImage()
+	{
+		canCorrelate(17, 29, true);
+	}
+
+	private void canCorrelate(int maxx, int maxy, boolean ijMode)
 	{
 		double cx = (maxx - 1) / 2.0;
 		double cy = (maxy - 1) / 2.0;
@@ -50,18 +68,21 @@ public class Image2DAlignerTest
 
 		Image2D reference = createData(maxx, maxy, cx, cy);
 		Image2DAligner a = new Image2DAligner();
-		a.setReference(reference);
+		if (ijMode)
+			a.setReference(reference.getImageProcessor());
+		else
+			a.setReference(reference);
 
 		for (double sy : shift)
 			for (double sx : shift)
 			{
-				canCorrelate(a, maxx, maxy, cx, cy, cx + sx, cy + sy, 0.25, 0, 1);
-				canCorrelate(a, maxx, maxy, cx, cy, cx + sx, cy + sy, 0.25, 5, 0.25);
+				canCorrelate(a, maxx, maxy, cx, cy, cx + sx, cy + sy, 0.25, 0, 1, ijMode);
+				canCorrelate(a, maxx, maxy, cx, cy, cx + sx, cy + sy, 0.25, 5, 0.25, ijMode);
 			}
 	}
 
 	private void canCorrelate(Image2DAligner a, int maxx, int maxy, double cx1, double cy1, double cx2, double cy2,
-			double window, int refinements, double tolerance)
+			double window, int refinements, double tolerance, boolean ijMode)
 	{
 		double[] result;
 		Image2D c;
@@ -90,7 +111,10 @@ public class Image2DAlignerTest
 		//}
 
 		// Test
-		result = a.align(target, refinements);
+		if (ijMode)
+			result = a.align(target.getImageProcessor(), refinements);
+		else
+			result = a.align(target, refinements);
 		c = a.getCorrelation();
 		System.out.printf("e %s %g, o %s\n", java.util.Arrays.toString(e), c.get(index),
 				java.util.Arrays.toString(result));
