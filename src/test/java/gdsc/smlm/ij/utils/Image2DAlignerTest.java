@@ -9,10 +9,6 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 public class Image2DAlignerTest
 {
-	// TODO - Make this test the StackAligner with sub-pixel accuracy and non power of 2 images
-
-	// Check the alignment of the ImageProcessor and Image2D is the same with padding and windowing
-
 	private FloatImage2D createData(int x, int y, double cx, double cy)
 	{
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, x, y, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE,
@@ -28,10 +24,25 @@ public class Image2DAlignerTest
 	}
 
 	@Test
-	public void canCorrelate()
+	public void canCorrelateSquareImage()
 	{
-		int maxx = 16;
-		int maxy = 16;
+		canCorrelate(16, 16);
+	}
+
+	@Test
+	public void canCorrelateNonSquareImage()
+	{
+		canCorrelate(16, 32);
+	}
+	
+	@Test
+	public void canCorrelateNonPow2Image()
+	{
+		canCorrelate(17, 29);
+	}
+	
+	private void canCorrelate(int maxx, int maxy)
+	{
 		double cx = (maxx - 1) / 2.0;
 		double cy = (maxy - 1) / 2.0;
 

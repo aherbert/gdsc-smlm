@@ -10,6 +10,8 @@ public abstract class Image3DTest
 {
 	protected abstract Image3D createData(int w, int h, int d);
 
+	protected abstract Image3D createEmptyData(int w, int h, int d);
+
 	@Test
 	public void canCrop()
 	{
@@ -78,7 +80,7 @@ public abstract class Image3DTest
 			Image3D image2 = image.copy();
 			Image3D image3 = image.copy();
 
-			Image3D blank = new FloatImage3D(w, h, d);
+			Image3D blank = createEmptyData(w, h, d);
 
 			image.insert(x, y, z, blank);
 
@@ -282,14 +284,76 @@ public abstract class Image3DTest
 		Assert.assertEquals(e, o, 0);
 		Assert.assertEquals(e, o2, 0);
 	}
-	
+
+	@Test
+	public void canFill()
+	{
+		canFill(3, 4, 5, 6, 7, 8);
+		canFill(3, 4, 5, 1, 1, 1);
+		canFill(0, 0, 0, 1, 2, 3);
+	}
+
+	private void canFill(int x, int y, int z, int w, int h, int d)
+	{
+		// This test assumes that copy, crop and insert work!
+		for (int pad : new int[] { 0, 1 })
+		{
+			Image3D image = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
+			image.fill(1);
+			image.fill(x, y, z, w, h, d, 2);
+
+			Image3D image2 = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
+			image2.fill(1);
+			Image3D blank = createEmptyData(w, h, d);
+			blank.fill(2);
+			image2.insert(x, y, z, blank);
+
+			Image3D croppedData = image.crop(x, y, z, w, h, d);
+
+			assertEquals(croppedData, blank);
+
+			assertEquals(image, image2);
+		}
+	}
+
+
+	@Test
+	public void canFillOutside()
+	{
+		canFillOutside(3, 4, 5, 6, 7, 8);
+		canFillOutside(3, 4, 5, 1, 1, 1);
+		canFillOutside(0, 0, 0, 1, 2, 3);
+	}
+
+	private void canFillOutside(int x, int y, int z, int w, int h, int d)
+	{
+		// This test assumes that copy, crop and insert work!
+		for (int pad : new int[] { 0, 1 })
+		{
+			Image3D image = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
+			image.fill(1);
+			image.fillOutside(x, y, z, w, h, d, 2);
+
+			Image3D image2 = createEmptyData(x + w + pad, y + h + pad, z + d + pad);
+			image2.fill(2);
+			Image3D blank = createEmptyData(w, h, d);
+			blank.fill(1);
+			image2.insert(x, y, z, blank);
+
+			Image3D croppedData = image.crop(x, y, z, w, h, d);
+
+			assertEquals(croppedData, blank);
+
+			assertEquals(image, image2);
+		}
+	}	
 	private static void assertEquals(Image3D a, Image3D b)
 	{
 		for (int i = a.getDataLength(); i-- > 0;)
 			Assert.assertEquals(a.get(i), b.get(i), 0);
 	}
-	
-	private  static int findMinIndex(Image3D image)
+
+	private static int findMinIndex(Image3D image)
 	{
 		int min = 0;
 		for (int i = image.getDataLength(); i-- > 0;)
@@ -298,7 +362,7 @@ public abstract class Image3DTest
 		return min;
 	}
 
-	private   static int findMaxIndex(Image3D image)
+	private static int findMaxIndex(Image3D image)
 	{
 		int max = 0;
 		for (int i = image.getDataLength(); i-- > 0;)
@@ -306,6 +370,7 @@ public abstract class Image3DTest
 				max = i;
 		return max;
 	}
+
 	private static double sum(Image3D image)
 	{
 		double sum = 0;

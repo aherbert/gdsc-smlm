@@ -356,4 +356,11 @@ public class DoubleImage3D extends Image3D
 	{
 		data[i] = value;
 	}
+
+	@Override
+	protected void fill(int i, int size, double value)
+	{
+		while (size-- > 0)
+			data[i++] = value;
+	}
 }

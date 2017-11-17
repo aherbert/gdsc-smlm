@@ -9,4 +9,9 @@ public class FloatImage2DTest extends Image2DTest
 		float[] data = SimpleArrayUtils.newArray(w * h, 1f, 1f);
 		return new FloatImage2D(w, h, data);
 	}
+	
+	protected FloatImage2D createEmptyData(int w, int h)
+	{
+		return new FloatImage2D(w, h);
+	}
 }

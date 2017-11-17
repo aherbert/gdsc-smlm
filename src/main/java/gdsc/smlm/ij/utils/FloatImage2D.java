@@ -316,4 +316,12 @@ public class FloatImage2D extends Image2D
 	{
 		data[i] = value;
 	}
+
+	@Override
+	protected void fill(int i, int size, double value)
+	{
+		final float v = (float) value;
+		while (size-- > 0)
+			data[i++] = v;
+	}
 }

@@ -12,8 +12,6 @@ public class Image3DAlignerTest
 {
 	// TODO - Make this test the StackAligner with sub-pixel accuracy and non power of 2 images
 
-	// Check the alignment of the ImageStack and Image3D is the same with padding and windowing
-
 	final static double gamma = 2.5;
 	final static int zDepth = 5;
 	protected QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
@@ -43,14 +41,23 @@ public class Image3DAlignerTest
 	}
 
 	@Test
-	public void canCorrelate()
+	public void canCorrelatePow2Image()
 	{
-		int maxx = 16;
-		int maxy = 16;
-		// Not as much information in the z dimension.
+		canCorrelate(16, 16, 32);
+	}	
+
+	@Test
+	public void canCorrelateNonPow2Image()
+	{
+		canCorrelate(15, 17, 29);
+	}	
+	
+	private void canCorrelate(int maxx, int maxy, int maxz)
+	{
+		// Not as much information in the z dimension due to axila imaging.
 		// Q. How to address in real PSF alignment? Perhaps the z-dimension should be
-		// sampled N-times more than the XY dimension. 
-		int maxz = 32;
+		// sampled N-times more than the XY dimension.
+		
 		double cx = (maxx - 1) / 2.0;
 		double cy = (maxy - 1) / 2.0;
 		double cz = (maxz - 1) / 2.0;

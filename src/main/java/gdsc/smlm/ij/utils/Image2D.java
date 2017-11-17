@@ -939,4 +939,112 @@ public abstract class Image2D
 			sum = -table[xw_yh - w];
 		return sum + table[xw_yh];
 	}
+
+	/**
+	 * Fill the image.
+	 *
+	 * @param value
+	 *            the value
+	 */
+	public void fill(double value)
+	{
+		fill(0, getDataLength(), value);
+	}
+
+	/**
+	 * Fill the region.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param value
+	 *            the value
+	 */
+	public void fill(int x, int y, int w, int h, double value)
+	{
+		int[] intersect = computeIntersect(x, y, w, h);
+		w = intersect[2];
+		h = intersect[3];
+		// Recheck bounds
+		if (w == 0 || h == 0)
+			return;
+		x = intersect[0];
+		y = intersect[1];
+		int base = y * nc + x;
+		for (int r = 0; r < h; r++)
+		{
+			fill(base, w, value);
+			base += nc;
+		}
+	}
+
+	/**
+	 * Fill with the given value from the given index.
+	 *
+	 * @param i
+	 *            the index
+	 * @param size
+	 *            the size to fill
+	 * @param value
+	 *            the value
+	 */
+	protected abstract void fill(int i, int size, double value);
+
+	/**
+	 * Fill outside the region. If the region is not within the image then the entire image is filled.
+	 *
+	 * @param x
+	 *            the x index
+	 * @param y
+	 *            the y index
+	 * @param w
+	 *            the width
+	 * @param h
+	 *            the height
+	 * @param value
+	 *            the value
+	 */
+	public void fillOutside(int x, int y, int w, int h, double value)
+	{
+		int[] intersect = computeIntersect(x, y, w, h);
+		w = intersect[2];
+		h = intersect[3];
+		// Recheck bounds
+		if (w == 0 || h == 0)
+		{
+			fill(value);
+			return;
+		}
+		x = intersect[0];
+		y = intersect[1];
+
+		int y_p_h = y + h;
+		int fillYBefore = y * nc;
+		int fillYAfter = (nr - y_p_h) * nc;
+
+		int x_p_w = x + w;
+		int fillXBefore = x;
+		int fillXAfter = (nc - x_p_w);
+
+		if (fillYBefore != 0)
+			fill(0, fillYBefore, value);
+		if (fillYAfter != 0)
+			fill(y_p_h * nc, fillYAfter, value);
+
+		int base = fillYBefore;
+
+		for (int r = 0; r < h; r++)
+		{
+			if (fillXBefore != 0)
+				fill(base, fillXBefore, value);
+			if (fillXAfter != 0)
+				fill(base + x_p_w, fillXAfter, value);
+			base += nc;
+		}
+	}
 }

@@ -141,6 +141,7 @@ public class Image3DAligner implements Cloneable
 	private DHTData target;
 	private double[] buffer, region;
 	private double frequencyDomainCorrelationError;
+	private int[] crop;
 
 	// Allow cached window weights
 	private double[] wx = null;
@@ -271,7 +272,7 @@ public class Image3DAligner implements Cloneable
 			if (wz[z] == 0)
 			{
 				// Special case happens with Tukey window at the ends
-				Arrays.fill(pixels, 0f);
+				Arrays.fill(pixels, 0);
 			}
 			else
 			{
@@ -511,8 +512,6 @@ public class Image3DAligner implements Cloneable
 		return dhtData;
 	}
 
-	// 
-
 	/**
 	 * The limit for the range of the data as an integer.
 	 * <p>
@@ -651,7 +650,7 @@ public class Image3DAligner implements Cloneable
 		{
 			// Re-use space
 			dest = dhtData.dht.getData();
-			Arrays.fill(dest, 0f);
+			Arrays.fill(dest, 0);
 		}
 		dht = new DoubleDHT3D(nc, nr, ns, dest, false);
 		int ix = getInsert(nc, w);
@@ -804,9 +803,9 @@ public class Image3DAligner implements Cloneable
 		int ix = Math.min(reference.ix, target.ix);
 		int iy = Math.min(reference.iy, target.iy);
 		int iz = Math.min(reference.iz, target.iz);
-		int iw = Math.max(reference.ix + reference.w, target.ix + target.w);
-		int ih = Math.max(reference.iy + reference.h, target.iy + target.h);
-		int id = Math.max(reference.iz + reference.d, target.iz + target.d);
+		int ixw = Math.max(reference.ix + reference.w, target.ix + target.w);
+		int iyh = Math.max(reference.iy + reference.h, target.iy + target.h);
+		int izd = Math.max(reference.iz + reference.d, target.iz + target.d);
 
 		if (minimumDimensionOverlap > 0)
 		{
@@ -815,18 +814,20 @@ public class Image3DAligner implements Cloneable
 			int uy = (int) (Math.round(Math.min(reference.h, target.h) * f));
 			int uz = (int) (Math.round(Math.min(reference.d, target.d) * f));
 			ix += ux;
-			iw -= ux;
+			ixw -= ux;
 			iy += uy;
-			ih -= uy;
+			iyh -= uy;
 			iz += uz;
-			id -= uz;
+			izd -= uz;
 		}
+
+		crop = new int[] { ix, iy, iz, ixw - ix, iyh - iy, izd - iz };
 
 		// The maximum correlation unnormalised. Since this is unnormalised
 		// it will be biased towards the centre of the image. This is used
 		// to restrict the bounds for finding the maximum of the normalised correlation
 		// which should be close to this.
-		int maxi = correlation.findMaxIndex(ix, iy, iz, iw - ix, ih - iy, id - iz);
+		int maxi = correlation.findMaxIndex(ix, iy, iz, crop[3], crop[4], crop[5]);
 		int[] xyz = correlation.getXYZ(maxi);
 
 		// Check in the spatial domain
@@ -871,13 +872,13 @@ public class Image3DAligner implements Cloneable
 		int tz = dz;
 
 		// Precompute the x-1,x+w-1,y-1,y+h-1
-		int nx = iw - ix;
+		int nx = crop[3];
 		int[] rx_1 = new int[nx];
 		int[] rx_w_1 = new int[nx];
 		int[] tx_1 = new int[nx];
 		int[] tx_w_1 = new int[nx];
 		int[] w = new int[nx];
-		for (int c = ix, i = 0; c < iw; c++, i++)
+		for (int c = ix, i = 0; c < ixw; c++, i++)
 		{
 			rx_1[i] = Math.max(-1, rx - 1);
 			rx_w_1[i] = Math.min(nc, rx + nc) - 1;
@@ -887,13 +888,13 @@ public class Image3DAligner implements Cloneable
 			tx--;
 			w[i] = rx_w_1[i] - rx_1[i];
 		}
-		int ny = ih - iy;
+		int ny = crop[4];
 		int[] ry_1 = new int[ny];
 		int[] ry_h_1 = new int[ny];
 		int[] ty_1 = new int[ny];
 		int[] ty_h_1 = new int[ny];
 		int[] h = new int[ny];
-		for (int r = iy, j = 0; r < ih; r++, j++)
+		for (int r = iy, j = 0; r < iyh; r++, j++)
 		{
 			ry_1[j] = Math.max(-1, ry - 1);
 			ry_h_1[j] = Math.min(nr, ry + nr) - 1;
@@ -916,7 +917,7 @@ public class Image3DAligner implements Cloneable
 		int maxj = -1;
 		double max = 0;
 
-		for (int s = iz; s < id; s++)
+		for (int s = iz; s < izd; s++)
 		{
 			// Compute the z-1,z+d-1
 			int rz_1 = Math.max(-1, rz - 1);
@@ -927,11 +928,11 @@ public class Image3DAligner implements Cloneable
 			tz--;
 			int d = rz_d_1 - rz_1;
 
-			for (int r = iy, j = 0; r < ih; r++, j++)
+			for (int r = iy, j = 0; r < iyh; r++, j++)
 			{
 				int base = s * nr_by_nc + r * nc;
 				int hd = h[j] * d;
-				for (int c = ix, i = 0; c < iw; c++, i++)
+				for (int c = ix, i = 0; c < ixw; c++, i++)
 				{
 					double sumXY = buffer[base + c];
 
@@ -1030,9 +1031,9 @@ public class Image3DAligner implements Cloneable
 			if (calc == null)
 				calc = new CubicSplineCalculator();
 			// Avoid out-of-bounds errors. Only use the range that was normalised
-			int x = Maths.clip(ix, iw - 4, xyz[0] - 1);
-			int y = Maths.clip(iy, ih - 4, xyz[1] - 1);
-			int z = Maths.clip(iz, id - 4, xyz[2] - 1);
+			int x = Maths.clip(ix, ixw - 4, xyz[0] - 1);
+			int y = Maths.clip(iy, iyh - 4, xyz[1] - 1);
+			int z = Maths.clip(iz, izd - 4, xyz[2] - 1);
 			DoubleImage3D crop = correlation.crop(x, y, z, 4, 4, 4, region);
 			region = crop.getData();
 			CustomTricubicFunction f = CustomTricubicFunction.create(calc.compute(region));
@@ -1382,7 +1383,9 @@ public class Image3DAligner implements Cloneable
 	{
 		try
 		{
-			return new DoubleImage3D(nc, nr, ns, buffer);
+			DoubleImage3D image = new DoubleImage3D(nc, nr, ns, buffer);
+			image.fillOutside(crop[0], crop[1], crop[2], crop[3], crop[5], crop[5], 0);
+			return image;
 		}
 		catch (IllegalArgumentException e)
 		{

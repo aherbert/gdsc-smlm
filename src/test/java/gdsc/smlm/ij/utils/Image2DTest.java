@@ -9,6 +9,8 @@ public abstract class Image2DTest
 {
 	protected abstract Image2D createData(int w, int h);
 
+	protected abstract Image2D createEmptyData(int w, int h);
+
 	@Test
 	public void canCrop()
 	{
@@ -68,7 +70,7 @@ public abstract class Image2DTest
 			Image2D image2 = image.copy();
 			Image2D image3 = image.copy();
 
-			Image2D blank = new FloatImage2D(w, h);
+			Image2D blank = createEmptyData(w, h);
 
 			image.insert(x, y, blank);
 
@@ -257,6 +259,68 @@ public abstract class Image2DTest
 		Assert.assertEquals(e, o2, 0);
 	}
 
+	@Test
+	public void canFill()
+	{
+		canFill(3, 4, 5, 6);
+		canFill(3, 4, 1, 1);
+		canFill(0, 0, 1, 1);
+	}
+
+	private void canFill(int x, int y, int w, int h)
+	{
+		// This test assumes that copy, crop and insert work!
+		for (int pad : new int[] { 0, 1 })
+		{
+			Image2D image = createEmptyData(x + w + pad, y + h + pad);
+			image.fill(1);
+			image.fill(x, y, w, h, 2);
+			
+			Image2D image2 = createEmptyData(x + w + pad, y + h + pad);
+			image2.fill(1);
+			Image2D blank = createEmptyData(w, h);
+			blank.fill(2);
+			image2.insert(x, y, blank);
+
+			Image2D croppedData = image.crop(x, y, w, h);
+
+			assertEquals(croppedData, blank);
+
+			assertEquals(image, image2);
+		}
+	}
+
+	@Test
+	public void canFillOutside()
+	{
+		canFillOutside(3, 4, 5, 6);
+		canFillOutside(3, 4, 1, 1);
+		canFillOutside(0, 0, 1, 1);
+	}
+
+	private void canFillOutside(int x, int y, int w, int h)
+	{
+		// This test assumes that copy, crop and insert work!
+		for (int pad : new int[] { 0, 1 })
+		{
+			Image2D image = createEmptyData(x + w + pad, y + h + pad);
+			image.fill(1);
+			image.fillOutside(x, y, w, h, 2);
+
+			Image2D image2 = createEmptyData(x + w + pad, y + h + pad);
+			image2.fill(2);
+
+			Image2D blank = createEmptyData(w, h);
+			blank.fill(1);
+			image2.insert(x, y, blank);
+
+			Image2D croppedData = image.crop(x, y, w, h);
+
+			assertEquals(croppedData, blank);
+
+			assertEquals(image, image2);
+		}
+	}	
 	private static void assertEquals(Image2D a, Image2D b)
 	{
 		for (int i = a.getDataLength(); i-- > 0;)
