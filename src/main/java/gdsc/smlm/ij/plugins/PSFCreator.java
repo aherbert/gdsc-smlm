@@ -2818,8 +2818,7 @@ public class PSFCreator implements PlugInFilter
 					gd.showDialog();
 					if (gd.wasCanceled())
 					{
-						imp.restoreRoi();
-						imp.setOverlay(null);
+						resetImp();
 						return;
 					}
 					boolean failed = excluded[spotIndex] || !gd.wasOKed();
@@ -2831,8 +2830,7 @@ public class PSFCreator implements PlugInFilter
 					}
 					location = gd.getLocation();
 				}
-				imp.restoreRoi();
-				imp.setOverlay(null);
+				resetImp();
 				if (reject == psfs.length)
 				{
 					IJ.error(TITLE, "No PSF translations were accepted");
@@ -2859,8 +2857,7 @@ public class PSFCreator implements PlugInFilter
 					gd.showDialog();
 					if (gd.wasCanceled())
 					{
-						imp.restoreRoi();
-						imp.setOverlay(null);
+						resetImp();
 						return;
 					}
 					if (!gd.wasOKed())
@@ -2874,8 +2871,7 @@ public class PSFCreator implements PlugInFilter
 				if (ok == 0)
 				{
 					IJ.error(TITLE, "No PSFs remaining");
-					imp.restoreRoi();
-					imp.setOverlay(null);
+					resetImp();
 					return;
 				}
 			}
@@ -3115,6 +3111,13 @@ public class PSFCreator implements PlugInFilter
 		IJ.showStatus("");
 	}
 
+	private void resetImp()
+	{
+		imp.restoreRoi();
+		imp.setOverlay(null);
+		imp.getWindow().toFront();
+	}
+
 	private int count(boolean[] flags)
 	{
 		int c = 0;
@@ -3177,7 +3180,7 @@ public class PSFCreator implements PlugInFilter
 				double dz = zSelector.run(true, false, false, Integer.toString(i + 1));
 				if (dz == -1)
 				{
-					imp.setOverlay(null);
+					resetImp();
 					return null;
 				}
 				if (dz == -2)
@@ -3224,6 +3227,7 @@ public class PSFCreator implements PlugInFilter
 			}
 			if (size == 0)
 			{
+				resetImp();
 				IJ.error(TITLE, "No remaining PSF centres");
 				return null;
 			}
