@@ -95,7 +95,12 @@ public class DoubleDHT2D extends DoubleImage2D
 	@Override
 	public DoubleDHT2D copy()
 	{
-		return new DoubleDHT2D(nc, nr, data.clone(), isFrequencyDomain, dht);
+		DoubleDHT2D copy = new DoubleDHT2D(nc, nr, data.clone(), isFrequencyDomain, dht);
+		copy.h2e = h2e;
+		copy.h2o = h2o;
+		copy.jj = jj;
+		copy.mag = mag;
+		return copy;
 	}
 
 	/**

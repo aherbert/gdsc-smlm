@@ -95,7 +95,12 @@ public class FloatDHT2D extends FloatImage2D
 	@Override
 	public FloatDHT2D copy()
 	{
-		return new FloatDHT2D(nc, nr, data.clone(), isFrequencyDomain, dht);
+		FloatDHT2D copy = new FloatDHT2D(nc, nr, data.clone(), isFrequencyDomain, dht);
+		copy.h2e = h2e;
+		copy.h2o = h2o;
+		copy.jj = jj;
+		copy.mag = mag;
+		return copy;
 	}
 
 	/**
