@@ -110,6 +110,7 @@ public class DoubleDHT2D extends DoubleImage2D
 			throw new IllegalArgumentException("Already frequency domain DHT");
 		dht.forward(data);
 		isFrequencyDomain = true;
+		resetFastOperations();
 	}
 
 	/**
@@ -124,6 +125,7 @@ public class DoubleDHT2D extends DoubleImage2D
 			throw new IllegalArgumentException("Already space domain DHT");
 		dht.inverse(data, true);
 		isFrequencyDomain = false;
+		resetFastOperations();
 	}
 
 	/**
