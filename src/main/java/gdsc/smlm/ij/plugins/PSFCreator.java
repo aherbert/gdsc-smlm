@@ -497,6 +497,7 @@ public class PSFCreator implements PlugInFilter
 			}
 			catch (OutOfMemoryError e)
 			{
+				MemoryPeakResults.runGC();
 				IJ.log(ExceptionUtils.getStackTrace(e));
 				IJ.showMessage(TITLE, TextUtils.wrap("Out-of-memory. You may be using too many spots or " +
 						"too large a PSF projection. The default projection size is 2.", 80));
@@ -5337,31 +5338,43 @@ public class PSFCreator implements PlugInFilter
 			if (n <= 1)
 				return this;
 
-			Utils.showStatus("Enlarging ... creating spline");
-
-			// The scales are actually arbitrary
+			IJTrackProgress progress = new IJTrackProgress();
+			FloatStackTrivalueProcedure p = new FloatStackTrivalueProcedure();
+			FloatStackTrivalueProvider fval = new FloatStackTrivalueProvider(psf, maxx, maxy);
+			
 			// We can enlarge by interpolation between the start and end
 			// by evenly sampling each spline node
-			double[] xval = SimpleArrayUtils.newArray(maxx, 0, 1.0);
-			double[] yval = SimpleArrayUtils.newArray(maxy, 0, 1.0);
-			double[] zval = SimpleArrayUtils.newArray(psf.length, 0, 1.0);
-			IJTrackProgress progress = new IJTrackProgress();
 
-			//@formatter:off
-			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator.Builder()
-					.setXValue(xval) 
-					.setYValue(yval) 
-					.setZValue(zval)
-					.setFValue(new FloatStackTrivalueProvider(psf, maxx, maxy))
-					.setProgress(progress)
-					.setExecutorService(threadPool)
-					.interpolate();
-			//@formatter:on
+			try
+			{
+				Utils.showStatus("Enlarging ... creating spline");
+				// The scales are actually arbitrary
+				double[] xval = SimpleArrayUtils.newArray(maxx, 0, 1.0);
+				double[] yval = SimpleArrayUtils.newArray(maxy, 0, 1.0);
+				double[] zval = SimpleArrayUtils.newArray(psf.length, 0, 1.0);
+				
+    			//@formatter:off
+    			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator.Builder()
+    					.setXValue(xval) 
+    					.setYValue(yval) 
+    					.setZValue(zval)
+    					.setFValue(fval)
+    					.setProgress(progress)
+    					.setExecutorService(threadPool)
+    					.interpolate();
+    			//@formatter:on
 
-			Utils.showStatus("Enlarging ... interpolating");
+				Utils.showStatus("Enlarging ... interpolating");
 
-			FloatStackTrivalueProcedure p = new FloatStackTrivalueProcedure();
-			f.sample(n, p, progress);
+				f.sample(n, p, progress);
+			}
+			catch (OutOfMemoryError e)
+			{
+				// Do this dynamically
+				MemoryPeakResults.runGC();
+				Utils.showStatus("Enlarging ... interpolating");
+				CustomTricubicInterpolator.sample(fval, n, p, progress);
+			}
 
 			IJ.showStatus("");
 
@@ -5392,7 +5405,7 @@ public class PSFCreator implements PlugInFilter
 		// TODO: Use the alignment settings.
 		// Extract each PSF around the current z-centre.
 		// The z-radius should never be smaller than the XY radius
-		
+
 		int n = psfs.length * 3;
 		List<Future<?>> futures = new TurboList<Future<?>>(n);
 
